@@ -288,8 +288,8 @@ namespace Module.Core.Editor.ProjectSetup
 
             if (item.isInstalled)
             {
-                var iconSize = rect.height;
-                var iconRect = new Rect(rect.x, rect.y, iconSize, iconSize);
+                var iconSize = rect.height - 4f;
+                var iconRect = new Rect(rect.x - 3f, rect.y + 2f, iconSize, iconSize);
                 var icon = EditorGUIUtility.IconContent("Installed@2x");
                 icon.tooltip = "Installed";
                 EditorGUI.LabelField(iconRect, icon);

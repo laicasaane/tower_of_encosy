@@ -757,7 +757,7 @@ namespace Module.Core.Editor
             "PrefabNormal Icon","PrefabNormal Icon","BuildSettings.BlackBerry.Small","BuildSettings.Tizen.Small",
             "BuildSettings.XBox360.Small","BuildSettings.PS3.Small","BuildSettings.SamsungTV.Small",
             "BuildSettings.BlackBerry","BuildSettings.Tizen","BuildSettings.XBox360","BuildSettings.PS3",
-            "BuildSettings.SamsungTV"
+            "BuildSettings.SamsungTV", "pane options", "pane options@2x",
         };
     }
 }
