@@ -91,7 +91,7 @@ namespace Module.Core.Scenes.Editor
 
             EditorGUILayout.Space();
 
-            _table.DrawTableGUI(_scenes, rowHeight: EditorGUIUtility.singleLineHeight * 1.3f);
+            _table.DrawTableGUI(_scenes, rowHeight: EditorGUIUtility.singleLineHeight * 1.7f);
             _table.ResizeToFit();
         }
 
@@ -128,6 +128,13 @@ namespace Module.Core.Scenes.Editor
                 return;
             }
 
+            var height = rect.height;
+
+            rect.height = 20f;
+            rect.width -= 24f;
+            rect.x += 12f;
+            rect.y += (height - 20f) / 2f;
+
             if (GUI.Button(rect, item.scene.name))
             {
                 EditorSceneManager.OpenScene(item.path, OpenSceneMode.Single);
@@ -146,6 +153,7 @@ namespace Module.Core.Scenes.Editor
 
             rect.height = EditorGUIUtility.singleLineHeight;
             rect.width = Mathf.Min(rect.width, maxW);
+            rect.y += 4f;
 
             if (EditorGUI.LinkButton(rect, label))
             {
