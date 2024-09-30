@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 
 using System;
+using System.Collections.Generic;
 using Module.Core.Logging;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
@@ -14,9 +15,11 @@ namespace Module.Core.Editor
 
         public float width = 200f;
         public float height = 400f;
+        public object data;
+        public Action<object, IList<int>> onApplySelectedIds;
 
-        private string _title;
-        private bool _showTitle;
+        private readonly GUIContent _title;
+        private readonly bool _showTitle;
         private string _search;
         private GUIStyle _titleStyle;
         private GUIContent _applyLabel;
@@ -24,7 +27,22 @@ namespace Module.Core.Editor
 
         public TreeViewPopup(string title)
         {
-            Title = title;
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                _title = GUIContent.none;
+                _showTitle = false;
+            }
+            else
+            {
+                _title = new(title);
+                _showTitle = true;
+            }
+        }
+
+        public TreeViewPopup(GUIContent title)
+        {
+            _title = title;
+            _showTitle = title != null;
         }
 
         public GUIStyle TitleStyle => _titleStyle ??= new GUIStyle(EditorStyles.boldLabel) {
@@ -39,16 +57,6 @@ namespace Module.Core.Editor
         public TreeViewState TreeViewState => _treeViewState;
 
         public TreeView Tree { get; set; }
-
-        public string Title
-        {
-            get => _title;
-            set
-            {
-                _title = value;
-                _showTitle = !string.IsNullOrWhiteSpace(value);
-            }
-        }
 
         public void Show(float x, float y)
             => Show(new Vector2(x, y));
@@ -86,8 +94,8 @@ namespace Module.Core.Editor
 
             DrawSearch(rect);
 
-            rect.y += 30;
-            rect.height -= 30;
+            rect.y += 40;
+            rect.height -= 40;
 
             Tree.OnGUI(rect);
 
@@ -103,7 +111,7 @@ namespace Module.Core.Editor
 
             rect = new Rect(rect.x, rect.y, rect.width, 24);
 
-            GUI.Label(rect, Title, TitleStyle);
+            GUI.Label(rect, _title, TitleStyle);
         }
 
         private void DrawToolbar(Rect rect)
@@ -118,6 +126,7 @@ namespace Module.Core.Editor
 
                 if (GUILayout.Button(ApplyLabel, EditorStyles.miniButtonMid))
                 {
+                    onApplySelectedIds?.Invoke(data, Tree.GetSelection());
                     base.editorWindow.Close();
                 }
 
