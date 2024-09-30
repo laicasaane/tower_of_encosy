@@ -1,0 +1,1 @@
+[assembly: Module.Core.Unions.SkipSourceGenForAssembly]

@@ -1,0 +1,30 @@
+{
+    "name": "Module.EntityComponents",
+    "rootNamespace": "Module.EntityComponents",
+    "references": [
+        "GUID:d29766b898749484da5345127198d934",
+        "GUID:46fe9b4ef94d76744bc0b97bc2f73d94",
+        "GUID:11912cc675165314485c904ed61b2e92",
+        "GUID:2de22fb7141426546b7382812669d73f",
+        "GUID:59e15be979a1f934cac2dcd97dd0ea2b",
+        "GUID:ea7f758f59c70b14a8f17e985660fb08",
+        "GUID:700dc31aa4edce94b91a54bd0bdb8f71",
+        "GUID:f5e7b231cfdd44540bf3e221228a46fa",
+        "GUID:2665a8d13d1b3f18800f46e256720795",
+        "GUID:e0cd26848372d4e5c891c569017e11f1",
+        "GUID:734d92eba21c94caba915361bd5ac177",
+        "GUID:7a450cf7ca9694b5a8bfa3fd83ec635a",
+        "GUID:8819f35a0fc84499b990e90a4ca1911f",
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:2765e68924a08a94ea0ea66b31c0168f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
