@@ -16,6 +16,10 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
     public abstract partial class MonoBinder
     {
         [SerializeField]
+        [HideInInspector]
+        internal string _subtitle;
+
+        [SerializeField]
         [SerializeReference]
         [HideInInspector]
         internal MonoBinding[] _presetBindings;

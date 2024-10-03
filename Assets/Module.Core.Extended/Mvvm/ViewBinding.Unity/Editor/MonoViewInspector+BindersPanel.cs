@@ -10,7 +10,16 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 {
     partial class MonoViewInspector
     {
-        private void DrawBindersPanel()
+        private const string BINDER_SUBTITLE_LABEL = "{0}\n<size=10>{1}</size>";
+
+        private enum ButtonState
+        {
+            None,
+            Apply,
+            Cancel,
+        }
+
+        private void DrawBindersPanel(KeyCode pressedKey)
         {
             var guiWidth = GUILayout.MinWidth(200);
 
@@ -25,7 +34,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 EditorGUILayout.BeginVertical(GUILayout.MinWidth(206));
                 {
                     DrawBindersPanel_Toolbar();
-                    DrawBindersPanel_Content();
+                    DrawBindersPanel_Content(pressedKey);
                     GUILayout.Space(6f);
                 }
                 EditorGUILayout.EndVertical();
@@ -105,6 +114,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                     var menu = new GenericMenu();
                     menu.AddItem(_clearLabel, false, ClearBinders, s_bindersPropRef);
+                    menu.AddItem(_subtitleLabel, false, SetSubtitle, s_bindersPropRef);
                     menu.ShowAsContext();
                 }
 
@@ -143,6 +153,23 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             serializedObject.Update();
 
             propRef.Inspector.SetSelectedBinderIndex(null);
+        }
+
+        private static void SetSubtitle(object userData)
+        {
+            if (userData is not BindersPropRef propRef)
+            {
+                return;
+            }
+
+            var inspector = propRef.Inspector;
+
+            if (inspector.ValidateSelectedBinderIndex() == false)
+            {
+                return;
+            }
+
+            inspector.SetSelectedSubtitleIndex(inspector._selectedBinderIndex);
         }
 
         private static void BinderMenu_AddBinder(object userData)
@@ -199,16 +226,21 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
         }
 
-        private void DrawBindersPanel_Content()
+        private void DrawBindersPanel_Content(KeyCode pressedKey)
         {
             var bindersLength = _presetBindersProp.arraySize;
             var guiWidth1 = GUILayout.MinWidth(206);
 
             var rect = EditorGUILayout.BeginVertical(guiWidth1);
             {
+                var expandHeight = 13;
                 var itemRect = rect;
-                var guiHeight = GUILayout.Height(itemRect.height = 26);
-                var guiWidth2 = GUILayout.MinWidth(itemRect.width = 200);
+                itemRect.height = 26;
+                itemRect.width = 200;
+
+                var guiHeight = GUILayout.Height(itemRect.height);
+                var guiHeightExpand = GUILayout.Height(itemRect.height + expandHeight);
+                var guiWidth2 = GUILayout.MinWidth(itemRect.width);
 
                 if (bindersLength < 1)
                 {
@@ -216,7 +248,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 }
                 else
                 {
-                    DrawBindersPanel_Content_Binders(guiHeight, guiWidth2, itemRect);
+                    DrawBindersPanel_Content_Binders(
+                          guiHeight
+                        , guiHeightExpand
+                        , guiWidth2
+                        , itemRect
+                        , expandHeight
+                        , pressedKey
+                    );
                 }
 
                 EditorGUILayout.Space(1f);
@@ -226,10 +265,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
         private void DrawBindersPanel_Content_Binders(
               GUILayoutOption guiHeight
+            , GUILayoutOption guiHeightExpand
             , GUILayoutOption guiWidth
-            , Rect itemRect
+            , Rect origItemRect
+            , float itemExpandHeight
+            , KeyCode pressedKey
         )
         {
+            var subtitleIndex = pressedKey == KeyCode.Escape ? null : _selectedSubtitleIndex;
             var bindersProp = _presetBindersProp;
             var bindersLength = bindersProp.arraySize;
             var binderSelectedButtonStyle = _binderSelectedButtonStyle;
@@ -239,6 +282,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             var indexColor = indexLabelStyle.normal.textColor;
             var selectedBinderIndex = _selectedBinderIndex;
             var iconWarning = _iconWarning;
+            var applyIconLabel = _applyIconLabel;
+            var cancelIconLabel = _cancelIconLabel;
+            var buttonLabel = new GUIContent();
+            var expandedPrevious = false;
+            var subtitleState = ButtonState.None;
 
             for (var i = 0; i < bindersLength; i++)
             {
@@ -258,8 +306,17 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 var normalColor = buttonStyle.normal.textColor;
                 var activeColor = buttonStyle.active.textColor;
                 var hoverColor = buttonStyle.hover.textColor;
+                var subtitleProp = binderProp.FindPropertyRelative("_subtitle");
                 var bindingsProp = binderProp.FindPropertyRelative("_presetBindings");
                 var targetsProp = binderProp.FindPropertyRelative("_presetTargets");
+                var itemRect = origItemRect;
+                itemRect.y += itemRect.height * i;
+
+                if (expandedPrevious)
+                {
+                    expandedPrevious = false;
+                    itemRect.y += itemExpandHeight;
+                }
 
                 if (EditorGUIUtility.isProSkin == false && isSelected)
                 {
@@ -272,27 +329,60 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                         = Color.white;
                 }
 
-                GUI.backgroundColor = isSelected ? selectedColor : newBackColor;
+                var showingSubtitle = false;
 
-                if (GUILayout.Button(labelAttrib.Label, buttonStyle, guiHeight, guiWidth))
+                if (subtitleIndex.HasValue && subtitleIndex.Value == i)
                 {
-                    SetSelectedBinderIndex(i);
+                    DrawBinderSubtitleField(
+                          applyIconLabel
+                        , cancelIconLabel
+                        , ref subtitleState
+                        , out showingSubtitle
+                    );
+                }
+                else
+                {
+                    GUI.backgroundColor = isSelected ? selectedColor : newBackColor;
+                    GUILayoutOption buttonHeight;
+
+                    if (string.IsNullOrWhiteSpace(subtitleProp.stringValue) == false)
+                    {
+                        buttonLabel.text = string.Format(BINDER_SUBTITLE_LABEL, labelAttrib.Label, subtitleProp.stringValue);
+                        buttonHeight = guiHeightExpand;
+                        itemRect.height += itemExpandHeight;
+                        expandedPrevious = true;
+                    }
+                    else
+                    {
+                        buttonLabel.text = labelAttrib.Label;
+                        buttonHeight = guiHeight;
+                    }
+
+                    if (GUILayout.Button(buttonLabel, buttonStyle, buttonHeight, guiWidth))
+                    {
+                        SetSelectedBinderIndex(i);
+                        SetSelectedSubtitleIndex(null);
+                    }
+
+                    GUI.backgroundColor = guiBackColor;
                 }
 
-                GUI.backgroundColor = guiBackColor;
-
                 // Draw index label
+                if (showingSubtitle == false)
                 {
                     var rect = itemRect;
                     rect.x += 3f;
-                    rect.y += rect.height * i;
 
                     GUI.Label(rect, $"{i}", indexLabelStyle);
                 }
 
                 var showWarning = bindingsProp.arraySize < 1 || targetsProp.arraySize < 1;
 
-                if (bindingsProp.arraySize < 1 && targetsProp.arraySize < 1)
+                if (showingSubtitle)
+                {
+                    showWarning = false;
+                }
+                else if (bindingsProp.arraySize < 1 && targetsProp.arraySize < 1)
                 {
                     iconWarning.tooltip = NO_BINDING_TARGET;
                 }
@@ -310,7 +400,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 {
                     var iconRect = itemRect;
                     iconRect.x += itemRect.width - 16f;
-                    iconRect.y += (itemRect.height * i) + 5f;
+                    iconRect.y += 5f;
                     iconRect.width = 18f;
                     iconRect.height = 18f;
 
@@ -327,6 +417,59 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     indexLabelStyle.hover.textColor = indexColor;
                 }
             }
+
+            if (_selectedSubtitleProp != null && subtitleState == ButtonState.Apply)
+            {
+                ApplyBinderSubtitle();
+            }
+        }
+
+        private void DrawBinderSubtitleField(
+              GUIContent applyIconLabel
+            , GUIContent cancelIconLabel
+            , ref ButtonState subtitleState
+            , out bool showingSubtitle
+        )
+        {
+            showingSubtitle = true;
+
+            GUILayout.Space(2f);
+            GUILayout.BeginHorizontal();
+            {
+                GUILayout.Space(4f);
+
+                GUI.SetNextControlName(_subtitleControlName);
+                _binderSubtitle = GUILayout.TextField(_binderSubtitle);
+
+                var btnWidth = GUILayout.Width(20);
+                var btnHeight = GUILayout.Height(20);
+
+                if (GUILayout.Button(applyIconLabel, EditorStyles.iconButton, btnWidth, btnHeight))
+                {
+                    subtitleState = ButtonState.Apply;
+                }
+
+                if (GUILayout.Button(cancelIconLabel, EditorStyles.iconButton, btnWidth, btnHeight))
+                {
+                    subtitleState = ButtonState.Cancel;
+                }
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(4f);
+        }
+
+        private void ApplyBinderSubtitle()
+        {
+            var property = _selectedSubtitleProp;
+            var serializedObject = property.serializedObject;
+            var target = serializedObject.targetObject;
+
+            Undo.RecordObject(target, $"Set subtitle to {property.propertyPath}");
+
+            property.stringValue = _binderSubtitle.Trim();
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+            SetSelectedSubtitleIndex(null);
         }
     }
 }
