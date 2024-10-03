@@ -114,7 +114,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                     var menu = new GenericMenu();
                     menu.AddItem(_clearLabel, false, ClearBinders, s_bindersPropRef);
-                    menu.AddItem(_subtitleLabel, false, SetSubtitle, s_bindersPropRef);
+                    menu.AddItem(_editSubtitleLabel, false, EditBinderSubtitle, s_bindersPropRef);
                     menu.ShowAsContext();
                 }
 
@@ -155,7 +155,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             propRef.Inspector.SetSelectedBinderIndex(null);
         }
 
-        private static void SetSubtitle(object userData)
+        private static void EditBinderSubtitle(object userData)
         {
             if (userData is not BindersPropRef propRef)
             {

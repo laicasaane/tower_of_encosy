@@ -28,7 +28,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private GUIContent _removeSelectedLabel;
         private GUIContent _menuLabel;
         private GUIContent _clearLabel;
-        private GUIContent _subtitleLabel;
+        private GUIContent _editSubtitleLabel;
         private GUIContent _iconWarning;
         private GUIContent _iconBinding;
         private GUIContent _applyIconLabel;
@@ -187,7 +187,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
 
             _clearLabel = new("Clear");
-            _subtitleLabel = new("Set Subtitle _f2");
+            _editSubtitleLabel = new("Edit Subtitle _f2");
 
             {
                 var icon = EditorGUIUtility.isProSkin
