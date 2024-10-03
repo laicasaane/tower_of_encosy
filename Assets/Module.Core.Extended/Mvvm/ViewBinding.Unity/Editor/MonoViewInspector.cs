@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Module.Core.Collections;
 using Module.Core.Editor;
 using Module.Core.Extended.Mvvm.ViewBinding.Unity;
@@ -32,6 +33,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private readonly static Dictionary<Type, GenericMenuPopup> s_bindingMenuMap = new(128);
         private readonly static BindersPropRef s_bindersPropRef = new();
         private readonly static BinderPropRef s_binderPropRef = new();
+        private static SerializedObject s_copiedObject;
 
         private const int TAB_INDEX_BINDINGS = 0;
         private const int TAB_INDEX_TARGETS = 1;
@@ -39,6 +41,15 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private const string NO_BINDING = "Has no binding!";
         private const string NO_TARGET = "Has no target!";
         private const string NO_BINDING_TARGET = "Has no binding and target!";
+
+        private const string PROP_PRESET_BINDERS = "_presetBinders";
+        private const string PROP_PRESET_BINDINGS = "_presetBindings";
+        private const string PROP_PRESET_TARGETS = "_presetTargets";
+        private const string PROP_SUBTITLE = "_subtitle";
+
+        private const string PROP_TARGET_PROPERTY_NAME = "<TargetPropertyName>k__BackingField";
+        private const string PROP_TARGET_COMMAND_NAME = "<TargetCommandName>k__BackingField";
+        private const string PROP_ADAPTER = "<Adapter>k__BackingField";
 
         private MonoView _view;
         private string _selectedBinderIndexKey;
@@ -58,7 +69,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
 
             _view = view;
-            _presetBindersProp = serializedObject.FindProperty("_presetBinders");
+            _presetBindersProp = serializedObject.FindProperty(PROP_PRESET_BINDERS);
 
             var instanceId = _view.GetInstanceID();
             _selectedBinderIndexKey = $"{instanceId}_selected_binder_index";
@@ -91,11 +102,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 return;
             }
 
-            var ev = Event.current;
-            var pressedKey = ev.keyCode;
-            var eventType = ev.type;
+            EventData eventData = Event.current;
 
-            if (ConsumeKeyPress(eventType, pressedKey))
+            if (ConsumeKeyPress(eventData))
             {
                 return;
             }
@@ -107,7 +116,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true));
             {
-                DrawBindersPanel(pressedKey);
+                DrawBindersPanel(eventData);
                 GUILayout.Space(4f);
                 DrawDetailsPanel();
             }
@@ -119,11 +128,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
         }
 
-        private bool ConsumeKeyPress(EventType eventType, KeyCode pressedKey)
+        private bool ConsumeKeyPress(in EventData eventData)
         {
-            var isKeyUp = eventType == EventType.KeyUp;
+            var isKeyUp = eventData.Type == EventType.KeyUp;
 
-            switch (pressedKey)
+            switch (eventData.Key)
             {
                 case KeyCode.F2:
                 {
@@ -166,6 +175,46 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     if (isKeyUp && ValidateSelectedSubtitleIndex())
                     {
                         ApplyBinderSubtitle();
+                        Event.current.Use();
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                case KeyCode.C:
+                {
+                    if (isKeyUp && eventData.Mods.HasFlag(EventModifiers.Control)
+                        && ValidateSelectedBinderIndex()
+                    )
+                    {
+                        CopySingleBinder();
+                        Event.current.Use();
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                case KeyCode.V:
+                {
+                    if (isKeyUp && eventData.Mods.HasFlag(EventModifiers.Control)
+                        && ValidateSelectedBinderIndex()
+                    )
+                    {
+                        PasteSingleBinder();
+                        Event.current.Use();
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                case KeyCode.Delete:
+                {
+                    if (isKeyUp && ValidateSelectedBinderIndex())
+                    {
+                        DeleteSelectedBinder();
                         Event.current.Use();
                         return true;
                     }
@@ -233,7 +282,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 _selectedSubtitleIndex = value;
                 _subtitleControlName = $"sub_name_{value.Value}";
-                _selectedSubtitleProp = _presetBindersProp.GetArrayElementAtIndex(value.Value).FindPropertyRelative("_subtitle");
+                _selectedSubtitleProp = _presetBindersProp.GetArrayElementAtIndex(value.Value)
+                    .FindPropertyRelative(PROP_SUBTITLE);
+
                 _binderSubtitle = _selectedSubtitleProp.stringValue;
             }
             else
@@ -267,6 +318,135 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 _selectedBinderIndex = null;
             }
+        }
+
+        private void CopyBinders()
+        {
+            var property = _presetBindersProp;
+
+            if (property.arraySize < 1)
+            {
+                return;
+            }
+
+            var serializedObject = property.serializedObject;
+            var target = serializedObject.targetObject;
+            s_copiedObject = new(target);
+
+            EditorGUIUtility.systemCopyBuffer = property.propertyPath;
+        }
+
+        private bool ValidatePasteBinders()
+        {
+            var copiedBuffer = EditorGUIUtility.systemCopyBuffer;
+
+            if (s_copiedObject == null || string.IsNullOrWhiteSpace(copiedBuffer))
+            {
+                return false;
+            }
+
+            var copiedProperty = s_copiedObject.FindProperty(copiedBuffer);
+            var property = _presetBindersProp;
+
+            if (copiedProperty == null
+                || copiedProperty.isArray == false
+                || string.Equals(copiedProperty.arrayElementType, property.arrayElementType, StringComparison.Ordinal) == false
+            )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void PasteBinders()
+        {
+            if (ValidatePasteBinders() == false)
+            {
+                return;
+            }
+
+            var copiedBuffer = EditorGUIUtility.systemCopyBuffer;
+            var copiedProperty = s_copiedObject.FindProperty(copiedBuffer);
+            var property = _presetBindersProp;
+            var serializedObject = property.serializedObject;
+            var target = serializedObject.targetObject;
+            var lastIndex = property.arraySize;
+            var length = copiedProperty.arraySize;
+
+            Undo.RecordObject(target, "Paste binders");
+
+            property.arraySize += length;
+
+            for (var i = 0; i < length; i++)
+            {
+                var binderProperty = property.GetArrayElementAtIndex(lastIndex + i);
+                binderProperty.managedReferenceValue = copiedProperty.GetArrayElementAtIndex(i).managedReferenceValue;
+            }
+
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+        }
+
+        private void CopySingleBinder()
+        {
+            if (ValidateSelectedBinderIndex() == false)
+            {
+                return;
+            }
+
+            var index = _selectedBinderIndex.Value;
+            var property = _presetBindersProp.GetArrayElementAtIndex(index);
+            var serializedObject = property.serializedObject;
+            var target = serializedObject.targetObject;
+            s_copiedObject = new(target);
+            EditorGUIUtility.systemCopyBuffer = property.propertyPath;
+        }
+
+        private bool ValidatePasteSingleBinder()
+        {
+            var copiedBuffer = EditorGUIUtility.systemCopyBuffer;
+
+            if (s_copiedObject == null || string.IsNullOrWhiteSpace(copiedBuffer))
+            {
+                return false;
+            }
+
+            var copiedProperty = s_copiedObject.FindProperty(copiedBuffer);
+
+            if (copiedProperty == null
+                || copiedProperty.isArray == true
+                || copiedProperty.managedReferenceValue is not MonoBinder
+            )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void PasteSingleBinder()
+        {
+            if (ValidatePasteSingleBinder() == false)
+            {
+                return;
+            }
+
+            var copiedBuffer = EditorGUIUtility.systemCopyBuffer;
+            var copiedProperty = s_copiedObject.FindProperty(copiedBuffer);
+            var bindersProperty = _presetBindersProp;
+            var lastIndex = bindersProperty.arraySize;
+            var serializedObject = bindersProperty.serializedObject;
+            var target = serializedObject.targetObject;
+
+            Undo.RecordObject(target, "Paste single binder");
+
+            bindersProperty.arraySize++;
+            var binderProperty = bindersProperty.GetArrayElementAtIndex(lastIndex);
+            binderProperty.managedReferenceValue = copiedProperty.managedReferenceValue;
+
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
         }
 
         private static void InitInspector()
@@ -448,6 +628,19 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
 
             return result;
+        }
+
+        private readonly record struct EventData(
+              EventType Type
+            , KeyCode Key
+            , EventModifiers Mods
+            , int Button
+            , Vector2 MousePos
+        )
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator EventData(Event ev)
+                => new(ev.type, ev.keyCode, ev.modifiers, ev.button, ev.mousePosition);
         }
 
         [WrapRecord]

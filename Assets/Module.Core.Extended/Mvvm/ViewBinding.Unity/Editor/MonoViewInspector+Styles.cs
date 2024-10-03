@@ -27,8 +27,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private GUIContent _removeLabel;
         private GUIContent _removeSelectedLabel;
         private GUIContent _menuLabel;
-        private GUIContent _clearLabel;
-        private GUIContent _editSubtitleLabel;
         private GUIContent _iconWarning;
         private GUIContent _iconBinding;
         private GUIContent _applyIconLabel;
@@ -99,7 +97,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             };
 
             _binderButtonStyle = new(EditorStyles.toolbarButton) {
-                padding = new(0, 0, 0, 0),
+                padding = new(30, 30, 0, 0),
                 margin = new(1, 0, 0, 0),
                 fixedHeight = 0,
                 fontSize = GUI.skin.button.fontSize,
@@ -185,9 +183,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 _menuLabel = new(icon.image, "Menu");
                 _menuColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
             }
-
-            _clearLabel = new("Clear");
-            _editSubtitleLabel = new("Edit Subtitle _f2");
 
             {
                 var icon = EditorGUIUtility.isProSkin

@@ -19,7 +19,15 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             Cancel,
         }
 
-        private void DrawBindersPanel(KeyCode pressedKey)
+        private readonly GUIContent _clearBindersLabel = new("Clear");
+        private readonly GUIContent _copyBindersLabel = new("Copy");
+        private readonly GUIContent _pasteBindersLabel = new("Paste");
+        private readonly GUIContent _editSubtitleLabel = new("Edit Subtitle _f2");
+        private readonly GUIContent _copyBinderLabel = new("Copy _^c");
+        private readonly GUIContent _pasteBinderLabel = new("Paste _^v");
+        private readonly GUIContent _deleteBinderLabel = new("Delete _del");
+
+        private void DrawBindersPanel(in EventData eventData)
         {
             var guiWidth = GUILayout.MinWidth(200);
 
@@ -34,7 +42,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 EditorGUILayout.BeginVertical(GUILayout.MinWidth(206));
                 {
                     DrawBindersPanel_Toolbar();
-                    DrawBindersPanel_Content(pressedKey);
+                    DrawBindersPanel_Content(eventData);
                     GUILayout.Space(6f);
                 }
                 EditorGUILayout.EndVertical();
@@ -42,7 +50,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             EditorGUILayout.EndVertical();
         }
 
-        private void DrawBindersLabel(GUILayoutOption guiWidth, Rect rect)
+        private void DrawBindersLabel(GUILayoutOption guiWidth, in Rect rect)
         {
             var label = _bindersLabel;
             var labelStyle = _rootTabLabelStyle;
@@ -99,7 +107,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                 if (GUILayout.Button(_removeSelectedLabel, _toolbarMidButtonStyle, GUILayout.Height(20)))
                 {
-                    RemoveSelectedBinder();
+                    DeleteSelectedBinder();
                 }
 
                 GUI.enabled = guiEnabled;
@@ -113,8 +121,18 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     s_bindersPropRef.Inspector = this;
 
                     var menu = new GenericMenu();
-                    menu.AddItem(_clearLabel, false, ClearBinders, s_bindersPropRef);
-                    menu.AddItem(_editSubtitleLabel, false, EditBinderSubtitle, s_bindersPropRef);
+                    menu.AddItem(_copyBindersLabel, false, Menu_OnCopyBinders, s_bindersPropRef);
+
+                    if (ValidatePasteBinders())
+                    {
+                        menu.AddItem(_pasteBindersLabel, false, Menu_OnPasteBinders, s_bindersPropRef);
+                    }
+                    else
+                    {
+                        menu.AddDisabledItem(_pasteBinderLabel);
+                    }
+
+                    menu.AddItem(_clearBindersLabel, false, Menu_OnClearBinders, s_bindersPropRef);
                     menu.ShowAsContext();
                 }
 
@@ -135,7 +153,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             menu.Show(Event.current.mousePosition);
         }
 
-        private static void ClearBinders(object userData)
+        private static void Menu_OnClearBinders(object userData)
         {
             if (userData is not BindersPropRef propRef)
             {
@@ -155,21 +173,24 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             propRef.Inspector.SetSelectedBinderIndex(null);
         }
 
-        private static void EditBinderSubtitle(object userData)
+        private static void Menu_OnCopyBinders(object userData)
         {
             if (userData is not BindersPropRef propRef)
             {
                 return;
             }
 
-            var inspector = propRef.Inspector;
+            propRef.Inspector.CopyBinders();
+        }
 
-            if (inspector.ValidateSelectedBinderIndex() == false)
+        private static void Menu_OnPasteBinders(object userData)
+        {
+            if (userData is not BindersPropRef propRef)
             {
                 return;
             }
 
-            inspector.SetSelectedSubtitleIndex(inspector._selectedBinderIndex);
+            propRef.Inspector.PasteBinders();
         }
 
         private static void BinderMenu_AddBinder(object userData)
@@ -198,7 +219,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             inspector.SetSelectedBinderIndex(lastIndex);
         }
 
-        private void RemoveSelectedBinder()
+        private void DeleteSelectedBinder()
         {
             var property = _presetBindersProp;
             var length = property.arraySize;
@@ -212,7 +233,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             var serializedObject = property.serializedObject;
             var target = serializedObject.targetObject;
 
-            Undo.RecordObject(target, $"Remove binder at {property.propertyPath}[{index}]");
+            Undo.RecordObject(target, $"Delete binder at {property.propertyPath}[{index}]");
 
             property.DeleteArrayElementAtIndex(index);
             serializedObject.ApplyModifiedProperties();
@@ -226,7 +247,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
         }
 
-        private void DrawBindersPanel_Content(KeyCode pressedKey)
+        private void DrawBindersPanel_Content(in EventData eventData)
         {
             var bindersLength = _presetBindersProp.arraySize;
             var guiWidth1 = GUILayout.MinWidth(206);
@@ -254,7 +275,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                         , guiWidth2
                         , itemRect
                         , expandHeight
-                        , pressedKey
+                        , eventData
                     );
                 }
 
@@ -267,12 +288,12 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
               GUILayoutOption guiHeight
             , GUILayoutOption guiHeightExpand
             , GUILayoutOption guiWidth
-            , Rect origItemRect
+            , in Rect origItemRect
             , float itemExpandHeight
-            , KeyCode pressedKey
+            , in EventData eventData
         )
         {
-            var subtitleIndex = pressedKey == KeyCode.Escape ? null : _selectedSubtitleIndex;
+            var subtitleIndex = eventData.Key == KeyCode.Escape ? null : _selectedSubtitleIndex;
             var bindersProp = _presetBindersProp;
             var bindersLength = bindersProp.arraySize;
             var binderSelectedButtonStyle = _binderSelectedButtonStyle;
@@ -285,8 +306,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             var applyIconLabel = _applyIconLabel;
             var cancelIconLabel = _cancelIconLabel;
             var buttonLabel = new GUIContent();
-            var expandedPrevious = false;
+            var indexLabel = new GUIContent();
             var subtitleState = ButtonState.None;
+            var mousePos = eventData.MousePos;
+            var mouseDownIndex = -1;
+            var offsetY = 0f;
 
             for (var i = 0; i < bindersLength; i++)
             {
@@ -306,17 +330,12 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 var normalColor = buttonStyle.normal.textColor;
                 var activeColor = buttonStyle.active.textColor;
                 var hoverColor = buttonStyle.hover.textColor;
-                var subtitleProp = binderProp.FindPropertyRelative("_subtitle");
-                var bindingsProp = binderProp.FindPropertyRelative("_presetBindings");
-                var targetsProp = binderProp.FindPropertyRelative("_presetTargets");
+                var subtitleProp = binderProp.FindPropertyRelative(PROP_SUBTITLE);
+                var bindingsProp = binderProp.FindPropertyRelative(PROP_PRESET_BINDINGS);
+                var targetsProp = binderProp.FindPropertyRelative(PROP_PRESET_TARGETS);
                 var itemRect = origItemRect;
-                itemRect.y += itemRect.height * i;
-
-                if (expandedPrevious)
-                {
-                    expandedPrevious = false;
-                    itemRect.y += itemExpandHeight;
-                }
+                itemRect.y += offsetY;
+                offsetY += itemRect.height;
 
                 if (EditorGUIUtility.isProSkin == false && isSelected)
                 {
@@ -350,7 +369,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                         buttonLabel.text = string.Format(BINDER_SUBTITLE_LABEL, labelAttrib.Label, subtitleProp.stringValue);
                         buttonHeight = guiHeightExpand;
                         itemRect.height += itemExpandHeight;
-                        expandedPrevious = true;
+                        offsetY += itemExpandHeight;
                     }
                     else
                     {
@@ -367,13 +386,23 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     GUI.backgroundColor = guiBackColor;
                 }
 
+                if (eventData.Type == EventType.MouseDown
+                    && eventData.Button == 1
+                    && itemRect.Contains(mousePos)
+                )
+                {
+                    mouseDownIndex = i;
+                }
+
                 // Draw index label
                 if (showingSubtitle == false)
                 {
-                    var rect = itemRect;
-                    rect.x += 3f;
+                    var indexRect = itemRect;
+                    indexRect.x += 3f;
+                    indexRect.width = 30f;
 
-                    GUI.Label(rect, $"{i}", indexLabelStyle);
+                    indexLabel.text = i.ToString();
+                    GUI.Label(indexRect, indexLabel, indexLabelStyle);
                 }
 
                 var showWarning = bindingsProp.arraySize < 1 || targetsProp.arraySize < 1;
@@ -398,11 +427,12 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 // Draw warning icon
                 if (showWarning)
                 {
+                    var size = 18f;
                     var iconRect = itemRect;
                     iconRect.x += itemRect.width - 16f;
-                    iconRect.y += 5f;
-                    iconRect.width = 18f;
-                    iconRect.height = 18f;
+                    iconRect.y += (iconRect.height - size) / 2f;
+                    iconRect.width = size;
+                    iconRect.height = size;
 
                     GUI.Label(iconRect, iconWarning);
                 }
@@ -427,6 +457,78 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 SetSelectedSubtitleIndex(null);
             }
+
+            if (mouseDownIndex >= 0)
+            {
+                SetSelectedBinderIndex(mouseDownIndex);
+
+                s_bindersPropRef.Prop = _presetBindersProp;
+                s_bindersPropRef.Inspector = this;
+
+                var menu = new GenericMenu();
+                menu.AddItem(_editSubtitleLabel, false, Menu_OnEditBinderSubtitle, s_bindersPropRef);
+                menu.AddSeparator(string.Empty);
+                menu.AddItem(_copyBinderLabel, false, Menu_OnCopyBinder, s_bindersPropRef);
+
+                if (ValidatePasteSingleBinder())
+                {
+                    menu.AddItem(_pasteBinderLabel, false, Menu_OnPasteBinder, s_bindersPropRef);
+                }
+                else
+                {
+                    menu.AddDisabledItem(_pasteBinderLabel);
+                }
+
+                menu.AddItem(_deleteBinderLabel, false, Menu_OnDeleteBinder, s_bindersPropRef);
+                menu.ShowAsContext();
+            }
+        }
+
+        private static void Menu_OnEditBinderSubtitle(object userData)
+        {
+            if (userData is not BindersPropRef propRef)
+            {
+                return;
+            }
+
+            var inspector = propRef.Inspector;
+
+            if (inspector.ValidateSelectedBinderIndex() == false)
+            {
+                return;
+            }
+
+            inspector.SetSelectedSubtitleIndex(inspector._selectedBinderIndex);
+        }
+
+        private static void Menu_OnCopyBinder(object userData)
+        {
+            if (userData is not BindersPropRef propRef)
+            {
+                return;
+            }
+
+            propRef.Inspector.CopySingleBinder();
+        }
+
+        private static void Menu_OnPasteBinder(object userData)
+        {
+            if (userData is not BindersPropRef propRef)
+            {
+                return;
+            }
+
+            propRef.Inspector.PasteSingleBinder();
+        }
+
+        private static void Menu_OnDeleteBinder(object userData)
+        {
+            if (userData is not BindersPropRef propRef)
+            {
+                return;
+            }
+
+            propRef.Inspector.DeleteSelectedBinder();
         }
 
         private void DrawBinderSubtitleField(

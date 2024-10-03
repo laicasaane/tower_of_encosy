@@ -19,6 +19,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             Menu = 2,
         }
 
+        private readonly GUIContent _clearBindingsLabel = new("Clear");
+        private readonly GUIContent _clearTargetsLabel = new("Clear");
+
         private void DrawDetailsPanel()
         {
             EditorGUILayout.BeginVertical(GUILayout.ExpandHeight(true));
@@ -39,8 +42,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                         var index = _selectedBinderIndex.Value;
                         var bindersProp = _presetBindersProp;
                         var binderProp = bindersProp.GetArrayElementAtIndex(index);
-                        var bindingsProp = binderProp.FindPropertyRelative("_presetBindings");
-                        var targetsProp = binderProp.FindPropertyRelative("_presetTargets");
+                        var bindingsProp = binderProp.FindPropertyRelative(PROP_PRESET_BINDINGS);
+                        var targetsProp = binderProp.FindPropertyRelative(PROP_PRESET_TARGETS);
 
                         var iconWarning = _iconWarning;
                         var iconRect = tabBarRect;
@@ -113,8 +116,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         {
             var bindersProp = _presetBindersProp;
             var binderProp = bindersProp.GetArrayElementAtIndex(index);
-            var targetsProp = binderProp.FindPropertyRelative("_presetTargets");
-            var bindingsProp = binderProp.FindPropertyRelative("_presetBindings");
+            var bindingsProp = binderProp.FindPropertyRelative(PROP_PRESET_BINDINGS);
+            var targetsProp = binderProp.FindPropertyRelative(PROP_PRESET_TARGETS);
             var tabIndex = _selectedDetailsTabIndex;
 
             switch (tabIndex)
@@ -149,7 +152,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     s_binderPropRef.Inspector = this;
 
                     var menu = new GenericMenu();
-                    menu.AddItem(_clearLabel, false, ClearTargetsOrBindings, s_binderPropRef);
+                    menu.AddItem(_clearTargetsLabel, false, ClearTargetsOrBindings, s_binderPropRef);
                     menu.ShowAsContext();
                     break;
                 }
@@ -255,7 +258,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     s_binderPropRef.Inspector = this;
 
                     var menu = new GenericMenu();
-                    menu.AddItem(_clearLabel, false, ClearTargetsOrBindings, s_binderPropRef);
+                    menu.AddItem(_clearBindingsLabel, false, ClearTargetsOrBindings, s_binderPropRef);
                     menu.ShowAsContext();
                     break;
                 }
@@ -445,7 +448,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
 
             var length = selectedIds.Count;
-            var targetsProp = binderProp.FindPropertyRelative("_presetTargets");
+            var targetsProp = binderProp.FindPropertyRelative(PROP_PRESET_TARGETS);
             var serializedObject = targetsProp.serializedObject;
             var target = serializedObject.targetObject;
 
@@ -472,7 +475,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             var (bindingType, _, binderPropRef) = menuItem;
             var binderProp = binderPropRef.Prop;
-            var bindingsProp = binderProp.FindPropertyRelative("_presetBindings");
+            var bindingsProp = binderProp.FindPropertyRelative(PROP_PRESET_BINDINGS);
             var serializedObject = bindingsProp.serializedObject;
             var target = serializedObject.targetObject;
             var lastIndex = bindingsProp.arraySize;
