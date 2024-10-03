@@ -16,7 +16,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Spacing", "Vertical Layout Group")]
-    public sealed partial class VerticalLayoutGroupBindingSpacing : MonoPropertyBinding<VerticalLayoutGroup>, IBinder
+    public sealed partial class VerticalLayoutGroupBindingSpacing : MonoBindingProperty<VerticalLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -34,7 +34,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Child Alignment", "Vertical Layout Group")]
-    public sealed partial class VerticalLayoutGroupBindingChildAlignment : MonoPropertyBinding<VerticalLayoutGroup>, IBinder
+    public sealed partial class VerticalLayoutGroupBindingChildAlignment : MonoBindingProperty<VerticalLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -52,7 +52,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Reverse Arrangement", "Vertical Layout Group")]
-    public sealed partial class VerticalLayoutGroupBindingReverseArrangement : MonoPropertyBinding<VerticalLayoutGroup>, IBinder
+    public sealed partial class VerticalLayoutGroupBindingReverseArrangement : MonoBindingProperty<VerticalLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -70,7 +70,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Control Child Width", "Vertical Layout Group")]
-    public sealed partial class VerticalLayoutGroupBindingControlChildWidth : MonoPropertyBinding<VerticalLayoutGroup>, IBinder
+    public sealed partial class VerticalLayoutGroupBindingControlChildWidth : MonoBindingProperty<VerticalLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -88,7 +88,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Control Child Height", "Vertical Layout Group")]
-    public sealed partial class VerticalLayoutGroupBindingControlChildHeight : MonoPropertyBinding<VerticalLayoutGroup>, IBinder
+    public sealed partial class VerticalLayoutGroupBindingControlChildHeight : MonoBindingProperty<VerticalLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -106,7 +106,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Use Child Scale Width", "Vertical Layout Group")]
-    public sealed partial class VerticalLayoutGroupBindingUseChildScaleWidth : MonoPropertyBinding<VerticalLayoutGroup>, IBinder
+    public sealed partial class VerticalLayoutGroupBindingUseChildScaleWidth : MonoBindingProperty<VerticalLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -124,7 +124,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Use Child Scale Height", "Vertical Layout Group")]
-    public sealed partial class VerticalLayoutGroupBindingUseChildScaleHeight : MonoPropertyBinding<VerticalLayoutGroup>, IBinder
+    public sealed partial class VerticalLayoutGroupBindingUseChildScaleHeight : MonoBindingProperty<VerticalLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -142,7 +142,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Child Force Expand Width", "Vertical Layout Group")]
-    public sealed partial class VerticalLayoutGroupBindingChildForceExpandWidth : MonoPropertyBinding<VerticalLayoutGroup>, IBinder
+    public sealed partial class VerticalLayoutGroupBindingChildForceExpandWidth : MonoBindingProperty<VerticalLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -160,7 +160,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Child Force Expand Height", "Vertical Layout Group")]
-    public sealed partial class VerticalLayoutGroupBindingChildForceExpandHeight : MonoPropertyBinding<VerticalLayoutGroup>, IBinder
+    public sealed partial class VerticalLayoutGroupBindingChildForceExpandHeight : MonoBindingProperty<VerticalLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

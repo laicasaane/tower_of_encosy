@@ -13,7 +13,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Anchored Position", "Rect Transform")]
-    public sealed partial class RectTransformBindingAnchorPosition : MonoPropertyBinding<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingAnchorPosition : MonoBindingProperty<RectTransform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -31,7 +31,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Anchored Position 3D", "Rect Transform")]
-    public sealed partial class RectTransformBindingAnchorPosition3D : MonoPropertyBinding<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingAnchorPosition3D : MonoBindingProperty<RectTransform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -49,7 +49,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Anchor Min", "Rect Transform")]
-    public sealed partial class RectTransformBindingAnchorMin : MonoPropertyBinding<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingAnchorMin : MonoBindingProperty<RectTransform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -67,7 +67,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Anchor Max", "Rect Transform")]
-    public sealed partial class RectTransformBindingAnchorMax : MonoPropertyBinding<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingAnchorMax : MonoBindingProperty<RectTransform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -85,7 +85,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Offset Min", "Rect Transform")]
-    public sealed partial class RectTransformBindingOffsetMin : MonoPropertyBinding<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingOffsetMin : MonoBindingProperty<RectTransform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -103,7 +103,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Offset Max", "Rect Transform")]
-    public sealed partial class RectTransformBindingOffsetMax : MonoPropertyBinding<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingOffsetMax : MonoBindingProperty<RectTransform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -121,7 +121,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Size Delta", "Rect Transform")]
-    public sealed partial class RectTransformBindingSizeDelta : MonoPropertyBinding<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingSizeDelta : MonoBindingProperty<RectTransform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -139,7 +139,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Pivot", "Rect Transform")]
-    public sealed partial class RectTransformBindingPivot : MonoPropertyBinding<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingPivot : MonoBindingProperty<RectTransform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

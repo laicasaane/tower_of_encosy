@@ -16,7 +16,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Cell Size", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingCellSize : MonoPropertyBinding<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingCellSize : MonoBindingProperty<GridLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -34,7 +34,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Cell Width", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingCellWidth : MonoPropertyBinding<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingCellWidth : MonoBindingProperty<GridLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -53,7 +53,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Cell Height", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingCellHeight : MonoPropertyBinding<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingCellHeight : MonoBindingProperty<GridLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -72,7 +72,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Spacing Width", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingSpacingWidth : MonoPropertyBinding<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingSpacingWidth : MonoBindingProperty<GridLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -91,7 +91,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Spacing Height", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingSpacingHeight : MonoPropertyBinding<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingSpacingHeight : MonoBindingProperty<GridLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -110,7 +110,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Start Corner", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingStartCorner : MonoPropertyBinding<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingStartCorner : MonoBindingProperty<GridLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -128,7 +128,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Start Axis", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingStartAxis : MonoPropertyBinding<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingStartAxis : MonoBindingProperty<GridLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -146,7 +146,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Child Alignment", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingChildAlignment : MonoPropertyBinding<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingChildAlignment : MonoBindingProperty<GridLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -164,7 +164,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Constraint", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingConstraint : MonoPropertyBinding<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingConstraint : MonoBindingProperty<GridLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -182,7 +182,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Constraint Count", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingConstraintCount : MonoPropertyBinding<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingConstraintCount : MonoBindingProperty<GridLayoutGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

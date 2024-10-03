@@ -17,7 +17,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Interactable", "Button")]
-    public sealed partial class ButtonBindingInteractable : MonoPropertyBinding<Button>, IBinder
+    public sealed partial class ButtonBindingInteractable : MonoBindingProperty<Button>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -35,7 +35,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("On Click", "Button")]
-    public sealed partial class ButtonBindingOnClick : MonoCommandBinding<Button>, IBinder
+    public sealed partial class ButtonBindingOnClick : MonoBindingCommand<Button>, IBinder
     {
         private readonly UnityAction _command;
 
