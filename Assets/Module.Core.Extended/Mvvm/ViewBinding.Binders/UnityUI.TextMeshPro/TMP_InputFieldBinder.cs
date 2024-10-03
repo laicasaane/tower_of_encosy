@@ -22,7 +22,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Text", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingText : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingText : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -40,7 +40,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Interactable", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingInteractable : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingInteractable : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -58,7 +58,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("On Value Changed", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingOnValueChanged : MonoCommandBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingOnValueChanged : MonoBindingCommand<TMP_InputField>, IBinder
     {
         private readonly UnityAction<string> _command;
 
@@ -98,7 +98,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Character Limit", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingCharacterLimit : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingCharacterLimit : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -116,7 +116,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Content Type", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingContentType : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingContentType : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -134,7 +134,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Line Type", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingLineType : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingLineType : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -152,7 +152,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Rich Text", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingRichText : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingRichText : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -170,7 +170,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Allow Rich Text Editing", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingAllowRichTextEditing : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingAllowRichTextEditing : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -188,7 +188,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Custom Caret Color", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingCustomCaretColor : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingCustomCaretColor : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -206,7 +206,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Caret Color", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingCaretColor : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingCaretColor : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -224,7 +224,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Selection Color", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingSelectionColor : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingSelectionColor : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -242,7 +242,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Placeholder Text", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingPlaceholderText : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingPlaceholderText : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -263,7 +263,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Text Color", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingTextColor : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingTextColor : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -288,7 +288,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Placeholder Text Color", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingPlaceholderTextColor : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingPlaceholderTextColor : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -313,7 +313,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Font Asset", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingFontAsset : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingFontAsset : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -331,7 +331,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Font Size", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingFontSize : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingFontSize : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -349,7 +349,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Raycast Target", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingRaycastTarget : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingRaycastTarget : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -374,7 +374,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Maskable", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingMaskable : MonoPropertyBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingMaskable : MonoBindingProperty<TMP_InputField>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -399,7 +399,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("On End Edit", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingOnEndEdit : MonoCommandBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingOnEndEdit : MonoBindingCommand<TMP_InputField>, IBinder
     {
         private readonly UnityAction<string> _command;
 
@@ -439,7 +439,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("On Submit", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingOnSubmit : MonoCommandBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingOnSubmit : MonoBindingCommand<TMP_InputField>, IBinder
     {
         private readonly UnityAction<string> _command;
 
@@ -479,7 +479,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("On Select", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingOnSelect : MonoCommandBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingOnSelect : MonoBindingCommand<TMP_InputField>, IBinder
     {
         private readonly UnityAction<string> _command;
 
@@ -519,7 +519,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("On Deselect", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingOnDeselect : MonoCommandBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingOnDeselect : MonoBindingCommand<TMP_InputField>, IBinder
     {
         private readonly UnityAction<string> _command;
 
@@ -559,7 +559,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("On Text Selection", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingOnTextSelection : MonoCommandBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingOnTextSelection : MonoBindingCommand<TMP_InputField>, IBinder
     {
         private readonly UnityAction<string, int, int> _command;
 
@@ -599,7 +599,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("On End Text Selection", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingOnEndTextSelection : MonoCommandBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingOnEndTextSelection : MonoBindingCommand<TMP_InputField>, IBinder
     {
         private readonly UnityAction<string, int, int> _command;
 
@@ -639,7 +639,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("On Touch Screen Keyboard Status Changed", "TMP Input Field")]
-    public sealed partial class TMP_InputFieldBindingOnTouchScreenKeyboardStatusChanged : MonoCommandBinding<TMP_InputField>, IBinder
+    public sealed partial class TMP_InputFieldBindingOnTouchScreenKeyboardStatusChanged : MonoBindingCommand<TMP_InputField>, IBinder
     {
         private readonly UnityAction<TouchScreenKeyboard.Status> _command;
 

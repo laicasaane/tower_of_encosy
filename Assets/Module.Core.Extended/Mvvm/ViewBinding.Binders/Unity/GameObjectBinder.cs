@@ -13,7 +13,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Active Self", "GameObject")]
-    public sealed partial class GameObjectBindingActiveSelf : MonoPropertyBinding<GameObject>, IBinder
+    public sealed partial class GameObjectBindingActiveSelf : MonoBindingProperty<GameObject>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

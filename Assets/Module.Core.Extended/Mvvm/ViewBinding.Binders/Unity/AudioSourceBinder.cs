@@ -13,7 +13,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Loop", "Audio Source")]
-    public sealed partial class AudioSourceBindingLoop : MonoPropertyBinding<AudioSource>, IBinder
+    public sealed partial class AudioSourceBindingLoop : MonoBindingProperty<AudioSource>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -31,7 +31,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Mute", "Audio Source")]
-    public sealed partial class AudioSourceBindingMute : MonoPropertyBinding<AudioSource>, IBinder
+    public sealed partial class AudioSourceBindingMute : MonoBindingProperty<AudioSource>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -49,7 +49,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Volume", "Audio Source")]
-    public sealed partial class AudioSourceBindingVolume : MonoPropertyBinding<AudioSource>, IBinder
+    public sealed partial class AudioSourceBindingVolume : MonoBindingProperty<AudioSource>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

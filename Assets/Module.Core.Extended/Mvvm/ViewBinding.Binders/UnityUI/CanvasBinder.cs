@@ -13,7 +13,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Camera", "Canvas")]
-    public sealed partial class CanvasBindingCamera : MonoPropertyBinding<Canvas>, IBinder
+    public sealed partial class CanvasBindingCamera : MonoBindingProperty<Canvas>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -31,7 +31,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Override Sorting", "Canvas")]
-    public sealed partial class CanvasBindingOverrideSorting : MonoPropertyBinding<Canvas>, IBinder
+    public sealed partial class CanvasBindingOverrideSorting : MonoBindingProperty<Canvas>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -49,7 +49,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Sorting Layer Id", "Canvas")]
-    public sealed partial class CanvasBindingSortingLayerId : MonoPropertyBinding<Canvas>, IBinder
+    public sealed partial class CanvasBindingSortingLayerId : MonoBindingProperty<Canvas>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -67,7 +67,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Sorting Layer Name", "Canvas")]
-    public sealed partial class CanvasBindingSortingLayerName : MonoPropertyBinding<Canvas>, IBinder
+    public sealed partial class CanvasBindingSortingLayerName : MonoBindingProperty<Canvas>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -85,7 +85,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Sorting Order In Layer", "Canvas")]
-    public sealed partial class CanvasBindingSortingOrderInLayer : MonoPropertyBinding<Canvas>, IBinder
+    public sealed partial class CanvasBindingSortingOrderInLayer : MonoBindingProperty<Canvas>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

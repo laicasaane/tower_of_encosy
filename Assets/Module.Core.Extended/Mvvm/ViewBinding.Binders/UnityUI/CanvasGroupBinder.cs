@@ -13,7 +13,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Alpha", "Canvas Group")]
-    public sealed partial class CanvasGroupBindingAlpha : MonoPropertyBinding<CanvasGroup>, IBinder
+    public sealed partial class CanvasGroupBindingAlpha : MonoBindingProperty<CanvasGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -31,7 +31,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Blocks Raycasts", "Canvas Group")]
-    public sealed partial class CanvasGroupBindingBlocksRaycasts : MonoPropertyBinding<CanvasGroup>, IBinder
+    public sealed partial class CanvasGroupBindingBlocksRaycasts : MonoBindingProperty<CanvasGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -49,7 +49,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Interactable", "Canvas Group")]
-    public sealed partial class CanvasGroupBindingInteractable : MonoPropertyBinding<CanvasGroup>, IBinder
+    public sealed partial class CanvasGroupBindingInteractable : MonoBindingProperty<CanvasGroup>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

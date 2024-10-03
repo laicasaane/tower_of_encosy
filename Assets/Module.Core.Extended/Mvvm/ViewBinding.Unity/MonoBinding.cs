@@ -59,7 +59,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
     /// should not have more than 1 binding property.
     /// </remarks>
     [Serializable]
-    public abstract partial class MonoPropertyBinding<T> : MonoBinding<T>, IBinder
+    public abstract partial class MonoBindingProperty<T> : MonoBinding<T>, IBinder
         where T : UnityEngine.Object
     {
         public sealed override bool IsCommand => false;
@@ -74,7 +74,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
     /// should not have more than 1 binding command.
     /// </remarks>
     [Serializable]
-    public abstract partial class MonoCommandBinding<T> : MonoBinding<T>, IBinder
+    public abstract partial class MonoBindingCommand<T> : MonoBinding<T>, IBinder
         where T : UnityEngine.Object
     {
         public sealed override bool IsCommand => true;

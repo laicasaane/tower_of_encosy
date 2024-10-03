@@ -16,7 +16,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Ignore Reversed Graphics", "Graphic Raycaster")]
-    public sealed partial class GraphicRaycasterBindingIgnoreReversedGraphics : MonoPropertyBinding<GraphicRaycaster>, IBinder
+    public sealed partial class GraphicRaycasterBindingIgnoreReversedGraphics : MonoBindingProperty<GraphicRaycaster>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -34,7 +34,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Blocking Objects", "Graphic Raycaster")]
-    public sealed partial class GraphicRaycasterBindingBlockingObjects : MonoPropertyBinding<GraphicRaycaster>, IBinder
+    public sealed partial class GraphicRaycasterBindingBlockingObjects : MonoBindingProperty<GraphicRaycaster>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -52,7 +52,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Blocking Mask", "Graphic Raycaster")]
-    public sealed partial class GraphicRaycasterBindingBlockingMask : MonoPropertyBinding<GraphicRaycaster>, IBinder
+    public sealed partial class GraphicRaycasterBindingBlockingMask : MonoBindingProperty<GraphicRaycaster>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

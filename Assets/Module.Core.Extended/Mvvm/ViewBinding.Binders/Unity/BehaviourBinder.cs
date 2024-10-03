@@ -13,7 +13,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Enabled", "Behaviour")]
-    public sealed partial class BehaviourBindingEnabled : MonoPropertyBinding<Behaviour>, IBinder
+    public sealed partial class BehaviourBindingEnabled : MonoBindingProperty<Behaviour>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

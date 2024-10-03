@@ -740,12 +740,14 @@ MonoBehaviour:
       type: {class: GameObjectBinder, ns: Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity,
         asm: Module.Core.Extended}
       data:
+        _subtitle: 
         _presetBindings: []
         _presetTargets: []
     - rid: 3970310128774938641
       type: {class: TransformBinder, ns: Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity,
         asm: Module.Core.Extended}
       data:
+        _subtitle: group-1
         _presetBindings:
         - rid: 3970310128774938645
         - rid: 3970310135001645065
@@ -785,6 +787,7 @@ MonoBehaviour:
       type: {class: ButtonBinder, ns: Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI,
         asm: Module.Core.Extended}
       data:
+        _subtitle: group-2
         _presetBindings:
         - rid: 3970310135001645069
         - rid: 3970310135001645070

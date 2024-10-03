@@ -34,7 +34,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                     _selectedDetailsTabIndex = GUI.Toolbar(tabBarRect, _selectedDetailsTabIndex, _detailsTabLabels);
 
-                    if (_selectedBinderIndex.HasValue)
+                    if (ValidateSelectedBinderIndex())
                     {
                         var index = _selectedBinderIndex.Value;
                         var bindersProp = _presetBindersProp;
@@ -362,7 +362,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                                 GUILayout.Space(itemLabelWidth + 22f);
 
-                                if (GUILayout.Button("A"))
+                                if (GUILayout.Button("A", EditorStyles.popup))
                                 {
 
                                 }

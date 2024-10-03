@@ -16,7 +16,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Text", "TMP Text")]
-    public sealed partial class TMP_TextBindingText : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingText : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -34,7 +34,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Color", "TMP Text")]
-    public sealed partial class TMP_TextBindingColor : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingColor : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -52,7 +52,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Color Gradient", "TMP Text")]
-    public sealed partial class TMP_TextBindingColorGradient : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingColorGradient : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -70,7 +70,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Max Visible Characters", "TMP Text")]
-    public sealed partial class TMP_TextBindingMaxVisibleCharacters : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingMaxVisibleCharacters : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -88,7 +88,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Max Visible Words", "TMP Text")]
-    public sealed partial class TMP_TextBindingMaxVisibleWords : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingMaxVisibleWords : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -106,7 +106,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Max Visible Lines", "TMP Text")]
-    public sealed partial class TMP_TextBindingMaxVisibleLines : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingMaxVisibleLines : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -124,7 +124,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Font Asset", "TMP Text")]
-    public sealed partial class TMP_TextBindingFontAsset : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingFontAsset : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -142,7 +142,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Font Size", "TMP Text")]
-    public sealed partial class TMP_TextBindingFontSize : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingFontSize : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -160,7 +160,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Auto Sizing", "TMP Text")]
-    public sealed partial class TMP_TextBindingAutoSizing : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingAutoSizing : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -178,7 +178,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Font Size Min", "TMP Text")]
-    public sealed partial class TMP_TextBindingFontSizeMin : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingFontSizeMin : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -196,7 +196,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Font Size Max", "TMP Text")]
-    public sealed partial class TMP_TextBindingFontSizeMax : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingFontSizeMax : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -214,7 +214,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Raycast Target", "TMP Text")]
-    public sealed partial class TMP_TextBindingRaycastTarget : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingRaycastTarget : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -232,7 +232,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Maskable", "TMP Text")]
-    public sealed partial class TMP_TextBindingMaskable : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingMaskable : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -250,7 +250,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Wrapping Mode", "TMP Text")]
-    public sealed partial class TMP_TextBindingWrappingMode : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingWrappingMode : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -268,7 +268,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Overflow Mode", "TMP Text")]
-    public sealed partial class TMP_TextBindingOverflowMode : MonoPropertyBinding<TMP_Text>, IBinder
+    public sealed partial class TMP_TextBindingOverflowMode : MonoBindingProperty<TMP_Text>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

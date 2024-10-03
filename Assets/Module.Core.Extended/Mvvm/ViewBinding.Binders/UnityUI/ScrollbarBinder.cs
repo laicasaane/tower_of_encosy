@@ -17,7 +17,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Interactable", "Scroll Bar")]
-    public sealed partial class ScrollbarBindingInteractable : MonoPropertyBinding<Scrollbar>, IBinder
+    public sealed partial class ScrollbarBindingInteractable : MonoBindingProperty<Scrollbar>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -35,7 +35,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Value", "Scroll Bar")]
-    public sealed partial class ScrollbarBindingValue : MonoPropertyBinding<Scrollbar>, IBinder
+    public sealed partial class ScrollbarBindingValue : MonoBindingProperty<Scrollbar>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -53,7 +53,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("On Value Changed", "Scroll Bar")]
-    public sealed partial class ScrollbarBindingOnValueChanged : MonoCommandBinding<Scrollbar>, IBinder
+    public sealed partial class ScrollbarBindingOnValueChanged : MonoBindingCommand<Scrollbar>, IBinder
     {
         private readonly UnityAction<float> _command;
 
@@ -93,7 +93,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Size", "Scroll Bar")]
-    public sealed partial class ScrollbarBindingSize : MonoPropertyBinding<Scrollbar>, IBinder
+    public sealed partial class ScrollbarBindingSize : MonoBindingProperty<Scrollbar>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -111,7 +111,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Number Of Steps", "Scroll Bar")]
-    public sealed partial class ScrollbarBindingNumberOfSteps : MonoPropertyBinding<Scrollbar>, IBinder
+    public sealed partial class ScrollbarBindingNumberOfSteps : MonoBindingProperty<Scrollbar>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

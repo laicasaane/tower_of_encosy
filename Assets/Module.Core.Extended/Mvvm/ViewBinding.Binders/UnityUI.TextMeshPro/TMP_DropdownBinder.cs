@@ -18,7 +18,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Value", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingValue : MonoPropertyBinding<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingValue : MonoBindingProperty<TMP_Dropdown>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -36,7 +36,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Caption Text", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingCaptionText : MonoPropertyBinding<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingCaptionText : MonoBindingProperty<TMP_Dropdown>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -61,7 +61,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Interactable", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingInteractable : MonoPropertyBinding<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingInteractable : MonoBindingProperty<TMP_Dropdown>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -79,7 +79,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("On Value Changed", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingOnValueChanged : MonoCommandBinding<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingOnValueChanged : MonoBindingCommand<TMP_Dropdown>, IBinder
     {
         private readonly UnityAction<int> _command;
 
@@ -119,7 +119,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Set Options", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingSetOptions : MonoPropertyBinding<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingSetOptions : MonoBindingProperty<TMP_Dropdown>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -139,7 +139,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Set String Options", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingSetStringOptions : MonoPropertyBinding<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingSetStringOptions : MonoBindingProperty<TMP_Dropdown>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,7 +159,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Set Sprite Options", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingSetSpriteOptions : MonoPropertyBinding<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingSetSpriteOptions : MonoBindingProperty<TMP_Dropdown>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -179,7 +179,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Add Options", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingAddOptions : MonoPropertyBinding<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingAddOptions : MonoBindingProperty<TMP_Dropdown>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -197,7 +197,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Add String Options", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingAddStringOptions : MonoPropertyBinding<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingAddStringOptions : MonoBindingProperty<TMP_Dropdown>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -215,7 +215,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
     [Serializable]
     [Label("Add Sprite Options", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingAddSpriteOptions : MonoPropertyBinding<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingAddSpriteOptions : MonoBindingProperty<TMP_Dropdown>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

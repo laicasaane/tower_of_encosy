@@ -17,7 +17,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Is On", "Toggle")]
-    public sealed partial class ToggleBindingIsOn : MonoPropertyBinding<Toggle>, IBinder
+    public sealed partial class ToggleBindingIsOn : MonoBindingProperty<Toggle>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -35,7 +35,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Interactable", "Toggle")]
-    public sealed partial class ToggleBindingInteractable : MonoPropertyBinding<Toggle>, IBinder
+    public sealed partial class ToggleBindingInteractable : MonoBindingProperty<Toggle>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -53,7 +53,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("On Value Changed", "Toggle")]
-    public sealed partial class ToggleBindingOnValueChanged : MonoCommandBinding<Toggle>, IBinder
+    public sealed partial class ToggleBindingOnValueChanged : MonoBindingCommand<Toggle>, IBinder
     {
         private readonly UnityAction<bool> _command;
 

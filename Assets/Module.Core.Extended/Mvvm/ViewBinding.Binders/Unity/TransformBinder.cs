@@ -13,7 +13,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Position", "Transform")]
-    public sealed partial class TransformBindingPosition : MonoPropertyBinding<Transform>, IBinder
+    public sealed partial class TransformBindingPosition : MonoBindingProperty<Transform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -31,7 +31,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Rotation", "Transform")]
-    public sealed partial class TransformBindingRotation : MonoPropertyBinding<Transform>, IBinder
+    public sealed partial class TransformBindingRotation : MonoBindingProperty<Transform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -49,7 +49,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Euler Angles", "Transform")]
-    public sealed partial class TransformBindingEulerAngles : MonoPropertyBinding<Transform>, IBinder
+    public sealed partial class TransformBindingEulerAngles : MonoBindingProperty<Transform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -67,7 +67,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Local Position", "Transform")]
-    public sealed partial class TransformBindingLocalPosition : MonoPropertyBinding<Transform>, IBinder
+    public sealed partial class TransformBindingLocalPosition : MonoBindingProperty<Transform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -85,7 +85,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Local Rotation", "Transform")]
-    public sealed partial class TransformBindingLocalRotation : MonoPropertyBinding<Transform>, IBinder
+    public sealed partial class TransformBindingLocalRotation : MonoBindingProperty<Transform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -103,7 +103,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Local Euler Angles", "Transform")]
-    public sealed partial class TransformBindingLocalEulerAngles : MonoPropertyBinding<Transform>, IBinder
+    public sealed partial class TransformBindingLocalEulerAngles : MonoBindingProperty<Transform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -121,7 +121,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 
     [Serializable]
     [Label("Local Scale", "Transform")]
-    public sealed partial class TransformBindingLocalScale : MonoPropertyBinding<Transform>, IBinder
+    public sealed partial class TransformBindingLocalScale : MonoBindingProperty<Transform>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

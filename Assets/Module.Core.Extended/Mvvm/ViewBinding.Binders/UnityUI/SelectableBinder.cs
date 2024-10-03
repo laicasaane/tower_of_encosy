@@ -15,7 +15,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Interactable", "Selectable")]
-    public sealed partial class SelectableBindingInteractable : MonoPropertyBinding<Selectable>, IBinder
+    public sealed partial class SelectableBindingInteractable : MonoBindingProperty<Selectable>, IBinder
     {
         [BindingProperty]
         [field: UnityEngine.HideInInspector]

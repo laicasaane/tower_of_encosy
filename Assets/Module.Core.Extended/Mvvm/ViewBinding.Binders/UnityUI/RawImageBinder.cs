@@ -16,7 +16,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Color", "Raw Image")]
-    public sealed partial class RawImageBindingColor : MonoPropertyBinding<RawImage>, IBinder
+    public sealed partial class RawImageBindingColor : MonoBindingProperty<RawImage>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -34,7 +34,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Texture", "Raw Image")]
-    public sealed partial class RawImageBindingTexture : MonoPropertyBinding<RawImage>, IBinder
+    public sealed partial class RawImageBindingTexture : MonoBindingProperty<RawImage>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -52,7 +52,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Texture (Native Size)", "Raw Image")]
-    public sealed partial class RawImageBindingTextureNativeSize : MonoPropertyBinding<RawImage>, IBinder
+    public sealed partial class RawImageBindingTextureNativeSize : MonoBindingProperty<RawImage>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -72,7 +72,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Material", "Raw Image")]
-    public sealed partial class RawImageBindingMaterial : MonoPropertyBinding<RawImage>, IBinder
+    public sealed partial class RawImageBindingMaterial : MonoBindingProperty<RawImage>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -90,7 +90,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Raycast Target", "Raw Image")]
-    public sealed partial class RawImageBindingRaycastTarget : MonoPropertyBinding<RawImage>, IBinder
+    public sealed partial class RawImageBindingRaycastTarget : MonoBindingProperty<RawImage>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -108,7 +108,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Maskable", "Raw Image")]
-    public sealed partial class RawImageBindingMaskable : MonoPropertyBinding<RawImage>, IBinder
+    public sealed partial class RawImageBindingMaskable : MonoBindingProperty<RawImage>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -126,7 +126,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("UV Rect", "Raw Image")]
-    public sealed partial class RawImageBindingUVRect : MonoPropertyBinding<RawImage>, IBinder
+    public sealed partial class RawImageBindingUVRect : MonoBindingProperty<RawImage>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]

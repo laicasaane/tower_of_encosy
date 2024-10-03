@@ -17,7 +17,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Value", "Slider")]
-    public sealed partial class SliderBindingValue : MonoPropertyBinding<Slider>, IBinder
+    public sealed partial class SliderBindingValue : MonoBindingProperty<Slider>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -35,7 +35,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Interactable", "Slider")]
-    public sealed partial class SliderBindingInteractable : MonoPropertyBinding<Slider>, IBinder
+    public sealed partial class SliderBindingInteractable : MonoBindingProperty<Slider>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -53,7 +53,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("On Value Changed", "Slider")]
-    public sealed partial class SliderBindingOnValueChanged : MonoCommandBinding<Slider>, IBinder
+    public sealed partial class SliderBindingOnValueChanged : MonoBindingCommand<Slider>, IBinder
     {
         private readonly UnityAction<float> _command;
 
@@ -93,7 +93,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Min Value", "Slider")]
-    public sealed partial class SliderBindingMinValue : MonoPropertyBinding<Slider>, IBinder
+    public sealed partial class SliderBindingMinValue : MonoBindingProperty<Slider>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -111,7 +111,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
     
     [Serializable]
     [Label("Max Value", "Slider")]
-    public sealed partial class SliderBindingMaxValue : MonoPropertyBinding<Slider>, IBinder
+    public sealed partial class SliderBindingMaxValue : MonoBindingProperty<Slider>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -129,7 +129,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Whole Numbers", "Slider")]
-    public sealed partial class SliderBindingWholeNumbers : MonoPropertyBinding<Slider>, IBinder
+    public sealed partial class SliderBindingWholeNumbers : MonoBindingProperty<Slider>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
