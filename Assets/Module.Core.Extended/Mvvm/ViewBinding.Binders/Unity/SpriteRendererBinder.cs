@@ -1,11 +1,9 @@
-#if UNITY_UGUI
-
 using System;
 using Module.Core.Extended.Mvvm.ViewBinding.Unity;
 using Module.Core.Mvvm.ViewBinding;
 using UnityEngine;
 
-namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
+namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity
 {
     [Serializable]
     [Label("Sprite Renderer")]
@@ -15,7 +13,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Adaptive Mode Threshold", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingAdaptiveModeThreshold : MonoPropertyBinding<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingAdaptiveModeThreshold : MonoBindingProperty<SpriteRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,7 +31,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Color", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingColor : MonoPropertyBinding<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingColor : MonoBindingProperty<SpriteRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,7 +49,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Draw Mode", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingDrawMode : MonoPropertyBinding<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingDrawMode : MonoBindingProperty<SpriteRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,7 +67,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Flip X", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingFlipX : MonoPropertyBinding<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingFlipX : MonoBindingProperty<SpriteRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,7 +85,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Flip Y", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingFlipY : MonoPropertyBinding<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingFlipY : MonoBindingProperty<SpriteRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,7 +103,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Mask Interaction", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingMaskInteraction : MonoPropertyBinding<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingMaskInteraction : MonoBindingProperty<SpriteRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,7 +121,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Size", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingSize : MonoPropertyBinding<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingSize : MonoBindingProperty<SpriteRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,7 +139,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Sprite", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingSprite : MonoPropertyBinding<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingSprite : MonoBindingProperty<SpriteRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,7 +157,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Sprite Sort Point", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingSpriteSortPoint : MonoPropertyBinding<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingSpriteSortPoint : MonoBindingProperty<SpriteRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -177,7 +175,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
 
     [Serializable]
     [Label("Tile Mode", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingTileMode : MonoPropertyBinding<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingTileMode : MonoBindingProperty<SpriteRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -193,5 +191,3 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 }
-
-#endif
