@@ -91,9 +91,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 return;
             }
 
-            var pressedKey = Event.current.keyCode;
+            var ev = Event.current;
+            var pressedKey = ev.keyCode;
+            var eventType = ev.type;
 
-            if (ConsumeInput(pressedKey))
+            if (ConsumeKeyPress(eventType, pressedKey))
             {
                 return;
             }
@@ -117,8 +119,10 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
         }
 
-        private bool ConsumeInput(KeyCode pressedKey)
+        private bool ConsumeKeyPress(EventType eventType, KeyCode pressedKey)
         {
+            var isKeyUp = eventType == EventType.KeyUp;
+
             switch (pressedKey)
             {
                 case KeyCode.F2:
@@ -130,11 +134,39 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     return false;
                 }
 
+                case KeyCode.UpArrow:
+                {
+                    if (isKeyUp && ValidateSelectedBinderIndex())
+                    {
+                        var prevIndex = _selectedBinderIndex.Value - 1;
+                        SetSelectedBinderIndex(Mathf.Max(prevIndex, 0));
+                        Event.current.Use();
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                case KeyCode.DownArrow:
+                {
+                    if (isKeyUp && ValidateSelectedBinderIndex())
+                    {
+                        var nextIndex = _selectedBinderIndex.Value + 1;
+                        var lastIndex = _presetBindersProp.arraySize - 1;
+                        SetSelectedBinderIndex(Mathf.Min(nextIndex, lastIndex));
+                        Event.current.Use();
+                        return true;
+                    }
+
+                    return false;
+                }
+
                 case KeyCode.Return:
                 {
-                    if (ValidateSelectedSubtitleIndex())
+                    if (isKeyUp && ValidateSelectedSubtitleIndex())
                     {
                         ApplyBinderSubtitle();
+                        Event.current.Use();
                         return true;
                     }
 
@@ -143,8 +175,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                 case KeyCode.Escape:
                 {
-                    SetSelectedSubtitleIndex(null);
-                    return true;
+                    if (isKeyUp)
+                    {
+                        SetSelectedSubtitleIndex(null);
+                        Event.current.Use();
+                        return true;
+                    }
+
+                    return false;
                 }
             }
 

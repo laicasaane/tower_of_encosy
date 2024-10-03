@@ -187,7 +187,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
 
             _clearLabel = new("Clear");
-            _subtitleLabel = new("Set Subtitle F2");
+            _subtitleLabel = new("Set Subtitle _f2");
 
             {
                 var icon = EditorGUIUtility.isProSkin
