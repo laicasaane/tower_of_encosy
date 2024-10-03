@@ -240,6 +240,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 _selectedSubtitleIndex = null;
                 _subtitleControlName = string.Empty;
+                _selectedSubtitleProp = null;
                 _binderSubtitle = string.Empty;
             }
         }

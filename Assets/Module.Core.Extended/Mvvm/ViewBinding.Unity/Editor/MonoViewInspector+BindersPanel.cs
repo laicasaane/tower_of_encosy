@@ -422,6 +422,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 ApplyBinderSubtitle();
             }
+
+            if (subtitleState == ButtonState.Cancel)
+            {
+                SetSelectedSubtitleIndex(null);
+            }
         }
 
         private void DrawBinderSubtitleField(
