@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Module.Core.Collections;
 using Module.Core.Editor;
 using Module.Core.Extended.Mvvm.ViewBinding.Unity;
@@ -32,6 +33,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private readonly static Dictionary<Type, GenericMenuPopup> s_bindingMenuMap = new(128);
         private readonly static BindersPropRef s_bindersPropRef = new();
         private readonly static BinderPropRef s_binderPropRef = new();
+        private static SerializedObject s_copiedObject;
 
         private const int TAB_INDEX_BINDINGS = 0;
         private const int TAB_INDEX_TARGETS = 1;
@@ -39,6 +41,15 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private const string NO_BINDING = "Has no binding!";
         private const string NO_TARGET = "Has no target!";
         private const string NO_BINDING_TARGET = "Has no binding and target!";
+
+        private const string PROP_PRESET_BINDERS = "_presetBinders";
+        private const string PROP_PRESET_BINDINGS = "_presetBindings";
+        private const string PROP_PRESET_TARGETS = "_presetTargets";
+        private const string PROP_SUBTITLE = "_subtitle";
+
+        private const string PROP_TARGET_PROPERTY_NAME = "<TargetPropertyName>k__BackingField";
+        private const string PROP_TARGET_COMMAND_NAME = "<TargetCommandName>k__BackingField";
+        private const string PROP_ADAPTER = "<Adapter>k__BackingField";
 
         private MonoView _view;
         private string _selectedBinderIndexKey;
@@ -49,6 +60,10 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private string _subtitleControlName = "";
         private string _binderSubtitle = "";
         private SerializedProperty _selectedSubtitleProp;
+        private SerializedProperty _presetBindingsProp;
+        private SerializedProperty _presetTargetsProp;
+        private int? _selectedTargetIndex;
+        private int? _selectedBindingIndex;
 
         private void OnEnable()
         {
@@ -58,7 +73,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
 
             _view = view;
-            _presetBindersProp = serializedObject.FindProperty("_presetBinders");
+            _presetBindersProp = serializedObject.FindProperty(PROP_PRESET_BINDERS);
 
             var instanceId = _view.GetInstanceID();
             _selectedBinderIndexKey = $"{instanceId}_selected_binder_index";
@@ -91,11 +106,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 return;
             }
 
-            var ev = Event.current;
-            var pressedKey = ev.keyCode;
-            var eventType = ev.type;
+            EventData eventData = Event.current;
 
-            if (ConsumeKeyPress(eventType, pressedKey))
+            if (ConsumeKeyPress(eventData))
             {
                 return;
             }
@@ -107,7 +120,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true));
             {
-                DrawBindersPanel(pressedKey);
+                DrawBindersPanel(eventData);
                 GUILayout.Space(4f);
                 DrawDetailsPanel();
             }
@@ -119,11 +132,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
         }
 
-        private bool ConsumeKeyPress(EventType eventType, KeyCode pressedKey)
+        private bool ConsumeKeyPress(in EventData eventData)
         {
-            var isKeyUp = eventType == EventType.KeyUp;
+            var isKeyUp = eventData.Type == EventType.KeyUp;
 
-            switch (pressedKey)
+            switch (eventData.Key)
             {
                 case KeyCode.F2:
                 {
@@ -173,6 +186,44 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     return false;
                 }
 
+                case KeyCode.C:
+                {
+                    if (isKeyUp && eventData.Mods.HasFlag(EventModifiers.Control)
+                        && ValidateSelectedBinderIndex()
+                    )
+                    {
+                        CopySingleBinder();
+                        Event.current.Use();
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                case KeyCode.V:
+                {
+                    if (isKeyUp && eventData.Mods.HasFlag(EventModifiers.Control))
+                    {
+                        PasteSingleBinder();
+                        Event.current.Use();
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                case KeyCode.Delete:
+                {
+                    if (isKeyUp && ValidateSelectedBinderIndex())
+                    {
+                        DeleteSelectedBinder();
+                        Event.current.Use();
+                        return true;
+                    }
+
+                    return false;
+                }
+
                 case KeyCode.Escape:
                 {
                     if (isKeyUp)
@@ -193,7 +244,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         {
             if (_presetBindersProp.arraySize < 1)
             {
-                _selectedBinderIndex = null;
+                SetSelectedBinderIndex(null);
                 return;
             }
 
@@ -201,28 +252,35 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             if (int.TryParse(str, out var value))
             {
-                _selectedBinderIndex = value;
+                SetSelectedBinderIndex(value);
             }
             else if (_presetBindersProp.arraySize > 0)
             {
-                _selectedBinderIndex = 0;
+                SetSelectedBinderIndex(0);
             }
             else
             {
-                _selectedBinderIndex = null;
+                SetSelectedBinderIndex(null);
             }
         }
 
         private void SetSelectedBinderIndex(int? value)
         {
             _selectedBinderIndex = value;
+            _selectedBindingIndex = null;
+            _selectedTargetIndex = null;
 
             if (value.HasValue)
             {
+                var binderProperty = _presetBindersProp.GetArrayElementAtIndex(value.Value);
+                _presetBindingsProp = binderProperty.FindPropertyRelative(PROP_PRESET_BINDINGS);
+                _presetTargetsProp = binderProperty.FindPropertyRelative(PROP_PRESET_TARGETS);
                 EditorUserSettings.SetConfigValue(_selectedBinderIndexKey, value.Value.ToString());
             }
             else
             {
+                _presetBindingsProp = null;
+                _presetTargetsProp = null;
                 EditorUserSettings.SetConfigValue(_selectedBinderIndexKey, string.Empty);
             }
         }
@@ -233,7 +291,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 _selectedSubtitleIndex = value;
                 _subtitleControlName = $"sub_name_{value.Value}";
-                _selectedSubtitleProp = _presetBindersProp.GetArrayElementAtIndex(value.Value).FindPropertyRelative("_subtitle");
+                _selectedSubtitleProp = _presetBindersProp.GetArrayElementAtIndex(value.Value)
+                    .FindPropertyRelative(PROP_SUBTITLE);
+
                 _binderSubtitle = _selectedSubtitleProp.stringValue;
             }
             else
@@ -266,6 +326,236 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             else if (_presetBindersProp.arraySize < 1 && _selectedBinderIndex.HasValue)
             {
                 _selectedBinderIndex = null;
+            }
+        }
+
+        private void SetSelectedBindingIndex(int? value)
+        {
+            _selectedBindingIndex = value;
+        }
+
+        private void SetSelectedTargetIndex(int? value)
+        {
+            _selectedTargetIndex = value;
+        }
+
+        private bool ValidateSelectedBindingIndex()
+        {
+            return _selectedBindingIndex.HasValue
+                && (uint)_selectedBindingIndex.Value < (uint)_presetBindingsProp.arraySize;
+        }
+
+        private bool ValidateSelectedTargetIndex()
+        {
+            return _selectedTargetIndex.HasValue
+                && (uint)_selectedTargetIndex.Value < (uint)_presetTargetsProp.arraySize;
+        }
+
+        private void CopyBinders()
+        {
+            var property = _presetBindersProp;
+
+            if (property.arraySize < 1)
+            {
+                return;
+            }
+
+            var serializedObject = property.serializedObject;
+            var target = serializedObject.targetObject;
+            s_copiedObject = new(target);
+
+            EditorGUIUtility.systemCopyBuffer = property.propertyPath;
+        }
+
+        private bool ValidatePasteBinders()
+        {
+            var copiedBuffer = EditorGUIUtility.systemCopyBuffer;
+
+            if (s_copiedObject == null || string.IsNullOrWhiteSpace(copiedBuffer))
+            {
+                return false;
+            }
+
+            var copiedProperty = s_copiedObject.FindProperty(copiedBuffer);
+            var property = _presetBindersProp;
+
+            if (copiedProperty == null
+                || copiedProperty.isArray == false
+                || string.Equals(copiedProperty.arrayElementType, property.arrayElementType, StringComparison.Ordinal) == false
+            )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void PasteBinders()
+        {
+            if (ValidatePasteBinders() == false)
+            {
+                return;
+            }
+
+            var copiedBuffer = EditorGUIUtility.systemCopyBuffer;
+            var copiedProperty = s_copiedObject.FindProperty(copiedBuffer);
+            var property = _presetBindersProp;
+            var serializedObject = property.serializedObject;
+            var target = serializedObject.targetObject;
+            var lastIndex = property.arraySize;
+            var length = copiedProperty.arraySize;
+
+            Undo.RecordObject(target, "Paste binders");
+
+            property.arraySize += length;
+
+            for (var i = 0; i < length; i++)
+            {
+                var binderProperty = property.GetArrayElementAtIndex(lastIndex + i);
+                binderProperty.managedReferenceValue = copiedProperty.GetArrayElementAtIndex(i).managedReferenceValue;
+            }
+
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+        }
+
+        private void CopySingleBinder()
+        {
+            if (ValidateSelectedBinderIndex() == false)
+            {
+                return;
+            }
+
+            var index = _selectedBinderIndex.Value;
+            var property = _presetBindersProp.GetArrayElementAtIndex(index);
+            var serializedObject = property.serializedObject;
+            var target = serializedObject.targetObject;
+            s_copiedObject = new(target);
+            EditorGUIUtility.systemCopyBuffer = property.propertyPath;
+        }
+
+        private bool ValidatePasteSingleBinder()
+        {
+            var copiedBuffer = EditorGUIUtility.systemCopyBuffer;
+
+            if (s_copiedObject == null || string.IsNullOrWhiteSpace(copiedBuffer))
+            {
+                return false;
+            }
+
+            var copiedProperty = s_copiedObject.FindProperty(copiedBuffer);
+
+            if (copiedProperty == null
+                || copiedProperty.isArray == true
+                || copiedProperty.managedReferenceValue is not MonoBinder
+            )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void PasteSingleBinder()
+        {
+            var copiedBuffer = EditorGUIUtility.systemCopyBuffer;
+            var copiedProperty = s_copiedObject.FindProperty(copiedBuffer);
+            var bindersProperty = _presetBindersProp;
+            var lastIndex = bindersProperty.arraySize;
+            var serializedObject = bindersProperty.serializedObject;
+            var target = serializedObject.targetObject;
+
+            Undo.RecordObject(target, "Paste single binder");
+
+            bindersProperty.arraySize++;
+            var binderProperty = bindersProperty.GetArrayElementAtIndex(lastIndex);
+            binderProperty.managedReferenceValue = copiedProperty.managedReferenceValue;
+
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+        }
+
+        private void DeleteSelectedBinder()
+        {
+            var property = _presetBindersProp;
+            var length = property.arraySize;
+            var index = _selectedBinderIndex ?? length - 1;
+
+            if ((uint)index >= (uint)length)
+            {
+                return;
+            }
+
+            var serializedObject = property.serializedObject;
+            var target = serializedObject.targetObject;
+
+            Undo.RecordObject(target, $"Delete binder at {property.propertyPath}[{index}]");
+
+            property.DeleteArrayElementAtIndex(index);
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+
+            var newLength = length - 1;
+
+            if (index >= newLength)
+            {
+                SetSelectedBinderIndex(newLength > 0 ? newLength - 1 : default(int?));
+            }
+        }
+
+        private void DeleteSelectedBinding()
+        {
+            var property = _presetBindingsProp;
+            var length = property.arraySize;
+            var index = _selectedBindingIndex ?? length - 1;
+
+            if ((uint)index >= (uint)length)
+            {
+                return;
+            }
+
+            var serializedObject = property.serializedObject;
+            var target = serializedObject.targetObject;
+
+            Undo.RecordObject(target, $"Delete binding at {property.propertyPath}[{index}]");
+
+            property.DeleteArrayElementAtIndex(index);
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+
+            var newLength = length - 1;
+
+            if (index >= newLength)
+            {
+                SetSelectedBindingIndex(newLength > 0 ? newLength - 1 : default(int?));
+            }
+        }
+
+        private void DeleteSelectedTarget()
+        {
+            var property = _presetTargetsProp;
+            var length = property.arraySize;
+            var index = _selectedTargetIndex ?? length - 1;
+
+            if ((uint)index >= (uint)length)
+            {
+                return;
+            }
+
+            var serializedObject = property.serializedObject;
+            var target = serializedObject.targetObject;
+
+            Undo.RecordObject(target, $"Delete target at {property.propertyPath}[{index}]");
+
+            property.DeleteArrayElementAtIndex(index);
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+
+            var newLength = length - 1;
+
+            if (index >= newLength)
+            {
+                SetSelectedTargetIndex(newLength > 0 ? newLength - 1 : default(int?));
             }
         }
 
@@ -450,6 +740,19 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             return result;
         }
 
+        private readonly record struct EventData(
+              EventType Type
+            , KeyCode Key
+            , EventModifiers Mods
+            , int Button
+            , Vector2 MousePos
+        )
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator EventData(Event ev)
+                => new(ev.type, ev.keyCode, ev.modifiers, ev.button, ev.mousePosition);
+        }
+
         [WrapRecord]
         private readonly partial record struct DestType(Type _);
 
@@ -468,6 +771,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
         private sealed class BindersPropRef
         {
+            public BindersPropRef() { }
+
+            public BindersPropRef(SerializedProperty prop, MonoViewInspector inspector)
+            {
+                Prop = prop;
+                Inspector = inspector;
+            }
+
             public SerializedProperty Prop { get; set; }
 
             public MonoViewInspector Inspector { get; set; }
@@ -481,6 +792,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
         private sealed class BinderPropRef
         {
+            public BinderPropRef() { }
+
+            public BinderPropRef(SerializedProperty prop, MonoViewInspector inspector)
+            {
+                Prop = prop;
+                Inspector = inspector;
+            }
+
             public SerializedProperty Prop { get; set; }
 
             public MonoViewInspector Inspector { get; set; }
