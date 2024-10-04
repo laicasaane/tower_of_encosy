@@ -217,34 +217,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             inspector.SetSelectedBinderIndex(lastIndex);
         }
 
-        private void DeleteSelectedBinder()
-        {
-            var property = _presetBindersProp;
-            var length = property.arraySize;
-            var index = _selectedBinderIndex ?? length - 1;
-
-            if ((uint)index >= (uint)length)
-            {
-                return;
-            }
-
-            var serializedObject = property.serializedObject;
-            var target = serializedObject.targetObject;
-
-            Undo.RecordObject(target, $"Delete binder at {property.propertyPath}[{index}]");
-
-            property.DeleteArrayElementAtIndex(index);
-            serializedObject.ApplyModifiedProperties();
-            serializedObject.Update();
-
-            var newLength = length - 1;
-
-            if (index >= newLength)
-            {
-                SetSelectedBinderIndex(newLength > 0 ? newLength - 1 : default(int?));
-            }
-        }
-
         private void DrawBindersPanel_Content(in EventData eventData)
         {
             var bindersLength = _presetBindersProp.arraySize;
@@ -264,6 +236,27 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 if (bindersLength < 1)
                 {
                     GUILayout.Label("This binder list is empty.", _noBinderStyle, guiHeight, guiWidth2);
+
+
+                    if (eventData.Type == EventType.MouseDown
+                        && eventData.Button == 1
+                        && rect.Contains(eventData.MousePos)
+                    )
+                    {
+                        var propRef = new BindersPropRef(_presetBindersProp, this);
+                        var menu = new GenericMenu();
+
+                        if (ValidatePasteSingleBinder())
+                        {
+                            menu.AddItem(_pasteBinderLabel, false, Menu_OnPasteBinder, propRef);
+                        }
+                        else
+                        {
+                            menu.AddDisabledItem(_pasteBinderLabel);
+                        }
+
+                        menu.ShowAsContext();
+                    }
                 }
                 else
                 {

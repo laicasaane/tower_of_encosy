@@ -16,7 +16,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         {
             None = 0,
             Add = 1,
-            Menu = 2,
+            Remove = 2,
+            Menu = 3,
         }
 
         private readonly GUIContent _clearBindingsLabel = new("Clear");
@@ -39,19 +40,13 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                     if (ValidateSelectedBinderIndex())
                     {
-                        var index = _selectedBinderIndex.Value;
-                        var bindersProp = _presetBindersProp;
-                        var binderProp = bindersProp.GetArrayElementAtIndex(index);
-                        var bindingsProp = binderProp.FindPropertyRelative(PROP_PRESET_BINDINGS);
-                        var targetsProp = binderProp.FindPropertyRelative(PROP_PRESET_TARGETS);
-
                         var iconWarning = _iconWarning;
                         var iconRect = tabBarRect;
                         iconRect.y += 8f;
                         iconRect.width = 18f;
                         iconRect.height = 18f;
 
-                        if (bindingsProp.arraySize < 1)
+                        if (_presetBindingsProp == null || _presetBindingsProp.arraySize < 1)
                         {
                             iconWarning.tooltip = NO_BINDING;
                             iconRect.x = tabBarRect.x + (tabBarRect.width / 2f) - 22f;
@@ -59,7 +54,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                             GUI.Label(iconRect, iconWarning);
                         }
 
-                        if (targetsProp.arraySize < 1)
+                        if (_presetTargetsProp == null || _presetTargetsProp.arraySize < 1)
                         {
                             iconWarning.tooltip = NO_TARGET;
                             iconRect.x = tabBarRect.x + tabBarRect.width - 22f;
@@ -101,7 +96,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                         }
                         else
                         {
-                            DrawDetailsPanel_Content(index);
+                            DrawDetailsPanel_Content();
                         }
                     }
 
@@ -112,141 +107,40 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             EditorGUILayout.EndVertical();
         }
 
-        private void DrawDetailsPanel_Content(int index)
+        private void DrawDetailsPanel_Content()
         {
-            var bindersProp = _presetBindersProp;
-            var binderProp = bindersProp.GetArrayElementAtIndex(index);
-            var bindingsProp = binderProp.FindPropertyRelative(PROP_PRESET_BINDINGS);
-            var targetsProp = binderProp.FindPropertyRelative(PROP_PRESET_TARGETS);
             var tabIndex = _selectedDetailsTabIndex;
 
             switch (tabIndex)
             {
                 case TAB_INDEX_BINDINGS:
-                    DrawDetailsPanel_Bindings(bindingsProp);
+                    DrawDetailsPanel_Bindings();
                     break;
 
                 case TAB_INDEX_TARGETS:
-                    DrawDetailsPanel_Targets(targetsProp);
+                    DrawDetailsPanel_Targets();
                     break;
             }
         }
 
-        private void DrawDetailsPanel_Targets(SerializedProperty property)
+        private void DrawDetailsPanel_Bindings()
         {
+            var property = _presetBindingsProp;
             var serializedObject = property.serializedObject;
             var target = serializedObject.targetObject;
-            var toolbarButton = DrawDetailsPanel_ToolbarButtons(_addLabel);
-
-            switch (toolbarButton)
-            {
-                case DetailsToolbarButton.Add:
-                {
-                    ShowTargetDropdown(_selectedBinderIndex.Value);
-                    break;
-                }
-
-                case DetailsToolbarButton.Menu:
-                {
-                    var propRef = new BinderPropRef(property, this);
-                    var menu = new GenericMenu();
-                    menu.AddItem(_clearTargetsLabel, false, ClearTargetsOrBindings, propRef);
-                    menu.ShowAsContext();
-                    break;
-                }
-            }
-
-            var length = property.arraySize;
-
-            if (length < 1)
-            {
-                EditorGUILayout.LabelField("This target list is empty.", _noBinderStyle, GUILayout.Height(30));
-                return;
-            }
-
-            var indexLabel = new GUIContent();
-            var indexLabelWidth = GUILayout.Width(20);
-            var removeLabel = _removeLabel;
-            var removeButtonStyle = _removeButtonStyle;
-            var itemLabelStyle = _indexLabelStyle;
-            var contentColor = _altContentColor;
-            var comp = EditorGUIUtility.isProSkin ? 0 : 1;
-            int? indexToRemove = null;
-
-            for (var i = 0; i < length; i++)
-            {
-                var elementProp = property.GetArrayElementAtIndex(i);
-
-                EditorGUILayout.Space(2f);
-                var rect = EditorGUILayout.BeginHorizontal();
-                {
-                    // Draw background
-                    if (i % 2 == comp)
-                    {
-                        var backRect = rect;
-                        backRect.x -= 2f;
-                        backRect.y -= 3.5f;
-                        backRect.width += 4f;
-                        backRect.height += 7f;
-
-                        var tex = Texture2D.whiteTexture;
-                        var mode = ScaleMode.StretchToFill;
-
-                        GUI.DrawTexture(backRect, tex, mode, false, 0f, contentColor, Vector4.zero, Vector4.zero);
-                    }
-
-                    indexLabel.text = i.ToString();
-                    EditorGUILayout.LabelField(indexLabel, itemLabelStyle, indexLabelWidth);
-
-                    EditorGUI.BeginChangeCheck();
-                    EditorGUILayout.PropertyField(elementProp, GUIContent.none);
-                    GUILayout.Space(23f);
-
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        Undo.RecordObject(target, $"Set value at {elementProp.propertyPath}");
-                        serializedObject.ApplyModifiedProperties();
-                        serializedObject.Update();
-                    }
-
-                    // Draw remove button
-                    {
-                        var buttonRect = rect;
-                        buttonRect.width = 22;
-                        buttonRect.height = 22;
-                        buttonRect.x += rect.width - 19;
-
-                        if (GUI.Button(buttonRect, removeLabel, removeButtonStyle))
-                        {
-                            indexToRemove = i;
-                        }
-                    }
-                }
-                EditorGUILayout.EndHorizontal();
-                EditorGUILayout.Space(2f);
-            }
-
-            if (indexToRemove.HasValue)
-            {
-                Undo.RecordObject(target, $"Remove target at index {indexToRemove}");
-
-                property.DeleteArrayElementAtIndex(indexToRemove.Value);
-                serializedObject.ApplyModifiedProperties();
-                serializedObject.Update();
-            }
-        }
-
-        private void DrawDetailsPanel_Bindings(SerializedProperty property)
-        {
-            var serializedObject = property.serializedObject;
-            var target = serializedObject.targetObject;
-            var toolbarButton = DrawDetailsPanel_ToolbarButtons(_addLabel);
+            var toolbarButton = DrawDetailsPanel_ToolbarButtons(property);
 
             switch (toolbarButton)
             {
                 case DetailsToolbarButton.Add:
                 {
                     ShowBindingDropdown(_selectedBinderIndex.Value);
+                    break;
+                }
+
+                case DetailsToolbarButton.Remove:
+                {
+                    DeleteSelectedBinding();
                     break;
                 }
 
@@ -283,10 +177,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             var removeButtonStyle = _removeButtonStyle;
             var indexLabelStyle = _indexLabelStyle;
             var headerLabelStyle = _headerLabelStyle;
+            var selectedColor = _selectedColor;
             var contentColor = _altContentColor;
             var comp = EditorGUIUtility.isProSkin ? 0 : 1;
-            int? indexToRemove = null;
             var last = length - 1;
+            var selectedIndex = _selectedBindingIndex;
 
             for (var i = 0; i < length; i++)
             {
@@ -304,19 +199,26 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 EditorGUILayout.Space(2f);
                 var rect = EditorGUILayout.BeginVertical();
                 {
-                    // Draw background
-                    if (i % 2 == comp)
+                    // Draw background and select button
                     {
                         var backRect = rect;
                         backRect.x += 1f;
-                        backRect.y -= 3.5f;
+                        backRect.y -= 4f;
                         backRect.width += 1f;
                         backRect.height += 7f + 4f;
+
+                        var backColor = i % 2 == comp ? contentColor : new Color(1, 1, 1, 0f);
+                        backColor = i == selectedIndex ? selectedColor : backColor;
 
                         var tex = Texture2D.whiteTexture;
                         var mode = ScaleMode.StretchToFill;
 
-                        GUI.DrawTexture(backRect, tex, mode, false, 0f, contentColor, Vector4.zero, Vector4.zero);
+                        GUI.DrawTexture(backRect, tex, mode, false, 0f, backColor, Vector4.zero, Vector4.zero);
+
+                        if (GUI.Button(backRect, GUIContent.none, GUIStyle.none))
+                        {
+                            SetSelectedBindingIndex(i);
+                        }
                     }
 
                     var headerRect = EditorGUILayout.BeginHorizontal();
@@ -326,20 +228,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                         headerLabel.text = attrib?.Label ?? type.Name;
                         EditorGUILayout.LabelField(headerLabel, headerLabelStyle);
-                        GUILayout.Space(23f);
-
-                        // Draw remove button
-                        {
-                            var buttonRect = headerRect;
-                            buttonRect.width = 22;
-                            buttonRect.height = 22;
-                            buttonRect.x += headerRect.width - 19;
-
-                            if (GUI.Button(buttonRect, removeLabel, removeButtonStyle))
-                            {
-                                indexToRemove = i;
-                            }
-                        }
+                        GUILayout.Space(4f);
                     }
                     EditorGUILayout.EndHorizontal();
                     GUILayout.Space(6f);
@@ -376,14 +265,100 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.Space(6f);
             }
+        }
 
-            if (indexToRemove.HasValue)
+        private void DrawDetailsPanel_Targets()
+        {
+            var property = _presetTargetsProp;
+            var serializedObject = property.serializedObject;
+            var target = serializedObject.targetObject;
+            var toolbarButton = DrawDetailsPanel_ToolbarButtons(property);
+
+            switch (toolbarButton)
             {
-                Undo.RecordObject(target, $"Remove binding at index {indexToRemove}");
+                case DetailsToolbarButton.Add:
+                {
+                    ShowTargetDropdown(_selectedBinderIndex.Value);
+                    break;
+                }
 
-                property.DeleteArrayElementAtIndex(indexToRemove.Value);
-                serializedObject.ApplyModifiedProperties();
-                serializedObject.Update();
+                case DetailsToolbarButton.Remove:
+                {
+                    DeleteSelectedTarget();
+                    break;
+                }
+
+                case DetailsToolbarButton.Menu:
+                {
+                    var propRef = new BinderPropRef(property, this);
+                    var menu = new GenericMenu();
+                    menu.AddItem(_clearTargetsLabel, false, ClearTargetsOrBindings, propRef);
+                    menu.ShowAsContext();
+                    break;
+                }
+            }
+
+            var length = property.arraySize;
+
+            if (length < 1)
+            {
+                EditorGUILayout.LabelField("This target list is empty.", _noBinderStyle, GUILayout.Height(30));
+                return;
+            }
+
+            var indexLabel = new GUIContent();
+            var indexLabelWidth = GUILayout.Width(30);
+            var itemLabelStyle = _indexLabelStyle;
+            var selectedColor = _selectedColor;
+            var contentColor = _altContentColor;
+            var comp = EditorGUIUtility.isProSkin ? 0 : 1;
+            var selectedIndex = _selectedTargetIndex;
+
+            for (var i = 0; i < length; i++)
+            {
+                var elementProp = property.GetArrayElementAtIndex(i);
+
+                EditorGUILayout.Space(2f);
+                var rect = EditorGUILayout.BeginHorizontal();
+                {
+                    // Draw background and select button
+                    {
+                        var backRect = rect;
+                        backRect.x -= 2f;
+                        backRect.y -= 4f;
+                        backRect.width += 4f;
+                        backRect.height += 7f;
+
+                        var backColor = i % 2 == comp ? contentColor : new Color(1, 1, 1, 0f);
+                        backColor = i == selectedIndex ? selectedColor : backColor;
+
+                        var tex = Texture2D.whiteTexture;
+                        var mode = ScaleMode.StretchToFill;
+
+                        GUI.DrawTexture(backRect, tex, mode, false, 0f, backColor, Vector4.zero, Vector4.zero);
+
+                        if (GUI.Button(backRect, GUIContent.none, GUIStyle.none))
+                        {
+                            SetSelectedTargetIndex(i);
+                        }
+                    }
+
+                    indexLabel.text = i.ToString();
+                    EditorGUILayout.LabelField(indexLabel, itemLabelStyle, indexLabelWidth);
+
+                    EditorGUI.BeginChangeCheck();
+                    EditorGUILayout.PropertyField(elementProp, GUIContent.none);
+                    GUILayout.Space(4f);
+
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        Undo.RecordObject(target, $"Set value at {elementProp.propertyPath}");
+                        serializedObject.ApplyModifiedProperties();
+                        serializedObject.Update();
+                    }
+                }
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.Space(2f);
             }
         }
 
@@ -510,16 +485,26 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             serializedObject.Update();
         }
 
-        private DetailsToolbarButton DrawDetailsPanel_ToolbarButtons(GUIContent addLabel)
+        private DetailsToolbarButton DrawDetailsPanel_ToolbarButtons(SerializedProperty property)
         {
             var result = DetailsToolbarButton.None;
 
             EditorGUILayout.BeginHorizontal();
             {
-                if (GUILayout.Button(addLabel, _toolbarLeftButtonStyle, GUILayout.Height(20)))
+                if (GUILayout.Button(_addLabel, _toolbarLeftButtonStyle, GUILayout.Height(20)))
                 {
                     result = DetailsToolbarButton.Add;
                 }
+
+                var guiEnabled = GUI.enabled;
+                GUI.enabled = property.arraySize > 0;
+
+                if (GUILayout.Button(_removeSelectedLabel, _toolbarMidButtonStyle, GUILayout.Height(20)))
+                {
+                    result = DetailsToolbarButton.Remove;
+                }
+
+                GUI.enabled = guiEnabled;
 
                 var guiContentColor = GUI.contentColor;
                 GUI.contentColor = _menuColor;
