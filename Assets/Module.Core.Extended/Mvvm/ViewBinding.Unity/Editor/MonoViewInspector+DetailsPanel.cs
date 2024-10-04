@@ -148,11 +148,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                 case DetailsToolbarButton.Menu:
                 {
-                    s_binderPropRef.Prop = property;
-                    s_binderPropRef.Inspector = this;
-
+                    var propRef = new BinderPropRef(property, this);
                     var menu = new GenericMenu();
-                    menu.AddItem(_clearTargetsLabel, false, ClearTargetsOrBindings, s_binderPropRef);
+                    menu.AddItem(_clearTargetsLabel, false, ClearTargetsOrBindings, propRef);
                     menu.ShowAsContext();
                     break;
                 }
@@ -254,11 +252,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                 case DetailsToolbarButton.Menu:
                 {
-                    s_binderPropRef.Prop = property;
-                    s_binderPropRef.Inspector = this;
-
+                    var propRef = new BinderPropRef(property, this);
                     var menu = new GenericMenu();
-                    menu.AddItem(_clearBindingsLabel, false, ClearTargetsOrBindings, s_binderPropRef);
+                    menu.AddItem(_clearBindingsLabel, false, ClearTargetsOrBindings, propRef);
                     menu.ShowAsContext();
                     break;
                 }

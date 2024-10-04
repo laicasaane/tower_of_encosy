@@ -117,22 +117,20 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                 if (GUILayout.Button(_menuLabel, _toolbarMenuButtonStyle, GUILayout.Height(20), GUILayout.Width(20)))
                 {
-                    s_bindersPropRef.Prop = _presetBindersProp;
-                    s_bindersPropRef.Inspector = this;
-
+                    var propRef = new BindersPropRef(_presetBindersProp, this);
                     var menu = new GenericMenu();
-                    menu.AddItem(_copyBindersLabel, false, Menu_OnCopyBinders, s_bindersPropRef);
+                    menu.AddItem(_copyBindersLabel, false, Menu_OnCopyBinders, propRef);
 
                     if (ValidatePasteBinders())
                     {
-                        menu.AddItem(_pasteBindersLabel, false, Menu_OnPasteBinders, s_bindersPropRef);
+                        menu.AddItem(_pasteBindersLabel, false, Menu_OnPasteBinders, propRef);
                     }
                     else
                     {
                         menu.AddDisabledItem(_pasteBinderLabel);
                     }
 
-                    menu.AddItem(_clearBindersLabel, false, Menu_OnClearBinders, s_bindersPropRef);
+                    menu.AddItem(_clearBindersLabel, false, Menu_OnClearBinders, propRef);
                     menu.ShowAsContext();
                 }
 
@@ -465,21 +463,22 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 s_bindersPropRef.Prop = _presetBindersProp;
                 s_bindersPropRef.Inspector = this;
 
+                var propRef = new BindersPropRef(_presetBindersProp, this);
                 var menu = new GenericMenu();
-                menu.AddItem(_editSubtitleLabel, false, Menu_OnEditBinderSubtitle, s_bindersPropRef);
+                menu.AddItem(_editSubtitleLabel, false, Menu_OnEditBinderSubtitle, propRef);
                 menu.AddSeparator(string.Empty);
-                menu.AddItem(_copyBinderLabel, false, Menu_OnCopyBinder, s_bindersPropRef);
+                menu.AddItem(_copyBinderLabel, false, Menu_OnCopyBinder, propRef);
 
                 if (ValidatePasteSingleBinder())
                 {
-                    menu.AddItem(_pasteBinderLabel, false, Menu_OnPasteBinder, s_bindersPropRef);
+                    menu.AddItem(_pasteBinderLabel, false, Menu_OnPasteBinder, propRef);
                 }
                 else
                 {
                     menu.AddDisabledItem(_pasteBinderLabel);
                 }
 
-                menu.AddItem(_deleteBinderLabel, false, Menu_OnDeleteBinder, s_bindersPropRef);
+                menu.AddItem(_deleteBinderLabel, false, Menu_OnDeleteBinder, propRef);
                 menu.ShowAsContext();
             }
         }

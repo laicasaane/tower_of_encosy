@@ -661,6 +661,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
         private sealed class BindersPropRef
         {
+            public BindersPropRef() { }
+
+            public BindersPropRef(SerializedProperty prop, MonoViewInspector inspector)
+            {
+                Prop = prop;
+                Inspector = inspector;
+            }
+
             public SerializedProperty Prop { get; set; }
 
             public MonoViewInspector Inspector { get; set; }
@@ -674,6 +682,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
         private sealed class BinderPropRef
         {
+            public BinderPropRef() { }
+
+            public BinderPropRef(SerializedProperty prop, MonoViewInspector inspector)
+            {
+                Prop = prop;
+                Inspector = inspector;
+            }
+
             public SerializedProperty Prop { get; set; }
 
             public MonoViewInspector Inspector { get; set; }
