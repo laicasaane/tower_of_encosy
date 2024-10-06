@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
 {
     [Serializable]
-    [Label("Sphere Collider", "Physics3D")]
+    [Label("Sphere Collider", "Physics 3D")]
     public sealed partial class SphereColliderBinder : MonoBinder<SphereCollider>
     {
     }
