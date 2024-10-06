@@ -19,21 +19,13 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             Cancel,
         }
 
-        private readonly GUIContent _clearBindersLabel = new("Clear");
-        private readonly GUIContent _copyBindersLabel = new("Copy");
-        private readonly GUIContent _pasteBindersLabel = new("Paste");
-        private readonly GUIContent _editSubtitleLabel = new("Edit Subtitle _f2");
-        private readonly GUIContent _copyBinderLabel = new("Copy _^c");
-        private readonly GUIContent _pasteBinderLabel = new("Paste _^v");
-        private readonly GUIContent _deleteBinderLabel = new("Delete _del");
-
         private void DrawBindersPanel(in EventData eventData)
         {
             var guiWidth = GUILayout.MinWidth(200);
 
-            EditorGUILayout.BeginVertical(_rootTabViewStyle, guiWidth);
+            EditorGUILayout.BeginVertical(s_rootTabViewStyle, guiWidth);
             {
-                var rect = EditorGUILayout.BeginHorizontal(_bindersHeaderStyle, guiWidth, GUILayout.Height(30));
+                var rect = EditorGUILayout.BeginHorizontal(s_bindersHeaderStyle, guiWidth, GUILayout.Height(30));
                 {
                     DrawBindersLabel(guiWidth, rect);
                 }
@@ -52,8 +44,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
         private void DrawBindersLabel(GUILayoutOption guiWidth, in Rect rect)
         {
-            var label = _bindersLabel;
-            var labelStyle = _rootTabLabelStyle;
+            var label = s_bindersLabel;
+            var labelStyle = s_rootTabLabelStyle;
 
             // Draw background
             {
@@ -68,7 +60,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 var borders = Vector4.zero;
                 var radius = new Vector4(3f, 3f, 0f, 0f);
 
-                GUI.DrawTexture(backRect, tex, mode, false, 0f, _headerColor, borders, radius);
+                GUI.DrawTexture(backRect, tex, mode, false, 0f, s_headerColor, borders, radius);
             }
 
             // Draw icon
@@ -82,7 +74,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 iconRect.width = 20f;
                 iconRect.height = 20f;
 
-                var tex = _iconBinding.image;
+                var tex = s_iconBinding.image;
                 var mode = ScaleMode.ScaleToFit;
                 var borders = Vector4.zero;
                 var radius = Vector4.zero;
@@ -97,40 +89,39 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         {
             EditorGUILayout.BeginHorizontal();
             {
-                if (GUILayout.Button(_addLabel, _toolbarLeftButtonStyle, GUILayout.Height(20)))
+                if (GUILayout.Button(s_addLabel, s_toolbarLeftButtonStyle, GUILayout.Height(20)))
                 {
                     ShowBinderDropdown();
                 }
 
                 var guiEnabled = GUI.enabled;
-                GUI.enabled = _presetBindersProp.arraySize > 0;
+                GUI.enabled = _presetBindersProp.ArraySize > 0;
 
-                if (GUILayout.Button(_removeSelectedLabel, _toolbarMidButtonStyle, GUILayout.Height(20)))
+                if (GUILayout.Button(s_removeSelectedLabel, s_toolbarMidButtonStyle, GUILayout.Height(20)))
                 {
-                    DeleteSelectedBinder();
+                    _presetBindersProp.DeleteSelected();
                 }
 
                 GUI.enabled = guiEnabled;
 
                 var guiContentColor = GUI.contentColor;
-                GUI.contentColor = _menuColor;
+                GUI.contentColor = s_menuColor;
 
-                if (GUILayout.Button(_menuLabel, _toolbarMenuButtonStyle, GUILayout.Height(20), GUILayout.Width(20)))
+                if (GUILayout.Button(s_menuLabel, s_toolbarMenuButtonStyle, GUILayout.Height(20), GUILayout.Width(20)))
                 {
-                    var propRef = new BindersPropRef(_presetBindersProp, this);
                     var menu = new GenericMenu();
-                    menu.AddItem(_copyBindersLabel, false, Menu_OnCopyBinders, propRef);
+                    menu.AddItem(s_copyAllLabel, false, Menu_OnCopyAll, _presetBindersProp);
 
-                    if (ValidatePasteBinders())
+                    if (_presetBindersProp.ValidatePasteAll())
                     {
-                        menu.AddItem(_pasteBindersLabel, false, Menu_OnPasteBinders, propRef);
+                        menu.AddItem(s_pasteAllLabel, false, Menu_OnPasteAll, _presetBindersProp);
                     }
                     else
                     {
-                        menu.AddDisabledItem(_pasteBinderLabel);
+                        menu.AddDisabledItem(s_pasteAllLabel);
                     }
 
-                    menu.AddItem(_clearBindersLabel, false, Menu_OnClearBinders, propRef);
+                    menu.AddItem(s_clearAllLabel, false, Menu_OnClearAll, _presetBindersProp);
                     menu.ShowAsContext();
                 }
 
@@ -141,54 +132,15 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
         private void ShowBinderDropdown()
         {
-            s_bindersPropRef.Prop = _presetBindersProp;
+            s_bindersPropRef.Prop = _presetBindersProp.Property;
             s_bindersPropRef.Inspector = this;
 
             var menu = s_binderMenu;
+            menu.width = 250;
             menu.height = 350;
             menu.maxHeight = 600;
             menu.showSearch = true;
             menu.Show(Event.current.mousePosition);
-        }
-
-        private static void Menu_OnClearBinders(object userData)
-        {
-            if (userData is not BindersPropRef propRef)
-            {
-                return;
-            }
-
-            var property = propRef.Prop;
-            var serializedObject = property.serializedObject;
-            var target = serializedObject.targetObject;
-
-            Undo.RecordObject(target, $"Clear {property.propertyPath}");
-
-            property.ClearArray();
-            serializedObject.ApplyModifiedProperties();
-            serializedObject.Update();
-
-            propRef.Inspector.SetSelectedBinderIndex(null);
-        }
-
-        private static void Menu_OnCopyBinders(object userData)
-        {
-            if (userData is not BindersPropRef propRef)
-            {
-                return;
-            }
-
-            propRef.Inspector.CopyBinders();
-        }
-
-        private static void Menu_OnPasteBinders(object userData)
-        {
-            if (userData is not BindersPropRef propRef)
-            {
-                return;
-            }
-
-            propRef.Inspector.PasteBinders();
         }
 
         private static void BinderMenu_AddBinder(object userData)
@@ -198,9 +150,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 return;
             }
 
-            var (binderType, _, instance) = menuItem;
-            var property = instance.Prop;
-            var inspector = instance.Inspector;
+            var (binderType, _, propRef) = menuItem;
+            var property = propRef.Prop;
+            var inspector = propRef.Inspector;
             var serializedObject = property.serializedObject;
             var target = serializedObject.targetObject;
             var lastIndex = property.arraySize;
@@ -214,12 +166,12 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             serializedObject.ApplyModifiedProperties();
             serializedObject.Update();
 
-            inspector.SetSelectedBinderIndex(lastIndex);
+            inspector._presetBindersProp.SetSelectedIndex(lastIndex);
         }
 
         private void DrawBindersPanel_Content(in EventData eventData)
         {
-            var bindersLength = _presetBindersProp.arraySize;
+            var bindersLength = _presetBindersProp.ArraySize;
             var guiWidth1 = GUILayout.MinWidth(206);
 
             var rect = EditorGUILayout.BeginVertical(guiWidth1);
@@ -235,24 +187,22 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                 if (bindersLength < 1)
                 {
-                    GUILayout.Label("This binder list is empty.", _noBinderStyle, guiHeight, guiWidth2);
-
+                    GUILayout.Label("This binder list is empty.", s_noBinderStyle, guiHeight, guiWidth2);
 
                     if (eventData.Type == EventType.MouseDown
                         && eventData.Button == 1
                         && rect.Contains(eventData.MousePos)
                     )
                     {
-                        var propRef = new BindersPropRef(_presetBindersProp, this);
                         var menu = new GenericMenu();
 
-                        if (ValidatePasteSingleBinder())
+                        if (_presetBindersProp.ValidatePasteSingle())
                         {
-                            menu.AddItem(_pasteBinderLabel, false, Menu_OnPasteBinder, propRef);
+                            menu.AddItem(s_pasteItemLabel, false, Menu_OnPasteSingle, _presetBindersProp);
                         }
                         else
                         {
-                            menu.AddDisabledItem(_pasteBinderLabel);
+                            menu.AddDisabledItem(s_pasteItemLabel);
                         }
 
                         menu.ShowAsContext();
@@ -286,16 +236,16 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         {
             var subtitleIndex = eventData.Key == KeyCode.Escape ? null : _selectedSubtitleIndex;
             var bindersProp = _presetBindersProp;
-            var bindersLength = bindersProp.arraySize;
-            var binderSelectedButtonStyle = _binderSelectedButtonStyle;
-            var binderButtonStyle = _binderButtonStyle;
-            var indexLabelStyle = _binderIndexLabelStyle;
-            var selectedColor = _selectedColor;
+            var bindersLength = bindersProp.ArraySize;
+            var binderSelectedButtonStyle = s_binderSelectedButtonStyle;
+            var binderButtonStyle = s_binderButtonStyle;
+            var indexLabelStyle = s_binderIndexLabelStyle;
+            var selectedColor = s_selectedColor;
             var indexColor = indexLabelStyle.normal.textColor;
-            var selectedBinderIndex = _selectedBinderIndex;
-            var iconWarning = _iconWarning;
-            var applyIconLabel = _applyIconLabel;
-            var cancelIconLabel = _cancelIconLabel;
+            var selectedBinderIndex = bindersProp.SelectedIndex;
+            var iconWarning = s_iconWarning;
+            var applyIconLabel = s_applyIconLabel;
+            var cancelIconLabel = s_cancelIconLabel;
             var buttonLabel = new GUIContent();
             var indexLabel = new GUIContent();
             var subtitleState = ButtonState.None;
@@ -305,7 +255,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             for (var i = 0; i < bindersLength; i++)
             {
-                var binderProp = bindersProp.GetArrayElementAtIndex(i);
+                var binderProp = bindersProp.GetElementAt(i);
 
                 if (binderProp.managedReferenceValue is not MonoBinder binder)
                 {
@@ -370,7 +320,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                     if (GUILayout.Button(buttonLabel, buttonStyle, buttonHeight, guiWidth))
                     {
-                        SetSelectedBinderIndex(i);
+                        bindersProp.SetSelectedIndex(i);
                         SetSelectedSubtitleIndex(null);
                     }
 
@@ -451,76 +401,41 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             if (mouseDownIndex >= 0)
             {
-                SetSelectedBinderIndex(mouseDownIndex);
+                bindersProp.SetSelectedIndex(mouseDownIndex);
 
-                s_bindersPropRef.Prop = _presetBindersProp;
-                s_bindersPropRef.Inspector = this;
-
-                var propRef = new BindersPropRef(_presetBindersProp, this);
+                var propRef = new ArrayPropertyRef(bindersProp, this);
                 var menu = new GenericMenu();
-                menu.AddItem(_editSubtitleLabel, false, Menu_OnEditBinderSubtitle, propRef);
+                menu.AddItem(s_editSubtitleLabel, false, Menu_OnEditBinderSubtitle, propRef);
                 menu.AddSeparator(string.Empty);
-                menu.AddItem(_copyBinderLabel, false, Menu_OnCopyBinder, propRef);
+                menu.AddItem(s_copyItemLabel, false, Menu_OnCopySelected, bindersProp);
 
-                if (ValidatePasteSingleBinder())
+                if (bindersProp.ValidatePasteSingle())
                 {
-                    menu.AddItem(_pasteBinderLabel, false, Menu_OnPasteBinder, propRef);
+                    menu.AddItem(s_pasteItemLabel, false, Menu_OnPasteSingle, bindersProp);
                 }
                 else
                 {
-                    menu.AddDisabledItem(_pasteBinderLabel);
+                    menu.AddDisabledItem(s_pasteItemLabel);
                 }
 
-                menu.AddItem(_deleteBinderLabel, false, Menu_OnDeleteBinder, propRef);
+                menu.AddItem(s_deleteItemLabel, false, Menu_OnDeleteSelected, bindersProp);
                 menu.ShowAsContext();
             }
         }
 
         private static void Menu_OnEditBinderSubtitle(object userData)
         {
-            if (userData is not BindersPropRef propRef)
+            if (userData is not ArrayPropertyRef propRef)
             {
                 return;
             }
 
-            var inspector = propRef.Inspector;
-
-            if (inspector.ValidateSelectedBinderIndex() == false)
+            if (propRef.Prop.ValidateSelectedIndex() == false)
             {
                 return;
             }
 
-            inspector.SetSelectedSubtitleIndex(inspector._selectedBinderIndex);
-        }
-
-        private static void Menu_OnCopyBinder(object userData)
-        {
-            if (userData is not BindersPropRef propRef)
-            {
-                return;
-            }
-
-            propRef.Inspector.CopySingleBinder();
-        }
-
-        private static void Menu_OnPasteBinder(object userData)
-        {
-            if (userData is not BindersPropRef propRef)
-            {
-                return;
-            }
-
-            propRef.Inspector.PasteSingleBinder();
-        }
-
-        private static void Menu_OnDeleteBinder(object userData)
-        {
-            if (userData is not BindersPropRef propRef)
-            {
-                return;
-            }
-
-            propRef.Inspector.DeleteSelectedBinder();
+            propRef.Inspector.SetSelectedSubtitleIndex(propRef.Prop.SelectedIndex);
         }
 
         private void DrawBinderSubtitleField(

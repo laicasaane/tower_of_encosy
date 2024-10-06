@@ -12,6 +12,16 @@ namespace Module.Core.Logging
     /// </summary>
     public static partial class RuntimeLoggerAPI
     {
+        [HideInCallstack, DoesNotReturn, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static CallerInfo GetCallerInfo(
+              [CallerLineNumber] int lineNumber = 0
+            , [CallerMemberName] string memberName = ""
+            , [CallerFilePath] string filePath = ""
+        )
+        {
+            return new CallerInfo(lineNumber, memberName, filePath);
+        }
+
         [HideInCallstack, DoesNotReturn]
         public static void LogException(System.Exception value)
         {

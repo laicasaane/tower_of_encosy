@@ -7,84 +7,92 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 {
     partial class MonoViewInspector
     {
-        private GUIStyle _rootTabViewStyle;
-        private GUIStyle _rootTabLabelStyle;
-        private GUIStyle _toolbarLeftButtonStyle;
-        private GUIStyle _toolbarMidButtonStyle;
-        private GUIStyle _toolbarRightButtonStyle;
-        private GUIStyle _toolbarMenuButtonStyle;
-        private GUIStyle _noBinderStyle;
-        private GUIStyle _binderButtonStyle;
-        private GUIStyle _binderIndexLabelStyle;
-        private GUIStyle _binderSelectedButtonStyle;
-        private GUIStyle _bindersHeaderStyle;
-        private GUIStyle _detailsHeaderStyle;
-        private GUIStyle _removeButtonStyle;
-        private GUIStyle _indexLabelStyle;
-        private GUIStyle _headerLabelStyle;
-        private GUIStyle _itemLabelStyle;
-        private GUIContent _addLabel;
-        private GUIContent _removeLabel;
-        private GUIContent _removeSelectedLabel;
-        private GUIContent _menuLabel;
-        private GUIContent _iconWarning;
-        private GUIContent _iconBinding;
-        private GUIContent _applyIconLabel;
-        private GUIContent _cancelIconLabel;
-        private GUIContent _bindersLabel;
-        private GUIContent _propertyBindingLabel;
-        private GUIContent _commandBindingLabel;
-        private GUIContent[] _detailsTabLabels;
-        private Color _headerColor;
-        private Color _contentColor;
-        private Color _selectedColor;
-        private Color _menuColor;
-        private Color _altContentColor;
+        private static GUIStyle s_rootTabViewStyle;
+        private static GUIStyle s_rootTabLabelStyle;
+        private static GUIStyle s_toolbarLeftButtonStyle;
+        private static GUIStyle s_toolbarMidButtonStyle;
+        private static GUIStyle s_toolbarRightButtonStyle;
+        private static GUIStyle s_toolbarMenuButtonStyle;
+        private static GUIStyle s_noBinderStyle;
+        private static GUIStyle s_binderButtonStyle;
+        private static GUIStyle s_binderIndexLabelStyle;
+        private static GUIStyle s_binderSelectedButtonStyle;
+        private static GUIStyle s_bindersHeaderStyle;
+        private static GUIStyle s_detailsHeaderStyle;
+        private static GUIStyle s_removeButtonStyle;
+        private static GUIStyle s_indexLabelStyle;
+        private static GUIStyle s_headerLabelStyle;
+        private static GUIStyle s_itemLabelStyle;
+        private static GUIContent s_addLabel;
+        private static GUIContent s_removeLabel;
+        private static GUIContent s_removeSelectedLabel;
+        private static GUIContent s_menuLabel;
+        private static GUIContent s_iconWarning;
+        private static GUIContent s_iconBinding;
+        private static GUIContent s_applyIconLabel;
+        private static GUIContent s_cancelIconLabel;
+        private static Color s_headerColor;
+        private static Color s_contentColor;
+        private static Color s_selectedColor;
+        private static Color s_menuColor;
+        private static Color s_altContentColor;
+
+        private static readonly GUIContent s_bindersLabel = new("Binders");
+        private static readonly GUIContent[] s_detailsTabLabels = new GUIContent[] { new("Bindings"), new("Targets"), };
+        private static readonly GUIContent s_propertyBindingLabel = new("Property");
+        private static readonly GUIContent s_commandBindingLabel = new("Command");
+        private static readonly GUIContent s_clearAllLabel = new("Clear All");
+        private static readonly GUIContent s_copyAllLabel = new("Copy All");
+        private static readonly GUIContent s_pasteAllLabel = new("Paste All");
+        private static readonly GUIContent s_editSubtitleLabel = new("Edit Subtitle");
+        private static readonly GUIContent s_copyItemLabel = new("Copy");
+        private static readonly GUIContent s_pasteItemLabel = new("Paste");
+        private static readonly GUIContent s_deleteItemLabel = new("Delete");
 
         private void InitStyles()
         {
-            if (_rootTabViewStyle != null)
+            if (s_rootTabViewStyle != null)
             {
                 return;
             }
 
-            _rootTabViewStyle = new(EditorStyles.helpBox) {
+            s_rootTabViewStyle = new(EditorStyles.helpBox) {
                 padding = new(0, 0, 0, 0),
                 margin = new(0, 0, 0, 0),
                 border = new(0, 0, 0, 0),
             };
 
-            _rootTabLabelStyle = new(EditorStyles.boldLabel) {
+            s_rootTabLabelStyle = new(EditorStyles.boldLabel) {
                 alignment = TextAnchor.MiddleCenter,
                 fontSize = 13,
             };
 
-            _toolbarLeftButtonStyle = new(EditorStyles.miniButtonMid) {
+            s_toolbarLeftButtonStyle = new(EditorStyles.miniButtonMid) {
                 padding = new(0, 0, 0, 0),
                 margin = new(2, 0, 0, 0),
                 border = new(0, 0, 0, 0),
                 fixedHeight = 0,
             };
 
-            _toolbarMidButtonStyle = new(EditorStyles.miniButtonMid) {
+            s_toolbarMidButtonStyle = new(EditorStyles.miniButtonMid) {
                 padding = new(0, 0, 0, 0),
                 margin = new(0, 0, 0, 0),
                 border = new(0, 0, 0, 0),
                 fixedHeight = 0,
             };
 
-            _toolbarRightButtonStyle = new(EditorStyles.miniButtonMid) {
+            s_toolbarRightButtonStyle = new(EditorStyles.miniButtonMid) {
                 padding = new(0, 0, 0, 0),
                 margin = new(0, 1, 0, 0),
                 border = new(0, 0, 0, 0),
                 fixedHeight = 0,
             };
 
-            _toolbarMenuButtonStyle = new(_toolbarRightButtonStyle) {
+            s_toolbarMenuButtonStyle = new(s_toolbarRightButtonStyle) {
                 padding = new(2, 2, 2, 2),
             };
 
-            _noBinderStyle = new(EditorStyles.miniLabel) {
+            s_noBinderStyle = new(EditorStyles.miniLabel) {
                 padding = new(0, 0, 0, 0),
                 margin = new(1, 0, 0, 0),
                 fixedHeight = 0,
@@ -96,7 +104,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 alignment = TextAnchor.MiddleCenter,
             };
 
-            _binderButtonStyle = new(EditorStyles.toolbarButton) {
+            s_binderButtonStyle = new(EditorStyles.toolbarButton) {
                 padding = new(30, 30, 0, 0),
                 margin = new(1, 0, 0, 0),
                 fixedHeight = 0,
@@ -104,17 +112,17 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 richText = true,
             };
 
-            _binderSelectedButtonStyle = new(_binderButtonStyle) {
+            s_binderSelectedButtonStyle = new(s_binderButtonStyle) {
                 fontStyle = FontStyle.Bold,
                 margin = new(1, 2, 0, 0),
             };
 
-            _binderIndexLabelStyle = new(EditorStyles.miniLabel) {
+            s_binderIndexLabelStyle = new(EditorStyles.miniLabel) {
                 alignment = TextAnchor.MiddleLeft,
             };
 
             {
-                var style = _binderSelectedButtonStyle;
+                var style = s_binderSelectedButtonStyle;
 
                 style.normal.scaledBackgrounds
                     = style.onNormal.scaledBackgrounds
@@ -129,7 +137,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     = Texture2D.whiteTexture;
             }
 
-            _bindersHeaderStyle = new() {
+            s_bindersHeaderStyle = new() {
                 padding = new(0, 0, 0, 0),
                 margin = new(0, 0, 0, 0),
                 border = new(0, 0, 0, 0),
@@ -137,7 +145,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 stretchWidth = true,
             };
 
-            _detailsHeaderStyle = new() {
+            s_detailsHeaderStyle = new() {
                 padding = new(0, 0, 0, 0),
                 margin = new(0, 0, 0, 0),
                 border = new(0, 0, 0, 0),
@@ -145,19 +153,19 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 stretchWidth = true,
             };
 
-            _removeButtonStyle = new(EditorStyles.iconButton);
+            s_removeButtonStyle = new(EditorStyles.iconButton);
 
-            _indexLabelStyle = new(EditorStyles.miniLabel) {
+            s_indexLabelStyle = new(EditorStyles.miniLabel) {
                 padding = new(3, 0, 0, 0),
             };
 
-            _headerLabelStyle = new(EditorStyles.boldLabel) {
+            s_headerLabelStyle = new(EditorStyles.boldLabel) {
                 padding = new(0, 0, 0, 0),
                 margin = new(0, 0, 0, 0),
                 alignment = TextAnchor.MiddleCenter,
             };
 
-            _itemLabelStyle = new(EditorStyles.label) {
+            s_itemLabelStyle = new(EditorStyles.label) {
                 stretchWidth = false,
             };
 
@@ -166,7 +174,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     ? EditorGUIUtility.IconContent("d_Toolbar Plus More")
                     : EditorGUIUtility.IconContent("Toolbar Plus More");
 
-                _addLabel = new(icon.image, "Add");
+                s_addLabel = new(icon.image, "Add");
             }
 
             {
@@ -174,14 +182,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     ? EditorGUIUtility.IconContent("d_Toolbar Minus")
                     : EditorGUIUtility.IconContent("Toolbar Minus");
 
-                _removeLabel = new(icon.image, "Remove");
-                _removeSelectedLabel = new(icon.image, "Remove Selected Item");
+                s_removeLabel = new(icon.image, "Remove");
+                s_removeSelectedLabel = new(icon.image, "Remove Selected Item");
             }
 
             {
                 var icon = EditorGUIUtility.IconContent("pane options@2x");
-                _menuLabel = new(icon.image, "Menu");
-                _menuColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+                s_menuLabel = new(icon.image, "Menu");
+                s_menuColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
             }
 
             {
@@ -189,10 +197,10 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     ? EditorGUIUtility.IconContent("d_console.warnicon")
                     : EditorGUIUtility.IconContent("console.warnicon");
 
-                _iconWarning = new GUIContent(icon.image);
+                s_iconWarning = new GUIContent(icon.image);
             }
 
-            _iconBinding = EditorGUIUtility.isProSkin
+            s_iconBinding = EditorGUIUtility.isProSkin
                 ? EditorGUIUtility.IconContent("d_BlendTree Icon")
                 : EditorGUIUtility.IconContent("BlendTree Icon");
 
@@ -201,7 +209,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     ? EditorGUIUtility.IconContent("d_P4_CheckOutRemote")
                     : EditorGUIUtility.IconContent("P4_CheckOutRemote");
 
-                _applyIconLabel = new GUIContent(icon.image, "Apply");
+                s_applyIconLabel = new GUIContent(icon.image, "Apply");
             }
 
             {
@@ -209,37 +217,32 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     ? EditorGUIUtility.IconContent("d_P4_DeletedLocal")
                     : EditorGUIUtility.IconContent("P4_DeletedLocal");
 
-                _cancelIconLabel = new GUIContent(icon.image, "Cancel");
+                s_cancelIconLabel = new GUIContent(icon.image, "Cancel");
             }
 
             {
                 ColorUtility.TryParseHtmlString("#2C5D87", out var darkColor);
                 ColorUtility.TryParseHtmlString("#3A72B0", out var lightColor);
-                _selectedColor = EditorGUIUtility.isProSkin ? darkColor : lightColor;
+                s_selectedColor = EditorGUIUtility.isProSkin ? darkColor : lightColor;
             }
 
             {
                 ColorUtility.TryParseHtmlString("#474747", out var darkColor);
                 ColorUtility.TryParseHtmlString("#D6D6D6", out var lightColor);
-                _headerColor = EditorGUIUtility.isProSkin ? darkColor : lightColor;
+                s_headerColor = EditorGUIUtility.isProSkin ? darkColor : lightColor;
             }
 
             {
                 ColorUtility.TryParseHtmlString("#383838", out var darkColor);
                 ColorUtility.TryParseHtmlString("#C8C8C8", out var lightColor);
-                _contentColor = EditorGUIUtility.isProSkin ? darkColor : lightColor;
+                s_contentColor = EditorGUIUtility.isProSkin ? darkColor : lightColor;
             }
 
             {
                 ColorUtility.TryParseHtmlString("#404040", out var darkColor);
                 ColorUtility.TryParseHtmlString("#ABABAB", out var lightColor);
-                _altContentColor = EditorGUIUtility.isProSkin ? darkColor : lightColor;
+                s_altContentColor = EditorGUIUtility.isProSkin ? darkColor : lightColor;
             }
-
-            _bindersLabel = new("Binders");
-            _detailsTabLabels = new GUIContent[] { new("Bindings"), new("Targets"), };
-            _propertyBindingLabel = new("Property");
-            _commandBindingLabel = new("Command");
         }
     }
 }

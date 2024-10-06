@@ -20,14 +20,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             Menu = 3,
         }
 
-        private readonly GUIContent _clearBindingsLabel = new("Clear");
-        private readonly GUIContent _clearTargetsLabel = new("Clear");
-
-        private void DrawDetailsPanel()
+        private void DrawDetailsPanel(in EventData eventData)
         {
             EditorGUILayout.BeginVertical(GUILayout.ExpandHeight(true));
             {
-                var rect = EditorGUILayout.BeginVertical(_detailsHeaderStyle, GUILayout.MinHeight(30), GUILayout.Height(30));
+                var rect = EditorGUILayout.BeginVertical(s_detailsHeaderStyle, GUILayout.MinHeight(30), GUILayout.Height(30));
                 {
                     EditorGUILayout.Space(20f);
 
@@ -36,17 +33,17 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     tabBarRect.x += 10f;
                     tabBarRect.width -= 20f;
 
-                    _selectedDetailsTabIndex = GUI.Toolbar(tabBarRect, _selectedDetailsTabIndex, _detailsTabLabels);
+                    _selectedDetailsTabIndex = GUI.Toolbar(tabBarRect, _selectedDetailsTabIndex, s_detailsTabLabels);
 
-                    if (ValidateSelectedBinderIndex())
+                    if (_presetBindersProp.ValidateSelectedIndex())
                     {
-                        var iconWarning = _iconWarning;
+                        var iconWarning = s_iconWarning;
                         var iconRect = tabBarRect;
                         iconRect.y += 8f;
                         iconRect.width = 18f;
                         iconRect.height = 18f;
 
-                        if (_presetBindingsProp == null || _presetBindingsProp.arraySize < 1)
+                        if (_presetBindingsProp == null || _presetBindingsProp.ArraySize < 1)
                         {
                             iconWarning.tooltip = NO_BINDING;
                             iconRect.x = tabBarRect.x + (tabBarRect.width / 2f) - 22f;
@@ -54,7 +51,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                             GUI.Label(iconRect, iconWarning);
                         }
 
-                        if (_presetTargetsProp == null || _presetTargetsProp.arraySize < 1)
+                        if (_presetTargetsProp == null || _presetTargetsProp.ArraySize < 1)
                         {
                             iconWarning.tooltip = NO_TARGET;
                             iconRect.x = tabBarRect.x + tabBarRect.width - 22f;
@@ -65,7 +62,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 }
                 EditorGUILayout.EndVertical();
 
-                rect = EditorGUILayout.BeginVertical(_rootTabViewStyle, GUILayout.ExpandHeight(true));
+                rect = EditorGUILayout.BeginVertical(s_rootTabViewStyle, GUILayout.ExpandHeight(true));
                 {
                     // Draw background
                     {
@@ -78,25 +75,25 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                         var tex = Texture2D.whiteTexture;
                         var mode = ScaleMode.StretchToFill;
 
-                        GUI.DrawTexture(newRect, tex, mode, false, 0f, _contentColor, Vector4.zero, 3f);
+                        GUI.DrawTexture(newRect, tex, mode, false, 0f, s_contentColor, Vector4.zero, 3f);
                     }
 
-                    if (_selectedBinderIndex.HasValue == false)
+                    if (_presetBindersProp.SelectedIndex.HasValue == false)
                     {
-                        GUILayout.Label("No binder is selected.", _noBinderStyle);
+                        GUILayout.Label("No binder is selected.", s_noBinderStyle);
                     }
                     else
                     {
-                        var index = _selectedBinderIndex.Value;
-                        var bindersLength = _presetBindersProp.arraySize;
+                        var index = _presetBindersProp.SelectedIndex.Value;
+                        var bindersLength = _presetBindersProp.ArraySize;
 
                         if ((uint)index >= (uint)bindersLength)
                         {
-                            GUILayout.Label("No binder is selected.", _noBinderStyle);
+                            GUILayout.Label("No binder is selected.", s_noBinderStyle);
                         }
                         else
                         {
-                            DrawDetailsPanel_Content();
+                            DrawDetailsPanel_Content(eventData, rect);
                         }
                     }
 
@@ -107,64 +104,69 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             EditorGUILayout.EndVertical();
         }
 
-        private void DrawDetailsPanel_Content()
+        private void DrawDetailsPanel_Content(in EventData eventData, Rect sectionRect)
         {
             var tabIndex = _selectedDetailsTabIndex;
 
             switch (tabIndex)
             {
                 case TAB_INDEX_BINDINGS:
-                    DrawDetailsPanel_Bindings();
+                    DrawDetailsPanel_Bindings(eventData, sectionRect);
                     break;
 
                 case TAB_INDEX_TARGETS:
-                    DrawDetailsPanel_Targets();
+                    DrawDetailsPanel_Targets(eventData, sectionRect);
                     break;
             }
         }
 
-        private void DrawDetailsPanel_Bindings()
+        private void DrawDetailsPanel_Bindings(in EventData eventData, Rect sectionRect)
         {
             var property = _presetBindingsProp;
-            var serializedObject = property.serializedObject;
+            var serializedObject = property.Property.serializedObject;
             var target = serializedObject.targetObject;
-            var toolbarButton = DrawDetailsPanel_ToolbarButtons(property);
+            var toolbarButton = DrawDetailsPanel_ToolbarButtons(property.ArraySize);
 
             switch (toolbarButton)
             {
                 case DetailsToolbarButton.Add:
                 {
-                    ShowBindingDropdown(_selectedBinderIndex.Value);
+                    ShowBindingDropdown(_presetBindersProp, this);
                     break;
                 }
 
                 case DetailsToolbarButton.Remove:
                 {
-                    DeleteSelectedBinding();
+                    property.DeleteSelected();
                     break;
                 }
 
                 case DetailsToolbarButton.Menu:
                 {
-                    var propRef = new BinderPropRef(property, this);
-                    var menu = new GenericMenu();
-                    menu.AddItem(_clearBindingsLabel, false, ClearTargetsOrBindings, propRef);
-                    menu.ShowAsContext();
+                    ShowMenuContextMenu(property);
                     break;
                 }
             }
 
-            var length = property.arraySize;
+            var length = property.ArraySize;
 
             if (length < 1)
             {
-                EditorGUILayout.LabelField("This binding list is empty.", _noBinderStyle, GUILayout.Height(30));
+                EditorGUILayout.LabelField("This binding list is empty.", s_noBinderStyle, GUILayout.Height(30));
+
+                if (eventData.Type == EventType.MouseDown
+                    && eventData.Button == 1
+                    && sectionRect.Contains(eventData.MousePos)
+                )
+                {
+                    ShowRightClickContextMenuEmpty(property);
+                }
                 return;
             }
 
-            var propertyLabel = _propertyBindingLabel;
-            var commandLabel = _commandBindingLabel;
-            var itemLabelStyle = _itemLabelStyle;
+            var propertyLabel = s_propertyBindingLabel;
+            var commandLabel = s_commandBindingLabel;
+            var itemLabelStyle = s_itemLabelStyle;
 
             itemLabelStyle.CalcMinMaxWidth(propertyLabel, out _, out var maxPropWidth);
             itemLabelStyle.CalcMinMaxWidth(commandLabel, out _, out var maxCmdWidth);
@@ -173,19 +175,21 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             var indexLabel = new GUIContent();
             var headerLabel = new GUIContent();
             var indexLabelWidth = GUILayout.Width(20);
-            var removeLabel = _removeLabel;
-            var removeButtonStyle = _removeButtonStyle;
-            var indexLabelStyle = _indexLabelStyle;
-            var headerLabelStyle = _headerLabelStyle;
-            var selectedColor = _selectedColor;
-            var contentColor = _altContentColor;
+            var removeLabel = s_removeLabel;
+            var removeButtonStyle = s_removeButtonStyle;
+            var indexLabelStyle = s_indexLabelStyle;
+            var headerLabelStyle = s_headerLabelStyle;
+            var selectedColor = s_selectedColor;
+            var contentColor = s_altContentColor;
             var comp = EditorGUIUtility.isProSkin ? 0 : 1;
             var last = length - 1;
-            var selectedIndex = _selectedBindingIndex;
+            var selectedIndex = property.SelectedIndex;
+            var mouseDownIndex = -1;
+            var mousePos = eventData.MousePos;
 
             for (var i = 0; i < length; i++)
             {
-                var elementProp = property.GetArrayElementAtIndex(i);
+                var elementProp = property.GetElementAt(i);
 
                 if (elementProp.managedReferenceValue is not MonoBinding binding)
                 {
@@ -217,7 +221,15 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                         if (GUI.Button(backRect, GUIContent.none, GUIStyle.none))
                         {
-                            SetSelectedBindingIndex(i);
+                            property.SetSelectedIndex(i);
+                        }
+
+                        if (eventData.Type == EventType.MouseDown
+                            && eventData.Button == 1
+                            && backRect.Contains(mousePos)
+                        )
+                        {
+                            mouseDownIndex = i;
                         }
                     }
 
@@ -265,58 +277,70 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.Space(6f);
             }
+
+            if (mouseDownIndex >= 0)
+            {
+                ShowRightClickContextMenu(property, mouseDownIndex);
+            }
         }
 
-        private void DrawDetailsPanel_Targets()
+        private void DrawDetailsPanel_Targets(in EventData eventData, Rect sectionRect)
         {
             var property = _presetTargetsProp;
-            var serializedObject = property.serializedObject;
+            var serializedObject = property.Property.serializedObject;
             var target = serializedObject.targetObject;
-            var toolbarButton = DrawDetailsPanel_ToolbarButtons(property);
+            var toolbarButton = DrawDetailsPanel_ToolbarButtons(property.ArraySize);
 
             switch (toolbarButton)
             {
                 case DetailsToolbarButton.Add:
                 {
-                    ShowTargetDropdown(_selectedBinderIndex.Value);
+                    ShowTargetDropdown(_presetBindersProp, this);
                     break;
                 }
 
                 case DetailsToolbarButton.Remove:
                 {
-                    DeleteSelectedTarget();
+                    property.DeleteSelected();
                     break;
                 }
 
                 case DetailsToolbarButton.Menu:
                 {
-                    var propRef = new BinderPropRef(property, this);
-                    var menu = new GenericMenu();
-                    menu.AddItem(_clearTargetsLabel, false, ClearTargetsOrBindings, propRef);
-                    menu.ShowAsContext();
+                    ShowMenuContextMenu(property);
                     break;
                 }
             }
 
-            var length = property.arraySize;
+            var length = property.ArraySize;
 
             if (length < 1)
             {
-                EditorGUILayout.LabelField("This target list is empty.", _noBinderStyle, GUILayout.Height(30));
+                EditorGUILayout.LabelField("This target list is empty.", s_noBinderStyle, GUILayout.Height(30));
+
+                if (eventData.Type == EventType.MouseDown
+                    && eventData.Button == 1
+                    && sectionRect.Contains(eventData.MousePos)
+                )
+                {
+                    ShowRightClickContextMenuEmpty(property);
+                }
                 return;
             }
 
             var indexLabel = new GUIContent();
             var indexLabelWidth = GUILayout.Width(30);
-            var itemLabelStyle = _indexLabelStyle;
-            var selectedColor = _selectedColor;
-            var contentColor = _altContentColor;
+            var itemLabelStyle = s_indexLabelStyle;
+            var selectedColor = s_selectedColor;
+            var contentColor = s_altContentColor;
             var comp = EditorGUIUtility.isProSkin ? 0 : 1;
-            var selectedIndex = _selectedTargetIndex;
+            var selectedIndex = property.SelectedIndex;
+            var mouseDownIndex = -1;
+            var mousePos = eventData.MousePos;
 
             for (var i = 0; i < length; i++)
             {
-                var elementProp = property.GetArrayElementAtIndex(i);
+                var elementProp = property.GetElementAt(i);
 
                 EditorGUILayout.Space(2f);
                 var rect = EditorGUILayout.BeginHorizontal();
@@ -339,7 +363,15 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                         if (GUI.Button(backRect, GUIContent.none, GUIStyle.none))
                         {
-                            SetSelectedTargetIndex(i);
+                            property.SetSelectedIndex(i);
+                        }
+
+                        if (eventData.Type == EventType.MouseDown
+                            && eventData.Button == 1
+                            && backRect.Contains(mousePos)
+                        )
+                        {
+                            mouseDownIndex = i;
                         }
                     }
 
@@ -360,16 +392,43 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.Space(2f);
             }
+
+            if (mouseDownIndex >= 0)
+            {
+                ShowRightClickContextMenu(property, mouseDownIndex);
+            }
         }
 
-        private void ShowTargetDropdown(int binderIndex)
+        private static void ShowBindingDropdown(SerializedArrayProperty bindersProp, MonoViewInspector inspector)
         {
-            if (TryGetTargetType(binderIndex, out var binderProp, out var targetType) == false)
+            if (TryGetTargetType(bindersProp, out var binderProp, out var targetType) == false)
             {
                 return;
             }
 
-            var rootGO = _view.gameObject;
+            if (s_targetTypeToBindingMenuMap.TryGetValue(targetType, out var menu) == false)
+            {
+                return;
+            }
+
+            s_binderPropRef.Prop = binderProp;
+            s_binderPropRef.Inspector = inspector;
+
+            menu.width = 250;
+            menu.height = 350;
+            menu.maxHeight = 600;
+            menu.showSearch = true;
+            menu.Show(Event.current.mousePosition);
+        }
+
+        private static void ShowTargetDropdown(SerializedArrayProperty bindersProp, MonoViewInspector inspector)
+        {
+            if (TryGetTargetType(bindersProp, out var binderProp, out var targetType) == false)
+            {
+                return;
+            }
+
+            var rootGO = inspector._view.gameObject;
             var menu = new TreeViewPopup(targetType.Name) {
                 width = 300,
                 data = binderProp,
@@ -385,25 +444,58 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             menu.Show(Event.current.mousePosition);
         }
 
-        private void ShowBindingDropdown(int binderIndex)
+        private static void ShowMenuContextMenu(SerializedArrayProperty property)
         {
-            if (TryGetTargetType(binderIndex, out var binderProp, out var targetType) == false)
+            var menu = new GenericMenu();
+            menu.AddItem(s_copyAllLabel, false, Menu_OnCopyAll, property);
+
+            if (property.ValidatePasteAll())
             {
-                return;
+                menu.AddItem(s_pasteAllLabel, false, Menu_OnPasteAll, property);
+            }
+            else
+            {
+                menu.AddDisabledItem(s_pasteAllLabel);
             }
 
-            if (s_bindingMenuMap.TryGetValue(targetType, out var menu) == false)
+            menu.AddItem(s_clearAllLabel, false, Menu_OnClearAll, property);
+            menu.ShowAsContext();
+        }
+
+        private static void ShowRightClickContextMenuEmpty(SerializedArrayProperty property)
+        {
+            var menu = new GenericMenu();
+
+            if (property.ValidatePasteSingle())
             {
-                return;
+                menu.AddItem(s_pasteItemLabel, false, Menu_OnPasteSingle, property);
+            }
+            else
+            {
+                menu.AddDisabledItem(s_pasteItemLabel);
             }
 
-            s_binderPropRef.Prop = binderProp;
-            s_binderPropRef.Inspector = this;
+            menu.ShowAsContext();
+        }
 
-            menu.height = 350;
-            menu.maxHeight = 600;
-            menu.showSearch = true;
-            menu.Show(Event.current.mousePosition);
+        private static void ShowRightClickContextMenu(SerializedArrayProperty property, int mouseDownIndex)
+        {
+            property.SetSelectedIndex(mouseDownIndex);
+
+            var menu = new GenericMenu();
+            menu.AddItem(s_copyItemLabel, false, Menu_OnCopySelected, property);
+
+            if (property.ValidatePasteSingle())
+            {
+                menu.AddItem(s_pasteItemLabel, false, Menu_OnPasteSingle, property);
+            }
+            else
+            {
+                menu.AddDisabledItem(s_pasteItemLabel);
+            }
+
+            menu.AddItem(s_deleteItemLabel, false, Menu_OnDeleteSelected, property);
+            menu.ShowAsContext();
         }
 
         private static void TargetMenu_AddTargets(object data, IList<int> selectedIds)
@@ -461,45 +553,21 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             serializedObject.Update();
         }
 
-        private static void ClearTargetsOrBindings(object userData)
-        {
-            if (userData is not BinderPropRef propRef)
-            {
-                return;
-            }
-
-            var property = propRef.Prop;
-
-            if (property.arraySize < 1)
-            {
-                return;
-            }
-
-            var serializedObject = property.serializedObject;
-            var target = serializedObject.targetObject;
-
-            Undo.RecordObject(target, $"Clear {property.propertyPath}");
-
-            property.ClearArray();
-            serializedObject.ApplyModifiedProperties();
-            serializedObject.Update();
-        }
-
-        private DetailsToolbarButton DrawDetailsPanel_ToolbarButtons(SerializedProperty property)
+        private static DetailsToolbarButton DrawDetailsPanel_ToolbarButtons(int arraySize)
         {
             var result = DetailsToolbarButton.None;
 
             EditorGUILayout.BeginHorizontal();
             {
-                if (GUILayout.Button(_addLabel, _toolbarLeftButtonStyle, GUILayout.Height(20)))
+                if (GUILayout.Button(s_addLabel, s_toolbarLeftButtonStyle, GUILayout.Height(20)))
                 {
                     result = DetailsToolbarButton.Add;
                 }
 
                 var guiEnabled = GUI.enabled;
-                GUI.enabled = property.arraySize > 0;
+                GUI.enabled = arraySize > 0;
 
-                if (GUILayout.Button(_removeSelectedLabel, _toolbarMidButtonStyle, GUILayout.Height(20)))
+                if (GUILayout.Button(s_removeSelectedLabel, s_toolbarMidButtonStyle, GUILayout.Height(20)))
                 {
                     result = DetailsToolbarButton.Remove;
                 }
@@ -507,9 +575,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 GUI.enabled = guiEnabled;
 
                 var guiContentColor = GUI.contentColor;
-                GUI.contentColor = _menuColor;
+                GUI.contentColor = s_menuColor;
 
-                if (GUILayout.Button(_menuLabel, _toolbarMenuButtonStyle, GUILayout.Height(20), GUILayout.Width(20)))
+                if (GUILayout.Button(s_menuLabel, s_toolbarMenuButtonStyle, GUILayout.Height(20), GUILayout.Width(20)))
                 {
                     result = DetailsToolbarButton.Menu;
                 }
@@ -521,10 +589,13 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             return result;
         }
 
-        private bool TryGetTargetType(int binderIndex, out SerializedProperty binderProp, out Type targetType)
+        private static bool TryGetTargetType(
+              SerializedArrayProperty bindersProp
+            , out SerializedProperty binderProp
+            , out Type targetType
+        )
         {
-            var bindersProp = _presetBindersProp;
-            binderProp = bindersProp.GetArrayElementAtIndex(binderIndex);
+            binderProp = bindersProp.GetElementAt(bindersProp.SelectedIndex.Value);
             var binderType = binderProp.managedReferenceValue?.GetType();
 
             if (binderType == null)
