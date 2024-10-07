@@ -1,8 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
-using Module.Core.Collections;
 using Module.Core.Mvvm.ViewBinding;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
 {
@@ -15,8 +13,6 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
         public IBindingContext Context { get; protected set; }
 
         public abstract bool IsCommand { get; }
-
-        public abstract void SetTargets(FasterList<UnityEngine.Object> targets);
     }
 
     /// <summary>
@@ -28,19 +24,19 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
     public abstract partial class MonoBinding<T> : MonoBinding, IBinder
         where T : UnityEngine.Object
     {
-        private FasterList<T> _targets;
+        private IAsReadOnlySpan<T> _targets;
 
         protected ReadOnlySpan<T> Targets
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _targets != null ? _targets.AsReadOnlySpan() : default;
+            get => _targets != null ? _targets.AsReadOnlySpan() : Array.Empty<T>();
         }
 
-        public sealed override void SetTargets(FasterList<UnityEngine.Object> targets)
+        public void SetTargets(IAsReadOnlySpan<T> targets)
         {
             OnBeforeSetTargets();
 
-            _targets = UnsafeUtility.As<FasterList<UnityEngine.Object>, FasterList<T>>(ref targets);
+            _targets = targets;
 
             OnAfterSetTargets();
         }

@@ -32,7 +32,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
             get => _bindings ??= new(this);
         }
 
-        public abstract void Initialize();
+        public abstract void Initialize(UnityEngine.Object context);
 
         protected sealed class BindingList : StatelessList<BindingBuffer, MonoBinding>
         {
@@ -77,15 +77,42 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
             get => _targets ??= new(this);
         }
 
-        public sealed override void Initialize()
+        public sealed override void Initialize(UnityEngine.Object context)
         {
+            var targets = this.Targets;
+            var bindings = this.Bindings.AsReadOnlySpan();
+            var bindingsLength = bindings.Length;
 
+            for (var i = 0; i < bindingsLength; i++)
+            {
+                var binding = bindings[i];
+
+                if (binding == null)
+                {
+                    ErrorIfBindingMissing(context, i);
+                    continue;
+                }
+
+                if (binding is not MonoBinding<T> bindingT)
+                {
+                    ErrorIfTypeNotMatch(context, i, binding);
+                    continue;
+                }
+
+                bindingT.SetTargets(targets);
+            }
         }
 
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ErrorIfTypeNotMatch(UnityEngine.Object value)
+        private static void ErrorIfBindingMissing(UnityEngine.Object context, int index)
         {
-            DevLoggerAPI.LogError(value, $"Expected type {typeof(T)}, but received {value.GetType()}");
+            DevLoggerAPI.LogError(context, $"Expected a MonoBinding<{typeof(T)}>, but received a null at index {index}");
+        }
+
+        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void ErrorIfTypeNotMatch(UnityEngine.Object context, int index, MonoBinding value)
+        {
+            DevLoggerAPI.LogError(context, $"Expected a MonoBinding<{typeof(T)}>, but received a {value.GetType()} at index {index}");
         }
 
         protected sealed class TargetList : StatelessList<TargetBuffer, T>
