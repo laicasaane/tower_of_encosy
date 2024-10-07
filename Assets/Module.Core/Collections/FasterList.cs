@@ -31,6 +31,7 @@ using System.Runtime.CompilerServices;
 namespace Module.Core.Collections
 {
     public class FasterList<T> : ICollection<T>, IReadOnlyCollection<T>, IList<T>, IReadOnlyList<T>
+        , IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
     {
         internal static readonly EqualityComparer<T> s_comp = EqualityComparer<T>.Default;
         internal static readonly bool s_shouldPerformMemClear = TypeCache<T>.IsUnmanaged == false;

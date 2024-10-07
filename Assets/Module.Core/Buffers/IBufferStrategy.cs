@@ -22,12 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
 using Unity.Collections;
 
 namespace Module.Core.Buffers
 {
-    public interface IBufferStrategy<T>
+    public interface IBufferStrategy<T> : IAsSpan<T>, IAsReadOnlySpan<T>
     {
         int Capacity { get; }
 
@@ -44,7 +43,5 @@ namespace Module.Core.Buffers
         void FastClear();
 
         void Dispose();
-
-        Span<T> AsSpan();
     }
 }

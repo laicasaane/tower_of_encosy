@@ -1,8 +1,10 @@
+using System;
 using System.Runtime.CompilerServices;
 
 namespace Module.Core.Buffers
 {
     public abstract class BufferBase<T> : IBufferProvider<T>
+        , IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
     {
         private int _count;
         private int _version;
@@ -26,5 +28,21 @@ namespace Module.Core.Buffers
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => ref _version;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Span<T> AsSpan()
+            => Buffer.AsSpan(0, Count);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlySpan<T> AsReadOnlySpan()
+            => Buffer.AsSpan(0, Count);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Memory<T> AsMemory()
+            => Buffer.AsMemory(0, Count);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlyMemory<T> AsReadOnlyMemory()
+            => Buffer.AsMemory(0, Count);
     }
 }

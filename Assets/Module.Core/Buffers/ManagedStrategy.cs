@@ -128,6 +128,9 @@ namespace Module.Core.Buffers
         public Span<T> AsSpan()
             => _realBuffer.AsSpan();
 
+        public ReadOnlySpan<T> AsReadOnlySpan()
+            => _realBuffer.AsSpan();
+
         public void Dispose() { }
     }
 }

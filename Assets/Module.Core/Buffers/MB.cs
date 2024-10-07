@@ -70,7 +70,7 @@ namespace Module.Core.Buffers
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-#if DEBUG && ENABLE_PARANOID_CHECKS                
+#if DEBUG && ENABLE_PARANOID_CHECKS
                 if (index >= _buffer.Length)
                     throw new IndexOutOfRangeException("Paranoid check failed!");
 #endif
@@ -119,6 +119,12 @@ namespace Module.Core.Buffers
         {
             return _bufferImplementation.AsSpan();
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlySpan<T> AsReadOnlySpan()
+        {
+            return _bufferImplementation.AsSpan();
+        }
     }
 
     internal struct MBInternal<T> : IBuffer<T>
@@ -148,7 +154,7 @@ namespace Module.Core.Buffers
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-#if DEBUG && ENABLE_PARANOID_CHECKS                
+#if DEBUG && ENABLE_PARANOID_CHECKS
                 if (index >= _buffer.Length)
                     throw new IndexOutOfRangeException("Paranoid check failed!");
 #endif
@@ -189,6 +195,12 @@ namespace Module.Core.Buffers
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span<T> AsSpan()
+        {
+            return _buffer;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlySpan<T> AsReadOnlySpan()
         {
             return _buffer;
         }

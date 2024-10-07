@@ -28,7 +28,7 @@ using System.Runtime.CompilerServices;
 
 namespace Module.Core.Collections
 {
-    public readonly struct FasterReadOnlyList<T>
+    public readonly struct FasterReadOnlyList<T> : IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
     {
         internal readonly FasterList<T> _list;
 

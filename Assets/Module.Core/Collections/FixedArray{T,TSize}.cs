@@ -12,7 +12,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace Module.Core.Collections
 {
-    public unsafe struct FixedArray<T, TSize>
+    public unsafe struct FixedArray<T, TSize> : IAsSpan<T>, IAsReadOnlySpan<T>
         where T : unmanaged
         where TSize : unmanaged
     {

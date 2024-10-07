@@ -61,6 +61,8 @@ namespace Module.Core.Collections
     /// <typeparam name="T">The element type in the managed representation.</typeparam>
     /// <typeparam name="TNative">The element type in the NativeArray representation. Must be the same size as <typeparamref name="T"/>.</typeparam>
     public class SharedArray<T, TNative> : IDisposable, IEnumerable<T>
+        , IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
+        , IAsNativeArray<TNative>, IAsNativeSlice<TNative>
         where T : unmanaged
         where TNative : unmanaged
     {

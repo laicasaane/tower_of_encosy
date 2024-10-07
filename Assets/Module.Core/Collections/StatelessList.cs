@@ -14,6 +14,7 @@ namespace Module.Core.Collections
     /// as the external state for this list.
     /// </summary>
     public class StatelessList<TState, T> : ICollection<T>, IReadOnlyCollection<T>, IList<T>, IReadOnlyList<T>
+        , IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
         where TState : IBufferProvider<T>
     {
         internal static readonly bool s_shouldPerformMemClear = TypeCache<T>.IsUnmanaged == false;

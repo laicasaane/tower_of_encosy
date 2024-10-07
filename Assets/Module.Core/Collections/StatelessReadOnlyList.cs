@@ -29,7 +29,7 @@ using Module.Core.Buffers;
 
 namespace Module.Core.Collections
 {
-    public readonly struct StatelessReadOnlyList<TState, T>
+    public readonly struct StatelessReadOnlyList<TState, T> : IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
         where TState : IBufferProvider<T>
     {
         internal readonly StatelessList<TState, T> _list;

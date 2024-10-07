@@ -22,11 +22,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-
 namespace Module.Core.Buffers
 {
-    public interface IBuffer<T>
+    public interface IBuffer<T> : IAsSpan<T>, IAsReadOnlySpan<T>
     {
         int Capacity { get; }
 
@@ -35,7 +33,5 @@ namespace Module.Core.Buffers
         void CopyTo(uint sourceStartIndex, T[] destination, uint destinationStartIndex, uint count);
 
         void Clear();
-
-        Span<T> AsSpan();
     }
 }

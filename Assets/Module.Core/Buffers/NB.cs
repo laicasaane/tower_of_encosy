@@ -113,6 +113,12 @@ namespace Module.Core.Buffers
         {
             return _bufferImplementation.AsSpan();
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlySpan<T> AsReadOnlySpan()
+        {
+            return _bufferImplementation.AsSpan();
+        }
     }
 
     internal readonly struct NBInternal<T> : IBuffer<T> where T : struct
@@ -190,6 +196,12 @@ namespace Module.Core.Buffers
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span<T> AsSpan()
+        {
+            return _buffer.AsSpan();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlySpan<T> AsReadOnlySpan()
         {
             return _buffer.AsSpan();
         }
