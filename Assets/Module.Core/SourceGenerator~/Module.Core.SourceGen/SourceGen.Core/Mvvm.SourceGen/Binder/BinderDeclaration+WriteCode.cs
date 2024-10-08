@@ -56,6 +56,7 @@ namespace Module.Core.Mvvm.SourceGen.Binders
                 WriteRelayCommands(ref p);
                 WriteFlags(ref p);
                 WriteConstructor(ref p);
+                WriteContextProperty(ref p);
                 WriteStartListeningMethod(ref p);
                 WritePartialOnBindFailedMethods(ref p);
                 WriteStopListeningMethod(ref p);
@@ -435,6 +436,23 @@ namespace Module.Core.Mvvm.SourceGen.Binders
             p.PrintEndLine();
         }
 
+        private void WriteContextProperty(ref Printer p)
+        {
+            if (HasBaseBinder)
+            {
+                return;
+            }
+
+            var keyword = Symbol.IsSealed ? "" : "virtual ";
+
+            p.PrintLine("/// <inheritdoc/>");
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(keyword)
+                .Print("global::Module.Core.Mvvm.ComponentModel.IObservableObject Context")
+                .PrintEndLine(" { get; private set; }");
+            p.PrintEndLine();
+        }
+
         private void WriteStartListeningMethod(ref Printer p)
         {
             var keyword = HasBaseBinder ? "override " : Symbol.IsSealed ? "" : "virtual ";
@@ -471,7 +489,7 @@ namespace Module.Core.Mvvm.SourceGen.Binders
 
                 if (BindingPropertyRefs.Length > 0)
                 {
-                    p.PrintLine("if (this.Context?.Target is global::Module.Core.Mvvm.ComponentModel.INotifyPropertyChanged inpc)");
+                    p.PrintLine("if (this.Context is global::Module.Core.Mvvm.ComponentModel.INotifyPropertyChanged inpc)");
                     p.OpenScope();
                     {
                         foreach (var member in BindingPropertyRefs)
@@ -491,7 +509,7 @@ namespace Module.Core.Mvvm.SourceGen.Binders
 
                 if (BindingCommandRefs.Length > 0)
                 {
-                    p.PrintLine("if (this.Context?.Target is global::Module.Core.Mvvm.Input.ICommandListener cl)");
+                    p.PrintLine("if (this.Context is global::Module.Core.Mvvm.Input.ICommandListener cl)");
                     p.OpenScope();
                     {
                         foreach (var member in BindingCommandRefs)
@@ -890,7 +908,7 @@ namespace Module.Core.Mvvm.SourceGen.Binders
 
                 if (BindingPropertyRefs.Length > 0)
                 {
-                    p.PrintLine("if (this.Context?.Target is global::Module.Core.Mvvm.ComponentModel.INotifyPropertyChanged inpc)");
+                    p.PrintLine("if (this.Context is global::Module.Core.Mvvm.ComponentModel.INotifyPropertyChanged inpc)");
                     p.OpenScope();
                     {
                         foreach (var member in BindingPropertyRefs)

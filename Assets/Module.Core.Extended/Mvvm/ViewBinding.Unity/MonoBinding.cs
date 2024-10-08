@@ -10,8 +10,6 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
     [Serializable]
     public abstract partial class MonoBinding : IBinder
     {
-        public IBindingContext Context { get; protected set; }
-
         public abstract bool IsCommand { get; }
     }
 

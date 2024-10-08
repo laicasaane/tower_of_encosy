@@ -1,4 +1,6 @@
-﻿namespace Module.Core.Mvvm.ViewBinding
+using Module.Core.Mvvm.ComponentModel;
+
+namespace Module.Core.Mvvm.ViewBinding
 {
     /// <summary>
     /// Any class implements this interface will be an eligible
@@ -8,7 +10,7 @@
     /// <seealso cref="BindingCommandAttribute"/>
     public interface IBinder
     {
-        IBindingContext Context { get; }
+        IObservableObject Context { get; }
 
         /// <summary>
         /// Sets target property name to a binding property.

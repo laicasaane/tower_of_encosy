@@ -23,8 +23,6 @@ namespace Module.Core.Tests.MvvmTests
 
     public partial class Binder : IBinder
     {
-        public IBindingContext Context { get; set; }
-
         [BindingProperty]
         private void SetIntValue(int value)
         {
@@ -66,8 +64,6 @@ namespace Module.Core.Tests.MvvmTests
 
     public partial class GenericBinder<T> : IBinder
     {
-        public IBindingContext Context { get; set; }
-
         [BindingProperty]
         private void SetIntValue(int value)
         {
