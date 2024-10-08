@@ -33,9 +33,17 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     [Label("Limits", "Hinge Joint")]
     public sealed partial class HingeJointBindingLimits : MonoBindingProperty<HingeJoint>, IBinder
     {
+#if !UNION_SIZE_32_BYTES
+        public HingeJointBindingLimits()
+        {
+            Logging.DevLoggerAPI.LogException(new NotSupportedException(
+                "Hinge Joint Limits binding property requires the symbol UNION_SIZE_32_BYTES to be defined"
+            ));
+        }
+#else
         [BindingProperty]
         [field: HideInInspector]
-        private void SetLimits(JointLimits value)
+        private void SetLimits(in JointLimits value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -45,6 +53,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
                 targets[i].limits = value;
             }
         }
+#endif
     }
 
     [Serializable]
@@ -53,7 +62,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetMotor(JointMotor value)
+        private void SetMotor(in JointMotor value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -71,7 +80,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetSpring(JointSpring value)
+        private void SetSpring(in JointSpring value)
         {
             var targets = Targets;
             var length = targets.Length;

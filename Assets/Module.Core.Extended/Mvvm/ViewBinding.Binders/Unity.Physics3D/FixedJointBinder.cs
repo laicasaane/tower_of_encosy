@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
 {
-
     [Serializable]
     [Label("Fixed Joint", "Physics 3D")]
     public sealed partial class FixedJointBinder : MonoBinder<FixedJoint>
@@ -36,7 +35,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetAnchor(Vector3 value)
+        private void SetAnchor(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -72,7 +71,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetAxis(Vector3 value)
+        private void SetAxis(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -126,7 +125,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetConnectedAnchor(Vector3 value)
+        private void SetConnectedAnchor(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;

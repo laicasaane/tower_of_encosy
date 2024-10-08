@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
 {
-
     [Serializable]
     [Label("Character Controller", "Physics 3D")]
     public sealed partial class CharacterControllerBinder : MonoBinder<CharacterController>
@@ -18,7 +17,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetCenter(Vector3 value)
+        private void SetCenter(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;

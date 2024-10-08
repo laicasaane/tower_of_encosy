@@ -17,7 +17,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetCenter(Vector3 value)
+        private void SetCenter(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -35,7 +35,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetSize(Vector3 value)
+        private void SetSize(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;

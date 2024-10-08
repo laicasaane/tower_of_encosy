@@ -38,7 +38,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetColor(Color value)
+        private void SetColor(in Color value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -54,6 +54,14 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
     [Label("Color Gradient", "TMP Text")]
     public sealed partial class TMP_TextBindingColorGradient : MonoBindingProperty<TMP_Text>, IBinder
     {
+#if !UNION_SIZE_64_BYTES
+        public TMP_TextBindingColorGradient()
+        {
+            Logging.DevLoggerAPI.LogException(new NotSupportedException(
+                "TMP Text Color Gradient binding requires the symbol UNION_SIZE_64_BYTES to be defined"
+            ));
+        }
+#else
         [BindingProperty]
         [field: HideInInspector]
         private void SetColorGradient(VertexGradient value)
@@ -66,6 +74,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
                 targets[i].colorGradient = value;
             }
         }
+#endif
     }
 
     [Serializable]

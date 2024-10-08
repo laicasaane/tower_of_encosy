@@ -1,3 +1,5 @@
+#if ENABLE_TILEMAP
+
 using System;
 using Module.Core.Extended.Mvvm.ViewBinding.Unity;
 using Module.Core.Mvvm.ViewBinding;
@@ -14,11 +16,11 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Tilemaps
 
     [Serializable]
     [Label("Chunk Culling Bounds", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererChunkCullingBounds : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingChunkCullingBounds : MonoBindingProperty<TilemapRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetChunkCullingBounds(Vector3 value)
+        private void SetChunkCullingBounds(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -32,11 +34,11 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Tilemaps
 
     [Serializable]
     [Label("Chunk Size", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererChunkSize : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingChunkSize : MonoBindingProperty<TilemapRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetChunkSize(Vector3Int value)
+        private void SetChunkSize(in Vector3Int value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -50,7 +52,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Tilemaps
 
     [Serializable]
     [Label("Detect Chunk Culling Bounds", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererDetectChunkCullingBounds : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingDetectChunkCullingBounds : MonoBindingProperty<TilemapRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -68,7 +70,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Tilemaps
 
     [Serializable]
     [Label("Mask Interaction", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererMaskInteraction : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingMaskInteraction : MonoBindingProperty<TilemapRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -86,7 +88,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Tilemaps
 
     [Serializable]
     [Label("Max Chunk Count", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererMaxChunkCount : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingMaxChunkCount : MonoBindingProperty<TilemapRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -104,7 +106,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Tilemaps
 
     [Serializable]
     [Label("Max Frame Age", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererMaxFrameAge : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingMaxFrameAge : MonoBindingProperty<TilemapRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -122,7 +124,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Tilemaps
 
     [Serializable]
     [Label("Mode", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererMode : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingMode : MonoBindingProperty<TilemapRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -140,7 +142,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Tilemaps
 
     [Serializable]
     [Label("Sort Order", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererSortOrder : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingSortOrder : MonoBindingProperty<TilemapRenderer>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -156,3 +158,5 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 }
+
+#endif

@@ -210,7 +210,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetCaretColor(Color value)
+        private void SetCaretColor(in Color value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -228,7 +228,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetSelectionColor(Color value)
+        private void SetSelectionColor(in Color value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -267,7 +267,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetTextColor(Color value)
+        private void SetTextColor(in Color value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -292,7 +292,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetPlaceholderTextColor(Color value)
+        private void SetPlaceholderTextColor(in Color value)
         {
             var targets = Targets;
             var length = targets.Length;

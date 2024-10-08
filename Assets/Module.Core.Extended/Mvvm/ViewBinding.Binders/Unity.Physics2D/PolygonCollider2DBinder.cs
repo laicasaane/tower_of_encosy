@@ -3,7 +3,6 @@ using Module.Core.Extended.Mvvm.ViewBinding.Unity;
 using Module.Core.Mvvm.ViewBinding;
 using UnityEngine;
 
-
 namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
 

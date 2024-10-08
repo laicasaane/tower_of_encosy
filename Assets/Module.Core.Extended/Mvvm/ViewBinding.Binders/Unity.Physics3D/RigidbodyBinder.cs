@@ -35,7 +35,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetAngularVelocity(Vector3 value)
+        private void SetAngularVelocity(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -89,7 +89,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetCenterOfMass(Vector3 value)
+        private void SetCenterOfMass(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -233,7 +233,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetInertiaTensor(Vector3 value)
+        private void SetInertiaTensor(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -251,7 +251,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetInertiaTensorRotation(Quaternion value)
+        private void SetInertiaTensorRotation(in Quaternion value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -377,7 +377,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetPosition(Vector3 value)
+        private void SetPosition(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -395,7 +395,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetRotation(Quaternion value)
+        private void SetRotation(in Quaternion value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -485,7 +485,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetVelocity(Vector3 value)
+        private void SetVelocity(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;

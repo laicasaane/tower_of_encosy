@@ -17,7 +17,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetForce(Vector3 value)
+        private void SetForce(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -35,7 +35,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetRelativeForce(Vector3 value)
+        private void SetRelativeForce(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -53,7 +53,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetRelativeTorque(Vector3 value)
+        private void SetRelativeTorque(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -71,7 +71,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics3D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetTorque(Vector3 value)
+        private void SetTorque(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;

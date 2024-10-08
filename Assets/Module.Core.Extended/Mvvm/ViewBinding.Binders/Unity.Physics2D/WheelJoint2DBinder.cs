@@ -3,7 +3,6 @@ using Module.Core.Extended.Mvvm.ViewBinding.Unity;
 using Module.Core.Mvvm.ViewBinding;
 using UnityEngine;
 
-
 namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
     [Serializable]
@@ -36,7 +35,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity.Physics2D
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetSuspension(JointSuspension2D value)
+        private void SetSuspension(in JointSuspension2D value)
         {
             var targets = Targets;
             var length = targets.Length;

@@ -68,6 +68,11 @@
             "define": "UNITY_ENTITIES"
         },
         {
+            "name": "com.unity.feature.2d",
+            "expression": "",
+            "define": "UNITY_FEATURE_2D"
+        },
+        {
             "name": "com.unity.mathematics",
             "expression": "",
             "define": "UNITY_MATHEMATICS"

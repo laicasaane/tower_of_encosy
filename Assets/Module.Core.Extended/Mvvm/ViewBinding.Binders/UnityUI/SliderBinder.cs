@@ -3,7 +3,6 @@
 using System;
 using Module.Core.Extended.Mvvm.ViewBinding.Unity;
 using Module.Core.Mvvm.ViewBinding;
-using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
@@ -108,7 +107,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
             }
         }
     }
-    
+
     [Serializable]
     [Label("Max Value", "Slider")]
     public sealed partial class SliderBindingMaxValue : MonoBindingProperty<Slider>, IBinder

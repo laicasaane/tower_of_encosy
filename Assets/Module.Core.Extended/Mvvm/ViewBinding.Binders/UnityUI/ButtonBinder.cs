@@ -3,7 +3,6 @@
 using System;
 using Module.Core.Extended.Mvvm.ViewBinding.Unity;
 using Module.Core.Mvvm.ViewBinding;
-using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
