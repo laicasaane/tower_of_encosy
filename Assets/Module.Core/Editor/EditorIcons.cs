@@ -352,7 +352,7 @@ namespace Module.Core.Editor
                 = new Texture2D[] { t };
         }
 
-        private static Texture2D Texture2DPixel(Color c)
+        private static Texture2D Texture2DPixel(in Color c)
         {
             var t = new Texture2D(1,1);
             t.SetPixel(0, 0, c);

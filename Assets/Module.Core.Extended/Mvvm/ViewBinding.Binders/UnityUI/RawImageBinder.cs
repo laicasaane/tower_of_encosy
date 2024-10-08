@@ -20,7 +20,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetColor(Color value)
+        private void SetColor(in Color value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -130,7 +130,7 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetUVRect(Rect value)
+        private void SetUVRect(in Rect value)
         {
             var targets = Targets;
             var length = targets.Length;
