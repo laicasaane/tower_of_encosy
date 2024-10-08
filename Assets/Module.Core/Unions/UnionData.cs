@@ -1,6 +1,7 @@
-﻿#if UNION_SIZE_16_BYTES || UNION_SIZE_24_BYTES || UNION_SIZE_32_BYTES || UNION_SIZE_40_BYTES || UNION_SIZE_48_BYTES || UNION_SIZE_56_BYTES || UNION_SIZE_64_BYTES || UNION_SIZE_72_BYTES || UNION_SIZE_80_BYTES || UNION_SIZE_88_BYTES || UNION_SIZE_96_BYTES || UNION_SIZE_104_BYTES || UNION_SIZE_112_BYTES || UNION_SIZE_120_BYTES || UNION_SIZE_128_BYTES
+// For practical reason, UnionData should be 16 bytes by default.
+// #if UNION_SIZE_16_BYTES || UNION_SIZE_24_BYTES || UNION_SIZE_32_BYTES || UNION_SIZE_40_BYTES || UNION_SIZE_48_BYTES || UNION_SIZE_56_BYTES || UNION_SIZE_64_BYTES || UNION_SIZE_72_BYTES || UNION_SIZE_80_BYTES || UNION_SIZE_88_BYTES || UNION_SIZE_96_BYTES || UNION_SIZE_104_BYTES || UNION_SIZE_112_BYTES || UNION_SIZE_120_BYTES || UNION_SIZE_128_BYTES
 #define __UNION_STORAGE_ENABLE_L2__
-#endif
+// #endif
 
 #if UNION_SIZE_24_BYTES || UNION_SIZE_32_BYTES || UNION_SIZE_40_BYTES || UNION_SIZE_48_BYTES || UNION_SIZE_56_BYTES || UNION_SIZE_64_BYTES || UNION_SIZE_72_BYTES || UNION_SIZE_80_BYTES || UNION_SIZE_88_BYTES || UNION_SIZE_96_BYTES || UNION_SIZE_104_BYTES || UNION_SIZE_112_BYTES || UNION_SIZE_120_BYTES || UNION_SIZE_128_BYTES
 #define __UNION_STORAGE_ENABLE_L3__
@@ -66,11 +67,10 @@ namespace Module.Core.Unions
     /// Represents a memory layout that can store the actual data of several types.
     /// </summary>
     /// <remarks>
-    /// By default, the native size is 8 bytes.
+    /// By default, the native size is 16 bytes.
     /// <br />
     /// To resize, define one of the following symbols:
     /// <list type="bullet">
-    /// <item><c>UNION_SIZE_16_BYTES</c></item>
     /// <item><c>UNION_SIZE_24_BYTES</c></item>
     /// <item><c>UNION_SIZE_32_BYTES</c></item>
     /// <item><c>UNION_SIZE_40_BYTES</c></item>

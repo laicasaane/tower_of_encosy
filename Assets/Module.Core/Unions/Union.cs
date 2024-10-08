@@ -7,18 +7,19 @@ namespace Module.Core.Unions
     /// <summary>
     /// The union data structure provides a layout and mechanism
     /// to store several types within the same memory position.
-    /// <br/>
-    /// By default, the capacity for storing other data is 8 bytes.
-    /// That means it can store any data whose native size is lesser than or
-    /// equal to 8 bytes. To increase this capacity, follow the instruction
-    /// at <see cref="UnionData"/>.
     /// </summary>
     /// <remarks>
-    /// The first 8-bytes block store the metadata.
-    /// <br/>
-    /// The second 8-byte block stores object reference.
-    /// <br/>
+    /// <list type="number">
+    /// <item>The first 8-bytes block store the metadata.</item>
+    /// <item>The second 8-byte block stores object reference.</item>
+    /// <item>
     /// The rest stores other data.
+    /// <br/>
+    /// NOTE: By default, the Union can store any other data whose native size
+    /// is lesser or equal to 16 bytes. To increase this capacity,
+    /// follow the instruction at <see cref="UnionData"/>.
+    /// </item>
+    /// </list>
     /// </remarks>
     /// <seealso cref="UnionBase" />
     [StructLayout(LayoutKind.Explicit)]
