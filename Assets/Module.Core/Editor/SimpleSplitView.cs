@@ -2,8 +2,8 @@
 
 // https://github.com/miguel12345/EditorGUISplitView/blob/master/Assets/EditorGUISplitView/Scripts/Editor/EditorGUISplitView.cs
 
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace Module.Core.Editor
 {

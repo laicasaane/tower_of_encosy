@@ -770,7 +770,7 @@ namespace Module.Core.Collections
 
             _buffer[index] = item;
         }
-        
+
         public void InsertAt(uint index, in T item)
         {
             _version++;
@@ -803,7 +803,7 @@ namespace Module.Core.Collections
             Insert(_count, item);
             return _count - 1;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Push(in T item)
         {
