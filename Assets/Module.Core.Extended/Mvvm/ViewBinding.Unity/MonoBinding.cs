@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using Module.Core.Mvvm.ComponentModel;
 using Module.Core.Mvvm.ViewBinding;
 
 namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
@@ -11,6 +12,20 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
     public abstract partial class MonoBinding : IBinder
     {
         public abstract bool IsCommand { get; }
+
+        public void SetContext(IObservableObject context, bool alsoStartListening)
+        {
+            StopListening();
+            Context = context;
+
+            if (alsoStartListening == false)
+            {
+                return;
+            }
+
+            StartListening();
+            RefreshContext();
+        }
     }
 
     /// <summary>

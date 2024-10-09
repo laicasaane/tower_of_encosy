@@ -7,7 +7,6 @@ using System.Reflection;
 using Module.Core.Collections;
 using Module.Core.Editor;
 using Module.Core.Extended.Mvvm.ViewBinding.Unity;
-using Module.Core.Logging;
 using Module.Core.Mvvm.ViewBinding;
 using UnityEditor;
 using UnityEngine;
@@ -28,9 +27,12 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         /// </remarks>
         private readonly static Dictionary<DestType, Dictionary<SourceType, HashSet<Type>>> s_adapterMap = new(128);
         private readonly static GenericMenuPopup s_binderMenu = new(new MenuItemNode(), "Binders");
+        private readonly static GenericMenuPopup s_contextMenu = new(new MenuItemNode(), "Contexts");
         private readonly static Dictionary<Type, Type> s_binderToTargetTypeMap = new(128);
         private readonly static Dictionary<Type, Type> s_bindingToTargetTypeMap = new(128);
         private readonly static Dictionary<Type, GenericMenuPopup> s_targetTypeToBindingMenuMap = new(128);
+        private readonly static Dictionary<Type, Type> s_contextToInspectorMap = new(4);
+        private readonly static PropertyRef s_contextPropRef = new();
         private readonly static PropertyRef s_bindersPropRef = new();
         private readonly static PropertyRef s_binderPropRef = new();
         private static SerializedObject s_copiedObject;
@@ -57,9 +59,13 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private SerializedProperty _selectedSubtitleProp;
         private int _selectedDetailsTabIndex;
         private int? _selectedSubtitleIndex;
+        private SerializedProperty _contextProp;
         private SerializedArrayProperty _presetBindersProp;
         private SerializedArrayProperty _presetBindingsProp;
         private SerializedArrayProperty _presetTargetsProp;
+        private ObservableContextInspector _contextInspector;
+
+        private readonly GUIContent _contextLabel = new();
 
         private void OnEnable()
         {
@@ -71,6 +77,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             _view = view;
 
             var instanceId = _view.GetInstanceID();
+
+            _contextProp = serializedObject.FindProperty("_context");
 
             _presetBindersProp = new(
                   nameof(MonoBinder)
@@ -124,10 +132,19 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 return;
             }
 
+            InitStyles();
+
             EventData eventData = Event.current;
 
-            InitStyles();
             _presetBindersProp.RefreshSelectedIndex();
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginVertical();
+            {
+                DrawContext();
+            }
+            EditorGUILayout.EndVertical();
 
             EditorGUILayout.Space();
 
@@ -143,6 +160,117 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 EditorGUI.FocusTextInControl(_subtitleControlName);
             }
+        }
+
+        private void DrawContext()
+        {
+            if (_contextInspector == null
+                && _contextProp.managedReferenceValue is ObservableContext context
+                && s_contextToInspectorMap.TryGetValue(context.GetType(), out var inspectorType)
+            )
+            {
+                _contextInspector = Activator.CreateInstance(inspectorType) as ObservableContextInspector;
+                _contextInspector.ContextType = context.GetType();
+                _contextInspector.OnEnable(_view, serializedObject, _contextProp);
+            }
+
+            EditorGUILayout.BeginVertical(s_rootTabViewStyle);
+            {
+                var rect = EditorGUILayout.BeginHorizontal(GUILayout.Height(22));
+                {
+                    EditorGUILayout.Space(22);
+                    DrawContextHeader(rect);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                if (_contextInspector != null)
+                {
+                    _contextInspector.OnInspectorGUI();
+                }
+                else
+                {
+                    GUILayout.Label("No observable context is chosen.", s_noBinderStyle, GUILayout.Height(30));
+                }
+            }
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawContextHeader(in Rect rect)
+        {
+            var labelStyle = s_rootTabLabelStyle;
+            var buttonSize = 80f;
+
+            // Draw background
+            {
+                var backRect = rect;
+                backRect.x += 1f;
+                backRect.y += 1f;
+                backRect.width -= 3f;
+                backRect.height += 3f;
+
+                var tex = Texture2D.whiteTexture;
+                var mode = ScaleMode.StretchToFill;
+                var borders = Vector4.zero;
+                var radius = new Vector4(3f, 3f, 0f, 0f);
+
+                GUI.DrawTexture(backRect, tex, mode, false, 0f, s_headerColor, borders, radius);
+            }
+
+            // Draw label
+            {
+                var labelRect = rect;
+                labelRect.y += 1f;
+                labelRect.width -= buttonSize + 2f;
+
+                _contextLabel.text = _contextInspector == null
+                    ? "<Invalid Observable Context>"
+                    : ObjectNames.NicifyVariableName(_contextInspector.ContextType.Name);
+
+                GUI.Label(labelRect, _contextLabel, labelStyle);
+            }
+
+            {
+                var btnRect = rect;
+                btnRect.x += rect.width - buttonSize - 3.5f;
+                btnRect.y += 2f;
+                btnRect.width = buttonSize;
+
+                if (GUI.Button(btnRect, s_chooseLabel, s_chooseContextButtonStyle))
+                {
+                    s_contextPropRef.Prop = _contextProp;
+                    s_contextPropRef.Inspector = this;
+
+                    var menu = s_contextMenu;
+                    menu.width = 250;
+                    menu.height = 350;
+                    menu.maxHeight = 600;
+                    menu.showSearch = true;
+                    menu.Show(Event.current.mousePosition);
+                }
+            }
+        }
+
+        private static void ContextMenu_SetContext(object userData)
+        {
+            if (userData is not MenuItemContext menuItem)
+            {
+                return;
+            }
+
+            var (contextType, inspectorType, propRef) = menuItem;
+            var contextInspector = Activator.CreateInstance(inspectorType) as ObservableContextInspector;
+            contextInspector.ContextType = contextType;
+            propRef.Inspector._contextInspector = contextInspector;
+
+            var property = propRef.Inspector._contextProp;
+            var serializedObject = property.serializedObject;
+            var target = serializedObject.targetObject;
+
+            Undo.RecordObject(target, "Set Observable Context");
+
+            property.managedReferenceValue = Activator.CreateInstance(contextType);
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
         }
 
         private void OnSetSelectedBinderIndex(SerializedArrayProperty property)
@@ -245,8 +373,68 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             property.DeleteSelected();
         }
 
+        private static void InitContextToInspector()
+        {
+            if (s_contextToInspectorMap.Count > 0)
+            {
+                return;
+            }
+
+            var contextTypes = TypeCache.GetTypesDerivedFrom<ObservableContextInspector>()
+                .Where(static x => x.IsAbstract == false && x.GetConstructor(Type.EmptyTypes) != null)
+                .Select(static x => (x, x.GetCustomAttribute<ObservableContextInspectorAttribute>()))
+                .Where(static x => x.Item2 != null && x.Item2.ContextType != null);
+
+            var typeMap = s_contextToInspectorMap;
+            var rootNode = s_contextMenu.rootNode;
+
+            foreach (var (inspectorType, inspectorAttrib) in contextTypes)
+            {
+                var contextType = inspectorAttrib.ContextType;
+
+                if (contextType == null)
+                {
+                    continue;
+                }
+
+                if (typeMap.TryAdd(contextType, inspectorType) == false)
+                {
+                    continue;
+                }
+
+                var labelAttrib = contextType.GetCustomAttribute<LabelAttribute>();
+                string label, directory;
+
+                if (labelAttrib != null)
+                {
+                    label = labelAttrib.Label ?? contextType.Name;
+                    directory = labelAttrib.Directory ?? string.Empty;
+                }
+                else
+                {
+                    label = contextType.Name;
+                    directory = contextType.Namespace;
+                }
+
+                var currentNode = rootNode;
+                var hasDirectory = string.IsNullOrWhiteSpace(directory) == false;
+
+                currentNode = hasDirectory ? currentNode.GetOrCreateNode(directory) : currentNode;
+                currentNode = currentNode.CreateNode(label);
+
+                currentNode.content = hasDirectory ? new($"{directory}/{label}") : new(label);
+                currentNode.func2 = ContextMenu_SetContext;
+                currentNode.userData = new MenuItemContext(contextType, inspectorType, s_contextPropRef);
+                currentNode.on = false;
+            }
+        }
+
         private static void InitInspector()
         {
+            InitContextToInspector();
+
+            EditorUtility.DisplayProgressBar("Initializing", "Please wait...", 0.25f);
+
             InitAdapterMap();
 
             EditorUtility.DisplayProgressBar("Initializing", "Please wait...", 0.5f);
@@ -307,6 +495,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             foreach (var (binderType, targetType, label, directory) in defs)
             {
+                if (typeMap.TryAdd(binderType, targetType) == false)
+                {
+                    continue;
+                }
+
                 var currentNode = rootNode;
                 var hasDirectory = string.IsNullOrWhiteSpace(directory) == false;
 
@@ -315,10 +508,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                 currentNode.content = hasDirectory ? new($"{directory}/{label}") : new(label);
                 currentNode.func2 = BinderMenu_AddBinder;
-                currentNode.userData = new BinderMenuItem(binderType, targetType, s_bindersPropRef);
+                currentNode.userData = new MenuItemBinder(binderType, targetType, s_bindersPropRef);
                 currentNode.on = false;
-
-                typeMap.TryAdd(binderType, targetType);
             }
         }
 
@@ -352,7 +543,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                 currentNode.content = new(label);
                 currentNode.func2 = BindingMenu_AddBinding;
-                currentNode.userData = new BindingMenuItem(bindingType, targetType, s_binderPropRef);
+                currentNode.userData = new MenuItemBinding(bindingType, targetType, s_binderPropRef);
                 currentNode.on = false;
             }
         }
@@ -373,10 +564,15 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
 
             var attrib = type.GetCustomAttribute<LabelAttribute>();
-            var label = attrib?.Label ?? "";
-            var directory = attrib?.Directory ?? "";
 
-            return new(type, targetType, label, directory);
+            if (attrib != null)
+            {
+                return new(type, targetType, attrib.Label ?? type.Name, attrib.Directory ?? "");
+            }
+            else
+            {
+                return new(type, targetType, type.Name, type.Namespace);
+            }
         }
 
         private static bool FindFirstTypeArg(Type baseType, Type type, out Type typeArg)

@@ -145,7 +145,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
         private static void BinderMenu_AddBinder(object userData)
         {
-            if (userData is not BinderMenuItem menuItem)
+            if (userData is not MenuItemBinder menuItem)
             {
                 return;
             }
@@ -244,8 +244,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             var indexColor = indexLabelStyle.normal.textColor;
             var selectedBinderIndex = bindersProp.SelectedIndex;
             var iconWarning = s_iconWarning;
-            var applyIconLabel = s_applyIconLabel;
-            var cancelIconLabel = s_cancelIconLabel;
+            var applyIconLabel = s_applyLabel;
+            var cancelIconLabel = s_cancelLabel;
             var buttonLabel = new GUIContent();
             var indexLabel = new GUIContent();
             var subtitleState = ButtonState.None;

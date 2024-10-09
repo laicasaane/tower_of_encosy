@@ -531,7 +531,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
         private static void BindingMenu_AddBinding(object userData)
         {
-            if (userData is not BindingMenuItem menuItem)
+            if (userData is not MenuItemBinding menuItem)
             {
                 return;
             }

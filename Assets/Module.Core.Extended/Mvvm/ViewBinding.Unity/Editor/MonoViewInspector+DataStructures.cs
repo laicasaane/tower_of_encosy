@@ -81,13 +81,19 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
         }
 
-        private sealed partial record class BinderMenuItem(
+        private sealed partial record class MenuItemContext(
+              Type ContextType
+            , Type InspectorType
+            , PropertyRef Instance
+        );
+
+        private sealed partial record class MenuItemBinder(
               Type BinderType
             , Type TargetType
             , PropertyRef Instance
         );
 
-        private sealed partial record class BindingMenuItem(
+        private sealed partial record class MenuItemBinding(
               Type BindingType
             , Type TargetType
             , PropertyRef Instance

@@ -13,6 +13,11 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
         [SerializeField]
         [SerializeReference]
         [HideInInspector]
+        internal ObservableContext _context = new ObservableUnityObjectContext();
+
+        [SerializeField]
+        [SerializeReference]
+        [HideInInspector]
         internal MonoBinder[] _presetBinders = new MonoBinder[0];
 
         private BinderList _binders;

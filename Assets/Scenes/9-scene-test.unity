@@ -727,6 +727,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac654a6aff531a4184a8e569696d74d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _context:
+    rid: 7562154210548776971
   _presetBinders:
   - rid: 3970310128774938639
   - rid: 3970310128774938641
@@ -807,6 +809,11 @@ MonoBehaviour:
       data:
         _bindingCommandForOnClick:
           <TargetCommandName>k__BackingField: 
+    - rid: 7562154210548776971
+      type: {class: ObservableUnityObjectContext, ns: Module.Core.Extended.Mvvm.ViewBinding.Unity,
+        asm: Module.Core.Extended}
+      data:
+        _object: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

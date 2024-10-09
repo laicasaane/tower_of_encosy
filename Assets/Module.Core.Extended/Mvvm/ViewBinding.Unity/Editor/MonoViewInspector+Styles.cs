@@ -23,14 +23,16 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private static GUIStyle s_indexLabelStyle;
         private static GUIStyle s_headerLabelStyle;
         private static GUIStyle s_itemLabelStyle;
+        private static GUIStyle s_chooseContextButtonStyle;
         private static GUIContent s_addLabel;
         private static GUIContent s_removeLabel;
         private static GUIContent s_removeSelectedLabel;
         private static GUIContent s_menuLabel;
         private static GUIContent s_iconWarning;
         private static GUIContent s_iconBinding;
-        private static GUIContent s_applyIconLabel;
-        private static GUIContent s_cancelIconLabel;
+        private static GUIContent s_applyLabel;
+        private static GUIContent s_cancelLabel;
+        private static GUIContent s_chooseLabel;
         private static Color s_headerColor;
         private static Color s_contentColor;
         private static Color s_selectedColor;
@@ -169,6 +171,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 stretchWidth = false,
             };
 
+            s_chooseContextButtonStyle = new(EditorStyles.miniButton) {
+                stretchWidth = true,
+                stretchHeight = true,
+                fixedHeight = 0,
+                fixedWidth = 0,
+                alignment = TextAnchor.MiddleCenter,
+            };
+
             {
                 var icon = EditorGUIUtility.isProSkin
                     ? EditorGUIUtility.IconContent("d_Toolbar Plus More")
@@ -209,7 +219,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     ? EditorGUIUtility.IconContent("d_P4_CheckOutRemote")
                     : EditorGUIUtility.IconContent("P4_CheckOutRemote");
 
-                s_applyIconLabel = new GUIContent(icon.image, "Apply");
+                s_applyLabel = new GUIContent(icon.image, "Apply");
             }
 
             {
@@ -217,7 +227,15 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     ? EditorGUIUtility.IconContent("d_P4_DeletedLocal")
                     : EditorGUIUtility.IconContent("P4_DeletedLocal");
 
-                s_cancelIconLabel = new GUIContent(icon.image, "Cancel");
+                s_cancelLabel = new GUIContent(icon.image, "Cancel");
+            }
+
+            {
+                var icon = EditorGUIUtility.isProSkin
+                    ? EditorGUIUtility.IconContent("d_Grid.PickingTool")
+                    : EditorGUIUtility.IconContent("Grid.PickingTool");
+
+                s_chooseLabel = new GUIContent("Choose", icon.image);
             }
 
             {
