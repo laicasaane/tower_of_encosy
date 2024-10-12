@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Module.Core.TypeWrap;
 using UnityEditor;
@@ -38,6 +39,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         {
             public readonly bool IsValid => BinderType != null && TargetType != null;
         }
+
+        private sealed class MemberMap : Dictionary<string, Type> { }
 
         private sealed class PropertyRef
         {

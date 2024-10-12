@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Module.Core.Editor;
 using Module.Core.Extended.Mvvm.ViewBinding.Unity;
@@ -18,6 +19,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             Add = 1,
             Remove = 2,
             Menu = 3,
+        }
+
+        private enum TargetBindingResult
+        {
+            Empty,
+            UnknownType,
+            UnknownMember,
+            Valid,
         }
 
         private void DrawDetailsPanel(in EventData eventData)
@@ -166,6 +175,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             var propertyLabel = s_propertyBindingLabel;
             var commandLabel = s_commandBindingLabel;
+            var converterLabel = s_converterLabel;
             var itemLabelStyle = s_itemLabelStyle;
 
             itemLabelStyle.CalcMinMaxWidth(propertyLabel, out _, out var maxPropWidth);
@@ -175,17 +185,20 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             var indexLabel = new GUIContent();
             var headerLabel = new GUIContent();
             var indexLabelWidth = GUILayout.Width(20);
-            var removeLabel = s_removeLabel;
-            var removeButtonStyle = s_removeButtonStyle;
             var indexLabelStyle = s_indexLabelStyle;
             var headerLabelStyle = s_headerLabelStyle;
             var selectedColor = s_selectedColor;
             var contentColor = s_altContentColor;
             var comp = EditorGUIUtility.isProSkin ? 0 : 1;
-            var last = length - 1;
             var selectedIndex = property.SelectedIndex;
             var mouseDownIndex = -1;
             var mousePos = eventData.MousePos;
+            var bindingProperyMap = s_bindingPropertyMap;
+            var bindingCommandMap = s_bindingCommandMap;
+            var contextPropertyMap = _contextPropertyMap;
+            var contextCommandMap = _contextCommandMap;
+            var contextType = _contextType;
+            var targetLabel = new GUIContent();
 
             for (var i = 0; i < length; i++)
             {
@@ -196,7 +209,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     continue;
                 }
 
-                var isAlternate = i % 2 == comp;
                 var type = binding.GetType();
                 var attrib = type.GetCustomAttribute<LabelAttribute>();
 
@@ -233,7 +245,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                         }
                     }
 
-                    var headerRect = EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.BeginHorizontal();
                     {
                         indexLabel.text = i.ToString();
                         EditorGUILayout.LabelField(indexLabel, indexLabelStyle, indexLabelWidth);
@@ -243,31 +255,129 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                         GUILayout.Space(4f);
                     }
                     EditorGUILayout.EndHorizontal();
+
                     GUILayout.Space(6f);
+
                     EditorGUILayout.BeginHorizontal();
                     {
                         GUILayout.Space(5f);
                         EditorGUILayout.BeginVertical();
                         {
-                            var itemRect = EditorGUILayout.BeginHorizontal();
+                            MemberMap memberMap = null;
+
+                            if (binding.IsCommand)
                             {
-                                // Draw label
+                                if (bindingCommandMap.TryGetValue(type, out var commandMap))
                                 {
-                                    var itemLabel = binding.IsCommand ? commandLabel : propertyLabel;
-                                    var itemLabelRect = itemRect;
-                                    itemLabelRect.width = itemLabelWidth;
-
-                                    GUI.Label(itemLabelRect, itemLabel, itemLabelStyle);
-                                }
-
-                                GUILayout.Space(itemLabelWidth + 22f);
-
-                                if (GUILayout.Button("A", EditorStyles.popup))
-                                {
-
+                                    memberMap = commandMap;
                                 }
                             }
-                            EditorGUILayout.EndHorizontal();
+                            else
+                            {
+                                if (bindingProperyMap.TryGetValue(type, out var propertyMap))
+                                {
+                                    memberMap = propertyMap;
+                                }
+                            }
+
+                            if (memberMap == null || memberMap.Count < 1)
+                            {
+                                EditorGUILayout.HelpBox(
+                                      $"There are 0 binding member.\n" +
+                                      "MonoView requires that any MonoBinding must " +
+                                      "contain 1 binding member (either property or command)."
+                                    , MessageType.Warning
+                                );
+                            }
+                            else if (memberMap.Count > 1)
+                            {
+                                EditorGUILayout.HelpBox(
+                                      $"There are more than 1 binding member.\n" +
+                                      "MonoView requires that any MonoBinding must " +
+                                      "contain only 1 binding member (either property or command)."
+                                    , MessageType.Warning
+                                );
+                            }
+                            else
+                            {
+                                var (methodName, paramType) = memberMap.First();
+                                var bindingPrefix = binding.IsCommand ? "_bindingCommandFor" : "_bindingFieldFor";
+                                var bindingSuffix = binding.IsCommand
+                                    ? ".<TargetCommandName>k__BackingField"
+                                    : ".<TargetPropertyName>k__BackingField";
+
+                                var targetPropertyPath = $"{bindingPrefix}{methodName}{bindingSuffix}";
+                                var converterPath = $"_converterFor{methodName}.<Adapter>k__BackingField";
+                                var targetPropertyProp = elementProp.FindPropertyRelative(targetPropertyPath);
+                                var converterProp = elementProp.FindPropertyRelative(converterPath);
+
+                                if (targetPropertyProp == null)
+                                {
+                                    EditorGUILayout.HelpBox(
+                                          $"Cannot find serialized field `{bindingPrefix}{methodName}`."
+                                        , MessageType.Error
+                                    );
+                                }
+                                else
+                                {
+                                    var result = binding.IsCommand
+                                        ? MakeTargetCommandLabel(contextType, contextCommandMap, targetPropertyProp, targetLabel)
+                                        : MakeTargetPropertyLabel(contextType, contextPropertyMap, targetPropertyProp, targetLabel)
+                                        ;
+
+                                    var memberRect = EditorGUILayout.BeginHorizontal();
+                                    {
+                                        // Draw label
+                                        {
+                                            var itemLabel = binding.IsCommand ? commandLabel : propertyLabel;
+                                            var itemLabelRect = memberRect;
+                                            itemLabelRect.width = itemLabelWidth;
+
+                                            GUI.Label(itemLabelRect, itemLabel, itemLabelStyle);
+                                        }
+
+                                        GUILayout.Space(itemLabelWidth + 22f);
+
+                                        if (GUILayout.Button(targetLabel, EditorStyles.popup))
+                                        {
+
+                                        }
+
+                                        if (result != TargetBindingResult.Valid)
+                                        {
+                                            GUILayout.Space(20f);
+
+                                            var iconRect = memberRect;
+                                            iconRect.x += iconRect.width - 16f;
+                                            iconRect.width = 16f;
+                                            iconRect.height = 16f;
+
+                                            GUI.DrawTexture(iconRect, s_iconWarning.image);
+                                        }
+                                    }
+                                    EditorGUILayout.EndHorizontal();
+
+                                    var converterRect = EditorGUILayout.BeginHorizontal();
+                                    if (converterProp != null)
+                                    {
+                                        // Draw label
+                                        {
+                                            var itemLabelRect = converterRect;
+                                            itemLabelRect.width = itemLabelWidth;
+
+                                            GUI.Label(itemLabelRect, converterLabel, itemLabelStyle);
+
+                                            GUILayout.Space(itemLabelWidth + 22f);
+
+                                            if (GUILayout.Button("A", EditorStyles.popup))
+                                            {
+
+                                            }
+                                        }
+                                    }
+                                    EditorGUILayout.EndHorizontal();
+                                }
+                            }
                         }
                         EditorGUILayout.EndVertical();
                         GUILayout.Space(4f);
@@ -637,6 +747,90 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
 
             return true;
+        }
+
+        private static TargetBindingResult MakeTargetPropertyLabel(
+              Type contextType
+            , Dictionary<string, Type> contextPropertyMap
+            , SerializedProperty property
+            , GUIContent label
+        )
+        {
+            if (string.IsNullOrWhiteSpace(property.stringValue))
+            {
+                label.text = "< empty >";
+                label.tooltip = "No property is selected";
+                return TargetBindingResult.Empty;
+            }
+
+            var candidate = property.stringValue;
+
+            if (contextType == null || contextPropertyMap.TryGetValue(candidate, out var propertyType) == false)
+            {
+                label.text = $"< invalid > {candidate}";
+
+                if (contextType == null)
+                {
+                    label.tooltip = "The type of the context object is unknown.";
+                    return TargetBindingResult.UnknownType;
+                }
+                else
+                {
+                    label.tooltip = $"{contextType.FullName} does not contain a `{candidate}` property.";
+                    return TargetBindingResult.UnknownMember;
+                }
+            }
+            else
+            {
+                var returnTypeName = propertyType.GetFriendlyName();
+                label.text = $"{candidate} : {returnTypeName}";
+                label.tooltip = $"property {candidate} : {returnTypeName}\n" +
+                    $"class {contextType.Name}\nnamespace {contextType.Namespace}";
+
+                return TargetBindingResult.Valid;
+            }
+        }
+
+        private static TargetBindingResult MakeTargetCommandLabel(
+              Type contextType
+            , Dictionary<string, Type> contextCommandMap
+            , SerializedProperty property
+            , GUIContent label
+        )
+        {
+            if (string.IsNullOrWhiteSpace(property.stringValue))
+            {
+                label.text = "< empty >";
+                label.tooltip = "No command is selected";
+                return TargetBindingResult.Empty;
+            }
+
+            var candidate = property.stringValue;
+
+            if (contextType == null || contextCommandMap.TryGetValue(candidate, out var propertyType) == false)
+            {
+                label.text = $"< invalid > {candidate}";
+
+                if (contextType == null)
+                {
+                    label.tooltip = "The type of the context object is unknown.";
+                    return TargetBindingResult.UnknownType;
+                }
+                else
+                {
+                    label.tooltip = $"{contextType.FullName} does not contain a `{candidate}` command.";
+                    return TargetBindingResult.UnknownMember;
+                }
+            }
+            else
+            {
+                var returnTypeName = propertyType.GetFriendlyName();
+                label.text = $"{candidate} : {returnTypeName}";
+                label.tooltip = $"command {candidate} : {returnTypeName}\n" +
+                    $"class {contextType.Name}\nnamespace {contextType.Namespace}";
+
+                return TargetBindingResult.Valid;
+            }
         }
     }
 }

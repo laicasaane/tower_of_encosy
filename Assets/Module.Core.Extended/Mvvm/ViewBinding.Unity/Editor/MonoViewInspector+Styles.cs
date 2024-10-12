@@ -43,6 +43,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private static readonly GUIContent[] s_detailsTabLabels = new GUIContent[] { new("Bindings"), new("Targets"), };
         private static readonly GUIContent s_propertyBindingLabel = new("Property");
         private static readonly GUIContent s_commandBindingLabel = new("Command");
+        private static readonly GUIContent s_converterLabel = new("Converter");
         private static readonly GUIContent s_clearAllLabel = new("Clear All");
         private static readonly GUIContent s_copyAllLabel = new("Copy All");
         private static readonly GUIContent s_pasteAllLabel = new("Paste All");

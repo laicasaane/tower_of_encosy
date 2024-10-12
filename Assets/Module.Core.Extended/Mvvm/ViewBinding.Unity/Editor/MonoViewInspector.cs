@@ -7,7 +7,10 @@ using System.Reflection;
 using Module.Core.Collections;
 using Module.Core.Editor;
 using Module.Core.Extended.Mvvm.ViewBinding.Unity;
+using Module.Core.Mvvm.ComponentModel.SourceGen;
+using Module.Core.Mvvm.Input;
 using Module.Core.Mvvm.ViewBinding;
+using Module.Core.Mvvm.ViewBinding.SourceGen;
 using UnityEditor;
 using UnityEngine;
 
@@ -30,6 +33,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private readonly static GenericMenuPopup s_contextMenu = new(new MenuItemNode(), "Contexts");
         private readonly static Dictionary<Type, Type> s_binderToTargetTypeMap = new(128);
         private readonly static Dictionary<Type, Type> s_bindingToTargetTypeMap = new(128);
+        private readonly static Dictionary<Type, MemberMap> s_bindingPropertyMap = new(128);
+        private readonly static Dictionary<Type, MemberMap> s_bindingCommandMap = new(128);
         private readonly static Dictionary<Type, GenericMenuPopup> s_targetTypeToBindingMenuMap = new(128);
         private readonly static Dictionary<Type, Type> s_contextToInspectorMap = new(4);
         private readonly static PropertyRef s_contextPropRef = new();
@@ -60,12 +65,15 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private int _selectedDetailsTabIndex;
         private int? _selectedSubtitleIndex;
         private SerializedProperty _contextProp;
+        private Type _contextType;
         private SerializedArrayProperty _presetBindersProp;
         private SerializedArrayProperty _presetBindingsProp;
         private SerializedArrayProperty _presetTargetsProp;
         private ObservableContextInspector _contextInspector;
 
         private readonly GUIContent _contextLabel = new();
+        private readonly Dictionary<string, Type> _contextPropertyMap = new();
+        private readonly Dictionary<string, Type> _contextCommandMap = new();
 
         private void OnEnable()
         {
@@ -120,6 +128,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         {
             s_bindersPropRef?.Reset();
             s_binderPropRef?.Reset();
+            _contextInspector?.OnDestroy();
             EditorApplication.update -= InitInspector;
         }
 
@@ -143,6 +152,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             EditorGUILayout.BeginVertical();
             {
                 DrawContext();
+                UpdateContextMaps();
             }
             EditorGUILayout.EndVertical();
 
@@ -185,7 +195,19 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                 if (_contextInspector != null)
                 {
-                    _contextInspector.OnInspectorGUI();
+                    EditorGUILayout.Space(6f);
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        GUILayout.Space(6f);
+                        EditorGUILayout.BeginVertical();
+                        {
+                            _contextInspector.OnInspectorGUI();
+                        }
+                        EditorGUILayout.EndVertical();
+                        GUILayout.Space(4f);
+                    }
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.Space(6f);
                 }
                 else
                 {
@@ -312,6 +334,42 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
         private bool ValidateSelectedSubtitleIndex()
             => _presetBindersProp.ValidateIndex(_selectedSubtitleIndex);
+
+        private void UpdateContextMaps()
+        {
+            var propMap = _contextPropertyMap;
+            var cmdMap = _contextCommandMap;
+
+            propMap.Clear();
+            cmdMap.Clear();
+
+            if (_contextProp.managedReferenceValue is not ObservableContext context
+                || context.TryGetContextType(out _contextType) == false
+            )
+            {
+                return;
+            }
+
+            var propertyAttribs = _contextType.GetCustomAttributes<NotifyPropertyChangedInfoAttribute>();
+
+            foreach (var attrib in propertyAttribs)
+            {
+                if (propMap.ContainsKey(attrib.PropertyName) == false)
+                {
+                    propMap[attrib.PropertyName] = attrib.PropertyType;
+                }
+            }
+
+            var commandAttribs = _contextType.GetCustomAttributes<RelayCommandInfoAttribute>();
+
+            foreach (var attrib in commandAttribs)
+            {
+                if (cmdMap.ContainsKey(attrib.CommandName) == false)
+                {
+                    cmdMap[attrib.CommandName] = attrib.ParameterType;
+                }
+            }
+        }
 
         private static void Menu_OnCopyAll(object userData)
         {
@@ -523,6 +581,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
 
             var bindingMap = s_bindingToTargetTypeMap;
+            var bindingPropertyMap = s_bindingPropertyMap;
+            var bindingCommandMap = s_bindingCommandMap;
 
             var defs = TypeCache.GetTypesDerivedFrom<MonoBinding>()
                 .Where(ValidateType)
@@ -537,6 +597,30 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 }
 
                 bindingMap[bindingType] = targetType;
+
+                if (bindingPropertyMap.TryGetValue(bindingType, out var propertyMap) == false)
+                {
+                    bindingPropertyMap[bindingType] = propertyMap = new();
+                }
+
+                if (bindingCommandMap.TryGetValue(bindingType, out var commandMap) == false)
+                {
+                    bindingCommandMap[bindingType] = commandMap = new();
+                }
+
+                var propertyAttribs = bindingType.GetCustomAttributes<BindingPropertyMethodInfoAttribute>();
+
+                foreach (var attrib in propertyAttribs)
+                {
+                    propertyMap.TryAdd(attrib.MethodName, attrib.ParameterType);
+                }
+
+                var commandAttribs = bindingType.GetCustomAttributes<BindingCommandMethodInfoAttribute>();
+
+                foreach (var attrib in commandAttribs)
+                {
+                    commandMap.TryAdd(attrib.MethodName, attrib.ParameterType);
+                }
 
                 var currentNode = menu.rootNode;
                 currentNode = currentNode.CreateNode(label);

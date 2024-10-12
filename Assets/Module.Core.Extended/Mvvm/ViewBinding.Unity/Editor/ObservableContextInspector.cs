@@ -12,12 +12,12 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         public Type ContextType { get; set; }
 
         public abstract void OnEnable(
-              UnityEngine.Object target
+              MonoView view
             , SerializedObject serializedObject
             , SerializedProperty serializedProperty
         );
 
-        public abstract void OnDestroy();
+        public virtual void OnDestroy() { }
 
         public abstract void OnInspectorGUI();
     }
@@ -31,27 +31,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         {
             Checks.IsTrue(typeof(ObservableContext).IsAssignableFrom(contextType), "contextType must be a subclass of ObservableContext");
             ContextType = contextType;
-        }
-    }
-
-    [ObservableContextInspector(typeof(ObservableUnityObjectContext))]
-    public sealed class ObservableUnityObjectContextInspector : ObservableContextInspector
-    {
-        public override void OnEnable(
-              UnityEngine.Object target
-            , SerializedObject serializedObject
-            , SerializedProperty serializedProperty
-        )
-        {
-
-        }
-
-        public override void OnDestroy()
-        {
-        }
-
-        public override void OnInspectorGUI()
-        {
         }
     }
 }
