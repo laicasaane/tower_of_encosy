@@ -1,5 +1,3 @@
-#if UNITY_COLLECTIONS
-
 #pragma warning disable IDE1006 // Naming Styles
 
 // https://github.com/stella3d/SharedArray
@@ -199,7 +197,7 @@ namespace Module.Core.Collections
                 return ref m_Managed[0];
             }
 
-            return ref System.Runtime.CompilerServices.Unsafe.NullRef<T>();
+            return ref NullRef();
         }
 
         public void Resize(int newSize)
@@ -336,6 +334,12 @@ namespace Module.Core.Collections
             return m_Native.Slice();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private unsafe static ref T NullRef()
+        {
+            return ref *(T*)null;
+        }
+
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static void ThrowIfNull(T[] managed)
         {
@@ -457,5 +461,3 @@ namespace Module.Core.Collections
         }
     }
 }
-
-#endif

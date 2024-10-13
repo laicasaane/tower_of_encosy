@@ -27,8 +27,7 @@ namespace Module.Core
 
     [RequiresPackage(PackageRegistry.OpenUpm, "com.draconware-dev.span-extensions.net.unity")]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.gilzoide.easy-project-settings")]
-    [RequiresPackage(PackageRegistry.OpenUpm, "com.needle.console")]
-    [RequiresPackage(PackageRegistry.OpenUpm, "org.nuget.system.runtime.compilerservices.unsafe")]
+    [RequiresPackage(PackageRegistry.OpenUpm, "com.needle.console", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.annulusgames.alchemy", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.annulusgames.debug-ui", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.annulusgames.lit-motion", isOptional: true)]

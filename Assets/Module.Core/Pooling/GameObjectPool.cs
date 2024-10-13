@@ -1,10 +1,9 @@
-#if UNITY_COLLECTIONS || SYSTEM_RUNTIME_COMPILER_SERVICES_UNSAFE
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Module.Core.Collections;
+using Module.Core.Collections.Unsafe;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -530,5 +529,3 @@ namespace Module.Core.Pooling
         }
     }
 }
-
-#endif
