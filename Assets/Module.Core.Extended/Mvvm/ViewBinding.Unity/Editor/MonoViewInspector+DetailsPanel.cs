@@ -407,7 +407,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                                     }
                                     EditorGUILayout.EndHorizontal();
 
-                                    var converterRect = EditorGUILayout.BeginHorizontal();
                                     if (adapterProp != null)
                                     {
                                         GetAdapterData(
@@ -418,27 +417,46 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                                             , out var compositeAdapter
                                         );
 
-                                        // Draw label
+                                        var converterRect = EditorGUILayout.BeginHorizontal();
                                         {
-                                            var itemLabelRect = converterRect;
-                                            itemLabelRect.width = itemLabelWidth;
+                                            // Draw label
+                                            {
+                                                var itemLabelRect = converterRect;
+                                                itemLabelRect.width = itemLabelWidth;
 
-                                            GUI.Label(itemLabelRect, converterLabel, itemLabelStyle);
+                                                GUI.Label(itemLabelRect, converterLabel, itemLabelStyle);
+                                            }
+
+                                            GUILayout.Space(itemLabelWidth + 22f);
+
+                                            if (GUILayout.Button(adapterLabel, popupStyle))
+                                            {
+                                                ShowAdapterPropertyMenu(
+                                                      bindingParamType
+                                                    , targetMemberType
+                                                    , adapterProp
+                                                    , adapterType
+                                                );
+                                            }
+                                        }
+                                        EditorGUILayout.EndHorizontal();
+
+                                        if (scriptableAdapter != null)
+                                        {
+                                            EditorGUILayout.HelpBox(
+                                                  "Scriptable Adapter is not yet supported."
+                                                , MessageType.Warning
+                                            );
                                         }
 
-                                        GUILayout.Space(itemLabelWidth + 22f);
-
-                                        if (GUILayout.Button(adapterLabel, popupStyle))
+                                        if (compositeAdapter != null)
                                         {
-                                            ShowAdapterPropertyMenu(
-                                                  bindingParamType
-                                                , targetMemberType
-                                                , adapterProp
-                                                , adapterType
+                                            EditorGUILayout.HelpBox(
+                                                  "Composite Adapter is not yet supported."
+                                                , MessageType.Warning
                                             );
                                         }
                                     }
-                                    EditorGUILayout.EndHorizontal();
                                 }
                             }
                         }
