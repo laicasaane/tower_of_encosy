@@ -22,8 +22,10 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private static GUIStyle s_removeButtonStyle;
         private static GUIStyle s_indexLabelStyle;
         private static GUIStyle s_headerLabelStyle;
+        private static GUIStyle s_subHeaderLabelStyle;
         private static GUIStyle s_itemLabelStyle;
         private static GUIStyle s_chooseContextButtonStyle;
+        private static GUIStyle s_popupStyle;
         private static GUIContent s_addLabel;
         private static GUIContent s_removeLabel;
         private static GUIContent s_removeSelectedLabel;
@@ -168,6 +170,13 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 alignment = TextAnchor.MiddleCenter,
             };
 
+            s_subHeaderLabelStyle = new(EditorStyles.label) {
+                padding = new(0, 0, 0, 0),
+                margin = new(0, 0, 0, 0),
+                alignment = TextAnchor.MiddleCenter,
+                fontSize = 10,
+            };
+
             s_itemLabelStyle = new(EditorStyles.label) {
                 stretchWidth = false,
             };
@@ -178,6 +187,10 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 fixedHeight = 0,
                 fixedWidth = 0,
                 alignment = TextAnchor.MiddleCenter,
+            };
+
+            s_popupStyle = new(EditorStyles.popup) {
+                richText = true,
             };
 
             {

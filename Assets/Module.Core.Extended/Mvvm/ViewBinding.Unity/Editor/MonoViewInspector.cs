@@ -344,13 +344,15 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             cmdMap.Clear();
 
             if (_contextProp.managedReferenceValue is not ObservableContext context
-                || context.TryGetContextType(out _contextType) == false
+                || context.TryGetContextType(out var contextType) == false
             )
             {
                 return;
             }
 
-            var propertyAttribs = _contextType.GetCustomAttributes<NotifyPropertyChangedInfoAttribute>();
+            _contextType = contextType;
+
+            var propertyAttribs = contextType.GetCustomAttributes<NotifyPropertyChangedInfoAttribute>();
 
             foreach (var attrib in propertyAttribs)
             {
@@ -360,7 +362,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 }
             }
 
-            var commandAttribs = _contextType.GetCustomAttributes<RelayCommandInfoAttribute>();
+            var commandAttribs = contextType.GetCustomAttributes<RelayCommandInfoAttribute>();
 
             foreach (var attrib in commandAttribs)
             {

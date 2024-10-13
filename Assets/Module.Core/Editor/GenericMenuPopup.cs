@@ -48,11 +48,12 @@ namespace Module.Core.Editor
         public bool separator;
         public bool on;
 
-        public MenuItemNode(string p_name = "", MenuItemNode p_parent = null)
+        public MenuItemNode(string name = "", string tooltip = "", MenuItemNode parent = null)
         {
-            Name = p_name;
-            Parent = p_parent;
+            Name = name;
+            Parent = parent;
             Nodes = new FasterList<MenuItemNode>();
+            content = new(name, tooltip);
         }
 
         public string Name { get; private set; }
@@ -74,17 +75,17 @@ namespace Module.Core.Editor
             Nodes.Clear();
         }
 
-        public MenuItemNode CreateNode(string name)
+        public MenuItemNode CreateNode(string name, string tooltip = "")
         {
-            var node = new MenuItemNode(name, this);
+            var node = new MenuItemNode(name, tooltip, this);
             Nodes.Add(node);
             return node;
         }
 
         // TODO Optimize
-        public MenuItemNode GetOrCreateNode(string name)
+        public MenuItemNode GetOrCreateNode(string name, string tooltip = "")
         {
-            return Nodes.Find(n => n.Name == name) ?? CreateNode(name);
+            return Nodes.Find(n => n.Name == name) ?? CreateNode(name, tooltip);
         }
 
         public FasterList<MenuItemNode> Search(string search)
@@ -218,6 +219,7 @@ namespace Module.Core.Editor
                 _tooltipStyle ??= new GUIStyle(EditorStyles.label) {
                     fontSize = 9,
                     wordWrap = true,
+                    richText = true,
                 };
 
                 return _tooltipStyle;
@@ -237,6 +239,36 @@ namespace Module.Core.Editor
                 }
 
                 return _whiteBoxStyle;
+            }
+        }
+
+        private GUIStyle _labelStyle;
+
+        public GUIStyle LabelStyle
+        {
+            get
+            {
+                _labelStyle ??= new GUIStyle(EditorStyles.label) {
+                    richText = true,
+                    wordWrap = true,
+                };
+
+                return _labelStyle;
+            }
+        }
+
+        private GUIStyle _boldLabelStyle;
+
+        public GUIStyle BoldLabelStyle
+        {
+            get
+            {
+                _boldLabelStyle ??= new GUIStyle(EditorStyles.boldLabel) {
+                    richText = true,
+                    wordWrap = true,
+                };
+
+                return _boldLabelStyle;
             }
         }
 
@@ -398,6 +430,8 @@ namespace Module.Core.Editor
 
             var lastPath = "";
             var whiteBoxStyle = WhiteBoxStyle;
+            var labelStyle = LabelStyle;
+            var boldLabelStyle = BoldLabelStyle;
             var sb = new StringBuilder();
 
             foreach (var node in search)
@@ -407,7 +441,7 @@ namespace Module.Core.Editor
                 if (string.Equals(nodePath, lastPath, StringComparison.Ordinal) == false)
                 {
                     _contentHeight += 20;
-                    GUILayout.Label(nodePath, GUILayout.Height(20));
+                    GUILayout.Label(nodePath, boldLabelStyle, GUILayout.Height(20));
                     lastPath = nodePath;
 
                     GUILayout.Space(4);
@@ -426,7 +460,7 @@ namespace Module.Core.Editor
                     }
 
                     GUI.color = _hoverNode == node ? Color.cyan : origColor;
-                    GUILayout.Label(node.Name, GUILayout.Height(20));
+                    GUILayout.Label(node.Name, labelStyle, GUILayout.Height(20));
                 }
                 GUILayout.EndHorizontal();
                 GUI.color = origColor;
@@ -445,7 +479,7 @@ namespace Module.Core.Editor
                                 _currentNode = node;
                                 _repaint = true;
                             }
-                            else
+                            else if (node.func != null || node.func2 != null)
                             {
                                 node.Execute();
                                 base.editorWindow.Close();
@@ -494,6 +528,8 @@ namespace Module.Core.Editor
             }
 
             var whiteBoxStyle = WhiteBoxStyle;
+            var labelStyle = LabelStyle;
+            var boldLabelStyle = BoldLabelStyle;
 
             foreach (var node in _currentNode.Nodes)
             {
@@ -507,7 +543,7 @@ namespace Module.Core.Editor
                 var origColor = GUI.color;
                 GUI.color = _hoverNode == node ? Color.cyan : origColor;
 
-                GUILayout.BeginHorizontal(EditorStyles.helpBox, GUILayout.Height(20));
+                GUILayout.BeginHorizontal(EditorStyles.helpBox);
                 {
                     if (showOnStatus)
                     {
@@ -517,8 +553,8 @@ namespace Module.Core.Editor
 
                     GUI.color = _hoverNode == node ? Color.cyan : origColor;
 
-                    var labelStyle = node.Nodes.Count > 0 ? EditorStyles.boldLabel : EditorStyles.label;
-                    GUILayout.Label(node.Name, labelStyle, GUILayout.Height(20));
+                    var nodeLabelStyle = node.Nodes.Count > 0 ? boldLabelStyle : labelStyle;
+                    GUILayout.Label(node.Name, nodeLabelStyle);
 
                 }
                 GUILayout.EndHorizontal();
@@ -538,7 +574,7 @@ namespace Module.Core.Editor
                                 _currentNode = node;
                                 _repaint = true;
                             }
-                            else
+                            else if (node.func != null || node.func2 != null)
                             {
                                 node.Execute();
                                 base.editorWindow.Close();
@@ -562,20 +598,20 @@ namespace Module.Core.Editor
 
                 if (node.Nodes.Count > 0)
                 {
-                    GUI.Label(new Rect(nodeRect.x + nodeRect.width - 20, nodeRect.y + 1, 20, 20), "+", PlusStyle);
+                    GUI.Label(new Rect(nodeRect.x + nodeRect.width - 20, nodeRect.y - 1, 20, 20), "+", PlusStyle);
                 }
             }
         }
 
         // TODO Possible type caching?
-        public static MenuItemNode GenerateMenuItemNodeTree(GenericMenu p_menu)
+        public static MenuItemNode GenerateMenuItemNodeTree(GenericMenu menu)
         {
             var rootNode = new MenuItemNode();
 
-            if (p_menu == null)
+            if (menu == null)
                 return rootNode;
 
-            var menuItems = TryGetMenuItems(p_menu, "menuItems") ?? TryGetMenuItems(p_menu, "m_MenuItems");
+            var menuItems = TryGetMenuItems(menu, "menuItems") ?? TryGetMenuItems(menu, "m_MenuItems");
 
             foreach (var menuItem in menuItems)
             {
@@ -610,10 +646,10 @@ namespace Module.Core.Editor
 
             return rootNode;
 
-            static IEnumerable TryGetMenuItems(GenericMenu p_menu, string fieldName)
+            static IEnumerable TryGetMenuItems(GenericMenu menu, string fieldName)
             {
-                var menuItemsField = p_menu.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-                return menuItemsField?.GetValue(p_menu) as IEnumerable;
+                var menuItemsField = menu.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+                return menuItemsField?.GetValue(menu) as IEnumerable;
             }
         }
 

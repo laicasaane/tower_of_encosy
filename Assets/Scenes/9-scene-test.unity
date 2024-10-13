@@ -689,6 +689,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2106007214}
+  - component: {fileID: 2106007216}
   - component: {fileID: 2106007215}
   m_Layer: 0
   m_Name: GameObject
@@ -743,8 +744,10 @@ MonoBehaviour:
         asm: Module.Core.Extended}
       data:
         _subtitle: 
-        _presetBindings: []
-        _presetTargets: []
+        _presetBindings:
+        - rid: 7562154307913777161
+        _presetTargets:
+        - {fileID: 692170998}
     - rid: 3970310128774938641
       type: {class: TransformBinder, ns: Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity,
         asm: Module.Core.Extended}
@@ -813,7 +816,28 @@ MonoBehaviour:
       type: {class: ObservableUnityObjectContext, ns: Module.Core.Extended.Mvvm.ViewBinding.Unity,
         asm: Module.Core.Extended}
       data:
-        _object: {fileID: 0}
+        _object: {fileID: 2106007216}
+    - rid: 7562154307913777161
+      type: {class: GameObjectBindingActiveSelf, ns: Module.Core.Extended.Mvvm.ViewBinding.Binders.Unity,
+        asm: Module.Core.Extended}
+      data:
+        _bindingFieldForSetActive:
+          <TargetPropertyName>k__BackingField: 
+        _converterForSetActive:
+          <Adapter>k__BackingField:
+            rid: -2
+--- !u!114 &2106007216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2106007212}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 325acd05c5ac3f14fb351c696a4b3297, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -5,7 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Module.Core.Editor;
+using Module.Core.Extended.Mvvm.ViewBinding.Adapters.Unity;
 using Module.Core.Extended.Mvvm.ViewBinding.Unity;
+using Module.Core.Logging;
+using Module.Core.Mvvm.ViewBinding;
+using Module.Core.Mvvm.ViewBinding.Adapters;
 using UnityEditor;
 using UnityEngine;
 
@@ -132,8 +136,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private void DrawDetailsPanel_Bindings(in EventData eventData, Rect sectionRect)
         {
             var property = _presetBindingsProp;
-            var serializedObject = property.Property.serializedObject;
-            var target = serializedObject.targetObject;
             var toolbarButton = DrawDetailsPanel_ToolbarButtons(property.ArraySize);
 
             switch (toolbarButton)
@@ -184,9 +186,12 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             var itemLabelWidth = Mathf.Max(maxPropWidth, maxCmdWidth);
             var indexLabel = new GUIContent();
             var headerLabel = new GUIContent();
+            var subHeaderLabel = new GUIContent();
             var indexLabelWidth = GUILayout.Width(20);
             var indexLabelStyle = s_indexLabelStyle;
             var headerLabelStyle = s_headerLabelStyle;
+            var subHeaderLabelStyle = s_subHeaderLabelStyle;
+            var popupStyle = s_popupStyle;
             var selectedColor = s_selectedColor;
             var contentColor = s_altContentColor;
             var comp = EditorGUIUtility.isProSkin ? 0 : 1;
@@ -199,6 +204,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             var contextCommandMap = _contextCommandMap;
             var contextType = _contextType;
             var targetLabel = new GUIContent();
+            var adapterLabel = new GUIContent();
 
             for (var i = 0; i < length; i++)
             {
@@ -209,8 +215,33 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     continue;
                 }
 
+                var isCommand = binding.IsCommand;
                 var type = binding.GetType();
                 var attrib = type.GetCustomAttribute<LabelAttribute>();
+
+                MemberMap memberMap = null;
+                string bindingMethodName = null;
+                Type bindingParamType = null;
+
+                if (isCommand)
+                {
+                    if (bindingCommandMap.TryGetValue(type, out var commandMap))
+                    {
+                        memberMap = commandMap;
+                    }
+                }
+                else
+                {
+                    if (bindingProperyMap.TryGetValue(type, out var propertyMap))
+                    {
+                        memberMap = propertyMap;
+                    }
+                }
+
+                if (memberMap != null && memberMap.Count == 1)
+                {
+                    (bindingMethodName, bindingParamType) = memberMap.First();
+                }
 
                 EditorGUILayout.Space(2f);
                 var rect = EditorGUILayout.BeginVertical();
@@ -231,17 +262,18 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                         GUI.DrawTexture(backRect, tex, mode, false, 0f, backColor, Vector4.zero, Vector4.zero);
 
-                        if (GUI.Button(backRect, GUIContent.none, GUIStyle.none))
-                        {
-                            property.SetSelectedIndex(i);
-                        }
-
                         if (eventData.Type == EventType.MouseDown
-                            && eventData.Button == 1
                             && backRect.Contains(mousePos)
                         )
                         {
-                            mouseDownIndex = i;
+                            if (eventData.Button == 0)
+                            {
+                                property.SetSelectedIndex(i);
+                            }
+                            else if (eventData.Button == 1)
+                            {
+                                mouseDownIndex = i;
+                            }
                         }
                     }
 
@@ -256,6 +288,18 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     }
                     EditorGUILayout.EndHorizontal();
 
+                    EditorGUILayout.BeginHorizontal();
+                    if (bindingParamType != null)
+                    {
+                        EditorGUILayout.LabelField(GUIContent.none, indexLabelStyle, indexLabelWidth);
+
+                        subHeaderLabel.text = bindingParamType.GetFriendlyName();
+                        subHeaderLabel.tooltip = bindingParamType.FullName;
+                        EditorGUILayout.LabelField(subHeaderLabel, subHeaderLabelStyle);
+                        GUILayout.Space(4f);
+                    }
+                    EditorGUILayout.EndHorizontal();
+
                     GUILayout.Space(6f);
 
                     EditorGUILayout.BeginHorizontal();
@@ -263,23 +307,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                         GUILayout.Space(5f);
                         EditorGUILayout.BeginVertical();
                         {
-                            MemberMap memberMap = null;
-
-                            if (binding.IsCommand)
-                            {
-                                if (bindingCommandMap.TryGetValue(type, out var commandMap))
-                                {
-                                    memberMap = commandMap;
-                                }
-                            }
-                            else
-                            {
-                                if (bindingProperyMap.TryGetValue(type, out var propertyMap))
-                                {
-                                    memberMap = propertyMap;
-                                }
-                            }
-
                             if (memberMap == null || memberMap.Count < 1)
                             {
                                 EditorGUILayout.HelpBox(
@@ -300,36 +327,40 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                             }
                             else
                             {
-                                var (methodName, paramType) = memberMap.First();
-                                var bindingPrefix = binding.IsCommand ? "_bindingCommandFor" : "_bindingFieldFor";
-                                var bindingSuffix = binding.IsCommand
+                                var contextMemberMap = isCommand ? contextCommandMap : contextPropertyMap;
+                                var bindingPrefix = isCommand ? "_bindingCommandFor" : "_bindingFieldFor";
+                                var bindingSuffix = isCommand
                                     ? ".<TargetCommandName>k__BackingField"
                                     : ".<TargetPropertyName>k__BackingField";
 
-                                var targetPropertyPath = $"{bindingPrefix}{methodName}{bindingSuffix}";
-                                var converterPath = $"_converterFor{methodName}.<Adapter>k__BackingField";
-                                var targetPropertyProp = elementProp.FindPropertyRelative(targetPropertyPath);
-                                var converterProp = elementProp.FindPropertyRelative(converterPath);
+                                var targetPropertyPath = $"{bindingPrefix}{bindingMethodName}{bindingSuffix}";
+                                var adapterPath = $"_converterFor{bindingMethodName}.<Adapter>k__BackingField";
+                                var targetMemberProp = elementProp.FindPropertyRelative(targetPropertyPath);
+                                var adapterProp = elementProp.FindPropertyRelative(adapterPath);
 
-                                if (targetPropertyProp == null)
+                                if (targetMemberProp == null)
                                 {
                                     EditorGUILayout.HelpBox(
-                                          $"Cannot find serialized field `{bindingPrefix}{methodName}`."
+                                          $"Cannot find serialized field `{bindingPrefix}{bindingMethodName}`."
                                         , MessageType.Error
                                     );
                                 }
                                 else
                                 {
-                                    var result = binding.IsCommand
-                                        ? MakeTargetCommandLabel(contextType, contextCommandMap, targetPropertyProp, targetLabel)
-                                        : MakeTargetPropertyLabel(contextType, contextPropertyMap, targetPropertyProp, targetLabel)
-                                        ;
+                                    var result = GetTargetMemberData(
+                                          contextType
+                                        , contextMemberMap
+                                        , targetMemberProp
+                                        , targetLabel
+                                        , binding.IsCommand
+                                        , out var targetMemberType
+                                    );
 
                                     var memberRect = EditorGUILayout.BeginHorizontal();
                                     {
                                         // Draw label
                                         {
-                                            var itemLabel = binding.IsCommand ? commandLabel : propertyLabel;
+                                            var itemLabel = isCommand ? commandLabel : propertyLabel;
                                             var itemLabelRect = memberRect;
                                             itemLabelRect.width = itemLabelWidth;
 
@@ -338,9 +369,28 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                                         GUILayout.Space(itemLabelWidth + 22f);
 
-                                        if (GUILayout.Button(targetLabel, EditorStyles.popup))
+                                        if (GUILayout.Button(targetLabel, popupStyle))
                                         {
-
+                                            if (isCommand)
+                                            {
+                                                ShowBindingCommandMenu(
+                                                      targetMemberProp
+                                                    , contextType
+                                                    , targetMemberProp.stringValue
+                                                    , contextMemberMap
+                                                );
+                                            }
+                                            else
+                                            {
+                                                ShowBindingPropertyMenu(
+                                                      targetMemberProp
+                                                    , adapterProp
+                                                    , contextType
+                                                    , bindingParamType
+                                                    , targetMemberProp.stringValue
+                                                    , contextMemberMap
+                                                );
+                                            }
                                         }
 
                                         if (result != TargetBindingResult.Valid)
@@ -358,21 +408,34 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                                     EditorGUILayout.EndHorizontal();
 
                                     var converterRect = EditorGUILayout.BeginHorizontal();
-                                    if (converterProp != null)
+                                    if (adapterProp != null)
                                     {
+                                        GetAdapterData(
+                                              adapterProp
+                                            , adapterLabel
+                                            , out var adapterType
+                                            , out var scriptableAdapter
+                                            , out var compositeAdapter
+                                        );
+
                                         // Draw label
                                         {
                                             var itemLabelRect = converterRect;
                                             itemLabelRect.width = itemLabelWidth;
 
                                             GUI.Label(itemLabelRect, converterLabel, itemLabelStyle);
+                                        }
 
-                                            GUILayout.Space(itemLabelWidth + 22f);
+                                        GUILayout.Space(itemLabelWidth + 22f);
 
-                                            if (GUILayout.Button("A", EditorStyles.popup))
-                                            {
-
-                                            }
+                                        if (GUILayout.Button(adapterLabel, popupStyle))
+                                        {
+                                            ShowAdapterPropertyMenu(
+                                                  bindingParamType
+                                                , targetMemberType
+                                                , adapterProp
+                                                , adapterType
+                                            );
                                         }
                                     }
                                     EditorGUILayout.EndHorizontal();
@@ -749,24 +812,30 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             return true;
         }
 
-        private static TargetBindingResult MakeTargetPropertyLabel(
+        private static TargetBindingResult GetTargetMemberData(
               Type contextType
-            , Dictionary<string, Type> contextPropertyMap
-            , SerializedProperty property
+            , Dictionary<string, Type> contextMemberMap
+            , SerializedProperty memberProp
             , GUIContent label
+            , bool isCommand
+            , out Type targetMemberType
         )
         {
-            if (string.IsNullOrWhiteSpace(property.stringValue))
+            var word = isCommand ? "command" : "property";
+
+            if (string.IsNullOrWhiteSpace(memberProp.stringValue))
             {
-                label.text = "< empty >";
-                label.tooltip = "No property is selected";
+                targetMemberType = null;
+                label.text = "< None >";
+                label.tooltip = $"No {word} is selected";
                 return TargetBindingResult.Empty;
             }
 
-            var candidate = property.stringValue;
+            var candidate = memberProp.stringValue;
 
-            if (contextType == null || contextPropertyMap.TryGetValue(candidate, out var propertyType) == false)
+            if (contextType == null || contextMemberMap.TryGetValue(candidate, out var memberType) == false)
             {
+                targetMemberType = null;
                 label.text = $"< invalid > {candidate}";
 
                 if (contextType == null)
@@ -776,60 +845,445 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 }
                 else
                 {
-                    label.tooltip = $"{contextType.FullName} does not contain a `{candidate}` property.";
+                    label.tooltip = $"{contextType.FullName} does not contain a `{candidate}` {word}.";
                     return TargetBindingResult.UnknownMember;
                 }
             }
             else
             {
-                var returnTypeName = propertyType.GetFriendlyName();
-                label.text = $"{candidate} : {returnTypeName}";
-                label.tooltip = $"property {candidate} : {returnTypeName}\n" +
-                    $"class {contextType.Name}\nnamespace {contextType.Namespace}";
+                targetMemberType = memberType;
+                var memberTypeName = memberType.GetFriendlyName();
+                var candidateName = ObjectNames.NicifyVariableName(candidate);
+
+                label.text = isCommand
+                    ? $"<b>{candidateName}</b> ( {memberTypeName} )"
+                    : $"<b>{candidateName}</b> : {memberTypeName}";
+
+                label.tooltip = $"{word} {candidateName} : {memberTypeName}\n" +
+                    $"class {contextType.Name}\n" +
+                    $"namespace {contextType.Namespace}";
 
                 return TargetBindingResult.Valid;
             }
         }
 
-        private static TargetBindingResult MakeTargetCommandLabel(
-              Type contextType
-            , Dictionary<string, Type> contextCommandMap
-            , SerializedProperty property
-            , GUIContent label
+        private static void ShowBindingPropertyMenu(
+              SerializedProperty targetPropertyProp
+            , SerializedProperty adapterProp
+            , Type contextType
+            , Type bindingParamType
+            , string targetPropertyName
+            , Dictionary<string, Type> targetPropertyMap
         )
         {
-            if (string.IsNullOrWhiteSpace(property.stringValue))
+            if (contextType == null)
             {
-                label.text = "< empty >";
-                label.tooltip = "No command is selected";
-                return TargetBindingResult.Empty;
+                EditorUtility.DisplayDialog(
+                      "Observable Context"
+                    , "No valid observable context is selected!"
+                    , "I understand"
+                );
+                return;
             }
 
-            var candidate = property.stringValue;
+            var root = new MenuItemNode();
+            var menu = new GenericMenuPopup(root, "Properties");
 
-            if (contextType == null || contextCommandMap.TryGetValue(candidate, out var propertyType) == false)
             {
-                label.text = $"< invalid > {candidate}";
+                var node = root.CreateNode("< None >");
+                node.func2 = RemoveBindingProperty;
+                node.on = false;
+                node.userData = (targetPropertyProp, adapterProp);
+            }
 
-                if (contextType == null)
+            foreach (var (propName, propType) in targetPropertyMap)
+            {
+                var node = root.CreateNode(
+                      $"<b>{ObjectNames.NicifyVariableName(propName)}</b> : {propType.GetFriendlyName()}"
+                    , propType.FullName
+                );
+
+                node.func2 = SetBindingProperty;
+                node.on = propName == targetPropertyName;
+                node.userData = (targetPropertyProp, adapterProp, bindingParamType, propName, propType);
+            }
+
+            if (targetPropertyMap.Count < 1)
+            {
+                root.CreateNode($"{contextType.GetFriendlyName()} contains no observable property!", contextType.FullName);
+            }
+
+            menu.width = 250;
+            menu.height = 350;
+            menu.maxHeight = 600;
+            menu.showSearch = true;
+            menu.showTooltip = true;
+            menu.Show(Event.current.mousePosition);
+        }
+
+        private static void RemoveBindingProperty(object param)
+        {
+            if (param is not (
+                  SerializedProperty targetPropertyProp
+                , SerializedProperty adapterProp
+            ))
+            {
+                return;
+            }
+
+            var serializedObject = targetPropertyProp.serializedObject;
+            var target = serializedObject.targetObject;
+
+            Undo.RecordObject(target, $"Remove {targetPropertyProp.propertyPath}");
+
+            targetPropertyProp.stringValue = string.Empty;
+            adapterProp.managedReferenceValue = null;
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+        }
+
+        private static void SetBindingProperty(object param)
+        {
+            {
+                if (param is (
+                      SerializedProperty targetPropertyProp
+                    , SerializedProperty adapterProp
+                    , Type bindingParamType
+                    , string selectedPropertyName
+                    , Type selectedPropertyType
+                ))
                 {
-                    label.tooltip = "The type of the context object is unknown.";
-                    return TargetBindingResult.UnknownType;
+                    var serializedObject = targetPropertyProp.serializedObject;
+                    var target = serializedObject.targetObject;
+
+                    Undo.RecordObject(target, $"Set {targetPropertyProp.propertyPath}");
+
+                    targetPropertyProp.stringValue = selectedPropertyName;
+
+                    if (TryCreateDefaultAdapter(selectedPropertyType, bindingParamType, out var adapter))
+                    {
+                        adapterProp.managedReferenceValue = adapter;
+                    }
+
+                    serializedObject.ApplyModifiedProperties();
+                    serializedObject.Update();
+                    return;
                 }
-                else
+            }
+
+            {
+                if (param is (
+                      SerializedProperty targetPropertyProp
+                    , _
+                    , _
+                    , string selectedPropName
+                    , _
+                ))
                 {
-                    label.tooltip = $"{contextType.FullName} does not contain a `{candidate}` command.";
-                    return TargetBindingResult.UnknownMember;
+                    var serializedObject = targetPropertyProp.serializedObject;
+                    var target = serializedObject.targetObject;
+
+                    Undo.RecordObject(target, $"Set {targetPropertyProp.propertyPath}");
+
+                    targetPropertyProp.stringValue = selectedPropName;
+                    serializedObject.ApplyModifiedProperties();
+                    serializedObject.Update();
+                    return;
                 }
+            }
+        }
+
+        private static void ShowBindingCommandMenu(
+              SerializedProperty targetCommandProp
+            , Type contextType
+            , string targetCommandName
+            , Dictionary<string, Type> targetCommandMap
+        )
+        {
+            if (contextType == null)
+            {
+                EditorUtility.DisplayDialog(
+                      "Observable Context"
+                    , "No valid observable context is selected!"
+                    , "I understand"
+                );
+                return;
+            }
+
+            var root = new MenuItemNode();
+            var menu = new GenericMenuPopup(root, "Properties");
+
+            {
+                var node = root.CreateNode("< None >");
+                node.func2 = RemoveBindingProperty;
+                node.on = false;
+                node.userData = targetCommandProp;
+            }
+
+            foreach (var (commandName, commandType) in targetCommandMap)
+            {
+                var label = commandType == null
+                    ? commandName
+                    : $"<b>{ObjectNames.NicifyVariableName(commandName)}</b> ( {commandType.GetFriendlyName()} )";
+
+                var node = root.CreateNode(label, commandType.FullName);
+                node.func2 = SetBindingCommand;
+                node.on = commandName == targetCommandName;
+                node.userData = (targetCommandProp, commandName);
+            }
+
+            if (targetCommandMap.Count < 1)
+            {
+                root.CreateNode($"{contextType.GetFriendlyName()} contains no observable command!", contextType.FullName);
+            }
+
+            menu.width = 250;
+            menu.height = 350;
+            menu.maxHeight = 600;
+            menu.showSearch = true;
+            menu.showTooltip = true;
+            menu.Show(Event.current.mousePosition);
+        }
+
+        private static void RemoveBindingCommand(object param)
+        {
+            if (param is not SerializedProperty targetCommandProp)
+            {
+                return;
+            }
+
+            var serializedObject = targetCommandProp.serializedObject;
+            var target = serializedObject.targetObject;
+
+            Undo.RecordObject(target, $"Remove {targetCommandProp.propertyPath}");
+
+            targetCommandProp.stringValue = string.Empty;
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+        }
+
+        private static void SetBindingCommand(object param)
+        {
+            if (param is not (
+                  SerializedProperty targetCommandProp
+                , string selectedCommandName
+            ))
+            {
+                return;
+            }
+
+            var serializedObject = targetCommandProp.serializedObject;
+            var target = serializedObject.targetObject;
+
+            Undo.RecordObject(target, $"Set {targetCommandProp.propertyPath}");
+
+            targetCommandProp.stringValue = selectedCommandName;
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+        }
+
+        private static bool TryCreateDefaultAdapter(Type sourceType, Type destType, out IAdapter adapter)
+        {
+            adapter = null;
+
+            if (s_adapterMap.TryGetValue(destType, out var map)
+                && map.TryGetValue(sourceType, out var adapterTypes)
+            )
+            {
+                try
+                {
+                    var sortedTypes = adapterTypes.OrderBy(x => {
+                        var attrib = x.GetCustomAttribute<AdapterAttribute>();
+                        return attrib?.Order ?? AdapterAttribute.DEFAULT_ORDER;
+                    });
+
+                    var adapterType = sortedTypes.FirstOrDefault();
+
+                    if (adapterType != null)
+                    {
+                        adapter = Activator.CreateInstance(adapterType) as IAdapter;
+                    }
+                }
+                catch
+                {
+                    adapter = null;
+                }
+            }
+
+            return adapter != null;
+        }
+
+        private static void GetAdapterData(
+              SerializedProperty adapterProp
+            , GUIContent label
+            , out Type adapterType
+            , out ScriptableAdapter scriptableAdapter
+            , out CompositeAdapter compositeAdapter
+        )
+        {
+            if (adapterProp?.managedReferenceValue is IAdapter adapter)
+            {
+                adapterType = adapter.GetType();
+
+                var keyword = adapterType.IsValueType ? "struct" : "class";
+                var adapterLabelAttrib = adapterType.GetCustomAttribute<LabelAttribute>();
+
+                label.text = adapterLabelAttrib?.Label ?? adapterType.Name;
+                label.tooltip = $"{keyword} <b>{adapterType.Name}</b>\nnamespace {adapterType.Namespace}";
+
+                scriptableAdapter = adapter as ScriptableAdapter;
+                compositeAdapter = adapter as CompositeAdapter;
             }
             else
             {
-                var returnTypeName = propertyType.GetFriendlyName();
-                label.text = $"{candidate} : {returnTypeName}";
-                label.tooltip = $"command {candidate} : {returnTypeName}\n" +
-                    $"class {contextType.Name}\nnamespace {contextType.Namespace}";
+                adapterType = null;
+                scriptableAdapter = null;
+                compositeAdapter = null;
+                label.text = "< Undefined >";
+                label.tooltip = string.Empty;
+            }
+        }
 
-                return TargetBindingResult.Valid;
+        private static void ShowAdapterPropertyMenu(
+              Type bindingParamType
+            , Type targetMemberType
+            , SerializedProperty adapterProp
+            , Type adapterTypeSaved
+        )
+        {
+            var adapterTypes = new List<Type> {
+                typeof(CompositeAdapter),
+                typeof(ScriptableAdapter)
+            };
+
+            try
+            {
+                if (s_adapterMap.TryGetValue(bindingParamType, out var map)
+                    && map.TryGetValue(targetMemberType, out var types)
+                )
+                {
+                    var orderedTypes = types.OrderBy(x => {
+                        var attrib = x.GetCustomAttribute<AdapterAttribute>();
+                        return attrib?.Order ?? AdapterAttribute.DEFAULT_ORDER;
+                    });
+
+                    adapterTypes.AddRange(orderedTypes);
+                }
+            }
+            catch { }
+
+            var root = new MenuItemNode();
+            var menu = new GenericMenuPopup(root, "Adapters");
+
+            {
+                var node = root.CreateNode("< None >");
+                node.on = false;
+                node.func2 = RemoveAdapterProperty;
+                node.userData = adapterProp;
+            }
+
+            AddAdapterTypesToMenu(
+                  root
+                , adapterProp
+                , adapterTypeSaved
+                , adapterTypes
+                , string.Empty
+            );
+
+            AddAdapterTypesToMenu(
+                  root
+                , adapterProp
+                , adapterTypeSaved
+                , GetOtherAdapterTypesExcludeSourceType(targetMemberType)
+                , "Other"
+            );
+
+            menu.width = 450;
+            menu.height = 350;
+            menu.maxHeight = 600;
+            menu.showSearch = true;
+            menu.showTooltip = true;
+            menu.Show(Event.current.mousePosition);
+        }
+
+        private static void AddAdapterTypesToMenu(
+              MenuItemNode root
+            , SerializedProperty adapterProp
+            , Type adapterTypeSaved
+            , List<Type> adapterTypes
+            , string directoryPrefix
+        )
+        {
+            foreach (var adapterType in adapterTypes)
+            {
+                var adapterAttrib = adapterType.GetCustomAttribute<AdapterAttribute>();
+                var labelAttrib = adapterType.GetCustomAttribute<LabelAttribute>();
+                var labelText = labelAttrib?.Label ?? adapterType.Name;
+                var keyword = adapterType.IsValueType ? "struct" : "class";
+                var tooltip = $"{keyword} <b>{adapterType.Name}</b>\nnamespace {adapterType.Namespace}";
+                var directory = labelAttrib?.Directory ?? adapterType.Namespace;
+
+                var node = string.IsNullOrWhiteSpace(directoryPrefix)
+                    ? root
+                    : root.GetOrCreateNode(directoryPrefix);
+
+                node = string.IsNullOrWhiteSpace(directory)
+                    ? node
+                    : node.GetOrCreateNode(directory);
+
+                if (adapterAttrib?.DestinationType is Type destinationType)
+                {
+                    node = node.GetOrCreateNode(destinationType.GetFriendlyName(), destinationType.FullName);
+                }
+
+                node = node.CreateNode(labelText, tooltip);
+                node.on = adapterType == adapterTypeSaved;
+                node.func2 = SetAdapterProperty;
+                node.userData = (adapterProp, adapterType);
+            }
+        }
+
+        private static void RemoveAdapterProperty(object param)
+        {
+            if (param is not SerializedProperty adapterProp)
+            {
+                return;
+            }
+
+            var serializedObject = adapterProp.serializedObject;
+            var target = serializedObject.targetObject;
+
+            Undo.RecordObject(target, $"Remove {adapterProp.propertyPath}");
+
+            adapterProp.managedReferenceValue = null;
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+        }
+
+        private static void SetAdapterProperty(object param)
+        {
+            if (param is not (
+                  SerializedProperty adapterProp
+                , Type selectedAdapterType
+            ))
+            {
+                return;
+            }
+
+            var serializedObject = adapterProp.serializedObject;
+            var target = serializedObject.targetObject;
+
+            try
+            {
+                Undo.RecordObject(target, $"Set {adapterProp.propertyPath}");
+
+                adapterProp.managedReferenceValue = Activator.CreateInstance(selectedAdapterType);
+                serializedObject.ApplyModifiedProperties();
+                serializedObject.Update();
+            }
+            catch (Exception ex)
+            {
+                DevLoggerAPI.LogException(target, ex);
             }
         }
     }
