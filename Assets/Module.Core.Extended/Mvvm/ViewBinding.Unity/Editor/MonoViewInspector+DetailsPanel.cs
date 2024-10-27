@@ -1357,6 +1357,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 , adapterTypeSaved
                 , adapterTypes
                 , string.Empty
+                , true
+                , true
             );
 
             AddAdapterTypesToMenu(
@@ -1365,6 +1367,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 , adapterTypeSaved
                 , GetOtherAdapterTypesExcludeSourceType(targetMemberType)
                 , "Other"
+                , false
+                , false
             );
 
             menu.width = 450;
@@ -1381,6 +1385,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             , Type adapterTypeSaved
             , List<Type> adapterTypes
             , string directoryPrefix
+            , bool ignoreDirectoryMenu
+            , bool ignoreDestinationTypeMenu
         )
         {
             foreach (var adapterType in adapterTypes)
@@ -1396,13 +1402,13 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     ? root
                     : root.GetOrCreateNode(directoryPrefix);
 
-                node = string.IsNullOrWhiteSpace(directory)
+                node = string.IsNullOrWhiteSpace(directory) || ignoreDirectoryMenu
                     ? node
                     : node.GetOrCreateNode(directory);
 
-                if (adapterAttrib?.DestinationType is Type destinationType)
+                if (ignoreDestinationTypeMenu == false && adapterAttrib?.DestinationType is Type destType)
                 {
-                    node = node.GetOrCreateNode(destinationType.GetFriendlyName(), destinationType.FullName);
+                    node = node.GetOrCreateNode(destType.GetFriendlyName(), destType.FullName);
                 }
 
                 node = node.CreateNode(labelText, tooltip);
