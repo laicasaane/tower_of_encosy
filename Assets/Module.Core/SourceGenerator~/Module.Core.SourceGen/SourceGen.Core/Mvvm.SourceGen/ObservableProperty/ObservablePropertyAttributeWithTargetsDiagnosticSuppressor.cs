@@ -15,7 +15,8 @@ namespace Module.Core.Mvvm.ObservablePropertySourceGen
 {
     /// <summary>
     /// <para>
-    /// A diagnostic suppressor to suppress CS0657 warnings for properties with [ObservableProperty] using a [field:] attribute list.
+    /// A diagnostic suppressor to suppress CS0657 warnings for properties with [ObservableProperty]
+    /// using a [field:] attribute list.
     /// </para>
     /// <para>
     /// That is, this diagnostic suppressor will suppress the following diagnostic:
@@ -32,17 +33,22 @@ namespace Module.Core.Mvvm.ObservablePropertySourceGen
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class ObservablePropertyAttributeWithTargetsDiagnosticSuppressor : DiagnosticSuppressor
     {
+        private const string ATTRIBUTE = "Module.Core.Mvvm.ComponentModel.ObservablePropertyAttribute";
+
         /// <inheritdoc/>
-        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions => ImmutableArray.Create(FieldAttributeListForObservableProperty);
+        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions
+            => ImmutableArray.Create(FieldAttributeListForObservableProperty);
 
         /// <inheritdoc/>
         public override void ReportSuppressions(SuppressionAnalysisContext context)
         {
             foreach (Diagnostic diagnostic in context.ReportedDiagnostics)
             {
-                var syntaxNode = diagnostic.Location.SourceTree?.GetRoot(context.CancellationToken).FindNode(diagnostic.Location.SourceSpan);
+                var syntaxNode = diagnostic.Location.SourceTree?.GetRoot(context.CancellationToken)
+                    .FindNode(diagnostic.Location.SourceSpan);
 
-                // Check that the target is effectively [field:] over a property declaration with at least one variable, which is the only case we are interested in
+                // Check that the target is effectively [field:] over a property declaration with at least one variable,
+                // which is the only case we are interested in
                 if (syntaxNode is not AttributeTargetSpecifierSyntax attributeTarget
                     || attributeTarget.Parent.Parent is not PropertyDeclarationSyntax propertyDeclaration
                     || attributeTarget.Identifier.Kind() is not SyntaxKind.FieldKeyword
@@ -58,8 +64,8 @@ namespace Module.Core.Mvvm.ObservablePropertySourceGen
 
                 // Check if the property is using [ObservableProperty], in which case we should suppress the warning
                 if (declaredSymbol is IPropertySymbol propertySymbol
-                    && semanticModel.Compilation.GetTypeByMetadataName("Module.Core.Mvvm.ComponentModel.ObservablePropertyAttribute") is INamedTypeSymbol observablePropertySymbol
-                    && propertySymbol.HasAttributeWithType(observablePropertySymbol)
+                    && semanticModel.Compilation.GetTypeByMetadataName(ATTRIBUTE) is INamedTypeSymbol attribTypeSymbol
+                    && propertySymbol.HasAttributeWithType(attribTypeSymbol)
                 )
                 {
                     context.ReportSuppression(Suppression.Create(FieldAttributeListForObservableProperty, diagnostic));

@@ -24,6 +24,7 @@ namespace Module.Core.Tests.MvvmTests
     public partial class Binder : IBinder
     {
         [BindingProperty]
+        [field: HideInInspector]
         private void SetIntValue(int value)
         {
         }

@@ -15,7 +15,8 @@ namespace Module.Core.Mvvm.SourceGen.Binders
 {
     /// <summary>
     /// <para>
-    /// A diagnostic suppressor to suppress CS0657 warnings for methods with [BindingCommand] using a [field:] attribute list.
+    /// A diagnostic suppressor to suppress CS0657 warnings for methods with [BindingCommand]
+    /// using a [field:] attribute list.
     /// </para>
     /// <para>
     /// That is, this diagnostic suppressor will suppress the following diagnostic:
@@ -32,15 +33,19 @@ namespace Module.Core.Mvvm.SourceGen.Binders
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class BindingCommandAttributeWithPropertyTargetDiagnosticSuppressor : DiagnosticSuppressor
     {
+        private const string ATTRIBUTE = "Module.Core.Mvvm.ViewBinding.BindingCommandAttribute";
+
         /// <inheritdoc/>
-        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions => ImmutableArray.Create(BindingCommandAttributeListForBindingMethod);
+        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions
+            => ImmutableArray.Create(BindingCommandAttributeListForBindingMethod);
 
         /// <inheritdoc/>
         public override void ReportSuppressions(SuppressionAnalysisContext context)
         {
             foreach (Diagnostic diagnostic in context.ReportedDiagnostics)
             {
-                var syntaxNode = diagnostic.Location.SourceTree?.GetRoot(context.CancellationToken).FindNode(diagnostic.Location.SourceSpan);
+                var syntaxNode = diagnostic.Location.SourceTree?.GetRoot(context.CancellationToken)
+                    .FindNode(diagnostic.Location.SourceSpan);
 
                 // Check that the target is effectively [field:] over a method declaration, which is the case we're looking for
                 if (syntaxNode is AttributeTargetSpecifierSyntax attributeTarget
@@ -53,10 +58,10 @@ namespace Module.Core.Mvvm.SourceGen.Binders
                     // Get the method symbol from the first variable declaration
                     var declaredSymbol = semanticModel.GetDeclaredSymbol(methodDeclaration, context.CancellationToken);
 
-                    // Check if the method is using [Binding], in which case we should suppress the warning
+                    // Check if the method is using [BindingCommand], in which case we should suppress the warning
                     if (declaredSymbol is IMethodSymbol methodSymbol
-                        && semanticModel.Compilation.GetTypeByMetadataName("Module.Core.Mvvm.ViewBinding.BindingCommandAttribute") is INamedTypeSymbol bindingSymbol
-                        && methodSymbol.HasAttributeWithType(bindingSymbol)
+                        && semanticModel.Compilation.GetTypeByMetadataName(ATTRIBUTE) is INamedTypeSymbol attribTypeSymbol
+                        && methodSymbol.HasAttributeWithType(attribTypeSymbol)
                     )
                     {
                         context.ReportSuppression(Suppression.Create(BindingCommandAttributeListForBindingMethod, diagnostic));

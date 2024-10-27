@@ -17,7 +17,7 @@ namespace Module.Core.Mvvm
         public static readonly SuppressionDescriptor PropertyAttributeListForObservableField = new(
               id: "MVVMTKSPR0001"
             , suppressedDiagnosticId: "CS0657"
-            , justification: "Fields using [ObservableProperty] can use [property:] attribute lists to forward attributes to the generated properties"
+            , justification: "Fields using [ObservableProperty] can use [property:] or [method:] attribute lists to forward attributes to the generated properties and methods"
         );
 
         /// <summary>
