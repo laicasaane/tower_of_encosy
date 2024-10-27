@@ -481,12 +481,20 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private void ApplyBinderSubtitle()
         {
             var property = _selectedSubtitleProp;
+            var newValue = _binderSubtitle.Trim();
+
+            if (string.Equals(property.stringValue, newValue, StringComparison.Ordinal))
+            {
+                SetSelectedSubtitleIndex(null);
+                return;
+            }
+
             var serializedObject = property.serializedObject;
             var target = serializedObject.targetObject;
 
             Undo.RecordObject(target, $"Set subtitle to {property.propertyPath}");
 
-            property.stringValue = _binderSubtitle.Trim();
+            property.stringValue = newValue;
             serializedObject.ApplyModifiedProperties();
             serializedObject.Update();
             SetSelectedSubtitleIndex(null);

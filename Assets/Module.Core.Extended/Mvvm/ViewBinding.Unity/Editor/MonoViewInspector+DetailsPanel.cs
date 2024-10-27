@@ -206,6 +206,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             var headerLabelStyle = s_headerLabelStyle;
             var subHeaderLabelStyle = s_subHeaderLabelStyle;
             var popupStyle = s_popupStyle;
+            var iconStyle = s_iconButtonStyle;
             var selectedColor = s_selectedColor;
             var contentColor = s_altContentColor;
             var comp = EditorGUIUtility.isProSkin ? 0 : 1;
@@ -219,6 +220,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             var contextType = _contextType;
             var targetLabel = new GUIContent();
             var adapterLabel = new GUIContent();
+            var adapterMemberLabel = new GUIContent();
+            var resetIconLabel = s_resetIconLabel;
 
             for (var i = 0; i < length; i++)
             {
@@ -421,56 +424,19 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                                     }
                                     EditorGUILayout.EndHorizontal();
 
-                                    if (adapterProp != null)
-                                    {
-                                        GetAdapterData(
-                                              adapterProp
-                                            , adapterLabel
-                                            , out var adapterType
-                                            , out var scriptableAdapter
-                                            , out var compositeAdapter
-                                        );
-
-                                        var converterRect = EditorGUILayout.BeginHorizontal();
-                                        {
-                                            // Draw label
-                                            {
-                                                var itemLabelRect = converterRect;
-                                                itemLabelRect.width = itemLabelWidth;
-
-                                                GUI.Label(itemLabelRect, converterLabel, itemLabelStyle);
-                                            }
-
-                                            GUILayout.Space(itemLabelWidth + 22f);
-
-                                            if (GUILayout.Button(adapterLabel, popupStyle))
-                                            {
-                                                ShowAdapterPropertyMenu(
-                                                      bindingParamType
-                                                    , targetMemberType
-                                                    , adapterProp
-                                                    , adapterType
-                                                );
-                                            }
-                                        }
-                                        EditorGUILayout.EndHorizontal();
-
-                                        if (scriptableAdapter != null)
-                                        {
-                                            EditorGUILayout.HelpBox(
-                                                  "Scriptable Adapter is not yet supported."
-                                                , MessageType.Warning
-                                            );
-                                        }
-
-                                        if (compositeAdapter != null)
-                                        {
-                                            EditorGUILayout.HelpBox(
-                                                  "Composite Adapter is not yet supported."
-                                                , MessageType.Warning
-                                            );
-                                        }
-                                    }
+                                    DrawAdapterProp(
+                                          converterLabel
+                                        , itemLabelStyle
+                                        , itemLabelWidth
+                                        , popupStyle
+                                        , iconStyle
+                                        , adapterLabel
+                                        , adapterMemberLabel
+                                        , resetIconLabel
+                                        , bindingParamType
+                                        , adapterProp
+                                        , targetMemberType
+                                    );
                                 }
                             }
                         }
@@ -486,6 +452,171 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             if (mouseDownIndex >= 0)
             {
                 ShowRightClickContextMenu(property, mouseDownIndex);
+            }
+        }
+
+        private static void DrawAdapterProp(
+              GUIContent converterLabel
+            , GUIStyle itemLabelStyle
+            , float itemLabelWidth
+            , GUIStyle popupStyle
+            , GUIStyle iconStyle
+            , GUIContent adapterLabel
+            , GUIContent adapterMemberLabel
+            , GUIContent resetIconLabel
+            , Type bindingParamType
+            , SerializedProperty adapterProp
+            , Type targetMemberType
+        )
+        {
+            if (adapterProp == null)
+            {
+                return;
+            }
+
+            GetAdapterData(
+                  adapterProp
+                , adapterLabel
+                , out var adapterType
+                , out var scriptableAdapter
+                , out var compositeAdapter
+            );
+
+            var converterRect = EditorGUILayout.BeginHorizontal();
+            {
+                // Draw label
+                {
+                    var itemLabelRect = converterRect;
+                    itemLabelRect.width = itemLabelWidth;
+
+                    GUI.Label(itemLabelRect, converterLabel, itemLabelStyle);
+                }
+
+                GUILayout.Space(itemLabelWidth + 22f);
+
+                if (GUILayout.Button(adapterLabel, popupStyle))
+                {
+                    ShowAdapterPropertyMenu(
+                          bindingParamType
+                        , targetMemberType
+                        , adapterProp
+                        , adapterType
+                    );
+                }
+
+                var guiEnabled = GUI.enabled;
+                GUI.enabled = adapterProp.managedReferenceValue != null;
+
+                if (GUILayout.Button(resetIconLabel, iconStyle, GUILayout.Width(20)))
+                {
+                    if (TryCreateDefaultAdapter(targetMemberType, bindingParamType, out var adapter))
+                    {
+                        var serializedObject = adapterProp.serializedObject;
+                        var target = serializedObject.targetObject;
+
+                        Undo.RecordObject(target, $"Reset {adapterProp.propertyPath}");
+
+                        adapterProp.managedReferenceValue = adapter;
+
+                        serializedObject.ApplyModifiedProperties();
+                        serializedObject.Update();
+                    }
+                }
+
+                GUI.enabled = guiEnabled;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            if (scriptableAdapter != null)
+            {
+                DrawScriptableAdapter(adapterProp, scriptableAdapter);
+                return;
+            }
+
+            if (compositeAdapter != null)
+            {
+                EditorGUILayout.HelpBox(
+                      "Composite Adapter is not yet supported."
+                    , MessageType.Warning
+                );
+                return;
+            }
+
+            if (adapterType != null)
+            {
+                DrawAdapterType(adapterType, adapterProp, adapterMemberLabel);
+                return;
+            }
+        }
+
+        private static void DrawScriptableAdapter(
+              SerializedProperty adapterProp
+            , ScriptableAdapter scriptableAdapter
+        )
+        {
+            if (scriptableAdapter == null)
+            {
+                return;
+            }
+
+            var assetProp = adapterProp.FindPropertyRelative("_asset");
+
+            if (assetProp == null)
+            {
+                return;
+            }
+
+            EditorGUI.indentLevel++;
+
+            EditorGUI.BeginChangeCheck();
+
+            EditorGUILayout.PropertyField(assetProp, GUIContent.none, false);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                var serializedObject = adapterProp.serializedObject;
+                serializedObject.ApplyModifiedProperties();
+                serializedObject.Update();
+            }
+
+            EditorGUI.indentLevel--;
+        }
+
+        private static void DrawAdapterType(
+              Type adapterType
+            , SerializedProperty adapterProp
+            , GUIContent adapterMemberLabel
+        )
+        {
+            var fieldNames = adapterType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(static x => x.IsPublic || x.GetCustomAttribute<SerializeField>() != null)
+                .Select(static x => x.Name);
+
+            EditorGUI.BeginChangeCheck();
+
+            EditorGUI.indentLevel++;
+
+            foreach (var name in fieldNames)
+            {
+                var prop = adapterProp.FindPropertyRelative(name);
+                adapterMemberLabel.text = ObjectNames.NicifyVariableName(name);
+                adapterMemberLabel.tooltip = adapterMemberLabel.text;
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField(adapterMemberLabel, GUILayout.Width(80));
+                    EditorGUILayout.PropertyField(prop, GUIContent.none, true);
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+
+            EditorGUI.indentLevel--;
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                var serializedObject = adapterProp.serializedObject;
+                serializedObject.ApplyModifiedProperties();
+                serializedObject.Update();
             }
         }
 
@@ -1129,7 +1260,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
                     targetPropertyProp.stringValue = selectedPropertyName;
 
-                    if (TryCreateDefaultAdapter(selectedPropertyType, bindingParamType, out var adapter))
+                    if (adapterProp.managedReferenceValue == null
+                        && TryCreateDefaultAdapter(selectedPropertyType, bindingParamType, out var adapter)
+                    )
                     {
                         adapterProp.managedReferenceValue = adapter;
                     }

@@ -26,6 +26,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private static GUIStyle s_itemLabelStyle;
         private static GUIStyle s_chooseContextButtonStyle;
         private static GUIStyle s_popupStyle;
+        private static GUIStyle s_iconButtonStyle;
         private static GUIContent s_addMoreIconLabel;
         private static GUIContent s_addIconLabel;
         private static GUIContent s_removeIconLabel;
@@ -38,6 +39,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private static GUIContent s_chooseIconLabel;
         private static GUIContent s_foldoutExpandedIconLabel;
         private static GUIContent s_foldoutCollapsedIconLabel;
+        private static GUIContent s_resetIconLabel;
         private static Color s_headerColor;
         private static Color s_contentColor;
         private static Color s_selectedColor;
@@ -204,6 +206,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 richText = true,
             };
 
+            s_iconButtonStyle = new(GUI.skin.button) {
+                imagePosition = ImagePosition.ImageLeft,
+                padding = new(2, 2, 1, 1),
+            };
+
             {
                 var icon = EditorGUIUtility.isProSkin
                     ? EditorGUIUtility.IconContent("d_Toolbar Plus")
@@ -285,6 +292,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 ColorUtility.TryParseHtmlString("#2C5D87", out var darkColor);
                 ColorUtility.TryParseHtmlString("#3A72B0", out var lightColor);
                 s_selectedColor = EditorGUIUtility.isProSkin ? darkColor : lightColor;
+            }
+
+            {
+                var icon = EditorGUIUtility.isProSkin
+                    ? EditorGUIUtility.IconContent("d_Refresh")
+                    : EditorGUIUtility.IconContent("Refresh");
+
+                s_resetIconLabel = new GUIContent(icon.image, "Reset");
             }
 
             {

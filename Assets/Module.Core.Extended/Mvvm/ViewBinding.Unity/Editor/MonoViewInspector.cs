@@ -100,7 +100,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             _presetBindersProp = new(
                   nameof(MonoBinder)
-                , static (src, dest) => dest.managedReferenceValue = src.managedReferenceValue
+                , CloneMonoBinder
                 , OnValidatePasteAllBinders
                 , OnValidatePasteSingleBinder
                 , $"{instanceId}_selected_binder_index"
@@ -109,7 +109,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             _presetBindingsProp = new(
                   nameof(MonoBinding)
-                , static (src, dest) => dest.managedReferenceValue = src.managedReferenceValue
+                , CloneManagedReference
                 , OnValidatePasteAllBindings
                 , OnValidatePasteSingleBinding
             );
@@ -126,6 +126,33 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             _presetBindersProp.SetSelectedIndex(_presetBindersProp.SelectedIndex);
 
             InitInspector();
+        }
+
+        private static void CloneManagedReference(SerializedProperty src, SerializedProperty dest)
+        {
+            var type = src.managedReferenceValue.GetType();
+            var cloned = Activator.CreateInstance(type);
+            var json = EditorJsonUtility.ToJson(src.managedReferenceValue, false);
+            EditorJsonUtility.FromJsonOverwrite(json, cloned);
+            dest.managedReferenceValue = cloned;
+        }
+
+        private static void CloneMonoBinder(SerializedProperty src, SerializedProperty dest)
+        {
+            CloneManagedReference(src, dest);
+
+            var srcTargets = src.FindPropertyRelative(PROP_PRESET_TARGETS);
+            var destTargets = dest.FindPropertyRelative(PROP_PRESET_TARGETS);
+            var targetsLength = srcTargets.arraySize;
+
+            destTargets.arraySize = targetsLength;
+
+            for (var i = 0; i < targetsLength; i++)
+            {
+                var srcTarget = srcTargets.GetArrayElementAtIndex(i);
+                var destTarget = destTargets.GetArrayElementAtIndex(i);
+                destTarget.objectReferenceValue = srcTarget.objectReferenceValue;
+            }
         }
 
         private void OnDisable()
@@ -152,6 +179,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             InitStyles();
 
             EventData eventData = Event.current;
+
+            if (ConsumeEvent(eventData))
+            {
+                return;
+            }
 
             _presetBindersProp.RefreshSelectedIndex();
 
@@ -189,6 +221,40 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
         }
 
+        private bool ConsumeEvent(in EventData eventData)
+        {
+            var isKeyUp = eventData.Type == EventType.KeyUp;
+            var key = eventData.Key;
+
+            switch (key)
+            {
+                case KeyCode.Return:
+                {
+                    if (isKeyUp && ValidateSelectedSubtitleIndex())
+                    {
+                        ApplyBinderSubtitle();
+                        Event.current.Use();
+                        return true;
+                    }
+                    break;
+                }
+
+                case KeyCode.Escape:
+                {
+                    if (isKeyUp && ValidateSelectedSubtitleIndex())
+                    {
+                        SetSelectedSubtitleIndex(null);
+                        Event.current.Use();
+                        return true;
+                    }
+
+                    break;
+                }
+            }
+
+            return false;
+        }
+
         private void DrawSettings(in EventData eventData)
         {
             EditorGUILayout.BeginVertical(s_rootTabViewStyle);
@@ -199,7 +265,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 var rect = EditorGUILayout.BeginHorizontal(GUILayout.Height(height));
                 {
                     EditorGUILayout.Space(height);
-                    DrawSettingsHeader(rect, eventData);
+                    DrawSettingsHeader(rect);
                 }
                 EditorGUILayout.EndHorizontal();
 
@@ -223,7 +289,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             EditorGUILayout.EndVertical();
         }
 
-        private void DrawSettingsHeader(in Rect rect, in EventData eventData)
+        private void DrawSettingsHeader(in Rect rect)
         {
             var isExpanded = _settingsProp.isExpanded;
 
@@ -247,8 +313,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 var labelRect = rect;
                 labelRect.y += 1f;
-
-                //GUI.Label(labelRect, _settingsLabel, labelStyle);
 
                 if (GUI.Button(rect, _settingsLabel, s_rootTabLabelStyle))
                 {
