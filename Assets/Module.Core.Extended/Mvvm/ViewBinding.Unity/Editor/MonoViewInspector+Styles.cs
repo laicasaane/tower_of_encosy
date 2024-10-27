@@ -35,7 +35,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private static GUIContent s_iconBinding;
         private static GUIContent s_applyLabel;
         private static GUIContent s_cancelLabel;
-        private static GUIContent s_chooseLabel;
+        private static GUIContent s_chooseIconLabel;
+        private static GUIContent s_foldoutExpandedIconLabel;
+        private static GUIContent s_foldoutCollapsedIconLabel;
         private static Color s_headerColor;
         private static Color s_contentColor;
         private static Color s_selectedColor;
@@ -266,7 +268,17 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     ? EditorGUIUtility.IconContent("d_Grid.PickingTool")
                     : EditorGUIUtility.IconContent("Grid.PickingTool");
 
-                s_chooseLabel = new GUIContent("Choose", icon.image);
+                s_chooseIconLabel = new GUIContent(icon.image, "Choose");
+            }
+
+            {
+                var icon = EditorGUIUtility.IconContent("IN foldout@2x");
+                s_foldoutCollapsedIconLabel = new GUIContent(icon.image);
+            }
+
+            {
+                var icon = EditorGUIUtility.IconContent("IN foldout on@2x");
+                s_foldoutExpandedIconLabel = new GUIContent(icon.image);
             }
 
             {

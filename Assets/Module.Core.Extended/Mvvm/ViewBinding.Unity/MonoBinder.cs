@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using Module.Core.Buffers;
 using Module.Core.Collections;
 using Module.Core.Logging;
+using Module.Core.Mvvm.ComponentModel;
 using UnityEngine;
 
 namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
@@ -32,7 +33,13 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
             get => _bindings ??= new(this);
         }
 
-        public abstract void Initialize(UnityEngine.Object context);
+        public abstract void Initialize(
+              IObservableObject context
+            , bool alsoStartListening
+            , UnityEngine.Object loggingContext
+        );
+
+        public abstract void StartListening(UnityEngine.Object loggingContext);
 
         protected sealed class BindingList : StatelessList<BindingBuffer, MonoBinding>
         {
@@ -77,7 +84,11 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
             get => _targets ??= new(this);
         }
 
-        public sealed override void Initialize(UnityEngine.Object context)
+        public sealed override void Initialize(
+              IObservableObject context
+            , bool alsoStartListening
+            , UnityEngine.Object loggingContext
+        )
         {
             var targets = this.Targets;
             var bindings = this.Bindings.AsReadOnlySpan();
@@ -89,30 +100,79 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
 
                 if (binding == null)
                 {
-                    ErrorIfBindingMissing(context, i);
+                    ErrorIfBindingMissing(loggingContext, i);
                     continue;
                 }
 
                 if (binding is not MonoBinding<T> bindingT)
                 {
-                    ErrorIfTypeNotMatch(context, i, binding);
+                    ErrorIfTypeNotMatch(loggingContext, i, binding);
                     continue;
                 }
 
                 bindingT.SetTargets(targets);
+                bindingT.SetContext(context, alsoStartListening);
+            }
+        }
+
+        public sealed override void StartListening(UnityEngine.Object loggingContext)
+        {
+            var bindings = this.Bindings.AsReadOnlySpan();
+            var bindingsLength = bindings.Length;
+
+            for (var i = 0; i < bindingsLength; i++)
+            {
+                var binding = bindings[i];
+
+                if (binding == null)
+                {
+                    ErrorIfBindingMissing(loggingContext, i);
+                    continue;
+                }
+
+                if (binding is not MonoBinding<T> bindingT)
+                {
+                    ErrorIfTypeNotMatch(loggingContext, i, binding);
+                    continue;
+                }
+
+                if (bindingT.Context == null)
+                {
+                    ErrorIfContextMissing(loggingContext, i, binding);
+                    continue;
+                }
+
+                bindingT.StopListening();
+                bindingT.StartListening();
+                bindingT.RefreshContext();
             }
         }
 
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfBindingMissing(UnityEngine.Object context, int index)
         {
-            DevLoggerAPI.LogError(context, $"Expected a MonoBinding<{typeof(T)}>, but received a null at index {index}");
+            DevLoggerAPI.LogError(
+                  context
+                , $"Expected a MonoBinding<{typeof(T)}>, but received a null at index {index}"
+            );
         }
 
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfTypeNotMatch(UnityEngine.Object context, int index, MonoBinding value)
         {
-            DevLoggerAPI.LogError(context, $"Expected a MonoBinding<{typeof(T)}>, but received a {value.GetType()} at index {index}");
+            DevLoggerAPI.LogError(
+                  context
+                , $"Expected a MonoBinding<{typeof(T)}>, but received a {value.GetType()} at index {index}"
+            );
+        }
+
+        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void ErrorIfContextMissing(UnityEngine.Object context, int index, MonoBinding value)
+        {
+            DevLoggerAPI.LogError(
+                  context
+                , $"The context of MonoBinding<{typeof(T)}> at index {index} is null"
+            );
         }
 
         protected sealed class TargetList : StatelessList<TargetBuffer, T>

@@ -43,6 +43,12 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private readonly static PropertyRef s_binderPropRef = new();
         private static SerializedObject s_copiedObject;
 
+        private static readonly string[] s_settingFieldNames = typeof(MonoViewSettings)
+            .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+            .Where(static x => x.IsPublic || x.GetCustomAttribute<SerializeField>() != null)
+            .Select(static x => x.Name)
+            .ToArray();
+
         private const int TAB_INDEX_BINDINGS = 0;
         private const int TAB_INDEX_TARGETS = 1;
 
@@ -65,6 +71,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private SerializedProperty _selectedSubtitleProp;
         private int _selectedDetailsTabIndex;
         private int? _selectedSubtitleIndex;
+        private SerializedProperty _settingsProp;
         private SerializedProperty _contextProp;
         private Type _contextType;
         private SerializedArrayProperty _presetBindersProp;
@@ -72,6 +79,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private SerializedArrayProperty _presetTargetsProp;
         private ObservableContextInspector _contextInspector;
 
+        private readonly GUIContent _settingsLabel = new("Settings");
         private readonly GUIContent _contextLabel = new();
         private readonly Dictionary<string, Type> _contextPropertyMap = new();
         private readonly Dictionary<string, Type> _contextCommandMap = new();
@@ -87,6 +95,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             var instanceId = _view.GetInstanceID();
 
+            _settingsProp = serializedObject.FindProperty("_settings");
             _contextProp = serializedObject.FindProperty("_context");
 
             _presetBindersProp = new(
@@ -150,6 +159,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             EditorGUILayout.BeginVertical();
             {
+                DrawSettings(eventData);
+            }
+            EditorGUILayout.EndVertical();
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginVertical();
+            {
                 DrawContext();
                 UpdateContextMaps();
             }
@@ -169,6 +186,97 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             if (ValidateSelectedSubtitleIndex())
             {
                 EditorGUI.FocusTextInControl(_subtitleControlName);
+            }
+        }
+
+        private void DrawSettings(in EventData eventData)
+        {
+            EditorGUILayout.BeginVertical(s_rootTabViewStyle);
+            {
+                var isExpanded = _settingsProp.isExpanded;
+                var height = isExpanded ? 22f : 24f;
+
+                var rect = EditorGUILayout.BeginHorizontal(GUILayout.Height(height));
+                {
+                    EditorGUILayout.Space(height);
+                    DrawSettingsHeader(rect, eventData);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                if (_settingsProp.isExpanded)
+                {
+                    EditorGUILayout.Space(6f);
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        GUILayout.Space(6f);
+                        EditorGUILayout.BeginVertical();
+                        {
+                            DrawSettingsContent();
+                        }
+                        EditorGUILayout.EndVertical();
+                        GUILayout.Space(4f);
+                    }
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.Space(6f);
+                }
+            }
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawSettingsHeader(in Rect rect, in EventData eventData)
+        {
+            var isExpanded = _settingsProp.isExpanded;
+
+            // Draw background
+            {
+                var backRect = rect;
+                backRect.x += 1f;
+                backRect.y += 1f;
+                backRect.width -= 3f;
+                backRect.height += isExpanded ? 3f : -2f;
+
+                var tex = Texture2D.whiteTexture;
+                var mode = ScaleMode.StretchToFill;
+                var borders = Vector4.zero;
+                var radius = isExpanded ? new Vector4(3f, 3f, 0f, 0f) : new Vector4(3f, 3f, 3f, 3f);
+
+                GUI.DrawTexture(backRect, tex, mode, false, 0f, s_headerColor, borders, radius);
+            }
+
+            // Draw label
+            {
+                var labelRect = rect;
+                labelRect.y += 1f;
+
+                //GUI.Label(labelRect, _settingsLabel, labelStyle);
+
+                if (GUI.Button(rect, _settingsLabel, s_rootTabLabelStyle))
+                {
+                    isExpanded = _settingsProp.isExpanded = !isExpanded;
+                }
+            }
+
+            // Draw arrow
+            {
+                var labelRect = rect;
+                labelRect.width = 24f;
+                labelRect.y += isExpanded ? 1f : 0f;
+
+                var icon = isExpanded ? s_foldoutExpandedIconLabel : s_foldoutCollapsedIconLabel;
+                GUI.Label(labelRect, icon);
+            }
+        }
+
+        private void DrawSettingsContent()
+        {
+            var settingsProp = _settingsProp;
+            var names = s_settingFieldNames.AsSpan();
+            var length = names.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                var prop = settingsProp.FindPropertyRelative(names[i]);
+                EditorGUILayout.PropertyField(prop, true);
             }
         }
 
@@ -219,8 +327,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
         private void DrawContextHeader(in Rect rect)
         {
-            var labelStyle = s_rootTabLabelStyle;
-            var buttonSize = 80f;
+            var buttonSize = 30f;
 
             // Draw background
             {
@@ -242,22 +349,20 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 var labelRect = rect;
                 labelRect.y += 1f;
-                labelRect.width -= buttonSize + 2f;
 
                 _contextLabel.text = _contextInspector == null
                     ? "<Invalid Observable Context>"
                     : ObjectNames.NicifyVariableName(_contextInspector.ContextType.Name);
 
-                GUI.Label(labelRect, _contextLabel, labelStyle);
+                GUI.Label(labelRect, _contextLabel, s_rootTabLabelStyle);
             }
 
             {
                 var btnRect = rect;
-                btnRect.x += rect.width - buttonSize - 3.5f;
-                btnRect.y += 2f;
+                btnRect.x += rect.width - buttonSize - 1f;
                 btnRect.width = buttonSize;
 
-                if (GUI.Button(btnRect, s_chooseLabel, s_chooseContextButtonStyle))
+                if (GUI.Button(btnRect, s_chooseIconLabel, s_chooseContextButtonStyle))
                 {
                     s_contextPropRef.Prop = _contextProp;
                     s_contextPropRef.Inspector = this;

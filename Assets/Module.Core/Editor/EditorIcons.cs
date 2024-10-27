@@ -758,6 +758,8 @@ namespace Module.Core.Editor
             "BuildSettings.XBox360.Small","BuildSettings.PS3.Small","BuildSettings.SamsungTV.Small",
             "BuildSettings.BlackBerry","BuildSettings.Tizen","BuildSettings.XBox360","BuildSettings.PS3",
             "BuildSettings.SamsungTV", "pane options", "pane options@2x",
+            "IN foldout@2x", "IN foldout act@2x", "IN foldout focus@2x",
+            "IN foldout on@2x", "IN foldout act on@2x", "IN foldout focus on@2x",
         };
     }
 }

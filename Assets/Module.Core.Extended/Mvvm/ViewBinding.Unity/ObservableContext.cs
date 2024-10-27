@@ -16,13 +16,12 @@ namespace Module.Core.Extended.Mvvm.ViewBinding.Unity
     [Serializable]
     public sealed class ObservableUnityObjectContext : ObservableContext
     {
-        [SerializeField]
-        private UnityEngine.Object _object;
+        [SerializeField] private UnityEngine.Object _object;
 
         public override bool TryGetContext(out IObservableObject result)
         {
             result = _object as IObservableObject;
-            return _object;
+            return result != null;
         }
 
         public override bool TryGetContextType(out Type result)

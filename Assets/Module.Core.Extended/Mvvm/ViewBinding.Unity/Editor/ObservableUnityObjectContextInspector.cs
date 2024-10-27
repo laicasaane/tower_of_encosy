@@ -65,10 +65,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 }
             }
             EditorGUILayout.EndHorizontal();
-
             EditorGUILayout.BeginHorizontal();
             {
-                GUILayout.Label(s_findLabel);
+                EditorGUILayout.PrefixLabel(s_findLabel);
 
                 if (GUILayout.Button(s_childrenLabel, EditorStyles.miniButtonLeft))
                 {
