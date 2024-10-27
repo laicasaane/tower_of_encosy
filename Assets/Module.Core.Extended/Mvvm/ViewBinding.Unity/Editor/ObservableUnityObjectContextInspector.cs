@@ -1,7 +1,6 @@
 #if UNITY_EDITOR
 
 using Module.Core.Extended.Mvvm.ViewBinding.Unity;
-using Module.Core.Logging;
 using Module.Core.Mvvm.ComponentModel;
 using UnityEditor;
 using UnityEngine;
@@ -42,7 +41,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 EditorGUILayout.PrefixLabel(s_contextLabel);
 
-                var obj = EditorGUILayout.ObjectField(_objectProperty.objectReferenceValue, typeof(UnityEngine.Object), true);
+                var obj = EditorGUILayout.ObjectField(
+                      _objectProperty.objectReferenceValue
+                    , typeof(UnityEngine.Object)
+                    , true
+                );
 
                 if (obj == false || obj is IObservableObject)
                 {

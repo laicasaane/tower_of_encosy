@@ -29,7 +29,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
         public ObservableContextInspectorAttribute([NotNull] Type contextType)
         {
-            Checks.IsTrue(typeof(ObservableContext).IsAssignableFrom(contextType), "contextType must be a subclass of ObservableContext");
+            Checks.IsTrue(
+                  typeof(ObservableContext).IsAssignableFrom(contextType)
+                , "contextType must be a subclass of ObservableContext"
+            );
+
             ContextType = contextType;
         }
     }

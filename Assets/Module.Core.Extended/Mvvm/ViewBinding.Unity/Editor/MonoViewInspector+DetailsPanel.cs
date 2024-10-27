@@ -23,6 +23,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             Add = 1,
             Remove = 2,
             Menu = 3,
+            SimpleAdd = 4,
         }
 
         private enum TargetBindingResult
@@ -32,6 +33,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             UnknownMember,
             Valid,
         }
+
+        private Action<Memory<UnityEngine.Object>> _onDropCreateTargets;
 
         private void DrawDetailsPanel(in EventData eventData)
         {
@@ -70,6 +73,16 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                             iconRect.x = tabBarRect.x + tabBarRect.width - 22f;
 
                             GUI.Label(iconRect, iconWarning);
+                        }
+
+                        var dropRect = tabBarRect;
+
+                        // Draw drop area for Targets
+                        if (_presetTargetsProp != null)
+                        {
+                            dropRect.width = tabBarRect.width / 2f;
+                            dropRect.x = tabBarRect.x + dropRect.width;
+                            DrawDragDropArea(dropRect, eventData, _onDropCreateTargets ??= OnDropCreateTargets);
                         }
                     }
                 }
@@ -136,7 +149,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private void DrawDetailsPanel_Bindings(in EventData eventData, Rect sectionRect)
         {
             var property = _presetBindingsProp;
-            var toolbarButton = DrawDetailsPanel_ToolbarButtons(property.ArraySize);
+            var toolbarButton = DrawDetailsPanel_ToolbarButtons(property.ArraySize, false);
 
             switch (toolbarButton)
             {
@@ -188,6 +201,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             var headerLabel = new GUIContent();
             var subHeaderLabel = new GUIContent();
             var indexLabelWidth = GUILayout.Width(20);
+            var iconWarning = s_iconWarning;
             var indexLabelStyle = s_indexLabelStyle;
             var headerLabelStyle = s_headerLabelStyle;
             var subHeaderLabelStyle = s_subHeaderLabelStyle;
@@ -402,7 +416,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                                             iconRect.width = 16f;
                                             iconRect.height = 16f;
 
-                                            GUI.DrawTexture(iconRect, s_iconWarning.image);
+                                            GUI.DrawTexture(iconRect, iconWarning.image);
                                         }
                                     }
                                     EditorGUILayout.EndHorizontal();
@@ -480,10 +494,16 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             var property = _presetTargetsProp;
             var serializedObject = property.Property.serializedObject;
             var target = serializedObject.targetObject;
-            var toolbarButton = DrawDetailsPanel_ToolbarButtons(property.ArraySize);
+            var toolbarButton = DrawDetailsPanel_ToolbarButtons(property.ArraySize, true);
 
             switch (toolbarButton)
             {
+                case DetailsToolbarButton.SimpleAdd:
+                {
+                    AddTargetToSelectedBinder(_presetBindersProp);
+                    break;
+                }
+
                 case DetailsToolbarButton.Add:
                 {
                     ShowTargetDropdown(_presetBindersProp, this);
@@ -612,6 +632,24 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             menu.Show(Event.current.mousePosition);
         }
 
+        private static void AddTargetToSelectedBinder(SerializedArrayProperty bindersProp)
+        {
+            if (TryGetTargetType(bindersProp, out var binderProp, out _) == false)
+            {
+                return;
+            }
+
+            var targetsProp = binderProp.FindPropertyRelative(PROP_PRESET_TARGETS);
+            var serializedObject = targetsProp.serializedObject;
+            var target = serializedObject.targetObject;
+
+            Undo.RecordObject(target, $"Add 1 item to {targetsProp.propertyPath}");
+
+            targetsProp.arraySize += 1;
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+        }
+
         private static void ShowTargetDropdown(SerializedArrayProperty bindersProp, MonoViewInspector inspector)
         {
             if (TryGetTargetType(bindersProp, out var binderProp, out var targetType) == false)
@@ -621,7 +659,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             var rootGO = inspector._view.gameObject;
             var menu = new TreeViewPopup(targetType.Name) {
-                width = 300,
+                width = 500,
                 data = binderProp,
                 onApplySelectedIds = TargetMenu_AddTargets,
             };
@@ -696,28 +734,131 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 return;
             }
 
-            if (selectedIds == null || selectedIds.Count < 1)
+            TryAddTargets(binderProp, selectedIds);
+        }
+
+        private void OnDropCreateTargets(Memory<UnityEngine.Object> objects)
+        {
+            if (TryGetTargetType(_presetBindersProp, out var binderProp, out var targetType) == false)
             {
                 return;
             }
 
-            var length = selectedIds.Count;
+            var span = objects.Span;
+            var length = span.Length;
+            var componentType = typeof(Component);
+            var instanceIds = new List<int>(length);
+
+            if (targetType == typeof(GameObject))
+            {
+                for (var i = 0; i < length; i++)
+                {
+                    var obj = span[i];
+
+                    if (obj is GameObject go)
+                    {
+                        instanceIds.Add(go.GetInstanceID());
+                        continue;
+                    }
+
+                    if (obj is Component comp)
+                    {
+                        instanceIds.Add(comp.gameObject.GetInstanceID());
+                        continue;
+                    }
+                }
+            }
+            else if (componentType.IsAssignableFrom(targetType))
+            {
+                for (var i = 0; i < length; i++)
+                {
+                    var obj = span[i];
+
+                    if (obj is Component comp && targetType == comp.GetType())
+                    {
+                        instanceIds.Add(obj.GetInstanceID());
+                        continue;
+                    }
+
+                    if (obj is GameObject go && go.TryGetComponent(targetType, out var firstComp))
+                    {
+                        instanceIds.Add(firstComp.GetInstanceID());
+                        continue;
+                    }
+                }
+            }
+
+            if (TryAddTargets(binderProp, instanceIds) == false)
+            {
+                return;
+            }
+
+            _selectedDetailsTabIndex = TAB_INDEX_TARGETS;
+        }
+
+        private static bool TryAddTargets(SerializedProperty binderProp, IList<int> instanceIds)
+        {
+            if (instanceIds == null)
+            {
+                return false;
+            }
+
+            var length = instanceIds.Count;
+
+            if (length < 1)
+            {
+                return false;
+            }
+
             var targetsProp = binderProp.FindPropertyRelative(PROP_PRESET_TARGETS);
+            var currentSize = targetsProp.arraySize;
+            var checkIds = new HashSet<int>(currentSize + length);
+
+            for (var i = 0; i < currentSize; i++)
+            {
+                var elementProp = targetsProp.GetArrayElementAtIndex(i);
+                checkIds.Add(elementProp.objectReferenceInstanceIDValue);
+            }
+
+            for (var i = length - 1; i >= 0; i--)
+            {
+                var instanceId = instanceIds[i];
+
+                if (checkIds.Contains(instanceId))
+                {
+                    instanceIds.RemoveAt(i);
+                }
+                else
+                {
+                    checkIds.Add(instanceId);
+                }
+            }
+
+            length = instanceIds.Count;
+
+            if (length < 1)
+            {
+                return false;
+            }
+
             var serializedObject = targetsProp.serializedObject;
             var target = serializedObject.targetObject;
 
             Undo.RecordObject(target, $"Add {length} items to {targetsProp.propertyPath}");
 
-            targetsProp.arraySize += length;
+            var first = targetsProp.arraySize;
+            var newSize = targetsProp.arraySize += length;
 
-            for (var i = 0; i < length; i++)
+            for (var i = first; i < newSize; i++)
             {
                 var elementProp = targetsProp.GetArrayElementAtIndex(i);
-                elementProp.objectReferenceInstanceIDValue = selectedIds[i];
+                elementProp.objectReferenceInstanceIDValue = instanceIds[i];
             }
 
             serializedObject.ApplyModifiedProperties();
             serializedObject.Update();
+
+            return true;
         }
 
         private static void BindingMenu_AddBinding(object userData)
@@ -744,13 +885,23 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             serializedObject.Update();
         }
 
-        private static DetailsToolbarButton DrawDetailsPanel_ToolbarButtons(int arraySize)
+        private static DetailsToolbarButton DrawDetailsPanel_ToolbarButtons(int arraySize, bool showSimpleAdd)
         {
             var result = DetailsToolbarButton.None;
 
             EditorGUILayout.BeginHorizontal();
             {
-                if (GUILayout.Button(s_addLabel, s_toolbarLeftButtonStyle, GUILayout.Height(20)))
+                if (showSimpleAdd)
+                {
+                    if (GUILayout.Button(s_addIconLabel, s_toolbarLeftButtonStyle, GUILayout.Height(20)))
+                    {
+                        result = DetailsToolbarButton.SimpleAdd;
+                    }
+                }
+
+                var addStyle = showSimpleAdd ? s_toolbarMidButtonStyle : s_toolbarLeftButtonStyle;
+
+                if (GUILayout.Button(s_addMoreIconLabel, addStyle, GUILayout.Height(20)))
                 {
                     result = DetailsToolbarButton.Add;
                 }
@@ -768,7 +919,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 var guiContentColor = GUI.contentColor;
                 GUI.contentColor = s_menuColor;
 
-                if (GUILayout.Button(s_menuLabel, s_toolbarMenuButtonStyle, GUILayout.Height(20), GUILayout.Width(20)))
+                if (GUILayout.Button(s_menuIconLabel, s_toolbarMenuButtonStyle, GUILayout.Height(20), GUILayout.Width(20)))
                 {
                     result = DetailsToolbarButton.Menu;
                 }

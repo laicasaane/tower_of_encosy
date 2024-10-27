@@ -55,7 +55,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             public int? SelectedIndex => _selectedIndex;
 
-            public int ArraySize => _property.arraySize;
+            public int ArraySize => _property?.arraySize ?? 0;
 
             public void Intialize(SerializedProperty property)
             {
@@ -213,22 +213,23 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 }
 
                 var copiedBuffer = EditorGUIUtility.systemCopyBuffer;
-                var copiedProperty = s_copiedObject.FindProperty(copiedBuffer);
+                var srcProperty = s_copiedObject.FindProperty(copiedBuffer);
                 var property = _property;
                 var serializedObject = property.serializedObject;
                 var target = serializedObject.targetObject;
-                var lastIndex = property.arraySize;
-                var length = copiedProperty.arraySize;
+                var srcLength = srcProperty.arraySize;
                 var onCopyValue = _onCopyValue;
 
                 Undo.RecordObject(target, $"Paste all {_undoKey}");
 
-                property.arraySize += length;
+                var firstDestIndex = property.arraySize;
 
-                for (var i = 0; i < length; i++)
+                property.arraySize += srcLength;
+
+                for (var srcIndex = 0; srcIndex < srcLength; srcIndex++)
                 {
-                    var srcProp = copiedProperty.GetArrayElementAtIndex(i);
-                    var destProp = property.GetArrayElementAtIndex(lastIndex + i);
+                    var srcProp = srcProperty.GetArrayElementAtIndex(srcIndex);
+                    var destProp = property.GetArrayElementAtIndex(firstDestIndex + srcIndex);
                     onCopyValue(srcProp, destProp);
                 }
 
@@ -343,6 +344,10 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 if (index >= newLength)
                 {
                     SetSelectedIndex(newLength > 0 ? newLength - 1 : default(int?));
+                }
+                else if ((uint)index < (uint)newLength)
+                {
+                    SetSelectedIndex(index);
                 }
             }
         }

@@ -26,10 +26,11 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private static GUIStyle s_itemLabelStyle;
         private static GUIStyle s_chooseContextButtonStyle;
         private static GUIStyle s_popupStyle;
-        private static GUIContent s_addLabel;
-        private static GUIContent s_removeLabel;
+        private static GUIContent s_addMoreIconLabel;
+        private static GUIContent s_addIconLabel;
+        private static GUIContent s_removeIconLabel;
         private static GUIContent s_removeSelectedLabel;
-        private static GUIContent s_menuLabel;
+        private static GUIContent s_menuIconLabel;
         private static GUIContent s_iconWarning;
         private static GUIContent s_iconBinding;
         private static GUIContent s_applyLabel;
@@ -41,8 +42,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private static Color s_menuColor;
         private static Color s_altContentColor;
 
-        private static readonly GUIContent s_bindersLabel = new("Binders");
-        private static readonly GUIContent[] s_detailsTabLabels = new GUIContent[] { new("Bindings"), new("Targets"), };
         private static readonly GUIContent s_propertyBindingLabel = new("Property");
         private static readonly GUIContent s_commandBindingLabel = new("Command");
         private static readonly GUIContent s_converterLabel = new("Converter");
@@ -53,6 +52,16 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private static readonly GUIContent s_copyItemLabel = new("Copy");
         private static readonly GUIContent s_pasteItemLabel = new("Paste");
         private static readonly GUIContent s_deleteItemLabel = new("Delete");
+
+        private static readonly GUIContent s_bindersLabel = new(
+            "Binders"
+            //, "Can also drag and drop GameObject or Component here to create binders."
+        );
+
+        private static readonly GUIContent[] s_detailsTabLabels = new GUIContent[] {
+            new("Bindings"),
+            new("Targets", "Can also drag and drop GameObject or Component here to add to the list."),
+        };
 
         private void InitStyles()
         {
@@ -195,10 +204,18 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             {
                 var icon = EditorGUIUtility.isProSkin
+                    ? EditorGUIUtility.IconContent("d_Toolbar Plus")
+                    : EditorGUIUtility.IconContent("Toolbar Plus");
+
+                s_addIconLabel = new(icon.image, "Add");
+            }
+
+            {
+                var icon = EditorGUIUtility.isProSkin
                     ? EditorGUIUtility.IconContent("d_Toolbar Plus More")
                     : EditorGUIUtility.IconContent("Toolbar Plus More");
 
-                s_addLabel = new(icon.image, "Add");
+                s_addMoreIconLabel = new(icon.image, "Add");
             }
 
             {
@@ -206,13 +223,13 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     ? EditorGUIUtility.IconContent("d_Toolbar Minus")
                     : EditorGUIUtility.IconContent("Toolbar Minus");
 
-                s_removeLabel = new(icon.image, "Remove");
+                s_removeIconLabel = new(icon.image, "Remove");
                 s_removeSelectedLabel = new(icon.image, "Remove Selected Item");
             }
 
             {
                 var icon = EditorGUIUtility.IconContent("pane options@2x");
-                s_menuLabel = new(icon.image, "Menu");
+                s_menuIconLabel = new(icon.image, "Menu");
                 s_menuColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
             }
 

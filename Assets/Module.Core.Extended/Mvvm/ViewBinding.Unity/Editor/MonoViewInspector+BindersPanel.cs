@@ -11,6 +11,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
     partial class MonoViewInspector
     {
         private const string BINDER_SUBTITLE_LABEL = "{0}\n<size=10>{1}</size>";
+        //private Action<Memory<UnityEngine.Object>> _onDropCreateBinders;
 
         private enum ButtonState
         {
@@ -28,6 +29,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 var rect = EditorGUILayout.BeginHorizontal(s_bindersHeaderStyle, guiWidth, GUILayout.Height(30));
                 {
                     DrawBindersLabel(guiWidth, rect);
+                    //DrawDragDropArea(rect, eventData, _onDropCreateBinders ??= OnDropCreateBinders);
                 }
                 EditorGUILayout.EndHorizontal();
 
@@ -41,6 +43,10 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
             EditorGUILayout.EndVertical();
         }
+
+        //private void OnDropCreateBinders(Memory<UnityEngine.Object> objects)
+        //{
+        //}
 
         private void DrawBindersLabel(GUILayoutOption guiWidth, in Rect rect)
         {
@@ -89,7 +95,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         {
             EditorGUILayout.BeginHorizontal();
             {
-                if (GUILayout.Button(s_addLabel, s_toolbarLeftButtonStyle, GUILayout.Height(20)))
+                if (GUILayout.Button(s_addMoreIconLabel, s_toolbarLeftButtonStyle, GUILayout.Height(20)))
                 {
                     ShowBinderDropdown();
                 }
@@ -107,7 +113,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 var guiContentColor = GUI.contentColor;
                 GUI.contentColor = s_menuColor;
 
-                if (GUILayout.Button(s_menuLabel, s_toolbarMenuButtonStyle, GUILayout.Height(20), GUILayout.Width(20)))
+                if (GUILayout.Button(s_menuIconLabel, s_toolbarMenuButtonStyle, GUILayout.Height(20), GUILayout.Width(20)))
                 {
                     var menu = new GenericMenu();
                     menu.AddItem(s_copyAllLabel, false, Menu_OnCopyAll, _presetBindersProp);

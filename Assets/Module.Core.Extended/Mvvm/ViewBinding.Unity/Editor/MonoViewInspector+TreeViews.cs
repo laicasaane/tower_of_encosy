@@ -76,9 +76,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             private readonly Type _componentType;
             private readonly List<Component> _components = new();
             private const string NAME_FORMAT = "{0}";
-            private const string NAME_2_FORMAT = "{0} • {1}";
-            private const string NAME_INDEX_FORMAT = "{0} • {1}";
-            private const string NAME_2_INDEX_FORMAT = "{2} • {0} • {1}";
+            private const string NAME_2_FORMAT = "{0} ▶ {1}";
+            private const string NAME_INDEX_FORMAT = "{0} ▶ {1}";
+            private const string NAME_2_INDEX_FORMAT = "{0} ▶ {2} • {1}";
 
             public TargetComponentTreeView(TreeViewState state, GameObject rootGO, Type componentType) : base(state)
             {
@@ -120,14 +120,21 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                             ? string.Format(name2Format, rootGO.name, ObjectNames.NicifyVariableName(type.Name), k)
                             : string.Format(nameFormat, rootGO.name, k);
 
-                        allItems.Add(new() { id = component.GetInstanceID(), depth = 0, displayName = name, icon = icon });
+                        allItems.Add(new TreeViewItem {
+                            id = component.GetInstanceID(),
+                            depth = 0,
+                            displayName = name,
+                            icon = icon,
+                        });
                     }
                 }
 
                 if (childCount > 0)
                 {
-                    Build(rootTransform, componentType, allItems, 1, components);
+                    Build(rootTransform, componentType, allItems, count > 0 ? 1 : 0, components);
                 }
+
+                components.Clear();
 
                 // Utility method that initializes the TreeViewItem.children and .parent for all items.
                 SetupParentsAndChildrenFromDepths(treeRoot, allItems);
@@ -171,13 +178,18 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                                 ? string.Format(name2Format, child.name, ObjectNames.NicifyVariableName(type.Name), k)
                                 : string.Format(nameFormat, child.name, k);
 
-                            list.Add(new TreeViewItem { id = id, depth = depth, displayName = name, icon = icon });
+                            list.Add(new TreeViewItem {
+                                id = id,
+                                depth = depth,
+                                displayName = name,
+                                icon = icon,
+                            });
                         }
                     }
 
                     if (child.childCount > 0)
                     {
-                        Build(child, componentType, list, depth + 1, components);
+                        Build(child, componentType, list, count > 0 ? depth + 1 : depth, components);
                     }
                 }
             }

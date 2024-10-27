@@ -32,6 +32,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private readonly static GenericMenuPopup s_binderMenu = new(new MenuItemNode(), "Binders");
         private readonly static GenericMenuPopup s_contextMenu = new(new MenuItemNode(), "Contexts");
         private readonly static Dictionary<Type, Type> s_binderToTargetTypeMap = new(128);
+        private readonly static Dictionary<Type, Type> s_targetTypeToBinderMap = new(128);
         private readonly static Dictionary<Type, Type> s_bindingToTargetTypeMap = new(128);
         private readonly static Dictionary<Type, MemberMap> s_bindingPropertyMap = new(128);
         private readonly static Dictionary<Type, MemberMap> s_bindingCommandMap = new(128);
@@ -115,8 +116,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             _presetBindersProp.LoadSelectedIndex();
             _presetBindersProp.SetSelectedIndex(_presetBindersProp.SelectedIndex);
 
-            EditorUtility.DisplayProgressBar("Initializing", "Please wait...", 0f);
-            EditorApplication.update += InitInspector;
+            InitInspector();
         }
 
         private void OnDisable()
@@ -129,7 +129,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             s_bindersPropRef?.Reset();
             s_binderPropRef?.Reset();
             _contextInspector?.OnDestroy();
-            EditorApplication.update -= InitInspector;
         }
 
         public override void OnInspectorGUI()
@@ -162,6 +161,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 DrawBindersPanel(eventData);
                 GUILayout.Space(4f);
+                PreventSerializedPropertyHasDisappearedError();
                 DrawDetailsPanel(eventData);
             }
             EditorGUILayout.EndHorizontal();
@@ -272,6 +272,33 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
         }
 
+        private void DrawDragDropArea(
+              in Rect dropRect
+            , in EventData eventData
+            , Action<Memory<UnityEngine.Object>> onDrop = null
+        )
+        {
+            if (eventData.Type is not (EventType.DragUpdated or EventType.DragPerform))
+            {
+                return;
+            }
+
+            if (dropRect.Contains(eventData.MousePos) == false)
+            {
+                return;
+            }
+
+            DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+
+            if (eventData.Type != EventType.DragPerform)
+            {
+                return;
+            }
+
+            DragAndDrop.AcceptDrag();
+            onDrop?.Invoke(DragAndDrop.objectReferences);
+        }
+
         private static void ContextMenu_SetContext(object userData)
         {
             if (userData is not MenuItemContext menuItem)
@@ -293,6 +320,27 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             property.managedReferenceValue = Activator.CreateInstance(contextType);
             serializedObject.ApplyModifiedProperties();
             serializedObject.Update();
+        }
+
+        /// <remarks>
+        /// 'SerializedProperty has disappeared!' happens when a binder is removed
+        /// or the recent removal is reverted via keyboard shortcut.
+        /// This error causes the Inspector to be corrupted.
+        /// </remarks>
+        private void PreventSerializedPropertyHasDisappearedError()
+        {
+            if (_presetBindersProp.TryGetAtSelectedIndex(out var binderProperty))
+            {
+                _presetBindingsProp.Intialize(binderProperty.FindPropertyRelative(PROP_PRESET_BINDINGS));
+                _presetTargetsProp.Intialize(binderProperty.FindPropertyRelative(PROP_PRESET_TARGETS));
+            }
+            else
+            {
+                _presetBindingsProp.SetSelectedIndex(null);
+                _presetTargetsProp.SetSelectedIndex(null);
+                _presetBindingsProp.Intialize(null);
+                _presetTargetsProp.Intialize(null);
+            }
         }
 
         private void OnSetSelectedBinderIndex(SerializedArrayProperty property)
@@ -492,21 +540,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private static void InitInspector()
         {
             InitContextToInspector();
-
-            EditorUtility.DisplayProgressBar("Initializing", "Please wait...", 0.25f);
-
             InitAdapterMap();
-
-            EditorUtility.DisplayProgressBar("Initializing", "Please wait...", 0.5f);
-
             InitBinderMenu();
-
-            EditorUtility.DisplayProgressBar("Initializing", "Please wait...", 0.75f);
-
             InitBindingMenuMap();
-
-            EditorUtility.ClearProgressBar();
-            EditorApplication.update -= InitInspector;
         }
 
         private static void InitAdapterMap()
@@ -551,11 +587,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 .Select(ToDefinition<MonoBinder>)
                 .Where(static x => x.IsValid);
 
-            var typeMap = s_binderToTargetTypeMap;
+            var binderMap = s_targetTypeToBinderMap;
+            var targetTypeMap = s_binderToTargetTypeMap;
 
             foreach (var (binderType, targetType, label, directory) in defs)
             {
-                if (typeMap.TryAdd(binderType, targetType) == false)
+                if (binderMap.TryAdd(targetType, binderType) == false
+                    || targetTypeMap.TryAdd(binderType, targetType) == false
+                )
                 {
                     continue;
                 }
