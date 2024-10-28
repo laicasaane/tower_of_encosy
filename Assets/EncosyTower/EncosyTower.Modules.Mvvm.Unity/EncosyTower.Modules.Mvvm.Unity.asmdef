@@ -1,0 +1,119 @@
+{
+    "name": "EncosyTower.Modules.Mvvm.Unity",
+    "rootNamespace": "EncosyTower.Modules.Mvvm.Unity",
+    "references": [
+        "EncosyTower.Modules",
+        "SpanExtensions.Net.Unity",
+        "UniTask",
+        "UniTask.Addressables",
+        "Unity.Addressables",
+        "Unity.Burst",
+        "Unity.Collections",
+        "Unity.Localization",
+        "Unity.Logging",
+        "Unity.Mathematics",
+        "Unity.ResourceManager",
+        "Unity.Serialization",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.annulusgames.unity-codegen",
+            "expression": "",
+            "define": "ANNULUS_CODEGEN"
+        },
+        {
+            "name": "com.cysharp.unitask",
+            "expression": "",
+            "define": "UNITASK"
+        },
+        {
+            "name": "com.latios.latiosframework",
+            "expression": "",
+            "define": "LATIOS_FRAMEWORK"
+        },
+        {
+            "name": "com.unity.addressables",
+            "expression": "",
+            "define": "UNITY_ADDRESSABLES"
+        },
+        {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "UNITY_BURST"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "UNITY_COLLECTIONS"
+        },
+        {
+            "name": "com.unity.entities",
+            "expression": "",
+            "define": "UNITY_ENTITIES"
+        },
+        {
+            "name": "com.unity.feature.2d",
+            "expression": "",
+            "define": "UNITY_FEATURE_2D"
+        },
+        {
+            "name": "com.unity.mathematics",
+            "expression": "",
+            "define": "UNITY_MATHEMATICS"
+        },
+        {
+            "name": "com.unity.inputsystem",
+            "expression": "",
+            "define": "UNITY_INPUT_SYSTEM"
+        },
+        {
+            "name": "com.unity.localization",
+            "expression": "",
+            "define": "UNITY_LOCALIZATION"
+        },
+        {
+            "name": "com.unity.logging",
+            "expression": "",
+            "define": "UNITY_LOGGING"
+        },
+        {
+            "name": "com.unity.nuget.newtonsoft-json",
+            "expression": "",
+            "define": "UNITY_NEWTONSOFT_JSON"
+        },
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "",
+            "define": "UNITY_URP"
+        },
+        {
+            "name": "com.unity.serialization",
+            "expression": "",
+            "define": "UNITY_SERIALIZATION"
+        },
+        {
+            "name": "com.unity.textmeshpro",
+            "expression": "",
+            "define": "UNITY_TEXTMESHPRO"
+        },
+        {
+            "name": "com.unity.ugui",
+            "expression": "",
+            "define": "UNITY_UGUI"
+        },
+        {
+            "name": "com.unity.ugui",
+            "expression": "2.0.0",
+            "define": "UNITY_TEXTMESHPRO"
+        }
+    ],
+    "noEngineReferences": false
+}

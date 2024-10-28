@@ -1,6 +1,6 @@
 using System;
 using Latios;
-using Module.Core.Entities;
+using EncosyTower.Modules.Entities;
 using Module.EntityComponents;
 using Unity.Entities;
 using UnityEngine;

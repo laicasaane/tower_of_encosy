@@ -3,7 +3,7 @@ using Latios;
 using Latios.Authoring;
 using Latios.Kinemation;
 using Latios.Kinemation.Authoring;
-using Module.Core.Entities;
+using EncosyTower.Modules.Entities;
 using Module.EntityComponents;
 using Module.GameCommon;
 using Unity.Collections;

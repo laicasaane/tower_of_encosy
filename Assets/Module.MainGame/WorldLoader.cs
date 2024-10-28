@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Module.MainGame
 {
-    public sealed partial class WorldLoader : MonoBehaviour
+    public sealed class WorldLoader : MonoBehaviour
     {
     }
 }
