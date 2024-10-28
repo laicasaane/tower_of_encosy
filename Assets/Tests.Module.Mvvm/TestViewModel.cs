@@ -1,9 +1,5 @@
-using System;
-using Module.Core;
 using Module.Core.Mvvm.ComponentModel;
 using Module.Core.Mvvm.Input;
-using Module.Core.Mvvm.ViewBinding;
-using Module.Core.Unions;
 using UnityEngine;
 
 namespace Tests.Module.Mvvm
@@ -13,14 +9,11 @@ namespace Tests.Module.Mvvm
         [SerializeField] private float _scrollSpeed = 2f;
         [SerializeField] private float _scrollInterval = 0.05f;
         [SerializeField] private float _scrollStop = 1f;
-        [SerializeField] private Color _colorStart = Color.white;
-        [SerializeField] private Color _colorEnd = Color.white;
 
         private float _scrollDirection = 1f;
         private float _scrollIntervalElapsed = 0f;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(Color))]
         public float ScrollPosition { get => Get_ScrollPosition(); set => Set_ScrollPosition(value); }
 
         [ObservableProperty]
@@ -30,8 +23,6 @@ namespace Tests.Module.Mvvm
         public string Status => Stopped
             ? "Status: <color=\"red\">Stopped</color>"
             : "Status: <color=\"green\">Playing</color>";
-
-        public Color Color => Color.Lerp(_colorStart, _colorEnd, ScrollPosition);
 
         private void Start()
         {
@@ -75,22 +66,6 @@ namespace Tests.Module.Mvvm
         private void OnStop()
         {
             Stopped = !Stopped;
-        }
-    }
-
-    [Serializable]
-    [Label("Scroll Position ⇒ Text", "Default")]
-    [Adapter(sourceType: typeof(float), destType: typeof(string), order: 0)]
-    public sealed class ScrollPositionTextAdapter : IAdapter
-    {
-        public Union Convert(in Union union)
-        {
-            if (union.TryGetValue(out float result))
-            {
-                return $"Scroll Position: {result:0.00}";
-            }
-
-            return union;
         }
     }
 }

@@ -986,8 +986,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
     - rid: 7562154210548776971
       type: {class: ObservableUnityObjectContext, ns: Module.Core.Extended.Mvvm.ViewBinding.Unity,
         asm: Module.Core.Extended}
@@ -1050,10 +1048,10 @@ MonoBehaviour:
         asm: Module.Core.Extended}
       data:
         _bindingFieldForSetColor:
-          <TargetPropertyName>k__BackingField: Color
+          <TargetPropertyName>k__BackingField: ScrollPosition
         _converterForSetColor:
           <Adapter>k__BackingField:
-            rid: -2
+            rid: 8482649283664543744
     - rid: 7562154631834632208
       type: {class: ButtonBinder, ns: Module.Core.Extended.Mvvm.ViewBinding.Binders.UnityUI,
         asm: Module.Core.Extended}
@@ -1091,6 +1089,11 @@ MonoBehaviour:
       type: {class: StringToStringAdapter, ns: Module.Core.Mvvm.ViewBinding.Adapters,
         asm: Module.Core}
       data: 
+    - rid: 8482649283664543744
+      type: {class: LerpColorAdapter, ns: Tests.Module.Mvvm, asm: Tests.Module.Mvvm}
+      data:
+        _from: {r: 0.9725491, g: 0.38431376, b: 0.33333334, a: 1}
+        _to: {r: 0.25490198, g: 0.3529412, b: 0.9176471, a: 1}
 --- !u!114 &690052017
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1106,8 +1109,6 @@ MonoBehaviour:
   _scrollSpeed: 2
   _scrollInterval: 0.05
   _scrollStop: 1
-  _colorStart: {r: 0.9740378, g: 0.38587594, b: 0.3352895, a: 1}
-  _colorEnd: {r: 0.25560245, g: 0.3543365, b: 0.9160756, a: 1}
 --- !u!1 &743286629
 GameObject:
   m_ObjectHideFlags: 0
