@@ -14,7 +14,7 @@ This is a playground for me to work on a 3D prototype. I aim to learn more about
 - **Enter Play Mode Options > Reload Domain**: Off
 - `csc.rsp`: Enable C# 10 for the Unity Engine
 - `Directory.Build.props`: Enable C# 10 for the IDE
-- `Module.Core/CompilerServices/IsExternalInit.cs`: Enable [`init`](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/init) of C# 9
+- `EncosyTower.Modules/CompilerServices/IsExternalInit.cs`: Enable [`init`](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/init) of C# 9
 
 ## Gameplay
 
