@@ -26,9 +26,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             EditorGUILayout.BeginVertical(s_rootTabViewStyle, guiWidth);
             {
-                var rect = EditorGUILayout.BeginHorizontal(s_bindersHeaderStyle, guiWidth, GUILayout.Height(30));
+                var rect = EditorGUILayout.BeginHorizontal(s_panelHeaderStyle, guiWidth, GUILayout.Height(30));
                 {
-                    DrawBindersLabel(guiWidth, rect);
+                    DrawPanelHeaderLabel(s_bindersLabel, guiWidth, rect, icon: s_iconBinding);
                     //DrawDragDropArea(rect, eventData, _onDropCreateBinders ??= OnDropCreateBinders);
                 }
                 EditorGUILayout.EndHorizontal();
@@ -47,49 +47,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         //private void OnDropCreateBinders(Memory<UnityEngine.Object> objects)
         //{
         //}
-
-        private void DrawBindersLabel(GUILayoutOption guiWidth, in Rect rect)
-        {
-            var label = s_bindersLabel;
-            var labelStyle = s_rootTabLabelStyle;
-
-            // Draw background
-            {
-                var backRect = rect;
-                backRect.x += 1f;
-                backRect.y += 1f;
-                backRect.width -= 3f;
-                backRect.height -= 1f;
-
-                var tex = Texture2D.whiteTexture;
-                var mode = ScaleMode.StretchToFill;
-                var borders = Vector4.zero;
-                var radius = new Vector4(3f, 3f, 0f, 0f);
-
-                GUI.DrawTexture(backRect, tex, mode, false, 0f, s_headerColor, borders, radius);
-            }
-
-            // Draw icon
-            {
-                labelStyle.CalcMinMaxWidth(label, out var minWidth, out _);
-                var minHeight = labelStyle.CalcHeight(label, minWidth);
-
-                var iconRect = rect;
-                iconRect.x += 5f;
-                iconRect.y += (rect.height - minHeight) / 2f - 3f;
-                iconRect.width = 20f;
-                iconRect.height = 20f;
-
-                var tex = s_iconBinding.image;
-                var mode = ScaleMode.ScaleToFit;
-                var borders = Vector4.zero;
-                var radius = Vector4.zero;
-
-                GUI.DrawTexture(iconRect, tex, mode, true, 1f, Color.white, borders, radius);
-            }
-
-            EditorGUILayout.LabelField(label, labelStyle, guiWidth, GUILayout.Height(26));
-        }
 
         private void DrawBindersPanel_Toolbar()
         {

@@ -49,9 +49,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             .Select(static x => x.Name)
             .ToArray();
 
-        private const int TAB_INDEX_BINDINGS = 0;
-        private const int TAB_INDEX_TARGETS = 1;
-
         private const string NO_BINDING = "Has no binding!";
         private const string NO_TARGET = "Has no target!";
         private const string NO_BINDING_TARGET = "Has no binding and target!";
@@ -69,7 +66,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private string _subtitleControlName = "";
         private string _binderSubtitle = "";
         private SerializedProperty _selectedSubtitleProp;
-        private int _selectedDetailsTabIndex;
         private int? _selectedSubtitleIndex;
         private SerializedProperty _settingsProp;
         private SerializedProperty _contextProp;
@@ -191,7 +187,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             EditorGUILayout.BeginVertical();
             {
-                DrawSettings(eventData);
+                DrawSettingsPanel();
             }
             EditorGUILayout.EndVertical();
 
@@ -199,7 +195,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             EditorGUILayout.BeginVertical();
             {
-                DrawContext();
+                DrawContextPanel();
                 UpdateContextMaps();
             }
             EditorGUILayout.EndVertical();
@@ -211,7 +207,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 DrawBindersPanel(eventData);
                 GUILayout.Space(4f);
                 PreventSerializedPropertyHasDisappearedError();
-                DrawDetailsPanel(eventData);
+                DrawDetailsPanels(eventData);
             }
             EditorGUILayout.EndHorizontal();
 
@@ -253,192 +249,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
 
             return false;
-        }
-
-        private void DrawSettings(in EventData eventData)
-        {
-            EditorGUILayout.BeginVertical(s_rootTabViewStyle);
-            {
-                var isExpanded = _settingsProp.isExpanded;
-                var height = isExpanded ? 22f : 24f;
-
-                var rect = EditorGUILayout.BeginHorizontal(GUILayout.Height(height));
-                {
-                    EditorGUILayout.Space(height);
-                    DrawSettingsHeader(rect);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                if (_settingsProp.isExpanded)
-                {
-                    EditorGUILayout.Space(6f);
-                    EditorGUILayout.BeginHorizontal();
-                    {
-                        GUILayout.Space(6f);
-                        EditorGUILayout.BeginVertical();
-                        {
-                            DrawSettingsContent();
-                        }
-                        EditorGUILayout.EndVertical();
-                        GUILayout.Space(4f);
-                    }
-                    EditorGUILayout.EndHorizontal();
-                    EditorGUILayout.Space(6f);
-                }
-            }
-            EditorGUILayout.EndVertical();
-        }
-
-        private void DrawSettingsHeader(in Rect rect)
-        {
-            var isExpanded = _settingsProp.isExpanded;
-
-            // Draw background
-            {
-                var backRect = rect;
-                backRect.x += 1f;
-                backRect.y += 1f;
-                backRect.width -= 3f;
-                backRect.height += isExpanded ? 3f : -2f;
-
-                var tex = Texture2D.whiteTexture;
-                var mode = ScaleMode.StretchToFill;
-                var borders = Vector4.zero;
-                var radius = isExpanded ? new Vector4(3f, 3f, 0f, 0f) : new Vector4(3f, 3f, 3f, 3f);
-
-                GUI.DrawTexture(backRect, tex, mode, false, 0f, s_headerColor, borders, radius);
-            }
-
-            // Draw label
-            {
-                var labelRect = rect;
-                labelRect.y += 1f;
-
-                if (GUI.Button(rect, _settingsLabel, s_rootTabLabelStyle))
-                {
-                    isExpanded = _settingsProp.isExpanded = !isExpanded;
-                }
-            }
-
-            // Draw arrow
-            {
-                var labelRect = rect;
-                labelRect.width = 24f;
-                labelRect.y += isExpanded ? 1f : 0f;
-
-                var icon = isExpanded ? s_foldoutExpandedIconLabel : s_foldoutCollapsedIconLabel;
-                GUI.Label(labelRect, icon);
-            }
-        }
-
-        private void DrawSettingsContent()
-        {
-            var settingsProp = _settingsProp;
-            var names = s_settingFieldNames.AsSpan();
-            var length = names.Length;
-
-            for (var i = 0; i < length; i++)
-            {
-                var prop = settingsProp.FindPropertyRelative(names[i]);
-                EditorGUILayout.PropertyField(prop, true);
-            }
-        }
-
-        private void DrawContext()
-        {
-            if (_contextInspector == null
-                && _contextProp.managedReferenceValue is ObservableContext context
-                && s_contextToInspectorMap.TryGetValue(context.GetType(), out var inspectorType)
-            )
-            {
-                _contextInspector = Activator.CreateInstance(inspectorType) as ObservableContextInspector;
-                _contextInspector.ContextType = context.GetType();
-                _contextInspector.OnEnable(_view, serializedObject, _contextProp);
-            }
-
-            EditorGUILayout.BeginVertical(s_rootTabViewStyle);
-            {
-                var rect = EditorGUILayout.BeginHorizontal(GUILayout.Height(22));
-                {
-                    EditorGUILayout.Space(22);
-                    DrawContextHeader(rect);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                if (_contextInspector != null)
-                {
-                    EditorGUILayout.Space(6f);
-                    EditorGUILayout.BeginHorizontal();
-                    {
-                        GUILayout.Space(6f);
-                        EditorGUILayout.BeginVertical();
-                        {
-                            _contextInspector.OnInspectorGUI();
-                        }
-                        EditorGUILayout.EndVertical();
-                        GUILayout.Space(4f);
-                    }
-                    EditorGUILayout.EndHorizontal();
-                    EditorGUILayout.Space(6f);
-                }
-                else
-                {
-                    GUILayout.Label("No observable context is chosen.", s_noBinderStyle, GUILayout.Height(30));
-                }
-            }
-            EditorGUILayout.EndVertical();
-        }
-
-        private void DrawContextHeader(in Rect rect)
-        {
-            var buttonSize = 30f;
-
-            // Draw background
-            {
-                var backRect = rect;
-                backRect.x += 1f;
-                backRect.y += 1f;
-                backRect.width -= 3f;
-                backRect.height += 3f;
-
-                var tex = Texture2D.whiteTexture;
-                var mode = ScaleMode.StretchToFill;
-                var borders = Vector4.zero;
-                var radius = new Vector4(3f, 3f, 0f, 0f);
-
-                GUI.DrawTexture(backRect, tex, mode, false, 0f, s_headerColor, borders, radius);
-            }
-
-            // Draw label
-            {
-                var labelRect = rect;
-                labelRect.y += 1f;
-
-                _contextLabel.text = _contextInspector == null
-                    ? "<Invalid Observable Context>"
-                    : ObjectNames.NicifyVariableName(_contextInspector.ContextType.Name);
-
-                GUI.Label(labelRect, _contextLabel, s_rootTabLabelStyle);
-            }
-
-            {
-                var btnRect = rect;
-                btnRect.x += rect.width - buttonSize - 1f;
-                btnRect.width = buttonSize;
-
-                if (GUI.Button(btnRect, s_chooseIconLabel, s_chooseContextButtonStyle))
-                {
-                    s_contextPropRef.Prop = _contextProp;
-                    s_contextPropRef.Inspector = this;
-
-                    var menu = s_contextMenu;
-                    menu.width = 250;
-                    menu.height = 350;
-                    menu.maxHeight = 600;
-                    menu.showSearch = true;
-                    menu.Show(Event.current.mousePosition);
-                }
-            }
         }
 
         private void DrawDragDropArea(
@@ -489,6 +299,97 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             property.managedReferenceValue = Activator.CreateInstance(contextType);
             serializedObject.ApplyModifiedProperties();
             serializedObject.Update();
+        }
+
+        private static void DrawPanelHeaderLabel(
+              GUIContent label
+            , GUILayoutOption guiWidth
+            , in Rect rect
+            , in Rect offset = default
+            , GUIContent icon = null
+        )
+        {
+            var labelStyle = s_rootTabLabelStyle;
+
+            // Draw background
+            {
+                var backRect = rect;
+                backRect.x += 1f + offset.x;
+                backRect.y += 1f + offset.y;
+                backRect.width -= 3f - offset.width;
+                backRect.height -= 1f - offset.height;
+
+                var tex = Texture2D.whiteTexture;
+                var mode = ScaleMode.StretchToFill;
+                var borders = Vector4.zero;
+                var radius = new Vector4(3f, 3f, 0f, 0f);
+
+                GUI.DrawTexture(backRect, tex, mode, false, 0f, s_headerColor, borders, radius);
+            }
+
+            // Draw icon
+            if (icon != null)
+            {
+                labelStyle.CalcMinMaxWidth(label, out var minWidth, out _);
+                var minHeight = labelStyle.CalcHeight(label, minWidth);
+
+                var iconRect = rect;
+                iconRect.x += 5f;
+                iconRect.y += (rect.height - minHeight) / 2f - 3f;
+                iconRect.width = 20f;
+                iconRect.height = 20f;
+
+                var tex = icon.image;
+                var mode = ScaleMode.ScaleToFit;
+                var borders = Vector4.zero;
+                var radius = Vector4.zero;
+
+                GUI.DrawTexture(iconRect, tex, mode, true, 1f, Color.white, borders, radius);
+            }
+
+            EditorGUILayout.LabelField(label, labelStyle, guiWidth, GUILayout.Height(26));
+        }
+
+        private static void DrawPanelHeaderFoldout(in Rect rect, SerializedProperty property, GUIContent label, in Rect offset = default)
+        {
+            var isExpanded = property.isExpanded;
+
+            // Draw background
+            {
+                var backRect = rect;
+                backRect.x += 1f + offset.x;
+                backRect.y += 1f + offset.y;
+                backRect.width -= 3f + offset.width;
+                backRect.height -= isExpanded ? (3f + offset.height) : 2f;
+
+                var tex = Texture2D.whiteTexture;
+                var mode = ScaleMode.StretchToFill;
+                var borders = Vector4.zero;
+                var radius = isExpanded ? new Vector4(3f, 3f, 0f, 0f) : new Vector4(3f, 3f, 3f, 3f);
+
+                GUI.DrawTexture(backRect, tex, mode, false, 0f, s_headerColor, borders, radius);
+            }
+
+            // Draw label
+            {
+                var labelRect = rect;
+                labelRect.y += 1f;
+
+                if (GUI.Button(rect, label, s_rootTabLabelStyle))
+                {
+                    isExpanded = property.isExpanded = !isExpanded;
+                }
+            }
+
+            // Draw arrow
+            {
+                var labelRect = rect;
+                labelRect.width = 24f;
+                labelRect.y += isExpanded ? 1f : 0f;
+
+                var icon = isExpanded ? s_foldoutExpandedIconLabel : s_foldoutCollapsedIconLabel;
+                GUI.Label(labelRect, icon);
+            }
         }
 
         /// <remarks>

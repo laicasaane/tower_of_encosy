@@ -58,14 +58,14 @@ namespace Module.Core
             };
         }
 
-        public static string GetFriendlyName(this Type type)
+        public static string GetFriendlyName(this Type type, bool fullName = false)
         {
             if (type == typeof(void))
             {
                 return VOID_TYPE_NAME;
             }
 
-            var friendlyName = type.GetName();
+            var friendlyName = fullName ? type.GetName() : type.GetFullName();
 
             if (type.IsGenericType)
             {

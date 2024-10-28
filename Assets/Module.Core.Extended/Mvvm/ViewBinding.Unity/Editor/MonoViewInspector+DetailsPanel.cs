@@ -12,6 +12,7 @@ using Module.Core.Mvvm.ViewBinding;
 using Module.Core.Mvvm.ViewBinding.Adapters;
 using UnityEditor;
 using UnityEngine;
+using static UnityEngine.Networking.UnityWebRequest;
 
 namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 {
@@ -34,119 +35,341 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             Valid,
         }
 
+        private enum TargetTypeResult
+        {
+            Success,
+            UnknownBinder,
+            NotFoundForBinder,
+            NotGameObjectOrComponent,
+        }
+
+        private enum EventResult
+        {
+            None,
+            Consume,
+        }
+
         private Action<Memory<UnityEngine.Object>> _onDropCreateTargets;
 
-        private void DrawDetailsPanel(in EventData eventData)
+        private void DrawDetailsPanels(in EventData eventData)
         {
-            EditorGUILayout.BeginVertical(GUILayout.ExpandHeight(true));
+            var eventResult = EventResult.None;
+
+            EditorGUILayout.BeginVertical();
             {
-                var rect = EditorGUILayout.BeginVertical(s_detailsHeaderStyle, GUILayout.MinHeight(30), GUILayout.Height(30));
+                var bindersProp = _presetBindersProp;
+
+                if (bindersProp.SelectedIndex.HasValue == false)
                 {
-                    EditorGUILayout.Space(20f);
+                    DrawDetailsPanel_NoBinderSelected();
+                }
+                else
+                {
+                    var index = bindersProp.SelectedIndex.Value;
+                    var bindersLength = bindersProp.ArraySize;
 
-                    var tabBarRect = rect;
-                    tabBarRect.height = 32f;
-                    tabBarRect.x += 10f;
-                    tabBarRect.width -= 20f;
-
-                    _selectedDetailsTabIndex = GUI.Toolbar(tabBarRect, _selectedDetailsTabIndex, s_detailsTabLabels);
-
-                    if (_presetBindersProp.ValidateSelectedIndex())
+                    if ((uint)index >= (uint)bindersLength)
                     {
-                        var iconWarning = s_iconWarning;
-                        var iconRect = tabBarRect;
-                        iconRect.y += 8f;
-                        iconRect.width = 18f;
-                        iconRect.height = 18f;
+                        DrawDetailsPanel_NoBinderSelected();
+                    }
+                    else
+                    {
+                        var result = TryGetTargetType(
+                              bindersProp
+                            , out var binderProp
+                            , out var binderType
+                            , out var targetType
+                        );
 
-                        if (_presetBindingsProp == null || _presetBindingsProp.ArraySize < 1)
+                        if (result == TargetTypeResult.Success)
                         {
-                            iconWarning.tooltip = NO_BINDING;
-                            iconRect.x = tabBarRect.x + (tabBarRect.width / 2f) - 22f;
+                            eventResult = DrawDetailsPanel_Targets(eventData, binderProp, targetType);
 
-                            GUI.Label(iconRect, iconWarning);
+                            GUILayout.Space(4f);
+
+                            if (eventResult == EventResult.None)
+                            {
+                                eventResult = DrawDetailsPanel_Bindings(eventData, binderProp, targetType);
+                            }
                         }
-
-                        if (_presetTargetsProp == null || _presetTargetsProp.ArraySize < 1)
+                        else
                         {
-                            iconWarning.tooltip = NO_TARGET;
-                            iconRect.x = tabBarRect.x + tabBarRect.width - 22f;
-
-                            GUI.Label(iconRect, iconWarning);
-                        }
-
-                        var dropRect = tabBarRect;
-
-                        // Draw drop area for Targets
-                        if (_presetTargetsProp != null)
-                        {
-                            dropRect.width = tabBarRect.width / 2f;
-                            dropRect.x = tabBarRect.x + dropRect.width;
-                            DrawDragDropArea(dropRect, eventData, _onDropCreateTargets ??= OnDropCreateTargets);
+                            DrawDetailsPanel_InvalidTargetType(result, binderType, targetType);
                         }
                     }
                 }
-                EditorGUILayout.EndVertical();
+            }
+            EditorGUILayout.EndVertical();
 
-                rect = EditorGUILayout.BeginVertical(s_rootTabViewStyle, GUILayout.ExpandHeight(true));
+            if (eventResult == EventResult.Consume)
+            {
+                Event.current.Use();
+            }
+        }
+
+        private void DrawDetailsPanel_NoBinderSelected()
+        {
+            EditorGUILayout.BeginVertical(s_rootTabViewStyle);
+            {
+                GUILayout.Label("No binder is selected.", s_noBinderStyle);
+            }
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawDetailsPanel_InvalidTargetType(TargetTypeResult result, Type binderType, Type targetType)
+        {
+            EditorGUILayout.BeginVertical(s_rootTabViewStyle);
+            {
+                GUILayout.Label(GetMessage(result, binderType, targetType), s_noBinderStyle);
+            }
+            EditorGUILayout.EndVertical();
+        }
+
+        private EventResult DrawDetailsPanel_Targets(
+              in EventData eventData
+            , SerializedProperty binderProp
+            , Type targetType
+        )
+        {
+            var eventResult = EventResult.None;
+
+            EditorGUILayout.BeginVertical(s_rootTabViewStyle);
+            {
+                var targetsProp = _presetTargetsProp.Property;
+                var layoutWidth = GUILayout.ExpandWidth(true);
+
+                var headerRect = EditorGUILayout.BeginHorizontal(layoutWidth, GUILayout.Height(30f));
                 {
-                    // Draw background
+                    EditorGUILayout.Space(30f);
+                    DrawPanelHeaderFoldout(headerRect, targetsProp, s_targetsLabel , new Rect(0f, 0f, 0f, -2f));
+                }
+                EditorGUILayout.EndHorizontal();
+
+                if (_presetTargetsProp == null || _presetTargetsProp.ArraySize < 1)
+                {
+                    var iconRect = headerRect;
+                    iconRect.x += headerRect.width - 22f;
+                    iconRect.y += 6f;
+                    iconRect.width = 18f;
+                    iconRect.height = 18f;
+
+                    var iconWarning = s_iconWarning;
+                    iconWarning.tooltip = NO_BINDING;
+
+                    GUI.Label(iconRect, iconWarning);
+                }
+
+                // Draw drop area for Targets
+                if (_presetTargetsProp != null)
+                {
+                    DrawDragDropArea(headerRect, eventData, _onDropCreateTargets ??= OnDropCreateTargets);
+                }
+
+                if (targetsProp.isExpanded)
+                {
+                    var contentRect = EditorGUILayout.BeginVertical(layoutWidth);
                     {
-                        var newRect = rect;
-                        newRect.x += 1f;
-                        newRect.y += 1f;
-                        newRect.width -= 2f;
-                        newRect.height -= 2f;
+                        eventResult = DrawDetailsPanel_Targets_Content(eventData, contentRect, binderProp, targetType);
+                        GUILayout.Space(6f);
+                    }
+                    EditorGUILayout.EndVertical();
+                }
+            }
+            EditorGUILayout.EndVertical();
+
+            return eventResult;
+        }
+
+        private EventResult DrawDetailsPanel_Targets_Content(
+              in EventData eventData
+            , in Rect sectionRect
+            , SerializedProperty binderProp
+            , Type targetType
+        )
+        {
+            var property = _presetTargetsProp;
+            var serializedObject = property.Property.serializedObject;
+            var target = serializedObject.targetObject;
+            var toolbarButton = DrawDetailsPanel_ToolbarButtons(property.ArraySize, true);
+
+            switch (toolbarButton)
+            {
+                case DetailsToolbarButton.SimpleAdd:
+                {
+                    AddTargetToSelectedBinder(binderProp);
+                    break;
+                }
+
+                case DetailsToolbarButton.Add:
+                {
+                    ShowTargetDropdown(this, binderProp, targetType);
+                    break;
+                }
+
+                case DetailsToolbarButton.Remove:
+                {
+                    property.DeleteSelected();
+                    break;
+                }
+
+                case DetailsToolbarButton.Menu:
+                {
+                    ShowMenuContextMenu(property);
+                    break;
+                }
+            }
+
+            var length = property.ArraySize;
+
+            if (length < 1)
+            {
+                EditorGUILayout.LabelField("This target list is empty.", s_noBinderStyle, GUILayout.Height(30));
+
+                if (eventData.Type == EventType.MouseDown
+                    && eventData.Button == 1
+                    && sectionRect.Contains(eventData.MousePos)
+                )
+                {
+                    ShowRightClickContextMenuEmpty(property);
+                }
+                return EventResult.None;
+            }
+
+            var indexLabel = new GUIContent();
+            var indexLabelWidth = GUILayout.Width(30);
+            var itemLabelStyle = s_indexLabelStyle;
+            var selectedColor = s_selectedColor;
+            var contentColor = s_altContentColor;
+            var comp = EditorGUIUtility.isProSkin ? 0 : 1;
+            var selectedIndex = property.SelectedIndex;
+            var mouseDownIndex = -1;
+            var mousePos = eventData.MousePos;
+
+            for (var i = 0; i < length; i++)
+            {
+                var elementProp = property.GetElementAt(i);
+
+                EditorGUILayout.Space(2f);
+                var rect = EditorGUILayout.BeginHorizontal();
+                {
+                    var backRect = rect;
+                    backRect.x -= 2f;
+                    backRect.y -= 4f;
+                    backRect.width += 4f;
+                    backRect.height += 7f;
+
+                    // Draw background and select button
+                    {
+                        var backColor = i % 2 == comp ? contentColor : new Color(1, 1, 1, 0f);
+                        backColor = i == selectedIndex ? selectedColor : backColor;
 
                         var tex = Texture2D.whiteTexture;
                         var mode = ScaleMode.StretchToFill;
 
-                        GUI.DrawTexture(newRect, tex, mode, false, 0f, s_contentColor, Vector4.zero, 3f);
+                        GUI.DrawTexture(backRect, tex, mode, false, 0f, backColor, Vector4.zero, Vector4.zero);
                     }
 
-                    if (_presetBindersProp.SelectedIndex.HasValue == false)
-                    {
-                        GUILayout.Label("No binder is selected.", s_noBinderStyle);
-                    }
-                    else
-                    {
-                        var index = _presetBindersProp.SelectedIndex.Value;
-                        var bindersLength = _presetBindersProp.ArraySize;
+                    indexLabel.text = i.ToString();
+                    EditorGUILayout.LabelField(indexLabel, itemLabelStyle, indexLabelWidth);
 
-                        if ((uint)index >= (uint)bindersLength)
+                    {
+                        var labelRect = rect;
+                        labelRect.width = 30;
+
+                        if (eventData.Type == EventType.MouseDown
+                            && eventData.Button == 1
+                            && labelRect.Contains(mousePos)
+                        )
                         {
-                            GUILayout.Label("No binder is selected.", s_noBinderStyle);
-                        }
-                        else
-                        {
-                            DrawDetailsPanel_Content(eventData, rect);
+                            mouseDownIndex = i;
                         }
                     }
 
+                    var oldValue = elementProp.objectReferenceValue;
+                    var newValue = EditorGUILayout.ObjectField(oldValue, targetType, true);
+
+                    if (oldValue != newValue)
+                    {
+                        Undo.RecordObject(target, $"Set value at {elementProp.propertyPath}");
+
+                        elementProp.objectReferenceValue = newValue;
+                        serializedObject.ApplyModifiedProperties();
+                        serializedObject.Update();
+                    }
+
+                    GUILayout.Space(4f);
+
+                    if (eventData.Type == EventType.MouseDown
+                        && eventData.Button == 0
+                        && backRect.Contains(mousePos)
+                    )
+                    {
+                        property.SetSelectedIndex(i);
+                        EditorGUILayout.EndHorizontal();
+                        return EventResult.Consume;
+                    }
+                }
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.Space(2f);
+            }
+
+            if (mouseDownIndex >= 0)
+            {
+                ShowRightClickContextMenu(property, mouseDownIndex);
+            }
+
+            return EventResult.None;
+        }
+
+        private EventResult DrawDetailsPanel_Bindings(
+              in EventData eventData
+            , SerializedProperty binderProp
+            , Type targetType
+        )
+        {
+            var eventResult = EventResult.None;
+
+            EditorGUILayout.BeginVertical(s_rootTabViewStyle);
+            {
+                var layoutWidth = GUILayout.ExpandWidth(true);
+                var headerRect = EditorGUILayout.BeginHorizontal(s_panelHeaderStyle, GUILayout.Height(30));
+                {
+                    DrawPanelHeaderLabel(s_bindingsLabel, layoutWidth, headerRect);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                if (_presetBindingsProp == null || _presetBindingsProp.ArraySize < 1)
+                {
+                    var iconRect = headerRect;
+                    iconRect.x += headerRect.width - 22f;
+                    iconRect.y += 6f;
+                    iconRect.width = 18f;
+                    iconRect.height = 18f;
+
+                    var iconWarning = s_iconWarning;
+                    iconWarning.tooltip = NO_BINDING;
+
+                    GUI.Label(iconRect, iconWarning);
+                }
+
+                var contentRect = EditorGUILayout.BeginVertical(layoutWidth);
+                {
+                    eventResult = DrawDetailsPanel_Bindings_Content(eventData, contentRect, binderProp, targetType);
                     GUILayout.Space(6f);
                 }
                 EditorGUILayout.EndVertical();
             }
             EditorGUILayout.EndVertical();
+
+            return eventResult;
         }
 
-        private void DrawDetailsPanel_Content(in EventData eventData, Rect sectionRect)
-        {
-            var tabIndex = _selectedDetailsTabIndex;
-
-            switch (tabIndex)
-            {
-                case TAB_INDEX_BINDINGS:
-                    DrawDetailsPanel_Bindings(eventData, sectionRect);
-                    break;
-
-                case TAB_INDEX_TARGETS:
-                    DrawDetailsPanel_Targets(eventData, sectionRect);
-                    break;
-            }
-        }
-
-        private void DrawDetailsPanel_Bindings(in EventData eventData, Rect sectionRect)
+        private EventResult DrawDetailsPanel_Bindings_Content(
+              in EventData eventData
+            , in Rect sectionRect
+            , SerializedProperty binderProp
+            , Type targetType
+        )
         {
             var property = _presetBindingsProp;
             var toolbarButton = DrawDetailsPanel_ToolbarButtons(property.ArraySize, false);
@@ -155,7 +378,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 case DetailsToolbarButton.Add:
                 {
-                    ShowBindingDropdown(_presetBindersProp, this);
+                    ShowBindingDropdown(this, binderProp, targetType);
                     break;
                 }
 
@@ -185,7 +408,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 {
                     ShowRightClickContextMenuEmpty(property);
                 }
-                return;
+                return EventResult.None;
             }
 
             var propertyLabel = s_propertyBindingLabel;
@@ -263,14 +486,14 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                 EditorGUILayout.Space(2f);
                 var rect = EditorGUILayout.BeginVertical();
                 {
+                    var backRect = rect;
+                    backRect.x += 1f;
+                    backRect.y -= 4f;
+                    backRect.width += 1f;
+                    backRect.height += 7f + 4f;
+
                     // Draw background and select button
                     {
-                        var backRect = rect;
-                        backRect.x += 1f;
-                        backRect.y -= 4f;
-                        backRect.width += 1f;
-                        backRect.height += 7f + 4f;
-
                         var backColor = i % 2 == comp ? contentColor : new Color(1, 1, 1, 0f);
                         backColor = i == selectedIndex ? selectedColor : backColor;
 
@@ -278,23 +501,9 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                         var mode = ScaleMode.StretchToFill;
 
                         GUI.DrawTexture(backRect, tex, mode, false, 0f, backColor, Vector4.zero, Vector4.zero);
-
-                        if (eventData.Type == EventType.MouseDown
-                            && backRect.Contains(mousePos)
-                        )
-                        {
-                            if (eventData.Button == 0)
-                            {
-                                property.SetSelectedIndex(i);
-                            }
-                            else if (eventData.Button == 1)
-                            {
-                                mouseDownIndex = i;
-                            }
-                        }
                     }
 
-                    EditorGUILayout.BeginHorizontal();
+                    var labelRect = EditorGUILayout.BeginHorizontal();
                     {
                         indexLabel.text = i.ToString();
                         EditorGUILayout.LabelField(indexLabel, indexLabelStyle, indexLabelWidth);
@@ -305,17 +514,31 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     }
                     EditorGUILayout.EndHorizontal();
 
-                    EditorGUILayout.BeginHorizontal();
+                    var rightClickRect = labelRect;
+
                     if (bindingParamType != null)
                     {
-                        EditorGUILayout.LabelField(GUIContent.none, indexLabelStyle, indexLabelWidth);
+                        var subLabelRect = EditorGUILayout.BeginHorizontal();
+                        {
+                            subHeaderLabel.text = bindingParamType.GetFriendlyName(true);
+                            subHeaderLabel.tooltip = bindingParamType.FullName;
 
-                        subHeaderLabel.text = bindingParamType.GetFriendlyName();
-                        subHeaderLabel.tooltip = bindingParamType.FullName;
-                        EditorGUILayout.LabelField(subHeaderLabel, subHeaderLabelStyle);
-                        GUILayout.Space(4f);
+                            EditorGUILayout.LabelField(GUIContent.none, indexLabelStyle, indexLabelWidth);
+                            EditorGUILayout.LabelField(subHeaderLabel, subHeaderLabelStyle);
+                            GUILayout.Space(4f);
+                        }
+                        EditorGUILayout.EndHorizontal();
+
+                        rightClickRect.height += subLabelRect.height;
                     }
-                    EditorGUILayout.EndHorizontal();
+
+                    if (eventData.Type == EventType.MouseDown
+                        && eventData.Button == 1
+                        && rightClickRect.Contains(mousePos)
+                    )
+                    {
+                        mouseDownIndex = i;
+                    }
 
                     GUILayout.Space(6f);
 
@@ -444,6 +667,16 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                         GUILayout.Space(4f);
                     }
                     EditorGUILayout.EndHorizontal();
+
+                    if (eventData.Type == EventType.MouseDown
+                        && eventData.Button == 0
+                        && backRect.Contains(mousePos)
+                    )
+                    {
+                        property.SetSelectedIndex(i);
+                        EditorGUILayout.EndVertical();
+                        return EventResult.Consume;
+                    }
                 }
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.Space(6f);
@@ -453,6 +686,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 ShowRightClickContextMenu(property, mouseDownIndex);
             }
+
+            return EventResult.None;
         }
 
         private static void DrawAdapterProp(
@@ -620,134 +855,12 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             }
         }
 
-        private void DrawDetailsPanel_Targets(in EventData eventData, Rect sectionRect)
+        private static void ShowBindingDropdown(
+              MonoViewInspector inspector
+            , SerializedProperty binderProp
+            , Type targetType
+        )
         {
-            var property = _presetTargetsProp;
-            var serializedObject = property.Property.serializedObject;
-            var target = serializedObject.targetObject;
-            var toolbarButton = DrawDetailsPanel_ToolbarButtons(property.ArraySize, true);
-
-            switch (toolbarButton)
-            {
-                case DetailsToolbarButton.SimpleAdd:
-                {
-                    AddTargetToSelectedBinder(_presetBindersProp);
-                    break;
-                }
-
-                case DetailsToolbarButton.Add:
-                {
-                    ShowTargetDropdown(_presetBindersProp, this);
-                    break;
-                }
-
-                case DetailsToolbarButton.Remove:
-                {
-                    property.DeleteSelected();
-                    break;
-                }
-
-                case DetailsToolbarButton.Menu:
-                {
-                    ShowMenuContextMenu(property);
-                    break;
-                }
-            }
-
-            var length = property.ArraySize;
-
-            if (length < 1)
-            {
-                EditorGUILayout.LabelField("This target list is empty.", s_noBinderStyle, GUILayout.Height(30));
-
-                if (eventData.Type == EventType.MouseDown
-                    && eventData.Button == 1
-                    && sectionRect.Contains(eventData.MousePos)
-                )
-                {
-                    ShowRightClickContextMenuEmpty(property);
-                }
-                return;
-            }
-
-            var indexLabel = new GUIContent();
-            var indexLabelWidth = GUILayout.Width(30);
-            var itemLabelStyle = s_indexLabelStyle;
-            var selectedColor = s_selectedColor;
-            var contentColor = s_altContentColor;
-            var comp = EditorGUIUtility.isProSkin ? 0 : 1;
-            var selectedIndex = property.SelectedIndex;
-            var mouseDownIndex = -1;
-            var mousePos = eventData.MousePos;
-
-            for (var i = 0; i < length; i++)
-            {
-                var elementProp = property.GetElementAt(i);
-
-                EditorGUILayout.Space(2f);
-                var rect = EditorGUILayout.BeginHorizontal();
-                {
-                    // Draw background and select button
-                    {
-                        var backRect = rect;
-                        backRect.x -= 2f;
-                        backRect.y -= 4f;
-                        backRect.width += 4f;
-                        backRect.height += 7f;
-
-                        var backColor = i % 2 == comp ? contentColor : new Color(1, 1, 1, 0f);
-                        backColor = i == selectedIndex ? selectedColor : backColor;
-
-                        var tex = Texture2D.whiteTexture;
-                        var mode = ScaleMode.StretchToFill;
-
-                        GUI.DrawTexture(backRect, tex, mode, false, 0f, backColor, Vector4.zero, Vector4.zero);
-
-                        if (GUI.Button(backRect, GUIContent.none, GUIStyle.none))
-                        {
-                            property.SetSelectedIndex(i);
-                        }
-
-                        if (eventData.Type == EventType.MouseDown
-                            && eventData.Button == 1
-                            && backRect.Contains(mousePos)
-                        )
-                        {
-                            mouseDownIndex = i;
-                        }
-                    }
-
-                    indexLabel.text = i.ToString();
-                    EditorGUILayout.LabelField(indexLabel, itemLabelStyle, indexLabelWidth);
-
-                    EditorGUI.BeginChangeCheck();
-                    EditorGUILayout.PropertyField(elementProp, GUIContent.none);
-                    GUILayout.Space(4f);
-
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        Undo.RecordObject(target, $"Set value at {elementProp.propertyPath}");
-                        serializedObject.ApplyModifiedProperties();
-                        serializedObject.Update();
-                    }
-                }
-                EditorGUILayout.EndHorizontal();
-                EditorGUILayout.Space(2f);
-            }
-
-            if (mouseDownIndex >= 0)
-            {
-                ShowRightClickContextMenu(property, mouseDownIndex);
-            }
-        }
-
-        private static void ShowBindingDropdown(SerializedArrayProperty bindersProp, MonoViewInspector inspector)
-        {
-            if (TryGetTargetType(bindersProp, out var binderProp, out var targetType) == false)
-            {
-                return;
-            }
-
             if (s_targetTypeToBindingMenuMap.TryGetValue(targetType, out var menu) == false)
             {
                 return;
@@ -763,13 +876,8 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             menu.Show(Event.current.mousePosition);
         }
 
-        private static void AddTargetToSelectedBinder(SerializedArrayProperty bindersProp)
+        private static void AddTargetToSelectedBinder(SerializedProperty binderProp)
         {
-            if (TryGetTargetType(bindersProp, out var binderProp, out _) == false)
-            {
-                return;
-            }
-
             var targetsProp = binderProp.FindPropertyRelative(PROP_PRESET_TARGETS);
             var serializedObject = targetsProp.serializedObject;
             var target = serializedObject.targetObject;
@@ -781,13 +889,12 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             serializedObject.Update();
         }
 
-        private static void ShowTargetDropdown(SerializedArrayProperty bindersProp, MonoViewInspector inspector)
+        private static void ShowTargetDropdown(
+              MonoViewInspector inspector
+            , SerializedProperty binderProp
+            , Type targetType
+        )
         {
-            if (TryGetTargetType(bindersProp, out var binderProp, out var targetType) == false)
-            {
-                return;
-            }
-
             var rootGO = inspector._view.gameObject;
             var menu = new TreeViewPopup(targetType.Name) {
                 width = 500,
@@ -870,8 +977,16 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
         private void OnDropCreateTargets(Memory<UnityEngine.Object> objects)
         {
-            if (TryGetTargetType(_presetBindersProp, out var binderProp, out var targetType) == false)
+            var result = TryGetTargetType(
+                  _presetBindersProp
+                , out var binderProp
+                , out var binderType
+                , out var targetType
+            );
+
+            if (result != TargetTypeResult.Success)
             {
+                DisplayDialog(result, binderType, targetType);
                 return;
             }
 
@@ -923,8 +1038,6 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             {
                 return;
             }
-
-            _selectedDetailsTabIndex = TAB_INDEX_TARGETS;
         }
 
         private static bool TryAddTargets(SerializedProperty binderProp, IList<int> instanceIds)
@@ -983,7 +1096,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             for (var i = first; i < newSize; i++)
             {
                 var elementProp = targetsProp.GetArrayElementAtIndex(i);
-                elementProp.objectReferenceInstanceIDValue = instanceIds[i];
+                elementProp.objectReferenceInstanceIDValue = instanceIds[i - first];
             }
 
             serializedObject.ApplyModifiedProperties();
@@ -1062,54 +1175,64 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
             return result;
         }
 
-        private static bool TryGetTargetType(
+        private static TargetTypeResult TryGetTargetType(
               SerializedArrayProperty bindersProp
             , out SerializedProperty binderProp
+            , out Type binderType
             , out Type targetType
         )
         {
             binderProp = bindersProp.GetElementAt(bindersProp.SelectedIndex.Value);
-            var binderType = binderProp.managedReferenceValue?.GetType();
+            binderType = binderProp.managedReferenceValue?.GetType();
 
             if (binderType == null)
             {
-                EditorUtility.DisplayDialog(
-                      "Invalid Target Type"
-                    , "Cannot find target type for an unknown binder"
-                    , "I understand"
-                );
-
                 targetType = default;
-                return false;
+                return TargetTypeResult.UnknownBinder;
             }
 
             if (s_binderToTargetTypeMap.TryGetValue(binderType, out targetType) == false)
             {
-                EditorUtility.DisplayDialog(
-                      "Invalid Target Type"
-                    , $"Cannot find target type for the binder {binderType}!"
-                    , "I understand"
-                );
-
                 targetType = default;
-                return false;
+                return TargetTypeResult.NotFoundForBinder;
             }
 
             if (targetType != typeof(GameObject)
                 && typeof(Component).IsAssignableFrom(targetType) == false
             )
             {
-                EditorUtility.DisplayDialog(
-                      "Invalid Target Type"
-                    , $"{targetType} is not UnityEngine.GameObject nor UnityEngine.Component!"
-                    , "I understand"
-                );
-
                 targetType = default;
-                return false;
+                return TargetTypeResult.NotGameObjectOrComponent;
             }
 
-            return true;
+            return TargetTypeResult.Success;
+        }
+
+        private static void DisplayDialog(
+              TargetTypeResult result
+            , Type binderType
+            , Type targetType
+        )
+        {
+            EditorUtility.DisplayDialog(
+                  "Invalid Target Type"
+                , GetMessage(result, binderType, targetType)
+                , "I understand"
+            );
+        }
+
+        private static string GetMessage(
+              TargetTypeResult result
+            , Type binderType
+            , Type targetType
+        )
+        {
+            return result switch {
+                TargetTypeResult.UnknownBinder => "Cannot find target type for an unknown binder",
+                TargetTypeResult.NotFoundForBinder => $"Cannot find target type for the binder {binderType}!",
+                TargetTypeResult.NotGameObjectOrComponent => $"{targetType} is not GameObject nor Component!",
+                _ => string.Empty,
+            };
         }
 
         private static TargetBindingResult GetTargetMemberData(

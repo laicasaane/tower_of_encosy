@@ -17,7 +17,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private static GUIStyle s_binderButtonStyle;
         private static GUIStyle s_binderIndexLabelStyle;
         private static GUIStyle s_binderSelectedButtonStyle;
-        private static GUIStyle s_bindersHeaderStyle;
+        private static GUIStyle s_panelHeaderStyle;
         private static GUIStyle s_detailsHeaderStyle;
         private static GUIStyle s_removeButtonStyle;
         private static GUIStyle s_indexLabelStyle;
@@ -58,8 +58,12 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
         private static readonly GUIContent s_deleteItemLabel = new("Delete");
 
         private static readonly GUIContent s_bindersLabel = new(
-            "Binders"
-            //, "Can also drag and drop GameObject or Component here to create binders."
+            "Binders"//, "Can also drag and drop GameObject or Component here to create binders."
+        );
+
+        private static readonly GUIContent s_bindingsLabel = new("Bindings");
+        private static readonly GUIContent s_targetsLabel = new(
+            "Targets", "Can also drag and drop GameObject or Component here to add to the list."
         );
 
         private static readonly GUIContent[] s_detailsTabLabels = new GUIContent[] {
@@ -82,7 +86,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
 
             s_rootTabLabelStyle = new(EditorStyles.boldLabel) {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = 13,
+                fontSize = 12,
             };
 
             s_toolbarLeftButtonStyle = new(EditorStyles.miniButtonMid) {
@@ -155,7 +159,7 @@ namespace Module.Core.Extended.Editor.Mvvm.ViewBinding.Unity
                     = Texture2D.whiteTexture;
             }
 
-            s_bindersHeaderStyle = new() {
+            s_panelHeaderStyle = new() {
                 padding = new(0, 0, 0, 0),
                 margin = new(0, 0, 0, 0),
                 border = new(0, 0, 0, 0),
