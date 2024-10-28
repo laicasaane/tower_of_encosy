@@ -1,1 +1,0 @@
-[assembly: global::Module.Core.Mvvm.SkipSourceGenForAssembly]
