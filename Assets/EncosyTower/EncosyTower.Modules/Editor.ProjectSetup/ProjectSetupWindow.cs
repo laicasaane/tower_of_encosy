@@ -46,6 +46,9 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
         private PackageInfo[] _selectedPackages = Array.Empty<PackageInfo>();
         private GUIStyle _featureButtonStyle;
         private Vector2 _scrollViewPos;
+        private float? _featureTitleWidth;
+
+        private readonly GUIContent _featureTitle = new();
 
         private static Dictionary<string, PackageInfo[]> GetFeatures(HashSet<string> installedPackages)
         {
@@ -119,12 +122,16 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
 
         public void OnEnable()
         {
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+
             s_listRequest = Client.List(true, true);
             EditorApplication.update += ListRequestProgress;
         }
 
         public void OnDestroy()
         {
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+
             if (s_listRequest != null)
             {
                 EditorApplication.update -= ListRequestProgress;
@@ -136,6 +143,11 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
                 EditorApplication.update -= AddRequestProgress;
                 s_addRequest = null;
             }
+        }
+
+        private void OnPlayModeStateChanged(PlayModeStateChange _)
+        {
+            Close();
         }
 
         private void ListRequestProgress()
@@ -191,6 +203,8 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
 
         public void OnGUI()
         {
+            var featureTitle = _featureTitle;
+            var featureButtonStyle = _featureButtonStyle;
             var features = _features;
 
             if (features == null || features.Count < 1)
@@ -235,11 +249,34 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
             EditorGUILayout.Space();
 
             EditorGUILayout.BeginHorizontal();
-            _scrollViewPos = EditorGUILayout.BeginScrollView(_scrollViewPos, GUILayout.MinWidth(200));
+
+            if (_featureTitleWidth.HasValue == false)
+            {
+                var maxValue = 0f;
+
+                foreach (var (feature, _) in features)
+                {
+                    featureTitle.text = feature;
+                    featureButtonStyle.CalcMinMaxWidth(featureTitle, out _, out var max);
+
+                    maxValue = Math.Max(max, maxValue);
+                }
+
+                _featureTitleWidth = maxValue;
+            }
+
+            var featureTitleWidth = _featureTitleWidth ?? 200f;
+            var scrollWidth = featureTitleWidth + 40f;
+
+            _scrollViewPos = EditorGUILayout.BeginScrollView(_scrollViewPos, GUILayout.MinWidth(scrollWidth));
+
+            featureButtonStyle.contentOffset = new((scrollWidth - featureTitleWidth) / 2f, 0f);
 
             foreach (var (feature, packages) in features.OrderBy(static x => x.Key))
             {
-                if (GUILayout.Button(feature, _featureButtonStyle))
+                featureTitle.text = feature;
+
+                if (GUILayout.Button(featureTitle, featureButtonStyle))
                 {
                     _selectedPackages = packages;
                 }
@@ -262,7 +299,6 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
 
             _featureButtonStyle = new(GUI.skin.button) {
                 alignment = TextAnchor.MiddleLeft,
-                contentOffset = new(30f, 0f),
             };
 
             var table = _table = new();

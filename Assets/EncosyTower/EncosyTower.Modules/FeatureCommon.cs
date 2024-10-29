@@ -4,7 +4,7 @@ using EncosyTower.Modules.Editor.ProjectSetup;
 
 namespace EncosyTower.Modules
 {
-    [Feature("0. Core")]
+    [Feature("0. EncosyTower: Common")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.burst", "1.8.18")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.collections", "2.5.1")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.logging", "1.3.4")]
@@ -36,11 +36,7 @@ namespace EncosyTower.Modules
     [RequiresPackage(PackageRegistry.OpenUpm, "com.xarbrough.renamer", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.xarbrough.scriptable-object-creator", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.yasirkula.inspectplus", isOptional: true)]
-
-    [RequiresPackage(PackageRegistry.GitUrl, "https://github.com/baba-s/Kogane.AssemblyDefinitionAssetHeaderGUI.git", isOptional: true)]
-    [RequiresPackage(PackageRegistry.GitUrl, "https://github.com/baba-s/Kogane.CheckBoxWindow.git", isOptional: true)]
-    [RequiresPackage(PackageRegistry.GitUrl, "https://github.com/baba-s/Kogane.JsonAssemblyDefinition.git", isOptional: true)]
-    internal readonly struct FeatureCore { }
+    internal readonly struct FeatureCommon { }
 }
 
 #endif

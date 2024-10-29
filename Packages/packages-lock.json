@@ -48,27 +48,6 @@
       "dependencies": {},
       "url": "https://package.openupm.com"
     },
-    "com.baba-s.kogane-assembly-definition-asset-header-gui": {
-      "version": "https://github.com/baba-s/Kogane.AssemblyDefinitionAssetHeaderGUI.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "2040dc04349d2a812a92bb7890861314650d9984"
-    },
-    "com.baba-s.kogane-check-box-window": {
-      "version": "https://github.com/baba-s/Kogane.CheckBoxWindow.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "b8b4b782e4673dedae1974d33cff23141d4c5ba7"
-    },
-    "com.baba-s.kogane-json-assembly-definition": {
-      "version": "https://github.com/baba-s/Kogane.JsonAssemblyDefinition.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "45e6f694b63f943e90ef13c40b276cd54316c345"
-    },
     "com.browar.editor-toolbox": {
       "version": "0.13.1",
       "depth": 0,
