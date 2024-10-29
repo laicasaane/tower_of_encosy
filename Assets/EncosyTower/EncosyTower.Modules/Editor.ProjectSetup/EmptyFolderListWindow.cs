@@ -22,17 +22,17 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
         private const string LIST_TITLE = "Empty Folders";
         private const string LIST_ZERO_MSG = "Found 0 empty folder...";
 
-        private EmptyFolderInfo[] _folders;
-        private SimpleTableView<EmptyFolderInfo> _table;
+        private ItemInfo[] _items;
+        private SimpleTableView<ItemInfo> _table;
 
         public void OnEnable()
         {
-            if (FindEmptyFolders(out var folders) == false)
+            if (FindItems(out var items) == false)
             {
                 return;
             }
 
-            _folders = folders;
+            _items = items;
         }
 
         public void OnGUI()
@@ -57,9 +57,9 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
             }
             EditorGUILayout.EndHorizontal();
 
-            var folders = _folders.AsSpan();
+            var items = _items.AsSpan();
 
-            if (folders.Length < 1)
+            if (items.Length < 1)
             {
                 EditorGUILayout.LabelField(LIST_ZERO_MSG);
                 return;
@@ -69,7 +69,7 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
 
             EditorGUILayout.Space();
 
-            _table.DrawTableGUI(_folders, rowHeight: EditorGUIUtility.singleLineHeight * 1.7f);
+            _table.DrawTableGUI(_items, rowHeight: EditorGUIUtility.singleLineHeight * 1.7f);
             _table.ResizeToFit();
         }
 
@@ -97,12 +97,12 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
                 .SetSorting((a, b) => string.Compare(a.path, b.path, StringComparison.Ordinal));
         }
 
-        private static void TableColumn_Empty(Rect rect, EmptyFolderInfo item)
+        private static void TableColumn_Empty(Rect rect, ItemInfo item)
         {
 
         }
 
-        private static void TableColumn_Select(Rect rect, EmptyFolderInfo item)
+        private static void TableColumn_Select(Rect rect, ItemInfo item)
         {
             if (item == null)
             {
@@ -115,7 +115,7 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
             item.selected = EditorGUI.Toggle(rect, item.selected);
         }
 
-        private static void TableColumn_Folder(Rect rect, EmptyFolderInfo item)
+        private static void TableColumn_Folder(Rect rect, ItemInfo item)
         {
             if (item == null || item.asset == false)
             {
@@ -132,7 +132,7 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
             EditorGUI.ObjectField(rect, item.asset, typeof(DefaultAsset), false);
         }
 
-        private static void TableColumn_Path(Rect rect, EmptyFolderInfo item)
+        private static void TableColumn_Path(Rect rect, ItemInfo item)
         {
             if (item == null || string.IsNullOrWhiteSpace(item.path))
             {
@@ -154,26 +154,26 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
 
         private void Delete()
         {
-            var span = _folders.AsSpan();
+            var span = _items.AsSpan();
             var length = span.Length;
-            var folders = new List<EmptyFolderInfo>(length);
+            var items = new List<ItemInfo>(length);
             var paths = new List<string>(length);
 
             for (var i = length - 1; i >= 0; i--)
             {
-                var folder = span[i];
+                var item = span[i];
 
-                if (folder.selected == false)
+                if (item.selected == false)
                 {
-                    folders.Add(folder);
+                    items.Add(item);
                     continue;
                 }
 
-                var path = AssetDatabase.GetAssetPath(folder.asset);
+                var path = AssetDatabase.GetAssetPath(item.asset);
                 paths.Add(path);
             }
 
-            _folders = folders.ToArray();
+            _items = items.ToArray();
 
             if (paths.Count < 1)
             {
@@ -184,11 +184,11 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
             AssetDatabase.DeleteAssets(paths.ToArray(), failed);
         }
 
-        private static bool FindEmptyFolders(out EmptyFolderInfo[] result)
+        private static bool FindItems(out ItemInfo[] result)
         {
             var directoryInfo = new DirectoryInfo(Application.dataPath);
             var rootPath = Path.Combine(Application.dataPath, "..");
-            var folders = new List<EmptyFolderInfo>();
+            var items = new List<ItemInfo>();
 
             foreach (var subDirectory in directoryInfo.GetDirectories("*.*", SearchOption.AllDirectories))
             {
@@ -219,21 +219,21 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
                     continue;
                 }
 
-                folders.Add(new EmptyFolderInfo {
+                items.Add(new ItemInfo {
                     asset = asset,
                     path = path,
                     selected = true,
                 });
             }
 
-            if (folders.Count < 1)
+            if (items.Count < 1)
             {
                 EditorUtility.DisplayDialog(LIST_TITLE, "No empty folder found in the project.", "I understand");
                 result = default;
                 return false;
             }
 
-            result = folders.ToArray();
+            result = items.ToArray();
             return true;
 
             static bool IsNotMeta(FileInfo file)
@@ -242,7 +242,7 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
             }
         }
 
-        private class EmptyFolderInfo
+        private class ItemInfo
         {
             public DefaultAsset asset;
             public string path;

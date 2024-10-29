@@ -22,17 +22,17 @@ namespace EncosyTower.Modules.Scenes.Editor
         private const string LIST_TITLE = "Scenes";
         private const string LIST_ZERO_MSG = "Found 0 scene...";
 
-        private SceneInfo[] _scenes;
-        private SimpleTableView<SceneInfo> _table;
+        private ItemInfo[] _items;
+        private SimpleTableView<ItemInfo> _table;
 
         public void OnEnable()
         {
-            if (FindScenes(out var scenes) == false)
+            if (FindItems(out var items) == false)
             {
                 return;
             }
 
-            _scenes = scenes;
+            _items = items;
         }
 
         public void OnGUI()
@@ -45,9 +45,9 @@ namespace EncosyTower.Modules.Scenes.Editor
                 return;
             }
 
-            var scenes = _scenes.AsSpan();
+            var items = _items.AsSpan();
 
-            if (scenes.Length < 1)
+            if (items.Length < 1)
             {
                 EditorGUILayout.LabelField(LIST_ZERO_MSG);
                 return;
@@ -57,7 +57,7 @@ namespace EncosyTower.Modules.Scenes.Editor
 
             EditorGUILayout.Space();
 
-            _table.DrawTableGUI(_scenes, rowHeight: EditorGUIUtility.singleLineHeight * 1.7f);
+            _table.DrawTableGUI(_items, rowHeight: EditorGUIUtility.singleLineHeight * 1.7f);
             _table.ResizeToFit();
         }
 
@@ -75,21 +75,21 @@ namespace EncosyTower.Modules.Scenes.Editor
 
             table.AddColumn("Scene", 200, TableColumn_Scene)
                 .SetAutoResize(true)
-                .SetSorting((a, b) => string.Compare(a.scene.name, b.scene.name, StringComparison.Ordinal));
+                .SetSorting((a, b) => string.Compare(a.asset.name, b.asset.name, StringComparison.Ordinal));
 
             table.AddColumn("Path", 200, TableColumn_Path)
                 .SetAutoResize(true)
                 .SetSorting((a, b) => string.Compare(a.path, b.path, StringComparison.Ordinal));
         }
 
-        private static void TableColumn_Empty(Rect rect, SceneInfo item)
+        private static void TableColumn_Empty(Rect rect, ItemInfo item)
         {
 
         }
 
-        private static void TableColumn_Scene(Rect rect, SceneInfo item)
+        private static void TableColumn_Scene(Rect rect, ItemInfo item)
         {
-            if (item == null || item.scene == false)
+            if (item == null || item.asset == false)
             {
                 return;
             }
@@ -101,13 +101,13 @@ namespace EncosyTower.Modules.Scenes.Editor
             rect.x += 12f;
             rect.y += (height - 20f) / 2f;
 
-            if (GUI.Button(rect, item.scene.name))
+            if (GUI.Button(rect, item.asset.name))
             {
                 EditorSceneManager.OpenScene(item.path, OpenSceneMode.Single);
             }
         }
 
-        private static void TableColumn_Path(Rect rect, SceneInfo item)
+        private static void TableColumn_Path(Rect rect, ItemInfo item)
         {
             if (item == null || string.IsNullOrWhiteSpace(item.path))
             {
@@ -123,11 +123,11 @@ namespace EncosyTower.Modules.Scenes.Editor
 
             if (EditorGUI.LinkButton(rect, label))
             {
-                Selection.activeObject = item.scene;
+                Selection.activeObject = item.asset;
             }
         }
 
-        private static bool FindScenes(out SceneInfo[] result)
+        private static bool FindItems(out ItemInfo[] result)
         {
             var guids = AssetDatabase.FindAssets("t:SceneAsset", s_folders).AsSpan();
 
@@ -138,32 +138,32 @@ namespace EncosyTower.Modules.Scenes.Editor
                 return false;
             }
 
-            var scenes = new List<SceneInfo>(guids.Length);
+            var items = new List<ItemInfo>(guids.Length);
 
             for (var i = 0; i < guids.Length; i++)
             {
                 var guid = guids[i];
                 var path = AssetDatabase.GUIDToAssetPath(guid);
-                var scene = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
+                var asset = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
 
-                if (scene == false)
+                if (asset == false)
                 {
                     continue;
                 }
 
-                scenes.Add(new SceneInfo {
-                    scene = scene,
+                items.Add(new ItemInfo {
+                    asset = asset,
                     path = path,
                 });
             }
 
-            result = scenes.ToArray();
+            result = items.ToArray();
             return true;
         }
 
-        private class SceneInfo
+        private class ItemInfo
         {
-            public SceneAsset scene;
+            public SceneAsset asset;
             public string path;
         }
     }
