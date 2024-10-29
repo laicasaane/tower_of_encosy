@@ -2,28 +2,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using EncosyTower.Modules.TypeWrap;
 using UnityEditor;
-using UnityEngine;
 
 namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 {
     partial class MonoViewInspector
     {
-        private readonly record struct EventData(
-              EventType Type
-            , KeyCode Key
-            , EventModifiers Mods
-            , int Button
-            , Vector2 MousePos
-        )
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator EventData(Event ev)
-                => new(ev.type, ev.keyCode, ev.modifiers, ev.button, ev.mousePosition);
-        }
-
         [WrapRecord]
         private readonly partial record struct DestType(Type _);
 
