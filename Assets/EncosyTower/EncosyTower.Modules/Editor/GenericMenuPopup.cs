@@ -110,7 +110,7 @@ namespace EncosyTower.Modules.Editor
 
         public bool ContainsInPath(string search)
         {
-            if (Name.Contains(search, StringComparison.OrdinalIgnoreCase))
+            if (UnityEditor.Search.FuzzySearch.FuzzyMatch(search, Name))
             {
                 return true;
             }

@@ -241,7 +241,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 itemRect.y += offsetY;
                 offsetY += itemRect.height;
 
-                if (EditorGUIUtility.isProSkin == false && isSelected)
+                if (EditorAPI.IsDark == false && isSelected)
                 {
                     buttonStyle.normal.textColor
                         = buttonStyle.active.textColor
@@ -341,7 +341,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                     GUI.Label(iconRect, iconWarning);
                 }
 
-                if (EditorGUIUtility.isProSkin == false && isSelected)
+                if (EditorAPI.IsDark == false && isSelected)
                 {
                     buttonStyle.normal.textColor = normalColor;
                     buttonStyle.active.textColor = activeColor;

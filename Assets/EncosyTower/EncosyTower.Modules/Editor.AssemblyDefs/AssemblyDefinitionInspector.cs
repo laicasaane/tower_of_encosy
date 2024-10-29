@@ -18,6 +18,8 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
         private const string TITLE = "Select References";
         private const string EMPTY_MSG = "No assembly definition found in the project.";
 
+        private static GUIStyle s_separatorStyle;
+
         static AssemblyDefinitionInspector()
         {
             UnityEditor.Editor.finishedDefaultHeaderGUI -= OnGUI;
@@ -58,36 +60,34 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
 
             }
 
-            CheckBoxWindow.OpenWindow(TITLE, data.Items, data, OnApply, new(DrawItem, ItemHeight));
+            CheckBoxWindow.OpenWindow(TITLE, data.Items, data, OnApply, new(DrawItem, ItemHeight, DrawSeparator));
         }
 
         private static int ItemHeight()
-            => 30;
+            => 22;
 
         private static void DrawItem(Rect rect, GUIContent label, int index, IItemInfo item)
         {
+            GUILayout.Space(2f);
             EditorGUILayout.BeginHorizontal();
             {
-                EditorGUILayout.Space(rect.height);
+                item.IsChecked = EditorGUILayout.ToggleLeft(label, item.IsChecked);
+                EditorGUILayout.ObjectField(((ItemInfo)item).asset, typeof(AssemblyDefinitionAsset), false);
+            }
+            EditorGUILayout.EndHorizontal();
+        }
 
-                var newRect = rect;
-                newRect.height = 18f;
-                newRect.y += (rect.height - newRect.height) / 2f;
+        private static void DrawSeparator(Rect rect, GUIContent label, int index, IItemInfo item)
+        {
+            s_separatorStyle ??= new GUIStyle(EditorStyles.boldLabel) {
+                alignment = TextAnchor.MiddleCenter
+            };
 
-                {
-                    var toggleRect = newRect;
-                    toggleRect.x += 9f;
-                    toggleRect.width = 18f;
-                    item.IsChecked = EditorGUI.Toggle(toggleRect, item.IsChecked);
-                }
+            label.text = ((ItemInfo)item).separatorText;
 
-                {
-                    var assetRect = newRect;
-                    assetRect.x += 30f;
-                    assetRect.width -= 30f + 9f;
-
-                    EditorGUI.ObjectField(assetRect, ((ItemInfo)item).asset, typeof(AssemblyDefinitionAsset), false);
-                }
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.LabelField(label, s_separatorStyle);
             }
             EditorGUILayout.EndHorizontal();
         }
@@ -104,6 +104,7 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
 
             assemblyDef.references = items
                 .Where(static x => x != null)
+                .Where(static x => x.Separator == false)
                 .Where(static x => x.IsChecked)
                 .Select(x => data.UseGuid ? x.guid : x.Name)
                 .ToArray();
@@ -123,9 +124,13 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
                 return false;
             }
 
-            var guidStrings = AssetDatabase.FindAssets($"t:{nameof(AssemblyDefinitionAsset)}").AsSpan();
+            var guidStrings = AssetDatabase
+                .FindAssets($"t:{nameof(AssemblyDefinitionAsset)}")
+                .AsSpan();
 
-            if (guidStrings.Length < 1)
+            var guidStringsLength = guidStrings.Length;
+
+            if (guidStringsLength < 1)
             {
                 EditorUtility.DisplayDialog(TITLE, EMPTY_MSG, "I understand");
                 result = default;
@@ -171,9 +176,10 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
                 }
             }
 
-            var items = new List<ItemInfo>(guidStrings.Length);
+            var items = new List<ItemInfo>(guidStringsLength);
+            var checkedItems = new List<ItemInfo>(guidStringsLength);
 
-            for (var i = 0; i < guidStrings.Length; i++)
+            for (var i = 0; i < guidStringsLength; i++)
             {
                 var guidString = guidStrings[i];
                 var path = AssetDatabase.GUIDToAssetPath(guidString);
@@ -189,16 +195,29 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
                     continue;
                 }
 
-                items.Add(new ItemInfo {
+                var item = new ItemInfo {
                     asset = asset,
                     guid = guidString,
                     IsChecked = useGuid ? refGuids.Contains(guid) : refNames.Contains(asset.name),
-                });
+                };
+
+                if (item.IsChecked)
+                {
+                    checkedItems.Add(item);
+                }
+                else
+                {
+                    items.Add(item);
+                }
             }
 
-            items.Sort(ItemInfo.Compare);
+            items.Sort(ItemInfo.CompareName);
+            checkedItems.Sort(ItemInfo.CompareName);
+            checkedItems.Insert(0, new() { Separator = true, separatorText = "Pre-selected References" });
+            checkedItems.Add(new() { Separator = true, separatorText = "Other References" });
+            checkedItems.AddRange(items);
 
-            result = new(assetPath, assemblyDef, useGuid, items.ToArray());
+            result = new(assetPath, assemblyDef, useGuid, checkedItems.ToArray());
             return true;
         }
 
@@ -206,12 +225,15 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
         {
             public AssemblyDefinitionAsset asset;
             public string guid;
+            public string separatorText;
 
-            public string Name => asset.name;
+            public string Name => asset ? asset.name : string.Empty;
 
             public bool IsChecked { get; set; }
 
-            public static int Compare(ItemInfo x, ItemInfo y)
+            public bool Separator { get; set; }
+
+            public static int CompareName(ItemInfo x, ItemInfo y)
                 => string.CompareOrdinal(x.Name, y.Name);
         }
 

@@ -41,10 +41,10 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
         private static GUIContent s_foldoutCollapsedIconLabel;
         private static GUIContent s_resetIconLabel;
         private static Color s_headerColor;
-        private static Color s_contentColor;
         private static Color s_selectedColor;
         private static Color s_menuColor;
-        private static Color s_altContentColor;
+        private static Color s_backColor;
+        private static Color s_altBackColor;
 
         private static readonly GUIContent s_propertyBindingLabel = new("Property");
         private static readonly GUIContent s_commandBindingLabel = new("Command");
@@ -216,26 +216,17 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             };
 
             {
-                var icon = EditorGUIUtility.isProSkin
-                    ? EditorGUIUtility.IconContent("d_Toolbar Plus")
-                    : EditorGUIUtility.IconContent("Toolbar Plus");
-
+                var icon = EditorAPI.GetIcon("d_Toolbar Plus", "Toolbar Plus");
                 s_addIconLabel = new(icon.image, "Add");
             }
 
             {
-                var icon = EditorGUIUtility.isProSkin
-                    ? EditorGUIUtility.IconContent("d_Toolbar Plus More")
-                    : EditorGUIUtility.IconContent("Toolbar Plus More");
-
+                var icon = EditorAPI.GetIcon("d_Toolbar Plus More", "Toolbar Plus More");
                 s_addMoreIconLabel = new(icon.image, "Add");
             }
 
             {
-                var icon = EditorGUIUtility.isProSkin
-                    ? EditorGUIUtility.IconContent("d_Toolbar Minus")
-                    : EditorGUIUtility.IconContent("Toolbar Minus");
-
+                var icon = EditorAPI.GetIcon("d_Toolbar Minus", "Toolbar Minus");
                 s_removeIconLabel = new(icon.image, "Remove");
                 s_removeSelectedLabel = new(icon.image, "Remove Selected Item");
             }
@@ -243,86 +234,50 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             {
                 var icon = EditorGUIUtility.IconContent("pane options@2x");
                 s_menuIconLabel = new(icon.image, "Menu");
-                s_menuColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+                s_menuColor = EditorAPI.IsDark ? Color.white : Color.black;
             }
 
             {
-                var icon = EditorGUIUtility.isProSkin
-                    ? EditorGUIUtility.IconContent("d_console.warnicon")
-                    : EditorGUIUtility.IconContent("console.warnicon");
-
+                var icon = EditorAPI.GetIcon("d_console.warnicon", "console.warnicon");
                 s_iconWarning = new GUIContent(icon.image);
             }
 
-            s_iconBinding = EditorGUIUtility.isProSkin
-                ? EditorGUIUtility.IconContent("d_BlendTree Icon")
-                : EditorGUIUtility.IconContent("BlendTree Icon");
+            s_iconBinding = EditorAPI.GetIcon("d_BlendTree Icon", "BlendTree Icon");
 
             {
-                var icon = EditorGUIUtility.isProSkin
-                    ? EditorGUIUtility.IconContent("d_P4_CheckOutRemote")
-                    : EditorGUIUtility.IconContent("P4_CheckOutRemote");
-
+                var icon = EditorAPI.GetIcon("d_P4_CheckOutRemote", "P4_CheckOutRemote");
                 s_applyLabel = new GUIContent(icon.image, "Apply");
             }
 
             {
-                var icon = EditorGUIUtility.isProSkin
-                    ? EditorGUIUtility.IconContent("d_P4_DeletedLocal")
-                    : EditorGUIUtility.IconContent("P4_DeletedLocal");
-
-                s_cancelLabel = new GUIContent(icon.image, "Cancel");
+                var icon = EditorAPI.GetIcon("d_P4_DeletedLocal", "P4_DeletedLocal");
+                s_cancelLabel = new(icon.image, "Cancel");
             }
 
             {
-                var icon = EditorGUIUtility.isProSkin
-                    ? EditorGUIUtility.IconContent("d_Grid.PickingTool")
-                    : EditorGUIUtility.IconContent("Grid.PickingTool");
-
-                s_chooseIconLabel = new GUIContent(icon.image, "Choose");
+                var icon = EditorAPI.GetIcon("d_Grid.PickingTool", "Grid.PickingTool");
+                s_chooseIconLabel = new(icon.image, "Choose");
             }
 
             {
                 var icon = EditorGUIUtility.IconContent("IN foldout@2x");
-                s_foldoutCollapsedIconLabel = new GUIContent(icon.image);
+                s_foldoutCollapsedIconLabel = new(icon.image);
             }
 
             {
                 var icon = EditorGUIUtility.IconContent("IN foldout on@2x");
-                s_foldoutExpandedIconLabel = new GUIContent(icon.image);
+                s_foldoutExpandedIconLabel = new(icon.image);
             }
 
             {
-                ColorUtility.TryParseHtmlString("#2C5D87", out var darkColor);
-                ColorUtility.TryParseHtmlString("#3A72B0", out var lightColor);
-                s_selectedColor = EditorGUIUtility.isProSkin ? darkColor : lightColor;
+                var icon = EditorAPI.GetIcon("d_Refresh", "Refresh");
+                s_resetIconLabel = new(icon.image, "Reset");
             }
 
-            {
-                var icon = EditorGUIUtility.isProSkin
-                    ? EditorGUIUtility.IconContent("d_Refresh")
-                    : EditorGUIUtility.IconContent("Refresh");
-
-                s_resetIconLabel = new GUIContent(icon.image, "Reset");
-            }
-
-            {
-                ColorUtility.TryParseHtmlString("#474747", out var darkColor);
-                ColorUtility.TryParseHtmlString("#D6D6D6", out var lightColor);
-                s_headerColor = EditorGUIUtility.isProSkin ? darkColor : lightColor;
-            }
-
-            {
-                ColorUtility.TryParseHtmlString("#383838", out var darkColor);
-                ColorUtility.TryParseHtmlString("#C8C8C8", out var lightColor);
-                s_contentColor = EditorGUIUtility.isProSkin ? darkColor : lightColor;
-            }
-
-            {
-                ColorUtility.TryParseHtmlString("#404040", out var darkColor);
-                ColorUtility.TryParseHtmlString("#ABABAB", out var lightColor);
-                s_altContentColor = EditorGUIUtility.isProSkin ? darkColor : lightColor;
-            }
+            s_selectedColor = EditorAPI.GetColor("#2C5D87", "#3A72B0");
+            s_headerColor = EditorAPI.GetColor("#474747", "#D6D6D6");
+            s_backColor = EditorAPI.GetColor("#383838", "#C8C8C8");
+            s_altBackColor = EditorAPI.GetColor("#3F3F3F", "#CACACA");
         }
     }
 }

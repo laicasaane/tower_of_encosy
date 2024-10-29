@@ -237,8 +237,8 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             var indexLabelWidth = GUILayout.Width(30);
             var itemLabelStyle = s_indexLabelStyle;
             var selectedColor = s_selectedColor;
-            var contentColor = s_altContentColor;
-            var comp = EditorGUIUtility.isProSkin ? 0 : 1;
+            var backColor = s_backColor;
+            var altBackColor = s_altBackColor;
             var selectedIndex = property.SelectedIndex;
             var mouseDownIndex = -1;
             var mousePos = eventData.MousePos;
@@ -258,13 +258,13 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
                     // Draw background and select button
                     {
-                        var backColor = i % 2 == comp ? contentColor : new Color(1, 1, 1, 0f);
-                        backColor = i == selectedIndex ? selectedColor : backColor;
+                        var bgColor = i % 2 == 0 ? altBackColor : backColor;
+                        bgColor = i == selectedIndex ? selectedColor : bgColor;
 
                         var tex = Texture2D.whiteTexture;
                         var mode = ScaleMode.StretchToFill;
 
-                        GUI.DrawTexture(backRect, tex, mode, false, 0f, backColor, Vector4.zero, Vector4.zero);
+                        GUI.DrawTexture(backRect, tex, mode, false, 0f, bgColor, Vector4.zero, Vector4.zero);
                     }
 
                     indexLabel.text = i.ToString();
@@ -325,7 +325,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             , Type targetType
         )
         {
-            var eventResult = EventResult.None;
+            EventResult eventResult;
 
             EditorGUILayout.BeginVertical(s_rootTabViewStyle);
             {
@@ -429,8 +429,8 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             var popupStyle = s_popupStyle;
             var iconStyle = s_iconButtonStyle;
             var selectedColor = s_selectedColor;
-            var contentColor = s_altContentColor;
-            var comp = EditorGUIUtility.isProSkin ? 0 : 1;
+            var backColor = s_backColor;
+            var altBackColor = s_altBackColor;
             var selectedIndex = property.SelectedIndex;
             var mouseDownIndex = -1;
             var mousePos = eventData.MousePos;
@@ -492,13 +492,13 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
                     // Draw background and select button
                     {
-                        var backColor = i % 2 == comp ? contentColor : new Color(1, 1, 1, 0f);
-                        backColor = i == selectedIndex ? selectedColor : backColor;
+                        var bgColor = i % 2 == 0 ? altBackColor : backColor;
+                        bgColor = i == selectedIndex ? selectedColor : bgColor;
 
                         var tex = Texture2D.whiteTexture;
                         var mode = ScaleMode.StretchToFill;
 
-                        GUI.DrawTexture(backRect, tex, mode, false, 0f, backColor, Vector4.zero, Vector4.zero);
+                        GUI.DrawTexture(backRect, tex, mode, false, 0f, bgColor, Vector4.zero, Vector4.zero);
                     }
 
                     var labelRect = EditorGUILayout.BeginHorizontal();

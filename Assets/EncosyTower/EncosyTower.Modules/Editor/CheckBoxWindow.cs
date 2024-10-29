@@ -38,9 +38,9 @@ namespace EncosyTower.Modules.Editor
 
         public delegate void OnOk2(IReadOnlyList<IItemInfo> items, object userData);
 
-        public delegate void DrawItemOverride(Rect rect, GUIContent label, int index, IItemInfo item);
+        public delegate void DrawItem(Rect rect, GUIContent label, int index, IItemInfo item);
 
-        public delegate int ItemHeightOverride();
+        public delegate int ItemHeight();
 
         private const int ITEM_HEIGHT = 18;
 
@@ -78,8 +78,9 @@ namespace EncosyTower.Modules.Editor
         private SearchField _searchField;
         private string _filter = string.Empty;
         private Vector2 _scrollPosition;
-        private GUIStyle _hoverStyle;
-        private GUIStyle[] _alternatingRowStyles;
+        private GUIStyle _hoverBackStyle;
+        private GUIStyle _separatorBackStyle;
+        private GUIStyle[] _altBackStyles;
 
         private readonly GUIContent _itemLabel = new();
 
@@ -103,22 +104,12 @@ namespace EncosyTower.Modules.Editor
 
         protected void OnEnable()
         {
-            {
-                ColorUtility.TryParseHtmlString("#404040", out var darkColor);
-                ColorUtility.TryParseHtmlString("#ABABAB", out var lightColor);
-
-                _alternatingRowStyles = new[]
-                {
-                    CreateGUIStyle(new Color(1, 1, 1, 0f)),
-                    CreateGUIStyle(EditorGUIUtility.isProSkin ? darkColor : lightColor),
-                };
-            }
-
-            {
-                ColorUtility.TryParseHtmlString("#2C5D87", out var darkColor);
-                ColorUtility.TryParseHtmlString("#3A72B0", out var lightColor);
-                _hoverStyle = CreateGUIStyle(EditorGUIUtility.isProSkin ? darkColor : lightColor);
-            }
+            _separatorBackStyle = new GUIStyle().WithNormalBackground(EditorAPI.GetColor("#4D4D4D", "#AEAEAE"));
+            _hoverBackStyle = new GUIStyle().WithNormalBackground(EditorAPI.GetColor("#2C5D87", "#3A72B0"));
+            _altBackStyles = new[] {
+                new GUIStyle().WithNormalBackground(EditorAPI.GetColor("#383838", "#C8C8C8")),
+                new GUIStyle().WithNormalBackground(EditorAPI.GetColor("#3F3F3F", "#CACACA")),
+            };
         }
 
         protected void OnGUI()
@@ -155,54 +146,86 @@ namespace EncosyTower.Modules.Editor
             }
             EditorGUILayout.EndHorizontal();
 
+            EditorGUILayout.Space(6f);
+
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
             {
                 var length = items.Count;
                 var filter = _filter;
                 var itemLabel = _itemLabel;
-                var hoverStyle = _hoverStyle;
-                var alternatingRowStyles = _alternatingRowStyles;
+                var hoverBackStyle = _hoverBackStyle;
+                var altBackStyles = _altBackStyles;
+                var separatorBackStyle = _separatorBackStyle;
                 var mouseY = (int)Event.current.mousePosition.y;
                 var drawItemOverride = _callbacks.DrawItem;
+                var drawSeparatorOverride = _callbacks.DrawSeparator;
                 var itemHeight = _callbacks.ItemHeight?.Invoke() ?? ITEM_HEIGHT;
+                var hasFilter = string.IsNullOrWhiteSpace(filter) == false;
                 var y = 0;
 
                 for (var i = 0; i < length; i++)
                 {
                     var item = items[i];
-                    var name = item.Name;
+                    var name = item.Name ?? string.Empty;
                     itemLabel.text = name;
 
-                    if (name.Contains(filter, StringComparison.OrdinalIgnoreCase) == false)
+                    if (hasFilter
+                        && string.IsNullOrEmpty(name) == false
+                        && UnityEditor.Search.FuzzySearch.FuzzyMatch(filter, name) == false
+                    )
                     {
                         continue;
                     }
 
-                    var isHovering = (mouseY / itemHeight) == y;
-                    var style = isHovering ? hoverStyle : alternatingRowStyles[i % 2];
-                    style.fixedHeight = itemHeight;
-
-                    var rect = EditorGUILayout.BeginHorizontal(style);
-                    EditorGUILayout.BeginVertical();
+                    if (item.Separator)
                     {
-                        if (drawItemOverride != null)
+                        var style = separatorBackStyle;
+                        style.fixedHeight = itemHeight;
+
+                        var rect = EditorGUILayout.BeginHorizontal(style);
+                        EditorGUILayout.BeginVertical();
+
+                        if (drawSeparatorOverride != null)
                         {
-                            drawItemOverride(rect, itemLabel, i, item);
+                            drawSeparatorOverride(rect, itemLabel, i, item);
                         }
                         else
                         {
-                            GUILayout.FlexibleSpace();
-                            item.IsChecked = EditorGUILayout.ToggleLeft(itemLabel, item.IsChecked);
-                            GUILayout.FlexibleSpace();
+                            EditorGUILayout.Space(itemHeight);
                         }
+                        EditorGUILayout.EndVertical();
+                        EditorGUILayout.EndHorizontal();
                     }
-                    EditorGUILayout.EndHorizontal();
-                    EditorGUILayout.EndVertical();
+                    else
+                    {
+                        var isHovering = (mouseY / itemHeight) == y;
+                        var style = isHovering ? hoverBackStyle : altBackStyles[i % 2];
+                        style.fixedHeight = itemHeight;
+
+                        var rect = EditorGUILayout.BeginHorizontal(style);
+                        EditorGUILayout.BeginVertical();
+                        {
+                            if (drawItemOverride != null)
+                            {
+                                drawItemOverride(rect, itemLabel, i, item);
+                            }
+                            else
+                            {
+                                GUILayout.FlexibleSpace();
+                                item.IsChecked = EditorGUILayout.ToggleLeft(itemLabel, item.IsChecked);
+                                GUILayout.FlexibleSpace();
+                            }
+                        }
+                        EditorGUILayout.EndVertical();
+                        EditorGUILayout.EndHorizontal();
+                    }
 
                     y++;
                 }
             }
             EditorGUILayout.EndScrollView();
+
+            EditorGUILayout.Space(6f);
 
             EditorGUILayout.BeginHorizontal();
             {
@@ -228,23 +251,13 @@ namespace EncosyTower.Modules.Editor
             EditorGUILayout.EndHorizontal();
         }
 
-        private static GUIStyle CreateGUIStyle(Color color)
-        {
-            var background = new Texture2D( 1, 1 );
-            background.SetPixel(0, 0, color);
-            background.Apply();
-
-            var style = new GUIStyle();
-            style.normal.background = background;
-
-            return style;
-        }
-
         public interface IItemInfo
         {
             string Name { get; }
 
             bool IsChecked { get; set; }
+
+            bool Separator { get; }
         }
 
         public sealed class ItemInfo : IItemInfo
@@ -253,16 +266,21 @@ namespace EncosyTower.Modules.Editor
 
             public bool IsChecked { get; set; }
 
-            public ItemInfo(string name, bool isChecked)
+            public bool Separator { get; set; }
+
+            public ItemInfo(string name, bool isChecked, bool separator = false)
             {
                 Name = name;
                 IsChecked = isChecked;
+                Separator = separator;
             }
         }
 
         public record struct OverrideCallbacks(
-              DrawItemOverride DrawItem = null
-            , ItemHeightOverride ItemHeight = null
+              DrawItem DrawItem = null
+            , ItemHeight ItemHeight = null
+            , DrawItem DrawSeparator = null
+
         );
     }
 }
