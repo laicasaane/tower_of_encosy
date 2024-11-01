@@ -948,18 +948,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             property.SetSelectedIndex(mouseDownIndex);
 
             var menu = new GenericMenu();
-            menu.AddItem(s_copyItemLabel, false, Menu_OnCopySelected, property);
-
-            if (property.ValidatePasteSingle())
-            {
-                menu.AddItem(s_pasteItemLabel, false, Menu_OnPasteSingle, property);
-            }
-            else
-            {
-                menu.AddDisabledItem(s_pasteItemLabel);
-            }
-
-            menu.AddItem(s_deleteItemLabel, false, Menu_OnDeleteSelected, property);
+            BuildRightClickTextMenu(menu, property);
             menu.ShowAsContext();
         }
 

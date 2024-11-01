@@ -350,6 +350,63 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                     SetSelectedIndex(index);
                 }
             }
+
+            public void MoveSelectedItemUp()
+            {
+                if (ValidateSelectedIndex() == false)
+                {
+                    return;
+                }
+
+                var property = _property;
+                var index = _selectedIndex.Value;
+
+                if (index <= 0)
+                {
+                    return;
+                }
+
+                var serializedObject = property.serializedObject;
+                var target = serializedObject.targetObject;
+                var prevIndex = index - 1;
+
+                Undo.RecordObject(target, $"Move up {_undoKey} to {property.propertyPath}[{prevIndex}]");
+
+                property.MoveArrayElement(index, prevIndex);
+                serializedObject.ApplyModifiedProperties();
+                serializedObject.Update();
+
+                SetSelectedIndex(prevIndex);
+            }
+
+            public void MoveSelectedItemDown()
+            {
+                if (ValidateSelectedIndex() == false)
+                {
+                    return;
+                }
+
+                var property = _property;
+                var index = _selectedIndex.Value;
+                var lastIndex = ArraySize - 1;
+
+                if (index >= lastIndex)
+                {
+                    return;
+                }
+
+                var serializedObject = property.serializedObject;
+                var target = serializedObject.targetObject;
+                var nextIndex = index + 1;
+
+                Undo.RecordObject(target, $"Move down {_undoKey} to {property.propertyPath}[{nextIndex}]");
+
+                property.MoveArrayElement(index, nextIndex);
+                serializedObject.ApplyModifiedProperties();
+                serializedObject.Update();
+
+                SetSelectedIndex(nextIndex);
+            }
         }
     }
 }

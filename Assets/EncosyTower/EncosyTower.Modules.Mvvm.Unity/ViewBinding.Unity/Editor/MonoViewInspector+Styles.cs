@@ -56,6 +56,8 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
         private static readonly GUIContent s_copyItemLabel = new("Copy");
         private static readonly GUIContent s_pasteItemLabel = new("Paste");
         private static readonly GUIContent s_deleteItemLabel = new("Delete");
+        private static readonly GUIContent s_moveUpLabel = new("Move Up");
+        private static readonly GUIContent s_moveDownLabel = new("Move Down");
 
         private static readonly GUIContent s_bindersLabel = new(
             "Binders"//, "Can also drag and drop GameObject or Component here to create binders."
@@ -86,7 +88,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
             s_rootTabLabelStyle = new(EditorStyles.boldLabel) {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = 12,
+                fontSize = EditorStyles.boldLabel.fontSize + 1,
             };
 
             s_toolbarLeftButtonStyle = new(EditorStyles.miniButtonMid) {
@@ -130,8 +132,10 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 padding = new(30, 30, 0, 0),
                 margin = new(1, 0, 0, 0),
                 fixedHeight = 0,
+                fixedWidth = 0,
                 fontSize = GUI.skin.button.fontSize,
                 richText = true,
+                alignment= TextAnchor.MiddleCenter,
             };
 
             s_binderSelectedButtonStyle = new(s_binderButtonStyle) {
@@ -185,6 +189,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 padding = new(0, 0, 0, 0),
                 margin = new(0, 0, 0, 0),
                 alignment = TextAnchor.MiddleCenter,
+                fontSize = EditorStyles.boldLabel.fontSize,
             };
 
             s_subHeaderLabelStyle = new(EditorStyles.label) {

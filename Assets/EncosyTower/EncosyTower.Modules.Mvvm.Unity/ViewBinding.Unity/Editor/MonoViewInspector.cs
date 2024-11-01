@@ -490,6 +490,44 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             }
         }
 
+        private static void BuildRightClickTextMenu(GenericMenu menu, SerializedArrayProperty property)
+        {
+            menu.AddItem(s_copyItemLabel, false, Menu_OnCopySelected, property);
+
+            if (property.ValidatePasteSingle())
+            {
+                menu.AddItem(s_pasteItemLabel, false, Menu_OnPasteSingle, property);
+            }
+            else
+            {
+                menu.AddDisabledItem(s_pasteItemLabel);
+            }
+
+            menu.AddItem(s_deleteItemLabel, false, Menu_OnDeleteSelected, property);
+
+            menu.AddSeparator(string.Empty);
+
+            var selectedIndex = property.SelectedIndex;
+
+            if (selectedIndex.HasValue && selectedIndex.Value > 0)
+            {
+                menu.AddItem(s_moveUpLabel, false, Menu_OnMoveUpSelected, property);
+            }
+            else
+            {
+                menu.AddDisabledItem(s_moveUpLabel);
+            }
+
+            if (selectedIndex.HasValue && selectedIndex.Value < property.ArraySize - 1)
+            {
+                menu.AddItem(s_moveDownLabel, false, Menu_OnMoveDownSelected, property);
+            }
+            else
+            {
+                menu.AddDisabledItem(s_moveDownLabel);
+            }
+        }
+
         private static void Menu_OnCopyAll(object userData)
         {
             if (userData is not SerializedArrayProperty property)
@@ -548,6 +586,27 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             }
 
             property.DeleteSelected();
+        }
+
+        private static void Menu_OnMoveUpSelected(object userData)
+        {
+            if (userData is not SerializedArrayProperty property)
+            {
+                return;
+            }
+
+            property.MoveSelectedItemUp();
+
+        }
+
+        private static void Menu_OnMoveDownSelected(object userData)
+        {
+            if (userData is not SerializedArrayProperty property)
+            {
+                return;
+            }
+
+            property.MoveSelectedItemDown();
         }
 
         private static void InitContextToInspector()

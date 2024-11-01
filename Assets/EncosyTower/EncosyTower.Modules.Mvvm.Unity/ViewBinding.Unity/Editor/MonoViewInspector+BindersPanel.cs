@@ -370,18 +370,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 var menu = new GenericMenu();
                 menu.AddItem(s_editSubtitleLabel, false, Menu_OnEditBinderSubtitle, propRef);
                 menu.AddSeparator(string.Empty);
-                menu.AddItem(s_copyItemLabel, false, Menu_OnCopySelected, bindersProp);
-
-                if (bindersProp.ValidatePasteSingle())
-                {
-                    menu.AddItem(s_pasteItemLabel, false, Menu_OnPasteSingle, bindersProp);
-                }
-                else
-                {
-                    menu.AddDisabledItem(s_pasteItemLabel);
-                }
-
-                menu.AddItem(s_deleteItemLabel, false, Menu_OnDeleteSelected, bindersProp);
+                BuildRightClickTextMenu(menu, bindersProp);
                 menu.ShowAsContext();
             }
         }

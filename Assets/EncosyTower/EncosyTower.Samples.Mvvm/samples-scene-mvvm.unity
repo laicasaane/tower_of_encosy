@@ -980,9 +980,9 @@ MonoBehaviour:
   _presetBinders:
   - rid: 7562154620754329610
   - rid: 7562154620754329616
+  - rid: 7562154631834632210
   - rid: 7562154620754329620
   - rid: 7562154631834632208
-  - rid: 7562154631834632210
   references:
     version: 2
     RefIds:
@@ -1017,7 +1017,7 @@ MonoBehaviour:
       type: {class: TMP_TextBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
         asm: EncosyTower.Modules.Mvvm.Unity}
       data:
-        _subtitle: 
+        _subtitle: scroll position
         _presetBindings:
         - rid: 7562154620754329617
         _presetTargets:
@@ -1071,7 +1071,7 @@ MonoBehaviour:
       type: {class: TMP_TextBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
         asm: EncosyTower.Modules.Mvvm.Unity}
       data:
-        _subtitle: 
+        _subtitle: status
         _presetBindings:
         - rid: 7562154631834632211
         _presetTargets:
