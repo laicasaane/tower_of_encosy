@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
+using EncosyTower.Modules.SourceGen;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using EncosyTower.Modules.SourceGen;
 
 namespace EncosyTower.Modules.Mvvm.CodeRefactors
 {

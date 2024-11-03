@@ -2,10 +2,10 @@
 using System.Collections.Immutable;
 using System.Text;
 using System.Threading;
+using EncosyTower.Modules.SourceGen;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using EncosyTower.Modules.SourceGen;
 
 namespace EncosyTower.Modules.Mvvm.ObservablePropertySourceGen
 {
@@ -244,7 +244,7 @@ namespace EncosyTower.Modules.Mvvm.ObservablePropertySourceGen
                               semanticModel
                             , token
                             , diagnosticBuilder
-                            , out var fieldAttributes
+                            , out ImmutableArray<AttributeInfo> fieldAttributes
                             , DiagnosticDescriptors.InvalidFieldMethodTargetedAttributeOnObservableProperty
                         );
 

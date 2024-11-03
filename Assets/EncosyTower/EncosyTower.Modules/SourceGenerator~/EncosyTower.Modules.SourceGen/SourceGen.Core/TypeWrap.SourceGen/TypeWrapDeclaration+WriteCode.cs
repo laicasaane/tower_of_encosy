@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
 using EncosyTower.Modules.SourceGen;
+using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.Modules.TypeWrap.SourceGen
 {

@@ -109,7 +109,7 @@ namespace EncosyTower.Modules.SourceGen
             return $"Temp/GeneratedCode/{assemblyName}";
         }
 
-        private static (bool IsSuccess, string FileName) TryGetFileNameWithoutExtension(SyntaxTree syntaxTree)
+        public static (bool IsSuccess, string FileName) TryGetFileNameWithoutExtension(this SyntaxTree syntaxTree)
         {
             var fileName = Path.GetFileNameWithoutExtension(syntaxTree.FilePath);
             return (IsSuccess: true, fileName);

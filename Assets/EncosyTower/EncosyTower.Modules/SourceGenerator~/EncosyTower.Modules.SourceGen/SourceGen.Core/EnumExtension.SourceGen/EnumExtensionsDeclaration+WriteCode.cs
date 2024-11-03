@@ -1,5 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
-using EncosyTower.Modules.SourceGen;
+﻿using EncosyTower.Modules.SourceGen;
+using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.Modules.EnumExtensions.SourceGen
 {

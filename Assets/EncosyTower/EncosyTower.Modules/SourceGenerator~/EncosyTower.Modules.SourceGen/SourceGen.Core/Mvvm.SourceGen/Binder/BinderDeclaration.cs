@@ -2,10 +2,10 @@
 using System.Collections.Immutable;
 using System.Text;
 using System.Threading;
+using EncosyTower.Modules.SourceGen;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using EncosyTower.Modules.SourceGen;
 
 namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
 {

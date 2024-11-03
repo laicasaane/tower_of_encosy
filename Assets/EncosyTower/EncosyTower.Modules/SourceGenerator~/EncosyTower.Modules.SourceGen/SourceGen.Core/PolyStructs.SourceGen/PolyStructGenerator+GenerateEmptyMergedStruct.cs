@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using EncosyTower.Modules.EnumExtensions.SourceGen;
 using EncosyTower.Modules.SourceGen;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.Modules.PolyStructs.SourceGen
 {

@@ -503,6 +503,64 @@ namespace EncosyTower.Modules.SourceGen
             return false;
         }
 
+        public static bool TryGetGenericType(
+              this INamedTypeSymbol symbol
+            , string startWith
+            , int genericArgumentCount
+            , out INamedTypeSymbol result
+        )
+        {
+            var baseType = symbol;
+
+            while (baseType != null)
+            {
+                if (baseType.ToFullName().StartsWith(startWith)
+                    && baseType.TypeArguments.Length == genericArgumentCount
+                )
+                {
+                    result = baseType;
+                    return true;
+                }
+
+                baseType = baseType.BaseType;
+            }
+
+            result = null;
+            return false;
+        }
+
+        public static bool TryGetGenericType(
+              this INamedTypeSymbol symbol
+            , string startWith
+            , int genericArgumentCount1
+            , int genericArgumentCount2
+            , out INamedTypeSymbol result
+        )
+        {
+            var baseType = symbol;
+
+            while (baseType != null)
+            {
+                var typeArguments = baseType.TypeArguments;
+
+                if (typeArguments.Length == genericArgumentCount1
+                    || typeArguments.Length == genericArgumentCount2
+                )
+                {
+                    if (baseType.ToFullName().StartsWith(startWith))
+                    {
+                        result = baseType;
+                        return true;
+                    }
+                }
+
+                baseType = baseType.BaseType;
+            }
+
+            result = null;
+            return false;
+        }
+
         /// <summary>
         /// Gathers all forwarded attributes for the generated field and property.
         /// </summary>
@@ -813,6 +871,100 @@ namespace EncosyTower.Modules.SourceGen
                             if (attributeList.Target.Identifier.IsKind(SyntaxKind.FieldKeyword))
                             {
                                 fieldAttributesInfo.Add(attributeInfo);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gathers all forwarded attributes for the generated field.
+        /// </summary>
+        /// <param name="fieldSymbol">The input <see cref="IMethodSymbol"/> instance to process.</param>
+        /// <param name="semanticModel">The <see cref="SemanticModel"/> instance for the current run.</param>
+        /// <param name="token">The cancellation token for the current operation.</param>
+        /// <param name="diagnostics">The current collection of gathered diagnostics.</param>
+        /// <param name="fieldAttributes">The resulting field attributes to forward.</param>
+        /// <param name="fieldAttributes">The resulting property attributes to forward.</param>
+        public static void GatherForwardedAttributes(
+              this IPropertySymbol fieldSymbol
+            , SemanticModel semanticModel
+            , CancellationToken token
+            , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
+            , out ImmutableArray<(string, AttributeInfo)> fieldAttributes
+            , DiagnosticDescriptor diagnostic
+        )
+        {
+            using var fieldAttributesInfo = ImmutableArrayBuilder<(string, AttributeInfo)>.Rent();
+
+            GatherForwardedAttributes(
+                  fieldSymbol
+                , semanticModel
+                , token
+                , in diagnostics
+                , in fieldAttributesInfo
+                , diagnostic
+            );
+
+            fieldAttributes = fieldAttributesInfo.ToImmutable();
+
+            static void GatherForwardedAttributes(
+                  IPropertySymbol symbol
+                , SemanticModel semanticModel
+                , CancellationToken token
+                , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
+                , in ImmutableArrayBuilder<(string, AttributeInfo)> fieldAttributesInfo
+                , DiagnosticDescriptor diagnostic
+            )
+            {
+                if (symbol.DeclaringSyntaxReferences.Length != 1
+                    || symbol.DeclaringSyntaxReferences[0] is not SyntaxReference syntaxReference
+                )
+                {
+                    return;
+                }
+
+                var syntax = syntaxReference.GetSyntax(token);
+
+                if (syntax is not PropertyDeclarationSyntax propDeclaration)
+                {
+                    return;
+                }
+
+                foreach (AttributeListSyntax attributeList in propDeclaration.AttributeLists)
+                {
+                    if (attributeList.Target == null
+                        || attributeList.Target.Identifier.Kind() is not SyntaxKind.FieldKeyword
+                    )
+                    {
+                        continue;
+                    }
+
+                    foreach (AttributeSyntax attribute in attributeList.Attributes)
+                    {
+                        if (!semanticModel.GetSymbolInfo(attribute, token)
+                                .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol)
+                        )
+                        {
+                            diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);
+                            continue;
+                        }
+
+                        var attributeInfo = AttributeInfo.From(
+                              attributeTypeSymbol
+                            , semanticModel
+                            , attribute.ArgumentList?.Arguments ?? Enumerable.Empty<AttributeArgumentSyntax>()
+                            , token
+                        );
+
+                        // Add the new attribute info to the right builder
+                        if (attributeList.Target != null)
+                        {
+                            if (attributeList.Target.Identifier.IsKind(SyntaxKind.FieldKeyword))
+                            {
+                                var typeName = attributeTypeSymbol.ToFullName();
+                                fieldAttributesInfo.Add((typeName, attributeInfo));
                             }
                         }
                     }

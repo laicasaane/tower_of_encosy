@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Text;
+using EncosyTower.Modules.SourceGen;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using EncosyTower.Modules.SourceGen;
 
 namespace EncosyTower.Modules.PolyStructs.SourceGen
 {

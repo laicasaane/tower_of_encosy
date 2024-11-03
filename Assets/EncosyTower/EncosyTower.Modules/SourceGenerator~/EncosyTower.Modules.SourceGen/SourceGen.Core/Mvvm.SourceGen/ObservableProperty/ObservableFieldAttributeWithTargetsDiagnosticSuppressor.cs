@@ -3,12 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
+using EncosyTower.Modules.SourceGen;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using EncosyTower.Modules.SourceGen;
-
 using static EncosyTower.Modules.Mvvm.SuppressionDescriptors;
 
 namespace EncosyTower.Modules.Mvvm.ObservablePropertySourceGen

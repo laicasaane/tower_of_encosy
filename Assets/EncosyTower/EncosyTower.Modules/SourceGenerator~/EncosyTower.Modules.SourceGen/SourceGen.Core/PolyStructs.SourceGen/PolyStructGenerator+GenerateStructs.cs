@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
 using EncosyTower.Modules.SourceGen;
+using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.Modules.PolyStructs.SourceGen
 {

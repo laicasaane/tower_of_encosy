@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
 using EncosyTower.Modules.SourceGen;
+using Microsoft.CodeAnalysis;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace EncosyTower.Modules.Mvvm.InternalStringAdapterSourceGen

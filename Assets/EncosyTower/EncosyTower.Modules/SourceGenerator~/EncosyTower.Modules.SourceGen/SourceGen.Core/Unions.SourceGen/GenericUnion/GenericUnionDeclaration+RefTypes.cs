@@ -1,6 +1,6 @@
 ﻿using System;
-using Microsoft.CodeAnalysis;
 using EncosyTower.Modules.SourceGen;
+using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
 {
