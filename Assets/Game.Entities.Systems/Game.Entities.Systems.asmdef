@@ -1,6 +1,6 @@
 {
-    "name": "Module.EntityAuthoring",
-    "rootNamespace": "Module.EntityAuthoring",
+    "name": "Game.Entities.Systems",
+    "rootNamespace": "Game.Entities.Systems",
     "references": [
         "EncosyTower.Modules",
         "Latios.Calligraphics",
@@ -9,11 +9,9 @@
         "Latios.Myri",
         "Latios.Psyshock",
         "Latios.Transforms",
-        "Module.EntityComponents",
-        "Module.GameCommon",
-        "Module.Inputs",
-        "Toolbox",
-        "Toolbox.Editor",
+        "Game.Common",
+        "Game.Entities.Components",
+        "Game.Inputs",
         "UniTask",
         "UniTask.Addressables",
         "Unity.Addressables",
@@ -34,9 +32,7 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [
-        "UNITY_EDITOR"
-    ],
+    "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false
 }

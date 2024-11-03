@@ -1,21 +1,22 @@
 {
-    "name": "Module.GameCommon",
-    "rootNamespace": "Module.GameCommon",
+    "name": "Game.MainGame",
+    "rootNamespace": "Game.MainGame",
     "references": [
+        "DebugUI",
         "EncosyTower.Modules",
-        "Toolbox",
-        "Toolbox.Editor",
+        "Game.Common",
+        "Game.Inputs",
         "UniTask",
         "UniTask.Addressables",
         "Unity.Addressables",
         "Unity.Burst",
-        "Unity.Cinemachine",
         "Unity.Collections",
         "Unity.InputSystem",
         "Unity.Logging",
         "Unity.Mathematics",
         "Unity.ResourceManager",
-        "Unity.Serialization"
+        "Unity.TextMeshPro",
+        "Unity.Timeline"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

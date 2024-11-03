@@ -1,20 +1,31 @@
 {
-    "name": "Module.EntityComponents",
-    "rootNamespace": "Module.EntityComponents",
+    "name": "Game.Entities.Authoring",
+    "rootNamespace": "Game.Entities.Authoring",
     "references": [
         "EncosyTower.Modules",
         "Latios.Calligraphics",
         "Latios.Core",
         "Latios.Kinemation",
+        "Latios.Myri",
         "Latios.Psyshock",
         "Latios.Transforms",
-        "Module.GameCommon",
+        "Game.Common",
+        "Game.Entities.Components",
+        "Game.Inputs",
+        "Toolbox",
+        "Toolbox.Editor",
+        "UniTask",
+        "UniTask.Addressables",
+        "Unity.Addressables",
         "Unity.Burst",
         "Unity.Collections",
         "Unity.Entities",
-        "Unity.Entities.Graphics",
         "Unity.Entities.Hybrid",
+        "Unity.Entities.UI",
+        "Unity.InputSystem",
+        "Unity.Logging",
         "Unity.Mathematics",
+        "Unity.ResourceManager",
         "Unity.Serialization"
     ],
     "includePlatforms": [],
@@ -23,7 +34,9 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "UNITY_EDITOR"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }

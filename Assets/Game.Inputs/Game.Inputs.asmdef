@@ -1,6 +1,6 @@
 {
-    "name": "Module.Inputs",
-    "rootNamespace": "Module.Inputs",
+    "name": "Game.Inputs",
+    "rootNamespace": "Game.Inputs",
     "references": [
         "Unity.InputSystem"
     ],
