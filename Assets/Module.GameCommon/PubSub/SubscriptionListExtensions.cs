@@ -1,10 +1,8 @@
-#if UNITASK || UNITY_6000_0_OR_NEWER
-
 using System;
 using System.Collections.Generic;
 using EncosyTower.Modules.PubSub;
 
-namespace Module.Core.PubSub
+namespace Module.GameCommon.PubSub
 {
     public static class SubscriptionListExtensions
     {
@@ -55,5 +53,3 @@ namespace Module.Core.PubSub
         }
     }
 }
-
-#endif

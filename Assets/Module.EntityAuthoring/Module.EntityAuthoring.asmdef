@@ -9,7 +9,6 @@
         "Latios.Myri",
         "Latios.Psyshock",
         "Latios.Transforms",
-        "Module.Core",
         "Module.EntityComponents",
         "Module.GameCommon",
         "Module.Inputs",

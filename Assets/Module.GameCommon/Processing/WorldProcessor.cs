@@ -1,10 +1,8 @@
-#if UNITASK || UNITY_6000_0_OR_NEWER
-
 using System.Runtime.CompilerServices;
 using EncosyTower.Modules.Processing;
 using UnityEngine;
 
-namespace Module.Core.Processing
+namespace Module.GameCommon.Processing
 {
     public static class WorldProcessor
     {
@@ -31,5 +29,3 @@ namespace Module.Core.Processing
             => Instance.Scope<TScope>();
     }
 }
-
-#endif

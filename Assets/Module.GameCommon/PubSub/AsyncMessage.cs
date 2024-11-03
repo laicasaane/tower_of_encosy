@@ -1,9 +1,7 @@
-#if UNITASK || UNITY_6000_0_OR_NEWER
-
 using System.Runtime.CompilerServices;
 using EncosyTower.Modules.PubSub;
 
-namespace Module.Core.PubSub
+namespace Module.GameCommon.PubSub
 {
     public readonly struct AsyncMessage<T> : IMessage
         where T : struct, IMessage
@@ -31,5 +29,3 @@ namespace Module.Core.PubSub
             => new(message);
     }
 }
-
-#endif

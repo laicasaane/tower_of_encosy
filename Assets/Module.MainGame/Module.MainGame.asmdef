@@ -4,7 +4,6 @@
     "references": [
         "DebugUI",
         "EncosyTower.Modules",
-        "Module.Core",
         "Module.GameCommon",
         "Module.Inputs",
         "UniTask",

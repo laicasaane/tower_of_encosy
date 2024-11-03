@@ -1,9 +1,7 @@
-#if UNITASK || UNITY_6000_0_OR_NEWER
-
 using EncosyTower.Modules.PubSub;
 using UnityEngine;
 
-namespace Module.Core.PubSub
+namespace Module.GameCommon.PubSub
 {
     public static class WorldMessenger
     {
@@ -29,5 +27,3 @@ namespace Module.Core.PubSub
 #endif
     }
 }
-
-#endif

@@ -3,7 +3,6 @@
     "rootNamespace": "Module.GameCommon",
     "references": [
         "EncosyTower.Modules",
-        "Module.Core",
         "Toolbox",
         "Toolbox.Editor",
         "UniTask",
