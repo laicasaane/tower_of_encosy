@@ -11,7 +11,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics3D
     }
 
     [Serializable]
+#if UNITY_6000_0_OR_NEWER
+    [Obsolete("Use RigidbodyBindingAngularDamping instead")]
+#else
     [Label("Angular Drag", "Rigidbody")]
+#endif
     public sealed partial class RigidbodyBindingAngularDrag : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
@@ -27,6 +31,26 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics3D
             }
         }
     }
+
+#if UNITY_6000_0_OR_NEWER
+    [Serializable]
+    [Label("Angular Damping", "Rigidbody")]
+    public sealed partial class RigidbodyBindingAngularDamping : MonoBindingProperty<Rigidbody>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetAngularDamping(float value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].angularDamping = value;
+            }
+        }
+    }
+#endif
 
     [Serializable]
     [Label("Angular Velocity", "Rigidbody")]
@@ -155,7 +179,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics3D
     }
 
     [Serializable]
+#if UNITY_6000_0_OR_NEWER
+    [Obsolete("Use RigidbodyBindingLinearDamping instead")]
+#else
     [Label("Drag", "Rigidbody")]
+#endif
     public sealed partial class RigidbodyBindingDrag : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
@@ -171,6 +199,26 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics3D
             }
         }
     }
+
+#if UNITY_6000_0_OR_NEWER
+    [Serializable]
+    [Label("Linear Damping", "Rigidbody")]
+    public sealed partial class RigidbodyBindingLinearDamping : MonoBindingProperty<Rigidbody>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetLinearDamping(float value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].linearDamping = value;
+            }
+        }
+    }
+#endif
 
     [Serializable]
     [Label("Exclude Layers", "Rigidbody")]
@@ -479,7 +527,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics3D
     }
 
     [Serializable]
+#if UNITY_6000_0_OR_NEWER
+    [Obsolete("Use RigidbodyBindingLinearVelocity instead")]
+#else
     [Label("Velocity", "Rigidbody")]
+#endif
     public sealed partial class RigidbodyBindingVelocity : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
@@ -495,4 +547,24 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics3D
             }
         }
     }
+
+#if UNITY_6000_0_OR_NEWER
+    [Serializable]
+    [Label("Linear Velocity", "Rigidbody")]
+    public sealed partial class RigidbodyBindingLinearVelocity : MonoBindingProperty<Rigidbody>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetLinearVelocity(in Vector3 value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].linearVelocity = value;
+            }
+        }
+    }
+#endif
 }

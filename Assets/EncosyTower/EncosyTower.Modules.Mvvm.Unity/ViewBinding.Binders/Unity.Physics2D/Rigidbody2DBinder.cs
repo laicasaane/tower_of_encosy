@@ -11,7 +11,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
+#if UNITY_6000_0_OR_NEWER
+    [Obsolete("Use Rigidbody2DBindingAngularDamping instead")]
+#else
     [Label("Angular Drag", "Rigidbody 2D")]
+#endif
     public sealed partial class Rigidbody2DBindingAngularDrag : MonoBindingProperty<Rigidbody2D>, IBinder
     {
         [BindingProperty]
@@ -27,6 +31,26 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D
             }
         }
     }
+
+#if UNITY_6000_0_OR_NEWER
+    [Serializable]
+    [Label("Angular Damping", "Rigidbody 2D")]
+    public sealed partial class Rigidbody2DBindingAngularDamping : MonoBindingProperty<Rigidbody2D>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetAngularDamping(float value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].angularDamping = value;
+            }
+        }
+    }
+#endif
 
     [Serializable]
     [Label("Angular Velocity", "Rigidbody 2D")]
@@ -119,7 +143,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
+#if UNITY_6000_0_OR_NEWER
+    [Obsolete("Use Rigidbody2DBindingLinearDamping instead")]
+#else
     [Label("Drag", "Rigidbody 2D")]
+#endif
     public sealed partial class Rigidbody2DBindingDrag : MonoBindingProperty<Rigidbody2D>, IBinder
     {
         [BindingProperty]
@@ -135,6 +163,26 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D
             }
         }
     }
+
+#if UNITY_6000_0_OR_NEWER
+    [Serializable]
+    [Label("Linear Damping", "Rigidbody 2D")]
+    public sealed partial class Rigidbody2DBindingLinearDamping : MonoBindingProperty<Rigidbody2D>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetLinearDamping(float value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].linearDamping = value;
+            }
+        }
+    }
+#endif
 
     [Serializable]
     [Label("Exclude Layers", "Rigidbody 2D")]
@@ -245,7 +293,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
+#if UNITY_6000_0_OR_NEWER
+    [Obsolete("Use Rigidbody2DBindingBodyType instead")]
+#else
     [Label("Is Kinematic", "Rigidbody 2D")]
+#endif
     public sealed partial class Rigidbody2DBindingIsKinematic : MonoBindingProperty<Rigidbody2D>, IBinder
     {
         [BindingProperty]
@@ -443,7 +495,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
+#if UNITY_6000_0_OR_NEWER
+    [Obsolete("Use Rigidbody2DBindingLinearVelocity instead")]
+#else
     [Label("Velocity", "Rigidbody 2D")]
+#endif
     public sealed partial class Rigidbody2DBindingVelocity : MonoBindingProperty<Rigidbody2D>, IBinder
     {
         [BindingProperty]
@@ -459,4 +515,24 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D
             }
         }
     }
+
+#if UNITY_6000_0_OR_NEWER
+    [Serializable]
+    [Label("Linear Velocity", "Rigidbody 2D")]
+    public sealed partial class Rigidbody2DBindingLinearVelocity : MonoBindingProperty<Rigidbody2D>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetLinearVelocity(Vector2 value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].linearVelocity = value;
+            }
+        }
+    }
+#endif
 }

@@ -300,7 +300,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
+#if UNITY_6000_0_OR_NEWER
+    [Obsolete("Use PolygonCollider2DBindingCompositeOperation instead")]
+#else
     [Label("Used By Composite", "Polygon Collider 2D")]
+#endif
     public sealed partial class PolygonCollider2DBindingUsedByComposite : MonoBindingProperty<PolygonCollider2D>, IBinder
     {
         [BindingProperty]
@@ -316,6 +320,26 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D
             }
         }
     }
+
+#if UNITY_6000_0_OR_NEWER
+    [Serializable]
+    [Label("Composite Operation", "Polygon Collider 2D")]
+    public sealed partial class PolygonCollider2DBindingCompositeOperation : MonoBindingProperty<PolygonCollider2D>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetCompositeOperation(Collider2D.CompositeOperation value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].compositeOperation = value;
+            }
+        }
+    }
+#endif
 
     [Serializable]
     [Label("Used By Effector", "Polygon Collider 2D")]

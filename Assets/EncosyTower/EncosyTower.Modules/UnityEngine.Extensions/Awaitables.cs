@@ -45,7 +45,7 @@ namespace EncosyTower.Modules
                 await Awaitable.NextFrameAsync();
             }
         }
-        
+
         /// <summary>
         /// Gets an <see cref="Awaitable"/> that will complete when
         /// the <paramref name="condition"/> returns true.
@@ -170,7 +170,7 @@ namespace EncosyTower.Modules
             foreach (var item in list)
             {
                 Checks.IsTrue(item != null);
-                
+
                 var awaiter = item.GetAwaiter();
                 awaiter.OnCompleted(() => awaiter.GetResult());
             }

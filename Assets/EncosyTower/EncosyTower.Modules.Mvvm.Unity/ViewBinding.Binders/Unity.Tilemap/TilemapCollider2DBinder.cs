@@ -266,7 +266,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Tilemaps
     }
 
     [Serializable]
+#if UNITY_6000_0_OR_NEWER
+    [Obsolete("Use TilemapCollider2DBindingCompositeOperation instead")]
+#else
     [Label("Used By Composite", "Tilemap Collider 2D")]
+#endif
     public sealed partial class TilemapCollider2DBindingUsedByComposite : MonoBindingProperty<TilemapCollider2D>, IBinder
     {
         [BindingProperty]
@@ -282,6 +286,26 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Tilemaps
             }
         }
     }
+
+#if UNITY_6000_0_OR_NEWER
+    [Serializable]
+    [Label("Composite Operation", "Tilemap Collider 2D")]
+    public sealed partial class TilemapCollider2DBindingCompositeOperation : MonoBindingProperty<TilemapCollider2D>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetCompositeOperation(Collider2D.CompositeOperation value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].compositeOperation = value;
+            }
+        }
+    }
+#endif
 
     [Serializable]
     [Label("Used By Effector", "Tilemap Collider 2D")]
