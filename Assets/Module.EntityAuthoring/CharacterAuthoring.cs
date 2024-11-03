@@ -1,9 +1,9 @@
 using System;
+using EncosyTower.Modules.Entities;
 using Latios;
 using Latios.Authoring;
 using Latios.Kinemation;
 using Latios.Kinemation.Authoring;
-using EncosyTower.Modules.Entities;
 using Module.EntityComponents;
 using Module.GameCommon;
 using Unity.Collections;

@@ -203,8 +203,6 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
 
         public void OnGUI()
         {
-            var featureTitle = _featureTitle;
-            var featureButtonStyle = _featureButtonStyle;
             var features = _features;
 
             if (features == null || features.Count < 1)
@@ -214,6 +212,9 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
             }
 
             BuildTable();
+
+            var featureTitle = _featureTitle;
+            var featureButtonStyle = _featureButtonStyle;
 
             EditorGUILayout.BeginHorizontal();
             {

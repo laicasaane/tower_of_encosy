@@ -36,7 +36,6 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Adapters.AddressableKeys
 
 using System;
 using EncosyTower.Modules.AddressableKeys;
-using EncosyTower.Modules.Mvvm.ViewBinding;
 using UnityEngine;
 ");
 

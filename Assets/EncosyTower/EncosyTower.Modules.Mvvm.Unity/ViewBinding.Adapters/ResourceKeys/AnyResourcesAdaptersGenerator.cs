@@ -34,7 +34,6 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Adapters.ResourceKeys
             p.PrintLine(@"#pragma warning disable
 
 using System;
-using EncosyTower.Modules.Mvvm.ViewBinding;
 using UnityEngine;
 ");
 

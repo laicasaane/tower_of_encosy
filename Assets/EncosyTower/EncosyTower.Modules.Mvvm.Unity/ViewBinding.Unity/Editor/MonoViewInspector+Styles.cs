@@ -135,7 +135,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 fixedWidth = 0,
                 fontSize = GUI.skin.button.fontSize,
                 richText = true,
-                alignment= TextAnchor.MiddleCenter,
+                alignment = TextAnchor.MiddleCenter,
             };
 
             s_binderSelectedButtonStyle = new(s_binderButtonStyle) {

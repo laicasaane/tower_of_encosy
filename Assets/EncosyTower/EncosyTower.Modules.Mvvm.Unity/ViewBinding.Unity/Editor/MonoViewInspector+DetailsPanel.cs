@@ -4,11 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using EncosyTower.Modules.Mvvm.ViewBinding.Adapters.Unity;
-using EncosyTower.Modules.Mvvm.ViewBinding.Unity;
 using EncosyTower.Modules.Logging;
 using EncosyTower.Modules.Mvvm.ViewBinding;
 using EncosyTower.Modules.Mvvm.ViewBinding.Adapters;
+using EncosyTower.Modules.Mvvm.ViewBinding.Adapters.Unity;
+using EncosyTower.Modules.Mvvm.ViewBinding.Unity;
 using UnityEditor;
 using UnityEngine;
 
@@ -139,7 +139,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 var headerRect = EditorGUILayout.BeginHorizontal(layoutWidth, GUILayout.Height(30f));
                 {
                     EditorGUILayout.Space(30f);
-                    DrawPanelHeaderFoldout(headerRect, targetsProp, s_targetsLabel , new Rect(0f, 0f, 0f, -2f));
+                    DrawPanelHeaderFoldout(headerRect, targetsProp, s_targetsLabel, new Rect(0f, 0f, 0f, -2f));
                 }
                 EditorGUILayout.EndHorizontal();
 

@@ -10,7 +10,6 @@
 #pragma warning disable
 
 using System;
-using EncosyTower.Modules.Mvvm.ViewBinding;
 using UnityEngine;
 
 namespace EncosyTower.Modules.Mvvm.ViewBinding.Adapters.ResourceKeys

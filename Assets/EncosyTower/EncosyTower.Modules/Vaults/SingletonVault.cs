@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using EncosyTower.Modules.Logging;
 
 namespace EncosyTower.Modules.Vaults
 {
@@ -27,7 +28,7 @@ namespace EncosyTower.Modules.Vaults
             if (_singletons.ContainsKey(TypeCache<T>.Hash))
             {
 #if ENABLE_DEBUG_CHECKS
-                UnityEngine.Debug.LogError($"An instance of {TypeCache<T>.Type.Name} has already been existing");
+                DevLoggerAPI.LogError($"An instance of {TypeCache<T>.Type.Name} has already been existing");
 #endif
 
                 return false;
@@ -52,7 +53,7 @@ namespace EncosyTower.Modules.Vaults
             if (_singletons.ContainsKey(TypeCache<T>.Hash))
             {
 #if ENABLE_DEBUG_CHECKS
-                UnityEngine.Debug.LogError($"An instance of {TypeCache<T>.Type} has already been existing");
+                DevLoggerAPI.LogError($"An instance of {TypeCache<T>.Type} has already been existing");
 #endif
 
                 return false;

@@ -13,7 +13,6 @@
 
 using System;
 using EncosyTower.Modules.AddressableKeys;
-using EncosyTower.Modules.Mvvm.ViewBinding;
 using UnityEngine;
 
 namespace EncosyTower.Modules.Mvvm.ViewBinding.Adapters.AddressableKeys

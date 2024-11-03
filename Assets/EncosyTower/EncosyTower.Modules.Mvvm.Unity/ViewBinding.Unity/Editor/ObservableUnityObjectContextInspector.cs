@@ -1,7 +1,7 @@
 #if UNITY_EDITOR
 
-using EncosyTower.Modules.Mvvm.ViewBinding.Unity;
 using EncosyTower.Modules.Mvvm.ComponentModel;
+using EncosyTower.Modules.Mvvm.ViewBinding.Unity;
 using UnityEditor;
 using UnityEngine;
 
