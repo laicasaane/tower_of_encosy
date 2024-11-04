@@ -3,12 +3,12 @@
     "rootNamespace": "Game.Entities.Components",
     "references": [
         "EncosyTower.Modules",
+        "Game.Common",
         "Latios.Calligraphics",
         "Latios.Core",
         "Latios.Kinemation",
         "Latios.Psyshock",
         "Latios.Transforms",
-        "Game.Common",
         "Unity.Burst",
         "Unity.Collections",
         "Unity.Entities",
