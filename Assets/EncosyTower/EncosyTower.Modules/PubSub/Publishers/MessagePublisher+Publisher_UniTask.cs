@@ -1,9 +1,9 @@
 #if UNITASK
 
 #if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#define __ENCOSY_PUBSUB_NO_VALIDATION__
 #else
-#define __MODULE_CORE_PUBSUB_VALIDATION__
+#define __ENCOSY_PUBSUB_VALIDATION__
 #endif
 
 using System.Threading;
@@ -17,7 +17,7 @@ namespace EncosyTower.Modules.PubSub
     {
         partial struct Publisher<TScope>
         {
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Publish<TMessage>(
@@ -25,13 +25,13 @@ namespace EncosyTower.Modules.PubSub
                 , ILogger logger = null
                 , CallerInfo callerInfo = default
             )
-#if MODULE_CORE_PUBSUB_RELAX_MODE
+#if ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : new()
 #else
                 where TMessage : IMessage, new()
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return;
@@ -42,7 +42,7 @@ namespace EncosyTower.Modules.PubSub
                 {
                     broker.PublishAsync(Scope, new TMessage(), new(callerInfo), token, logger ?? DevLogger.Default).Forget();
                 }
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 else
                 {
                     LogWarning<TMessage>(Scope, logger);
@@ -50,7 +50,7 @@ namespace EncosyTower.Modules.PubSub
 #endif
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Publish<TMessage>(
@@ -59,11 +59,11 @@ namespace EncosyTower.Modules.PubSub
                 , ILogger logger = null
                 , CallerInfo callerInfo = default
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(message, logger) == false)
                 {
                     return;
@@ -74,7 +74,7 @@ namespace EncosyTower.Modules.PubSub
                 {
                     broker.PublishAsync(Scope, message, new(callerInfo), token, logger ?? DevLogger.Default).Forget();
                 }
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 else
                 {
                     LogWarning<TMessage>(Scope, logger);
@@ -82,7 +82,7 @@ namespace EncosyTower.Modules.PubSub
 #endif
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public UniTask PublishAsync<TMessage>(
@@ -90,13 +90,13 @@ namespace EncosyTower.Modules.PubSub
                 , ILogger logger = null
                 , CallerInfo callerInfo = default
             )
-#if MODULE_CORE_PUBSUB_RELAX_MODE
+#if ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : new()
 #else
                 where TMessage : IMessage, new()
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return UniTask.CompletedTask;
@@ -108,7 +108,7 @@ namespace EncosyTower.Modules.PubSub
                     return broker.PublishAsync(Scope, new TMessage(), new(callerInfo), token, logger ?? DevLogger.Default);
                 }
 
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 else
                 {
                     LogWarning<TMessage>(Scope, logger);
@@ -118,7 +118,7 @@ namespace EncosyTower.Modules.PubSub
                 return UniTask.CompletedTask;
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public UniTask PublishAsync<TMessage>(
@@ -127,11 +127,11 @@ namespace EncosyTower.Modules.PubSub
                 , ILogger logger = null
                 , CallerInfo callerInfo = default
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(message, logger) == false)
                 {
                     return UniTask.CompletedTask;
@@ -143,7 +143,7 @@ namespace EncosyTower.Modules.PubSub
                     return broker.PublishAsync(Scope, message, new(callerInfo), token, logger ?? DevLogger.Default);
                 }
 
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 else
                 {
                     LogWarning<TMessage>(Scope, logger);

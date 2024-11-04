@@ -1,9 +1,9 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 #if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#define __ENCOSY_PUBSUB_NO_VALIDATION__
 #else
-#define __MODULE_CORE_PUBSUB_VALIDATION__
+#define __ENCOSY_PUBSUB_VALIDATION__
 #endif
 
 using System;
@@ -15,7 +15,7 @@ using EncosyTower.Modules.PubSub.Internals;
 namespace EncosyTower.Modules.PubSub
 {
     public partial struct CachedPublisher<TMessage> : IDisposable
-#if MODULE_CORE_PUBSUB_RELAX_MODE
+#if ENCOSY_PUBSUB_RELAX_MODE
         where TMessage : new()
 #else
         where TMessage : IMessage, new()
@@ -46,7 +46,7 @@ namespace EncosyTower.Modules.PubSub
             Publish(new TMessage(), token, logger, callerInfo);
         }
 
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
         private readonly bool Validate(ILogger logger)
         {
             if (_broker == null)

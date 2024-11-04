@@ -1,9 +1,9 @@
 #if !UNITASK && UNITY_6000_0_OR_NEWER
 
 #if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#define __ENCOSY_PUBSUB_NO_VALIDATION__
 #else
-#define __MODULE_CORE_PUBSUB_VALIDATION__
+#define __ENCOSY_PUBSUB_VALIDATION__
 #endif
 
 using System;
@@ -18,7 +18,7 @@ namespace EncosyTower.Modules.PubSub
     {
         partial struct UnitySubscriber<TScope>
         {
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public ISubscription Subscribe<TMessage>(
@@ -26,11 +26,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return Subscription<TMessage>.None;
@@ -40,7 +40,7 @@ namespace EncosyTower.Modules.PubSub
                 return _subscriber.Subscribe<TMessage>(handler, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public ISubscription Subscribe<TMessage>(
@@ -48,11 +48,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return Subscription<TMessage>.None;
@@ -62,7 +62,7 @@ namespace EncosyTower.Modules.PubSub
                 return _subscriber.Subscribe<TMessage>(handler, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public ISubscription Subscribe<TMessage>(
@@ -70,11 +70,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return Subscription<TMessage>.None;
@@ -84,7 +84,7 @@ namespace EncosyTower.Modules.PubSub
                 return _subscriber.Subscribe<TMessage>(handler, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public ISubscription Subscribe<TMessage>(
@@ -92,11 +92,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return Subscription<TMessage>.None;
@@ -106,7 +106,7 @@ namespace EncosyTower.Modules.PubSub
                 return _subscriber.Subscribe<TMessage>(handler, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Subscribe<TMessage>(
@@ -115,11 +115,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return;
@@ -129,7 +129,7 @@ namespace EncosyTower.Modules.PubSub
                 _subscriber.Subscribe<TMessage>(handler, unsubscribeToken, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Subscribe<TMessage>(
@@ -138,11 +138,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return;
@@ -152,7 +152,7 @@ namespace EncosyTower.Modules.PubSub
                 _subscriber.Subscribe<TMessage>(handler, unsubscribeToken, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Subscribe<TMessage>(
@@ -161,11 +161,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return;
@@ -175,7 +175,7 @@ namespace EncosyTower.Modules.PubSub
                 _subscriber.Subscribe<TMessage>(handler, unsubscribeToken, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Subscribe<TMessage>(
@@ -184,11 +184,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return;
@@ -198,7 +198,7 @@ namespace EncosyTower.Modules.PubSub
                 _subscriber.Subscribe<TMessage>(handler, unsubscribeToken, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public ISubscription Subscribe<TMessage>(
@@ -206,11 +206,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return Subscription<TMessage>.None;
@@ -220,7 +220,7 @@ namespace EncosyTower.Modules.PubSub
                 return _subscriber.Subscribe<TMessage>(handler, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public ISubscription Subscribe<TMessage>(
@@ -228,11 +228,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return Subscription<TMessage>.None;
@@ -242,7 +242,7 @@ namespace EncosyTower.Modules.PubSub
                 return _subscriber.Subscribe<TMessage>(handler, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public ISubscription Subscribe<TMessage>(
@@ -250,11 +250,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return Subscription<TMessage>.None;
@@ -264,7 +264,7 @@ namespace EncosyTower.Modules.PubSub
                 return _subscriber.Subscribe<TMessage>(handler, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public ISubscription Subscribe<TMessage>(
@@ -272,11 +272,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return Subscription<TMessage>.None;
@@ -286,7 +286,7 @@ namespace EncosyTower.Modules.PubSub
                 return _subscriber.Subscribe<TMessage>(handler, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Subscribe<TMessage>(
@@ -295,11 +295,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return;
@@ -309,7 +309,7 @@ namespace EncosyTower.Modules.PubSub
                 _subscriber.Subscribe<TMessage>(handler, unsubscribeToken, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Subscribe<TMessage>(
@@ -318,11 +318,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return;
@@ -332,7 +332,7 @@ namespace EncosyTower.Modules.PubSub
                 _subscriber.Subscribe<TMessage>(handler, unsubscribeToken, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Subscribe<TMessage>(
@@ -341,11 +341,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return;
@@ -355,7 +355,7 @@ namespace EncosyTower.Modules.PubSub
                 _subscriber.Subscribe<TMessage>(handler, unsubscribeToken, order, logger);
             }
 
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Subscribe<TMessage>(
@@ -364,11 +364,11 @@ namespace EncosyTower.Modules.PubSub
                 , int order = 0
                 , EncosyTower.Modules.Logging.ILogger logger = null
             )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return;

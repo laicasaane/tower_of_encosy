@@ -1,9 +1,9 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 #if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __MODULE_CORE_NO_VALIDATION__
+#define __ENCOSY_NO_VALIDATION__
 #else
-#define __MODULE_CORE_VALIDATION__
+#define __ENCOSY_VALIDATION__
 #endif
 
 using System;
@@ -31,7 +31,7 @@ namespace EncosyTower.Modules.PubSub.Internals
         {
             lock (_orderToHandlerMap)
             {
-#if __MODULE_CORE_VALIDATION__
+#if __ENCOSY_VALIDATION__
                 try
 #endif
                 {
@@ -55,7 +55,7 @@ namespace EncosyTower.Modules.PubSub.Internals
                         return new Subscription<TMessage>(handler, handlerMap);
                     }
                 }
-#if __MODULE_CORE_VALIDATION__
+#if __ENCOSY_VALIDATION__
                 catch (Exception ex)
                 {
                     logger?.LogException(ex);
@@ -102,7 +102,7 @@ namespace EncosyTower.Modules.PubSub.Internals
         {
             lock (_orderToHandlerMap)
             {
-#if __MODULE_CORE_VALIDATION__
+#if __ENCOSY_VALIDATION__
                 try
 #endif
                 {
@@ -128,7 +128,7 @@ namespace EncosyTower.Modules.PubSub.Internals
                         ordering.RemoveAt(i);
                     }
                 }
-#if __MODULE_CORE_VALIDATION__
+#if __ENCOSY_VALIDATION__
                 catch (Exception ex)
                 {
                     logger?.LogException(ex);
@@ -145,7 +145,7 @@ namespace EncosyTower.Modules.PubSub.Internals
                 var orders = _ordering.AsSpan();
                 var handlerListList = GetHandlerListList();
 
-#if __MODULE_CORE_VALIDATION__
+#if __ENCOSY_VALIDATION__
                 try
 #endif
                 {
@@ -167,7 +167,7 @@ namespace EncosyTower.Modules.PubSub.Internals
                         handlerListList.Add(handlerList);
                     }
                 }
-#if __MODULE_CORE_VALIDATION__
+#if __ENCOSY_VALIDATION__
                 catch (Exception ex)
                 {
                     logger?.LogException(ex);

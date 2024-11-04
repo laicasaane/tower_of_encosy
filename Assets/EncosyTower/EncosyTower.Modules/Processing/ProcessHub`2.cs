@@ -1,8 +1,8 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 #if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __MODULE_CORE_PROCESSING_NO_VALIDATION__
+#define __ENCOSY_PROCESSING_NO_VALIDATION__
 #else
-#define __MODULE_CORE_PROCESSING_VALIDATION__
+#define __ENCOSY_PROCESSING_VALIDATION__
 #endif
 
 using System;
@@ -45,28 +45,28 @@ namespace EncosyTower.Modules.Processing
         #region    REGISTER - SYNC
         #endregion ===============
 
-#if __MODULE_CORE_PROCESSING_NO_VALIDATION__
+#if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public Option<TypeId> Register<TRequest>(Action<TState, TRequest> process)
         {
             ThrowIfHandlerIsNull(process);
 
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif
 
             return _hub.Register(new Internals.Sync.ProcessByStateHandler<TState, TRequest>(State, process));
         }
 
-#if __MODULE_CORE_PROCESSING_NO_VALIDATION__
+#if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public Option<TypeId> Register<TRequest, TResult>(Func<TState, TRequest, TResult> process)
         {
             ThrowIfHandlerIsNull(process);
 
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif
 
@@ -76,73 +76,73 @@ namespace EncosyTower.Modules.Processing
         #region    UNREGISTER - SYNC
         #endregion =================
 
-#if __MODULE_CORE_PROCESSING_NO_VALIDATION__
+#if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Unregister<TRequest>(Action<TState, TRequest> _)
         {
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif
 
             return _hub.Unregister(TypeId.Get<Action<TState, TRequest>>());
         }
 
-#if __MODULE_CORE_PROCESSING_NO_VALIDATION__
+#if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Unregister<TRequest>(Func<TState, TRequest, bool> _)
         {
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif
 
             return _hub.Unregister(TypeId.Get<Func<TState, TRequest, bool>>());
         }
 
-#if __MODULE_CORE_PROCESSING_NO_VALIDATION__
+#if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Unregister<TRequest, TResult>(Func<TState, TRequest, TResult> _)
         {
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif
 
             return _hub.Unregister(TypeId.Get<Func<TState, TRequest, TResult>>());
         }
 
-#if __MODULE_CORE_PROCESSING_NO_VALIDATION__
+#if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Unregister<TRequest, TResult>(Func<TState, TRequest, Option<TResult>> _)
         {
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif
 
             return _hub.Unregister(TypeId.Get<Func<TState, TRequest, Option<TResult>>>());
         }
 
-#if __MODULE_CORE_PROCESSING_NO_VALIDATION__
+#if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Unregister(TypeId id)
         {
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif
 
             return _hub.Unregister(id);
         }
 
-        [Conditional("__MODULE_CORE_PROCESSING_VALIDATION__"), DoesNotReturn]
+        [Conditional("__ENCOSY_PROCESSING_VALIDATION__"), DoesNotReturn]
         private static void ThrowIfHandlerIsNull(Delegate process)
         {
             if (process == null) throw new ArgumentNullException(nameof(process));
         }
 
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
         private bool Validate()
         {
             if (IsValid == true)

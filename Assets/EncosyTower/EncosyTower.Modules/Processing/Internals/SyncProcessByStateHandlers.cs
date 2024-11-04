@@ -1,8 +1,8 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 #if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __MODULE_CORE_PROCESSING_NO_VALIDATION__
+#define __ENCOSY_PROCESSING_NO_VALIDATION__
 #else
-#define __MODULE_CORE_PROCESSING_VALIDATION__
+#define __ENCOSY_PROCESSING_VALIDATION__
 #endif
 
 using System;
@@ -43,7 +43,7 @@ namespace EncosyTower.Modules.Processing.Internals.Sync
                 return;
             }
 
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
             StateValidation.ErrorIfStateIsDestroyed<TState>();
 #endif
         }
@@ -81,7 +81,7 @@ namespace EncosyTower.Modules.Processing.Internals.Sync
                 return _process(state, arg);
             }
 
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
             StateValidation.ErrorIfStateIsDestroyed<TState>();
 #endif
 
@@ -89,7 +89,7 @@ namespace EncosyTower.Modules.Processing.Internals.Sync
         }
     }
 
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
     internal static class StateValidation
     {
         public static void ErrorIfStateIsDestroyed<TState>()

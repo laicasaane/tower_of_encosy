@@ -1,8 +1,8 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 #if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __MODULE_CORE_PROCESSING_NO_VALIDATION__
+#define __ENCOSY_PROCESSING_NO_VALIDATION__
 #else
-#define __MODULE_CORE_PROCESSING_VALIDATION__
+#define __ENCOSY_PROCESSING_VALIDATION__
 #endif
 
 using System;
@@ -50,12 +50,12 @@ namespace EncosyTower.Modules.Processing
             return Register(new Internals.Sync.ProcessHandler<TRequest, TResult>(process));
         }
 
-#if __MODULE_CORE_PROCESSING_NO_VALIDATION__
+#if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         internal Option<TypeId> Register(IProcessHandler handler)
         {
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false)
             {
                 return default;
@@ -92,12 +92,12 @@ namespace EncosyTower.Modules.Processing
             return Unregister(TypeId.Get<Func<TRequest, Option<TResult>>>());
         }
 
-#if __MODULE_CORE_PROCESSING_NO_VALIDATION__
+#if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Unregister(TypeId id)
         {
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false)
             {
                 return false;
@@ -203,12 +203,12 @@ namespace EncosyTower.Modules.Processing
             }
         }
 
-#if __MODULE_CORE_PROCESSING_NO_VALIDATION__
+#if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         private bool TryGet(TypeId typeId, out IProcessHandler handler)
         {
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false)
             {
                 handler = null;
@@ -219,13 +219,13 @@ namespace EncosyTower.Modules.Processing
             return _map.TryGet(typeId, out handler);
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("__MODULE_CORE_PROCESSING_VALIDATION__")]
+        [HideInCallstack, DoesNotReturn, Conditional("__ENCOSY_PROCESSING_VALIDATION__")]
         private static void ThrowIfHandlerIsNull(Delegate @delegate)
         {
             if (@delegate == null) throw new ArgumentNullException(nameof(@delegate));
         }
 
-#if __MODULE_CORE_PROCESSING_VALIDATION__
+#if __ENCOSY_PROCESSING_VALIDATION__
         private bool Validate()
         {
             if (_map != null)

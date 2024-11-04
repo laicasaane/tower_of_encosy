@@ -1,9 +1,9 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 #if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#define __ENCOSY_PUBSUB_NO_VALIDATION__
 #else
-#define __MODULE_CORE_PUBSUB_VALIDATION__
+#define __ENCOSY_PUBSUB_VALIDATION__
 #endif
 
 using System.Diagnostics.CodeAnalysis;
@@ -29,13 +29,13 @@ namespace EncosyTower.Modules.PubSub
             }
 
             public CachedPublisher<TMessage> Cache<TMessage>(ILogger logger = null)
-#if MODULE_CORE_PUBSUB_RELAX_MODE
+#if ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : new()
 #else
                 where TMessage : IMessage, new()
 #endif
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return default;
@@ -52,7 +52,7 @@ namespace EncosyTower.Modules.PubSub
 
                         if (brokers.TryAdd(scopedBroker) == false)
                         {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                             LogUnexpectedErrorWhenCache<TMessage>(logger);
 #endif
 
@@ -66,7 +66,7 @@ namespace EncosyTower.Modules.PubSub
                 }
             }
 
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
             private bool Validate(ILogger logger)
             {
                 if (_publisher == null)

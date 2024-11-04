@@ -1,9 +1,9 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 #if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __MODULE_CORE_NO_VALIDATION__
+#define __ENCOSY_NO_VALIDATION__
 #else
-#define __MODULE_CORE_VALIDATION__
+#define __ENCOSY_VALIDATION__
 #endif
 
 using System;
@@ -40,7 +40,7 @@ namespace EncosyTower.Modules.PubSub.Internals
         {
             lock (_scopedBrokers)
             {
-#if !__MODULE_CORE_NO_VALIDATION__
+#if !__ENCOSY_NO_VALIDATION__
                 try
 #endif
                 {
@@ -67,7 +67,7 @@ namespace EncosyTower.Modules.PubSub.Internals
                         scopedBrokers.Remove(scope);
                     }
                 }
-#if !__MODULE_CORE_NO_VALIDATION__
+#if !__ENCOSY_NO_VALIDATION__
                 catch (Exception ex)
                 {
                     logger.LogException(ex);

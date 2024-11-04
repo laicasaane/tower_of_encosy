@@ -33,7 +33,7 @@ namespace EncosyTower.Modules.PubSub
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CachedPublisher<TMessage> GlobalCache<TMessage>(ILogger logger = null)
-#if MODULE_CORE_PUBSUB_RELAX_MODE
+#if ENCOSY_PUBSUB_RELAX_MODE
             where TMessage : new()
 #else
             where TMessage : IMessage, new()
@@ -45,7 +45,7 @@ namespace EncosyTower.Modules.PubSub
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CachedPublisher<TMessage> Cache<TScope, TMessage>(ILogger logger = null)
             where TScope : struct
-#if MODULE_CORE_PUBSUB_RELAX_MODE
+#if ENCOSY_PUBSUB_RELAX_MODE
             where TMessage : new()
 #else
             where TMessage : IMessage, new()
@@ -56,7 +56,7 @@ namespace EncosyTower.Modules.PubSub
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CachedPublisher<TMessage> Cache<TScope, TMessage>([NotNull] TScope scope, ILogger logger = null)
-#if MODULE_CORE_PUBSUB_RELAX_MODE
+#if ENCOSY_PUBSUB_RELAX_MODE
             where TMessage : new()
 #else
             where TMessage : IMessage, new()
@@ -75,7 +75,7 @@ namespace EncosyTower.Modules.PubSub
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CachedPublisher<TMessage> UnityCache<TScope, TMessage>([NotNull] TScope scope, ILogger logger = null)
             where TScope : UnityEngine.Object
-#if MODULE_CORE_PUBSUB_RELAX_MODE
+#if ENCOSY_PUBSUB_RELAX_MODE
             where TMessage : new()
 #else
             where TMessage : IMessage, new()

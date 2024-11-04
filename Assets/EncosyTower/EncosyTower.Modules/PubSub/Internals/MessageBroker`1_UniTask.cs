@@ -1,9 +1,9 @@
 #if UNITASK
 
 #if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __MODULE_CORE_NO_VALIDATION__
+#define __ENCOSY_NO_VALIDATION__
 #else
-#define __MODULE_CORE_VALIDATION__
+#define __ENCOSY_VALIDATION__
 #endif
 
 using System;
@@ -34,7 +34,7 @@ namespace EncosyTower.Modules.PubSub.Internals
         {
             var handlerListList = GetHandlerListList(logger);
 
-#if __MODULE_CORE_VALIDATION__
+#if __ENCOSY_VALIDATION__
             try
 #endif
             {
@@ -55,7 +55,7 @@ namespace EncosyTower.Modules.PubSub.Internals
                     }
                 }
             }
-#if __MODULE_CORE_VALIDATION__
+#if __ENCOSY_VALIDATION__
             catch (Exception ex)
             {
                 logger?.LogException(ex);
@@ -84,13 +84,13 @@ namespace EncosyTower.Modules.PubSub.Internals
             var tasks = taskArrayPool.Rent(handlerList.Count);
             ToTasks(handlerList, message, context, token, logger, tasks);
 
-#if __MODULE_CORE_VALIDATION__
+#if __ENCOSY_VALIDATION__
             try
 #endif
             {
                 await UniTask.WhenAll(tasks);
             }
-#if __MODULE_CORE_VALIDATION__
+#if __ENCOSY_VALIDATION__
             catch (Exception ex)
             {
                 logger?.LogException(ex);
@@ -115,13 +115,13 @@ namespace EncosyTower.Modules.PubSub.Internals
 
                 for (var i = 0; i < handlersLength; i++)
                 {
-#if __MODULE_CORE_VALIDATION__
+#if __ENCOSY_VALIDATION__
                     try
 #endif
                     {
                         result[i] = handlers[i]?.Handle(message, context, token) ?? UniTask.CompletedTask;
                     }
-#if __MODULE_CORE_VALIDATION__
+#if __ENCOSY_VALIDATION__
                     catch (Exception ex)
                     {
                         result[i] = UniTask.CompletedTask;

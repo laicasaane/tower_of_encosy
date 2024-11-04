@@ -46,7 +46,7 @@ namespace EncosyTower.Modules.PubSub.Internals
               [NotNull] this Subscription<TMessage> subscription
             , CancellationToken unsubscribeToken
         )
-#if !MODULE_CORE_PUBSUB_RELAX_MODE
+#if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
         {

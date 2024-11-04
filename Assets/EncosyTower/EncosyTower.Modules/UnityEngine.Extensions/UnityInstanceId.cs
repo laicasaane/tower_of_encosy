@@ -1,7 +1,7 @@
 #if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __MODULE_CORE_NO_VALIDATION__
+#define __ENCOSY_NO_VALIDATION__
 #else
-#define __MODULE_CORE_VALIDATION__
+#define __ENCOSY_VALIDATION__
 #endif
 
 using System;
@@ -72,7 +72,7 @@ namespace EncosyTower.Modules
         public static bool operator !=(UnityInstanceId<T> left, UnityInstanceId<T> right)
             => left._isValid != right._isValid || left._instanceId != right._instanceId;
 
-        [Conditional("__MODULE_CORE_VALIDATION__"), DoesNotReturn]
+        [Conditional("__ENCOSY_VALIDATION__"), DoesNotReturn]
         private static void ThrowIfInvalid(UnityEngine.Object obj)
         {
             if (obj == false || obj == null)
@@ -81,7 +81,7 @@ namespace EncosyTower.Modules
             }
         }
 
-        [Conditional("__MODULE_CORE_VALIDATION__"), DoesNotReturn]
+        [Conditional("__ENCOSY_VALIDATION__"), DoesNotReturn]
         private static void ThrowIfNotCreated(bool value)
         {
             if (value == false)

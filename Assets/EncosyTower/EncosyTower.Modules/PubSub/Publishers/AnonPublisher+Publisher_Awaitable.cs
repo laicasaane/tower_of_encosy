@@ -1,9 +1,9 @@
 #if !UNITASK && UNITY_6000_0_OR_NEWER
 
 #if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#define __ENCOSY_PUBSUB_NO_VALIDATION__
 #else
-#define __MODULE_CORE_PUBSUB_VALIDATION__
+#define __ENCOSY_PUBSUB_VALIDATION__
 #endif
 
 using System.Threading;
@@ -15,7 +15,7 @@ namespace EncosyTower.Modules.PubSub
     {
         partial struct Publisher<TScope>
         {
-#if __MODULE_CORE_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_PUBSUB_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public Awaitable PublishAsync(
@@ -24,7 +24,7 @@ namespace EncosyTower.Modules.PubSub
                 , CallerInfo callerInfo = default
             )
             {
-#if __MODULE_CORE_PUBSUB_VALIDATION__
+#if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return Awaitables.GetCompleted();
