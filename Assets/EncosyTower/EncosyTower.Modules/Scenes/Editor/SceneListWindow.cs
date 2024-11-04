@@ -156,8 +156,13 @@ namespace EncosyTower.Modules.Editor.Scenes
                 });
             }
 
+            items.Sort(Sort);
+
             result = items.ToArray();
             return true;
+
+            static int Sort(ItemInfo x, ItemInfo y)
+                => StringComparer.OrdinalIgnoreCase.Compare(x.path, y.path);
         }
 
         private class ItemInfo
