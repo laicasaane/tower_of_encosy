@@ -2,7 +2,7 @@
 
 using EncosyTower.Modules.Editor.ProjectSetup;
 
-namespace EncosyTower.Modules.Data.Editor
+namespace EncosyTower.Modules.Editor.Data
 {
     [Feature("5. EncosyTower: Data")]
     [RequiresPackage(PackageRegistry.Unity, "com.cathei.bakingsheet", "4.1.3")]

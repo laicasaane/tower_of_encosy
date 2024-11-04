@@ -2,7 +2,7 @@
 
 using EncosyTower.Modules.Editor.ProjectSetup;
 
-namespace EncosyTower.Modules.Localization.Editor
+namespace EncosyTower.Modules.Editor.Localization
 {
     [Feature("2. EncosyTower: Localization")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.addressables", "1.22.2")]

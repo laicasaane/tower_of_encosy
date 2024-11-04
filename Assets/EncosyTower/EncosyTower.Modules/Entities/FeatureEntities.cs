@@ -2,7 +2,7 @@
 
 using EncosyTower.Modules.Editor.ProjectSetup;
 
-namespace EncosyTower.Modules.Entities.Editor
+namespace EncosyTower.Modules.Editor.Entities
 {
     [Feature("4. EncosyTower: Entities")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.entities", "1.2.4")]

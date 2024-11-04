@@ -2,7 +2,7 @@
 
 using EncosyTower.Modules.Editor.ProjectSetup;
 
-namespace EncosyTower.Modules.AddressableKeys.Editor
+namespace EncosyTower.Modules.Editor.AddressableKeys
 {
     [Feature("1. EncosyTower: Addressables")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.addressables", "1.22.2")]

@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-using EncosyTower.Modules.Editor;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace EncosyTower.Modules.Scenes.Editor
+namespace EncosyTower.Modules.Editor.Scenes
 {
     internal sealed class SceneListWindow : EditorWindow
     {
