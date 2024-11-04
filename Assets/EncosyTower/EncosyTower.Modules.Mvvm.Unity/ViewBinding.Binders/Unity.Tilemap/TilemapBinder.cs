@@ -71,11 +71,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Tilemaps
     [Label("Orientation Matrix", "Tilemap")]
     public sealed partial class TilemapBindingOrientationMatrix : MonoBindingProperty<Tilemap>, IBinder
     {
-#if !UNION_SIZE_64_BYTES
+#if !(UNION_64_BYTES || UNION_16_INTS || UNION_8_LONGS)
         public TilemapBindingOrientationMatrix()
         {
             Logging.DevLoggerAPI.LogException(new NotSupportedException(
-                "Tilemap Orientation Matrix binding property requires the symbol UNION_SIZE_64_BYTES to be defined"
+                "Tilemap Orientation Matrix binding property requires the symbol UNION_64_BYTES to be defined"
             ));
         }
 #else

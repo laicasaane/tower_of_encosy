@@ -9,10 +9,10 @@ namespace EncosyTower.Modules.Editor.Unions
     [Generator]
     internal class UnionDataGenerator : ICodeGenerator
     {
-        private const uint SIZE_ULONG = 8;
-        private const uint MAX_COUNT = 512;
-        private const uint DEFAULT_SIZE = SIZE_ULONG * 2;
-        private const uint MAX_SIZE = SIZE_ULONG * MAX_COUNT;
+        private const uint SIZE_OF_LONG = 8;
+        private const uint MAX_LONG_COUNT = 512;
+        private const uint DEFAULT_BYTE_COUNT = SIZE_OF_LONG * 2;
+        private const uint MAX_BYTE_COUNT = SIZE_OF_LONG * MAX_LONG_COUNT;
 
         public void Execute([NotNull] GeneratorContext context)
         {
@@ -27,8 +27,10 @@ namespace EncosyTower.Modules.Editor.Unions
             p.PrintEndLine();
             p.PrintLine("#pragma warning disable");
             p.PrintEndLine();
-            p.Print($"// For practical reason, UnionData should be {DEFAULT_SIZE} bytes by default.").PrintEndLine();
-            p.Print($"#define UNION_SIZE_{DEFAULT_SIZE}_BYTES").PrintEndLine();
+            p.Print($"// For practical reason, UnionData should be {DEFAULT_BYTE_COUNT} bytes by default.").PrintEndLine();
+            p.Print($"#define UNION_{DEFAULT_BYTE_COUNT}_BYTES").PrintEndLine();
+            p.Print($"#define UNION_{(DEFAULT_BYTE_COUNT / SIZE_OF_LONG) * 2}_INTS").PrintEndLine();
+            p.Print($"#define UNION_{DEFAULT_BYTE_COUNT / SIZE_OF_LONG}_LONGS").PrintEndLine();
             p.PrintEndLine();
 
             p.PrintLine(@"using System.Runtime.InteropServices;");
@@ -39,52 +41,88 @@ namespace EncosyTower.Modules.Editor.Unions
             {
                 p.PrintLine("/// <summary>");
                 p.PrintLine("/// Represents a memory layout that can store the actual data of several types.");
-                p.PrintLine($"/// The data size can be between {DEFAULT_SIZE} and {MAX_SIZE} bytes.");
+                p.PrintLine($"/// The data size can be between {DEFAULT_BYTE_COUNT} and {MAX_BYTE_COUNT} bytes.");
                 p.PrintLine("/// </summary>");
                 p.PrintLine("/// <remarks>");
-                p.PrintLine($"/// For practical reason, the default size is {DEFAULT_SIZE} bytes.");
+                p.PrintLine($"/// For practical reason, the default size is {DEFAULT_BYTE_COUNT} bytes.");
                 p.PrintLine("/// <br />");
                 p.PrintLine("/// <br />");
                 p.PrintLine("/// To resize, define one of the following symbols:");
                 p.PrintLine("/// <list type=\"bullet\">");
-                p.PrintLine($"/// <item><c>UNION_SIZE_{DEFAULT_SIZE + SIZE_ULONG * 0}_BYTES</c> = {2} × <see cref=\"long\"/>, or {2 * 2} × <see cref=\"int\"/></item>");
-                p.PrintLine($"/// <item><c>UNION_SIZE_{DEFAULT_SIZE + SIZE_ULONG * 1}_BYTES</c> = {3} × <see cref=\"long\"/>, or {3 * 2} × <see cref=\"int\"/></item>");
-                p.PrintLine($"/// <item><c>UNION_SIZE_{DEFAULT_SIZE + SIZE_ULONG * 2}_BYTES</c> = {4} × <see cref=\"long\"/>, or {4 * 2} × <see cref=\"int\"/></item>");
-                p.PrintLine($"/// <item><c>UNION_SIZE_{DEFAULT_SIZE + SIZE_ULONG * 3}_BYTES</c> = {5} × <see cref=\"long\"/>, or {5 * 2} × <see cref=\"int\"/></item>");
+
+                for (var i = 0; i <= 3; i++)
+                {
+                    var size = DEFAULT_BYTE_COUNT + SIZE_OF_LONG * i;
+                    var count = size / SIZE_OF_LONG;
+
+                    p.PrintBeginLine($"/// <item>")
+                        .Print($"<c>UNION_{size}_BYTES</c>")
+                        .Print("; or ")
+                        .Print($"<c>UNION_{count * 2}_INTS</c>")
+                        .Print("; or ")
+                        .Print($"<c>UNION_{count}_LONGS</c>")
+                        .PrintEndLine("</item>");
+                }
+
                 p.PrintLine("/// <item><c>...</c></item>");
-                p.PrintLine($"/// <item><c>UNION_SIZE_{MAX_SIZE - SIZE_ULONG * 2}_BYTES</c> = {MAX_COUNT - 2} × <see cref=\"long\"/>, or {(MAX_COUNT - 2) * 2} × <see cref=\"int\"/></item>");
-                p.PrintLine($"/// <item><c>UNION_SIZE_{MAX_SIZE - SIZE_ULONG * 1}_BYTES</c> = {MAX_COUNT - 1} × <see cref=\"long\"/>, or {(MAX_COUNT - 1) * 2} × <see cref=\"int\"/></item>");
-                p.PrintLine($"/// <item><c>UNION_SIZE_{MAX_SIZE                 }_BYTES</c> = {MAX_COUNT    } × <see cref=\"long\"/>, or {(MAX_COUNT    ) * 2} × <see cref=\"int\"/></item>");
+
+                for (var i = 2; i >= 0; i--)
+                {
+                    var size = DEFAULT_BYTE_COUNT + SIZE_OF_LONG * i;
+                    var count = size / SIZE_OF_LONG;
+
+                    p.PrintBeginLine($"/// <item>")
+                        .Print($"<c>UNION_{size}_BYTES</c>")
+                        .Print("; or ")
+                        .Print($"<c>UNION_{count * 2}_INTS</c>")
+                        .Print("; or ")
+                        .Print($"<c>UNION_{count}_LONGS</c>")
+                        .PrintEndLine("</item>");
+                }
+
                 p.PrintLine("/// </list>");
                 p.PrintLine("/// </remarks>");
-                p.PrintLine("[StructLayout(LayoutKind.Sequential, Size = UnionData.SIZE)]");
+                p.PrintLine("[StructLayout(LayoutKind.Sequential, Size = UnionData.BYTE_COUNT)]");
                 p.PrintLine("public readonly struct UnionData");
                 p.OpenScope();
                 {
-                    p.Print($"#if UNION_SIZE_{MAX_SIZE}_BYTES").PrintEndLine();
+                    p.PrintLine("/// <summary>");
+                    p.PrintLine("/// Size of <see cref=\"long\"/> in bytes.");
+                    p.PrintLine("/// </summary>");
+                    p.PrintLine($"public const int SIZE_OF_LONG = {SIZE_OF_LONG};");
+                    p.PrintEndLine();
 
-                    for (var size = MAX_SIZE; size >= SIZE_ULONG; size -= SIZE_ULONG)
+                    p.PrintLine($"public const int MAX_LONG_COUNT = {MAX_LONG_COUNT};");
+                    p.PrintLine($"public const int MAX_INT_COUNT = MAX_LONG_COUNT * 2;");
+                    p.PrintLine($"public const int MAX_BYTE_COUNT = MAX_LONG_COUNT * SIZE_OF_LONG;");
+                    p.PrintEndLine();
+
+                    p.Print($"#if (UNION_{MAX_BYTE_COUNT}_BYTES || UNION_{MAX_LONG_COUNT}_LONGS || UNION_{MAX_LONG_COUNT * 2}_INTS)").PrintEndLine();
+
+                    for (var size = MAX_BYTE_COUNT; size >= SIZE_OF_LONG; size -= SIZE_OF_LONG)
                     {
-                        var count = size / SIZE_ULONG;
+                        var count = size / SIZE_OF_LONG;
 
                         p.PrintEndLine();
                         p.PrintLine("/// <summary>");
-                        p.PrintLine($"/// Equals to {count} × <see cref=\"long\"/>, or {count * 2} × <see cref=\"int\"/>");
+                        p.PrintLine($"/// Equals to {count * 2} × <see cref=\"int\"/>, or {count} × <see cref=\"long\"/>");
                         p.PrintLine("/// </summary>");
-                        p.PrintLine($"public const int SIZE = {SIZE_ULONG} * {count};");
+                        p.PrintLine($"public const int BYTE_COUNT = {count} * SIZE_OF_LONG;");
                         p.PrintEndLine();
 
-                        var nextSize = size - SIZE_ULONG;
+                        var nextSize = size - SIZE_OF_LONG;
 
-                        if (nextSize < SIZE_ULONG)
+                        if (nextSize < SIZE_OF_LONG)
                         {
                             break;
                         }
 
+                        var nextCount = nextSize / SIZE_OF_LONG;
+
                         p.PrintSelect(
                               $"#else"
-                            , $"#elif UNION_SIZE_{nextSize}_BYTES"
-                            , nextSize == SIZE_ULONG
+                            , $"#elif (UNION_{nextSize}_BYTES || UNION_{nextCount * 2}_INTS || UNION_{nextCount}_LONGS)"
+                            , nextSize == SIZE_OF_LONG
                         ).PrintEndLine();
                     }
 

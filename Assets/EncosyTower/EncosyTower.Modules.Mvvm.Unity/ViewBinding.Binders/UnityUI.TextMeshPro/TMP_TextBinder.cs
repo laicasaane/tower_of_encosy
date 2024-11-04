@@ -53,11 +53,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
     [Label("Color Gradient", "TMP Text")]
     public sealed partial class TMP_TextBindingColorGradient : MonoBindingProperty<TMP_Text>, IBinder
     {
-#if !UNION_SIZE_64_BYTES
+#if !(UNION_64_BYTES || UNION_16_INTS || UNION_8_LONGS)
         public TMP_TextBindingColorGradient()
         {
             Logging.DevLoggerAPI.LogException(new NotSupportedException(
-                "TMP Text Color Gradient binding requires the symbol UNION_SIZE_64_BYTES to be defined"
+                "TMP Text Color Gradient binding requires the symbol UNION_64_BYTES to be defined"
             ));
         }
 #else

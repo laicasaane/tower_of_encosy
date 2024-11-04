@@ -10,7 +10,9 @@
 #pragma warning disable
 
 // For practical reason, UnionData should be 16 bytes by default.
-#define UNION_SIZE_16_BYTES
+#define UNION_16_BYTES
+#define UNION_4_INTS
+#define UNION_2_LONGS
 
 using System.Runtime.InteropServices;
 
@@ -26,3602 +28,3611 @@ namespace EncosyTower.Modules.Unions
     /// <br />
     /// To resize, define one of the following symbols:
     /// <list type="bullet">
-    /// <item><c>UNION_SIZE_16_BYTES</c> = 2 × <see cref="long"/>, or 4 × <see cref="int"/></item>
-    /// <item><c>UNION_SIZE_24_BYTES</c> = 3 × <see cref="long"/>, or 6 × <see cref="int"/></item>
-    /// <item><c>UNION_SIZE_32_BYTES</c> = 4 × <see cref="long"/>, or 8 × <see cref="int"/></item>
-    /// <item><c>UNION_SIZE_40_BYTES</c> = 5 × <see cref="long"/>, or 10 × <see cref="int"/></item>
+    /// <item><c>UNION_16_BYTES</c>; or <c>UNION_4_INTS</c>; or <c>UNION_2_LONGS</c></item>
+    /// <item><c>UNION_24_BYTES</c>; or <c>UNION_6_INTS</c>; or <c>UNION_3_LONGS</c></item>
+    /// <item><c>UNION_32_BYTES</c>; or <c>UNION_8_INTS</c>; or <c>UNION_4_LONGS</c></item>
+    /// <item><c>UNION_40_BYTES</c>; or <c>UNION_10_INTS</c>; or <c>UNION_5_LONGS</c></item>
     /// <item><c>...</c></item>
-    /// <item><c>UNION_SIZE_4080_BYTES</c> = 510 × <see cref="long"/>, or 1020 × <see cref="int"/></item>
-    /// <item><c>UNION_SIZE_4088_BYTES</c> = 511 × <see cref="long"/>, or 1022 × <see cref="int"/></item>
-    /// <item><c>UNION_SIZE_4096_BYTES</c> = 512 × <see cref="long"/>, or 1024 × <see cref="int"/></item>
+    /// <item><c>UNION_32_BYTES</c>; or <c>UNION_8_INTS</c>; or <c>UNION_4_LONGS</c></item>
+    /// <item><c>UNION_24_BYTES</c>; or <c>UNION_6_INTS</c>; or <c>UNION_3_LONGS</c></item>
+    /// <item><c>UNION_16_BYTES</c>; or <c>UNION_4_INTS</c>; or <c>UNION_2_LONGS</c></item>
     /// </list>
     /// </remarks>
-    [StructLayout(LayoutKind.Sequential, Size = UnionData.SIZE)]
+    [StructLayout(LayoutKind.Sequential, Size = UnionData.BYTE_COUNT)]
     public readonly struct UnionData
     {
-#if UNION_SIZE_4096_BYTES
+        /// <summary>
+        /// Size of <see cref="long"/> in bytes.
+        /// </summary>
+        public const int SIZE_OF_LONG = 8;
+
+        public const int MAX_LONG_COUNT = 512;
+        public const int MAX_INT_COUNT = MAX_LONG_COUNT * 2;
+        public const int MAX_BYTE_COUNT = MAX_LONG_COUNT * SIZE_OF_LONG;
+
+#if (UNION_4096_BYTES || UNION_512_LONGS || UNION_1024_INTS)
 
         /// <summary>
-        /// Equals to 512 × <see cref="long"/>, or 1024 × <see cref="int"/>
+        /// Equals to 1024 × <see cref="int"/>, or 512 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 512;
+        public const int BYTE_COUNT = 512 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_4088_BYTES
+#elif (UNION_4088_BYTES || UNION_1022_INTS || UNION_511_LONGS)
 
         /// <summary>
-        /// Equals to 511 × <see cref="long"/>, or 1022 × <see cref="int"/>
+        /// Equals to 1022 × <see cref="int"/>, or 511 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 511;
+        public const int BYTE_COUNT = 511 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_4080_BYTES
+#elif (UNION_4080_BYTES || UNION_1020_INTS || UNION_510_LONGS)
 
         /// <summary>
-        /// Equals to 510 × <see cref="long"/>, or 1020 × <see cref="int"/>
+        /// Equals to 1020 × <see cref="int"/>, or 510 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 510;
+        public const int BYTE_COUNT = 510 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_4072_BYTES
+#elif (UNION_4072_BYTES || UNION_1018_INTS || UNION_509_LONGS)
 
         /// <summary>
-        /// Equals to 509 × <see cref="long"/>, or 1018 × <see cref="int"/>
+        /// Equals to 1018 × <see cref="int"/>, or 509 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 509;
+        public const int BYTE_COUNT = 509 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_4064_BYTES
+#elif (UNION_4064_BYTES || UNION_1016_INTS || UNION_508_LONGS)
 
         /// <summary>
-        /// Equals to 508 × <see cref="long"/>, or 1016 × <see cref="int"/>
+        /// Equals to 1016 × <see cref="int"/>, or 508 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 508;
+        public const int BYTE_COUNT = 508 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_4056_BYTES
+#elif (UNION_4056_BYTES || UNION_1014_INTS || UNION_507_LONGS)
 
         /// <summary>
-        /// Equals to 507 × <see cref="long"/>, or 1014 × <see cref="int"/>
+        /// Equals to 1014 × <see cref="int"/>, or 507 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 507;
+        public const int BYTE_COUNT = 507 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_4048_BYTES
+#elif (UNION_4048_BYTES || UNION_1012_INTS || UNION_506_LONGS)
 
         /// <summary>
-        /// Equals to 506 × <see cref="long"/>, or 1012 × <see cref="int"/>
+        /// Equals to 1012 × <see cref="int"/>, or 506 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 506;
+        public const int BYTE_COUNT = 506 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_4040_BYTES
+#elif (UNION_4040_BYTES || UNION_1010_INTS || UNION_505_LONGS)
 
         /// <summary>
-        /// Equals to 505 × <see cref="long"/>, or 1010 × <see cref="int"/>
+        /// Equals to 1010 × <see cref="int"/>, or 505 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 505;
+        public const int BYTE_COUNT = 505 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_4032_BYTES
+#elif (UNION_4032_BYTES || UNION_1008_INTS || UNION_504_LONGS)
 
         /// <summary>
-        /// Equals to 504 × <see cref="long"/>, or 1008 × <see cref="int"/>
+        /// Equals to 1008 × <see cref="int"/>, or 504 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 504;
+        public const int BYTE_COUNT = 504 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_4024_BYTES
+#elif (UNION_4024_BYTES || UNION_1006_INTS || UNION_503_LONGS)
 
         /// <summary>
-        /// Equals to 503 × <see cref="long"/>, or 1006 × <see cref="int"/>
+        /// Equals to 1006 × <see cref="int"/>, or 503 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 503;
+        public const int BYTE_COUNT = 503 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_4016_BYTES
+#elif (UNION_4016_BYTES || UNION_1004_INTS || UNION_502_LONGS)
 
         /// <summary>
-        /// Equals to 502 × <see cref="long"/>, or 1004 × <see cref="int"/>
+        /// Equals to 1004 × <see cref="int"/>, or 502 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 502;
+        public const int BYTE_COUNT = 502 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_4008_BYTES
+#elif (UNION_4008_BYTES || UNION_1002_INTS || UNION_501_LONGS)
 
         /// <summary>
-        /// Equals to 501 × <see cref="long"/>, or 1002 × <see cref="int"/>
+        /// Equals to 1002 × <see cref="int"/>, or 501 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 501;
+        public const int BYTE_COUNT = 501 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_4000_BYTES
+#elif (UNION_4000_BYTES || UNION_1000_INTS || UNION_500_LONGS)
 
         /// <summary>
-        /// Equals to 500 × <see cref="long"/>, or 1000 × <see cref="int"/>
+        /// Equals to 1000 × <see cref="int"/>, or 500 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 500;
+        public const int BYTE_COUNT = 500 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3992_BYTES
+#elif (UNION_3992_BYTES || UNION_998_INTS || UNION_499_LONGS)
 
         /// <summary>
-        /// Equals to 499 × <see cref="long"/>, or 998 × <see cref="int"/>
+        /// Equals to 998 × <see cref="int"/>, or 499 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 499;
+        public const int BYTE_COUNT = 499 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3984_BYTES
+#elif (UNION_3984_BYTES || UNION_996_INTS || UNION_498_LONGS)
 
         /// <summary>
-        /// Equals to 498 × <see cref="long"/>, or 996 × <see cref="int"/>
+        /// Equals to 996 × <see cref="int"/>, or 498 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 498;
+        public const int BYTE_COUNT = 498 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3976_BYTES
+#elif (UNION_3976_BYTES || UNION_994_INTS || UNION_497_LONGS)
 
         /// <summary>
-        /// Equals to 497 × <see cref="long"/>, or 994 × <see cref="int"/>
+        /// Equals to 994 × <see cref="int"/>, or 497 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 497;
+        public const int BYTE_COUNT = 497 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3968_BYTES
+#elif (UNION_3968_BYTES || UNION_992_INTS || UNION_496_LONGS)
 
         /// <summary>
-        /// Equals to 496 × <see cref="long"/>, or 992 × <see cref="int"/>
+        /// Equals to 992 × <see cref="int"/>, or 496 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 496;
+        public const int BYTE_COUNT = 496 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3960_BYTES
+#elif (UNION_3960_BYTES || UNION_990_INTS || UNION_495_LONGS)
 
         /// <summary>
-        /// Equals to 495 × <see cref="long"/>, or 990 × <see cref="int"/>
+        /// Equals to 990 × <see cref="int"/>, or 495 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 495;
+        public const int BYTE_COUNT = 495 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3952_BYTES
+#elif (UNION_3952_BYTES || UNION_988_INTS || UNION_494_LONGS)
 
         /// <summary>
-        /// Equals to 494 × <see cref="long"/>, or 988 × <see cref="int"/>
+        /// Equals to 988 × <see cref="int"/>, or 494 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 494;
+        public const int BYTE_COUNT = 494 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3944_BYTES
+#elif (UNION_3944_BYTES || UNION_986_INTS || UNION_493_LONGS)
 
         /// <summary>
-        /// Equals to 493 × <see cref="long"/>, or 986 × <see cref="int"/>
+        /// Equals to 986 × <see cref="int"/>, or 493 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 493;
+        public const int BYTE_COUNT = 493 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3936_BYTES
+#elif (UNION_3936_BYTES || UNION_984_INTS || UNION_492_LONGS)
 
         /// <summary>
-        /// Equals to 492 × <see cref="long"/>, or 984 × <see cref="int"/>
+        /// Equals to 984 × <see cref="int"/>, or 492 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 492;
+        public const int BYTE_COUNT = 492 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3928_BYTES
+#elif (UNION_3928_BYTES || UNION_982_INTS || UNION_491_LONGS)
 
         /// <summary>
-        /// Equals to 491 × <see cref="long"/>, or 982 × <see cref="int"/>
+        /// Equals to 982 × <see cref="int"/>, or 491 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 491;
+        public const int BYTE_COUNT = 491 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3920_BYTES
+#elif (UNION_3920_BYTES || UNION_980_INTS || UNION_490_LONGS)
 
         /// <summary>
-        /// Equals to 490 × <see cref="long"/>, or 980 × <see cref="int"/>
+        /// Equals to 980 × <see cref="int"/>, or 490 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 490;
+        public const int BYTE_COUNT = 490 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3912_BYTES
+#elif (UNION_3912_BYTES || UNION_978_INTS || UNION_489_LONGS)
 
         /// <summary>
-        /// Equals to 489 × <see cref="long"/>, or 978 × <see cref="int"/>
+        /// Equals to 978 × <see cref="int"/>, or 489 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 489;
+        public const int BYTE_COUNT = 489 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3904_BYTES
+#elif (UNION_3904_BYTES || UNION_976_INTS || UNION_488_LONGS)
 
         /// <summary>
-        /// Equals to 488 × <see cref="long"/>, or 976 × <see cref="int"/>
+        /// Equals to 976 × <see cref="int"/>, or 488 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 488;
+        public const int BYTE_COUNT = 488 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3896_BYTES
+#elif (UNION_3896_BYTES || UNION_974_INTS || UNION_487_LONGS)
 
         /// <summary>
-        /// Equals to 487 × <see cref="long"/>, or 974 × <see cref="int"/>
+        /// Equals to 974 × <see cref="int"/>, or 487 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 487;
+        public const int BYTE_COUNT = 487 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3888_BYTES
+#elif (UNION_3888_BYTES || UNION_972_INTS || UNION_486_LONGS)
 
         /// <summary>
-        /// Equals to 486 × <see cref="long"/>, or 972 × <see cref="int"/>
+        /// Equals to 972 × <see cref="int"/>, or 486 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 486;
+        public const int BYTE_COUNT = 486 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3880_BYTES
+#elif (UNION_3880_BYTES || UNION_970_INTS || UNION_485_LONGS)
 
         /// <summary>
-        /// Equals to 485 × <see cref="long"/>, or 970 × <see cref="int"/>
+        /// Equals to 970 × <see cref="int"/>, or 485 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 485;
+        public const int BYTE_COUNT = 485 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3872_BYTES
+#elif (UNION_3872_BYTES || UNION_968_INTS || UNION_484_LONGS)
 
         /// <summary>
-        /// Equals to 484 × <see cref="long"/>, or 968 × <see cref="int"/>
+        /// Equals to 968 × <see cref="int"/>, or 484 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 484;
+        public const int BYTE_COUNT = 484 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3864_BYTES
+#elif (UNION_3864_BYTES || UNION_966_INTS || UNION_483_LONGS)
 
         /// <summary>
-        /// Equals to 483 × <see cref="long"/>, or 966 × <see cref="int"/>
+        /// Equals to 966 × <see cref="int"/>, or 483 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 483;
+        public const int BYTE_COUNT = 483 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3856_BYTES
+#elif (UNION_3856_BYTES || UNION_964_INTS || UNION_482_LONGS)
 
         /// <summary>
-        /// Equals to 482 × <see cref="long"/>, or 964 × <see cref="int"/>
+        /// Equals to 964 × <see cref="int"/>, or 482 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 482;
+        public const int BYTE_COUNT = 482 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3848_BYTES
+#elif (UNION_3848_BYTES || UNION_962_INTS || UNION_481_LONGS)
 
         /// <summary>
-        /// Equals to 481 × <see cref="long"/>, or 962 × <see cref="int"/>
+        /// Equals to 962 × <see cref="int"/>, or 481 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 481;
+        public const int BYTE_COUNT = 481 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3840_BYTES
+#elif (UNION_3840_BYTES || UNION_960_INTS || UNION_480_LONGS)
 
         /// <summary>
-        /// Equals to 480 × <see cref="long"/>, or 960 × <see cref="int"/>
+        /// Equals to 960 × <see cref="int"/>, or 480 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 480;
+        public const int BYTE_COUNT = 480 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3832_BYTES
+#elif (UNION_3832_BYTES || UNION_958_INTS || UNION_479_LONGS)
 
         /// <summary>
-        /// Equals to 479 × <see cref="long"/>, or 958 × <see cref="int"/>
+        /// Equals to 958 × <see cref="int"/>, or 479 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 479;
+        public const int BYTE_COUNT = 479 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3824_BYTES
+#elif (UNION_3824_BYTES || UNION_956_INTS || UNION_478_LONGS)
 
         /// <summary>
-        /// Equals to 478 × <see cref="long"/>, or 956 × <see cref="int"/>
+        /// Equals to 956 × <see cref="int"/>, or 478 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 478;
+        public const int BYTE_COUNT = 478 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3816_BYTES
+#elif (UNION_3816_BYTES || UNION_954_INTS || UNION_477_LONGS)
 
         /// <summary>
-        /// Equals to 477 × <see cref="long"/>, or 954 × <see cref="int"/>
+        /// Equals to 954 × <see cref="int"/>, or 477 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 477;
+        public const int BYTE_COUNT = 477 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3808_BYTES
+#elif (UNION_3808_BYTES || UNION_952_INTS || UNION_476_LONGS)
 
         /// <summary>
-        /// Equals to 476 × <see cref="long"/>, or 952 × <see cref="int"/>
+        /// Equals to 952 × <see cref="int"/>, or 476 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 476;
+        public const int BYTE_COUNT = 476 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3800_BYTES
+#elif (UNION_3800_BYTES || UNION_950_INTS || UNION_475_LONGS)
 
         /// <summary>
-        /// Equals to 475 × <see cref="long"/>, or 950 × <see cref="int"/>
+        /// Equals to 950 × <see cref="int"/>, or 475 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 475;
+        public const int BYTE_COUNT = 475 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3792_BYTES
+#elif (UNION_3792_BYTES || UNION_948_INTS || UNION_474_LONGS)
 
         /// <summary>
-        /// Equals to 474 × <see cref="long"/>, or 948 × <see cref="int"/>
+        /// Equals to 948 × <see cref="int"/>, or 474 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 474;
+        public const int BYTE_COUNT = 474 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3784_BYTES
+#elif (UNION_3784_BYTES || UNION_946_INTS || UNION_473_LONGS)
 
         /// <summary>
-        /// Equals to 473 × <see cref="long"/>, or 946 × <see cref="int"/>
+        /// Equals to 946 × <see cref="int"/>, or 473 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 473;
+        public const int BYTE_COUNT = 473 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3776_BYTES
+#elif (UNION_3776_BYTES || UNION_944_INTS || UNION_472_LONGS)
 
         /// <summary>
-        /// Equals to 472 × <see cref="long"/>, or 944 × <see cref="int"/>
+        /// Equals to 944 × <see cref="int"/>, or 472 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 472;
+        public const int BYTE_COUNT = 472 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3768_BYTES
+#elif (UNION_3768_BYTES || UNION_942_INTS || UNION_471_LONGS)
 
         /// <summary>
-        /// Equals to 471 × <see cref="long"/>, or 942 × <see cref="int"/>
+        /// Equals to 942 × <see cref="int"/>, or 471 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 471;
+        public const int BYTE_COUNT = 471 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3760_BYTES
+#elif (UNION_3760_BYTES || UNION_940_INTS || UNION_470_LONGS)
 
         /// <summary>
-        /// Equals to 470 × <see cref="long"/>, or 940 × <see cref="int"/>
+        /// Equals to 940 × <see cref="int"/>, or 470 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 470;
+        public const int BYTE_COUNT = 470 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3752_BYTES
+#elif (UNION_3752_BYTES || UNION_938_INTS || UNION_469_LONGS)
 
         /// <summary>
-        /// Equals to 469 × <see cref="long"/>, or 938 × <see cref="int"/>
+        /// Equals to 938 × <see cref="int"/>, or 469 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 469;
+        public const int BYTE_COUNT = 469 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3744_BYTES
+#elif (UNION_3744_BYTES || UNION_936_INTS || UNION_468_LONGS)
 
         /// <summary>
-        /// Equals to 468 × <see cref="long"/>, or 936 × <see cref="int"/>
+        /// Equals to 936 × <see cref="int"/>, or 468 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 468;
+        public const int BYTE_COUNT = 468 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3736_BYTES
+#elif (UNION_3736_BYTES || UNION_934_INTS || UNION_467_LONGS)
 
         /// <summary>
-        /// Equals to 467 × <see cref="long"/>, or 934 × <see cref="int"/>
+        /// Equals to 934 × <see cref="int"/>, or 467 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 467;
+        public const int BYTE_COUNT = 467 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3728_BYTES
+#elif (UNION_3728_BYTES || UNION_932_INTS || UNION_466_LONGS)
 
         /// <summary>
-        /// Equals to 466 × <see cref="long"/>, or 932 × <see cref="int"/>
+        /// Equals to 932 × <see cref="int"/>, or 466 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 466;
+        public const int BYTE_COUNT = 466 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3720_BYTES
+#elif (UNION_3720_BYTES || UNION_930_INTS || UNION_465_LONGS)
 
         /// <summary>
-        /// Equals to 465 × <see cref="long"/>, or 930 × <see cref="int"/>
+        /// Equals to 930 × <see cref="int"/>, or 465 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 465;
+        public const int BYTE_COUNT = 465 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3712_BYTES
+#elif (UNION_3712_BYTES || UNION_928_INTS || UNION_464_LONGS)
 
         /// <summary>
-        /// Equals to 464 × <see cref="long"/>, or 928 × <see cref="int"/>
+        /// Equals to 928 × <see cref="int"/>, or 464 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 464;
+        public const int BYTE_COUNT = 464 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3704_BYTES
+#elif (UNION_3704_BYTES || UNION_926_INTS || UNION_463_LONGS)
 
         /// <summary>
-        /// Equals to 463 × <see cref="long"/>, or 926 × <see cref="int"/>
+        /// Equals to 926 × <see cref="int"/>, or 463 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 463;
+        public const int BYTE_COUNT = 463 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3696_BYTES
+#elif (UNION_3696_BYTES || UNION_924_INTS || UNION_462_LONGS)
 
         /// <summary>
-        /// Equals to 462 × <see cref="long"/>, or 924 × <see cref="int"/>
+        /// Equals to 924 × <see cref="int"/>, or 462 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 462;
+        public const int BYTE_COUNT = 462 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3688_BYTES
+#elif (UNION_3688_BYTES || UNION_922_INTS || UNION_461_LONGS)
 
         /// <summary>
-        /// Equals to 461 × <see cref="long"/>, or 922 × <see cref="int"/>
+        /// Equals to 922 × <see cref="int"/>, or 461 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 461;
+        public const int BYTE_COUNT = 461 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3680_BYTES
+#elif (UNION_3680_BYTES || UNION_920_INTS || UNION_460_LONGS)
 
         /// <summary>
-        /// Equals to 460 × <see cref="long"/>, or 920 × <see cref="int"/>
+        /// Equals to 920 × <see cref="int"/>, or 460 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 460;
+        public const int BYTE_COUNT = 460 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3672_BYTES
+#elif (UNION_3672_BYTES || UNION_918_INTS || UNION_459_LONGS)
 
         /// <summary>
-        /// Equals to 459 × <see cref="long"/>, or 918 × <see cref="int"/>
+        /// Equals to 918 × <see cref="int"/>, or 459 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 459;
+        public const int BYTE_COUNT = 459 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3664_BYTES
+#elif (UNION_3664_BYTES || UNION_916_INTS || UNION_458_LONGS)
 
         /// <summary>
-        /// Equals to 458 × <see cref="long"/>, or 916 × <see cref="int"/>
+        /// Equals to 916 × <see cref="int"/>, or 458 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 458;
+        public const int BYTE_COUNT = 458 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3656_BYTES
+#elif (UNION_3656_BYTES || UNION_914_INTS || UNION_457_LONGS)
 
         /// <summary>
-        /// Equals to 457 × <see cref="long"/>, or 914 × <see cref="int"/>
+        /// Equals to 914 × <see cref="int"/>, or 457 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 457;
+        public const int BYTE_COUNT = 457 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3648_BYTES
+#elif (UNION_3648_BYTES || UNION_912_INTS || UNION_456_LONGS)
 
         /// <summary>
-        /// Equals to 456 × <see cref="long"/>, or 912 × <see cref="int"/>
+        /// Equals to 912 × <see cref="int"/>, or 456 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 456;
+        public const int BYTE_COUNT = 456 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3640_BYTES
+#elif (UNION_3640_BYTES || UNION_910_INTS || UNION_455_LONGS)
 
         /// <summary>
-        /// Equals to 455 × <see cref="long"/>, or 910 × <see cref="int"/>
+        /// Equals to 910 × <see cref="int"/>, or 455 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 455;
+        public const int BYTE_COUNT = 455 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3632_BYTES
+#elif (UNION_3632_BYTES || UNION_908_INTS || UNION_454_LONGS)
 
         /// <summary>
-        /// Equals to 454 × <see cref="long"/>, or 908 × <see cref="int"/>
+        /// Equals to 908 × <see cref="int"/>, or 454 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 454;
+        public const int BYTE_COUNT = 454 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3624_BYTES
+#elif (UNION_3624_BYTES || UNION_906_INTS || UNION_453_LONGS)
 
         /// <summary>
-        /// Equals to 453 × <see cref="long"/>, or 906 × <see cref="int"/>
+        /// Equals to 906 × <see cref="int"/>, or 453 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 453;
+        public const int BYTE_COUNT = 453 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3616_BYTES
+#elif (UNION_3616_BYTES || UNION_904_INTS || UNION_452_LONGS)
 
         /// <summary>
-        /// Equals to 452 × <see cref="long"/>, or 904 × <see cref="int"/>
+        /// Equals to 904 × <see cref="int"/>, or 452 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 452;
+        public const int BYTE_COUNT = 452 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3608_BYTES
+#elif (UNION_3608_BYTES || UNION_902_INTS || UNION_451_LONGS)
 
         /// <summary>
-        /// Equals to 451 × <see cref="long"/>, or 902 × <see cref="int"/>
+        /// Equals to 902 × <see cref="int"/>, or 451 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 451;
+        public const int BYTE_COUNT = 451 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3600_BYTES
+#elif (UNION_3600_BYTES || UNION_900_INTS || UNION_450_LONGS)
 
         /// <summary>
-        /// Equals to 450 × <see cref="long"/>, or 900 × <see cref="int"/>
+        /// Equals to 900 × <see cref="int"/>, or 450 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 450;
+        public const int BYTE_COUNT = 450 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3592_BYTES
+#elif (UNION_3592_BYTES || UNION_898_INTS || UNION_449_LONGS)
 
         /// <summary>
-        /// Equals to 449 × <see cref="long"/>, or 898 × <see cref="int"/>
+        /// Equals to 898 × <see cref="int"/>, or 449 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 449;
+        public const int BYTE_COUNT = 449 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3584_BYTES
+#elif (UNION_3584_BYTES || UNION_896_INTS || UNION_448_LONGS)
 
         /// <summary>
-        /// Equals to 448 × <see cref="long"/>, or 896 × <see cref="int"/>
+        /// Equals to 896 × <see cref="int"/>, or 448 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 448;
+        public const int BYTE_COUNT = 448 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3576_BYTES
+#elif (UNION_3576_BYTES || UNION_894_INTS || UNION_447_LONGS)
 
         /// <summary>
-        /// Equals to 447 × <see cref="long"/>, or 894 × <see cref="int"/>
+        /// Equals to 894 × <see cref="int"/>, or 447 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 447;
+        public const int BYTE_COUNT = 447 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3568_BYTES
+#elif (UNION_3568_BYTES || UNION_892_INTS || UNION_446_LONGS)
 
         /// <summary>
-        /// Equals to 446 × <see cref="long"/>, or 892 × <see cref="int"/>
+        /// Equals to 892 × <see cref="int"/>, or 446 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 446;
+        public const int BYTE_COUNT = 446 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3560_BYTES
+#elif (UNION_3560_BYTES || UNION_890_INTS || UNION_445_LONGS)
 
         /// <summary>
-        /// Equals to 445 × <see cref="long"/>, or 890 × <see cref="int"/>
+        /// Equals to 890 × <see cref="int"/>, or 445 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 445;
+        public const int BYTE_COUNT = 445 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3552_BYTES
+#elif (UNION_3552_BYTES || UNION_888_INTS || UNION_444_LONGS)
 
         /// <summary>
-        /// Equals to 444 × <see cref="long"/>, or 888 × <see cref="int"/>
+        /// Equals to 888 × <see cref="int"/>, or 444 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 444;
+        public const int BYTE_COUNT = 444 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3544_BYTES
+#elif (UNION_3544_BYTES || UNION_886_INTS || UNION_443_LONGS)
 
         /// <summary>
-        /// Equals to 443 × <see cref="long"/>, or 886 × <see cref="int"/>
+        /// Equals to 886 × <see cref="int"/>, or 443 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 443;
+        public const int BYTE_COUNT = 443 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3536_BYTES
+#elif (UNION_3536_BYTES || UNION_884_INTS || UNION_442_LONGS)
 
         /// <summary>
-        /// Equals to 442 × <see cref="long"/>, or 884 × <see cref="int"/>
+        /// Equals to 884 × <see cref="int"/>, or 442 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 442;
+        public const int BYTE_COUNT = 442 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3528_BYTES
+#elif (UNION_3528_BYTES || UNION_882_INTS || UNION_441_LONGS)
 
         /// <summary>
-        /// Equals to 441 × <see cref="long"/>, or 882 × <see cref="int"/>
+        /// Equals to 882 × <see cref="int"/>, or 441 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 441;
+        public const int BYTE_COUNT = 441 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3520_BYTES
+#elif (UNION_3520_BYTES || UNION_880_INTS || UNION_440_LONGS)
 
         /// <summary>
-        /// Equals to 440 × <see cref="long"/>, or 880 × <see cref="int"/>
+        /// Equals to 880 × <see cref="int"/>, or 440 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 440;
+        public const int BYTE_COUNT = 440 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3512_BYTES
+#elif (UNION_3512_BYTES || UNION_878_INTS || UNION_439_LONGS)
 
         /// <summary>
-        /// Equals to 439 × <see cref="long"/>, or 878 × <see cref="int"/>
+        /// Equals to 878 × <see cref="int"/>, or 439 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 439;
+        public const int BYTE_COUNT = 439 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3504_BYTES
+#elif (UNION_3504_BYTES || UNION_876_INTS || UNION_438_LONGS)
 
         /// <summary>
-        /// Equals to 438 × <see cref="long"/>, or 876 × <see cref="int"/>
+        /// Equals to 876 × <see cref="int"/>, or 438 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 438;
+        public const int BYTE_COUNT = 438 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3496_BYTES
+#elif (UNION_3496_BYTES || UNION_874_INTS || UNION_437_LONGS)
 
         /// <summary>
-        /// Equals to 437 × <see cref="long"/>, or 874 × <see cref="int"/>
+        /// Equals to 874 × <see cref="int"/>, or 437 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 437;
+        public const int BYTE_COUNT = 437 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3488_BYTES
+#elif (UNION_3488_BYTES || UNION_872_INTS || UNION_436_LONGS)
 
         /// <summary>
-        /// Equals to 436 × <see cref="long"/>, or 872 × <see cref="int"/>
+        /// Equals to 872 × <see cref="int"/>, or 436 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 436;
+        public const int BYTE_COUNT = 436 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3480_BYTES
+#elif (UNION_3480_BYTES || UNION_870_INTS || UNION_435_LONGS)
 
         /// <summary>
-        /// Equals to 435 × <see cref="long"/>, or 870 × <see cref="int"/>
+        /// Equals to 870 × <see cref="int"/>, or 435 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 435;
+        public const int BYTE_COUNT = 435 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3472_BYTES
+#elif (UNION_3472_BYTES || UNION_868_INTS || UNION_434_LONGS)
 
         /// <summary>
-        /// Equals to 434 × <see cref="long"/>, or 868 × <see cref="int"/>
+        /// Equals to 868 × <see cref="int"/>, or 434 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 434;
+        public const int BYTE_COUNT = 434 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3464_BYTES
+#elif (UNION_3464_BYTES || UNION_866_INTS || UNION_433_LONGS)
 
         /// <summary>
-        /// Equals to 433 × <see cref="long"/>, or 866 × <see cref="int"/>
+        /// Equals to 866 × <see cref="int"/>, or 433 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 433;
+        public const int BYTE_COUNT = 433 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3456_BYTES
+#elif (UNION_3456_BYTES || UNION_864_INTS || UNION_432_LONGS)
 
         /// <summary>
-        /// Equals to 432 × <see cref="long"/>, or 864 × <see cref="int"/>
+        /// Equals to 864 × <see cref="int"/>, or 432 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 432;
+        public const int BYTE_COUNT = 432 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3448_BYTES
+#elif (UNION_3448_BYTES || UNION_862_INTS || UNION_431_LONGS)
 
         /// <summary>
-        /// Equals to 431 × <see cref="long"/>, or 862 × <see cref="int"/>
+        /// Equals to 862 × <see cref="int"/>, or 431 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 431;
+        public const int BYTE_COUNT = 431 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3440_BYTES
+#elif (UNION_3440_BYTES || UNION_860_INTS || UNION_430_LONGS)
 
         /// <summary>
-        /// Equals to 430 × <see cref="long"/>, or 860 × <see cref="int"/>
+        /// Equals to 860 × <see cref="int"/>, or 430 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 430;
+        public const int BYTE_COUNT = 430 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3432_BYTES
+#elif (UNION_3432_BYTES || UNION_858_INTS || UNION_429_LONGS)
 
         /// <summary>
-        /// Equals to 429 × <see cref="long"/>, or 858 × <see cref="int"/>
+        /// Equals to 858 × <see cref="int"/>, or 429 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 429;
+        public const int BYTE_COUNT = 429 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3424_BYTES
+#elif (UNION_3424_BYTES || UNION_856_INTS || UNION_428_LONGS)
 
         /// <summary>
-        /// Equals to 428 × <see cref="long"/>, or 856 × <see cref="int"/>
+        /// Equals to 856 × <see cref="int"/>, or 428 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 428;
+        public const int BYTE_COUNT = 428 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3416_BYTES
+#elif (UNION_3416_BYTES || UNION_854_INTS || UNION_427_LONGS)
 
         /// <summary>
-        /// Equals to 427 × <see cref="long"/>, or 854 × <see cref="int"/>
+        /// Equals to 854 × <see cref="int"/>, or 427 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 427;
+        public const int BYTE_COUNT = 427 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3408_BYTES
+#elif (UNION_3408_BYTES || UNION_852_INTS || UNION_426_LONGS)
 
         /// <summary>
-        /// Equals to 426 × <see cref="long"/>, or 852 × <see cref="int"/>
+        /// Equals to 852 × <see cref="int"/>, or 426 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 426;
+        public const int BYTE_COUNT = 426 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3400_BYTES
+#elif (UNION_3400_BYTES || UNION_850_INTS || UNION_425_LONGS)
 
         /// <summary>
-        /// Equals to 425 × <see cref="long"/>, or 850 × <see cref="int"/>
+        /// Equals to 850 × <see cref="int"/>, or 425 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 425;
+        public const int BYTE_COUNT = 425 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3392_BYTES
+#elif (UNION_3392_BYTES || UNION_848_INTS || UNION_424_LONGS)
 
         /// <summary>
-        /// Equals to 424 × <see cref="long"/>, or 848 × <see cref="int"/>
+        /// Equals to 848 × <see cref="int"/>, or 424 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 424;
+        public const int BYTE_COUNT = 424 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3384_BYTES
+#elif (UNION_3384_BYTES || UNION_846_INTS || UNION_423_LONGS)
 
         /// <summary>
-        /// Equals to 423 × <see cref="long"/>, or 846 × <see cref="int"/>
+        /// Equals to 846 × <see cref="int"/>, or 423 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 423;
+        public const int BYTE_COUNT = 423 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3376_BYTES
+#elif (UNION_3376_BYTES || UNION_844_INTS || UNION_422_LONGS)
 
         /// <summary>
-        /// Equals to 422 × <see cref="long"/>, or 844 × <see cref="int"/>
+        /// Equals to 844 × <see cref="int"/>, or 422 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 422;
+        public const int BYTE_COUNT = 422 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3368_BYTES
+#elif (UNION_3368_BYTES || UNION_842_INTS || UNION_421_LONGS)
 
         /// <summary>
-        /// Equals to 421 × <see cref="long"/>, or 842 × <see cref="int"/>
+        /// Equals to 842 × <see cref="int"/>, or 421 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 421;
+        public const int BYTE_COUNT = 421 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3360_BYTES
+#elif (UNION_3360_BYTES || UNION_840_INTS || UNION_420_LONGS)
 
         /// <summary>
-        /// Equals to 420 × <see cref="long"/>, or 840 × <see cref="int"/>
+        /// Equals to 840 × <see cref="int"/>, or 420 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 420;
+        public const int BYTE_COUNT = 420 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3352_BYTES
+#elif (UNION_3352_BYTES || UNION_838_INTS || UNION_419_LONGS)
 
         /// <summary>
-        /// Equals to 419 × <see cref="long"/>, or 838 × <see cref="int"/>
+        /// Equals to 838 × <see cref="int"/>, or 419 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 419;
+        public const int BYTE_COUNT = 419 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3344_BYTES
+#elif (UNION_3344_BYTES || UNION_836_INTS || UNION_418_LONGS)
 
         /// <summary>
-        /// Equals to 418 × <see cref="long"/>, or 836 × <see cref="int"/>
+        /// Equals to 836 × <see cref="int"/>, or 418 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 418;
+        public const int BYTE_COUNT = 418 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3336_BYTES
+#elif (UNION_3336_BYTES || UNION_834_INTS || UNION_417_LONGS)
 
         /// <summary>
-        /// Equals to 417 × <see cref="long"/>, or 834 × <see cref="int"/>
+        /// Equals to 834 × <see cref="int"/>, or 417 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 417;
+        public const int BYTE_COUNT = 417 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3328_BYTES
+#elif (UNION_3328_BYTES || UNION_832_INTS || UNION_416_LONGS)
 
         /// <summary>
-        /// Equals to 416 × <see cref="long"/>, or 832 × <see cref="int"/>
+        /// Equals to 832 × <see cref="int"/>, or 416 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 416;
+        public const int BYTE_COUNT = 416 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3320_BYTES
+#elif (UNION_3320_BYTES || UNION_830_INTS || UNION_415_LONGS)
 
         /// <summary>
-        /// Equals to 415 × <see cref="long"/>, or 830 × <see cref="int"/>
+        /// Equals to 830 × <see cref="int"/>, or 415 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 415;
+        public const int BYTE_COUNT = 415 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3312_BYTES
+#elif (UNION_3312_BYTES || UNION_828_INTS || UNION_414_LONGS)
 
         /// <summary>
-        /// Equals to 414 × <see cref="long"/>, or 828 × <see cref="int"/>
+        /// Equals to 828 × <see cref="int"/>, or 414 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 414;
+        public const int BYTE_COUNT = 414 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3304_BYTES
+#elif (UNION_3304_BYTES || UNION_826_INTS || UNION_413_LONGS)
 
         /// <summary>
-        /// Equals to 413 × <see cref="long"/>, or 826 × <see cref="int"/>
+        /// Equals to 826 × <see cref="int"/>, or 413 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 413;
+        public const int BYTE_COUNT = 413 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3296_BYTES
+#elif (UNION_3296_BYTES || UNION_824_INTS || UNION_412_LONGS)
 
         /// <summary>
-        /// Equals to 412 × <see cref="long"/>, or 824 × <see cref="int"/>
+        /// Equals to 824 × <see cref="int"/>, or 412 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 412;
+        public const int BYTE_COUNT = 412 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3288_BYTES
+#elif (UNION_3288_BYTES || UNION_822_INTS || UNION_411_LONGS)
 
         /// <summary>
-        /// Equals to 411 × <see cref="long"/>, or 822 × <see cref="int"/>
+        /// Equals to 822 × <see cref="int"/>, or 411 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 411;
+        public const int BYTE_COUNT = 411 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3280_BYTES
+#elif (UNION_3280_BYTES || UNION_820_INTS || UNION_410_LONGS)
 
         /// <summary>
-        /// Equals to 410 × <see cref="long"/>, or 820 × <see cref="int"/>
+        /// Equals to 820 × <see cref="int"/>, or 410 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 410;
+        public const int BYTE_COUNT = 410 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3272_BYTES
+#elif (UNION_3272_BYTES || UNION_818_INTS || UNION_409_LONGS)
 
         /// <summary>
-        /// Equals to 409 × <see cref="long"/>, or 818 × <see cref="int"/>
+        /// Equals to 818 × <see cref="int"/>, or 409 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 409;
+        public const int BYTE_COUNT = 409 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3264_BYTES
+#elif (UNION_3264_BYTES || UNION_816_INTS || UNION_408_LONGS)
 
         /// <summary>
-        /// Equals to 408 × <see cref="long"/>, or 816 × <see cref="int"/>
+        /// Equals to 816 × <see cref="int"/>, or 408 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 408;
+        public const int BYTE_COUNT = 408 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3256_BYTES
+#elif (UNION_3256_BYTES || UNION_814_INTS || UNION_407_LONGS)
 
         /// <summary>
-        /// Equals to 407 × <see cref="long"/>, or 814 × <see cref="int"/>
+        /// Equals to 814 × <see cref="int"/>, or 407 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 407;
+        public const int BYTE_COUNT = 407 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3248_BYTES
+#elif (UNION_3248_BYTES || UNION_812_INTS || UNION_406_LONGS)
 
         /// <summary>
-        /// Equals to 406 × <see cref="long"/>, or 812 × <see cref="int"/>
+        /// Equals to 812 × <see cref="int"/>, or 406 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 406;
+        public const int BYTE_COUNT = 406 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3240_BYTES
+#elif (UNION_3240_BYTES || UNION_810_INTS || UNION_405_LONGS)
 
         /// <summary>
-        /// Equals to 405 × <see cref="long"/>, or 810 × <see cref="int"/>
+        /// Equals to 810 × <see cref="int"/>, or 405 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 405;
+        public const int BYTE_COUNT = 405 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3232_BYTES
+#elif (UNION_3232_BYTES || UNION_808_INTS || UNION_404_LONGS)
 
         /// <summary>
-        /// Equals to 404 × <see cref="long"/>, or 808 × <see cref="int"/>
+        /// Equals to 808 × <see cref="int"/>, or 404 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 404;
+        public const int BYTE_COUNT = 404 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3224_BYTES
+#elif (UNION_3224_BYTES || UNION_806_INTS || UNION_403_LONGS)
 
         /// <summary>
-        /// Equals to 403 × <see cref="long"/>, or 806 × <see cref="int"/>
+        /// Equals to 806 × <see cref="int"/>, or 403 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 403;
+        public const int BYTE_COUNT = 403 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3216_BYTES
+#elif (UNION_3216_BYTES || UNION_804_INTS || UNION_402_LONGS)
 
         /// <summary>
-        /// Equals to 402 × <see cref="long"/>, or 804 × <see cref="int"/>
+        /// Equals to 804 × <see cref="int"/>, or 402 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 402;
+        public const int BYTE_COUNT = 402 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3208_BYTES
+#elif (UNION_3208_BYTES || UNION_802_INTS || UNION_401_LONGS)
 
         /// <summary>
-        /// Equals to 401 × <see cref="long"/>, or 802 × <see cref="int"/>
+        /// Equals to 802 × <see cref="int"/>, or 401 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 401;
+        public const int BYTE_COUNT = 401 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3200_BYTES
+#elif (UNION_3200_BYTES || UNION_800_INTS || UNION_400_LONGS)
 
         /// <summary>
-        /// Equals to 400 × <see cref="long"/>, or 800 × <see cref="int"/>
+        /// Equals to 800 × <see cref="int"/>, or 400 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 400;
+        public const int BYTE_COUNT = 400 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3192_BYTES
+#elif (UNION_3192_BYTES || UNION_798_INTS || UNION_399_LONGS)
 
         /// <summary>
-        /// Equals to 399 × <see cref="long"/>, or 798 × <see cref="int"/>
+        /// Equals to 798 × <see cref="int"/>, or 399 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 399;
+        public const int BYTE_COUNT = 399 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3184_BYTES
+#elif (UNION_3184_BYTES || UNION_796_INTS || UNION_398_LONGS)
 
         /// <summary>
-        /// Equals to 398 × <see cref="long"/>, or 796 × <see cref="int"/>
+        /// Equals to 796 × <see cref="int"/>, or 398 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 398;
+        public const int BYTE_COUNT = 398 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3176_BYTES
+#elif (UNION_3176_BYTES || UNION_794_INTS || UNION_397_LONGS)
 
         /// <summary>
-        /// Equals to 397 × <see cref="long"/>, or 794 × <see cref="int"/>
+        /// Equals to 794 × <see cref="int"/>, or 397 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 397;
+        public const int BYTE_COUNT = 397 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3168_BYTES
+#elif (UNION_3168_BYTES || UNION_792_INTS || UNION_396_LONGS)
 
         /// <summary>
-        /// Equals to 396 × <see cref="long"/>, or 792 × <see cref="int"/>
+        /// Equals to 792 × <see cref="int"/>, or 396 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 396;
+        public const int BYTE_COUNT = 396 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3160_BYTES
+#elif (UNION_3160_BYTES || UNION_790_INTS || UNION_395_LONGS)
 
         /// <summary>
-        /// Equals to 395 × <see cref="long"/>, or 790 × <see cref="int"/>
+        /// Equals to 790 × <see cref="int"/>, or 395 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 395;
+        public const int BYTE_COUNT = 395 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3152_BYTES
+#elif (UNION_3152_BYTES || UNION_788_INTS || UNION_394_LONGS)
 
         /// <summary>
-        /// Equals to 394 × <see cref="long"/>, or 788 × <see cref="int"/>
+        /// Equals to 788 × <see cref="int"/>, or 394 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 394;
+        public const int BYTE_COUNT = 394 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3144_BYTES
+#elif (UNION_3144_BYTES || UNION_786_INTS || UNION_393_LONGS)
 
         /// <summary>
-        /// Equals to 393 × <see cref="long"/>, or 786 × <see cref="int"/>
+        /// Equals to 786 × <see cref="int"/>, or 393 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 393;
+        public const int BYTE_COUNT = 393 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3136_BYTES
+#elif (UNION_3136_BYTES || UNION_784_INTS || UNION_392_LONGS)
 
         /// <summary>
-        /// Equals to 392 × <see cref="long"/>, or 784 × <see cref="int"/>
+        /// Equals to 784 × <see cref="int"/>, or 392 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 392;
+        public const int BYTE_COUNT = 392 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3128_BYTES
+#elif (UNION_3128_BYTES || UNION_782_INTS || UNION_391_LONGS)
 
         /// <summary>
-        /// Equals to 391 × <see cref="long"/>, or 782 × <see cref="int"/>
+        /// Equals to 782 × <see cref="int"/>, or 391 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 391;
+        public const int BYTE_COUNT = 391 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3120_BYTES
+#elif (UNION_3120_BYTES || UNION_780_INTS || UNION_390_LONGS)
 
         /// <summary>
-        /// Equals to 390 × <see cref="long"/>, or 780 × <see cref="int"/>
+        /// Equals to 780 × <see cref="int"/>, or 390 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 390;
+        public const int BYTE_COUNT = 390 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3112_BYTES
+#elif (UNION_3112_BYTES || UNION_778_INTS || UNION_389_LONGS)
 
         /// <summary>
-        /// Equals to 389 × <see cref="long"/>, or 778 × <see cref="int"/>
+        /// Equals to 778 × <see cref="int"/>, or 389 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 389;
+        public const int BYTE_COUNT = 389 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3104_BYTES
+#elif (UNION_3104_BYTES || UNION_776_INTS || UNION_388_LONGS)
 
         /// <summary>
-        /// Equals to 388 × <see cref="long"/>, or 776 × <see cref="int"/>
+        /// Equals to 776 × <see cref="int"/>, or 388 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 388;
+        public const int BYTE_COUNT = 388 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3096_BYTES
+#elif (UNION_3096_BYTES || UNION_774_INTS || UNION_387_LONGS)
 
         /// <summary>
-        /// Equals to 387 × <see cref="long"/>, or 774 × <see cref="int"/>
+        /// Equals to 774 × <see cref="int"/>, or 387 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 387;
+        public const int BYTE_COUNT = 387 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3088_BYTES
+#elif (UNION_3088_BYTES || UNION_772_INTS || UNION_386_LONGS)
 
         /// <summary>
-        /// Equals to 386 × <see cref="long"/>, or 772 × <see cref="int"/>
+        /// Equals to 772 × <see cref="int"/>, or 386 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 386;
+        public const int BYTE_COUNT = 386 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3080_BYTES
+#elif (UNION_3080_BYTES || UNION_770_INTS || UNION_385_LONGS)
 
         /// <summary>
-        /// Equals to 385 × <see cref="long"/>, or 770 × <see cref="int"/>
+        /// Equals to 770 × <see cref="int"/>, or 385 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 385;
+        public const int BYTE_COUNT = 385 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3072_BYTES
+#elif (UNION_3072_BYTES || UNION_768_INTS || UNION_384_LONGS)
 
         /// <summary>
-        /// Equals to 384 × <see cref="long"/>, or 768 × <see cref="int"/>
+        /// Equals to 768 × <see cref="int"/>, or 384 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 384;
+        public const int BYTE_COUNT = 384 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3064_BYTES
+#elif (UNION_3064_BYTES || UNION_766_INTS || UNION_383_LONGS)
 
         /// <summary>
-        /// Equals to 383 × <see cref="long"/>, or 766 × <see cref="int"/>
+        /// Equals to 766 × <see cref="int"/>, or 383 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 383;
+        public const int BYTE_COUNT = 383 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3056_BYTES
+#elif (UNION_3056_BYTES || UNION_764_INTS || UNION_382_LONGS)
 
         /// <summary>
-        /// Equals to 382 × <see cref="long"/>, or 764 × <see cref="int"/>
+        /// Equals to 764 × <see cref="int"/>, or 382 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 382;
+        public const int BYTE_COUNT = 382 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3048_BYTES
+#elif (UNION_3048_BYTES || UNION_762_INTS || UNION_381_LONGS)
 
         /// <summary>
-        /// Equals to 381 × <see cref="long"/>, or 762 × <see cref="int"/>
+        /// Equals to 762 × <see cref="int"/>, or 381 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 381;
+        public const int BYTE_COUNT = 381 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3040_BYTES
+#elif (UNION_3040_BYTES || UNION_760_INTS || UNION_380_LONGS)
 
         /// <summary>
-        /// Equals to 380 × <see cref="long"/>, or 760 × <see cref="int"/>
+        /// Equals to 760 × <see cref="int"/>, or 380 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 380;
+        public const int BYTE_COUNT = 380 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3032_BYTES
+#elif (UNION_3032_BYTES || UNION_758_INTS || UNION_379_LONGS)
 
         /// <summary>
-        /// Equals to 379 × <see cref="long"/>, or 758 × <see cref="int"/>
+        /// Equals to 758 × <see cref="int"/>, or 379 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 379;
+        public const int BYTE_COUNT = 379 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3024_BYTES
+#elif (UNION_3024_BYTES || UNION_756_INTS || UNION_378_LONGS)
 
         /// <summary>
-        /// Equals to 378 × <see cref="long"/>, or 756 × <see cref="int"/>
+        /// Equals to 756 × <see cref="int"/>, or 378 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 378;
+        public const int BYTE_COUNT = 378 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3016_BYTES
+#elif (UNION_3016_BYTES || UNION_754_INTS || UNION_377_LONGS)
 
         /// <summary>
-        /// Equals to 377 × <see cref="long"/>, or 754 × <see cref="int"/>
+        /// Equals to 754 × <see cref="int"/>, or 377 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 377;
+        public const int BYTE_COUNT = 377 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3008_BYTES
+#elif (UNION_3008_BYTES || UNION_752_INTS || UNION_376_LONGS)
 
         /// <summary>
-        /// Equals to 376 × <see cref="long"/>, or 752 × <see cref="int"/>
+        /// Equals to 752 × <see cref="int"/>, or 376 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 376;
+        public const int BYTE_COUNT = 376 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_3000_BYTES
+#elif (UNION_3000_BYTES || UNION_750_INTS || UNION_375_LONGS)
 
         /// <summary>
-        /// Equals to 375 × <see cref="long"/>, or 750 × <see cref="int"/>
+        /// Equals to 750 × <see cref="int"/>, or 375 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 375;
+        public const int BYTE_COUNT = 375 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2992_BYTES
+#elif (UNION_2992_BYTES || UNION_748_INTS || UNION_374_LONGS)
 
         /// <summary>
-        /// Equals to 374 × <see cref="long"/>, or 748 × <see cref="int"/>
+        /// Equals to 748 × <see cref="int"/>, or 374 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 374;
+        public const int BYTE_COUNT = 374 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2984_BYTES
+#elif (UNION_2984_BYTES || UNION_746_INTS || UNION_373_LONGS)
 
         /// <summary>
-        /// Equals to 373 × <see cref="long"/>, or 746 × <see cref="int"/>
+        /// Equals to 746 × <see cref="int"/>, or 373 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 373;
+        public const int BYTE_COUNT = 373 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2976_BYTES
+#elif (UNION_2976_BYTES || UNION_744_INTS || UNION_372_LONGS)
 
         /// <summary>
-        /// Equals to 372 × <see cref="long"/>, or 744 × <see cref="int"/>
+        /// Equals to 744 × <see cref="int"/>, or 372 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 372;
+        public const int BYTE_COUNT = 372 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2968_BYTES
+#elif (UNION_2968_BYTES || UNION_742_INTS || UNION_371_LONGS)
 
         /// <summary>
-        /// Equals to 371 × <see cref="long"/>, or 742 × <see cref="int"/>
+        /// Equals to 742 × <see cref="int"/>, or 371 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 371;
+        public const int BYTE_COUNT = 371 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2960_BYTES
+#elif (UNION_2960_BYTES || UNION_740_INTS || UNION_370_LONGS)
 
         /// <summary>
-        /// Equals to 370 × <see cref="long"/>, or 740 × <see cref="int"/>
+        /// Equals to 740 × <see cref="int"/>, or 370 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 370;
+        public const int BYTE_COUNT = 370 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2952_BYTES
+#elif (UNION_2952_BYTES || UNION_738_INTS || UNION_369_LONGS)
 
         /// <summary>
-        /// Equals to 369 × <see cref="long"/>, or 738 × <see cref="int"/>
+        /// Equals to 738 × <see cref="int"/>, or 369 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 369;
+        public const int BYTE_COUNT = 369 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2944_BYTES
+#elif (UNION_2944_BYTES || UNION_736_INTS || UNION_368_LONGS)
 
         /// <summary>
-        /// Equals to 368 × <see cref="long"/>, or 736 × <see cref="int"/>
+        /// Equals to 736 × <see cref="int"/>, or 368 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 368;
+        public const int BYTE_COUNT = 368 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2936_BYTES
+#elif (UNION_2936_BYTES || UNION_734_INTS || UNION_367_LONGS)
 
         /// <summary>
-        /// Equals to 367 × <see cref="long"/>, or 734 × <see cref="int"/>
+        /// Equals to 734 × <see cref="int"/>, or 367 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 367;
+        public const int BYTE_COUNT = 367 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2928_BYTES
+#elif (UNION_2928_BYTES || UNION_732_INTS || UNION_366_LONGS)
 
         /// <summary>
-        /// Equals to 366 × <see cref="long"/>, or 732 × <see cref="int"/>
+        /// Equals to 732 × <see cref="int"/>, or 366 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 366;
+        public const int BYTE_COUNT = 366 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2920_BYTES
+#elif (UNION_2920_BYTES || UNION_730_INTS || UNION_365_LONGS)
 
         /// <summary>
-        /// Equals to 365 × <see cref="long"/>, or 730 × <see cref="int"/>
+        /// Equals to 730 × <see cref="int"/>, or 365 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 365;
+        public const int BYTE_COUNT = 365 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2912_BYTES
+#elif (UNION_2912_BYTES || UNION_728_INTS || UNION_364_LONGS)
 
         /// <summary>
-        /// Equals to 364 × <see cref="long"/>, or 728 × <see cref="int"/>
+        /// Equals to 728 × <see cref="int"/>, or 364 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 364;
+        public const int BYTE_COUNT = 364 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2904_BYTES
+#elif (UNION_2904_BYTES || UNION_726_INTS || UNION_363_LONGS)
 
         /// <summary>
-        /// Equals to 363 × <see cref="long"/>, or 726 × <see cref="int"/>
+        /// Equals to 726 × <see cref="int"/>, or 363 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 363;
+        public const int BYTE_COUNT = 363 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2896_BYTES
+#elif (UNION_2896_BYTES || UNION_724_INTS || UNION_362_LONGS)
 
         /// <summary>
-        /// Equals to 362 × <see cref="long"/>, or 724 × <see cref="int"/>
+        /// Equals to 724 × <see cref="int"/>, or 362 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 362;
+        public const int BYTE_COUNT = 362 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2888_BYTES
+#elif (UNION_2888_BYTES || UNION_722_INTS || UNION_361_LONGS)
 
         /// <summary>
-        /// Equals to 361 × <see cref="long"/>, or 722 × <see cref="int"/>
+        /// Equals to 722 × <see cref="int"/>, or 361 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 361;
+        public const int BYTE_COUNT = 361 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2880_BYTES
+#elif (UNION_2880_BYTES || UNION_720_INTS || UNION_360_LONGS)
 
         /// <summary>
-        /// Equals to 360 × <see cref="long"/>, or 720 × <see cref="int"/>
+        /// Equals to 720 × <see cref="int"/>, or 360 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 360;
+        public const int BYTE_COUNT = 360 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2872_BYTES
+#elif (UNION_2872_BYTES || UNION_718_INTS || UNION_359_LONGS)
 
         /// <summary>
-        /// Equals to 359 × <see cref="long"/>, or 718 × <see cref="int"/>
+        /// Equals to 718 × <see cref="int"/>, or 359 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 359;
+        public const int BYTE_COUNT = 359 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2864_BYTES
+#elif (UNION_2864_BYTES || UNION_716_INTS || UNION_358_LONGS)
 
         /// <summary>
-        /// Equals to 358 × <see cref="long"/>, or 716 × <see cref="int"/>
+        /// Equals to 716 × <see cref="int"/>, or 358 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 358;
+        public const int BYTE_COUNT = 358 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2856_BYTES
+#elif (UNION_2856_BYTES || UNION_714_INTS || UNION_357_LONGS)
 
         /// <summary>
-        /// Equals to 357 × <see cref="long"/>, or 714 × <see cref="int"/>
+        /// Equals to 714 × <see cref="int"/>, or 357 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 357;
+        public const int BYTE_COUNT = 357 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2848_BYTES
+#elif (UNION_2848_BYTES || UNION_712_INTS || UNION_356_LONGS)
 
         /// <summary>
-        /// Equals to 356 × <see cref="long"/>, or 712 × <see cref="int"/>
+        /// Equals to 712 × <see cref="int"/>, or 356 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 356;
+        public const int BYTE_COUNT = 356 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2840_BYTES
+#elif (UNION_2840_BYTES || UNION_710_INTS || UNION_355_LONGS)
 
         /// <summary>
-        /// Equals to 355 × <see cref="long"/>, or 710 × <see cref="int"/>
+        /// Equals to 710 × <see cref="int"/>, or 355 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 355;
+        public const int BYTE_COUNT = 355 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2832_BYTES
+#elif (UNION_2832_BYTES || UNION_708_INTS || UNION_354_LONGS)
 
         /// <summary>
-        /// Equals to 354 × <see cref="long"/>, or 708 × <see cref="int"/>
+        /// Equals to 708 × <see cref="int"/>, or 354 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 354;
+        public const int BYTE_COUNT = 354 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2824_BYTES
+#elif (UNION_2824_BYTES || UNION_706_INTS || UNION_353_LONGS)
 
         /// <summary>
-        /// Equals to 353 × <see cref="long"/>, or 706 × <see cref="int"/>
+        /// Equals to 706 × <see cref="int"/>, or 353 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 353;
+        public const int BYTE_COUNT = 353 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2816_BYTES
+#elif (UNION_2816_BYTES || UNION_704_INTS || UNION_352_LONGS)
 
         /// <summary>
-        /// Equals to 352 × <see cref="long"/>, or 704 × <see cref="int"/>
+        /// Equals to 704 × <see cref="int"/>, or 352 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 352;
+        public const int BYTE_COUNT = 352 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2808_BYTES
+#elif (UNION_2808_BYTES || UNION_702_INTS || UNION_351_LONGS)
 
         /// <summary>
-        /// Equals to 351 × <see cref="long"/>, or 702 × <see cref="int"/>
+        /// Equals to 702 × <see cref="int"/>, or 351 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 351;
+        public const int BYTE_COUNT = 351 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2800_BYTES
+#elif (UNION_2800_BYTES || UNION_700_INTS || UNION_350_LONGS)
 
         /// <summary>
-        /// Equals to 350 × <see cref="long"/>, or 700 × <see cref="int"/>
+        /// Equals to 700 × <see cref="int"/>, or 350 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 350;
+        public const int BYTE_COUNT = 350 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2792_BYTES
+#elif (UNION_2792_BYTES || UNION_698_INTS || UNION_349_LONGS)
 
         /// <summary>
-        /// Equals to 349 × <see cref="long"/>, or 698 × <see cref="int"/>
+        /// Equals to 698 × <see cref="int"/>, or 349 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 349;
+        public const int BYTE_COUNT = 349 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2784_BYTES
+#elif (UNION_2784_BYTES || UNION_696_INTS || UNION_348_LONGS)
 
         /// <summary>
-        /// Equals to 348 × <see cref="long"/>, or 696 × <see cref="int"/>
+        /// Equals to 696 × <see cref="int"/>, or 348 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 348;
+        public const int BYTE_COUNT = 348 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2776_BYTES
+#elif (UNION_2776_BYTES || UNION_694_INTS || UNION_347_LONGS)
 
         /// <summary>
-        /// Equals to 347 × <see cref="long"/>, or 694 × <see cref="int"/>
+        /// Equals to 694 × <see cref="int"/>, or 347 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 347;
+        public const int BYTE_COUNT = 347 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2768_BYTES
+#elif (UNION_2768_BYTES || UNION_692_INTS || UNION_346_LONGS)
 
         /// <summary>
-        /// Equals to 346 × <see cref="long"/>, or 692 × <see cref="int"/>
+        /// Equals to 692 × <see cref="int"/>, or 346 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 346;
+        public const int BYTE_COUNT = 346 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2760_BYTES
+#elif (UNION_2760_BYTES || UNION_690_INTS || UNION_345_LONGS)
 
         /// <summary>
-        /// Equals to 345 × <see cref="long"/>, or 690 × <see cref="int"/>
+        /// Equals to 690 × <see cref="int"/>, or 345 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 345;
+        public const int BYTE_COUNT = 345 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2752_BYTES
+#elif (UNION_2752_BYTES || UNION_688_INTS || UNION_344_LONGS)
 
         /// <summary>
-        /// Equals to 344 × <see cref="long"/>, or 688 × <see cref="int"/>
+        /// Equals to 688 × <see cref="int"/>, or 344 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 344;
+        public const int BYTE_COUNT = 344 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2744_BYTES
+#elif (UNION_2744_BYTES || UNION_686_INTS || UNION_343_LONGS)
 
         /// <summary>
-        /// Equals to 343 × <see cref="long"/>, or 686 × <see cref="int"/>
+        /// Equals to 686 × <see cref="int"/>, or 343 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 343;
+        public const int BYTE_COUNT = 343 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2736_BYTES
+#elif (UNION_2736_BYTES || UNION_684_INTS || UNION_342_LONGS)
 
         /// <summary>
-        /// Equals to 342 × <see cref="long"/>, or 684 × <see cref="int"/>
+        /// Equals to 684 × <see cref="int"/>, or 342 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 342;
+        public const int BYTE_COUNT = 342 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2728_BYTES
+#elif (UNION_2728_BYTES || UNION_682_INTS || UNION_341_LONGS)
 
         /// <summary>
-        /// Equals to 341 × <see cref="long"/>, or 682 × <see cref="int"/>
+        /// Equals to 682 × <see cref="int"/>, or 341 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 341;
+        public const int BYTE_COUNT = 341 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2720_BYTES
+#elif (UNION_2720_BYTES || UNION_680_INTS || UNION_340_LONGS)
 
         /// <summary>
-        /// Equals to 340 × <see cref="long"/>, or 680 × <see cref="int"/>
+        /// Equals to 680 × <see cref="int"/>, or 340 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 340;
+        public const int BYTE_COUNT = 340 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2712_BYTES
+#elif (UNION_2712_BYTES || UNION_678_INTS || UNION_339_LONGS)
 
         /// <summary>
-        /// Equals to 339 × <see cref="long"/>, or 678 × <see cref="int"/>
+        /// Equals to 678 × <see cref="int"/>, or 339 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 339;
+        public const int BYTE_COUNT = 339 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2704_BYTES
+#elif (UNION_2704_BYTES || UNION_676_INTS || UNION_338_LONGS)
 
         /// <summary>
-        /// Equals to 338 × <see cref="long"/>, or 676 × <see cref="int"/>
+        /// Equals to 676 × <see cref="int"/>, or 338 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 338;
+        public const int BYTE_COUNT = 338 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2696_BYTES
+#elif (UNION_2696_BYTES || UNION_674_INTS || UNION_337_LONGS)
 
         /// <summary>
-        /// Equals to 337 × <see cref="long"/>, or 674 × <see cref="int"/>
+        /// Equals to 674 × <see cref="int"/>, or 337 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 337;
+        public const int BYTE_COUNT = 337 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2688_BYTES
+#elif (UNION_2688_BYTES || UNION_672_INTS || UNION_336_LONGS)
 
         /// <summary>
-        /// Equals to 336 × <see cref="long"/>, or 672 × <see cref="int"/>
+        /// Equals to 672 × <see cref="int"/>, or 336 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 336;
+        public const int BYTE_COUNT = 336 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2680_BYTES
+#elif (UNION_2680_BYTES || UNION_670_INTS || UNION_335_LONGS)
 
         /// <summary>
-        /// Equals to 335 × <see cref="long"/>, or 670 × <see cref="int"/>
+        /// Equals to 670 × <see cref="int"/>, or 335 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 335;
+        public const int BYTE_COUNT = 335 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2672_BYTES
+#elif (UNION_2672_BYTES || UNION_668_INTS || UNION_334_LONGS)
 
         /// <summary>
-        /// Equals to 334 × <see cref="long"/>, or 668 × <see cref="int"/>
+        /// Equals to 668 × <see cref="int"/>, or 334 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 334;
+        public const int BYTE_COUNT = 334 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2664_BYTES
+#elif (UNION_2664_BYTES || UNION_666_INTS || UNION_333_LONGS)
 
         /// <summary>
-        /// Equals to 333 × <see cref="long"/>, or 666 × <see cref="int"/>
+        /// Equals to 666 × <see cref="int"/>, or 333 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 333;
+        public const int BYTE_COUNT = 333 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2656_BYTES
+#elif (UNION_2656_BYTES || UNION_664_INTS || UNION_332_LONGS)
 
         /// <summary>
-        /// Equals to 332 × <see cref="long"/>, or 664 × <see cref="int"/>
+        /// Equals to 664 × <see cref="int"/>, or 332 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 332;
+        public const int BYTE_COUNT = 332 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2648_BYTES
+#elif (UNION_2648_BYTES || UNION_662_INTS || UNION_331_LONGS)
 
         /// <summary>
-        /// Equals to 331 × <see cref="long"/>, or 662 × <see cref="int"/>
+        /// Equals to 662 × <see cref="int"/>, or 331 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 331;
+        public const int BYTE_COUNT = 331 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2640_BYTES
+#elif (UNION_2640_BYTES || UNION_660_INTS || UNION_330_LONGS)
 
         /// <summary>
-        /// Equals to 330 × <see cref="long"/>, or 660 × <see cref="int"/>
+        /// Equals to 660 × <see cref="int"/>, or 330 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 330;
+        public const int BYTE_COUNT = 330 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2632_BYTES
+#elif (UNION_2632_BYTES || UNION_658_INTS || UNION_329_LONGS)
 
         /// <summary>
-        /// Equals to 329 × <see cref="long"/>, or 658 × <see cref="int"/>
+        /// Equals to 658 × <see cref="int"/>, or 329 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 329;
+        public const int BYTE_COUNT = 329 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2624_BYTES
+#elif (UNION_2624_BYTES || UNION_656_INTS || UNION_328_LONGS)
 
         /// <summary>
-        /// Equals to 328 × <see cref="long"/>, or 656 × <see cref="int"/>
+        /// Equals to 656 × <see cref="int"/>, or 328 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 328;
+        public const int BYTE_COUNT = 328 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2616_BYTES
+#elif (UNION_2616_BYTES || UNION_654_INTS || UNION_327_LONGS)
 
         /// <summary>
-        /// Equals to 327 × <see cref="long"/>, or 654 × <see cref="int"/>
+        /// Equals to 654 × <see cref="int"/>, or 327 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 327;
+        public const int BYTE_COUNT = 327 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2608_BYTES
+#elif (UNION_2608_BYTES || UNION_652_INTS || UNION_326_LONGS)
 
         /// <summary>
-        /// Equals to 326 × <see cref="long"/>, or 652 × <see cref="int"/>
+        /// Equals to 652 × <see cref="int"/>, or 326 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 326;
+        public const int BYTE_COUNT = 326 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2600_BYTES
+#elif (UNION_2600_BYTES || UNION_650_INTS || UNION_325_LONGS)
 
         /// <summary>
-        /// Equals to 325 × <see cref="long"/>, or 650 × <see cref="int"/>
+        /// Equals to 650 × <see cref="int"/>, or 325 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 325;
+        public const int BYTE_COUNT = 325 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2592_BYTES
+#elif (UNION_2592_BYTES || UNION_648_INTS || UNION_324_LONGS)
 
         /// <summary>
-        /// Equals to 324 × <see cref="long"/>, or 648 × <see cref="int"/>
+        /// Equals to 648 × <see cref="int"/>, or 324 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 324;
+        public const int BYTE_COUNT = 324 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2584_BYTES
+#elif (UNION_2584_BYTES || UNION_646_INTS || UNION_323_LONGS)
 
         /// <summary>
-        /// Equals to 323 × <see cref="long"/>, or 646 × <see cref="int"/>
+        /// Equals to 646 × <see cref="int"/>, or 323 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 323;
+        public const int BYTE_COUNT = 323 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2576_BYTES
+#elif (UNION_2576_BYTES || UNION_644_INTS || UNION_322_LONGS)
 
         /// <summary>
-        /// Equals to 322 × <see cref="long"/>, or 644 × <see cref="int"/>
+        /// Equals to 644 × <see cref="int"/>, or 322 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 322;
+        public const int BYTE_COUNT = 322 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2568_BYTES
+#elif (UNION_2568_BYTES || UNION_642_INTS || UNION_321_LONGS)
 
         /// <summary>
-        /// Equals to 321 × <see cref="long"/>, or 642 × <see cref="int"/>
+        /// Equals to 642 × <see cref="int"/>, or 321 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 321;
+        public const int BYTE_COUNT = 321 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2560_BYTES
+#elif (UNION_2560_BYTES || UNION_640_INTS || UNION_320_LONGS)
 
         /// <summary>
-        /// Equals to 320 × <see cref="long"/>, or 640 × <see cref="int"/>
+        /// Equals to 640 × <see cref="int"/>, or 320 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 320;
+        public const int BYTE_COUNT = 320 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2552_BYTES
+#elif (UNION_2552_BYTES || UNION_638_INTS || UNION_319_LONGS)
 
         /// <summary>
-        /// Equals to 319 × <see cref="long"/>, or 638 × <see cref="int"/>
+        /// Equals to 638 × <see cref="int"/>, or 319 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 319;
+        public const int BYTE_COUNT = 319 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2544_BYTES
+#elif (UNION_2544_BYTES || UNION_636_INTS || UNION_318_LONGS)
 
         /// <summary>
-        /// Equals to 318 × <see cref="long"/>, or 636 × <see cref="int"/>
+        /// Equals to 636 × <see cref="int"/>, or 318 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 318;
+        public const int BYTE_COUNT = 318 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2536_BYTES
+#elif (UNION_2536_BYTES || UNION_634_INTS || UNION_317_LONGS)
 
         /// <summary>
-        /// Equals to 317 × <see cref="long"/>, or 634 × <see cref="int"/>
+        /// Equals to 634 × <see cref="int"/>, or 317 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 317;
+        public const int BYTE_COUNT = 317 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2528_BYTES
+#elif (UNION_2528_BYTES || UNION_632_INTS || UNION_316_LONGS)
 
         /// <summary>
-        /// Equals to 316 × <see cref="long"/>, or 632 × <see cref="int"/>
+        /// Equals to 632 × <see cref="int"/>, or 316 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 316;
+        public const int BYTE_COUNT = 316 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2520_BYTES
+#elif (UNION_2520_BYTES || UNION_630_INTS || UNION_315_LONGS)
 
         /// <summary>
-        /// Equals to 315 × <see cref="long"/>, or 630 × <see cref="int"/>
+        /// Equals to 630 × <see cref="int"/>, or 315 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 315;
+        public const int BYTE_COUNT = 315 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2512_BYTES
+#elif (UNION_2512_BYTES || UNION_628_INTS || UNION_314_LONGS)
 
         /// <summary>
-        /// Equals to 314 × <see cref="long"/>, or 628 × <see cref="int"/>
+        /// Equals to 628 × <see cref="int"/>, or 314 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 314;
+        public const int BYTE_COUNT = 314 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2504_BYTES
+#elif (UNION_2504_BYTES || UNION_626_INTS || UNION_313_LONGS)
 
         /// <summary>
-        /// Equals to 313 × <see cref="long"/>, or 626 × <see cref="int"/>
+        /// Equals to 626 × <see cref="int"/>, or 313 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 313;
+        public const int BYTE_COUNT = 313 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2496_BYTES
+#elif (UNION_2496_BYTES || UNION_624_INTS || UNION_312_LONGS)
 
         /// <summary>
-        /// Equals to 312 × <see cref="long"/>, or 624 × <see cref="int"/>
+        /// Equals to 624 × <see cref="int"/>, or 312 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 312;
+        public const int BYTE_COUNT = 312 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2488_BYTES
+#elif (UNION_2488_BYTES || UNION_622_INTS || UNION_311_LONGS)
 
         /// <summary>
-        /// Equals to 311 × <see cref="long"/>, or 622 × <see cref="int"/>
+        /// Equals to 622 × <see cref="int"/>, or 311 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 311;
+        public const int BYTE_COUNT = 311 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2480_BYTES
+#elif (UNION_2480_BYTES || UNION_620_INTS || UNION_310_LONGS)
 
         /// <summary>
-        /// Equals to 310 × <see cref="long"/>, or 620 × <see cref="int"/>
+        /// Equals to 620 × <see cref="int"/>, or 310 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 310;
+        public const int BYTE_COUNT = 310 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2472_BYTES
+#elif (UNION_2472_BYTES || UNION_618_INTS || UNION_309_LONGS)
 
         /// <summary>
-        /// Equals to 309 × <see cref="long"/>, or 618 × <see cref="int"/>
+        /// Equals to 618 × <see cref="int"/>, or 309 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 309;
+        public const int BYTE_COUNT = 309 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2464_BYTES
+#elif (UNION_2464_BYTES || UNION_616_INTS || UNION_308_LONGS)
 
         /// <summary>
-        /// Equals to 308 × <see cref="long"/>, or 616 × <see cref="int"/>
+        /// Equals to 616 × <see cref="int"/>, or 308 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 308;
+        public const int BYTE_COUNT = 308 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2456_BYTES
+#elif (UNION_2456_BYTES || UNION_614_INTS || UNION_307_LONGS)
 
         /// <summary>
-        /// Equals to 307 × <see cref="long"/>, or 614 × <see cref="int"/>
+        /// Equals to 614 × <see cref="int"/>, or 307 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 307;
+        public const int BYTE_COUNT = 307 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2448_BYTES
+#elif (UNION_2448_BYTES || UNION_612_INTS || UNION_306_LONGS)
 
         /// <summary>
-        /// Equals to 306 × <see cref="long"/>, or 612 × <see cref="int"/>
+        /// Equals to 612 × <see cref="int"/>, or 306 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 306;
+        public const int BYTE_COUNT = 306 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2440_BYTES
+#elif (UNION_2440_BYTES || UNION_610_INTS || UNION_305_LONGS)
 
         /// <summary>
-        /// Equals to 305 × <see cref="long"/>, or 610 × <see cref="int"/>
+        /// Equals to 610 × <see cref="int"/>, or 305 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 305;
+        public const int BYTE_COUNT = 305 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2432_BYTES
+#elif (UNION_2432_BYTES || UNION_608_INTS || UNION_304_LONGS)
 
         /// <summary>
-        /// Equals to 304 × <see cref="long"/>, or 608 × <see cref="int"/>
+        /// Equals to 608 × <see cref="int"/>, or 304 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 304;
+        public const int BYTE_COUNT = 304 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2424_BYTES
+#elif (UNION_2424_BYTES || UNION_606_INTS || UNION_303_LONGS)
 
         /// <summary>
-        /// Equals to 303 × <see cref="long"/>, or 606 × <see cref="int"/>
+        /// Equals to 606 × <see cref="int"/>, or 303 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 303;
+        public const int BYTE_COUNT = 303 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2416_BYTES
+#elif (UNION_2416_BYTES || UNION_604_INTS || UNION_302_LONGS)
 
         /// <summary>
-        /// Equals to 302 × <see cref="long"/>, or 604 × <see cref="int"/>
+        /// Equals to 604 × <see cref="int"/>, or 302 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 302;
+        public const int BYTE_COUNT = 302 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2408_BYTES
+#elif (UNION_2408_BYTES || UNION_602_INTS || UNION_301_LONGS)
 
         /// <summary>
-        /// Equals to 301 × <see cref="long"/>, or 602 × <see cref="int"/>
+        /// Equals to 602 × <see cref="int"/>, or 301 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 301;
+        public const int BYTE_COUNT = 301 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2400_BYTES
+#elif (UNION_2400_BYTES || UNION_600_INTS || UNION_300_LONGS)
 
         /// <summary>
-        /// Equals to 300 × <see cref="long"/>, or 600 × <see cref="int"/>
+        /// Equals to 600 × <see cref="int"/>, or 300 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 300;
+        public const int BYTE_COUNT = 300 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2392_BYTES
+#elif (UNION_2392_BYTES || UNION_598_INTS || UNION_299_LONGS)
 
         /// <summary>
-        /// Equals to 299 × <see cref="long"/>, or 598 × <see cref="int"/>
+        /// Equals to 598 × <see cref="int"/>, or 299 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 299;
+        public const int BYTE_COUNT = 299 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2384_BYTES
+#elif (UNION_2384_BYTES || UNION_596_INTS || UNION_298_LONGS)
 
         /// <summary>
-        /// Equals to 298 × <see cref="long"/>, or 596 × <see cref="int"/>
+        /// Equals to 596 × <see cref="int"/>, or 298 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 298;
+        public const int BYTE_COUNT = 298 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2376_BYTES
+#elif (UNION_2376_BYTES || UNION_594_INTS || UNION_297_LONGS)
 
         /// <summary>
-        /// Equals to 297 × <see cref="long"/>, or 594 × <see cref="int"/>
+        /// Equals to 594 × <see cref="int"/>, or 297 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 297;
+        public const int BYTE_COUNT = 297 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2368_BYTES
+#elif (UNION_2368_BYTES || UNION_592_INTS || UNION_296_LONGS)
 
         /// <summary>
-        /// Equals to 296 × <see cref="long"/>, or 592 × <see cref="int"/>
+        /// Equals to 592 × <see cref="int"/>, or 296 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 296;
+        public const int BYTE_COUNT = 296 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2360_BYTES
+#elif (UNION_2360_BYTES || UNION_590_INTS || UNION_295_LONGS)
 
         /// <summary>
-        /// Equals to 295 × <see cref="long"/>, or 590 × <see cref="int"/>
+        /// Equals to 590 × <see cref="int"/>, or 295 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 295;
+        public const int BYTE_COUNT = 295 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2352_BYTES
+#elif (UNION_2352_BYTES || UNION_588_INTS || UNION_294_LONGS)
 
         /// <summary>
-        /// Equals to 294 × <see cref="long"/>, or 588 × <see cref="int"/>
+        /// Equals to 588 × <see cref="int"/>, or 294 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 294;
+        public const int BYTE_COUNT = 294 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2344_BYTES
+#elif (UNION_2344_BYTES || UNION_586_INTS || UNION_293_LONGS)
 
         /// <summary>
-        /// Equals to 293 × <see cref="long"/>, or 586 × <see cref="int"/>
+        /// Equals to 586 × <see cref="int"/>, or 293 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 293;
+        public const int BYTE_COUNT = 293 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2336_BYTES
+#elif (UNION_2336_BYTES || UNION_584_INTS || UNION_292_LONGS)
 
         /// <summary>
-        /// Equals to 292 × <see cref="long"/>, or 584 × <see cref="int"/>
+        /// Equals to 584 × <see cref="int"/>, or 292 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 292;
+        public const int BYTE_COUNT = 292 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2328_BYTES
+#elif (UNION_2328_BYTES || UNION_582_INTS || UNION_291_LONGS)
 
         /// <summary>
-        /// Equals to 291 × <see cref="long"/>, or 582 × <see cref="int"/>
+        /// Equals to 582 × <see cref="int"/>, or 291 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 291;
+        public const int BYTE_COUNT = 291 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2320_BYTES
+#elif (UNION_2320_BYTES || UNION_580_INTS || UNION_290_LONGS)
 
         /// <summary>
-        /// Equals to 290 × <see cref="long"/>, or 580 × <see cref="int"/>
+        /// Equals to 580 × <see cref="int"/>, or 290 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 290;
+        public const int BYTE_COUNT = 290 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2312_BYTES
+#elif (UNION_2312_BYTES || UNION_578_INTS || UNION_289_LONGS)
 
         /// <summary>
-        /// Equals to 289 × <see cref="long"/>, or 578 × <see cref="int"/>
+        /// Equals to 578 × <see cref="int"/>, or 289 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 289;
+        public const int BYTE_COUNT = 289 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2304_BYTES
+#elif (UNION_2304_BYTES || UNION_576_INTS || UNION_288_LONGS)
 
         /// <summary>
-        /// Equals to 288 × <see cref="long"/>, or 576 × <see cref="int"/>
+        /// Equals to 576 × <see cref="int"/>, or 288 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 288;
+        public const int BYTE_COUNT = 288 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2296_BYTES
+#elif (UNION_2296_BYTES || UNION_574_INTS || UNION_287_LONGS)
 
         /// <summary>
-        /// Equals to 287 × <see cref="long"/>, or 574 × <see cref="int"/>
+        /// Equals to 574 × <see cref="int"/>, or 287 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 287;
+        public const int BYTE_COUNT = 287 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2288_BYTES
+#elif (UNION_2288_BYTES || UNION_572_INTS || UNION_286_LONGS)
 
         /// <summary>
-        /// Equals to 286 × <see cref="long"/>, or 572 × <see cref="int"/>
+        /// Equals to 572 × <see cref="int"/>, or 286 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 286;
+        public const int BYTE_COUNT = 286 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2280_BYTES
+#elif (UNION_2280_BYTES || UNION_570_INTS || UNION_285_LONGS)
 
         /// <summary>
-        /// Equals to 285 × <see cref="long"/>, or 570 × <see cref="int"/>
+        /// Equals to 570 × <see cref="int"/>, or 285 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 285;
+        public const int BYTE_COUNT = 285 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2272_BYTES
+#elif (UNION_2272_BYTES || UNION_568_INTS || UNION_284_LONGS)
 
         /// <summary>
-        /// Equals to 284 × <see cref="long"/>, or 568 × <see cref="int"/>
+        /// Equals to 568 × <see cref="int"/>, or 284 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 284;
+        public const int BYTE_COUNT = 284 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2264_BYTES
+#elif (UNION_2264_BYTES || UNION_566_INTS || UNION_283_LONGS)
 
         /// <summary>
-        /// Equals to 283 × <see cref="long"/>, or 566 × <see cref="int"/>
+        /// Equals to 566 × <see cref="int"/>, or 283 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 283;
+        public const int BYTE_COUNT = 283 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2256_BYTES
+#elif (UNION_2256_BYTES || UNION_564_INTS || UNION_282_LONGS)
 
         /// <summary>
-        /// Equals to 282 × <see cref="long"/>, or 564 × <see cref="int"/>
+        /// Equals to 564 × <see cref="int"/>, or 282 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 282;
+        public const int BYTE_COUNT = 282 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2248_BYTES
+#elif (UNION_2248_BYTES || UNION_562_INTS || UNION_281_LONGS)
 
         /// <summary>
-        /// Equals to 281 × <see cref="long"/>, or 562 × <see cref="int"/>
+        /// Equals to 562 × <see cref="int"/>, or 281 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 281;
+        public const int BYTE_COUNT = 281 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2240_BYTES
+#elif (UNION_2240_BYTES || UNION_560_INTS || UNION_280_LONGS)
 
         /// <summary>
-        /// Equals to 280 × <see cref="long"/>, or 560 × <see cref="int"/>
+        /// Equals to 560 × <see cref="int"/>, or 280 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 280;
+        public const int BYTE_COUNT = 280 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2232_BYTES
+#elif (UNION_2232_BYTES || UNION_558_INTS || UNION_279_LONGS)
 
         /// <summary>
-        /// Equals to 279 × <see cref="long"/>, or 558 × <see cref="int"/>
+        /// Equals to 558 × <see cref="int"/>, or 279 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 279;
+        public const int BYTE_COUNT = 279 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2224_BYTES
+#elif (UNION_2224_BYTES || UNION_556_INTS || UNION_278_LONGS)
 
         /// <summary>
-        /// Equals to 278 × <see cref="long"/>, or 556 × <see cref="int"/>
+        /// Equals to 556 × <see cref="int"/>, or 278 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 278;
+        public const int BYTE_COUNT = 278 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2216_BYTES
+#elif (UNION_2216_BYTES || UNION_554_INTS || UNION_277_LONGS)
 
         /// <summary>
-        /// Equals to 277 × <see cref="long"/>, or 554 × <see cref="int"/>
+        /// Equals to 554 × <see cref="int"/>, or 277 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 277;
+        public const int BYTE_COUNT = 277 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2208_BYTES
+#elif (UNION_2208_BYTES || UNION_552_INTS || UNION_276_LONGS)
 
         /// <summary>
-        /// Equals to 276 × <see cref="long"/>, or 552 × <see cref="int"/>
+        /// Equals to 552 × <see cref="int"/>, or 276 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 276;
+        public const int BYTE_COUNT = 276 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2200_BYTES
+#elif (UNION_2200_BYTES || UNION_550_INTS || UNION_275_LONGS)
 
         /// <summary>
-        /// Equals to 275 × <see cref="long"/>, or 550 × <see cref="int"/>
+        /// Equals to 550 × <see cref="int"/>, or 275 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 275;
+        public const int BYTE_COUNT = 275 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2192_BYTES
+#elif (UNION_2192_BYTES || UNION_548_INTS || UNION_274_LONGS)
 
         /// <summary>
-        /// Equals to 274 × <see cref="long"/>, or 548 × <see cref="int"/>
+        /// Equals to 548 × <see cref="int"/>, or 274 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 274;
+        public const int BYTE_COUNT = 274 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2184_BYTES
+#elif (UNION_2184_BYTES || UNION_546_INTS || UNION_273_LONGS)
 
         /// <summary>
-        /// Equals to 273 × <see cref="long"/>, or 546 × <see cref="int"/>
+        /// Equals to 546 × <see cref="int"/>, or 273 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 273;
+        public const int BYTE_COUNT = 273 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2176_BYTES
+#elif (UNION_2176_BYTES || UNION_544_INTS || UNION_272_LONGS)
 
         /// <summary>
-        /// Equals to 272 × <see cref="long"/>, or 544 × <see cref="int"/>
+        /// Equals to 544 × <see cref="int"/>, or 272 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 272;
+        public const int BYTE_COUNT = 272 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2168_BYTES
+#elif (UNION_2168_BYTES || UNION_542_INTS || UNION_271_LONGS)
 
         /// <summary>
-        /// Equals to 271 × <see cref="long"/>, or 542 × <see cref="int"/>
+        /// Equals to 542 × <see cref="int"/>, or 271 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 271;
+        public const int BYTE_COUNT = 271 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2160_BYTES
+#elif (UNION_2160_BYTES || UNION_540_INTS || UNION_270_LONGS)
 
         /// <summary>
-        /// Equals to 270 × <see cref="long"/>, or 540 × <see cref="int"/>
+        /// Equals to 540 × <see cref="int"/>, or 270 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 270;
+        public const int BYTE_COUNT = 270 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2152_BYTES
+#elif (UNION_2152_BYTES || UNION_538_INTS || UNION_269_LONGS)
 
         /// <summary>
-        /// Equals to 269 × <see cref="long"/>, or 538 × <see cref="int"/>
+        /// Equals to 538 × <see cref="int"/>, or 269 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 269;
+        public const int BYTE_COUNT = 269 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2144_BYTES
+#elif (UNION_2144_BYTES || UNION_536_INTS || UNION_268_LONGS)
 
         /// <summary>
-        /// Equals to 268 × <see cref="long"/>, or 536 × <see cref="int"/>
+        /// Equals to 536 × <see cref="int"/>, or 268 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 268;
+        public const int BYTE_COUNT = 268 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2136_BYTES
+#elif (UNION_2136_BYTES || UNION_534_INTS || UNION_267_LONGS)
 
         /// <summary>
-        /// Equals to 267 × <see cref="long"/>, or 534 × <see cref="int"/>
+        /// Equals to 534 × <see cref="int"/>, or 267 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 267;
+        public const int BYTE_COUNT = 267 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2128_BYTES
+#elif (UNION_2128_BYTES || UNION_532_INTS || UNION_266_LONGS)
 
         /// <summary>
-        /// Equals to 266 × <see cref="long"/>, or 532 × <see cref="int"/>
+        /// Equals to 532 × <see cref="int"/>, or 266 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 266;
+        public const int BYTE_COUNT = 266 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2120_BYTES
+#elif (UNION_2120_BYTES || UNION_530_INTS || UNION_265_LONGS)
 
         /// <summary>
-        /// Equals to 265 × <see cref="long"/>, or 530 × <see cref="int"/>
+        /// Equals to 530 × <see cref="int"/>, or 265 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 265;
+        public const int BYTE_COUNT = 265 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2112_BYTES
+#elif (UNION_2112_BYTES || UNION_528_INTS || UNION_264_LONGS)
 
         /// <summary>
-        /// Equals to 264 × <see cref="long"/>, or 528 × <see cref="int"/>
+        /// Equals to 528 × <see cref="int"/>, or 264 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 264;
+        public const int BYTE_COUNT = 264 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2104_BYTES
+#elif (UNION_2104_BYTES || UNION_526_INTS || UNION_263_LONGS)
 
         /// <summary>
-        /// Equals to 263 × <see cref="long"/>, or 526 × <see cref="int"/>
+        /// Equals to 526 × <see cref="int"/>, or 263 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 263;
+        public const int BYTE_COUNT = 263 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2096_BYTES
+#elif (UNION_2096_BYTES || UNION_524_INTS || UNION_262_LONGS)
 
         /// <summary>
-        /// Equals to 262 × <see cref="long"/>, or 524 × <see cref="int"/>
+        /// Equals to 524 × <see cref="int"/>, or 262 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 262;
+        public const int BYTE_COUNT = 262 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2088_BYTES
+#elif (UNION_2088_BYTES || UNION_522_INTS || UNION_261_LONGS)
 
         /// <summary>
-        /// Equals to 261 × <see cref="long"/>, or 522 × <see cref="int"/>
+        /// Equals to 522 × <see cref="int"/>, or 261 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 261;
+        public const int BYTE_COUNT = 261 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2080_BYTES
+#elif (UNION_2080_BYTES || UNION_520_INTS || UNION_260_LONGS)
 
         /// <summary>
-        /// Equals to 260 × <see cref="long"/>, or 520 × <see cref="int"/>
+        /// Equals to 520 × <see cref="int"/>, or 260 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 260;
+        public const int BYTE_COUNT = 260 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2072_BYTES
+#elif (UNION_2072_BYTES || UNION_518_INTS || UNION_259_LONGS)
 
         /// <summary>
-        /// Equals to 259 × <see cref="long"/>, or 518 × <see cref="int"/>
+        /// Equals to 518 × <see cref="int"/>, or 259 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 259;
+        public const int BYTE_COUNT = 259 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2064_BYTES
+#elif (UNION_2064_BYTES || UNION_516_INTS || UNION_258_LONGS)
 
         /// <summary>
-        /// Equals to 258 × <see cref="long"/>, or 516 × <see cref="int"/>
+        /// Equals to 516 × <see cref="int"/>, or 258 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 258;
+        public const int BYTE_COUNT = 258 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2056_BYTES
+#elif (UNION_2056_BYTES || UNION_514_INTS || UNION_257_LONGS)
 
         /// <summary>
-        /// Equals to 257 × <see cref="long"/>, or 514 × <see cref="int"/>
+        /// Equals to 514 × <see cref="int"/>, or 257 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 257;
+        public const int BYTE_COUNT = 257 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2048_BYTES
+#elif (UNION_2048_BYTES || UNION_512_INTS || UNION_256_LONGS)
 
         /// <summary>
-        /// Equals to 256 × <see cref="long"/>, or 512 × <see cref="int"/>
+        /// Equals to 512 × <see cref="int"/>, or 256 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 256;
+        public const int BYTE_COUNT = 256 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2040_BYTES
+#elif (UNION_2040_BYTES || UNION_510_INTS || UNION_255_LONGS)
 
         /// <summary>
-        /// Equals to 255 × <see cref="long"/>, or 510 × <see cref="int"/>
+        /// Equals to 510 × <see cref="int"/>, or 255 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 255;
+        public const int BYTE_COUNT = 255 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2032_BYTES
+#elif (UNION_2032_BYTES || UNION_508_INTS || UNION_254_LONGS)
 
         /// <summary>
-        /// Equals to 254 × <see cref="long"/>, or 508 × <see cref="int"/>
+        /// Equals to 508 × <see cref="int"/>, or 254 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 254;
+        public const int BYTE_COUNT = 254 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2024_BYTES
+#elif (UNION_2024_BYTES || UNION_506_INTS || UNION_253_LONGS)
 
         /// <summary>
-        /// Equals to 253 × <see cref="long"/>, or 506 × <see cref="int"/>
+        /// Equals to 506 × <see cref="int"/>, or 253 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 253;
+        public const int BYTE_COUNT = 253 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2016_BYTES
+#elif (UNION_2016_BYTES || UNION_504_INTS || UNION_252_LONGS)
 
         /// <summary>
-        /// Equals to 252 × <see cref="long"/>, or 504 × <see cref="int"/>
+        /// Equals to 504 × <see cref="int"/>, or 252 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 252;
+        public const int BYTE_COUNT = 252 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2008_BYTES
+#elif (UNION_2008_BYTES || UNION_502_INTS || UNION_251_LONGS)
 
         /// <summary>
-        /// Equals to 251 × <see cref="long"/>, or 502 × <see cref="int"/>
+        /// Equals to 502 × <see cref="int"/>, or 251 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 251;
+        public const int BYTE_COUNT = 251 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_2000_BYTES
+#elif (UNION_2000_BYTES || UNION_500_INTS || UNION_250_LONGS)
 
         /// <summary>
-        /// Equals to 250 × <see cref="long"/>, or 500 × <see cref="int"/>
+        /// Equals to 500 × <see cref="int"/>, or 250 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 250;
+        public const int BYTE_COUNT = 250 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1992_BYTES
+#elif (UNION_1992_BYTES || UNION_498_INTS || UNION_249_LONGS)
 
         /// <summary>
-        /// Equals to 249 × <see cref="long"/>, or 498 × <see cref="int"/>
+        /// Equals to 498 × <see cref="int"/>, or 249 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 249;
+        public const int BYTE_COUNT = 249 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1984_BYTES
+#elif (UNION_1984_BYTES || UNION_496_INTS || UNION_248_LONGS)
 
         /// <summary>
-        /// Equals to 248 × <see cref="long"/>, or 496 × <see cref="int"/>
+        /// Equals to 496 × <see cref="int"/>, or 248 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 248;
+        public const int BYTE_COUNT = 248 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1976_BYTES
+#elif (UNION_1976_BYTES || UNION_494_INTS || UNION_247_LONGS)
 
         /// <summary>
-        /// Equals to 247 × <see cref="long"/>, or 494 × <see cref="int"/>
+        /// Equals to 494 × <see cref="int"/>, or 247 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 247;
+        public const int BYTE_COUNT = 247 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1968_BYTES
+#elif (UNION_1968_BYTES || UNION_492_INTS || UNION_246_LONGS)
 
         /// <summary>
-        /// Equals to 246 × <see cref="long"/>, or 492 × <see cref="int"/>
+        /// Equals to 492 × <see cref="int"/>, or 246 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 246;
+        public const int BYTE_COUNT = 246 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1960_BYTES
+#elif (UNION_1960_BYTES || UNION_490_INTS || UNION_245_LONGS)
 
         /// <summary>
-        /// Equals to 245 × <see cref="long"/>, or 490 × <see cref="int"/>
+        /// Equals to 490 × <see cref="int"/>, or 245 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 245;
+        public const int BYTE_COUNT = 245 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1952_BYTES
+#elif (UNION_1952_BYTES || UNION_488_INTS || UNION_244_LONGS)
 
         /// <summary>
-        /// Equals to 244 × <see cref="long"/>, or 488 × <see cref="int"/>
+        /// Equals to 488 × <see cref="int"/>, or 244 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 244;
+        public const int BYTE_COUNT = 244 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1944_BYTES
+#elif (UNION_1944_BYTES || UNION_486_INTS || UNION_243_LONGS)
 
         /// <summary>
-        /// Equals to 243 × <see cref="long"/>, or 486 × <see cref="int"/>
+        /// Equals to 486 × <see cref="int"/>, or 243 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 243;
+        public const int BYTE_COUNT = 243 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1936_BYTES
+#elif (UNION_1936_BYTES || UNION_484_INTS || UNION_242_LONGS)
 
         /// <summary>
-        /// Equals to 242 × <see cref="long"/>, or 484 × <see cref="int"/>
+        /// Equals to 484 × <see cref="int"/>, or 242 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 242;
+        public const int BYTE_COUNT = 242 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1928_BYTES
+#elif (UNION_1928_BYTES || UNION_482_INTS || UNION_241_LONGS)
 
         /// <summary>
-        /// Equals to 241 × <see cref="long"/>, or 482 × <see cref="int"/>
+        /// Equals to 482 × <see cref="int"/>, or 241 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 241;
+        public const int BYTE_COUNT = 241 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1920_BYTES
+#elif (UNION_1920_BYTES || UNION_480_INTS || UNION_240_LONGS)
 
         /// <summary>
-        /// Equals to 240 × <see cref="long"/>, or 480 × <see cref="int"/>
+        /// Equals to 480 × <see cref="int"/>, or 240 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 240;
+        public const int BYTE_COUNT = 240 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1912_BYTES
+#elif (UNION_1912_BYTES || UNION_478_INTS || UNION_239_LONGS)
 
         /// <summary>
-        /// Equals to 239 × <see cref="long"/>, or 478 × <see cref="int"/>
+        /// Equals to 478 × <see cref="int"/>, or 239 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 239;
+        public const int BYTE_COUNT = 239 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1904_BYTES
+#elif (UNION_1904_BYTES || UNION_476_INTS || UNION_238_LONGS)
 
         /// <summary>
-        /// Equals to 238 × <see cref="long"/>, or 476 × <see cref="int"/>
+        /// Equals to 476 × <see cref="int"/>, or 238 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 238;
+        public const int BYTE_COUNT = 238 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1896_BYTES
+#elif (UNION_1896_BYTES || UNION_474_INTS || UNION_237_LONGS)
 
         /// <summary>
-        /// Equals to 237 × <see cref="long"/>, or 474 × <see cref="int"/>
+        /// Equals to 474 × <see cref="int"/>, or 237 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 237;
+        public const int BYTE_COUNT = 237 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1888_BYTES
+#elif (UNION_1888_BYTES || UNION_472_INTS || UNION_236_LONGS)
 
         /// <summary>
-        /// Equals to 236 × <see cref="long"/>, or 472 × <see cref="int"/>
+        /// Equals to 472 × <see cref="int"/>, or 236 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 236;
+        public const int BYTE_COUNT = 236 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1880_BYTES
+#elif (UNION_1880_BYTES || UNION_470_INTS || UNION_235_LONGS)
 
         /// <summary>
-        /// Equals to 235 × <see cref="long"/>, or 470 × <see cref="int"/>
+        /// Equals to 470 × <see cref="int"/>, or 235 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 235;
+        public const int BYTE_COUNT = 235 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1872_BYTES
+#elif (UNION_1872_BYTES || UNION_468_INTS || UNION_234_LONGS)
 
         /// <summary>
-        /// Equals to 234 × <see cref="long"/>, or 468 × <see cref="int"/>
+        /// Equals to 468 × <see cref="int"/>, or 234 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 234;
+        public const int BYTE_COUNT = 234 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1864_BYTES
+#elif (UNION_1864_BYTES || UNION_466_INTS || UNION_233_LONGS)
 
         /// <summary>
-        /// Equals to 233 × <see cref="long"/>, or 466 × <see cref="int"/>
+        /// Equals to 466 × <see cref="int"/>, or 233 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 233;
+        public const int BYTE_COUNT = 233 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1856_BYTES
+#elif (UNION_1856_BYTES || UNION_464_INTS || UNION_232_LONGS)
 
         /// <summary>
-        /// Equals to 232 × <see cref="long"/>, or 464 × <see cref="int"/>
+        /// Equals to 464 × <see cref="int"/>, or 232 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 232;
+        public const int BYTE_COUNT = 232 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1848_BYTES
+#elif (UNION_1848_BYTES || UNION_462_INTS || UNION_231_LONGS)
 
         /// <summary>
-        /// Equals to 231 × <see cref="long"/>, or 462 × <see cref="int"/>
+        /// Equals to 462 × <see cref="int"/>, or 231 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 231;
+        public const int BYTE_COUNT = 231 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1840_BYTES
+#elif (UNION_1840_BYTES || UNION_460_INTS || UNION_230_LONGS)
 
         /// <summary>
-        /// Equals to 230 × <see cref="long"/>, or 460 × <see cref="int"/>
+        /// Equals to 460 × <see cref="int"/>, or 230 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 230;
+        public const int BYTE_COUNT = 230 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1832_BYTES
+#elif (UNION_1832_BYTES || UNION_458_INTS || UNION_229_LONGS)
 
         /// <summary>
-        /// Equals to 229 × <see cref="long"/>, or 458 × <see cref="int"/>
+        /// Equals to 458 × <see cref="int"/>, or 229 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 229;
+        public const int BYTE_COUNT = 229 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1824_BYTES
+#elif (UNION_1824_BYTES || UNION_456_INTS || UNION_228_LONGS)
 
         /// <summary>
-        /// Equals to 228 × <see cref="long"/>, or 456 × <see cref="int"/>
+        /// Equals to 456 × <see cref="int"/>, or 228 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 228;
+        public const int BYTE_COUNT = 228 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1816_BYTES
+#elif (UNION_1816_BYTES || UNION_454_INTS || UNION_227_LONGS)
 
         /// <summary>
-        /// Equals to 227 × <see cref="long"/>, or 454 × <see cref="int"/>
+        /// Equals to 454 × <see cref="int"/>, or 227 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 227;
+        public const int BYTE_COUNT = 227 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1808_BYTES
+#elif (UNION_1808_BYTES || UNION_452_INTS || UNION_226_LONGS)
 
         /// <summary>
-        /// Equals to 226 × <see cref="long"/>, or 452 × <see cref="int"/>
+        /// Equals to 452 × <see cref="int"/>, or 226 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 226;
+        public const int BYTE_COUNT = 226 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1800_BYTES
+#elif (UNION_1800_BYTES || UNION_450_INTS || UNION_225_LONGS)
 
         /// <summary>
-        /// Equals to 225 × <see cref="long"/>, or 450 × <see cref="int"/>
+        /// Equals to 450 × <see cref="int"/>, or 225 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 225;
+        public const int BYTE_COUNT = 225 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1792_BYTES
+#elif (UNION_1792_BYTES || UNION_448_INTS || UNION_224_LONGS)
 
         /// <summary>
-        /// Equals to 224 × <see cref="long"/>, or 448 × <see cref="int"/>
+        /// Equals to 448 × <see cref="int"/>, or 224 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 224;
+        public const int BYTE_COUNT = 224 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1784_BYTES
+#elif (UNION_1784_BYTES || UNION_446_INTS || UNION_223_LONGS)
 
         /// <summary>
-        /// Equals to 223 × <see cref="long"/>, or 446 × <see cref="int"/>
+        /// Equals to 446 × <see cref="int"/>, or 223 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 223;
+        public const int BYTE_COUNT = 223 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1776_BYTES
+#elif (UNION_1776_BYTES || UNION_444_INTS || UNION_222_LONGS)
 
         /// <summary>
-        /// Equals to 222 × <see cref="long"/>, or 444 × <see cref="int"/>
+        /// Equals to 444 × <see cref="int"/>, or 222 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 222;
+        public const int BYTE_COUNT = 222 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1768_BYTES
+#elif (UNION_1768_BYTES || UNION_442_INTS || UNION_221_LONGS)
 
         /// <summary>
-        /// Equals to 221 × <see cref="long"/>, or 442 × <see cref="int"/>
+        /// Equals to 442 × <see cref="int"/>, or 221 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 221;
+        public const int BYTE_COUNT = 221 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1760_BYTES
+#elif (UNION_1760_BYTES || UNION_440_INTS || UNION_220_LONGS)
 
         /// <summary>
-        /// Equals to 220 × <see cref="long"/>, or 440 × <see cref="int"/>
+        /// Equals to 440 × <see cref="int"/>, or 220 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 220;
+        public const int BYTE_COUNT = 220 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1752_BYTES
+#elif (UNION_1752_BYTES || UNION_438_INTS || UNION_219_LONGS)
 
         /// <summary>
-        /// Equals to 219 × <see cref="long"/>, or 438 × <see cref="int"/>
+        /// Equals to 438 × <see cref="int"/>, or 219 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 219;
+        public const int BYTE_COUNT = 219 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1744_BYTES
+#elif (UNION_1744_BYTES || UNION_436_INTS || UNION_218_LONGS)
 
         /// <summary>
-        /// Equals to 218 × <see cref="long"/>, or 436 × <see cref="int"/>
+        /// Equals to 436 × <see cref="int"/>, or 218 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 218;
+        public const int BYTE_COUNT = 218 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1736_BYTES
+#elif (UNION_1736_BYTES || UNION_434_INTS || UNION_217_LONGS)
 
         /// <summary>
-        /// Equals to 217 × <see cref="long"/>, or 434 × <see cref="int"/>
+        /// Equals to 434 × <see cref="int"/>, or 217 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 217;
+        public const int BYTE_COUNT = 217 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1728_BYTES
+#elif (UNION_1728_BYTES || UNION_432_INTS || UNION_216_LONGS)
 
         /// <summary>
-        /// Equals to 216 × <see cref="long"/>, or 432 × <see cref="int"/>
+        /// Equals to 432 × <see cref="int"/>, or 216 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 216;
+        public const int BYTE_COUNT = 216 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1720_BYTES
+#elif (UNION_1720_BYTES || UNION_430_INTS || UNION_215_LONGS)
 
         /// <summary>
-        /// Equals to 215 × <see cref="long"/>, or 430 × <see cref="int"/>
+        /// Equals to 430 × <see cref="int"/>, or 215 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 215;
+        public const int BYTE_COUNT = 215 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1712_BYTES
+#elif (UNION_1712_BYTES || UNION_428_INTS || UNION_214_LONGS)
 
         /// <summary>
-        /// Equals to 214 × <see cref="long"/>, or 428 × <see cref="int"/>
+        /// Equals to 428 × <see cref="int"/>, or 214 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 214;
+        public const int BYTE_COUNT = 214 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1704_BYTES
+#elif (UNION_1704_BYTES || UNION_426_INTS || UNION_213_LONGS)
 
         /// <summary>
-        /// Equals to 213 × <see cref="long"/>, or 426 × <see cref="int"/>
+        /// Equals to 426 × <see cref="int"/>, or 213 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 213;
+        public const int BYTE_COUNT = 213 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1696_BYTES
+#elif (UNION_1696_BYTES || UNION_424_INTS || UNION_212_LONGS)
 
         /// <summary>
-        /// Equals to 212 × <see cref="long"/>, or 424 × <see cref="int"/>
+        /// Equals to 424 × <see cref="int"/>, or 212 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 212;
+        public const int BYTE_COUNT = 212 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1688_BYTES
+#elif (UNION_1688_BYTES || UNION_422_INTS || UNION_211_LONGS)
 
         /// <summary>
-        /// Equals to 211 × <see cref="long"/>, or 422 × <see cref="int"/>
+        /// Equals to 422 × <see cref="int"/>, or 211 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 211;
+        public const int BYTE_COUNT = 211 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1680_BYTES
+#elif (UNION_1680_BYTES || UNION_420_INTS || UNION_210_LONGS)
 
         /// <summary>
-        /// Equals to 210 × <see cref="long"/>, or 420 × <see cref="int"/>
+        /// Equals to 420 × <see cref="int"/>, or 210 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 210;
+        public const int BYTE_COUNT = 210 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1672_BYTES
+#elif (UNION_1672_BYTES || UNION_418_INTS || UNION_209_LONGS)
 
         /// <summary>
-        /// Equals to 209 × <see cref="long"/>, or 418 × <see cref="int"/>
+        /// Equals to 418 × <see cref="int"/>, or 209 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 209;
+        public const int BYTE_COUNT = 209 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1664_BYTES
+#elif (UNION_1664_BYTES || UNION_416_INTS || UNION_208_LONGS)
 
         /// <summary>
-        /// Equals to 208 × <see cref="long"/>, or 416 × <see cref="int"/>
+        /// Equals to 416 × <see cref="int"/>, or 208 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 208;
+        public const int BYTE_COUNT = 208 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1656_BYTES
+#elif (UNION_1656_BYTES || UNION_414_INTS || UNION_207_LONGS)
 
         /// <summary>
-        /// Equals to 207 × <see cref="long"/>, or 414 × <see cref="int"/>
+        /// Equals to 414 × <see cref="int"/>, or 207 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 207;
+        public const int BYTE_COUNT = 207 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1648_BYTES
+#elif (UNION_1648_BYTES || UNION_412_INTS || UNION_206_LONGS)
 
         /// <summary>
-        /// Equals to 206 × <see cref="long"/>, or 412 × <see cref="int"/>
+        /// Equals to 412 × <see cref="int"/>, or 206 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 206;
+        public const int BYTE_COUNT = 206 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1640_BYTES
+#elif (UNION_1640_BYTES || UNION_410_INTS || UNION_205_LONGS)
 
         /// <summary>
-        /// Equals to 205 × <see cref="long"/>, or 410 × <see cref="int"/>
+        /// Equals to 410 × <see cref="int"/>, or 205 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 205;
+        public const int BYTE_COUNT = 205 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1632_BYTES
+#elif (UNION_1632_BYTES || UNION_408_INTS || UNION_204_LONGS)
 
         /// <summary>
-        /// Equals to 204 × <see cref="long"/>, or 408 × <see cref="int"/>
+        /// Equals to 408 × <see cref="int"/>, or 204 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 204;
+        public const int BYTE_COUNT = 204 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1624_BYTES
+#elif (UNION_1624_BYTES || UNION_406_INTS || UNION_203_LONGS)
 
         /// <summary>
-        /// Equals to 203 × <see cref="long"/>, or 406 × <see cref="int"/>
+        /// Equals to 406 × <see cref="int"/>, or 203 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 203;
+        public const int BYTE_COUNT = 203 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1616_BYTES
+#elif (UNION_1616_BYTES || UNION_404_INTS || UNION_202_LONGS)
 
         /// <summary>
-        /// Equals to 202 × <see cref="long"/>, or 404 × <see cref="int"/>
+        /// Equals to 404 × <see cref="int"/>, or 202 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 202;
+        public const int BYTE_COUNT = 202 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1608_BYTES
+#elif (UNION_1608_BYTES || UNION_402_INTS || UNION_201_LONGS)
 
         /// <summary>
-        /// Equals to 201 × <see cref="long"/>, or 402 × <see cref="int"/>
+        /// Equals to 402 × <see cref="int"/>, or 201 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 201;
+        public const int BYTE_COUNT = 201 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1600_BYTES
+#elif (UNION_1600_BYTES || UNION_400_INTS || UNION_200_LONGS)
 
         /// <summary>
-        /// Equals to 200 × <see cref="long"/>, or 400 × <see cref="int"/>
+        /// Equals to 400 × <see cref="int"/>, or 200 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 200;
+        public const int BYTE_COUNT = 200 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1592_BYTES
+#elif (UNION_1592_BYTES || UNION_398_INTS || UNION_199_LONGS)
 
         /// <summary>
-        /// Equals to 199 × <see cref="long"/>, or 398 × <see cref="int"/>
+        /// Equals to 398 × <see cref="int"/>, or 199 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 199;
+        public const int BYTE_COUNT = 199 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1584_BYTES
+#elif (UNION_1584_BYTES || UNION_396_INTS || UNION_198_LONGS)
 
         /// <summary>
-        /// Equals to 198 × <see cref="long"/>, or 396 × <see cref="int"/>
+        /// Equals to 396 × <see cref="int"/>, or 198 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 198;
+        public const int BYTE_COUNT = 198 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1576_BYTES
+#elif (UNION_1576_BYTES || UNION_394_INTS || UNION_197_LONGS)
 
         /// <summary>
-        /// Equals to 197 × <see cref="long"/>, or 394 × <see cref="int"/>
+        /// Equals to 394 × <see cref="int"/>, or 197 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 197;
+        public const int BYTE_COUNT = 197 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1568_BYTES
+#elif (UNION_1568_BYTES || UNION_392_INTS || UNION_196_LONGS)
 
         /// <summary>
-        /// Equals to 196 × <see cref="long"/>, or 392 × <see cref="int"/>
+        /// Equals to 392 × <see cref="int"/>, or 196 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 196;
+        public const int BYTE_COUNT = 196 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1560_BYTES
+#elif (UNION_1560_BYTES || UNION_390_INTS || UNION_195_LONGS)
 
         /// <summary>
-        /// Equals to 195 × <see cref="long"/>, or 390 × <see cref="int"/>
+        /// Equals to 390 × <see cref="int"/>, or 195 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 195;
+        public const int BYTE_COUNT = 195 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1552_BYTES
+#elif (UNION_1552_BYTES || UNION_388_INTS || UNION_194_LONGS)
 
         /// <summary>
-        /// Equals to 194 × <see cref="long"/>, or 388 × <see cref="int"/>
+        /// Equals to 388 × <see cref="int"/>, or 194 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 194;
+        public const int BYTE_COUNT = 194 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1544_BYTES
+#elif (UNION_1544_BYTES || UNION_386_INTS || UNION_193_LONGS)
 
         /// <summary>
-        /// Equals to 193 × <see cref="long"/>, or 386 × <see cref="int"/>
+        /// Equals to 386 × <see cref="int"/>, or 193 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 193;
+        public const int BYTE_COUNT = 193 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1536_BYTES
+#elif (UNION_1536_BYTES || UNION_384_INTS || UNION_192_LONGS)
 
         /// <summary>
-        /// Equals to 192 × <see cref="long"/>, or 384 × <see cref="int"/>
+        /// Equals to 384 × <see cref="int"/>, or 192 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 192;
+        public const int BYTE_COUNT = 192 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1528_BYTES
+#elif (UNION_1528_BYTES || UNION_382_INTS || UNION_191_LONGS)
 
         /// <summary>
-        /// Equals to 191 × <see cref="long"/>, or 382 × <see cref="int"/>
+        /// Equals to 382 × <see cref="int"/>, or 191 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 191;
+        public const int BYTE_COUNT = 191 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1520_BYTES
+#elif (UNION_1520_BYTES || UNION_380_INTS || UNION_190_LONGS)
 
         /// <summary>
-        /// Equals to 190 × <see cref="long"/>, or 380 × <see cref="int"/>
+        /// Equals to 380 × <see cref="int"/>, or 190 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 190;
+        public const int BYTE_COUNT = 190 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1512_BYTES
+#elif (UNION_1512_BYTES || UNION_378_INTS || UNION_189_LONGS)
 
         /// <summary>
-        /// Equals to 189 × <see cref="long"/>, or 378 × <see cref="int"/>
+        /// Equals to 378 × <see cref="int"/>, or 189 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 189;
+        public const int BYTE_COUNT = 189 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1504_BYTES
+#elif (UNION_1504_BYTES || UNION_376_INTS || UNION_188_LONGS)
 
         /// <summary>
-        /// Equals to 188 × <see cref="long"/>, or 376 × <see cref="int"/>
+        /// Equals to 376 × <see cref="int"/>, or 188 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 188;
+        public const int BYTE_COUNT = 188 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1496_BYTES
+#elif (UNION_1496_BYTES || UNION_374_INTS || UNION_187_LONGS)
 
         /// <summary>
-        /// Equals to 187 × <see cref="long"/>, or 374 × <see cref="int"/>
+        /// Equals to 374 × <see cref="int"/>, or 187 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 187;
+        public const int BYTE_COUNT = 187 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1488_BYTES
+#elif (UNION_1488_BYTES || UNION_372_INTS || UNION_186_LONGS)
 
         /// <summary>
-        /// Equals to 186 × <see cref="long"/>, or 372 × <see cref="int"/>
+        /// Equals to 372 × <see cref="int"/>, or 186 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 186;
+        public const int BYTE_COUNT = 186 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1480_BYTES
+#elif (UNION_1480_BYTES || UNION_370_INTS || UNION_185_LONGS)
 
         /// <summary>
-        /// Equals to 185 × <see cref="long"/>, or 370 × <see cref="int"/>
+        /// Equals to 370 × <see cref="int"/>, or 185 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 185;
+        public const int BYTE_COUNT = 185 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1472_BYTES
+#elif (UNION_1472_BYTES || UNION_368_INTS || UNION_184_LONGS)
 
         /// <summary>
-        /// Equals to 184 × <see cref="long"/>, or 368 × <see cref="int"/>
+        /// Equals to 368 × <see cref="int"/>, or 184 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 184;
+        public const int BYTE_COUNT = 184 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1464_BYTES
+#elif (UNION_1464_BYTES || UNION_366_INTS || UNION_183_LONGS)
 
         /// <summary>
-        /// Equals to 183 × <see cref="long"/>, or 366 × <see cref="int"/>
+        /// Equals to 366 × <see cref="int"/>, or 183 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 183;
+        public const int BYTE_COUNT = 183 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1456_BYTES
+#elif (UNION_1456_BYTES || UNION_364_INTS || UNION_182_LONGS)
 
         /// <summary>
-        /// Equals to 182 × <see cref="long"/>, or 364 × <see cref="int"/>
+        /// Equals to 364 × <see cref="int"/>, or 182 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 182;
+        public const int BYTE_COUNT = 182 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1448_BYTES
+#elif (UNION_1448_BYTES || UNION_362_INTS || UNION_181_LONGS)
 
         /// <summary>
-        /// Equals to 181 × <see cref="long"/>, or 362 × <see cref="int"/>
+        /// Equals to 362 × <see cref="int"/>, or 181 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 181;
+        public const int BYTE_COUNT = 181 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1440_BYTES
+#elif (UNION_1440_BYTES || UNION_360_INTS || UNION_180_LONGS)
 
         /// <summary>
-        /// Equals to 180 × <see cref="long"/>, or 360 × <see cref="int"/>
+        /// Equals to 360 × <see cref="int"/>, or 180 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 180;
+        public const int BYTE_COUNT = 180 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1432_BYTES
+#elif (UNION_1432_BYTES || UNION_358_INTS || UNION_179_LONGS)
 
         /// <summary>
-        /// Equals to 179 × <see cref="long"/>, or 358 × <see cref="int"/>
+        /// Equals to 358 × <see cref="int"/>, or 179 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 179;
+        public const int BYTE_COUNT = 179 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1424_BYTES
+#elif (UNION_1424_BYTES || UNION_356_INTS || UNION_178_LONGS)
 
         /// <summary>
-        /// Equals to 178 × <see cref="long"/>, or 356 × <see cref="int"/>
+        /// Equals to 356 × <see cref="int"/>, or 178 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 178;
+        public const int BYTE_COUNT = 178 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1416_BYTES
+#elif (UNION_1416_BYTES || UNION_354_INTS || UNION_177_LONGS)
 
         /// <summary>
-        /// Equals to 177 × <see cref="long"/>, or 354 × <see cref="int"/>
+        /// Equals to 354 × <see cref="int"/>, or 177 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 177;
+        public const int BYTE_COUNT = 177 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1408_BYTES
+#elif (UNION_1408_BYTES || UNION_352_INTS || UNION_176_LONGS)
 
         /// <summary>
-        /// Equals to 176 × <see cref="long"/>, or 352 × <see cref="int"/>
+        /// Equals to 352 × <see cref="int"/>, or 176 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 176;
+        public const int BYTE_COUNT = 176 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1400_BYTES
+#elif (UNION_1400_BYTES || UNION_350_INTS || UNION_175_LONGS)
 
         /// <summary>
-        /// Equals to 175 × <see cref="long"/>, or 350 × <see cref="int"/>
+        /// Equals to 350 × <see cref="int"/>, or 175 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 175;
+        public const int BYTE_COUNT = 175 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1392_BYTES
+#elif (UNION_1392_BYTES || UNION_348_INTS || UNION_174_LONGS)
 
         /// <summary>
-        /// Equals to 174 × <see cref="long"/>, or 348 × <see cref="int"/>
+        /// Equals to 348 × <see cref="int"/>, or 174 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 174;
+        public const int BYTE_COUNT = 174 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1384_BYTES
+#elif (UNION_1384_BYTES || UNION_346_INTS || UNION_173_LONGS)
 
         /// <summary>
-        /// Equals to 173 × <see cref="long"/>, or 346 × <see cref="int"/>
+        /// Equals to 346 × <see cref="int"/>, or 173 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 173;
+        public const int BYTE_COUNT = 173 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1376_BYTES
+#elif (UNION_1376_BYTES || UNION_344_INTS || UNION_172_LONGS)
 
         /// <summary>
-        /// Equals to 172 × <see cref="long"/>, or 344 × <see cref="int"/>
+        /// Equals to 344 × <see cref="int"/>, or 172 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 172;
+        public const int BYTE_COUNT = 172 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1368_BYTES
+#elif (UNION_1368_BYTES || UNION_342_INTS || UNION_171_LONGS)
 
         /// <summary>
-        /// Equals to 171 × <see cref="long"/>, or 342 × <see cref="int"/>
+        /// Equals to 342 × <see cref="int"/>, or 171 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 171;
+        public const int BYTE_COUNT = 171 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1360_BYTES
+#elif (UNION_1360_BYTES || UNION_340_INTS || UNION_170_LONGS)
 
         /// <summary>
-        /// Equals to 170 × <see cref="long"/>, or 340 × <see cref="int"/>
+        /// Equals to 340 × <see cref="int"/>, or 170 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 170;
+        public const int BYTE_COUNT = 170 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1352_BYTES
+#elif (UNION_1352_BYTES || UNION_338_INTS || UNION_169_LONGS)
 
         /// <summary>
-        /// Equals to 169 × <see cref="long"/>, or 338 × <see cref="int"/>
+        /// Equals to 338 × <see cref="int"/>, or 169 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 169;
+        public const int BYTE_COUNT = 169 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1344_BYTES
+#elif (UNION_1344_BYTES || UNION_336_INTS || UNION_168_LONGS)
 
         /// <summary>
-        /// Equals to 168 × <see cref="long"/>, or 336 × <see cref="int"/>
+        /// Equals to 336 × <see cref="int"/>, or 168 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 168;
+        public const int BYTE_COUNT = 168 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1336_BYTES
+#elif (UNION_1336_BYTES || UNION_334_INTS || UNION_167_LONGS)
 
         /// <summary>
-        /// Equals to 167 × <see cref="long"/>, or 334 × <see cref="int"/>
+        /// Equals to 334 × <see cref="int"/>, or 167 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 167;
+        public const int BYTE_COUNT = 167 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1328_BYTES
+#elif (UNION_1328_BYTES || UNION_332_INTS || UNION_166_LONGS)
 
         /// <summary>
-        /// Equals to 166 × <see cref="long"/>, or 332 × <see cref="int"/>
+        /// Equals to 332 × <see cref="int"/>, or 166 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 166;
+        public const int BYTE_COUNT = 166 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1320_BYTES
+#elif (UNION_1320_BYTES || UNION_330_INTS || UNION_165_LONGS)
 
         /// <summary>
-        /// Equals to 165 × <see cref="long"/>, or 330 × <see cref="int"/>
+        /// Equals to 330 × <see cref="int"/>, or 165 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 165;
+        public const int BYTE_COUNT = 165 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1312_BYTES
+#elif (UNION_1312_BYTES || UNION_328_INTS || UNION_164_LONGS)
 
         /// <summary>
-        /// Equals to 164 × <see cref="long"/>, or 328 × <see cref="int"/>
+        /// Equals to 328 × <see cref="int"/>, or 164 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 164;
+        public const int BYTE_COUNT = 164 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1304_BYTES
+#elif (UNION_1304_BYTES || UNION_326_INTS || UNION_163_LONGS)
 
         /// <summary>
-        /// Equals to 163 × <see cref="long"/>, or 326 × <see cref="int"/>
+        /// Equals to 326 × <see cref="int"/>, or 163 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 163;
+        public const int BYTE_COUNT = 163 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1296_BYTES
+#elif (UNION_1296_BYTES || UNION_324_INTS || UNION_162_LONGS)
 
         /// <summary>
-        /// Equals to 162 × <see cref="long"/>, or 324 × <see cref="int"/>
+        /// Equals to 324 × <see cref="int"/>, or 162 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 162;
+        public const int BYTE_COUNT = 162 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1288_BYTES
+#elif (UNION_1288_BYTES || UNION_322_INTS || UNION_161_LONGS)
 
         /// <summary>
-        /// Equals to 161 × <see cref="long"/>, or 322 × <see cref="int"/>
+        /// Equals to 322 × <see cref="int"/>, or 161 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 161;
+        public const int BYTE_COUNT = 161 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1280_BYTES
+#elif (UNION_1280_BYTES || UNION_320_INTS || UNION_160_LONGS)
 
         /// <summary>
-        /// Equals to 160 × <see cref="long"/>, or 320 × <see cref="int"/>
+        /// Equals to 320 × <see cref="int"/>, or 160 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 160;
+        public const int BYTE_COUNT = 160 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1272_BYTES
+#elif (UNION_1272_BYTES || UNION_318_INTS || UNION_159_LONGS)
 
         /// <summary>
-        /// Equals to 159 × <see cref="long"/>, or 318 × <see cref="int"/>
+        /// Equals to 318 × <see cref="int"/>, or 159 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 159;
+        public const int BYTE_COUNT = 159 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1264_BYTES
+#elif (UNION_1264_BYTES || UNION_316_INTS || UNION_158_LONGS)
 
         /// <summary>
-        /// Equals to 158 × <see cref="long"/>, or 316 × <see cref="int"/>
+        /// Equals to 316 × <see cref="int"/>, or 158 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 158;
+        public const int BYTE_COUNT = 158 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1256_BYTES
+#elif (UNION_1256_BYTES || UNION_314_INTS || UNION_157_LONGS)
 
         /// <summary>
-        /// Equals to 157 × <see cref="long"/>, or 314 × <see cref="int"/>
+        /// Equals to 314 × <see cref="int"/>, or 157 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 157;
+        public const int BYTE_COUNT = 157 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1248_BYTES
+#elif (UNION_1248_BYTES || UNION_312_INTS || UNION_156_LONGS)
 
         /// <summary>
-        /// Equals to 156 × <see cref="long"/>, or 312 × <see cref="int"/>
+        /// Equals to 312 × <see cref="int"/>, or 156 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 156;
+        public const int BYTE_COUNT = 156 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1240_BYTES
+#elif (UNION_1240_BYTES || UNION_310_INTS || UNION_155_LONGS)
 
         /// <summary>
-        /// Equals to 155 × <see cref="long"/>, or 310 × <see cref="int"/>
+        /// Equals to 310 × <see cref="int"/>, or 155 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 155;
+        public const int BYTE_COUNT = 155 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1232_BYTES
+#elif (UNION_1232_BYTES || UNION_308_INTS || UNION_154_LONGS)
 
         /// <summary>
-        /// Equals to 154 × <see cref="long"/>, or 308 × <see cref="int"/>
+        /// Equals to 308 × <see cref="int"/>, or 154 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 154;
+        public const int BYTE_COUNT = 154 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1224_BYTES
+#elif (UNION_1224_BYTES || UNION_306_INTS || UNION_153_LONGS)
 
         /// <summary>
-        /// Equals to 153 × <see cref="long"/>, or 306 × <see cref="int"/>
+        /// Equals to 306 × <see cref="int"/>, or 153 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 153;
+        public const int BYTE_COUNT = 153 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1216_BYTES
+#elif (UNION_1216_BYTES || UNION_304_INTS || UNION_152_LONGS)
 
         /// <summary>
-        /// Equals to 152 × <see cref="long"/>, or 304 × <see cref="int"/>
+        /// Equals to 304 × <see cref="int"/>, or 152 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 152;
+        public const int BYTE_COUNT = 152 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1208_BYTES
+#elif (UNION_1208_BYTES || UNION_302_INTS || UNION_151_LONGS)
 
         /// <summary>
-        /// Equals to 151 × <see cref="long"/>, or 302 × <see cref="int"/>
+        /// Equals to 302 × <see cref="int"/>, or 151 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 151;
+        public const int BYTE_COUNT = 151 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1200_BYTES
+#elif (UNION_1200_BYTES || UNION_300_INTS || UNION_150_LONGS)
 
         /// <summary>
-        /// Equals to 150 × <see cref="long"/>, or 300 × <see cref="int"/>
+        /// Equals to 300 × <see cref="int"/>, or 150 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 150;
+        public const int BYTE_COUNT = 150 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1192_BYTES
+#elif (UNION_1192_BYTES || UNION_298_INTS || UNION_149_LONGS)
 
         /// <summary>
-        /// Equals to 149 × <see cref="long"/>, or 298 × <see cref="int"/>
+        /// Equals to 298 × <see cref="int"/>, or 149 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 149;
+        public const int BYTE_COUNT = 149 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1184_BYTES
+#elif (UNION_1184_BYTES || UNION_296_INTS || UNION_148_LONGS)
 
         /// <summary>
-        /// Equals to 148 × <see cref="long"/>, or 296 × <see cref="int"/>
+        /// Equals to 296 × <see cref="int"/>, or 148 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 148;
+        public const int BYTE_COUNT = 148 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1176_BYTES
+#elif (UNION_1176_BYTES || UNION_294_INTS || UNION_147_LONGS)
 
         /// <summary>
-        /// Equals to 147 × <see cref="long"/>, or 294 × <see cref="int"/>
+        /// Equals to 294 × <see cref="int"/>, or 147 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 147;
+        public const int BYTE_COUNT = 147 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1168_BYTES
+#elif (UNION_1168_BYTES || UNION_292_INTS || UNION_146_LONGS)
 
         /// <summary>
-        /// Equals to 146 × <see cref="long"/>, or 292 × <see cref="int"/>
+        /// Equals to 292 × <see cref="int"/>, or 146 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 146;
+        public const int BYTE_COUNT = 146 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1160_BYTES
+#elif (UNION_1160_BYTES || UNION_290_INTS || UNION_145_LONGS)
 
         /// <summary>
-        /// Equals to 145 × <see cref="long"/>, or 290 × <see cref="int"/>
+        /// Equals to 290 × <see cref="int"/>, or 145 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 145;
+        public const int BYTE_COUNT = 145 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1152_BYTES
+#elif (UNION_1152_BYTES || UNION_288_INTS || UNION_144_LONGS)
 
         /// <summary>
-        /// Equals to 144 × <see cref="long"/>, or 288 × <see cref="int"/>
+        /// Equals to 288 × <see cref="int"/>, or 144 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 144;
+        public const int BYTE_COUNT = 144 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1144_BYTES
+#elif (UNION_1144_BYTES || UNION_286_INTS || UNION_143_LONGS)
 
         /// <summary>
-        /// Equals to 143 × <see cref="long"/>, or 286 × <see cref="int"/>
+        /// Equals to 286 × <see cref="int"/>, or 143 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 143;
+        public const int BYTE_COUNT = 143 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1136_BYTES
+#elif (UNION_1136_BYTES || UNION_284_INTS || UNION_142_LONGS)
 
         /// <summary>
-        /// Equals to 142 × <see cref="long"/>, or 284 × <see cref="int"/>
+        /// Equals to 284 × <see cref="int"/>, or 142 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 142;
+        public const int BYTE_COUNT = 142 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1128_BYTES
+#elif (UNION_1128_BYTES || UNION_282_INTS || UNION_141_LONGS)
 
         /// <summary>
-        /// Equals to 141 × <see cref="long"/>, or 282 × <see cref="int"/>
+        /// Equals to 282 × <see cref="int"/>, or 141 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 141;
+        public const int BYTE_COUNT = 141 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1120_BYTES
+#elif (UNION_1120_BYTES || UNION_280_INTS || UNION_140_LONGS)
 
         /// <summary>
-        /// Equals to 140 × <see cref="long"/>, or 280 × <see cref="int"/>
+        /// Equals to 280 × <see cref="int"/>, or 140 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 140;
+        public const int BYTE_COUNT = 140 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1112_BYTES
+#elif (UNION_1112_BYTES || UNION_278_INTS || UNION_139_LONGS)
 
         /// <summary>
-        /// Equals to 139 × <see cref="long"/>, or 278 × <see cref="int"/>
+        /// Equals to 278 × <see cref="int"/>, or 139 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 139;
+        public const int BYTE_COUNT = 139 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1104_BYTES
+#elif (UNION_1104_BYTES || UNION_276_INTS || UNION_138_LONGS)
 
         /// <summary>
-        /// Equals to 138 × <see cref="long"/>, or 276 × <see cref="int"/>
+        /// Equals to 276 × <see cref="int"/>, or 138 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 138;
+        public const int BYTE_COUNT = 138 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1096_BYTES
+#elif (UNION_1096_BYTES || UNION_274_INTS || UNION_137_LONGS)
 
         /// <summary>
-        /// Equals to 137 × <see cref="long"/>, or 274 × <see cref="int"/>
+        /// Equals to 274 × <see cref="int"/>, or 137 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 137;
+        public const int BYTE_COUNT = 137 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1088_BYTES
+#elif (UNION_1088_BYTES || UNION_272_INTS || UNION_136_LONGS)
 
         /// <summary>
-        /// Equals to 136 × <see cref="long"/>, or 272 × <see cref="int"/>
+        /// Equals to 272 × <see cref="int"/>, or 136 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 136;
+        public const int BYTE_COUNT = 136 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1080_BYTES
+#elif (UNION_1080_BYTES || UNION_270_INTS || UNION_135_LONGS)
 
         /// <summary>
-        /// Equals to 135 × <see cref="long"/>, or 270 × <see cref="int"/>
+        /// Equals to 270 × <see cref="int"/>, or 135 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 135;
+        public const int BYTE_COUNT = 135 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1072_BYTES
+#elif (UNION_1072_BYTES || UNION_268_INTS || UNION_134_LONGS)
 
         /// <summary>
-        /// Equals to 134 × <see cref="long"/>, or 268 × <see cref="int"/>
+        /// Equals to 268 × <see cref="int"/>, or 134 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 134;
+        public const int BYTE_COUNT = 134 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1064_BYTES
+#elif (UNION_1064_BYTES || UNION_266_INTS || UNION_133_LONGS)
 
         /// <summary>
-        /// Equals to 133 × <see cref="long"/>, or 266 × <see cref="int"/>
+        /// Equals to 266 × <see cref="int"/>, or 133 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 133;
+        public const int BYTE_COUNT = 133 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1056_BYTES
+#elif (UNION_1056_BYTES || UNION_264_INTS || UNION_132_LONGS)
 
         /// <summary>
-        /// Equals to 132 × <see cref="long"/>, or 264 × <see cref="int"/>
+        /// Equals to 264 × <see cref="int"/>, or 132 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 132;
+        public const int BYTE_COUNT = 132 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1048_BYTES
+#elif (UNION_1048_BYTES || UNION_262_INTS || UNION_131_LONGS)
 
         /// <summary>
-        /// Equals to 131 × <see cref="long"/>, or 262 × <see cref="int"/>
+        /// Equals to 262 × <see cref="int"/>, or 131 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 131;
+        public const int BYTE_COUNT = 131 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1040_BYTES
+#elif (UNION_1040_BYTES || UNION_260_INTS || UNION_130_LONGS)
 
         /// <summary>
-        /// Equals to 130 × <see cref="long"/>, or 260 × <see cref="int"/>
+        /// Equals to 260 × <see cref="int"/>, or 130 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 130;
+        public const int BYTE_COUNT = 130 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1032_BYTES
+#elif (UNION_1032_BYTES || UNION_258_INTS || UNION_129_LONGS)
 
         /// <summary>
-        /// Equals to 129 × <see cref="long"/>, or 258 × <see cref="int"/>
+        /// Equals to 258 × <see cref="int"/>, or 129 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 129;
+        public const int BYTE_COUNT = 129 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1024_BYTES
+#elif (UNION_1024_BYTES || UNION_256_INTS || UNION_128_LONGS)
 
         /// <summary>
-        /// Equals to 128 × <see cref="long"/>, or 256 × <see cref="int"/>
+        /// Equals to 256 × <see cref="int"/>, or 128 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 128;
+        public const int BYTE_COUNT = 128 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1016_BYTES
+#elif (UNION_1016_BYTES || UNION_254_INTS || UNION_127_LONGS)
 
         /// <summary>
-        /// Equals to 127 × <see cref="long"/>, or 254 × <see cref="int"/>
+        /// Equals to 254 × <see cref="int"/>, or 127 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 127;
+        public const int BYTE_COUNT = 127 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1008_BYTES
+#elif (UNION_1008_BYTES || UNION_252_INTS || UNION_126_LONGS)
 
         /// <summary>
-        /// Equals to 126 × <see cref="long"/>, or 252 × <see cref="int"/>
+        /// Equals to 252 × <see cref="int"/>, or 126 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 126;
+        public const int BYTE_COUNT = 126 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_1000_BYTES
+#elif (UNION_1000_BYTES || UNION_250_INTS || UNION_125_LONGS)
 
         /// <summary>
-        /// Equals to 125 × <see cref="long"/>, or 250 × <see cref="int"/>
+        /// Equals to 250 × <see cref="int"/>, or 125 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 125;
+        public const int BYTE_COUNT = 125 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_992_BYTES
+#elif (UNION_992_BYTES || UNION_248_INTS || UNION_124_LONGS)
 
         /// <summary>
-        /// Equals to 124 × <see cref="long"/>, or 248 × <see cref="int"/>
+        /// Equals to 248 × <see cref="int"/>, or 124 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 124;
+        public const int BYTE_COUNT = 124 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_984_BYTES
+#elif (UNION_984_BYTES || UNION_246_INTS || UNION_123_LONGS)
 
         /// <summary>
-        /// Equals to 123 × <see cref="long"/>, or 246 × <see cref="int"/>
+        /// Equals to 246 × <see cref="int"/>, or 123 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 123;
+        public const int BYTE_COUNT = 123 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_976_BYTES
+#elif (UNION_976_BYTES || UNION_244_INTS || UNION_122_LONGS)
 
         /// <summary>
-        /// Equals to 122 × <see cref="long"/>, or 244 × <see cref="int"/>
+        /// Equals to 244 × <see cref="int"/>, or 122 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 122;
+        public const int BYTE_COUNT = 122 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_968_BYTES
+#elif (UNION_968_BYTES || UNION_242_INTS || UNION_121_LONGS)
 
         /// <summary>
-        /// Equals to 121 × <see cref="long"/>, or 242 × <see cref="int"/>
+        /// Equals to 242 × <see cref="int"/>, or 121 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 121;
+        public const int BYTE_COUNT = 121 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_960_BYTES
+#elif (UNION_960_BYTES || UNION_240_INTS || UNION_120_LONGS)
 
         /// <summary>
-        /// Equals to 120 × <see cref="long"/>, or 240 × <see cref="int"/>
+        /// Equals to 240 × <see cref="int"/>, or 120 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 120;
+        public const int BYTE_COUNT = 120 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_952_BYTES
+#elif (UNION_952_BYTES || UNION_238_INTS || UNION_119_LONGS)
 
         /// <summary>
-        /// Equals to 119 × <see cref="long"/>, or 238 × <see cref="int"/>
+        /// Equals to 238 × <see cref="int"/>, or 119 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 119;
+        public const int BYTE_COUNT = 119 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_944_BYTES
+#elif (UNION_944_BYTES || UNION_236_INTS || UNION_118_LONGS)
 
         /// <summary>
-        /// Equals to 118 × <see cref="long"/>, or 236 × <see cref="int"/>
+        /// Equals to 236 × <see cref="int"/>, or 118 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 118;
+        public const int BYTE_COUNT = 118 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_936_BYTES
+#elif (UNION_936_BYTES || UNION_234_INTS || UNION_117_LONGS)
 
         /// <summary>
-        /// Equals to 117 × <see cref="long"/>, or 234 × <see cref="int"/>
+        /// Equals to 234 × <see cref="int"/>, or 117 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 117;
+        public const int BYTE_COUNT = 117 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_928_BYTES
+#elif (UNION_928_BYTES || UNION_232_INTS || UNION_116_LONGS)
 
         /// <summary>
-        /// Equals to 116 × <see cref="long"/>, or 232 × <see cref="int"/>
+        /// Equals to 232 × <see cref="int"/>, or 116 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 116;
+        public const int BYTE_COUNT = 116 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_920_BYTES
+#elif (UNION_920_BYTES || UNION_230_INTS || UNION_115_LONGS)
 
         /// <summary>
-        /// Equals to 115 × <see cref="long"/>, or 230 × <see cref="int"/>
+        /// Equals to 230 × <see cref="int"/>, or 115 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 115;
+        public const int BYTE_COUNT = 115 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_912_BYTES
+#elif (UNION_912_BYTES || UNION_228_INTS || UNION_114_LONGS)
 
         /// <summary>
-        /// Equals to 114 × <see cref="long"/>, or 228 × <see cref="int"/>
+        /// Equals to 228 × <see cref="int"/>, or 114 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 114;
+        public const int BYTE_COUNT = 114 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_904_BYTES
+#elif (UNION_904_BYTES || UNION_226_INTS || UNION_113_LONGS)
 
         /// <summary>
-        /// Equals to 113 × <see cref="long"/>, or 226 × <see cref="int"/>
+        /// Equals to 226 × <see cref="int"/>, or 113 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 113;
+        public const int BYTE_COUNT = 113 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_896_BYTES
+#elif (UNION_896_BYTES || UNION_224_INTS || UNION_112_LONGS)
 
         /// <summary>
-        /// Equals to 112 × <see cref="long"/>, or 224 × <see cref="int"/>
+        /// Equals to 224 × <see cref="int"/>, or 112 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 112;
+        public const int BYTE_COUNT = 112 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_888_BYTES
+#elif (UNION_888_BYTES || UNION_222_INTS || UNION_111_LONGS)
 
         /// <summary>
-        /// Equals to 111 × <see cref="long"/>, or 222 × <see cref="int"/>
+        /// Equals to 222 × <see cref="int"/>, or 111 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 111;
+        public const int BYTE_COUNT = 111 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_880_BYTES
+#elif (UNION_880_BYTES || UNION_220_INTS || UNION_110_LONGS)
 
         /// <summary>
-        /// Equals to 110 × <see cref="long"/>, or 220 × <see cref="int"/>
+        /// Equals to 220 × <see cref="int"/>, or 110 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 110;
+        public const int BYTE_COUNT = 110 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_872_BYTES
+#elif (UNION_872_BYTES || UNION_218_INTS || UNION_109_LONGS)
 
         /// <summary>
-        /// Equals to 109 × <see cref="long"/>, or 218 × <see cref="int"/>
+        /// Equals to 218 × <see cref="int"/>, or 109 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 109;
+        public const int BYTE_COUNT = 109 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_864_BYTES
+#elif (UNION_864_BYTES || UNION_216_INTS || UNION_108_LONGS)
 
         /// <summary>
-        /// Equals to 108 × <see cref="long"/>, or 216 × <see cref="int"/>
+        /// Equals to 216 × <see cref="int"/>, or 108 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 108;
+        public const int BYTE_COUNT = 108 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_856_BYTES
+#elif (UNION_856_BYTES || UNION_214_INTS || UNION_107_LONGS)
 
         /// <summary>
-        /// Equals to 107 × <see cref="long"/>, or 214 × <see cref="int"/>
+        /// Equals to 214 × <see cref="int"/>, or 107 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 107;
+        public const int BYTE_COUNT = 107 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_848_BYTES
+#elif (UNION_848_BYTES || UNION_212_INTS || UNION_106_LONGS)
 
         /// <summary>
-        /// Equals to 106 × <see cref="long"/>, or 212 × <see cref="int"/>
+        /// Equals to 212 × <see cref="int"/>, or 106 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 106;
+        public const int BYTE_COUNT = 106 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_840_BYTES
+#elif (UNION_840_BYTES || UNION_210_INTS || UNION_105_LONGS)
 
         /// <summary>
-        /// Equals to 105 × <see cref="long"/>, or 210 × <see cref="int"/>
+        /// Equals to 210 × <see cref="int"/>, or 105 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 105;
+        public const int BYTE_COUNT = 105 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_832_BYTES
+#elif (UNION_832_BYTES || UNION_208_INTS || UNION_104_LONGS)
 
         /// <summary>
-        /// Equals to 104 × <see cref="long"/>, or 208 × <see cref="int"/>
+        /// Equals to 208 × <see cref="int"/>, or 104 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 104;
+        public const int BYTE_COUNT = 104 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_824_BYTES
+#elif (UNION_824_BYTES || UNION_206_INTS || UNION_103_LONGS)
 
         /// <summary>
-        /// Equals to 103 × <see cref="long"/>, or 206 × <see cref="int"/>
+        /// Equals to 206 × <see cref="int"/>, or 103 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 103;
+        public const int BYTE_COUNT = 103 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_816_BYTES
+#elif (UNION_816_BYTES || UNION_204_INTS || UNION_102_LONGS)
 
         /// <summary>
-        /// Equals to 102 × <see cref="long"/>, or 204 × <see cref="int"/>
+        /// Equals to 204 × <see cref="int"/>, or 102 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 102;
+        public const int BYTE_COUNT = 102 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_808_BYTES
+#elif (UNION_808_BYTES || UNION_202_INTS || UNION_101_LONGS)
 
         /// <summary>
-        /// Equals to 101 × <see cref="long"/>, or 202 × <see cref="int"/>
+        /// Equals to 202 × <see cref="int"/>, or 101 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 101;
+        public const int BYTE_COUNT = 101 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_800_BYTES
+#elif (UNION_800_BYTES || UNION_200_INTS || UNION_100_LONGS)
 
         /// <summary>
-        /// Equals to 100 × <see cref="long"/>, or 200 × <see cref="int"/>
+        /// Equals to 200 × <see cref="int"/>, or 100 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 100;
+        public const int BYTE_COUNT = 100 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_792_BYTES
+#elif (UNION_792_BYTES || UNION_198_INTS || UNION_99_LONGS)
 
         /// <summary>
-        /// Equals to 99 × <see cref="long"/>, or 198 × <see cref="int"/>
+        /// Equals to 198 × <see cref="int"/>, or 99 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 99;
+        public const int BYTE_COUNT = 99 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_784_BYTES
+#elif (UNION_784_BYTES || UNION_196_INTS || UNION_98_LONGS)
 
         /// <summary>
-        /// Equals to 98 × <see cref="long"/>, or 196 × <see cref="int"/>
+        /// Equals to 196 × <see cref="int"/>, or 98 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 98;
+        public const int BYTE_COUNT = 98 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_776_BYTES
+#elif (UNION_776_BYTES || UNION_194_INTS || UNION_97_LONGS)
 
         /// <summary>
-        /// Equals to 97 × <see cref="long"/>, or 194 × <see cref="int"/>
+        /// Equals to 194 × <see cref="int"/>, or 97 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 97;
+        public const int BYTE_COUNT = 97 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_768_BYTES
+#elif (UNION_768_BYTES || UNION_192_INTS || UNION_96_LONGS)
 
         /// <summary>
-        /// Equals to 96 × <see cref="long"/>, or 192 × <see cref="int"/>
+        /// Equals to 192 × <see cref="int"/>, or 96 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 96;
+        public const int BYTE_COUNT = 96 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_760_BYTES
+#elif (UNION_760_BYTES || UNION_190_INTS || UNION_95_LONGS)
 
         /// <summary>
-        /// Equals to 95 × <see cref="long"/>, or 190 × <see cref="int"/>
+        /// Equals to 190 × <see cref="int"/>, or 95 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 95;
+        public const int BYTE_COUNT = 95 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_752_BYTES
+#elif (UNION_752_BYTES || UNION_188_INTS || UNION_94_LONGS)
 
         /// <summary>
-        /// Equals to 94 × <see cref="long"/>, or 188 × <see cref="int"/>
+        /// Equals to 188 × <see cref="int"/>, or 94 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 94;
+        public const int BYTE_COUNT = 94 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_744_BYTES
+#elif (UNION_744_BYTES || UNION_186_INTS || UNION_93_LONGS)
 
         /// <summary>
-        /// Equals to 93 × <see cref="long"/>, or 186 × <see cref="int"/>
+        /// Equals to 186 × <see cref="int"/>, or 93 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 93;
+        public const int BYTE_COUNT = 93 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_736_BYTES
+#elif (UNION_736_BYTES || UNION_184_INTS || UNION_92_LONGS)
 
         /// <summary>
-        /// Equals to 92 × <see cref="long"/>, or 184 × <see cref="int"/>
+        /// Equals to 184 × <see cref="int"/>, or 92 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 92;
+        public const int BYTE_COUNT = 92 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_728_BYTES
+#elif (UNION_728_BYTES || UNION_182_INTS || UNION_91_LONGS)
 
         /// <summary>
-        /// Equals to 91 × <see cref="long"/>, or 182 × <see cref="int"/>
+        /// Equals to 182 × <see cref="int"/>, or 91 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 91;
+        public const int BYTE_COUNT = 91 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_720_BYTES
+#elif (UNION_720_BYTES || UNION_180_INTS || UNION_90_LONGS)
 
         /// <summary>
-        /// Equals to 90 × <see cref="long"/>, or 180 × <see cref="int"/>
+        /// Equals to 180 × <see cref="int"/>, or 90 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 90;
+        public const int BYTE_COUNT = 90 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_712_BYTES
+#elif (UNION_712_BYTES || UNION_178_INTS || UNION_89_LONGS)
 
         /// <summary>
-        /// Equals to 89 × <see cref="long"/>, or 178 × <see cref="int"/>
+        /// Equals to 178 × <see cref="int"/>, or 89 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 89;
+        public const int BYTE_COUNT = 89 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_704_BYTES
+#elif (UNION_704_BYTES || UNION_176_INTS || UNION_88_LONGS)
 
         /// <summary>
-        /// Equals to 88 × <see cref="long"/>, or 176 × <see cref="int"/>
+        /// Equals to 176 × <see cref="int"/>, or 88 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 88;
+        public const int BYTE_COUNT = 88 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_696_BYTES
+#elif (UNION_696_BYTES || UNION_174_INTS || UNION_87_LONGS)
 
         /// <summary>
-        /// Equals to 87 × <see cref="long"/>, or 174 × <see cref="int"/>
+        /// Equals to 174 × <see cref="int"/>, or 87 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 87;
+        public const int BYTE_COUNT = 87 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_688_BYTES
+#elif (UNION_688_BYTES || UNION_172_INTS || UNION_86_LONGS)
 
         /// <summary>
-        /// Equals to 86 × <see cref="long"/>, or 172 × <see cref="int"/>
+        /// Equals to 172 × <see cref="int"/>, or 86 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 86;
+        public const int BYTE_COUNT = 86 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_680_BYTES
+#elif (UNION_680_BYTES || UNION_170_INTS || UNION_85_LONGS)
 
         /// <summary>
-        /// Equals to 85 × <see cref="long"/>, or 170 × <see cref="int"/>
+        /// Equals to 170 × <see cref="int"/>, or 85 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 85;
+        public const int BYTE_COUNT = 85 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_672_BYTES
+#elif (UNION_672_BYTES || UNION_168_INTS || UNION_84_LONGS)
 
         /// <summary>
-        /// Equals to 84 × <see cref="long"/>, or 168 × <see cref="int"/>
+        /// Equals to 168 × <see cref="int"/>, or 84 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 84;
+        public const int BYTE_COUNT = 84 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_664_BYTES
+#elif (UNION_664_BYTES || UNION_166_INTS || UNION_83_LONGS)
 
         /// <summary>
-        /// Equals to 83 × <see cref="long"/>, or 166 × <see cref="int"/>
+        /// Equals to 166 × <see cref="int"/>, or 83 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 83;
+        public const int BYTE_COUNT = 83 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_656_BYTES
+#elif (UNION_656_BYTES || UNION_164_INTS || UNION_82_LONGS)
 
         /// <summary>
-        /// Equals to 82 × <see cref="long"/>, or 164 × <see cref="int"/>
+        /// Equals to 164 × <see cref="int"/>, or 82 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 82;
+        public const int BYTE_COUNT = 82 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_648_BYTES
+#elif (UNION_648_BYTES || UNION_162_INTS || UNION_81_LONGS)
 
         /// <summary>
-        /// Equals to 81 × <see cref="long"/>, or 162 × <see cref="int"/>
+        /// Equals to 162 × <see cref="int"/>, or 81 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 81;
+        public const int BYTE_COUNT = 81 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_640_BYTES
+#elif (UNION_640_BYTES || UNION_160_INTS || UNION_80_LONGS)
 
         /// <summary>
-        /// Equals to 80 × <see cref="long"/>, or 160 × <see cref="int"/>
+        /// Equals to 160 × <see cref="int"/>, or 80 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 80;
+        public const int BYTE_COUNT = 80 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_632_BYTES
+#elif (UNION_632_BYTES || UNION_158_INTS || UNION_79_LONGS)
 
         /// <summary>
-        /// Equals to 79 × <see cref="long"/>, or 158 × <see cref="int"/>
+        /// Equals to 158 × <see cref="int"/>, or 79 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 79;
+        public const int BYTE_COUNT = 79 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_624_BYTES
+#elif (UNION_624_BYTES || UNION_156_INTS || UNION_78_LONGS)
 
         /// <summary>
-        /// Equals to 78 × <see cref="long"/>, or 156 × <see cref="int"/>
+        /// Equals to 156 × <see cref="int"/>, or 78 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 78;
+        public const int BYTE_COUNT = 78 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_616_BYTES
+#elif (UNION_616_BYTES || UNION_154_INTS || UNION_77_LONGS)
 
         /// <summary>
-        /// Equals to 77 × <see cref="long"/>, or 154 × <see cref="int"/>
+        /// Equals to 154 × <see cref="int"/>, or 77 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 77;
+        public const int BYTE_COUNT = 77 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_608_BYTES
+#elif (UNION_608_BYTES || UNION_152_INTS || UNION_76_LONGS)
 
         /// <summary>
-        /// Equals to 76 × <see cref="long"/>, or 152 × <see cref="int"/>
+        /// Equals to 152 × <see cref="int"/>, or 76 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 76;
+        public const int BYTE_COUNT = 76 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_600_BYTES
+#elif (UNION_600_BYTES || UNION_150_INTS || UNION_75_LONGS)
 
         /// <summary>
-        /// Equals to 75 × <see cref="long"/>, or 150 × <see cref="int"/>
+        /// Equals to 150 × <see cref="int"/>, or 75 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 75;
+        public const int BYTE_COUNT = 75 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_592_BYTES
+#elif (UNION_592_BYTES || UNION_148_INTS || UNION_74_LONGS)
 
         /// <summary>
-        /// Equals to 74 × <see cref="long"/>, or 148 × <see cref="int"/>
+        /// Equals to 148 × <see cref="int"/>, or 74 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 74;
+        public const int BYTE_COUNT = 74 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_584_BYTES
+#elif (UNION_584_BYTES || UNION_146_INTS || UNION_73_LONGS)
 
         /// <summary>
-        /// Equals to 73 × <see cref="long"/>, or 146 × <see cref="int"/>
+        /// Equals to 146 × <see cref="int"/>, or 73 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 73;
+        public const int BYTE_COUNT = 73 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_576_BYTES
+#elif (UNION_576_BYTES || UNION_144_INTS || UNION_72_LONGS)
 
         /// <summary>
-        /// Equals to 72 × <see cref="long"/>, or 144 × <see cref="int"/>
+        /// Equals to 144 × <see cref="int"/>, or 72 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 72;
+        public const int BYTE_COUNT = 72 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_568_BYTES
+#elif (UNION_568_BYTES || UNION_142_INTS || UNION_71_LONGS)
 
         /// <summary>
-        /// Equals to 71 × <see cref="long"/>, or 142 × <see cref="int"/>
+        /// Equals to 142 × <see cref="int"/>, or 71 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 71;
+        public const int BYTE_COUNT = 71 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_560_BYTES
+#elif (UNION_560_BYTES || UNION_140_INTS || UNION_70_LONGS)
 
         /// <summary>
-        /// Equals to 70 × <see cref="long"/>, or 140 × <see cref="int"/>
+        /// Equals to 140 × <see cref="int"/>, or 70 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 70;
+        public const int BYTE_COUNT = 70 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_552_BYTES
+#elif (UNION_552_BYTES || UNION_138_INTS || UNION_69_LONGS)
 
         /// <summary>
-        /// Equals to 69 × <see cref="long"/>, or 138 × <see cref="int"/>
+        /// Equals to 138 × <see cref="int"/>, or 69 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 69;
+        public const int BYTE_COUNT = 69 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_544_BYTES
+#elif (UNION_544_BYTES || UNION_136_INTS || UNION_68_LONGS)
 
         /// <summary>
-        /// Equals to 68 × <see cref="long"/>, or 136 × <see cref="int"/>
+        /// Equals to 136 × <see cref="int"/>, or 68 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 68;
+        public const int BYTE_COUNT = 68 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_536_BYTES
+#elif (UNION_536_BYTES || UNION_134_INTS || UNION_67_LONGS)
 
         /// <summary>
-        /// Equals to 67 × <see cref="long"/>, or 134 × <see cref="int"/>
+        /// Equals to 134 × <see cref="int"/>, or 67 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 67;
+        public const int BYTE_COUNT = 67 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_528_BYTES
+#elif (UNION_528_BYTES || UNION_132_INTS || UNION_66_LONGS)
 
         /// <summary>
-        /// Equals to 66 × <see cref="long"/>, or 132 × <see cref="int"/>
+        /// Equals to 132 × <see cref="int"/>, or 66 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 66;
+        public const int BYTE_COUNT = 66 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_520_BYTES
+#elif (UNION_520_BYTES || UNION_130_INTS || UNION_65_LONGS)
 
         /// <summary>
-        /// Equals to 65 × <see cref="long"/>, or 130 × <see cref="int"/>
+        /// Equals to 130 × <see cref="int"/>, or 65 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 65;
+        public const int BYTE_COUNT = 65 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_512_BYTES
+#elif (UNION_512_BYTES || UNION_128_INTS || UNION_64_LONGS)
 
         /// <summary>
-        /// Equals to 64 × <see cref="long"/>, or 128 × <see cref="int"/>
+        /// Equals to 128 × <see cref="int"/>, or 64 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 64;
+        public const int BYTE_COUNT = 64 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_504_BYTES
+#elif (UNION_504_BYTES || UNION_126_INTS || UNION_63_LONGS)
 
         /// <summary>
-        /// Equals to 63 × <see cref="long"/>, or 126 × <see cref="int"/>
+        /// Equals to 126 × <see cref="int"/>, or 63 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 63;
+        public const int BYTE_COUNT = 63 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_496_BYTES
+#elif (UNION_496_BYTES || UNION_124_INTS || UNION_62_LONGS)
 
         /// <summary>
-        /// Equals to 62 × <see cref="long"/>, or 124 × <see cref="int"/>
+        /// Equals to 124 × <see cref="int"/>, or 62 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 62;
+        public const int BYTE_COUNT = 62 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_488_BYTES
+#elif (UNION_488_BYTES || UNION_122_INTS || UNION_61_LONGS)
 
         /// <summary>
-        /// Equals to 61 × <see cref="long"/>, or 122 × <see cref="int"/>
+        /// Equals to 122 × <see cref="int"/>, or 61 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 61;
+        public const int BYTE_COUNT = 61 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_480_BYTES
+#elif (UNION_480_BYTES || UNION_120_INTS || UNION_60_LONGS)
 
         /// <summary>
-        /// Equals to 60 × <see cref="long"/>, or 120 × <see cref="int"/>
+        /// Equals to 120 × <see cref="int"/>, or 60 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 60;
+        public const int BYTE_COUNT = 60 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_472_BYTES
+#elif (UNION_472_BYTES || UNION_118_INTS || UNION_59_LONGS)
 
         /// <summary>
-        /// Equals to 59 × <see cref="long"/>, or 118 × <see cref="int"/>
+        /// Equals to 118 × <see cref="int"/>, or 59 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 59;
+        public const int BYTE_COUNT = 59 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_464_BYTES
+#elif (UNION_464_BYTES || UNION_116_INTS || UNION_58_LONGS)
 
         /// <summary>
-        /// Equals to 58 × <see cref="long"/>, or 116 × <see cref="int"/>
+        /// Equals to 116 × <see cref="int"/>, or 58 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 58;
+        public const int BYTE_COUNT = 58 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_456_BYTES
+#elif (UNION_456_BYTES || UNION_114_INTS || UNION_57_LONGS)
 
         /// <summary>
-        /// Equals to 57 × <see cref="long"/>, or 114 × <see cref="int"/>
+        /// Equals to 114 × <see cref="int"/>, or 57 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 57;
+        public const int BYTE_COUNT = 57 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_448_BYTES
+#elif (UNION_448_BYTES || UNION_112_INTS || UNION_56_LONGS)
 
         /// <summary>
-        /// Equals to 56 × <see cref="long"/>, or 112 × <see cref="int"/>
+        /// Equals to 112 × <see cref="int"/>, or 56 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 56;
+        public const int BYTE_COUNT = 56 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_440_BYTES
+#elif (UNION_440_BYTES || UNION_110_INTS || UNION_55_LONGS)
 
         /// <summary>
-        /// Equals to 55 × <see cref="long"/>, or 110 × <see cref="int"/>
+        /// Equals to 110 × <see cref="int"/>, or 55 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 55;
+        public const int BYTE_COUNT = 55 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_432_BYTES
+#elif (UNION_432_BYTES || UNION_108_INTS || UNION_54_LONGS)
 
         /// <summary>
-        /// Equals to 54 × <see cref="long"/>, or 108 × <see cref="int"/>
+        /// Equals to 108 × <see cref="int"/>, or 54 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 54;
+        public const int BYTE_COUNT = 54 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_424_BYTES
+#elif (UNION_424_BYTES || UNION_106_INTS || UNION_53_LONGS)
 
         /// <summary>
-        /// Equals to 53 × <see cref="long"/>, or 106 × <see cref="int"/>
+        /// Equals to 106 × <see cref="int"/>, or 53 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 53;
+        public const int BYTE_COUNT = 53 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_416_BYTES
+#elif (UNION_416_BYTES || UNION_104_INTS || UNION_52_LONGS)
 
         /// <summary>
-        /// Equals to 52 × <see cref="long"/>, or 104 × <see cref="int"/>
+        /// Equals to 104 × <see cref="int"/>, or 52 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 52;
+        public const int BYTE_COUNT = 52 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_408_BYTES
+#elif (UNION_408_BYTES || UNION_102_INTS || UNION_51_LONGS)
 
         /// <summary>
-        /// Equals to 51 × <see cref="long"/>, or 102 × <see cref="int"/>
+        /// Equals to 102 × <see cref="int"/>, or 51 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 51;
+        public const int BYTE_COUNT = 51 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_400_BYTES
+#elif (UNION_400_BYTES || UNION_100_INTS || UNION_50_LONGS)
 
         /// <summary>
-        /// Equals to 50 × <see cref="long"/>, or 100 × <see cref="int"/>
+        /// Equals to 100 × <see cref="int"/>, or 50 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 50;
+        public const int BYTE_COUNT = 50 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_392_BYTES
+#elif (UNION_392_BYTES || UNION_98_INTS || UNION_49_LONGS)
 
         /// <summary>
-        /// Equals to 49 × <see cref="long"/>, or 98 × <see cref="int"/>
+        /// Equals to 98 × <see cref="int"/>, or 49 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 49;
+        public const int BYTE_COUNT = 49 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_384_BYTES
+#elif (UNION_384_BYTES || UNION_96_INTS || UNION_48_LONGS)
 
         /// <summary>
-        /// Equals to 48 × <see cref="long"/>, or 96 × <see cref="int"/>
+        /// Equals to 96 × <see cref="int"/>, or 48 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 48;
+        public const int BYTE_COUNT = 48 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_376_BYTES
+#elif (UNION_376_BYTES || UNION_94_INTS || UNION_47_LONGS)
 
         /// <summary>
-        /// Equals to 47 × <see cref="long"/>, or 94 × <see cref="int"/>
+        /// Equals to 94 × <see cref="int"/>, or 47 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 47;
+        public const int BYTE_COUNT = 47 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_368_BYTES
+#elif (UNION_368_BYTES || UNION_92_INTS || UNION_46_LONGS)
 
         /// <summary>
-        /// Equals to 46 × <see cref="long"/>, or 92 × <see cref="int"/>
+        /// Equals to 92 × <see cref="int"/>, or 46 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 46;
+        public const int BYTE_COUNT = 46 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_360_BYTES
+#elif (UNION_360_BYTES || UNION_90_INTS || UNION_45_LONGS)
 
         /// <summary>
-        /// Equals to 45 × <see cref="long"/>, or 90 × <see cref="int"/>
+        /// Equals to 90 × <see cref="int"/>, or 45 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 45;
+        public const int BYTE_COUNT = 45 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_352_BYTES
+#elif (UNION_352_BYTES || UNION_88_INTS || UNION_44_LONGS)
 
         /// <summary>
-        /// Equals to 44 × <see cref="long"/>, or 88 × <see cref="int"/>
+        /// Equals to 88 × <see cref="int"/>, or 44 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 44;
+        public const int BYTE_COUNT = 44 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_344_BYTES
+#elif (UNION_344_BYTES || UNION_86_INTS || UNION_43_LONGS)
 
         /// <summary>
-        /// Equals to 43 × <see cref="long"/>, or 86 × <see cref="int"/>
+        /// Equals to 86 × <see cref="int"/>, or 43 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 43;
+        public const int BYTE_COUNT = 43 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_336_BYTES
+#elif (UNION_336_BYTES || UNION_84_INTS || UNION_42_LONGS)
 
         /// <summary>
-        /// Equals to 42 × <see cref="long"/>, or 84 × <see cref="int"/>
+        /// Equals to 84 × <see cref="int"/>, or 42 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 42;
+        public const int BYTE_COUNT = 42 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_328_BYTES
+#elif (UNION_328_BYTES || UNION_82_INTS || UNION_41_LONGS)
 
         /// <summary>
-        /// Equals to 41 × <see cref="long"/>, or 82 × <see cref="int"/>
+        /// Equals to 82 × <see cref="int"/>, or 41 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 41;
+        public const int BYTE_COUNT = 41 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_320_BYTES
+#elif (UNION_320_BYTES || UNION_80_INTS || UNION_40_LONGS)
 
         /// <summary>
-        /// Equals to 40 × <see cref="long"/>, or 80 × <see cref="int"/>
+        /// Equals to 80 × <see cref="int"/>, or 40 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 40;
+        public const int BYTE_COUNT = 40 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_312_BYTES
+#elif (UNION_312_BYTES || UNION_78_INTS || UNION_39_LONGS)
 
         /// <summary>
-        /// Equals to 39 × <see cref="long"/>, or 78 × <see cref="int"/>
+        /// Equals to 78 × <see cref="int"/>, or 39 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 39;
+        public const int BYTE_COUNT = 39 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_304_BYTES
+#elif (UNION_304_BYTES || UNION_76_INTS || UNION_38_LONGS)
 
         /// <summary>
-        /// Equals to 38 × <see cref="long"/>, or 76 × <see cref="int"/>
+        /// Equals to 76 × <see cref="int"/>, or 38 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 38;
+        public const int BYTE_COUNT = 38 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_296_BYTES
+#elif (UNION_296_BYTES || UNION_74_INTS || UNION_37_LONGS)
 
         /// <summary>
-        /// Equals to 37 × <see cref="long"/>, or 74 × <see cref="int"/>
+        /// Equals to 74 × <see cref="int"/>, or 37 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 37;
+        public const int BYTE_COUNT = 37 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_288_BYTES
+#elif (UNION_288_BYTES || UNION_72_INTS || UNION_36_LONGS)
 
         /// <summary>
-        /// Equals to 36 × <see cref="long"/>, or 72 × <see cref="int"/>
+        /// Equals to 72 × <see cref="int"/>, or 36 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 36;
+        public const int BYTE_COUNT = 36 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_280_BYTES
+#elif (UNION_280_BYTES || UNION_70_INTS || UNION_35_LONGS)
 
         /// <summary>
-        /// Equals to 35 × <see cref="long"/>, or 70 × <see cref="int"/>
+        /// Equals to 70 × <see cref="int"/>, or 35 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 35;
+        public const int BYTE_COUNT = 35 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_272_BYTES
+#elif (UNION_272_BYTES || UNION_68_INTS || UNION_34_LONGS)
 
         /// <summary>
-        /// Equals to 34 × <see cref="long"/>, or 68 × <see cref="int"/>
+        /// Equals to 68 × <see cref="int"/>, or 34 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 34;
+        public const int BYTE_COUNT = 34 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_264_BYTES
+#elif (UNION_264_BYTES || UNION_66_INTS || UNION_33_LONGS)
 
         /// <summary>
-        /// Equals to 33 × <see cref="long"/>, or 66 × <see cref="int"/>
+        /// Equals to 66 × <see cref="int"/>, or 33 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 33;
+        public const int BYTE_COUNT = 33 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_256_BYTES
+#elif (UNION_256_BYTES || UNION_64_INTS || UNION_32_LONGS)
 
         /// <summary>
-        /// Equals to 32 × <see cref="long"/>, or 64 × <see cref="int"/>
+        /// Equals to 64 × <see cref="int"/>, or 32 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 32;
+        public const int BYTE_COUNT = 32 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_248_BYTES
+#elif (UNION_248_BYTES || UNION_62_INTS || UNION_31_LONGS)
 
         /// <summary>
-        /// Equals to 31 × <see cref="long"/>, or 62 × <see cref="int"/>
+        /// Equals to 62 × <see cref="int"/>, or 31 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 31;
+        public const int BYTE_COUNT = 31 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_240_BYTES
+#elif (UNION_240_BYTES || UNION_60_INTS || UNION_30_LONGS)
 
         /// <summary>
-        /// Equals to 30 × <see cref="long"/>, or 60 × <see cref="int"/>
+        /// Equals to 60 × <see cref="int"/>, or 30 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 30;
+        public const int BYTE_COUNT = 30 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_232_BYTES
+#elif (UNION_232_BYTES || UNION_58_INTS || UNION_29_LONGS)
 
         /// <summary>
-        /// Equals to 29 × <see cref="long"/>, or 58 × <see cref="int"/>
+        /// Equals to 58 × <see cref="int"/>, or 29 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 29;
+        public const int BYTE_COUNT = 29 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_224_BYTES
+#elif (UNION_224_BYTES || UNION_56_INTS || UNION_28_LONGS)
 
         /// <summary>
-        /// Equals to 28 × <see cref="long"/>, or 56 × <see cref="int"/>
+        /// Equals to 56 × <see cref="int"/>, or 28 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 28;
+        public const int BYTE_COUNT = 28 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_216_BYTES
+#elif (UNION_216_BYTES || UNION_54_INTS || UNION_27_LONGS)
 
         /// <summary>
-        /// Equals to 27 × <see cref="long"/>, or 54 × <see cref="int"/>
+        /// Equals to 54 × <see cref="int"/>, or 27 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 27;
+        public const int BYTE_COUNT = 27 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_208_BYTES
+#elif (UNION_208_BYTES || UNION_52_INTS || UNION_26_LONGS)
 
         /// <summary>
-        /// Equals to 26 × <see cref="long"/>, or 52 × <see cref="int"/>
+        /// Equals to 52 × <see cref="int"/>, or 26 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 26;
+        public const int BYTE_COUNT = 26 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_200_BYTES
+#elif (UNION_200_BYTES || UNION_50_INTS || UNION_25_LONGS)
 
         /// <summary>
-        /// Equals to 25 × <see cref="long"/>, or 50 × <see cref="int"/>
+        /// Equals to 50 × <see cref="int"/>, or 25 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 25;
+        public const int BYTE_COUNT = 25 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_192_BYTES
+#elif (UNION_192_BYTES || UNION_48_INTS || UNION_24_LONGS)
 
         /// <summary>
-        /// Equals to 24 × <see cref="long"/>, or 48 × <see cref="int"/>
+        /// Equals to 48 × <see cref="int"/>, or 24 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 24;
+        public const int BYTE_COUNT = 24 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_184_BYTES
+#elif (UNION_184_BYTES || UNION_46_INTS || UNION_23_LONGS)
 
         /// <summary>
-        /// Equals to 23 × <see cref="long"/>, or 46 × <see cref="int"/>
+        /// Equals to 46 × <see cref="int"/>, or 23 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 23;
+        public const int BYTE_COUNT = 23 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_176_BYTES
+#elif (UNION_176_BYTES || UNION_44_INTS || UNION_22_LONGS)
 
         /// <summary>
-        /// Equals to 22 × <see cref="long"/>, or 44 × <see cref="int"/>
+        /// Equals to 44 × <see cref="int"/>, or 22 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 22;
+        public const int BYTE_COUNT = 22 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_168_BYTES
+#elif (UNION_168_BYTES || UNION_42_INTS || UNION_21_LONGS)
 
         /// <summary>
-        /// Equals to 21 × <see cref="long"/>, or 42 × <see cref="int"/>
+        /// Equals to 42 × <see cref="int"/>, or 21 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 21;
+        public const int BYTE_COUNT = 21 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_160_BYTES
+#elif (UNION_160_BYTES || UNION_40_INTS || UNION_20_LONGS)
 
         /// <summary>
-        /// Equals to 20 × <see cref="long"/>, or 40 × <see cref="int"/>
+        /// Equals to 40 × <see cref="int"/>, or 20 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 20;
+        public const int BYTE_COUNT = 20 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_152_BYTES
+#elif (UNION_152_BYTES || UNION_38_INTS || UNION_19_LONGS)
 
         /// <summary>
-        /// Equals to 19 × <see cref="long"/>, or 38 × <see cref="int"/>
+        /// Equals to 38 × <see cref="int"/>, or 19 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 19;
+        public const int BYTE_COUNT = 19 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_144_BYTES
+#elif (UNION_144_BYTES || UNION_36_INTS || UNION_18_LONGS)
 
         /// <summary>
-        /// Equals to 18 × <see cref="long"/>, or 36 × <see cref="int"/>
+        /// Equals to 36 × <see cref="int"/>, or 18 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 18;
+        public const int BYTE_COUNT = 18 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_136_BYTES
+#elif (UNION_136_BYTES || UNION_34_INTS || UNION_17_LONGS)
 
         /// <summary>
-        /// Equals to 17 × <see cref="long"/>, or 34 × <see cref="int"/>
+        /// Equals to 34 × <see cref="int"/>, or 17 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 17;
+        public const int BYTE_COUNT = 17 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_128_BYTES
+#elif (UNION_128_BYTES || UNION_32_INTS || UNION_16_LONGS)
 
         /// <summary>
-        /// Equals to 16 × <see cref="long"/>, or 32 × <see cref="int"/>
+        /// Equals to 32 × <see cref="int"/>, or 16 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 16;
+        public const int BYTE_COUNT = 16 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_120_BYTES
+#elif (UNION_120_BYTES || UNION_30_INTS || UNION_15_LONGS)
 
         /// <summary>
-        /// Equals to 15 × <see cref="long"/>, or 30 × <see cref="int"/>
+        /// Equals to 30 × <see cref="int"/>, or 15 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 15;
+        public const int BYTE_COUNT = 15 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_112_BYTES
+#elif (UNION_112_BYTES || UNION_28_INTS || UNION_14_LONGS)
 
         /// <summary>
-        /// Equals to 14 × <see cref="long"/>, or 28 × <see cref="int"/>
+        /// Equals to 28 × <see cref="int"/>, or 14 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 14;
+        public const int BYTE_COUNT = 14 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_104_BYTES
+#elif (UNION_104_BYTES || UNION_26_INTS || UNION_13_LONGS)
 
         /// <summary>
-        /// Equals to 13 × <see cref="long"/>, or 26 × <see cref="int"/>
+        /// Equals to 26 × <see cref="int"/>, or 13 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 13;
+        public const int BYTE_COUNT = 13 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_96_BYTES
+#elif (UNION_96_BYTES || UNION_24_INTS || UNION_12_LONGS)
 
         /// <summary>
-        /// Equals to 12 × <see cref="long"/>, or 24 × <see cref="int"/>
+        /// Equals to 24 × <see cref="int"/>, or 12 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 12;
+        public const int BYTE_COUNT = 12 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_88_BYTES
+#elif (UNION_88_BYTES || UNION_22_INTS || UNION_11_LONGS)
 
         /// <summary>
-        /// Equals to 11 × <see cref="long"/>, or 22 × <see cref="int"/>
+        /// Equals to 22 × <see cref="int"/>, or 11 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 11;
+        public const int BYTE_COUNT = 11 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_80_BYTES
+#elif (UNION_80_BYTES || UNION_20_INTS || UNION_10_LONGS)
 
         /// <summary>
-        /// Equals to 10 × <see cref="long"/>, or 20 × <see cref="int"/>
+        /// Equals to 20 × <see cref="int"/>, or 10 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 10;
+        public const int BYTE_COUNT = 10 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_72_BYTES
+#elif (UNION_72_BYTES || UNION_18_INTS || UNION_9_LONGS)
 
         /// <summary>
-        /// Equals to 9 × <see cref="long"/>, or 18 × <see cref="int"/>
+        /// Equals to 18 × <see cref="int"/>, or 9 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 9;
+        public const int BYTE_COUNT = 9 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_64_BYTES
+#elif (UNION_64_BYTES || UNION_16_INTS || UNION_8_LONGS)
 
         /// <summary>
-        /// Equals to 8 × <see cref="long"/>, or 16 × <see cref="int"/>
+        /// Equals to 16 × <see cref="int"/>, or 8 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 8;
+        public const int BYTE_COUNT = 8 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_56_BYTES
+#elif (UNION_56_BYTES || UNION_14_INTS || UNION_7_LONGS)
 
         /// <summary>
-        /// Equals to 7 × <see cref="long"/>, or 14 × <see cref="int"/>
+        /// Equals to 14 × <see cref="int"/>, or 7 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 7;
+        public const int BYTE_COUNT = 7 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_48_BYTES
+#elif (UNION_48_BYTES || UNION_12_INTS || UNION_6_LONGS)
 
         /// <summary>
-        /// Equals to 6 × <see cref="long"/>, or 12 × <see cref="int"/>
+        /// Equals to 12 × <see cref="int"/>, or 6 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 6;
+        public const int BYTE_COUNT = 6 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_40_BYTES
+#elif (UNION_40_BYTES || UNION_10_INTS || UNION_5_LONGS)
 
         /// <summary>
-        /// Equals to 5 × <see cref="long"/>, or 10 × <see cref="int"/>
+        /// Equals to 10 × <see cref="int"/>, or 5 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 5;
+        public const int BYTE_COUNT = 5 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_32_BYTES
+#elif (UNION_32_BYTES || UNION_8_INTS || UNION_4_LONGS)
 
         /// <summary>
-        /// Equals to 4 × <see cref="long"/>, or 8 × <see cref="int"/>
+        /// Equals to 8 × <see cref="int"/>, or 4 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 4;
+        public const int BYTE_COUNT = 4 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_24_BYTES
+#elif (UNION_24_BYTES || UNION_6_INTS || UNION_3_LONGS)
 
         /// <summary>
-        /// Equals to 3 × <see cref="long"/>, or 6 × <see cref="int"/>
+        /// Equals to 6 × <see cref="int"/>, or 3 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 3;
+        public const int BYTE_COUNT = 3 * SIZE_OF_LONG;
 
-#elif UNION_SIZE_16_BYTES
+#elif (UNION_16_BYTES || UNION_4_INTS || UNION_2_LONGS)
 
         /// <summary>
-        /// Equals to 2 × <see cref="long"/>, or 4 × <see cref="int"/>
+        /// Equals to 4 × <see cref="int"/>, or 2 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 2;
+        public const int BYTE_COUNT = 2 * SIZE_OF_LONG;
 
 #else
 
         /// <summary>
-        /// Equals to 1 × <see cref="long"/>, or 2 × <see cref="int"/>
+        /// Equals to 2 × <see cref="int"/>, or 1 × <see cref="long"/>
         /// </summary>
-        public const int SIZE = 8 * 1;
+        public const int BYTE_COUNT = 1 * SIZE_OF_LONG;
 
 #endif
     }

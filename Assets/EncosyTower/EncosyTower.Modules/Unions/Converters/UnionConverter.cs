@@ -95,11 +95,11 @@ namespace EncosyTower.Modules.Unions.Converters
 
             var sizeOfT = UnsafeUtility.SizeOf(type);
 
-            if (sizeOfT > UnionData.SIZE)
+            if (sizeOfT > UnionData.BYTE_COUNT)
             {
                 throw new NotSupportedException(
                     $"The size of {typeof(T)} is {sizeOfT} bytes, " +
-                    $"while a Union can only store {UnionData.SIZE} bytes of custom data. " +
+                    $"while a Union can only store {UnionData.BYTE_COUNT} bytes of custom data. " +
                     $"To enable the automatic conversion between {typeof(T)} and {typeof(Union)}, " +
                     $"please {GetDefineSymbolMessage(sizeOfT)}"
                 );
@@ -107,24 +107,18 @@ namespace EncosyTower.Modules.Unions.Converters
 
             static string GetDefineSymbolMessage(int size)
             {
-                if (size > 128) return "contact the author to increase the maximum data size of the Union type.";
-                if (size > 120) return "define UNION_SIZE_128_BYTES.";
-                if (size > 112) return "define UNION_SIZE_120_BYTES.";
-                if (size > 104) return "define UNION_SIZE_112_BYTES.";
-                if (size > 96) return "define UNION_SIZE_104_BYTES.";
-                if (size > 88) return "define UNION_SIZE_96_BYTES.";
-                if (size > 80) return "define UNION_SIZE_88_BYTES.";
-                if (size > 72) return "define UNION_SIZE_80_BYTES.";
-                if (size > 64) return "define UNION_SIZE_72_BYTES.";
-                if (size > 56) return "define UNION_SIZE_64_BYTES.";
-                if (size > 48) return "define UNION_SIZE_56_BYTES.";
-                if (size > 40) return "define UNION_SIZE_48_BYTES.";
-                if (size > 32) return "define UNION_SIZE_40_BYTES.";
-                if (size > 24) return "define UNION_SIZE_32_BYTES.";
-                if (size > 16) return "define UNION_SIZE_24_BYTES.";
-                if (size > 8) return "define UNION_SIZE_16_BYTES.";
+                var longCount = (int)Math.Ceiling((double)size / UnionData.SIZE_OF_LONG);
+                var nextSize = longCount * UnionData.SIZE_OF_LONG;
 
-                return "report to the author, because this is an unexpected error.";
+                if (size > UnionData.MAX_BYTE_COUNT)
+                {
+                    return $"contact the author to increase the maximum size of Union type to {nextSize} bytes " +
+                        $"(currently it is {UnionData.MAX_BYTE_COUNT} bytes).";
+                }
+                else
+                {
+                    return $"define UNION_{nextSize}_BYTES, or UNION_{longCount * 2}_INTS, or UNION_{longCount}_LONGS.";
+                }
             }
         }
     }

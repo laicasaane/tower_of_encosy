@@ -32,11 +32,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics3D
     [Label("Limits", "Hinge Joint")]
     public sealed partial class HingeJointBindingLimits : MonoBindingProperty<HingeJoint>, IBinder
     {
-#if !UNION_SIZE_32_BYTES
+#if !(UNION_32_BYTES || UNION_8_INTS || UNION_4_LONGS)
         public HingeJointBindingLimits()
         {
             Logging.DevLoggerAPI.LogException(new NotSupportedException(
-                "Hinge Joint Limits binding property requires the symbol UNION_SIZE_32_BYTES to be defined"
+                "Hinge Joint Limits binding property requires the symbol UNION_32_BYTES to be defined"
             ));
         }
 #else
