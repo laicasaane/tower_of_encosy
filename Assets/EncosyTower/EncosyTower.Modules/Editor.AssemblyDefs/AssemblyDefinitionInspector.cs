@@ -15,9 +15,10 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
     [InitializeOnLoad]
     internal static class AssemblyDefinitionInspector
     {
-        private const string TITLE = "Select References";
-        private const string EMPTY_MSG = "No assembly definition found in the project.";
+        private const string SELECT_REFS_LABEL = "Select References";
+        private const string NO_ASMDEF_MSG = "No assembly definition found in the project.";
 
+        private static GUIStyle s_headerStyle;
         private static GUIStyle s_separatorStyle;
 
         static AssemblyDefinitionInspector()
@@ -33,16 +34,37 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
                 return;
             }
 
-            if (GUILayout.Button(TITLE))
+            s_headerStyle ??= new GUIStyle(EditorStyles.boldLabel) {
+                alignment = TextAnchor.MiddleCenter,
+            };
+
+            var label = new GUIContent();
+
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             {
-                SelectReferences(importer);
+                EditorGUILayout.LabelField(label.WithText("References"), s_headerStyle);
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    if (GUILayout.Button(label.WithText("Select"), EditorStyles.miniButtonLeft))
+                    {
+                        SelectReferences(importer);
+                    }
+
+                    if (GUILayout.Button(label.WithText("Sort"), EditorStyles.miniButtonRight))
+                    {
+                        SortReferences(importer);
+                    }
+                }
+                EditorGUILayout.EndHorizontal();
+                GUILayout.Space(3f);
             }
+            EditorGUILayout.EndVertical();
         }
 
-        private static void SelectReferences(AssemblyDefinitionImporter importer)
+        private static bool TryGetAssemblyDef(AssemblyDefinitionImporter importer, out AssemblyDef result)
         {
-            var assetPath = importer.assetPath;
-            var json = File.ReadAllText(assetPath);
+            var json = File.ReadAllText(importer.assetPath);
             var assemblyDef = new AssemblyDef();
 
             try
@@ -51,16 +73,96 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
             }
             catch (Exception ex)
             {
-                EditorUtility.DisplayDialog(TITLE, ex.ToString(), "I understand");
+                EditorUtility.DisplayDialog(importer.name, ex.ToString(), "I understand");
+                result = null;
+                return false;
+            }
+
+            result = assemblyDef;
+            return true;
+        }
+
+        private static void SortReferences(AssemblyDefinitionImporter importer)
+        {
+            if (TryGetAssemblyDef(importer, out var assemblyDef) == false)
+            {
                 return;
             }
 
-            if (FindItems(assetPath, assemblyDef, out var data) == false)
-            {
+            var span = assemblyDef.references.AsSpan();
+            var length = span.Length;
+            var useGuid = span.Length > 0
+                && span[0] is string firstReference
+                && firstReference.StartsWith("GUID:", StringComparison.Ordinal);
 
+            var pairs = new List<(string name, string guid)>(useGuid == false ? length : 0);
+
+            if (useGuid)
+            {
+                for (var i = 0; i < length; i++)
+                {
+                    var reference = span[i];
+
+                    if (string.IsNullOrEmpty(reference))
+                    {
+                        continue;
+                    }
+
+                    var guid = reference.Replace("GUID:", "");
+                    var path = AssetDatabase.GUIDToAssetPath(guid);
+                    var asset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
+
+                    if (asset == false)
+                    {
+                        continue;
+                    }
+
+                    pairs.Add((asset.name, guid));
+                }
+            }
+            else
+            {
+                for (var i = 0; i < length; i++)
+                {
+                    var reference = span[i];
+
+                    if (string.IsNullOrWhiteSpace(reference) == false)
+                    {
+                        pairs.Add((reference, reference));
+                    }
+                }
             }
 
-            CheckBoxWindow.OpenWindow(TITLE, data.Items, data, OnApply, new(DrawItem, ItemHeight, DrawSeparator));
+            pairs.Sort(SortPair);
+
+            static int SortPair((string name, string guid) x, (string name, string guid) y)
+            {
+                return StringComparer.OrdinalIgnoreCase.Compare(x.name, y.name);
+            }
+
+            assemblyDef.references = pairs
+                .Select(x => useGuid ? x.guid : x.guid)
+                .ToArray();
+
+            var json = EditorJsonUtility.ToJson(assemblyDef, true);
+
+            File.WriteAllText(importer.assetPath, json);
+            AssetDatabase.Refresh();
+        }
+
+        private static void SelectReferences(AssemblyDefinitionImporter importer)
+        {
+            if (TryGetAssemblyDef(importer, out var assemblyDef) == false)
+            {
+                return;
+            }
+
+            if (FindItems(importer.assetPath, assemblyDef, out var data) == false)
+            {
+                return;
+            }
+
+            CheckBoxWindow.OpenWindow(SELECT_REFS_LABEL, data.Items, data, OnApply, new(DrawItem, ItemHeight, DrawSeparator));
         }
 
         private static int ItemHeight()
@@ -119,7 +221,7 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
         {
             if (assemblyDef == null)
             {
-                EditorUtility.DisplayDialog(TITLE, EMPTY_MSG, "I understand");
+                EditorUtility.DisplayDialog(SELECT_REFS_LABEL, NO_ASMDEF_MSG, "I understand");
                 result = default;
                 return false;
             }
@@ -132,7 +234,7 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
 
             if (guidStringsLength < 1)
             {
-                EditorUtility.DisplayDialog(TITLE, EMPTY_MSG, "I understand");
+                EditorUtility.DisplayDialog(SELECT_REFS_LABEL, NO_ASMDEF_MSG, "I understand");
                 result = default;
                 return false;
             }
@@ -234,7 +336,7 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
             public bool Separator { get; set; }
 
             public static int CompareName(ItemInfo x, ItemInfo y)
-                => string.CompareOrdinal(x.Name, y.Name);
+                => StringComparer.OrdinalIgnoreCase.Compare(x.Name, y.Name);
         }
 
         private record class Data(
