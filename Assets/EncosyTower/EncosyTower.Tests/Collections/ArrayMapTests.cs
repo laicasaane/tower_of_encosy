@@ -8,11 +8,11 @@ namespace EncosyTower.Tests
         [Test]
         public void ArrayMap_Tests()
         {
-            var map = new ArrayMap<int, string>();
-
-            map.Add(1, "One");
-            map.Add(2, "Two");
-            map.Add(3, "Three");
+            var map = new ArrayMap<int, string> {
+                { 1, "One" },
+                { 2, "Two" },
+                { 3, "Three" },
+            };
 
             Assert.IsTrue(map.Count == 3);
             Assert.IsTrue(map.ContainsKey(1));
