@@ -29,9 +29,4 @@ namespace Module.GameCommon
     [EnumMembersForTemplate(typeof(CharAnim_Template), 50)]
     [EnumExtensions]
     public enum CharAnimHit : byte { Hit }
-
-    [EnumExtensions]
-    public enum TestEnum { A, B, C }
-
-    partial class TestEnumExtensions { }
 }
