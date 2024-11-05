@@ -491,16 +491,38 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
 
                 case SpecialType.System_Char:
                 case SpecialType.System_SByte:
-                case SpecialType.System_Byte:
                 case SpecialType.System_Int16:
                 case SpecialType.System_Int32:
                 case SpecialType.System_Int64:
-                case SpecialType.System_UInt16:
-                case SpecialType.System_UInt32:
-                case SpecialType.System_UInt64:
                 case SpecialType.System_Decimal:
                     return OperatorKind.UnaryPlus
                         | OperatorKind.UnaryMinus
+                        | OperatorKind.OnesComplement
+                        | OperatorKind.Increment
+                        | OperatorKind.Decrement
+                        | OperatorKind.Addition
+                        | OperatorKind.Substraction
+                        | OperatorKind.Multiplication
+                        | OperatorKind.Division
+                        | OperatorKind.Remainder
+                        | OperatorKind.BitwiseAnd
+                        | OperatorKind.BitwiseOr
+                        | OperatorKind.BitwiseXor
+                        | OperatorKind.LeftShift // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/bitwise-and-shift-operators#shift-count-of-the-shift-operators
+                        | OperatorKind.RightShift
+                        | OperatorKind.Equal
+                        | OperatorKind.NotEqual
+                        | OperatorKind.Greater
+                        | OperatorKind.Lesser
+                        | OperatorKind.GreaterEqual
+                        | OperatorKind.LesserEqual
+                        ;
+
+                case SpecialType.System_Byte:
+                case SpecialType.System_UInt16:
+                case SpecialType.System_UInt32:
+                case SpecialType.System_UInt64:
+                    return OperatorKind.UnaryPlus
                         | OperatorKind.OnesComplement
                         | OperatorKind.Increment
                         | OperatorKind.Decrement
