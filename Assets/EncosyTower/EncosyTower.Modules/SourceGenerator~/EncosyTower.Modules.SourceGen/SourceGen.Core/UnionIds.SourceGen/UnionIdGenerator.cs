@@ -64,7 +64,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             token.ThrowIfCancellationRequested();
 
             return syntaxNode is BaseTypeDeclarationSyntax typeSyntax
-                && typeSyntax.Kind() is SyntaxKind.StructDeclaration or SyntaxKind.EnumDeclaration
+                && typeSyntax.Kind() is SyntaxKind.EnumDeclaration or SyntaxKind.StructDeclaration or SyntaxKind.RecordStructDeclaration
                 && typeSyntax.GetAttribute("EncosyTower.Modules", "KindForUnionId") is AttributeSyntax attribSyntax
                 && attribSyntax.ArgumentList != null
                 && attribSyntax.ArgumentList.Arguments.Count > 0

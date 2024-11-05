@@ -492,8 +492,6 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                                         p.PrintEndLine();
                                     }
 
-                                    p.PrintEndLine();
-
                                     p.PrintLine("if (idResult)");
                                     p.OpenScope();
                                     {
@@ -977,7 +975,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                             else
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
-                                    .Print(" => Id_").Print(kindName)
+                                    .Print(" => Id_").Print(kindName).Print(".ToString()")
                                     .PrintEndLine(",");
                             }
                         }
@@ -1020,7 +1018,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                             else
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
-                                    .Print(" => Id_").Print(kindName)
+                                    .Print(" => Id_").Print(kindName).Print(".ToString()")
                                     .PrintEndLine(",");
                             }
                         }
