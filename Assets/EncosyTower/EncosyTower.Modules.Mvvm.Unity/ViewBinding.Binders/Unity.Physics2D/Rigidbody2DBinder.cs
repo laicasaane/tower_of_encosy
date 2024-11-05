@@ -35,6 +35,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D
 #if UNITY_6000_0_OR_NEWER
     [Serializable]
     [Label("Angular Damping", "Rigidbody 2D")]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true
+        , "EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D"
+        , "EncosyTower.Modules.Mvvm.Unity"
+        , "Rigidbody2DBindingAngularDrag"
+    )]
     public sealed partial class Rigidbody2DBindingAngularDamping : MonoBindingProperty<Rigidbody2D>, IBinder
     {
         [BindingProperty]
@@ -167,6 +172,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D
 #if UNITY_6000_0_OR_NEWER
     [Serializable]
     [Label("Linear Damping", "Rigidbody 2D")]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true
+        , "EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D"
+        , "EncosyTower.Modules.Mvvm.Unity"
+        , "Rigidbody2DBindingDrag"
+    )]
     public sealed partial class Rigidbody2DBindingLinearDamping : MonoBindingProperty<Rigidbody2D>, IBinder
     {
         [BindingProperty]
@@ -519,6 +529,11 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D
 #if UNITY_6000_0_OR_NEWER
     [Serializable]
     [Label("Linear Velocity", "Rigidbody 2D")]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true
+        , "EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics2D"
+        , "EncosyTower.Modules.Mvvm.Unity"
+        , "Rigidbody2DBindingVelocity"
+    )]
     public sealed partial class Rigidbody2DBindingLinearVelocity : MonoBindingProperty<Rigidbody2D>, IBinder
     {
         [BindingProperty]
