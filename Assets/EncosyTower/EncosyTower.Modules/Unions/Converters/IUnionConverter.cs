@@ -1,6 +1,11 @@
 namespace EncosyTower.Modules.Unions.Converters
 {
-    public interface IUnionConverter<T>
+    public interface IUnionConverter
+    {
+        string ToString(in Union union);
+    }
+
+    public interface IUnionConverter<T> : IUnionConverter
     {
         Union ToUnion(T value);
 
@@ -11,7 +16,5 @@ namespace EncosyTower.Modules.Unions.Converters
         bool TryGetValue(in Union union, out T result);
 
         bool TrySetValueTo(in Union union, ref T dest);
-
-        string ToString(in Union union);
     }
 }

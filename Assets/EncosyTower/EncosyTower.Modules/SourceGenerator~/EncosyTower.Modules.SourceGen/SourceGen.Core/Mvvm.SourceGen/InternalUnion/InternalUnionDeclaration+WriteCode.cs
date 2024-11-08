@@ -2,10 +2,11 @@
 using System.Collections.Immutable;
 using EncosyTower.Modules.SourceGen;
 using Microsoft.CodeAnalysis;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
 {
+    using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
     partial class InternalUnionDeclaration
     {
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";

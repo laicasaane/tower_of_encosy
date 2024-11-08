@@ -2,10 +2,11 @@
 using System.Collections.Immutable;
 using EncosyTower.Modules.SourceGen;
 using Microsoft.CodeAnalysis;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
 {
+    using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
     partial class GenericUnionDeclaration
     {
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
@@ -19,6 +20,7 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
         public const string DOES_NOT_RETURN = "[global::System.Diagnostics.CodeAnalysis.DoesNotReturn]";
         public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.AfterAssembliesLoaded)]";
         public const string GENERATED_GENERIC_UNIONS = "[global::EncosyTower.Modules.Unions.SourceGen.GeneratedGenericUnions]";
+        public const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
 
         public const string GENERATOR_NAME = nameof(GenericUnionDeclaration);
 

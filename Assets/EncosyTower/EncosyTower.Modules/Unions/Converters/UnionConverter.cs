@@ -10,7 +10,7 @@ namespace EncosyTower.Modules.Unions.Converters
 {
     public static partial class UnionConverter
     {
-        private static ConcurrentDictionary<TypeId, object> s_converters;
+        private static ConcurrentDictionary<TypeId, IUnionConverter> s_converters;
 
         static UnionConverter()
         {
@@ -20,7 +20,7 @@ namespace EncosyTower.Modules.Unions.Converters
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Init()
         {
-            s_converters = new ConcurrentDictionary<TypeId, object>();
+            s_converters = new();
 
             TryRegisterGeneratedConverters();
             TryRegister(UnionConverterString.Default);
@@ -54,6 +54,18 @@ namespace EncosyTower.Modules.Unions.Converters
             return UnionConverterUndefined<T>.Default;
         }
 
+        public static bool TryGetConverter(TypeId typeId, out IUnionConverter result)
+        {
+            if (s_converters.TryGetValue(typeId, out var candidate) && candidate is not null)
+            {
+                result = candidate;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Union ToUnion<T>(T value)
             => GetConverter<T>().ToUnion(value);
@@ -77,6 +89,14 @@ namespace EncosyTower.Modules.Unions.Converters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ToString<T>(in Union union)
             => GetConverter<T>().ToString(union);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string ToString(in Union union)
+        {
+            return TryGetConverter(union.TypeId, out var converter)
+                ? converter.ToString(union)
+                : union.TypeId.ToType().ToString();
+        }
 
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfNullOrSizeOfTIsBiggerThanUnionDataSize<T>(IUnionConverter<T> converter)

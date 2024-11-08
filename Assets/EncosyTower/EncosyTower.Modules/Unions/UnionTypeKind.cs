@@ -1,5 +1,8 @@
-﻿namespace EncosyTower.Modules.Unions
+using EncosyTower.Modules.EnumExtensions;
+
+namespace EncosyTower.Modules.Unions
 {
+    [EnumExtensions]
     public enum UnionTypeKind : byte
     {
         Undefined = 0,

@@ -216,7 +216,7 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine("[Preserve]");
                 p.PrintBeginLine()
                     .Print("public sealed class Converter")
-                    .Print($": global::EncosyTower.Modules.Unions.Converters.IUnionConverter<{typeName}>")
+                    .Print($" : global::EncosyTower.Modules.Unions.Converters.IUnionConverter<{typeName}>")
                     .PrintEndLine();
                 p.OpenScope();
                 {
@@ -293,7 +293,7 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine("[Preserve]");
                     p.PrintLine($"public string ToString(in {UNION_TYPE} union)");
                     p.OpenScope();
                     {

@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using EncosyTower.Modules.Unions.Converters;
 
 namespace EncosyTower.Modules.Unions
 {
@@ -495,36 +496,16 @@ namespace EncosyTower.Modules.Unions
                 case UnionTypeKind.ULong: return ULong.ToString();
                 case UnionTypeKind.Short: return Short.ToString();
                 case UnionTypeKind.UShort: return UShort.ToString();
-
-                case UnionTypeKind.String:
+                case UnionTypeKind.String: return Object is string stringVal ? stringVal : string.Empty;
+                case UnionTypeKind.Object: return Object is object objectVal ? objectVal.ToString() : TypeId.ToType().ToString();
+                case UnionTypeKind.ValueType: return UnionConverter.ToString(this);
+                default:
                 {
-                    if (Object is string value)
-                    {
-                        return value;
-                    }
-
-                    return string.Empty;
+                    return (TypeId != TypeId.Undefined)
+                        ? $"Undefined: {TypeId.ToType()}"
+                        : string.Empty;
                 }
-
-                case UnionTypeKind.Object:
-                {
-                    if (Object is object value)
-                    {
-                        return value.ToString();
-                    }
-
-                    return TypeId.ToType().ToString() ?? string.Empty;
-                }
-
-                case UnionTypeKind.ValueType: return TypeId.ToType().ToString() ?? string.Empty;
             }
-
-            if (TypeId != TypeId.Undefined)
-            {
-                return $"{UnionTypeKind.Undefined}: {TypeId.ToType()}";
-            }
-
-            return string.Empty;
         }
     }
 }

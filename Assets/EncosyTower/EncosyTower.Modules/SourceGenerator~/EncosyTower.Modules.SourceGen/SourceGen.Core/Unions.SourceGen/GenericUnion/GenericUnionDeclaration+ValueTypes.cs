@@ -105,7 +105,7 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
 
             static Printer WriteConstructors(string typeName, string structName, string unionName, Printer p)
             {
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
                 p.PrintLine($"public {structName}({typeName} value)");
                 p.OpenScope();
                 {
@@ -115,7 +115,7 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
                 p.PrintLine($"public {structName}(in {unionName} union) : this()");
                 p.OpenScope();
                 {
@@ -124,7 +124,7 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
                 p.PrintLine($"public {structName}(in {UNION_TYPE} union) : this()");
                 p.OpenScope();
                 {
@@ -171,19 +171,19 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
 
             static Printer WirteImplicitConversions(string typeName, string structName, string unionName, Printer p)
             {
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
                 p.PrintLine($"public static implicit operator {structName}({typeName} value) => new {structName}(value);");
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
                 p.PrintLine($"public static implicit operator {UNION_TYPE}(in {structName} value) => value.Union;");
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
                 p.PrintLine($"public static implicit operator {unionName}(in {structName} value) => value.Union;");
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
                 p.PrintLine($"public static implicit operator {structName}(in {unionName} value) => new {structName}(value);");
                 p.PrintEndLine();
                 return p;
@@ -191,10 +191,10 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
 
             static Printer WriteConverterClass(string typeName, string structName, string unionName, Printer p)
             {
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
                 p.PrintBeginLine()
                     .Print("public sealed class Converter")
-                    .Print($": global::EncosyTower.Modules.Unions.Converters.IUnionConverter<{typeName}>")
+                    .Print($" : global::EncosyTower.Modules.Unions.Converters.IUnionConverter<{typeName}>")
                     .PrintEndLine();
                 p.OpenScope();
                 {
@@ -202,19 +202,19 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
                     p.PrintLine("public static readonly Converter Default = new Converter();");
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
                     p.PrintLine("private Converter() { }");
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
                     p.PrintLine($"public {UNION_TYPE} ToUnion({typeName} value) => new {structName}(value);");
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
                     p.PrintLine($"public {unionName} ToUnionT({typeName} value) => new {structName}(value).Union;");
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
                     p.PrintLine($"public {typeName} GetValue(in {UNION_TYPE} union)");
                     p.OpenScope();
                     {
@@ -232,7 +232,7 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
                     p.PrintLine($"public bool TryGetValue(in {UNION_TYPE} union, out {typeName} result)");
                     p.OpenScope();
                     {
@@ -252,7 +252,7 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
                     p.PrintLine($"public bool TrySetValueTo(in {UNION_TYPE} union, ref {typeName} result)");
                     p.OpenScope();
                     {
@@ -271,7 +271,7 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
                     p.PrintLine($"public string ToString(in {UNION_TYPE} union)");
                     p.OpenScope();
                     {
