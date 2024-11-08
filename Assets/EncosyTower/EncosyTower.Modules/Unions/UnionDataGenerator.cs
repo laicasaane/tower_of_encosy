@@ -68,7 +68,7 @@ namespace EncosyTower.Modules.Editor.Unions
 
                 for (var i = 2; i >= 0; i--)
                 {
-                    var size = DEFAULT_BYTE_COUNT + SIZE_OF_LONG * i;
+                    var size = SIZE_OF_LONG * (MAX_LONG_COUNT - i);
                     var count = size / SIZE_OF_LONG;
 
                     p.PrintBeginLine($"/// <item>")

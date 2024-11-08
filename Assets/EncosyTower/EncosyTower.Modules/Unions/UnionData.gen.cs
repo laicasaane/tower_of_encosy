@@ -33,9 +33,9 @@ namespace EncosyTower.Modules.Unions
     /// <item><c>UNION_32_BYTES</c>; or <c>UNION_8_INTS</c>; or <c>UNION_4_LONGS</c></item>
     /// <item><c>UNION_40_BYTES</c>; or <c>UNION_10_INTS</c>; or <c>UNION_5_LONGS</c></item>
     /// <item><c>...</c></item>
-    /// <item><c>UNION_32_BYTES</c>; or <c>UNION_8_INTS</c>; or <c>UNION_4_LONGS</c></item>
-    /// <item><c>UNION_24_BYTES</c>; or <c>UNION_6_INTS</c>; or <c>UNION_3_LONGS</c></item>
-    /// <item><c>UNION_16_BYTES</c>; or <c>UNION_4_INTS</c>; or <c>UNION_2_LONGS</c></item>
+    /// <item><c>UNION_4080_BYTES</c>; or <c>UNION_1020_INTS</c>; or <c>UNION_510_LONGS</c></item>
+    /// <item><c>UNION_4088_BYTES</c>; or <c>UNION_1022_INTS</c>; or <c>UNION_511_LONGS</c></item>
+    /// <item><c>UNION_4096_BYTES</c>; or <c>UNION_1024_INTS</c>; or <c>UNION_512_LONGS</c></item>
     /// </list>
     /// </remarks>
     [StructLayout(LayoutKind.Sequential, Size = UnionData.BYTE_COUNT)]
