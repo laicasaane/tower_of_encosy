@@ -47,6 +47,8 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                     , true
                 );
 
+                obj = FindContext(obj);
+
                 if (obj == false || obj is IObservableObject)
                 {
                     Undo.RecordObject(_view, "Change context object reference");
@@ -101,6 +103,16 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             _objectProperty.objectReferenceValue = obj;
             _serializedObject.ApplyModifiedProperties();
             _serializedObject.Update();
+        }
+
+        private static UnityEngine.Object FindContext(UnityEngine.Object src)
+        {
+            if (src is GameObject go && go.TryGetComponent<IObservableObject>(out var result))
+            {
+                return result as UnityEngine.Object;
+            }
+
+            return src;
         }
     }
 }
