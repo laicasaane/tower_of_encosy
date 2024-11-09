@@ -44,11 +44,11 @@ namespace EncosyTower.Modules.Unions
         /// <summary>
         /// Size of <see cref="long"/> in bytes.
         /// </summary>
-        public const int SIZE_OF_LONG = 8;
+        internal const int SIZE_OF_LONG = 8;
 
-        public const int MAX_LONG_COUNT = 512;
-        public const int MAX_INT_COUNT = MAX_LONG_COUNT * 2;
-        public const int MAX_BYTE_COUNT = MAX_LONG_COUNT * SIZE_OF_LONG;
+        internal const int MAX_LONG_COUNT = 512;
+        internal const int MAX_INT_COUNT = MAX_LONG_COUNT * 2;
+        internal const int MAX_BYTE_COUNT = MAX_LONG_COUNT * SIZE_OF_LONG;
 
 #if (UNION_4096_BYTES || UNION_512_LONGS || UNION_1024_INTS)
 

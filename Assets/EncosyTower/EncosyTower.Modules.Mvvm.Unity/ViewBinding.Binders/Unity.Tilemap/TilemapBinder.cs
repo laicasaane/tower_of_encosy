@@ -2,6 +2,7 @@
 
 using System;
 using EncosyTower.Modules.Mvvm.ViewBinding.Unity;
+using EncosyTower.Modules.Unions;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -71,14 +72,18 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Tilemaps
     [Label("Orientation Matrix", "Tilemap")]
     public sealed partial class TilemapBindingOrientationMatrix : MonoBindingProperty<Tilemap>, IBinder
     {
-#if !(UNION_64_BYTES || UNION_16_INTS || UNION_8_LONGS)
-        public TilemapBindingOrientationMatrix()
+        partial void OnBeforeConstructor()
         {
-            Logging.DevLoggerAPI.LogException(new NotSupportedException(
-                "Tilemap Orientation Matrix binding property requires the symbol UNION_64_BYTES to be defined"
-            ));
+#pragma warning disable CS0162 // Unreachable code detected
+            if (UnionData.BYTE_COUNT >= 64)
+            {
+                return;
+            }
+#pragma warning restore CS0162 // Unreachable code detected
+
+            ThrowNotSupported();
         }
-#else
+
         [BindingProperty]
         [field: HideInInspector]
         private void SetOrientationMatrix(in Matrix4x4 value)
@@ -91,7 +96,13 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Tilemaps
                 targets[i].orientationMatrix = value;
             }
         }
-#endif
+
+        private static void ThrowNotSupported()
+        {
+            Logging.RuntimeLoggerAPI.LogException(new NotSupportedException(
+                "Tilemap Orientation Matrix binding property requires the symbol UNION_64_BYTES or higher to be defined"
+            ));
+        }
     }
 
     [Serializable]

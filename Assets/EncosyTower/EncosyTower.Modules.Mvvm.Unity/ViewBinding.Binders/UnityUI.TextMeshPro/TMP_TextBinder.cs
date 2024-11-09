@@ -2,6 +2,7 @@
 
 using System;
 using EncosyTower.Modules.Mvvm.ViewBinding.Unity;
+using EncosyTower.Modules.Unions;
 using TMPro;
 using UnityEngine;
 
@@ -53,14 +54,18 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
     [Label("Color Gradient", "TMP Text")]
     public sealed partial class TMP_TextBindingColorGradient : MonoBindingProperty<TMP_Text>, IBinder
     {
-#if !(UNION_64_BYTES || UNION_16_INTS || UNION_8_LONGS)
-        public TMP_TextBindingColorGradient()
+        partial void OnBeforeConstructor()
         {
-            Logging.DevLoggerAPI.LogException(new NotSupportedException(
-                "TMP Text Color Gradient binding requires the symbol UNION_64_BYTES to be defined"
-            ));
+#pragma warning disable CS0162 // Unreachable code detected
+            if (UnionData.BYTE_COUNT >= 64)
+            {
+                return;
+            }
+#pragma warning restore CS0162 // Unreachable code detected
+
+            ThrowNotSupported();
         }
-#else
+
         [BindingProperty]
         [field: HideInInspector]
         private void SetColorGradient(VertexGradient value)
@@ -73,7 +78,13 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
                 targets[i].colorGradient = value;
             }
         }
-#endif
+
+        private static void ThrowNotSupported()
+        {
+            Logging.RuntimeLoggerAPI.LogException(new NotSupportedException(
+                "TMP Text Color Gradient binding requires the symbol UNION_64_BYTES or higher to be defined"
+            ));
+        }
     }
 
     [Serializable]

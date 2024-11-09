@@ -106,21 +106,20 @@ namespace EncosyTower.Modules.Unions.Converters
                 throw new ArgumentNullException(nameof(converter));
             }
 
-            var type = typeof(T);
-
-            if (type.IsValueType == false)
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 return;
             }
 
-            var sizeOfT = UnsafeUtility.SizeOf(type);
+            var typeOfT = typeof(T);
+            var sizeOfT = UnsafeUtility.SizeOf(typeOfT);
 
             if (sizeOfT > UnionData.BYTE_COUNT)
             {
                 throw new NotSupportedException(
-                    $"The size of {typeof(T)} is {sizeOfT} bytes, " +
+                    $"The size of {typeOfT} is {sizeOfT} bytes, " +
                     $"while a Union can only store {UnionData.BYTE_COUNT} bytes of custom data. " +
-                    $"To enable the automatic conversion between {typeof(T)} and {typeof(Union)}, " +
+                    $"To enable the automatic conversion between {typeOfT} and {typeof(Union)}, " +
                     $"please {GetDefineSymbolMessage(sizeOfT)}"
                 );
             }

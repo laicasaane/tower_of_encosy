@@ -2,7 +2,6 @@
 using EncosyTower.Modules.Mvvm.ComponentModel;
 using EncosyTower.Modules.Mvvm.Input;
 using EncosyTower.Modules.Mvvm.ViewBinding;
-using EncosyTower.Modules.Unions;
 using UnityEngine;
 
 namespace EncosyTower.Modules.Tests.MvvmTests
@@ -71,14 +70,4 @@ namespace EncosyTower.Modules.Tests.MvvmTests
             Console.WriteLine(value);
         }
     }
-
-    public readonly partial struct Vector3Union : IUnion<Vector3> { }
-
-    public struct StructWithRefs
-    {
-        public int intValue;
-        public object objValue;
-    }
-
-    public readonly partial struct StructWithRefsUnion : IUnion<StructWithRefs> { }
 }

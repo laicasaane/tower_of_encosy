@@ -40,6 +40,10 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
 
                 if (symbol.IsUnmanagedType)
                 {
+                    var size = 0;
+                    symbol.GetUnmanagedSize(ref size);
+                    candidate.UnmanagedSize = size;
+
                     if (valueTypeFiltered.ContainsKey(typeName) == false)
                     {
                         valueTypeFiltered[typeName] = candidate;
@@ -70,5 +74,7 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
         public TypeSyntax Syntax { get; set; }
 
         public ITypeSymbol Symbol { get; set; }
+
+        public int? UnmanagedSize { get; set; }
     }
 }

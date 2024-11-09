@@ -190,10 +190,16 @@ namespace EncosyTower.Modules.SourceGen
             return true;
         }
 
-        public static void GetUnmanagedSize(this ITypeSymbol symbol, ref int size, HashSet<ITypeSymbol> seenSymbols = null)
+        public static void GetUnmanagedSize(this ITypeSymbol symbol, ref int size)
         {
             if (symbol == null)
             {
+                return;
+            }
+
+            if (symbol.IsReferenceType)
+            {
+                size += sizeof(ulong);
                 return;
             }
 
@@ -232,6 +238,8 @@ namespace EncosyTower.Modules.SourceGen
                 case SpecialType.System_UInt64:
                 case SpecialType.System_Double:
                 case SpecialType.System_DateTime:
+                case SpecialType.System_IntPtr:
+                case SpecialType.System_UIntPtr:
                 {
                     size += sizeof(ulong);
                     return;
@@ -247,20 +255,15 @@ namespace EncosyTower.Modules.SourceGen
                 {
                     if (symbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.EnumUnderlyingType != null)
                     {
-                        GetUnmanagedSize(namedTypeSymbol.EnumUnderlyingType, ref size, seenSymbols);
+                        GetUnmanagedSize(namedTypeSymbol.EnumUnderlyingType, ref size);
                     }
                     else if (symbol.IsUnmanagedType)
                     {
-                        seenSymbols ??= new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
-
-                        if (seenSymbols.Add(symbol))
+                        foreach (var field in symbol.GetMembers().OfType<IFieldSymbol>())
                         {
-                            foreach (var field in symbol.GetMembers().OfType<IFieldSymbol>())
+                            if (field.IsStatic == false && field.IsConst == false)
                             {
-                                if (field.IsStatic == false && field.IsConst == false)
-                                {
-                                    GetUnmanagedSize(field.Type, ref size, seenSymbols);
-                                }
+                                GetUnmanagedSize(field.Type, ref size);
                             }
                         }
                     }

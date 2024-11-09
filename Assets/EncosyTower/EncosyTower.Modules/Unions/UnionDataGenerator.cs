@@ -89,12 +89,12 @@ namespace EncosyTower.Modules.Editor.Unions
                     p.PrintLine("/// <summary>");
                     p.PrintLine("/// Size of <see cref=\"long\"/> in bytes.");
                     p.PrintLine("/// </summary>");
-                    p.PrintLine($"public const int SIZE_OF_LONG = {SIZE_OF_LONG};");
+                    p.PrintLine($"internal const int SIZE_OF_LONG = {SIZE_OF_LONG};");
                     p.PrintEndLine();
 
-                    p.PrintLine($"public const int MAX_LONG_COUNT = {MAX_LONG_COUNT};");
-                    p.PrintLine($"public const int MAX_INT_COUNT = MAX_LONG_COUNT * 2;");
-                    p.PrintLine($"public const int MAX_BYTE_COUNT = MAX_LONG_COUNT * SIZE_OF_LONG;");
+                    p.PrintLine($"internal const int MAX_LONG_COUNT = {MAX_LONG_COUNT};");
+                    p.PrintLine($"internal const int MAX_INT_COUNT = MAX_LONG_COUNT * 2;");
+                    p.PrintLine($"internal const int MAX_BYTE_COUNT = MAX_LONG_COUNT * SIZE_OF_LONG;");
                     p.PrintEndLine();
 
                     p.Print($"#if (UNION_{MAX_BYTE_COUNT}_BYTES || UNION_{MAX_LONG_COUNT}_LONGS || UNION_{MAX_LONG_COUNT * 2}_INTS)").PrintEndLine();

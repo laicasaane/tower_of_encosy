@@ -1,5 +1,6 @@
 using System;
 using EncosyTower.Modules.Mvvm.ViewBinding.Unity;
+using EncosyTower.Modules.Unions;
 using UnityEngine;
 
 namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics3D
@@ -32,14 +33,18 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics3D
     [Label("Limits", "Hinge Joint")]
     public sealed partial class HingeJointBindingLimits : MonoBindingProperty<HingeJoint>, IBinder
     {
-#if !(UNION_32_BYTES || UNION_8_INTS || UNION_4_LONGS)
-        public HingeJointBindingLimits()
+        partial void OnBeforeConstructor()
         {
-            Logging.DevLoggerAPI.LogException(new NotSupportedException(
-                "Hinge Joint Limits binding property requires the symbol UNION_32_BYTES to be defined"
-            ));
+#pragma warning disable CS0162 // Unreachable code detected
+            if (UnionData.BYTE_COUNT >= 32)
+            {
+                return;
+            }
+#pragma warning restore CS0162 // Unreachable code detected
+
+            ThrowNotSupported();
         }
-#else
+
         [BindingProperty]
         [field: HideInInspector]
         private void SetLimits(in JointLimits value)
@@ -52,7 +57,13 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity.Physics3D
                 targets[i].limits = value;
             }
         }
-#endif
+
+        private static void ThrowNotSupported()
+        {
+            Logging.RuntimeLoggerAPI.LogException(new NotSupportedException(
+                "Hinge Joint Limits binding property requires the symbol UNION_32_BYTES or higher to be defined"
+            ));
+        }
     }
 
     [Serializable]

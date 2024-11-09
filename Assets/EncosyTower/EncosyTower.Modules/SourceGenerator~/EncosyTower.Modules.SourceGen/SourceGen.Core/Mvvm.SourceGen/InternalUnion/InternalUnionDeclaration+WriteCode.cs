@@ -16,6 +16,7 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
         public const string META_OFFSET = "[global::System.Runtime.InteropServices.FieldOffset(global::EncosyTower.Modules.Unions.UnionBase.META_OFFSET)]";
         public const string DATA_OFFSET = "[global::System.Runtime.InteropServices.FieldOffset(global::EncosyTower.Modules.Unions.UnionBase.DATA_OFFSET)]";
         public const string UNION_TYPE = "global::EncosyTower.Modules.Unions.Union";
+        public const string UNION_DATA_TYPE = "global::EncosyTower.Modules.Unions.UnionData";
         public const string UNION_TYPE_KIND = "global::EncosyTower.Modules.Unions.UnionTypeKind";
         public const string DOES_NOT_RETURN = "[global::System.Diagnostics.CodeAnalysis.DoesNotReturn]";
         public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.AfterAssembliesLoaded)]";
@@ -161,13 +162,28 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
                 var identifier = symbol.ToValidIdentifier();
                 var converterDefault = $"Union__{identifier}.Converter.Default";
 
+                if (typeRef.UnmanagedSize.HasValue)
+                {
+                    p.PrintBeginLine("if (").Print(UNION_DATA_TYPE).Print(".BYTE_COUNT >= ")
+                        .Print(typeRef.UnmanagedSize.Value.ToString())
+                        .PrintEndLine(")");
+                    p.OpenScope();
+                }
+
                 p.OpenScope($"Register<{typeName}>({converterDefault}");
                 {
                     p.Print("#if UNITY_EDITOR && MODULE_CORE_MVVM_LOG_INTERNAL_UNIONS_REGISTRIES").PrintEndLine();
                     p.PrintBeginLine(", \"").Print(simpleTypeName).PrintEndLine("\"");
                     p.Print("#endif").PrintEndLine();
                 }
+
                 p.CloseScope(");");
+
+                if (typeRef.UnmanagedSize.HasValue)
+                {
+                    p.CloseScope();
+                }
+
                 p.PrintEndLine();
             }
         }

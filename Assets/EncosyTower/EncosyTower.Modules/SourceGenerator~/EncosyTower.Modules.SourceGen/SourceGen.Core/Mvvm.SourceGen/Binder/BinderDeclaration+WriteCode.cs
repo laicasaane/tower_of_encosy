@@ -403,6 +403,8 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
 
             p.OpenScope();
             {
+                p.PrintLine($"OnBeforeConstructor();").PrintEndLine();
+
                 foreach (var member in BindingPropertyRefs)
                 {
                     var methodName = MethodName(member);
@@ -424,15 +426,21 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
                     p.PrintEndLine();
                 }
 
-                p.PrintLine($"OnConstructor();");
+                p.PrintLine($"OnAfterConstructor();");
             }
             p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintLine($"/// <summary>Executes the logic at the beginning of the default constructor.</summary>");
+            p.PrintLine($"/// <remarks>This method is invoked at the beginning of the default constructor.</remarks>");
+            p.PrintLine(GENERATED_CODE);
+            p.PrintLine($"partial void OnBeforeConstructor();");
             p.PrintEndLine();
 
             p.PrintLine($"/// <summary>Executes the logic at the end of the default constructor.</summary>");
             p.PrintLine($"/// <remarks>This method is invoked at the end of the default constructor.</remarks>");
             p.PrintLine(GENERATED_CODE);
-            p.PrintLine($"partial void OnConstructor();");
+            p.PrintLine($"partial void OnAfterConstructor();");
             p.PrintEndLine();
         }
 
