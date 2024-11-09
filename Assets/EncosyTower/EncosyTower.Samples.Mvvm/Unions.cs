@@ -4,4 +4,6 @@ using UnityEngine;
 namespace EncosyTower.Samples.Mvvm
 {
     public readonly partial struct ColorUnion : IUnion<Color> { }
+
+    public readonly partial struct Vector3Union : IUnion<Vector3> { }
 }
