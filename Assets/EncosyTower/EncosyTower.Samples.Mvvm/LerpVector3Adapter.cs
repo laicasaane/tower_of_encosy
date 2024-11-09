@@ -7,18 +7,20 @@ using UnityEngine;
 namespace EncosyTower.Samples.Mvvm
 {
     [Serializable]
-    [Label("Lerp Euler Angles", "Default")]
+    [Label("Lerp Vector3", "Default")]
     [Adapter(sourceType: typeof(float), destType: typeof(Vector3), order: 0)]
-    public sealed class LerpEulerAnglesAdapter : IAdapter
+    public sealed class LerpVector3Adapter : IAdapter
     {
-        [SerializeField] private Vector3 _from = Vector3.zero;
-        [SerializeField] private Vector3 _to = Vector3.zero;
+        [SerializeField] private Vector3 _from;
+        [SerializeField] private Vector3 _to;
+        [SerializeField] private bool _reversed;
 
         public Union Convert(in Union union)
         {
             if (union.TryGetValue(out float result))
             {
-                return new Vector3Union(Vector3.Lerp(_from, _to, result));
+                var v3 = _reversed ? Vector3.Lerp(_to, _from, result) : Vector3.Lerp(_from, _to, result);
+                return new Vector3Union(v3);
             }
 
             return union;

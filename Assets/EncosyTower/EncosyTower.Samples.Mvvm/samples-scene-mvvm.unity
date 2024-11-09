@@ -660,7 +660,7 @@ Transform:
   m_GameObject: {fileID: 343873116}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 3, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -687,6 +687,7 @@ MonoBehaviour:
     rid: 8109321786255212778
   _presetBinders:
   - rid: 8109321786255212780
+  - rid: 8109321786255212786
   references:
     version: 2
     RefIds:
@@ -701,23 +702,48 @@ MonoBehaviour:
       data:
         _subtitle: 
         _presetBindings:
-        - rid: 8109321786255212782
+        - rid: 8109321786255212784
         _presetTargets:
         - {fileID: 343873117}
-    - rid: 8109321786255212782
-      type: {class: TransformBindingLocalEulerAngles, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
+    - rid: 8109321786255212784
+      type: {class: TransformBindingLocalRotation, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
         asm: EncosyTower.Modules.Mvvm.Unity}
       data:
-        _bindingFieldForSetLocalEulerAngles:
+        _bindingFieldForSetLocalRotation:
           <TargetPropertyName>k__BackingField: ScrollPosition
-        _converterForSetLocalEulerAngles:
+        _converterForSetLocalRotation:
           <Adapter>k__BackingField:
-            rid: 8109321786255212783
-    - rid: 8109321786255212783
-      type: {class: LerpEulerAnglesAdapter, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
+            rid: 8109321786255212785
+    - rid: 8109321786255212785
+      type: {class: LerpQuaternionAdapter, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
-        _from: {x: 0, y: 0, z: 0}
-        _to: {x: 180, y: 180, z: 0}
+        _fromEuler: {x: 0, y: 0, z: 0}
+        _toEuler: {x: 180, y: 180, z: 0}
+        _reversed: 1
+    - rid: 8109321786255212786
+      type: {class: TransformBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Modules.Mvvm.Unity}
+      data:
+        _subtitle: 
+        _presetBindings:
+        - rid: 8109321786255212787
+        _presetTargets:
+        - {fileID: 402938463}
+    - rid: 8109321786255212787
+      type: {class: TransformBindingLocalScale, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Modules.Mvvm.Unity}
+      data:
+        _bindingFieldForSetLocalScale:
+          <TargetPropertyName>k__BackingField: ScrollPosition
+        _converterForSetLocalScale:
+          <Adapter>k__BackingField:
+            rid: 8109321786255212788
+    - rid: 8109321786255212788
+      type: {class: LerpVector3Adapter, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
+      data:
+        _from: {x: 2, y: 2, z: 2}
+        _to: {x: 8, y: 1, z: 4}
+        _reversed: 1
 --- !u!1 &402938462
 GameObject:
   m_ObjectHideFlags: 0
@@ -1260,6 +1286,7 @@ MonoBehaviour:
       data:
         _from: {r: 0.9725491, g: 0.38431376, b: 0.33333334, a: 1}
         _to: {r: 0.25490198, g: 0.3529412, b: 0.9176471, a: 1}
+        _reversed: 0
 --- !u!1 &743286629
 GameObject:
   m_ObjectHideFlags: 0
@@ -1407,6 +1434,7 @@ GameObject:
   - component: {fileID: 752059393}
   - component: {fileID: 752059392}
   - component: {fileID: 752059394}
+  - component: {fileID: 752059395}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -1517,6 +1545,58 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!114 &752059395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 752059391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ac654a6aff531a4184a8e569696d74d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _settings:
+    initializeOn: 0
+    intializeAsync: 1
+    startListeningOnInitialized: 1
+  _context:
+    rid: 8109321786255212789
+  _presetBinders:
+  - rid: 8109321786255212790
+  references:
+    version: 2
+    RefIds:
+    - rid: 8109321786255212789
+      type: {class: ObservableUnityObjectContext, ns: EncosyTower.Modules.Mvvm.ViewBinding.Unity,
+        asm: EncosyTower.Modules.Mvvm.Unity}
+      data:
+        _object: {fileID: 1603940289}
+    - rid: 8109321786255212790
+      type: {class: TransformBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Modules.Mvvm.Unity}
+      data:
+        _subtitle: 
+        _presetBindings:
+        - rid: 8109321786255212791
+        _presetTargets:
+        - {fileID: 752059393}
+    - rid: 8109321786255212791
+      type: {class: TransformBindingLocalEulerAngles, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Modules.Mvvm.Unity}
+      data:
+        _bindingFieldForSetLocalEulerAngles:
+          <TargetPropertyName>k__BackingField: ScrollPosition
+        _converterForSetLocalEulerAngles:
+          <Adapter>k__BackingField:
+            rid: 8109321786255212792
+    - rid: 8109321786255212792
+      type: {class: LerpVector3Adapter, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
+      data:
+        _from: {x: 50, y: -30, z: 0}
+        _to: {x: 180, y: -30, z: 0}
+        _reversed: 1
 --- !u!1 &812328866
 GameObject:
   m_ObjectHideFlags: 0

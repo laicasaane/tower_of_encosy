@@ -13,12 +13,14 @@ namespace EncosyTower.Samples.Mvvm
     {
         [SerializeField] private Color _from = Color.white;
         [SerializeField] private Color _to = Color.white;
+        [SerializeField] private bool _reversed;
 
         public Union Convert(in Union union)
         {
             if (union.TryGetValue(out float result))
             {
-                return new ColorUnion(Color.Lerp(_from, _to, result));
+                var color = _reversed ? Color.Lerp(_to, _from, result) : Color.Lerp(_from, _to, result);
+                return new ColorUnion(color);
             }
 
             return union;
