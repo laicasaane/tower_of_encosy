@@ -245,16 +245,16 @@ namespace EncosyTower.Modules
         {
             private readonly static AwaitableCompletionSource s_source;
 
-            static Completed()
-            {
-                s_source = new();
-                s_source.SetResult();
-            }
-
             public static Awaitable Awaitable
             {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => s_source.Awaitable;
+                get
+                {
+                    // https://discussions.unity.com/t/awaitable-equivalent-of-task-completedtask/1546128/4
+                    s_source.SetResult();
+                    var awaitable = s_source.Awaitable;
+                    s_source.Reset();
+                    return awaitable;
+                }
             }
         }
 
@@ -262,16 +262,15 @@ namespace EncosyTower.Modules
         {
             private readonly static AwaitableCompletionSource<T> s_source;
 
-            static Completed()
-            {
-                s_source = new();
-                s_source.SetResult(default);
-            }
-
             public static Awaitable<T> Awaitable
             {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => s_source.Awaitable;
+                get
+                {
+                    s_source.SetResult(default);
+                    var awaitable = s_source.Awaitable;
+                    s_source.Reset();
+                    return awaitable;
+                }
             }
         }
     }
