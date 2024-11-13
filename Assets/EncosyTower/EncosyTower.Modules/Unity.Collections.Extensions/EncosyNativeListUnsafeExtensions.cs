@@ -6,7 +6,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace EncosyTower.Modules.Collections.Unsafe
 {
-    public static class CoreNativeListUnsafeExtensions
+    public static class EncosyNativeListUnsafeExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T ElementAsUnsafeRefRW<T>(ref this NativeList<T> list, int index)

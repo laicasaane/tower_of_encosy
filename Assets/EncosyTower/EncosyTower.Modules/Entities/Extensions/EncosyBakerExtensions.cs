@@ -5,7 +5,7 @@ using Unity.Entities;
 
 namespace EncosyTower.Modules.Entities
 {
-    public static class CoreBakerExtensions
+    public static class EncosyBakerExtensions
     {
         public static void AddComponentEnabled<T>([NotNull] this IBaker self, Entity entity, bool value)
             where T : struct, IComponentData, IEnableableComponent

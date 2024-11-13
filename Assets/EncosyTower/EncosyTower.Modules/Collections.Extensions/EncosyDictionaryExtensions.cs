@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Modules.Collections
 {
-    public static class CoreDictionaryExtensions
+    public static class EncosyDictionaryExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrEmpty<TKey, TValue>(this IDictionary<TKey, TValue> dict)

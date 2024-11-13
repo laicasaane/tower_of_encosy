@@ -5,7 +5,7 @@ using Unity.Collections;
 
 namespace EncosyTower.Modules.Collections
 {
-    public static class CoreNativeHashSetExtensions
+    public static class EncosyNativeHashSetExtensions
     {
         public static ref NativeHashSet<T> NewOrClear<T>(
               ref this NativeHashSet<T> set

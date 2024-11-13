@@ -5,7 +5,7 @@ namespace EncosyTower.Modules.Collections
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
 
-    public static partial class CoreListExtensions
+    public static partial class EncosyListExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrEmpty<T>(this IList<T> list)

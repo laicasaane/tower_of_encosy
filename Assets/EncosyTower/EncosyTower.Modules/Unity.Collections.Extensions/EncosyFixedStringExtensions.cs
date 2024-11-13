@@ -6,7 +6,7 @@ using Unity.Collections;
 
 namespace EncosyTower.Modules.Collections
 {
-    public static class CoreFixedStringExtensions
+    public static class EncosyFixedStringExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static FixedString32Bytes ToFixedString(this bool value)

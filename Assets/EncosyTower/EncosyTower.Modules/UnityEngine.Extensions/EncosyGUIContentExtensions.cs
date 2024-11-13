@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace EncosyTower.Modules
 {
-    public static class CoreGUIContentExtensions
+    public static class EncosyGUIContentExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static GUIContent WithText(this GUIContent self, string text)

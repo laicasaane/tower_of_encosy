@@ -6,7 +6,7 @@ using Unity.Entities;
 
 namespace EncosyTower.Modules
 {
-    public static class CoreSystemStateExtensions
+    public static class EncosySystemStateExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<T> CreateNativeArray<T>(ref this SystemState state, int length)

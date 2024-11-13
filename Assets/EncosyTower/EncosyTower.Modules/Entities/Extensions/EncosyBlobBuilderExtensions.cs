@@ -8,7 +8,7 @@ using Unity.Entities;
 
 namespace EncosyTower.Modules.Entities
 {
-    public static class CoreBlobBuilderExtensions
+    public static class EncosyBlobBuilderExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BlobBuilderArray<T> ConstructArray<T>(this BlobBuilder builder, ref BlobArray<T> ptr, NativeArray<T> src)

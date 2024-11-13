@@ -8,7 +8,7 @@ using UnityEditor;
 
 namespace EncosyTower.Modules.Editor
 {
-    public static class CoreSerializedPropertyExtensions
+    public static class EncosySerializedPropertyExtensions
     {
         private static readonly Regex s_regexPropertyPath = new("^data\\[(\\d+)\\]$", RegexOptions.Compiled);
 

@@ -51,7 +51,7 @@ namespace EncosyTower.Modules.Collections
         }
     }
 
-    public static class CoreNativeArrayExtensions
+    public static class EncosyNativeArrayExtensions
     {
         /// <summary>
         /// Create a NativeArray with memory that is not cleared and may contain garbage values.

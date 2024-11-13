@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Modules
 {
-    public static class CoreMemoryExtensions
+    public static class EncosyMemoryExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ObjectMemoryGetter BeginGet(this Memory<object> buffer)

@@ -7,7 +7,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace EncosyTower.Modules.Collections.Unsafe
 {
-    public static class CoreNativeReferenceUnsafeExtensions
+    public static class EncosyNativeReferenceUnsafeExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T ValueAsUnsafeRefRW<T>(ref this NativeReference<T> reference)

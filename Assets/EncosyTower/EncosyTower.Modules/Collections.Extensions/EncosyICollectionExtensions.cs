@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Modules.Collections
 {
-    public static class CoreICollectionExtensions
+    public static class EncosyICollectionExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddTo<T>(this T item, ICollection<T> collection)

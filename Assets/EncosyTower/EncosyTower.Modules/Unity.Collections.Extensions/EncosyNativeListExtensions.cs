@@ -5,7 +5,7 @@ using Unity.Collections;
 
 namespace EncosyTower.Modules.Collections
 {
-    public static class CoreNativeListExtensions
+    public static class EncosyNativeListExtensions
     {
         public static void NewOrClear<T>(
               ref this NativeList<T> list

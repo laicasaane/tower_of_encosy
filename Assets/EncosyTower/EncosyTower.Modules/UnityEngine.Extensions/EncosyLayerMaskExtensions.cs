@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace EncosyTower.Modules
 {
-    public static class CoreLayerMaskExtensions
+    public static class EncosyLayerMaskExtensions
     {
         /// <summary>
 		/// Determines whether some of the bit fields are set in the current instance.
 		/// </summary>
-		/// <returns><c>true</c> if all of the bit fields that are set in <c>flag</c> are also set in the current instance; otherwise, <c>false</c>.</returns>
+		/// <returns><c>true</c> if all the bit fields that are set in <c>flag</c> are also set in the current instance; otherwise, <c>false</c>.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Contains(this LayerMask value, LayerMask flag)
             => (value & flag) == flag;

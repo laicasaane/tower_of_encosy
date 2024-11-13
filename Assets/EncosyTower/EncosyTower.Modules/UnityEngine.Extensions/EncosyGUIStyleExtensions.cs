@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace EncosyTower.Modules
 {
-    public static class CoreGUIStyleExtensions
+    public static class EncosyGUIStyleExtensions
     {
         public static GUIStyle WithNormalBackground([NotNull] this GUIStyle style, Color color)
         {

@@ -5,7 +5,7 @@ using Unity.Entities;
 
 namespace EncosyTower.Modules.Entities
 {
-    public static class CoreEntityManagerExtensions
+    public static class EncosyEntityManagerExtensions
     {
         public static void SetComponentEnabled<T>(
               this EntityManager em

@@ -9,7 +9,7 @@ namespace EncosyTower.Modules.Entities
     using PsyshockCollider = Latios.Psyshock.Collider;
     using UnityCollider = UnityEngine.Collider;
 
-    public static class CorePsyshockColliderExtensions
+    public static class EncosyPsyshockColliderExtensions
     {
         public static PsyshockCollider ToPsyshockCollider([NotNull] this UnityCollider collider)
         {

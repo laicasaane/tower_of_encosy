@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Modules
 {
-    public static class CoreUnityObjectExtensions
+    public static class EncosyUnityObjectExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsValid(this UnityEngine.Object self)

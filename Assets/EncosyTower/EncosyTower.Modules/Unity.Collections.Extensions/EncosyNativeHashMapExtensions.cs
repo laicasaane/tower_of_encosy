@@ -6,7 +6,7 @@ using Unity.Collections;
 
 namespace EncosyTower.Modules.Collections
 {
-    public static class CoreNativeHashMapExtensions
+    public static class EncosyNativeHashMapExtensions
     {
         public static ref NativeHashMap<TKey, TValue> NewOrClear<TKey, TValue>(
               ref this NativeHashMap<TKey, TValue> map

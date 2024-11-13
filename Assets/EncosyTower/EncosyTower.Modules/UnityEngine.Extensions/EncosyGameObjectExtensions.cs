@@ -7,7 +7,7 @@ namespace EncosyTower.Modules
     using UnityEngine;
     using UnityEngine.SceneManagement;
 
-    public static partial class CoreGameObjectExtensions
+    public static partial class EncosyGameObjectExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void MoveToScene([NotNull] this GameObject self, Scene scene)
@@ -81,7 +81,7 @@ namespace EncosyTower.Modules
     using Cysharp.Threading.Tasks;
     using UnityEngine;
 
-    public static partial class CoreGameObjectExtensions
+    public static partial class EncosyGameObjectExtensions
     {
         /// <summary>
         /// SetActive(false) => 1 frame => SetActive(true);
