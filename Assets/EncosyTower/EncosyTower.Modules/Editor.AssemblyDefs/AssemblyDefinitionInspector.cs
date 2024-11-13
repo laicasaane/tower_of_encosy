@@ -92,7 +92,7 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
             var span = assemblyDef.references.AsSpan();
             var length = span.Length;
             var useGuid = span.Length > 0
-                && span[0] is string firstReference
+                && span[0] is { } firstReference
                 && firstReference.StartsWith("GUID:", StringComparison.Ordinal);
 
             var pairs = new List<(string name, string guid)>(useGuid == false ? length : 0);
@@ -135,19 +135,20 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
 
             pairs.Sort(SortPair);
 
-            static int SortPair((string name, string guid) x, (string name, string guid) y)
-            {
-                return StringComparer.OrdinalIgnoreCase.Compare(x.name, y.name);
-            }
-
             assemblyDef.references = pairs
-                .Select(x => useGuid ? x.guid : x.guid)
+                .Select(x => useGuid ? x.guid : x.name)
                 .ToArray();
 
             var json = EditorJsonUtility.ToJson(assemblyDef, true);
 
             File.WriteAllText(importer.assetPath, json);
             AssetDatabase.Refresh();
+            return;
+
+            static int SortPair((string name, string guid) x, (string name, string guid) y)
+            {
+                return StringComparer.OrdinalIgnoreCase.Compare(x.name, y.name);
+            }
         }
 
         private static void SelectReferences(AssemblyDefinitionImporter importer)
@@ -242,7 +243,7 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
             var references = assemblyDef.references.AsSpan();
             var referencesLength = references.Length;
             var useGuid = references.Length > 0
-                && references[0] is string firstReference
+                && references[0] is { } firstReference
                 && firstReference.StartsWith("GUID:", StringComparison.Ordinal);
 
             var refGuids = new HashSet<GUID>(useGuid ? referencesLength : 0);
@@ -333,13 +334,13 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
 
             public bool IsChecked { get; set; }
 
-            public bool Separator { get; set; }
+            public bool Separator { get; init; }
 
             public static int CompareName(ItemInfo x, ItemInfo y)
                 => StringComparer.OrdinalIgnoreCase.Compare(x.Name, y.Name);
         }
 
-        private record class Data(
+        private record Data(
               string AssetPath
             , AssemblyDef AssemblyDef
             , bool UseGuid

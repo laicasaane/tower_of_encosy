@@ -9,11 +9,12 @@
 ///*****************************************************************///
 /// </auto-generated>
 
+// ReSharper disable InconsistentNaming
+
 #pragma warning disable
 
 using System;
 using EncosyTower.Modules.Localization;
-using EncosyTower.Modules.Mvvm.ViewBinding;
 using EncosyTower.Modules.Unions;
 
 namespace EncosyTower.Modules.Mvvm.ViewBinding.Adapters.Localization

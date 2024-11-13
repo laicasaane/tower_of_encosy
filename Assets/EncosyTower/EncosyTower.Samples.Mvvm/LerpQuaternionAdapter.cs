@@ -17,16 +17,16 @@ namespace EncosyTower.Samples.Mvvm
 
         public Union Convert(in Union union)
         {
-            if (union.TryGetValue(out float result))
+            if (union.TryGetValue(out float result) == false)
             {
-                var quaternion = _reversed
-                    ? Quaternion.Euler(Vector3.Lerp(_toEuler, _fromEuler, result))
-                    : Quaternion.Euler(Vector3.Lerp(_fromEuler, _toEuler, result));
-
-                return new QuaternionUnion(quaternion);
+                return union;
             }
 
-            return union;
+            var quaternion = _reversed
+                ? Quaternion.Euler(Vector3.Lerp(_toEuler, _fromEuler, result))
+                : Quaternion.Euler(Vector3.Lerp(_fromEuler, _toEuler, result));
+
+            return new QuaternionUnion(quaternion);
         }
     }
 }

@@ -152,8 +152,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 {
                     GUILayout.Label("This binder list is empty.", s_noBinderStyle, guiHeight, guiWidth2);
 
-                    if (eventData.Type == EventType.MouseDown
-                        && eventData.Button == 1
+                    if (eventData is { Type: EventType.MouseDown, Button: 1 }
                         && rect.Contains(eventData.MousePos)
                     )
                     {
@@ -290,8 +289,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                     GUI.backgroundColor = guiBackColor;
                 }
 
-                if (eventData.Type == EventType.MouseDown
-                    && eventData.Button == 1
+                if (eventData is { Type: EventType.MouseDown, Button: 1 }
                     && itemRect.Contains(mousePos)
                 )
                 {
@@ -315,17 +313,29 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 {
                     showWarning = false;
                 }
-                else if (bindingsProp.arraySize < 1 && targetsProp.arraySize < 1)
+                else switch (bindingsProp.arraySize)
                 {
-                    iconWarning.tooltip = NO_BINDING_TARGET;
-                }
-                else if (bindingsProp.arraySize < 1)
-                {
-                    iconWarning.tooltip = NO_BINDING;
-                }
-                else if (targetsProp.arraySize < 1)
-                {
-                    iconWarning.tooltip = NO_TARGET;
+                    case < 1 when targetsProp.arraySize < 1:
+                    {
+                        iconWarning.tooltip = NO_BINDING_TARGET;
+                        break;
+                    }
+                    
+                    case < 1:
+                    {
+                        iconWarning.tooltip = NO_BINDING;
+                        break;
+                    }
+                    
+                    default:
+                    {
+                        if (targetsProp.arraySize < 1)
+                        {
+                            iconWarning.tooltip = NO_TARGET;
+                        }
+
+                        break;
+                    }
                 }
 
                 // Draw warning icon

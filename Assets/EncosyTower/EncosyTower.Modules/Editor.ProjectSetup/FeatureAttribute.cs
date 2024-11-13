@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace EncosyTower.Modules.Editor.ProjectSetup
 {
-    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Struct)]
     public sealed class FeatureAttribute : Attribute
     {
         public string Name { get; }

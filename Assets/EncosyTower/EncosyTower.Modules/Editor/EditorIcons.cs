@@ -27,15 +27,15 @@ namespace EncosyTower.Modules.Editor
         private static List<GUIContent> s_iconContentListAll;
         private static List<GUIContent> s_iconContentListSmall;
         private static List<GUIContent> s_iconContentListBig;
-        private static GUIStyle s_iconButtonStyle = null;
-        private static GUIStyle s_iconPreviewBlack = null;
-        private static GUIStyle s_iconPreviewWhite = null;
+        private static GUIStyle s_iconButtonStyle;
+        private static GUIStyle s_iconPreviewBlack;
+        private static GUIStyle s_iconPreviewWhite;
 
         private Vector2 _scroll;
         private int _buttonSize = 70;
         private string _search = "";
 
-        private bool IsWide => Screen.width > 550;
+        private static bool IsWide => Screen.width > 550;
 
         private bool DoSearch => !string.IsNullOrWhiteSpace(_search) && _search != "";
 
@@ -57,31 +57,31 @@ namespace EncosyTower.Modules.Editor
             }
         }
 
-        private static GUIContent GetIcon(string icon_name)
+        private static GUIContent GetIcon(string iconName)
         {
             var logEnabled = Debug.unityLogger.logEnabled;
 
             GUIContent valid = null;
             Debug.unityLogger.logEnabled = false;
 
-            if (string.IsNullOrEmpty(icon_name) == false)
+            if (string.IsNullOrEmpty(iconName) == false)
             {
-                valid = EditorGUIUtility.IconContent(icon_name);
+                valid = EditorGUIUtility.IconContent(iconName);
             }
 
             Debug.unityLogger.logEnabled = logEnabled;
-            return valid?.image == null ? null : valid;
+            return valid?.image ? null : valid;
         }
 
-        private static void SaveIcon(string icon_name)
+        private static void SaveIcon(string iconName)
         {
-            if (EditorGUIUtility.IconContent(icon_name).image is not Texture2D tex)
+            if (EditorGUIUtility.IconContent(iconName).image is not Texture2D tex)
             {
-                DevLoggerAPI.LogError($"Cannot save the icon '{icon_name}'");
+                DevLoggerAPI.LogError($"Cannot save the icon '{iconName}'");
                 return;
             }
 
-            var path = EditorUtility.SaveFilePanel("Save icon", "", icon_name, "png");
+            var path = EditorUtility.SaveFilePanel("Save icon", "", iconName, "png");
 
             if (path == null)
             {
@@ -149,7 +149,7 @@ namespace EncosyTower.Modules.Editor
 
         public void OnEnable()
         {
-            var all_icons = s_icons
+            var icons = s_icons
                 .Where(static x => GetIcon(x) != null)
                 .Distinct()
                 .ToHashSet();
@@ -163,10 +163,10 @@ namespace EncosyTower.Modules.Editor
                     continue;
                 }
 
-                all_icons.Add(tex.name);
+                icons.Add(tex.name);
             }
 
-            s_icons = s_icons.ToArray();
+            s_icons = icons.ToArray();
 
             Resources.UnloadUnusedAssets();
             GC.Collect();
@@ -194,7 +194,7 @@ namespace EncosyTower.Modules.Editor
 
                 s_viewBigIcons = GUILayout.SelectionGrid(
                       s_viewBigIcons ? 1 : 0
-                    , new string[] { "Small", "Big" }
+                    , new[] { "Small", "Big" }
                     , 2
                     , EditorStyles.toolbarButton
                 ) == 1;
@@ -219,9 +219,9 @@ namespace EncosyTower.Modules.Editor
                 _buttonSize = s_viewBigIcons ? 70 : 40;
 
                 // scrollbar_width = ~ 12.5
-                var render_width = (Screen.width / ppp - 13f);
-                var gridW = Mathf.FloorToInt( render_width / _buttonSize );
-                var margin_left = ( render_width - _buttonSize * gridW ) / 2;
+                var renderWidth = (Screen.width / ppp - 13f);
+                var gridW = Mathf.FloorToInt( renderWidth / _buttonSize );
+                var marginLeft = ( renderWidth - _buttonSize * gridW ) / 2;
 
                 int row = 0, index = 0;
 
@@ -233,7 +233,7 @@ namespace EncosyTower.Modules.Editor
                 {
                     using (new GUILayout.HorizontalScope())
                     {
-                        GUILayout.Space(margin_left);
+                        GUILayout.Space(marginLeft);
 
                         for (var i = 0; i < gridW; ++i)
                         {
@@ -286,7 +286,7 @@ namespace EncosyTower.Modules.Editor
 
                     s_darkPreview = GUILayout.SelectionGrid(
                           s_darkPreview ? 1 : 0
-                        , new string[] { "Light", "Dark" }
+                        , new[] { "Light", "Dark" }
                         , 2
                         , EditorStyles.miniButton
                     ) == 1;
@@ -298,8 +298,9 @@ namespace EncosyTower.Modules.Editor
 
                 using (new GUILayout.VerticalScope())
                 {
+                    var isDark = s_iconSelected.tooltip.IndexOf("d_", StringComparison.Ordinal) == 0;
                     var s = $"Size: {s_iconSelected.image.width}x{s_iconSelected.image.height}";
-                    s += "\nIs Pro Skin Icon: " + (s_iconSelected.tooltip.IndexOf("d_") == 0 ? "Yes" : "No");
+                    s += "\nIs Pro Skin Icon: " + (isDark ? "Yes" : "No");
                     s += $"\nTotal {s_iconContentListAll.Count} icons";
 
                     GUILayout.Space(5);
@@ -329,7 +330,7 @@ namespace EncosyTower.Modules.Editor
             }
         }
 
-        private static void AllTheTEXTURES(ref GUIStyle s, Texture2D t)
+        private static void EveryTextures(ref GUIStyle s, Texture2D t)
         {
             s.hover.background
                 = s.onHover.background
@@ -349,7 +350,7 @@ namespace EncosyTower.Modules.Editor
                 = s.onActive.scaledBackgrounds
                 = s.normal.scaledBackgrounds
                 = s.onNormal.scaledBackgrounds
-                = new Texture2D[] { t };
+                = new[] { t };
         }
 
         private static Texture2D Texture2DPixel(in Color c)
@@ -373,10 +374,10 @@ namespace EncosyTower.Modules.Editor
             };
 
             s_iconPreviewBlack = new GUIStyle(s_iconButtonStyle);
-            AllTheTEXTURES(ref s_iconPreviewBlack, Texture2DPixel(new Color(0.15f, 0.15f, 0.15f)));
+            EveryTextures(ref s_iconPreviewBlack, Texture2DPixel(new Color(0.15f, 0.15f, 0.15f)));
 
             s_iconPreviewWhite = new GUIStyle(s_iconButtonStyle);
-            AllTheTEXTURES(ref s_iconPreviewWhite, Texture2DPixel(new Color(0.85f, 0.85f, 0.85f)));
+            EveryTextures(ref s_iconPreviewWhite, Texture2DPixel(new Color(0.85f, 0.85f, 0.85f)));
 
             var iconContentListAll = s_iconContentListAll = new List<GUIContent>();
             var iconContentListSmall = s_iconContentListSmall = new List<GUIContent>();

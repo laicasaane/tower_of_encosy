@@ -2,7 +2,7 @@
 
 namespace EncosyTower.Modules.Data.Authoring
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class TableAttribute : Attribute
     {
         /// <summary>

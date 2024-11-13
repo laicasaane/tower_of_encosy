@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Serialization;
 
 namespace EncosyTower.Modules.Mvvm.ViewBinding.Unity
 {
@@ -6,7 +7,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Unity
     public sealed class MonoViewSettings
     {
         public InitializationMethod initializeOn = InitializationMethod.Awake;
-        public bool intializeAsync = true;
+        public bool initializeAsync = true;
         public bool startListeningOnInitialized = true;
     }
 

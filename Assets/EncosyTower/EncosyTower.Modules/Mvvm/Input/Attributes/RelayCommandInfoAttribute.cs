@@ -2,7 +2,7 @@
 
 namespace EncosyTower.Modules.Mvvm.Input
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class RelayCommandInfoAttribute : Attribute
     {
         public string CommandName { get; }

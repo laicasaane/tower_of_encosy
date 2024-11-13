@@ -36,7 +36,7 @@ namespace EncosyTower.Modules.Mvvm.Input
     /// <code>
     /// </para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
     public sealed class RelayCommandAttribute : Attribute
     {
         /// <summary>

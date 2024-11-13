@@ -11,52 +11,32 @@ namespace EncosyTower.Modules.NameKeys
             return PlayerPrefs.HasKey(self.ToStringGlobal());
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<string> GetPlayerPref(this NameKey<string> self)
         {
             var key = self.ToStringGlobal();
-
-            if (PlayerPrefs.HasKey(key))
-            {
-                return PlayerPrefs.GetString(key);
-            }
-
-            return default;
+            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : default;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<bool> GetPlayerPref(this NameKey<bool> self)
         {
             var key = self.ToStringGlobal();
-
-            if (PlayerPrefs.HasKey(key))
-            {
-                return PlayerPrefs.GetInt(key) != 0;
-            }
-
-            return default;
+            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetInt(key) != 0 : default;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<int> GetPlayerPref(this NameKey<int> self)
         {
             var key = self.ToStringGlobal();
-
-            if (PlayerPrefs.HasKey(key))
-            {
-                return PlayerPrefs.GetInt(key);
-            }
-
-            return default;
+            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetInt(key) : default;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<float> GetPlayerPref(this NameKey<float> self)
         {
             var key = self.ToStringGlobal();
-
-            if (PlayerPrefs.HasKey(key))
-            {
-                return PlayerPrefs.GetFloat(key);
-            }
-
-            return default;
+            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetFloat(key) : default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -29,14 +29,6 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
         private sealed class PropertyRef
         {
-            public PropertyRef() { }
-
-            public PropertyRef(SerializedProperty prop, MonoViewInspector inspector)
-            {
-                Prop = prop;
-                Inspector = inspector;
-            }
-
             public SerializedProperty Prop { get; set; }
 
             public MonoViewInspector Inspector { get; set; }
@@ -50,17 +42,15 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
         private sealed class ArrayPropertyRef
         {
-            public ArrayPropertyRef() { }
-
             public ArrayPropertyRef(SerializedArrayProperty prop, MonoViewInspector inspector)
             {
                 Prop = prop;
                 Inspector = inspector;
             }
 
-            public SerializedArrayProperty Prop { get; set; }
+            public SerializedArrayProperty Prop { get; private set; }
 
-            public MonoViewInspector Inspector { get; set; }
+            public MonoViewInspector Inspector { get; private set; }
 
             public void Reset()
             {
@@ -69,19 +59,19 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             }
         }
 
-        private sealed partial record class MenuItemContext(
+        private sealed partial record MenuItemContext(
               Type ContextType
             , Type InspectorType
             , PropertyRef Instance
         );
 
-        private sealed partial record class MenuItemBinder(
+        private sealed partial record MenuItemBinder(
               Type BinderType
             , Type TargetType
             , PropertyRef Instance
         );
 
-        private sealed partial record class MenuItemBinding(
+        private sealed partial record MenuItemBinding(
               Type BindingType
             , Type TargetType
             , PropertyRef Instance

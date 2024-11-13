@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace EncosyTower.Modules.Localization
 {
+    // ReSharper disable once InconsistentNaming
     public readonly struct L10nLanguage<TEnum> : IEquatable<L10nLanguage<TEnum>>, IEquatable<L10nLanguage>
         where TEnum : unmanaged, Enum
     {
@@ -72,6 +73,7 @@ namespace EncosyTower.Modules.Localization
             => !left.Equals(right);
     }
 
+    // ReSharper disable once InconsistentNaming
     partial struct L10nLanguage
     {
         [Serializable]

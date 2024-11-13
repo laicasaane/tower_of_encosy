@@ -15,7 +15,6 @@ namespace EncosyTower.Modules
             return CollectionHelper.CreateNativeArray<T>(
                   length
                 , state.WorldUpdateAllocator
-                , NativeArrayOptions.ClearMemory
             );
         }
 

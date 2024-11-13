@@ -61,12 +61,9 @@ namespace EncosyTower.Modules.Scenes
                 }
             }
 
-            if (token.IsCancellationRequested)
-            {
-                return default;
-            }
-
-            return SceneManager.GetSceneByBuildIndex(index.Index);
+            return token.IsCancellationRequested
+                ? default
+                : SceneManager.GetSceneByBuildIndex(index.Index);
         }
 
         #region SERIALIZABLE

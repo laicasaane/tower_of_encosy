@@ -22,11 +22,11 @@ namespace EncosyTower.Modules.Editor
         private bool _resize;
         private Vector2 _scrollPosition;
         private Rect _availableRect;
-        private bool _isSplitted;
+        private bool _isSplit;
 
-        public SimpleSplitView(Direction splitDirection, float splitMormalizedPosition = 0.5f, bool enabledScrollView = true)
+        public SimpleSplitView(Direction splitDirection, float splitNormalizedPosition = 0.5f, bool enabledScrollView = true)
         {
-            _splitNormalizedPosition = splitMormalizedPosition;
+            _splitNormalizedPosition = splitNormalizedPosition;
             _splitDirection = splitDirection;
             _enabledScrollView = enabledScrollView;
         }
@@ -52,7 +52,7 @@ namespace EncosyTower.Modules.Editor
 
         public void Split()
         {
-            _isSplitted = true;
+            _isSplit = true;
 
             if (_enabledScrollView)
             {
@@ -64,7 +64,7 @@ namespace EncosyTower.Modules.Editor
 
         public void EndSplitView()
         {
-            if (_isSplitted == false && _enabledScrollView)
+            if (_isSplit == false && _enabledScrollView)
             {
                 GUILayout.EndScrollView();
             }
@@ -87,14 +87,11 @@ namespace EncosyTower.Modules.Editor
 
             GUI.DrawTexture(resizeHandleRect, EditorGUIUtility.whiteTexture);
 
-            if (_splitDirection == Direction.Horizontal)
-            {
-                EditorGUIUtility.AddCursorRect(resizeHandleRect, MouseCursor.ResizeHorizontal);
-            }
-            else
-            {
-                EditorGUIUtility.AddCursorRect(resizeHandleRect, MouseCursor.ResizeVertical);
-            }
+            EditorGUIUtility.AddCursorRect(resizeHandleRect,
+                _splitDirection == Direction.Horizontal
+                    ? MouseCursor.ResizeHorizontal
+                    : MouseCursor.ResizeVertical
+            );
 
             if (Event.current.type == EventType.MouseDown && resizeHandleRect.Contains(Event.current.mousePosition))
             {

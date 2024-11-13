@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace EncosyTower.Modules.Data
 {
-    public abstract class DataTableAsset<TDataId, TData, TConvertedId> : DataTableAssetBase<TDataId, TData>, IDataTableAsset
+    public abstract class DataTableAsset<TDataId, TData, TConvertedId> : DataTableAssetBase<TDataId, TData>
         where TData : IData, IDataWithId<TDataId>
     {
         private readonly Dictionary<TConvertedId, int> _idToIndexMap = new();
@@ -30,11 +30,12 @@ namespace EncosyTower.Modules.Data
             {
                 var id = Convert(GetId(entries[i]));
 
-                if (map.TryAdd(id, i) == false)
+                if (map.TryAdd(id, i))
                 {
-                    ErrorDuplicateId(id, i, this);
                     continue;
                 }
+
+                ErrorDuplicateId(id, i, this);
             }
         }
 
@@ -64,7 +65,11 @@ namespace EncosyTower.Modules.Data
             => value.ToString();
 
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        protected static void ErrorDuplicateId(TConvertedId id, int index, [NotNull] DataTableAsset<TDataId, TData, TConvertedId> context)
+        protected static void ErrorDuplicateId(
+              TConvertedId id
+            , int index
+            , [NotNull] DataTableAsset<TDataId, TData, TConvertedId> context
+        )
         {
             DevLoggerAPI.LogErrorFormat(
                   context

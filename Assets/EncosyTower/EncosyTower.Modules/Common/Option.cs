@@ -19,7 +19,7 @@ namespace EncosyTower.Modules
 
             HasValue = value is UnityEngine.Object obj
                 ? (ByteBool)(obj == true)
-                : (ByteBool)(value is not null);
+                : value is not null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

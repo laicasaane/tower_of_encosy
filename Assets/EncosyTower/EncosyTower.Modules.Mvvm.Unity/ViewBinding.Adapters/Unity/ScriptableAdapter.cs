@@ -13,12 +13,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Adapters.Unity
 
         public Union Convert(in Union union)
         {
-            if (_asset)
-            {
-                return _asset.Convert(union);
-            }
-
-            return union;
+            return _asset ? _asset.Convert(union) : union;
         }
     }
 }

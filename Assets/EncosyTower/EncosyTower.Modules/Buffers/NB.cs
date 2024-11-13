@@ -22,6 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// ReSharper disable InconsistentNaming
+
 #if DEBUG || ENABLE_UNITY_COLLECTIONS_CHECKS || UNITY_DOTS_DEBUG
 #define ENABLE_DEBUG_CHECKS
 #endif
@@ -103,7 +105,7 @@ namespace EncosyTower.Modules.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public NativeArray<T> ToNativeArray()
+        internal NativeArray<T> ToNativeArray()
         {
             return _bufferImplementation.ToNativeArray();
         }
@@ -173,7 +175,7 @@ namespace EncosyTower.Modules.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(uint sourceStartIndex, T[] destination, uint destinationStartIndex, uint count)
         {
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < count; i++)
             {
                 destination[i] = this[i];
             }
@@ -189,7 +191,7 @@ namespace EncosyTower.Modules.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public NativeArray<T> ToNativeArray()
+        internal NativeArray<T> ToNativeArray()
         {
             return _buffer;
         }

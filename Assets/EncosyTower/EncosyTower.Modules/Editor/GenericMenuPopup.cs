@@ -164,13 +164,11 @@ namespace EncosyTower.Modules.Editor
         {
             get
             {
-                _backStyle ??= new GUIStyle(GUI.skin.button) {
+                return _backStyle ??= new GUIStyle(GUI.skin.button) {
                     alignment = TextAnchor.MiddleLeft,
                     fontStyle = FontStyle.Bold,
                     fixedHeight = 22,
                 };
-
-                return _backStyle;
             }
         }
 
@@ -180,18 +178,12 @@ namespace EncosyTower.Modules.Editor
         {
             get
             {
-                if (_plusStyle == null)
-                {
-                    _plusStyle = new GUIStyle {
-                        alignment = TextAnchor.MiddleCenter,
-                        fontStyle = FontStyle.Bold,
-                        fontSize = 16,
-                    };
-
-                    _plusStyle.normal.textColor = Color.white;
-                }
-
-                return _plusStyle;
+                return _plusStyle ??= new GUIStyle {
+                    alignment = TextAnchor.MiddleCenter,
+                    fontStyle = FontStyle.Bold,
+                    fontSize = 16,
+                    normal = { textColor = Color.white }
+                };
             }
         }
 
@@ -201,12 +193,10 @@ namespace EncosyTower.Modules.Editor
         {
             get
             {
-                _titleStyle ??= new GUIStyle(EditorStyles.boldLabel) {
+                return _titleStyle ??= new GUIStyle(EditorStyles.boldLabel) {
                     fontStyle = FontStyle.Bold,
                     alignment = TextAnchor.MiddleCenter,
                 };
-
-                return _titleStyle;
             }
         }
 
@@ -216,13 +206,11 @@ namespace EncosyTower.Modules.Editor
         {
             get
             {
-                _tooltipStyle ??= new GUIStyle(EditorStyles.label) {
+                return _tooltipStyle ??= new GUIStyle(EditorStyles.label) {
                     fontSize = 9,
                     wordWrap = true,
                     richText = true,
                 };
-
-                return _tooltipStyle;
             }
         }
 
@@ -232,13 +220,9 @@ namespace EncosyTower.Modules.Editor
         {
             get
             {
-                if (_whiteBoxStyle == null)
-                {
-                    _whiteBoxStyle = new GUIStyle("box");
-                    _whiteBoxStyle.normal.background = Texture2D.whiteTexture;
-                }
-
-                return _whiteBoxStyle;
+                return _whiteBoxStyle ??= new GUIStyle("box") {
+                    normal = { background = Texture2D.whiteTexture }
+                };
             }
         }
 
@@ -248,12 +232,10 @@ namespace EncosyTower.Modules.Editor
         {
             get
             {
-                _labelStyle ??= new GUIStyle(EditorStyles.label) {
+                return _labelStyle ??= new GUIStyle(EditorStyles.label) {
                     richText = true,
                     wordWrap = true,
                 };
-
-                return _labelStyle;
             }
         }
 
@@ -280,8 +262,9 @@ namespace EncosyTower.Modules.Editor
         private int _contentHeight;
         private bool _useScroll;
 
-        public string title;
-        public MenuItemNode rootNode;
+        public readonly string Title;
+        public readonly MenuItemNode RootNode;
+        
         public int width = 200;
         public int height = 200;
         public int maxHeight = 300;
@@ -293,16 +276,16 @@ namespace EncosyTower.Modules.Editor
 
         public GenericMenuPopup(MenuItemNode rootNode, string title)
         {
-            this.title = title;
-            showTitle = !string.IsNullOrWhiteSpace(this.title);
-            _currentNode = this.rootNode = rootNode;
+            this.Title = title;
+            showTitle = !string.IsNullOrWhiteSpace(this.Title);
+            _currentNode = this.RootNode = rootNode;
         }
 
         public GenericMenuPopup(GenericMenu menu, string title)
         {
-            this.title = title;
-            showTitle = !string.IsNullOrWhiteSpace(this.title);
-            _currentNode = rootNode = GenerateMenuItemNodeTree(menu);
+            this.Title = title;
+            showTitle = !string.IsNullOrWhiteSpace(this.Title);
+            _currentNode = RootNode = GenerateMenuItemNodeTree(menu);
         }
 
         public override Vector2 GetWindowSize()
@@ -353,7 +336,7 @@ namespace EncosyTower.Modules.Editor
         {
             _contentHeight += 24;
 
-            GUI.Label(rect, title, TitleStyle);
+            GUI.Label(rect, Title, TitleStyle);
         }
 
         private void DrawSearch(Rect rect)
@@ -413,19 +396,16 @@ namespace EncosyTower.Modules.Editor
 
         private void DrawNodeSearch(Rect _)
         {
-            var search = rootNode.Search(_search);
+            var search = RootNode.Search(_search);
 
             search.Sort(static (n1, n2) => {
                 var sb = new StringBuilder();
                 var p1 = n1.Parent.BuildPath(sb.Clear()).ToString();
                 var p2 = n2.Parent.BuildPath(sb.Clear()).ToString();
 
-                if (string.Equals(p1, p2, StringComparison.Ordinal))
-                {
-                    string.CompareOrdinal(n1.Name, n2.Name);
-                }
-
-                return string.CompareOrdinal(p1, p2);
+                return string.Equals(p1, p2, StringComparison.Ordinal)
+                    ? string.CompareOrdinal(n1.Name, n2.Name)
+                    : string.CompareOrdinal(p1, p2);
             });
 
             var lastPath = "";
@@ -512,7 +492,7 @@ namespace EncosyTower.Modules.Editor
 
         private void DrawNodeTree(Rect _)
         {
-            if (_currentNode != rootNode)
+            if (_currentNode != RootNode)
             {
                 _contentHeight += 20;
 
@@ -618,12 +598,12 @@ namespace EncosyTower.Modules.Editor
                 var menuItemType = menuItem.GetType();
                 var content = (GUIContent)menuItemType.GetField("content").GetValue(menuItem);
 
-                bool separator = (bool)menuItemType.GetField("separator").GetValue(menuItem);
-                string path = content.text;
-                string[] splitPath = path.Split('/');
+                var separator = (bool)menuItemType.GetField("separator").GetValue(menuItem);
+                var path = content.text;
+                var splitPath = path.Split('/');
                 MenuItemNode currentNode = rootNode;
 
-                for (int i = 0; i < splitPath.Length; i++)
+                for (var i = 0; i < splitPath.Length; i++)
                 {
                     currentNode = (i < splitPath.Length - 1)
                         ? currentNode.GetOrCreateNode(splitPath[i])

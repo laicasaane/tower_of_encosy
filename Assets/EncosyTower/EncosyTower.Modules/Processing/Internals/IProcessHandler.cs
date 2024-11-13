@@ -7,12 +7,12 @@ namespace EncosyTower.Modules.Processing.Internals
         TypeId Id { get; }
     }
 
-    internal interface IProcessHandler<TRequest> : IProcessHandler
+    internal interface IProcessHandler<in TRequest> : IProcessHandler
     {
         void Process(TRequest request);
     }
 
-    internal interface IProcessHandler<TRequest, TResult> : IProcessHandler
+    internal interface IProcessHandler<in TRequest, out TResult> : IProcessHandler
     {
         TResult Process(TRequest request);
     }
@@ -27,12 +27,12 @@ namespace EncosyTower.Modules.Processing.Internals
     using System.Threading;
     using Cysharp.Threading.Tasks;
 
-    internal interface IAsyncProcessHandler<TRequest> : IProcessHandler
+    internal interface IAsyncProcessHandler<in TRequest> : IProcessHandler
     {
         UniTask ProcessAsync(TRequest request, CancellationToken token);
     }
 
-    internal interface IAsyncProcessHandler<TRequest, TResult> : IProcessHandler
+    internal interface IAsyncProcessHandler<in TRequest, TResult> : IProcessHandler
     {
         UniTask<TResult> ProcessAsync(TRequest request, CancellationToken token);
     }

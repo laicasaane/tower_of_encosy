@@ -4,7 +4,7 @@ namespace EncosyTower.Modules.Data
 {
     public interface IData { }
 
-    public interface IDataWithId<TDataId> : IData
+    public interface IDataWithId<out TDataId> : IData
     {
         TDataId Id { get; }
     }

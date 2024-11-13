@@ -2,7 +2,7 @@ using System;
 
 namespace EncosyTower.Modules.Data
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
     public sealed class DataMutableAttribute : Attribute
     {
         public bool WithoutPropertySetter { get; }

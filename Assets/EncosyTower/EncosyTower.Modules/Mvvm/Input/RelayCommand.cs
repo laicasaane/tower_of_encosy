@@ -54,7 +54,7 @@ namespace EncosyTower.Modules.Mvvm.Input
             if (listener == null) throw new ArgumentNullException(nameof(listener));
 
             _canExecuteChanged += listener.OnEvent;
-            listener.OnDetachAction = (listener) => _canExecuteChanged -= listener.OnEvent;
+            listener.OnDetachAction = l => _canExecuteChanged -= l.OnEvent;
         }
 
         /// <inheritdoc/>

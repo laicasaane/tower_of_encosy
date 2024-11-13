@@ -1,3 +1,5 @@
+// ReSharper disable InconsistentNaming
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,8 +15,9 @@ namespace EncosyTower.Modules.Collections
     /// Effectively, anything implementing <see cref="IBufferProvider{T}"/> can be used
     /// as the external state for this list.
     /// </summary>
-    public class StatelessList<TState, T> : ICollection<T>, IReadOnlyCollection<T>, IList<T>, IReadOnlyList<T>
-        , IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
+    public class StatelessList<TState, T> : IList<T>, IReadOnlyList<T>
+        , IAsSpan<T>, IAsReadOnlySpan<T>
+        , IAsMemory<T>, IAsReadOnlyMemory<T>
         where TState : IBufferProvider<T>
     {
         internal static readonly bool s_shouldPerformMemClear = TypeCache<T>.IsUnmanaged == false;
@@ -50,6 +53,7 @@ namespace EncosyTower.Modules.Collections
             get
             {
                 Checks.IsTrue(State != null, "StatelessList<T> is not initialized");
+                // ReSharper disable once PossibleNullReferenceException
                 return ref State.Buffer;
             }
         }
@@ -61,6 +65,7 @@ namespace EncosyTower.Modules.Collections
             get
             {
                 Checks.IsTrue(State != null, "StatelessList<T> is not initialized");
+                // ReSharper disable once PossibleNullReferenceException
                 return ref State.Count;
             }
         }
@@ -72,6 +77,7 @@ namespace EncosyTower.Modules.Collections
             get
             {
                 Checks.IsTrue(State != null, "StatelessList<T> is not initialized");
+                // ReSharper disable once PossibleNullReferenceException
                 return ref State.Version;
             }
         }
@@ -237,7 +243,7 @@ namespace EncosyTower.Modules.Collections
             var items = AsReadOnlySpan();
             var endIndex = startIndex + count;
 
-            for (int i = startIndex; i < endIndex; i++)
+            for (var i = startIndex; i < endIndex; i++)
             {
                 ref readonly var item = ref items[i];
 
@@ -265,7 +271,7 @@ namespace EncosyTower.Modules.Collections
             var items = AsReadOnlySpan();
             var endIndex = startIndex + count;
 
-            for (int i = startIndex; i < endIndex; i++)
+            for (var i = startIndex; i < endIndex; i++)
             {
                 ref readonly var item = ref items[i];
 
@@ -301,7 +307,7 @@ namespace EncosyTower.Modules.Collections
             var items = AsReadOnlySpan();
             var endIndex = startIndex - count;
 
-            for (int i = startIndex; i > endIndex; i--)
+            for (var i = startIndex; i > endIndex; i--)
             {
                 ref readonly var item = ref items[i];
 
@@ -338,7 +344,7 @@ namespace EncosyTower.Modules.Collections
             var items = AsReadOnlySpan();
             var endIndex = startIndex - count;
 
-            for (int i = startIndex; i > endIndex; i--)
+            for (var i = startIndex; i > endIndex; i--)
             {
                 ref readonly var item = ref items[i];
 
@@ -443,7 +449,7 @@ namespace EncosyTower.Modules.Collections
 
             EnsureCountIsAtLeast(index + 1);
 
-            if (EqualityComparer<T>.Default.Equals(this[index], default) == true)
+            if (EqualityComparer<T>.Default.Equals(this[index], default))
                 this[index] = item();
 
             return ref ElementAt(index);
@@ -509,7 +515,7 @@ namespace EncosyTower.Modules.Collections
         {
             if (collection is ICollection<T> c)
             {
-                int count = c.Count;
+                var count = c.Count;
 
                 if (count > 0)
                 {
@@ -1005,20 +1011,6 @@ namespace EncosyTower.Modules.Collections
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ReuseOneSlot<TDerived>()
-            where TDerived : T
-        {
-            _version++;
-
-            if (_count >= _buffer.Length)
-                return false;
-
-            _count++;
-
-            return true;
-        }
-
         public void AddReplicate<TDerived>(int count)
             where TDerived : T, new()
         {
@@ -1113,7 +1105,7 @@ namespace EncosyTower.Modules.Collections
 
             if (count > 1)
             {
-                Array.Sort<T>(_buffer, index, count, comparer);
+                Array.Sort(_buffer, index, count, comparer);
             }
 
             _version++;

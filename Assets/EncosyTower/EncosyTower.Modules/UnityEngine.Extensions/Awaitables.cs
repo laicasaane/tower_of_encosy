@@ -88,7 +88,7 @@ namespace EncosyTower.Modules
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static async Awaitable AwaitAll(Awaitable[] awaitables)
             {
-                for (int i = 0; i < awaitables.Length; i++)
+                for (var i = 0; i < awaitables.Length; i++)
                 {
                     Checks.IsTrue(awaitables[i] != null);
                     await awaitables[i];
@@ -121,7 +121,7 @@ namespace EncosyTower.Modules
             {
                 var awaited = new AwaitableCompletionSource();
 
-                for (int i = 0; i < awaitables.Length; i++)
+                for (var i = 0; i < awaitables.Length; i++)
                 {
                     Checks.IsTrue(awaitables[i] != null);
                     Run(WaitCompletion(awaitables[i], awaited));

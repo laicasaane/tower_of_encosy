@@ -47,7 +47,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Unity
                 return;
             }
 
-            if (settings.intializeAsync)
+            if (settings.initializeAsync)
             {
                 await InitializeAsync(settings.startListeningOnInitialized, destroyCancellationToken);
             }
@@ -66,7 +66,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Unity
                 return;
             }
 
-            if (settings.intializeAsync)
+            if (settings.initializeAsync)
             {
                 await InitializeAsync(settings.startListeningOnInitialized, destroyCancellationToken);
             }

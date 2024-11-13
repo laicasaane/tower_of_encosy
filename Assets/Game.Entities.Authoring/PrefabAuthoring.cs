@@ -44,7 +44,7 @@ namespace Module.EntityAuthoring
 
     [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
     [UpdateInGroup(typeof(PostBakingSystemGroup))]
-    internal partial struct RemoveLEGSystem : ISystem
+    internal partial struct RemoveLegSystem : ISystem
     {
         private EntityQuery _query;
 

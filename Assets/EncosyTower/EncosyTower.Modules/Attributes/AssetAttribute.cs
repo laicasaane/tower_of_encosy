@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace EncosyTower.Modules
 {
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Field)]
     public sealed class AssetAttribute : Attribute
     {
         public string Guid { get; }

@@ -17,7 +17,7 @@ namespace EncosyTower.Modules.EnumExtensions
     /// </code>
     /// </example>
     /// <seealso cref="EnumMembersForTemplateAttribute"/>
-    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Struct)]
     public sealed class EnumTemplateAttribute : Attribute
     {
     }
@@ -44,6 +44,7 @@ namespace EncosyTower.Modules.EnumExtensions
         public ulong Order { get; }
 
         /// <param name="enumType">To provide members for the enum generated from [EnumTemplate]</param>
+        /// <param name="order"></param>
         public EnumTemplateMembersFromEnumAttribute(Type enumType, ulong order)
         {
             EnumType = enumType;
@@ -96,7 +97,7 @@ namespace EncosyTower.Modules.EnumExtensions
     /// </code>
     /// </example>
     /// <seealso cref="EnumTemplateAttribute"/>
-    [AttributeUsage(AttributeTargets.Enum, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Enum)]
     public sealed class EnumMembersForTemplateAttribute : Attribute
     {
         public Type TemplateType { get; }
@@ -125,11 +126,10 @@ namespace EncosyTower.Modules.EnumExtensions
     /// </example>
     /// <seealso cref="EnumTemplateAttribute"/>
     [AttributeUsage(
-          AttributeTargets.Class
+        AttributeTargets.Class
         | AttributeTargets.Struct
         | AttributeTargets.Enum
         | AttributeTargets.Interface
-        , AllowMultiple = false
     )]
     public sealed class TypeNameMemberForEnumTemplateAttribute : Attribute
     {

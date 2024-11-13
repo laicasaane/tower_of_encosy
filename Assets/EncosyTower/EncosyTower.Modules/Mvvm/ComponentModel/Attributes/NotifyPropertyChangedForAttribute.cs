@@ -31,7 +31,7 @@ namespace EncosyTower.Modules.Mvvm.ComponentModel
     /// </code>
     /// </para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
     public sealed class NotifyPropertyChangedForAttribute : Attribute
     {
         /// <summary>

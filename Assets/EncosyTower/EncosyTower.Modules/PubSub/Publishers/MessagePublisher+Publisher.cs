@@ -42,10 +42,10 @@ namespace EncosyTower.Modules.PubSub
                 }
 #endif
 
-                var brokers = _publisher._brokers;
-
-                lock (brokers)
+                lock (_publisher._brokers)
                 {
+                    var brokers = _publisher._brokers;
+
                     if (brokers.TryGet<MessageBroker<TScope, TMessage>>(out var scopedBroker) == false)
                     {
                         scopedBroker = new MessageBroker<TScope, TMessage>();
@@ -56,7 +56,7 @@ namespace EncosyTower.Modules.PubSub
                             LogUnexpectedErrorWhenCache<TMessage>(logger);
 #endif
 
-                            scopedBroker?.Dispose();
+                            scopedBroker.Dispose();
                             return default;
                         }
                     }
@@ -78,13 +78,13 @@ namespace EncosyTower.Modules.PubSub
                     return false;
                 }
 
-                if (Scope == null)
+                if (Scope != null)
                 {
-                    (logger ?? DevLogger.Default).LogException(new System.NullReferenceException(nameof(Scope)));
-                    return false;
+                    return true;
                 }
 
-                return true;
+                (logger ?? DevLogger.Default).LogException(new System.NullReferenceException(nameof(Scope)));
+                return false;
             }
 
             private bool Validate<TMessage>(TMessage message, ILogger logger)
@@ -104,13 +104,13 @@ namespace EncosyTower.Modules.PubSub
                     return false;
                 }
 
-                if (message == null)
+                if (message != null)
                 {
-                    (logger ?? DevLogger.Default).LogException(new System.ArgumentNullException(nameof(message)));
-                    return false;
+                    return true;
                 }
 
-                return true;
+                (logger ?? DevLogger.Default).LogException(new System.ArgumentNullException(nameof(message)));
+                return false;
             }
 
             private static void LogWarning<TMessage>(TScope scope, ILogger logger)

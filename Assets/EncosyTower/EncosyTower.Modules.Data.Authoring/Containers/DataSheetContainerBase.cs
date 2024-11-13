@@ -61,14 +61,11 @@ namespace EncosyTower.Modules.Data.Authoring
 
                 sheet.Name = pair.Key;
 
-                if (rowTypeToSheet.ContainsKey(sheet.RowType))
+                if (rowTypeToSheet.TryAdd(sheet.RowType, sheet) == false)
                 {
                     // row type must be unique in a sheet container
                     context.Logger.LogError("Duplicated Row type is used for {SheetName}", pair.Key);
-                    continue;
                 }
-
-                rowTypeToSheet.Add(sheet.RowType, sheet);
             }
 
             // making sure all references are mapped before calling PostLoad

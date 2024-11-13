@@ -12,27 +12,27 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
     {
         private sealed class TargetGameObjectTreeView : TreeView
         {
-            private readonly GameObject _rootGO;
+            private readonly GameObject _rootGo;
             private readonly GUIContent _content;
 
-            public TargetGameObjectTreeView(TreeViewState state, GameObject rootGO) : base(state)
+            public TargetGameObjectTreeView(TreeViewState state, GameObject rootGo) : base(state)
             {
-                _rootGO = rootGO;
-                _content = EditorGUIUtility.ObjectContent(rootGO, typeof(GameObject));
+                _rootGo = rootGo;
+                _content = EditorGUIUtility.ObjectContent(rootGo, typeof(GameObject));
 
                 Reload();
             }
 
             protected override TreeViewItem BuildRoot()
             {
-                var rootGO = _rootGO;
-                var rootTransform = rootGO.transform;
+                var rootGo = _rootGo;
+                var rootTransform = rootGo.transform;
                 var childCount = rootTransform.childCount;
                 var content = _content;
                 var icon = content.image as Texture2D;
                 var treeRoot = new TreeViewItem { id = 0, depth = -1, displayName = "Root" };
                 var allItems = new List<TreeViewItem>(childCount + 1) {
-                    new() { id = rootGO.GetInstanceID(), depth = 0, displayName = rootGO.name, icon = icon },
+                    new() { id = rootGo.GetInstanceID(), depth = 0, displayName = rootGo.name, icon = icon },
                 };
 
                 if (childCount > 0)
@@ -63,16 +63,11 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                     }
                 }
             }
-
-            public override void OnGUI(Rect rect)
-            {
-                base.OnGUI(rect);
-            }
         }
 
         private sealed class TargetComponentTreeView : TreeView
         {
-            private readonly GameObject _rootGO;
+            private readonly GameObject _rootGo;
             private readonly Type _componentType;
             private readonly List<Component> _components = new();
             private const string NAME_FORMAT = "{0}";
@@ -80,9 +75,9 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             private const string NAME_INDEX_FORMAT = "{0} ▶ {1}";
             private const string NAME_2_INDEX_FORMAT = "{0} ▶ {2} • {1}";
 
-            public TargetComponentTreeView(TreeViewState state, GameObject rootGO, Type componentType) : base(state)
+            public TargetComponentTreeView(TreeViewState state, GameObject rootGo, Type componentType) : base(state)
             {
-                _rootGO = rootGO;
+                _rootGo = rootGo;
                 _componentType = componentType;
 
                 Reload();
@@ -90,10 +85,10 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
             protected override TreeViewItem BuildRoot()
             {
-                var rootGO = _rootGO;
+                var rootGo = _rootGo;
                 var componentType = _componentType;
 
-                var rootTransform = rootGO.transform;
+                var rootTransform = rootGo.transform;
                 var childCount = rootTransform.childCount;
 
                 var treeRoot = new TreeViewItem { id = 0, depth = -1, displayName = "Root" };
@@ -101,7 +96,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 var components = _components;
                 components.Clear();
 
-                rootGO.GetComponents(componentType, components);
+                rootGo.GetComponents(componentType, components);
 
                 var count = components.Count;
 
@@ -117,8 +112,8 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                         var content = EditorGUIUtility.ObjectContent(component, type);
                         var icon = content.image as Texture2D;
                         var name = type != componentType
-                            ? string.Format(name2Format, rootGO.name, ObjectNames.NicifyVariableName(type.Name), k)
-                            : string.Format(nameFormat, rootGO.name, k);
+                            ? string.Format(name2Format, rootGo.name, ObjectNames.NicifyVariableName(type.Name), k)
+                            : string.Format(nameFormat, rootGo.name, k);
 
                         allItems.Add(new TreeViewItem {
                             id = component.GetInstanceID(),

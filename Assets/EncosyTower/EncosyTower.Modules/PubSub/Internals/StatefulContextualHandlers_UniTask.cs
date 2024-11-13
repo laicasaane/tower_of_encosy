@@ -6,9 +6,9 @@ using Cysharp.Threading.Tasks;
 
 namespace EncosyTower.Modules.PubSub.Internals
 {
-    internal sealed class StatefulContextualHandlerFuncMessageToken<TState, TMessage> : IHandler<TMessage> where TState : class
+    internal sealed class StatefulContextualHandlerFuncMessageToken<TState, TMessage> : IHandler<TMessage>
+        where TState : class
     {
-        private readonly DelegateId _id;
         private readonly WeakReference<TState> _state;
         private Func<TState, TMessage, PublishingContext, CancellationToken, UniTask> _handler;
 
@@ -16,10 +16,10 @@ namespace EncosyTower.Modules.PubSub.Internals
         {
             _state = new(state ?? throw new ArgumentNullException(nameof(state)));
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            _id = new(handler, state.GetHashCode());
+            Id = new(handler, state.GetHashCode());
         }
 
-        public DelegateId Id => _id;
+        public DelegateId Id { get; }
 
         public void Dispose()
         {
@@ -39,7 +39,6 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class StatefulContextualHandlerFuncToken<TState, TMessage> : IHandler<TMessage> where TState : class
     {
-        private readonly DelegateId _id;
         private readonly WeakReference<TState> _state;
         private Func<TState, PublishingContext, CancellationToken, UniTask> _handler;
 
@@ -47,10 +46,10 @@ namespace EncosyTower.Modules.PubSub.Internals
         {
             _state = new(state ?? throw new ArgumentNullException(nameof(state)));
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            _id = new(handler, state.GetHashCode());
+            Id = new(handler, state.GetHashCode());
         }
 
-        public DelegateId Id => _id;
+        public DelegateId Id { get; }
 
         public void Dispose()
         {
@@ -70,7 +69,6 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class StatefulContextualHandlerFuncMessage<TState, TMessage> : IHandler<TMessage> where TState : class
     {
-        private readonly DelegateId _id;
         private readonly WeakReference<TState> _state;
         private Func<TState, TMessage, PublishingContext, UniTask> _handler;
 
@@ -78,10 +76,10 @@ namespace EncosyTower.Modules.PubSub.Internals
         {
             _state = new(state ?? throw new ArgumentNullException(nameof(state)));
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            _id = new(handler, state.GetHashCode());
+            Id = new(handler, state.GetHashCode());
         }
 
-        public DelegateId Id => _id;
+        public DelegateId Id { get; }
 
         public void Dispose()
         {
@@ -101,7 +99,6 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class StatefulContextualHandlerFunc<TState, TMessage> : IHandler<TMessage> where TState : class
     {
-        private readonly DelegateId _id;
         private readonly WeakReference<TState> _state;
         private Func<TState, PublishingContext, UniTask> _handler;
 
@@ -109,10 +106,10 @@ namespace EncosyTower.Modules.PubSub.Internals
         {
             _state = new(state ?? throw new ArgumentNullException(nameof(state)));
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            _id = new(handler, state.GetHashCode());
+            Id = new(handler, state.GetHashCode());
         }
 
-        public DelegateId Id => _id;
+        public DelegateId Id { get; }
 
         public void Dispose()
         {
@@ -132,7 +129,6 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class StatefulContextualHandlerActionMessage<TState, TMessage> : IHandler<TMessage> where TState : class
     {
-        private readonly DelegateId _id;
         private readonly WeakReference<TState> _state;
         private Action<TState, TMessage, PublishingContext> _handler;
 
@@ -140,10 +136,10 @@ namespace EncosyTower.Modules.PubSub.Internals
         {
             _state = new(state ?? throw new ArgumentNullException(nameof(state)));
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            _id = new(handler, state.GetHashCode());
+            Id = new(handler, state.GetHashCode());
         }
 
-        public DelegateId Id => _id;
+        public DelegateId Id { get; }
 
         public void Dispose()
         {
@@ -164,7 +160,6 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class StatefulContextualHandlerAction<TState, TMessage> : IHandler<TMessage> where TState : class
     {
-        private readonly DelegateId _id;
         private readonly WeakReference<TState> _state;
         private Action<TState, PublishingContext> _handler;
 
@@ -172,10 +167,10 @@ namespace EncosyTower.Modules.PubSub.Internals
         {
             _state = new(state ?? throw new ArgumentNullException(nameof(state)));
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            _id = new(handler, state.GetHashCode());
+            Id = new(handler, state.GetHashCode());
         }
 
-        public DelegateId Id => _id;
+        public DelegateId Id { get; }
 
         public void Dispose()
         {

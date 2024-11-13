@@ -151,7 +151,7 @@ namespace EncosyTower.Modules.Data.Authoring
                         var dataTableAssetPath = Path.Combine(savePath, $"{dataTableAssetType.Name}.asset");
                         var dataTableAsset = AssetDatabase.LoadAssetAtPath<DataTableAsset>(dataTableAssetPath);
 
-                        if (dataTableAsset == null)
+                        if (dataTableAsset.IsInvalid())
                         {
                             dataTableAsset = ScriptableObject.CreateInstance(dataTableAssetType) as DataTableAsset;
                             AssetDatabase.CreateAsset(dataTableAsset, dataTableAssetPath);
@@ -183,13 +183,13 @@ namespace EncosyTower.Modules.Data.Authoring
                 var sheetType = property.PropertyType;
                 attribute = sheetType.GetCustomAttribute<GeneratedSheetAttribute>();
 
-                if (attribute == null)
+                if (attribute != null)
                 {
-                    context.Logger.LogError("Cannot find {Attribute} on {Sheet}", typeof(GeneratedSheetAttribute), sheetType);
-                    return false;
+                    return true;
                 }
 
-                return true;
+                context.Logger.LogError("Cannot find {Attribute} on {Sheet}", typeof(GeneratedSheetAttribute), sheetType);
+                return false;
             }
 
             attribute = default;
@@ -226,13 +226,13 @@ namespace EncosyTower.Modules.Data.Authoring
 
             toDataArrayMethod = sheetType.GetMethod(methodName, Type.EmptyTypes);
 
-            if (toDataArrayMethod == null)
+            if (toDataArrayMethod != null)
             {
-                context.Logger.LogError("Cannot find {MethodName} method in {SheetType}", methodName, sheetType);
-                return false;
+                return true;
             }
 
-            return true;
+            context.Logger.LogError("Cannot find {MethodName} method in {SheetType}", methodName, sheetType);
+            return false;
         }
 
         private static void SaveAsset(

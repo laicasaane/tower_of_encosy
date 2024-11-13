@@ -2,7 +2,7 @@ using System;
 
 namespace EncosyTower.Modules.Mvvm.ViewBinding
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
     public sealed class AdapterAttribute : Attribute
     {
         public const int DEFAULT_ORDER = 1000;

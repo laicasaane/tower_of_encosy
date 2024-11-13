@@ -11,7 +11,7 @@ namespace EncosyTower.Modules.Mvvm.ComponentModel.SourceGen
     /// However, it can be used in other contexts, such as reflection.
     /// </remarks>
     /// <seealso cref="INotifyPropertyChanging"/>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class NotifyPropertyChangingInfoAttribute : Attribute
     {
         public string PropertyName { get; }

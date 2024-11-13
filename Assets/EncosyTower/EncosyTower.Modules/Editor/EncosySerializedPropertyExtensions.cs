@@ -1,7 +1,6 @@
 #if UNITY_EDITOR
 
 using System;
-using System.Linq;
 using System.Text.RegularExpressions;
 using SpanExtensions;
 using UnityEditor;
@@ -10,7 +9,7 @@ namespace EncosyTower.Modules.Editor
 {
     public static class EncosySerializedPropertyExtensions
     {
-        private static readonly Regex s_regexPropertyPath = new("^data\\[(\\d+)\\]$", RegexOptions.Compiled);
+        private static readonly Regex s_regexPropertyPath = new(@"^data\[(\d+)\]$", RegexOptions.Compiled);
 
         public static SerializedProperty FindParentProperty(this SerializedProperty self)
         {

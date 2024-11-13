@@ -26,13 +26,13 @@ namespace EncosyTower.Modules.PolyStructs
     /// <summary>
     /// Polymorphic struct
     /// </summary>
-    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Struct)]
     public sealed class PolyStructAttribute : Attribute { }
 
     /// <summary>
     /// Polymorphic struct interface
     /// </summary>
-    [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Interface)]
     public sealed class PolyStructInterfaceAttribute : Attribute
     {
         public bool Verbose { get; set; }

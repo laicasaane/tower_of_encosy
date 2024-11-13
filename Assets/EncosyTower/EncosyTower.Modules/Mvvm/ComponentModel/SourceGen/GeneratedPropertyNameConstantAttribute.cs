@@ -11,6 +11,6 @@ namespace EncosyTower.Modules.Mvvm.ComponentModel.SourceGen
     /// However, it can be used in other contexts, such as reflection.
     /// </remarks>
     /// <seealso cref="PropertyChangingEventHandler"/>
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Field)]
     public sealed class GeneratedPropertyNameConstantAttribute : Attribute { }
 }

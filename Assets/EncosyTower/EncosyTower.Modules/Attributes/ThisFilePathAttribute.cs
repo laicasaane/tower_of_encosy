@@ -8,12 +8,11 @@ namespace EncosyTower.Modules
     /// Get the path to the file code wherein this attribute is used.
     /// </summary>
     [AttributeUsage(
-          AttributeTargets.Class
+        AttributeTargets.Class
         | AttributeTargets.Struct
         | AttributeTargets.Enum
         | AttributeTargets.Interface
         | AttributeTargets.Delegate
-        , AllowMultiple = false
         , Inherited = false
     )]
     public sealed class ThisFilePathAttribute : Attribute

@@ -91,22 +91,26 @@ namespace EncosyTower.Modules.Buffers
 #endif
         public void Resize(int newSize, bool copyContent = true, bool memClear = true)
         {
-            if (newSize != Capacity)
+            if (newSize == Capacity)
             {
-                var realBuffer = _realBuffer.ToManagedArray();
-                if (copyContent == true)
-                    Array.Resize(ref realBuffer, newSize);
-                else
-                    realBuffer = new T[newSize];
+                return;
+            }
+
+            var realBuffer = _realBuffer.ToManagedArray();
+            
+            if (copyContent)
+                Array.Resize(ref realBuffer, newSize);
+            else
+                realBuffer = new T[newSize];
 
 #if (NEW_C_SHARP && !UNITY_5_3_OR_NEWER) //this is still not supported by Unity
-                if (memClear)
-                    Array.Clear(realBuffer, 0, realBuffer.Length);
+            if (memClear)
+                Array.Clear(realBuffer, 0, realBuffer.Length);
 #endif
-                var b = default(MBInternal<T>);
-                b.Set(realBuffer);
-                _realBuffer = b;
-            }
+            
+            var b = default(MBInternal<T>);
+            b.Set(realBuffer);
+            _realBuffer = b;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

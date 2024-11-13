@@ -1,6 +1,5 @@
 using System;
 using EncosyTower.Modules.Entities;
-using Latios;
 using Latios.Authoring;
 using Latios.Kinemation;
 using Latios.Kinemation.Authoring;
@@ -28,7 +27,7 @@ namespace Module.EntityAuthoring
         [TemporaryBakingType]
         private struct SmartBakeItem : ISmartBakeItem<CharacterAuthoring>
         {
-            public SmartBlobberHandle<SkeletonClipSetBlob> animClipBlob;
+            private SmartBlobberHandle<SkeletonClipSetBlob> _animClipBlob;
 
             public bool Bake(CharacterAuthoring authoring, IBaker baker)
             {
@@ -66,17 +65,17 @@ namespace Module.EntityAuthoring
                 });
 
                 baker.AddComponent<AnimClipBlobRef>(entity);
-                animClipBlob = baker.RequestCreateBlobAsset(baker.GetComponentInChildren<Animator>(), animClips);
+                _animClipBlob = baker.RequestCreateBlobAsset(baker.GetComponentInChildren<Animator>(), animClips);
 
                 return true;
             }
 
             public void PostProcessBlobRequests(EntityManager entityManager, Entity entity)
             {
-                if (animClipBlob.IsValid)
+                if (_animClipBlob.IsValid)
                 {
                     entityManager.SetComponentData(entity, new AnimClipBlobRef {
-                        value = animClipBlob.Resolve(entityManager)
+                        value = _animClipBlob.Resolve(entityManager)
                     });
                 }
             }

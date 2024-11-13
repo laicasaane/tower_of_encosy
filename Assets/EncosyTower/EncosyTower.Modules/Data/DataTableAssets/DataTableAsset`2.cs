@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace EncosyTower.Modules.Data
 {
-    public abstract class DataTableAsset<TDataId, TData> : DataTableAssetBase<TDataId, TData>, IDataTableAsset
+    public abstract class DataTableAsset<TDataId, TData> : DataTableAssetBase<TDataId, TData>
         where TData : IData, IDataWithId<TDataId>
     {
         private readonly Dictionary<TDataId, int> _idToIndexMap = new();

@@ -24,7 +24,7 @@ namespace EncosyTower.Modules.Jobs
                 return default;
             }
 
-            if (blackboard.GetCollectionComponent<TCollectionComponent>(false).TryGet(out var queue) == false)
+            if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var queue) == false)
             {
                 return default;
             }

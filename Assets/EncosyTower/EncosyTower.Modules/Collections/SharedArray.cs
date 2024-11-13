@@ -64,20 +64,21 @@ namespace EncosyTower.Modules.Collections
         where T : unmanaged
         where TNative : unmanaged
     {
-        protected GCHandle m_GcHandle;
+        protected GCHandle gcHandle;
 
 #if UNITY_EDITOR
+        // ReSharper disable once InconsistentNaming
         protected AtomicSafetyHandle m_SafetyHandle;
 #endif
 
-        protected T[] m_Managed;
-        protected NativeArray<TNative> m_Native;
-        protected int m_Version;
+        protected T[] managed;
+        protected NativeArray<TNative> native;
+        protected int version;
 
         public int Length
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => m_Managed.Length;
+            get => managed.Length;
         }
 
         protected SharedArray() { }
@@ -100,7 +101,7 @@ namespace EncosyTower.Modules.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator NativeArray<TNative>([NotNull] SharedArray<T, TNative> self)
         {
-            return self.m_Native;
+            return self.native;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -110,7 +111,7 @@ namespace EncosyTower.Modules.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(self.m_SafetyHandle);
 #endif
 
-            return self.m_Managed;
+            return self.managed;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -120,7 +121,7 @@ namespace EncosyTower.Modules.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(self.m_SafetyHandle);
 #endif
 
-            return self.m_Managed;
+            return self.managed;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -130,7 +131,7 @@ namespace EncosyTower.Modules.Collections
             AtomicSafetyHandle.CheckReadAndThrow(self.m_SafetyHandle);
 #endif
 
-            return self.m_Managed;
+            return self.managed;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -140,7 +141,7 @@ namespace EncosyTower.Modules.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(self.m_SafetyHandle);
 #endif
 
-            return self.m_Managed;
+            return self.managed;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -150,15 +151,15 @@ namespace EncosyTower.Modules.Collections
             AtomicSafetyHandle.CheckReadAndThrow(self.m_SafetyHandle);
 #endif
 
-            return self.m_Managed;
+            return self.managed;
         }
 
         protected void Initialize(T[] managed)
         {
-            m_Version++;
+            version++;
 
             ThrowIfNull(managed);
-            m_Managed = managed;
+            this.managed = managed;
             Initialize();
         }
 
@@ -166,22 +167,22 @@ namespace EncosyTower.Modules.Collections
         {
             // Unity's default garbage collector doesn't move objects around, so pinning the array in memory
             // should not even be necessary. Better to be safe, though
-            m_GcHandle = GCHandle.Alloc(m_Managed, GCHandleType.Pinned);
+            gcHandle = GCHandle.Alloc(managed, GCHandleType.Pinned);
             CreateNativeAlias();
 
             unsafe void CreateNativeAlias()
             {
                 // this is the trick to making a NativeArray view of a managed array (or any pointer)
-                fixed (void* ptr = m_Managed)
+                fixed (void* ptr = managed)
                 {
-                    m_Native = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TNative>(
-                        ptr, m_Managed.Length, Allocator.None
+                    native = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TNative>(
+                        ptr, managed.Length, Allocator.None
                     );
                 }
 
 #if UNITY_EDITOR
                 m_SafetyHandle = AtomicSafetyHandle.Create();
-                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref m_Native, m_SafetyHandle);
+                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref native, m_SafetyHandle);
 #endif
             }
         }
@@ -192,9 +193,9 @@ namespace EncosyTower.Modules.Collections
         /// <returns></returns>
         public ref T GetPinnableReference()
         {
-            if (m_Managed.Length > 0)
+            if (managed.Length > 0)
             {
-                return ref m_Managed[0];
+                return ref managed[0];
             }
 
             return ref NullRef();
@@ -202,11 +203,11 @@ namespace EncosyTower.Modules.Collections
 
         public void Resize(int newSize)
         {
-            m_Version++;
+            version++;
 
             ThrowIfSizeNegative(newSize);
 
-            if (newSize == m_Managed.Length)
+            if (newSize == managed.Length)
             {
                 return;
             }
@@ -216,12 +217,12 @@ namespace EncosyTower.Modules.Collections
             AtomicSafetyHandle.Release(m_SafetyHandle);
 #endif
 
-            if (m_GcHandle.IsAllocated)
+            if (gcHandle.IsAllocated)
             {
-                m_GcHandle.Free();
+                gcHandle.Free();
             }
 
-            Array.Resize(ref m_Managed, newSize);
+            Array.Resize(ref managed, newSize);
             Initialize();
         }
 
@@ -231,7 +232,7 @@ namespace EncosyTower.Modules.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
 
-            Array.Clear(m_Managed, 0, m_Managed.Length);
+            Array.Clear(managed, 0, managed.Length);
         }
 
         public Enumerator GetEnumerator()
@@ -252,24 +253,24 @@ namespace EncosyTower.Modules.Collections
 
         public void Dispose()
         {
-            if (m_Managed == null)
+            if (managed == null)
             {
                 return;
             }
 
-            m_Version++;
+            version++;
 
 #if UNITY_EDITOR
             AtomicSafetyHandle.CheckDeallocateAndThrow(m_SafetyHandle);
             AtomicSafetyHandle.Release(m_SafetyHandle);
 #endif
 
-            if (m_GcHandle.IsAllocated)
+            if (gcHandle.IsAllocated)
             {
-                m_GcHandle.Free();
+                gcHandle.Free();
             }
 
-            m_Managed = null;
+            managed = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -279,7 +280,7 @@ namespace EncosyTower.Modules.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
 
-            return m_Managed;
+            return managed;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -289,7 +290,7 @@ namespace EncosyTower.Modules.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
 
-            return m_Managed.AsSpan();
+            return managed.AsSpan();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -299,7 +300,7 @@ namespace EncosyTower.Modules.Collections
             AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
 
-            return m_Managed.AsSpan();
+            return managed.AsSpan();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -309,7 +310,7 @@ namespace EncosyTower.Modules.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
 
-            return m_Managed.AsMemory();
+            return managed.AsMemory();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -319,19 +320,19 @@ namespace EncosyTower.Modules.Collections
             AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
 
-            return m_Managed.AsMemory();
+            return managed.AsMemory();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeArray<TNative> AsNativeArray()
         {
-            return m_Native;
+            return native;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeSlice<TNative> AsNativeSlice()
         {
-            return m_Native.Slice();
+            return native.Slice();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -362,7 +363,7 @@ namespace EncosyTower.Modules.Collections
         }
 
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        protected static unsafe void ThrowIfSizeNegative(int size)
+        protected static void ThrowIfSizeNegative(int size)
         {
             if (size < 0)
             {
@@ -380,7 +381,7 @@ namespace EncosyTower.Modules.Collections
             public Enumerator([NotNull] SharedArray<T, TNative> sharedArray)
             {
                 _sharedArray = sharedArray;
-                _version = sharedArray.m_Version;
+                _version = sharedArray.version;
                 _index = -1;
                 _current = default;
             }
@@ -394,9 +395,9 @@ namespace EncosyTower.Modules.Collections
             public bool MoveNext()
             {
                 var sharedArray = _sharedArray;
-                var array = sharedArray.m_Managed;
+                var array = sharedArray.managed;
 
-                if (_version == sharedArray.m_Version && ((uint)_index < (uint)array.Length))
+                if (_version == sharedArray.version && ((uint)_index < (uint)array.Length))
                 {
                     _current = array[_index];
                     _index++;
@@ -410,7 +411,7 @@ namespace EncosyTower.Modules.Collections
             {
                 var sharedArray = _sharedArray;
 
-                if (_version != sharedArray.m_Version)
+                if (_version != sharedArray.version)
                 {
                     ThrowEnumFailedVersion();
                 }
@@ -422,7 +423,7 @@ namespace EncosyTower.Modules.Collections
 
             void IEnumerator.Reset()
             {
-                if (_version != _sharedArray.m_Version)
+                if (_version != _sharedArray.version)
                 {
                     ThrowEnumFailedVersion();
                 }

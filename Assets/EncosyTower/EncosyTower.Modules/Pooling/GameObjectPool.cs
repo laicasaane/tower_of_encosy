@@ -84,57 +84,57 @@ namespace EncosyTower.Modules.Pooling
 
                 go.SetActive(false);
             }
+        }
 
-            void PrepoolMany(int amount)
+        private void PrepoolMany(int amount)
+        {
+            if (_prefab.Instantiate(amount
+                , Allocator.Temp
+                , out var instanceIds
+                , out var transformIds
+                , Location.Parent, Location.PoolScene, Location.Scene
+            ) == false)
             {
-                if (_prefab.Instantiate(amount
-                    , Allocator.Temp
-                    , out var instanceIds
-                    , out var transformIds
-                    , Location.Parent, Location.PoolScene, Location.Scene
-                ) == false)
-                {
-                    return;
-                }
-
-                _objectList.Clear();
-                _objectList.Capacity = Mathf.Max(_objectList.Capacity, amount);
-
-                Resources.InstanceIDToObjectList(instanceIds, _objectList);
-
-                var unusedObjects = _unusedObjects;
-                unusedObjects.IncreaseCapacityBy(amount);
-                _unusedInstanceIds.IncreaseCapacityBy(amount);
-                _unusedTransformIds.IncreaseCapacityBy(amount);
-
-                var objects = _objectList.AsReadOnlySpanUnsafe();
-                var objectsLength = objects.Length;
-                var trimCloneSuffix = TrimCloneSuffix;
-
-                for (var i = 0; i < objectsLength; i++)
-                {
-                    var go = objects[i] as GameObject;
-
-                    if (go.IsInvalid())
-                    {
-                        continue;
-                    }
-
-                    if (trimCloneSuffix)
-                    {
-                        go.TrimCloneSuffix();
-                    }
-
-                    unusedObjects.Add(go);
-                }
-
-                _unusedInstanceIds.AddRange(instanceIds.AsReadOnlySpan());
-                _unusedTransformIds.AddRange(transformIds.AsReadOnlySpan());
-
-                _objectList.Clear();
-
-                GameObject.SetGameObjectsActive(instanceIds, false);
+                return;
             }
+
+            _objectList.Clear();
+            _objectList.Capacity = Mathf.Max(_objectList.Capacity, amount);
+
+            Resources.InstanceIDToObjectList(instanceIds, _objectList);
+
+            var unusedObjects = _unusedObjects;
+            unusedObjects.IncreaseCapacityBy(amount);
+            _unusedInstanceIds.IncreaseCapacityBy(amount);
+            _unusedTransformIds.IncreaseCapacityBy(amount);
+
+            var objects = _objectList.AsReadOnlySpanUnsafe();
+            var objectsLength = objects.Length;
+            var trimCloneSuffix = TrimCloneSuffix;
+
+            for (var i = 0; i < objectsLength; i++)
+            {
+                var go = objects[i] as GameObject;
+
+                if (go.IsInvalid())
+                {
+                    continue;
+                }
+
+                if (trimCloneSuffix)
+                {
+                    go.TrimCloneSuffix();
+                }
+
+                unusedObjects.Add(go);
+            }
+
+            _unusedInstanceIds.AddRange(instanceIds.AsReadOnlySpan());
+            _unusedTransformIds.AddRange(transformIds.AsReadOnlySpan());
+
+            _objectList.Clear();
+
+            GameObject.SetGameObjectsActive(instanceIds, false);
         }
 
         public void ReleaseInstances(int keep, Action<GameObject> onReleased = null)

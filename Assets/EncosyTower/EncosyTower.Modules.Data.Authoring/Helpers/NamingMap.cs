@@ -41,22 +41,12 @@ namespace EncosyTower.Modules.Data.Authoring
 
         public string GetSerializedName(string properName)
         {
-            if (_properNameToSerializedName.TryGetValue(properName, out var value))
-            {
-                return value;
-            }
-
-            return properName;
+            return _properNameToSerializedName.GetValueOrDefault(properName, properName);
         }
 
         public string GetProperName(string serializedName)
         {
-            if (_serializedNameToProperName.TryGetValue(serializedName, out var value))
-            {
-                return value;
-            }
-
-            return serializedName;
+            return _serializedNameToProperName.GetValueOrDefault(serializedName, serializedName);
         }
 
         public static string ConvertName(string name, NamingStrategy namingStrategy)

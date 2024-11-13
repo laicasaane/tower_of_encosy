@@ -11,13 +11,13 @@ namespace EncosyTower.Modules.AddressableKeys
     partial record struct AddressableKey<T> : ILoadAsync<T>, ITryLoadAsync<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly async UniTask<T> LoadAsync(CancellationToken token = default)
+        public async UniTask<T> LoadAsync(CancellationToken token = default)
         {
             var result = await TryLoadAsync(token);
             return result.ValueOrDefault();
         }
 
-        public readonly async UniTask<Option<T>> TryLoadAsync(CancellationToken token = default)
+        public async UniTask<Option<T>> TryLoadAsync(CancellationToken token = default)
         {
             if (IsValid == false) return default;
 
@@ -55,12 +55,8 @@ namespace EncosyTower.Modules.AddressableKeys
 
             var asset = handle.Result;
 
-            if ((asset is UnityEngine.Object obj && obj) || asset != null)
-            {
-                return asset;
-            }
-
-            return default;
+            return (asset is UnityEngine.Object obj && obj) || asset != null
+                ? asset : default;
         }
     }
 }

@@ -18,17 +18,17 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Adapters.Unity
     [Serializable]
     [Label("Resources.Load<Sprite>(string)", "Default")]
     [Adapter(sourceType: typeof(string), destType: typeof(Sprite), order: 0)]
-    public sealed class SpriteResorcesAdapter : ResourcesAdapter<Sprite> { }
+    public sealed class SpriteResourcesAdapter : ResourcesAdapter<Sprite> { }
 
     [Serializable]
     [Label("Resources.Load<GameObject>(string)", "Default")]
     [Adapter(sourceType: typeof(string), destType: typeof(GameObject), order: 0)]
-    public sealed class GameObjectResorcesAdapter : ResourcesAdapter<GameObject> { }
+    public sealed class GameObjectResourcesAdapter : ResourcesAdapter<GameObject> { }
 
     [Serializable]
     [Label("Resources.Load<AudioClip>(string)", "Default")]
     [Adapter(sourceType: typeof(string), destType: typeof(AudioClip), order: 0)]
-    public sealed class AudioClipResorcesAdapter : ResourcesAdapter<AudioClip> { }
+    public sealed class AudioClipResourcesAdapter : ResourcesAdapter<AudioClip> { }
 
 }
 

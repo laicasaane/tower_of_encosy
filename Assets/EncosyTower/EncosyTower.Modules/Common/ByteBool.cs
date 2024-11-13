@@ -78,7 +78,7 @@ namespace EncosyTower.Modules
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
-            => ((bool)this) ? bool.TrueString : bool.FalseString;
+            => this ? bool.TrueString : bool.FalseString;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CompareTo(bool other)
@@ -86,21 +86,15 @@ namespace EncosyTower.Modules
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CompareTo(ByteBool other)
-            => ((bool)this).CompareTo((bool)other);
+            => ((bool)this).CompareTo(other);
 
         public int CompareTo(object obj)
         {
-            if (obj is ByteBool other)
-            {
-                return CompareTo(other);
-            }
-
-            if (obj is bool otherBool)
-            {
-                return ((bool)this).CompareTo(otherBool);
-            }
-
-            return ((bool)this).CompareTo(obj);
+            return obj switch {
+                ByteBool other => CompareTo(other),
+                bool otherBool => ((bool)this).CompareTo(otherBool),
+                _ => ((bool)this).CompareTo(obj)
+            };
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -207,7 +201,7 @@ namespace EncosyTower.Modules
             get
             {
                 var fs = new FixedString32Bytes();
-                FixedStringMethods.Append(ref fs, (FixedString32Bytes)bool.FalseString);
+                fs.Append((FixedString32Bytes)bool.FalseString);
                 return fs;
             }
         }
@@ -218,14 +212,14 @@ namespace EncosyTower.Modules
             get
             {
                 var fs = new FixedString32Bytes();
-                FixedStringMethods.Append(ref fs, (FixedString32Bytes)bool.TrueString);
+                fs.Append((FixedString32Bytes)bool.TrueString);
                 return fs;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public FixedString32Bytes ToFixedString()
-            => ((bool)this) ? TrueString : FalseString;
+            => this ? TrueString : FalseString;
     }
 }
 

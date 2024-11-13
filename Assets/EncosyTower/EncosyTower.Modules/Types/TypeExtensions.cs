@@ -80,9 +80,9 @@ namespace EncosyTower.Modules
 
                 var typeParameters = type.GetGenericArguments();
 
-                for (int i = 0; i < typeParameters.Length; ++i)
+                for (var i = 0; i < typeParameters.Length; ++i)
                 {
-                    string typeParamName = GetFriendlyName(typeParameters[i]);
+                    var typeParamName = GetFriendlyName(typeParameters[i]);
                     friendlyName += (i == 0 ? typeParamName : "," + typeParamName);
                 }
 

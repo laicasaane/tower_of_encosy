@@ -10,11 +10,11 @@ using UnityEngine;
 
 namespace EncosyTower.Modules.NameKeys
 {
-    public readonly partial struct NativeNameVault
+    public partial struct NativeNameVault
     {
-        private readonly NativeHashMap<NameHash, Id> _map;
-        private readonly NativeList<FixedString32Bytes> _names;
-        private readonly NativeList<Option<NameHash>> _hashes;
+        private NativeHashMap<NameHash, Id> _map;
+        private NativeList<FixedString32Bytes> _names;
+        private NativeList<Option<NameHash>> _hashes;
 
         public NativeNameVault(int initialCapacity, Allocator allocator)
         {
@@ -52,16 +52,18 @@ namespace EncosyTower.Modules.NameKeys
             var hash = name.GetHashCode();
             id = new Id(index);
 
-            if (_map.TryAdd(hash, id))
+            if (_map.TryAdd(hash, id) == false)
             {
-                EnsureCapacity();
-                _names.Add(name);
-                ref var elem = ref _hashes.ElementAt(index);
-                elem = new(hash);
-                return true;
+                return default;
             }
 
-            return default;
+            EnsureCapacity();
+            _names.Add(name);
+            
+            ref var elem = ref _hashes.ElementAt(index);
+            elem = new(hash);
+            
+            return true;
         }
 
         private void EnsureCapacity()

@@ -5,7 +5,7 @@ namespace EncosyTower.Modules
     /// <summary>
     /// Provides label text that will be shown on the Unity Inspector.
     /// </summary>
-    [AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.All, Inherited = false)]
     public sealed class LabelAttribute : Attribute
     {
         public string Label { get; }

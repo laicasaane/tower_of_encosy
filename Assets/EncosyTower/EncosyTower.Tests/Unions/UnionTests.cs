@@ -12,7 +12,7 @@ namespace EncosyTower.Tests
         [Test, Performance]
         public void Union_Performance()
         {
-            int i = 0;
+            var i = 0;
 
             Measure.Method(() => {
                 Profiler.BeginSample("Union");
@@ -32,7 +32,7 @@ namespace EncosyTower.Tests
         [Test, Performance]
         public void UnionBig_Performance()
         {
-            int i = 0;
+            var i = 0;
 
             Measure.Method(() => {
                 Profiler.BeginSample("UnionBig");

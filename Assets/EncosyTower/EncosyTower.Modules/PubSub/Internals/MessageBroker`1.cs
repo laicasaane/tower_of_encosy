@@ -23,7 +23,16 @@ namespace EncosyTower.Modules.PubSub.Internals
 
         private long _refCount;
 
-        public bool IsEmpty => _ordering.Count < 1;
+        public bool IsEmpty
+        {
+            get
+            {
+                lock (_ordering)
+                {
+                    return _ordering.Count < 1;
+                }
+            }
+        }
 
         public bool IsCached => _refCount > 0;
 
@@ -66,12 +75,11 @@ namespace EncosyTower.Modules.PubSub.Internals
             }
         }
 
-        public sealed override void Dispose()
+        public override void Dispose()
         {
             lock (_orderToHandlerMap)
             {
                 var orderToHandlerMap = _orderToHandlerMap;
-                var ordering = _ordering;
 
                 foreach (var kvp in orderToHandlerMap)
                 {
@@ -98,7 +106,7 @@ namespace EncosyTower.Modules.PubSub.Internals
         /// <summary>
         /// Remove empty handler groups to optimize performance.
         /// </summary>
-        public sealed override void Compress(ILogger logger)
+        public override void Compress(ILogger logger)
         {
             lock (_orderToHandlerMap)
             {

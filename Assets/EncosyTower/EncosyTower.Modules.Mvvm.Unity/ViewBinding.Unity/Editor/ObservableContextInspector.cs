@@ -22,7 +22,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
         public abstract void OnInspectorGUI();
     }
 
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public sealed class ObservableContextInspectorAttribute : Attribute
     {
         public Type ContextType { get; }

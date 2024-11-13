@@ -30,8 +30,9 @@ using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Modules.Collections
 {
-    public class FasterList<T> : ICollection<T>, IReadOnlyCollection<T>, IList<T>, IReadOnlyList<T>
-        , IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
+    public class FasterList<T> : IList<T>, IReadOnlyList<T>
+        , IAsSpan<T>, IAsReadOnlySpan<T>
+        , IAsMemory<T>, IAsReadOnlyMemory<T>
     {
         internal static readonly EqualityComparer<T> s_comp = EqualityComparer<T>.Default;
         internal static readonly bool s_shouldPerformMemClear = TypeCache<T>.IsUnmanaged == false;
@@ -285,7 +286,7 @@ namespace EncosyTower.Modules.Collections
             var items = AsReadOnlySpan();
             var endIndex = startIndex + count;
 
-            for (int i = startIndex; i < endIndex; i++)
+            for (var i = startIndex; i < endIndex; i++)
             {
                 ref readonly var item = ref items[i];
 
@@ -313,7 +314,7 @@ namespace EncosyTower.Modules.Collections
             var items = AsReadOnlySpan();
             var endIndex = startIndex + count;
 
-            for (int i = startIndex; i < endIndex; i++)
+            for (var i = startIndex; i < endIndex; i++)
             {
                 ref readonly var item = ref items[i];
 
@@ -349,7 +350,7 @@ namespace EncosyTower.Modules.Collections
             var items = AsReadOnlySpan();
             var endIndex = startIndex - count;
 
-            for (int i = startIndex; i > endIndex; i--)
+            for (var i = startIndex; i > endIndex; i--)
             {
                 ref readonly var item = ref items[i];
 
@@ -386,7 +387,7 @@ namespace EncosyTower.Modules.Collections
             var items = AsReadOnlySpan();
             var endIndex = startIndex - count;
 
-            for (int i = startIndex; i > endIndex; i--)
+            for (var i = startIndex; i > endIndex; i--)
             {
                 ref readonly var item = ref items[i];
 
@@ -491,7 +492,7 @@ namespace EncosyTower.Modules.Collections
 
             EnsureCountIsAtLeast(index + 1);
 
-            if (s_comp.Equals(this[index], default) == true)
+            if (s_comp.Equals(this[index], default))
                 this[index] = item();
 
             return ref ElementAt(index);
@@ -549,7 +550,7 @@ namespace EncosyTower.Modules.Collections
         {
             if (collection is ICollection<T> c)
             {
-                int count = c.Count;
+                var count = c.Count;
 
                 if (count > 0)
                 {
@@ -1049,20 +1050,6 @@ namespace EncosyTower.Modules.Collections
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ReuseOneSlot<TDerived>()
-            where TDerived : T
-        {
-            _version++;
-
-            if (_count >= _buffer.Length)
-                return false;
-
-            _count++;
-
-            return true;
-        }
-
         public void AddReplicate<TDerived>(int count)
             where TDerived : T, new()
         {
@@ -1157,7 +1144,7 @@ namespace EncosyTower.Modules.Collections
 
             if (count > 1)
             {
-                Array.Sort<T>(_buffer, index, count, comparer);
+                Array.Sort(_buffer, index, count, comparer);
             }
 
             _version++;

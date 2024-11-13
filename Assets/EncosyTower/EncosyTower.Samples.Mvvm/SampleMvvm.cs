@@ -11,7 +11,7 @@ namespace EncosyTower.Samples.Mvvm
         [SerializeField] private float _scrollStop = 1f;
 
         private float _scrollDirection = 1f;
-        private float _scrollIntervalElapsed = 0f;
+        private float _scrollIntervalElapsed;
 
         [ObservableProperty]
         public float ScrollPosition { get => Get_ScrollPosition(); set => Set_ScrollPosition(value); }

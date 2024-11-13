@@ -22,7 +22,7 @@ namespace EncosyTower.Modules.NameKeys
 
         static GlobalFixedNameVault()
         {
-            s_vault.Data = new FixedNameVault(0);
+            s_vault.Data = new FixedNameVault();
         }
 
         public static int Capacity

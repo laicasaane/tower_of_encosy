@@ -8,16 +8,15 @@ namespace EncosyTower.Modules.PubSub.Internals
 {
     internal sealed class HandlerFuncMessageToken<TMessage> : IHandler<TMessage>
     {
-        private readonly DelegateId _id;
         private Func<TMessage, CancellationToken, UniTask> _handler;
 
         public HandlerFuncMessageToken(Func<TMessage, CancellationToken, UniTask> handler)
         {
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            _id = new(handler);
+            Id = new(handler);
         }
 
-        public DelegateId Id => _id;
+        public DelegateId Id { get; }
 
         public void Dispose()
         {
@@ -37,16 +36,15 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class HandlerFuncToken<TMessage> : IHandler<TMessage>
     {
-        private readonly DelegateId _id;
         private Func<CancellationToken, UniTask> _handler;
 
         public HandlerFuncToken(Func<CancellationToken, UniTask> handler)
         {
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            _id = new(handler);
+            Id = new(handler);
         }
 
-        public DelegateId Id => _id;
+        public DelegateId Id { get; }
 
         public void Dispose()
         {
@@ -66,16 +64,15 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class HandlerFuncMessage<TMessage> : IHandler<TMessage>
     {
-        private readonly DelegateId _id;
         private Func<TMessage, UniTask> _handler;
 
         public HandlerFuncMessage(Func<TMessage, UniTask> handler)
         {
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            _id = new(handler);
+            Id = new(handler);
         }
 
-        public DelegateId Id => _id;
+        public DelegateId Id { get; }
 
         public void Dispose()
         {
@@ -95,16 +92,15 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class HandlerFunc<TMessage> : IHandler<TMessage>
     {
-        private readonly DelegateId _id;
         private Func<UniTask> _handler;
 
         public HandlerFunc(Func<UniTask> handler)
         {
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            _id = new(handler);
+            Id = new(handler);
         }
 
-        public DelegateId Id => _id;
+        public DelegateId Id { get; }
 
         public void Dispose()
         {
@@ -124,16 +120,15 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class HandlerActionMessage<TMessage> : IHandler<TMessage>
     {
-        private readonly DelegateId _id;
         private Action<TMessage> _handler;
 
         public HandlerActionMessage(Action<TMessage> handler)
         {
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            _id = new(handler);
+            Id = new(handler);
         }
 
-        public DelegateId Id => _id;
+        public DelegateId Id { get; }
 
         public void Dispose()
         {
@@ -154,16 +149,15 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class HandlerAction<TMessage> : IHandler<TMessage>
     {
-        private readonly DelegateId _id;
         private Action _handler;
 
         public HandlerAction(Action handler)
         {
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            _id = new(handler);
+            Id = new(handler);
         }
 
-        public DelegateId Id => _id;
+        public DelegateId Id { get; }
 
         public void Dispose()
         {

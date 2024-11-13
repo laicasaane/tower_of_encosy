@@ -8,6 +8,8 @@ using UnityEngine.Serialization;
 
 namespace EncosyTower.Modules.Localization
 {
+    // ReSharper disable once InconsistentNaming
+
     public readonly struct L10nKey<T> : IEquatable<L10nKey<T>>, IEquatable<L10nKey>
     {
         public readonly L10nKey Value;
@@ -81,6 +83,7 @@ namespace EncosyTower.Modules.Localization
             => !left.Equals(right);
     }
 
+    // ReSharper disable once InconsistentNaming
     partial struct L10nKey
     {
         [Serializable]

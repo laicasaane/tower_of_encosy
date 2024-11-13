@@ -2,7 +2,7 @@
 
 namespace EncosyTower.Modules.Data
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Property)]
     public sealed class DataPropertyAttribute : Attribute
     {
         public Type FieldType { get; }

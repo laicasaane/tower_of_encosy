@@ -38,17 +38,16 @@ namespace EncosyTower.Modules.Data.Authoring
 
         public async Task<DateTime> FetchModifiedTime()
         {
-            using (var service = new DriveService(new BaseClientService.Initializer() {
+            using var service = new DriveService(new BaseClientService.Initializer {
                 HttpClientInitializer = _credential
-            }))
-            {
-                var fileReq = service.Files.Get(_gsheetAddress);
-                fileReq.SupportsTeamDrives = true;
-                fileReq.Fields = "modifiedTime";
+            });
+            
+            var fileReq = service.Files.Get(_gsheetAddress);
+            fileReq.SupportsTeamDrives = true;
+            fileReq.Fields = "modifiedTime";
 
-                var file = await fileReq.ExecuteAsync();
-                return file.ModifiedTime ?? default;
-            }
+            var file = await fileReq.ExecuteAsync();
+            return file.ModifiedTime ?? default;
         }
 
         public async Task Export(
@@ -60,7 +59,7 @@ namespace EncosyTower.Modules.Data.Authoring
         {
             if (_isLoaded == false)
             {
-                using (var service = new SheetsService(new BaseClientService.Initializer() {
+                using (var service = new SheetsService(new BaseClientService.Initializer {
                     HttpClientInitializer = _credential
                 }))
                 {
@@ -81,7 +80,7 @@ namespace EncosyTower.Modules.Data.Authoring
 
             if (cleanOutputFolder && fileSystem.DirectoryExists(outputPath))
             {
-                fileSystem.DeleteDirectory(outputPath, true);
+                fileSystem.DeleteDirectory(outputPath);
             }
 
             fileSystem.CreateDirectory(outputPath);
@@ -116,46 +115,50 @@ namespace EncosyTower.Modules.Data.Authoring
 
                 var file = Path.Combine(outputPath, $"{fileName}.csv");
 
-                using (var stream = fileSystem.OpenWrite(file))
-                using (var writer = new StreamWriter(stream))
+                await using var stream = fileSystem.OpenWrite(file);
+                await using var writer = new StreamWriter(stream);
+                var rows = data.RowData;
+
+                if (rows == null || rows.Count < 1)
                 {
-                    var rows = data.RowData;
-                    var rowCount = rows?.Count ?? 0;
+                    continue;
+                }
 
-                    if (rowCount < 1)
+                var rowCount = rows.Count;
+                var totalColCount = CountColumns(rows);
+
+                if (totalColCount < 1)
+                {
+                    continue;
+                }
+
+                var csv = new CsvWriter(writer);
+
+                for (var r = 0; r < rowCount; r++)
+                {
+                    var row = rows[r];
+                    var cols = row.Values;
+
+                    if (cols == null || cols.Count < 1)
                     {
                         continue;
                     }
+                    
+                    var colCount = cols.Count;
 
-                    var totalColCount = CountColumns(rows);
-
-                    if (totalColCount < 1)
+                    for (var c = 0; c < colCount; c++)
                     {
-                        continue;
+                        csv.WriteField(cols[c]?.FormattedValue);
                     }
 
-                    var csv = new CsvWriter(writer);
+                    var emptyCount = totalColCount - colCount;
 
-                    for (var r = 0; r < rowCount; r++)
+                    for (var c = 0; c <= emptyCount; c++)
                     {
-                        var row = rows[r];
-                        var cols = row.Values;
-                        var colCount = cols?.Count ?? 0;
-
-                        for (var c = 0; c < colCount; c++)
-                        {
-                            csv.WriteField(cols[c]?.FormattedValue);
-                        }
-
-                        var emptyCount = totalColCount - colCount;
-
-                        for (var c = 0; c <= emptyCount; c++)
-                        {
-                            csv.WriteField(string.Empty);
-                        }
-
-                        csv.NextRecord();
+                        csv.WriteField(string.Empty);
                     }
+
+                    csv.NextRecord();
                 }
             }
         }

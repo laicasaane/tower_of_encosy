@@ -25,7 +25,7 @@ namespace EncosyTower.Modules.Jobs
                 return default;
             }
 
-            if (blackboard.GetCollectionComponent<TCollectionComponent>(false).TryGet(out var map) == false)
+            if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var map) == false)
             {
                 return default;
             }
@@ -56,7 +56,7 @@ namespace EncosyTower.Modules.Jobs
                 return default;
             }
 
-            if (blackboard.GetCollectionComponent<TCollectionComponent>(false).TryGet(out var map) == false)
+            if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var map) == false)
             {
                 return default;
             }
@@ -82,7 +82,7 @@ namespace EncosyTower.Modules.Jobs
                 return default;
             }
 
-            if (blackboard.GetCollectionComponent<TCollectionComponent>(false).TryGet(out var map) == false)
+            if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var map) == false)
             {
                 return default;
             }

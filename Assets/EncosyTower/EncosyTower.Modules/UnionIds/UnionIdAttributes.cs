@@ -6,7 +6,7 @@ namespace EncosyTower.Modules.UnionIds
     /// Place this attribute on a struct to indicate that it is a union id.
     /// </summary>
     /// <seealso cref="KindForUnionIdAttribute"/>
-    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Struct)]
     public sealed class UnionIdAttribute : Attribute
     {
         public UnionIdSize Size { get; set; }
@@ -56,7 +56,7 @@ namespace EncosyTower.Modules.UnionIds
     /// The type size must be 8 bytes or lesser.
     /// </remarks>
     /// <seealso cref="UnionIdAttribute"/>
-    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Enum, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Enum)]
     public sealed class KindForUnionIdAttribute : Attribute
     {
         public Type IdType { get; }

@@ -223,8 +223,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             {
                 EditorGUILayout.LabelField("This target list is empty.", s_noBinderStyle, GUILayout.Height(30));
 
-                if (eventData.Type == EventType.MouseDown
-                    && eventData.Button == 1
+                if (eventData is { Type: EventType.MouseDown, Button: 1 }
                     && sectionRect.Contains(eventData.MousePos)
                 )
                 {
@@ -274,8 +273,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                         var labelRect = rect;
                         labelRect.width = 30;
 
-                        if (eventData.Type == EventType.MouseDown
-                            && eventData.Button == 1
+                        if (eventData is { Type: EventType.MouseDown, Button: 1 }
                             && labelRect.Contains(mousePos)
                         )
                         {
@@ -297,8 +295,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
                     GUILayout.Space(4f);
 
-                    if (eventData.Type == EventType.MouseDown
-                        && eventData.Button == 0
+                    if (eventData is { Type: EventType.MouseDown, Button: 0 }
                         && backRect.Contains(mousePos)
                     )
                     {
@@ -399,8 +396,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             {
                 EditorGUILayout.LabelField("This binding list is empty.", s_noBinderStyle, GUILayout.Height(30));
 
-                if (eventData.Type == EventType.MouseDown
-                    && eventData.Button == 1
+                if (eventData is { Type: EventType.MouseDown, Button: 1 }
                     && sectionRect.Contains(eventData.MousePos)
                 )
                 {
@@ -476,7 +472,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                     }
                 }
 
-                if (memberMap != null && memberMap.Count == 1)
+                if (memberMap is { Count: 1 })
                 {
                     (bindingMethodName, bindingParamType) = memberMap.First();
                 }
@@ -530,8 +526,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                         rightClickRect.height += subLabelRect.height;
                     }
 
-                    if (eventData.Type == EventType.MouseDown
-                        && eventData.Button == 1
+                    if (eventData is { Type: EventType.MouseDown, Button: 1 }
                         && rightClickRect.Contains(mousePos)
                     )
                     {
@@ -666,8 +661,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                     }
                     EditorGUILayout.EndHorizontal();
 
-                    if (eventData.Type == EventType.MouseDown
-                        && eventData.Button == 0
+                    if (eventData is { Type: EventType.MouseDown, Button: 0 }
                         && backRect.Contains(mousePos)
                     )
                     {
@@ -778,7 +772,6 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             if (adapterType != null)
             {
                 DrawAdapterType(adapterType, adapterProp, adapterMemberLabel);
-                return;
             }
         }
 
@@ -893,7 +886,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             , Type targetType
         )
         {
-            var rootGO = inspector._view.gameObject;
+            var rootGo = inspector._view.gameObject;
             var menu = new TreeViewPopup(targetType.Name) {
                 width = 500,
                 data = binderProp,
@@ -901,8 +894,8 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             };
 
             var tree = targetType == typeof(GameObject)
-                ? (menu.Tree = new TargetGameObjectTreeView(menu.TreeViewState, rootGO))
-                : (menu.Tree = new TargetComponentTreeView(menu.TreeViewState, rootGO, targetType))
+                ? (menu.Tree = new TargetGameObjectTreeView(menu.TreeViewState, rootGo))
+                : (menu.Tree = new TargetComponentTreeView(menu.TreeViewState, rootGo, targetType))
                 ;
 
             tree.ExpandAll();
@@ -988,16 +981,19 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 {
                     var obj = span[i];
 
-                    if (obj is GameObject go)
+                    switch (obj)
                     {
-                        instanceIds.Add(go.GetInstanceID());
-                        continue;
-                    }
-
-                    if (obj is Component comp)
-                    {
-                        instanceIds.Add(comp.gameObject.GetInstanceID());
-                        continue;
+                        case GameObject go:
+                        {
+                            instanceIds.Add(go.GetInstanceID());
+                            continue;
+                        }
+                        
+                        case Component comp:
+                        {
+                            instanceIds.Add(comp.gameObject.GetInstanceID());
+                            continue;
+                        }
                     }
                 }
             }
@@ -1007,38 +1003,38 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 {
                     var obj = span[i];
 
-                    if (obj is Component comp && targetType == comp.GetType())
+                    switch (obj)
                     {
-                        instanceIds.Add(obj.GetInstanceID());
-                        continue;
-                    }
-
-                    if (obj is GameObject go && go.TryGetComponent(targetType, out var firstComp))
-                    {
-                        instanceIds.Add(firstComp.GetInstanceID());
-                        continue;
+                        case Component comp when targetType == comp.GetType():
+                        {
+                            instanceIds.Add(obj.GetInstanceID());
+                            continue;
+                        }
+                        
+                        case GameObject go when go.TryGetComponent(targetType, out var firstComp):
+                        {
+                            instanceIds.Add(firstComp.GetInstanceID());
+                            continue;
+                        }
                     }
                 }
             }
 
-            if (TryAddTargets(binderProp, instanceIds) == false)
-            {
-                return;
-            }
+            TryAddTargets(binderProp, instanceIds);
         }
 
-        private static bool TryAddTargets(SerializedProperty binderProp, IList<int> instanceIds)
+        private static void TryAddTargets(SerializedProperty binderProp, IList<int> instanceIds)
         {
             if (instanceIds == null)
             {
-                return false;
+                return;
             }
 
             var length = instanceIds.Count;
 
             if (length < 1)
             {
-                return false;
+                return;
             }
 
             var targetsProp = binderProp.FindPropertyRelative(PROP_PRESET_TARGETS);
@@ -1055,13 +1051,9 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             {
                 var instanceId = instanceIds[i];
 
-                if (checkIds.Contains(instanceId))
+                if (checkIds.Add(instanceId) == false)
                 {
                     instanceIds.RemoveAt(i);
-                }
-                else
-                {
-                    checkIds.Add(instanceId);
                 }
             }
 
@@ -1069,7 +1061,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
             if (length < 1)
             {
-                return false;
+                return;
             }
 
             var serializedObject = targetsProp.serializedObject;
@@ -1088,8 +1080,6 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
             serializedObject.ApplyModifiedProperties();
             serializedObject.Update();
-
-            return true;
         }
 
         private static void BindingMenu_AddBinding(object userData)
@@ -1180,19 +1170,18 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
             if (s_binderToTargetTypeMap.TryGetValue(binderType, out targetType) == false)
             {
-                targetType = default;
                 return TargetTypeResult.NotFoundForBinder;
             }
 
-            if (targetType != typeof(GameObject)
-                && typeof(Component).IsAssignableFrom(targetType) == false
+            if (targetType == typeof(GameObject)
+                || typeof(Component).IsAssignableFrom(targetType)
             )
             {
-                targetType = default;
-                return TargetTypeResult.NotGameObjectOrComponent;
+                return TargetTypeResult.Success;
             }
 
-            return TargetTypeResult.Success;
+            targetType = default;
+            return TargetTypeResult.NotGameObjectOrComponent;
         }
 
         private static void DisplayDialog(
@@ -1384,24 +1373,25 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             }
 
             {
-                if (param is (
-                      SerializedProperty targetPropertyProp
+                if (param is not (
+                    SerializedProperty targetPropertyProp
                     , _
                     , _
                     , string selectedPropName
                     , _
                 ))
                 {
-                    var serializedObject = targetPropertyProp.serializedObject;
-                    var target = serializedObject.targetObject;
-
-                    Undo.RecordObject(target, $"Set {targetPropertyProp.propertyPath}");
-
-                    targetPropertyProp.stringValue = selectedPropName;
-                    serializedObject.ApplyModifiedProperties();
-                    serializedObject.Update();
                     return;
                 }
+
+                var serializedObject = targetPropertyProp.serializedObject;
+                var target = serializedObject.targetObject;
+
+                Undo.RecordObject(target, $"Set {targetPropertyProp.propertyPath}");
+
+                targetPropertyProp.stringValue = selectedPropName;
+                serializedObject.ApplyModifiedProperties();
+                serializedObject.Update();
             }
         }
 
@@ -1582,7 +1572,10 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                     adapterTypes.AddRange(orderedTypes);
                 }
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             var root = new MenuItemNode();
             var menu = new GenericMenuPopup(root, "Adapters");
@@ -1649,7 +1642,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                     ? node
                     : node.GetOrCreateNode(directory);
 
-                if (ignoreDestinationTypeMenu == false && adapterAttrib?.DestinationType is Type destType)
+                if (ignoreDestinationTypeMenu == false && adapterAttrib?.DestinationType is { } destType)
                 {
                     node = node.GetOrCreateNode(destType.GetFriendlyName(), destType.FullName);
                 }

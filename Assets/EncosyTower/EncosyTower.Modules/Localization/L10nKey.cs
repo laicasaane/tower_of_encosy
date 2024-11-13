@@ -8,6 +8,8 @@ using UnityEngine.Serialization;
 
 namespace EncosyTower.Modules.Localization
 {
+    // ReSharper disable once InconsistentNaming
+
     public readonly partial struct L10nKey : IEquatable<L10nKey>
     {
         public readonly TableReference Table;

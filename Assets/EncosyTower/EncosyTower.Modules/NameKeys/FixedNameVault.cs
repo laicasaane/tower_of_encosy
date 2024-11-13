@@ -19,7 +19,7 @@ namespace EncosyTower.Modules.NameKeys
         private FixedArray<FixedString32Bytes, NameArrayData> _names;
         private FixedArray<Option<NameHash>, HashArrayData> _hashes;
 
-        public FixedNameVault(int _)
+        public FixedNameVault()
         {
             _map = new(default);
             _names = new(default);

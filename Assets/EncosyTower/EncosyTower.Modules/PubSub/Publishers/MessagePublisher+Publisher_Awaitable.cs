@@ -7,14 +7,12 @@
 #endif
 
 using System.Threading;
+using EncosyTower.Modules.Logging;
 using EncosyTower.Modules.PubSub.Internals;
 using UnityEngine;
 
 namespace EncosyTower.Modules.PubSub
 {
-    using CallerInfo = EncosyTower.Modules.Logging.CallerInfo;
-    using DevLogger = EncosyTower.Modules.Logging.DevLogger;
-
     partial class MessagePublisher
     {
         partial struct Publisher<TScope>
@@ -24,7 +22,7 @@ namespace EncosyTower.Modules.PubSub
 #endif
             public void Publish<TMessage>(
                   CancellationToken token = default
-                , EncosyTower.Modules.Logging.ILogger logger = null
+                , Logging.ILogger logger = null
                 , CallerInfo callerInfo = default
             )
 #if ENCOSY_PUBSUB_RELAX_MODE
@@ -58,7 +56,7 @@ namespace EncosyTower.Modules.PubSub
             public void Publish<TMessage>(
                   TMessage message
                 , CancellationToken token = default
-                , EncosyTower.Modules.Logging.ILogger logger = null
+                , Logging.ILogger logger = null
                 , CallerInfo callerInfo = default
             )
 #if !ENCOSY_PUBSUB_RELAX_MODE
@@ -89,7 +87,7 @@ namespace EncosyTower.Modules.PubSub
 #endif
             public Awaitable PublishAsync<TMessage>(
                   CancellationToken token = default
-                , EncosyTower.Modules.Logging.ILogger logger = null
+                , Logging.ILogger logger = null
                 , CallerInfo callerInfo = default
             )
 #if ENCOSY_PUBSUB_RELAX_MODE
@@ -126,7 +124,7 @@ namespace EncosyTower.Modules.PubSub
             public Awaitable PublishAsync<TMessage>(
                   TMessage message
                 , CancellationToken token = default
-                , EncosyTower.Modules.Logging.ILogger logger = null
+                , Logging.ILogger logger = null
                 , CallerInfo callerInfo = default
             )
 #if !ENCOSY_PUBSUB_RELAX_MODE

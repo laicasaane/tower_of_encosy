@@ -2,7 +2,7 @@ using System;
 
 namespace EncosyTower.Modules.Data.SourceGen
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Property)]
     public sealed class GeneratedPropertyFromFieldAttribute : Attribute
     {
         public string FieldName { get; }
@@ -16,7 +16,7 @@ namespace EncosyTower.Modules.Data.SourceGen
         }
     }
 
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Field)]
     public sealed class GeneratedFieldFromPropertyAttribute : Attribute
     {
         public string PropertyName { get; }

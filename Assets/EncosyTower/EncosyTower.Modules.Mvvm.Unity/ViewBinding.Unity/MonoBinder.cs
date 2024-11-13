@@ -138,7 +138,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Unity
 
                 if (bindingT.Context == null)
                 {
-                    ErrorIfContextMissing(loggingContext, i, binding);
+                    ErrorIfContextMissing(loggingContext, i);
                     continue;
                 }
 
@@ -167,7 +167,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Unity
         }
 
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ErrorIfContextMissing(UnityEngine.Object context, int index, MonoBinding value)
+        private static void ErrorIfContextMissing(UnityEngine.Object context, int index)
         {
             DevLoggerAPI.LogError(
                   context

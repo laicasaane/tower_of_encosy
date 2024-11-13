@@ -16,7 +16,7 @@ namespace EncosyTower.Modules.NameKeys
 #endif
 
             GlobalNameVault<T>.ThrowIfNotDefined(self);
-            return GlobalNameVault<T>.KeyToName(self).ToString();
+            return GlobalNameVault<T>.KeyToName(self);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

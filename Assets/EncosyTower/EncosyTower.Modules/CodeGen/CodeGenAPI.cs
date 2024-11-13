@@ -29,17 +29,19 @@ namespace EncosyTower.Modules.CodeGen
                 var relativePath = AssetDatabase.GUIDToAssetPath(guid);
                 var fileNameWithExtension = Path.GetFileName(relativePath);
 
-                if (fileNameWithExtension == $"{fileName}.{extension}")
+                if (fileNameWithExtension != $"{fileName}.{extension}")
                 {
-                    path = Path.GetDirectoryName(relativePath);
-
-                    if (rootIsAssets)
-                    {
-                        path = Path.GetRelativePath("Assets", path);
-                    }
-
-                    return true;
+                    continue;
                 }
+
+                path = Path.GetDirectoryName(relativePath);
+
+                if (rootIsAssets)
+                {
+                    path = Path.GetRelativePath("Assets", path);
+                }
+
+                return true;
             }
 
         FAILED:

@@ -1,6 +1,6 @@
 ﻿namespace EncosyTower.Modules
 {
-    public interface ILoad<T>
+    public interface ILoad<out T>
     {
         T Load();
     }

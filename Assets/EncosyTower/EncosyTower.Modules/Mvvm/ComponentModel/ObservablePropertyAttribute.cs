@@ -25,7 +25,7 @@ namespace EncosyTower.Modules.Mvvm.ComponentModel
     /// the <c>_lowerCamel</c> or <c>m_lowerCamel</c> naming scheme. Otherwise, the first character in the
     /// source field name will be converted to uppercase (eg. <c>isEnabled</c> to <c>IsEnabled</c>).
     /// </remarks>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ObservablePropertyAttribute : Attribute
     {
         public string Name { get; }

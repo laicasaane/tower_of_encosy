@@ -12,12 +12,9 @@ namespace EncosyTower.Samples.Mvvm
     {
         public Union Convert(in Union union)
         {
-            if (union.TryGetValue(out float result))
-            {
-                return $"Scroll Position: {result:0.00}";
-            }
-
-            return union;
+            return union.TryGetValue(out float result)
+                ? $"Scroll Position: {result:0.00}"
+                : union;
         }
     }
 }

@@ -22,6 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// ReSharper disable InconsistentNaming
+
 #if UNITY_COLLECTIONS
 #if DEBUG || ENABLE_UNITY_COLLECTIONS_CHECKS || UNITY_DOTS_DEBUG
 #define ENABLE_DEBUG_CHECKS
@@ -164,7 +166,7 @@ namespace EncosyTower.Modules.Collections
         {
             var itemAdded = AddValue(key, out index);
 
-            if (itemAdded == true)
+            if (itemAdded)
                 _values[index] = value;
 
             return itemAdded;
@@ -176,7 +178,7 @@ namespace EncosyTower.Modules.Collections
             var itemAdded = AddValue(key, out var index);
 
 #if ENABLE_DEBUG_CHECKS
-            if (itemAdded == true)
+            if (itemAdded)
                 throw new InvalidOperationException("Trying to set a value on a not existing key");
 #endif
 
@@ -219,7 +221,7 @@ namespace EncosyTower.Modules.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryGetValue(TKey key, out TValue result)
         {
-            if (TryFindIndex(key, out var findIndex) == true)
+            if (TryFindIndex(key, out var findIndex))
             {
                 result = _values[findIndex];
                 return true;
@@ -232,7 +234,7 @@ namespace EncosyTower.Modules.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetOrAdd(TKey key)
         {
-            if (TryFindIndex(key, out var findIndex) == true)
+            if (TryFindIndex(key, out var findIndex))
             {
                 return ref _values[findIndex];
             }
@@ -247,7 +249,7 @@ namespace EncosyTower.Modules.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetOrAdd(TKey key, Func<TValue> builder)
         {
-            if (TryFindIndex(key, out var findIndex) == true)
+            if (TryFindIndex(key, out var findIndex))
             {
                 return ref _values[findIndex];
             }
@@ -262,7 +264,7 @@ namespace EncosyTower.Modules.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetOrAdd(TKey key, out int index)
         {
-            if (TryFindIndex(key, out index) == true)
+            if (TryFindIndex(key, out index))
             {
                 return ref _values[index];
             }
@@ -275,7 +277,7 @@ namespace EncosyTower.Modules.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetOrAdd<W>(TKey key, FuncRef<W, TValue> builder, ref W parameter)
         {
-            if (TryFindIndex(key, out var findIndex) == true)
+            if (TryFindIndex(key, out var findIndex))
             {
                 return ref _values[findIndex];
             }
@@ -291,7 +293,7 @@ namespace EncosyTower.Modules.Collections
         public readonly ref TValue GetValueByRef(TKey key)
         {
 #if ENABLE_DEBUG_CHECKS
-            if (TryFindIndex(key, out var findIndex) == true)
+            if (TryFindIndex(key, out var findIndex))
                 return ref _values[findIndex];
 
             throw new KeyNotFoundException("Key not found");
@@ -311,7 +313,7 @@ namespace EncosyTower.Modules.Collections
                 var expandPrime = HashHelpers.ExpandPrime(size);
 
                 _values.Resize(expandPrime, true, false);
-                _valuesInfo.Resize(expandPrime, true, true);
+                _valuesInfo.Resize(expandPrime);
             }
         }
 
@@ -321,7 +323,7 @@ namespace EncosyTower.Modules.Collections
             var expandPrime = HashHelpers.ExpandPrime(_values.Capacity + size);
 
             _values.Resize(expandPrime, true, false);
-            _valuesInfo.Resize(expandPrime, true, true);
+            _valuesInfo.Resize(expandPrime);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -337,15 +339,15 @@ namespace EncosyTower.Modules.Collections
             var bucketIndex = (int)Reduce((uint)hash, (uint)_buckets.Capacity, _fastModBucketsMultiplier.Value);
 
             //find the bucket
-            int indexToValueToRemove = _buckets[bucketIndex] - 1;
-            int itemAfterCurrentOne = -1;
+            var indexToValueToRemove = _buckets[bucketIndex] - 1;
+            var itemAfterCurrentOne = -1;
 
             //Part one: look for the actual key in the bucket list if found I update the bucket list so that it doesn't
             //point anymore to the cell to remove
             while (indexToValueToRemove != -1)
             {
                 ref var node = ref _valuesInfo[indexToValueToRemove];
-                if (node._hashcode == hash && node.key.Equals(key) == true)
+                if (node._hashcode == hash && node.key.Equals(key))
                 {
                     //if the key is found and the bucket points directly to the node to remove
                     if (_buckets[bucketIndex] - 1 == indexToValueToRemove)
@@ -462,7 +464,7 @@ namespace EncosyTower.Modules.Collections
                 //Comparer<TKey>.default needs to create a new comparer, so it is much slower
                 //than assuming that Equals is implemented through IEquatable
                 ref var node = ref _valuesInfo[valueIndex];
-                if (node._hashcode == hash && node.key.Equals(key) == true)
+                if (node._hashcode == hash && node.key.Equals(key))
                 {
                     //this is the one
                     findIndex = valueIndex;
@@ -480,7 +482,7 @@ namespace EncosyTower.Modules.Collections
         public readonly int GetIndex(TKey key)
         {
 #if ENABLE_DEBUG_CHECKS
-            if (TryFindIndex(key, out var findIndex) == true)
+            if (TryFindIndex(key, out var findIndex))
                 return findIndex;
 
             throw new KeyNotFoundException("Key not found");
@@ -498,7 +500,7 @@ namespace EncosyTower.Modules.Collections
         {
             var keys = _valuesInfo.AsSpan();
 
-            for (int i = Count - 1; i >= 0; i--)
+            for (var i = Count - 1; i >= 0; i--)
             {
                 var tKey = keys[i].key;
                 if (otherMapKeys.ContainsKey(tKey) == false) Remove(tKey);
@@ -511,10 +513,10 @@ namespace EncosyTower.Modules.Collections
         {
             var keys = _valuesInfo.AsSpan();
 
-            for (int i = Count - 1; i >= 0; i--)
+            for (var i = Count - 1; i >= 0; i--)
             {
                 var tKey = keys[i].key;
-                if (otherMapKeys.ContainsKey(tKey) == true) Remove(tKey);
+                if (otherMapKeys.ContainsKey(tKey)) Remove(tKey);
             }
         }
 
@@ -545,14 +547,14 @@ namespace EncosyTower.Modules.Collections
             }
             else //collision or already exists
             {
-                int currentValueIndex = valueIndex;
+                var currentValueIndex = valueIndex;
                 do
                 {
                     //must check if the key already exists in the map
                     //Comparer<TKey>.default needs to create a new comparer, so it is much slower
                     //than assuming that Equals is implemented through IEquatable (but what if the comparer is statically cached?)
                     ref var mode = ref _valuesInfo[currentValueIndex];
-                    if (mode._hashcode == hash && mode.key.Equals(key) == true)
+                    if (mode._hashcode == hash && mode.key.Equals(key))
                     {
                         //the key already exists, simply replace the value!
                         indexSet = currentValueIndex;
@@ -598,7 +600,7 @@ namespace EncosyTower.Modules.Collections
         private void RecomputeBuckets(int newSize)
         {
             //we need more space and less collisions
-            _buckets.Resize(newSize, false, true);
+            _buckets.Resize(newSize, false);
             _collisions.Value = 0;
             _fastModBucketsMultiplier.Value = HashHelpers.GetFastModMultiplier((uint)_buckets.Capacity);
             var bucketsCapacity = (uint)_buckets.Capacity;
@@ -609,7 +611,7 @@ namespace EncosyTower.Modules.Collections
             var fastModBucketsMultiplier = _fastModBucketsMultiplier.Value;
             var collisions = _collisions.Value;
 
-            for (int newValueIndex = 0; newValueIndex < freeValueCellIndex; ++newValueIndex)
+            for (var newValueIndex = 0; newValueIndex < freeValueCellIndex; ++newValueIndex)
             {
                 //get the original hash code and find the new bucketIndex due to the new length
                 ref var valueInfoNode = ref _valuesInfo[newValueIndex];
@@ -619,7 +621,7 @@ namespace EncosyTower.Modules.Collections
                 //the bucket will now points to the new one
                 //In this way we can rebuild the linkedlist.
                 //get the current valueIndex, it's -1 if no collision happens
-                int existingValueIndex = _buckets[bucketIndex] - 1;
+                var existingValueIndex = _buckets[bucketIndex] - 1;
                 //update the bucket index to the index of the current item that share the bucketIndex
                 //(last found is always the one in the bucket)
                 _buckets[bucketIndex] = newValueIndex + 1;
@@ -646,22 +648,22 @@ namespace EncosyTower.Modules.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ResizeIfNeeded()
         {
-            if (_freeValueCellIndex.Value == _values.Capacity)
+            if (_freeValueCellIndex.Value != _values.Capacity)
             {
-                var expandPrime = HashHelpers.ExpandPrime(_freeValueCellIndex.Value);
-
-                _values.Resize(expandPrime, true, false);
-                _valuesInfo.Resize(expandPrime, true, true);
+                return;
             }
-        }
 
-        private static readonly bool s_is64BitProcess = Environment.Is64BitProcess;
+            var expandPrime = HashHelpers.ExpandPrime(_freeValueCellIndex.Value);
+
+            _values.Resize(expandPrime, true, false);
+            _valuesInfo.Resize(expandPrime);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint Reduce(uint hashcode, uint N, ulong fastModBucketsMultiplier)
         {
             if (hashcode >= N) //is the condition return actually an optimization?
-                return s_is64BitProcess
+                return Environment.Is64BitProcess
                     ? HashHelpers.FastMod(hashcode, N, fastModBucketsMultiplier)
                     : hashcode % N;
 

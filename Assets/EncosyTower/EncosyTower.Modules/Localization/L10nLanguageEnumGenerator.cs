@@ -13,6 +13,7 @@ using UnityEngine.Localization;
 
 namespace EncosyTower.Modules.Editor.Localization
 {
+    // ReSharper disable once InconsistentNaming
     [Generator]
     internal class L10nLanguageEnumGenerator : ICodeGenerator
     {

@@ -1,7 +1,6 @@
 #if UNITY_COLLECTIONS
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Modules.Collections
@@ -9,7 +8,7 @@ namespace EncosyTower.Modules.Collections
     public static class NativeArrayMapExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<TValue> GetValues<TKey, TValue>([NotNull] this ref NativeArrayMap<TKey, TValue> self)
+        public static Span<TValue> GetValues<TKey, TValue>(this ref NativeArrayMap<TKey, TValue> self)
             where TKey : unmanaged, IEquatable<TKey>
             where TValue : unmanaged
         {

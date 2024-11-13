@@ -19,6 +19,7 @@ namespace EncosyTower.Modules
         [FieldOffset(4)]
         public readonly Id X;
 
+        // ReSharper disable once UnusedMember.Local
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Id2(ulong value) : this()
         {
@@ -203,7 +204,7 @@ namespace EncosyTower.Modules
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public int CompareTo(Serializable other)
-                => ((Id2)this).CompareTo((Id2)other);
+                => ((Id2)this).CompareTo(other);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Id2(Serializable value)

@@ -4,7 +4,7 @@ using System;
 
 namespace EncosyTower.Modules.Entities
 {
-    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true)]
     public sealed class LookupAttribute : Attribute
     {
         public Type Type { get; }

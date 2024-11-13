@@ -75,12 +75,7 @@ namespace EncosyTower.Modules.AddressableKeys
                 return default;
             }
 
-            if (handle.Status != AsyncOperationStatus.Succeeded)
-            {
-                return default;
-            }
-
-            return handle.Result;
+            return handle.Status != AsyncOperationStatus.Succeeded ? default : handle.Result;
         }
     }
 }

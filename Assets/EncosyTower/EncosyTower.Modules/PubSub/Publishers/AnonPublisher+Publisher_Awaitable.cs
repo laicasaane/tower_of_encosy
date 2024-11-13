@@ -7,6 +7,7 @@
 #endif
 
 using System.Threading;
+using EncosyTower.Modules.Logging;
 using UnityEngine;
 
 namespace EncosyTower.Modules.PubSub
@@ -20,7 +21,7 @@ namespace EncosyTower.Modules.PubSub
 #endif
             public Awaitable PublishAsync(
                   CancellationToken token = default
-                , EncosyTower.Modules.Logging.ILogger logger = null
+                , Logging.ILogger logger = null
                 , CallerInfo callerInfo = default
             )
             {

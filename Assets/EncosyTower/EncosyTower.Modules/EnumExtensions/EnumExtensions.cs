@@ -5,7 +5,7 @@ namespace EncosyTower.Modules.EnumExtensions
     /// <summary>
     /// Add to any enum that should be extended.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Enum, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Enum)]
     public class EnumExtensionsAttribute : Attribute
     {
     }
@@ -13,7 +13,7 @@ namespace EncosyTower.Modules.EnumExtensions
     /// <summary>
     /// Add to any static class that should extend an enum.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class)]
     public class EnumExtensionsForAttribute : Attribute
     {
         public Type EnumType { get; }

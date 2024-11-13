@@ -70,16 +70,11 @@ namespace EncosyTower.Modules.CodeGen
         /// <summary>
         /// Allows to continue inline printing using the same printer from an function call
         /// </summary>
-        /// <param name="printer"></param>
+        /// <param name="func"></param>
         /// <returns></returns>
         public readonly Printer PrintWith(Func<Printer, Printer> func)
         {
-            if (func != null)
-            {
-                return func(this);
-            }
-
-            return this;
+            return func?.Invoke(this) ?? this;
         }
 
         /// <summary>
@@ -168,6 +163,7 @@ namespace EncosyTower.Modules.CodeGen
         /// Print a character multiple times
         /// </summary>
         /// <param name="character"></param>
+        /// <param name="repeatCount"></param>
         /// <returns></returns>
         public readonly Printer Print(char character, int repeatCount)
         {
@@ -176,7 +172,7 @@ namespace EncosyTower.Modules.CodeGen
         }
 
         /// <summary>
-        /// Print a string if condition is truw
+        /// Print a string if condition is true
         /// </summary>
         /// <param name="condition"></param>
         /// <param name="text"></param>
@@ -191,19 +187,16 @@ namespace EncosyTower.Modules.CodeGen
 
         public readonly Printer PrintSelect(string trueText, string falseText, bool condition)
         {
-            if (condition)
-                Print(trueText);
-            else
-                Print(falseText);
-
+            Print(condition ? trueText : falseText);
             return this;
         }
 
         /// <summary>
         /// Print a character multiple times if condition is true
         /// </summary>
-        /// <param name="condition"></param>
         /// <param name="character"></param>
+        /// <param name="repeatCount"></param>
+        /// <param name="condition"></param>
         /// <returns></returns>
         public readonly Printer Print(char character, int repeatCount, bool condition)
         {
@@ -238,11 +231,7 @@ namespace EncosyTower.Modules.CodeGen
 
         public readonly Printer PrintBeginLineSelect(string trueText, string falseText, bool condition)
         {
-            if (condition)
-                PrintBeginLine(trueText);
-            else
-                PrintBeginLine(falseText);
-
+            PrintBeginLine(condition ? trueText : falseText);
             return this;
         }
 
@@ -250,6 +239,7 @@ namespace EncosyTower.Modules.CodeGen
         /// Print indent and a string
         /// </summary>
         /// <param name="character"></param>
+        /// <param name="repeatCount"></param>
         /// <returns></returns>
         public readonly Printer PrintBeginLine(char character, int repeatCount)
             => Print(CurrentIndent).Print(character, repeatCount);
@@ -285,6 +275,7 @@ namespace EncosyTower.Modules.CodeGen
         /// Print a character multiple times, and an end-line
         /// </summary>
         /// <param name="character"></param>
+        /// <param name="repeatCount"></param>
         /// <returns></returns>
         public readonly Printer PrintEndLine(char character, int repeatCount)
         {
@@ -310,6 +301,7 @@ namespace EncosyTower.Modules.CodeGen
         /// Print indent, a character multiple times, and an end-line
         /// </summary>
         /// <param name="character"></param>
+        /// <param name="repeatCount"></param>
         /// <returns></returns>
         public readonly Printer PrintLine(char character, int repeatCount)
             => PrintBeginLine().PrintEndLine(character, repeatCount);
@@ -333,19 +325,16 @@ namespace EncosyTower.Modules.CodeGen
 
         public readonly Printer PrintLineSelect(string trueText, string falseText, bool condition)
         {
-            if (condition)
-                PrintLine(trueText);
-            else
-                PrintLine(falseText);
-
+            PrintLine(condition ? trueText : falseText);
             return this;
         }
 
         /// <summary>
         /// Print indent, a character multiple times, and an end-line if a condition is true
         /// </summary>
-        /// <param name="condition"></param>
         /// <param name="character"></param>
+        /// <param name="repeatCount"></param>
+        /// <param name="condition"></param>
         /// <returns></returns>
         public readonly Printer PrintLine(char character, int repeatCount, bool condition)
         {
@@ -371,11 +360,7 @@ namespace EncosyTower.Modules.CodeGen
 
         public readonly Printer PrintEndLineSelect(string trueText, string falseText, bool condition)
         {
-            if (condition)
-                PrintEndLine(trueText);
-            else
-                PrintEndLine(falseText);
-
+            PrintEndLine(condition ? trueText : falseText);
             return this;
         }
 
@@ -384,15 +369,15 @@ namespace EncosyTower.Modules.CodeGen
         /// </summary>
         public struct ListPrinter
         {
-            public Printer printer;
-            public string  separator;
-            public bool    isStarted;
+            internal Printer _printer;
+            internal readonly string  _separator;
+            internal bool _started;
 
             public ListPrinter(Printer printer, string separator)
             {
-                this.printer = printer;
-                this.separator = separator;
-                isStarted = false;
+                _printer = printer;
+                _separator = separator;
+                _started = false;
             }
 
             /// <summary>
@@ -401,11 +386,12 @@ namespace EncosyTower.Modules.CodeGen
             /// <returns></returns>
             public Printer NextItemPrinter()
             {
-                if (isStarted)
-                    printer.Print(separator);
+                if (_started)
+                    _printer.Print(_separator);
                 else
-                    isStarted = true;
-                return printer;
+                    _started = true;
+                
+                return _printer;
             }
 
             /// <summary>
@@ -415,12 +401,14 @@ namespace EncosyTower.Modules.CodeGen
             /// <returns></returns>
             public ListPrinter PrintAll(IEnumerable<string> elements)
             {
-                if (elements != null)
+                if (elements == null)
                 {
-                    foreach (var e in elements)
-                    {
-                        NextItemPrinter().Print(e);
-                    }
+                    return this;
+                }
+
+                foreach (var e in elements)
+                {
+                    NextItemPrinter().Print(e);
                 }
 
                 return this;
@@ -438,8 +426,8 @@ namespace EncosyTower.Modules.CodeGen
             {
                 get
                 {
-                    var printer                 = AsMultiline;
-                    printer.listPrinter.printer = printer.listPrinter.printer.WithIncreasedIndent();
+                    var printer                  = AsMultiline;
+                    printer.listPrinter._printer = printer.listPrinter._printer.WithIncreasedIndent();
                     return printer;
                 }
             }
@@ -464,14 +452,17 @@ namespace EncosyTower.Modules.CodeGen
             /// <returns></returns>
             public Printer NextItemPrinter()
             {
-                if (listPrinter.isStarted)
+                if (listPrinter._started)
                 {
-                    listPrinter.printer.PrintEndLine(listPrinter.separator);
-                    listPrinter.printer.PrintBeginLine();
+                    listPrinter._printer.PrintEndLine(listPrinter._separator);
+                    listPrinter._printer.PrintBeginLine();
                 }
                 else
-                    listPrinter.isStarted = true;
-                return listPrinter.printer;
+                {
+                    listPrinter._started = true;
+                }
+                
+                return listPrinter._printer;
             }
         }
 

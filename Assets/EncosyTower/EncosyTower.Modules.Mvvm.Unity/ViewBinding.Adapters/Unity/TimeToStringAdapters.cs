@@ -10,12 +10,9 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Adapters.Unity
     {
         public Union Convert(in Union union)
         {
-            if (union.TryGetValue(out double totalSeconds))
-            {
-                return TimeSpan.FromSeconds(totalSeconds).ToString(@"mm\:ss");
-            }
-
-            return union;
+            return union.TryGetValue(out double totalSeconds)
+                ? TimeSpan.FromSeconds(totalSeconds).ToString(@"mm\:ss")
+                : union;
         }
     }
 }

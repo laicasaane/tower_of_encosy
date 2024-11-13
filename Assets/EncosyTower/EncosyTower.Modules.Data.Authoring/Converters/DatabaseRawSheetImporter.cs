@@ -147,7 +147,7 @@ namespace EncosyTower.Modules.Data.Authoring
             // if the columns next to the id column are empty,
             // it means the id column is split
             // so the next rows would be a part of header row too
-            for (int pageColumn = 1; ; ++pageColumn)
+            for (var pageColumn = 1; ; ++pageColumn)
             {
                 try
                 {
@@ -175,11 +175,11 @@ namespace EncosyTower.Modules.Data.Authoring
 
             var columnNames = new List<string>();
 
-            for (int pageColumn = 0; ; ++pageColumn)
+            for (var pageColumn = 0; ; ++pageColumn)
             {
-                int lastValidRow = -1;
+                var lastValidRow = -1;
 
-                for (int pageRow = 0; pageRow < headerRows.Count; ++pageRow)
+                for (var pageRow = 0; pageRow < headerRows.Count; ++pageRow)
                 {
                     if (page.IsEmptyCell(pageColumn, pageRow) == false)
                     {
@@ -204,9 +204,9 @@ namespace EncosyTower.Modules.Data.Authoring
             var vindex = 0;
             var emptyRowStreak = 0;
 
-            for (int pageRow = headerRows.Count; emptyRowStreak <= EmptyRowStreakThreshold; ++pageRow)
+            for (var pageRow = headerRows.Count; emptyRowStreak <= EmptyRowStreakThreshold; ++pageRow)
             {
-                string idCellValue = page.GetCell(0, pageRow);
+                var idCellValue = page.GetCell(0, pageRow);
 
                 if (string.IsNullOrWhiteSpace(idCellValue) == false)
                 {
@@ -273,9 +273,9 @@ namespace EncosyTower.Modules.Data.Authoring
             , int pageRow
         )
         {
-            for (int pageColumn = 0; pageColumn < columnNames.Count; ++pageColumn)
+            for (var pageColumn = 0; pageColumn < columnNames.Count; ++pageColumn)
             {
-                string columnValue = columnNames[pageColumn];
+                var columnValue = columnNames[pageColumn];
 
                 if (columnValue.StartsWith(Config.Comment))
                 {
@@ -284,10 +284,10 @@ namespace EncosyTower.Modules.Data.Authoring
 
                 using (context.Logger.BeginScope(columnValue))
                 {
-                    string cellValue = page.GetCell(pageColumn, pageRow);
+                    var cellValue = page.GetCell(pageColumn, pageRow);
 
                     // if cell is empty, value should not be set
-                    // Property will keep it's default value
+                    // Property will keep its default value
                     if (string.IsNullOrEmpty(cellValue))
                     {
                         continue;
@@ -299,7 +299,7 @@ namespace EncosyTower.Modules.Data.Authoring
                     }
                     catch (Exception ex)
                     {
-                        // for Id column, throw and exclude whole column
+                        // for ID column, throw and exclude whole column
                         if (pageColumn == 0)
                         {
                             context.Logger.LogError(ex, "Failed to set id \"{CellValue}\". {Reason}", cellValue, ex.Message);

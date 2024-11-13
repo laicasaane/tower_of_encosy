@@ -17,12 +17,15 @@ namespace EncosyTower.Modules
             {
                 var obj = Resources.Load<T>(Value);
 
-                if (obj is T asset && asset)
+                if (obj is { } asset && asset)
                 {
                     return obj;
                 }
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             return default;
         }

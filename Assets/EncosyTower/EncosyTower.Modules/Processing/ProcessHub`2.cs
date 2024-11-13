@@ -145,7 +145,7 @@ namespace EncosyTower.Modules.Processing
 #if __ENCOSY_PROCESSING_VALIDATION__
         private bool Validate()
         {
-            if (IsValid == true)
+            if (IsValid)
             {
                 return true;
             }

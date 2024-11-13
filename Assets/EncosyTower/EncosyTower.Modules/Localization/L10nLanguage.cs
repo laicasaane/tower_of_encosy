@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace EncosyTower.Modules.Localization
 {
+    // ReSharper disable once InconsistentNaming
     public readonly partial struct L10nLanguage : IEquatable<L10nLanguage>
     {
         public const string DEFAULT_LOCALE_CODE = "en";

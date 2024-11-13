@@ -56,7 +56,10 @@ namespace EncosyTower.Modules
                     return asset;
                 }
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             return default;
         }

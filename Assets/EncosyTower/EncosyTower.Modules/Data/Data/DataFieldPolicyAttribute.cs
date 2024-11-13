@@ -2,7 +2,7 @@
 
 namespace EncosyTower.Modules.Data
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
     public sealed class DataFieldPolicyAttribute : Attribute
     {
         public DataFieldPolicy Policy { get; }

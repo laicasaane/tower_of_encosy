@@ -11,7 +11,7 @@ namespace EncosyTower.Modules.Data.Authoring
     /// In case this behavior is not desired, use <see cref="HorizontalAttribute"/>
     /// to signify that the property should be a horizontal list.
     /// </remarks>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public sealed class DatabaseAttribute : Attribute
     {
         public NamingStrategy NamingStrategy { get; }

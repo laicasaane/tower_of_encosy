@@ -11,7 +11,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.SourceGen
     /// However, it can be used in other contexts, such as reflection.
     /// </remarks>
     /// <seealso cref="BindingPropertyAttribute"/>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class BindingPropertyMethodInfoAttribute : Attribute
     {
         public string MethodName { get; }

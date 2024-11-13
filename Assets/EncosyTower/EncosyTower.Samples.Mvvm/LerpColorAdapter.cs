@@ -17,13 +17,13 @@ namespace EncosyTower.Samples.Mvvm
 
         public Union Convert(in Union union)
         {
-            if (union.TryGetValue(out float result))
+            if (union.TryGetValue(out float result) == false)
             {
-                var color = _reversed ? Color.Lerp(_to, _from, result) : Color.Lerp(_from, _to, result);
-                return new ColorUnion(color);
+                return union;
             }
 
-            return union;
+            var color = _reversed ? Color.Lerp(_to, _from, result) : Color.Lerp(_from, _to, result);
+            return new ColorUnion(color);
         }
     }
 }

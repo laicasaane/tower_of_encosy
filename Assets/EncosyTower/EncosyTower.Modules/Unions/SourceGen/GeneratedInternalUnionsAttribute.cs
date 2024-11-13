@@ -10,6 +10,6 @@ namespace EncosyTower.Modules.Unions.SourceGen
     /// <br/>
     /// However, it can be used in other contexts, such as reflection.
     /// </remarks>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public sealed class GeneratedInternalUnionsAttribute : Attribute { }
 }

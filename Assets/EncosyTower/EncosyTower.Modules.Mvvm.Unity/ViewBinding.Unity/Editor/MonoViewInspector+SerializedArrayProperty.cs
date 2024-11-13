@@ -23,7 +23,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             private readonly Action<SerializedArrayProperty> _onSelectedIndexChanged;
 
             private SerializedProperty _property;
-            private int? _selectedIndex = null;
+            private int? _selectedIndex;
 
             public SerializedArrayProperty(
                   string undoKey
@@ -96,14 +96,10 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                     return;
                 }
 
-                if (value.HasValue)
-                {
-                    EditorUserSettings.SetConfigValue(_selectedIndexKey, value.Value.ToString());
-                }
-                else
-                {
-                    EditorUserSettings.SetConfigValue(_selectedIndexKey, string.Empty);
-                }
+                EditorUserSettings.SetConfigValue(
+                      _selectedIndexKey
+                    , value.HasValue ? value.Value.ToString() : string.Empty
+                );
             }
 
             public bool ValidateIndex(int? value)
@@ -285,7 +281,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 var copiedProperty = s_copiedObject.FindProperty(copiedBuffer);
 
                 if (copiedProperty == null
-                    || copiedProperty.isArray == true
+                    || copiedProperty.isArray
                     || _onValidatePasteSingle(copiedProperty, this) == false
                 )
                 {

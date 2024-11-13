@@ -99,22 +99,22 @@ namespace EncosyTower.Modules
 
             var go = UnityObject.Instantiate(prefab, parent.Transform, inWorldSpace);
 
-            if (go.IsValid())
+            if (go.IsInvalid())
             {
-                if (parent.IsValid && parent.IsScene)
-                {
-                    go.MoveToScene(parent.Scene);
-                }
-
-                if (trimCloneSuffix)
-                {
-                    go.TrimCloneSuffix();
-                }
-
-                return go;
+                return default;
             }
 
-            return default;
+            if (parent is { IsValid: true, IsScene: true })
+            {
+                go.MoveToScene(parent.Scene);
+            }
+
+            if (trimCloneSuffix)
+            {
+                go.TrimCloneSuffix();
+            }
+
+            return go;
         }
     }
 }

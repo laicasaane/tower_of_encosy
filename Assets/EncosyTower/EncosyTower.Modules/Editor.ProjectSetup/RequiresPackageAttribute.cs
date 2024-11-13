@@ -8,7 +8,7 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
     /// <summary>
     /// Declares a UPM package dependency.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true)]
     public sealed class RequiresPackageAttribute : Attribute
     {
         public PackageRegistry Registry { get; }

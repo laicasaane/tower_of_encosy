@@ -24,6 +24,7 @@ namespace EncosyTower.Modules.Logging
             return new CallerInfo(lineNumber, memberName, filePath);
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogException(System.Exception value)
         {
@@ -42,6 +43,7 @@ namespace EncosyTower.Modules.Logging
             UnityDebug.LogFormat(format, args);
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogWarning(object message)
         {
@@ -60,12 +62,14 @@ namespace EncosyTower.Modules.Logging
             UnityDebug.LogWarningFormat(context, format, args);
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogError(object message)
         {
             UnityDebug.LogError(message);
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogErrorFormat(string format, params object[] args)
         {
@@ -144,6 +148,7 @@ namespace EncosyTower.Modules.Logging
             UnityDebug.LogError(message, context);
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogErrorFormat(UnityObject context, string format, params object[] args)
         {

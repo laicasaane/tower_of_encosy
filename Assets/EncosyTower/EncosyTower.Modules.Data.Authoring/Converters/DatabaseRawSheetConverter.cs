@@ -84,7 +84,7 @@ namespace EncosyTower.Modules.Data.Authoring
 
             foreach (var (node, indexes) in leafs)
             {
-                int i = 0;
+                var i = 0;
 
                 foreach (var index in indexes)
                 {
@@ -96,7 +96,7 @@ namespace EncosyTower.Modules.Data.Authoring
 
                 if (SplitHeader)
                 {
-                    int tempRow = 0;
+                    var tempRow = 0;
 
                     foreach (var path in columnName.Split(Config.IndexDelimiterArray, StringSplitOptions.None))
                     {
@@ -120,21 +120,21 @@ namespace EncosyTower.Modules.Data.Authoring
                 pageColumn++;
             }
 
-            int pageRow = SplitHeader ? headerRows.Count : 1;
+            var pageRow = SplitHeader ? headerRows.Count : 1;
 
             foreach (ISheetRow sheetRow in sheet)
             {
-                int maxVerticalCount = 1;
+                var maxVerticalCount = 1;
 
                 pageColumn = 0;
 
                 foreach (var (node, indexes) in leafs)
                 {
-                    int verticalCount = node.GetVerticalCount(sheetRow, indexes.GetEnumerator());
+                    var verticalCount = node.GetVerticalCount(sheetRow, indexes.GetEnumerator());
 
-                    for (int vindex = 0; vindex < verticalCount; ++vindex)
+                    for (var vIndex = 0; vIndex < verticalCount; ++vIndex)
                     {
-                        var value = node.GetValue(sheetRow, vindex, indexes.GetEnumerator());
+                        var value = node.GetValue(sheetRow, vIndex, indexes.GetEnumerator());
 
                         string valueString = null;
 
@@ -143,7 +143,7 @@ namespace EncosyTower.Modules.Data.Authoring
                             valueString = node.ValueConverter.ValueToString(node.ValueType, value, valueContext);
                         }
 
-                        page.SetCell(pageColumn, pageRow + vindex, valueString);
+                        page.SetCell(pageColumn, pageRow + vIndex, valueString);
                     }
 
                     if (maxVerticalCount < verticalCount)

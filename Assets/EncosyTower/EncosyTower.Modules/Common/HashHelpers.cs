@@ -11,10 +11,10 @@ namespace EncosyTower.Modules
 {
     public static partial class HashHelpers
     {
-        public const int HashCollisionThreshold = 100;
+        public const int HASH_COLLISION_THRESHOLD = 100;
 
         // This is the maximum prime smaller than Array.MaxArrayLength
-        public const int MaxPrimeArrayLength = 0x7FEFFFFD;
+        public const int MAX_PRIME_ARRAY_LENGTH = 0x7FEFFFFD;
 
         public const int HashPrime = 101;
 
@@ -49,8 +49,8 @@ namespace EncosyTower.Modules
         {
             if ((candidate & 1) != 0)
             {
-                int limit = (int)Math.Sqrt(candidate);
-                for (int divisor = 3; divisor <= limit; divisor += 2)
+                var limit = (int)Math.Sqrt(candidate);
+                for (var divisor = 3; divisor <= limit; divisor += 2)
                 {
                     if ((candidate % divisor) == 0)
                         return false;
@@ -67,16 +67,16 @@ namespace EncosyTower.Modules
 
             var primes = Primes;
 
-            for (int i = 0; i < primes.Length; i++)
+            for (var i = 0; i < primes.Length; i++)
             {
-                int prime = primes[i];
+                var prime = primes[i];
                 if (prime >= min)
                     return prime;
             }
 
             //outside of our predefined table. 
             //compute the hard way. 
-            for (int i = (min | 1); i < int.MaxValue; i += 2)
+            for (var i = (min | 1); i < int.MaxValue; i += 2)
             {
                 if (IsPrime(i) && ((i - 1) % HashPrime != 0))
                     return i;
@@ -87,17 +87,17 @@ namespace EncosyTower.Modules
         // Returns size of hashtable to grow to.
         public static int ExpandPrime(int oldSize)
         {
-            int newSize = 2 * oldSize;
+            var newSize = 2 * oldSize;
 
-            // Allow the hashtables to grow to maximum possible size (~2G elements) before encountering capacity overflow.
+            // Allow the hash tables to grow to maximum possible size (~2G elements) before encountering capacity overflow.
             // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
-            if ((uint)newSize > MaxPrimeArrayLength && MaxPrimeArrayLength > oldSize)
+            if ((uint)newSize <= MAX_PRIME_ARRAY_LENGTH || MAX_PRIME_ARRAY_LENGTH <= oldSize)
             {
-                Checks.IsTrue(MaxPrimeArrayLength == GetPrime(MaxPrimeArrayLength), "Invalid MaxPrimeArrayLength");
-                return MaxPrimeArrayLength;
+                return GetPrime(newSize);
             }
 
-            return GetPrime(newSize);
+            Checks.IsTrue(MAX_PRIME_ARRAY_LENGTH == GetPrime(MAX_PRIME_ARRAY_LENGTH), "Invalid MaxPrimeArrayLength");
+            return MAX_PRIME_ARRAY_LENGTH;
         }
 
         /// <summary>Returns approximate reciprocal of the divisor: ceil(2**64 / divisor).</summary>
@@ -116,10 +116,11 @@ namespace EncosyTower.Modules
 
             // This is equivalent of (uint)Math.BigMul(multiplier * value, divisor, out _). This version
             // is faster than BigMul currently because we only need the high bits.
-            uint highbits = (uint)(((((multiplier * value) >> 32) + 1) * divisor) >> 32);
-
-            Checks.IsTrue(highbits == value % divisor);
-            return highbits;
+            var highBits = (uint)(((((multiplier * value) >> 32) + 1) * divisor) >> 32);
+            
+            Checks.IsTrue(highBits == value % divisor);
+            
+            return highBits;
         }
     }
 }

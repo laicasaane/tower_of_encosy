@@ -19,7 +19,7 @@ namespace EncosyTower.Modules.Vaults
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Awaitable<Option<T>> TryGetAsync<T>(Id<T> id, UnityObject context = null, CancellationToken token = default)
-            => s_vault.TryGetAsync<T>(id, context, token);
+            => s_vault.TryGetAsync(id, context, token);
 
         #region    PRESET_ID
         #endregion =========

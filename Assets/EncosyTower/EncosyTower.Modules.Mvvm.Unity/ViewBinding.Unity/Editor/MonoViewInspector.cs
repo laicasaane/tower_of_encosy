@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using EncosyTower.Modules.Collections;
 using EncosyTower.Modules.Mvvm.ComponentModel.SourceGen;
 using EncosyTower.Modules.Mvvm.Input;
 using EncosyTower.Modules.Mvvm.ViewBinding;
@@ -56,10 +55,6 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
         private const string PROP_PRESET_BINDINGS = "_presetBindings";
         private const string PROP_PRESET_TARGETS = "_presetTargets";
         private const string PROP_SUBTITLE = "_subtitle";
-
-        private const string PROP_TARGET_PROPERTY_NAME = "<TargetPropertyName>k__BackingField";
-        private const string PROP_TARGET_COMMAND_NAME = "<TargetCommandName>k__BackingField";
-        private const string PROP_ADAPTER = "<Adapter>k__BackingField";
 
         private MonoView _view;
         private string _subtitleControlName = "";
@@ -509,7 +504,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
             var selectedIndex = property.SelectedIndex;
 
-            if (selectedIndex.HasValue && selectedIndex.Value > 0)
+            if (selectedIndex is > 0)
             {
                 menu.AddItem(s_moveUpLabel, false, Menu_OnMoveUpSelected, property);
             }
@@ -619,10 +614,10 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             var contextTypes = TypeCache.GetTypesDerivedFrom<ObservableContextInspector>()
                 .Where(static x => x.IsAbstract == false && x.GetConstructor(Type.EmptyTypes) != null)
                 .Select(static x => (x, x.GetCustomAttribute<ObservableContextInspectorAttribute>()))
-                .Where(static x => x.Item2 != null && x.Item2.ContextType != null);
+                .Where(static x => x.Item2 is { ContextType: not null });
 
             var typeMap = s_contextToInspectorMap;
-            var rootNode = s_contextMenu.rootNode;
+            var rootNode = s_contextMenu.RootNode;
 
             foreach (var (inspectorType, inspectorAttrib) in contextTypes)
             {
@@ -703,7 +698,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
         private static void InitBinderMenu()
         {
-            var rootNode = s_binderMenu.rootNode;
+            var rootNode = s_binderMenu.RootNode;
 
             if (rootNode.Nodes.Count > 0)
             {
@@ -791,7 +786,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                     commandMap.TryAdd(attrib.MethodName, attrib.ParameterType);
                 }
 
-                var currentNode = menu.rootNode;
+                var currentNode = menu.RootNode;
                 currentNode = currentNode.CreateNode(label);
 
                 currentNode.content = new(label);
@@ -858,7 +853,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
         {
             var result = new List<Type>();
 
-            foreach (var (destType, map) in s_adapterMap)
+            foreach (var (_, map) in s_adapterMap)
             {
                 foreach (var (sourceType, types) in map)
                 {
@@ -910,12 +905,10 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
             var destParent = dest.Property.FindParentProperty();
 
-            return destParent != null
-                && destParent.propertyType == SerializedPropertyType.ManagedReference
-                && destParent.managedReferenceValue is MonoBinder destBinder
-                && s_binderToTargetTypeMap.TryGetValue(destBinder.GetType(), out var destTargetType)
-                && s_bindingToTargetTypeMap.TryGetValue(srcBinding.GetType(), out var srcTargetType)
-                && srcTargetType == destTargetType;
+            return destParent is { propertyType: SerializedPropertyType.ManagedReference, managedReferenceValue: MonoBinder destBinder }
+                   && s_binderToTargetTypeMap.TryGetValue(destBinder.GetType(), out var destTargetType)
+                   && s_bindingToTargetTypeMap.TryGetValue(srcBinding.GetType(), out var srcTargetType)
+                   && srcTargetType == destTargetType;
         }
 
         private static bool OnValidatePasteAllTargets(SerializedProperty src, SerializedArrayProperty dest)
@@ -934,9 +927,8 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             var srcObject = src.objectReferenceValue;
             var destParent = dest.Property.FindParentProperty();
 
-            return srcObject && destParent != null
-                && destParent.propertyType == SerializedPropertyType.ManagedReference
-                && destParent.managedReferenceValue is MonoBinder destBinder
+            return srcObject
+                && destParent is { propertyType: SerializedPropertyType.ManagedReference, managedReferenceValue: MonoBinder destBinder }
                 && s_binderToTargetTypeMap.TryGetValue(destBinder.GetType(), out var destTargetType)
                 && destTargetType.IsAssignableFrom(srcObject.GetType());
         }

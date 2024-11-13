@@ -46,7 +46,7 @@ namespace EncosyTower.Modules.PubSub.Internals
             , EncosyTower.Modules.Logging.ILogger logger
         )
         {
-            var handlersArray = GetAllHandlers(logger);
+            var handlersArray = GetHandlerListList(logger);
             var completionSource = CompletionSource;
 
 #if __ENCOSY_VALIDATION__

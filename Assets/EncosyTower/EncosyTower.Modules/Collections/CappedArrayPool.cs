@@ -91,10 +91,7 @@ namespace EncosyTower.Modules.Collections
                     _buckets[i] = bucket;
                 }
 
-                if (bucket[tail] == null)
-                {
-                    bucket[tail] = new T[length];
-                }
+                bucket[tail] ??= new T[length];
 
                 var result = bucket[tail];
                 _tails[i] += 1;

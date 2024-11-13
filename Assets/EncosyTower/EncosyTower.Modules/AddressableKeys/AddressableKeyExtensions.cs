@@ -63,16 +63,14 @@ namespace EncosyTower.Modules.AddressableKeys
         {
             var result = InstantiateInternal(key, parent, inWorldSpace, trimCloneSuffix);
 
-            if (result.HasValue)
+            if (result.HasValue == false)
             {
-                if (result.Value().TryGetComponent<TComponent>(out var comp))
-                {
-                    return comp;
-                }
+                return default;
             }
 
-            return default;
+            return result.Value().TryGetComponent<TComponent>(out var comp) ? comp : default;
         }
+        
         private static Option<GameObject> InstantiateInternal(
               AddressableKey<GameObject> key
             , TransformOrScene parent
@@ -85,22 +83,23 @@ namespace EncosyTower.Modules.AddressableKeys
             var handle = Addressables.InstantiateAsync(key.Value, parent.Transform, inWorldSpace);
             var go = handle.WaitForCompletion();
 
-            if (go.IsValid())
+            if (go.IsInvalid())
             {
-                if (parent.IsValid && parent.IsScene)
-                {
-                    go.MoveToScene(parent.Scene);
-                }
-
-                if (trimCloneSuffix)
-                {
-                    go.TrimCloneSuffix();
-                }
-
-                return go;
+                return default;
             }
 
-            return default;
+            if (parent is { IsValid: true, IsScene: true })
+            {
+                go.MoveToScene(parent.Scene);
+            }
+
+            if (trimCloneSuffix)
+            {
+                go.TrimCloneSuffix();
+            }
+
+            return go;
+
         }
     }
 }

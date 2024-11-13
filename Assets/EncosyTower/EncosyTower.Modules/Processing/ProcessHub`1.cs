@@ -233,7 +233,7 @@ namespace EncosyTower.Modules.Processing
                 return true;
             }
 
-            Logging.RuntimeLoggerAPI.LogError(
+            RuntimeLoggerAPI.LogError(
                 $"{GetType().Name} must be retrieved via `{nameof(Processor)}.{nameof(Scope)}` API"
             );
 

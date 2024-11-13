@@ -110,7 +110,7 @@ namespace EncosyTower.Modules
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Serializable(int value)
             {
-                _value = new Id.Union(value).uintValue;
+                _value = new Union(value).uintValue;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -164,7 +164,7 @@ namespace EncosyTower.Modules
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Serializable<T>(Serializable value)
-                => new((uint)value);
+                => new(value);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Serializable(Serializable<T> value)
@@ -172,7 +172,7 @@ namespace EncosyTower.Modules
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Serializable<T>(Id<T> value)
-                => new((uint)value);
+                => new(value);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator uint(Serializable<T> value)

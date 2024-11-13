@@ -43,17 +43,16 @@ namespace EncosyTower.Modules.Data.Authoring
 
         public async Task<DateTime> FetchModifiedTime()
         {
-            using (var service = new DriveService(new BaseClientService.Initializer() {
+            using var service = new DriveService(new BaseClientService.Initializer {
                 HttpClientInitializer = _credential
-            }))
-            {
-                var fileReq = service.Files.Get(_gsheetAddress);
-                fileReq.SupportsTeamDrives = true;
-                fileReq.Fields = "modifiedTime";
+            });
+            
+            var fileReq = service.Files.Get(_gsheetAddress);
+            fileReq.SupportsTeamDrives = true;
+            fileReq.Fields = "modifiedTime";
 
-                var file = await fileReq.ExecuteAsync();
-                return file.ModifiedTime ?? default;
-            }
+            var file = await fileReq.ExecuteAsync();
+            return file.ModifiedTime ?? default;
         }
 
         public override void Reset()
@@ -64,12 +63,9 @@ namespace EncosyTower.Modules.Data.Authoring
 
         protected override IEnumerable<IRawSheetImporterPage> GetPages(string sheetName)
         {
-            if (_pages.TryGetValue(sheetName, out var pages))
-            {
-                return pages;
-            }
-
-            return Enumerable.Empty<IRawSheetImporterPage>();
+            return _pages.TryGetValue(sheetName, out var pages)
+                ? pages
+                : Enumerable.Empty<IRawSheetImporterPage>();
         }
 
         protected override async Task<bool> LoadData()

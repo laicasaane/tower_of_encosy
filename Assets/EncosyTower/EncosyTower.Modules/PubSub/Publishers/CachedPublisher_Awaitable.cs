@@ -8,13 +8,11 @@
 
 using System.Runtime.CompilerServices;
 using System.Threading;
+using EncosyTower.Modules.Logging;
 using UnityEngine;
 
 namespace EncosyTower.Modules.PubSub
 {
-    using CallerInfo = EncosyTower.Modules.Logging.CallerInfo;
-    using DevLogger = EncosyTower.Modules.Logging.DevLogger;
-
     partial struct CachedPublisher<TMessage>
     {
 #if __ENCOSY_PUBSUB_NO_VALIDATION__
@@ -23,7 +21,7 @@ namespace EncosyTower.Modules.PubSub
         public readonly void Publish(
               TMessage message
             , CancellationToken token = default
-            , EncosyTower.Modules.Logging.ILogger logger = null
+            , Logging.ILogger logger = null
             , CallerInfo callerInfo = default
         )
         {
@@ -40,7 +38,7 @@ namespace EncosyTower.Modules.PubSub
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Awaitable PublishAsync(
               CancellationToken token = default
-            , EncosyTower.Modules.Logging.ILogger logger = null
+            , Logging.ILogger logger = null
             , CallerInfo callerInfo = default
         )
         {
@@ -53,7 +51,7 @@ namespace EncosyTower.Modules.PubSub
         public readonly Awaitable PublishAsync(
               TMessage message
             , CancellationToken token = default
-            , EncosyTower.Modules.Logging.ILogger logger = null
+            , Logging.ILogger logger = null
             , CallerInfo callerInfo = default
         )
         {

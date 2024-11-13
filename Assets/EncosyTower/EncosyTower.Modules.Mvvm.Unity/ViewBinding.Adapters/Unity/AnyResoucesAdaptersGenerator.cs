@@ -48,7 +48,7 @@ using UnityEngine;
                     p.PrintLine($"[Serializable]");
                     p.PrintLine($"[Label(\"Resources.Load<{type}>(string)\", \"Default\")]");
                     p.PrintLine($"[Adapter(sourceType: typeof(string), destType: typeof({type}), order: 0)]");
-                    p.PrintLine($"public sealed class {type}ResorcesAdapter : ResourcesAdapter<{type}> {{ }}");
+                    p.PrintLine($"public sealed class {type}ResourcesAdapter : ResourcesAdapter<{type}> {{ }}");
                     p.PrintEndLine();
                 }
             }

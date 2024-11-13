@@ -5,7 +5,7 @@ namespace EncosyTower.Modules.Data.Authoring
     /// <summary>
     /// Specify a property as a horizontal list, as opposed to <see cref="Cathei.BakingSheet.VerticalList{T}"/>.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
     public sealed class HorizontalAttribute : Attribute
     {
         /// <summary>

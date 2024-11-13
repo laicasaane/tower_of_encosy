@@ -69,36 +69,34 @@ namespace EncosyTower.Modules.Data.Authoring
                     continue;
                 }
 
-                using (var stream = _fileSystem.OpenRead(file))
-                using (var reader = ExcelReaderFactory.CreateReader(stream))
-                {
-                    var dataset = reader.AsDataSet(new ExcelDataSetConfiguration {
-                        UseColumnDataType = false,
-                        ConfigureDataTable = _ => new ExcelDataTableConfiguration {
-                            UseHeaderRow = false,
-                        }
-                    });
-
-                    for (int i = 0; i < dataset.Tables.Count; ++i)
-                    {
-                        var table = dataset.Tables[i];
-                        var tableName = table.TableName;
-
-                        if (SheetUtility.ValidateSheetName(tableName) == false)
-                        {
-                            continue;
-                        }
-
-                        var (sheetName, subName) = Config.ParseSheetName(tableName);
-
-                        if (_pages.TryGetValue(sheetName, out var sheetList) == false)
-                        {
-                            sheetList = new List<Page>();
-                            _pages.Add(sheetName, sheetList);
-                        }
-
-                        sheetList.Add(new Page(table, subName, FormatProvider));
+                using var stream = _fileSystem.OpenRead(file);
+                using var reader = ExcelReaderFactory.CreateReader(stream);
+                var dataset = reader.AsDataSet(new ExcelDataSetConfiguration {
+                    UseColumnDataType = false,
+                    ConfigureDataTable = _ => new ExcelDataTableConfiguration {
+                        UseHeaderRow = false,
                     }
+                });
+
+                for (var i = 0; i < dataset.Tables.Count; ++i)
+                {
+                    var table = dataset.Tables[i];
+                    var tableName = table.TableName;
+
+                    if (SheetUtility.ValidateSheetName(tableName) == false)
+                    {
+                        continue;
+                    }
+
+                    var (sheetName, subName) = Config.ParseSheetName(tableName);
+
+                    if (_pages.TryGetValue(sheetName, out var sheetList) == false)
+                    {
+                        sheetList = new List<Page>();
+                        _pages.Add(sheetName, sheetList);
+                    }
+
+                    sheetList.Add(new Page(table, subName, FormatProvider));
                 }
             }
 
@@ -107,12 +105,9 @@ namespace EncosyTower.Modules.Data.Authoring
 
         protected override IEnumerable<IRawSheetImporterPage> GetPages(string sheetName)
         {
-            if (_pages.TryGetValue(sheetName, out var page))
-            {
-                return page;
-            }
-
-            return Enumerable.Empty<IRawSheetImporterPage>();
+            return _pages.TryGetValue(sheetName, out var page)
+                ? page
+                : Enumerable.Empty<IRawSheetImporterPage>();
         }
 
         private class Page : IRawSheetImporterPage

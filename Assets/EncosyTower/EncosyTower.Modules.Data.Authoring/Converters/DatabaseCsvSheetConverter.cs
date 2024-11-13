@@ -93,30 +93,28 @@ namespace EncosyTower.Modules.Data.Authoring
 
                 var (sheetName, subName) = Config.ParseSheetName(fileName);
 
-                using (var stream = _fileSystem.OpenRead(file))
-                using (var reader = new StreamReader(stream))
+                using var stream = _fileSystem.OpenRead(file);
+                using var reader = new StreamReader(stream);
+                var csv = new CsvReader(reader);
+                var table = new CsvTable();
+
+                while (csv.Read())
                 {
-                    var csv = new CsvReader(reader);
-                    var table = new CsvTable();
+                    var row = table.AddRow();
 
-                    while (csv.Read())
+                    for (var i = 0; i < csv.FieldsCount; ++i)
                     {
-                        var row = table.AddRow();
-
-                        for (int i = 0; i < csv.FieldsCount; ++i)
-                        {
-                            row.Add(csv[i]);
-                        }
+                        row.Add(csv[i]);
                     }
-
-                    if (_pages.TryGetValue(sheetName, out var sheetList) == false)
-                    {
-                        sheetList = new List<Page>();
-                        _pages.Add(sheetName, sheetList);
-                    }
-
-                    sheetList.Add(new Page(table, subName));
                 }
+
+                if (_pages.TryGetValue(sheetName, out var sheetList) == false)
+                {
+                    sheetList = new List<Page>();
+                    _pages.Add(sheetName, sheetList);
+                }
+
+                sheetList.Add(new Page(table, subName));
             }
 
             return Task.FromResult(true);
@@ -130,22 +128,20 @@ namespace EncosyTower.Modules.Data.Authoring
             {
                 var file = Path.Combine(_loadPath, $"{pageItem.Key}.{_extension}");
 
-                using (var stream = _fileSystem.OpenWrite(file))
-                using (var writer = new StreamWriter(stream))
+                using var stream = _fileSystem.OpenWrite(file);
+                using var writer = new StreamWriter(stream);
+                var csv = new CsvWriter(writer);
+
+                foreach (var page in pageItem.Value)
                 {
-                    var csv = new CsvWriter(writer);
-
-                    foreach (var page in pageItem.Value)
+                    foreach (var row in page.Table)
                     {
-                        foreach (var row in page.Table)
+                        foreach (var cell in row)
                         {
-                            foreach (var cell in row)
-                            {
-                                csv.WriteField(cell);
-                            }
-
-                            csv.NextRecord();
+                            csv.WriteField(cell);
                         }
+
+                        csv.NextRecord();
                     }
                 }
             }
@@ -155,46 +151,39 @@ namespace EncosyTower.Modules.Data.Authoring
 
         private class Page : IRawSheetImporterPage, IRawSheetExporterPage
         {
-            private readonly CsvTable _table;
-
             public string SubName { get; }
 
-            public CsvTable Table => _table;
+            public CsvTable Table { get; }
 
             public Page(CsvTable table, string subName)
             {
-                _table = table;
+                Table = table;
                 SubName = subName;
             }
 
             public string GetCell(int col, int row)
             {
-                if (row >= _table.Count)
+                if (row >= Table.Count)
                 {
                     return null;
                 }
 
-                if (col >= _table[row].Count)
-                {
-                    return null;
-                }
-
-                return _table[row][col];
+                return col >= Table[row].Count ? null : Table[row][col];
             }
 
             public void SetCell(int col, int row, string data)
             {
-                for (int i = _table.Count; i <= row; ++i)
+                for (var i = Table.Count; i <= row; ++i)
                 {
-                    _table.AddRow();
+                    Table.AddRow();
                 }
 
-                for (int i = _table[row].Count; i <= col; ++i)
+                for (var i = Table[row].Count; i <= col; ++i)
                 {
-                    _table[row].Add(null);
+                    Table[row].Add(null);
                 }
 
-                _table[row][col] = data;
+                Table[row][col] = data;
             }
         }
     }

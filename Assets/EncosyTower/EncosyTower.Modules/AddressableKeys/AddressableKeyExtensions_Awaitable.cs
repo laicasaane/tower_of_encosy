@@ -70,15 +70,12 @@ namespace EncosyTower.Modules.AddressableKeys
         {
             var result = await InstantiateAsyncInternal(key, parent, inWorldSpace, trimCloneSuffix, token);
 
-            if (result.HasValue)
+            if (result.HasValue == false)
             {
-                if (result.Value().TryGetComponent<TComponent>(out var comp))
-                {
-                    return comp;
-                }
+                return default;
             }
 
-            return default;
+            return result.Value().TryGetComponent<TComponent>(out var comp) ? comp : default;
         }
 
         private static async Awaitable<Option<GameObject>> InstantiateAsyncInternal(
@@ -125,22 +122,22 @@ namespace EncosyTower.Modules.AddressableKeys
 
             var go = handle.Result;
 
-            if (go.IsValid())
+            if (go.IsInvalid())
             {
-                if (parent.IsValid && parent.IsScene)
-                {
-                    go.MoveToScene(parent.Scene);
-                }
-
-                if (trimCloneSuffix)
-                {
-                    go.TrimCloneSuffix();
-                }
-
-                return go;
+                return default;
             }
 
-            return default;
+            if (parent is { IsValid: true, IsScene: true })
+            {
+                go.MoveToScene(parent.Scene);
+            }
+
+            if (trimCloneSuffix)
+            {
+                go.TrimCloneSuffix();
+            }
+
+            return go;
         }
     }
 }

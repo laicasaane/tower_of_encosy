@@ -28,8 +28,9 @@ namespace EncosyTower.Modules.Collections
 {
     public struct ArrayMapNode<TKey>
     {
-        internal int _hashcode;
+        internal readonly int _hashcode;
         internal int _previous;
+        
         public TKey key;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

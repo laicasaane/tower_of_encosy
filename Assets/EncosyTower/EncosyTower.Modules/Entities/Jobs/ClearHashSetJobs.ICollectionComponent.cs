@@ -25,7 +25,7 @@ namespace EncosyTower.Modules.Jobs
                 return default;
             }
 
-            if (blackboard.GetCollectionComponent<TCollectionComponent>(false).TryGet(out var set) == false)
+            if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var set) == false)
             {
                 return default;
             }
@@ -56,7 +56,7 @@ namespace EncosyTower.Modules.Jobs
                 return default;
             }
 
-            if (blackboard.GetCollectionComponent<TCollectionComponent>(false).TryGet(out var set) == false)
+            if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var set) == false)
             {
                 return default;
             }

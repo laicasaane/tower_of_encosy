@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 
 namespace EncosyTower.Modules.Data
 {
-    public abstract class DataTableAssetBase<TDataId, TData> : DataTableAsset, IDataTableAsset
+    public abstract class DataTableAssetBase<TDataId, TData> : DataTableAsset
         where TData : IData, IDataWithId<TDataId>
     {
         [SerializeField, FormerlySerializedAs("_rows")]
@@ -38,14 +38,11 @@ namespace EncosyTower.Modules.Data
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorCannotCast(object obj, UnityEngine.Object context)
         {
-            if (obj == null)
-            {
-                DevLoggerAPI.LogError(context, $"Cannot cast null into {typeof(TData[])}");
-            }
-            else
-            {
-                DevLoggerAPI.LogError(context, $"Cannot cast {obj.GetType()} into {typeof(TData[])}");
-            }
+            DevLoggerAPI.LogError(context,
+                obj == null
+                    ? $"Cannot cast null into {typeof(TData[])}"
+                    : $"Cannot cast {obj.GetType()} into {typeof(TData[])}"
+            );
         }
     }
 }

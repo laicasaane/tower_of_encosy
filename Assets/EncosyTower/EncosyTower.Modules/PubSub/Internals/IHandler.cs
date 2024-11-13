@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace EncosyTower.Modules.PubSub.Internals
 {
-    internal interface IHandler<TMessage> : IDisposable
+    internal interface IHandler<in TMessage> : IDisposable
     {
         DelegateId Id { get; }
 

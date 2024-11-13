@@ -53,38 +53,38 @@ namespace EncosyTower.Modules.Editor
 
         public class ColumnDef
         {
-            internal MultiColumnHeaderState.Column column;
-            internal DrawItem onDraw;
-            internal Comparison<TData> onSort;
+            internal MultiColumnHeaderState.Column _column;
+            internal DrawItem _onDraw;
+            internal Comparison<TData> _onSort;
 
             public ColumnDef SetMaxWidth(float maxWidth)
             {
-                column.maxWidth = maxWidth;
+                _column.maxWidth = maxWidth;
                 return this;
             }
 
             public ColumnDef SetTooltip(string tooltip)
             {
-                column.headerContent.tooltip = tooltip;
+                _column.headerContent.tooltip = tooltip;
                 return this;
             }
 
             public ColumnDef SetAutoResize(bool autoResize)
             {
-                column.autoResize = autoResize;
+                _column.autoResize = autoResize;
                 return this;
             }
 
             public ColumnDef SetAllowToggleVisibility(bool allow)
             {
-                column.allowToggleVisibility = allow;
+                _column.allowToggleVisibility = allow;
                 return this;
             }
 
             public ColumnDef SetSorting(Comparison<TData> onSort)
             {
-                this.onSort = onSort;
-                column.canSort = true;
+                _onSort = onSort;
+                _column.canSort = true;
                 return this;
             }
         }
@@ -101,7 +101,7 @@ namespace EncosyTower.Modules.Editor
         {
             ColumnDef columnDef = new ColumnDef()
             {
-                column = new MultiColumnHeaderState.Column()
+                _column = new MultiColumnHeaderState.Column()
                 {
                     allowToggleVisibility = false,
                     autoResize = true,
@@ -111,7 +111,7 @@ namespace EncosyTower.Modules.Editor
                     headerContent = new GUIContent(title),
                     headerTextAlignment = TextAlignment.Left,
                 },
-                onDraw = onDrawItem
+                _onDraw = onDrawItem
             };
 
             _columnDefs.Add(columnDef);
@@ -121,11 +121,11 @@ namespace EncosyTower.Modules.Editor
 
         private void ReBuild()
         {
-            _columns = _columnDefs.Select(static (def) => def.column).ToArray();
+            _columns = _columnDefs.Select(static def => def._column).ToArray();
             _multiColumnHeaderState = new MultiColumnHeaderState(_columns);
             _multiColumnHeader = new MultiColumnHeader(_multiColumnHeaderState);
-            _multiColumnHeader.visibleColumnsChanged += static (multiColumnHeader) => multiColumnHeader.ResizeToFit();
-            _multiColumnHeader.sortingChanged += (multiColumnHeader) => _sortingDirty = true;
+            _multiColumnHeader.visibleColumnsChanged += static multiColumnHeader => multiColumnHeader.ResizeToFit();
+            _multiColumnHeader.sortingChanged += _ => _sortingDirty = true;
             _multiColumnHeader.ResizeToFit();
             _columnResized = false;
         }
@@ -133,7 +133,12 @@ namespace EncosyTower.Modules.Editor
         public void ResizeToFit()
             => _multiColumnHeader?.ResizeToFit();
 
-        public void DrawTableGUI(TData[] data, float maxHeight = float.MaxValue, float rowHeight = -1, float rowWidth = -1)
+        public void DrawTableGUI(
+              TData[] data
+            , float maxHeight = float.MaxValue
+            , float rowHeight = -1
+            , float rowWidth = -1
+        )
         {
             if (_multiColumnHeader == null || _columnResized)
                 ReBuild();
@@ -147,8 +152,8 @@ namespace EncosyTower.Modules.Editor
             Rect headerRect = GUILayoutUtility.GetRect(rowWidth, rowHeight);
             _multiColumnHeader!.OnGUI(headerRect, xScroll: 0.0f);
 
-            float sumWidth = rowWidth;
-            float sumHeight = rowHeight * data.Length + GUI.skin.horizontalScrollbar.fixedHeight;
+            var sumWidth = rowWidth;
+            var sumHeight = rowHeight * data.Length + GUI.skin.horizontalScrollbar.fixedHeight;
 
             UpdateSorting(data);
 
@@ -165,19 +170,19 @@ namespace EncosyTower.Modules.Editor
 
             EditorGUILayout.BeginVertical();
 
-            for (int row = 0; row < data.Length; row++)
+            for (var row = 0; row < data.Length; row++)
             {
                 Rect rowRect = new Rect(0, rowHeight * row, rowWidth, rowHeight);
 
                 EditorGUI.DrawRect(rect: rowRect, color: row % 2 == 0 ? _darkerColor : _lighterColor);
 
-                for (int col = 0; col < _columns.Length; col++)
+                for (var col = 0; col < _columns.Length; col++)
                 {
                     if (_multiColumnHeader.IsColumnVisible(col))
                     {
-                        int visibleColumnIndex = _multiColumnHeader.GetVisibleColumnIndex(col);
+                        var visibleColumnIndex = _multiColumnHeader.GetVisibleColumnIndex(col);
                         Rect cellRect = _multiColumnHeader.GetCellRect(visibleColumnIndex, rowRect);
-                        _columnDefs[col].onDraw(cellRect, data[row]);
+                        _columnDefs[col]._onDraw(cellRect, data[row]);
                     }
                 }
             }
@@ -190,14 +195,14 @@ namespace EncosyTower.Modules.Editor
         {
             if (_sortingDirty)
             {
-                int sortIndex = _multiColumnHeader.sortedColumnIndex;
+                var sortIndex = _multiColumnHeader.sortedColumnIndex;
                 if (sortIndex >= 0)
                 {
-                    var sortCompare = _columnDefs[sortIndex].onSort;
-                    bool ascending = _multiColumnHeader.IsSortedAscending(sortIndex);
+                    var sortCompare = _columnDefs[sortIndex]._onSort;
+                    var ascending = _multiColumnHeader.IsSortedAscending(sortIndex);
 
                     Array.Sort(data, ((a, b) => {
-                        int r = sortCompare(a, b);
+                        var r = sortCompare(a, b);
                         return ascending ? r : -r;
                     }));
                 }

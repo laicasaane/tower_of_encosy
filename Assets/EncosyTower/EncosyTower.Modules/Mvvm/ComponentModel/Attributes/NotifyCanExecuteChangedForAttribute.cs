@@ -25,7 +25,7 @@ namespace EncosyTower.Modules.Mvvm.ComponentModel
     /// }
     /// </code>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
     public sealed class NotifyCanExecuteChangedForAttribute : Attribute
     {
         /// <summary>

@@ -67,10 +67,8 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
                 packages.Clear();
                 var featureName = featureAttrib.Name;
 
-                if (result.TryGetValue(featureName, out var featurePackages))
+                if (result.Remove(featureName, out var featurePackages))
                 {
-                    result.Remove(featureName);
-
                     foreach (var package in featurePackages)
                     {
                         packages.Add(package);
@@ -113,7 +111,7 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
 
                 result[featureName] = packages
                     .OrderBy(static x => x.name)
-                    .OrderBy(static x => x.registry)
+                    .ThenBy(static x => x.registry)
                     .ToArray();
             }
 
@@ -173,7 +171,7 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
 
             foreach (var item in result)
             {
-                string name = "";
+                var name = "";
 
                 if (item.source == PackageSource.Git)
                 {
@@ -187,7 +185,10 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
                             name = packageId.Substring(indexOfAt + 1, packageId.Length - indexOfAt - 1);
                         }
                     }
-                    catch { }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
 
                 if (string.IsNullOrWhiteSpace(name))
@@ -425,14 +426,11 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
                 {
                     case PackageRegistry.Unity:
                     {
-                        if (string.IsNullOrWhiteSpace(package.version))
-                        {
-                            unityIdentifiers.Add(package.name);
-                        }
-                        else
-                        {
-                            unityIdentifiers.Add($"{package.name}@{package.version}");
-                        }
+                        unityIdentifiers.Add(
+                            string.IsNullOrWhiteSpace(package.version)
+                                ? package.name
+                                : $"{package.name}@{package.version}"
+                        );
                         break;
                     }
 
@@ -461,13 +459,13 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
                 }
             }
 
-            ApplyOpenUPM();
+            ApplyOpenUpm();
 
             s_addRequest = Client.AddAndRemove(packagesToAdd: s_unityIdentifiers.ToArray());
             EditorApplication.update += AddRequestProgress;
         }
 
-        public static void ApplyOpenUPM()
+        public static void ApplyOpenUpm()
         {
             if (s_openUpmSb.Length < 1)
             {
@@ -552,7 +550,7 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
                 => obj is PackageInfo other && Equals(other);
 
             public bool Equals(PackageInfo other)
-                => string.Equals(name, other.name, StringComparison.Ordinal);
+                => string.Equals(name, other?.name, StringComparison.Ordinal);
 
             public bool ShouldBeInstalled()
                 => isInstalled == false && (isOptional == false || isChosen);

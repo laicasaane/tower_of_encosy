@@ -22,6 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// ReSharper disable InconsistentNaming
+
 using System;
 using System.Runtime.CompilerServices;
 
@@ -109,7 +111,7 @@ namespace EncosyTower.Modules.Buffers
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T[] ToManagedArray()
+        internal T[] ToManagedArray()
         {
             return _bufferImplementation.ToManagedArray();
         }
@@ -188,7 +190,7 @@ namespace EncosyTower.Modules.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T[] ToManagedArray()
+        internal T[] ToManagedArray()
         {
             return _buffer;
         }

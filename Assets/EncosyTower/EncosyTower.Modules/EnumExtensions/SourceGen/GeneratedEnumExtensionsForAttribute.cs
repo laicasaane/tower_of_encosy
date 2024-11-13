@@ -2,7 +2,7 @@ using System;
 
 namespace EncosyTower.Modules.EnumExtensions.SourceGen
 {
-    [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Struct | AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Struct | AttributeTargets.Class)]
     public sealed class GeneratedEnumExtensionsForAttribute : Attribute
     {
         public Type EnumType { get; }

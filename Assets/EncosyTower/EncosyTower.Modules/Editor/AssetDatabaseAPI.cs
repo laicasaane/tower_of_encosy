@@ -28,11 +28,13 @@ namespace EncosyTower.Modules.Editor
                     var path = AssetDatabase.GUIDToAssetPath(candidate);
                     var asset = AssetDatabase.LoadAssetAtPath<T>(path);
 
-                    if (asset)
+                    if (!asset)
                     {
-                        result = asset;
-                        return true;
+                        continue;
                     }
+
+                    result = asset;
+                    return true;
                 }
             }
 

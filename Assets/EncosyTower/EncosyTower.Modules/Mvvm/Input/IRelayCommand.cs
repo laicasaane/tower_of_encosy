@@ -2,7 +2,7 @@ namespace EncosyTower.Modules.Mvvm.Input
 {
     /// <summary>
     /// An interface expanding <see cref="ICommand"/> with the ability to raise
-    /// the <see cref="ICommand.CanExecuteChanged"/> event externally.
+    /// the <see cref="ICommand.CanExecuteChanged{TInstance}"/> event externally.
     /// </summary>
     public interface IRelayCommand : ICommand
     {
@@ -37,7 +37,7 @@ namespace EncosyTower.Modules.Mvvm.Input
         /// Provides a strongly-typed variant of <see cref="ICommand.CanExecute(in Unions.Union)"/>.
         /// </summary>
         /// <param name="parameter">The input parameter.</param>
-        /// <returns>Whether or not the current command can be executed.</returns>
+        /// <returns>Whether the current command can be executed.</returns>
         bool CanExecute(T parameter);
 
         /// <summary>

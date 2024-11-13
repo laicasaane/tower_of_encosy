@@ -7,7 +7,7 @@ using EncosyTower.Modules.Logging;
 
 namespace EncosyTower.Modules.PubSub.Internals
 {
-    internal sealed partial class MessageBroker<TScope, TMessage> : MessageBroker
+    internal sealed partial class MessageBroker<TScope, TMessage>
     {
         public UniTask PublishAsync(
               TScope scope, TMessage message
@@ -20,12 +20,9 @@ namespace EncosyTower.Modules.PubSub.Internals
 
             lock (scopedBrokers)
             {
-                if (scopedBrokers.TryGetValue(scope, out var broker))
-                {
-                    return broker.PublishAsync(message, context, token, logger);
-                }
-
-                return UniTask.CompletedTask;
+                return scopedBrokers.TryGetValue(scope, out var broker)
+                    ? broker.PublishAsync(message, context, token, logger)
+                    : UniTask.CompletedTask;
             }
         }
 

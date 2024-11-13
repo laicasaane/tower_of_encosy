@@ -11,7 +11,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.SourceGen
     /// However, it can be used in other contexts, such as reflection.
     /// </remarks>
     /// <seealso cref="Converter"/>
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Field)]
     public sealed class GeneratedConverterAttribute : Attribute
     {
         public string ForMemberName { get; }

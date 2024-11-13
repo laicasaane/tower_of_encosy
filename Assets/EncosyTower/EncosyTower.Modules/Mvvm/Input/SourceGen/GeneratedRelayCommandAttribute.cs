@@ -11,7 +11,7 @@ namespace EncosyTower.Modules.Mvvm.Input.SourceGen
     /// However, it can be used in other contexts, such as reflection.
     /// </remarks>
     /// <seealso cref="RelayCommandAttribute"/>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Property)]
     public sealed class GeneratedRelayCommandAttribute : Attribute
     {
         public string ForMemberName { get; }

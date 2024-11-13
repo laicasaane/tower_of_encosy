@@ -17,7 +17,7 @@ namespace EncosyTower.Modules
             _index = index;
         }
 
-        public readonly ObjectSpanGetter TryGet<T>(out Option<T> result)
+        public ObjectSpanGetter TryGet<T>(out Option<T> result)
         {
             var buffer = _buffer;
 
@@ -35,7 +35,7 @@ namespace EncosyTower.Modules
             return this;
         }
 
-        public readonly ObjectSpanGetter TryGetThenMoveNext<T>(out Option<T> result)
+        public ObjectSpanGetter TryGetThenMoveNext<T>(out Option<T> result)
         {
             var buffer = _buffer;
 
@@ -53,16 +53,16 @@ namespace EncosyTower.Modules
             return new(buffer, _index + 1);
         }
 
-        public readonly ObjectSpanGetter Get<T>(out T result)
+        public ObjectSpanGetter Get<T>(out T result)
         {
-            ThrowIfIndexOutOfRange();
+            ThrowIfIndexOutOfRange(_index, _buffer);
             result = (T)_buffer[_index];
             return this;
         }
 
-        public readonly ObjectSpanGetter GetThenMoveNext<T>(out T result)
+        public ObjectSpanGetter GetThenMoveNext<T>(out T result)
         {
-            ThrowIfIndexOutOfRange();
+            ThrowIfIndexOutOfRange(_index, _buffer);
             result = (T)_buffer[_index];
             return new(_buffer, _index + 1);
         }
@@ -72,7 +72,7 @@ namespace EncosyTower.Modules
         /// </summary>
         /// <returns>A copy of the current getter with the index 0</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly ObjectSpanGetter Reset()
+        public ObjectSpanGetter Reset()
             => new(_buffer, 0);
 
         /// <summary>
@@ -81,13 +81,13 @@ namespace EncosyTower.Modules
         /// <param name="index">The index at that the getter will begin to read</param>
         /// <returns>A copy of the current getter with the new index</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly ObjectSpanGetter MoveTo(int index)
+        public ObjectSpanGetter MoveTo(int index)
             => new(_buffer, index);
 
         [DoesNotReturn, HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private void ThrowIfIndexOutOfRange()
+        private static void ThrowIfIndexOutOfRange(int index, Span<object> buffer)
         {
-            if ((uint)_index >= (uint)_buffer.Length)
+            if ((uint)index >= (uint)buffer.Length)
             {
                 throw new IndexOutOfRangeException("Index is out of range of the Memory<object>.");
             }

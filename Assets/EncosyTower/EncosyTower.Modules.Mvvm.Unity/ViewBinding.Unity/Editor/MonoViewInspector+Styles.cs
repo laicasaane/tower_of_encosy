@@ -18,8 +18,6 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
         private static GUIStyle s_binderIndexLabelStyle;
         private static GUIStyle s_binderSelectedButtonStyle;
         private static GUIStyle s_panelHeaderStyle;
-        private static GUIStyle s_detailsHeaderStyle;
-        private static GUIStyle s_removeButtonStyle;
         private static GUIStyle s_indexLabelStyle;
         private static GUIStyle s_headerLabelStyle;
         private static GUIStyle s_subHeaderLabelStyle;
@@ -29,7 +27,6 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
         private static GUIStyle s_iconButtonStyle;
         private static GUIContent s_addMoreIconLabel;
         private static GUIContent s_addIconLabel;
-        private static GUIContent s_removeIconLabel;
         private static GUIContent s_removeSelectedLabel;
         private static GUIContent s_menuIconLabel;
         private static GUIContent s_iconWarning;
@@ -154,7 +151,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                     = style.onNormal.scaledBackgrounds
                     = style.active.scaledBackgrounds
                     = style.onActive.scaledBackgrounds
-                    = new Texture2D[] { Texture2D.whiteTexture };
+                    = new[] { Texture2D.whiteTexture };
 
                 style.normal.background
                     = style.onNormal.background
@@ -170,16 +167,6 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 stretchHeight = true,
                 stretchWidth = true,
             };
-
-            s_detailsHeaderStyle = new() {
-                padding = new(0, 0, 0, 0),
-                margin = new(0, 0, 0, 0),
-                border = new(0, 0, 0, 0),
-                stretchHeight = true,
-                stretchWidth = true,
-            };
-
-            s_removeButtonStyle = new(EditorStyles.iconButton);
 
             s_indexLabelStyle = new(EditorStyles.miniLabel) {
                 padding = new(3, 0, 0, 0),
@@ -232,7 +219,6 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 
             {
                 var icon = EditorAPI.GetIcon("d_Toolbar Minus", "Toolbar Minus");
-                s_removeIconLabel = new(icon.image, "Remove");
                 s_removeSelectedLabel = new(icon.image, "Remove Selected Item");
             }
 

@@ -9,6 +9,7 @@ namespace EncosyTower.Modules.Localization
     using UnityEngine.Localization.Settings;
     using UnityEngine.ResourceManagement.AsyncOperations;
 
+    // ReSharper disable once InconsistentNaming
     public static partial class L10nKeyExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -61,12 +62,7 @@ namespace EncosyTower.Modules.Localization
                 return default;
             }
 
-            if (handle.Status != AsyncOperationStatus.Succeeded)
-            {
-                return default;
-            }
-
-            return handle.Result;
+            return handle.Status == AsyncOperationStatus.Succeeded ? handle.Result : default;
         }
 
         public static async UniTask<TObject> LocalizeAssetAsync<TObject>(this L10nKey<TObject> key, CancellationToken token = default)

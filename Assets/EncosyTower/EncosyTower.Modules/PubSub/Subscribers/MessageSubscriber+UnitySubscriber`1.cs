@@ -93,7 +93,7 @@ namespace EncosyTower.Modules.PubSub
                 }
 #endif
 
-                return _subscriber.Subscribe<TMessage>(handler, order, logger);
+                return _subscriber.Subscribe(handler, order, logger);
             }
 
 #if __ENCOSY_PUBSUB_NO_VALIDATION__
@@ -139,7 +139,7 @@ namespace EncosyTower.Modules.PubSub
                 }
 #endif
 
-                _subscriber.Subscribe<TMessage>(handler, unsubscribeToken, order, logger);
+                _subscriber.Subscribe(handler, unsubscribeToken, order, logger);
             }
 
 #if __ENCOSY_PUBSUB_NO_VALIDATION__
@@ -183,7 +183,7 @@ namespace EncosyTower.Modules.PubSub
                 }
 #endif
 
-                return _subscriber.Subscribe<TMessage>(handler, order, logger);
+                return _subscriber.Subscribe(handler, order, logger);
             }
 
 #if __ENCOSY_PUBSUB_NO_VALIDATION__
@@ -229,13 +229,13 @@ namespace EncosyTower.Modules.PubSub
                 }
 #endif
 
-                _subscriber.Subscribe<TMessage>(handler, unsubscribeToken, order, logger);
+                _subscriber.Subscribe(handler, unsubscribeToken, order, logger);
             }
 
 #if __ENCOSY_PUBSUB_VALIDATION__
             private bool Validate(ILogger logger)
             {
-                if (IsValid == true)
+                if (IsValid)
                 {
                     return true;
                 }

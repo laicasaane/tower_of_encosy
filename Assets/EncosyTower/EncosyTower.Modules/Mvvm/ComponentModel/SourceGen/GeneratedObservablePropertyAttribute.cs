@@ -11,6 +11,6 @@ namespace EncosyTower.Modules.Mvvm.ComponentModel.SourceGen
     /// However, it can be used in other contexts, such as reflection.
     /// </remarks>
     /// <seealso cref="IObservableObject"/>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Property)]
     public sealed class GeneratedObservablePropertyAttribute : Attribute { }
 }

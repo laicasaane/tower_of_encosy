@@ -30,7 +30,7 @@ namespace EncosyTower.Modules.Mvvm.Input
 
         private event MvvmEventHandler _canExecuteChanged;
 
-        private readonly CachedUnionConverter<T> _converter = new CachedUnionConverter<T>();
+        private readonly CachedUnionConverter<T> _converter = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RelayCommand{T}"/> class that can always execute.
@@ -67,7 +67,7 @@ namespace EncosyTower.Modules.Mvvm.Input
             if (listener == null) throw new ArgumentNullException(nameof(listener));
 
             _canExecuteChanged += listener.OnEvent;
-            listener.OnDetachAction = (listener) => _canExecuteChanged -= listener.OnEvent;
+            listener.OnDetachAction = l => _canExecuteChanged -= l.OnEvent;
         }
 
         /// <inheritdoc/>

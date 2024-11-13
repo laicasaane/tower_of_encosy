@@ -24,7 +24,7 @@ namespace EncosyTower.Modules.Entities
         {
             var arrayBuilder = builder.Allocate(ref UnsafeUtility.As<BlobString, BlobArray<byte>>(ref blobStr), fixedString.Length);
 
-            for (int i = 0; i < fixedString.Length; i++)
+            for (var i = 0; i < fixedString.Length; i++)
             {
                 arrayBuilder[i] = fixedString[i];
             }

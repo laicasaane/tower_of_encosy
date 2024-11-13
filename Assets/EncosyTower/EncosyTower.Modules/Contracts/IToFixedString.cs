@@ -5,7 +5,7 @@ using Unity.Collections;
 
 namespace EncosyTower.Modules
 {
-    public interface IToFixedString<T>
+    public interface IToFixedString<out T>
         where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
                 , IComparable<string>, IEquatable<string>
                 , IComparable<T>, IEquatable<T>
@@ -13,7 +13,7 @@ namespace EncosyTower.Modules
         T ToFixedString();
     }
 
-    public interface IToDisplayFixedString<T>
+    public interface IToDisplayFixedString<out T>
         where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
                 , IComparable<string>, IEquatable<string>
                 , IComparable<T>, IEquatable<T>

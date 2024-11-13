@@ -263,7 +263,7 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
             private bool Validate(ILogger logger)
             {
-                if (IsValid == true)
+                if (IsValid)
                 {
                     return true;
                 }

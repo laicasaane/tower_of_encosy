@@ -25,7 +25,7 @@ namespace EncosyTower.Modules.PubSub
 
         internal CachedPublisher(MessageBroker<TMessage> broker)
         {
-            _broker = broker ?? throw new System.ArgumentNullException(nameof(broker));
+            _broker = broker ?? throw new ArgumentNullException(nameof(broker));
         }
 
         public readonly bool IsValid => _broker != null;
@@ -49,16 +49,16 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
         private readonly bool Validate(ILogger logger)
         {
-            if (_broker == null)
+            if (_broker != null)
             {
-                (logger ?? DevLogger.Default).LogError(
-                    $"{GetType()} must be retrieved via `{nameof(MessagePublisher)}.{nameof(MessagePublisher.Cache)}` API"
-                );
-
-                return false;
+                return true;
             }
 
-            return true;
+            (logger ?? DevLogger.Default).LogError(
+                $"{GetType()} must be retrieved via `{nameof(MessagePublisher)}.{nameof(MessagePublisher.Cache)}` API"
+            );
+
+            return false;
         }
 
         private readonly bool Validate(TMessage message, ILogger logger)
@@ -72,13 +72,13 @@ namespace EncosyTower.Modules.PubSub
                 return false;
             }
 
-            if (message == null)
+            if (message != null)
             {
-                (logger ?? DevLogger.Default).LogException(new System.ArgumentNullException(nameof(message)));
-                return false;
+                return true;
             }
 
-            return true;
+            (logger ?? DevLogger.Default).LogException(new ArgumentNullException(nameof(message)));
+            return false;
         }
 #endif
     }

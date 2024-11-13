@@ -5,6 +5,7 @@ namespace EncosyTower.Modules.Localization
     using System.Runtime.CompilerServices;
     using UnityEngine.Localization.Settings;
 
+    // ReSharper disable once InconsistentNaming
     public static partial class L10nKeyExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

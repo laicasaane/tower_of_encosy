@@ -2,7 +2,7 @@ using System;
 
 namespace EncosyTower.Modules.EnumExtensions
 {
-    public interface IEnumExtensions<TEnum, TUnderlyingValue>
+    public interface IEnumExtensions<TEnum, out TUnderlyingValue>
         : IHasLength
         , IToStringFast
         , IToDisplayStringFast

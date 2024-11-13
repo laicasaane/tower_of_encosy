@@ -17,12 +17,9 @@ namespace EncosyTower.Samples.Mvvm
 
         public Union Convert(in Union union)
         {
-            if (union.TryGetValue(out bool result))
-            {
-                return ActualValue(result) ? new ColorUnion(_stop) : new ColorUnion(_start);
-            }
-
-            return union;
+            return union.TryGetValue(out bool result)
+                ? ActualValue(result) ? new ColorUnion(_stop) : new ColorUnion(_start)
+                : union;
         }
 
         private bool ActualValue(bool value) => _invert ? !value : value;
