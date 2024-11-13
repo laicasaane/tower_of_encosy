@@ -2,6 +2,7 @@
 
 using System;
 using EncosyTower.Modules.Mvvm.ViewBinding.Unity;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI
