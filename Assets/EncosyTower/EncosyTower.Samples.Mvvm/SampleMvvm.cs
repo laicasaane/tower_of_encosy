@@ -53,7 +53,7 @@ namespace EncosyTower.Samples.Mvvm
             var scrollPos = ScrollPosition;
             scrollPos += _scrollSpeed * _scrollDirection * Time.deltaTime;
 
-            if (scrollPos >= 1f || scrollPos <= 0f)
+            if (scrollPos is >= 1f or <= 0f)
             {
                 _scrollDirection *= -1f;
                 _scrollIntervalElapsed = _scrollStop * -1f;
