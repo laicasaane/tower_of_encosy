@@ -7,8 +7,8 @@ using UnityEngine;
 
 namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 {
-    [ObservableContextInspector(typeof(ObservableUnityObjectContext))]
-    public sealed class ObservableUnityObjectContextInspector : ObservableContextInspector
+    [BindingContextInspector(typeof(UnityObjectBindingContext))]
+    public sealed class UnityObjectBindingContextInspector : BindingContextInspector
     {
         private static readonly GUIContent s_findLabel = new("Find Nearest Context");
         private static readonly GUIContent s_childrenLabel = new("On Children");
@@ -60,8 +60,8 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 else
                 {
                     EditorUtility.DisplayDialog(
-                          "Observable Unity Object Context"
-                        , "Context Object must implement IObservableObject interface."
+                          "Unity Object Binding Context"
+                        , $"Context Object must implement {nameof(IObservableObject)} interface."
                         , "I understand"
                     );
                 }

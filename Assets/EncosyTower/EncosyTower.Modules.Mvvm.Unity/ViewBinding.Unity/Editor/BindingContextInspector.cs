@@ -2,12 +2,13 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using EncosyTower.Modules.Mvvm.ViewBinding;
 using EncosyTower.Modules.Mvvm.ViewBinding.Unity;
 using UnityEditor;
 
 namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
 {
-    public abstract class ObservableContextInspector
+    public abstract class BindingContextInspector
     {
         public Type ContextType { get; set; }
 
@@ -23,15 +24,15 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
     }
 
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    public sealed class ObservableContextInspectorAttribute : Attribute
+    public sealed class BindingContextInspectorAttribute : Attribute
     {
         public Type ContextType { get; }
 
-        public ObservableContextInspectorAttribute([NotNull] Type contextType)
+        public BindingContextInspectorAttribute([NotNull] Type contextType)
         {
             Checks.IsTrue(
-                  typeof(ObservableContext).IsAssignableFrom(contextType)
-                , "contextType must be a subclass of ObservableContext"
+                  typeof(IBindingContext).IsAssignableFrom(contextType)
+                , $"contextType must implement {nameof(IBindingContext)}"
             );
 
             ContextType = contextType;

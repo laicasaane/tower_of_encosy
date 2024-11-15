@@ -1,7 +1,7 @@
 #if UNITY_EDITOR
 
 using System;
-using EncosyTower.Modules.Mvvm.ViewBinding.Unity;
+using EncosyTower.Modules.Mvvm.ViewBinding;
 using UnityEditor;
 using UnityEngine;
 
@@ -12,11 +12,11 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
         private void DrawContextPanel()
         {
             if (_contextInspector == null
-                && _contextProp.managedReferenceValue is ObservableContext context
+                && _contextProp.managedReferenceValue is IBindingContext context
                 && s_contextToInspectorMap.TryGetValue(context.GetType(), out var inspectorType)
             )
             {
-                _contextInspector = Activator.CreateInstance(inspectorType) as ObservableContextInspector;
+                _contextInspector = Activator.CreateInstance(inspectorType) as BindingContextInspector;
                 _contextInspector.ContextType = context.GetType();
                 _contextInspector.OnEnable(_view, serializedObject, _contextProp);
             }
@@ -48,7 +48,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 }
                 else
                 {
-                    GUILayout.Label("No observable context is chosen.", s_noBinderStyle, GUILayout.Height(30));
+                    GUILayout.Label("No binding context is chosen.", s_noBinderStyle, GUILayout.Height(30));
                 }
             }
             EditorGUILayout.EndVertical();
@@ -80,7 +80,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 labelRect.y += 1f;
 
                 _contextLabel.text = _contextInspector == null
-                    ? "<Invalid Observable Context>"
+                    ? "<Invalid Binding Context>"
                     : ObjectNames.NicifyVariableName(_contextInspector.ContextType.Name);
 
                 GUI.Label(labelRect, _contextLabel, s_rootTabLabelStyle);

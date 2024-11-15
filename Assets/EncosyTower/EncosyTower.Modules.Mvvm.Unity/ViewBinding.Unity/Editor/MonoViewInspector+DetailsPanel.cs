@@ -988,7 +988,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                             instanceIds.Add(go.GetInstanceID());
                             continue;
                         }
-                        
+
                         case Component comp:
                         {
                             instanceIds.Add(comp.gameObject.GetInstanceID());
@@ -1010,7 +1010,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                             instanceIds.Add(obj.GetInstanceID());
                             continue;
                         }
-                        
+
                         case GameObject go when go.TryGetComponent(targetType, out var firstComp):
                         {
                             instanceIds.Add(firstComp.GetInstanceID());
@@ -1278,8 +1278,8 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             if (contextType == null)
             {
                 EditorUtility.DisplayDialog(
-                      "Observable Context"
-                    , "No valid observable context is selected!"
+                      "Binding Context"
+                    , "No valid binding context is selected!"
                     , "I understand"
                 );
                 return;
@@ -1405,8 +1405,8 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             if (contextType == null)
             {
                 EditorUtility.DisplayDialog(
-                      "Observable Context"
-                    , "No valid observable context is selected!"
+                      "Binding Context"
+                    , "No valid binding context is selected!"
                     , "I understand"
                 );
                 return;

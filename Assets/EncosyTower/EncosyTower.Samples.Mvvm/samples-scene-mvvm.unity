@@ -681,7 +681,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _settings:
     initializeOn: 0
-    intializeAsync: 1
+    initializeAsync: 1
     startListeningOnInitialized: 1
   _context:
     rid: 8109321786255212778
@@ -692,7 +692,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8109321786255212778
-      type: {class: ObservableUnityObjectContext, ns: EncosyTower.Modules.Mvvm.ViewBinding.Unity,
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Modules.Mvvm.ViewBinding.Unity,
         asm: EncosyTower.Modules.Mvvm.Unity}
       data:
         _object: {fileID: 1603940289}
@@ -1165,7 +1165,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _settings:
     initializeOn: 0
-    intializeAsync: 1
+    initializeAsync: 1
     startListeningOnInitialized: 1
   _context:
     rid: 7562154210548776971
@@ -1179,7 +1179,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 7562154210548776971
-      type: {class: ObservableUnityObjectContext, ns: EncosyTower.Modules.Mvvm.ViewBinding.Unity,
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Modules.Mvvm.ViewBinding.Unity,
         asm: EncosyTower.Modules.Mvvm.Unity}
       data:
         _object: {fileID: 1603940289}
@@ -1559,7 +1559,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _settings:
     initializeOn: 0
-    intializeAsync: 1
+    initializeAsync: 1
     startListeningOnInitialized: 1
   _context:
     rid: 8109321786255212789
@@ -1569,7 +1569,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8109321786255212789
-      type: {class: ObservableUnityObjectContext, ns: EncosyTower.Modules.Mvvm.ViewBinding.Unity,
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Modules.Mvvm.ViewBinding.Unity,
         asm: EncosyTower.Modules.Mvvm.Unity}
       data:
         _object: {fileID: 1603940289}
@@ -2409,7 +2409,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _settings:
     initializeOn: 0
-    intializeAsync: 1
+    initializeAsync: 1
     startListeningOnInitialized: 1
   _context:
     rid: 7562154620754329622
@@ -2422,7 +2422,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 7562154620754329622
-      type: {class: ObservableUnityObjectContext, ns: EncosyTower.Modules.Mvvm.ViewBinding.Unity,
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Modules.Mvvm.ViewBinding.Unity,
         asm: EncosyTower.Modules.Mvvm.Unity}
       data:
         _object: {fileID: 1289389108}

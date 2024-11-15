@@ -67,7 +67,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
         private SerializedArrayProperty _presetBindersProp;
         private SerializedArrayProperty _presetBindingsProp;
         private SerializedArrayProperty _presetTargetsProp;
-        private ObservableContextInspector _contextInspector;
+        private BindingContextInspector _contextInspector;
 
         private readonly GUIContent _settingsLabel = new("Settings");
         private readonly GUIContent _contextLabel = new();
@@ -280,7 +280,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             }
 
             var (contextType, inspectorType, propRef) = menuItem;
-            var contextInspector = Activator.CreateInstance(inspectorType) as ObservableContextInspector;
+            var contextInspector = Activator.CreateInstance(inspectorType) as BindingContextInspector;
             contextInspector.ContextType = contextType;
             propRef.Inspector._contextInspector = contextInspector;
 
@@ -288,7 +288,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             var serializedObject = property.serializedObject;
             var target = serializedObject.targetObject;
 
-            Undo.RecordObject(target, "Set Observable Context");
+            Undo.RecordObject(target, "Set Binding Context");
 
             property.managedReferenceValue = Activator.CreateInstance(contextType);
             serializedObject.ApplyModifiedProperties();
@@ -455,7 +455,7 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
             propMap.Clear();
             cmdMap.Clear();
 
-            if (_contextProp.managedReferenceValue is not ObservableContext context
+            if (_contextProp.managedReferenceValue is not IBindingContext context
                 || context.TryGetContextType(out var contextType) == false
             )
             {
@@ -611,9 +611,9 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                 return;
             }
 
-            var contextTypes = TypeCache.GetTypesDerivedFrom<ObservableContextInspector>()
+            var contextTypes = TypeCache.GetTypesDerivedFrom<BindingContextInspector>()
                 .Where(static x => x.IsAbstract == false && x.GetConstructor(Type.EmptyTypes) != null)
-                .Select(static x => (x, x.GetCustomAttribute<ObservableContextInspectorAttribute>()))
+                .Select(static x => (x, x.GetCustomAttribute<BindingContextInspectorAttribute>()))
                 .Where(static x => x.Item2 is { ContextType: not null });
 
             var typeMap = s_contextToInspectorMap;

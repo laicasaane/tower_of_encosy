@@ -21,7 +21,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Unity
         [SerializeField]
         [SerializeReference]
         [HideInInspector]
-        internal ObservableContext _context = new ObservableUnityObjectContext();
+        internal IBindingContext _context = new UnityObjectBindingContext();
 
         [SerializeField]
         [SerializeReference]
