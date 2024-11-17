@@ -147,11 +147,11 @@
       "url": "https://package.openupm.com"
     },
     "com.unity.2d.animation": {
-      "version": "10.1.3",
+      "version": "10.1.4",
       "depth": 1,
       "source": "registry",
       "dependencies": {
-        "com.unity.2d.common": "9.0.6",
+        "com.unity.2d.common": "9.0.7",
         "com.unity.2d.sprite": "1.0.0",
         "com.unity.collections": "1.2.4",
         "com.unity.modules.animation": "1.0.0",
@@ -172,7 +172,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.2d.common": {
-      "version": "9.0.6",
+      "version": "9.0.7",
       "depth": 2,
       "source": "registry",
       "dependencies": {
@@ -208,11 +208,11 @@
       "dependencies": {}
     },
     "com.unity.2d.spriteshape": {
-      "version": "10.0.6",
+      "version": "10.0.7",
       "depth": 1,
       "source": "registry",
       "dependencies": {
-        "com.unity.2d.common": "9.0.5",
+        "com.unity.2d.common": "9.0.7",
         "com.unity.mathematics": "1.1.0",
         "com.unity.modules.physics2d": "1.0.0"
       },
@@ -228,11 +228,10 @@
       }
     },
     "com.unity.2d.tilemap.extras": {
-      "version": "4.0.2",
+      "version": "4.1.0",
       "depth": 1,
       "source": "registry",
       "dependencies": {
-        "com.unity.ugui": "1.0.0",
         "com.unity.2d.tilemap": "1.0.0",
         "com.unity.modules.tilemap": "1.0.0",
         "com.unity.modules.jsonserialize": "1.0.0"
@@ -350,13 +349,13 @@
       "depth": 0,
       "source": "builtin",
       "dependencies": {
-        "com.unity.2d.animation": "10.1.3",
+        "com.unity.2d.animation": "10.1.4",
         "com.unity.2d.pixel-perfect": "5.0.3",
         "com.unity.2d.psdimporter": "9.0.3",
         "com.unity.2d.sprite": "1.0.0",
-        "com.unity.2d.spriteshape": "10.0.6",
+        "com.unity.2d.spriteshape": "10.0.7",
         "com.unity.2d.tilemap": "1.0.0",
-        "com.unity.2d.tilemap.extras": "4.0.2",
+        "com.unity.2d.tilemap.extras": "4.1.0",
         "com.unity.2d.aseprite": "1.1.6"
       }
     },
