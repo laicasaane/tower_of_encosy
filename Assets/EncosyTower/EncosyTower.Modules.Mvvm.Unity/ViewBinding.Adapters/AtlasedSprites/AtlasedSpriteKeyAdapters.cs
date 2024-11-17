@@ -76,8 +76,8 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Adapters.AtlasedSprites
 
             if (converter.TryGetValue(union, out var key) && key.IsValid)
             {
-                atlas = key.Atlas;
-                sprite = key.Sprite;
+                atlas = (string)key.Atlas;
+                sprite = (string)key.Sprite;
                 return true;
             }
 

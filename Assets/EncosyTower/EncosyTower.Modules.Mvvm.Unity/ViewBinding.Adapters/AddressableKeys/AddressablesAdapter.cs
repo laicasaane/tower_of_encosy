@@ -68,7 +68,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Adapters.AddressableKeys
 
             if (converter.TryGetValue(union, out var key) && key.IsValid)
             {
-                result = key.Value;
+                result = (string)key.Value;
                 return true;
             }
 
@@ -86,7 +86,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Adapters.AddressableKeys
 
             if (converter.TryGetValue(union, out var key) && key.IsValid)
             {
-                result = key.Value;
+                result = (string)key.Value;
                 return true;
             }
 

@@ -27,7 +27,7 @@ namespace EncosyTower.Modules.AddressableKeys
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator AddressableKey(AddressableKey<T> value)
-            => new(value.Value);
+            => new((string)value.Value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator AddressableKey<T>(AssetKey.Serializable<T> value)

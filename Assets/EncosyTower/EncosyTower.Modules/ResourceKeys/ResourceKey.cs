@@ -25,7 +25,7 @@ namespace EncosyTower.Modules
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator ResourceKey(ResourceKey<T> value)
-            => new(value.Value);
+            => new((string)value.Value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ResourceKey<T>(AssetKey.Serializable<T> value)

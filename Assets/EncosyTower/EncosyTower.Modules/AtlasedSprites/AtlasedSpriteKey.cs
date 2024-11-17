@@ -112,7 +112,7 @@ namespace EncosyTower.Modules.AtlasedSprites
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Serializable(AtlasedSpriteKey value)
-                => new(value.Atlas, value.Sprite);
+                => new((string)value.Atlas, (string)value.Sprite);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(Serializable left, Serializable right)

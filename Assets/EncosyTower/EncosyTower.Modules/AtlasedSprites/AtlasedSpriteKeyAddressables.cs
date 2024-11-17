@@ -16,7 +16,7 @@ namespace EncosyTower.Modules.AtlasedSprites
         public AtlasedSpriteKeyAddressables(AtlasedSpriteKey value)
         {
             Atlas = value.Atlas;
-            Sprite = value.Sprite;
+            Sprite = (string)value.Sprite;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -33,7 +33,7 @@ namespace EncosyTower.Modules.AtlasedSprites
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator AtlasedSpriteKey.Serializable(AtlasedSpriteKeyAddressables value)
-            => new(value.Atlas.Value, value.Sprite);
+            => new((string)value.Atlas.Value, value.Sprite);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Sprite Load()
