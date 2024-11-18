@@ -1,12 +1,12 @@
+using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
 namespace EncosyTower.Modules
 {
-    using System;
-    using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Runtime.CompilerServices;
-    using UnityEngine;
-    using UnityEngine.SceneManagement;
-
     public static partial class EncosyGameObjectExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -72,48 +72,3 @@ namespace EncosyTower.Modules
         }
     }
 }
-
-#if UNITASK
-
-namespace EncosyTower.Modules
-{
-    using System.Diagnostics.CodeAnalysis;
-    using Cysharp.Threading.Tasks;
-    using UnityEngine;
-
-    public static partial class EncosyGameObjectExtensions
-    {
-        /// <summary>
-        /// SetActive(false) => 1 frame => SetActive(true);
-        /// </summary>
-        public static async UniTask ActivateAsync([NotNull] this GameObject self)
-        {
-            ThrowIfGameObjectInvalid(self);
-
-            self.SetActive(false);
-
-            await UniTask.NextFrame();
-
-            self.SetActive(true);
-        }
-
-        /// <summary>
-        /// SetActive(false) => N frame => SetActive(true);
-        /// </summary>
-        public static async UniTask ActivateAsync([NotNull] this GameObject self, int delayFrames)
-        {
-            ThrowIfGameObjectInvalid(self);
-
-            self.SetActive(false);
-
-            for (var i = 0; i < delayFrames; i++)
-            {
-                await UniTask.NextFrame();
-            }
-
-            self.SetActive(true);
-        }
-    }
-}
-
-#endif
