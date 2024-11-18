@@ -59,10 +59,10 @@ namespace EncosyTower.Modules.NameKeys
 
             EnsureCapacity();
             _names.Add(name);
-            
+
             ref var elem = ref _hashes.ElementAt(index);
             elem = new(hash);
-            
+
             return true;
         }
 
@@ -106,8 +106,12 @@ namespace EncosyTower.Modules.NameKeys
         }
 
         [BurstDiscard]
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfFailedRegistering(bool result, in FixedString32Bytes name, Id id)
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void ThrowIfFailedRegistering(
+              [DoesNotReturnIf(false)] bool result
+            , in FixedString32Bytes name
+            , Id id
+        )
         {
             if (result == false)
             {

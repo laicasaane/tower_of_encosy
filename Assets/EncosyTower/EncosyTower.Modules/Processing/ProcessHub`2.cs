@@ -6,7 +6,6 @@
 #endif
 
 using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
@@ -48,10 +47,8 @@ namespace EncosyTower.Modules.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public Option<TypeId> Register<TRequest>(Action<TState, TRequest> process)
+        public Option<TypeId> Register<TRequest>([NotNull] Action<TState, TRequest> process)
         {
-            ThrowIfHandlerIsNull(process);
-
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif
@@ -62,10 +59,8 @@ namespace EncosyTower.Modules.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public Option<TypeId> Register<TRequest, TResult>(Func<TState, TRequest, TResult> process)
+        public Option<TypeId> Register<TRequest, TResult>([NotNull] Func<TState, TRequest, TResult> process)
         {
-            ThrowIfHandlerIsNull(process);
-
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif
@@ -134,12 +129,6 @@ namespace EncosyTower.Modules.Processing
 #endif
 
             return _hub.Unregister(id);
-        }
-
-        [Conditional("__ENCOSY_PROCESSING_VALIDATION__"), DoesNotReturn]
-        private static void ThrowIfHandlerIsNull(Delegate process)
-        {
-            if (process == null) throw new ArgumentNullException(nameof(process));
         }
 
 #if __ENCOSY_PROCESSING_VALIDATION__

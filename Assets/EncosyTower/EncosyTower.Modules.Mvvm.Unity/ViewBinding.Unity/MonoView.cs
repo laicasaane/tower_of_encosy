@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Modules.Buffers;
 using EncosyTower.Modules.Collections;
@@ -116,13 +115,13 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Unity
             }
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static void ErrorFoundNoContext(UnityEngine.Object context)
         {
             DevLoggerAPI.LogError(context, $"MonoView has no context that implements IObservableObject");
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static void ErrorNotInitialized(UnityEngine.Object context)
         {
             DevLoggerAPI.LogError(context, $"MonoView must be initialized");

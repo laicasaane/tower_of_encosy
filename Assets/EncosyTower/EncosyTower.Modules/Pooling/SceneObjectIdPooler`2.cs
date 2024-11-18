@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using EncosyTower.Modules.Collections;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -262,7 +261,7 @@ namespace EncosyTower.Modules.Pooling
             }
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void AssertInitialization(SceneObjectIdPooler<TKey, TId> pooler)
         {
             Assert.IsTrue(pooler._transformArray.isCreated, "Pooler must be initialized first!");

@@ -7,7 +7,6 @@
 #endif
 
 using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -68,7 +67,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
                 TrySubscribe(new HandlerAction<TMessage>(handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -85,7 +83,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
                 TrySubscribe(new HandlerActionMessage<TMessage>(handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -103,8 +100,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
-
                 if (TrySubscribe(new HandlerAction<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -124,8 +119,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
-
                 if (TrySubscribe(new HandlerActionMessage<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -144,7 +137,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
                 TrySubscribe(new ContextualHandlerAction<TMessage>(handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -161,7 +153,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
                 TrySubscribe(new ContextualHandlerActionMessage<TMessage>(handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -179,8 +170,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
-
                 if (TrySubscribe(new ContextualHandlerAction<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -200,8 +189,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
-
                 if (TrySubscribe(new ContextualHandlerActionMessage<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -209,7 +196,7 @@ namespace EncosyTower.Modules.PubSub
             }
 
             internal bool TrySubscribe<TMessage>(
-                  [NotNull] IHandler<TMessage> handler
+                  IHandler<TMessage> handler
                 , int order
                 , out Subscription<TMessage> subscription
                 , ILogger logger
@@ -243,12 +230,6 @@ namespace EncosyTower.Modules.PubSub
                     subscription = broker.Subscribe(Scope, handler, order, taskArrayPool, logger);
                     return true;
                 }
-            }
-
-            [Conditional("__ENCOSY_PUBSUB_VALIDATION__"), DoesNotReturn]
-            private static void ThrowIfHandlerIsNull(Delegate handler)
-            {
-                if (handler == null) throw new ArgumentNullException(nameof(handler));
             }
 
 #if __ENCOSY_PUBSUB_VALIDATION__

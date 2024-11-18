@@ -53,7 +53,7 @@ namespace EncosyTower.Modules
             return self;
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfGameObjectInvalid(GameObject self)
         {
             if (self.IsInvalid())
@@ -62,7 +62,7 @@ namespace EncosyTower.Modules
             }
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfSceneInvalid(Scene scene)
         {
             if (scene.IsValid() == false)

@@ -7,7 +7,6 @@
 #endif
 
 using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -84,8 +83,6 @@ namespace EncosyTower.Modules.PubSub
                 if (Validate(logger) == false) return Subscription<TMessage>.None;
 #endif
 
-                ThrowIfHandlerIsNull(handler);
-
                 _subscriber.TrySubscribe(new StatefulHandlerAction<TState, TMessage>(State, handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -105,8 +102,6 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false) return Subscription<TMessage>.None;
 #endif
-
-                ThrowIfHandlerIsNull(handler);
 
                 _subscriber.TrySubscribe(new StatefulHandlerActionMessage<TState, TMessage>(State, handler), order, out var subscription, logger);
                 return subscription;
@@ -128,8 +123,6 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false) return;
 #endif
-
-                ThrowIfHandlerIsNull(handler);
 
                 if (_subscriber.TrySubscribe(new StatefulHandlerAction<TState, TMessage>(State, handler), order, out var subscription, logger))
                 {
@@ -154,8 +147,6 @@ namespace EncosyTower.Modules.PubSub
                 if (Validate(logger) == false) return;
 #endif
 
-                ThrowIfHandlerIsNull(handler);
-
                 if (_subscriber.TrySubscribe(new StatefulHandlerActionMessage<TState, TMessage>(State, handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -178,8 +169,6 @@ namespace EncosyTower.Modules.PubSub
                 if (Validate(logger) == false) return Subscription<TMessage>.None;
 #endif
 
-                ThrowIfHandlerIsNull(handler);
-
                 _subscriber.TrySubscribe(new StatefulContextualHandlerAction<TState, TMessage>(State, handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -199,8 +188,6 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false) return Subscription<TMessage>.None;
 #endif
-
-                ThrowIfHandlerIsNull(handler);
 
                 _subscriber.TrySubscribe(new StatefulContextualHandlerActionMessage<TState, TMessage>(State, handler), order, out var subscription, logger);
                 return subscription;
@@ -222,8 +209,6 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false) return;
 #endif
-
-                ThrowIfHandlerIsNull(handler);
 
                 if (_subscriber.TrySubscribe(new StatefulContextualHandlerAction<TState, TMessage>(State, handler), order, out var subscription, logger))
                 {
@@ -248,18 +233,10 @@ namespace EncosyTower.Modules.PubSub
                 if (Validate(logger) == false) return;
 #endif
 
-                ThrowIfHandlerIsNull(handler);
-
                 if (_subscriber.TrySubscribe(new StatefulContextualHandlerActionMessage<TState, TMessage>(State, handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
                 }
-            }
-
-            [Conditional("__ENCOSY_PUBSUB_VALIDATION__"), DoesNotReturn]
-            private static void ThrowIfHandlerIsNull(Delegate handler)
-            {
-                if (handler == null) throw new ArgumentNullException(nameof(handler));
             }
 
 #if __ENCOSY_PUBSUB_VALIDATION__

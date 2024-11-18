@@ -37,16 +37,14 @@ namespace EncosyTower.Modules.Processing
         #endregion ===============
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TypeId> Register<TRequest>(Action<TRequest> process)
+        public Option<TypeId> Register<TRequest>([NotNull] Action<TRequest> process)
         {
-            ThrowIfHandlerIsNull(process);
             return Register(new Internals.Sync.ProcessHandler<TRequest>(process));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TypeId> Register<TRequest, TResult>(Func<TRequest, TResult> process)
+        public Option<TypeId> Register<TRequest, TResult>([NotNull] Func<TRequest, TResult> process)
         {
-            ThrowIfHandlerIsNull(process);
             return Register(new Internals.Sync.ProcessHandler<TRequest, TResult>(process));
         }
 
@@ -145,7 +143,7 @@ namespace EncosyTower.Modules.Processing
 
             return false;
 
-            [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
                 DevLoggerAPI.LogError(
@@ -192,7 +190,7 @@ namespace EncosyTower.Modules.Processing
 
             return default;
 
-            [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
                 DevLoggerAPI.LogError(
@@ -217,12 +215,6 @@ namespace EncosyTower.Modules.Processing
 #endif
 
             return _map.TryGet(typeId, out handler);
-        }
-
-        [HideInCallstack, DoesNotReturn, Conditional("__ENCOSY_PROCESSING_VALIDATION__")]
-        private static void ThrowIfHandlerIsNull(Delegate @delegate)
-        {
-            if (@delegate == null) throw new ArgumentNullException(nameof(@delegate));
         }
 
 #if __ENCOSY_PROCESSING_VALIDATION__

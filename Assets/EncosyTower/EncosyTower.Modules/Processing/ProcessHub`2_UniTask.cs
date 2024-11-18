@@ -6,6 +6,7 @@
 #endif
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
@@ -20,10 +21,8 @@ namespace EncosyTower.Modules.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public Option<TypeId> Register<TRequest>(Func<TState, TRequest, UniTask> process)
+        public Option<TypeId> Register<TRequest>([NotNull] Func<TState, TRequest, UniTask> process)
         {
-            ThrowIfHandlerIsNull(process);
-
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif
@@ -34,10 +33,8 @@ namespace EncosyTower.Modules.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public Option<TypeId> Register<TRequest, TResult>(Func<TState, TRequest, UniTask<TResult>> process)
+        public Option<TypeId> Register<TRequest, TResult>([NotNull] Func<TState, TRequest, UniTask<TResult>> process)
         {
-            ThrowIfHandlerIsNull(process);
-
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif
@@ -48,10 +45,8 @@ namespace EncosyTower.Modules.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public Option<TypeId> Register<TRequest>(Func<TState, TRequest, CancellationToken, UniTask> process)
+        public Option<TypeId> Register<TRequest>([NotNull] Func<TState, TRequest, CancellationToken, UniTask> process)
         {
-            ThrowIfHandlerIsNull(process);
-
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif
@@ -62,10 +57,8 @@ namespace EncosyTower.Modules.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public Option<TypeId> Register<TRequest, TResult>(Func<TState, TRequest, CancellationToken, UniTask<TResult>> process)
+        public Option<TypeId> Register<TRequest, TResult>([NotNull] Func<TState, TRequest, CancellationToken, UniTask<TResult>> process)
         {
-            ThrowIfHandlerIsNull(process);
-
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif

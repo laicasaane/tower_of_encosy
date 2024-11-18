@@ -1,6 +1,8 @@
-﻿using System;
+using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using UnityEngine;
 
 namespace EncosyTower.Modules.Unions.Converters
 {
@@ -40,7 +42,7 @@ namespace EncosyTower.Modules.Unions.Converters
         public string ToString(in Union union)
             => union.Object?.ToString() ?? string.Empty;
 
-        [DoesNotReturn]
+        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
             throw new InvalidCastException($"Cannot get value of {typeof(string)} from the input union.");

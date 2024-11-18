@@ -64,7 +64,7 @@ namespace EncosyTower.Modules.Data
         protected virtual string ToString(TConvertedId value)
             => value.ToString();
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static void ErrorDuplicateId(
               TConvertedId id
             , int index

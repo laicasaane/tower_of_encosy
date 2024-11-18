@@ -23,30 +23,26 @@ namespace EncosyTower.Modules.Processing
         #endregion ================
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TypeId> Register<TRequest>(Func<TRequest, UniTask> process)
+        public Option<TypeId> Register<TRequest>([NotNull] Func<TRequest, UniTask> process)
         {
-            ThrowIfHandlerIsNull(process);
             return Register(new Internals.Async.AsyncProcessHandler<TRequest>(process));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TypeId> Register<TRequest, TResult>(Func<TRequest, UniTask<TResult>> process)
+        public Option<TypeId> Register<TRequest, TResult>([NotNull] Func<TRequest, UniTask<TResult>> process)
         {
-            ThrowIfHandlerIsNull(process);
             return Register(new Internals.Async.AsyncProcessHandler<TRequest, TResult>(process));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TypeId> Register<TRequest>(Func<TRequest, CancellationToken, UniTask> process)
+        public Option<TypeId> Register<TRequest>([NotNull] Func<TRequest, CancellationToken, UniTask> process)
         {
-            ThrowIfHandlerIsNull(process);
             return Register(new Internals.Async.CancellableAsyncProcessHandler<TRequest>(process));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TypeId> Register<TRequest, TResult>(Func<TRequest, CancellationToken, UniTask<TResult>> process)
+        public Option<TypeId> Register<TRequest, TResult>([NotNull] Func<TRequest, CancellationToken, UniTask<TResult>> process)
         {
-            ThrowIfHandlerIsNull(process);
             return Register(new Internals.Async.CancellableAsyncProcessHandler<TRequest, TResult>(process));
         }
 
@@ -141,7 +137,7 @@ namespace EncosyTower.Modules.Processing
 
             return false;
 
-            [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
                 DevLoggerAPI.LogError(
@@ -191,7 +187,7 @@ namespace EncosyTower.Modules.Processing
 
             return default;
 
-            [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
                 DevLoggerAPI.LogError(
@@ -240,7 +236,7 @@ namespace EncosyTower.Modules.Processing
 
             return false;
 
-            [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
                 DevLoggerAPI.LogError(
@@ -288,7 +284,7 @@ namespace EncosyTower.Modules.Processing
 
             return default;
 
-            [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
                 DevLoggerAPI.LogError(

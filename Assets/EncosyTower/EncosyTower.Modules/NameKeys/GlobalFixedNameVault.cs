@@ -60,10 +60,10 @@ namespace EncosyTower.Modules.NameKeys
         public static bool IsDefined(NameKey<T> key)
             => s_vault.Data.ContainsId(key.Id);
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        public static void ThrowIfNotDefined(NameKey<T> key)
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        public static void ThrowIfNotDefined([DoesNotReturnIf(false)] bool isDefined, NameKey<T> key)
         {
-            if (IsDefined(key) == false)
+            if (isDefined == false)
             {
                 throw new InvalidOperationException(
                     $"No NameKey<{typeof(T).Name}> has not been globally defined with id \"{key}\". " +

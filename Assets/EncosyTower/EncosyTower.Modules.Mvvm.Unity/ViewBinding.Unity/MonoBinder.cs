@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Modules.Buffers;
 using EncosyTower.Modules.Collections;
@@ -148,7 +147,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Unity
             }
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfBindingMissing(UnityEngine.Object context, int index)
         {
             DevLoggerAPI.LogError(
@@ -157,7 +156,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Unity
             );
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfTypeNotMatch(UnityEngine.Object context, int index, MonoBinding value)
         {
             DevLoggerAPI.LogError(
@@ -166,7 +165,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Unity
             );
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfContextMissing(UnityEngine.Object context, int index)
         {
             DevLoggerAPI.LogError(

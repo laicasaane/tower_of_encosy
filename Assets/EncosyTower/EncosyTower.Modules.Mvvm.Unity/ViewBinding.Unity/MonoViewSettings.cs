@@ -1,5 +1,4 @@
 using System;
-using UnityEngine.Serialization;
 
 namespace EncosyTower.Modules.Mvvm.ViewBinding.Unity
 {

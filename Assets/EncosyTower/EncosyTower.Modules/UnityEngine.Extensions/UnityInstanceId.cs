@@ -72,7 +72,7 @@ namespace EncosyTower.Modules
         public static bool operator !=(UnityInstanceId<T> left, UnityInstanceId<T> right)
             => left._isValid != right._isValid || left._instanceId != right._instanceId;
 
-        [Conditional("__ENCOSY_VALIDATION__"), DoesNotReturn]
+        [Conditional("__ENCOSY_VALIDATION__")]
         private static void ThrowIfInvalid(UnityEngine.Object obj)
         {
             if (obj == false || obj == null)
@@ -81,8 +81,8 @@ namespace EncosyTower.Modules
             }
         }
 
-        [Conditional("__ENCOSY_VALIDATION__"), DoesNotReturn]
-        private static void ThrowIfNotCreated(bool value)
+        [Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowIfNotCreated([DoesNotReturnIf(false)] bool value)
         {
             if (value == false)
             {

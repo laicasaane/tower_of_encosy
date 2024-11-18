@@ -2,7 +2,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using EncosyTower.Modules.AtlasedSprites;
 using EncosyTower.Modules.Logging;
 using EncosyTower.Modules.Unions;
@@ -46,7 +45,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Adapters.AtlasedSprites
             return union;
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorFoundNoAtlas(string atlas)
         {
             DevLoggerAPI.LogErrorFormat("Cannot find SpriteAtlas {0} in Addressables."
@@ -54,7 +53,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Adapters.AtlasedSprites
             );
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorFoundNoSprite(string atlas, string sprite, UnityEngine.Object context)
         {
             DevLoggerAPI.LogErrorFormat(context

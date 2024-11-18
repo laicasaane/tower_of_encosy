@@ -30,7 +30,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
                 TrySubscribe(new HandlerFunc<TMessage>(handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -47,7 +46,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
                 TrySubscribe(new HandlerFuncMessage<TMessage>(handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -64,7 +62,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
                 TrySubscribe(new HandlerFuncToken<TMessage>(handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -81,7 +78,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
                 TrySubscribe(new HandlerFuncMessageToken<TMessage>(handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -99,8 +95,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
-
                 if (TrySubscribe(new HandlerFunc<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -120,8 +114,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
-
                 if (TrySubscribe(new HandlerFuncMessage<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -141,8 +133,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
-
                 if (TrySubscribe(new HandlerFuncToken<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -162,8 +152,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
-
                 if (TrySubscribe(new HandlerFuncMessageToken<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -182,7 +170,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
                 TrySubscribe(new ContextualHandlerFunc<TMessage>(handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -199,7 +186,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
                 TrySubscribe(new ContextualHandlerFuncMessage<TMessage>(handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -216,7 +202,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
                 TrySubscribe(new ContextualHandlerFuncToken<TMessage>(handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -233,7 +218,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
                 TrySubscribe(new ContextualHandlerFuncMessageToken<TMessage>(handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -251,8 +235,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
-
                 if (TrySubscribe(new ContextualHandlerFunc<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -272,8 +254,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
-
                 if (TrySubscribe(new ContextualHandlerFuncMessage<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -293,8 +273,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
-
                 if (TrySubscribe(new ContextualHandlerFuncToken<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -314,8 +292,6 @@ namespace EncosyTower.Modules.PubSub
                 where TMessage : IMessage
 #endif
             {
-                ThrowIfHandlerIsNull(handler);
-
                 if (TrySubscribe(new ContextualHandlerFuncMessageToken<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);

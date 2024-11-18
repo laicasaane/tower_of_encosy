@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -84,7 +83,7 @@ namespace EncosyTower.Modules
         public ObjectMemoryGetter MoveTo(int index)
             => new(_buffer, index);
 
-        [DoesNotReturn, HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfIndexOutOfRange(int index, Memory<object> buffer)
         {
             if ((uint)index >= (uint)buffer.Length)

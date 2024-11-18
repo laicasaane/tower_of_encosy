@@ -34,8 +34,6 @@ namespace EncosyTower.Modules.PubSub
                 if (Validate(logger) == false) return Subscription<TMessage>.None;
 #endif
 
-                ThrowIfHandlerIsNull(handler);
-
                 _subscriber.TrySubscribe(new StatefulHandlerFunc<TState, TMessage>(State, handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -55,8 +53,6 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false) return Subscription<TMessage>.None;
 #endif
-
-                ThrowIfHandlerIsNull(handler);
 
                 _subscriber.TrySubscribe(new StatefulHandlerFuncMessage<TState, TMessage>(State, handler), order, out var subscription, logger);
                 return subscription;
@@ -78,8 +74,6 @@ namespace EncosyTower.Modules.PubSub
                 if (Validate(logger) == false) return Subscription<TMessage>.None;
 #endif
 
-                ThrowIfHandlerIsNull(handler);
-
                 _subscriber.TrySubscribe(new StatefulHandlerFuncToken<TState, TMessage>(State, handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -99,8 +93,6 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false) return Subscription<TMessage>.None;
 #endif
-
-                ThrowIfHandlerIsNull(handler);
 
                 _subscriber.TrySubscribe(new StatefulHandlerFuncMessageToken<TState, TMessage>(State, handler), order, out var subscription, logger);
                 return subscription;
@@ -122,8 +114,6 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false) return;
 #endif
-
-                ThrowIfHandlerIsNull(handler);
 
                 if (_subscriber.TrySubscribe(new StatefulHandlerFunc<TState, TMessage>(State, handler), order, out var subscription, logger))
                 {
@@ -148,8 +138,6 @@ namespace EncosyTower.Modules.PubSub
                 if (Validate(logger) == false) return;
 #endif
 
-                ThrowIfHandlerIsNull(handler);
-
                 if (_subscriber.TrySubscribe(new StatefulHandlerFuncMessage<TState, TMessage>(State, handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -172,8 +160,6 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false) return;
 #endif
-
-                ThrowIfHandlerIsNull(handler);
 
                 if (_subscriber.TrySubscribe(new StatefulHandlerFuncToken<TState, TMessage>(State, handler), order, out var subscription, logger))
                 {
@@ -198,8 +184,6 @@ namespace EncosyTower.Modules.PubSub
                 if (Validate(logger) == false) return;
 #endif
 
-                ThrowIfHandlerIsNull(handler);
-
                 if (_subscriber.TrySubscribe(new StatefulHandlerFuncMessageToken<TState, TMessage>(State, handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -222,8 +206,6 @@ namespace EncosyTower.Modules.PubSub
                 if (Validate(logger) == false) return Subscription<TMessage>.None;
 #endif
 
-                ThrowIfHandlerIsNull(handler);
-
                 _subscriber.TrySubscribe(new StatefulContextualHandlerFunc<TState, TMessage>(State, handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -243,8 +225,6 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false) return Subscription<TMessage>.None;
 #endif
-
-                ThrowIfHandlerIsNull(handler);
 
                 _subscriber.TrySubscribe(new StatefulContextualHandlerFuncMessage<TState, TMessage>(State, handler), order, out var subscription, logger);
                 return subscription;
@@ -266,8 +246,6 @@ namespace EncosyTower.Modules.PubSub
                 if (Validate(logger) == false) return Subscription<TMessage>.None;
 #endif
 
-                ThrowIfHandlerIsNull(handler);
-
                 _subscriber.TrySubscribe(new StatefulContextualHandlerFuncToken<TState, TMessage>(State, handler), order, out var subscription, logger);
                 return subscription;
             }
@@ -287,8 +265,6 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false) return Subscription<TMessage>.None;
 #endif
-
-                ThrowIfHandlerIsNull(handler);
 
                 _subscriber.TrySubscribe(new StatefulContextualHandlerFuncMessageToken<TState, TMessage>(State, handler), order, out var subscription, logger);
                 return subscription;
@@ -310,8 +286,6 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false) return;
 #endif
-
-                ThrowIfHandlerIsNull(handler);
 
                 if (_subscriber.TrySubscribe(new StatefulContextualHandlerFunc<TState, TMessage>(State, handler), order, out var subscription, logger))
                 {
@@ -336,8 +310,6 @@ namespace EncosyTower.Modules.PubSub
                 if (Validate(logger) == false) return;
 #endif
 
-                ThrowIfHandlerIsNull(handler);
-
                 if (_subscriber.TrySubscribe(new StatefulContextualHandlerFuncMessage<TState, TMessage>(State, handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -361,8 +333,6 @@ namespace EncosyTower.Modules.PubSub
                 if (Validate(logger) == false) return;
 #endif
 
-                ThrowIfHandlerIsNull(handler);
-
                 if (_subscriber.TrySubscribe(new StatefulContextualHandlerFuncToken<TState, TMessage>(State, handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
@@ -385,8 +355,6 @@ namespace EncosyTower.Modules.PubSub
 #if __ENCOSY_PUBSUB_VALIDATION__
                 if (Validate(logger) == false) return;
 #endif
-
-                ThrowIfHandlerIsNull(handler);
 
                 if (_subscriber.TrySubscribe(new StatefulContextualHandlerFuncMessageToken<TState, TMessage>(State, handler), order, out var subscription, logger))
                 {

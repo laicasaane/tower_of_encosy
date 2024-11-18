@@ -89,8 +89,12 @@ namespace EncosyTower.Modules.NameKeys
             return hash.HasValue;
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfFailedRegistering(bool result, in FixedString32Bytes name, Id id)
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void ThrowIfFailedRegistering(
+              [DoesNotReturnIf(false)] bool result
+            , in FixedString32Bytes name
+            , Id id
+        )
         {
             if (result == false)
             {

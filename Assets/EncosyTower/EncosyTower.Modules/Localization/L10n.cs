@@ -15,7 +15,7 @@ using UnityEngine.Localization.Settings;
 namespace EncosyTower.Modules.Localization
 {
     // ReSharper disable once InconsistentNaming
-    
+
     /// <summary>
     /// L10n = L(ocalizatio)n
     /// </summary>
@@ -166,19 +166,19 @@ namespace EncosyTower.Modules.Localization
         private static Option<Locale> FindLocale(string localeCode)
             => s_codeToLocaleMap.TryGetValue(localeCode, out var locale) && locale ? (Option<Locale>)locale : default;
 
-        [HideInStackTrace, HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInStackTrace, HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorNotReady()
         {
             DevLoggerAPI.LogError("Must call \"L10n.Initialize()\" first.");
         }
 
-        [HideInStackTrace, HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInStackTrace, HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorCannotFindLanguage(string value)
         {
             DevLoggerAPI.LogError($"Cannot find any language by locale code {value}");
         }
 
-        [HideInStackTrace, HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInStackTrace, HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void InfoChangeLanguage(string value)
         {
             DevLoggerAPI.LogInfo($"Change language to {value}");

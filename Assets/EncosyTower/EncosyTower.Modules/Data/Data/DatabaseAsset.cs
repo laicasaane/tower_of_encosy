@@ -95,10 +95,8 @@ namespace EncosyTower.Modules.Data
             _typeToAsset.Clear();
         }
 
-        public bool TryGetDataTableAsset(string name, out DataTableAsset tableAsset)
+        public bool TryGetDataTableAsset([NotNull] string name, out DataTableAsset tableAsset)
         {
-            ThrowIfNull(name);
-
             if (Initialized == false)
             {
                 LogErrorDatabaseIsNotInitialized(this);
@@ -121,10 +119,8 @@ namespace EncosyTower.Modules.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetDataTableAsset(Type type, out DataTableAsset tableAsset)
+        public bool TryGetDataTableAsset([NotNull] Type type, out DataTableAsset tableAsset)
         {
-            ThrowIfNull(type);
-
             if (Initialized == false)
             {
                 LogErrorDatabaseIsNotInitialized(this);
@@ -180,11 +176,9 @@ namespace EncosyTower.Modules.Data
             return false;
         }
 
-        public bool TryGetDataTableAsset<T>(string name, out T tableAsset)
+        public bool TryGetDataTableAsset<T>([NotNull] string name, out T tableAsset)
             where T : DataTableAsset
         {
-            ThrowIfNull(name);
-
             if (Initialized == false)
             {
                 LogErrorDatabaseIsNotInitialized(this);
@@ -214,11 +208,8 @@ namespace EncosyTower.Modules.Data
         }
 
         [Obsolete("Use other TryGetDataTableAsset overloads instead.", false)]
-        public bool TryGetDataTableAsset(Type type, string name, out DataTableAsset tableAsset)
+        public bool TryGetDataTableAsset([NotNull] Type type, [NotNull] string name, out DataTableAsset tableAsset)
         {
-            ThrowIfNull(name);
-            ThrowIfNull(type);
-
             if (Initialized == false)
             {
                 LogErrorDatabaseIsNotInitialized(this);
@@ -247,61 +238,43 @@ namespace EncosyTower.Modules.Data
             return false;
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfNull(string name)
-        {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-        }
-
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfNull(Type type)
-        {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-        }
-
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorReferenceIsInvalid(int index, DatabaseAsset context)
         {
             DevLoggerAPI.LogError(context, $"Table Asset reference at index {index} is invalid.");
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorAssetIsInvalid(int index, DatabaseAsset context)
         {
             DevLoggerAPI.LogError(context, $"Table Asset at index {index} is invalid.");
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorDatabaseIsNotInitialized(DatabaseAsset context)
         {
             DevLoggerAPI.LogError(context, $"The database is not initialized yet. Please invoke {nameof(Initialize)} method beofre using.");
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorCannotFindAsset(string name, DatabaseAsset context)
         {
             DevLoggerAPI.LogError(context, $"Cannot find any data table asset named {name}.");
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorCannotFindAsset(Type type, DatabaseAsset context)
         {
             DevLoggerAPI.LogError(context, $"Cannot find any data table asset of type {type}.");
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorFoundAssetIsNotValidType<T>(DataTableAsset context)
         {
             DevLoggerAPI.LogError(context, $"The data table asset is not an instance of {typeof(T)}");
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorFoundAssetIsNotValidType(Type type, DataTableAsset context)
         {
             DevLoggerAPI.LogError(context, $"The data table asset is not an instance of {type}");

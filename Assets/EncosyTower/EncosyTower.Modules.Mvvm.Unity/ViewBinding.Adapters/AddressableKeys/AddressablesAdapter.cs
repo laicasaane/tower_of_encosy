@@ -2,7 +2,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using EncosyTower.Modules.AddressableKeys;
 using EncosyTower.Modules.Logging;
 using EncosyTower.Modules.Unions;
@@ -40,7 +39,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Adapters.AddressableKeys
             return union;
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorFoundNoAsset(Type type, string address)
         {
             DevLoggerAPI.LogErrorFormat("Cannot find Addressable Asset of type {0} by address {1}"

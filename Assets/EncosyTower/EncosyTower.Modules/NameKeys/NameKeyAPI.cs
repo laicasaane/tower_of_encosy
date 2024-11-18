@@ -36,7 +36,7 @@ namespace EncosyTower.Modules.NameKeys
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string Get<T>(NameKey<T> key)
         {
-            GlobalNameVault<T>.ThrowIfNotDefined(key);
+            GlobalNameVault<T>.ThrowIfNotDefined(GlobalNameVault<T>.IsDefined(key), key);
             return GlobalNameVault<T>.KeyToName(key);
         }
     }

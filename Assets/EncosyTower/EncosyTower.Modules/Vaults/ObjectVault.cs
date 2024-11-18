@@ -147,7 +147,7 @@ namespace EncosyTower.Modules.Vaults
             return default;
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfNotReferenceType<T>()
         {
             if (TypeCache<T>.IsUnmanaged || TypeCache<T>.IsValueType)
@@ -158,7 +158,7 @@ namespace EncosyTower.Modules.Vaults
             }
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfUnityObjectIsDestroyed<T>(T obj)
         {
             if (obj is UnityObject unityObj && unityObj == false)
@@ -167,7 +167,7 @@ namespace EncosyTower.Modules.Vaults
             }
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfTypeMismatch<T>(Id2 id, object obj, UnityObject context)
         {
             var message = "Id \"{0}\" is mapped to an object of type \"{1}\". " +
@@ -184,7 +184,7 @@ namespace EncosyTower.Modules.Vaults
             }
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfRegisteredObjectIsNull(Id2 id, UnityObject context)
         {
             var message = "The object registered with id \"{0}\" is null.";

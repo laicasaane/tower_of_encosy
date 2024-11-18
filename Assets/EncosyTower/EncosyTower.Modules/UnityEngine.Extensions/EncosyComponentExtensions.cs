@@ -49,7 +49,7 @@ namespace EncosyTower.Modules
             return self;
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfComponentInvalid(Component self)
         {
             if (self.IsInvalid())

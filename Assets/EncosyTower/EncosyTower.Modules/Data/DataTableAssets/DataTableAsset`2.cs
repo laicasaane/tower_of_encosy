@@ -61,8 +61,12 @@ namespace EncosyTower.Modules.Data
         protected virtual string ToString(TDataId value)
             => value.ToString();
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        protected static void ErrorDuplicateId(TDataId id, int index, [NotNull] DataTableAsset<TDataId, TData> context)
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        protected static void ErrorDuplicateId(
+              TDataId id
+            , int index
+            , [NotNull] DataTableAsset<TDataId, TData> context
+        )
         {
             DevLoggerAPI.LogErrorFormat(
                   context

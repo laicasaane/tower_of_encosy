@@ -10,12 +10,12 @@ namespace EncosyTower.Modules.NameKeys
 #if UNITY_BURST && UNITY_COLLECTIONS
             if (self.IsFixed)
             {
-                GlobalFixedNameVault<T>.ThrowIfNotDefined(self);
+                GlobalFixedNameVault<T>.ThrowIfNotDefined(GlobalFixedNameVault<T>.IsDefined(self), self);
                 return GlobalFixedNameVault<T>.KeyToName(self).ToString();
             }
 #endif
 
-            GlobalNameVault<T>.ThrowIfNotDefined(self);
+            GlobalNameVault<T>.ThrowIfNotDefined(GlobalNameVault<T>.IsDefined(self), self);
             return GlobalNameVault<T>.KeyToName(self);
         }
 

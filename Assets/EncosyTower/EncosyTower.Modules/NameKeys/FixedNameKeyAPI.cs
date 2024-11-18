@@ -44,7 +44,7 @@ namespace EncosyTower.Modules.NameKeys
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static FixedString32Bytes Get<T>(NameKey<T> key)
         {
-            GlobalFixedNameVault<T>.ThrowIfNotDefined(key);
+            GlobalFixedNameVault<T>.ThrowIfNotDefined(GlobalFixedNameVault<T>.IsDefined(key), key);
             return GlobalFixedNameVault<T>.KeyToName(key);
         }
     }

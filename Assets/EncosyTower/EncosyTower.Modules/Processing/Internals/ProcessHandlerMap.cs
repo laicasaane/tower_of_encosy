@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -70,7 +69,7 @@ namespace EncosyTower.Modules.Processing.Internals
             return false;
         }
 
-        [DoesNotReturn, HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private void LogIfExist(IProcessHandler handler)
         {
             Logging.DevLoggerAPI.LogWarning(

@@ -147,7 +147,7 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
 
             static Printer WriteValidateTypeIdMethod(string typeName, string unionName, Printer p)
             {
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(DOES_NOT_RETURN);
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"private static void ValidateTypeId(in {UNION_TYPE} union)");
                 p.OpenScope();
                 {

@@ -154,11 +154,10 @@ namespace EncosyTower.Modules.Collections
             return self.managed;
         }
 
-        protected void Initialize(T[] managed)
+        protected void Initialize([NotNull] T[] managed)
         {
             version++;
 
-            ThrowIfNull(managed);
             this.managed = managed;
             Initialize();
         }
@@ -188,7 +187,7 @@ namespace EncosyTower.Modules.Collections
         }
 
         /// <summary>
-        /// Allows taking pointer of SharedArray in 'fixed' statements 
+        /// Allows taking pointer of SharedArray in 'fixed' statements
         /// </summary>
         /// <returns></returns>
         public ref T GetPinnableReference()
@@ -341,16 +340,7 @@ namespace EncosyTower.Modules.Collections
             return ref *(T*)null;
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        protected static void ThrowIfNull(T[] managed)
-        {
-            if (managed == null)
-            {
-                throw new ArgumentNullException(nameof(managed));
-            }
-        }
-
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static unsafe void ThrowIfTypesNotEqualSize()
         {
             if (sizeof(T) != sizeof(TNative))
@@ -362,7 +352,7 @@ namespace EncosyTower.Modules.Collections
             }
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static void ThrowIfSizeNegative(int size)
         {
             if (size < 0)
@@ -448,13 +438,13 @@ namespace EncosyTower.Modules.Collections
             {
             }
 
-            [DoesNotReturn, HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             private static void ThrowEnumFailedVersion()
             {
                 throw new InvalidOperationException("SharedArray was modified during enumeration.");
             }
 
-            [DoesNotReturn, HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             private static void ThrowEnumOpCantHappen()
             {
                 throw new InvalidOperationException("Invalid enumerator state: enumeration cannot proceed.");
