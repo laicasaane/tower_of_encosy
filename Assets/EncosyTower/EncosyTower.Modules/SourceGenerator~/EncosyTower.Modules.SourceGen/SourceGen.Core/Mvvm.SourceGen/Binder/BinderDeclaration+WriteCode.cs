@@ -415,11 +415,11 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
 
                     if (param == null)
                     {
-                        p.PrintLine($"OnEventAction = (instance, args) => instance.{methodName}()");
+                        p.PrintLine($"OnEventAction = static (instance, args) => instance.{methodName}()");
                     }
                     else
                     {
-                        p.PrintLine($"OnEventAction = (instance, args) => instance.{methodName}(this.{ConverterName(member)}.Convert(args.NewValue))");
+                        p.PrintLine($"OnEventAction = static (instance, args) => instance.{methodName}(instance.{ConverterName(member)}.Convert(args.NewValue))");
                     }
 
                     p.CloseScope("};");
