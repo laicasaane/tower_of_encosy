@@ -1,6 +1,7 @@
 #if UNITY_TEXTMESHPRO
 
 using System;
+using System.Text;
 using EncosyTower.Modules.Mvvm.ViewBinding.Unity;
 using EncosyTower.Modules.Unions;
 using TMPro;
@@ -28,6 +29,24 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
             for (var i = 0; i < length; i++)
             {
                 targets[i].text = value;
+            }
+        }
+    }
+
+    [Serializable]
+    [Label("Text (String Builder)", "TMP Text")]
+    public sealed partial class TMP_TextBindingText_StringBuilder : MonoBindingProperty<TMP_Text>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetText(StringBuilder value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].SetText(value);
             }
         }
     }
