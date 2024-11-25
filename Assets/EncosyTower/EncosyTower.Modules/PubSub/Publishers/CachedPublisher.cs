@@ -1,9 +1,9 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
-#if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __ENCOSY_PUBSUB_NO_VALIDATION__
+#if !(UNITY_EDITOR || DEBUG) || DISABLE_ENCOSY_CHECKS
+#define __ENCOSY_NO_VALIDATION__
 #else
-#define __ENCOSY_PUBSUB_VALIDATION__
+#define __ENCOSY_VALIDATION__
 #endif
 
 using System;
@@ -46,7 +46,7 @@ namespace EncosyTower.Modules.PubSub
             Publish(new TMessage(), token, logger, callerInfo);
         }
 
-#if __ENCOSY_PUBSUB_VALIDATION__
+#if __ENCOSY_VALIDATION__
         private readonly bool Validate(ILogger logger)
         {
             if (_broker != null)

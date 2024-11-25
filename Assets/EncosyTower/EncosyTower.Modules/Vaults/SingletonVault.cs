@@ -1,5 +1,7 @@
-#if (UNITY_EDITOR || DEBUG) && !DISABLE_DEBUG
-#define ENABLE_DEBUG_CHECKS
+#if !(UNITY_EDITOR || DEBUG) || DISABLE_ENCOSY_CHECKS
+#define __ENCOSY_NO_VALIDATION__
+#else
+#define __ENCOSY_VALIDATION__
 #endif
 
 using System;
@@ -27,7 +29,7 @@ namespace EncosyTower.Modules.Vaults
         {
             if (_singletons.ContainsKey(TypeCache<T>.Hash))
             {
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
                 DevLoggerAPI.LogError($"An instance of {TypeCache<T>.Type.Name} has already been existing");
 #endif
 
@@ -43,7 +45,7 @@ namespace EncosyTower.Modules.Vaults
         {
             if (instance == null)
             {
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
                 throw new ArgumentNullException(nameof(instance));
 #else
                 return false;
@@ -52,7 +54,7 @@ namespace EncosyTower.Modules.Vaults
 
             if (_singletons.ContainsKey(TypeCache<T>.Hash))
             {
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
                 DevLoggerAPI.LogError($"An instance of {TypeCache<T>.Type} has already been existing");
 #endif
 
@@ -73,7 +75,7 @@ namespace EncosyTower.Modules.Vaults
                     instance = inst;
                     return true;
                 }
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
                 else
                 {
                     throw new InvalidCastException(
@@ -98,7 +100,7 @@ namespace EncosyTower.Modules.Vaults
                     instance = inst;
                     return true;
                 }
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
                 else
                 {
                     throw new InvalidCastException(

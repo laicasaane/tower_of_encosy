@@ -1,9 +1,9 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
-#if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __ENCOSY_PUBSUB_NO_VALIDATION__
+#if !(UNITY_EDITOR || DEBUG) || DISABLE_ENCOSY_CHECKS
+#define __ENCOSY_NO_VALIDATION__
 #else
-#define __ENCOSY_PUBSUB_VALIDATION__
+#define __ENCOSY_VALIDATION__
 #endif
 
 using System;
@@ -37,12 +37,12 @@ namespace EncosyTower.Modules.PubSub
             /// <summary>
             /// Remove empty handler groups to optimize performance.
             /// </summary>
-#if __ENCOSY_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Compress(ILogger logger = null)
             {
-#if __ENCOSY_PUBSUB_VALIDATION__
+#if __ENCOSY_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return;
@@ -52,7 +52,7 @@ namespace EncosyTower.Modules.PubSub
                 _subscriber.Compress<AnonMessage>(logger);
             }
 
-#if __ENCOSY_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public ISubscription Subscribe(
@@ -61,7 +61,7 @@ namespace EncosyTower.Modules.PubSub
                 , ILogger logger = null
             )
             {
-#if __ENCOSY_PUBSUB_VALIDATION__
+#if __ENCOSY_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return Subscription<AnonMessage>.None;
@@ -71,7 +71,7 @@ namespace EncosyTower.Modules.PubSub
                 return _subscriber.Subscribe<AnonMessage>(handler, order, logger);
             }
 
-#if __ENCOSY_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Subscribe(
@@ -81,7 +81,7 @@ namespace EncosyTower.Modules.PubSub
                 , ILogger logger = null
             )
             {
-#if __ENCOSY_PUBSUB_VALIDATION__
+#if __ENCOSY_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return;
@@ -91,7 +91,7 @@ namespace EncosyTower.Modules.PubSub
                 _subscriber.Subscribe<AnonMessage>(handler, unsubscribeToken, order, logger);
             }
 
-#if __ENCOSY_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public ISubscription Subscribe(
@@ -100,7 +100,7 @@ namespace EncosyTower.Modules.PubSub
                 , ILogger logger = null
             )
             {
-#if __ENCOSY_PUBSUB_VALIDATION__
+#if __ENCOSY_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return Subscription<AnonMessage>.None;
@@ -110,7 +110,7 @@ namespace EncosyTower.Modules.PubSub
                 return _subscriber.Subscribe<AnonMessage>(handler, order, logger);
             }
 
-#if __ENCOSY_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Subscribe(
@@ -120,7 +120,7 @@ namespace EncosyTower.Modules.PubSub
                 , ILogger logger = null
             )
             {
-#if __ENCOSY_PUBSUB_VALIDATION__
+#if __ENCOSY_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return;
@@ -130,7 +130,7 @@ namespace EncosyTower.Modules.PubSub
                 _subscriber.Subscribe<AnonMessage>(handler, unsubscribeToken, order, logger);
             }
 
-#if __ENCOSY_PUBSUB_VALIDATION__
+#if __ENCOSY_VALIDATION__
             private bool Validate(ILogger logger)
             {
                 if (IsValid)

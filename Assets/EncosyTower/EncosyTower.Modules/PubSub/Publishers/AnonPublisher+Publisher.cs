@@ -1,9 +1,9 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
-#if !(UNITY_EDITOR || DEBUG) || DISABLE_DEBUG
-#define __ENCOSY_PUBSUB_NO_VALIDATION__
+#if !(UNITY_EDITOR || DEBUG) || DISABLE_ENCOSY_CHECKS
+#define __ENCOSY_NO_VALIDATION__
 #else
-#define __ENCOSY_PUBSUB_VALIDATION__
+#define __ENCOSY_VALIDATION__
 #endif
 
 using System.Runtime.CompilerServices;
@@ -30,12 +30,12 @@ namespace EncosyTower.Modules.PubSub
                 _publisher = publisher;
             }
 
-#if __ENCOSY_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public CachedPublisher<AnonMessage> Cache(ILogger logger = null)
             {
-#if __ENCOSY_PUBSUB_VALIDATION__
+#if __ENCOSY_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return default;
@@ -45,7 +45,7 @@ namespace EncosyTower.Modules.PubSub
                 return _publisher.Cache<AnonMessage>(logger);
             }
 
-#if __ENCOSY_PUBSUB_NO_VALIDATION__
+#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Publish(
@@ -54,7 +54,7 @@ namespace EncosyTower.Modules.PubSub
                 , CallerInfo callerInfo = default
             )
             {
-#if __ENCOSY_PUBSUB_VALIDATION__
+#if __ENCOSY_VALIDATION__
                 if (Validate(logger) == false)
                 {
                     return;
@@ -64,7 +64,7 @@ namespace EncosyTower.Modules.PubSub
                 _publisher.Publish<AnonMessage>(token, logger, callerInfo);
             }
 
-#if __ENCOSY_PUBSUB_VALIDATION__
+#if __ENCOSY_VALIDATION__
             private bool Validate(ILogger logger)
             {
                 if (IsValid)
