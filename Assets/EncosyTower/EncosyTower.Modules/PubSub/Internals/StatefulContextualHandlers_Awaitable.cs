@@ -9,7 +9,7 @@ namespace EncosyTower.Modules.PubSub.Internals
     internal sealed class StatefulContextualHandlerFuncMessageToken<TState, TMessage> : IHandler<TMessage>
         where TState : class
     {
-        private readonly WeakReference<TState> _state;
+        private WeakReference<TState> _state;
         private Func<TState, TMessage, PublishingContext, CancellationToken, Awaitable> _handler;
 
         public StatefulContextualHandlerFuncMessageToken(TState state, Func<TState, TMessage, PublishingContext, CancellationToken, Awaitable> handler)
@@ -24,6 +24,7 @@ namespace EncosyTower.Modules.PubSub.Internals
         public void Dispose()
         {
             _handler = null;
+            _state = null;
         }
 
         public Awaitable Handle(TMessage message, PublishingContext context, CancellationToken token)
@@ -39,7 +40,7 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class StatefulContextualHandlerFuncToken<TState, TMessage> : IHandler<TMessage> where TState : class
     {
-        private readonly WeakReference<TState> _state;
+        private WeakReference<TState> _state;
         private Func<TState, PublishingContext, CancellationToken, Awaitable> _handler;
 
         public StatefulContextualHandlerFuncToken(TState state, Func<TState, PublishingContext, CancellationToken, Awaitable> handler)
@@ -54,6 +55,7 @@ namespace EncosyTower.Modules.PubSub.Internals
         public void Dispose()
         {
             _handler = null;
+            _state = null;
         }
 
         public Awaitable Handle(TMessage message, PublishingContext context, CancellationToken token)
@@ -69,7 +71,7 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class StatefulContextualHandlerFuncMessage<TState, TMessage> : IHandler<TMessage> where TState : class
     {
-        private readonly WeakReference<TState> _state;
+        private WeakReference<TState> _state;
         private Func<TState, TMessage, PublishingContext, Awaitable> _handler;
 
         public StatefulContextualHandlerFuncMessage(TState state, Func<TState, TMessage, PublishingContext, Awaitable> handler)
@@ -84,6 +86,7 @@ namespace EncosyTower.Modules.PubSub.Internals
         public void Dispose()
         {
             _handler = null;
+            _state = null;
         }
 
         public Awaitable Handle(TMessage message, PublishingContext context, CancellationToken token)
@@ -99,7 +102,7 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class StatefulContextualHandlerFunc<TState, TMessage> : IHandler<TMessage> where TState : class
     {
-        private readonly WeakReference<TState> _state;
+        private WeakReference<TState> _state;
         private Func<TState, PublishingContext, Awaitable> _handler;
 
         public StatefulContextualHandlerFunc(TState state, Func<TState, PublishingContext, Awaitable> handler)
@@ -114,6 +117,7 @@ namespace EncosyTower.Modules.PubSub.Internals
         public void Dispose()
         {
             _handler = null;
+            _state = null;
         }
 
         public Awaitable Handle(TMessage message, PublishingContext context, CancellationToken token)
@@ -129,7 +133,7 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class StatefulContextualHandlerActionMessage<TState, TMessage> : IHandler<TMessage> where TState : class
     {
-        private readonly WeakReference<TState> _state;
+        private WeakReference<TState> _state;
         private Action<TState, TMessage, PublishingContext> _handler;
 
         public StatefulContextualHandlerActionMessage(TState state, Action<TState, TMessage, PublishingContext> handler)
@@ -144,6 +148,7 @@ namespace EncosyTower.Modules.PubSub.Internals
         public void Dispose()
         {
             _handler = null;
+            _state = null;
         }
 
         public Awaitable Handle(TMessage message, PublishingContext context, CancellationToken token)
@@ -160,7 +165,7 @@ namespace EncosyTower.Modules.PubSub.Internals
 
     internal sealed class StatefulContextualHandlerAction<TState, TMessage> : IHandler<TMessage> where TState : class
     {
-        private readonly WeakReference<TState> _state;
+        private WeakReference<TState> _state;
         private Action<TState, PublishingContext> _handler;
 
         public StatefulContextualHandlerAction(TState state, Action<TState, PublishingContext> handler)
@@ -175,6 +180,7 @@ namespace EncosyTower.Modules.PubSub.Internals
         public void Dispose()
         {
             _handler = null;
+            _state = null;
         }
 
         public Awaitable Handle(TMessage message, PublishingContext context, CancellationToken token)
