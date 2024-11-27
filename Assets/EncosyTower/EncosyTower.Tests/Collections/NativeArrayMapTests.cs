@@ -2,7 +2,7 @@ using EncosyTower.Modules.Collections;
 using NUnit.Framework;
 using Unity.Collections;
 
-namespace EncosyTower.Tests
+namespace EncosyTower.Tests.Collections
 {
     public class NativeArrayMapTests
     {

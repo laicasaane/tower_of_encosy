@@ -5,7 +5,7 @@ using NUnit.Framework;
 using Unity.PerformanceTesting;
 using UnityEngine.Profiling;
 
-namespace EncosyTower.Tests
+namespace EncosyTower.Tests.Unions
 {
     public class UnionTests
     {
