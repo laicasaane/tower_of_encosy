@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using EncosyTower.Modules.Logging;
 using UnityEngine;
 
 namespace EncosyTower.Modules
@@ -141,8 +142,85 @@ namespace EncosyTower.Modules
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Forget(this Awaitable _) { }
+        /// <summary>
+        /// Dismiss warning on fire-and-forget calls.
+        /// </summary>
+        public static void Forget(this Awaitable self)
+        {
+            var awaiter = self.GetAwaiter();
+
+            if (awaiter.IsCompleted == false)
+            {
+                awaiter.OnCompleted(HandleLogException);
+            }
+            else
+            {
+                HandleLogException();
+            }
+
+            void HandleLogException()
+            {
+                try
+                {
+                    awaiter.GetResult();
+                }
+#if DISABLE_CHECKS
+#if UNITY_EDITOR
+                catch (Exception ex)
+                {
+                    DevLoggerAPI.LogException(ex);
+                }
+#else
+                catch { }
+#endif
+#else
+                catch (Exception ex)
+                {
+                    RuntimeLoggerAPI.LogException(ex);
+                }
+#endif
+            }
+        }
+
+        /// <summary>
+        /// Dismiss warning on fire-and-forget calls.
+        /// </summary>
+        public static void Forget<TResult>(this Awaitable<TResult> self)
+        {
+            var awaiter = self.GetAwaiter();
+
+            if (awaiter.IsCompleted == false)
+            {
+                awaiter.OnCompleted(LogHandleException);
+            }
+            else
+            {
+                LogHandleException();
+            }
+
+            void LogHandleException()
+            {
+                try
+                {
+                    _ = awaiter.GetResult();
+                }
+#if DISABLE_CHECKS
+#if UNITY_EDITOR
+                catch (Exception ex)
+                {
+                    DevLoggerAPI.LogException(ex);
+                }
+#else
+                catch { }
+#endif
+#else
+                catch (Exception ex)
+                {
+                    RuntimeLoggerAPI.LogException(ex);
+                }
+#endif
+            }
+        }
 
         /// <summary>
         /// Runs an <see cref="Awaitable"/> without awaiting for it.
