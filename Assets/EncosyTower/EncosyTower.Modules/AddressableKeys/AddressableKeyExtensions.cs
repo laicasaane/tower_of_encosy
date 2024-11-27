@@ -70,7 +70,7 @@ namespace EncosyTower.Modules.AddressableKeys
 
             return result.Value().TryGetComponent<TComponent>(out var comp) ? comp : default;
         }
-        
+
         private static Option<GameObject> InstantiateInternal(
               AddressableKey<GameObject> key
             , TransformOrScene parent

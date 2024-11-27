@@ -5,7 +5,7 @@ using System;
 namespace EncosyTower.Modules.Localization
 {
     // ReSharper disable once InconsistentNaming
-    
+
     /// <summary>
     /// Place on a struct whose name ends with either "_EnumTemplate" or "_Template"
     /// to indicate a template for generating an L10n Language enum.
@@ -14,7 +14,7 @@ namespace EncosyTower.Modules.Localization
     /// <code>
     /// [L10nLanguageEnumTemplate]
     /// public readonly partial struct GameLanguage_Template { }
-    /// 
+    ///
     /// // Will generate an enum named 'GameLanguage' along with associated APIs.
     /// </code>
     /// </example>

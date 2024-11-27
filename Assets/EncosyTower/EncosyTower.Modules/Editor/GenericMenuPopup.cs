@@ -264,7 +264,7 @@ namespace EncosyTower.Modules.Editor
 
         public readonly string Title;
         public readonly MenuItemNode RootNode;
-        
+
         public int width = 200;
         public int height = 200;
         public int maxHeight = 300;

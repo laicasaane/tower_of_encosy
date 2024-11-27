@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -41,7 +41,7 @@ namespace EncosyTower.Modules.Data.Authoring
             using var service = new DriveService(new BaseClientService.Initializer {
                 HttpClientInitializer = _credential
             });
-            
+
             var fileReq = service.Files.Get(_gsheetAddress);
             fileReq.SupportsTeamDrives = true;
             fileReq.Fields = "modifiedTime";
@@ -143,7 +143,7 @@ namespace EncosyTower.Modules.Data.Authoring
                     {
                         continue;
                     }
-                    
+
                     var colCount = cols.Count;
 
                     for (var c = 0; c < colCount; c++)

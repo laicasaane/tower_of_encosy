@@ -320,13 +320,13 @@ namespace EncosyTower.Modules.Editor.Mvvm.ViewBinding.Unity
                         iconWarning.tooltip = NO_BINDING_TARGET;
                         break;
                     }
-                    
+
                     case < 1:
                     {
                         iconWarning.tooltip = NO_BINDING;
                         break;
                     }
-                    
+
                     default:
                     {
                         if (targetsProp.arraySize < 1)

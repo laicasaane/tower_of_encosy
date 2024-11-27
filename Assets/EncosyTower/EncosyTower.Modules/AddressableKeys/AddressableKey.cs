@@ -15,7 +15,6 @@ namespace EncosyTower.Modules.AddressableKeys
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator AssetKey.Serializable(AddressableKey value)
             => value.Value;
-
     }
 
     [WrapRecord]

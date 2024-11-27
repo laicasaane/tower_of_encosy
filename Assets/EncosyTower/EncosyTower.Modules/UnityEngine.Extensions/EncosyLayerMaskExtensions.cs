@@ -8,7 +8,10 @@ namespace EncosyTower.Modules
         /// <summary>
 		/// Determines whether some of the bit fields are set in the current instance.
 		/// </summary>
-		/// <returns><c>true</c> if all the bit fields that are set in <c>flag</c> are also set in the current instance; otherwise, <c>false</c>.</returns>
+		/// <returns>
+        /// <c>true</c> if all the bit fields that are set in <c>flag</c> are also set in the current instance;
+        /// otherwise, <c>false</c>.
+        /// </returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Contains(this LayerMask value, LayerMask flag)
             => (value & flag) == flag;
@@ -16,7 +19,10 @@ namespace EncosyTower.Modules
         /// <summary>
         /// Determines whether the bit at <paramref name="bit"/> is set in the current instance.
         /// </summary>
-        /// <returns><c>true</c> if the bit at <paramref name="bit"/> is set in the current instance; otherwise, <c>false</c>.</returns>
+        /// <returns>
+        /// <c>true</c> if the bit at <paramref name="bit"/> is set in the current instance;
+        /// otherwise, <c>false</c>.
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Contains(this LayerMask value, int bit)
             => bit >= 0 && Contains(value, ToLayerMask(bit));
@@ -24,7 +30,10 @@ namespace EncosyTower.Modules
         /// <summary>
         /// Determines whether any of the bit fields are set in the current instance.
         /// </summary>
-        /// <returns><c>true</c> if any of the bit fields that are set in <c>flag</c> is also set in the current instance; otherwise, <c>false</c>.</returns>
+        /// <returns>
+        /// <c>true</c> if any of the bit fields that are set in <c>flag</c> is also set in the current instance;
+        /// otherwise, <c>false</c>.
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Any(this LayerMask value, LayerMask flag)
             => (value & flag) != 0;

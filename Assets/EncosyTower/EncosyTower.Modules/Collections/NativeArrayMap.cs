@@ -1,19 +1,19 @@
 // https://github.com/sebas77/Svelto.Common/blob/master/DataStructures/Dictionaries/SveltoDictionary.cs
 
 // MIT License
-// 
+//
 // Copyright (c) 2015-2020 Sebastiano Mandalà
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -354,7 +354,7 @@ namespace EncosyTower.Modules.Collections
                     {
                         //the bucket will point to the previous cell. if a previous cell exists
                         //its next pointer must be updated!
-                        //<--- iteration order  
+                        //<--- iteration order
                         //                      Bucket points always to the last one
                         //   ------- ------- -------
                         //   |  1  | |  2  | |  3  | //bucket cannot have next, only previous
@@ -447,7 +447,7 @@ namespace EncosyTower.Modules.Collections
         //When read the offset must be offset by -1 again to be the real one. In this way
         //I avoid to initialize the array to -1
 
-        //WARNING this method must stay stateless (not relying on states that can change, it's ok to read 
+        //WARNING this method must stay stateless (not relying on states that can change, it's ok to read
         //constant states) because it will be used in multithreaded parallel code
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryFindIndex(TKey key, out int findIndex)
@@ -636,7 +636,7 @@ namespace EncosyTower.Modules.Collections
                     //oops a value was already being pointed by this cell in the new bucket list,
                     //it means there is a collision, problem
                     collisions++;
-                    //the bucket will point to this value, so 
+                    //the bucket will point to this value, so
                     //the previous index will be used as previous for the new value.
                     valueInfoNode._previous = existingValueIndex;
                 }

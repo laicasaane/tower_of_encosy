@@ -1,19 +1,19 @@
 // https://github.com/sebas77/Svelto.Common/blob/master/DataStructures/DualMemorySupport/ManagedStrategy.cs
 
 // MIT License
-// 
+//
 // Copyright (c) 2015-2020 Sebastiano Mandalà
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,7 +30,7 @@ namespace EncosyTower.Modules.Buffers
 {
     /// <summary>
     /// They are called strategy because they abstract the handling of the memory type used.
-    /// Through the IBufferStrategy interface, external datastructure can use interchangeably native and managed memory. 
+    /// Through the IBufferStrategy interface, external datastructure can use interchangeably native and managed memory.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public struct ManagedStrategy<T> : IBufferStrategy<T>
@@ -97,7 +97,7 @@ namespace EncosyTower.Modules.Buffers
             }
 
             var realBuffer = _realBuffer.ToManagedArray();
-            
+
             if (copyContent)
                 Array.Resize(ref realBuffer, newSize);
             else
@@ -107,7 +107,7 @@ namespace EncosyTower.Modules.Buffers
             if (memClear)
                 Array.Clear(realBuffer, 0, realBuffer.Length);
 #endif
-            
+
             var b = default(MBInternal<T>);
             b.Set(realBuffer);
             _realBuffer = b;

@@ -1,4 +1,4 @@
-﻿// BakingSheet, Maxwell Keonwoo Kang <code.athei@gmail.com>, 2022
+// BakingSheet, Maxwell Keonwoo Kang <code.athei@gmail.com>, 2022
 
 using System;
 using System.Collections.Generic;
@@ -46,7 +46,7 @@ namespace EncosyTower.Modules.Data.Authoring
             using var service = new DriveService(new BaseClientService.Initializer {
                 HttpClientInitializer = _credential
             });
-            
+
             var fileReq = service.Files.Get(_gsheetAddress);
             fileReq.SupportsTeamDrives = true;
             fileReq.Fields = "modifiedTime";

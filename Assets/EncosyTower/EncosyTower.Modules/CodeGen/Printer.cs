@@ -1,5 +1,3 @@
-#if UNITY_EDITOR
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -390,7 +388,7 @@ namespace EncosyTower.Modules.CodeGen
                     _printer.Print(_separator);
                 else
                     _started = true;
-                
+
                 return _printer;
             }
 
@@ -461,7 +459,7 @@ namespace EncosyTower.Modules.CodeGen
                 {
                     listPrinter._started = true;
                 }
-                
+
                 return listPrinter._printer;
             }
         }
@@ -537,5 +535,3 @@ namespace EncosyTower.Modules.CodeGen
         }
     }
 }
-
-#endif
