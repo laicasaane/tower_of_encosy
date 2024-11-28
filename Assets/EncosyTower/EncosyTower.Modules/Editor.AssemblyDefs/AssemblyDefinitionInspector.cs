@@ -133,7 +133,7 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
                 }
             }
 
-            pairs.Sort(SortPair);
+            pairs.Sort(Compare);
 
             assemblyDef.references = pairs
                 .Select(x => useGuid ? x.guid : x.name)
@@ -145,7 +145,7 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
             AssetDatabase.Refresh();
             return;
 
-            static int SortPair((string name, string guid) x, (string name, string guid) y)
+            static int Compare((string name, string guid) x, (string name, string guid) y)
             {
                 return StringComparer.OrdinalIgnoreCase.Compare(x.name, y.name);
             }
@@ -203,7 +203,9 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
             }
 
             var assemblyDef = data.AssemblyDef;
-            var items = data.Items;
+            var items = data.Items.ToList();
+
+            items.Sort(Compare);
 
             assemblyDef.references = items
                 .Where(static x => x != null)
@@ -216,6 +218,12 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
 
             File.WriteAllText(data.AssetPath, json);
             AssetDatabase.Refresh();
+            return;
+
+            static int Compare(ItemInfo x, ItemInfo y)
+            {
+                return StringComparer.OrdinalIgnoreCase.Compare(x.Name, y.Name);
+            }
         }
 
         private static bool FindItems(string assetPath, AssemblyDef assemblyDef, out Data result)
