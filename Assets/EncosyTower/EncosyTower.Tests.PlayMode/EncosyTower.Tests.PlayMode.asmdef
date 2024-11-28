@@ -1,0 +1,42 @@
+{
+    "name": "EncosyTower.Tests.PlayMode",
+    "rootNamespace": "EncosyTower.Tests",
+    "references": [
+        "AnnulusGames.UnityCodeGen.Editor",
+        "EncosyTower.Modules",
+        "Gilzoide.EasyProjectSettings",
+        "Latios.Core",
+        "Latios.Psyshock",
+        "Latios.Transforms",
+        "SpanExtensions.Net.Unity",
+        "UniTask",
+        "UniTask.Addressables",
+        "Unity.Addressables",
+        "Unity.Burst",
+        "Unity.Collections",
+        "Unity.Entities",
+        "Unity.Entities.Hybrid",
+        "Unity.Localization",
+        "Unity.Logging",
+        "Unity.Mathematics",
+        "Unity.PerformanceTesting",
+        "Unity.ResourceManager",
+        "Unity.Serialization",
+        "Unity.TextMeshPro",
+        "UnityEditor.TestRunner",
+        "UnityEngine.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,5 +1,5 @@
 {
-    "name": "EncosyTower.Tests",
+    "name": "EncosyTower.Tests.EditorMode",
     "rootNamespace": "EncosyTower.Tests",
     "references": [
         "AnnulusGames.UnityCodeGen.Editor",
