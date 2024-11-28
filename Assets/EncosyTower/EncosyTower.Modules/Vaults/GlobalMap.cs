@@ -23,7 +23,7 @@ namespace EncosyTower.Modules.Vaults
 
         public static void Register<TScope>(IDictionary map)
         {
-            s_maps.TryAdd(TypeId.Get<TScope>(), map);
+            s_maps.TryAdd((TypeId)TypeId<TScope>.Value, map);
         }
     }
 #endif

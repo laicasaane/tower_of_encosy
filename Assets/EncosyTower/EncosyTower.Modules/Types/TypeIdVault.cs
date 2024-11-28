@@ -30,21 +30,21 @@ namespace EncosyTower.Modules
             s_vault.Clear();
             s_vault.TryAdd(TypeId.Undefined._value, UndefinedType);
 
-            TypeId.Get<bool>();
-            TypeId.Get<byte>();
-            TypeId.Get<sbyte>();
-            TypeId.Get<char>();
-            TypeId.Get<decimal>();
-            TypeId.Get<double>();
-            TypeId.Get<float>();
-            TypeId.Get<int>();
-            TypeId.Get<uint>();
-            TypeId.Get<long>();
-            TypeId.Get<ulong>();
-            TypeId.Get<short>();
-            TypeId.Get<ushort>();
-            TypeId.Get<string>();
-            TypeId.Get<object>();
+            _ = TypeId<bool>.Value;
+            _ = TypeId<byte>.Value;
+            _ = TypeId<sbyte>.Value;
+            _ = TypeId<char>.Value;
+            _ = TypeId<decimal>.Value;
+            _ = TypeId<double>.Value;
+            _ = TypeId<float>.Value;
+            _ = TypeId<int>.Value;
+            _ = TypeId<uint>.Value;
+            _ = TypeId<long>.Value;
+            _ = TypeId<ulong>.Value;
+            _ = TypeId<short>.Value;
+            _ = TypeId<ushort>.Value;
+            _ = TypeId<string>.Value;
+            _ = TypeId<object>.Value;
         }
 
         public static readonly Type UndefinedType = typeof(__UndefinedType__);

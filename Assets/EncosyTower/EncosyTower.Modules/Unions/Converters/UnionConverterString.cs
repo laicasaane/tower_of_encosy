@@ -8,13 +8,13 @@ namespace EncosyTower.Modules.Unions.Converters
 {
     internal sealed class UnionConverterString : IUnionConverter<string>
     {
-        public static readonly UnionConverterString Default = new UnionConverterString();
+        public static readonly UnionConverterString Default = new();
 
         private UnionConverterString() { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Union ToUnion(string value)
-            => new Union(value);
+            => new(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Union<string> ToUnionT(string value)

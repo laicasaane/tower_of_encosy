@@ -21,7 +21,7 @@ namespace EncosyTower.Modules.Localization
     /// </summary>
     public static partial class L10n
     {
-        public static readonly Id<Localization> PresetId = TypeId<Localization>.Get();
+        public static readonly Id<Localization> PresetId = TypeId<Localization>.Value;
 
         private static readonly Dictionary<string, Locale> s_codeToLocaleMap = new();
         private static Func<ReadOnlyMemory<L10nLanguage>> s_getLanguages;

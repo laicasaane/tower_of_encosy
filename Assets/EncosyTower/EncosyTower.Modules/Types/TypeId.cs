@@ -10,17 +10,9 @@ namespace EncosyTower.Modules
         internal readonly uint _value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private TypeId(uint value)
+        internal TypeId(uint value)
         {
             _value = value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Type ToType()
-        {
-            return TypeIdVault.TryGetType(_value, out var type)
-                ? type
-                : TypeIdVault.UndefinedType;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -50,13 +42,6 @@ namespace EncosyTower.Modules
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in TypeId lhs, in TypeId rhs)
             => lhs._value != rhs._value;
-
-        public static TypeId Get<T>()
-        {
-            var id = new TypeId(TypeIdVault.Cache<T>.Id);
-            TypeIdVault.Register(id._value, TypeCache<T>.Type);
-            return id;
-        }
     }
 }
 

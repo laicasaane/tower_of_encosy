@@ -8,17 +8,17 @@ namespace EncosyTower.Modules.Unions.Converters
 {
     internal sealed class UnionConverterUndefined<T> : IUnionConverter<T>
     {
-        public static readonly UnionConverterUndefined<T> Default = new UnionConverterUndefined<T>();
+        public static readonly UnionConverterUndefined<T> Default = new();
 
         private UnionConverterUndefined() { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Union ToUnion(T value)
-            => new Union(UnionTypeKind.Undefined, TypeId.Get<T>());
+            => new(UnionTypeKind.Undefined, (TypeId)TypeId<T>.Value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Union<T> ToUnionT(T value)
-            => new Union(UnionTypeKind.Undefined, TypeId.Get<T>());
+            => new Union(UnionTypeKind.Undefined, (TypeId)TypeId<T>.Value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetValue(in Union union)

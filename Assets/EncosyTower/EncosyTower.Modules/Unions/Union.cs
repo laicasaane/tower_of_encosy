@@ -66,20 +66,20 @@ namespace EncosyTower.Modules.Unions
             Base = @base;
         }
 
-        public Union(bool value) : this() { TypeKind = UnionTypeKind.Bool; TypeId = BuiltInTypeIds.Bool; Bool = value; }
-        public Union(byte value) : this() { TypeKind = UnionTypeKind.Byte; TypeId = BuiltInTypeIds.Byte; Byte = value; }
-        public Union(sbyte value) : this() { TypeKind = UnionTypeKind.SByte; TypeId = BuiltInTypeIds.SByte; SByte = value; }
-        public Union(char value) : this() { TypeKind = UnionTypeKind.Char; TypeId = BuiltInTypeIds.Char; Char = value; }
-        public Union(double value) : this() { TypeKind = UnionTypeKind.Double; TypeId = BuiltInTypeIds.Double; Double = value; }
-        public Union(float value) : this() { TypeKind = UnionTypeKind.Float; TypeId = BuiltInTypeIds.Float; Float = value; }
-        public Union(int value) : this() { TypeKind = UnionTypeKind.Int; TypeId = BuiltInTypeIds.Int; Int = value; }
-        public Union(uint value) : this() { TypeKind = UnionTypeKind.UInt; TypeId = BuiltInTypeIds.UInt; UInt = value; }
-        public Union(long value) : this() { TypeKind = UnionTypeKind.Long; TypeId = BuiltInTypeIds.Long; Long = value; }
-        public Union(ulong value) : this() { TypeKind = UnionTypeKind.ULong; TypeId = BuiltInTypeIds.ULong; ULong = value; }
-        public Union(short value) : this() { TypeKind = UnionTypeKind.Short; TypeId = BuiltInTypeIds.Short; Short = value; }
-        public Union(ushort value) : this() { TypeKind = UnionTypeKind.UShort; TypeId = BuiltInTypeIds.UShort; UShort = value; }
-        public Union(string value) : this() { TypeKind = UnionTypeKind.String; TypeId = BuiltInTypeIds.String; Object = value; }
-        public Union(object value) : this() { TypeKind = UnionTypeKind.Object; TypeId = BuiltInTypeIds.Object; Object = value; }
+        public Union(bool value) : this() { TypeKind = UnionTypeKind.Bool; TypeId = (TypeId)TypeId<bool>.Value; Bool = value; }
+        public Union(byte value) : this() { TypeKind = UnionTypeKind.Byte; TypeId = (TypeId)TypeId<byte>.Value; Byte = value; }
+        public Union(sbyte value) : this() { TypeKind = UnionTypeKind.SByte; TypeId = (TypeId)TypeId<sbyte>.Value; SByte = value; }
+        public Union(char value) : this() { TypeKind = UnionTypeKind.Char; TypeId = (TypeId)TypeId<char>.Value; Char = value; }
+        public Union(double value) : this() { TypeKind = UnionTypeKind.Double; TypeId = (TypeId)TypeId<double>.Value; Double = value; }
+        public Union(float value) : this() { TypeKind = UnionTypeKind.Float; TypeId = (TypeId)TypeId<float>.Value; Float = value; }
+        public Union(int value) : this() { TypeKind = UnionTypeKind.Int; TypeId = (TypeId)TypeId<int>.Value; Int = value; }
+        public Union(uint value) : this() { TypeKind = UnionTypeKind.UInt; TypeId = (TypeId)TypeId<uint>.Value; UInt = value; }
+        public Union(long value) : this() { TypeKind = UnionTypeKind.Long; TypeId = (TypeId)TypeId<long>.Value; Long = value; }
+        public Union(ulong value) : this() { TypeKind = UnionTypeKind.ULong; TypeId = (TypeId)TypeId<ulong>.Value; ULong = value; }
+        public Union(short value) : this() { TypeKind = UnionTypeKind.Short; TypeId = (TypeId)TypeId<short>.Value; Short = value; }
+        public Union(ushort value) : this() { TypeKind = UnionTypeKind.UShort; TypeId = (TypeId)TypeId<ushort>.Value; UShort = value; }
+        public Union(string value) : this() { TypeKind = UnionTypeKind.String; TypeId = (TypeId)TypeId<string>.Value; Object = value; }
+        public Union(object value) : this() { TypeKind = UnionTypeKind.Object; TypeId = (TypeId)TypeId<object>.Value; Object = value; }
 
         public Union(TypeId typeId, object value) : this()
         {

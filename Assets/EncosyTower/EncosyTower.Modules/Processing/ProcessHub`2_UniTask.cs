@@ -79,7 +79,7 @@ namespace EncosyTower.Modules.Processing
             if (Validate() == false) return default;
 #endif
 
-            return _hub.Unregister(TypeId.Get<Func<TState, TRequest, UniTask>>());
+            return _hub.Unregister((TypeId)TypeId<Func<TState, TRequest, UniTask>>.Value);
         }
 
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
@@ -91,7 +91,7 @@ namespace EncosyTower.Modules.Processing
             if (Validate() == false) return default;
 #endif
 
-            return _hub.Unregister(TypeId.Get<Func<TState, TRequest, UniTask<bool>>>());
+            return _hub.Unregister((TypeId)TypeId<Func<TState, TRequest, UniTask<bool>>>.Value);
         }
 
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
@@ -103,7 +103,7 @@ namespace EncosyTower.Modules.Processing
             if (Validate() == false) return default;
 #endif
 
-            return _hub.Unregister(TypeId.Get<Func<TState, TRequest, UniTask<TResult>>>());
+            return _hub.Unregister((TypeId)TypeId<Func<TState, TRequest, UniTask<TResult>>>.Value);
         }
 
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
@@ -115,7 +115,7 @@ namespace EncosyTower.Modules.Processing
             if (Validate() == false) return default;
 #endif
 
-            return _hub.Unregister(TypeId.Get<Func<TState, TRequest, UniTask<Option<TResult>>>>());
+            return _hub.Unregister((TypeId)TypeId<Func<TState, TRequest, UniTask<Option<TResult>>>>.Value);
         }
 
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
@@ -127,7 +127,7 @@ namespace EncosyTower.Modules.Processing
             if (Validate() == false) return default;
 #endif
 
-            return _hub.Unregister(TypeId.Get<Func<TState, TRequest, CancellationToken, UniTask>>());
+            return _hub.Unregister((TypeId)TypeId<Func<TState, TRequest, CancellationToken, UniTask>>.Value);
         }
 
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
@@ -139,7 +139,7 @@ namespace EncosyTower.Modules.Processing
             if (Validate() == false) return default;
 #endif
 
-            return _hub.Unregister(TypeId.Get<Func<TState, TRequest, CancellationToken, UniTask<bool>>>());
+            return _hub.Unregister((TypeId)TypeId<Func<TState, TRequest, CancellationToken, UniTask<bool>>>.Value);
         }
 
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
@@ -151,7 +151,7 @@ namespace EncosyTower.Modules.Processing
             if (Validate() == false) return default;
 #endif
 
-            return _hub.Unregister(TypeId.Get<Func<TState, TRequest, CancellationToken, UniTask<TResult>>>());
+            return _hub.Unregister((TypeId)TypeId<Func<TState, TRequest, CancellationToken, UniTask<TResult>>>.Value);
         }
 
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
@@ -163,7 +163,7 @@ namespace EncosyTower.Modules.Processing
             if (Validate() == false) return default;
 #endif
 
-            return _hub.Unregister(TypeId.Get<Func<TState, TRequest, CancellationToken, UniTask<Option<TResult>>>>());
+            return _hub.Unregister((TypeId)TypeId<Func<TState, TRequest, CancellationToken, UniTask<Option<TResult>>>>.Value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -32,12 +32,12 @@ namespace EncosyTower.Modules.Unions.Converters
         {
             ThrowIfNullOrSizeOfTIsBiggerThanUnionDataSize(converter);
 
-            return s_converters.TryAdd(TypeId.Get<T>(), converter);
+            return s_converters.TryAdd((TypeId)TypeId<T>.Value, converter);
         }
 
         public static IUnionConverter<T> GetConverter<T>()
         {
-            if (s_converters.TryGetValue(TypeId.Get<T>(), out var candidate))
+            if (s_converters.TryGetValue((TypeId)TypeId<T>.Value, out var candidate))
             {
                 if (candidate is IUnionConverter<T> converterT)
                 {

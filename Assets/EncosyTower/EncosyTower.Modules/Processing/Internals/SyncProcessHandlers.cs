@@ -12,7 +12,7 @@ namespace EncosyTower.Modules.Processing.Internals.Sync
 
         static ProcessHandler()
         {
-            s_typeId = TypeId.Get<Action<TRequest>>();
+            s_typeId = (TypeId)TypeId<Action<TRequest>>.Value;
         }
 
         public ProcessHandler(Action<TRequest> process)
@@ -40,7 +40,7 @@ namespace EncosyTower.Modules.Processing.Internals.Sync
 
         static ProcessHandler()
         {
-            s_typeId = TypeId.Get<Func<TRequest, TResult>>();
+            s_typeId = (TypeId)TypeId<Func<TRequest, TResult>>.Value;
         }
 
         public ProcessHandler(Func<TRequest, TResult> process)

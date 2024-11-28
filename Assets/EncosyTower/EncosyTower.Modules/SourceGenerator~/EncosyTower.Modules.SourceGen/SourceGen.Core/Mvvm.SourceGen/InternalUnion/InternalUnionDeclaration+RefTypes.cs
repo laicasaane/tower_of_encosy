@@ -175,10 +175,13 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
                 p.PrintLine($"private static void ThrowIfInvalidCast(in {UNION_TYPE} union)");
                 p.OpenScope();
                 {
+                    p.PrintLine("var type = global::EncosyTower.Modules.TypeIdExtensions.ToType(union.TypeId);");
+                    p.PrintEndLine();
+
                     p.PrintLine("throw new global::System.InvalidCastException");
                     p.OpenScope("(");
                     {
-                        p.PrintLine($"$\"Cannot cast {{union.TypeId.ToType()}} to {{typeof({typeName})}}\"");
+                        p.PrintLine($"$\"Cannot cast {{type}} to {{typeof({typeName})}}\"");
                     }
                     p.CloseScope(");");
                 }
@@ -306,7 +309,7 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
                         p.CloseScope();
                         p.PrintEndLine();
 
-                        p.PrintLine("return union.TypeId.ToType().ToString() ?? string.Empty;");
+                        p.PrintLine("return global::EncosyTower.Modules.TypeIdExtensions.ToType(union.TypeId).ToString();");
                     }
                     p.CloseScope();
                     p.PrintEndLine();

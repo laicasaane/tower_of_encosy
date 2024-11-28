@@ -21,7 +21,7 @@ namespace EncosyTower.Modules.Vaults
         public static void Register<T>(ValueVault<T> vault)
             where T : struct
         {
-            s_vaults.TryAdd(TypeId.Get<T>(), vault);
+            s_vaults.TryAdd((TypeId)TypeId<T>.Value, vault);
         }
     }
 #endif

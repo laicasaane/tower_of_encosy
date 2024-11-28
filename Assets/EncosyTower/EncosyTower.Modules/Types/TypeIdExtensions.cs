@@ -1,9 +1,22 @@
+using System;
 using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Modules
 {
     public static class TypeIdExtensions
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Type ToType(this TypeId self)
+        {
+            return TypeIdVault.TryGetType(self._value, out var type)
+                ? type
+                : TypeIdVault.UndefinedType;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Type ToType<T>(this TypeId<T> _)
+            => TypeCache<T>.Type;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsOfType<T>(this TypeId self)
             => self.ToType() == typeof(T);

@@ -19,7 +19,7 @@ namespace EncosyTower.Modules.Processing.Internals.Sync
 
         static ProcessByStateHandler()
         {
-            s_typeId = TypeId.Get<Action<TRequest>>();
+            s_typeId = (TypeId)TypeId<Action<TRequest>>.Value;
         }
 
         public ProcessByStateHandler(TState state, Action<TState, TRequest> process)
@@ -58,7 +58,7 @@ namespace EncosyTower.Modules.Processing.Internals.Sync
 
         static ProcessByStateHandler()
         {
-            s_typeId = TypeId.Get<Func<TRequest, TResult>>();
+            s_typeId = (TypeId)TypeId<Func<TRequest, TResult>>.Value;
         }
 
         public ProcessByStateHandler(TState state, Func<TState, TRequest, TResult> process)

@@ -24,6 +24,13 @@ namespace EncosyTower.Modules
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsUnmanaged<T>()
             => RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
+
+        public static TypeId GetId<T>()
+        {
+            var id = new TypeId(TypeIdVault.Cache<T>.Id);
+            TypeIdVault.Register(id._value, TypeCache<T>.Type);
+            return id;
+        }
     }
 
     public static class TypeCache<T>

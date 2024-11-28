@@ -4,6 +4,8 @@ namespace EncosyTower.Modules.Unions.Converters
 {
     public sealed class CachedUnionConverter<T> : IUnionConverter<T>
     {
+        public static readonly CachedUnionConverter<T> Default = new();
+
         private IUnionConverter<T> _converter;
 
         public IUnionConverter<T> Converter

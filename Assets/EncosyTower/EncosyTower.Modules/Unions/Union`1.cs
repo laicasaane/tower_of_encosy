@@ -5,9 +5,6 @@ namespace EncosyTower.Modules.Unions
 {
     public readonly struct Union<T> : IUnion<T>
     {
-        public static readonly TypeId TypeId = TypeId.Get<T>();
-        private static readonly CachedUnionConverter<T> s_cachedUnionConverter = new();
-
         public readonly Union Value;
 
         public Union(in Union union)
@@ -15,10 +12,16 @@ namespace EncosyTower.Modules.Unions
             Value = new Union(union.Base, union.TypeKind, TypeId);
         }
 
+        public static TypeId TypeId
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => (TypeId)TypeId<T>.Value;
+        }
+
         public IUnionConverter<T> Converter
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => s_cachedUnionConverter.Converter;
+            get => CachedUnionConverter<T>.Default.Converter;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -35,7 +38,7 @@ namespace EncosyTower.Modules.Unions
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Union<T>(in Union union)
-            => new Union<T>(union);
+            => new(union);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Union(in Union<T> union)
@@ -43,7 +46,7 @@ namespace EncosyTower.Modules.Unions
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IUnionConverter<T> GetConverter()
-            => s_cachedUnionConverter.Converter;
+            => CachedUnionConverter<T>.Default.Converter;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Union ToUnion(T value)

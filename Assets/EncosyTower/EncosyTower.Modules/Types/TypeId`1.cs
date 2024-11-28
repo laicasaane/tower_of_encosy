@@ -1,25 +1,30 @@
 namespace EncosyTower.Modules
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
-    using UnityEngine;
 
     public readonly partial struct TypeId<T> : IEquatable<TypeId<T>>
     {
-        public static readonly TypeId Undefined = default;
+        private static readonly TypeId<T> s_value;
+
+        static TypeId()
+        {
+            s_value = (TypeId<T>)TypeCache.GetId<T>();
+        }
 
         internal readonly uint _value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private TypeId(uint value)
+        internal TypeId(uint value)
         {
             _value = value;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Type ToType()
-            => TypeCache<T>.Type;
+        public static TypeId<T> Value
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => s_value;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(TypeId<T> other)
@@ -42,28 +47,20 @@ namespace EncosyTower.Modules
             => id._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator TypeId<T>(in TypeId id)
+            => new(id._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator TypeId(in TypeId<T> id)
+            => new(id._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(in TypeId<T> lhs, in TypeId<T> rhs)
             => lhs._value == rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in TypeId<T> lhs, in TypeId<T> rhs)
             => lhs._value != rhs._value;
-
-        public static TypeId<T> Get()
-        {
-            var id = new TypeId<T>(TypeIdVault.Cache<T>.Id);
-            TypeIdVault.Register(id._value, TypeCache<T>.Type);
-            return id;
-        }
-
-        [HideInCallstack, DoesNotReturn]
-        private static void ThrowIfTypeIdIsInvalid()
-        {
-            throw new InvalidOperationException(
-                $"This {nameof(TypeId<T>)} is not valid." +
-                $"A valid value must be retrieved from {nameof(TypeId<T>)}.{nameof(TypeId<T>.Get)}."
-            );
-        }
     }
 }
 
