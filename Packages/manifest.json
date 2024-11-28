@@ -72,12 +72,10 @@
       "url": "https://package.openupm.com",
       "scopes": [
         "cat.natsuneko.power-rename",
-        "com.annulusgames.alchemy",
         "com.annulusgames.debug-ui",
         "com.annulusgames.lit-motion",
         "com.annulusgames.tween-playables",
         "com.annulusgames.unity-codegen",
-        "com.audune.utils.unityeditor",
         "com.browar.editor-toolbox",
         "com.cathei.bakingsheet",
         "com.cysharp.unitask",
@@ -88,13 +86,6 @@
         "com.roytheunissen.assetpalette",
         "com.xarbrough.renamer",
         "com.xarbrough.scriptable-object-creator",
-        "com.zbase.collections.pooled",
-        "com.zbase.foundation",
-        "com.zbase.foundation.data",
-        "com.zbase.foundation.mvvm",
-        "com.zbase.foundation.pooling",
-        "com.zbase.foundation.pubsub",
-        "com.zbase.unityscreennavigator",
         "jp.co.cyberagent.smartaddresser",
         "org.nuget.system.runtime.compilerservices.unsafe"
       ]
