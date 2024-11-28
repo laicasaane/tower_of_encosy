@@ -34,7 +34,7 @@
     ],
     "autoReferenced": false,
     "defineConstraints": [
-        "UNITY_INCLUDE_TESTS"
+        "UNITY_EDITOR || INCLUDE_ENCOSY_TEST_PLAYMODE"
     ],
     "versionDefines": [],
     "noEngineReferences": false

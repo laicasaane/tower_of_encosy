@@ -2,10 +2,8 @@
     "name": "EncosyTower.Samples.Mvvm",
     "rootNamespace": "EncosyTower.Samples.Mvvm",
     "references": [
-        "AnnulusGames.UnityCodeGen.Editor",
         "EncosyTower.Modules",
         "Gilzoide.EasyProjectSettings",
-        "Gilzoide.EasyProjectSettings.Editor",
         "Latios.Core",
         "Latios.Psyshock",
         "Latios.Transforms",
@@ -31,7 +29,7 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [
-        "UNITY_EDITOR"
+        "UNITY_EDITOR || INCLUDE_ENCOSY_SAMPLES_MVVM"
     ],
     "versionDefines": [
         {
