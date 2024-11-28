@@ -6,6 +6,7 @@
 #define __ENCOSY_VALIDATION__
 #endif
 
+using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Modules.Logging;
 using UnityEngine;
@@ -62,6 +63,9 @@ namespace EncosyTower.Modules.PubSub
 
                 return _publisher.PublishAsync(message, token, logger, callerInfo);
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            partial void RetainUsings_Awaitable();
         }
     }
 }

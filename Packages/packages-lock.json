@@ -130,7 +130,7 @@
       "dependencies": {
         "com.unity.entities": "1.2.3"
       },
-      "hash": "3cb96060bd4068ead4407f6ba8691cd26822bf94"
+      "hash": "0c0a6f4504dc3e9a02a1da704480b7920787439f"
     },
     "com.needle.console": {
       "version": "2.4.1",

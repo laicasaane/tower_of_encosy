@@ -6,6 +6,7 @@
 #define __ENCOSY_VALIDATION__
 #endif
 
+using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Modules.Logging;
 using EncosyTower.Modules.PubSub.Internals;
@@ -152,6 +153,9 @@ namespace EncosyTower.Modules.PubSub
 
                 return Awaitables.GetCompleted();
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            partial void RetainUsings_Awaitable();
         }
     }
 }

@@ -7,6 +7,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
@@ -164,6 +165,9 @@ namespace EncosyTower.Modules.Processing
 
             return _hub.Unregister(TypeId.Get<Func<TState, TRequest, CancellationToken, UniTask<Option<TResult>>>>());
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        partial void RetainUsings_UniTask();
     }
 }
 

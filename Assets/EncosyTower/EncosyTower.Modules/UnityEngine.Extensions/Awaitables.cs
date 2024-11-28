@@ -229,8 +229,10 @@ namespace EncosyTower.Modules
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Run(this Awaitable self)
         {
+#if !DISABLE_CHECKS
             Checks.IsTrue(self != null);
             Checks.IsTrue(HasContinuation(self) == false, "Awaitable already have a continuation, is it already awaited?");
+#endif
 
             var awaiter = self.GetAwaiter();
             awaiter.OnCompleted(() => awaiter.GetResult());

@@ -8,6 +8,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Modules.PubSub.Internals;
 using UnityEngine;
@@ -377,6 +378,9 @@ namespace EncosyTower.Modules.PubSub
 
                 _subscriber.Subscribe<TMessage>(handler, unsubscribeToken, order, logger);
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            partial void RetainUsings_Awaitable();
         }
     }
 }

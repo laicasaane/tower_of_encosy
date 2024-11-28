@@ -1,4 +1,4 @@
-#if UNITY_LOCALIZATION && ANNULUS_CODEGEN
+#if UNITY_EDITOR && UNITY_LOCALIZATION && ANNULUS_CODEGEN
 
 using System;
 using System.Collections.Generic;

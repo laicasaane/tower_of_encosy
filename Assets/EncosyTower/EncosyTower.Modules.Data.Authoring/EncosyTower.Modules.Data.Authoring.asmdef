@@ -29,7 +29,8 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [
-        "UNITY_EDITOR || BAKING_SHEET"
+        "UNITY_EDITOR",
+        "BAKING_SHEET"
     ],
     "versionDefines": [
         {
