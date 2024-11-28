@@ -15,7 +15,7 @@ namespace EncosyTower.Modules
 
             try
             {
-                var obj = Resources.Load<T>((string)Value);
+                var obj = Resources.Load<T>(Value.Value);
 
                 if (obj is { } asset && asset)
                 {

@@ -48,7 +48,7 @@ namespace EncosyTower.Modules.AddressableKeys
         {
             if (key.IsValid == false) return default;
 
-            var handle = Addressables.LoadSceneAsync(key.Value, mode, activateOnLoad, priority);
+            var handle = Addressables.LoadSceneAsync(key.Value.Value, mode, activateOnLoad, priority);
 
             if (handle.IsValid() == false)
             {

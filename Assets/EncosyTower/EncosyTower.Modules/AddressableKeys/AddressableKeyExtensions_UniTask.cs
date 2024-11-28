@@ -89,7 +89,7 @@ namespace EncosyTower.Modules.AddressableKeys
         {
             if (key.IsValid == false) return default;
 
-            var handle = Addressables.InstantiateAsync(key.Value, parent.Transform, inWorldSpace);
+            var handle = Addressables.InstantiateAsync(key.Value.Value, parent.Transform, inWorldSpace);
 
             if (handle.IsValid() == false)
             {

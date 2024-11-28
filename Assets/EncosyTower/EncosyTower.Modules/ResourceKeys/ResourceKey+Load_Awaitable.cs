@@ -21,7 +21,7 @@ namespace EncosyTower.Modules
 
             try
             {
-                var handle = Resources.LoadAsync<T>((string)Value);
+                var handle = Resources.LoadAsync<T>(Value.Value);
 
                 if (handle == null)
                 {

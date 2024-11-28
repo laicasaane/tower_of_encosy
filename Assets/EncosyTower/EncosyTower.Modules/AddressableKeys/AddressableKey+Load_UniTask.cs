@@ -21,7 +21,7 @@ namespace EncosyTower.Modules.AddressableKeys
         {
             if (IsValid == false) return default;
 
-            var handle = Addressables.LoadAssetAsync<T>(Value);
+            var handle = Addressables.LoadAssetAsync<T>(Value.Value);
 
             if (handle.IsValid() == false)
             {

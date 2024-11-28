@@ -37,6 +37,15 @@ namespace EncosyTower.Modules
         }
 
         /// <summary>
+        /// Gets the value of the key.
+        /// </summary>
+        public string Value
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _value;
+        }
+
+        /// <summary>
         /// Determines whether the specified <see cref="AssetKey"/> is equal to the current <see cref="AssetKey"/>.
         /// </summary>
         /// <param name="other">

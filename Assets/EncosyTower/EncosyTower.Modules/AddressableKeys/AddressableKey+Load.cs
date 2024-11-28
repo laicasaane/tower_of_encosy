@@ -15,7 +15,7 @@ namespace EncosyTower.Modules.AddressableKeys
         {
             if (IsValid == false) return default;
 
-            var handle = Addressables.LoadAssetAsync<T>(Value);
+            var handle = Addressables.LoadAssetAsync<T>(Value.Value);
             var asset = handle.WaitForCompletion();
 
             return (asset is UnityEngine.Object obj && obj) || asset != null
