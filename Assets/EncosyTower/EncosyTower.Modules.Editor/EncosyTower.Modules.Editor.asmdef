@@ -21,6 +21,8 @@
         "Unity.Logging",
         "Unity.Mathematics",
         "Unity.ResourceManager",
+        "Unity.ScriptableBuildPipeline",
+        "Unity.ScriptableBuildPipeline.Editor",
         "Unity.Serialization",
         "Unity.TextMeshPro"
     ],
@@ -101,6 +103,11 @@
             "name": "com.unity.serialization",
             "expression": "",
             "define": "UNITY_SERIALIZATION"
+        },
+        {
+            "name": "com.unity.scriptablebuildpipeline",
+            "expression": "",
+            "define": "UNITY_SCRIPTABLE_BUILD_PIPELINE"
         },
         {
             "name": "com.unity.textmeshpro",
