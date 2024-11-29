@@ -48,8 +48,10 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
             });
         }
 
-        private static bool IsValidTypeSyntax(SyntaxNode node, CancellationToken _)
+        private static bool IsValidTypeSyntax(SyntaxNode node, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             if (node is not TypeDeclarationSyntax type)
             {
                 return false;
@@ -81,6 +83,7 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
         )
         {
             token.ThrowIfCancellationRequested();
+
             var semanticModel = context.SemanticModel;
 
             switch (context.Node)

@@ -41,8 +41,10 @@ namespace EncosyTower.Modules.EnumExtensions.SourceGen
             });
         }
 
-        private static bool IsValidEnumSyntax(SyntaxNode node, CancellationToken _)
+        private static bool IsValidEnumSyntax(SyntaxNode node, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             return node is EnumDeclarationSyntax syntax
                 && syntax.AttributeLists.Count > 0
                 && syntax.HasAttributeCandidate("EncosyTower.Modules.EnumExtensions", "EnumExtensions")

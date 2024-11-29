@@ -55,6 +55,8 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
             , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             if (context.SemanticModel.Compilation.IsValidCompilation(SKIP_ATTRIBUTE) == false
                 || context.Node is not StructDeclarationSyntax structSyntax
                 || structSyntax.BaseList == null

@@ -42,6 +42,8 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
 
         private static bool IsValidDatabaseSyntax(SyntaxNode node, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             return node is ClassDeclarationSyntax classSyntax
                 && classSyntax.AttributeLists.Count > 0
                 && classSyntax.HasAttributeCandidate("EncosyTower.Modules.Data.Authoring", "Database");
@@ -52,6 +54,8 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
             , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             if (context.SemanticModel.Compilation.IsValidCompilation(SKIP_ATTRIBUTE) == false
                 || context.Node is not ClassDeclarationSyntax classSyntax
             )

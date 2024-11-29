@@ -56,6 +56,8 @@ namespace EncosyTower.Modules.Data.SourceGen
             , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             if (context.Node is not ClassDeclarationSyntax classSyntax
                 || classSyntax.BaseList == null
             )

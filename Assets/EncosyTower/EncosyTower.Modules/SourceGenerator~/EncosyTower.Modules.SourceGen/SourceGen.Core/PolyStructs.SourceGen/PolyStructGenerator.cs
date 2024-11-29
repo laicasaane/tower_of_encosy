@@ -61,21 +61,24 @@ namespace EncosyTower.Modules.PolyStructs.SourceGen
             });
         }
 
-        private static bool IsValidInterfaceSyntax(SyntaxNode node, CancellationToken _)
+        private static bool IsValidInterfaceSyntax(SyntaxNode node, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             return node is InterfaceDeclarationSyntax syntax
                 && syntax.AttributeLists.Count > 0
                 && syntax.HasAttributeCandidate("EncosyTower.Modules.PolyStructs", "PolyStructInterface");
         }
 
-        public static (InterfaceDeclarationSyntax syntax, INamedTypeSymbol symbol, bool verbose)
-            GetInterfaceRefSemanticMatch(GeneratorSyntaxContext context, CancellationToken token)
+        public static InterfaceCandidate GetInterfaceRefSemanticMatch(GeneratorSyntaxContext context, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             if (context.SemanticModel.Compilation.IsValidCompilation(SKIP_ATTRIBUTE) == false
                 || context.Node is not InterfaceDeclarationSyntax syntax
             )
             {
-                return (null, null, default);
+                return new(null, null, default);
             }
 
             var semanticModel = context.SemanticModel;
@@ -84,7 +87,7 @@ namespace EncosyTower.Modules.PolyStructs.SourceGen
 
             if (attribute == null)
             {
-                return (null, null, default);
+                return new(null, null, default);
             }
 
             var verbose = false;
@@ -97,7 +100,7 @@ namespace EncosyTower.Modules.PolyStructs.SourceGen
                 }
             }
 
-            return (syntax, symbol, verbose);
+            return new(syntax, symbol, verbose);
         }
 
         private static bool IsValidStructSyntax(SyntaxNode node, CancellationToken _)
@@ -110,7 +113,7 @@ namespace EncosyTower.Modules.PolyStructs.SourceGen
                 ;
         }
 
-        public static (StructDeclarationSyntax syntax, INamedTypeSymbol symbol) GetStructRefSemanticMatch(
+        public static StructCandidate GetStructRefSemanticMatch(
               GeneratorSyntaxContext context
             , CancellationToken token
         )
@@ -121,7 +124,7 @@ namespace EncosyTower.Modules.PolyStructs.SourceGen
                 || syntax.BaseList.Types.Count < 1
             )
             {
-                return (null, null);
+                return new(null, null);
             }
 
             var semanticModel = context.SemanticModel;
@@ -129,25 +132,25 @@ namespace EncosyTower.Modules.PolyStructs.SourceGen
 
             if (symbol.HasAttribute(POLY_STRUCT_ATTRIBUTE) == false)
             {
-                return (null, null);
+                return new(null, null);
             }
 
             foreach (var item in symbol.AllInterfaces)
             {
                 if (item.HasAttribute(POLY_INTERFACE_ATTRIBUTE))
                 {
-                    return (syntax, symbol);
+                    return new(syntax, symbol);
                 }
             }
 
-            return (null, null);
+            return new(null, null);
         }
 
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationCandidate compilationCandidate
-            , ImmutableArray<(InterfaceDeclarationSyntax syntax, INamedTypeSymbol symbol, bool verbose)> interfaces
-            , ImmutableArray<(StructDeclarationSyntax syntax, INamedTypeSymbol symbol)> structs
+            , ImmutableArray<InterfaceCandidate> interfaces
+            , ImmutableArray<StructCandidate> structs
             , string projectPath
             , bool outputSourceGenFiles
         )
@@ -220,8 +223,8 @@ namespace EncosyTower.Modules.PolyStructs.SourceGen
 
         private static void BuildMaps(
               SourceProductionContext context
-            , ImmutableArray<(InterfaceDeclarationSyntax syntax, INamedTypeSymbol symbol, bool verbose)> interfaces
-            , ImmutableArray<(StructDeclarationSyntax syntax, INamedTypeSymbol symbol)> structs
+            , ImmutableArray<InterfaceCandidate> interfaces
+            , ImmutableArray<StructCandidate> structs
             , out InterfaceMap interfaceMap
             , out InterfaceToStructMap interfaceToStructMap
             , out ImmutableArray<StructRef> structRefs
@@ -413,5 +416,44 @@ namespace EncosyTower.Modules.PolyStructs.SourceGen
                 , isEnabledByDefault: true
                 , description: ""
             );
+
+        public struct InterfaceCandidate
+        {
+            public InterfaceDeclarationSyntax syntax;
+            public INamedTypeSymbol symbol;
+            public bool verbose;
+
+            public InterfaceCandidate(InterfaceDeclarationSyntax syntax, INamedTypeSymbol symbol, bool verbose)
+            {
+                this.syntax = syntax;
+                this.symbol = symbol;
+                this.verbose = verbose;
+            }
+
+            public void Deconstruct(out InterfaceDeclarationSyntax syntax, out INamedTypeSymbol symbol, out bool verbose)
+            {
+                syntax = this.syntax;
+                symbol = this.symbol;
+                verbose = this.verbose;
+            }
+        }
+
+        public struct StructCandidate
+        {
+            public StructDeclarationSyntax syntax;
+            public INamedTypeSymbol symbol;
+
+            public StructCandidate(StructDeclarationSyntax syntax, INamedTypeSymbol symbol)
+            {
+                this.syntax = syntax;
+                this.symbol = symbol;
+            }
+
+            public void Deconstruct(out StructDeclarationSyntax syntax, out INamedTypeSymbol symbol)
+            {
+                syntax = this.syntax;
+                symbol = this.symbol;
+            }
+        }
     }
 }
