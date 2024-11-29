@@ -1,0 +1,16 @@
+{
+    "name": "EncosyTower.Modules.Testing",
+    "rootNamespace": "EncosyTower.Modules.Testing",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_EDITOR || INCLUDE_ENCOSY_TESTING"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
