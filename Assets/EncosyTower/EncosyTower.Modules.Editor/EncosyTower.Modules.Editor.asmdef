@@ -1,10 +1,9 @@
 {
-    "name": "EncosyTower.Tests.EditorMode",
-    "rootNamespace": "EncosyTower.Tests",
+    "name": "EncosyTower.Modules.Editor",
+    "rootNamespace": "EncosyTower.Modules.Editor",
     "references": [
         "AnnulusGames.UnityCodeGen.Editor",
         "EncosyTower.Modules",
-        "EncosyTower.Modules.Editor",
         "Gilzoide.EasyProjectSettings",
         "Gilzoide.EasyProjectSettings.Editor",
         "Latios.Core",
@@ -21,26 +20,17 @@
         "Unity.Localization",
         "Unity.Logging",
         "Unity.Mathematics",
-        "Unity.PerformanceTesting",
         "Unity.ResourceManager",
         "Unity.Serialization",
-        "Unity.TextMeshPro",
-        "UnityEditor.TestRunner",
-        "UnityEngine.TestRunner"
+        "Unity.TextMeshPro"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
-    "overrideReferences": true,
-    "precompiledReferences": [
-        "nunit.framework.dll"
-    ],
+    "overrideReferences": false,
+    "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [
-        "UNITY_TEST_FRAMEWORK"
-    ],
+    "defineConstraints": [],
     "versionDefines": [
         {
             "name": "com.annulusgames.unity-codegen",
@@ -111,11 +101,6 @@
             "name": "com.unity.serialization",
             "expression": "",
             "define": "UNITY_SERIALIZATION"
-        },
-        {
-            "name": "com.unity.test-framework",
-            "expression": "",
-            "define": "UNITY_TEST_FRAMEWORK"
         },
         {
             "name": "com.unity.textmeshpro",

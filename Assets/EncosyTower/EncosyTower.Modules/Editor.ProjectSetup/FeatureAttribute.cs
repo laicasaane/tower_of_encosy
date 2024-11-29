@@ -1,10 +1,10 @@
-#if UNITY_EDITOR
-
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace EncosyTower.Modules.Editor.ProjectSetup
 {
+    [Conditional("UNITY_EDITOR")]
     [AttributeUsage(AttributeTargets.Struct)]
     public sealed class FeatureAttribute : Attribute
     {
@@ -16,5 +16,3 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
         }
     }
 }
-
-#endif

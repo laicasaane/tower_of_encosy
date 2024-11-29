@@ -1,6 +1,5 @@
-#if UNITY_EDITOR
-
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace EncosyTower.Modules.Editor.ProjectSetup
@@ -8,6 +7,7 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
     /// <summary>
     /// Declares a UPM package dependency.
     /// </summary>
+    [Conditional("UNITY_EDITOR")]
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true)]
     public sealed class RequiresPackageAttribute : Attribute
     {
@@ -46,5 +46,3 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
         }
     }
 }
-
-#endif

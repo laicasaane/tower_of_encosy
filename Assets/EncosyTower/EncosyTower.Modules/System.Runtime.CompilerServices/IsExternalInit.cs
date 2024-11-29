@@ -1,11 +1,15 @@
+#if !DISABLE_ENCOSY_ISEXTERNALINIT
+
 using UnityEngine.Scripting;
 
 namespace System.Runtime.CompilerServices
 {
     [Preserve]
-    internal sealed class IsExternalInit
+    public sealed class IsExternalInit
     {
         [Preserve]
         public IsExternalInit() { }
     }
 }
+
+#endif
