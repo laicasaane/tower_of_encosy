@@ -9,7 +9,7 @@ namespace EncosyTower.Modules
 
         static TypeId()
         {
-            s_value = (TypeId<T>)TypeCache.GetId<T>();
+            s_value = (TypeId<T>)RuntimeTypeCache.GetId<T>();
         }
 
         internal readonly uint _value;

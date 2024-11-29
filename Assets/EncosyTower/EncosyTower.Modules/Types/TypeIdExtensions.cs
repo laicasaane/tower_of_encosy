@@ -15,7 +15,7 @@ namespace EncosyTower.Modules
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Type ToType<T>(this TypeId<T> _)
-            => TypeCache<T>.Type;
+            => Type<T>.Value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsOfType<T>(this TypeId self)

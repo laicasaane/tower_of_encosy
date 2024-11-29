@@ -17,26 +17,26 @@ namespace EncosyTower.Modules.Vaults
 
         public bool Contains<T>()
             where T : TBase
-            => _singletons.ContainsKey(TypeCache<T>.Hash);
+            => _singletons.ContainsKey(Type<T>.Hash);
 
         public bool Contains<T>(T instance)
             where T : TBase
-            => _singletons.TryGetValue(TypeCache<T>.Hash, out var obj)
+            => _singletons.TryGetValue(Type<T>.Hash, out var obj)
                && ReferenceEquals(obj, instance);
 
         public bool TryAdd<T>()
             where T : TBase, new()
         {
-            if (_singletons.ContainsKey(TypeCache<T>.Hash))
+            if (_singletons.ContainsKey(Type<T>.Hash))
             {
 #if __ENCOSY_VALIDATION__
-                DevLoggerAPI.LogError($"An instance of {TypeCache<T>.Type.Name} has already been existing");
+                DevLoggerAPI.LogError($"An instance of {Type<T>.Value.Name} has already been existing");
 #endif
 
                 return false;
             }
 
-            _singletons.Add(TypeCache<T>.Hash, new T());
+            _singletons.Add(Type<T>.Hash, new T());
             return true;
         }
 
@@ -52,23 +52,23 @@ namespace EncosyTower.Modules.Vaults
 #endif
             }
 
-            if (_singletons.ContainsKey(TypeCache<T>.Hash))
+            if (_singletons.ContainsKey(Type<T>.Hash))
             {
 #if __ENCOSY_VALIDATION__
-                DevLoggerAPI.LogError($"An instance of {TypeCache<T>.Type} has already been existing");
+                DevLoggerAPI.LogError($"An instance of {Type<T>.Value} has already been existing");
 #endif
 
                 return false;
             }
 
-            _singletons.Add(TypeCache<T>.Hash, instance);
+            _singletons.Add(Type<T>.Hash, instance);
             return true;
         }
 
         public bool TryGetOrAdd<T>(out T instance)
             where T : TBase, new()
         {
-            if (_singletons.TryGetValue(TypeCache<T>.Hash, out var obj))
+            if (_singletons.TryGetValue(Type<T>.Hash, out var obj))
             {
                 if (obj is T inst)
                 {
@@ -79,21 +79,21 @@ namespace EncosyTower.Modules.Vaults
                 else
                 {
                     throw new InvalidCastException(
-                        $"Cannot cast an instance of type {obj.GetType()} to {TypeCache<T>.Type}" +
-                        $"even though it is registered for {TypeCache<T>.Type}"
+                        $"Cannot cast an instance of type {obj.GetType()} to {Type<T>.Value}" +
+                        $"even though it is registered for {Type<T>.Value}"
                     );
                 }
 #endif
             }
 
-            _singletons[TypeCache<T>.Hash] = instance = new();
+            _singletons[Type<T>.Hash] = instance = new();
             return true;
         }
 
         public bool TryGet<T>(out T instance)
             where T : TBase
         {
-            if (_singletons.TryGetValue(TypeCache<T>.Hash, out var obj))
+            if (_singletons.TryGetValue(Type<T>.Hash, out var obj))
             {
                 if (obj is T inst)
                 {
@@ -104,7 +104,7 @@ namespace EncosyTower.Modules.Vaults
                 else
                 {
                     throw new InvalidCastException(
-                        $"Cannot cast an instance of type {obj.GetType()} to {TypeCache<T>.Type}"
+                        $"Cannot cast an instance of type {obj.GetType()} to {Type<T>.Value}"
                     );
                 }
 #endif

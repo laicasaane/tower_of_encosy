@@ -150,10 +150,10 @@ namespace EncosyTower.Modules.Vaults
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfNotReferenceType<T>()
         {
-            if (TypeCache<T>.IsUnmanaged || TypeCache<T>.IsValueType)
+            if (Type<T>.IsUnmanaged || Type<T>.IsValueType)
             {
                 throw new InvalidCastException(
-                    $"\"{TypeCache<T>.Type}\" is not a reference type"
+                    $"\"{Type<T>.Value}\" is not a reference type"
                 );
             }
         }

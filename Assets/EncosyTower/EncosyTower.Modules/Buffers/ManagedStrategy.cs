@@ -116,7 +116,7 @@ namespace EncosyTower.Modules.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void FastClear()
         {
-            if (TypeCache<T>.IsUnmanaged == false)
+            if (Type<T>.IsUnmanaged == false)
                 _realBuffer.Clear();
         }
 

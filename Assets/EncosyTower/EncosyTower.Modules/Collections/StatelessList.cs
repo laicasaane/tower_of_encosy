@@ -20,7 +20,7 @@ namespace EncosyTower.Modules.Collections
         , IAsMemory<T>, IAsReadOnlyMemory<T>
         where TState : IBufferProvider<T>
     {
-        internal static readonly bool s_shouldPerformMemClear = TypeCache<T>.IsUnmanaged == false;
+        internal static readonly bool s_shouldPerformMemClear = Type<T>.IsUnmanaged == false;
 
         public readonly TState State;
 

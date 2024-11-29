@@ -128,7 +128,7 @@ namespace EncosyTower.Modules.Buffers
         static NBInternal()
         {
 #if ENABLE_DEBUG_CHECKS
-            if (TypeCache<T>.IsUnmanaged == false)
+            if (Type<T>.IsUnmanaged == false)
                 throw new InvalidOperationException("NativeBuffer (NB) supports only unmanaged types");
 #endif
         }

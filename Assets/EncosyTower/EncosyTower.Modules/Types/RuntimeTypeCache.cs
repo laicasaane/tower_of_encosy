@@ -1,40 +1,100 @@
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
-
 namespace EncosyTower.Modules
 {
-    public static class TypeCache
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Reflection;
+    using System.Runtime.CompilerServices;
+    using UnityEngine.Scripting;
+
+    /// <summary>
+    /// Provides information about a type.
+    /// </summary>
+    public static partial class RuntimeTypeCache
     {
+        /// <summary>
+        /// Gets the <see cref="Type"/> of <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Type Get<T>()
-            => TypeCache<T>.Type;
+            => Type<T>.Value;
 
+        /// <summary>
+        /// Determines whether <typeparamref name="T"/> is a value type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="type"></param>
+        /// <returns>
+        /// <see langword="true"/> if <typeparamref name="T"/> is a value type; otherwise, <see langword="false"/>.
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Is<T>(this Type type)
-            => type == TypeCache<T>.Type;
+            => type == Type<T>.Value;
 
+        /// <summary>
+        /// Gets the hash code of <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>
+        /// The hash code of <typeparamref name="T"/>.
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TypeHash GetHash<T>()
-            => TypeCache<T>.Hash;
+            => Type<T>.Hash;
 
+        /// <summary>
+        /// Determines whether <typeparamref name="T"/> is a value type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>
+        /// <see langword="true"/> if <typeparamref name="T"/> is a value type; otherwise, <see langword="false"/>.
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string GetName<T>()
-            => TypeCache<T>.Type.Name;
+        public static bool IsValueType<T>()
+            => Type<T>.IsValueType;
 
+        /// <summary>
+        /// Determines whether <typeparamref name="T"/> is unmanaged.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>
+        /// <see langword="true"/> if <typeparamref name="T"/> is unmanaged; otherwise, <see langword="false"/>.
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsUnmanaged<T>()
-            => RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
+            => Type<T>.IsUnmanaged;
 
+        /// <summary>
+        /// Determines whether <typeparamref name="T"/> is both unmanaged and blittable.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>
+        /// <see langword="true"/> if <typeparamref name="T"/> is both unmanaged and blittable; otherwise, <see langword="false"/>.
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsBlittable<T>()
+            => Type<T>.IsBlittable;
+
+        /// <summary>
+        /// Gets the <see cref="TypeId"/> of <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static TypeId GetId<T>()
         {
             var id = new TypeId(TypeIdVault.Cache<T>.Id);
-            TypeIdVault.Register(id._value, TypeCache<T>.Type);
+            TypeIdVault.Register(id._value, Type<T>.Value);
             return id;
         }
 
+        /// <summary>
+        /// Retrieves an unordered collection of types derived from <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">Type of a class or interface.</typeparam>
+        /// <returns>
+        /// Returns an unordered collection of derived types.
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlyMemory<Type> GetTypesDerivedFrom<T>()
         {
@@ -50,6 +110,14 @@ namespace EncosyTower.Modules
 #endif
         }
 
+        /// <summary>
+        /// Retrieves an unordered collection of types derived from <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">Type of a class or interface.</typeparam>
+        /// <param name="assemblyName">	Optional assembly name.</param>
+        /// <returns>
+        /// Returns an unordered collection of derived types defined in this <paramref name="assemblyName"/>.
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlyMemory<Type> GetTypesDerivedFrom<T>([NotNull] string assemblyName)
         {
@@ -65,6 +133,13 @@ namespace EncosyTower.Modules
 #endif
         }
 
+        /// <summary>
+        /// Retrieves an unordered collection of types derived from <paramref name="type"/>.
+        /// </summary>
+        /// <param name="type">Type of a class or interface.</param>
+        /// <returns>
+        /// Returns an unordered collection of derived types.
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlyMemory<Type> GetTypesDerivedFrom([NotNull] Type type)
         {
@@ -80,6 +155,14 @@ namespace EncosyTower.Modules
 #endif
         }
 
+        /// <summary>
+        /// Retrieves an unordered collection of types derived from <paramref name="type"/>.
+        /// </summary>
+        /// <param name="type">Type of a class or interface.</param>
+        /// <param name="assemblyName">	Optional assembly name.</param>
+        /// <returns>
+        /// Returns an unordered collection of derived types defined in this <paramref name="assemblyName"/>.
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlyMemory<Type> GetTypesDerivedFrom([NotNull] Type type, [NotNull] string assemblyName)
         {
@@ -328,46 +411,59 @@ namespace EncosyTower.Modules
         {
             return Array.Empty<MethodInfo>();
         }
-
-#if UNITY_EDITOR
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit)]
-        private struct TypeCollection
-        {
-            [System.Runtime.InteropServices.FieldOffset(0)] public UnityEditor.TypeCache.TypeCollection collection;
-            [System.Runtime.InteropServices.FieldOffset(0)] public Type[] types;
-
-            public static ReadOnlyMemory<Type> AsMemory(UnityEditor.TypeCache.TypeCollection collection)
-            {
-                var result = new TypeCollection { collection = collection };
-                return result.types.AsMemory();
-            }
-        }
-
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit)]
-        private struct FieldCollection
-        {
-            [System.Runtime.InteropServices.FieldOffset(0)] public UnityEditor.TypeCache.FieldInfoCollection collection;
-            [System.Runtime.InteropServices.FieldOffset(0)] public FieldInfo[] fields;
-
-            public static ReadOnlyMemory<FieldInfo> AsMemory(UnityEditor.TypeCache.FieldInfoCollection collection)
-            {
-                var result = new FieldCollection { collection = collection };
-                return result.fields.AsMemory();
-            }
-        }
-
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit)]
-        private struct MethodCollection
-        {
-            [System.Runtime.InteropServices.FieldOffset(0)] public UnityEditor.TypeCache.MethodCollection collection;
-            [System.Runtime.InteropServices.FieldOffset(0)] public MethodInfo[] methods;
-
-            public static ReadOnlyMemory<MethodInfo> AsMemory(UnityEditor.TypeCache.MethodCollection collection)
-            {
-                var result = new MethodCollection { collection = collection };
-                return result.methods.AsMemory();
-            }
-        }
-#endif
     }
 }
+
+#if UNITY_EDITOR
+
+namespace EncosyTower.Modules
+{
+    using System;
+    using System.Reflection;
+    using System.Runtime.InteropServices;
+    using UnityEditor;
+
+    static partial class RuntimeTypeCache
+    {
+        [StructLayout(LayoutKind.Explicit)]
+        private struct TypeCollection
+        {
+            [FieldOffset(0)] public TypeCache.TypeCollection collection;
+            [FieldOffset(0)] public Type[] items;
+
+            public static ReadOnlyMemory<Type> AsMemory(TypeCache.TypeCollection value)
+            {
+                var result = new TypeCollection { collection = value };
+                return result.items.AsMemory();
+            }
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        private struct FieldCollection
+        {
+            [FieldOffset(0)] public TypeCache.FieldInfoCollection collection;
+            [FieldOffset(0)] public FieldInfo[] items;
+
+            public static ReadOnlyMemory<FieldInfo> AsMemory(TypeCache.FieldInfoCollection value)
+            {
+                var result = new FieldCollection { collection = value };
+                return result.items.AsMemory();
+            }
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        private struct MethodCollection
+        {
+            [FieldOffset(0)] public TypeCache.MethodCollection collection;
+            [FieldOffset(0)] public MethodInfo[] items;
+
+            public static ReadOnlyMemory<MethodInfo> AsMemory(TypeCache.MethodCollection value)
+            {
+                var result = new MethodCollection { collection = value };
+                return result.items.AsMemory();
+            }
+        }
+    }
+}
+
+#endif

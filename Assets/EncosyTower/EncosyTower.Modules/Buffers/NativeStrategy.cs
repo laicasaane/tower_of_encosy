@@ -43,7 +43,7 @@ namespace EncosyTower.Modules.Buffers
 #if DEBUG && !PROFILE_SVELTO
         static NativeStrategy()
         {
-            if (TypeCache<T>.IsUnmanaged == false)
+            if (Type<T>.IsUnmanaged == false)
                 throw new InvalidOperationException("Only unmanaged data can be stored natively");
         }
 #endif

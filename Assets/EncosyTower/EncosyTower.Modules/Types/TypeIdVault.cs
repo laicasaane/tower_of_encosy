@@ -84,7 +84,7 @@ namespace EncosyTower.Modules
 #pragma warning disable IDE0002
 
                 s_id = TypeIdVault.Next;
-                _ = TypeCache<T>.Type;
+                _ = Type<T>.Value;
 
 #pragma warning restore
 #if UNITY_EDITOR && TYPE_ID_DEBUG_LOG
