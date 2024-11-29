@@ -64,5 +64,17 @@ namespace EncosyTower.Modules
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => s_type;
         }
+
+        public static TypeInfo<T> Info
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => new(
+                  TypeId<T>.Value
+                , Hash
+                , IsValueType
+                , IsUnmanaged
+                , IsBlittable
+            );
+        }
     }
 }

@@ -33,17 +33,6 @@ namespace EncosyTower.Modules
             => type == Type<T>.Value;
 
         /// <summary>
-        /// Gets the hash code of <typeparamref name="T"/>.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns>
-        /// The hash code of <typeparamref name="T"/>.
-        /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TypeHash GetHash<T>()
-            => Type<T>.Hash;
-
-        /// <summary>
         /// Determines whether <typeparamref name="T"/> is a value type.
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -77,16 +66,36 @@ namespace EncosyTower.Modules
             => Type<T>.IsBlittable;
 
         /// <summary>
-        /// Gets the <see cref="TypeId"/> of <typeparamref name="T"/>.
+        /// Gets the <see cref="TypeId{T}"/> of <typeparamref name="T"/>.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static TypeId GetId<T>()
+        internal static TypeId<T> GetId<T>()
         {
-            var id = new TypeId(TypeIdVault.Cache<T>.Id);
+            var id = new TypeId<T>(TypeIdVault.Cache<T>.Id);
             TypeIdVault.Register(id._value, Type<T>.Value);
             return id;
         }
+
+        /// <summary>
+        /// Gets the <see cref="Type"/> of <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TypeInfo<T> GetInfo<T>()
+            => Type<T>.Info;
+
+        /// <summary>
+        /// Gets the hash code of <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>
+        /// The hash code of <typeparamref name="T"/>.
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TypeHash GetHash<T>()
+            => Type<T>.Hash;
 
         /// <summary>
         /// Retrieves an unordered collection of types derived from <typeparamref name="T"/>.
