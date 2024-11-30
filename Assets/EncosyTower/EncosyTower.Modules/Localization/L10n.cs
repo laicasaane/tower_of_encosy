@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Modules.Logging;
+using EncosyTower.Modules.Types;
 using EncosyTower.Modules.Vaults;
 using Unity.Logging;
 using UnityEngine;

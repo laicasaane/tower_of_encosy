@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.Types;
 
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.PresetIds
 {
     public readonly record struct PresetId(Id Value)
     {

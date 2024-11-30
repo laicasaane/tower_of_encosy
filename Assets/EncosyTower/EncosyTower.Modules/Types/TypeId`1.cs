@@ -1,4 +1,4 @@
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.Types
 {
     using System;
     using System.Runtime.CompilerServices;
@@ -132,7 +132,7 @@ namespace EncosyTower.Modules
 
 #if UNITY_COLLECTIONS
 
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.Types
 {
     using System.Runtime.CompilerServices;
     using Unity.Collections;

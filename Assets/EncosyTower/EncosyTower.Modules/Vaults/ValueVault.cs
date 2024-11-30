@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.PresetIds;
+using EncosyTower.Modules.Types;
 
 namespace EncosyTower.Modules.Vaults
 {

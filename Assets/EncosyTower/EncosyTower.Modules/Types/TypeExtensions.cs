@@ -1,6 +1,6 @@
 using System;
 
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.Types
 {
     public static class TypeExtensions
     {

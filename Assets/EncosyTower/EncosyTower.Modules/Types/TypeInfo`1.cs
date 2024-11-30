@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.Types
 {
     /// <summary>
     /// Provides information about the type of <typeparamref name="T"/>.

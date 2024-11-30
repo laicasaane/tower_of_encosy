@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.Types;
 
 namespace EncosyTower.Modules.Vaults
 {

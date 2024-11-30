@@ -24,6 +24,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.Types;
 using Unity.Collections;
 
 namespace EncosyTower.Modules.Buffers

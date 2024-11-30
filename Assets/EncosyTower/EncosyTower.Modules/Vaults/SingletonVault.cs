@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using EncosyTower.Modules.Logging;
+using EncosyTower.Modules.Types;
 
 namespace EncosyTower.Modules.Vaults
 {

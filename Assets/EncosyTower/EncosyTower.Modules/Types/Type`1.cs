@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.Types
 {
     /// <summary>
     /// Provides information about the type <typeparamref name="T"/>.

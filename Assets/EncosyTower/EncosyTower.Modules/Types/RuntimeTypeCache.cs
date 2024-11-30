@@ -1,4 +1,4 @@
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.Types
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
@@ -7,7 +7,7 @@ namespace EncosyTower.Modules
     using UnityEngine.Scripting;
 
     /// <summary>
-    /// Provides information about a type.
+    /// Provides methods for fast type extraction from assemblies loaded into the Unity Domain.
     /// </summary>
     public static partial class RuntimeTypeCache
     {
@@ -339,7 +339,7 @@ namespace EncosyTower.Modules
 
 #if UNITY_EDITOR
 
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.Types
 {
     using System;
     using System.Reflection;

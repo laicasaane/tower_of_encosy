@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.Types;
 
 namespace EncosyTower.Modules.Processing.Internals.Sync
 {

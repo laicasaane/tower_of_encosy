@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.Types
 {
     public static class TypeInfoExtensions
     {

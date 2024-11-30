@@ -6,7 +6,7 @@ using System.Threading;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.Types
 {
     internal static class TypeIdVault
     {

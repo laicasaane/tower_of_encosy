@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.Types;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 

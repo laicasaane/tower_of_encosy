@@ -13,6 +13,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using EncosyTower.Modules.Logging;
 using EncosyTower.Modules.Processing.Internals;
+using EncosyTower.Modules.Types;
 using UnityEngine;
 
 namespace EncosyTower.Modules.Processing

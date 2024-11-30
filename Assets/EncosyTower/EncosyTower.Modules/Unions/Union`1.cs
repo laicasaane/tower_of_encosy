@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.Types;
 using EncosyTower.Modules.Unions.Converters;
 
 namespace EncosyTower.Modules.Unions
