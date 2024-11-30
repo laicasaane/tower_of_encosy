@@ -5,29 +5,6 @@ using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Modules.Vaults
 {
-#if UNITY_EDITOR
-    internal static partial class GlobalMapEditor
-    {
-        private readonly static Dictionary<TypeId, IDictionary> s_maps = new();
-
-        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Init()
-        {
-            var maps = s_maps;
-
-            foreach (var (_, map) in maps)
-            {
-                map?.Clear();
-            }
-        }
-
-        public static void Register<TScope>(IDictionary map)
-        {
-            s_maps.TryAdd((TypeId)TypeId<TScope>.Value, map);
-        }
-    }
-#endif
-
     public static partial class GlobalMap<TKey, TValue>
         where TKey : IEquatable<TKey>
     {
@@ -62,4 +39,27 @@ namespace EncosyTower.Modules.Vaults
 
         private readonly struct Scope { }
     }
+
+#if UNITY_EDITOR
+    internal static partial class GlobalMapEditor
+    {
+        private readonly static Dictionary<TypeId, IDictionary> s_maps = new();
+
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void Init()
+        {
+            var maps = s_maps;
+
+            foreach (var (_, map) in maps)
+            {
+                map?.Clear();
+            }
+        }
+
+        public static void Register<TScope>(IDictionary map)
+        {
+            s_maps.TryAdd((TypeId)Type<TScope>.Id, map);
+        }
+    }
+#endif
 }
