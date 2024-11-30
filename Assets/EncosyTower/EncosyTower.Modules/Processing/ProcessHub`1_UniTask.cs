@@ -52,55 +52,55 @@ namespace EncosyTower.Modules.Processing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest>(Func<TRequest, UniTask> _)
         {
-            return Unregister((TypeId)TypeId<Func<TRequest, UniTask>>.Value);
+            return Unregister((TypeId)Type<Func<TRequest, UniTask>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest>(Func<TRequest, UniTask<bool>> _)
         {
-            return Unregister((TypeId)TypeId<Func<TRequest, UniTask<bool>>>.Value);
+            return Unregister((TypeId)Type<Func<TRequest, UniTask<bool>>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, UniTask<TResult>> _)
         {
-            return Unregister((TypeId)TypeId<Func<TRequest, UniTask<TResult>>>.Value);
+            return Unregister((TypeId)Type<Func<TRequest, UniTask<TResult>>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, UniTask<Option<TResult>>> _)
         {
-            return Unregister((TypeId)TypeId<Func<TRequest, UniTask<Option<TResult>>>>.Value);
+            return Unregister((TypeId)Type<Func<TRequest, UniTask<Option<TResult>>>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest>(Func<TRequest, CancellationToken, UniTask> _)
         {
-            return Unregister((TypeId)TypeId<Func<TRequest, CancellationToken, UniTask>>.Value);
+            return Unregister((TypeId)Type<Func<TRequest, CancellationToken, UniTask>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest>(Func<TRequest, CancellationToken, UniTask<bool>> _)
         {
-            return Unregister((TypeId)TypeId<Func<TRequest, CancellationToken, UniTask<bool>>>.Value);
+            return Unregister((TypeId)Type<Func<TRequest, CancellationToken, UniTask<bool>>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, CancellationToken, UniTask<TResult>> _)
         {
-            return Unregister((TypeId)TypeId<Func<TRequest, CancellationToken, UniTask<TResult>>>.Value);
+            return Unregister((TypeId)Type<Func<TRequest, CancellationToken, UniTask<TResult>>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, CancellationToken, UniTask<Option<TResult>>> _)
         {
-            return Unregister((TypeId)TypeId<Func<TRequest, CancellationToken, UniTask<Option<TResult>>>>.Value);
+            return Unregister((TypeId)Type<Func<TRequest, CancellationToken, UniTask<Option<TResult>>>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UniTask ProcessAsync<TRequest>(TRequest request)
         {
-            if (TryGet((TypeId)TypeId<Func<TRequest, UniTask>>.Value, out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, UniTask>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest> handler
             )
             {
@@ -122,7 +122,7 @@ namespace EncosyTower.Modules.Processing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async UniTask<bool> TryProcessAsync<TRequest>(TRequest request, bool silent = false)
         {
-            if (TryGet((TypeId)TypeId<Func<TRequest, UniTask>>.Value, out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, UniTask>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest> handler
             )
             {
@@ -151,7 +151,7 @@ namespace EncosyTower.Modules.Processing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UniTask<TResult> ProcessAsync<TRequest, TResult>(TRequest request)
         {
-            if (TryGet((TypeId)TypeId<Func<TRequest, UniTask<TResult>>>.Value, out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, UniTask<TResult>>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest, TResult> handler
             )
             {
@@ -173,7 +173,7 @@ namespace EncosyTower.Modules.Processing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async UniTask<Option<TResult>> TryProcessAsync<TRequest, TResult>(TRequest request, bool silent = false)
         {
-            if (TryGet((TypeId)TypeId<Func<TRequest, UniTask<TResult>>>.Value, out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, UniTask<TResult>>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest, TResult> handler
             )
             {
@@ -200,7 +200,7 @@ namespace EncosyTower.Modules.Processing
 
         public UniTask ProcessAsync<TRequest>(TRequest request, CancellationToken token)
         {
-            if (TryGet((TypeId)TypeId<Func<TRequest, CancellationToken, UniTask>>.Value, out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, CancellationToken, UniTask>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest> handler
             )
             {
@@ -221,7 +221,7 @@ namespace EncosyTower.Modules.Processing
 
         public async UniTask<bool> TryProcessAsync<TRequest>(TRequest request, CancellationToken token, bool silent = false)
         {
-            if (TryGet((TypeId)TypeId<Func<TRequest, CancellationToken, UniTask>>.Value, out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, CancellationToken, UniTask>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest> handler
             )
             {
@@ -249,7 +249,7 @@ namespace EncosyTower.Modules.Processing
 
         public UniTask<TResult> ProcessAsync<TRequest, TResult>(TRequest request, CancellationToken token)
         {
-            if (TryGet((TypeId)TypeId<Func<TRequest, CancellationToken, UniTask<TResult>>>.Value, out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, CancellationToken, UniTask<TResult>>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest, TResult> handler
             )
             {
@@ -270,7 +270,7 @@ namespace EncosyTower.Modules.Processing
 
         public async UniTask<Option<TResult>> TryProcessAsync<TRequest, TResult>(TRequest request, CancellationToken token, bool silent = false)
         {
-            if (TryGet((TypeId)TypeId<Func<TRequest, CancellationToken, UniTask<TResult>>>.Value, out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, CancellationToken, UniTask<TResult>>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest, TResult> handler
             )
             {

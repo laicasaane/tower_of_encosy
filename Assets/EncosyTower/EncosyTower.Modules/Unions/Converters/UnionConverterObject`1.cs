@@ -14,11 +14,11 @@ namespace EncosyTower.Modules.Unions.Converters
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Union ToUnion(T value)
-            => new((TypeId)TypeId<T>.Value, (object)value);
+            => new((TypeId)Type<T>.Id, (object)value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Union<T> ToUnionT(T value)
-            => new Union((TypeId)TypeId<T>.Value, (object)value);
+            => new Union((TypeId)Type<T>.Id, (object)value);
 
         public T GetValue(in Union union)
         {

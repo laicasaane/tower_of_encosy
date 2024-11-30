@@ -21,7 +21,7 @@ namespace EncosyTower.Modules.Processing.Internals.Async
 
         static AsyncProcessByStateHandler()
         {
-            s_typeId = (TypeId)TypeId<Func<TRequest, UniTask>>.Value;
+            s_typeId = (TypeId)Type<Func<TRequest, UniTask>>.Id;
         }
 
         public AsyncProcessByStateHandler(TState state, Func<TState, TRequest, UniTask> process)
@@ -61,7 +61,7 @@ namespace EncosyTower.Modules.Processing.Internals.Async
 
         static AsyncProcessByStateHandler()
         {
-            s_typeId = (TypeId)TypeId<Func<TRequest, UniTask<TResult>>>.Value;
+            s_typeId = (TypeId)Type<Func<TRequest, UniTask<TResult>>>.Id;
         }
 
         public AsyncProcessByStateHandler(TState state, Func<TState, TRequest, UniTask<TResult>> process)
@@ -101,7 +101,7 @@ namespace EncosyTower.Modules.Processing.Internals.Async
 
         static CancellableAsyncProcessByStateHandler()
         {
-            s_typeId = (TypeId)TypeId<Func<TRequest, CancellationToken, UniTask>>.Value;
+            s_typeId = (TypeId)Type<Func<TRequest, CancellationToken, UniTask>>.Id;
         }
 
         public CancellableAsyncProcessByStateHandler(TState state, Func<TState, TRequest, CancellationToken, UniTask> process)
@@ -141,7 +141,7 @@ namespace EncosyTower.Modules.Processing.Internals.Async
 
         static CancellableAsyncProcessByStateHandler()
         {
-            s_typeId = (TypeId)TypeId<Func<TRequest, CancellationToken, UniTask<TResult>>>.Value;
+            s_typeId = (TypeId)Type<Func<TRequest, CancellationToken, UniTask<TResult>>>.Id;
         }
 
         public CancellableAsyncProcessByStateHandler(TState state, Func<TState, TRequest, CancellationToken, UniTask<TResult>> process)

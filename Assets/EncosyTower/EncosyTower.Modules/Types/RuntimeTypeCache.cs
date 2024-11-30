@@ -12,92 +12,6 @@ namespace EncosyTower.Modules
     public static partial class RuntimeTypeCache
     {
         /// <summary>
-        /// Gets the <see cref="Type"/> of <typeparamref name="T"/>.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Type Get<T>()
-            => Type<T>.Value;
-
-        /// <summary>
-        /// Determines whether <typeparamref name="T"/> is a value type.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="type"></param>
-        /// <returns>
-        /// <see langword="true"/> if <typeparamref name="T"/> is a value type; otherwise, <see langword="false"/>.
-        /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Is<T>(this Type type)
-            => type == Type<T>.Value;
-
-        /// <summary>
-        /// Determines whether <typeparamref name="T"/> is a value type.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns>
-        /// <see langword="true"/> if <typeparamref name="T"/> is a value type; otherwise, <see langword="false"/>.
-        /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsValueType<T>()
-            => Type<T>.IsValueType;
-
-        /// <summary>
-        /// Determines whether <typeparamref name="T"/> is unmanaged.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns>
-        /// <see langword="true"/> if <typeparamref name="T"/> is unmanaged; otherwise, <see langword="false"/>.
-        /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsUnmanaged<T>()
-            => Type<T>.IsUnmanaged;
-
-        /// <summary>
-        /// Determines whether <typeparamref name="T"/> is both unmanaged and blittable.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns>
-        /// <see langword="true"/> if <typeparamref name="T"/> is both unmanaged and blittable; otherwise, <see langword="false"/>.
-        /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsBlittable<T>()
-            => Type<T>.IsBlittable;
-
-        /// <summary>
-        /// Gets the <see cref="TypeId{T}"/> of <typeparamref name="T"/>.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        internal static TypeId<T> GetId<T>()
-        {
-            var id = new TypeId<T>(TypeIdVault.Cache<T>.Id);
-            TypeIdVault.Register(id._value, Type<T>.Value);
-            return id;
-        }
-
-        /// <summary>
-        /// Gets the <see cref="Type"/> of <typeparamref name="T"/>.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TypeInfo<T> GetInfo<T>()
-            => Type<T>.Info;
-
-        /// <summary>
-        /// Gets the hash code of <typeparamref name="T"/>.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns>
-        /// The hash code of <typeparamref name="T"/>.
-        /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TypeHash GetHash<T>()
-            => Type<T>.Hash;
-
-        /// <summary>
         /// Retrieves an unordered collection of types derived from <typeparamref name="T"/>.
         /// </summary>
         /// <typeparam name="T">Type of a class or interface.</typeparam>
@@ -114,7 +28,7 @@ namespace EncosyTower.Modules
             }
 #else
             {
-                return GetTypesDerivedFrom(typeof(T));
+                return GetTypesDerivedFrom(Type<T>.Value);
             }
 #endif
         }
@@ -137,7 +51,7 @@ namespace EncosyTower.Modules
             }
 #else
             {
-                return GetTypesDerivedFrom(typeof(T), assemblyName);
+                return GetTypesDerivedFrom(Type<T>.Value, assemblyName);
             }
 #endif
         }
@@ -198,7 +112,7 @@ namespace EncosyTower.Modules
             }
 #else
             {
-                return GetTypesWithAttribute(typeof(T));
+                return GetTypesWithAttribute(Type<T>.Value);
             }
 #endif
         }
@@ -214,7 +128,7 @@ namespace EncosyTower.Modules
             }
 #else
             {
-                return GetTypesWithAttribute(typeof(T), assemblyName);
+                return GetTypesWithAttribute(Type<T>.Value, assemblyName);
             }
 #endif
         }
@@ -260,7 +174,7 @@ namespace EncosyTower.Modules
             }
 #else
             {
-                return GetFieldsWithAttribute(typeof(T));
+                return GetFieldsWithAttribute(Type<T>.Value);
             }
 #endif
         }
@@ -276,7 +190,7 @@ namespace EncosyTower.Modules
             }
 #else
             {
-                return GetFieldsWithAttribute(typeof(T), assemblyName);
+                return GetFieldsWithAttribute(Type<T>.Value, assemblyName);
             }
 #endif
         }
@@ -322,7 +236,7 @@ namespace EncosyTower.Modules
             }
 #else
             {
-                return GetMethodsWithAttribute(typeof(T));
+                return GetMethodsWithAttribute(Type<T>.Value);
             }
 #endif
         }
@@ -338,7 +252,7 @@ namespace EncosyTower.Modules
             }
 #else
             {
-                return GetMethodsWithAttribute(typeof(T), assemblyName);
+                return GetMethodsWithAttribute(Type<T>.Value, assemblyName);
             }
 #endif
         }

@@ -15,7 +15,7 @@ namespace EncosyTower.Modules.Unions
         public static TypeId TypeId
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => (TypeId)TypeId<T>.Value;
+            get => (TypeId)Type<T>.Id;
         }
 
         public IUnionConverter<T> Converter

@@ -27,24 +27,23 @@ namespace EncosyTower.Modules
 #endif
         private static void Init()
         {
-            s_vault.Clear();
             s_vault.TryAdd(TypeId.Undefined._value, UndefinedType);
 
-            _ = TypeId<bool>.Value;
-            _ = TypeId<byte>.Value;
-            _ = TypeId<sbyte>.Value;
-            _ = TypeId<char>.Value;
-            _ = TypeId<decimal>.Value;
-            _ = TypeId<double>.Value;
-            _ = TypeId<float>.Value;
-            _ = TypeId<int>.Value;
-            _ = TypeId<uint>.Value;
-            _ = TypeId<long>.Value;
-            _ = TypeId<ulong>.Value;
-            _ = TypeId<short>.Value;
-            _ = TypeId<ushort>.Value;
-            _ = TypeId<string>.Value;
-            _ = TypeId<object>.Value;
+            _ = Type<bool>.Id;
+            _ = Type<byte>.Id;
+            _ = Type<sbyte>.Id;
+            _ = Type<char>.Id;
+            _ = Type<decimal>.Id;
+            _ = Type<double>.Id;
+            _ = Type<float>.Id;
+            _ = Type<int>.Id;
+            _ = Type<uint>.Id;
+            _ = Type<long>.Id;
+            _ = Type<ulong>.Id;
+            _ = Type<short>.Id;
+            _ = Type<ushort>.Id;
+            _ = Type<string>.Id;
+            _ = Type<object>.Id;
         }
 
         public static readonly Type UndefinedType = typeof(__UndefinedType__);
@@ -84,7 +83,6 @@ namespace EncosyTower.Modules
 #pragma warning disable IDE0002
 
                 s_id = TypeIdVault.Next;
-                _ = Type<T>.Value;
 
 #pragma warning restore
 #if UNITY_EDITOR && TYPE_ID_DEBUG_LOG

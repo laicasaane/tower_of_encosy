@@ -10,6 +10,7 @@ namespace EncosyTower.Modules
     public static class Type<T>
     {
         private readonly static Type s_type;
+        private readonly static TypeId s_id;
         private readonly static bool s_isUnmanaged;
         private readonly static bool s_isBlittable;
 
@@ -18,6 +19,19 @@ namespace EncosyTower.Modules
             s_type = typeof(T);
             s_isUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
             s_isBlittable = s_isUnmanaged && s_type.IsAutoLayout == false && s_type != Type<bool>.s_type;
+            s_id = new TypeId(TypeIdVault.Cache<T>.Id);
+            TypeIdVault.Register(s_id._value, s_type);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="TypeId{T}"/> of <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static TypeId<T> Id
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => new(s_id._value);
         }
 
         /// <summary>
@@ -68,13 +82,7 @@ namespace EncosyTower.Modules
         public static TypeInfo<T> Info
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => new(
-                  TypeId<T>.Value
-                , Hash
-                , IsValueType
-                , IsUnmanaged
-                , IsBlittable
-            );
+            get => new(Id, Hash, IsValueType, IsUnmanaged, IsBlittable);
         }
     }
 }

@@ -26,7 +26,7 @@ namespace EncosyTower.Modules
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<TypeId<T>> AsTyped<T>(this TypeId self)
-            => self.IsType<T>() ? TypeId<T>.Value : default;
+            => self.IsType<T>() ? Type<T>.Id : default;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Id2 ToId2(this TypeId self)

@@ -26,6 +26,6 @@ namespace EncosyTower.Modules
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Id2(PresetId value)
-            => TypeId<PresetId>.Value.ToId2(value);
+            => Type<PresetId>.Id.ToId2(value);
     }
 }
