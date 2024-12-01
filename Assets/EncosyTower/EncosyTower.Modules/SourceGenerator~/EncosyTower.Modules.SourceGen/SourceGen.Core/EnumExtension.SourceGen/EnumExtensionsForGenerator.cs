@@ -10,6 +10,7 @@ namespace EncosyTower.Modules.EnumExtensions.SourceGen
     [Generator]
     public class EnumExtensionsForGenerator : IIncrementalGenerator
     {
+        private const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.EnumExtensions.SkipSourceGenForAssemblyAttribute";
         public const string ENUM_EXTENSIONS_FOR_ATTRIBUTE = "global::EncosyTower.Modules.EnumExtensions.EnumExtensionsForAttribute";
         public const string FLAGS_ATTRIBUTE = "global::System.FlagsAttribute";
         public const string GENERATOR_NAME = nameof(EnumExtensionsGenerator);
@@ -28,7 +29,8 @@ namespace EncosyTower.Modules.EnumExtensions.SourceGen
 
             var combined = candidateProvider
                 .Combine(compilationProvider)
-                .Combine(projectPathProvider);
+                .Combine(projectPathProvider)
+                .Where(static t => t.Left.Right.compilation.IsValidCompilation(SKIP_ATTRIBUTE));
 
             context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
                 GenerateOutput(
