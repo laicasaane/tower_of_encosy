@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Modules.Types
 {
@@ -6,7 +8,15 @@ namespace EncosyTower.Modules.Types
     {
         public const string VOID_TYPE_NAME = "void";
 
-        public static string GetName(this Type type)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Option<TypeId> FindId([NotNull] this Type type)
+            => TypeIdVault.TryGetId(type, out var id) ? id : default;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TypeId GetOrRegisterId([NotNull] this Type type)
+            => TypeIdVault.TryGetId(type, out var id) ? id : RuntimeTypeCache.GetInfo(type).Id;
+
+        public static string GetName([NotNull] this Type type)
         {
             if (type.IsEnum)
             {
@@ -32,7 +42,7 @@ namespace EncosyTower.Modules.Types
             };
         }
 
-        public static string GetFullName(this Type type)
+        public static string GetFullName([NotNull] this Type type)
         {
             if (type.IsEnum)
             {
@@ -58,7 +68,7 @@ namespace EncosyTower.Modules.Types
             };
         }
 
-        public static string GetFriendlyName(this Type type, bool fullName = false)
+        public static string GetFriendlyName([NotNull] this Type type, bool fullName = false)
         {
             if (type == typeof(void))
             {
@@ -90,6 +100,36 @@ namespace EncosyTower.Modules.Types
             }
 
             return friendlyName;
+        }
+
+        public static bool IsReferenceOrContainsReferences([NotNull] this Type type)
+        {
+            if (type.IsValueType == false)
+            {
+                return true;
+            }
+
+            if (type.IsEnum)
+            {
+                return false;
+            }
+
+            var typeCode = Type.GetTypeCode(type);
+
+            if (typeCode is >= TypeCode.Boolean and <= TypeCode.DateTime)
+            {
+                return false;
+            }
+
+            foreach (var field in type.GetFields())
+            {
+                if (field.FieldType.IsReferenceOrContainsReferences())
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

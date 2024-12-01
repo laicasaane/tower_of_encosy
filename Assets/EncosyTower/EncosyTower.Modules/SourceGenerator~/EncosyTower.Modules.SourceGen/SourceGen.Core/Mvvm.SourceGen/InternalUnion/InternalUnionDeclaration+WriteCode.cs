@@ -19,7 +19,7 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
         public const string UNION_DATA_TYPE = "global::EncosyTower.Modules.Unions.UnionData";
         public const string UNION_TYPE_KIND = "global::EncosyTower.Modules.Unions.UnionTypeKind";
         public const string DOES_NOT_RETURN = "[global::System.Diagnostics.CodeAnalysis.DoesNotReturn]";
-        public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.AfterAssembliesLoaded)]";
+        public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.BeforeSplashScreen)]";
         public const string GENERATED_INTERNAL_UNIONS = "[global::EncosyTower.Modules.Unions.SourceGen.GeneratedInternalUnions]";
 
         public const string GENERATOR_NAME = nameof(InternalUnionGenerator);

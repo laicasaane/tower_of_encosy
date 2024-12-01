@@ -10,17 +10,14 @@ namespace EncosyTower.Modules.Types
     public static class Type<T>
     {
         private readonly static Type s_type;
-        private readonly static TypeId s_id;
-        private readonly static bool s_isUnmanaged;
-        private readonly static bool s_isBlittable;
+        private readonly static TypeInfo<T> s_info;
 
         static Type()
         {
             s_type = typeof(T);
-            s_isUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
-            s_isBlittable = s_isUnmanaged && s_type.IsAutoLayout == false && s_type != Type<bool>.s_type;
-            s_id = new TypeId(TypeIdVault.Cache<T>.Id);
-            TypeIdVault.Register(s_id._value, s_type);
+
+            var info = RuntimeTypeCache.Register<T>(s_type);
+            s_info = new(info.Id, info.Hash, info.IsValueType, info.IsUnmanaged, info.IsBlittable);
         }
 
         /// <summary>
@@ -31,7 +28,7 @@ namespace EncosyTower.Modules.Types
         public static TypeId<T> Id
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => new(s_id._value);
+            get => s_info.Id;
         }
 
         /// <summary>
@@ -49,7 +46,7 @@ namespace EncosyTower.Modules.Types
         public static bool IsValueType
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => s_type.IsValueType;
+            get => s_info.IsValueType;
         }
 
         /// <summary>
@@ -58,7 +55,7 @@ namespace EncosyTower.Modules.Types
         public static bool IsUnmanaged
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => s_isUnmanaged;
+            get => s_info.IsUnmanaged;
         }
 
         /// <summary>
@@ -67,7 +64,7 @@ namespace EncosyTower.Modules.Types
         public static bool IsBlittable
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => s_isBlittable;
+            get => s_info.IsBlittable;
         }
 
         /// <summary>
@@ -79,10 +76,10 @@ namespace EncosyTower.Modules.Types
             get => s_type;
         }
 
-        public static TypeInfo<T> Info
+        public static ref readonly TypeInfo<T> Info
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => new(Id, Hash, IsValueType, IsUnmanaged, IsBlittable);
+            get => ref s_info;
         }
     }
 }

@@ -8,13 +8,13 @@ namespace EncosyTower.Modules.Types
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Type ToType(this TypeId self)
         {
-            return TypeIdVault.TryGetType(self._value, out var type)
+            return TypeIdVault.TryGetType(self, out var type)
                 ? type : TypeIdVault.UndefinedType;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryToType(this TypeId self, out Type type)
-            => TypeIdVault.TryGetType(self._value, out type);
+            => TypeIdVault.TryGetType(self, out type);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Type ToType<T>(this TypeId<T> _)
@@ -22,7 +22,7 @@ namespace EncosyTower.Modules.Types
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsType<T>(this TypeId self)
-            => TypeIdVault.TryGetType(self._value, out var type) && type == Type<T>.Value;
+            => TypeIdVault.TryGetType(self, out var type) && type == Type<T>.Value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<TypeId<T>> AsTyped<T>(this TypeId self)

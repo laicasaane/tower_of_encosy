@@ -57,6 +57,10 @@ namespace EncosyTower.Modules.Types
             => new(id._value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator TypeId<T>(in TypeId id)
+            => new(id._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(in TypeId<T> lhs, in TypeId<T> rhs)
             => lhs._value == rhs._value;
 
