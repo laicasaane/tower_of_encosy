@@ -45,18 +45,21 @@ namespace EncosyTower.Modules.SourceGen
             }
         }
 
+        public static int GetStableHashCode(this SyntaxTree syntaxTree)
+            => SourceGenHelpers.GetStableHashCode(syntaxTree.FilePath) & 0x7fffffff;
+
         public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, SyntaxNode node)
-            => GetGeneratedSourceFileName(syntaxTree, generatorName, node.GetLocation().GetLineSpan().StartLinePosition.Line);
+            => GetGeneratedSourceFileName(syntaxTree, generatorName, node.GetLineNumber());
 
         public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, int salting = 0)
         {
             var (isSuccess, fileName) = TryGetFileNameWithoutExtension(syntaxTree);
-            var stableHashCode = SourceGenHelpers.GetStableHashCode(syntaxTree.FilePath) & 0x7fffffff;
+            var stableHashCode = syntaxTree.GetStableHashCode();
 
             var postfix = generatorName.Length > 0 ? $"__{generatorName}" : string.Empty;
 
             if (isSuccess)
-                fileName = $"{fileName}{postfix}_{stableHashCode}{salting}.g.cs";
+                fileName = $"{fileName}{postfix}_{stableHashCode}_{salting}.g.cs";
             else
                 fileName = Path.Combine($"{Path.GetRandomFileName()}{postfix}", ".g.cs");
 
@@ -64,12 +67,12 @@ namespace EncosyTower.Modules.SourceGen
         }
 
         public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, SyntaxNode node, string typeName)
-            => GetGeneratedSourceFileName(syntaxTree, generatorName, node.GetLocation().GetLineSpan().StartLinePosition.Line, typeName);
+            => GetGeneratedSourceFileName(syntaxTree, generatorName, node.GetLineNumber(), typeName);
 
         public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, int salting, string typeName)
         {
             var (isSuccess, fileName) = TryGetFileNameWithoutExtension(syntaxTree);
-            var stableHashCode = SourceGenHelpers.GetStableHashCode(syntaxTree.FilePath) & 0x7fffffff;
+            var stableHashCode = syntaxTree.GetStableHashCode();
 
             var postfix = generatorName.Length > 0 ? $"__{generatorName}" : string.Empty;
 
@@ -79,7 +82,7 @@ namespace EncosyTower.Modules.SourceGen
             }
 
             if (isSuccess)
-                fileName = $"{fileName}{postfix}_{stableHashCode}{salting}.g.cs";
+                fileName = $"{fileName}{postfix}_{stableHashCode}_{salting}.g.cs";
             else
                 fileName = Path.Combine($"{Path.GetRandomFileName()}{postfix}", ".g.cs");
 
@@ -87,14 +90,14 @@ namespace EncosyTower.Modules.SourceGen
         }
 
         public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, string fileName, SyntaxNode node)
-            => GetGeneratedSourceFileName(syntaxTree, generatorName, fileName, node.GetLocation().GetLineSpan().StartLinePosition.Line);
+            => GetGeneratedSourceFileName(syntaxTree, generatorName, fileName, node.GetLineNumber());
 
         public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, string fileName, int salting = 0)
         {
-            var stableHashCode = SourceGenHelpers.GetStableHashCode(syntaxTree.FilePath) & 0x7fffffff;
+            var stableHashCode = syntaxTree.GetStableHashCode();
             var postfix = generatorName.Length > 0 ? $"__{generatorName}" : string.Empty;
 
-            return $"{fileName}{postfix}_{stableHashCode}{salting}.g.cs";
+            return $"{fileName}{postfix}_{stableHashCode}_{salting}.g.cs";
         }
 
         public static string GetGeneratedSourceFilePath(this SyntaxTree syntaxTree, string assemblyName, string generatorName)
@@ -224,7 +227,8 @@ namespace EncosyTower.Modules.SourceGen
             return node.WithLeadingTrivia(lineTrivia, CarriageReturnLineFeed);
         }
 
-        public static int GetLineNumber(this SyntaxNode node) => node.GetLocation().GetLineSpan().StartLinePosition.Line;
+        public static int GetLineNumber(this SyntaxNode node)
+            => node.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
 
         public static SyntaxNode WithHiddenLineTrivia(this SyntaxNode node)
             => node.WithLeadingTrivia(Comment($"#line hidden"), CarriageReturnLineFeed);

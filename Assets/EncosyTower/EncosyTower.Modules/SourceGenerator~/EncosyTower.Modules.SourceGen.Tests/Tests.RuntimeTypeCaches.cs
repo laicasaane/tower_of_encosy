@@ -9,11 +9,11 @@ namespace EncosyTower.Modules.Tests.RuntimeTypeCaches
 
     public class SomeAttribute : Attribute { }
 
-    public class Tests
+    public partial class Tests
     {
         public void DoSomething()
         {
-            RuntimeTypeCache.GetTypesDerivedFrom<IMyInterface>();
+            RuntimeTypeCache.GetTypesDerivedFrom<IMyInterface>("aa");
             RuntimeTypeCache.GetFieldsWithAttribute<SomeAttribute>();
             RuntimeTypeCache.GetFieldsWithAttribute<UnityEngine.SerializeField>();
         }
