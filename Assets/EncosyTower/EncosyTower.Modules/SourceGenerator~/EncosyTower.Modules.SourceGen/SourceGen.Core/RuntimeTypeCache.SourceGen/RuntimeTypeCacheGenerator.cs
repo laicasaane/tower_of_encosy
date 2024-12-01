@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using EncosyTower.Modules.SourceGen;
@@ -20,6 +22,7 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
         private const string RUNTIME_TYPE_CACHE = "global::EncosyTower.Modules.Types.RuntimeTypeCache";
         private const string GENERATED_RUNTIME_TYPE_CACHE = "[global::EncosyTower.Modules.Types.Caches.SourceGen.GeneratedRuntimeTypeCache]";
         private const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
+        private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -33,10 +36,9 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
                 , transform: GetMatchedType
             ).Where(ValidateCandiate);
 
-            var combined = typeProvider
+            var combined = typeProvider.Collect()
                 .Combine(compilationProvider)
-                .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.compilation.IsValidCompilation(SKIP_ATTRIBUTE));
+                .Combine(projectPathProvider);
 
             context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
                 GenerateOutput(
@@ -88,8 +90,12 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
         {
             token.ThrowIfCancellationRequested();
 
-            var semanticModel = context.SemanticModel;
+            if (context.SemanticModel.Compilation.IsValidCompilation(SKIP_ATTRIBUTE) == false)
+            {
+                return default;
+            }
 
+            var semanticModel = context.SemanticModel;
             var syntax = context.Node as MemberAccessExpressionSyntax;
             var identifier = syntax.Expression as IdentifierNameSyntax;
             var identifierType = semanticModel.GetTypeInfo(identifier, token).Type;
@@ -148,43 +154,60 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationCandidate compilationCandidate
-            , Candidate candidate
+            , ImmutableArray<Candidate> candidates
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            try
+            if (candidates.Length < 1)
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
-                var containingSyntax = candidate.containingSyntax;
-                var containingType = candidate.containingType;
-                var syntaxTree = containingSyntax.SyntaxTree;
-                var compilation = compilationCandidate.compilation;
-                var assemblyName = compilation.Assembly.Name;
-
-                context.OutputSource(
-                      outputSourceGenFiles
-                    , containingSyntax
-                    , WriteCode(candidate)
-                    , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, candidate.typeSyntax, containingType.ToValidIdentifier())
-                    , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME)
-                );
+                return;
             }
-            catch (Exception e)
+
+            SourceGenHelpers.ProjectPath = projectPath;
+
+            var cacheMap = MakeCacheMap(candidates);
+            var compilation = compilationCandidate.compilation;
+            var assemblyName = compilation.Assembly.Name;
+
+            foreach (var kvp in cacheMap)
             {
-                if (e is OperationCanceledException)
+                var containingType = kvp.Key;
+                var list = kvp.Value;
+
+                if (list.Count < 1)
                 {
-                    throw;
+                    continue;
                 }
 
-                context.ReportDiagnostic(Diagnostic.Create(
-                      s_errorDescriptor
-                    , candidate.containingSyntax.GetLocation()
-                    , e.ToUnityPrintableString()
-                ));
+                var containingSyntax = list[0].containingSyntax;
+                var syntaxTree = containingSyntax.SyntaxTree;
+
+                try
+                {
+                    context.OutputSource(
+                          outputSourceGenFiles
+                        , containingSyntax
+                        , WriteCode(containingSyntax, containingType, list)
+                        , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, containingSyntax, containingType.ToValidIdentifier())
+                        , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME)
+                    );
+                }
+                catch (Exception e)
+                {
+                    if (e is OperationCanceledException)
+                    {
+                        throw;
+                    }
+
+                    context.ReportDiagnostic(Diagnostic.Create(
+                          s_errorDescriptor
+                        , containingSyntax.GetLocation()
+                        , e.ToUnityPrintableString()
+                    ));
+                }
             }
         }
 
@@ -198,12 +221,31 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
                 , description: ""
             );
 
-        private static string WriteCode(Candidate cdd)
+        private static CacheMap MakeCacheMap(ImmutableArray<Candidate> candidates)
         {
-            var containingSyntax = cdd.containingSyntax;
-            var containingType = cdd.containingType;
+            var map = new CacheMap(SymbolEqualityComparer.Default);
 
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, cdd.containingSyntax.Parent);
+            foreach (var candidate in candidates)
+            {
+                if (map.TryGetValue(candidate.containingType, out var list) == false)
+                {
+                    list = new List<Candidate>();
+                    map.Add(candidate.containingType, list);
+                }
+
+                list.Add(candidate);
+            }
+
+            return map;
+        }
+
+        private static string WriteCode(
+              TypeDeclarationSyntax containingSyntax
+            , INamedTypeSymbol containingType
+            , List<Candidate> candidates
+        )
+        {
+            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, containingSyntax.Parent);
             var p = scopePrinter.printer;
 
             p.PrintEndLine();
@@ -228,39 +270,48 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
                     p.PrintLine("/// <summary>");
                     p.PrintLine("/// Provides information about the types, fields and methods to be cached.");
                     p.PrintLine("/// </summary>");
-                    p.PrintLine(GENERATED_RUNTIME_TYPE_CACHE).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+                    p.PrintLine(GENERATED_RUNTIME_TYPE_CACHE)
+                        .PrintLine(GENERATED_CODE)
+                        .PrintLine(EXCLUDE_COVERAGE)
+                        .PrintLine(EDITOR_BROWSABLE_NEVER)
+                        .PrintLine(PRESERVE);
 
-                    p.PrintBeginLine("[global::EncosyTower.Modules.Types.Caches.");
-
-                    switch (cdd.cacheAttributeType)
+                    foreach (var cdd in candidates)
                     {
-                        case CacheAttributeType.CacheTypesDerivedFrom:
-                            p.Print(nameof(CacheAttributeType.CacheTypesDerivedFrom));
-                            break;
+                        p.PrintBeginLine("[global::EncosyTower.Modules.Types.Caches.");
 
-                        case CacheAttributeType.CacheTypesWithAttribute:
-                            p.Print(nameof(CacheAttributeType.CacheTypesWithAttribute));
-                            break;
+                        switch (cdd.cacheAttributeType)
+                        {
+                            case CacheAttributeType.CacheTypesDerivedFrom:
+                                p.Print(nameof(CacheAttributeType.CacheTypesDerivedFrom));
+                                break;
 
-                        case CacheAttributeType.CacheFieldsWithAttribute:
-                            p.Print(nameof(CacheAttributeType.CacheFieldsWithAttribute));
-                            break;
+                            case CacheAttributeType.CacheTypesWithAttribute:
+                                p.Print(nameof(CacheAttributeType.CacheTypesWithAttribute));
+                                break;
 
-                        case CacheAttributeType.CacheMethodsWithAttribute:
-                            p.Print(nameof(CacheAttributeType.CacheMethodsWithAttribute));
-                            break;
+                            case CacheAttributeType.CacheFieldsWithAttribute:
+                                p.Print(nameof(CacheAttributeType.CacheFieldsWithAttribute));
+                                break;
+
+                            case CacheAttributeType.CacheMethodsWithAttribute:
+                                p.Print(nameof(CacheAttributeType.CacheMethodsWithAttribute));
+                                break;
+                        }
+
+                        p.Print("(typeof(").Print(cdd.type.ToFullName()).Print(")");
+
+                        if (string.IsNullOrEmpty(cdd.assemblyName) == false)
+                        {
+                            p.Print(", \"").Print(cdd.assemblyName).Print("\"");
+                        }
+
+                        p.PrintEndLine(")]");
                     }
 
-                    p.Print("(typeof(").Print(cdd.type.ToFullName()).Print(")");
-
-                    if (string.IsNullOrEmpty(cdd.assemblyName) == false)
-                    {
-                        p.Print(", \"").Print(cdd.assemblyName).Print("\"");
-                    }
-
-                    p.PrintEndLine(")]");
-                    p.PrintBeginLine("private struct RuntimeTypeCache_")
-                        .Print(cdd.typeSyntax.GetLineNumber().ToString())
+                    p.PrintBeginLine("private struct ")
+                        .Print(containingSyntax.Identifier.ValueText)
+                        .Print("_RuntimeTypeCaches")
                         .PrintEndLine(" { }");
                 }
                 p.CloseScope();
@@ -287,6 +338,11 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
             public ITypeSymbol type;
             public string assemblyName;
             public CacheAttributeType cacheAttributeType;
+        }
+
+        private class CacheMap : Dictionary<INamedTypeSymbol, List<Candidate>>
+        {
+            public CacheMap(IEqualityComparer<ISymbol> comparer) : base(comparer) { }
         }
     }
 }

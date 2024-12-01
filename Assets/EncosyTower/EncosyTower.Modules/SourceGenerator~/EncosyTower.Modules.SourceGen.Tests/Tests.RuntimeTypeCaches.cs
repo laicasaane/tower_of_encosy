@@ -11,7 +11,17 @@ namespace EncosyTower.Modules.Tests.RuntimeTypeCaches
 
     public partial class Tests
     {
-        public void DoSomething()
+        public void DoSomethingX()
+        {
+            RuntimeTypeCache.GetTypesDerivedFrom<IMyInterface>("aa");
+            RuntimeTypeCache.GetFieldsWithAttribute<SomeAttribute>();
+            RuntimeTypeCache.GetFieldsWithAttribute<UnityEngine.SerializeField>();
+        }
+    }
+
+    public partial class Tests
+    {
+        public void DoSomethingY()
         {
             RuntimeTypeCache.GetTypesDerivedFrom<IMyInterface>("aa");
             RuntimeTypeCache.GetFieldsWithAttribute<SomeAttribute>();
