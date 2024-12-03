@@ -1,21 +1,22 @@
 ﻿using System;
+using System.Collections;
 using EncosyTower.Modules.Types;
 
 namespace EncosyTower.Modules.Tests.RuntimeTypeCaches
 {
-    public interface IMyInterface { }
-
     public class YourType { }
 
     public class SomeAttribute : Attribute { }
+
+    public class SpecialAttribute : Attribute { }
 
     public partial class Tests
     {
         public void DoSomethingX()
         {
-            RuntimeTypeCache.GetTypesDerivedFrom<IMyInterface>("aa");
+            var a = "EncosyTower.Modules.Tests";
+            RuntimeTypeCache.GetTypesDerivedFrom<IEqualityComparer>(a);
             RuntimeTypeCache.GetFieldsWithAttribute<SomeAttribute>();
-            RuntimeTypeCache.GetFieldsWithAttribute<UnityEngine.SerializeField>();
         }
     }
 
@@ -23,9 +24,9 @@ namespace EncosyTower.Modules.Tests.RuntimeTypeCaches
     {
         public void DoSomethingY()
         {
-            RuntimeTypeCache.GetTypesDerivedFrom<IMyInterface>("aa");
-            RuntimeTypeCache.GetFieldsWithAttribute<SomeAttribute>();
-            RuntimeTypeCache.GetFieldsWithAttribute<UnityEngine.SerializeField>();
+            RuntimeTypeCache.GetTypesDerivedFrom<YourType>();
+            RuntimeTypeCache.GetFieldsWithAttribute<SpecialAttribute>();
+            RuntimeTypeCache.GetFieldsWithAttribute<UnityEngine.SerializeField>("EncosyTower.Modules.Tests");
         }
     }
 }
