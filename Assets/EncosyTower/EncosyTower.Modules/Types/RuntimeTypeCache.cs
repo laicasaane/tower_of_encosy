@@ -113,10 +113,14 @@ namespace EncosyTower.Modules.Types
         /// Retrieves an unordered collection of types derived from <typeparamref name="T"/>.
         /// </summary>
         /// <typeparam name="T">Type of a class or interface.</typeparam>
-        /// <param name="assemblyName">	Optional assembly name.</param>
+        /// <param name="assemblyName">Optional assembly name.</param>
         /// <returns>
         /// Returns an unordered collection of derived types defined in this <paramref name="assemblyName"/>.
         /// </returns>
+        /// <remarks>
+        /// Literals should be passed into the method.
+        /// Source generator accompanied RuntimeTypeCache can't resolve non-literal variables.
+        /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlyMemory<Type> GetTypesDerivedFrom<T>([NotNull] string assemblyName)
         {
@@ -158,10 +162,14 @@ namespace EncosyTower.Modules.Types
         /// Retrieves an unordered collection of types derived from <paramref name="type"/>.
         /// </summary>
         /// <param name="type">Type of a class or interface.</param>
-        /// <param name="assemblyName">	Optional assembly name.</param>
+        /// <param name="assemblyName">Optional assembly name.</param>
         /// <returns>
         /// Returns an unordered collection of derived types defined in this <paramref name="assemblyName"/>.
         /// </returns>
+        /// <remarks>
+        /// Literals should be passed into the method.
+        /// Source generator accompanied RuntimeTypeCache can't resolve non-literal variables.
+        /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlyMemory<Type> GetTypesDerivedFrom([NotNull] Type type, [NotNull] string assemblyName)
         {
