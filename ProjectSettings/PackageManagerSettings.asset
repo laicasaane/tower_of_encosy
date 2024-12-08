@@ -32,7 +32,6 @@ MonoBehaviour:
     m_Url: https://package.openupm.com
     m_Scopes:
     - cat.natsuneko.power-rename
-    - com.annulusgames.debug-ui
     - com.annulusgames.lit-motion
     - com.annulusgames.tween-playables
     - com.annulusgames.unity-codegen
@@ -46,6 +45,8 @@ MonoBehaviour:
     - com.roytheunissen.assetpalette
     - com.xarbrough.renamer
     - com.xarbrough.scriptable-object-creator
+    - ga.fuquna.rosettaui
+    - ga.fuquna.rosettaui.uitoolkit
     - jp.co.cyberagent.smartaddresser
     - org.nuget.system.runtime.compilerservices.unsafe
     m_IsDefault: 0
