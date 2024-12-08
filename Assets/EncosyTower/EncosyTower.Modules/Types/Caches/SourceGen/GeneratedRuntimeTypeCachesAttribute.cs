@@ -11,5 +11,5 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
     /// However, it can be used in other contexts, such as reflection.
     /// </remarks>
     [AttributeUsage(AttributeTargets.Struct, Inherited = false)]
-    public sealed class GeneratedRuntimeTypeCacheAttribute : Attribute { }
+    public sealed class GeneratedRuntimeTypeCachesAttribute : Attribute { }
 }

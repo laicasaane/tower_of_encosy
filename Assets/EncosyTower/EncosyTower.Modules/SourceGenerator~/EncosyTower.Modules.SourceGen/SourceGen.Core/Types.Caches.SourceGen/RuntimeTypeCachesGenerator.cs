@@ -8,21 +8,25 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
+namespace EncosyTower.Modules.Types.Caches.SourceGen
 {
     [Generator]
-    internal class RuntimeTypeCacheGenerator : IIncrementalGenerator
+    internal class RuntimeTypeCachesGenerator : IIncrementalGenerator
     {
         private const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.Types.Caches.SkipSourceGenForAssemblyAttribute";
-        public const string GENERATOR_NAME = nameof(RuntimeTypeCacheGenerator);
+        public const string GENERATOR_NAME = nameof(RuntimeTypeCachesGenerator);
 
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.RuntimeTypeCache.SourceGen.RuntimeTypeCacheGenerator\", \"1.0.0\")]";
+        private const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Types.Caches.SourceGen.RuntimeTypeCachesGenerator\", \"1.0.0\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string RUNTIME_TYPE_CACHE = "global::EncosyTower.Modules.Types.RuntimeTypeCache";
-        private const string GENERATED_RUNTIME_TYPE_CACHE = "[global::EncosyTower.Modules.Types.Caches.SourceGen.GeneratedRuntimeTypeCache]";
+        private const string GENERATED_RUNTIME_TYPE_CACHES = "[global::EncosyTower.Modules.Types.Caches.SourceGen.GeneratedRuntimeTypeCaches]";
         private const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
         private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
+        private const string METHOD_GET_TYPES_DERIVED_FFROM = "GetTypesDerivedFrom";
+        private const string METHOD_GET_TYPES_WITH_ATTRIBUTE = "GetTypesWithAttribute";
+        private const string METHOD_GET_FIELDS_WITH_ATTRIBUTE = "GetFieldsWithAttribute";
+        private const string METHOD_GET_METHODS_WITH_ATTRIBUTE = "GetMethodsWithAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -53,10 +57,10 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
             static bool ValidateCandiate(Candidate candidate)
             {
                 return candidate.cacheAttributeType is not CacheAttributeType.None
+                    && string.IsNullOrEmpty(candidate.methodName) == false
                     && candidate.containingSyntax is not null
                     && candidate.containingType is not null
                     && candidate.typeSyntax is not null
-                    && candidate.type is not null
                     ;
             }
         }
@@ -75,10 +79,10 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
         private static bool IsMemberSupported(string memberName)
         {
             return memberName switch {
-                "GetTypesDerivedFrom" => true,
-                "GetTypesWithAttribute" => true,
-                "GetFieldsWithAttribute" => true,
-                "GetMethodsWithAttribute" => true,
+                METHOD_GET_TYPES_DERIVED_FFROM => true,
+                METHOD_GET_TYPES_WITH_ATTRIBUTE => true,
+                METHOD_GET_FIELDS_WITH_ATTRIBUTE => true,
+                METHOD_GET_METHODS_WITH_ATTRIBUTE => true,
                 _ => false,
             };
         }
@@ -113,10 +117,10 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
             var typeInfo = semanticModel.GetTypeInfo(typeArgList.Arguments[0], token);
 
             var cacheAttributeType = member.Identifier.ValueText switch {
-                "GetTypesDerivedFrom" => CacheAttributeType.CacheTypesDerivedFrom,
-                "GetTypesWithAttribute" => CacheAttributeType.CacheTypesWithAttribute,
-                "GetFieldsWithAttribute" => CacheAttributeType.CacheFieldsWithAttribute,
-                "GetMethodsWithAttribute" => CacheAttributeType.CacheMethodsWithAttribute,
+                METHOD_GET_TYPES_DERIVED_FFROM => CacheAttributeType.CacheTypesDerivedFrom,
+                METHOD_GET_TYPES_WITH_ATTRIBUTE => CacheAttributeType.CacheTypesWithAttribute,
+                METHOD_GET_FIELDS_WITH_ATTRIBUTE => CacheAttributeType.CacheFieldsWithAttribute,
+                METHOD_GET_METHODS_WITH_ATTRIBUTE => CacheAttributeType.CacheMethodsWithAttribute,
                 _ => CacheAttributeType.None,
             };
 
@@ -126,6 +130,7 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
                 typeSyntax = typeArgList.Arguments[0],
                 type = typeInfo.Type,
                 cacheAttributeType = cacheAttributeType,
+                methodName = member.Identifier.ValueText,
             };
 
             if (syntax.Parent is InvocationExpressionSyntax { ArgumentList.Arguments: { Count: 1 } arguments }
@@ -168,7 +173,7 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
 
             SourceGenHelpers.ProjectPath = projectPath;
 
-            var cacheMap = MakeCacheMap(candidates);
+            var cacheMap = MakeCacheMap(context, candidates);
             var compilation = compilationCandidate.compilation;
             var assemblyName = compilation.Assembly.Name;
 
@@ -214,19 +219,66 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
         private static readonly DiagnosticDescriptor s_errorDescriptor
             = new("SG_RUNTIME_TYPE_CACHE_01"
                 , "Runtime Type Cache Generator Error"
-                , "This error indicates a bug in the Runtime Type Cache source generators. Error message: '{0}'."
+                , "This error indicates a bug in the Runtime Type Caches source generators. Error message: '{0}'."
                 , "RuntimeTypeCache"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""
             );
 
-        private static CacheMap MakeCacheMap(ImmutableArray<Candidate> candidates)
+        private static CacheMap MakeCacheMap(
+              SourceProductionContext context
+            , ImmutableArray<Candidate> candidates
+        )
         {
             var map = new CacheMap(SymbolEqualityComparer.Default);
 
             foreach (var candidate in candidates)
             {
+                if (candidate.type is not INamedTypeSymbol type)
+                {
+                    context.ReportDiagnostic(
+                          DiagnosticDescriptors.TypeParameterIsNotApplicable
+                        , candidate.typeSyntax
+                        , (candidate.typeSyntax as IdentifierNameSyntax)?.Identifier.ValueText ?? "T"
+                        , candidate.methodName
+                    );
+                    continue;
+                }
+
+                if (candidate.cacheAttributeType == CacheAttributeType.CacheTypesDerivedFrom)
+                {
+                    if (type.TypeKind is not (TypeKind.Class or TypeKind.Interface))
+                    {
+                        context.ReportDiagnostic(
+                              DiagnosticDescriptors.OnlyClassOrInterfaceIsApplicable
+                            , candidate.typeSyntax
+                            , type.ToFullName()
+                        );
+                        continue;
+                    }
+
+                    if (type.IsStatic)
+                    {
+                        context.ReportDiagnostic(
+                              DiagnosticDescriptors.StaticClassIsNotApplicable
+                            , candidate.typeSyntax
+                            , type.ToFullName()
+                        );
+                        continue;
+                    }
+
+                    if (type.IsSealed)
+                    {
+                        context.ReportDiagnostic(
+                              DiagnosticDescriptors.SealedClassIsNotApplicable
+                            , candidate.typeSyntax
+                            , type.ToFullName()
+                        );
+                        continue;
+                    }
+                }
+
                 if (map.TryGetValue(candidate.containingType, out var list) == false)
                 {
                     list = new List<Candidate>();
@@ -270,7 +322,7 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
                     p.PrintLine("/// <summary>");
                     p.PrintLine("/// Provides information about the types, fields and methods to be cached.");
                     p.PrintLine("/// </summary>");
-                    p.PrintLine(GENERATED_RUNTIME_TYPE_CACHE)
+                    p.PrintLine(GENERATED_RUNTIME_TYPE_CACHES)
                         .PrintLine(GENERATED_CODE)
                         .PrintLine(EXCLUDE_COVERAGE)
                         .PrintLine(EDITOR_BROWSABLE_NEVER)
@@ -311,7 +363,8 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
 
                     p.PrintBeginLine("private struct ")
                         .Print(containingSyntax.Identifier.ValueText)
-                        .Print("_RuntimeTypeCaches")
+                        .Print("_RuntimeTypeCaches_")
+                        .Print(containingSyntax.SyntaxTree.GetStableHashCode().ToString())
                         .PrintEndLine(" { }");
                 }
                 p.CloseScope();
@@ -337,6 +390,7 @@ namespace EncosyTower.Modules.RuntimeTypeCache.SourceGen
             public TypeSyntax typeSyntax;
             public ITypeSymbol type;
             public string assemblyName;
+            public string methodName;
             public CacheAttributeType cacheAttributeType;
         }
 
