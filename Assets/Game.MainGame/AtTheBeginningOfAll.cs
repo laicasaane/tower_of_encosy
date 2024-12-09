@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Module.MainGame
 {
-    public sealed class WorldLoader : MonoBehaviour
+    public sealed class AtTheBeginningOfAll : MonoBehaviour
     {
     }
 }
