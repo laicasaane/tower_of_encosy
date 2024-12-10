@@ -1,7 +1,9 @@
 #if UNITY_6000_0_OR_NEWER
 
-#if !DEBUG && !ENABLE_UNITY_COLLECTIONS_CHECKS && !UNITY_DOTS_DEBUG
-#define DISABLE_CHECKS
+#if !(UNITY_EDITOR || DEBUG) || DISABLE_ENCOSY_CHECKS
+#define __ENCOSY_NO_VALIDATION__
+#else
+#define __ENCOSY_VALIDATION__
 #endif
 
 using System;
@@ -164,7 +166,7 @@ namespace EncosyTower.Modules
                 {
                     awaiter.GetResult();
                 }
-#if DISABLE_CHECKS
+#if __ENCOSY_NO_VALIDATION__
 #if UNITY_EDITOR
                 catch (Exception ex)
                 {
@@ -204,7 +206,7 @@ namespace EncosyTower.Modules
                 {
                     _ = awaiter.GetResult();
                 }
-#if DISABLE_CHECKS
+#if __ENCOSY_NO_VALIDATION__
 #if UNITY_EDITOR
                 catch (Exception ex)
                 {
@@ -229,7 +231,7 @@ namespace EncosyTower.Modules
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Run(this Awaitable self)
         {
-#if !DISABLE_CHECKS
+#if !__ENCOSY_NO_VALIDATION__
             Checks.IsTrue(self != null);
             Checks.IsTrue(HasContinuation(self) == false, "Awaitable already have a continuation, is it already awaited?");
 #endif
@@ -312,7 +314,7 @@ namespace EncosyTower.Modules
             }
         }
 
-#if !DISABLE_CHECKS
+#if !__ENCOSY_NO_VALIDATION__
         private static readonly FieldInfo s_continuationFieldInfo = typeof(Awaitable)
             .GetField("_continuation", BindingFlags.NonPublic | BindingFlags.Instance);
 

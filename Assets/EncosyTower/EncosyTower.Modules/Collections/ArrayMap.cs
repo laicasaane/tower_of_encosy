@@ -24,8 +24,10 @@
 
 // ReSharper disable InconsistentNaming
 
-#if DEBUG || ENABLE_UNITY_COLLECTIONS_CHECKS || UNITY_DOTS_DEBUG
-#define ENABLE_DEBUG_CHECKS
+#if !(UNITY_EDITOR || DEBUG || ENABLE_UNITY_COLLECTIONS_CHECKS || UNITY_DOTS_DEBUG) || DISABLE_ENCOSY_CHECKS
+#define __ENCOSY_NO_VALIDATION__
+#else
+#define __ENCOSY_VALIDATION__
 #endif
 
 using System;
@@ -138,7 +140,7 @@ namespace EncosyTower.Modules.Collections
         {
             var itemAdded = AddValue(key, out var index);
 
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
             if (itemAdded == false)
                 throw new InvalidOperationException("Key already present");
 #endif
@@ -173,7 +175,7 @@ namespace EncosyTower.Modules.Collections
         {
             var itemAdded = AddValue(key, out var index);
 
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
             if (itemAdded)
                 throw new InvalidOperationException("Trying to set a value on a not existing key");
 #endif
@@ -356,7 +358,7 @@ namespace EncosyTower.Modules.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetValueByRef(TKey key)
         {
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
             if (TryFindIndex(key, out var findIndex))
                 return ref _values[findIndex];
 
@@ -544,7 +546,7 @@ namespace EncosyTower.Modules.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetIndex(TKey key)
         {
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
             if (TryFindIndex(key, out var findIndex))
                 return findIndex;
 
@@ -757,7 +759,7 @@ namespace EncosyTower.Modules.Collections
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext()
             {
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
                 if (_count != _map.Count)
                     throw new InvalidOperationException("Cannot modify a map while it is being iterated");
 #endif
@@ -809,7 +811,7 @@ namespace EncosyTower.Modules.Collections
     {
         private readonly ArrayMap<TKey, TValue> _map;
 
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
         internal int _startCount;
 #endif
 
@@ -822,7 +824,7 @@ namespace EncosyTower.Modules.Collections
             _index = -1;
             _count = map.Count;
 
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
             _startCount = map.Count;
 #endif
         }
@@ -830,7 +832,7 @@ namespace EncosyTower.Modules.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MoveNext()
         {
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
             if (_count != _startCount)
                 throw new InvalidOperationException("Cannot modify a map while it is being iterated");
 #endif
@@ -862,7 +864,7 @@ namespace EncosyTower.Modules.Collections
             _index = (int)startIndex - 1;
             _count = (int)count;
 
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
             if (_count > _startCount)
                 throw new InvalidOperationException("Cannot set a count greater than the starting one");
 
@@ -875,7 +877,7 @@ namespace EncosyTower.Modules.Collections
             _index = -1;
             _count = _map.Count;
 
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
             _startCount = _map.Count;
 #endif
         }

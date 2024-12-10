@@ -23,8 +23,10 @@
 // SOFTWARE.
 
 #if UNITY_COLLECTIONS
-#if DEBUG || ENABLE_UNITY_COLLECTIONS_CHECKS || UNITY_DOTS_DEBUG
-#define ENABLE_DEBUG_CHECKS
+#if !(UNITY_EDITOR || DEBUG || ENABLE_UNITY_COLLECTIONS_CHECKS || UNITY_DOTS_DEBUG) || DISABLE_ENCOSY_CHECKS
+#define __ENCOSY_NO_VALIDATION__
+#else
+#define __ENCOSY_VALIDATION__
 #endif
 
 using System;
@@ -79,7 +81,7 @@ namespace EncosyTower.Modules.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Alloc(int newCapacity, Allocator allocator, bool memClear = true)
         {
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
             if (_realBuffer.ToNativeArray().IsCreated)
                 throw new InvalidOperationException("Cannot allocate an already allocated buffer");
 
@@ -99,7 +101,7 @@ namespace EncosyTower.Modules.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Resize(int newSize, bool copyContent = true, bool memClear = true)
         {
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
             if (_nativeAllocator.IsCreated == false || _realBuffer.ToNativeArray().IsCreated == false)
                 throw new InvalidOperationException("Cannot resize an uninitialized buffer");
 #endif

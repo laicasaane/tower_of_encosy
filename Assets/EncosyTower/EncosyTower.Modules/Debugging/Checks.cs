@@ -1,5 +1,7 @@
-#if !DEBUG && !ENABLE_UNITY_COLLECTIONS_CHECKS && !UNITY_DOTS_DEBUG
-#define DISABLE_CHECKS
+#if !(UNITY_EDITOR || DEBUG) || DISABLE_ENCOSY_CHECKS
+#define __ENCOSY_NO_VALIDATION__
+#else
+#define __ENCOSY_VALIDATION__
 #endif
 
 namespace EncosyTower.Modules
@@ -11,7 +13,7 @@ namespace EncosyTower.Modules
     [System.Diagnostics.DebuggerStepThrough]
     public static partial class Checks
     {
-#if DISABLE_CHECKS
+#if __ENCOSY_NO_VALIDATION__
         [System.Diagnostics.Conditional("__NEVER_DEFINED__")]
 #endif
         public static void IsTrue(bool condition)
@@ -19,7 +21,7 @@ namespace EncosyTower.Modules
             Debug.Assert(condition);
         }
 
-#if DISABLE_CHECKS
+#if __ENCOSY_NO_VALIDATION__
         [System.Diagnostics.Conditional("__NEVER_DEFINED__")]
 #endif
         public static void IsTrue(bool condition, string message)
@@ -27,7 +29,7 @@ namespace EncosyTower.Modules
             Debug.Assert(condition, message);
         }
 
-#if DISABLE_CHECKS
+#if __ENCOSY_NO_VALIDATION__
         [System.Diagnostics.Conditional("__NEVER_DEFINED__")]
 #endif
         public static void IndexInRange(int index, int length)
@@ -38,7 +40,7 @@ namespace EncosyTower.Modules
             }
         }
 
-#if DISABLE_CHECKS
+#if __ENCOSY_NO_VALIDATION__
         [System.Diagnostics.Conditional("__NEVER_DEFINED__")]
 #endif
         public static void OneIndexInRange(int index, int length)
