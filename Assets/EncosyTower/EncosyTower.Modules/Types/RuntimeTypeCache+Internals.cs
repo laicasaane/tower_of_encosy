@@ -30,7 +30,11 @@ namespace EncosyTower.Modules.Types
             InitTypeIdVault();
 
 #if !__ENCOSY_RUNTIME_TYPECACHE_AUTO__
+#if UNITY_EDITOR
+            s_source = LoadTypeCacheSourceRuntime_EnforcedMode();
+#else
             s_source = LoadTypeCacheSourceRuntime();
+#endif
 #endif
         }
 
@@ -71,8 +75,19 @@ namespace EncosyTower.Modules.Types
         private static TypeCacheSourceRuntime LoadTypeCacheSourceRuntime()
         {
             var asset = SerializedTypeCacheAsset.GetInstance();
-            return new(new(asset._typeCache));
+            return new(new(asset._cache));
         }
+
+#if UNITY_EDITOR
+#pragma warning disable IDE0051 // Remove unused private members
+        private static TypeCacheSourceRuntime LoadTypeCacheSourceRuntime_EnforcedMode()
+        {
+            var cache = new SerializedTypeCache();
+            Editor.SerializedTypeCacheEditor.Regenerate(cache);
+            return new(new(cache));
+        }
+#pragma warning restore IDE0051 // Remove unused private members
+#endif
 
         internal static TypeInfo<T> Register<T>([NotNull] Type type)
         {

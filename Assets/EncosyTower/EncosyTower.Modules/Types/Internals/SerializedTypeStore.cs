@@ -36,7 +36,7 @@ namespace EncosyTower.Modules.Types.Internals
     [Serializable]
     internal sealed class SerializedTypeStore : ISerializationCallbackReceiver
     {
-        [SerializeField] private List<string> _assemblyQualifiedNames = new();
+        [SerializeField] internal List<string> _assemblyQualifiedNames = new();
 
         private readonly Dictionary<Type, int> _typeToIndex = new();
         private readonly FasterList<Type> _types = new();

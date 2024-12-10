@@ -29,7 +29,7 @@ namespace EncosyTower.Modules.Types.Internals
 {
     internal class SerializedTypeCacheAsset : ScriptableObject
     {
-        [SerializeField] internal SerializedTypeCache _typeCache = new();
+        [SerializeField] internal SerializedTypeCache _cache = new();
 
         public static SerializedTypeCacheAsset GetInstance()
         {
