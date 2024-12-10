@@ -145,7 +145,7 @@ namespace EncosyTower.Modules.Collections
         /// This returns readonly because the enumerator cannot be, but at the same time, it cannot be modified
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public NativeArrayMapKeyValueEnumerator<TKey, TValue> GetEnumerator()
+        public readonly NativeArrayMapKeyValueEnumerator<TKey, TValue> GetEnumerator()
             => new(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -716,7 +716,7 @@ namespace EncosyTower.Modules.Collections
                 return false;
             }
 
-            public TKey Current
+            public readonly TKey Current
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _map._valuesInfo[_index].key;

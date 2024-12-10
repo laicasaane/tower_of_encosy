@@ -36,8 +36,9 @@ namespace EncosyTower.Modules.Collections
 
         public int Count { get; private set; }
 
-        private uint* Ptr
+        private readonly uint* Ptr
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 fixed (TCapacity* key = &_data)
@@ -47,13 +48,22 @@ namespace EncosyTower.Modules.Collections
             }
         }
 
-        private int* NumItems => (int*)(Ptr + Capacity);
+        private readonly int* NumItems
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => (int*)(Ptr + Capacity);
+        }
 
-        private TKey* Keys => (TKey*)(Ptr + (Capacity * 2));
+        private readonly TKey* Keys
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => (TKey*)(Ptr + (Capacity * 2));
+        }
 
         public bool TryAdd(TKey key, TValue item)
         {
             var index = TryAdd(key);
+
             if (index != -1)
             {
                 GetElementAt(index) = item;
@@ -64,7 +74,7 @@ namespace EncosyTower.Modules.Collections
         }
 
         [Pure]
-        public bool TryGetValue(TKey key, out TValue item)
+        public readonly bool TryGetValue(TKey key, out TValue item)
         {
             var index = Find(key);
 
@@ -118,7 +128,7 @@ namespace EncosyTower.Modules.Collections
             return -1;
         }
 
-        private int Find(in TKey key)
+        private readonly int Find(in TKey key)
         {
             var hash = Hash(key);
             var firstIndex = GetFirstIndex(hash);
@@ -150,32 +160,32 @@ namespace EncosyTower.Modules.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private uint Hash(in TKey key)
+        private readonly uint Hash(in TKey key)
         {
             var hash = (uint)key.GetHashCode();
             return hash == uint.MaxValue ? 0 : hash;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int GetFirstIndex(uint hash)
+        private readonly int GetFirstIndex(uint hash)
         {
             return (int)(hash % (uint)Capacity);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ref TKey GetKeyAt(int index)
+        private readonly ref TKey GetKeyAt(int index)
         {
             return ref Keys[index];
         }
 
         [GenerateTestsForBurstCompatibility(GenericTypeArguments = new[] { typeof(int) })]
-        private ref TValue GetElementAt(int index)
+        private readonly ref TValue GetElementAt(int index)
         {
             return ref *(TValue*)GetElementAt(Ptr, Capacity, index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void* GetElementAt(void* src, int capacity, int index)
+        private readonly void* GetElementAt(void* src, int capacity, int index)
         {
             var ptr = (byte*)src;
             ptr += capacity * (sizeof(uint) + sizeof(int) + sizeof(TKey));

@@ -131,19 +131,19 @@ namespace EncosyTower.Modules
                 => _value == other._value;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override readonly bool Equals(object obj)
+            public readonly override bool Equals(object obj)
                 => obj is Serializable<T> other && _value == other._value;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override readonly int GetHashCode()
+            public readonly override int GetHashCode()
                 => _value.GetHashCode();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override string ToString()
+            public readonly override string ToString()
                 => _value.ToString();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int CompareTo(Serializable<T> other)
+            public readonly int CompareTo(Serializable<T> other)
                 => _value.CompareTo(other._value);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -215,7 +215,7 @@ namespace EncosyTower.Modules
     public readonly partial struct Id<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FixedString32Bytes ToFixedString()
+        public readonly FixedString32Bytes ToFixedString()
         {
             var fs = new FixedString32Bytes();
             fs.Append(_value);
@@ -228,7 +228,7 @@ namespace EncosyTower.Modules
         public partial struct Serializable<T>
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public FixedString32Bytes ToFixedString()
+            public readonly FixedString32Bytes ToFixedString()
             {
                 var fs = new FixedString32Bytes();
                 fs.Append(_value);

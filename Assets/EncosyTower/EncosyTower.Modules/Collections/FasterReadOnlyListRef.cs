@@ -113,7 +113,7 @@ namespace EncosyTower.Modules.Collections
                 _index = -1;
             }
 
-            public T Current
+            public readonly T Current
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _list[_index];
@@ -124,10 +124,10 @@ namespace EncosyTower.Modules.Collections
                 => ++_index < _count;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Reset() { }
+            public readonly void Reset() { }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Dispose() { }
+            public readonly void Dispose() { }
         }
     }
 }

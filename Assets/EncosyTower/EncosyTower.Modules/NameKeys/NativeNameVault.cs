@@ -23,13 +23,13 @@ namespace EncosyTower.Modules.NameKeys
             _hashes = new(initialCapacity, allocator);
         }
 
-        public int Capacity
+        public readonly int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _names.Capacity;
         }
 
-        public int Count
+        public readonly int Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _map.Count;
@@ -66,7 +66,7 @@ namespace EncosyTower.Modules.NameKeys
             return true;
         }
 
-        private void EnsureCapacity()
+        private readonly void EnsureCapacity()
         {
             var hashes = _hashes;
             var oldCapacity = hashes.Capacity;

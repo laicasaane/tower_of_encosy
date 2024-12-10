@@ -24,7 +24,11 @@ namespace EncosyTower.Modules.Collections
             _data = data;
         }
 
-        public readonly int Length => sizeof(TSize) / sizeof(T);
+        public readonly int Length
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => sizeof(TSize) / sizeof(T);
+        }
 
         private readonly T* Buffer
         {
@@ -38,10 +42,10 @@ namespace EncosyTower.Modules.Collections
             }
         }
 
-        public T this[int index]
+        public readonly T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            readonly get
+            get
             {
                 Checks.IndexInRange(index, Length);
                 return UnsafeUtility.ReadArrayElement<T>(Buffer, Checks.BurstAssumePositive(index));
@@ -56,7 +60,7 @@ namespace EncosyTower.Modules.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T ElementAt(int index)
+        public readonly ref T ElementAt(int index)
         {
             Checks.IndexInRange(index, Length);
             return ref UnsafeUtility.ArrayElementAsRef<T>(Buffer, Checks.BurstAssumePositive(index));

@@ -19,6 +19,7 @@ namespace EncosyTower.Modules.NameKeys
         private FixedArray<FixedString32Bytes, NameArrayData> _names;
         private FixedArray<Option<NameHash>, HashArrayData> _hashes;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public FixedNameVault()
         {
             _map = new(default);
@@ -26,13 +27,13 @@ namespace EncosyTower.Modules.NameKeys
             _hashes = new(default);
         }
 
-        public int Capacity
+        public readonly int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _map.Capacity;
         }
 
-        public int Count
+        public readonly int Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _map.Count;
@@ -66,14 +67,14 @@ namespace EncosyTower.Modules.NameKeys
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetId(in FixedString32Bytes name, out Id id)
+        public readonly bool TryGetId(in FixedString32Bytes name, out Id id)
         {
             var hash = name.GetHashCode();
             return _map.TryGetValue(hash, out id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetName(Id id, out FixedString32Bytes name)
+        public readonly bool TryGetName(Id id, out FixedString32Bytes name)
         {
             var index = (int)(uint)id;
             var hash = _hashes[index];
@@ -82,7 +83,7 @@ namespace EncosyTower.Modules.NameKeys
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ContainsId(Id id)
+        public readonly bool ContainsId(Id id)
         {
             var index = (int)(uint)id;
             var hash = _hashes[index];

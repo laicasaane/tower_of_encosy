@@ -770,7 +770,7 @@ namespace EncosyTower.Modules.Collections
                 return false;
             }
 
-            public TKey Current
+            public readonly TKey Current
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _map._valuesInfo[_index].key;
@@ -844,13 +844,13 @@ namespace EncosyTower.Modules.Collections
             return true;
         }
 
-        public KeyValuePairFast<TKey, TValue> Current
+        public readonly KeyValuePairFast<TKey, TValue> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(_map._valuesInfo[_index].key, _map._values, _index);
         }
 
-        object IEnumerator.Current
+        readonly object IEnumerator.Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => Current;
@@ -880,7 +880,7 @@ namespace EncosyTower.Modules.Collections
 #endif
         }
 
-        public void Dispose() { }
+        public readonly void Dispose() { }
     }
 
     [DebuggerDisplay("[{Key}] = {Value}")]

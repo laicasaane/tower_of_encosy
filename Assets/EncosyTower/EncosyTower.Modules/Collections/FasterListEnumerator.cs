@@ -44,7 +44,7 @@ namespace EncosyTower.Modules.Collections
             _buffer = buffer;
         }
 
-        public ref T Current
+        public readonly ref T Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
@@ -80,7 +80,7 @@ namespace EncosyTower.Modules.Collections.Internals
             _buffer = buffer;
         }
 
-        public T Current
+        public readonly T Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
@@ -98,10 +98,10 @@ namespace EncosyTower.Modules.Collections.Internals
         public void Reset()
             => _counter = 0;
 
-        object IEnumerator.Current
+        readonly object IEnumerator.Current
             => Current;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Dispose() { }
+        public readonly void Dispose() { }
     }
 }

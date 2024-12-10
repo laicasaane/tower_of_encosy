@@ -94,26 +94,26 @@ namespace EncosyTower.Modules.Localization
                 _code = code;
             }
 
-            public bool IsValid
+            public readonly bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => string.IsNullOrEmpty(_code) == false;
             }
 
-            public ushort Value
+            public readonly ushort Value
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _value;
             }
 
-            public string Code
+            public readonly string Code
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _code;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool TryConvert(out L10nLanguage<TEnum> result)
+            public readonly bool TryConvert(out L10nLanguage<TEnum> result)
             {
                 result = new(_value, _code);
                 return false;
@@ -124,11 +124,11 @@ namespace EncosyTower.Modules.Localization
                 => _value == other._value;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override readonly bool Equals(object obj)
+            public readonly override bool Equals(object obj)
                 => obj is Serializable<TEnum> other && _value == other._value;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override readonly int GetHashCode()
+            public readonly override int GetHashCode()
                 => _value.GetHashCode();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

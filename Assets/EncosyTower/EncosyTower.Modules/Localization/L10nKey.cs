@@ -70,19 +70,19 @@ namespace EncosyTower.Modules.Localization
                 _entry = entry;
             }
 
-            public bool IsValid
+            public readonly bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => string.IsNullOrEmpty(_table) == false && string.IsNullOrEmpty(_entry) == false;
             }
 
-            public TableReference Table
+            public readonly TableReference Table
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _table;
             }
 
-            public TableEntryReference Entry
+            public readonly TableEntryReference Entry
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _entry;
@@ -96,20 +96,20 @@ namespace EncosyTower.Modules.Localization
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Equals(Serializable other)
+            public readonly bool Equals(Serializable other)
                 => _table.Equals(other._table, StringComparison.Ordinal)
                 && _entry.Equals(other._entry, StringComparison.Ordinal);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override bool Equals(object obj)
+            public readonly override bool Equals(object obj)
                 => obj is Serializable other && Equals(other);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override int GetHashCode()
+            public readonly override int GetHashCode()
                 => HashCode.Combine(_table, _entry);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override string ToString()
+            public readonly override string ToString()
                 => $"{_table},{_entry}";
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -172,7 +172,7 @@ namespace EncosyTower.Modules
                 _y = y;
             }
 
-            public bool TryConvert(out Id2 result)
+            public readonly bool TryConvert(out Id2 result)
             {
                 if (_x.TryConvert(out var x) && _y.TryConvert(out var y))
                 {
@@ -189,21 +189,21 @@ namespace EncosyTower.Modules
                 => _x == other._x && _y == other._y;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override readonly bool Equals(object obj)
+            public readonly override bool Equals(object obj)
                 => obj is Serializable other && _x == other._x && _y == other._y;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override readonly int GetHashCode()
+            public readonly override int GetHashCode()
                 => ((Id2)this).GetHashCode();
 
 #if !UNITY_COLLECTIONS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override string ToString()
+            public readonly override string ToString()
                 => $"({_x}, {_y})";
 #endif
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int CompareTo(Serializable other)
+            public readonly int CompareTo(Serializable other)
                 => ((Id2)this).CompareTo(other);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -251,10 +251,10 @@ namespace EncosyTower.Modules
     public readonly partial struct Id2
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString()
+        public readonly override string ToString()
             => ToFixedString().ToString();
 
-        public FixedString32Bytes ToFixedString()
+        public readonly FixedString32Bytes ToFixedString()
         {
             var fs = new FixedString32Bytes();
             fs.Append('(');
@@ -269,11 +269,11 @@ namespace EncosyTower.Modules
         public partial struct Serializable
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override string ToString()
+            public readonly override string ToString()
                 => ToFixedString().ToString();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public FixedString32Bytes ToFixedString()
+            public readonly FixedString32Bytes ToFixedString()
             {
                 var fs = new FixedString32Bytes();
                 fs.Append('(');

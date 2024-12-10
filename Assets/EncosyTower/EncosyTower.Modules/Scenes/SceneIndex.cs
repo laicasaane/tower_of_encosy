@@ -63,19 +63,19 @@ namespace EncosyTower.Modules.Scenes
                 _name = name;
             }
 
-            public bool IsValid
+            public readonly bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => string.IsNullOrEmpty(_name) == false;
             }
 
-            public int Index
+            public readonly int Index
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _index;
             }
 
-            public string Name
+            public readonly string Name
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _name;
@@ -93,15 +93,15 @@ namespace EncosyTower.Modules.Scenes
                 => _index == other._index;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override readonly bool Equals(object obj)
+            public readonly override bool Equals(object obj)
                 => obj is Serializable other && _index == other._index;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override readonly int GetHashCode()
+            public readonly override int GetHashCode()
                 => _index.GetHashCode();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override string ToString()
+            public readonly override string ToString()
                 => _name ?? string.Empty;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

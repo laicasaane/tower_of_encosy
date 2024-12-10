@@ -58,13 +58,13 @@ namespace EncosyTower.Modules.Buffers
             Alloc(size, allocator, clear);
         }
 
-        public int Capacity
+        public readonly int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _realBuffer.Capacity;
         }
 
-        public bool IsValid
+        public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _realBuffer.IsValid;
@@ -119,10 +119,10 @@ namespace EncosyTower.Modules.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void FastClear() { }
+        public readonly void FastClear() { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Clear()
+        public readonly void Clear()
             => _realBuffer.Clear();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -130,11 +130,11 @@ namespace EncosyTower.Modules.Buffers
             => _realBuffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span<T> AsSpan()
+        public readonly Span<T> AsSpan()
             => _realBuffer.AsSpan();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpan<T> AsReadOnlySpan()
+        public readonly ReadOnlySpan<T> AsReadOnlySpan()
             => _realBuffer.AsSpan();
 
         public void Dispose()
