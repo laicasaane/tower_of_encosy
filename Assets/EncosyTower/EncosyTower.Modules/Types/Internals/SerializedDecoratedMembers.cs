@@ -34,6 +34,7 @@ namespace EncosyTower.Modules.Types.Internals
     [Serializable]
     internal class SerializedDecoratedMembers<T> where T : struct, ISerializedMember
     {
+        [SerializeField] internal string _assemblyName = string.Empty;
         [SerializeField] internal SerializedType _attributeType;
         [SerializeField] internal List<T> _matches;
     }

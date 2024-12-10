@@ -33,10 +33,10 @@ namespace EncosyTower.Modules.Types.Internals
 {
     internal sealed class DeserializedTypeCache
     {
-        internal readonly Dictionary<Type, FasterList<Type>> _typesDerivedFromTypeMap;
-        internal readonly Dictionary<Type, FasterList<Type>> _typesWithAttributeMap;
-        internal readonly Dictionary<Type, FasterList<FieldInfo>> _fieldsWithAttributeMap;
-        internal readonly Dictionary<Type, FasterList<MethodInfo>> _methodsWithAttributeMap;
+        internal readonly AssemblyNameToMemberMapMap<Type> _typesDerivedFromTypeMap;
+        internal readonly AssemblyNameToMemberMapMap<Type> _typesWithAttributeMap;
+        internal readonly AssemblyNameToMemberMapMap<FieldInfo> _fieldsWithAttributeMap;
+        internal readonly AssemblyNameToMemberMapMap<MethodInfo> _methodsWithAttributeMap;
 
         public DeserializedTypeCache([NotNull] SerializedTypeCache cache)
         {
@@ -46,12 +46,12 @@ namespace EncosyTower.Modules.Types.Internals
             _methodsWithAttributeMap = MapFromSerialized<SerializedMethod, MethodInfo>(cache, cache._methodsWithAttributeList);
         }
 
-        private static Dictionary<Type, FasterList<Type>> MapFromSerialized(
+        private static AssemblyNameToMemberMapMap<Type> MapFromSerialized(
               SerializedTypeCache cache
             , List<SerializedDerivedTypes> serializedItems
         )
         {
-            var lookup = new Dictionary<Type, FasterList<Type>>();
+            var map = new AssemblyNameToMemberMapMap<Type>();
             var items = serializedItems.AsSpanUnsafe();
             var itemsLength = items.Length;
             var typeStore = cache._typeStore;
@@ -66,26 +66,36 @@ namespace EncosyTower.Modules.Types.Internals
                     continue;
                 }
 
-                if (lookup.TryGetValue(parentType, out var types) == false)
+                var assemblyName = string.IsNullOrWhiteSpace(item._assemblyName)
+                    ? string.Empty
+                    : item._assemblyName;
+
+                if (map.TryGetValue(assemblyName, out var memberMap) == false)
+                {
+                    memberMap = new TypeToMemberMap<Type>();
+                    map[assemblyName] = memberMap;
+                }
+
+                if (memberMap.TryGetValue(parentType, out var types) == false)
                 {
                     types = new FasterList<Type>();
-                    lookup[parentType] = types;
+                    memberMap[parentType] = types;
                 }
 
                 Deserialize(typeStore, types, item._derivedTypes.AsSpanUnsafe());
             }
 
-            return lookup;
+            return map;
         }
 
-        private static Dictionary<Type, FasterList<T2>> MapFromSerialized<T1, T2>(
+        private static AssemblyNameToMemberMapMap<T2> MapFromSerialized<T1, T2>(
               SerializedTypeCache cache
             , List<SerializedDecoratedMembers<T1>> serializedItems
         )
             where T1 : struct, ISerializedMember<T2>
             where T2 : MemberInfo
         {
-            var lookup = new Dictionary<Type, FasterList<T2>>();
+            var map = new AssemblyNameToMemberMapMap<T2>();
             var items = serializedItems.AsSpanUnsafe();
             var itemsLength = items.Length;
             var typeStore = cache._typeStore;
@@ -100,16 +110,26 @@ namespace EncosyTower.Modules.Types.Internals
                     continue;
                 }
 
-                if (lookup.TryGetValue(attributeType, out var members) == false)
+                var assemblyName = string.IsNullOrWhiteSpace(item._assemblyName)
+                    ? string.Empty
+                    : item._assemblyName;
+
+                if (map.TryGetValue(assemblyName, out var memberMap) == false)
+                {
+                    memberMap = new TypeToMemberMap<T2>();
+                    map[assemblyName] = memberMap;
+                }
+
+                if (memberMap.TryGetValue(attributeType, out var members) == false)
                 {
                     members = new FasterList<T2>();
-                    lookup[attributeType] = members;
+                    memberMap[attributeType] = members;
                 }
 
                 Deserialize(typeStore, members, item._matches.AsSpanUnsafe());
             }
 
-            return lookup;
+            return map;
         }
 
         private static void Deserialize<T1, T2>(
@@ -134,6 +154,16 @@ namespace EncosyTower.Modules.Types.Internals
                     output.Add(result);
                 }
             }
+        }
+
+        internal sealed class TypeToMemberMap<T> : Dictionary<Type, FasterList<T>>
+            where T : MemberInfo
+        {
+        }
+
+        internal sealed class AssemblyNameToMemberMapMap<T> : Dictionary<string, TypeToMemberMap<T>>
+            where T : MemberInfo
+        {
         }
     }
 }

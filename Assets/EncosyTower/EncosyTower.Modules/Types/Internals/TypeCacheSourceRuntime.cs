@@ -22,10 +22,18 @@
 //
 // https://github.com/thebeardphantom/Runtime-TypeCache
 
+#if !(UNITY_EDITOR || DEBUG) || DISABLE_ENCOSY_CHECKS
+#define __ENCOSY_NO_VALIDATION__
+#else
+#define __ENCOSY_VALIDATION__
+#endif
+
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using UnityEngine;
 
 namespace EncosyTower.Modules.Types.Internals
 {
@@ -37,6 +45,11 @@ namespace EncosyTower.Modules.Types.Internals
         public TypeCacheSourceRuntime([NotNull] DeserializedTypeCache cache)
         {
             _cache = cache;
+        }
+
+        public bool IsValid
+        {
+            get => _cache != null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -51,13 +64,27 @@ namespace EncosyTower.Modules.Types.Internals
             return GetTypesDerivedFrom(typeof(T), assemblyName);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<Type> GetTypesDerivedFrom(Type type)
         {
-            return Array.Empty<Type>();
+            return GetTypesDerivedFrom(type, string.Empty);
         }
 
         public ReadOnlyMemory<Type> GetTypesDerivedFrom(Type type, string assemblyName)
         {
+            ThrowIfNull(_cache);
+
+            EnsureValidAssemblyName(ref assemblyName);
+
+            var assemblyToMemberMap = _cache._typesDerivedFromTypeMap;
+
+            if (assemblyToMemberMap.TryGetValue(assemblyName, out var memberMap)
+                && memberMap.TryGetValue(type, out var members)
+            )
+            {
+                return members.AsReadOnlyMemory();
+            }
+
             return Array.Empty<Type>();
         }
 
@@ -73,13 +100,27 @@ namespace EncosyTower.Modules.Types.Internals
             return GetTypesWithAttribute(typeof(T), assemblyName);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<Type> GetTypesWithAttribute(Type attrType)
         {
-            return Array.Empty<Type>();
+            return GetTypesWithAttribute(attrType, string.Empty);
         }
 
         public ReadOnlyMemory<Type> GetTypesWithAttribute(Type attrType, string assemblyName)
         {
+            ThrowIfNull(_cache);
+
+            EnsureValidAssemblyName(ref assemblyName);
+
+            var assemblyToMemberMap = _cache._typesWithAttributeMap;
+
+            if (assemblyToMemberMap.TryGetValue(assemblyName, out var memberMap)
+                && memberMap.TryGetValue(attrType, out var members)
+            )
+            {
+                return members.AsReadOnlyMemory();
+            }
+
             return Array.Empty<Type>();
         }
 
@@ -95,13 +136,27 @@ namespace EncosyTower.Modules.Types.Internals
             return GetFieldsWithAttribute(typeof(T), assemblyName);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<FieldInfo> GetFieldsWithAttribute(Type attrType)
         {
-            return Array.Empty<FieldInfo>();
+            return GetFieldsWithAttribute(attrType, string.Empty);
         }
 
         public ReadOnlyMemory<FieldInfo> GetFieldsWithAttribute(Type attrType, string assemblyName)
         {
+            ThrowIfNull(_cache);
+
+            EnsureValidAssemblyName(ref assemblyName);
+
+            var assemblyToMemberMap = _cache._fieldsWithAttributeMap;
+
+            if (assemblyToMemberMap.TryGetValue(assemblyName, out var memberMap)
+                && memberMap.TryGetValue(attrType, out var members)
+            )
+            {
+                return members.AsReadOnlyMemory();
+            }
+
             return Array.Empty<FieldInfo>();
         }
 
@@ -117,14 +172,43 @@ namespace EncosyTower.Modules.Types.Internals
             return GetMethodsWithAttribute(typeof(T), assemblyName);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<MethodInfo> GetMethodsWithAttribute(Type attrType)
         {
-            return Array.Empty<MethodInfo>();
+            return GetMethodsWithAttribute(attrType, string.Empty);
         }
 
         public ReadOnlyMemory<MethodInfo> GetMethodsWithAttribute(Type attrType, string assemblyName)
         {
+            ThrowIfNull(_cache);
+
+            EnsureValidAssemblyName(ref assemblyName);
+
+            var assemblyToMemberMap = _cache._methodsWithAttributeMap;
+
+            if (assemblyToMemberMap.TryGetValue(assemblyName, out var memberMap)
+                && memberMap.TryGetValue(attrType, out var members)
+            )
+            {
+                return members.AsReadOnlyMemory();
+            }
+
             return Array.Empty<MethodInfo>();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void EnsureValidAssemblyName(ref string assemblyName)
+        {
+            assemblyName = string.IsNullOrWhiteSpace(assemblyName) ? string.Empty : assemblyName;
+        }
+
+        [HideInCallstack, Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowIfNull(DeserializedTypeCache cache)
+        {
+            if (cache == null)
+            {
+                throw new InvalidOperationException("RuntimeTypeCache is not initialized correctly.");
+            }
         }
     }
 }
