@@ -38,10 +38,10 @@ namespace EncosyTower.Modules.Types
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Id2 ToId2<T>(this TypeId<T> self)
-            => new((Id)(Id<T>)self, default);
+            => new((Id<T>)self, default);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Id2 ToId2<T>(this TypeId<T> self, Id id)
-            => new((Id)(Id<T>)self, id);
+            => new((Id<T>)self, id);
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Unity.Collections.LowLevel.Unsafe;
@@ -9,8 +8,10 @@ namespace EncosyTower.Modules.Types
 {
     internal static class TypeIdVault
     {
-        [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Clearly denotes an undefined type")]
+        #pragma warning disable IDE1006
+        // ReSharper disable once InconsistentNaming
         private readonly struct __UndefinedType__ { }
+        #pragma warning restore IDE1006
 
         private static readonly object s_lock = new();
         private static readonly ConcurrentDictionary<TypeId, Type> s_idToTypeVault = new();

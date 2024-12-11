@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using EncosyTower.Modules.Types.Internals;
@@ -65,7 +66,7 @@ namespace EncosyTower.Modules.Types.Editor
             return (flag & value) != 0;
         }
 
-        private static bool IsInEditorAssembly(Type type, HashSet<string> playerAssemblies)
+        private static bool IsInEditorAssembly([NotNull] Type type, HashSet<string> playerAssemblies)
         {
             playerAssemblies ??= CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies)
                 .Select(a => a.name)
@@ -86,7 +87,7 @@ namespace EncosyTower.Modules.Types.Editor
                 .ToHashSet();
 
             return playerAssemblies.Contains(type.Assembly.GetName().Name) == false
-                || type.FullName.StartsWith("UnityEditorInternal");
+                || (type.FullName ?? string.Empty).StartsWith("UnityEditorInternal");
         }
 
         //private void CacheAllAttributeUsages(IEnumerable<Type> targetTypes, ITypeCacheSource typeCacheSource)

@@ -28,7 +28,7 @@ namespace EncosyTower.Modules.Types.Internals
 {
     internal interface ISerializedMember { }
 
-    internal interface ISerializedMember<T> : ISerializedMember
+    internal interface ISerializedMember<out T> : ISerializedMember
         where T : MemberInfo
     {
         T Deserialize(SerializedTypeStore typeStore);

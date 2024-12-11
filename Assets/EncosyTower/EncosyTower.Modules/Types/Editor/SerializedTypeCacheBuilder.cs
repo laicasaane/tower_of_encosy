@@ -34,6 +34,7 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditorInternal;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace EncosyTower.Modules.Types.Editor
 {
@@ -96,7 +97,7 @@ namespace EncosyTower.Modules.Types.Editor
                 asset.name = ASSET_FILE_NAME_DEBUG;
 
                 InternalEditorUtility.SaveToSerializedFileAndForget(
-                      new[] { asset }
+                      new Object[] { asset }
                     , ASSET_FILE_NAME_DEBUG
                     , true
                 );
@@ -118,10 +119,10 @@ namespace EncosyTower.Modules.Types.Editor
 
                 PlayerSettings.SetPreloadedAssets(preloadedAssets.ToArray());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 DeleteAndRemoveAsset();
-                throw ex;
+                throw;
             }
         }
 

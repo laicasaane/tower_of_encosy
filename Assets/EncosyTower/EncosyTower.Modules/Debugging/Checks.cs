@@ -7,12 +7,16 @@
 namespace EncosyTower.Modules
 {
     using System;
+    using System.Diagnostics;
+    using JetBrains.Annotations;
 
     using Debug = UnityEngine.Debug;
 
-    [System.Diagnostics.DebuggerStepThrough]
+    [DebuggerStepThrough]
     public static partial class Checks
     {
+        [AssertionMethod]
+        [ContractAnnotation("condition:false=>halt")]
 #if __ENCOSY_NO_VALIDATION__
         [System.Diagnostics.Conditional("__NEVER_DEFINED__")]
 #endif
@@ -21,6 +25,8 @@ namespace EncosyTower.Modules
             Debug.Assert(condition);
         }
 
+        [AssertionMethod]
+        [ContractAnnotation("condition:false=>halt")]
 #if __ENCOSY_NO_VALIDATION__
         [System.Diagnostics.Conditional("__NEVER_DEFINED__")]
 #endif
@@ -29,6 +35,7 @@ namespace EncosyTower.Modules
             Debug.Assert(condition, message);
         }
 
+        [AssertionMethod]
 #if __ENCOSY_NO_VALIDATION__
         [System.Diagnostics.Conditional("__NEVER_DEFINED__")]
 #endif
@@ -40,6 +47,7 @@ namespace EncosyTower.Modules
             }
         }
 
+        [AssertionMethod]
 #if __ENCOSY_NO_VALIDATION__
         [System.Diagnostics.Conditional("__NEVER_DEFINED__")]
 #endif
@@ -62,20 +70,6 @@ namespace EncosyTower.Modules
 
     public static partial class Checks
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void BurstAssume(bool assumption)
-        {
-            IsTrue(assumption);
-            Hint.Assume(assumption);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void BurstAssume(bool assumption, string message)
-        {
-            IsTrue(assumption, message);
-            Hint.Assume(assumption);
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: AssumeRange(0L, 2147483647L)]
         public static int BurstAssumePositive(int value)
