@@ -26,7 +26,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using UnityEngine.Assertions;
 
 namespace EncosyTower.Modules.Collections
 {
@@ -49,7 +48,7 @@ namespace EncosyTower.Modules.Collections
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                Assert.IsTrue(_counter <= _size);
+                Checks.IsTrue(_counter <= _size);
                 return ref _buffer[_counter - 1];
             }
         }
@@ -85,7 +84,7 @@ namespace EncosyTower.Modules.Collections.Internals
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                Assert.IsTrue(_counter <= _size);
+                Checks.IsTrue(_counter <= _size);
                 return _buffer[_counter - 1];
             }
         }

@@ -6,7 +6,6 @@ using EncosyTower.Modules.Collections;
 using EncosyTower.Modules.Collections.Unsafe;
 using Unity.Collections;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
 
 namespace EncosyTower.Modules.Pooling
@@ -210,8 +209,8 @@ namespace EncosyTower.Modules.Pooling
         {
             var length = instanceIds.Length;
 
-            Assert.IsTrue(length == transformIds.Length, "arrays do not have the same size");
-            Assert.IsTrue(length > 0, "arrays do not have enough space to contain the items");
+            Checks.IsTrue(length == transformIds.Length, "arrays do not have the same size");
+            Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
 
             Prepool(length - UnusedCount);
 
@@ -233,7 +232,7 @@ namespace EncosyTower.Modules.Pooling
         {
             var length = instanceIds.Length;
 
-            Assert.IsTrue(length > 0, "\"instanceIds\" array does not have enough space to contain the items");
+            Checks.IsTrue(length > 0, "\"instanceIds\" array does not have enough space to contain the items");
 
             Prepool(length - UnusedCount);
 
@@ -253,7 +252,7 @@ namespace EncosyTower.Modules.Pooling
         {
             var length = transformIds.Length;
 
-            Assert.IsTrue(length > 0, "\"transformIds\" array does not have enough space to contain the items");
+            Checks.IsTrue(length > 0, "\"transformIds\" array does not have enough space to contain the items");
 
             Prepool(length - UnusedCount);
 
@@ -274,7 +273,7 @@ namespace EncosyTower.Modules.Pooling
 
         public void RentTransforms(int amount, [NotNull] FasterList<Transform> transforms, bool activate = false)
         {
-            Assert.IsTrue(amount > 0, "\"amount\" must be greater than 0");
+            Checks.IsTrue(amount > 0, "\"amount\" must be greater than 0");
 
             Prepool(amount - UnusedCount);
 
@@ -314,7 +313,7 @@ namespace EncosyTower.Modules.Pooling
         {
             var length = instanceIds.Length;
 
-            Assert.IsTrue(length == transformIds.Length, "arrays do not have the same size");
+            Checks.IsTrue(length == transformIds.Length, "arrays do not have the same size");
 
             if (length < 1)
             {

@@ -7,7 +7,6 @@ using EncosyTower.Modules.Collections;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Jobs;
 using UnityEngine.SceneManagement;
 
@@ -264,10 +263,10 @@ namespace EncosyTower.Modules.Pooling
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void AssertInitialization(SceneObjectIdPooler<TKey, TId> pooler)
         {
-            Assert.IsTrue(pooler._transformArray.isCreated, "Pooler must be initialized first!");
-            Assert.IsTrue(pooler._goInfoMap.IsCreated, "Pooler must be initialized first!");
-            Assert.IsTrue(pooler._positions.IsCreated, "Pooler must be initialized first!");
-            Assert.IsTrue(pooler._poolMap.Count > 0, "Pooler must be initialized first!");
+            Checks.IsTrue(pooler._transformArray.isCreated, "Pooler must be initialized first!");
+            Checks.IsTrue(pooler._goInfoMap.IsCreated, "Pooler must be initialized first!");
+            Checks.IsTrue(pooler._positions.IsCreated, "Pooler must be initialized first!");
+            Checks.IsTrue(pooler._poolMap.Count > 0, "Pooler must be initialized first!");
         }
     }
 }
