@@ -10,7 +10,7 @@ While I have some knowledge with the former, I nearly have zero experience with 
 since I've been working mostly on 2D projects. Utility AI and 3D physics are also the topics
 I want to explore within this project.
 
-## Techincal Notes
+## Technical Notes
 
 - **Unity Version**: 2022.3+
 - **Rendering Pipeline**: URP
