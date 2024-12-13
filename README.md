@@ -5,7 +5,10 @@
 
 ## Foreword
 
-This is a playground for me to work on a 3D prototype. I aim to learn more about using ECS and 3D game. While I have some knowledge with the former, I nearly have zero experience with the latter, since I've been working mostly on 2D projects. Utility AI and 3D physics are also the topics I want to explore within this project.
+This is a playground for me to work on a 3D prototype. I aim to learn more about using ECS and 3D game.
+While I have some knowledge with the former, I nearly have zero experience with the latter,
+since I've been working mostly on 2D projects. Utility AI and 3D physics are also the topics
+I want to explore within this project.
 
 ## Techincal Notes
 
@@ -14,11 +17,15 @@ This is a playground for me to work on a 3D prototype. I aim to learn more about
 - **Enter Play Mode Options > Reload Domain**: Off
 - `csc.rsp`: Enable C# 10 for the Unity Engine
 - `Directory.Build.props`: Enable C# 10 for the IDE
-- `EncosyTower.Modules/CompilerServices/IsExternalInit.cs`: Enable [`init`](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/init) of C# 9
+- `IsExternalInit.cs`: Enable [`init`][1] of C# 9
+
+[1]: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/init
 
 ## Gameplay
 
-I choose to work on a classic RPG mechanics where the player controls a character to subjugate monsters in a dungeon. More features will come later after the very first goals are completed.
+I choose to work on a classic RPG mechanics where the player controls a character to subjugate monsters in a dungeon.
+
+More features will come later after the very first goals are completed.
 
 ## First Goals
 
