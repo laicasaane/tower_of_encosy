@@ -1,8 +1,6 @@
 {
   "dependencies": {
     "cat.natsuneko.power-rename": "0.1.0",
-    "com.annulusgames.lit-motion": "1.9.0",
-    "com.annulusgames.tween-playables": "0.9.1",
     "com.annulusgames.unity-codegen": "1.0.0",
     "com.browar.editor-toolbox": "0.13.2",
     "com.cathei.bakingsheet": "4.1.3",
@@ -72,8 +70,6 @@
       "url": "https://package.openupm.com",
       "scopes": [
         "cat.natsuneko.power-rename",
-        "com.annulusgames.lit-motion",
-        "com.annulusgames.tween-playables",
         "com.annulusgames.unity-codegen",
         "com.browar.editor-toolbox",
         "com.cathei.bakingsheet",

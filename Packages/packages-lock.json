@@ -13,27 +13,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "com.annulusgames.lit-motion": {
-      "version": "1.9.0",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.burst": "1.6.0",
-        "com.unity.collections": "1.5.1",
-        "com.unity.mathematics": "1.0.1"
-      },
-      "url": "https://package.openupm.com"
-    },
-    "com.annulusgames.tween-playables": {
-      "version": "0.9.1",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.textmeshpro": "2.0.1",
-        "com.unity.timeline": "1.2.14"
-      },
-      "url": "https://package.openupm.com"
-    },
     "com.annulusgames.unity-codegen": {
       "version": "1.0.0",
       "depth": 0,
@@ -560,14 +539,6 @@
         "com.unity.modules.jsonserialize": "1.0.0"
       },
       "url": "https://packages.unity.com"
-    },
-    "com.unity.textmeshpro": {
-      "version": "2.0.1",
-      "depth": 1,
-      "source": "builtin",
-      "dependencies": {
-        "com.unity.ugui": "2.0.0"
-      }
     },
     "com.unity.timeline": {
       "version": "1.8.7",

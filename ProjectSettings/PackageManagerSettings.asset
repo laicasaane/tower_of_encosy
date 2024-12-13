@@ -32,8 +32,6 @@ MonoBehaviour:
     m_Url: https://package.openupm.com
     m_Scopes:
     - cat.natsuneko.power-rename
-    - com.annulusgames.lit-motion
-    - com.annulusgames.tween-playables
     - com.annulusgames.unity-codegen
     - com.browar.editor-toolbox
     - com.cathei.bakingsheet
