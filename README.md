@@ -40,22 +40,133 @@ More features will come later after the very first goals are completed.
 
 ## Credits
 
-### Latios Framework
+Thank you for your contributions to the community. Your works greatly ease my development process.
 
-- The framework https://github.com/Dreaming381/Latios-Framework
-- The massive demo https://github.com/Dreaming381/lsss-wip
-- The documentation https://github.com/Dreaming381/Latios-Framework-Documentation
-
-### Assets by KayKit
-
-- Character Pack : Adventurers https://kaylousberg.itch.io/kaykit-adventurers
-- Character Pack : Skeletons https://kaylousberg.itch.io/kaykit-skeletons
-- Halloween Bits https://kaylousberg.itch.io/halloween-bits
-- Dungeon Remastered Pack https://kaylousberg.itch.io/kaykit-dungeon-remastered
-
-### Assets by Kenney
-
-- UI Pack - Adventure https://www.kenney.nl/assets/ui-pack-adventure
+<table>
+  <tbody>
+    <tr>
+      <td>Annulus Games</td>
+      <td><a href='https://github.com/AnnulusGames/UnityCodeGen'>Unity CodeGen</a></td>
+    </tr>
+    <tr>
+      <td>baba-s</td>
+      <td><a href='https://github.com/baba-s/Kogane.CheckBoxWindow'>Kogane Check Box Window</a></td>
+    </tr>
+    <tr>
+      <td>Cathei</td>
+      <td><a href='https://github.com/cathei/BakingSheet'>BakingSheet</a></td>
+    </tr>
+    <tr>
+      <td rowspan=2>Chris Yarbrough</td>
+      <td><a href='https://github.com/chrisyarbrough/Renamer'>Renamer</a></td>
+    </tr>
+    <tr>
+      <td><a href='https://github.com/chrisyarbrough/ScriptableObjectCreator'>ScriptableObjectCreator</a></td>
+    </tr>
+    <tr>
+      <td>Community Toolkit</td>
+      <td><a href='https://github.com/CommunityToolkit/dotnet'>.NET Community Toolkit</a></td>
+    </tr>
+    <tr>
+      <td>CyberAgent Game & Entertainment</td>
+      <td><a href='https://github.com/CyberAgentGameEntertainment/SmartAddresser'>Smart Addresser</a></td>
+    </tr>
+    <tr>
+      <td>Cysharp, Inc.</td>
+      <td><a href='https://github.com/Cysharp/UniTask'>UniTask</a></td>
+    </tr>
+    <tr>
+      <td>Draconware</td>
+      <td><a href='https://github.com/draconware-dev/SpanExtensions.Net'>SpanExtensions.Net</a></td>
+    </tr>
+    <tr>
+      <td>fuqunaga</td>
+      <td><a href='https://github.com/fuqunaga/RosettaUI'>RosettaUI</a></td>
+    </tr>
+    <tr>
+      <td>Gil Reis</td>
+      <td><a href='https://github.com/gilzoide/unity-easy-project-settings'>Unity Easy Project Settings</a></td>
+    </tr>
+    <tr>
+      <td>hadashiA</td>
+      <td><a href='https://github.com/hadashiA/UniTaskPubSub'>UniTaskPubSub</a></td>
+    </tr>
+    <tr>
+      <td>Jiaqi Liu</td>
+      <td><a href='https://github.com/0x7c13/UnityEditor-DarkMode'>DarkMode Mod for Unity Editor on Windows</a></td>
+    </tr>
+    <tr>
+      <td rowspan=4>KayKit</td>
+      <td><a href='https://kaylousberg.itch.io/kaykit-adventurers'>Character Pack: Adventurers</a></td>
+    </tr>
+    <tr>
+      <td><a href='https://kaylousberg.itch.io/kaykit-skeletons'>Character Pack : Skeletons</a></td>
+    </tr>
+    <tr>
+      <td><a href='https://kaylousberg.itch.io/kaykit-dungeon-remastered'>Dungeon Remastered Pack</a></td>
+    </tr>
+    <tr>
+      <td><a href='https://kaylousberg.itch.io/halloween-bits'>Halloween Bits</a></td>
+    </tr>
+    <tr>
+      <td>Kenney</td>
+      <td><a href='https://www.kenney.nl/assets/ui-pack-adventure'>UI Pack - Adventure</a></td>
+    </tr>
+    <tr>
+      <td rowspan=3>DreamingImLatios</td>
+      <td><a href='https://github.com/Dreaming381/Latios-Framework'>Latios fFramework</a></td>
+    <tr>
+      <td><a href='https://github.com/Dreaming381/lsss-wip'>Latios Space Shooter Sample</a></td>
+    </tr>
+    <tr>
+      <td><a href='https://github.com/Dreaming381/Latios-Framework-Documentation'>Latios Framework Documentation</a></td>
+    </tr>
+    <tr>
+      <td>Mika Notarnicola</td>
+      <td><a href='https://github.com/thebeardphantom/Runtime-TypeCache'>Runtime TypeCache</a></td>
+    </tr>
+    <tr>
+      <td>Miłosz Matkowski</td>
+      <td><a href='https://github.com/arimger/Unity-Editor-Toolbox'>Unity Editor Toolbox</a></td>
+    </tr>
+    <tr>
+      <td>Natsuneko Laboratory</td>
+      <td><a href='https://github.com/natsuneko-laboratory/power-rename'>Power Rename</a></td>
+    </tr>
+    <tr>
+      <td>Needle</td>
+      <td><a href='https://github.com/needle-tools/needle-console'>Needle Console</a></td>
+    </tr>
+    <tr>
+      <td>Peter @sHTiF Stefcek</td>
+      <td><a href='https://github.com/pshtif/GenericMenuPopup'>GenericMenuPopup</a></td>
+    </tr>
+    <tr>
+      <td>Philippe St-Amand</td>
+      <td><a href='https://github.com/PhilSA/Trove'>Trove</a></td>
+    </tr>
+    <tr>
+      <td>Roy Theunissen</td>
+      <td><a href='https://github.com/RoyTheunissen/Asset-Palette'>Asset Palette</a></td>
+    </tr>
+    <tr>
+      <td>Sebastiano Mandalà</td>
+      <td><a href='https://github.com/sebas77/Svelto.Common'>Svelto.Common</a></td>
+    </tr>
+    <tr>
+      <td>Stella Cannefax</td>
+      <td><a href='https://github.com/stella3d/SharedArray'>SharedArray</a></td>
+    </tr>
+    <tr>
+      <td>WMJordan</td>
+      <td><a href='https://github.com/wmjordan/Codist'>Codist</a></td>
+    </tr>
+    <tr>
+      <td>Yao Chunhui</td>
+      <td><a href='https://github.com/redclock/SimpleEditorTableView'>SimpleEditorTableView</a></td>
+    </tr>
+  </tbody>
+</table>
 
 ## Contributors ✨
 
