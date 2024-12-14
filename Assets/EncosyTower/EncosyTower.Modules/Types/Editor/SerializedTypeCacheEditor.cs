@@ -175,7 +175,6 @@ namespace EncosyTower.Modules.Types.Editor
                 }
 
                 typeStore.Add(type);
-                assemblies.Add(baseTypeAssemblyName);
 
                 var attribute = type.GetCustomAttribute<TAttribute>();
                 var assemblyNames = attribute.AssemblyNames.AsSpan();
@@ -235,7 +234,6 @@ namespace EncosyTower.Modules.Types.Editor
                     }
 
                     typeStore.Add(baseType);
-                    assemblies.Add(baseTypeAssemblyName);
 
                     var assemblyNames = attribute.AssemblyNames.AsSpan();
 

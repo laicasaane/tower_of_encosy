@@ -50,9 +50,14 @@ namespace EncosyTower.Modules.Types.Editor
         private const string ASSET_FILE_NAME = nameof(SerializedTypeCacheAsset);
 
         /// <summary>
+        /// The directory at which the <see cref="SerializedTypeCacheAsset"/> will be created.
+        /// </summary>
+        private const string ASSET_DIRECTORY = $"Assets/{nameof(Resources)}/{nameof(RuntimeTypeCache)}";
+
+        /// <summary>
         /// The path at which the transitory <see cref="SerializedTypeCacheAsset"/> will be created.
         /// </summary>
-        private const string ASSET_FILE_PATH = $"Assets/Resources/{ASSET_FILE_NAME}.asset";
+        private const string ASSET_FILE_PATH = $"{ASSET_DIRECTORY}/{ASSET_FILE_NAME}.asset";
 
         /// <summary>
         /// The name of which the debug copies of the <see cref="SerializedTypeCacheAsset"/> will be created.
@@ -69,24 +74,8 @@ namespace EncosyTower.Modules.Types.Editor
         /// </summary>
         private const string ASSET_JSON_FILE_PATH_DEBUG = $"Temp/{ASSET_FILE_NAME_DEBUG}.json";
 
-        /// <inheritdoc />
-        int IOrderedCallback.callbackOrder { get; }
-
-        /// <summary>
-        /// Cleans up after the <see cref="IPreprocessBuildWithReport.OnPreprocessBuild" /> function.
-        /// </summary>
-        private static void DeleteAndRemoveAsset()
-        {
-            AssetDatabase.DeleteAsset(ASSET_FILE_PATH);
-
-            var preloadedAssets = PlayerSettings.GetPreloadedAssets().ToList();
-            preloadedAssets.RemoveAll(static obj => obj == false || obj is SerializedTypeCacheAsset);
-
-            PlayerSettings.SetPreloadedAssets(preloadedAssets.ToArray());
-        }
-
-        /// <inheritdoc />
-        void IPreprocessBuildWithReport.OnPreprocessBuild(BuildReport report)
+        [MenuItem("Encosy Tower/Runtime Type Cache/Create Serialized Type Cache Asset")]
+        private static void CreateAsset()
         {
             try
             {
@@ -99,15 +88,23 @@ namespace EncosyTower.Modules.Types.Editor
 
                 InternalEditorUtility.SaveToSerializedFileAndForget(
                       new Object[] { asset }
-                    , ASSET_FILE_NAME_DEBUG
+                    , ASSET_FILE_PATH_DEBUG
                     , true
                 );
 
-                // Serialize to json for debug inspection
-                var json = JsonUtility.ToJson(asset, true);
-                json = Regex.Replace(json, "(<|>|k__BackingField)", "");
+                if (Directory.Exists("Temp"))
+                {
+                    // Serialize to json for debug inspection
+                    var json = JsonUtility.ToJson(asset, true);
+                    json = Regex.Replace(json, "(<|>|k__BackingField)", "");
 
-                File.WriteAllText(ASSET_JSON_FILE_PATH_DEBUG, json);
+                    File.WriteAllText(ASSET_JSON_FILE_PATH_DEBUG, json);
+                }
+
+                if (Directory.Exists(ASSET_DIRECTORY) == false)
+                {
+                    Directory.CreateDirectory(ASSET_DIRECTORY);
+                }
 
                 // Create asset so preloaded assets can actually use it
                 asset.name = ASSET_FILE_NAME;
@@ -125,6 +122,28 @@ namespace EncosyTower.Modules.Types.Editor
                 DeleteAndRemoveAsset();
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Cleans up after the <see cref="IPreprocessBuildWithReport.OnPreprocessBuild" /> function.
+        /// </summary>
+        private static void DeleteAndRemoveAsset()
+        {
+            AssetDatabase.DeleteAsset(ASSET_FILE_PATH);
+
+            var preloadedAssets = PlayerSettings.GetPreloadedAssets().ToList();
+            preloadedAssets.RemoveAll(static obj => obj == false || obj is SerializedTypeCacheAsset);
+
+            PlayerSettings.SetPreloadedAssets(preloadedAssets.ToArray());
+        }
+
+        /// <inheritdoc />
+        int IOrderedCallback.callbackOrder { get; }
+
+        /// <inheritdoc />
+        void IPreprocessBuildWithReport.OnPreprocessBuild(BuildReport report)
+        {
+            CreateAsset();
         }
 
         /// <inheritdoc />
