@@ -133,12 +133,18 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
                 methodName = member.Identifier.ValueText,
             };
 
-            if (syntax.Parent is InvocationExpressionSyntax { ArgumentList.Arguments: { Count: 1 } arguments }
-                && arguments[0].Expression is LiteralExpressionSyntax literal
-                && string.IsNullOrWhiteSpace(literal.Token.ValueText) == false
-            )
+            if (syntax.Parent is InvocationExpressionSyntax { ArgumentList.Arguments: { Count: 1 } arguments })
             {
-                candidate.assemblyName = literal.Token.ValueText;
+                var constValueOpt = semanticModel.GetConstantValue(arguments[0].Expression, token);
+
+                if (constValueOpt is { HasValue: true, Value: string assemblyName })
+                {
+                    candidate.assemblyName = string.IsNullOrWhiteSpace(assemblyName) ? string.Empty : assemblyName;
+                }
+                else
+                {
+                    candidate.invalidAssemblyNameSyntax = arguments[0].Expression;
+                }
             }
 
             return candidate;
@@ -242,6 +248,16 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
                         , candidate.typeSyntax
                         , (candidate.typeSyntax as IdentifierNameSyntax)?.Identifier.ValueText ?? "T"
                         , candidate.methodName
+                    );
+                    continue;
+                }
+
+                if (candidate.invalidAssemblyNameSyntax is ExpressionSyntax invalidAssemblyNameSyntax)
+                {
+
+                    context.ReportDiagnostic(
+                          DiagnosticDescriptors.AssemblyNameMustBeStringLiteralOrConstant
+                        , invalidAssemblyNameSyntax
                     );
                     continue;
                 }
@@ -391,6 +407,7 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
             public ITypeSymbol type;
             public string assemblyName;
             public string methodName;
+            public ExpressionSyntax invalidAssemblyNameSyntax;
             public CacheAttributeType cacheAttributeType;
         }
 

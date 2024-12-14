@@ -53,5 +53,15 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
             , isEnabledByDefault: true
             , description: "Sealed class is not applicable."
         );
+
+        public static readonly DiagnosticDescriptor AssemblyNameMustBeStringLiteralOrConstant = new DiagnosticDescriptor(
+              id: "RUNTIME_TYPE_CACHES_0005"
+            , title: "Assembly name must be a string literal or constant"
+            , messageFormat: "Assembly name must be a string literal or constant"
+            , category: "RuntimeTypeCachesGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: "Assembly name must be a string literal or constant."
+        );
     }
 }

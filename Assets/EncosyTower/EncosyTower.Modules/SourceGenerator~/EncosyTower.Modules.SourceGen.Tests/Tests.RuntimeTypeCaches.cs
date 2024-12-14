@@ -14,8 +14,8 @@ namespace EncosyTower.Modules.Tests.RuntimeTypeCaches
     {
         public void DoSomethingX()
         {
-            var a = "EncosyTower.Modules.Tests";
-            RuntimeTypeCache.GetTypesDerivedFrom<IEqualityComparer>(a);
+            const string ASSEMBLY = "EncosyTower.Modules.Tests";
+            RuntimeTypeCache.GetTypesDerivedFrom<IEqualityComparer>(ASSEMBLY);
             RuntimeTypeCache.GetFieldsWithAttribute<SomeAttribute>();
         }
     }
