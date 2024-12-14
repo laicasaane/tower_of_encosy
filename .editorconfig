@@ -12,12 +12,12 @@ charset = utf-8
 
 # New line preferences
 end_of_line = lf
-insert_final_newline = true
 
 # C# files
 [*.cs]
 
 #### Core EditorConfig Options ####
+insert_final_newline = true
 
 #### .NET Coding Conventions ####
 
