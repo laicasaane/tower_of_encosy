@@ -34,10 +34,11 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditorInternal;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace EncosyTower.Modules.Types.Editor
 {
+    using Object = UnityEngine.Object;
+
     /// <summary>
     /// Responsible for creating the <see cref="SerializedTypeCacheAsset"/> at build time.
     /// </summary>
