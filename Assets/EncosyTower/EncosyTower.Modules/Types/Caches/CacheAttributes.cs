@@ -49,13 +49,13 @@ namespace EncosyTower.Modules.Types.Caches
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true, Inherited = false)]
     public sealed class CacheTypesDerivedFromAttribute : Attribute
     {
-        public Type Type { get; }
+        public Type BaseType { get; }
 
         public string[] AssemblyNames { get; }
 
-        public CacheTypesDerivedFromAttribute(Type type, params string[] assemblyNames)
+        public CacheTypesDerivedFromAttribute(Type baseType, params string[] assemblyNames)
         {
-            Type = type;
+            BaseType = baseType;
             AssemblyNames = assemblyNames;
         }
     }
@@ -63,13 +63,13 @@ namespace EncosyTower.Modules.Types.Caches
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true, Inherited = false)]
     public sealed class CacheTypesWithAttributeAttribute : Attribute
     {
-        public Type Type { get; }
+        public Type AttributeType { get; }
 
         public string[] AssemblyNames { get; }
 
-        public CacheTypesWithAttributeAttribute(Type type, params string[] assemblyNames)
+        public CacheTypesWithAttributeAttribute(Type attributeType, params string[] assemblyNames)
         {
-            Type = type;
+            AttributeType = attributeType;
             AssemblyNames = assemblyNames;
         }
     }
@@ -77,13 +77,13 @@ namespace EncosyTower.Modules.Types.Caches
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true, Inherited = false)]
     public sealed class CacheFieldsWithAttributeAttribute : Attribute
     {
-        public Type Type { get; }
+        public Type AttributeType { get; }
 
         public string[] AssemblyNames { get; }
 
-        public CacheFieldsWithAttributeAttribute(Type type, params string[] assemblyNames)
+        public CacheFieldsWithAttributeAttribute(Type attributeType, params string[] assemblyNames)
         {
-            Type = type;
+            AttributeType = attributeType;
             AssemblyNames = assemblyNames;
         }
     }
@@ -91,13 +91,13 @@ namespace EncosyTower.Modules.Types.Caches
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true, Inherited = false)]
     public sealed class CacheMethodsWithAttributeAttribute : Attribute
     {
-        public Type Type { get; }
+        public Type AttributeType { get; }
 
         public string[] AssemblyNames { get; }
 
-        public CacheMethodsWithAttributeAttribute(Type type, params string[] assemblyNames)
+        public CacheMethodsWithAttributeAttribute(Type attributeType, params string[] assemblyNames)
         {
-            Type = type;
+            AttributeType = attributeType;
             AssemblyNames = assemblyNames;
         }
     }
