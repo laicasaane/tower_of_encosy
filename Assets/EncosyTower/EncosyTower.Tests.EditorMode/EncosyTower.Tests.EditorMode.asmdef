@@ -10,7 +10,6 @@
         "Latios.Core",
         "Latios.Psyshock",
         "Latios.Transforms",
-        "SpanExtensions.Net.Unity",
         "UniTask",
         "UniTask.Addressables",
         "Unity.Addressables",

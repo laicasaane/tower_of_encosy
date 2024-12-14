@@ -25,7 +25,6 @@ namespace EncosyTower.Modules
     [RequiresPackage(PackageRegistry.OpenUpm, "com.cysharp.unitask", isOptional: true)]
 #endif
 
-    [RequiresPackage(PackageRegistry.OpenUpm, "com.draconware-dev.span-extensions.net.unity")]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.gilzoide.easy-project-settings")]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.needle.console", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.browar.editor-toolbox", isOptional: true)]

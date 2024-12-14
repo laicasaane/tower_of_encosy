@@ -45,13 +45,6 @@
       "dependencies": {},
       "url": "https://package.openupm.com"
     },
-    "com.draconware-dev.span-extensions.net.unity": {
-      "version": "1.4.2",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://package.openupm.com"
-    },
     "com.gilzoide.easy-project-settings": {
       "version": "1.1.0",
       "depth": 0,
