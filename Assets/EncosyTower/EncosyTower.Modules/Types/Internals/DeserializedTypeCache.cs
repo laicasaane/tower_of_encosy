@@ -59,9 +59,9 @@ namespace EncosyTower.Modules.Types.Internals
             for (var i = 0; i < itemsLength; i++)
             {
                 var item = items[i];
-                var parentType = item._parentType.Deserialize(typeStore);
+                var baseType = item._baseType.Deserialize(typeStore);
 
-                if (parentType is null)
+                if (baseType is null)
                 {
                     continue;
                 }
@@ -76,10 +76,10 @@ namespace EncosyTower.Modules.Types.Internals
                     map[assemblyName] = memberMap;
                 }
 
-                if (memberMap.TryGetValue(parentType, out var types) == false)
+                if (memberMap.TryGetValue(baseType, out var types) == false)
                 {
                     types = new FasterList<Type>();
-                    memberMap[parentType] = types;
+                    memberMap[baseType] = types;
                 }
 
                 Deserialize(typeStore, types, item._derivedTypes.AsSpanUnsafe());

@@ -26,9 +26,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using EncosyTower.Modules.Collections;
+using EncosyTower.Modules.Logging;
+using EncosyTower.Modules.Types.Caches;
 using EncosyTower.Modules.Types.Internals;
 using UnityEditor;
 using UnityEditor.Compilation;
@@ -37,43 +40,102 @@ namespace EncosyTower.Modules.Types.Editor
 {
     internal static class SerializedTypeCacheEditor
     {
+        [MenuItem("Encosy Tower/Runtime Type Cache/Print Player Assemblies")]
+        private static void PrintAssemblies()
+        {
+            var names = GetPlayerAssemblyNames();
+
+            foreach (var name in names)
+            {
+                DevLoggerAPI.LogInfoSlim(name);
+            }
+        }
+
         public static void Regenerate(this SerializedTypeCache cache)
         {
-            var typesDerivedFromTypeList = cache._typesDerivedFromTypeList;
-            var typesWithAttributeList = cache._typesWithAttributeList;
-            var fieldsWithAttributeList = cache._fieldsWithAttributeList;
-            var methodsWithAttributeList = cache._methodsWithAttributeList;
-            var typeStore = cache._typeStore;
-            var assemblyQualifiedNames = typeStore._assemblyQualifiedNames;
+            var typesDerivedFromTypeList = cache._typesDerivedFromTypeList = new();
+            var typesWithAttributeList = cache._typesWithAttributeList = new();
+            var fieldsWithAttributeList = cache._fieldsWithAttributeList = new();
+            var methodsWithAttributeList = cache._methodsWithAttributeList = new();
+            var typeStore = cache._typeStore = new();
 
-            typesDerivedFromTypeList.Clear();
-            typesWithAttributeList.Clear();
-            fieldsWithAttributeList.Clear();
-            methodsWithAttributeList.Clear();
-            assemblyQualifiedNames.Clear();
+            var playerAssemblyNames = GetPlayerAssemblyNames();
+            var baseTypeToAssemblyMap = new Dictionary<Type, HashSet<string>>();
+            var typeAttribToAssemblyMap = new Dictionary<Type, HashSet<string>>();
+            var fieldAttribToAssemblyMap = new Dictionary<Type, HashSet<string>>();
+            var methodAttribToAssemblyMap = new Dictionary<Type, HashSet<string>>();
 
-            //var targetTypesAll = TypeCache.GetTypesWithAttribute<TypeCacheTargetAttribute>().ToArray();
-            //var targetTypesAttributes = targetTypesAll.Where(typeof(Attribute).IsAssignableFrom).ToArray();
-            //var typeCacheSource = new EditorTypeCacheSource();
-            //CacheAllAttributeUsages(targetTypesAttributes, typeCacheSource);
+            GetTypesFromThis<CacheTypesDerivedFromThisTypeAttribute>(
+                playerAssemblyNames, typeStore, baseTypeToAssemblyMap
+            );
 
-            //var targetTypesNonAttributes = targetTypesAll.Except(targetTypesAttributes).ToArray();
-            //CacheAllTypeInheritances(targetTypesNonAttributes, typeCacheSource);
+            GetTypesFrom<CacheTypesDerivedFromAttribute>(
+                playerAssemblyNames, typeStore, baseTypeToAssemblyMap
+            );
+
+            GetTypesFromThis<CacheTypesWithThisAttributeAttribute>(
+                playerAssemblyNames, typeStore, typeAttribToAssemblyMap
+            );
+
+            GetTypesFrom<CacheTypesWithAttributeAttribute>(
+                playerAssemblyNames, typeStore, typeAttribToAssemblyMap
+            );
+
+            GetTypesFromThis<CacheFieldsWithThisAttributeAttribute>(
+                playerAssemblyNames, typeStore, fieldAttribToAssemblyMap
+            );
+
+            GetTypesFrom<CacheFieldsWithAttributeAttribute>(
+                playerAssemblyNames, typeStore, fieldAttribToAssemblyMap
+            );
+
+            GetTypesFromThis<CacheMethodsWithThisAttributeAttribute>(
+                playerAssemblyNames, typeStore, methodAttribToAssemblyMap
+            );
+
+            GetTypesFrom<CacheMethodsWithAttributeAttribute>(
+                playerAssemblyNames, typeStore, methodAttribToAssemblyMap
+            );
+
+            BuildTypesDerivedFromTypeList(
+                playerAssemblyNames, baseTypeToAssemblyMap, typeStore, typesDerivedFromTypeList
+            );
+
+            BuildTypesWithAttributeList(
+                playerAssemblyNames, typeAttribToAssemblyMap, typeStore, typesWithAttributeList
+            );
+
+            BuildFieldsWithAttributeList(
+                playerAssemblyNames, fieldAttribToAssemblyMap, typeStore, fieldsWithAttributeList
+            );
+
+            BuildMethodsWithAttributeList(
+                playerAssemblyNames, methodAttribToAssemblyMap, typeStore, methodsWithAttributeList
+            );
         }
 
-        private static bool HasFlag(AttributeTargets flag, AttributeTargets value)
+        private static bool IsEditor(Type type, string assemblyName, HashSet<string> playerAssemblyNames)
         {
-            return (flag & value) != 0;
+            return playerAssemblyNames.Contains(assemblyName) == false
+                || (type.FullName ?? string.Empty).StartsWith("UnityEditorInternal");
         }
 
-        private static bool IsInEditorAssembly([NotNull] Type type, HashSet<string> playerAssemblies)
+        private static HashSet<string> GetPlayerAssemblyNames()
         {
-            playerAssemblies ??= CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies)
-                .Select(a => a.name)
+            const AssembliesType ASSEMBLIES_TYPE =
+#if UNITY_INCLUDE_TESTS
+                AssembliesType.Player
+#else
+                AssembliesType.PlayerWithoutTestAssemblies
+#endif
+                ;
+
+            return CompilationPipeline.GetAssemblies(ASSEMBLIES_TYPE)
+                .Select(static x => x.name)
                 .Concat(CompilationPipeline
                     .GetPrecompiledAssemblyPaths(CompilationPipeline.PrecompiledAssemblySources.UnityEngine)
                     .Select(Path.GetFileNameWithoutExtension)
-                    .Where(n => n.StartsWith("UnityEditor") == false)
+                    .Where(static x => x.StartsWith("UnityEditor") == false)
                 )
                 .Concat(CompilationPipeline
                     .GetPrecompiledAssemblyPaths(CompilationPipeline.PrecompiledAssemblySources.SystemAssembly)
@@ -84,155 +146,325 @@ namespace EncosyTower.Modules.Types.Editor
                     .Select(Path.GetFileNameWithoutExtension)
                 )
                 .Distinct()
+                .OrderBy(static x => x)
                 .ToHashSet();
-
-            return playerAssemblies.Contains(type.Assembly.GetName().Name) == false
-                || (type.FullName ?? string.Empty).StartsWith("UnityEditorInternal");
         }
 
-        //private void CacheAllAttributeUsages(IEnumerable<Type> targetTypes, ITypeCacheSource typeCacheSource)
-        //{
-        //    /*
-        //     * Only cache attributes that are decorated with the TypeCachedAttribute attribute, OR if:
-        //     * 1. StrictMode is disabled.
-        //     * 2. They aren't in editor assemblies.
-        //     * AND
-        //     * 3. They pass the predicate filter.
-        //     */
-        //    foreach (var type in targetTypes) CacheAttributeUsage(type, typeCacheSource);
+        private static void GetTypesFromThis<TAttribute>(
+              HashSet<string> playerAssemblyNames
+            , SerializedTypeStore typeStore
+            , Dictionary<Type, HashSet<string>> typeToAssemblyMap
+        )
+            where TAttribute : Attribute, ICacheAttributeWithAssemblyNames
+        {
+            var types = TypeCache.GetTypesWithAttribute<TAttribute>();
 
-        //    if (TypeCacheBuilderUtility.StrictMode) return;
+            foreach (var type in types)
+            {
+                var baseTypeAssemblyName = type.Assembly.GetName().Name;
 
-        //    var attributeTypes = TypeCache.GetTypesDerivedFrom<Attribute>();
+                if (IsEditor(type, baseTypeAssemblyName, playerAssemblyNames))
+                {
+                    continue;
+                }
 
-        //    foreach (var type in attributeTypes)
-        //    {
-        //        if (IsInEditorAssembly(type)) continue;
+                if (typeToAssemblyMap.TryGetValue(type, out var assemblies) == false)
+                {
+                    assemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    typeToAssemblyMap[type] = assemblies;
+                }
 
-        //        var passesPredicate = TypeCacheBuilderUtility.ShouldCacheAttributeTypePredicate(type);
-        //        if (!passesPredicate) continue;
+                typeStore.Add(type);
+                assemblies.Add(baseTypeAssemblyName);
 
-        //        CacheAttributeUsage(type, typeCacheSource);
-        //    }
-        //}
+                var attribute = type.GetCustomAttribute<TAttribute>();
+                var assemblyNames = attribute.AssemblyNames.AsSpan();
 
-        //private void CacheAttributeUsage(Type attributeType, ITypeCacheSource typeCacheSource)
-        //{
-        //    var attributeUsage = attributeType.GetCustomAttribute<AttributeUsageAttribute>();
-        //    var serializedAttributeType = new SerializedType().Build(attributeType, TypeStore);
+                if (assemblyNames.Length < 1)
+                {
+                    assemblies.Add(string.Empty);
+                    continue;
+                }
 
-        //    // Check for Types with attribute
-        //    if (HasFlag(attributeUsage.ValidOn, AttributeTargets.Class) ||
-        //        HasFlag(attributeUsage.ValidOn, AttributeTargets.Struct))
-        //    {
-        //        var matches = typeCacheSource.GetTypesWithAttribute(attributeType).Where(t => !IsInEditorAssembly(t));
-        //        if (matches.Any())
-        //        {
-        //            var matchesSerialized = matches
-        //                .Select(memberInfo => new SerializedType().Build(memberInfo, TypeStore))
-        //                .ToList();
-        //            TypesWithAttribute.Add(
-        //                new MemberInfoWithAttribute<SerializedType> {
-        //                    AttributeType = serializedAttributeType,
-        //                    Matches = matchesSerialized
-        //                });
-        //        }
-        //    }
+                foreach (var assemblyName in assemblyNames)
+                {
+                    if (string.IsNullOrWhiteSpace(assemblyName))
+                    {
+                        assemblies.Add(string.Empty);
+                    }
+                    else if (playerAssemblyNames.Contains(assemblyName))
+                    {
+                        assemblies.Add(assemblyName);
+                    }
+                }
+            }
+        }
 
-        //    // Check for Methods with attribute
-        //    if (HasFlag(attributeUsage.ValidOn, AttributeTargets.Method))
-        //    {
-        //        var matches = typeCacheSource.GetMethodsWithAttribute(attributeType)
-        //            .Where(memberInfo => !IsInEditorAssembly(memberInfo.DeclaringType));
-        //        if (matches.Any())
-        //        {
-        //            var matchesSerialized = matches
-        //                .Select(memberInfo => new SerializedMethod().Build(memberInfo, TypeStore))
-        //                .ToList();
-        //            MethodsWithAttribute.Add(
-        //                new MemberInfoWithAttribute<SerializedMethod> {
-        //                    AttributeType = serializedAttributeType,
-        //                    Matches = matchesSerialized
-        //                });
-        //        }
-        //    }
+        private static void GetTypesFrom<TAttribute>(
+              HashSet<string> playerAssemblyNames
+            , SerializedTypeStore typeStore
+            , Dictionary<Type, HashSet<string>> typeToAssemblyMap
+        )
+            where TAttribute : Attribute, ICacheAttributeWithType, ICacheAttributeWithAssemblyNames
+        {
+            var runtimeTypeCacheTypes = TypeCache.GetTypesWithAttribute<TAttribute>();
 
-        //    // Check for Fields with attribute
-        //    if (HasFlag(attributeUsage.ValidOn, AttributeTargets.Property))
-        //    {
-        //        var matches = typeCacheSource.GetPropertiesWithAttribute(attributeType)
-        //            .Where(memberInfo => !IsInEditorAssembly(memberInfo.DeclaringType));
-        //        if (matches.Any())
-        //        {
-        //            var matchesSerialized = matches
-        //                .Select(memberInfo => new SerializedProperty().Build(memberInfo, TypeStore))
-        //                .ToList();
-        //            PropertiesWithAttribute.Add(
-        //                new MemberInfoWithAttribute<SerializedProperty> {
-        //                    AttributeType = serializedAttributeType,
-        //                    Matches = matchesSerialized
-        //                });
-        //        }
-        //    }
+            foreach (var runtimeTypeCacheType in runtimeTypeCacheTypes)
+            {
+                var attributes = runtimeTypeCacheType.GetCustomAttributes<TAttribute>();
 
-        //    // Check for Fields with attribute
-        //    if (HasFlag(attributeUsage.ValidOn, AttributeTargets.Field))
-        //    {
-        //        var matches = typeCacheSource.GetFieldsWithAttribute(attributeType)
-        //            .Where(memberInfo => !IsInEditorAssembly(memberInfo.DeclaringType));
-        //        if (matches.Any())
-        //        {
-        //            var matchesSerialized = matches
-        //                .Select(memberInfo => new SerializedField().Build(memberInfo, TypeStore))
-        //                .ToList();
-        //            FieldsWithAttribute.Add(
-        //                new MemberInfoWithAttribute<SerializedField> {
-        //                    AttributeType = serializedAttributeType,
-        //                    Matches = matchesSerialized
-        //                });
-        //        }
-        //    }
-        //}
+                foreach (var attribute in attributes)
+                {
+                    if (attribute.Type == null)
+                    {
+                        continue;
+                    }
 
-        //private void CacheAllTypeInheritances(IEnumerable<Type> targetTypes, ITypeCacheSource typeCacheSource)
-        //{
-        //    /*
-        //     * Only cache types that are decorated with the TypeCachedType attribute, OR if:
-        //     * 1. StrictMode is disabled.
-        //     * 2. They aren't in editor assemblies.
-        //     * AND
-        //     * 3. They pass the predicate filter.
-        //     */
-        //    foreach (var typeCachedType in targetTypes) CacheTypeInheritance(typeCachedType, typeCacheSource);
+                    var baseType = attribute.Type;
+                    var baseTypeAssemblyName = baseType.Assembly.GetName().Name;
 
-        //    if (TypeCacheBuilderUtility.StrictMode) return;
+                    if (IsEditor(baseType, baseTypeAssemblyName, playerAssemblyNames))
+                    {
+                        continue;
+                    }
 
-        //    var allTypes = typeCacheSource.GetTypesDerivedFrom<object>();
-        //    foreach (var type in allTypes)
-        //    {
-        //        if (IsInEditorAssembly(type)) continue;
+                    if (typeToAssemblyMap.TryGetValue(baseType, out var assemblies) == false)
+                    {
+                        assemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                        typeToAssemblyMap[baseType] = assemblies;
+                    }
 
-        //        var passesPredicate = TypeCacheBuilderUtility.ShouldCacheTypeInheritance(type);
-        //        if (!passesPredicate) continue;
+                    typeStore.Add(baseType);
+                    assemblies.Add(baseTypeAssemblyName);
 
-        //        CacheTypeInheritance(type, typeCacheSource);
-        //    }
-        //}
+                    var assemblyNames = attribute.AssemblyNames.AsSpan();
 
-        //private void CacheTypeInheritance(Type type, ITypeCacheSource typeCacheSource)
-        //{
-        //    var derived = typeCacheSource.GetTypesDerivedFrom(type).Where(t => !IsInEditorAssembly(t));
-        //    if (!derived.Any()) return;
+                    if (assemblyNames.Length < 1)
+                    {
+                        assemblies.Add(string.Empty);
+                        continue;
+                    }
 
-        //    var derivedSerialized = derived.Select(t => new SerializedType().Build(t, TypeStore)).ToList();
-        //    var parentType = new SerializedType();
-        //    parentType.Serialize(type, TypeStore);
-        //    TypesDerivedFromType.Add(
-        //        new TypesDerivedFromType {
-        //            ParentType = parentType,
-        //            DerivedTypes = derivedSerialized
-        //        });
-        //}
+                    foreach (var assemblyName in assemblyNames)
+                    {
+                        if (string.IsNullOrWhiteSpace(assemblyName))
+                        {
+                            assemblies.Add(string.Empty);
+                        }
+                        else if (playerAssemblyNames.Contains(assemblyName))
+                        {
+                            assemblies.Add(assemblyName);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void BuildTypesDerivedFromTypeList(
+              HashSet<string> playerAssemblyNames
+            , Dictionary<Type, HashSet<string>> assemblyNameMap
+            , SerializedTypeStore typeStore
+            , List<SerializedDerivedTypes> result
+        )
+        {
+            foreach (var (baseType, assemblyNames) in assemblyNameMap)
+            {
+                var filteredTypes = new List<Type>();
+
+                foreach (var assemblyName in assemblyNames)
+                {
+                    filteredTypes.Clear();
+
+                    var candidates = string.IsNullOrEmpty(assemblyName)
+                        ? TypeCache.GetTypesDerivedFrom(baseType)
+                        : TypeCache.GetTypesDerivedFrom(baseType, assemblyName);
+
+                    foreach (var candidate in candidates)
+                    {
+                        if (IsEditor(candidate, candidate.Assembly.GetName().Name, playerAssemblyNames) == false)
+                        {
+                            filteredTypes.Add(candidate);
+                        }
+                    }
+
+                    if (filteredTypes.Count < 1)
+                    {
+                        continue;
+                    }
+
+                    var item = new SerializedDerivedTypes {
+                        _assemblyName = assemblyName,
+                        _baseType = new SerializedType(baseType, typeStore),
+                    };
+
+                    var derivedTypes = item._derivedTypes;
+
+                    foreach (var type in filteredTypes)
+                    {
+                        derivedTypes.Add(new SerializedType(type, typeStore));
+                    }
+
+                    result.Add(item);
+                }
+            }
+        }
+
+        private static void BuildTypesWithAttributeList(
+              HashSet<string> playerAssemblyNames
+            , Dictionary<Type, HashSet<string>> assemblyNameMap
+            , SerializedTypeStore typeStore
+            , List<SerializedDecoratedMembers<SerializedType>> result
+        )
+        {
+            foreach (var (attribType, assemblyNames) in assemblyNameMap)
+            {
+                var filteredTypes = new List<Type>();
+
+                foreach (var assemblyName in assemblyNames)
+                {
+                    filteredTypes.Clear();
+
+                    var candidates = string.IsNullOrEmpty(assemblyName)
+                        ? TypeCache.GetTypesWithAttribute(attribType)
+                        : TypeCache.GetTypesWithAttribute(attribType, assemblyName);
+
+                    foreach (var candidate in candidates)
+                    {
+                        if (IsEditor(candidate, candidate.Assembly.GetName().Name, playerAssemblyNames) == false)
+                        {
+                            filteredTypes.Add(candidate);
+                        }
+                    }
+
+                    if (filteredTypes.Count < 1)
+                    {
+                        continue;
+                    }
+
+                    var item = new SerializedDecoratedMembers<SerializedType> {
+                        _assemblyName = assemblyName,
+                        _attributeType = new SerializedType(attribType, typeStore),
+                    };
+
+                    var matches = item._matches;
+
+                    foreach (var type in filteredTypes)
+                    {
+                        matches.Add(new SerializedType(type, typeStore));
+                    }
+
+                    result.Add(item);
+                }
+            }
+        }
+
+        private static void BuildFieldsWithAttributeList(
+              HashSet<string> playerAssemblyNames
+            , Dictionary<Type, HashSet<string>> assemblyNameMap
+            , SerializedTypeStore typeStore
+            , List<SerializedDecoratedMembers<SerializedField>> result
+        )
+        {
+            foreach (var (attribType, assemblyNames) in assemblyNameMap)
+            {
+                var filteredMembers = new List<FieldInfo>();
+
+                foreach (var assemblyName in assemblyNames)
+                {
+                    filteredMembers.Clear();
+
+                    var candidates = string.IsNullOrEmpty(assemblyName)
+                        ? TypeCache.GetFieldsWithAttribute(attribType)
+                        : TypeCache.GetFieldsWithAttribute(attribType, assemblyName);
+
+                    foreach (var candidate in candidates)
+                    {
+                        var declType = candidate.DeclaringType;
+                        var fieldType = candidate.FieldType;
+
+                        if (IsEditor(declType, declType.Assembly.GetName().Name, playerAssemblyNames) == false
+                            && IsEditor(fieldType, fieldType.Assembly.GetName().Name, playerAssemblyNames) == false
+                        )
+                        {
+                            filteredMembers.Add(candidate);
+                        }
+                    }
+
+                    if (filteredMembers.Count < 1)
+                    {
+                        continue;
+                    }
+
+                    var item = new SerializedDecoratedMembers<SerializedField> {
+                        _assemblyName = assemblyName,
+                        _attributeType = new SerializedType(attribType, typeStore),
+                    };
+
+                    var matches = item._matches;
+
+                    foreach (var member in filteredMembers)
+                    {
+                        matches.Add(new SerializedField(member, typeStore));
+                    }
+
+                    result.Add(item);
+                }
+            }
+        }
+
+        private static void BuildMethodsWithAttributeList(
+              HashSet<string> playerAssemblyNames
+            , Dictionary<Type, HashSet<string>> assemblyNameMap
+            , SerializedTypeStore typeStore
+            , List<SerializedDecoratedMembers<SerializedMethod>> result
+        )
+        {
+            foreach (var (attribType, assemblyNames) in assemblyNameMap)
+            {
+                var filteredMembers = new List<MethodInfo>();
+
+                foreach (var assemblyName in assemblyNames)
+                {
+                    filteredMembers.Clear();
+
+                    var candidates = string.IsNullOrEmpty(assemblyName)
+                        ? TypeCache.GetMethodsWithAttribute(attribType)
+                        : TypeCache.GetMethodsWithAttribute(attribType, assemblyName);
+
+                    foreach (var candidate in candidates)
+                    {
+                        var declType = candidate.DeclaringType;
+                        var returnType = candidate.ReturnType;
+
+                        if (IsEditor(declType, declType.Assembly.GetName().Name, playerAssemblyNames) == false
+                            && IsEditor(returnType, returnType.Assembly.GetName().Name, playerAssemblyNames) == false
+                        )
+                        {
+                            filteredMembers.Add(candidate);
+                        }
+                    }
+
+                    if (filteredMembers.Count < 1)
+                    {
+                        continue;
+                    }
+
+                    var item = new SerializedDecoratedMembers<SerializedMethod> {
+                        _assemblyName = assemblyName,
+                        _attributeType = new SerializedType(attribType, typeStore),
+                    };
+
+                    var matches = item._matches;
+
+                    foreach (var member in filteredMembers)
+                    {
+                        matches.Add(new SerializedMethod(member, typeStore));
+                    }
+
+                    result.Add(item);
+                }
+            }
+        }
     }
 }
 

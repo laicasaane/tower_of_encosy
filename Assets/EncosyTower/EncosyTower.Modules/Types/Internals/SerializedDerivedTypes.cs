@@ -35,7 +35,7 @@ namespace EncosyTower.Modules.Types.Internals
     internal class SerializedDerivedTypes
     {
         [SerializeField] internal string _assemblyName = string.Empty;
-        [SerializeField] internal SerializedType _parentType;
-        [SerializeField] internal List<SerializedType> _derivedTypes;
+        [SerializeField] internal SerializedType _baseType;
+        [SerializeField] internal List<SerializedType> _derivedTypes = new();
     }
 }
