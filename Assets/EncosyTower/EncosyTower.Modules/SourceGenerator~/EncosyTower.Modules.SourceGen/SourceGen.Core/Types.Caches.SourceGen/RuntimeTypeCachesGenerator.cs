@@ -20,6 +20,7 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
         private const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Types.Caches.SourceGen.RuntimeTypeCachesGenerator\", \"1.0.0\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string RUNTIME_TYPE_CACHE = "global::EncosyTower.Modules.Types.RuntimeTypeCache";
+        private const string CACHES_NAMESPACE = "global::EncosyTower.Modules.Types.Caches";
         private const string GENERATED_RUNTIME_TYPE_CACHES = "[global::EncosyTower.Modules.Types.Caches.SourceGen.GeneratedRuntimeTypeCaches]";
         private const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
         private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
@@ -123,6 +124,11 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
                 METHOD_GET_METHODS_WITH_ATTRIBUTE => CacheAttributeType.CacheMethodsWithAttribute,
                 _ => CacheAttributeType.None,
             };
+
+            if (cacheAttributeType == CacheAttributeType.None)
+            {
+                return default;
+            }
 
             var candidate = new Candidate {
                 containingSyntax = containingSyntax,
@@ -288,6 +294,18 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
                     {
                         context.ReportDiagnostic(
                               DiagnosticDescriptors.SealedClassIsNotApplicable
+                            , candidate.typeSyntax
+                            , type.ToFullName()
+                        );
+                        continue;
+                    }
+                }
+                else if (candidate.cacheAttributeType != CacheAttributeType.CacheTypesDerivedFrom)
+                {
+                    if (type.ToFullName().StartsWith(CACHES_NAMESPACE))
+                    {
+                        context.ReportDiagnostic(
+                              DiagnosticDescriptors.TypesFromCachesAreProhibited
                             , candidate.typeSyntax
                             , type.ToFullName()
                         );

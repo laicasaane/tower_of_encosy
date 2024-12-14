@@ -63,5 +63,15 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
             , isEnabledByDefault: true
             , description: "Assembly name must be a string literal or constant."
         );
+
+        public static readonly DiagnosticDescriptor TypesFromCachesAreProhibited = new DiagnosticDescriptor(
+              id: "RUNTIME_TYPE_CACHES_0006"
+            , title: "Types from \"EncosyTower.Modules.Types.Caches\" are prohibited"
+            , messageFormat: "\"{0}\" is prohibited"
+            , category: "RuntimeTypeCachesGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: "Types from \"EncosyTower.Modules.Types.Caches\" are prohibited."
+        );
     }
 }
