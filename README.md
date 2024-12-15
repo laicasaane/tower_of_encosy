@@ -23,9 +23,73 @@ I want to explore within this project.
 
 ## Gameplay
 
-I choose to work on a classic RPG mechanics where the player controls a character to subjugate monsters in a dungeon.
+With great help from my friend, a game designer, the project has now evolved into a turn-based strategy game.
 
-More features will come later after the very first goals are completed.
+As of now, he is still planning much of the game's mechanics, but the core loop is as follows:
+
+```mermaid
+---
+config:
+  layout: elk
+---
+flowchart LR
+    A(Main Gameplay) --> B{{Select Path}}
+    B --> C(Upgrade) & D(Random Event)
+    B & C & D --> A
+```
+
+And the main gameplay loop is as follows:
+
+```mermaid
+---
+config:
+  layout: elk
+---
+flowchart TD;
+    start_stage((Start a Stage))
+    generate_map(Generate a Map)
+    spawn_hero(Spawn a Hero)
+    spawn_enemies(Spawn Enemies)
+    check_spawn_enemies{{Conditions for<br/>Spawning Enemies}}
+    draw_cards(Draw Cards)
+    check_draw_card{{Conditions for<br/>Drawing Cards}}
+    gain_mp(Gain Mana Points)
+    check_gain_mp{{Conditions for<br/>Gaining Mana Points}}
+    enemies_decision(Enemies Decision)
+    player_acts{{Player Acts}}
+    use_cards@{ shape: lean-r, label: "Use Cards" }
+    use_skills@{ shape: lean-r, label: "Use Skills" }
+    move@{ shape: lean-r, label: "Move" }
+    use_consumables@{ shape: lean-r, label: "Use Consumables" }
+    skip_turn@{ shape: lean-r, label: "Skip Turn" }
+    resolve_player_actions(Resolve Player Actions)
+    enemies_act(Enemies Act)
+    check_game_defeat{{Conditions for<br/>Defeating}}
+    end_game_defeated((End Stage<br/>Defeated))
+    end_game_victory((End Stage<br/>Victory))
+    new_turn((New Turn))
+    is_stage_cleared{{Is Stage Cleared}}
+    check_game_victory{{Conditions for<br/>Victory}}
+    next_stage((Next Stage))
+
+    start_stage --> generate_map --> spawn_hero --> new_turn
+    sub_new_turn --> enemies_decision --> player_acts
+    resolve_player_actions --> is_stage_cleared
+    check_game_defeat -- True --> end_game_defeated
+    check_game_defeat -- False --> new_turn
+    is_stage_cleared -- False --> enemies_act --> check_game_defeat
+    is_stage_cleared -- True --> check_game_victory -- True --> end_game_victory
+    check_game_victory -- False --> next_stage
+    subgraph sub_new_turn [ ]
+        new_turn --> check_spawn_enemies -- Remain Turns < 1 --> spawn_enemies
+        new_turn --> check_draw_card -- Remain Turns < 1 --> draw_cards
+        new_turn  --> check_gain_mp -- Remain Turns < 1 --> gain_mp
+    end
+    subgraph sub_player_acts [ ]
+        choose_one@{ shape: braces, label: "Choose only 1 action" }
+        player_acts --> use_cards & use_skills & move & use_consumables & skip_turn --> resolve_player_actions
+    end
+```
 
 ## First Goals
 
