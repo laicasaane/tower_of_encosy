@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 
 namespace EncosyTower.Modules.Mvvm.Input
 {
     /// <summary>
     /// An attribute that can be used to automatically generate <see cref="ICommand"/> properties from declared methods. When this attribute
-    /// is used to decorate a method, a generator will create a command property with the corresponding <see cref="IRelayCommand"/> interface
+    /// is used to annotate a method, a generator will create a command property with the corresponding <see cref="IRelayCommand"/> interface
     /// depending on the signature of the method. If an invalid method signature is used, the generator will report an error.
     /// <para>
     /// In order to use this attribute, the containing type doesn't need to implement any interfaces. The generated properties will be lazily

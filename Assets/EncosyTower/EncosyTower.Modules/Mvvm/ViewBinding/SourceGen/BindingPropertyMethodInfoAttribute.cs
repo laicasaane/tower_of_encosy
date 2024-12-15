@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace EncosyTower.Modules.Mvvm.ViewBinding.SourceGen
 {
@@ -6,7 +6,7 @@ namespace EncosyTower.Modules.Mvvm.ViewBinding.SourceGen
     /// An attribute that indicates that a given method can be binded to any observable property.
     /// </summary>
     /// <remarks>
-    /// This attribute is not intended to be used directly by user code to decorate user-defined types.
+    /// This attribute is not intended to be used directly by user code to annotate user-defined types.
     /// <br/>
     /// However, it can be used in other contexts, such as reflection.
     /// </remarks>
