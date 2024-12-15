@@ -10,6 +10,29 @@ While I have some knowledge with the former, I nearly have zero experience with 
 since I've been working mostly on 2D projects. Utility AI and 3D physics are also the topics
 I want to explore within this project.
 
+### A change of plan
+
+The project was intended to be only a personal development sandbox. At some point I realized that
+it won't be helpful for neither me nor the community. Knowing various tools and techiques is one thing,
+applying that knowledge to a real game project requires much more reasoning skills.
+
+So I decided to turn this project into an actual game. With great help from my friend, a game designer,
+the project is going to be a turn-based RPG with a dedicated design document. Whatever techniques and tools
+applied will be justified based on the document to give a real world example of how to use them.
+
+While the project remains an OSS, anything related to the game mechanics won't be available
+to public until the first playable version is published on some marketplaces.
+
+### A change of licenses
+
+- Most of the code inside `Assets/EncosyTower` folder is under the [MIT License][mit], unless stated otherwise.
+- The code inside `Assets/Game` folder is under the [Apache License 2.0][apache].
+- The game design document is under the [CC BY-NC-SA 4.0 License][cc].
+
+[mit]: https://opensource.org/licenses/MIT
+[apache]: https://www.apache.org/licenses/LICENSE-2.0
+[cc]: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
 ## Technical Notes
 
 - **Unity Version**: 2022.3+
@@ -17,15 +40,9 @@ I want to explore within this project.
 - **Enter Play Mode Options > Reload Domain**: Off
 - `csc.rsp`: Enable C# 10 for the Unity Engine
 - `Directory.Build.props`: Enable C# 10 for the IDE
-- `IsExternalInit.cs`: Enable [`init`][1] of C# 9
+- `IsExternalInit.cs`: Enable [`init`][init] of C# 9
 
-[1]: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/init
-
-## Gameplay
-
-I choose to work on a classic RPG mechanics where the player controls a character to subjugate monsters in a dungeon.
-
-More features will come later after the very first goals are completed.
+[init]: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/init
 
 ## First Goals
 
