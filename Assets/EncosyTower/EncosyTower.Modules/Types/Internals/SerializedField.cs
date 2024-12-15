@@ -34,9 +34,9 @@ namespace EncosyTower.Modules.Types.Internals
     [Serializable]
     internal struct SerializedField : ISerializedMember<FieldInfo>
     {
-        [SerializeField] private string _fieldName;
-        [SerializeField] private SerializedType _declaringType;
-        [SerializeField] private BindingFlags _bindingFlags;
+        [SerializeField] internal string _fieldName;
+        [SerializeField] internal SerializedType _declaringType;
+        [SerializeField] internal BindingFlags _bindingFlags;
 
         public SerializedField(FieldInfo memberInfo, SerializedType declaringType)
         {

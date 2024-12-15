@@ -34,9 +34,9 @@ namespace EncosyTower.Modules.Types.Internals
     [Serializable]
     internal struct SerializedMethod : ISerializedMember<MethodInfo>
     {
-        [SerializeField] private string _methodName;
-        [SerializeField] private SerializedType _declaringType;
-        [SerializeField] private BindingFlags _bindingFlags;
+        [SerializeField] internal string _methodName;
+        [SerializeField] internal SerializedType _declaringType;
+        [SerializeField] internal BindingFlags _bindingFlags;
 
         public SerializedMethod(MethodInfo memberInfo, SerializedType declaringType)
         {

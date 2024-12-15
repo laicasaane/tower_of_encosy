@@ -494,6 +494,8 @@ namespace EncosyTower.Modules.Types.Editor
             var assemblies = assemblyToTypesMap.Keys.ToList();
             assemblies.Sort(static (x, y) => string.CompareOrdinal(x.FullName, y.FullName));
 
+            dest.Add(TypeIdVault.UndefinedType);
+
             foreach (var assembly in assemblies)
             {
                 var types = assemblyToTypesMap[assembly];
@@ -530,8 +532,11 @@ namespace EncosyTower.Modules.Types.Editor
                     derivedTypes.Add(new(tempDerivedTypes[i].index));
                 }
 
+                derivedTypes.Sort(static (x, y) => x._typeStoreIndex.CompareTo(y._typeStoreIndex));
                 dest.Add(item);
             }
+
+            dest.Sort(static (x, y) => x._baseType._typeStoreIndex.CompareTo(y._baseType._typeStoreIndex));
         }
 
         private static void BuildTypesWithAttributeList(
@@ -557,8 +562,11 @@ namespace EncosyTower.Modules.Types.Editor
                     matches.Add(new(tempMatches[i].declaringType.index));
                 }
 
+                matches.Sort(static (x, y) => x._typeStoreIndex.CompareTo(y._typeStoreIndex));
                 dest.Add(item);
             }
+
+            dest.Sort(static (x, y) => x._attributeType._typeStoreIndex.CompareTo(y._attributeType._typeStoreIndex));
         }
 
         private static void BuildFieldsWithAttributeList(
@@ -586,8 +594,11 @@ namespace EncosyTower.Modules.Types.Editor
                     matches.Add(new(tempMatch.Member, new(tempMatch.declaringType.index)));
                 }
 
+                matches.Sort(static (x, y) => x._declaringType._typeStoreIndex.CompareTo(y._declaringType._typeStoreIndex));
                 dest.Add(item);
             }
+
+            dest.Sort(static (x, y) => x._attributeType._typeStoreIndex.CompareTo(y._attributeType._typeStoreIndex));
         }
 
         private static void BuildMethodsWithAttributeList(

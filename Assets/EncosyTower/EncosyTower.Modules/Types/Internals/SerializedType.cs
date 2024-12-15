@@ -33,7 +33,7 @@ namespace EncosyTower.Modules.Types.Internals
     [Serializable]
     internal struct SerializedType : ISerializedMember<Type>
     {
-        [SerializeField] private int _typeStoreIndex;
+        [SerializeField] internal int _typeStoreIndex;
 
         public SerializedType(int typeStoreIndex)
         {
