@@ -90,7 +90,7 @@ namespace EncosyTower.Modules.Types.Internals
 
         private static AssemblyNameToMemberMapMap<T2> MapFromSerialized<T1, T2>(
               SerializedTypeCache cache
-            , List<SerializedDecoratedMembers<T1>> serializedItems
+            , List<SerializedAnnotatedMembers<T1>> serializedItems
         )
             where T1 : struct, ISerializedMember<T2>
             where T2 : MemberInfo

@@ -38,9 +38,9 @@ namespace EncosyTower.Modules.Types.Internals
         [SerializeField] private SerializedType _declaringType;
         [SerializeField] private BindingFlags _bindingFlags;
 
-        public SerializedMethod(MethodInfo memberInfo, SerializedTypeStore typeStore)
+        public SerializedMethod(MethodInfo memberInfo, SerializedType declaringType)
         {
-            _declaringType = new SerializedType(memberInfo.DeclaringType, typeStore);
+            _declaringType = declaringType;
             _methodName = memberInfo.Name;
 
             BindingFlags bindingFlags = default;

@@ -32,9 +32,9 @@ namespace EncosyTower.Modules.Types.Internals
     internal sealed class SerializedTypeCache
     {
         [SerializeField] internal List<SerializedDerivedTypes> _typesDerivedFromTypeList = new();
-        [SerializeField] internal List<SerializedDecoratedMembers<SerializedType>> _typesWithAttributeList = new();
-        [SerializeField] internal List<SerializedDecoratedMembers<SerializedField>> _fieldsWithAttributeList = new();
-        [SerializeField] internal List<SerializedDecoratedMembers<SerializedMethod>> _methodsWithAttributeList = new();
+        [SerializeField] internal List<SerializedAnnotatedMembers<SerializedType>> _typesWithAttributeList = new();
+        [SerializeField] internal List<SerializedAnnotatedMembers<SerializedField>> _fieldsWithAttributeList = new();
+        [SerializeField] internal List<SerializedAnnotatedMembers<SerializedMethod>> _methodsWithAttributeList = new();
         [SerializeField] internal SerializedTypeStore _typeStore = new();
     }
 }

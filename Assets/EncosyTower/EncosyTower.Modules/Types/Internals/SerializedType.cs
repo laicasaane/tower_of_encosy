@@ -35,9 +35,9 @@ namespace EncosyTower.Modules.Types.Internals
     {
         [SerializeField] private int _typeStoreIndex;
 
-        public SerializedType(Type memberInfo, SerializedTypeStore typeStore)
+        public SerializedType(int typeStoreIndex)
         {
-            _typeStoreIndex = typeStore.Add(memberInfo);
+            _typeStoreIndex = typeStoreIndex;
         }
 
         public readonly Type Deserialize(SerializedTypeStore typeStore)

@@ -29,10 +29,11 @@ using UnityEngine;
 namespace EncosyTower.Modules.Types.Internals
 {
     /// <summary>
-    /// Represents in serializable form all MemberInfo derived types that are decorated with an attribute.
+    /// Represents in serializable form all MemberInfo derived types that are annotated with an attribute.
     /// </summary>
     [Serializable]
-    internal class SerializedDecoratedMembers<T> where T : struct, ISerializedMember
+    internal class SerializedAnnotatedMembers<T>
+        where T : struct, ISerializedMember
     {
         [SerializeField] internal string _assemblyName = string.Empty;
         [SerializeField] internal SerializedType _attributeType;
