@@ -83,7 +83,7 @@ namespace EncosyTower.Modules.Types
         private static TypeCacheSourceRuntime LoadTypeCacheSourceRuntime_EnforcedMode()
         {
             var cache = new SerializedTypeCache();
-            Editor.SerializedTypeCacheEditor.Regenerate(cache);
+            Editor.SerializedTypeCacheEditor.Regenerate(cache, out _);
             return new(new(cache));
         }
 #pragma warning restore IDE0051 // Remove unused private members

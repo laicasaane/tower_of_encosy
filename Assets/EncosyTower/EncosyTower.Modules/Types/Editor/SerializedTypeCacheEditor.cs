@@ -53,7 +53,7 @@ namespace EncosyTower.Modules.Types.Editor
             }
         }
 
-        public static void Regenerate(this SerializedTypeCache cache)
+        public static void Regenerate(this SerializedTypeCache cache, out LinkXmlTypeStore linkXmlTypeStore)
         {
             var typesDerivedFromTypeList = cache._typesDerivedFromTypeList = new();
             var typesWithAttributeList = cache._typesWithAttributeList = new();
@@ -72,6 +72,7 @@ namespace EncosyTower.Modules.Types.Editor
             var tempFieldsWithAttributeList = new List<TempSerializedAnnonatedMembers<FieldInfo>>();
             var tempMethodsWithAttributeList = new List<TempSerializedAnnonatedMembers<MethodInfo>>();
             var tempTypeStore = new TempTypeStore();
+            linkXmlTypeStore = new LinkXmlTypeStore();
 
             GetTypesFromThisAttribute<CacheTypesDerivedFromThisTypeAttribute>(
                 playerAssemblyNames, tempTypeStore, baseTypeToAssemblyMap
@@ -106,19 +107,19 @@ namespace EncosyTower.Modules.Types.Editor
             );
 
             PrepareTypesDerivedFromTypeList(
-                playerAssemblyNames, baseTypeToAssemblyMap, tempTypeStore, tempTypesDerivedFromTypeList
+                playerAssemblyNames, baseTypeToAssemblyMap, tempTypeStore, linkXmlTypeStore, tempTypesDerivedFromTypeList
             );
 
             PrepareTypesWithAttributeList(
-                playerAssemblyNames, typeAttribToAssemblyMap, tempTypeStore, tempTypesWithAttributeList
+                playerAssemblyNames, typeAttribToAssemblyMap, tempTypeStore, linkXmlTypeStore, tempTypesWithAttributeList
             );
 
             PrepareFieldsWithAttributeList(
-                playerAssemblyNames, fieldAttribToAssemblyMap, tempTypeStore, tempFieldsWithAttributeList
+                playerAssemblyNames, fieldAttribToAssemblyMap, tempTypeStore, linkXmlTypeStore, tempFieldsWithAttributeList
             );
 
             PrepareMethodsWithAttributeList(
-                playerAssemblyNames, methodAttribToAssemblyMap, tempTypeStore, tempMethodsWithAttributeList
+                playerAssemblyNames, methodAttribToAssemblyMap, tempTypeStore, linkXmlTypeStore, tempMethodsWithAttributeList
             );
 
             BuildTypeStore(typeStore, tempTypeStore);
@@ -276,6 +277,7 @@ namespace EncosyTower.Modules.Types.Editor
               HashSet<string> playerAssemblyNames
             , Dictionary<Type, HashSet<string>> assemblyNameMap
             , TempTypeStore typeStore
+            , LinkXmlTypeStore linkXmlTypeStore
             , List<TempSerializedDerivedTypes> result
         )
         {
@@ -314,7 +316,9 @@ namespace EncosyTower.Modules.Types.Editor
 
                     foreach (var type in filteredTypes)
                     {
-                        derivedTypes.Add(typeStore.Add(type));
+                        var indexedType = typeStore.Add(type);
+                        derivedTypes.Add(indexedType);
+                        linkXmlTypeStore.Add(indexedType);
                     }
 
                     result.Add(item);
@@ -326,6 +330,7 @@ namespace EncosyTower.Modules.Types.Editor
               HashSet<string> playerAssemblyNames
             , Dictionary<Type, HashSet<string>> assemblyNameMap
             , TempTypeStore typeStore
+            , LinkXmlTypeStore linkXmlTypeStore
             , List<TempSerializedAnnonatedMembers<Type>> result
         )
         {
@@ -364,9 +369,13 @@ namespace EncosyTower.Modules.Types.Editor
 
                     foreach (var type in filteredTypes)
                     {
+                        var indexedType = typeStore.Add(type);
+
                         matches.Add(new MemberRef<Type>(type) {
-                            declaringType = typeStore.Add(type),
+                            declaringType = indexedType,
                         });
+
+                        linkXmlTypeStore.Add(indexedType);
                     }
 
                     result.Add(item);
@@ -378,6 +387,7 @@ namespace EncosyTower.Modules.Types.Editor
               HashSet<string> playerAssemblyNames
             , Dictionary<Type, HashSet<string>> assemblyNameMap
             , TempTypeStore typeStore
+            , LinkXmlTypeStore linkXmlTypeStore
             , List<TempSerializedAnnonatedMembers<FieldInfo>> result
         )
         {
@@ -421,9 +431,13 @@ namespace EncosyTower.Modules.Types.Editor
 
                     foreach (var member in filteredMembers)
                     {
+                        var indexedType = typeStore.Add(member.DeclaringType);
+
                         matches.Add(new MemberRef<FieldInfo>(member) {
-                            declaringType = typeStore.Add(member.DeclaringType),
+                            declaringType = indexedType,
                         });
+
+                        linkXmlTypeStore.Add(indexedType, member);
                     }
 
                     result.Add(item);
@@ -435,6 +449,7 @@ namespace EncosyTower.Modules.Types.Editor
               HashSet<string> playerAssemblyNames
             , Dictionary<Type, HashSet<string>> assemblyNameMap
             , TempTypeStore typeStore
+            , LinkXmlTypeStore linkXmlTypeStore
             , List<TempSerializedAnnonatedMembers<MethodInfo>> result
         )
         {
@@ -478,9 +493,13 @@ namespace EncosyTower.Modules.Types.Editor
 
                     foreach (var member in filteredMembers)
                     {
+                        var indexedType = typeStore.Add(member.DeclaringType);
+
                         matches.Add(new MemberRef<MethodInfo>(member) {
-                            declaringType = typeStore.Add(member.DeclaringType),
+                            declaringType = indexedType,
                         });
+
+                        linkXmlTypeStore.Add(indexedType, member);
                     }
 
                     result.Add(item);
@@ -498,13 +517,12 @@ namespace EncosyTower.Modules.Types.Editor
 
             foreach (var assembly in assemblies)
             {
-                var types = assemblyToTypesMap[assembly];
-                var typeRefs = types.Values.ToList();
-                typeRefs.Sort(static (x, y) => string.CompareOrdinal(x.Value.FullName, y.Value.FullName));
+                var types = assemblyToTypesMap[assembly].Values.ToList();
+                types.Sort(static (x, y) => string.CompareOrdinal(x.Type.FullName, y.Type.FullName));
 
-                foreach (var typeRef in typeRefs)
+                foreach (var type in types)
                 {
-                    typeRef.index = dest.Add(typeRef.Value);
+                    type.index = dest.Add(type.Type);
                 }
             }
         }
@@ -626,25 +644,23 @@ namespace EncosyTower.Modules.Types.Editor
                     matches.Add(new(tempMatch.Member, new(tempMatch.declaringType.index)));
                 }
 
+                matches.Sort(static (x, y) => x._declaringType._typeStoreIndex.CompareTo(y._declaringType._typeStoreIndex));
                 dest.Add(item);
             }
-        }
 
-        private record class IndexedRef<T>(T Value)
-        {
-            public int index;
+            dest.Sort(static (x, y) => x._attributeType._typeStoreIndex.CompareTo(y._attributeType._typeStoreIndex));
         }
 
         private record class MemberRef<T>(T Member) where T : MemberInfo
         {
-            public IndexedRef<Type> declaringType;
+            public IndexedType declaringType;
         }
 
         private class TempTypeStore
         {
-            public Dictionary<SystemAssembly, Dictionary<Type, IndexedRef<Type>>> assemblyToTypesMap = new();
+            public Dictionary<SystemAssembly, Dictionary<Type, IndexedType>> assemblyToTypesMap = new();
 
-            public IndexedRef<Type> Add(Type type)
+            public IndexedType Add(Type type)
             {
                 var assembly = type.Assembly;
 
@@ -666,15 +682,15 @@ namespace EncosyTower.Modules.Types.Editor
         private class TempSerializedDerivedTypes
         {
             public string assemblyName;
-            public IndexedRef<Type> baseType;
-            public FasterList<IndexedRef<Type>> derivedTypes = new();
+            public IndexedType baseType;
+            public FasterList<IndexedType> derivedTypes = new();
         }
 
         private class TempSerializedAnnonatedMembers<T>
             where T : MemberInfo
         {
             public string assemblyName;
-            public IndexedRef<Type> attributeType;
+            public IndexedType attributeType;
             public FasterList<MemberRef<T>> matches = new();
         }
     }

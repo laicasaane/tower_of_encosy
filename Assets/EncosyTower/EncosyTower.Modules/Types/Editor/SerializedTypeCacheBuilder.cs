@@ -27,7 +27,9 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using EncosyTower.Modules.CodeGen;
 using EncosyTower.Modules.Types.Internals;
 using UnityEditor;
 using UnityEditor.Build;
@@ -50,9 +52,14 @@ namespace EncosyTower.Modules.Types.Editor
         private const string ASSET_FILE_NAME = nameof(SerializedTypeCacheAsset);
 
         /// <summary>
+        /// The root directory at which the <see cref="SerializedTypeCacheAsset"/> will be created.
+        /// </summary>
+        private const string ASSET_ROOT_DIRECTORY = $"Assets/{nameof(RuntimeTypeCache)}";
+
+        /// <summary>
         /// The directory at which the <see cref="SerializedTypeCacheAsset"/> will be created.
         /// </summary>
-        private const string ASSET_DIRECTORY = $"Assets/{nameof(Resources)}/{nameof(RuntimeTypeCache)}";
+        private const string ASSET_DIRECTORY = $"{ASSET_ROOT_DIRECTORY}/{nameof(Resources)}";
 
         /// <summary>
         /// The path at which the transitory <see cref="SerializedTypeCacheAsset"/> will be created.
@@ -74,6 +81,11 @@ namespace EncosyTower.Modules.Types.Editor
         /// </summary>
         private const string ASSET_JSON_FILE_PATH_DEBUG = $"Temp/{ASSET_FILE_NAME_DEBUG}.json";
 
+        /// <summary>
+        /// The path at which the 'link.xml' file will be created.
+        /// </summary>
+        private const string LINK_XML_FILE_PATH = $"{ASSET_ROOT_DIRECTORY}/link.xml";
+
         [MenuItem("Encosy Tower/Runtime Type Cache/Create Serialized Type Cache Asset")]
         private static void CreateAsset()
         {
@@ -81,7 +93,7 @@ namespace EncosyTower.Modules.Types.Editor
             {
                 // Generate type cache asset
                 var asset = ScriptableObject.CreateInstance<SerializedTypeCacheAsset>();
-                asset._cache.Regenerate();
+                asset._cache.Regenerate(out var linkXmlTypeStore);
 
                 // Serialize asset to temp folder for debug inspection
                 asset.name = ASSET_FILE_NAME_DEBUG;
@@ -116,6 +128,8 @@ namespace EncosyTower.Modules.Types.Editor
                 preloadedAssets.RemoveAll(static obj => obj == false);
 
                 PlayerSettings.SetPreloadedAssets(preloadedAssets.ToArray());
+
+                CreateLinkXmlFile(linkXmlTypeStore);
             }
             catch (Exception)
             {
@@ -135,6 +149,98 @@ namespace EncosyTower.Modules.Types.Editor
             preloadedAssets.RemoveAll(static obj => obj == false || obj is SerializedTypeCacheAsset);
 
             PlayerSettings.SetPreloadedAssets(preloadedAssets.ToArray());
+        }
+
+        private static void CreateLinkXmlFile(LinkXmlTypeStore linkXmlTypeStore)
+        {
+            var p = Printer.DefaultLarge;
+            var store = linkXmlTypeStore.Store;
+            var assemblies = store.Keys.ToList();
+            assemblies.Sort(static (x, y) => string.CompareOrdinal(x.FullName, y.FullName));
+
+            p.OpenScope("<linker>");
+            {
+                foreach (var assembly in assemblies)
+                {
+                    var typeToMembersMap = store[assembly];
+
+                    if (typeToMembersMap.Count < 1)
+                    {
+                        continue;
+                    }
+
+                    p.PrintBeginLine("<assembly fullname=\"").Print(assembly.FullName).PrintEndLine("\">");
+                    p = p.IncreasedIndent();
+                    {
+                        var types = typeToMembersMap.Keys.ToList();
+                        types.Sort(static (x, y) => x.index.CompareTo(y.index));
+
+                        foreach (var type in types)
+                        {
+                            var members = typeToMembersMap[type];
+                            p.PrintBeginLine("<type fullname=\"").Print(type.Type.FullName);
+
+                            if (members.Count < 1)
+                            {
+                                p.PrintEndLine("\" />");
+                                continue;
+                            }
+
+                            p.PrintEndLine("\">");
+                            p = p.IncreasedIndent();
+                            {
+                                var sortedMembers = members.OrderBy(static x => x.MemberType).ToList();
+
+                                foreach (var member in sortedMembers)
+                                {
+                                    if (member is FieldInfo field)
+                                    {
+                                        p.PrintBeginLine("<field signature=\"")
+                                            .Print(field.FieldType.FullName)
+                                            .Print(" ")
+                                            .Print(field.Name)
+                                            .PrintEndLine("\" />");
+                                    }
+                                    else if (member is MethodInfo method)
+                                    {
+                                        p.PrintBeginLine("<method signature=\"")
+                                            .Print(method.ReturnType.FullName)
+                                            .Print(" ")
+                                            .Print(method.Name)
+                                            .Print("(");
+
+                                        var args = method.GetParameters().AsSpan();
+                                        var argsLength = args.Length;
+
+                                        for (var k = 0; k < argsLength; k++)
+                                        {
+                                            p.Print(args[k].ParameterType.FullName);
+
+                                            if (k < argsLength - 1)
+                                            {
+                                                p.Print(",");
+                                            }
+                                        }
+
+                                        p.Print(")").PrintEndLine("\" />");
+                                    }
+                                }
+                            }
+                            p = p.DecreasedIndent();
+                            p.PrintLine("</type>");
+                        }
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintLine("</assembly>");
+                }
+            }
+            p.CloseScope("</linker>");
+            p.PrintEndLine();
+
+            File.WriteAllText(LINK_XML_FILE_PATH, p.Result);
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
 
         /// <inheritdoc />
