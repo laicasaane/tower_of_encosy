@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Modules.Logging;
+using EncosyTower.Modules.PresetIds;
+using EncosyTower.Modules.Types;
 using UnityEngine;
 
 namespace EncosyTower.Modules.Vaults
@@ -112,7 +114,7 @@ namespace EncosyTower.Modules.Vaults
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Id2 ToId2<T>(Id<T> id)
-            => TypeId<T>.Value.ToId2(id);
+            => Type<T>.Id.ToId2(id);
 
         private static Option<T> TryCast<T>(Id2 id, object obj, UnityObject context = null)
         {
@@ -150,10 +152,10 @@ namespace EncosyTower.Modules.Vaults
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfNotReferenceType<T>()
         {
-            if (TypeCache<T>.IsUnmanaged || TypeCache<T>.IsValueType)
+            if (Type<T>.IsUnmanaged || Type<T>.IsValueType)
             {
                 throw new InvalidCastException(
-                    $"\"{TypeCache<T>.Type}\" is not a reference type"
+                    $"\"{Type<T>.Value}\" is not a reference type"
                 );
             }
         }

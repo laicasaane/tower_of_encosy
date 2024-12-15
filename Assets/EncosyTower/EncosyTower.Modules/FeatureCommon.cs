@@ -25,13 +25,8 @@ namespace EncosyTower.Modules
     [RequiresPackage(PackageRegistry.OpenUpm, "com.cysharp.unitask", isOptional: true)]
 #endif
 
-    [RequiresPackage(PackageRegistry.OpenUpm, "com.draconware-dev.span-extensions.net.unity")]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.gilzoide.easy-project-settings")]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.needle.console", isOptional: true)]
-    [RequiresPackage(PackageRegistry.OpenUpm, "com.annulusgames.alchemy", isOptional: true)]
-    [RequiresPackage(PackageRegistry.OpenUpm, "com.annulusgames.debug-ui", isOptional: true)]
-    [RequiresPackage(PackageRegistry.OpenUpm, "com.annulusgames.lit-motion", isOptional: true)]
-    [RequiresPackage(PackageRegistry.OpenUpm, "com.annulusgames.tween-playables", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.browar.editor-toolbox", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.xarbrough.renamer", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.xarbrough.scriptable-object-creator", isOptional: true)]

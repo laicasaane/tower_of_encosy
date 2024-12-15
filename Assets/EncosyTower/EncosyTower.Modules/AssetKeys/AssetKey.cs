@@ -170,7 +170,7 @@ namespace EncosyTower.Modules
             /// <summary>
             /// Gets a boolean value indicating whether the key is valid.
             /// </summary>
-            public bool IsValid
+            public readonly bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => string.IsNullOrEmpty(_value) == false;
@@ -179,7 +179,7 @@ namespace EncosyTower.Modules
             /// <summary>
             /// Gets the value of the key.
             /// </summary>
-            public string Value
+            public readonly string Value
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _value;
@@ -231,7 +231,7 @@ namespace EncosyTower.Modules
             /// if it is a <see cref="Serializable"/> and their values are equal.
             /// </remarks>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override readonly bool Equals(object obj)
+            public readonly override bool Equals(object obj)
                 => obj is Serializable other && Equals(other);
 
             /// <summary>
@@ -241,7 +241,7 @@ namespace EncosyTower.Modules
             /// The hash code for this <see cref="Serializable"/>.
             /// </returns>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override readonly int GetHashCode()
+            public readonly override int GetHashCode()
                 => _value.GetHashCode(StringComparison.Ordinal);
 
             /// <summary>
@@ -251,7 +251,7 @@ namespace EncosyTower.Modules
             /// The value of the key.
             /// </returns>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override string ToString()
+            public readonly override string ToString()
                 => _value ?? string.Empty;
 
             /// <summary>

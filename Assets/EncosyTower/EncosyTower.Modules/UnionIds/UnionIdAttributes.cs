@@ -27,7 +27,7 @@ namespace EncosyTower.Modules.UnionIds
     }
 
     /// <summary>
-    /// Place this attribute on a struct decorated with [UnionId] to specify the kinds of values for the union id.
+    /// Place this attribute on a struct annotateed with [UnionId] to specify the kinds of values for the union id.
     /// </summary>
     /// <seealso cref="UnionIdAttribute"/>
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true)]
@@ -65,7 +65,7 @@ namespace EncosyTower.Modules.UnionIds
 
         public string DisplayName { get; }
 
-        /// <param name="idType">The type that is decorated with [UnionId].</param>
+        /// <param name="idType">The type that is annotated with [UnionId].</param>
         public KindForUnionIdAttribute(Type idType, ulong order, string displayName = "")
         {
             IdType = idType;

@@ -3,7 +3,6 @@
     "rootNamespace": "EncosyTower.Modules.Mvvm.Unity",
     "references": [
         "EncosyTower.Modules",
-        "SpanExtensions.Net.Unity",
         "UniTask",
         "UniTask.Addressables",
         "Unity.Addressables",

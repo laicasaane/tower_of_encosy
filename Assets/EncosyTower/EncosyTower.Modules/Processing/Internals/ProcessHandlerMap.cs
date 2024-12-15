@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.Types;
 using UnityEngine;
 
 namespace EncosyTower.Modules.Processing.Internals

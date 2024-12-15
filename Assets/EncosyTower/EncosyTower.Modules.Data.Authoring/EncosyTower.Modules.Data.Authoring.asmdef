@@ -10,7 +10,6 @@
         "BakingSheet.Json",
         "EncosyTower.Modules",
         "EncosyTower.Modules.Editor",
-        "SpanExtensions.Net.Unity",
         "UniTask",
         "UniTask.Addressables",
         "Unity.Addressables",

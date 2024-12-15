@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.Types;
 
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.PresetIds
 {
     public readonly record struct PresetId(Id Value)
     {
@@ -26,6 +27,6 @@ namespace EncosyTower.Modules
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Id2(PresetId value)
-            => TypeId<PresetId>.Value.ToId2(value);
+            => Type<PresetId>.Id.ToId2(value);
     }
 }

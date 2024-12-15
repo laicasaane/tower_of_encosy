@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using EncosyTower.Modules.Types;
 using UnityEngine;
 
 namespace EncosyTower.Modules.Processing.Internals.Async
@@ -14,7 +15,7 @@ namespace EncosyTower.Modules.Processing.Internals.Async
 
         static AsyncProcessHandler()
         {
-            s_typeId = TypeId.Get<Func<TRequest, Awaitable>>();
+            s_typeId = (TypeId)Type<Func<TRequest, Awaitable>>.Id;
         }
 
         public AsyncProcessHandler(Func<TRequest, Awaitable> process)
@@ -42,7 +43,7 @@ namespace EncosyTower.Modules.Processing.Internals.Async
 
         static AsyncProcessHandler()
         {
-            s_typeId = TypeId.Get<Func<TRequest, Awaitable<TResult>>>();
+            s_typeId = (TypeId)Type<Func<TRequest, Awaitable<TResult>>>.Id;
         }
 
         public AsyncProcessHandler(Func<TRequest, Awaitable<TResult>> process)
@@ -70,7 +71,7 @@ namespace EncosyTower.Modules.Processing.Internals.Async
 
         static CancellableAsyncProcessHandler()
         {
-            s_typeId = TypeId.Get<Func<TRequest, CancellationToken, Awaitable>>();
+            s_typeId = (TypeId)Type<Func<TRequest, CancellationToken, Awaitable>>.Id;
         }
 
         public CancellableAsyncProcessHandler(Func<TRequest, CancellationToken, Awaitable> process)
@@ -98,7 +99,7 @@ namespace EncosyTower.Modules.Processing.Internals.Async
 
         static CancellableAsyncProcessHandler()
         {
-            s_typeId = TypeId.Get<Func<TRequest, CancellationToken, Awaitable<TResult>>>();
+            s_typeId = (TypeId)Type<Func<TRequest, CancellationToken, Awaitable<TResult>>>.Id;
         }
 
         public CancellableAsyncProcessHandler(Func<TRequest, CancellationToken, Awaitable<TResult>> process)

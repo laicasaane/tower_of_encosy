@@ -27,6 +27,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.Types;
 
 namespace EncosyTower.Modules.Collections
 {
@@ -35,7 +36,7 @@ namespace EncosyTower.Modules.Collections
         , IAsMemory<T>, IAsReadOnlyMemory<T>
     {
         internal static readonly EqualityComparer<T> s_comp = EqualityComparer<T>.Default;
-        internal static readonly bool s_shouldPerformMemClear = TypeCache<T>.IsUnmanaged == false;
+        internal static readonly bool s_shouldPerformMemClear = Type<T>.IsUnmanaged == false;
 
         internal T[] _buffer;
         internal int _count;

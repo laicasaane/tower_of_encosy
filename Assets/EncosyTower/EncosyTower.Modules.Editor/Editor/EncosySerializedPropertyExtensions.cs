@@ -2,7 +2,6 @@
 
 using System;
 using System.Text.RegularExpressions;
-using SpanExtensions;
 using UnityEditor;
 
 namespace EncosyTower.Modules.Editor
@@ -13,7 +12,7 @@ namespace EncosyTower.Modules.Editor
 
         public static SerializedProperty FindParentProperty(this SerializedProperty self)
         {
-            var paths = self.propertyPath.Split('.').AsSpan();
+            var paths = self.propertyPath.Split('.');
 
             if (paths.Length <= 1)
             {
@@ -21,7 +20,7 @@ namespace EncosyTower.Modules.Editor
             }
 
             var pathsLength = paths.Length;
-            var parentProperty = self.serializedObject.FindProperty(paths.First());
+            var parentProperty = self.serializedObject.FindProperty(paths[0]);
             var regexPropertyPath = s_regexPropertyPath;
 
             for (var index = 1; index < pathsLength - 1; index++)

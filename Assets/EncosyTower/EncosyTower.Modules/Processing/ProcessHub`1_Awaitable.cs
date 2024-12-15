@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Modules.Logging;
 using EncosyTower.Modules.Processing.Internals;
+using EncosyTower.Modules.Types;
 using UnityEngine;
 
 namespace EncosyTower.Modules.Processing
@@ -51,55 +52,55 @@ namespace EncosyTower.Modules.Processing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest>(Func<TRequest, Awaitable> _)
         {
-            return Unregister(TypeId.Get<Func<TRequest, Awaitable>>());
+            return Unregister((TypeId)Type<Func<TRequest, Awaitable>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest>(Func<TRequest, Awaitable<bool>> _)
         {
-            return Unregister(TypeId.Get<Func<TRequest, Awaitable<bool>>>());
+            return Unregister((TypeId)Type<Func<TRequest, Awaitable<bool>>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, Awaitable<TResult>> _)
         {
-            return Unregister(TypeId.Get<Func<TRequest, Awaitable<TResult>>>());
+            return Unregister((TypeId)Type<Func<TRequest, Awaitable<TResult>>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, Awaitable<Option<TResult>>> _)
         {
-            return Unregister(TypeId.Get<Func<TRequest, Awaitable<Option<TResult>>>>());
+            return Unregister((TypeId)Type<Func<TRequest, Awaitable<Option<TResult>>>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest>(Func<TRequest, CancellationToken, Awaitable> _)
         {
-            return Unregister(TypeId.Get<Func<TRequest, CancellationToken, Awaitable>>());
+            return Unregister((TypeId)Type<Func<TRequest, CancellationToken, Awaitable>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest>(Func<TRequest, CancellationToken, Awaitable<bool>> _)
         {
-            return Unregister(TypeId.Get<Func<TRequest, CancellationToken, Awaitable<bool>>>());
+            return Unregister((TypeId)Type<Func<TRequest, CancellationToken, Awaitable<bool>>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, CancellationToken, Awaitable<TResult>> _)
         {
-            return Unregister(TypeId.Get<Func<TRequest, CancellationToken, Awaitable<TResult>>>());
+            return Unregister((TypeId)Type<Func<TRequest, CancellationToken, Awaitable<TResult>>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, CancellationToken, Awaitable<Option<TResult>>> _)
         {
-            return Unregister(TypeId.Get<Func<TRequest, CancellationToken, Awaitable<Option<TResult>>>>());
+            return Unregister((TypeId)Type<Func<TRequest, CancellationToken, Awaitable<Option<TResult>>>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Awaitable ProcessAsync<TRequest>(TRequest request)
         {
-            if (TryGet(TypeId.Get<Func<TRequest, Awaitable>>(), out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, Awaitable>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest> handler
             )
             {
@@ -121,7 +122,7 @@ namespace EncosyTower.Modules.Processing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Awaitable<bool> TryProcessAsync<TRequest>(TRequest request, bool silent = false)
         {
-            if (TryGet(TypeId.Get<Func<TRequest, Awaitable>>(), out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, Awaitable>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest> handler
             )
             {
@@ -150,7 +151,7 @@ namespace EncosyTower.Modules.Processing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Awaitable<TResult> ProcessAsync<TRequest, TResult>(TRequest request)
         {
-            if (TryGet(TypeId.Get<Func<TRequest, Awaitable<TResult>>>(), out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, Awaitable<TResult>>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest, TResult> handler
             )
             {
@@ -172,7 +173,7 @@ namespace EncosyTower.Modules.Processing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Awaitable<Option<TResult>> TryProcessAsync<TRequest, TResult>(TRequest request, bool silent = false)
         {
-            if (TryGet(TypeId.Get<Func<TRequest, Awaitable<TResult>>>(), out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, Awaitable<TResult>>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest, TResult> handler
             )
             {
@@ -199,7 +200,7 @@ namespace EncosyTower.Modules.Processing
 
         public Awaitable ProcessAsync<TRequest>(TRequest request, CancellationToken token)
         {
-            if (TryGet(TypeId.Get<Func<TRequest, CancellationToken, Awaitable>>(), out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, CancellationToken, Awaitable>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest> handler
             )
             {
@@ -220,7 +221,7 @@ namespace EncosyTower.Modules.Processing
 
         public async Awaitable<bool> TryProcessAsync<TRequest>(TRequest request, CancellationToken token, bool silent = false)
         {
-            if (TryGet(TypeId.Get<Func<TRequest, CancellationToken, Awaitable>>(), out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, CancellationToken, Awaitable>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest> handler
             )
             {
@@ -248,7 +249,7 @@ namespace EncosyTower.Modules.Processing
 
         public Awaitable<TResult> ProcessAsync<TRequest, TResult>(TRequest request, CancellationToken token)
         {
-            if (TryGet(TypeId.Get<Func<TRequest, CancellationToken, Awaitable<TResult>>>(), out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, CancellationToken, Awaitable<TResult>>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest, TResult> handler
             )
             {
@@ -269,7 +270,7 @@ namespace EncosyTower.Modules.Processing
 
         public async Awaitable<Option<TResult>> TryProcessAsync<TRequest, TResult>(TRequest request, CancellationToken token, bool silent = false)
         {
-            if (TryGet(TypeId.Get<Func<TRequest, CancellationToken, Awaitable<TResult>>>(), out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, CancellationToken, Awaitable<TResult>>>.Id, out var result)
                 && result is IAsyncProcessHandler<TRequest, TResult> handler
             )
             {

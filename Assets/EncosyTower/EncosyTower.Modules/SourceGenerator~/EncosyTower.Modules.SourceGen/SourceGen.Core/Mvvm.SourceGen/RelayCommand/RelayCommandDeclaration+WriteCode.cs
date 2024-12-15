@@ -8,6 +8,7 @@ namespace EncosyTower.Modules.Mvvm.RelayCommandSourceGen
         private const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Mvvm.RelayCommandGenerator\", \"1.0.0\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string GENERATED_RELAY_COMMAND = "[global::EncosyTower.Modules.Mvvm.Input.SourceGen.GeneratedRelayCommand({0})]";
+        private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
 
         public string WriteCode()
         {
@@ -93,7 +94,7 @@ namespace EncosyTower.Modules.Mvvm.RelayCommandSourceGen
                     p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
                 }
 
-                p.PrintLine(GENERATED_CODE);
+                p.PrintLine(GENERATED_CODE).PrintLine(EDITOR_BROWSABLE_NEVER);
                 p.PrintLine($"private {typeName} {fieldName};");
                 p.PrintEndLine();
             }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.Types;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
@@ -32,12 +33,12 @@ namespace EncosyTower.Modules.Unions.Converters
         {
             ThrowIfNullOrSizeOfTIsBiggerThanUnionDataSize(converter);
 
-            return s_converters.TryAdd((TypeId)TypeId<T>.Value, converter);
+            return s_converters.TryAdd((TypeId)Type<T>.Id, converter);
         }
 
         public static IUnionConverter<T> GetConverter<T>()
         {
-            if (s_converters.TryGetValue((TypeId)TypeId<T>.Value, out var candidate))
+            if (s_converters.TryGetValue((TypeId)Type<T>.Id, out var candidate))
             {
                 if (candidate is IUnionConverter<T> converterT)
                 {

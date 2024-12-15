@@ -1,31 +1,9 @@
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.PresetIds;
+using EncosyTower.Modules.Types;
 
 namespace EncosyTower.Modules.Vaults
 {
-#if UNITY_EDITOR
-    internal static partial class GlobalValueVaultEditor
-    {
-        private readonly static System.Collections.Generic.Dictionary<TypeId, IClearable> s_vaults = new();
-
-        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Init()
-        {
-            var vaults = s_vaults;
-
-            foreach (var (_, disposable) in vaults)
-            {
-                disposable?.Clear();
-            }
-        }
-
-        public static void Register<T>(ValueVault<T> vault)
-            where T : struct
-        {
-            s_vaults.TryAdd((TypeId)TypeId<T>.Value, vault);
-        }
-    }
-#endif
-
     public static partial class GlobalValueVault<TValue>
         where TValue : struct
     {
@@ -95,4 +73,29 @@ namespace EncosyTower.Modules.Vaults
         public static bool TrySet(Id2 id, TValue value)
             => s_vault.TrySet(id, value);
     }
+
+
+#if UNITY_EDITOR
+    internal static partial class GlobalValueVaultEditor
+    {
+        private readonly static System.Collections.Generic.Dictionary<TypeId, IClearable> s_vaults = new();
+
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void Init()
+        {
+            var vaults = s_vaults;
+
+            foreach (var (_, disposable) in vaults)
+            {
+                disposable?.Clear();
+            }
+        }
+
+        public static void Register<T>(ValueVault<T> vault)
+            where T : struct
+        {
+            s_vaults.TryAdd((TypeId)Type<T>.Id, vault);
+        }
+    }
+#endif
 }

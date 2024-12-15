@@ -7,6 +7,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.Types;
 
 namespace EncosyTower.Modules.Processing.Internals.Sync
 {
@@ -19,7 +20,7 @@ namespace EncosyTower.Modules.Processing.Internals.Sync
 
         static ProcessByStateHandler()
         {
-            s_typeId = (TypeId)TypeId<Action<TRequest>>.Value;
+            s_typeId = (TypeId)Type<Action<TRequest>>.Id;
         }
 
         public ProcessByStateHandler(TState state, Action<TState, TRequest> process)
@@ -58,7 +59,7 @@ namespace EncosyTower.Modules.Processing.Internals.Sync
 
         static ProcessByStateHandler()
         {
-            s_typeId = (TypeId)TypeId<Func<TRequest, TResult>>.Value;
+            s_typeId = (TypeId)Type<Func<TRequest, TResult>>.Id;
         }
 
         public ProcessByStateHandler(TState state, Func<TState, TRequest, TResult> process)

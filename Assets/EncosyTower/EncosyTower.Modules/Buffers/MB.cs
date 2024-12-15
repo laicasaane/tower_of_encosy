@@ -55,13 +55,13 @@ namespace EncosyTower.Modules.Buffers
             _bufferImplementation = mbInternal;
         }
 
-        public int Capacity
+        public readonly int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _bufferImplementation.Capacity;
         }
 
-        public bool IsValid
+        public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _bufferImplementation.IsValid;
@@ -82,13 +82,13 @@ namespace EncosyTower.Modules.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(uint sourceStartIndex, T[] destination, uint destinationStartIndex, uint count)
+        public readonly void CopyTo(uint sourceStartIndex, T[] destination, uint destinationStartIndex, uint count)
         {
             _bufferImplementation.CopyTo(sourceStartIndex, destination, destinationStartIndex, count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Clear()
+        public readonly void Clear()
         {
             _bufferImplementation.Clear();
         }
@@ -100,7 +100,7 @@ namespace EncosyTower.Modules.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyFrom(T[] collection, uint actualSize)
+        public readonly void CopyFrom(T[] collection, uint actualSize)
         {
             _bufferImplementation.CopyFrom(collection, actualSize);
         }
@@ -111,19 +111,19 @@ namespace EncosyTower.Modules.Buffers
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal T[] ToManagedArray()
+        internal readonly T[] ToManagedArray()
         {
             return _bufferImplementation.ToManagedArray();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span<T> AsSpan()
+        public readonly Span<T> AsSpan()
         {
             return _bufferImplementation.AsSpan();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpan<T> AsReadOnlySpan()
+        public readonly ReadOnlySpan<T> AsReadOnlySpan()
         {
             return _bufferImplementation.AsSpan();
         }
@@ -139,19 +139,19 @@ namespace EncosyTower.Modules.Buffers
             _buffer = array;
         }
 
-        public int Capacity
+        public readonly int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _buffer.Length;
         }
 
-        public bool IsValid
+        public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _buffer != null;
         }
 
-        public ref T this[int index]
+        public readonly ref T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
@@ -172,37 +172,37 @@ namespace EncosyTower.Modules.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyFrom(T[] collection, uint actualSize)
+        public readonly void CopyFrom(T[] collection, uint actualSize)
         {
             Array.Copy(collection, 0, _buffer, 0, actualSize);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(uint sourceStartIndex, T[] destination, uint destinationStartIndex, uint count)
+        public readonly void CopyTo(uint sourceStartIndex, T[] destination, uint destinationStartIndex, uint count)
         {
             Array.Copy(_buffer, sourceStartIndex, destination, destinationStartIndex, count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Clear()
+        public readonly void Clear()
         {
             Array.Clear(_buffer, 0, _buffer.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal T[] ToManagedArray()
+        internal readonly T[] ToManagedArray()
         {
             return _buffer;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span<T> AsSpan()
+        public readonly Span<T> AsSpan()
         {
             return _buffer;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpan<T> AsReadOnlySpan()
+        public readonly ReadOnlySpan<T> AsReadOnlySpan()
         {
             return _buffer;
         }

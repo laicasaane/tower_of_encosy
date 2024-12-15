@@ -90,7 +90,7 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
             {
                 case RecordDeclarationSyntax recordSyntax:
                 {
-                    if (recordSyntax.ParameterList is ParameterListSyntax { Parameters: { Count: 1 } }
+                    if (recordSyntax.ParameterList is ParameterListSyntax { Parameters.Count: 1 }
                         && TryGetWrapRecordInfo(recordSyntax, out var candidate)
                         && semanticModel.GetDeclaredSymbol(recordSyntax, token) is INamedTypeSymbol symbol
                         && symbol.HasAttribute(WRAP_RECORD_ATTRIBUTE)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using UnityEngine;
+using EncosyTower.Modules.PresetIds;
 
 namespace EncosyTower.Modules.Vaults
 {

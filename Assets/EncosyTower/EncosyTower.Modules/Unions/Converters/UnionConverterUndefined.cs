@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.Types;
 using UnityEngine;
 
 namespace EncosyTower.Modules.Unions.Converters
@@ -14,11 +15,11 @@ namespace EncosyTower.Modules.Unions.Converters
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Union ToUnion(T value)
-            => new(UnionTypeKind.Undefined, (TypeId)TypeId<T>.Value);
+            => new(UnionTypeKind.Undefined, (TypeId)Type<T>.Id);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Union<T> ToUnionT(T value)
-            => new Union(UnionTypeKind.Undefined, (TypeId)TypeId<T>.Value);
+            => new Union(UnionTypeKind.Undefined, (TypeId)Type<T>.Id);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetValue(in Union union)

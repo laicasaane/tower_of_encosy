@@ -1,9 +1,9 @@
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.Types
 {
     using System;
     using System.Runtime.CompilerServices;
 
-    public readonly partial struct TypeId : IEquatable<TypeId>
+    public readonly partial struct TypeId : IEquatable<TypeId>, IComparable<TypeId>
     {
         public static readonly TypeId Undefined = default;
 
@@ -32,6 +32,10 @@ namespace EncosyTower.Modules
             => _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int CompareTo(TypeId other)
+            => _value.CompareTo(other._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Id(in TypeId id)
             => id._value;
 
@@ -42,12 +46,28 @@ namespace EncosyTower.Modules
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in TypeId lhs, in TypeId rhs)
             => lhs._value != rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <(in TypeId lhs, in TypeId rhs)
+            => lhs._value < rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >(in TypeId lhs, in TypeId rhs)
+            => lhs._value > rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <=(in TypeId lhs, in TypeId rhs)
+            => lhs._value <= rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >=(in TypeId lhs, in TypeId rhs)
+            => lhs._value >= rhs._value;
     }
 }
 
 #if UNITY_COLLECTIONS
 
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.Types
 {
     using System.Runtime.CompilerServices;
     using Unity.Collections;

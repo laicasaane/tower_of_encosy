@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.PresetIds;
+using EncosyTower.Modules.Types;
 
 namespace EncosyTower.Modules.Vaults
 {
@@ -75,6 +77,6 @@ namespace EncosyTower.Modules.Vaults
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Id2 ToId2<T>(Id<T> id)
-            => TypeId<T>.Value.ToId2(id);
+            => Type<T>.Id.ToId2(id);
     }
 }

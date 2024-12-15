@@ -212,8 +212,8 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
 
             if (isSuccess)
             {
-                var salting = node.GetLocation().GetLineSpan().StartLinePosition.Line;
-                fileName = $"{fileName}{postfix}_{stableHashCode}{salting}.g.cs";
+                var salting = node.GetLineNumber();
+                fileName = $"{fileName}{postfix}_{stableHashCode}_{salting}.g.cs";
             }
             else
             {

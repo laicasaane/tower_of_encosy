@@ -11,6 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Modules.Logging;
 using EncosyTower.Modules.Processing.Internals;
+using EncosyTower.Modules.Types;
 using UnityEngine;
 
 namespace EncosyTower.Modules.Processing
@@ -69,25 +70,25 @@ namespace EncosyTower.Modules.Processing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest>(Action<TRequest> _)
         {
-            return Unregister((TypeId)TypeId<Action<TRequest>>.Value);
+            return Unregister((TypeId)Type<Action<TRequest>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest>(Func<TRequest, bool> _)
         {
-            return Unregister((TypeId)TypeId<Func<TRequest, bool>>.Value);
+            return Unregister((TypeId)Type<Func<TRequest, bool>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, TResult> _)
         {
-            return Unregister((TypeId)TypeId<Func<TRequest, TResult>>.Value);
+            return Unregister((TypeId)Type<Func<TRequest, TResult>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, Option<TResult>> _)
         {
-            return Unregister((TypeId)TypeId<Func<TRequest, Option<TResult>>>.Value);
+            return Unregister((TypeId)Type<Func<TRequest, Option<TResult>>>.Id);
         }
 
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
@@ -107,7 +108,7 @@ namespace EncosyTower.Modules.Processing
 
         public void Process<TRequest>(TRequest request)
         {
-            if (TryGet((TypeId)TypeId<Action<TRequest>>.Value, out var result)
+            if (TryGet((TypeId)Type<Action<TRequest>>.Id, out var result)
                 && result is IProcessHandler<TRequest> handler
             )
             {
@@ -128,7 +129,7 @@ namespace EncosyTower.Modules.Processing
 
         public bool TryProcess<TRequest>(TRequest request, bool silent = false)
         {
-            if (TryGet((TypeId)TypeId<Action<TRequest>>.Value, out var result)
+            if (TryGet((TypeId)Type<Action<TRequest>>.Id, out var result)
                 && result is IProcessHandler<TRequest> handler
             )
             {
@@ -155,7 +156,7 @@ namespace EncosyTower.Modules.Processing
 
         public TResult Process<TRequest, TResult>(TRequest request)
         {
-            if (TryGet((TypeId)TypeId<Func<TRequest, TResult>>.Value, out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, TResult>>.Id, out var result)
                 && result is IProcessHandler<TRequest, TResult> handler
             )
             {
@@ -176,7 +177,7 @@ namespace EncosyTower.Modules.Processing
 
         public Option<TResult> TryProcess<TRequest, TResult>(TRequest request, bool silent = false)
         {
-            if (TryGet((TypeId)TypeId<Func<TRequest, TRequest>>.Value, out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, TRequest>>.Id, out var result)
                 && result is IProcessHandler<TRequest, TResult> handler
             )
             {

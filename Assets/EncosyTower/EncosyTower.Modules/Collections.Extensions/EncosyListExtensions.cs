@@ -11,6 +11,14 @@ namespace EncosyTower.Modules.Collections
         public static bool IsNullOrEmpty<T>(this IList<T> list)
             => list == null || list.Count < 1;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void IncreaseCapacityBy<T>([NotNull] this List<T> list, int amount)
+            => list.Capacity += amount;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void IncreaseCapacityTo<T>([NotNull] this List<T> list, int capacity)
+            => list.Capacity = Math.Max(list.Capacity, capacity);
+
         public static void AddRange<T>(
               [NotNull] this List<T> list
             , ReadOnlyMemory<T> collection

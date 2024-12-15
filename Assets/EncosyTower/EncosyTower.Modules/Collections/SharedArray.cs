@@ -376,7 +376,7 @@ namespace EncosyTower.Modules.Collections
                 _current = default;
             }
 
-            public T Current
+            public readonly T Current
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _current.Value();
@@ -422,7 +422,7 @@ namespace EncosyTower.Modules.Collections
                 _current = default;
             }
 
-            object IEnumerator.Current
+            readonly object IEnumerator.Current
             {
                 get
                 {
@@ -434,7 +434,7 @@ namespace EncosyTower.Modules.Collections
                 }
             }
 
-            public void Dispose()
+            public readonly void Dispose()
             {
             }
 

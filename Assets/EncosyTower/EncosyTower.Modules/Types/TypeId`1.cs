@@ -1,17 +1,11 @@
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.Types
 {
     using System;
     using System.Runtime.CompilerServices;
 
-    public readonly partial struct TypeId<T> : IEquatable<TypeId<T>>
+    public readonly partial struct TypeId<T> : IEquatable<TypeId<T>>, IEquatable<TypeId>
+        , IComparable<TypeId<T>>, IComparable<TypeId>
     {
-        private static readonly TypeId<T> s_value;
-
-        static TypeId()
-        {
-            s_value = (TypeId<T>)TypeCache.GetId<T>();
-        }
-
         internal readonly uint _value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -20,19 +14,23 @@ namespace EncosyTower.Modules
             _value = value;
         }
 
-        public static TypeId<T> Value
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => s_value;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(TypeId<T> other)
             => _value == other._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(TypeId other)
+            => _value == other._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
-            => obj is TypeId<T> other && _value == other._value;
+        {
+            return obj switch {
+                TypeId<T> otherT => _value == otherT._value,
+                TypeId other => _value == other._value,
+                _ => false
+            };
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
@@ -43,15 +41,23 @@ namespace EncosyTower.Modules
             => _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int CompareTo(TypeId<T> other)
+            => _value.CompareTo(other._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int CompareTo(TypeId other)
+            => _value.CompareTo(other._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Id<T>(in TypeId<T> id)
             => id._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator TypeId<T>(in TypeId id)
+        public static explicit operator TypeId(in TypeId<T> id)
             => new(id._value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator TypeId(in TypeId<T> id)
+        public static explicit operator TypeId<T>(in TypeId id)
             => new(id._value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -61,12 +67,76 @@ namespace EncosyTower.Modules
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in TypeId<T> lhs, in TypeId<T> rhs)
             => lhs._value != rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(in TypeId<T> lhs, in TypeId rhs)
+            => lhs._value == rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(in TypeId<T> lhs, in TypeId rhs)
+            => lhs._value != rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(in TypeId lhs, in TypeId<T> rhs)
+            => lhs._value == rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(in TypeId lhs, in TypeId<T> rhs)
+            => lhs._value != rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <(in TypeId<T> lhs, in TypeId<T> rhs)
+            => lhs._value < rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >(in TypeId<T> lhs, in TypeId<T> rhs)
+            => lhs._value > rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <(in TypeId<T> lhs, in TypeId rhs)
+            => lhs._value < rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >(in TypeId<T> lhs, in TypeId rhs)
+            => lhs._value > rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <(in TypeId lhs, in TypeId<T> rhs)
+            => lhs._value < rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >(in TypeId lhs, in TypeId<T> rhs)
+            => lhs._value > rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <=(in TypeId<T> lhs, in TypeId<T> rhs)
+            => lhs._value <= rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >=(in TypeId<T> lhs, in TypeId<T> rhs)
+            => lhs._value >= rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <=(in TypeId<T> lhs, in TypeId rhs)
+            => lhs._value <= rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >=(in TypeId<T> lhs, in TypeId rhs)
+            => lhs._value >= rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <=(in TypeId lhs, in TypeId<T> rhs)
+            => lhs._value <= rhs._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >=(in TypeId lhs, in TypeId<T> rhs)
+            => lhs._value >= rhs._value;
     }
 }
 
 #if UNITY_COLLECTIONS
 
-namespace EncosyTower.Modules
+namespace EncosyTower.Modules.Types
 {
     using System.Runtime.CompilerServices;
     using Unity.Collections;

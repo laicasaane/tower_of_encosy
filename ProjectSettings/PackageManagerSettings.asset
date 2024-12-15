@@ -32,20 +32,18 @@ MonoBehaviour:
     m_Url: https://package.openupm.com
     m_Scopes:
     - cat.natsuneko.power-rename
-    - com.annulusgames.debug-ui
-    - com.annulusgames.lit-motion
-    - com.annulusgames.tween-playables
     - com.annulusgames.unity-codegen
     - com.browar.editor-toolbox
     - com.cathei.bakingsheet
     - com.cysharp.unitask
-    - com.draconware-dev.span-extensions.net.unity
     - com.gilzoide.easy-project-settings
     - com.latios.latiosframework
     - com.needle.console
     - com.roytheunissen.assetpalette
     - com.xarbrough.renamer
     - com.xarbrough.scriptable-object-creator
+    - ga.fuquna.rosettaui
+    - ga.fuquna.rosettaui.uitoolkit
     - jp.co.cyberagent.smartaddresser
     - org.nuget.system.runtime.compilerservices.unsafe
     m_IsDefault: 0

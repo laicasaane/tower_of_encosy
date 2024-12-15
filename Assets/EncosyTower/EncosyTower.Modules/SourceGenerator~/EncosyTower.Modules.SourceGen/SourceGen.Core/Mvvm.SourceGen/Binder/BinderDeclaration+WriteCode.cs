@@ -10,7 +10,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
         private const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Mvvm.SourceGen.Binders.BinderGenerator\", \"1.0.0\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string OBSOLETE_METHOD = "[global::System.Obsolete(\"This method is not intended to be use directly by user code.\")]";
-        private const string NEVER_BROWSABLE = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
+        private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
         private const string GENERATED_BINDING_PROPERTY = "[global::EncosyTower.Modules.Mvvm.ViewBinding.SourceGen.GeneratedBindingProperty({0}, typeof({1}))]";
         private const string GENERATED_BINDING_COMMAND = "[global::EncosyTower.Modules.Mvvm.ViewBinding.SourceGen.GeneratedBindingCommand(";
         private const string GENERATED_CONVERTER = "[global::EncosyTower.Modules.Mvvm.ViewBinding.SourceGen.GeneratedConverter({0}, typeof({1}))]";
@@ -333,7 +333,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
                 p.PrintLine($"/// The listener that binds <see cref=\"{member.Symbol.Name}\"/>");
                 p.PrintLine($"/// to the property chosen by <see cref=\"{BindingPropertyName(member)}\"/>.");
                 p.PrintLine($"/// </summary>");
-                p.PrintLine(GENERATED_CODE);
+                p.PrintLine(GENERATED_CODE).PrintLine(EDITOR_BROWSABLE_NEVER);
                 p.PrintLine($"private readonly global::EncosyTower.Modules.Mvvm.ComponentModel.PropertyChangeEventListener<{ClassName}> {ListenerName(member)};");
                 p.PrintEndLine();
             }
@@ -354,7 +354,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
                 p.PrintLine($"/// The relay command that binds <see cref=\"{member.Symbol.Name}\"/>");
                 p.PrintLine($"/// to the command chosen by <see cref=\"{BindingCommandName(member)}\"/>.");
                 p.PrintLine($"/// </summary>");
-                p.PrintLine(GENERATED_CODE);
+                p.PrintLine(GENERATED_CODE).PrintLine(EDITOR_BROWSABLE_NEVER);
 
                 if (member.Parameter == null)
                 {
@@ -758,7 +758,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
                 p.PrintLine($"/// to pass into <see cref=\"{originalMethodName}\"/>.");
                 p.PrintLine($"/// </summary>");
                 p.PrintLine($"/// <remarks>This method is not intended to be use directly by user code.</remarks>");
-                p.PrintLine(NEVER_BROWSABLE).PrintLine(OBSOLETE_METHOD).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(EDITOR_BROWSABLE_NEVER).PrintLine(OBSOLETE_METHOD).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"private void {methodName}(in global::EncosyTower.Modules.Unions.Union union)");
                 p.OpenScope();
                 {

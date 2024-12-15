@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Modules.Logging;
+using EncosyTower.Modules.Types;
 using EncosyTower.Modules.Vaults;
 using Unity.Logging;
 using UnityEngine;
@@ -21,7 +22,7 @@ namespace EncosyTower.Modules.Localization
     /// </summary>
     public static partial class L10n
     {
-        public static readonly Id<Localization> PresetId = TypeId<Localization>.Value;
+        public static readonly Id<Localization> PresetId = Type<Localization>.Id;
 
         private static readonly Dictionary<string, Locale> s_codeToLocaleMap = new();
         private static Func<ReadOnlyMemory<L10nLanguage>> s_getLanguages;

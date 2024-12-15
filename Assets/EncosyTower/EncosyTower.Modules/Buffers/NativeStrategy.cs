@@ -23,12 +23,15 @@
 // SOFTWARE.
 
 #if UNITY_COLLECTIONS
-#if DEBUG || ENABLE_UNITY_COLLECTIONS_CHECKS || UNITY_DOTS_DEBUG
-#define ENABLE_DEBUG_CHECKS
+#if !(UNITY_EDITOR || DEBUG || ENABLE_UNITY_COLLECTIONS_CHECKS || UNITY_DOTS_DEBUG) || DISABLE_ENCOSY_CHECKS
+#define __ENCOSY_NO_VALIDATION__
+#else
+#define __ENCOSY_VALIDATION__
 #endif
 
 using System;
 using System.Runtime.CompilerServices;
+using EncosyTower.Modules.Types;
 using Unity.Collections;
 
 namespace EncosyTower.Modules.Buffers
@@ -43,7 +46,7 @@ namespace EncosyTower.Modules.Buffers
 #if DEBUG && !PROFILE_SVELTO
         static NativeStrategy()
         {
-            if (TypeCache<T>.IsUnmanaged == false)
+            if (Type<T>.IsUnmanaged == false)
                 throw new InvalidOperationException("Only unmanaged data can be stored natively");
         }
 #endif
@@ -57,13 +60,13 @@ namespace EncosyTower.Modules.Buffers
             Alloc(size, allocator, clear);
         }
 
-        public int Capacity
+        public readonly int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _realBuffer.Capacity;
         }
 
-        public bool IsValid
+        public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _realBuffer.IsValid;
@@ -78,7 +81,7 @@ namespace EncosyTower.Modules.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Alloc(int newCapacity, Allocator allocator, bool memClear = true)
         {
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
             if (_realBuffer.ToNativeArray().IsCreated)
                 throw new InvalidOperationException("Cannot allocate an already allocated buffer");
 
@@ -98,7 +101,7 @@ namespace EncosyTower.Modules.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Resize(int newSize, bool copyContent = true, bool memClear = true)
         {
-#if ENABLE_DEBUG_CHECKS
+#if __ENCOSY_VALIDATION__
             if (_nativeAllocator.IsCreated == false || _realBuffer.ToNativeArray().IsCreated == false)
                 throw new InvalidOperationException("Cannot resize an uninitialized buffer");
 #endif
@@ -118,10 +121,10 @@ namespace EncosyTower.Modules.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void FastClear() { }
+        public readonly void FastClear() { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Clear()
+        public readonly void Clear()
             => _realBuffer.Clear();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -129,11 +132,11 @@ namespace EncosyTower.Modules.Buffers
             => _realBuffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span<T> AsSpan()
+        public readonly Span<T> AsSpan()
             => _realBuffer.AsSpan();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpan<T> AsReadOnlySpan()
+        public readonly ReadOnlySpan<T> AsReadOnlySpan()
             => _realBuffer.AsSpan();
 
         public void Dispose()

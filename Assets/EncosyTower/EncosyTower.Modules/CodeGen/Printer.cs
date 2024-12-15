@@ -27,17 +27,6 @@ namespace EncosyTower.Modules.CodeGen
             .Select(i => string.Join("", Enumerable.Repeat(element: TAB, count: i)))
             .ToArray();
 
-        public static Printer Default => new(0);
-
-        public static Printer DefaultLarge => new(0, 1024 * 16);
-
-        /// <summary>
-        /// Get a copy of this printer with the same setting but new output.
-        /// </summary>
-        /// <param name="printer"></param>
-        /// <returns></returns>
-        public static Printer NewCopy(Printer printer) => new(printer._currentIndentIndex);
-
         public Printer(int indentCount)
         {
             System.Diagnostics.Debug.Assert(indentCount < s_tabs.Length);
@@ -57,6 +46,17 @@ namespace EncosyTower.Modules.CodeGen
             _builder = builder;
             _currentIndentIndex = indentCount;
         }
+
+        public static Printer Default => new(0);
+
+        public static Printer DefaultLarge => new(0, 1024 * 16);
+
+        /// <summary>
+        /// Get a copy of this printer with the same setting but new output.
+        /// </summary>
+        /// <param name="printer"></param>
+        /// <returns></returns>
+        public static Printer NewCopy(Printer printer) => new(printer._currentIndentIndex);
 
         /// <summary>
         /// Allows to continue inline printing using a different printer

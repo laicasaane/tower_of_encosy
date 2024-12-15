@@ -64,19 +64,19 @@ namespace EncosyTower.Modules.AtlasedSprites
                 _sprite = sprite;
             }
 
-            public bool IsValid
+            public readonly bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => string.IsNullOrEmpty(_atlas) == false && string.IsNullOrEmpty(_sprite) == false;
             }
 
-            public string Atlas
+            public readonly string Atlas
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _atlas;
             }
 
-            public string Sprite
+            public readonly string Sprite
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _sprite;
@@ -95,15 +95,15 @@ namespace EncosyTower.Modules.AtlasedSprites
                 && string.Equals(_sprite, other._sprite, StringComparison.Ordinal);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override readonly bool Equals(object obj)
+            public readonly override bool Equals(object obj)
                 => obj is Serializable other && Equals(other);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override readonly int GetHashCode()
+            public readonly override int GetHashCode()
                 => HashCode.Combine(_atlas, _sprite);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override string ToString()
+            public readonly override string ToString()
                 => $"{_atlas},{_sprite}";
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

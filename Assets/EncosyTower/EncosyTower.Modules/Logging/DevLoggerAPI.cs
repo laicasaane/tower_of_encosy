@@ -13,7 +13,7 @@ namespace EncosyTower.Modules.Logging
     /// </summary>
     public static partial class DevLoggerAPI
     {
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static CallerInfo GetCallerInfo(
               [CallerLineNumber] int lineNumber = 0
             , [CallerMemberName] string memberName = ""

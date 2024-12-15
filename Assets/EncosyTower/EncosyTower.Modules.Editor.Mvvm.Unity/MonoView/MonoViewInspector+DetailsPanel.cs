@@ -9,6 +9,7 @@ using EncosyTower.Modules.Mvvm.ViewBinding;
 using EncosyTower.Modules.Mvvm.ViewBinding.Adapters;
 using EncosyTower.Modules.Mvvm.ViewBinding.Adapters.Unity;
 using EncosyTower.Modules.Mvvm.ViewBinding.Unity;
+using EncosyTower.Modules.Types;
 using UnityEditor;
 using UnityEngine;
 

@@ -1,4 +1,10 @@
-﻿using System;
+#if !(UNITY_EDITOR || DEBUG) || DISABLE_ENCOSY_CHECKS
+#define __ENCOSY_NO_VALIDATION__
+#else
+#define __ENCOSY_VALIDATION__
+#endif
+
+using System;
 using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Modules
@@ -13,40 +19,65 @@ namespace EncosyTower.Modules
     /// </remarks>
     public readonly struct TypeHash : IEquatable<TypeHash>
     {
-        private const byte VALID = 1;
-
         public static readonly TypeHash Null = new();
 
         private readonly int _value;
-        private readonly byte _isValid;
+
+#if __ENCOSY_VALIDATION__
+        private readonly ByteBool _isValid;
+#endif
 
         private TypeHash(Type type)
         {
             _value = type.GetHashCode();
-            _isValid = VALID;
+
+#if __ENCOSY_VALIDATION__
+            _isValid = true;
+#endif
         }
 
         public override bool Equals(object obj)
-            => obj switch {
-                TypeHash typeHash => _isValid == typeHash._isValid && _value == typeHash._value,
-                int hashCode => _isValid == VALID && _value == hashCode,
-                Type type => _isValid == VALID && _value == type.GetHashCode(),
-                _ => false
+        {
+            if (obj is TypeHash typeHash)
+            {
+                return
+#if __ENCOSY_VALIDATION__
+                    _isValid == typeHash._isValid &&
+#endif
+                    _value == typeHash._value;
+            }
+
+#if __ENCOSY_VALIDATION__
+            if (_isValid == false)
+            {
+                return false;
+            }
+#endif
+
+            return obj switch {
+                int hashCode => _value == hashCode,
+                Type type => _value == type.GetHashCode(),
+                _ => false,
             };
+        }
 
         public bool Equals(TypeHash other)
-            => _isValid == other._isValid && _value == other._value;
+        {
+            return
+#if __ENCOSY_VALIDATION__
+                _isValid == other._isValid &&
+#endif
+                _value == other._value;
+        }
 
         public override int GetHashCode()
         {
-            if (_isValid != VALID)
+#if __ENCOSY_VALIDATION__
+            if (_isValid != false)
             {
-                throw new NullReferenceException(
-                    $"Cannot use an invalid {nameof(TypeHash)} value. " +
-                    $"{nameof(TypeHash)} value must be retrieved from System.Type " +
-                    $"by the implicit operator."
-                );
+                throw GetNullReferenceException();
             }
+#endif
 
             return _value;
         }
@@ -61,10 +92,33 @@ namespace EncosyTower.Modules
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(TypeHash lhs, TypeHash rhs)
-            => lhs._isValid == rhs._isValid && lhs._value == rhs._value;
+        {
+            return
+#if __ENCOSY_VALIDATION__
+                lhs._isValid == rhs._isValid &&
+#endif
+                lhs._value == rhs._value;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(TypeHash lhs, TypeHash rhs)
-            => lhs._isValid != rhs._isValid || lhs._value != rhs._value;
+        {
+            return
+#if __ENCOSY_VALIDATION__
+                lhs._isValid != rhs._isValid ||
+#endif
+                lhs._value != rhs._value;
+        }
+
+#if __ENCOSY_VALIDATION__
+        private static NullReferenceException GetNullReferenceException()
+        {
+            return new NullReferenceException(
+                $"Cannot use an invalid {nameof(TypeHash)} value. " +
+                $"{nameof(TypeHash)} value must be retrieved from System.Type " +
+                $"by the implicit operator."
+            );
+        }
+#endif
     }
 }
