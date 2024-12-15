@@ -53,10 +53,6 @@ Thank you for your contributions to the community. Your works greatly ease my de
       <td><a href='https://github.com/baba-s/Kogane.CheckBoxWindow'>Kogane Check Box Window</a></td>
     </tr>
     <tr>
-      <td>Cathei</td>
-      <td><a href='https://github.com/cathei/BakingSheet'>BakingSheet</a></td>
-    </tr>
-    <tr>
       <td rowspan=2>Chris Yarbrough</td>
       <td><a href='https://github.com/chrisyarbrough/Renamer'>Renamer</a></td>
     </tr>
@@ -96,7 +92,7 @@ Thank you for your contributions to the community. Your works greatly ease my de
       <td><a href='https://github.com/0x7c13/UnityEditor-DarkMode'>DarkMode Mod for Unity Editor on Windows</a></td>
     </tr>
     <tr>
-      <td rowspan=4>KayKit</td>
+      <td rowspan=4>Kay Lousberg</td>
       <td><a href='https://kaylousberg.itch.io/kaykit-adventurers'>Character Pack: Adventurers</a></td>
     </tr>
     <tr>
@@ -120,6 +116,10 @@ Thank you for your contributions to the community. Your works greatly ease my de
     </tr>
     <tr>
       <td><a href='https://github.com/Dreaming381/Latios-Framework-Documentation'>Latios Framework Documentation</a></td>
+    </tr>
+    <tr>
+      <td>Maxwell Keonwoo Kang</td>
+      <td><a href='https://github.com/cathei/BakingSheet'>BakingSheet</a></td>
     </tr>
     <tr>
       <td>Mika Notarnicola</td>
