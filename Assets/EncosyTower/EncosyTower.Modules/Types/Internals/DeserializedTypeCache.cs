@@ -161,6 +161,27 @@ namespace EncosyTower.Modules.Types.Internals
         {
         }
 
+        // TODO: Assembly Name should be replaced by an integer hash so this map can be performant.
+        // However to facilitate such thing, we have to wait for the new CoreCLR and higher .NET version
+        // to incorporate interceptors into source-generated code.
+        // https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-12#interceptors
+        //
+        // The idea is we can generate a method that passes a stable hash for the assembly name
+        // into this map. The code for stable hash is already inside the csproj for EncosyTower.Modules.SourceGen.
+        //
+        // Example:
+        // For this call:
+        //     void DoSomething()
+        //     {
+        //         RuntimeTypeCache.GetTypesDerivedFromType<SomeType>("Some.Assembly.Name");
+        //     }
+        //
+        // We can then generate a intercept method:
+        //     [InterceptsLocation(<file-name.cs>, <line>, <column>)]
+        //     public static void DoSomething_RuntimeTypeCache_GetTypesDerivedFromType_SomeType_Some_Assembly_Name()
+        //     {
+        //         RuntimeTypeCache.GetTypesDerivedFromType<SomeType>(1234567890);
+        //     }
         internal sealed class AssemblyNameToMemberMapMap<T> : Dictionary<string, TypeToMemberMap<T>>
             where T : MemberInfo
         {
