@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -46,3 +48,5 @@ namespace EncosyTower.Modules.Editor.ProjectSetup
         }
     }
 }
+
+#endif
