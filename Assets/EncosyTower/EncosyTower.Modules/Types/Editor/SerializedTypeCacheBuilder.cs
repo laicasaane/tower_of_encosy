@@ -153,6 +153,7 @@ namespace EncosyTower.Modules.Types.Editor
 
         private static void CreateLinkXmlFile(LinkXmlTypeStore linkXmlTypeStore)
         {
+            var unityObjectType = typeof(UnityEngine.Object);
             var p = Printer.DefaultLarge;
             var store = linkXmlTypeStore.Store;
             var assemblies = store.Keys.ToList();
@@ -172,21 +173,30 @@ namespace EncosyTower.Modules.Types.Editor
                     p.PrintBeginLine("<assembly fullname=\"").Print(assembly.FullName).PrintEndLine("\">");
                     p = p.IncreasedIndent();
                     {
-                        var types = typeToMembersMap.Keys.ToList();
-                        types.Sort(static (x, y) => x.index.CompareTo(y.index));
+                        var indexedTypes = typeToMembersMap.Keys.ToList();
+                        indexedTypes.Sort(static (x, y) => x.index.CompareTo(y.index));
 
-                        foreach (var type in types)
+                        foreach (var indexedType in indexedTypes)
                         {
-                            var members = typeToMembersMap[type];
-                            p.PrintBeginLine("<type fullname=\"").Print(type.Type.FullName);
+                            var type = indexedType.Type;
+                            var members = typeToMembersMap[indexedType];
+
+                            p.PrintBeginLine("<type fullname=\"").Print(type.FullName).Print("\"");
+
+                            if (unityObjectType.IsAssignableFrom(type) == false
+                                && type.GetCustomAttribute<System.SerializableAttribute>() != null
+                            )
+                            {
+                                p.Print("serialized=\"true\"");
+                            }
 
                             if (members.Count < 1)
                             {
-                                p.PrintEndLine("\" />");
+                                p.PrintEndLine(" />");
                                 continue;
                             }
 
-                            p.PrintEndLine("\">");
+                            p.PrintEndLine(">");
                             p = p.IncreasedIndent();
                             {
                                 var sortedMembers = members.OrderBy(static x => x.MemberType).ToList();
