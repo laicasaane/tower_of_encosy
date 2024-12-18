@@ -12,6 +12,7 @@
         "UniTask",
         "UniTask.Addressables",
         "Unity.Addressables",
+        "Unity.Addressables.Editor",
         "Unity.Burst",
         "Unity.Collections",
         "Unity.Entities",
