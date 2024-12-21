@@ -6,13 +6,13 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/0-scene-main.unity
+    path: Assets/Game/Scenes/0-scene-main.unity
     guid: 63557b858c41485428ba7522f4bc7c5d
   - enabled: 1
-    path: Assets/Scenes/2-scene-entities-hero.unity
+    path: Assets/Game/Scenes/2-scene-entities-hero.unity
     guid: 384bcd454c0c9bf4a96bcf999b302aba
   - enabled: 1
-    path: Assets/Scenes/3-scene-entities-enemy.unity
+    path: Assets/Game/Scenes/3-scene-entities-enemy.unity
     guid: d273b8a2c70297c469845311233838e2
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: f3741bdbfcb188a4f9330e00e18f0580,
@@ -23,3 +23,4 @@ EditorBuildSettings:
       type: 3}
     com.unity.localization.settings: {fileID: 11400000, guid: a1a43384e5ff3e14db233a70b1817714,
       type: 2}
+  m_UseUCBPForAssetBundles: 0

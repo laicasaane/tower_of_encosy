@@ -76,6 +76,12 @@
       "source": "local-tarball",
       "dependencies": {}
     },
+    "com.kenney.ui-pack-adventure": {
+      "version": "file:com.kenney.ui-pack-adventure-1.0.0.tgz",
+      "depth": 0,
+      "source": "local-tarball",
+      "dependencies": {}
+    },
     "com.latios.latiosframework": {
       "version": "0.11.5",
       "depth": 0,
