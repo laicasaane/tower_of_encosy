@@ -30,6 +30,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using EncosyTower.Modules.CodeGen;
+using EncosyTower.Modules.Logging;
 using EncosyTower.Modules.Types.Internals;
 using UnityEditor;
 using UnityEditor.Build;
@@ -86,8 +87,31 @@ namespace EncosyTower.Modules.Types.Editor
         /// </summary>
         private const string LINK_XML_FILE_PATH = $"{ASSET_ROOT_DIRECTORY}/link.xml";
 
-        [MenuItem("Encosy Tower/Runtime Type Cache/Create Serialized Type Cache Asset")]
-        private static void CreateAsset()
+        /// <summary>
+        /// The path at which the debug copy of 'link.xml' file will be created.
+        /// </summary>
+        private const string LINK_XML_FILE_PATH_DEBUG = $"Temp/{ASSET_FILE_NAME_DEBUG}_link.xml";
+
+        [MenuItem("Encosy Tower/Runtime Type Cache/Create Debug Assets")]
+        private static void Menu_CreateDebugAssets()
+        {
+            CreateAssets(onlyDebug: true);
+
+            DevLoggerAPI.LogInfo($"<a href=\"{ASSET_FILE_PATH_DEBUG}\">{ASSET_FILE_NAME_DEBUG}.asset</a>");
+            DevLoggerAPI.LogInfo($"<a href=\"{ASSET_JSON_FILE_PATH_DEBUG}\">{ASSET_FILE_NAME_DEBUG}.json</a>");
+            DevLoggerAPI.LogInfo($"<a href=\"{LINK_XML_FILE_PATH_DEBUG}\">{ASSET_FILE_NAME_DEBUG}_link.xml</a>");
+        }
+
+        [MenuItem("Encosy Tower/Runtime Type Cache/Create Runtime Assets")]
+        private static void Menu_CreateRuntimeAssets()
+        {
+            CreateAssets(onlyDebug: false);
+
+            DevLoggerAPI.LogInfo($"<a href=\"{ASSET_FILE_PATH}\">{ASSET_FILE_NAME}.asset</a>");
+            DevLoggerAPI.LogInfo($"<a href=\"{LINK_XML_FILE_PATH}\">link.xml</a>");
+        }
+
+        private static void CreateAssets(bool onlyDebug)
         {
             try
             {
@@ -113,23 +137,29 @@ namespace EncosyTower.Modules.Types.Editor
                     File.WriteAllText(ASSET_JSON_FILE_PATH_DEBUG, json);
                 }
 
-                if (Directory.Exists(ASSET_DIRECTORY) == false)
+                if (onlyDebug == false && Directory.Exists(ASSET_DIRECTORY) == false)
                 {
                     Directory.CreateDirectory(ASSET_DIRECTORY);
                 }
 
-                // Create asset so preloaded assets can actually use it
-                asset.name = ASSET_FILE_NAME;
-                AssetDatabase.CreateAsset(asset, ASSET_FILE_PATH);
+                if (onlyDebug == false)
+                {
+                    // Create asset so preloaded assets can actually use it
+                    asset.name = ASSET_FILE_NAME;
+                    AssetDatabase.CreateAsset(asset, ASSET_FILE_PATH);
 
-                var preloadedAssets = PlayerSettings.GetPreloadedAssets().ToList();
+                    var preloadedAssets = PlayerSettings.GetPreloadedAssets().ToList();
 
-                preloadedAssets.Add(asset);
-                preloadedAssets.RemoveAll(static obj => obj == false);
+                    preloadedAssets.Add(asset);
+                    preloadedAssets.RemoveAll(static obj => obj == false);
 
-                PlayerSettings.SetPreloadedAssets(preloadedAssets.ToArray());
+                    PlayerSettings.SetPreloadedAssets(preloadedAssets.ToArray());
 
-                CreateLinkXmlFile(linkXmlTypeStore);
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.Refresh();
+                }
+
+                CreateLinkXmlFile(linkXmlTypeStore, onlyDebug);
             }
             catch (Exception)
             {
@@ -151,7 +181,7 @@ namespace EncosyTower.Modules.Types.Editor
             PlayerSettings.SetPreloadedAssets(preloadedAssets.ToArray());
         }
 
-        private static void CreateLinkXmlFile(LinkXmlTypeStore linkXmlTypeStore)
+        private static void CreateLinkXmlFile(LinkXmlTypeStore linkXmlTypeStore, bool onlyDebug)
         {
             var unityObjectType = typeof(UnityEngine.Object);
             var p = Printer.DefaultLarge;
@@ -247,10 +277,17 @@ namespace EncosyTower.Modules.Types.Editor
             p.CloseScope("</linker>");
             p.PrintEndLine();
 
-            File.WriteAllText(LINK_XML_FILE_PATH, p.Result);
+            if (onlyDebug)
+            {
+                File.WriteAllText(LINK_XML_FILE_PATH_DEBUG, p.Result);
+            }
+            else
+            {
+                File.WriteAllText(LINK_XML_FILE_PATH, p.Result);
 
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+            }
         }
 
         /// <inheritdoc />
@@ -259,7 +296,7 @@ namespace EncosyTower.Modules.Types.Editor
         /// <inheritdoc />
         void IPreprocessBuildWithReport.OnPreprocessBuild(BuildReport report)
         {
-            CreateAsset();
+            CreateAssets(onlyDebug: false);
         }
 
         /// <inheritdoc />
