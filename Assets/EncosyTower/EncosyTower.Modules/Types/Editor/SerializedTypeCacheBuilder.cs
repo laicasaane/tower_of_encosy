@@ -173,12 +173,16 @@ namespace EncosyTower.Modules.Types.Editor
         /// </summary>
         private static void DeleteAndRemoveAsset()
         {
-            AssetDatabase.DeleteAsset(ASSET_FILE_PATH);
+            AssetDatabase.DeleteAsset(ASSET_DIRECTORY);
+            AssetDatabase.DeleteAsset(LINK_XML_FILE_PATH);
 
             var preloadedAssets = PlayerSettings.GetPreloadedAssets().ToList();
             preloadedAssets.RemoveAll(static obj => obj == false || obj is SerializedTypeCacheAsset);
 
             PlayerSettings.SetPreloadedAssets(preloadedAssets.ToArray());
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
 
         private static void CreateLinkXmlFile(LinkXmlTypeStore linkXmlTypeStore, bool onlyDebug)
