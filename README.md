@@ -167,6 +167,10 @@ Thank you for your contributions to the community. Your works greatly ease my de
       <td><a href='https://github.com/sebas77/Svelto.Common'>Svelto.Common</a></td>
     </tr>
     <tr>
+      <td>SolarianZ</td>
+      <td><a href='https://github.com/SolarianZ/UnityBuiltinUIResBrowser'>Unity Editor Built-in UI Resources Browser</a></td>
+    </tr>
+    <tr>
       <td>Stella Cannefax</td>
       <td><a href='https://github.com/stella3d/SharedArray'>SharedArray</a></td>
     </tr>
