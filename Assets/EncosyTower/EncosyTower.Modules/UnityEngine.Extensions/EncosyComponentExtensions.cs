@@ -9,6 +9,18 @@ namespace EncosyTower.Modules
 {
     public static partial class EncosyComponentExtensions
     {
+        public static T GetOrAddComponent<T>([NotNull] this Component self) where T : Component
+        {
+            ThrowIfComponentInvalid(self);
+
+            if (self.TryGetComponent(out T component) == false)
+            {
+                component = self.gameObject.AddComponent<T>();
+            }
+
+            return component;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void MoveToScene([NotNull] this Component self, Scene scene)
         {
