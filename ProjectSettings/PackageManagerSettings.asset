@@ -42,8 +42,6 @@ MonoBehaviour:
     - com.roytheunissen.assetpalette
     - com.xarbrough.renamer
     - com.xarbrough.scriptable-object-creator
-    - ga.fuquna.rosettaui
-    - ga.fuquna.rosettaui.uitoolkit
     - jp.co.cyberagent.smartaddresser
     - org.nuget.system.runtime.compilerservices.unsafe
     m_IsDefault: 0

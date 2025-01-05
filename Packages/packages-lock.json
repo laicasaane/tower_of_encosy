@@ -579,22 +579,6 @@
       },
       "url": "https://package.openupm.com"
     },
-    "ga.fuquna.rosettaui": {
-      "version": "1.8.0",
-      "depth": 1,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://package.openupm.com"
-    },
-    "ga.fuquna.rosettaui.uitoolkit": {
-      "version": "1.7.3",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "ga.fuquna.rosettaui": "1.8.0"
-      },
-      "url": "https://package.openupm.com"
-    },
     "jp.co.cyberagent.smartaddresser": {
       "version": "1.0.9",
       "depth": 0,

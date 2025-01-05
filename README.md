@@ -93,10 +93,6 @@ Thank you for your contributions to the community. Your works greatly ease my de
       <td><a href='https://github.com/draconware-dev/SpanExtensions.Net'>SpanExtensions.Net</a></td>
     </tr>
     <tr>
-      <td>fuqunaga</td>
-      <td><a href='https://github.com/fuqunaga/RosettaUI'>RosettaUI</a></td>
-    </tr>
-    <tr>
       <td>Gil Reis</td>
       <td><a href='https://github.com/gilzoide/unity-easy-project-settings'>Unity Easy Project Settings</a></td>
     </tr>
