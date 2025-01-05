@@ -34,6 +34,7 @@ using EncosyTower.Modules.Logging;
 using EncosyTower.Modules.Types.Caches;
 using EncosyTower.Modules.Types.Internals;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.Compilation;
 
 namespace EncosyTower.Modules.Types.Editor
@@ -43,7 +44,7 @@ namespace EncosyTower.Modules.Types.Editor
     internal static class SerializedTypeCacheEditor
     {
         [MenuItem("Encosy Tower/Runtime Type Cache/Print Player Assemblies")]
-        private static void PrintAssemblies()
+        public static void PrintAssemblies()
         {
             var names = GetPlayerAssemblyNames();
 
@@ -135,17 +136,20 @@ namespace EncosyTower.Modules.Types.Editor
                 || (type.FullName ?? string.Empty).StartsWith("UnityEditorInternal");
         }
 
+        private static bool CanIncludeTests()
+        {
+            var target = EditorUserBuildSettings.activeBuildTarget;
+            var group = BuildPipeline.GetBuildTargetGroup(target);
+            var symbols = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(group));
+            return symbols.Contains("UNITY_INCLUDE_TESTS");
+        }
+
         private static HashSet<string> GetPlayerAssemblyNames()
         {
-            const AssembliesType ASSEMBLIES_TYPE =
-#if UNITY_INCLUDE_TESTS
-                AssembliesType.Player
-#else
-                AssembliesType.PlayerWithoutTestAssemblies
-#endif
-                ;
+            var includeTests = CanIncludeTests();
+            var assembliesType = includeTests ? AssembliesType.Player : AssembliesType.PlayerWithoutTestAssemblies;
 
-            return CompilationPipeline.GetAssemblies(ASSEMBLIES_TYPE)
+            return CompilationPipeline.GetAssemblies(assembliesType)
                 .Select(static x => x.name)
                 .Concat(CompilationPipeline
                     .GetPrecompiledAssemblyPaths(CompilationPipeline.PrecompiledAssemblySources.UnityEngine)
