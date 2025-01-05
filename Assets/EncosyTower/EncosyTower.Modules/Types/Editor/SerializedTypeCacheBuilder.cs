@@ -176,6 +176,13 @@ namespace EncosyTower.Modules.Types.Editor
             AssetDatabase.DeleteAsset(ASSET_DIRECTORY);
             AssetDatabase.DeleteAsset(LINK_XML_FILE_PATH);
 
+            var files = Directory.GetFiles($"{Application.dataPath}/../{ASSET_ROOT_DIRECTORY}");
+
+            if (files.Length < 1)
+            {
+                AssetDatabase.DeleteAsset(ASSET_ROOT_DIRECTORY);
+            }
+
             var preloadedAssets = PlayerSettings.GetPreloadedAssets().ToList();
             preloadedAssets.RemoveAll(static obj => obj == false || obj is SerializedTypeCacheAsset);
 
