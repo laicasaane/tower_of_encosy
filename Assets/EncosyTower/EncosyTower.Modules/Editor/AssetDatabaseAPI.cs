@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using EncosyTower.Modules.Collections;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,12 +12,9 @@ namespace EncosyTower.Modules.Editor
     public static class AssetDatabaseAPI
     {
         /// <summary>
-        /// Find object by full type name with `global::` prefix.
+        /// Find first object by global qualified type name (i.e. with `global::` prefix).
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        public static bool FindObjectByGlobalPrefixType<T>(out T result)
+        public static bool FindFirstObjectByGlobalQualifiedType<T>(out T result)
             where T : UnityEngine.Object
         {
             var candidates = AssetDatabase.FindAssets($"t:global::{typeof(T).FullName}");
@@ -28,7 +26,7 @@ namespace EncosyTower.Modules.Editor
                     var path = AssetDatabase.GUIDToAssetPath(candidate);
                     var asset = AssetDatabase.LoadAssetAtPath<T>(path);
 
-                    if (!asset)
+                    if (asset.IsInvalid())
                     {
                         continue;
                     }
@@ -40,6 +38,31 @@ namespace EncosyTower.Modules.Editor
 
             result = default;
             return false;
+        }
+
+        /// <summary>
+        /// Find all objects by global qualified type name (i.e. with `global::` prefix).
+        /// </summary>
+        public static FasterList<T> FindAllObjectsByGlobalQualifiedType<T>()
+            where T : UnityEngine.Object
+        {
+            var candidates = AssetDatabase.FindAssets($"t:global::{typeof(T).FullName}");
+            var result = new FasterList<T>(candidates.Length);
+
+            foreach (var candidate in candidates)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(candidate);
+                var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+
+                if (asset.IsInvalid())
+                {
+                    continue;
+                }
+
+                result.Add(asset);
+            }
+
+            return result;
         }
 
         public static bool TryCreateScriptableObject<T>(out T result)
