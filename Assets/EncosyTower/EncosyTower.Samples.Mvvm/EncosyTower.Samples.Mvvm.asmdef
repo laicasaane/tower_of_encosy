@@ -3,7 +3,6 @@
     "rootNamespace": "EncosyTower.Samples.Mvvm",
     "references": [
         "EncosyTower.Modules",
-        "Gilzoide.EasyProjectSettings",
         "Latios.Core",
         "Latios.Psyshock",
         "Latios.Transforms",

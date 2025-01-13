@@ -25,11 +25,9 @@ namespace EncosyTower.Modules
     [RequiresPackage(PackageRegistry.OpenUpm, "com.cysharp.unitask", isOptional: true)]
 #endif
 
-    [RequiresPackage(PackageRegistry.OpenUpm, "com.gilzoide.easy-project-settings")]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.needle.console", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.browar.editor-toolbox", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.xarbrough.renamer", isOptional: true)]
-    [RequiresPackage(PackageRegistry.OpenUpm, "com.xarbrough.scriptable-object-creator", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.yasirkula.inspectplus", isOptional: true)]
     internal readonly struct FeatureCommon { }
 }

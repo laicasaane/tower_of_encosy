@@ -3,8 +3,6 @@
     "rootNamespace": "EncosyTower.Modules",
     "references": [
         "AnnulusGames.UnityCodeGen.Editor",
-        "Gilzoide.EasyProjectSettings",
-        "Gilzoide.EasyProjectSettings.Editor",
         "Latios.Core",
         "Latios.Psyshock",
         "Latios.Transforms",

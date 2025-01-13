@@ -4,8 +4,6 @@
     "references": [
         "AnnulusGames.UnityCodeGen.Editor",
         "EncosyTower.Modules",
-        "Gilzoide.EasyProjectSettings",
-        "Gilzoide.EasyProjectSettings.Editor",
         "Latios.Core",
         "Latios.Psyshock",
         "Latios.Transforms",

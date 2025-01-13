@@ -45,13 +45,6 @@
       "dependencies": {},
       "url": "https://package.openupm.com"
     },
-    "com.gilzoide.easy-project-settings": {
-      "version": "1.1.0",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://package.openupm.com"
-    },
     "com.kaykit.character-pack.adventurers": {
       "version": "file:com.kaykit.character-pack.adventurers-1.0.0.tgz",
       "depth": 0,
@@ -566,15 +559,6 @@
       "source": "registry",
       "dependencies": {
         "com.unity.modules.imgui": "1.0.0",
-        "com.unity.test-framework": "1.1.33"
-      },
-      "url": "https://package.openupm.com"
-    },
-    "com.xarbrough.scriptable-object-creator": {
-      "version": "1.0.0",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
         "com.unity.test-framework": "1.1.33"
       },
       "url": "https://package.openupm.com"
