@@ -15,13 +15,16 @@ namespace EncosyTower.Modules.Editor.Settings
         /// </summary>
         public static SettingsProvider GetSettingsProvider<T>(this Settings<T> self) where T : Settings<T>
         {
-            Checks.IsTrue(string.IsNullOrEmpty(Settings<T>.Attribute.DisplayPath) == false);
+            var attribute = Settings<T>.Attribute;
+            var scope = attribute.Usage == SettingsUsage.EditorUser
+                ? SettingsScope.User
+                : SettingsScope.Project;
 
-            return new ScriptableObjectSettingsProvider(
-                  self
-                , Settings<T>.Attribute.Usage == SettingsUsage.EditorUser ? SettingsScope.User : SettingsScope.Project
-                , Settings<T>.Attribute.DisplayPath
-            );
+            var displayPath = string.IsNullOrEmpty(attribute.DisplayPath)
+                ? ObjectNames.NicifyVariableName(typeof(T).Name)
+                : attribute.DisplayPath;
+
+            return new ScriptableObjectSettingsProvider(self, scope, displayPath);
         }
     }
 }
