@@ -39,6 +39,7 @@ MonoBehaviour:
     - com.gilzoide.easy-project-settings
     - com.latios.latiosframework
     - com.needle.console
+    - com.quickeye.ui-toolkit-plus
     - com.roytheunissen.assetpalette
     - com.xarbrough.renamer
     - com.xarbrough.scriptable-object-creator

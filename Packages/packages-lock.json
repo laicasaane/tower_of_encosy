@@ -103,6 +103,13 @@
       "dependencies": {},
       "url": "https://package.openupm.com"
     },
+    "com.quickeye.ui-toolkit-plus": {
+      "version": "3.0.3",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
     "com.roytheunissen.assetpalette": {
       "version": "0.4.7",
       "depth": 0,

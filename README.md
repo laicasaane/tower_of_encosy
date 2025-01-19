@@ -90,6 +90,10 @@ Thank you for your contributions to the community. Your works greatly ease my de
       <td><a href='https://github.com/draconware-dev/SpanExtensions.Net'>SpanExtensions.Net</a></td>
     </tr>
     <tr>
+      <td>Ernest Suryś</td>
+      <td><a href='https://github.com/ErnSur/UI-Toolkit-Plus'>UI Toolkit Plus</a></td>
+    </tr>
+    <tr>
       <td>hadashiA</td>
       <td><a href='https://github.com/hadashiA/UniTaskPubSub'>UniTaskPubSub</a></td>
     </tr>
