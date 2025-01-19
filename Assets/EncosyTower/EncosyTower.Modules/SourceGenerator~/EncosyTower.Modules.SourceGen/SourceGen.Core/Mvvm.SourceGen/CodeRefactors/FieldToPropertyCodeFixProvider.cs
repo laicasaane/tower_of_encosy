@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EncosyTower.Modules.SourceGen;
@@ -40,14 +41,45 @@ namespace EncosyTower.Modules.Mvvm.CodeRefactors
             var declaration = root.FindToken(diagnosticSpan.Start).Parent
                 .AncestorsAndSelf()
                 .OfType<FieldDeclarationSyntax>()
-                .First();
+                .FirstOrDefault();
+
+            if (declaration?.Declaration is null)
+            {
+                return;
+            }
+
+            var variables = declaration.Declaration.Variables;
+            var count = variables.Count;
+
+            if (count < 1)
+            {
+                return;
+            }
+
+            var sb = new StringBuilder();
+            var lastIndex = count - 1;
+
+            for (var i = 0; i < count; i++)
+            {
+                sb.Append('\'');
+                sb.Append(variables[i].Identifier.Text);
+                sb.Append('\'');
+
+                if (i < lastIndex)
+                {
+                    sb.Append(", ");
+                }
+            }
+
+            var title = count > 1
+                ? $"Replace {sb} with properties"
+                : $"Replace {sb} with property";
 
             // Register a code action that will invoke the fix.
             context.RegisterCodeFix(
                 CodeAction.Create(
-                      title: "Replace field by property"
+                      title: title
                     , createChangedSolution: c => MakePropertyAsync(context.Document, declaration, c)
-                    , equivalenceKey: "Replace field by property"
                 )
                 , diagnostic
             );
@@ -136,11 +168,32 @@ namespace EncosyTower.Modules.Mvvm.CodeRefactors
                 }
             }
 
-            var variableDelc = fieldDecl.Declaration.Variables.First();
-            var propName = variableDelc.Identifier.Text.ToPropertyName();
+            var variables = fieldDecl.Declaration.Variables;
+            var count = variables.Count;
+            var newNodes = new List<SyntaxNode>();
+
+            for (var i = 0; i < count; i++)
+            {
+                var variableDecl = variables[i];
+                MakeProperty(fieldDecl, propAttribListList, fieldAttribListList, variableDecl, newNodes);
+            }
+
+            root = root.InsertNodesAfterThenRemove(fieldDecl, newNodes, SyntaxRemoveOptions.KeepNoTrivia);
+            return document.WithSyntaxRoot(root).Project.Solution;
+        }
+
+        private static void MakeProperty(
+              FieldDeclarationSyntax fieldDecl
+            , List<List<AttributeSyntax>> propAttribListList
+            , List<List<AttributeSyntax>> fieldAttribListList
+            , VariableDeclaratorSyntax variableDecl
+            , List<SyntaxNode> newNodes
+        )
+        {
+            var propName = variableDecl.Identifier.Text.ToPropertyName();
 
             var getAccessor = SyntaxFactory.AccessorDeclaration(
-                    kind: SyntaxKind.GetAccessorDeclaration
+                  kind: SyntaxKind.GetAccessorDeclaration
                 , attributeLists: new SyntaxList<AttributeListSyntax>()
                 , modifiers: SyntaxFactory.TokenList()
                 , keyword: SyntaxFactory.Token(SyntaxKind.GetKeyword)
@@ -151,14 +204,14 @@ namespace EncosyTower.Modules.Mvvm.CodeRefactors
             );
 
             var setAccessor = SyntaxFactory.AccessorDeclaration(
-                    kind: SyntaxKind.SetAccessorDeclaration
+                  kind: SyntaxKind.SetAccessorDeclaration
                 , attributeLists: new SyntaxList<AttributeListSyntax>()
                 , modifiers: SyntaxFactory.TokenList()
                 , keyword: SyntaxFactory.Token(SyntaxKind.SetKeyword)
                 , semicolonToken: SyntaxFactory.Token(SyntaxKind.SemicolonToken)
                 , expressionBody: SyntaxFactory.ArrowExpressionClause(
                     SyntaxFactory.InvocationExpression(
-                            SyntaxFactory.IdentifierName($"Set_{propName}")
+                          SyntaxFactory.IdentifierName($"Set_{propName}")
                         , SyntaxFactory.ArgumentList(
                             SyntaxFactory.SingletonSeparatedList(
                                 SyntaxFactory.Argument(SyntaxFactory.IdentifierName("value"))
@@ -215,8 +268,7 @@ namespace EncosyTower.Modules.Mvvm.CodeRefactors
                 propDecl = propDecl.AddAttributeLists(fieldAttribList);
             }
 
-            var newRoot = root.ReplaceNode(fieldDecl, propDecl);
-            return document.WithSyntaxRoot(newRoot).Project.Solution;
+            newNodes.Add(propDecl);
         }
 
         private static (string, AttributeTargets) GetAttributeInfo(

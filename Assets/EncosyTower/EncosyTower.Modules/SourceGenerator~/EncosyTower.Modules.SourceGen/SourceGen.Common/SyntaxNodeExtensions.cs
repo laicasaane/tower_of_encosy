@@ -587,5 +587,22 @@ namespace EncosyTower.Modules.SourceGen
             typename = symbol?.GetSymbolType().ToFullName();
             return symbol;
         }
+
+        public static TRoot InsertNodesAfterThenRemove<TRoot>(
+              this TRoot root
+            , SyntaxNode nodeInList
+            , IEnumerable<SyntaxNode> newNodes
+            , SyntaxRemoveOptions removeOptions
+        )
+            where TRoot : SyntaxNode
+        {
+            root = root.TrackNodes(nodeInList);
+
+            var newNodeInList = root.GetCurrentNode(nodeInList);
+            root = root.InsertNodesAfter(newNodeInList, newNodes);
+
+            var toRemove = root.GetCurrentNode(nodeInList);
+            return root.RemoveNode(toRemove, removeOptions);
+        }
     }
 }

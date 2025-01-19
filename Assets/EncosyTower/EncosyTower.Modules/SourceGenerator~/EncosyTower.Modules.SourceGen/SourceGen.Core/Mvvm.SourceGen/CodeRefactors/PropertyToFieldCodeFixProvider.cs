@@ -40,14 +40,18 @@ namespace EncosyTower.Modules.Mvvm.CodeRefactors
             var declaration = root.FindToken(diagnosticSpan.Start).Parent
                 .AncestorsAndSelf()
                 .OfType<PropertyDeclarationSyntax>()
-                .First();
+                .FirstOrDefault();
+
+            if (declaration?.Identifier.Text is null)
+            {
+                return;
+            }
 
             // Register a code action that will invoke the fix.
             context.RegisterCodeFix(
                 CodeAction.Create(
-                      title: "Replace property by field"
+                      title: $"Replace '{declaration.Identifier.Text}' with field"
                     , createChangedSolution: c => MakePropertyAsync(context.Document, declaration, c)
-                    , equivalenceKey: "Replace property by field"
                 )
                 , diagnostic
             );
