@@ -63,7 +63,7 @@ namespace EncosyTower.Modules.SourceGen
                 foreach (var symbolName in options.PreprocessorSymbolNames)
                 {
                     inUnity2021OrNewer |= symbolName == "UNITY_2021_1_OR_NEWER";
-                    parseOptionsConfig.outputSourceGenFiles |= symbolName == "MODULE_FOUNDATION_OUTPUT_SOURCEGEN_FILES";
+                    parseOptionsConfig.outputSourceGenFiles |= symbolName == "ENCOSY_OUTPUT_SOURCEGEN_FILES";
                 }
 
                 parseOptionsConfig.pathIsInFirstAdditionalTextItem = inUnity2021OrNewer;
