@@ -8,7 +8,8 @@ using EncosyTower.Modules.Settings;
 namespace EncosyTower.Modules.Editor.Settings
 {
     /// <summary>
-    /// A custom inspector for Settings that does not draw the "Script" field.
+    /// A custom inspector for <see cref="Settings{T}"/>
+    /// that does not draw the <code>Script</code> field.
     /// </summary>
     [CustomEditor(typeof(Settings<>), true)]
     public class SettingsEditor : UnityEditor.Editor
@@ -21,7 +22,7 @@ namespace EncosyTower.Modules.Editor.Settings
         // Draws the UI for exposed properties *without* the "Script" field.
         protected new bool DrawDefaultInspector()
         {
-            if (serializedObject.targetObject == null)
+            if (serializedObject.targetObject.IsInvalid())
             {
                 return false;
             }

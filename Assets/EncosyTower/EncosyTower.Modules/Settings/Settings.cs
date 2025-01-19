@@ -6,8 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using EncosyTower.Modules.Editor;
 using EncosyTower.Modules.Logging;
+using EncosyTower.Modules.Types;
 using UnityEditor;
 using UnityEngine;
 
@@ -57,7 +59,7 @@ namespace EncosyTower.Modules.Settings
 
             // Attempt to load the settings asset.
             var filename = attribute.Filename ?? type.Name;
-            var path = $"{GetSettingsPath()}{filename}.asset";
+            var path = $"{SettingsAPI.GetSettingsPath(attribute.Usage)}{filename}.asset";
 
             if (attribute.Usage == SettingsUsage.RuntimeProject)
             {
@@ -134,45 +136,14 @@ namespace EncosyTower.Modules.Settings
             return s_instance;
         }
 
-#if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        private static void Init()
-        {
-            s_attribute = null;
-            s_instance = null;
-        }
-#endif
-
-        /// <summary>
-        /// Returns the full asset path to the settings file.
-        /// </summary>
-        private static string GetSettingsPath()
-        {
-            const string ROOT = "Assets/Settings";
-
-            return Attribute.Usage switch {
-                SettingsUsage.RuntimeProject => $"{ROOT}/Resources/",
-                SettingsUsage.EditorProject => $"{ROOT}/Editor/",
-                SettingsUsage.EditorUser => $"{ROOT}/Editor/User/{GetProjectFolderName()}/",
-                _ => throw new InvalidOperationException(),
-            };
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected static string GetNameWithoutSuffix()
+            => typeof(T).GetNameWithoutSuffix(nameof(Settings<T>));
 
         /// <summary>
         /// Called to validate settings changes.
         /// </summary>
         protected virtual void OnValidate() { }
-
-#if UNITY_EDITOR
-
-        /// <summary>
-        /// The directory name of the current project folder.
-        /// </summary>
-        private static string GetProjectFolderName()
-        {
-            var path = Application.dataPath.Split('/');
-            return path[^2];
-        }
 
         /// <summary>
         /// Sets the specified setting to the desired value and marks the settings
@@ -193,8 +164,12 @@ namespace EncosyTower.Modules.Settings
         /// <summary>
         /// Marks the settings dirty so that it will be saved.
         /// </summary>
-        protected new void SetDirty() => EditorUtility.SetDirty(this);
+        protected new void SetDirty()
+        {
+#if UNITY_EDITOR
+            EditorUtility.SetDirty(this);
 #endif
+        }
 
         /// <summary>
         /// Base class for settings contained by a <see cref="Settings{T}"/> instance.
@@ -207,7 +182,6 @@ namespace EncosyTower.Modules.Settings
             /// </summary>
             protected virtual void OnValidate() { }
 
-#if UNITY_EDITOR
             /// <summary>
             /// Sets the specified setting to the desired value and marks the settings
             /// instance so that it will be saved.
@@ -223,7 +197,6 @@ namespace EncosyTower.Modules.Settings
                 OnValidate();
                 Instance.SetDirty();
             }
-#endif
         }
     }
 }

@@ -23,6 +23,8 @@ namespace EncosyTower.Modules.Editor.Settings
         /// </summary>
         private bool _keywordsBuilt;
 
+        private readonly bool _imguiEnabled;
+
         /// <summary>
         /// Cached editor used to render inspector GUI.
         /// </summary>
@@ -38,29 +40,49 @@ namespace EncosyTower.Modules.Editor.Settings
         /// </summary>
         public SerializedObject SerializedSettings => _serializedSettings ??= new(Settings);
 
-        public ScriptableObjectSettingsProvider(ScriptableObject settings, SettingsScope scope, string displayPath)
+        public ScriptableObjectSettingsProvider(
+              ScriptableObject settings
+            , SettingsScope scope
+            , string displayPath
+            , bool useImgui
+        )
             : base(displayPath, scope)
-            => Settings = settings;
+        {
+            Settings = settings;
+            _imguiEnabled = useImgui;
+        }
 
-        // Called when the settings are displayed in the UI.
+        /// <inheritdoc/>
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
-            _editor = Editor.CreateEditor(Settings);
+            if (_imguiEnabled)
+            {
+                _editor = Editor.CreateEditor(Settings);
+            }
+
             base.OnActivate(searchContext, rootElement);
         }
 
-        // Called when the settings are no longer displayed in the UI.
+        /// <inheritdoc/>
         public override void OnDeactivate()
         {
-            Object.DestroyImmediate(_editor);
+            if (_imguiEnabled && _editor.IsValid())
+            {
+                Object.DestroyImmediate(_editor);
+            }
+
             _editor = null;
+
             base.OnDeactivate();
         }
 
-        // Displays the settings.
+        /// <inheritdoc/>
         public override void OnGUI(string searchContext)
         {
-            if (Settings == null || _editor == null) return;
+            if (Settings.IsInvalid() || _imguiEnabled == false || _editor.IsInvalid())
+            {
+                return;
+            }
 
             // Set label width and indentation to match other settings.
             EditorGUIUtility.labelWidth = 250;
@@ -78,7 +100,7 @@ namespace EncosyTower.Modules.Editor.Settings
             EditorGUIUtility.labelWidth = 0;
         }
 
-        // Build the set of keywords on demand from the settings fields.
+        /// <inheritdoc/>
         public override bool HasSearchInterest(string searchContext)
         {
             if (_keywordsBuilt == false)

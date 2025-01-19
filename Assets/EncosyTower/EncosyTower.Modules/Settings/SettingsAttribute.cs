@@ -36,9 +36,7 @@ namespace EncosyTower.Modules.Settings
         {
             Usage = usage;
             Filename = filename;
-            DisplayPath = displayPath != null
-                ? ((usage == SettingsUsage.EditorUser ? "Preferences/" : "Project/") + displayPath)
-                : string.Empty;
+            DisplayPath = displayPath;
         }
     }
 }
