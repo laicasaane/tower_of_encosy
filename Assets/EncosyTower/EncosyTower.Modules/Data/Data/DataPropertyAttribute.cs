@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace EncosyTower.Modules.Data
 {
@@ -13,7 +13,7 @@ namespace EncosyTower.Modules.Data
 
         public DataPropertyAttribute(Type fieldType)
         {
-            this.FieldType = fieldType;
+            FieldType = fieldType;
         }
     }
 }

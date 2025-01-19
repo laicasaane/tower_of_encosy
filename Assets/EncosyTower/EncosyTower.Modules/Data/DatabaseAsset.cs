@@ -8,26 +8,26 @@ using UnityEngine;
 
 namespace EncosyTower.Modules.Data
 {
-    using TableAssetRef = LazyLoadReference<DataTableAsset>;
+    using LazyTableLoadReference = LazyLoadReference<DataTableAssetBase>;
 
     public class DatabaseAsset : ScriptableObject
     {
         [SerializeField]
-        internal TableAssetRef[] _assetRefs = Array.Empty<TableAssetRef>();
+        internal LazyTableLoadReference[] _assetRefs = new LazyTableLoadReference[0];
 
         [SerializeField]
-        internal TableAssetRef[] _redundantAssetRefs = Array.Empty<TableAssetRef>();
+        internal LazyTableLoadReference[] _redundantAssetRefs = new LazyTableLoadReference[0];
 
-        private readonly Dictionary<string, DataTableAsset> _nameToAsset = new();
-        private readonly Dictionary<Type, DataTableAsset> _typeToAsset = new();
+        private readonly Dictionary<string, DataTableAssetBase> _nameToAsset = new();
+        private readonly Dictionary<Type, DataTableAssetBase> _typeToAsset = new();
 
-        protected IReadOnlyDictionary<string, DataTableAsset> NameToAsset => _nameToAsset;
+        protected IReadOnlyDictionary<string, DataTableAssetBase> NameToAsset => _nameToAsset;
 
-        protected IReadOnlyDictionary<Type, DataTableAsset> TypeToAsset => _typeToAsset;
+        protected IReadOnlyDictionary<Type, DataTableAssetBase> TypeToAsset => _typeToAsset;
 
-        protected ReadOnlyMemory<TableAssetRef> AssetRefs => _assetRefs;
+        protected ReadOnlyMemory<LazyTableLoadReference> AssetRefs => _assetRefs;
 
-        protected ReadOnlyMemory<TableAssetRef> RedundantAssetRefs => _redundantAssetRefs;
+        protected ReadOnlyMemory<LazyTableLoadReference> RedundantAssetRefs => _redundantAssetRefs;
 
         public bool Initialized { get; protected set; }
 
@@ -95,7 +95,7 @@ namespace EncosyTower.Modules.Data
             _typeToAsset.Clear();
         }
 
-        public bool TryGetDataTableAsset([NotNull] string name, out DataTableAsset tableAsset)
+        public bool TryGetDataTableAsset([NotNull] string name, out DataTableAssetBase tableAsset)
         {
             if (Initialized == false)
             {
@@ -119,7 +119,7 @@ namespace EncosyTower.Modules.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetDataTableAsset([NotNull] Type type, out DataTableAsset tableAsset)
+        public bool TryGetDataTableAsset([NotNull] Type type, out DataTableAssetBase tableAsset)
         {
             if (Initialized == false)
             {
@@ -144,7 +144,7 @@ namespace EncosyTower.Modules.Data
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetDataTableAsset<T>(out T tableAsset)
-            where T : DataTableAsset
+            where T : DataTableAssetBase
         {
             if (Initialized == false)
             {
@@ -177,7 +177,7 @@ namespace EncosyTower.Modules.Data
         }
 
         public bool TryGetDataTableAsset<T>([NotNull] string name, out T tableAsset)
-            where T : DataTableAsset
+            where T : DataTableAssetBase
         {
             if (Initialized == false)
             {
@@ -208,7 +208,7 @@ namespace EncosyTower.Modules.Data
         }
 
         [Obsolete("Use other TryGetDataTableAsset overloads instead.", false)]
-        public bool TryGetDataTableAsset([NotNull] Type type, [NotNull] string name, out DataTableAsset tableAsset)
+        public bool TryGetDataTableAsset([NotNull] Type type, [NotNull] string name, out DataTableAssetBase tableAsset)
         {
             if (Initialized == false)
             {
@@ -269,13 +269,13 @@ namespace EncosyTower.Modules.Data
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void LogErrorFoundAssetIsNotValidType<T>(DataTableAsset context)
+        private static void LogErrorFoundAssetIsNotValidType<T>(DataTableAssetBase context)
         {
             DevLoggerAPI.LogError(context, $"The data table asset is not an instance of {typeof(T)}");
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void LogErrorFoundAssetIsNotValidType(Type type, DataTableAsset context)
+        private static void LogErrorFoundAssetIsNotValidType(Type type, DataTableAssetBase context)
         {
             DevLoggerAPI.LogError(context, $"The data table asset is not an instance of {type}");
         }

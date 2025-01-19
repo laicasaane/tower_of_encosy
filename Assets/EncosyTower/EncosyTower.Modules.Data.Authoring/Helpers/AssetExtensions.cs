@@ -1,16 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace EncosyTower.Modules.Data.Authoring
 {
-    using TableAssetRef = LazyLoadReference<DataTableAsset>;
+    using LazyTableLoadReference = LazyLoadReference<DataTableAssetBase>;
 
     public static class AssetExtensions
     {
         public static void AddRange<TDatabaseAsset>(
               this TDatabaseAsset target
-            , DataTableAsset[] assets
+            , DataTableAssetBase[] assets
         )
             where TDatabaseAsset : DatabaseAsset
         {
@@ -19,8 +19,8 @@ namespace EncosyTower.Modules.Data.Authoring
 
         public static void AddRange<TDatabaseAsset>(
               this TDatabaseAsset target
-            , DataTableAsset[] assets
-            , DataTableAsset[] redundantAssets
+            , DataTableAssetBase[] assets
+            , DataTableAssetBase[] redundantAssets
         )
             where TDatabaseAsset : DatabaseAsset
         {
@@ -31,14 +31,14 @@ namespace EncosyTower.Modules.Data.Authoring
         public static void Clear<TDatabaseAsset>(this TDatabaseAsset target)
             where TDatabaseAsset : DatabaseAsset
         {
-            target._assetRefs = Array.Empty<TableAssetRef>();
-            target._redundantAssetRefs = Array.Empty<TableAssetRef>();
+            target._assetRefs = new LazyTableLoadReference[0];
+            target._redundantAssetRefs = new LazyTableLoadReference[0];
         }
 
-        public static TableAssetRef[] ToRefArray(this DataTableAsset[] assets)
+        public static LazyTableLoadReference[] ToRefArray(this DataTableAssetBase[] assets)
         {
             var span = assets.AsSpan();
-            var list = new List<TableAssetRef>(span.Length);
+            var list = new List<LazyTableLoadReference>(span.Length);
 
             foreach (var asset in span)
             {

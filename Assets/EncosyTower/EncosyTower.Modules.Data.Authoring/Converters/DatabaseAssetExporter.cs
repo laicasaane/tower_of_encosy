@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -76,7 +76,7 @@ namespace EncosyTower.Modules.Data.Authoring
             , string savePath
             , string databaseName
             , out TDatabaseAsset databaseAsset
-            , out List<DataTableAsset> dataTableAssetList
+            , out List<DataTableAssetBase> dataTableAssetList
         )
         {
             var databaseAssetPath = Path.Combine(savePath, $"{databaseName}.asset");
@@ -89,7 +89,7 @@ namespace EncosyTower.Modules.Data.Authoring
                 AssetDatabase.CreateAsset(databaseAsset, databaseAssetPath);
             }
 
-            var redundantAssets = new HashSet<DataTableAsset>();
+            var redundantAssets = new HashSet<DataTableAssetBase>();
 
             foreach (var assetRef in databaseAsset._assetRefs)
             {
@@ -102,7 +102,7 @@ namespace EncosyTower.Modules.Data.Authoring
             }
 
             databaseAsset.Clear();
-            dataTableAssetList = new List<DataTableAsset>();
+            dataTableAssetList = new List<DataTableAssetBase>();
 
             var sheetProperties = context.Container.GetSheetProperties();
             var dataSheetContainer = context.Container as DataSheetContainerBase;
@@ -123,7 +123,7 @@ namespace EncosyTower.Modules.Data.Authoring
 
                         var dataTableAssetType = sheetAttrib.DataTableAssetType;
                         var dataTableAssetPath = Path.Combine(savePath, $"{dataTableAssetType.Name}.asset");
-                        var dataTableAsset = AssetDatabase.LoadAssetAtPath<DataTableAsset>(dataTableAssetPath);
+                        var dataTableAsset = AssetDatabase.LoadAssetAtPath<DataTableAssetBase>(dataTableAssetPath);
 
                         if (dataTableAsset == null)
                         {
@@ -149,11 +149,11 @@ namespace EncosyTower.Modules.Data.Authoring
 
                         var dataTableAssetType = sheetAttrib.DataTableAssetType;
                         var dataTableAssetPath = Path.Combine(savePath, $"{dataTableAssetType.Name}.asset");
-                        var dataTableAsset = AssetDatabase.LoadAssetAtPath<DataTableAsset>(dataTableAssetPath);
+                        var dataTableAsset = AssetDatabase.LoadAssetAtPath<DataTableAssetBase>(dataTableAssetPath);
 
                         if (dataTableAsset.IsInvalid())
                         {
-                            dataTableAsset = ScriptableObject.CreateInstance(dataTableAssetType) as DataTableAsset;
+                            dataTableAsset = ScriptableObject.CreateInstance(dataTableAssetType) as DataTableAssetBase;
                             AssetDatabase.CreateAsset(dataTableAsset, dataTableAssetPath);
                         }
 
@@ -237,7 +237,7 @@ namespace EncosyTower.Modules.Data.Authoring
 
         private static void SaveAsset(
               TDatabaseAsset databaseAsset
-            , List<DataTableAsset> dataTableAssets
+            , List<DataTableAssetBase> dataTableAssets
         )
         {
             EditorUtility.SetDirty(databaseAsset);

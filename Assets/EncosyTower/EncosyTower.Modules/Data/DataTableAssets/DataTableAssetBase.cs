@@ -1,47 +1,15 @@
-using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using EncosyTower.Modules.Logging;
+#pragma warning disable CA1040 // Avoid empty interfaces
+
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace EncosyTower.Modules.Data
 {
-    public abstract class DataTableAssetBase<TDataId, TData> : DataTableAsset
-        where TData : IData, IDataWithId<TDataId>
+    public abstract class DataTableAssetBase : ScriptableObject, IDataTableAsset
     {
-        [SerializeField, FormerlySerializedAs("_rows")]
-        private TData[] _entries;
+        internal abstract void SetEntries(object obj);
 
-        public ReadOnlyMemory<TData> Entries
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _entries;
-        }
+        internal protected virtual void Initialize() { }
 
-        protected abstract TDataId GetId(in TData data);
-
-        internal sealed override void SetEntries(object obj)
-        {
-            if (obj is TData[] entries)
-            {
-                _entries = entries;
-            }
-            else
-            {
-                _entries = Array.Empty<TData>();
-                ErrorCannotCast(obj, this);
-            }
-        }
-
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ErrorCannotCast(object obj, UnityEngine.Object context)
-        {
-            DevLoggerAPI.LogError(context,
-                obj == null
-                    ? $"Cannot cast null into {typeof(TData[])}"
-                    : $"Cannot cast {obj.GetType()} into {typeof(TData[])}"
-            );
-        }
+        internal protected virtual void Deinitialize() { }
     }
 }
