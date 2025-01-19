@@ -1,4 +1,5 @@
 ﻿using EncosyTower.Modules.SourceGen;
+using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.Modules.Data.SourceGen
 {
@@ -111,25 +112,58 @@ namespace EncosyTower.Modules.Data.SourceGen
                 p.PrintLine($"[{SERIALIZE_FIELD_ATTRIBUTE}]");
             }
 
-            var typeName = GetPropertyTypeName(prop);
+            var fieldTypeName = GetFieldTypeName(prop.FieldType, prop.FieldCollection);
+            var propTypeName = prop.PropertyType.ToFullName();
+            var mustCast = SymbolEqualityComparer.Default.Equals(prop.FieldType, prop.PropertyType) == false;
+            var casting = mustCast ? $"({prop.FieldType.ToFullName()})" : string.Empty;
 
-            p.PrintLine($"{accessKeyword} {typeName} {prop.FieldName};");
+            GetTypeNames(
+                  prop.PropertyType
+                , prop.FieldCollection
+                , out var mutableTypeName
+                , out _
+                , out var sameType
+            );
+
+            p.PrintLine($"{accessKeyword} {fieldTypeName} {prop.FieldName};");
             p.PrintEndLine();
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
-            p.PrintLine($"private {readonlyKeyword}{typeName} Get_{prop.Property.Name}()");
+            p.PrintLine($"private {readonlyKeyword}{propTypeName} Get_{prop.Property.Name}()");
             p.OpenScope();
             {
-                p.PrintLine($"return this.{fieldName};");
+                p.PrintBeginLine($"return ")
+                    .PrintIf(mustCast, $"({propTypeName})")
+                    .PrintEndLine($"this.{fieldName};");
             }
             p.CloseScope();
             p.PrintEndLine();
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
-            p.PrintLine($"private void Set_{prop.Property.Name}({typeName} value)");
+            p.PrintLine($"private void Set_{prop.Property.Name}({propTypeName} value)");
             p.OpenScope();
             {
-                p.PrintLine($"this.{fieldName} = value;");
+                p.PrintBeginLine($"this.{fieldName} = ");
+
+                if ((IsMutable && WithoutPropertySetter == false)
+                    || (IsMutable && prop.FieldCollection.Kind == CollectionKind.Array)
+                    || sameType
+                )
+                {
+                    p.PrintIf(mustCast, casting).PrintEndLine("value;");
+                }
+                else if (prop.FieldCollection.Kind == CollectionKind.Array)
+                {
+                    p.PrintIf(mustCast, casting).PrintEndLine("value.ToArray();");
+                }
+                else if (mustCast)
+                {
+                    p.Print(casting).PrintEndLine("value;");
+                }
+                else
+                {
+                    p.PrintEndLine($"({mutableTypeName})value;");
+                }
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -143,64 +177,16 @@ namespace EncosyTower.Modules.Data.SourceGen
             }
 
             var fieldName = field.Field.Name;
-            string mutableTypeName;
-            string immutableTypeName;
-            var sameType = false;
 
-            switch (field.CollectionKind)
-            {
-                case CollectionKind.Array:
-                {
-                    mutableTypeName = $"{field.CollectionElementType.ToFullName()}[]";
-                    immutableTypeName = $"global::System.ReadOnlyMemory<{field.CollectionElementType.ToFullName()}>";
-                    break;
-                }
+            GetTypeNames(
+                  field.PropertyType
+                , field.FieldCollection
+                , out var mutableTypeName
+                , out var immutableTypeName
+                , out var sameType
+            );
 
-                case CollectionKind.List:
-                {
-                    mutableTypeName = $"global::System.Collections.Generic.List<{field.CollectionElementType.ToFullName()}>";
-                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyList<{field.CollectionElementType.ToFullName()}>";
-                    break;
-                }
-
-                case CollectionKind.Dictionary:
-                {
-                    mutableTypeName = $"global::System.Collections.Generic.Dictionary<{field.CollectionKeyType.ToFullName()}, {field.CollectionElementType.ToFullName()}>";
-                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyDictionary<{field.CollectionKeyType.ToFullName()}, {field.CollectionElementType.ToFullName()}>";
-                    break;
-                }
-
-                case CollectionKind.HashSet:
-                {
-                    mutableTypeName = $"global::System.Collections.Generic.HashSet<{field.CollectionElementType.ToFullName()}>";
-                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyCollection<{field.CollectionElementType.ToFullName()}>";
-                    break;
-                }
-
-                case CollectionKind.Queue:
-                {
-                    mutableTypeName = $"global::System.Collections.Generic.Queue<{field.CollectionElementType.ToFullName()}>";
-                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyCollection<{field.CollectionElementType.ToFullName()}>";
-                    break;
-                }
-
-                case CollectionKind.Stack:
-                {
-                    mutableTypeName = $"global::System.Collections.Generic.Stack<{field.CollectionElementType.ToFullName()}>";
-                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyCollection<{field.CollectionElementType.ToFullName()}>";
-                    break;
-                }
-
-                default:
-                {
-                    mutableTypeName = field.Type.ToFullName();
-                    immutableTypeName = field.Type.ToFullName();
-                    sameType = true;
-                    break;
-                }
-            }
-
-            p.PrintLine(string.Format(GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE, fieldName, field.Type.ToFullName()));
+            p.PrintLine(string.Format(GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE, fieldName, field.FieldType.ToFullName()));
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
 
             foreach (var attribute in field.ForwardedPropertyAttributes)
@@ -208,28 +194,43 @@ namespace EncosyTower.Modules.Data.SourceGen
                 p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
             }
 
+            var mustCast = SymbolEqualityComparer.Default.Equals(field.FieldType, field.PropertyType) == false;
             var typeName = IsMutable ? mutableTypeName : immutableTypeName;
 
             p.PrintLine($"public {typeName} {field.PropertyName}");
             p.OpenScope();
             {
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintLine($"get => this.{fieldName};");
+                p.PrintBeginLine("get => ")
+                    .PrintIf(mustCast, $"({typeName})")
+                    .PrintEndLine($"this.{fieldName};");
 
                 p.PrintEndLine();
                 p.PrintLine(AGGRESSIVE_INLINING);
 
+                var casting = mustCast ? $"({field.FieldType.ToFullName()})" : string.Empty;
+
                 if (IsMutable && WithoutPropertySetter == false)
                 {
-                    p.PrintLine($"set => this.{fieldName} = value;");
+                    p.PrintBeginLine($"set => this.{fieldName} = ")
+                        .PrintIf(mustCast, casting)
+                        .PrintEndLine("value;");
                 }
-                else if ((IsMutable && field.CollectionKind == CollectionKind.Array) || sameType)
+                else if ((IsMutable && field.FieldCollection.Kind == CollectionKind.Array) || sameType)
                 {
-                    p.PrintLine($"init => this.{fieldName} = value;");
+                    p.PrintBeginLine($"init => this.{fieldName} = ")
+                        .PrintIf(mustCast, casting)
+                        .PrintEndLine("value;");
                 }
-                else if (field.CollectionKind == CollectionKind.Array)
+                else if (field.FieldCollection.Kind == CollectionKind.Array)
                 {
-                    p.PrintLine($"init => this.{fieldName} = value.ToArray();");
+                    p.PrintBeginLine($"init => this.{fieldName} = ")
+                        .PrintIf(mustCast, casting)
+                        .PrintEndLine("value.ToArray();");
+                }
+                else if (mustCast)
+                {
+                    p.PrintLine($"init => this.{fieldName} = {casting}value;");
                 }
                 else
                 {
@@ -390,7 +391,7 @@ namespace EncosyTower.Modules.Data.SourceGen
                 {
                     var fieldRef = FieldRefs[i];
                     var fieldName = fieldRef.Field.Name;
-                    var fieldType = fieldRef.Type.ToFullName();
+                    var fieldType = fieldRef.FieldType.ToFullName();
                     var and = i == 0 && previous == false ? "  " : "&&";
                     previous = true;
 
@@ -401,7 +402,7 @@ namespace EncosyTower.Modules.Data.SourceGen
                 {
                     var propRef = PropRefs[i];
                     var fieldName = propRef.FieldName;
-                    var fieldType = GetPropertyTypeName(propRef);
+                    var fieldType = GetFieldTypeName(propRef.FieldType, propRef.FieldCollection);
                     var and = i == 0 && previous == false ? "  " : "&&";
                     previous = true;
 
@@ -426,14 +427,14 @@ namespace EncosyTower.Modules.Data.SourceGen
                     previous = true;
                     var fieldRef = FieldRefs[i];
                     var comma = i == 0 ? " " : ",";
-                    p.PrintLine($"{comma} {fieldRef.Type.ToFullName()} {fieldRef.Field.Name}");
+                    p.PrintLine($"{comma} {fieldRef.FieldType.ToFullName()} {fieldRef.Field.Name}");
                 }
 
                 for (var i = 0; i < PropRefs.Length; i++)
                 {
                     var propRef = PropRefs[i];
                     var comma = i == 0 && previous == false ? " " : ",";
-                    p.PrintLine($"{comma} {GetPropertyTypeName(propRef)} {propRef.FieldName}");
+                    p.PrintLine($"{comma} {GetFieldTypeName(propRef.FieldType, propRef.FieldCollection)} {propRef.FieldName}");
                 }
             }
             p = p.DecreasedIndent();
@@ -499,33 +500,115 @@ namespace EncosyTower.Modules.Data.SourceGen
             p.PrintEndLine();
         }
 
-        private static string GetPropertyTypeName(PropertyRef prop)
+        private static string GetFieldTypeName(ITypeSymbol typeSymbol, CollectionRef collection)
         {
-            switch (prop.CollectionKind)
+            switch (collection.Kind)
             {
                 case CollectionKind.ReadOnlyMemory:
                 case CollectionKind.Memory:
                 case CollectionKind.ReadOnlySpan:
                 case CollectionKind.Span:
+                case CollectionKind.Array:
                 {
-                    return $"{prop.CollectionElementType.ToFullName()}[]";
+                    return $"{collection.ElementType.ToFullName()}[]";
                 }
 
                 case CollectionKind.ReadOnlyList:
+                case CollectionKind.List:
                 {
-                    return $"{LIST_TYPE_T}{prop.CollectionElementType.ToFullName()}>";
+                    return $"{LIST_TYPE_T}{collection.ElementType.ToFullName()}>";
+                }
+
+                case CollectionKind.HashSet:
+                {
+                    return $"{HASH_SET_TYPE_T}{collection.ElementType.ToFullName()}>";
+                }
+
+                case CollectionKind.Stack:
+                {
+                    return $"{STACK_TYPE_T}{collection.ElementType.ToFullName()}>";
+                }
+
+                case CollectionKind.Queue:
+                {
+                    return $"{QUEUE_TYPE_T}{collection.ElementType.ToFullName()}>";
                 }
 
                 case CollectionKind.ReadOnlyDictionary:
+                case CollectionKind.Dictionary:
                 {
-                    var keyType = prop.CollectionKeyType.ToFullName();
-                    var valueType = prop.CollectionElementType.ToFullName();
+                    var keyType = collection.KeyType.ToFullName();
+                    var valueType = collection.ElementType.ToFullName();
                     return $"{DICTIONARY_TYPE_T}{keyType}, {valueType}>";
                 }
 
                 default:
                 {
-                    return prop.Type.ToFullName();
+                    return typeSymbol.ToFullName();
+                }
+            }
+        }
+
+        private static void GetTypeNames(
+              ITypeSymbol typeSymbol
+            , CollectionRef collection
+            , out string mutableTypeName
+            , out string immutableTypeName
+            , out bool sameType
+        )
+        {
+            sameType = false;
+
+            switch (collection.Kind)
+            {
+                case CollectionKind.Array:
+                {
+                    mutableTypeName = $"{collection.ElementType.ToFullName()}[]";
+                    immutableTypeName = $"global::System.ReadOnlyMemory<{collection.ElementType.ToFullName()}>";
+                    break;
+                }
+
+                case CollectionKind.List:
+                {
+                    mutableTypeName = $"global::System.Collections.Generic.List<{collection.ElementType.ToFullName()}>";
+                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyList<{collection.ElementType.ToFullName()}>";
+                    break;
+                }
+
+                case CollectionKind.Dictionary:
+                {
+                    mutableTypeName = $"global::System.Collections.Generic.Dictionary<{collection.KeyType.ToFullName()}, {collection.ElementType.ToFullName()}>";
+                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyDictionary<{collection.KeyType.ToFullName()}, {collection.ElementType.ToFullName()}>";
+                    break;
+                }
+
+                case CollectionKind.HashSet:
+                {
+                    mutableTypeName = $"global::System.Collections.Generic.HashSet<{collection.ElementType.ToFullName()}>";
+                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyCollection<{collection.ElementType.ToFullName()}>";
+                    break;
+                }
+
+                case CollectionKind.Queue:
+                {
+                    mutableTypeName = $"global::System.Collections.Generic.Queue<{collection.ElementType.ToFullName()}>";
+                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyCollection<{collection.ElementType.ToFullName()}>";
+                    break;
+                }
+
+                case CollectionKind.Stack:
+                {
+                    mutableTypeName = $"global::System.Collections.Generic.Stack<{collection.ElementType.ToFullName()}>";
+                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyCollection<{collection.ElementType.ToFullName()}>";
+                    break;
+                }
+
+                default:
+                {
+                    mutableTypeName = typeSymbol.ToFullName();
+                    immutableTypeName = typeSymbol.ToFullName();
+                    sameType = true;
+                    break;
                 }
             }
         }

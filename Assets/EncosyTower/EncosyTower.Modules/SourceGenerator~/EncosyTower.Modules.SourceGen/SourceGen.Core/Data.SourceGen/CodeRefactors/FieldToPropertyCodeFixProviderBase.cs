@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Composition;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EncosyTower.Modules.SourceGen;
@@ -15,11 +15,10 @@ using Microsoft.CodeAnalysis.Formatting;
 
 namespace EncosyTower.Modules.Data.SourceGen
 {
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(PropertyToFieldCodeFixProvider)), Shared]
-    internal class PropertyToFieldCodeFixProvider : CodeFixProvider
+    internal abstract class FieldToPropertyCodeFixProviderBase : CodeFixProvider
     {
         public sealed override ImmutableArray<string> FixableDiagnosticIds
-            => ImmutableArray.Create(DataDiagnosticAnalyzer.DIAGNOSTIC_PROPERTY);
+            => ImmutableArray.Create(DataDiagnosticAnalyzer.DIAGNOSTIC_FIELD);
 
         public sealed override FixAllProvider GetFixAllProvider()
         {
@@ -39,70 +38,123 @@ namespace EncosyTower.Modules.Data.SourceGen
 
             var declaration = root.FindToken(diagnosticSpan.Start).Parent
                 .AncestorsAndSelf()
-                .OfType<PropertyDeclarationSyntax>()
+                .OfType<FieldDeclarationSyntax>()
                 .FirstOrDefault();
 
-            if (declaration?.Identifier.Text is null)
+            if (declaration?.Declaration is null)
             {
                 return;
             }
 
+            var variables = declaration.Declaration.Variables;
+            var count = variables.Count;
+
+            if (count < 1)
+            {
+                return;
+            }
+
+            var sb = new StringBuilder();
+            var lastIndex = count - 1;
+
+            for (var i = 0; i < count; i++)
+            {
+                sb.Append('\'');
+                sb.Append(variables[i].Identifier.Text);
+                sb.Append('\'');
+
+                if (i < lastIndex)
+                {
+                    sb.Append(", ");
+                }
+            }
+
+            var title = MakeTitle(count, sb);
+
             // Register a code action that will invoke the fix.
             context.RegisterCodeFix(
                 CodeAction.Create(
-                      title: $"Replace '{declaration.Identifier.Text}' with field"
+                      title: title
                     , createChangedSolution: c => MakePropertyAsync(context.Document, declaration, c)
+                    , equivalenceKey: title
                 )
                 , diagnostic
             );
         }
 
+        protected abstract string MakeTitle(int fieldVariableCount, StringBuilder fieldVariableBuilder);
+
+        protected abstract PropertyDeclarationSyntax MakePropertyBody(
+              string propName
+            , FieldDeclarationSyntax fieldDecl
+            , PropertyDeclarationSyntax propDecl
+        );
+
         private async Task<Solution> MakePropertyAsync(
               Document document
-            , PropertyDeclarationSyntax propertyDecl
+            , FieldDeclarationSyntax fieldDecl
             , CancellationToken cancellationToken
         )
         {
             var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
             var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
+
             var fieldAttribListList = new List<List<AttributeSyntax>>();
             var propAttribListList = new List<List<AttributeSyntax>>();
             var fieldAttribCheck = new HashSet<string>();
             var propAttribCheck = new HashSet<string>();
 
-            TypeSyntax fieldTypeSyntax = null;
-
             PrepareAttributeListLists(
-                propertyDecl
+                  fieldDecl
                 , semanticModel
                 , fieldAttribListList
                 , propAttribListList
                 , fieldAttribCheck
                 , propAttribCheck
-                , cancellationToken
-                , ref fieldTypeSyntax
             );
 
-            AddPropertyTypeAttribute(propertyDecl, fieldAttribListList, fieldAttribCheck, fieldTypeSyntax);
+            AddDataPropertyAttribute(fieldDecl, propAttribListList, propAttribCheck);
 
-            var fieldName = propertyDecl.Identifier.Text.ToFieldName();
-            var varDecl = SyntaxFactory.VariableDeclaration(fieldTypeSyntax ?? propertyDecl.Type);
-            varDecl = varDecl.WithVariables(
-                SyntaxFactory.SingletonSeparatedList(SyntaxFactory.VariableDeclarator(fieldName))
+            var propertyType = ExtractTypeFromPropertyTypeAttribute(fieldAttribListList);
+            var variables = fieldDecl.Declaration.Variables;
+            var count = variables.Count;
+            var newNodes = new List<SyntaxNode>();
+
+            for (var i = 0; i < count; i++)
+            {
+                var variableDecl = variables[i];
+                MakeProperty(fieldDecl, fieldAttribListList, propAttribListList, propertyType, variableDecl, newNodes);
+            }
+
+            root = root.InsertNodesAfterThenRemove(fieldDecl, newNodes, SyntaxRemoveOptions.KeepNoTrivia);
+            return document.WithSyntaxRoot(root).Project.Solution;
+        }
+
+        private void MakeProperty(
+              FieldDeclarationSyntax fieldDecl
+            , List<List<AttributeSyntax>> fieldAttribListList
+            , List<List<AttributeSyntax>> propAttribListList
+            , TypeSyntax propertyType
+            , VariableDeclaratorSyntax variableDecl
+            , List<SyntaxNode> newNodes
+        )
+        {
+            var propName = variableDecl.Identifier.Text.ToPropertyName();
+            var propDecl = MakePropertyBody(
+                  propName
+                , fieldDecl
+                , SyntaxFactory.PropertyDeclaration(propertyType ?? fieldDecl.Declaration.Type, propName)
+                    .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+                    .WithAdditionalAnnotations(Formatter.Annotation)
+                    .WithTrailingTrivia(fieldDecl.GetTrailingTrivia())
             );
-
-            var fieldDecl = SyntaxFactory.FieldDeclaration(varDecl)
-                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword))
-                .WithAdditionalAnnotations(Formatter.Annotation)
-                .WithTrailingTrivia(propertyDecl.GetTrailingTrivia())
-                ;
 
             var withAttribListTrivia = false;
 
-            for (var i = 0; i < fieldAttribListList.Count; i++)
+            for (var i = 0; i < propAttribListList.Count; i++)
             {
-                var list = fieldAttribListList[i];
-                var fieldAttribList = SyntaxFactory.AttributeList(
+                var list = propAttribListList[i];
+                var propAttribList = SyntaxFactory.AttributeList(
                       openBracketToken: SyntaxFactory.Token(SyntaxKind.OpenBracketToken)
                     , target: null
                     , attributes: SyntaxFactory.SeparatedList(list)
@@ -112,18 +164,18 @@ namespace EncosyTower.Modules.Data.SourceGen
                 if (i == 0)
                 {
                     withAttribListTrivia = true;
-                    fieldAttribList = fieldAttribList.WithTriviaFrom(propertyDecl.AttributeLists[0]);
+                    propAttribList = propAttribList.WithTriviaFrom(fieldDecl.AttributeLists[0]);
                 }
 
-                fieldDecl = fieldDecl.AddAttributeLists(fieldAttribList);
+                propDecl = propDecl.AddAttributeLists(propAttribList);
             }
 
-            for (var i = 0; i < propAttribListList.Count; i++)
+            for (var i = 0; i < fieldAttribListList.Count; i++)
             {
-                var list = propAttribListList[i];
-                var propAttribList = SyntaxFactory.AttributeList(
+                var list = fieldAttribListList[i];
+                var fieldAttribList = SyntaxFactory.AttributeList(
                       openBracketToken: SyntaxFactory.Token(SyntaxKind.OpenBracketToken)
-                    , target: SyntaxFactory.AttributeTargetSpecifier(SyntaxFactory.Token(SyntaxKind.PropertyKeyword))
+                    , target: SyntaxFactory.AttributeTargetSpecifier(SyntaxFactory.Token(SyntaxKind.FieldKeyword))
                     , attributes: SyntaxFactory.SeparatedList(list)
                     , closeBracketToken: SyntaxFactory.Token(SyntaxKind.CloseBracketToken)
                 );
@@ -131,28 +183,25 @@ namespace EncosyTower.Modules.Data.SourceGen
                 if (i == 0 && withAttribListTrivia == false)
                 {
                     withAttribListTrivia = true;
-                    propAttribList = propAttribList.WithTriviaFrom(propertyDecl.AttributeLists[0]);
+                    fieldAttribList = fieldAttribList.WithTriviaFrom(fieldDecl.AttributeLists[0]);
                 }
 
-                fieldDecl = fieldDecl.AddAttributeLists(propAttribList);
+                propDecl = propDecl.AddAttributeLists(fieldAttribList);
             }
 
-            var newRoot = root.ReplaceNode(propertyDecl, fieldDecl);
-            return document.WithSyntaxRoot(newRoot).Project.Solution;
+            newNodes.Add(propDecl);
         }
 
         private static void PrepareAttributeListLists(
-              PropertyDeclarationSyntax propertyDecl
+              FieldDeclarationSyntax fieldDecl
             , SemanticModel semanticModel
             , List<List<AttributeSyntax>> fieldAttribListList
             , List<List<AttributeSyntax>> propAttribListList
             , HashSet<string> fieldAttribCheck
             , HashSet<string> propAttribCheck
-            , CancellationToken cancellationToken
-            , ref TypeSyntax fieldTypeSyntax
         )
         {
-            foreach (var attribList in propertyDecl.AttributeLists)
+            foreach (var attribList in fieldDecl.AttributeLists)
             {
                 var attributes = attribList.Attributes;
 
@@ -165,39 +214,11 @@ namespace EncosyTower.Modules.Data.SourceGen
                 var fieldList = new List<AttributeSyntax>();
                 var targetKind = attribList.Target?.Identifier.Kind();
 
-                if (targetKind is SyntaxKind.FieldKeyword)
-                {
-                    foreach (var attrib in attributes)
-                    {
-                        var name = attrib.ToString();
-
-                        if (fieldAttribCheck.Contains(name) == false)
-                        {
-                            fieldAttribCheck.Add(name);
-                            fieldList.Add(attrib);
-                        }
-                    }
-
-                    fieldAttribListList.Add(fieldList);
-                    continue;
-                }
-
                 if (targetKind is SyntaxKind.PropertyKeyword)
                 {
                     foreach (var attrib in attributes)
                     {
                         var name = attrib.ToString();
-
-                        if (name.StartsWith("DataProperty"))
-                        {
-                            if (attrib.ArgumentList is { Arguments.Count: > 0 } argList
-                                && argList.Arguments[0].Expression is TypeOfExpressionSyntax typeOfExp
-                            )
-                            {
-                                fieldTypeSyntax = typeOfExp.Type;
-                            }
-                            continue;
-                        }
 
                         if (propAttribCheck.Contains(name) == false)
                         {
@@ -210,29 +231,37 @@ namespace EncosyTower.Modules.Data.SourceGen
                     continue;
                 }
 
-                foreach (var attrib in attributes)
+                if (targetKind is SyntaxKind.FieldKeyword)
                 {
-                    var (_, target) = GetAttributeInfo(semanticModel, attrib);
-                    var name = attrib.ToString();
-
-                    if (name.StartsWith("DataProperty"))
+                    foreach (var attrib in attributes)
                     {
-                        if (attrib.ArgumentList is { Arguments.Count: > 0 } argList
-                            && argList.Arguments[0].Expression is TypeOfExpressionSyntax typeOfExp
-                        )
+                        var (_, _) = GetAttributeInfo(semanticModel, attrib);
+                        var name = attrib.ToString();
+
+                        if (name.StartsWith("SerializeField"))
                         {
-                            fieldTypeSyntax = typeOfExp.Type;
+                            continue;
                         }
-                        continue;
-                    }
 
-                    if (target.HasFlag(AttributeTargets.Field))
-                    {
                         if (fieldAttribCheck.Contains(name) == false)
                         {
                             fieldAttribCheck.Add(name);
                             fieldList.Add(attrib);
                         }
+                    }
+
+                    fieldAttribListList.Add(fieldList);
+                    continue;
+                }
+
+                foreach (var attrib in attributes)
+                {
+                    var (_, target) = GetAttributeInfo(semanticModel, attrib);
+                    var name = attrib.ToString();
+
+                    if (name.StartsWith("SerializeField"))
+                    {
+                        continue;
                     }
 
                     if (target.HasFlag(AttributeTargets.Property))
@@ -241,6 +270,15 @@ namespace EncosyTower.Modules.Data.SourceGen
                         {
                             propAttribCheck.Add(name);
                             propList.Add(attrib);
+                        }
+                    }
+
+                    if (target.HasFlag(AttributeTargets.Field))
+                    {
+                        if (fieldAttribCheck.Contains(name) == false)
+                        {
+                            fieldAttribCheck.Add(name);
+                            fieldList.Add(attrib);
                         }
                     }
                 }
@@ -253,59 +291,6 @@ namespace EncosyTower.Modules.Data.SourceGen
                 if (fieldList.Count > 0)
                 {
                     fieldAttribListList.Add(fieldList);
-                }
-            }
-
-            if (fieldAttribCheck.Contains("SerializeField") == false
-                && fieldAttribCheck.Contains("JsonProperty") == false
-                && fieldAttribCheck.Contains("JsonInclude") == false
-            )
-            {
-                var referenceUnityEngine = false;
-                var referenceNewtonsoft = false;
-                var referenceSystemTextJson = false;
-                var propertySymbol = semanticModel.GetDeclaredSymbol(propertyDecl, cancellationToken);
-
-                foreach (var assembly in propertySymbol.ContainingModule.ReferencedAssemblySymbols)
-                {
-                    var assemblyName = assembly.ToDisplayString();
-
-                    if (assemblyName.StartsWith("UnityEngine,"))
-                    {
-                        referenceUnityEngine = true;
-                        continue;
-                    }
-
-                    if (assemblyName.StartsWith("Newtonsoft.Json,"))
-                    {
-                        referenceNewtonsoft = true;
-                        continue;
-                    }
-
-                    if (assemblyName.StartsWith("System.Text.Json,"))
-                    {
-                        referenceSystemTextJson = true;
-                        continue;
-                    }
-                }
-
-                if (referenceUnityEngine)
-                {
-                    fieldAttribListList.Add(new List<AttributeSyntax> {
-                        SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("SerializeField"))
-                    });
-                }
-                else if (referenceNewtonsoft)
-                {
-                    fieldAttribListList.Add(new List<AttributeSyntax> {
-                        SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("JsonProperty"))
-                    });
-                }
-                else if (referenceSystemTextJson)
-                {
-                    fieldAttribListList.Add(new List<AttributeSyntax> {
-                        SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("JsonInclude"))
-                    });
                 }
             }
         }
@@ -339,28 +324,75 @@ namespace EncosyTower.Modules.Data.SourceGen
             return (attribTypeSymbol.Name, (AttributeTargets)attributeUsageAttribute.ConstructorArguments[0].Value);
         }
 
-        private static void AddPropertyTypeAttribute(
-              PropertyDeclarationSyntax propertyDecl
-            , List<List<AttributeSyntax>> fieldAttribListList
-            , HashSet<string> fieldAttribCheck
-            , TypeSyntax fieldTypeSyntax
+        private static TypeSyntax ExtractTypeFromPropertyTypeAttribute(List<List<AttributeSyntax>> attribListList)
+        {
+            TypeSyntax result = null;
+
+            for (var iList = attribListList.Count - 1; iList >= 0; iList--)
+            {
+                var attributes = attribListList[iList];
+
+                for (var iAttrib = attributes.Count - 1; iAttrib >= 0; iAttrib--)
+                {
+                    var attrib = attributes[iAttrib];
+                    var name = attrib.ToString();
+
+                    if (name.StartsWith("PropertyType") == false)
+                    {
+                        continue;
+                    }
+
+                    attributes.RemoveAt(iAttrib);
+
+                    if (attrib.ArgumentList is null)
+                    {
+                        continue;
+                    }
+
+                    var args = attrib.ArgumentList.Arguments;
+
+                    if (args.Count < 1 || args[0].Expression is not TypeOfExpressionSyntax typeOfSyntax)
+                    {
+                        continue;
+                    }
+
+                    result = typeOfSyntax.Type;
+                    break;
+                }
+
+                if (attributes.Count < 1)
+                {
+                    attribListList.RemoveAt(iList);
+                    continue;
+                }
+
+                if (result != null)
+                {
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        private static void AddDataPropertyAttribute(
+              FieldDeclarationSyntax fieldDecl
+            , List<List<AttributeSyntax>> propAttribListList
+            , HashSet<string> propAttribCheck
         )
         {
-            if (fieldAttribCheck.Any(static x => x.StartsWith("PropertyType"))
-                || fieldTypeSyntax == null
-                || propertyDecl.Type.IsEquivalentTo(fieldTypeSyntax)
-            )
+            if (propAttribCheck.Any(static x => x.StartsWith("DataProperty")))
             {
                 return;
             }
 
             var typeArg = SyntaxFactory.SeparatedList<AttributeArgumentSyntax>().Add(
-                SyntaxFactory.AttributeArgument(SyntaxFactory.TypeOfExpression(propertyDecl.Type))
+                SyntaxFactory.AttributeArgument(SyntaxFactory.TypeOfExpression(fieldDecl.Declaration.Type))
             );
 
-            fieldAttribListList.Add(new List<AttributeSyntax> {
+            propAttribListList.Add(new List<AttributeSyntax> {
                 SyntaxFactory.Attribute(
-                      SyntaxFactory.IdentifierName("PropertyType")
+                      SyntaxFactory.IdentifierName("DataProperty")
                     , SyntaxFactory.AttributeArgumentList(
                           openParenToken: SyntaxFactory.Token(SyntaxKind.OpenParenToken)
                         , arguments: typeArg

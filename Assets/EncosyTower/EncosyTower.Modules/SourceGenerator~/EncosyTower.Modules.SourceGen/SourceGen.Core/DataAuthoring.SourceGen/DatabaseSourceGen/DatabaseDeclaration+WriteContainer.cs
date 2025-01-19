@@ -64,7 +64,12 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
                     }
 
                     p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintLine($"public SheetContainer(global::Microsoft.Extensions.Logging.ILogger logger) : base(logger)");
+                    p.PrintLine("public SheetContainer() : this(global::Cathei.BakingSheet.Unity.UnityLogger.Default)");
+                    p.PrintLine("{ }");
+                    p.PrintEndLine();
+
+                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine("public SheetContainer(global::Microsoft.Extensions.Logging.ILogger logger) : base(logger)");
                     p.OpenScope();
                     {
                         if (containsTables)

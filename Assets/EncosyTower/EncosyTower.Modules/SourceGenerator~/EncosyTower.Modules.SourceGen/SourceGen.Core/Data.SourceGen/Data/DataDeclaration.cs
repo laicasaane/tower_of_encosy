@@ -186,6 +186,20 @@ namespace EncosyTower.Modules.Data.SourceGen
                         continue;
                     }
 
+                    ITypeSymbol propertyType = null;
+
+                    if (field.TryGetAttribute(PROPERTY_TYPE_ATTRIBUTE, out var propertyTypeAttrib))
+                    {
+                        var args = propertyTypeAttrib.ConstructorArguments;
+
+                        if (args.Length == 1 && args[0].Value is ITypeSymbol propType)
+                        {
+                            propertyType = propType;
+                        }
+                    }
+
+                    propertyType ??= field.Type;
+
                     field.GatherForwardedAttributes(
                           semanticModel
                         , context.CancellationToken
@@ -198,46 +212,13 @@ namespace EncosyTower.Modules.Data.SourceGen
 
                     var fieldRef = new FieldRef {
                         Field = field,
-                        Type = field.Type,
+                        FieldType = field.Type,
+                        PropertyType = propertyType,
                         PropertyName = propertyName,
                         PropertyIsImplemented = existingProperties.Contains(propertyName),
                         ForwardedPropertyAttributes = propertyAttributes,
+                        FieldCollection = GetFieldCollection(field.Type),
                     };
-
-                    if (field.Type is IArrayTypeSymbol arrayType)
-                    {
-                        fieldRef.CollectionKind = CollectionKind.Array;
-                        fieldRef.CollectionElementType = arrayType.ElementType;
-                    }
-                    else if (field.Type is INamedTypeSymbol namedType)
-                    {
-                        if (namedType.TryGetGenericType(LIST_TYPE_T, 1, out var listType))
-                        {
-                            fieldRef.CollectionKind = CollectionKind.List;
-                            fieldRef.CollectionElementType = listType.TypeArguments[0];
-                        }
-                        else if (namedType.TryGetGenericType(DICTIONARY_TYPE_T, 2, out var dictType))
-                        {
-                            fieldRef.CollectionKind = CollectionKind.Dictionary;
-                            fieldRef.CollectionKeyType = dictType.TypeArguments[0];
-                            fieldRef.CollectionElementType = dictType.TypeArguments[1];
-                        }
-                        else if (namedType.TryGetGenericType(HASH_SET_TYPE_T, 1, out var hashSetType))
-                        {
-                            fieldRef.CollectionKind = CollectionKind.HashSet;
-                            fieldRef.CollectionElementType = hashSetType.TypeArguments[0];
-                        }
-                        else if (namedType.TryGetGenericType(QUEUE_TYPE_T, 1, out var queueType))
-                        {
-                            fieldRef.CollectionKind = CollectionKind.Queue;
-                            fieldRef.CollectionElementType = queueType.TypeArguments[0];
-                        }
-                        else if (namedType.TryGetGenericType(STACK_TYPE_T, 1, out var stackType))
-                        {
-                            fieldRef.CollectionKind = CollectionKind.Stack;
-                            fieldRef.CollectionElementType = stackType.TypeArguments[0];
-                        }
-                    }
 
                     var index = fieldArrayBuilder.Count;
                     orderBuilder.Add(new Order { index = index });
@@ -246,18 +227,18 @@ namespace EncosyTower.Modules.Data.SourceGen
 
                     if (string.Equals(propertyName, "Id", StringComparison.Ordinal))
                     {
-                        if (fieldRef.CollectionKind != CollectionKind.NotCollection)
+                        if (fieldRef.PropertyCollection.Kind != CollectionKind.NotCollection)
                         {
                             context.ReportDiagnostic(
                                   DiagnosticDescriptors.CollectionIsNotApplicableForProperty
                                 , field.DeclaringSyntaxReferences[0].GetSyntax(context.CancellationToken)
-                                , field.Type.ToDisplayString()
+                                , propertyType.ToDisplayString()
                                 , "Id"
                             );
                         }
                         else
                         {
-                            IdPropertyType = field.Type;
+                            IdPropertyType = propertyType;
                         }
                     }
 
@@ -289,14 +270,11 @@ namespace EncosyTower.Modules.Data.SourceGen
                         continue;
                     }
 
-                    var checkAutoCollectionType = false;
-
                     if (attribute.ConstructorArguments.Length < 1
                         || attribute.ConstructorArguments[0].Value is not ITypeSymbol fieldType
                     )
                     {
                         fieldType = property.Type;
-                        checkAutoCollectionType = true;
                     }
 
                     property.GatherForwardedAttributes(
@@ -311,46 +289,14 @@ namespace EncosyTower.Modules.Data.SourceGen
 
                     var propRef = new PropertyRef {
                         Property = property,
-                        Type = fieldType,
+                        FieldType = fieldType,
+                        PropertyType = property.Type,
                         FieldName = fieldName,
                         FieldIsImplemented = existingFields.Contains(fieldName),
                         ForwardedFieldAttributes = fieldAttributes,
+                        FieldCollection = GetFieldCollection(fieldType),
+                        PropertyCollection = GetPropertyCollection(property.Type),
                     };
-
-                    if (checkAutoCollectionType && property.Type is INamedTypeSymbol namedType)
-                    {
-                        if (namedType.TryGetGenericType(READONLY_MEMORY_TYPE_T, 1, out var readMemoryType))
-                        {
-                            propRef.CollectionKind = CollectionKind.ReadOnlyMemory;
-                            propRef.CollectionElementType = readMemoryType.TypeArguments[0];
-                        }
-                        else if (namedType.TryGetGenericType(MEMORY_TYPE_T, 1, out var memoryType))
-                        {
-                            propRef.CollectionKind = CollectionKind.Memory;
-                            propRef.CollectionElementType = memoryType.TypeArguments[0];
-                        }
-                        else if (namedType.TryGetGenericType(READONLY_SPAN_TYPE_T, 1, out var readSpanType))
-                        {
-                            propRef.CollectionKind = CollectionKind.ReadOnlySpan;
-                            propRef.CollectionElementType = readSpanType.TypeArguments[0];
-                        }
-                        else if (namedType.TryGetGenericType(SPAN_TYPE_T, 1, out var spanType))
-                        {
-                            propRef.CollectionKind = CollectionKind.Span;
-                            propRef.CollectionElementType = spanType.TypeArguments[0];
-                        }
-                        else if (namedType.TryGetGenericType(IREADONLY_LIST_TYPE_T, 1, out var readListType))
-                        {
-                            propRef.CollectionKind = CollectionKind.ReadOnlyList;
-                            propRef.CollectionElementType = readListType.TypeArguments[0];
-                        }
-                        else if (namedType.TryGetGenericType(IREADONLY_DICTIONARY_TYPE_T, 2, out var readDictType))
-                        {
-                            propRef.CollectionKind = CollectionKind.ReadOnlyDictionary;
-                            propRef.CollectionKeyType = readDictType.TypeArguments[0];
-                            propRef.CollectionElementType = readDictType.TypeArguments[1];
-                        }
-                    }
 
                     var index = propArrayBuilder.Count;
                     orderBuilder.Add(new Order { index = index, isPropRef = true });
@@ -359,7 +305,7 @@ namespace EncosyTower.Modules.Data.SourceGen
 
                     if (string.Equals(property.Name, "Id", StringComparison.Ordinal))
                     {
-                        if (propRef.CollectionKind != CollectionKind.NotCollection)
+                        if (propRef.PropertyCollection.Kind != CollectionKind.NotCollection)
                         {
                             context.ReportDiagnostic(
                                   DiagnosticDescriptors.CollectionIsNotApplicableForProperty
@@ -473,15 +419,158 @@ namespace EncosyTower.Modules.Data.SourceGen
             IsValid = true;
         }
 
+        private static CollectionRef GetFieldCollection(ITypeSymbol typeSymbol)
+        {
+            if (typeSymbol is IArrayTypeSymbol arrayType)
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.Array,
+                    ElementType = arrayType.ElementType,
+                };
+            }
+
+            if (typeSymbol is not INamedTypeSymbol namedType)
+            {
+                return default;
+            }
+
+            if (namedType.TryGetGenericType(LIST_TYPE_T, 1, out var listType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.List,
+                    ElementType = listType.TypeArguments[0],
+                };
+            }
+
+            if (namedType.TryGetGenericType(DICTIONARY_TYPE_T, 2, out var dictType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.Dictionary,
+                    KeyType = dictType.TypeArguments[0],
+                    ElementType = dictType.TypeArguments[1],
+                };
+            }
+
+            if (namedType.TryGetGenericType(HASH_SET_TYPE_T, 1, out var hashSetType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.HashSet,
+                    ElementType = hashSetType.TypeArguments[0],
+                };
+            }
+
+            if (namedType.TryGetGenericType(QUEUE_TYPE_T, 1, out var queueType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.Queue,
+                    ElementType = queueType.TypeArguments[0],
+                };
+            }
+
+            if (namedType.TryGetGenericType(STACK_TYPE_T, 1, out var stackType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.Stack,
+                    ElementType = stackType.TypeArguments[0],
+                };
+            }
+
+            return default;
+        }
+
+        private static CollectionRef GetPropertyCollection(ITypeSymbol typeSymbol)
+        {
+            if (typeSymbol is not INamedTypeSymbol namedType)
+            {
+                return default;
+            }
+
+            if (namedType.TryGetGenericType(READONLY_MEMORY_TYPE_T, 1, out var readMemoryType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.ReadOnlyMemory,
+                    ElementType = readMemoryType.TypeArguments[0],
+                };
+            }
+
+            if (namedType.TryGetGenericType(MEMORY_TYPE_T, 1, out var memoryType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.Memory,
+                    ElementType = memoryType.TypeArguments[0],
+                };
+            }
+
+            if (namedType.TryGetGenericType(READONLY_SPAN_TYPE_T, 1, out var readSpanType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.ReadOnlySpan,
+                    ElementType = readSpanType.TypeArguments[0],
+                };
+            }
+
+            if (namedType.TryGetGenericType(SPAN_TYPE_T, 1, out var spanType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.Span,
+                    ElementType = spanType.TypeArguments[0],
+                };
+            }
+
+            if (namedType.TryGetGenericType(IREADONLY_LIST_TYPE_T, 1, out var readListType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.ReadOnlyList,
+                    ElementType = readListType.TypeArguments[0],
+                };
+            }
+
+            if (namedType.TryGetGenericType(ILIST_TYPE_T, 1, out var listType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.List,
+                    ElementType = listType.TypeArguments[0],
+                };
+            }
+
+            if (namedType.TryGetGenericType(ISET_TYPE_T, 1, out var setType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.HashSet,
+                    ElementType = setType.TypeArguments[0],
+                };
+            }
+
+            if (namedType.TryGetGenericType(IREADONLY_DICTIONARY_TYPE_T, 2, out var readDictType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.ReadOnlyDictionary,
+                    KeyType = readDictType.TypeArguments[0],
+                    ElementType = readDictType.TypeArguments[1],
+                };
+            }
+
+            if (namedType.TryGetGenericType(IDICTIONARY_TYPE_T, 2, out var dictType))
+            {
+                return new CollectionRef {
+                    Kind = CollectionKind.Dictionary,
+                    KeyType = dictType.TypeArguments[0],
+                    ElementType = dictType.TypeArguments[1],
+                };
+            }
+
+            return default;
+        }
+
         public abstract class MemberRef
         {
-            public ITypeSymbol Type { get; set; }
+            public ITypeSymbol FieldType { get; set; }
 
-            public CollectionKind CollectionKind { get; set; }
+            public ITypeSymbol PropertyType { get; set; }
 
-            public ITypeSymbol CollectionKeyType { get; set; }
+            public CollectionRef FieldCollection { get; set; }
 
-            public ITypeSymbol CollectionElementType { get; set; }
+            public CollectionRef PropertyCollection { get; set; }
         }
 
         public class FieldRef : MemberRef
@@ -504,6 +593,15 @@ namespace EncosyTower.Modules.Data.SourceGen
             public bool FieldIsImplemented { get; set; }
 
             public ImmutableArray<(string, AttributeInfo)> ForwardedFieldAttributes { get; set; }
+        }
+
+        public struct CollectionRef
+        {
+            public CollectionKind Kind { get; set; }
+
+            public ITypeSymbol KeyType { get; set; }
+
+            public ITypeSymbol ElementType { get; set; }
         }
 
         public struct Order

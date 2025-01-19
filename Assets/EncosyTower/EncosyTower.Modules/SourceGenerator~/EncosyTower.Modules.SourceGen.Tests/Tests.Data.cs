@@ -146,8 +146,8 @@ namespace EncosyTower.Modules.Tests.Data.Heroes
         [SerializeField]
         private List<float> _floats;
 
-        [SerializeField]
-        private Dictionary<int, string> _stringMap;
+        [DataProperty(typeof(Dictionary<int, string>))]
+        public ReadDictionary<int, string> StringMap { get => Get_StringMap(); init => Set_StringMap(value); }
 
         [DataProperty]
         public ReadOnlyMemory<StatMultiplierData> Multipliers => Get_Multipliers();
@@ -162,6 +162,22 @@ namespace EncosyTower.Modules.Tests.Data.Heroes
         private Dictionary<StatKind, StatMultiplierData> _statMap;
     }
 
+    public readonly struct ReadDictionary<TKey, TValue>
+    {
+        private readonly Dictionary<TKey, TValue> _dictionary;
+
+        public ReadDictionary(Dictionary<TKey, TValue> dictionary)
+        {
+            _dictionary = dictionary;
+        }
+
+        public static implicit operator ReadDictionary<TKey, TValue>(Dictionary<TKey, TValue> dictionary)
+            => new(dictionary);
+
+        public static explicit operator Dictionary<TKey, TValue>(ReadDictionary<TKey, TValue> readDictionary)
+            => readDictionary._dictionary;
+    }
+
     public partial class HeroDataTableAsset : DataTableAsset<IdData, HeroData>, IDataTableAsset
     {
     }
@@ -171,6 +187,9 @@ namespace EncosyTower.Modules.Tests.Data.Heroes
         [DataProperty]
         [field: SerializeField]
         public ReadOnlyMemory<int> NewValues => Get_NewValues();
+
+        [DataProperty(typeof(HashSet<int>))]
+        public IReadOnlyCollection<int> ValueSet => Get_ValueSet();
     }
 
     public partial class NewHeroDataTableAsset : DataTableAsset<IdData, NewHeroData>, IDataTableAsset
@@ -228,7 +247,7 @@ namespace EncosyTower.Modules.Tests.Data.Authoring
     using EncosyTower.Modules.Tests.Data.Enemies;
 
     [Database(NamingStrategy.SnakeCase, typeof(IntWrapperConverter))]
-    public partial class Database : UnityEngine.ScriptableObject
+    public partial class Database
     {
         partial class SheetContainer
         {

@@ -31,7 +31,10 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
         public const string VERTICAL_LIST_TYPE = "global::Cathei.BakingSheet.VerticalList<";
 
         public const string IREADONLY_LIST_TYPE_T = "global::System.Collections.Generic.IReadOnlyList<";
+        public const string ILIST_TYPE_T = "global::System.Collections.Generic.IList<";
+        public const string ISET_TYPE_T = "global::System.Collections.Generic.ISet<";
         public const string IREADONLY_DICTIONARY_TYPE_T = "global::System.Collections.Generic.IReadOnlyDictionary<";
+        public const string IDICTIONARY_TYPE_T = "global::System.Collections.Generic.IDictionary<";
         public const string READONLY_MEMORY_TYPE_T = "global::System.ReadOnlyMemory<";
         public const string READONLY_SPAN_TYPE_T = "global::System.ReadOnlySpan<";
         public const string MEMORY_TYPE_T = "global::System.Memory<";
@@ -142,11 +145,27 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
                     collectionTypeRef.Kind = CollectionKind.List;
                     collectionTypeRef.ElementType = readListType.TypeArguments[0];
                 }
+                else if (namedType.TryGetGenericType(ILIST_TYPE_T, 1, out var listInterfaceType))
+                {
+                    collectionTypeRef.Kind = CollectionKind.List;
+                    collectionTypeRef.ElementType = listInterfaceType.TypeArguments[0];
+                }
+                else if (namedType.TryGetGenericType(ISET_TYPE_T, 1, out var setInterfaceType))
+                {
+                    collectionTypeRef.Kind = CollectionKind.HashSet;
+                    collectionTypeRef.ElementType = setInterfaceType.TypeArguments[0];
+                }
                 else if (namedType.TryGetGenericType(IREADONLY_DICTIONARY_TYPE_T, 2, out var readDictType))
                 {
                     collectionTypeRef.Kind = CollectionKind.Dictionary;
                     collectionTypeRef.KeyType = readDictType.TypeArguments[0];
                     collectionTypeRef.ElementType = readDictType.TypeArguments[1];
+                }
+                else if (namedType.TryGetGenericType(IDICTIONARY_TYPE_T, 2, out var dictInterfaceType))
+                {
+                    collectionTypeRef.Kind = CollectionKind.Dictionary;
+                    collectionTypeRef.KeyType = dictInterfaceType.TypeArguments[0];
+                    collectionTypeRef.ElementType = dictInterfaceType.TypeArguments[1];
                 }
             }
         }

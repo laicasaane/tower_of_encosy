@@ -15,6 +15,7 @@ namespace EncosyTower.Modules.Data.SourceGen
         public const string JSON_PROPERTY_ATTRIBUTE = "global::Newtonsoft.Json.JsonPropertyAttribute";
         public const string DATA_MUTABLE_ATTRIBUTE = "global::EncosyTower.Modules.Data.DataMutableAttribute";
         public const string DATA_FIELD_POLICY_ATTRIBUTE = "global::EncosyTower.Modules.Data.DataFieldPolicyAttribute";
+        public const string PROPERTY_TYPE_ATTRIBUTE = "global::EncosyTower.Modules.Data.PropertyTypeAttribute";
         public const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.Data.SkipSourceGenForAssemblyAttribute";
 
         public const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
@@ -27,7 +28,10 @@ namespace EncosyTower.Modules.Data.SourceGen
         public const string STACK_TYPE_T = "global::System.Collections.Generic.Stack<";
 
         public const string IREADONLY_LIST_TYPE_T = "global::System.Collections.Generic.IReadOnlyList<";
+        public const string ILIST_TYPE_T = "global::System.Collections.Generic.IList<";
+        public const string ISET_TYPE_T = "global::System.Collections.Generic.ISet<";
         public const string IREADONLY_DICTIONARY_TYPE_T = "global::System.Collections.Generic.IReadOnlyDictionary<";
+        public const string IDICTIONARY_TYPE_T = "global::System.Collections.Generic.IDictionary<";
         public const string READONLY_MEMORY_TYPE_T = "global::System.ReadOnlyMemory<";
         public const string READONLY_SPAN_TYPE_T = "global::System.ReadOnlySpan<";
         public const string MEMORY_TYPE_T = "global::System.Memory<";
