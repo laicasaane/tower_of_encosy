@@ -3,7 +3,6 @@ namespace EncosyTower.Modules
     using System;
     using System.Runtime.CompilerServices;
     using UnityEngine;
-    using UnityEngine.Serialization;
 
     public readonly partial struct Id<T>
         : IEquatable<Id<T>>
@@ -104,7 +103,7 @@ namespace EncosyTower.Modules
             , IEquatable<Serializable<T>>
             , IComparable<Serializable<T>>
         {
-            [SerializeField, FormerlySerializedAs("_id")]
+            [SerializeField]
             private uint _value;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

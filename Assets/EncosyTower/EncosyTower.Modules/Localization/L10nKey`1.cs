@@ -4,7 +4,6 @@ using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Localization.Tables;
-using UnityEngine.Serialization;
 
 namespace EncosyTower.Modules.Localization
 {
@@ -93,7 +92,7 @@ namespace EncosyTower.Modules.Localization
             [SerializeField]
             private string _table;
 
-            [SerializeField, FormerlySerializedAs("_key")]
+            [SerializeField]
             private string _entry;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

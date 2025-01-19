@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Modules.Types
 {
-    public static class TypeExtensions
+    public static class EncosyTypeExtensions
     {
         public const string VOID_TYPE_NAME = "void";
 
@@ -130,6 +130,26 @@ namespace EncosyTower.Modules.Types
             }
 
             return false;
+        }
+
+        public static string GetNameWithoutSuffix([NotNull] this Type type, [NotNull] string suffix)
+        {
+            var name = type.Name;
+
+            if (string.IsNullOrEmpty(suffix))
+            {
+                return name;
+            }
+
+            var lastIndex = name.Length - 1;
+            var index = name.LastIndexOf(suffix, lastIndex, StringComparison.OrdinalIgnoreCase);
+
+            if (index > 0)
+            {
+                name = name[..index];
+            }
+
+            return name;
         }
     }
 }
