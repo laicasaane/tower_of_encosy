@@ -15,20 +15,23 @@ namespace EncosyTower.Modules.Data
         internal protected override void Initialize()
         {
             var map = IdToIndexMap;
-            var entries = Entries.Span;
+            var entries = EntriesInternal.Span;
 
             map.Clear();
             map.EnsureCapacity(entries.Length);
 
             for (var i = 0; i < entries.Length; i++)
             {
-                var id = GetId(entries[i]);
+                ref var entry = ref entries[i];
+                var id = GetId(entry);
 
                 if (map.TryAdd(id, i) == false)
                 {
                     ErrorDuplicateId(id, i, this);
                     continue;
                 }
+
+                Initialize(ref entry);
             }
         }
 

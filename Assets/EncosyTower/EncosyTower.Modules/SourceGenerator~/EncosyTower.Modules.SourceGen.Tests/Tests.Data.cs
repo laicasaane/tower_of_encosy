@@ -199,7 +199,7 @@ namespace EncosyTower.Modules.Tests.Data.Heroes
 
 namespace EncosyTower.Modules.Tests.Data.Enemies
 {
-    public partial class EnemyData : IData
+    public partial class EnemyData : IData, IInitializable
     {
         [SerializeField]
         private IdData _id;
@@ -218,6 +218,10 @@ namespace EncosyTower.Modules.Tests.Data.Enemies
 
         [SerializeField]
         private Stack<float> _floatStack;
+
+        public void Initialize()
+        {
+        }
     }
 
     public abstract class EnemyDataTableAsset<T> : DataTableAsset<IdData, T>, IDataTableAsset where T : IDataWithId<IdData>

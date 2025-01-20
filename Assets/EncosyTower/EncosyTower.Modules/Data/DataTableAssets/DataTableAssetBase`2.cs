@@ -18,11 +18,20 @@ namespace EncosyTower.Modules.Data
             get => _entries;
         }
 
+        internal protected Memory<TData> EntriesInternal
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _entries;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator()
             => new(_entries);
 
-        protected abstract TDataId GetId(in TData data);
+        protected abstract TDataId GetId(in TData entry);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected virtual void Initialize(ref TData entry) { }
 
         internal sealed override void SetEntries(object obj)
         {

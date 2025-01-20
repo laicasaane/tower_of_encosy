@@ -6,11 +6,14 @@ namespace EncosyTower.Modules.Data.SourceGen
 
     partial class DataTableAssetDeclaration
     {
+        private const string IINITIALIZABLE = "global::EncosyTower.Modules.IInitializable";
+
         public string WriteCode()
         {
             var syntax = TypeRef.Syntax;
             var idTypeName = TypeRef.IdType.ToFullName();
             var dataTypeName = TypeRef.DataType.ToFullName();
+            var dataTypeHasInitializeMethod = TypeRef.DataType.ImplementsInterface(IINITIALIZABLE);
 
             var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, syntax.Parent);
             var p = scopePrinter.printer;
@@ -30,12 +33,25 @@ namespace EncosyTower.Modules.Data.SourceGen
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintLine($"protected override {idTypeName} GetId(in {dataTypeName} data)");
+                p.PrintLine($"protected override {idTypeName} GetId(in {dataTypeName} entry)");
                 p.OpenScope();
                 {
-                    p.PrintLine($"return data.Id;");
+                    p.PrintLine($"return entry.Id;");
                 }
                 p.CloseScope();
+                p.PrintEndLine();
+
+                if (dataTypeHasInitializeMethod)
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine($"protected override void Initialize(ref {dataTypeName} entry)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine($"entry.Initialize();");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
             }
             p.CloseScope();
 
