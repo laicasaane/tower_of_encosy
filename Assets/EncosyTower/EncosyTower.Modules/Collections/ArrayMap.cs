@@ -54,6 +54,7 @@ namespace EncosyTower.Modules.Collections
     public class ArrayMap<TKey, TValue> : IDisposable
         , ICollection<KeyValuePairFast<TKey, TValue>>
         , IReadOnlyCollection<KeyValuePairFast<TKey, TValue>>
+        , IClearable
     {
         internal readonly static EqualityComparer<TKey> s_comparer = EqualityComparer<TKey>.Default;
 

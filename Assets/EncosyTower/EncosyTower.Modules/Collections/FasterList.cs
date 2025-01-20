@@ -34,6 +34,7 @@ namespace EncosyTower.Modules.Collections
     public class FasterList<T> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , IAsMemory<T>, IAsReadOnlyMemory<T>
+        , IClearable
     {
         internal static readonly EqualityComparer<T> s_comp = EqualityComparer<T>.Default;
         internal static readonly bool s_shouldPerformMemClear = Type<T>.IsUnmanaged == false;

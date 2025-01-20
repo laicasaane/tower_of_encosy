@@ -24,14 +24,12 @@
 
 namespace EncosyTower.Modules.Buffers
 {
-    public interface IBuffer<T> : IAsSpan<T>, IAsReadOnlySpan<T>
+    public interface IBuffer<T> : IAsSpan<T>, IAsReadOnlySpan<T>, IClearable
     {
         int Capacity { get; }
 
         bool IsValid { get; }
 
         void CopyTo(uint sourceStartIndex, T[] destination, uint destinationStartIndex, uint count);
-
-        void Clear();
     }
 }

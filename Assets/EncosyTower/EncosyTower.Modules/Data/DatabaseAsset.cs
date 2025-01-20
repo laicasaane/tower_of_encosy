@@ -10,7 +10,7 @@ namespace EncosyTower.Modules.Data
 {
     using LazyTableLoadReference = LazyLoadReference<DataTableAssetBase>;
 
-    public class DatabaseAsset : ScriptableObject
+    public class DatabaseAsset : ScriptableObject, IInitializable, IDeinitializable
     {
         [SerializeField]
         internal LazyTableLoadReference[] _assetRefs = new LazyTableLoadReference[0];

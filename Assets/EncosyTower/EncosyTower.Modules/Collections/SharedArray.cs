@@ -39,7 +39,8 @@ namespace EncosyTower.Modules.Collections
     /// An array usable as both a NativeArray and managed array
     /// </summary>
     /// <typeparam name="T">The type of the array element</typeparam>
-    public sealed class SharedArray<T> : SharedArray<T, T> where T : unmanaged
+    public sealed class SharedArray<T> : SharedArray<T, T>
+        where T : unmanaged
     {
         public SharedArray(T[] managed)
         {
@@ -58,7 +59,7 @@ namespace EncosyTower.Modules.Collections
     /// </summary>
     /// <typeparam name="T">The element type in the managed representation.</typeparam>
     /// <typeparam name="TNative">The element type in the NativeArray representation. Must be the same size as <typeparamref name="T"/>.</typeparam>
-    public class SharedArray<T, TNative> : IDisposable, IEnumerable<T>
+    public class SharedArray<T, TNative> : IDisposable, IClearable, IEnumerable<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
         , IAsNativeArray<TNative>, IAsNativeSlice<TNative>
         where T : unmanaged
@@ -162,7 +163,7 @@ namespace EncosyTower.Modules.Collections
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             // Unity's default garbage collector doesn't move objects around, so pinning the array in memory
             // should not even be necessary. Better to be safe, though

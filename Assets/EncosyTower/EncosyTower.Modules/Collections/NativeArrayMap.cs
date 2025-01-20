@@ -53,7 +53,7 @@ namespace EncosyTower.Modules.Collections
     /// value with shared hash hence bucket list index.
     /// </summary>
     [DebuggerTypeProxy(typeof(NativeArrayMapDebugProxy<,>))]
-    public struct NativeArrayMap<TKey, TValue> : IDisposable
+    public struct NativeArrayMap<TKey, TValue> : IDisposable, IClearable
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {

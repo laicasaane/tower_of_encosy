@@ -34,7 +34,7 @@ using UnityEngine;
 namespace EncosyTower.Modules.Types.Internals
 {
     [Serializable]
-    internal sealed class SerializedTypeStore : ISerializationCallbackReceiver
+    internal sealed class SerializedTypeStore : IInitializable, ISerializationCallbackReceiver
     {
         /// <summary>
         /// Stores the <see cref="Type.AssemblyQualifiedName"/> of the types.

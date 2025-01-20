@@ -22,11 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System;
 using Unity.Collections;
 
 namespace EncosyTower.Modules.Buffers
 {
-    public interface IBufferStrategy<T> : IAsSpan<T>, IAsReadOnlySpan<T>
+    public interface IBufferStrategy<T> : IAsSpan<T>, IAsReadOnlySpan<T>, IClearable, IDisposable
     {
         int Capacity { get; }
 
@@ -38,10 +39,6 @@ namespace EncosyTower.Modules.Buffers
 
         void Resize(int newCapacity, bool copyContent = true, bool memClear = true);
 
-        void Clear();
-
         void FastClear();
-
-        void Dispose();
     }
 }

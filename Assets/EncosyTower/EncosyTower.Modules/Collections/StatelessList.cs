@@ -19,6 +19,7 @@ namespace EncosyTower.Modules.Collections
     public class StatelessList<TState, T> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , IAsMemory<T>, IAsReadOnlyMemory<T>
+        , IClearable
         where TState : IBufferProvider<T>
     {
         internal static readonly bool s_shouldPerformMemClear = Type<T>.IsUnmanaged == false;
