@@ -4,13 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace EncosyTower.Modules.Editor.AssemblyDefs
 {
-    using IItemInfo = CheckBoxWindow.IItemInfo;
+    using IItemInfo = CheckBoxWindowUITK.IItemInfo;
 
     [InitializeOnLoad]
     internal static class AssemblyDefinitionInspector
@@ -163,7 +166,7 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
                 return;
             }
 
-            CheckBoxWindow.OpenWindow(SELECT_REFS_LABEL, data.Items, data, OnApply, new(DrawItem, ItemHeight, DrawSeparator));
+            CheckBoxWindowUITK.OpenWindow(SELECT_REFS_LABEL, data.Items, data, OnApply, new(DrawItem, ItemHeight, DrawSeparator));
         }
 
         private static int ItemHeight()
@@ -332,7 +335,7 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
             return true;
         }
 
-        private class ItemInfo : IItemInfo
+        public class ItemInfo : IItemInfo
         {
             public AssemblyDefinitionAsset asset;
             public string guid;
