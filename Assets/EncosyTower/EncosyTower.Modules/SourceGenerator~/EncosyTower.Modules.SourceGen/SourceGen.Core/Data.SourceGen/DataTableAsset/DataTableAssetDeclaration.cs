@@ -8,6 +8,8 @@ namespace EncosyTower.Modules.Data.SourceGen
 
         public bool GetIdMethodIsImplemented { get; }
 
+        public bool InitializeMethodIsImplemented { get; }
+
         public DataTableAssetDeclaration(DataTableAssetRef candidate)
         {
             TypeRef = candidate;
@@ -28,7 +30,17 @@ namespace EncosyTower.Modules.Data.SourceGen
                 )
                 {
                     GetIdMethodIsImplemented = true;
-                    break;
+                    continue;
+                }
+
+                if (method.Name == "Initialize"
+                    && method.Parameters.Length == 1
+                    && method.Parameters[0].RefKind == RefKind.Ref
+                    && SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, TypeRef.DataType)
+                )
+                {
+                    InitializeMethodIsImplemented = true;
+                    continue;
                 }
             }
         }

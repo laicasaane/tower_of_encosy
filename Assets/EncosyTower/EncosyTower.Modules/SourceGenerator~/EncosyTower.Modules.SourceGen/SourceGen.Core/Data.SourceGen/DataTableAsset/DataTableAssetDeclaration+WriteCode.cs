@@ -32,16 +32,19 @@ namespace EncosyTower.Modules.Data.SourceGen
                 p.PrintLine($"public const string NAME = nameof({syntax.Identifier.Text});");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintLine($"protected override {idTypeName} GetId(in {dataTypeName} entry)");
-                p.OpenScope();
+                if (GetIdMethodIsImplemented == false)
                 {
-                    p.PrintLine($"return entry.Id;");
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine($"protected override {idTypeName} GetId(in {dataTypeName} entry)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine($"return entry.Id;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
                 }
-                p.CloseScope();
-                p.PrintEndLine();
 
-                if (dataTypeHasInitializeMethod)
+                if (InitializeMethodIsImplemented == false && dataTypeHasInitializeMethod)
                 {
                     p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintLine($"protected override void Initialize(ref {dataTypeName} entry)");
