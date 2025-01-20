@@ -23,7 +23,7 @@ namespace EncosyTower.Modules.Data
             for (var i = 0; i < entries.Length; i++)
             {
                 ref var entry = ref entries[i];
-                var id = Convert(GetId(entry));
+                var id = ConvertId(GetId(entry));
 
                 if (map.TryAdd(id, i) == false)
                 {
@@ -58,7 +58,7 @@ namespace EncosyTower.Modules.Data
                 : default;
         }
 
-        protected abstract TConvertedId Convert(TDataId value);
+        protected abstract TConvertedId ConvertId(TDataId value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected virtual string ToString(TConvertedId value)

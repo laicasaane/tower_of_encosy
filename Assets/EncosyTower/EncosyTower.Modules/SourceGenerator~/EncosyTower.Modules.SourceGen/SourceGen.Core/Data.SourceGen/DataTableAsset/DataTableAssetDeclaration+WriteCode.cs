@@ -1,4 +1,5 @@
 ﻿using EncosyTower.Modules.SourceGen;
+using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.Modules.Data.SourceGen
 {
@@ -55,11 +56,79 @@ namespace EncosyTower.Modules.Data.SourceGen
                     p.CloseScope();
                     p.PrintEndLine();
                 }
+
+                if (ConvertIdMethodIsImplemented == false
+                    && TypeRef.ConvertedIdType != null
+                )
+                {
+                    var convertedIdTypeName = TypeRef.ConvertedIdType.ToFullName();
+                    var result = GetConvertExpression(TypeRef.IdType, TypeRef.ConvertedIdType, convertedIdTypeName);
+
+                    if (string.IsNullOrEmpty(result))
+                    {
+                        result = GetConvertExpression(TypeRef.ConvertedIdType, TypeRef.IdType, convertedIdTypeName);
+                    }
+
+                    if (string.IsNullOrEmpty(result) == false)
+                    {
+                        p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                        p.PrintLine($"protected override {convertedIdTypeName} ConvertId({idTypeName} value)");
+                        p.OpenScope();
+                        {
+                            p.PrintLine($"return {result};");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+                }
             }
             p.CloseScope();
 
             p = p.DecreasedIndent();
             return p.Result;
+        }
+
+        private static string GetConvertExpression(ITypeSymbol from, ITypeSymbol to, string typeName)
+        {
+            var members = from.GetMembers();
+            var comparer = SymbolEqualityComparer.Default;
+
+            foreach (var member in members)
+            {
+                if (member is not IMethodSymbol method)
+                {
+                    continue;
+                }
+
+                if (method.IsStatic == false
+                    || method.DeclaredAccessibility != Accessibility.Public
+                    || method.Parameters.Length != 1
+                )
+                {
+                    continue;
+                }
+
+                var parameters = method.Parameters;
+
+                if (comparer.Equals(method.ReturnType, to) == false
+                    || comparer.Equals(parameters[0].Type, from) == false
+                )
+                {
+                    continue;
+                }
+
+                if (method.Name == "op_Implicit")
+                {
+                    return "value";
+                }
+
+                if (method.Name == "op_Explicit")
+                {
+                    return $"({typeName})value";
+                }
+            }
+
+            return string.Empty;
         }
     }
 }

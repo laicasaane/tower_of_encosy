@@ -12,5 +12,7 @@ namespace EncosyTower.Modules.Data.SourceGen
         public ITypeSymbol IdType { get; set; }
 
         public ITypeSymbol DataType { get; set; }
+
+        public ITypeSymbol ConvertedIdType { get; set; }
     }
 }

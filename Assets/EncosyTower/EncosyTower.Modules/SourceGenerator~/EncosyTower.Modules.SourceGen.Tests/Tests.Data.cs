@@ -243,6 +243,31 @@ namespace EncosyTower.Modules.Tests.Data.Enemies
     public partial class GenericDataTableAsset : GenericDataTableAsset<int>, IDataTableAsset { }
 }
 
+namespace EncosyTower.Modules.Tests.Data.ConvertibleIds
+{
+    public partial struct IdData : IData
+    {
+        [DataProperty]
+        public readonly int Value => Get_Value();
+
+        public static implicit operator int(IdData id)
+            => id.Value;
+    }
+
+    public partial struct ItemData : IData
+    {
+        [DataProperty]
+        public readonly IdData Id => Get_Id();
+
+        [DataProperty]
+        public readonly float Amount => Get_Amount();
+    }
+
+    public sealed partial class ItemTableAsset : DataTableAsset<IdData, ItemData, int>, IDataTableAsset
+    {
+    }
+}
+
 #if UNITY_EDITOR
 namespace EncosyTower.Modules.Tests.Data.Authoring
 {

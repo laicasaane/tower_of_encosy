@@ -92,12 +92,19 @@ namespace EncosyTower.Modules.Data.SourceGen
 
                     if (fullName.StartsWith(DATA_TABLE_ASSET))
                     {
-                        return new DataTableAssetRef {
+                        var result = new DataTableAssetRef {
                             Syntax = classSyntax,
                             Symbol = symbol,
                             IdType = typeArguments[0],
                             DataType = typeArguments[1],
                         };
+
+                        if (typeArguments.Length > 2)
+                        {
+                            result.ConvertedIdType = typeArguments[2];
+                        }
+
+                        return result;
                     }
                 }
 
