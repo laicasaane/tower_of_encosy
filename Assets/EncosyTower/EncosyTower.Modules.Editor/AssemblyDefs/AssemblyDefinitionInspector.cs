@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace EncosyTower.Modules.Editor.AssemblyDefs
 {
-    using IItemInfo = CheckBoxWindow.IItemInfo;
+    using IItemInfo = CheckBoxWindowUiToolkit.IItemInfo;
 
     [InitializeOnLoad]
     internal static class AssemblyDefinitionInspector
@@ -163,7 +163,7 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
                 return;
             }
 
-            CheckBoxWindow.OpenWindow(SELECT_REFS_LABEL, data.Items, data, OnApply, new(DrawItem, ItemHeight, DrawSeparator));
+            CheckBoxWindowUiToolkit.OpenWindow(SELECT_REFS_LABEL, data.Items, data, OnApply, new(DrawItem, ItemHeight, DrawSeparator));
         }
 
         private static int ItemHeight()
@@ -332,7 +332,7 @@ namespace EncosyTower.Modules.Editor.AssemblyDefs
             return true;
         }
 
-        private class ItemInfo : IItemInfo
+        public class ItemInfo : IItemInfo
         {
             public AssemblyDefinitionAsset asset;
             public string guid;
