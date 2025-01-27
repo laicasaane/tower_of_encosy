@@ -54,18 +54,9 @@ MonoBehaviour:
       - rid: 9223270420107493386
       - rid: 8109321644154290195
       - rid: 8109321957794381918
+      - rid: 7189211235928768512
     m_RuntimeSettings:
-      m_List:
-      - rid: 8109321644154290176
-      - rid: 8109321644154290177
-      - rid: 8109321644154290178
-      - rid: 8109321644154290179
-      - rid: 8109321644154290180
-      - rid: 8109321644154290184
-      - rid: 8109321644154290187
-      - rid: 8109321644154290192
-      - rid: 8109321644154290195
-      - rid: 8109321957794381918
+      m_List: []
   m_AssetVersion: 8
   m_ObsoleteDefaultVolumeProfile: {fileID: 0}
   m_RenderingLayerNames:
@@ -96,6 +87,12 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: 7189211235928768512
+      type: {class: UniversalRenderPipelineEditorAssets, ns: UnityEngine.Rendering.Universal,
+        asm: Unity.RenderPipelines.Universal.Runtime}
+      data:
+        m_DefaultSettingsVolumeProfile: {fileID: 11400000, guid: eda47df5b85f4f249abf7abd73db2cb2,
+          type: 2}
     - rid: 8109321644154290176
       type: {class: UniversalRenderPipelineRuntimeTextures, ns: UnityEngine.Rendering.Universal,
         asm: Unity.RenderPipelines.Universal.Runtime}
@@ -250,6 +247,8 @@ MonoBehaviour:
         m_DefaultTerrainMaterial: {fileID: 2100000, guid: 594ea882c5a793440b60ff72d896021e,
           type: 2}
         m_DefaultDecalMaterial: {fileID: 2100000, guid: 31d0dcc6f2dd4e4408d18036a2c93862,
+          type: 2}
+        m_DefaultSpriteMaterial: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40,
           type: 2}
     - rid: 9223270420107493380
       type: {class: GPUResidentDrawerResources, ns: UnityEngine.Rendering, asm: Unity.RenderPipelines.GPUDriven.Runtime}
