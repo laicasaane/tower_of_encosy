@@ -1,0 +1,10 @@
+.enableable-foldout__enable_toggle {
+    flex-direction: row;
+    position: absolute;
+    margin-left: 20px;
+    margin-top: 2px;
+}
+
+.enableable-foldout .unity-foldout__text {
+    margin-left: 20px;
+}
