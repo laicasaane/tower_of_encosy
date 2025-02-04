@@ -1,0 +1,7 @@
+.button-text-field {
+    flex-direction: row;
+}
+
+.button-text-field .unity-text-field {
+    flex-grow: 1;
+}
