@@ -11,7 +11,7 @@ namespace EncosyTower.Modules.UIElements
         public static readonly string UssClassName = "enableable-foldout";
         public static readonly string EnableToggleUssClassName = $"{UssClassName}__enable_toggle";
 
-        public event Action<ChangeEvent<bool>> ValueChanged;
+        public event Action<EnableableFoldout, ChangeEvent<bool>> ValueChanged;
 
         private readonly Foldout _foldout;
         private readonly Toggle _foldToggle;
@@ -84,7 +84,7 @@ namespace EncosyTower.Modules.UIElements
                 _foldToggle.enabledSelf = evt.newValue;
             }
 
-            ValueChanged?.Invoke(evt);
+            ValueChanged?.Invoke(this, evt);
         }
     }
 }
