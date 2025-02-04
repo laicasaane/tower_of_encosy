@@ -16,17 +16,28 @@ namespace EncosyTower.Modules.UIElements
         private readonly Foldout _foldout;
         private readonly Toggle _foldToggle;
         private readonly Toggle _enableToggle;
+        private bool _linkToggleToFoldout;
 
-        public EnableableFoldout(string text) : base()
+        public EnableableFoldout(string text, bool linkToggleToFoldout = false) : base()
         {
+            _linkToggleToFoldout = linkToggleToFoldout;
+
             AddToClassList(UssClassName);
 
             var foldout = _foldout = new Foldout { text = text };
-            foldout.value = false;
+
+            if (linkToggleToFoldout)
+            {
+                foldout.value = false;
+            }
+
             hierarchy.Add(foldout);
 
-            var foldToggle = _foldToggle = foldout.Q<Toggle>(className: ToggleUssClassName);
-            foldToggle.enabledSelf = false;
+            if (linkToggleToFoldout)
+            {
+                var foldToggle = _foldToggle = foldout.Q<Toggle>(className: ToggleUssClassName);
+                foldToggle.enabledSelf = false;
+            }
 
             var enableToggle = _enableToggle = new Toggle(string.Empty);
             enableToggle.AddToClassList(EnableToggleUssClassName);
@@ -43,14 +54,35 @@ namespace EncosyTower.Modules.UIElements
             set => _enableToggle.bindingPath = value;
         }
 
-        private void EnableToggle_OnValueChanged(ChangeEvent<bool> evt)
+        public bool LinkToggleToFoldout
         {
-            if (evt.newValue == false)
+            get
             {
-                _foldout.value = false;
+                return _linkToggleToFoldout;
             }
 
-            _foldToggle.enabledSelf = evt.newValue;
+            set
+            {
+                _linkToggleToFoldout = value;
+
+                if (_linkToggleToFoldout == false)
+                {
+                    _foldToggle.enabledSelf = true;
+                }
+            }
+        }
+
+        private void EnableToggle_OnValueChanged(ChangeEvent<bool> evt)
+        {
+            if (_linkToggleToFoldout)
+            {
+                if (evt.newValue == false)
+                {
+                    _foldout.value = false;
+                }
+
+                _foldToggle.enabledSelf = evt.newValue;
+            }
 
             ValueChanged?.Invoke(evt);
         }
