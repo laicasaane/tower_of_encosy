@@ -562,7 +562,7 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
                     .Print("int CompareTo(").Print(FullTypeName).PrintEndLine(" other)");
                 p = p.IncreasedIndent();
                 {
-                    p.PrintBeginLine("=> ").Print(FieldName).Print(".CompareTo(other.").Print(FieldName).PrintEndLine(");");
+                    p.PrintBeginLine("=> this.").Print(FieldName).Print(".CompareTo(other.").Print(FieldName).PrintEndLine(");");
                 }
                 p = p.DecreasedIndent();
                 p.PrintEndLine();
@@ -585,11 +585,11 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
                 {
                     if (ImplementOperators.HasFlag(OperatorKind.Equal))
                     {
-                        p.PrintBeginLine("=> ").Print(FieldName).Print(" == other.").Print(FieldName).PrintEndLine(";");
+                        p.PrintBeginLine("=> this.").Print(FieldName).Print(" == other.").Print(FieldName).PrintEndLine(";");
                     }
                     else
                     {
-                        p.PrintBeginLine("=> ").Print(FieldName).Print(".Equals(other.").Print(FieldName).PrintEndLine(");");
+                        p.PrintBeginLine("=> this.").Print(FieldName).Print(".Equals(other.").Print(FieldName).PrintEndLine(");");
                     }
                 }
                 p = p.DecreasedIndent();
@@ -605,7 +605,7 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
                 p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ").PrintEndLine("override int GetHashCode()");
                 p = p.IncreasedIndent();
                 {
-                    p.PrintBeginLine("=> ").Print(FieldName).PrintEndLine(".GetHashCode();");
+                    p.PrintBeginLine("=> this.").Print(FieldName).PrintEndLine(".GetHashCode();");
                 }
                 p = p.DecreasedIndent();
                 p.PrintEndLine();
@@ -620,7 +620,7 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
                 p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ").PrintEndLine("override string ToString()");
                 p = p.IncreasedIndent();
                 {
-                    p.PrintBeginLine("=> ").Print(FieldName).PrintEndLine(".ToString();");
+                    p.PrintBeginLine("=> this.").Print(FieldName).PrintEndLine(".ToString();");
                 }
                 p = p.DecreasedIndent();
                 p.PrintEndLine();
@@ -649,7 +649,7 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
             p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLineIf(isPublic, "public ", "");
             p.PrintIf(method.IsStatic, "static ");
-            p.PrintIf(method.IsOverride, "override ");
+            p.PrintIf(IsStruct == false && method.IsOverride, "override ");
             p.PrintIf(method.IsReadOnly, "readonly ");
             p.PrintIf(method.RefKind == RefKind.Ref, "ref ");
             p.PrintIf(method.RefKind == RefKind.RefReadOnly, "ref readonly ");
@@ -711,7 +711,7 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
                 }
                 else
                 {
-                    p.Print(FieldName);
+                    p.Print($"this.{FieldName}");
                 }
 
                 p.Print(".").Print(method.Name);

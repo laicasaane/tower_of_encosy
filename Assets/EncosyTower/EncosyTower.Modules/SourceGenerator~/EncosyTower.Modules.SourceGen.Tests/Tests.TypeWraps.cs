@@ -1,5 +1,6 @@
 ﻿using System;
 using EncosyTower.Modules.TypeWrap;
+using UnityEngine.UIElements;
 
 namespace EncosyTower.Modules.Tests.TypeWraps
 {
@@ -34,4 +35,7 @@ namespace EncosyTower.Modules.Tests.TypeWraps
             Print(default);
         }
     }
+
+    [WrapType(typeof(VisualElement))]
+    public readonly partial struct VisualElementWrapper { }
 }
