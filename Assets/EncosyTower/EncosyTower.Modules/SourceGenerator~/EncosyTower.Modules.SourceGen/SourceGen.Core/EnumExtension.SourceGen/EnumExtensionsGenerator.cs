@@ -25,7 +25,7 @@ namespace EncosyTower.Modules.EnumExtensions.SourceGen
             var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
                 predicate: IsValidEnumSyntax,
                 transform: GetSemanticSymbolMatch
-            ).Where(t => t.syntax is { } && t.symbol is { });
+            ).Where(static t => t.syntax is { } && t.symbol is { });
 
             var combined = candidateProvider
                 .Combine(compilationProvider)

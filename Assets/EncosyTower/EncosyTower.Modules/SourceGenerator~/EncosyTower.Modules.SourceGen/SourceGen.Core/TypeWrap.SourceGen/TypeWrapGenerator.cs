@@ -30,7 +30,7 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
             var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
                 predicate: IsValidTypeSyntax,
                 transform: GetSemanticSymbolMatch
-            ).Where(t => t is { syntax: { }, symbol: { }, fieldTypeSymbol: { } });
+            ).Where(static t => t is { syntax: { }, symbol: { }, fieldTypeSymbol: { } });
 
             var combined = candidateProvider
                 .Combine(compilationProvider)
