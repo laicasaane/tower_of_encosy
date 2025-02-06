@@ -24,7 +24,8 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
         private const string GENERATED_RUNTIME_TYPE_CACHES = "[global::EncosyTower.Modules.Types.Caches.SourceGen.GeneratedRuntimeTypeCaches]";
         private const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
         private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
-        private const string METHOD_GET_TYPES_DERIVED_FFROM = "GetTypesDerivedFrom";
+        private const string METHOD_GET_INFO = "GetInfo";
+        private const string METHOD_GET_TYPES_DERIVED_FROM = "GetTypesDerivedFrom";
         private const string METHOD_GET_TYPES_WITH_ATTRIBUTE = "GetTypesWithAttribute";
         private const string METHOD_GET_FIELDS_WITH_ATTRIBUTE = "GetFieldsWithAttribute";
         private const string METHOD_GET_METHODS_WITH_ATTRIBUTE = "GetMethodsWithAttribute";
@@ -80,7 +81,8 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
         private static bool IsMemberSupported(string memberName)
         {
             return memberName switch {
-                METHOD_GET_TYPES_DERIVED_FFROM => true,
+                METHOD_GET_INFO => true,
+                METHOD_GET_TYPES_DERIVED_FROM => true,
                 METHOD_GET_TYPES_WITH_ATTRIBUTE => true,
                 METHOD_GET_FIELDS_WITH_ATTRIBUTE => true,
                 METHOD_GET_METHODS_WITH_ATTRIBUTE => true,
@@ -118,7 +120,8 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
             var typeInfo = semanticModel.GetTypeInfo(typeArgList.Arguments[0], token);
 
             var cacheAttributeType = member.Identifier.ValueText switch {
-                METHOD_GET_TYPES_DERIVED_FFROM => CacheAttributeType.CacheTypesDerivedFrom,
+                METHOD_GET_INFO => CacheAttributeType.CacheType,
+                METHOD_GET_TYPES_DERIVED_FROM => CacheAttributeType.CacheTypesDerivedFrom,
                 METHOD_GET_TYPES_WITH_ATTRIBUTE => CacheAttributeType.CacheTypesWithAttribute,
                 METHOD_GET_FIELDS_WITH_ATTRIBUTE => CacheAttributeType.CacheFieldsWithAttribute,
                 METHOD_GET_METHODS_WITH_ATTRIBUTE => CacheAttributeType.CacheMethodsWithAttribute,
@@ -260,7 +263,6 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
 
                 if (candidate.invalidAssemblyNameSyntax is ExpressionSyntax invalidAssemblyNameSyntax)
                 {
-
                     context.ReportDiagnostic(
                           DiagnosticDescriptors.AssemblyNameMustBeStringLiteralOrConstant
                         , invalidAssemblyNameSyntax
@@ -268,7 +270,19 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
                     continue;
                 }
 
-                if (candidate.cacheAttributeType == CacheAttributeType.CacheTypesDerivedFrom)
+                if (candidate.cacheAttributeType == CacheAttributeType.CacheType)
+                {
+                    if (type.IsStatic)
+                    {
+                        context.ReportDiagnostic(
+                              DiagnosticDescriptors.StaticClassIsNotApplicable
+                            , candidate.typeSyntax
+                            , type.ToFullName()
+                        );
+                        continue;
+                    }
+                }
+                else if (candidate.cacheAttributeType == CacheAttributeType.CacheTypesDerivedFrom)
                 {
                     if (type.TypeKind is not (TypeKind.Class or TypeKind.Interface))
                     {
@@ -368,6 +382,10 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
 
                         switch (cdd.cacheAttributeType)
                         {
+                            case CacheAttributeType.CacheType:
+                                p.Print(nameof(CacheAttributeType.CacheType));
+                                break;
+
                             case CacheAttributeType.CacheTypesDerivedFrom:
                                 p.Print(nameof(CacheAttributeType.CacheTypesDerivedFrom));
                                 break;
@@ -411,6 +429,7 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
         private enum CacheAttributeType
         {
             None,
+            CacheType,
             CacheTypesDerivedFrom,
             CacheTypesWithAttribute,
             CacheFieldsWithAttribute,

@@ -12,6 +12,18 @@ namespace EncosyTower.Modules.Types.Caches
         string[] AssemblyNames { get; }
     }
 
+    [AttributeUsage(AttributeTargets.Class
+        | AttributeTargets.Struct
+        | AttributeTargets.Enum
+        | AttributeTargets.Interface
+        | AttributeTargets.Delegate
+        , AllowMultiple = false
+        , Inherited = false
+    )]
+    public sealed class CacheThisTypeAttribute : Attribute
+    {
+    }
+
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
     public sealed class CacheTypesDerivedFromThisTypeAttribute : Attribute
         , ICacheAttributeWithAssemblyNames
@@ -57,6 +69,18 @@ namespace EncosyTower.Modules.Types.Caches
         public CacheMethodsWithThisAttributeAttribute(params string[] assemblyNames)
         {
             AssemblyNames = assemblyNames;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true, Inherited = false)]
+    public sealed class CacheTypeAttribute : Attribute
+        , ICacheAttributeWithType
+    {
+        public Type Type { get; }
+
+        public CacheTypeAttribute(Type baseType)
+        {
+            Type = baseType;
         }
     }
 
