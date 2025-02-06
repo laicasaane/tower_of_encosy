@@ -73,7 +73,7 @@ namespace EncosyTower.Modules
         public override int GetHashCode()
         {
 #if __ENCOSY_VALIDATION__
-            if (_isValid != false)
+            if (_isValid == false)
             {
                 throw GetNullReferenceException();
             }
