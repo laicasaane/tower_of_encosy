@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.Modules.UIElements
 {
-    public class EnableableFoldout : VisualElement, IHasBindingPath
+    public class EnableableFoldout : VisualElement, IHasBindingPath, INotifyValueChanged<bool>
     {
         public static readonly string InputUssClassName = Foldout.inputUssClassName;
         public static readonly string TextUssClassName = Foldout.textUssClassName;
@@ -71,6 +71,21 @@ namespace EncosyTower.Modules.UIElements
                 }
             }
         }
+
+        public bool Expand
+        {
+            get => _foldout.value;
+            set => _foldout.value = value;
+        }
+
+        public bool value
+        {
+            get => _enableToggle.value;
+            set => _enableToggle.value = value;
+        }
+
+        public void SetValueWithoutNotify(bool newValue)
+            => _enableToggle.SetValueWithoutNotify(newValue);
 
         private void EnableToggle_OnValueChanged(ChangeEvent<bool> evt)
         {
