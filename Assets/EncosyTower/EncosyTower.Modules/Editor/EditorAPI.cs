@@ -7,6 +7,8 @@ namespace EncosyTower.Modules.Editor
 {
     public static class EditorAPI
     {
+        public static string ProjectPath => Application.dataPath.Replace("/Assets", string.Empty);
+
         public static bool IsDark => EditorGUIUtility.isProSkin;
 
         public static Color GetColor(in Color dark, in Color light)
