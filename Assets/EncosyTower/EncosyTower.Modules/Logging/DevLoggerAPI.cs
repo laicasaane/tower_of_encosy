@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -200,14 +201,16 @@ namespace EncosyTower.Modules.Logging
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void DebugLogSlim(LogType type, object message)
         {
-            UnityDebug.LogFormat(type, LogOption.NoStacktrace, null, message.ToString());
+            var msg = message.GetString(CultureInfo.InvariantCulture);
+            UnityDebug.LogFormat(type, LogOption.NoStacktrace, null, "{0}", msg);
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void DebugLogSlim(LogType type, UnityObject context, object message)
         {
-            UnityDebug.LogFormat(type, LogOption.NoStacktrace, context, message.ToString());
+            var msg = message.GetString(CultureInfo.InvariantCulture);
+            UnityDebug.LogFormat(type, LogOption.NoStacktrace, context, "{0}", msg);
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
