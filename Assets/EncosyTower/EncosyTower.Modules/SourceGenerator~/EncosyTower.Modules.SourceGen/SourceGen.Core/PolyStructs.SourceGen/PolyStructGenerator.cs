@@ -19,13 +19,14 @@ namespace EncosyTower.Modules.PolyStructs.SourceGen
     public partial class PolyStructGenerator : IIncrementalGenerator
     {
         public const string GENERATOR_NAME = nameof(PolyStructGenerator);
-        public const string POLY_INTERFACE_ATTRIBUTE = "global::EncosyTower.Modules.PolyStructs.PolyStructInterfaceAttribute";
-        public const string POLY_STRUCT_ATTRIBUTE = "global::EncosyTower.Modules.PolyStructs.PolyStructAttribute";
+        public const string NAMESPACE = "EncosyTower.Modules.PolyStructs";
+        public const string POLY_INTERFACE_ATTRIBUTE = $"global::{NAMESPACE}.PolyStructInterfaceAttribute";
+        public const string POLY_STRUCT_ATTRIBUTE = $"global::{NAMESPACE}.PolyStructAttribute";
 
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.PolyStructs.PolyStructSourceGen.PolymorphicStructGenerator\", \"1.0.0\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"{NAMESPACE}.PolyStructSourceGen.PolymorphicStructGenerator\", \"1.0.0\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
-        private const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.PolyStructs.SkipSourceGenForAssemblyAttribute";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -67,14 +68,14 @@ namespace EncosyTower.Modules.PolyStructs.SourceGen
 
             return node is InterfaceDeclarationSyntax syntax
                 && syntax.AttributeLists.Count > 0
-                && syntax.HasAttributeCandidate("EncosyTower.Modules.PolyStructs", "PolyStructInterface");
+                && syntax.HasAttributeCandidate(NAMESPACE, "PolyStructInterface");
         }
 
         public static InterfaceCandidate GetInterfaceRefSemanticMatch(GeneratorSyntaxContext context, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(SKIP_ATTRIBUTE) == false
+            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
                 || context.Node is not InterfaceDeclarationSyntax syntax
             )
             {
@@ -107,7 +108,7 @@ namespace EncosyTower.Modules.PolyStructs.SourceGen
         {
             return node is StructDeclarationSyntax syntax
                 && syntax.AttributeLists.Count > 0
-                && syntax.HasAttributeCandidate("EncosyTower.Modules.PolyStructs", "PolyStruct")
+                && syntax.HasAttributeCandidate(NAMESPACE, "PolyStruct")
                 && syntax.BaseList != null
                 && syntax.BaseList.Types.Count > 0
                 ;
@@ -118,7 +119,7 @@ namespace EncosyTower.Modules.PolyStructs.SourceGen
             , CancellationToken token
         )
         {
-            if (context.SemanticModel.Compilation.IsValidCompilation(SKIP_ATTRIBUTE) == false
+            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
                 || context.Node is not StructDeclarationSyntax syntax
                 || syntax.BaseList == null
                 || syntax.BaseList.Types.Count < 1
@@ -411,7 +412,7 @@ namespace EncosyTower.Modules.PolyStructs.SourceGen
             = new("SG_POLYMORPHIC_STRUCT_01"
                 , "Polymorphic Struct Generator Error"
                 , "This error indicates a bug in the Polymorphic Struct source generators. Error message: '{0}'."
-                , "EncosyTower.Modules.PolyStructs.SourceGen.PolyStructGenerator"
+                , $"{NAMESPACE}.SourceGen.PolyStructGenerator"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""

@@ -25,7 +25,7 @@ namespace EncosyTower.Modules.Data.SourceGen
             var combined = dataRefProvider
                 .Combine(context.CompilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.IsValidCompilation(SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
 
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(

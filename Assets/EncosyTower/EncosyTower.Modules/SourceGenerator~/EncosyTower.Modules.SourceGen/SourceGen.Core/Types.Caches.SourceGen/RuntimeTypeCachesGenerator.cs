@@ -13,15 +13,16 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
     [Generator]
     internal class RuntimeTypeCachesGenerator : IIncrementalGenerator
     {
-        private const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.Types.Caches.SkipSourceGenForAssemblyAttribute";
+        public const string NAMESPACE = "EncosyTower.Modules.Types.Caches";
+        public const string NAMESPACE_PREFIX = $"global::{NAMESPACE}";
+        public const string SKIP_ATTRIBUTE = $"{NAMESPACE_PREFIX}.SkipSourceGenForAssemblyAttribute";
         public const string GENERATOR_NAME = nameof(RuntimeTypeCachesGenerator);
 
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Types.Caches.SourceGen.RuntimeTypeCachesGenerator\", \"1.0.0\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"{NAMESPACE}.SourceGen.RuntimeTypeCachesGenerator\", \"1.0.0\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string RUNTIME_TYPE_CACHE = "global::EncosyTower.Modules.Types.RuntimeTypeCache";
-        private const string CACHES_NAMESPACE = "global::EncosyTower.Modules.Types.Caches";
-        private const string GENERATED_RUNTIME_TYPE_CACHES = "[global::EncosyTower.Modules.Types.Caches.SourceGen.GeneratedRuntimeTypeCaches]";
+        private const string GENERATED_RUNTIME_TYPE_CACHES = $"[{NAMESPACE_PREFIX}.SourceGen.GeneratedRuntimeTypeCaches]";
         private const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
         private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
         private const string METHOD_GET_INFO = "GetInfo";
@@ -97,7 +98,7 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(SKIP_ATTRIBUTE) == false)
+            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false)
             {
                 return default;
             }
@@ -316,7 +317,7 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
                 }
                 else if (candidate.cacheAttributeType != CacheAttributeType.CacheTypesDerivedFrom)
                 {
-                    if (type.ToFullName().StartsWith(CACHES_NAMESPACE))
+                    if (type.ToFullName().StartsWith(NAMESPACE_PREFIX))
                     {
                         context.ReportDiagnostic(
                               DiagnosticDescriptors.TypesFromCachesAreProhibited
@@ -378,7 +379,7 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
 
                     foreach (var cdd in candidates)
                     {
-                        p.PrintBeginLine("[global::EncosyTower.Modules.Types.Caches.");
+                        p.PrintBeginLine("[").Print(NAMESPACE_PREFIX).Print(".");
 
                         switch (cdd.cacheAttributeType)
                         {

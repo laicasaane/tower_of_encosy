@@ -10,8 +10,9 @@ namespace EncosyTower.Modules.EnumExtensions.SourceGen
     [Generator]
     public class EnumExtensionsGenerator : IIncrementalGenerator
     {
-        private const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.EnumExtensions.SkipSourceGenForAssemblyAttribute";
-        public const string ENUM_EXTENSIONS_ATTRIBUTE = "global::EncosyTower.Modules.EnumExtensions.EnumExtensionsAttribute";
+        private const string NAMESPACE = "EncosyTower.Modules.EnumExtensions";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        public const string ENUM_EXTENSIONS_ATTRIBUTE = $"global::{NAMESPACE}.EnumExtensionsAttribute";
         public const string FLAGS_ATTRIBUTE = "global::System.FlagsAttribute";
         public const string GENERATOR_NAME = nameof(EnumExtensionsGenerator);
 
@@ -30,7 +31,7 @@ namespace EncosyTower.Modules.EnumExtensions.SourceGen
             var combined = candidateProvider
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.compilation.IsValidCompilation(SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
 
             context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
                 GenerateOutput(
@@ -49,7 +50,7 @@ namespace EncosyTower.Modules.EnumExtensions.SourceGen
 
             return node is EnumDeclarationSyntax syntax
                 && syntax.AttributeLists.Count > 0
-                && syntax.HasAttributeCandidate("EncosyTower.Modules.EnumExtensions", "EnumExtensions")
+                && syntax.HasAttributeCandidate(NAMESPACE, "EnumExtensions")
                 ;
         }
 
@@ -139,7 +140,7 @@ namespace EncosyTower.Modules.EnumExtensions.SourceGen
             = new("SG_ENUM_EXTENSIONS_01"
                 , "Enum Extensions Generator Error"
                 , "This error indicates a bug in the Enum Extensions source generators. Error message: '{0}'."
-                , "EncosyTower.Modules.EnumExtensions.EnumExtensionsAttribute"
+                , $"{NAMESPACE}.EnumExtensionsAttribute"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""

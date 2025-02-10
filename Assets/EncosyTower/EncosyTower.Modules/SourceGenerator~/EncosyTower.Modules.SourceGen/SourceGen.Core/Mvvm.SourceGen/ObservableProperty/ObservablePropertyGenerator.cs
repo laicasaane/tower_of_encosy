@@ -11,6 +11,8 @@ namespace EncosyTower.Modules.Mvvm.ObservablePropertySourceGen
     public class ObservablePropertyGenerator : IIncrementalGenerator
     {
         public const string GENERATOR_NAME = nameof(ObservablePropertyGenerator);
+        public const string NAMESPACE = MvvmGeneratorHelpers.NAMESPACE;
+        public const string SKIP_ATTRIBUTE = MvvmGeneratorHelpers.SKIP_ATTRIBUTE;
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -24,7 +26,7 @@ namespace EncosyTower.Modules.Mvvm.ObservablePropertySourceGen
             var combined = candidateProvider
                 .Combine(context.CompilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.IsValidCompilation(MvvmGeneratorHelpers.SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
 
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
@@ -143,7 +145,7 @@ namespace EncosyTower.Modules.Mvvm.ObservablePropertySourceGen
             = new("SG_OBSERVABLE_PROPERTY_01"
                 , "Observable Property Generator Error"
                 , "This error indicates a bug in the Observable Property source generators. Error message: '{0}'."
-                , "EncosyTower.Modules.Mvvm.ObservablePropertyAttribute"
+                , $"{NAMESPACE}.ObservablePropertyAttribute"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""

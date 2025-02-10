@@ -11,12 +11,15 @@ namespace EncosyTower.Modules.Mvvm.InternalStringAdapterSourceGen
     [Generator]
     public class InternalStringAdapterGenerator : IIncrementalGenerator
     {
-        private const string COMPONENT_MODEL_NS = "global::EncosyTower.Modules.Mvvm.ComponentModel";
-        private const string VIEW_BINDING_NS = "EncosyTower.Modules.Mvvm.ViewBinding";
-        private const string INPUT_NS = "EncosyTower.Modules.Mvvm.Input";
-        private const string IOBSERVABLE_OBJECT = "global::EncosyTower.Modules.Mvvm.ComponentModel.IObservableObject";
-        private const string IADAPTER = "global::EncosyTower.Modules.Mvvm.ViewBinding.IAdapter";
-        private const string ADAPTER_ATTRIBUTE = "global::EncosyTower.Modules.Mvvm.ViewBinding.AdapterAttribute";
+        public const string NAMESPACE = MvvmGeneratorHelpers.NAMESPACE;
+        public const string SKIP_ATTRIBUTE = MvvmGeneratorHelpers.SKIP_ATTRIBUTE;
+
+        private const string COMPONENT_MODEL_NS = $"global::{NAMESPACE}.ComponentModel";
+        private const string VIEW_BINDING_NS = $"{NAMESPACE}.ViewBinding";
+        private const string INPUT_NS = $"{NAMESPACE}.Input";
+        private const string IOBSERVABLE_OBJECT = $"global::{NAMESPACE}.ComponentModel.IObservableObject";
+        private const string IADAPTER = $"global::{NAMESPACE}.ViewBinding.IAdapter";
+        private const string ADAPTER_ATTRIBUTE = $"global::{NAMESPACE}.ViewBinding.AdapterAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -90,7 +93,7 @@ namespace EncosyTower.Modules.Mvvm.InternalStringAdapterSourceGen
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(MvvmGeneratorHelpers.SKIP_ATTRIBUTE) == false)
+            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false)
             {
                 return null;
             }
@@ -148,7 +151,7 @@ namespace EncosyTower.Modules.Mvvm.InternalStringAdapterSourceGen
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(MvvmGeneratorHelpers.SKIP_ATTRIBUTE) == false
+            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
                 || context.Node is not TypeDeclarationSyntax typeDeclareSyntax
                 || typeDeclareSyntax.Kind() is not (SyntaxKind.ClassDeclaration or SyntaxKind.StructDeclaration)
                 || typeDeclareSyntax.BaseList == null
@@ -270,7 +273,7 @@ namespace EncosyTower.Modules.Mvvm.InternalStringAdapterSourceGen
             = new("SG_INTERNAL_STRING_ADAPTER_01"
                 , "Internal String Adapter Generator Error"
                 , "This error indicates a bug in the Internal String Adapter source generators. Error message: '{0}'."
-                , "EncosyTower.Modules.Mvvm.ViewBinding.IAdapter"
+                , $"{NAMESPACE}.ViewBinding.IAdapter"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""

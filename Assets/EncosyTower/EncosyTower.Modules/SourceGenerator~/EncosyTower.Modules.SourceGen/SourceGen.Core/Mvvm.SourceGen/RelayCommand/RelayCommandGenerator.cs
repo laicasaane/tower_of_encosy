@@ -9,9 +9,12 @@ namespace EncosyTower.Modules.Mvvm.RelayCommandSourceGen
     [Generator]
     public class RelayCommandGenerator : IIncrementalGenerator
     {
+        public const string NAMESPACE = MvvmGeneratorHelpers.NAMESPACE;
+        public const string SKIP_ATTRIBUTE = MvvmGeneratorHelpers.SKIP_ATTRIBUTE;
+
         public const string ATTRIBUTE = "RelayCommand";
-        public const string NAMESPACE = "EncosyTower.Modules.Mvvm.Input";
-        public const string INTERFACE = "global::EncosyTower.Modules.Mvvm.ComponentModel.IObservableObject";
+        public const string INPUT_NAMESPACE = $"{NAMESPACE}.Input";
+        public const string INTERFACE = $"global::{NAMESPACE}.ComponentModel.IObservableObject";
         public const string GENERATOR_NAME = nameof(RelayCommandGenerator);
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -19,14 +22,20 @@ namespace EncosyTower.Modules.Mvvm.RelayCommandSourceGen
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: static (node, token) => MvvmGeneratorHelpers.IsClassSyntaxMatchByAttribute(node, token, SyntaxKind.MethodDeclaration, NAMESPACE, ATTRIBUTE),
-                transform: static (syntaxContext, token) => MvvmGeneratorHelpers.GetClassSemanticMatch(syntaxContext, token, INTERFACE)
+                predicate: static (node, token) => {
+                    return MvvmGeneratorHelpers.IsClassSyntaxMatchByAttribute(
+                        node, token, SyntaxKind.MethodDeclaration, INPUT_NAMESPACE, ATTRIBUTE
+                    );
+                },
+                transform: static (syntaxContext, token) => {
+                    return MvvmGeneratorHelpers.GetClassSemanticMatch(syntaxContext, token, INTERFACE);
+                }
             ).Where(static t => t is { });
 
             var combined = candidateProvider
                 .Combine(context.CompilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.IsValidCompilation(MvvmGeneratorHelpers.SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
 
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
@@ -110,7 +119,7 @@ namespace EncosyTower.Modules.Mvvm.RelayCommandSourceGen
             = new("SG_RELAY_COMMAND_01"
                 , "Relay Command Generator Error"
                 , "This error indicates a bug in the RelayCommand source generators. Error message: '{0}'."
-                , "EncosyTower.Modules.Mvvm.IObservableObject"
+                , $"{NAMESPACE}.IObservableObject"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""

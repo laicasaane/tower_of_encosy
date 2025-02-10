@@ -11,8 +11,9 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
     [Generator]
     public class GenericUnionGenerator : IIncrementalGenerator
     {
-        public const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.Unions.SkipSourceGenForAssemblyAttribute";
-        public const string IUNION_T = "global::EncosyTower.Modules.Unions.IUnion<";
+        public const string NAMESPACE = "EncosyTower.Modules.Unions";
+        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        public const string IUNION_T = $"global::{NAMESPACE}.IUnion<";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -46,7 +47,7 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
                 && structSyntax.BaseList != null
                 && structSyntax.BaseList.Types.Count > 0
                 && structSyntax.BaseList.Types.Any(
-                    static x => x.Type.IsTypeNameGenericCandidate("EncosyTower.Modules.Unions", "IUnion", out _)
+                    static x => x.Type.IsTypeNameGenericCandidate(NAMESPACE, "IUnion", out _)
                 );
         }
 
@@ -57,7 +58,7 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(SKIP_ATTRIBUTE) == false
+            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
                 || context.Node is not StructDeclarationSyntax structSyntax
                 || structSyntax.BaseList == null
             )

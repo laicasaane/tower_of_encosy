@@ -9,9 +9,10 @@ namespace EncosyTower.Modules.Mvvm
 {
     public static class MvvmGeneratorHelpers
     {
-        public const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.Mvvm.SkipSourceGenForAssemblyAttribute";
+        public const string NAMESPACE = "EncosyTower.Modules.Mvvm";
+        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
 
-        private const string COMPONENT_MODEL_NS = "global::EncosyTower.Modules.Mvvm.ComponentModel";
+        private const string COMPONENT_MODEL_NS = $"global::{NAMESPACE}.ComponentModel";
 
         public static bool IsClassSyntaxMatchByAttribute(
               SyntaxNode syntaxNode

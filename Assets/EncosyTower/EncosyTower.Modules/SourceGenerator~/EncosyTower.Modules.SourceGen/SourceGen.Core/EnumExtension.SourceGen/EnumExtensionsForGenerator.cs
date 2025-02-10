@@ -10,8 +10,9 @@ namespace EncosyTower.Modules.EnumExtensions.SourceGen
     [Generator]
     public class EnumExtensionsForGenerator : IIncrementalGenerator
     {
-        private const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.EnumExtensions.SkipSourceGenForAssemblyAttribute";
-        public const string ENUM_EXTENSIONS_FOR_ATTRIBUTE = "global::EncosyTower.Modules.EnumExtensions.EnumExtensionsForAttribute";
+        private const string NAMESPACE = "EncosyTower.Modules.EnumExtensions";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        public const string ENUM_EXTENSIONS_FOR_ATTRIBUTE = $"global::{NAMESPACE}.EnumExtensionsForAttribute";
         public const string FLAGS_ATTRIBUTE = "global::System.FlagsAttribute";
         public const string GENERATOR_NAME = nameof(EnumExtensionsGenerator);
 
@@ -30,7 +31,7 @@ namespace EncosyTower.Modules.EnumExtensions.SourceGen
             var combined = candidateProvider
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.compilation.IsValidCompilation(SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
 
             context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
                 GenerateOutput(
@@ -49,7 +50,7 @@ namespace EncosyTower.Modules.EnumExtensions.SourceGen
 
             return node is ClassDeclarationSyntax syntax
                 && syntax.AttributeLists.Count > 0
-                && syntax.HasAttributeCandidate("EncosyTower.Modules.EnumExtensions", "EnumExtensionsFor")
+                && syntax.HasAttributeCandidate(NAMESPACE, "EnumExtensionsFor")
                 ;
         }
 
@@ -86,7 +87,7 @@ namespace EncosyTower.Modules.EnumExtensions.SourceGen
             {
                 foreach (var attrib in attribList.Attributes)
                 {
-                    if (attrib.Name.IsTypeNameCandidate("EncosyTower.Modules.EnumExtensions", "EnumExtensionsFor") == false
+                    if (attrib.Name.IsTypeNameCandidate(NAMESPACE, "EnumExtensionsFor") == false
                         || attrib.ArgumentList == null
                         || attrib.ArgumentList.Arguments.Count < 1
                     )
@@ -186,7 +187,7 @@ namespace EncosyTower.Modules.EnumExtensions.SourceGen
             = new("SG_ENUM_EXTENSIONS_02"
                 , "Enum Extensions For Generator Error"
                 , "This error indicates a bug in the Enum Extensions For source generators. Error message: '{0}'."
-                , "EncosyTower.Modules.EnumExtensions.EnumExtensionsForAttribute"
+                , $"{NAMESPACE}.EnumExtensionsForAttribute"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""

@@ -8,7 +8,8 @@ namespace EncosyTower.Modules.Entities.SourceGen
 {
     internal abstract class LookupGenerator : IIncrementalGenerator
     {
-        private const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.Entities.SkipSourceGenForAssemblyAttribute";
+        private const string NAMESPACE = "EncosyTower.Modules.Entities";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
 
         protected abstract string Interface { get; }
 
@@ -28,7 +29,7 @@ namespace EncosyTower.Modules.Entities.SourceGen
             var combined = candidateProvider
                 .Combine(context.CompilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.IsValidCompilation(SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
 
             context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
                 GenerateOutput(

@@ -11,9 +11,10 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
     [Generator]
     internal class UnionIdGenerator : IIncrementalGenerator
     {
-        public const string UNION_ID_ATTRIBUTE = "global::EncosyTower.Modules.UnionIds.UnionIdAttribute";
-        public const string UNION_ID_KIND_ATTRIBUTE = "global::EncosyTower.Modules.UnionIds.KindForUnionIdAttribute";
-        private const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.UnionIds.SkipSourceGenForAssemblyAttribute";
+        public const string NAMESPACE = "EncosyTower.Modules.UnionIds";
+        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        public const string UNION_ID_ATTRIBUTE = $"global::{NAMESPACE}.UnionIdAttribute";
+        public const string UNION_ID_KIND_ATTRIBUTE = $"global::{NAMESPACE}.KindForUnionIdAttribute";
         public const string GENERATOR_NAME = nameof(UnionIdGenerator);
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -37,7 +38,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                 .Combine(kindProvider.Collect())
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.compilation.IsValidCompilation(SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
 
             context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
                 GenerateOutput(

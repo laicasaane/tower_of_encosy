@@ -11,10 +11,11 @@ namespace EncosyTower.Modules.EnumTemplates.SourceGen
     [Generator]
     internal class EnumTemplateGenerator : IIncrementalGenerator
     {
-        public const string ENUM_TEMPLATE_ATTRIBUTE = "global::EncosyTower.Modules.EnumExtensions.EnumTemplateAttribute";
-        public const string ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE = "global::EncosyTower.Modules.EnumExtensions.EnumMembersForTemplateAttribute";
-        public const string TYPE_MEMBER_FOR_ENUM_TEMPLATE_ATTRIBUTE = "global::EncosyTower.Modules.EnumExtensions.TypeNameMemberForEnumTemplateAttribute";
-        private const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.EnumExtensions.SkipSourceGenForAssemblyAttribute";
+        public const string NAMESPACE = "EncosyTower.Modules.EnumExtensions";
+        public const string ENUM_TEMPLATE_ATTRIBUTE = $"global::{NAMESPACE}.EnumTemplateAttribute";
+        public const string ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE = $"global::{NAMESPACE}.EnumMembersForTemplateAttribute";
+        public const string TYPE_MEMBER_FOR_ENUM_TEMPLATE_ATTRIBUTE = $"global::{NAMESPACE}.TypeNameMemberForEnumTemplateAttribute";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
         public const string GENERATOR_NAME = nameof(EnumTemplateGenerator);
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -38,7 +39,7 @@ namespace EncosyTower.Modules.EnumTemplates.SourceGen
                 .Combine(kindProvider.Collect())
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.compilation.IsValidCompilation(SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
 
             context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
                 GenerateOutput(
@@ -57,7 +58,7 @@ namespace EncosyTower.Modules.EnumTemplates.SourceGen
             token.ThrowIfCancellationRequested();
 
             return syntaxNode is StructDeclarationSyntax structSyntax
-                && structSyntax.HasAttributeCandidate("EncosyTower.Modules.EnumExtensions", "EnumTemplate");
+                && structSyntax.HasAttributeCandidate(NAMESPACE, "EnumTemplate");
         }
 
         private static bool IsSyntaxMatchKind(SyntaxNode syntaxNode, CancellationToken token)
@@ -72,8 +73,8 @@ namespace EncosyTower.Modules.EnumTemplates.SourceGen
             }
 
             var baseTypeSyntax = (BaseTypeDeclarationSyntax)syntaxNode;
-            var attribSyntax = baseTypeSyntax.GetAttribute("EncosyTower.Modules.EnumExtensions", "EnumMembersForTemplate");
-            attribSyntax ??= baseTypeSyntax.GetAttribute("EncosyTower.Modules.EnumExtensions", "TypeNameMemberForEnumTemplate");
+            var attribSyntax = baseTypeSyntax.GetAttribute(NAMESPACE, "EnumMembersForTemplate");
+            attribSyntax ??= baseTypeSyntax.GetAttribute(NAMESPACE, "TypeNameMemberForEnumTemplate");
 
             return attribSyntax?.ArgumentList is { Arguments: { Count: > 1 } args }
                 && args[0].Expression is TypeOfExpressionSyntax

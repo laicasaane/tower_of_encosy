@@ -14,9 +14,10 @@ namespace EncosyTower.Modules.NewtonsoftAotHelpers.SourceGen
     [Generator]
     internal class NewtonsoftAotHelperGenerator : IIncrementalGenerator
     {
-        private const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.NewtonsoftAot.SkipSourceGenForAssemblyAttribute";
+        private const string NAMESPACE = "EncosyTower.Modules.NewtonsoftAot";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
         public const string GENERATOR_NAME = nameof(NewtonsoftAotHelperGenerator);
-        private const string ATTRIBUTE = "global::Newtonsoft.Json.Utilities.NewtonsoftAotHelperAttribute";
+        private const string ATTRIBUTE = $"global::{NAMESPACE}.NewtonsoftAotHelperAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -39,7 +40,7 @@ namespace EncosyTower.Modules.NewtonsoftAotHelpers.SourceGen
                 .Combine(typeProvider.Collect())
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.compilation.IsValidCompilation(SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
 
             context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
                 GenerateOutput(
@@ -115,7 +116,7 @@ namespace EncosyTower.Modules.NewtonsoftAotHelpers.SourceGen
             , CancellationToken token
         )
         {
-            if (context.SemanticModel.Compilation.IsValidCompilation(SKIP_ATTRIBUTE) == false
+            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
                 || context.Node is not TypeDeclarationSyntax syntax
                 || syntax.BaseList == null
                 || syntax.BaseList.Types.Count < 1
@@ -229,7 +230,7 @@ namespace EncosyTower.Modules.NewtonsoftAotHelpers.SourceGen
             = new("SG_NEWTONSOFT_AOT_HELPER_01"
                 , "NewtonsoftAotHelper Generator Error"
                 , "This error indicates a bug in the NewtonsoftAotHelper source generators. Error message: '{0}'."
-                , "Newtonsoft.Json.Utilities.NewtonsoftAotHelperAttribute"
+                , $"{NAMESPACE}.NewtonsoftAotHelperAttribute"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""

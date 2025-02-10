@@ -11,6 +11,8 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
     public class BinderGenerator : IIncrementalGenerator
     {
         public const string GENERATOR_NAME = nameof(BinderGenerator);
+        public const string NAMESPACE = MvvmGeneratorHelpers.NAMESPACE;
+        public const string SKIP_ATTRIBUTE = MvvmGeneratorHelpers.SKIP_ATTRIBUTE;
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -24,7 +26,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
             var combined = candidateProvider
                 .Combine(context.CompilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.IsValidCompilation(MvvmGeneratorHelpers.SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
 
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
@@ -45,7 +47,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
                 && classSyntax.BaseList != null
                 && classSyntax.BaseList.Types.Count > 0
                 && classSyntax.BaseList.Types.Any(
-                    static x => x.Type.IsTypeNameCandidate("EncosyTower.Modules.Mvvm.ViewBinding", "IBinder")
+                    static x => x.Type.IsTypeNameCandidate($"{NAMESPACE}.ViewBinding", "IBinder")
                 );
         }
 
@@ -133,7 +135,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
             = new("SG_BINDER_01"
                 , "Binder Generator Error"
                 , "This error indicates a bug in the Binder source generators. Error message: '{0}'."
-                , "EncosyTower.Modules.Mvvm.BindingAttribute"
+                , $"{NAMESPACE}.BindingAttribute"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""

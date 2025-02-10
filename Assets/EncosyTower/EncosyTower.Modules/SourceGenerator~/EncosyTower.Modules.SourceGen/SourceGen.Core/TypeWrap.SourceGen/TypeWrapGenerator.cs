@@ -14,11 +14,11 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
     {
         public const string NAMESPACE = "EncosyTower.Modules.TypeWrap";
         public const string WRAP_TYPE = "WrapType";
-        public const string WRAP_TYPE_ATTRIBUTE = "global::EncosyTower.Modules.TypeWrap.WrapTypeAttribute";
+        public const string WRAP_TYPE_ATTRIBUTE = $"global::{NAMESPACE}.WrapTypeAttribute";
         public const string WRAP_RECORD = "WrapRecord";
-        public const string WRAP_RECORD_ATTRIBUTE = "global::EncosyTower.Modules.TypeWrap.WrapRecordAttribute";
+        public const string WRAP_RECORD_ATTRIBUTE = $"global::{NAMESPACE}.WrapRecordAttribute";
         public const string GENERATOR_NAME = nameof(TypeWrapGenerator);
-        private const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.TypeWrap.SkipSourceGenForAssemblyAttribute";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -35,7 +35,7 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
             var combined = candidateProvider
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.compilation.IsValidCompilation(SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
 
             context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
                 GenerateOutput(

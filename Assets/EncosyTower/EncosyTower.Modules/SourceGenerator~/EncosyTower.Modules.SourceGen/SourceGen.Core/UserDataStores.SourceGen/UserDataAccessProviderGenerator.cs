@@ -15,9 +15,10 @@ namespace EncosyTower.Modules.UserDataStores.SourceGen
     internal class UserDataAccessProviderGenerator : IIncrementalGenerator
     {
         public const string GENERATOR_NAME = nameof(UserDataAccessProviderGenerator);
-        private const string ATTRIBUTE = "global::EncosyTower.Modules.UserDataStores.UserDataAccessProviderAttribute";
-        private const string IUSER_DATA_ACCESS = "global::EncosyTower.Modules.UserDataStores.IUserDataAccess";
-        private const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.UserDataStores.SkipSourceGenForAssemblyAttribute";
+        private const string NAMESPACE = "EncosyTower.Modules.UserDataStores";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        private const string ATTRIBUTE = $"global::{NAMESPACE}.UserDataAccessProviderAttribute";
+        private const string IUSER_DATA_ACCESS = $"global::{NAMESPACE}.IUserDataAccess";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -40,7 +41,7 @@ namespace EncosyTower.Modules.UserDataStores.SourceGen
                 .Combine(accessProvider.Collect())
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.compilation.IsValidCompilation(SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
 
             context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
                 GenerateOutput(
@@ -59,7 +60,7 @@ namespace EncosyTower.Modules.UserDataStores.SourceGen
             token.ThrowIfCancellationRequested();
 
             return syntaxNode is ClassDeclarationSyntax syntax
-                && syntax.HasAttributeCandidate("EncosyTower.Modules.UserDataStores", "UserDataAccessProvider");
+                && syntax.HasAttributeCandidate(NAMESPACE, "UserDataAccessProvider");
         }
 
         private static UserDataProviderCandidate GetProviderCandidate(
@@ -128,7 +129,7 @@ namespace EncosyTower.Modules.UserDataStores.SourceGen
                 && syntax.BaseList != null
                 && syntax.BaseList.Types.Count > 0
                 && syntax.BaseList.Types.Any(
-                    static x => x.Type.IsTypeNameCandidate("EncosyTower.Modules.UserDataStores", "IUserDataAccess"
+                    static x => x.Type.IsTypeNameCandidate(NAMESPACE, "IUserDataAccess"
                 ));
         }
 
@@ -137,7 +138,7 @@ namespace EncosyTower.Modules.UserDataStores.SourceGen
             , CancellationToken token
         )
         {
-            if (context.SemanticModel.Compilation.IsValidCompilation(SKIP_ATTRIBUTE) == false
+            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
                 || context.Node is not ClassDeclarationSyntax syntax
                 || syntax.BaseList == null
                 || syntax.BaseList.Types.Count < 1
@@ -260,7 +261,7 @@ namespace EncosyTower.Modules.UserDataStores.SourceGen
             = new("SG_USER_DATA_ACCESS_PROVIDER_01"
                 , "UserDataAccessProvider Generator Error"
                 , "This error indicates a bug in the UserDataAccessProvider source generators. Error message: '{0}'."
-                , "EncosyTower.Modules.UserDataStores.UserDataAccessProviderAttribute"
+                , $"{NAMESPACE}.UserDataAccessProviderAttribute"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""

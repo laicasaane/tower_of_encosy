@@ -12,15 +12,61 @@ namespace EncosyTower.Modules.SourceGen
         private const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Generator\", \"1.0.0\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.SkipSourceGenForAssemblyAttribute";
+        private const string ALLOW_ATTRIBUTE = "global::EncosyTower.Modules.AllowSourceGeneratorsForAssemblyAttribute";
 
         public const string FIELD_PREFIX_UNDERSCORE = "_";
         public const string FIELD_PREFIX_M_UNDERSCORE = "m_";
 
-        public static bool IsValidCompilation(this Compilation compilation, string skipAttribute)
+        public static bool IsValidCompilation(
+              this Compilation compilation
+            , string generatorNamespace
+            , string skipAttribute
+        )
         {
             var assembly = compilation.Assembly;
-            return assembly.HasAttribute(SKIP_ATTRIBUTE) == false
-                && (string.IsNullOrEmpty(skipAttribute) || assembly.HasAttribute(skipAttribute) == false);
+            var skipAllSourceGen = assembly.HasAttribute(SKIP_ATTRIBUTE);
+            var skipThisSourceGen = CanSkipThisSourceGen(assembly, skipAttribute);
+            var isAllowed = IsThisSourceGenAllowed(assembly, generatorNamespace);
+
+            return (skipAllSourceGen && isAllowed)
+                || (skipAllSourceGen == false && skipThisSourceGen == false);
+
+            static bool CanSkipThisSourceGen(IAssemblySymbol assembly, string skipAttribute)
+            {
+                return string.IsNullOrWhiteSpace(skipAttribute) == false
+                    && assembly.HasAttribute(skipAttribute);
+            }
+
+            static bool IsThisSourceGenAllowed(IAssemblySymbol assembly, string generatorNamespace)
+            {
+                if (string.IsNullOrWhiteSpace(generatorNamespace)
+                    || assembly.TryGetAttribute(ALLOW_ATTRIBUTE, out var allowAttrib) == false
+                )
+                {
+                    return false;
+                }
+
+                var args = allowAttrib.ConstructorArguments;
+
+                if (args.Length < 1 || args[0].Kind != TypedConstantKind.Array)
+                {
+                    return false;
+                }
+
+                var values = args[0].Values;
+
+                foreach (var value in values)
+                {
+                    if (value.Value is string ns
+                        && string.Equals(ns, generatorNamespace, StringComparison.Ordinal)
+                    )
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
 
         public static bool IsClassSyntaxMatch(SyntaxNode syntaxNode, CancellationToken token)

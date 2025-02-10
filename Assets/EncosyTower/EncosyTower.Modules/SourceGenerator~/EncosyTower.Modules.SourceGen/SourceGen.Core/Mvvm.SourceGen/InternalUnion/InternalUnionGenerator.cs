@@ -11,10 +11,13 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
     [Generator]
     public class InternalUnionGenerator : IIncrementalGenerator
     {
-        private const string COMPONENT_MODEL_NS = "global::EncosyTower.Modules.Mvvm.ComponentModel";
-        private const string VIEW_BINDING_NS = "EncosyTower.Modules.Mvvm.ViewBinding";
-        private const string INPUT_NS = "EncosyTower.Modules.Mvvm.Input";
-        private const string IOBSERVABLE_OBJECT = "global::EncosyTower.Modules.Mvvm.ComponentModel.IObservableObject";
+        public const string NAMESPACE = MvvmGeneratorHelpers.NAMESPACE;
+        public const string SKIP_ATTRIBUTE = MvvmGeneratorHelpers.SKIP_ATTRIBUTE;
+
+        private const string COMPONENT_MODEL_NS = $"global::{NAMESPACE}.ComponentModel";
+        private const string VIEW_BINDING_NS = $"{NAMESPACE}.ViewBinding";
+        private const string INPUT_NS = $"{NAMESPACE}.Input";
+        private const string IOBSERVABLE_OBJECT = $"global::{NAMESPACE}.ComponentModel.IObservableObject";
         private const string IUNION_T = "global::EncosyTower.Modules.Unions.IUnion<";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -102,7 +105,7 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(MvvmGeneratorHelpers.SKIP_ATTRIBUTE) == false)
+            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false)
             {
                 return null;
             }
@@ -149,7 +152,7 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(MvvmGeneratorHelpers.SKIP_ATTRIBUTE) == false
+            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
                 || context.Node is not StructDeclarationSyntax structSyntax
                 || structSyntax.BaseList == null
                 || structSyntax.BaseList.Types.Count < 1
@@ -264,7 +267,7 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
             = new("SG_INTERNAL_UNIONS_01"
                 , "Internal Union Generator Error"
                 , "This error indicates a bug in the Internal Union source generators. Error message: '{0}'."
-                , "EncosyTower.Modules.Mvvm.IObservableObject"
+                , $"{NAMESPACE}.IObservableObject"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""

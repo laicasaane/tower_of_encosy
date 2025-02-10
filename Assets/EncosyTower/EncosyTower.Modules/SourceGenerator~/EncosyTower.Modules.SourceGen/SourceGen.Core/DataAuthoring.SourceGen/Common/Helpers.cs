@@ -10,18 +10,20 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
     {
         public const string GENERATOR_NAME = nameof(DatabaseGenerator);
 
-        public const string IDATA = "global::EncosyTower.Modules.Data.IData";
-        public const string DATA_TABLE_ASSET = "global::EncosyTower.Modules.Data.DataTableAsset";
-        public const string DATABASE_ATTRIBUTE = "global::EncosyTower.Modules.Data.Authoring.DatabaseAttribute";
-        public const string TABLE_ATTRIBUTE = "global::EncosyTower.Modules.Data.Authoring.TableAttribute";
-        public const string HORIZONTAL_LIST_ATTRIBUTE = "global::EncosyTower.Modules.Data.Authoring.HorizontalAttribute";
+        public const string DATA_NAMESPACE = "EncosyTower.Modules.Data";
+        public const string AUTHORING_NAMESPACE = $"{DATA_NAMESPACE}.Authoring";
+        public const string IDATA = $"global::{DATA_NAMESPACE}.IData";
+        public const string DATA_TABLE_ASSET = $"global::{DATA_NAMESPACE}.DataTableAsset";
+        public const string DATABASE_ATTRIBUTE = $"global::{AUTHORING_NAMESPACE}.DatabaseAttribute";
+        public const string TABLE_ATTRIBUTE = $"global::{AUTHORING_NAMESPACE}.TableAttribute";
+        public const string HORIZONTAL_LIST_ATTRIBUTE = $"global::{AUTHORING_NAMESPACE}.HorizontalAttribute";
 
-        public const string DATA_PROPERTY_ATTRIBUTE = "global::EncosyTower.Modules.Data.DataPropertyAttribute";
-        public const string DATA_CONVERTER_ATTRIBUTE = "global::EncosyTower.Modules.Data.DataConverterAttribute";
+        public const string DATA_PROPERTY_ATTRIBUTE = $"global::{DATA_NAMESPACE}.DataPropertyAttribute";
+        public const string DATA_CONVERTER_ATTRIBUTE = $"global::{DATA_NAMESPACE}.DataConverterAttribute";
         public const string SERIALIZE_FIELD_ATTRIBUTE = "global::UnityEngine.SerializeField";
         public const string JSON_INCLUDE_ATTRIBUTE = "global::System.Text.Json.Serialization.JsonIncludeAttribute";
         public const string JSON_PROPERTY_ATTRIBUTE = "global::Newtonsoft.Json.JsonPropertyAttribute";
-        public const string SKIP_ATTRIBUTE = "global::EncosyTower.Modules.Data.Authoring.SkipSourceGenForAssemblyAttribute";
+        public const string SKIP_ATTRIBUTE = $"global::{AUTHORING_NAMESPACE}.SkipSourceGenForAssemblyAttribute";
 
         public const string LIST_TYPE_T = "global::System.Collections.Generic.List<";
         public const string DICTIONARY_TYPE_T = "global::System.Collections.Generic.Dictionary<";
@@ -40,10 +42,10 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
         public const string MEMORY_TYPE_T = "global::System.Memory<";
         public const string SPAN_TYPE_T = "global::System.Span<";
 
-        public const string GENERATED_PROPERTY_FROM_FIELD = "global::EncosyTower.Modules.Data.SourceGen.GeneratedPropertyFromFieldAttribute";
-        public const string GENERATED_FIELD_FROM_PROPERTY = "global::EncosyTower.Modules.Data.SourceGen.GeneratedFieldFromPropertyAttribute";
+        public const string GENERATED_PROPERTY_FROM_FIELD = $"global::{DATA_NAMESPACE}.SourceGen.GeneratedPropertyFromFieldAttribute";
+        public const string GENERATED_FIELD_FROM_PROPERTY = $"global::{DATA_NAMESPACE}.SourceGen.GeneratedFieldFromPropertyAttribute";
         public const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        public const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Data.DatabaseGenerator\", \"1.8.2\")]";
+        public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"{DATA_NAMESPACE}.DatabaseGenerator\", \"1.8.2\")]";
         public const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
 
         public static void Process(this MemberRef memberRef)

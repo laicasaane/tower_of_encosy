@@ -56,7 +56,7 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(SKIP_ATTRIBUTE) == false
+            if (context.SemanticModel.Compilation.IsValidCompilation(AUTHORING_NAMESPACE, SKIP_ATTRIBUTE) == false
                 || context.Node is not ClassDeclarationSyntax classSyntax
             )
             {
