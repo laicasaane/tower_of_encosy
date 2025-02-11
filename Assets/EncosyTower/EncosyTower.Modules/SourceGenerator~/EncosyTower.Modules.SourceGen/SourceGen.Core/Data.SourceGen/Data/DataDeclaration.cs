@@ -50,6 +50,8 @@ namespace EncosyTower.Modules.Data.SourceGen
 
         public ITypeSymbol IdPropertyType { get; }
 
+        public bool WithoutId { get; }
+
         public bool IsValid { get; }
 
         public DataDeclaration(
@@ -63,6 +65,7 @@ namespace EncosyTower.Modules.Data.SourceGen
             Symbol = symbol;
             IsSealed = Symbol.IsSealed || Symbol.IsValueType;
 
+            var withoutId = WithoutId = Symbol.GetAttribute(DATA_WITHOUT_ID_ATTRIBUTE) != null;
             var mutableAttrib = Symbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE);
 
             if (mutableAttrib != null)
@@ -228,7 +231,7 @@ namespace EncosyTower.Modules.Data.SourceGen
 
                     fieldArrayBuilder.Add(fieldRef);
 
-                    if (string.Equals(propertyName, "Id", StringComparison.Ordinal))
+                    if (withoutId == false && string.Equals(propertyName, "Id", StringComparison.Ordinal))
                     {
                         if (fieldRef.PropertyCollection.Kind != CollectionKind.NotCollection)
                         {
@@ -316,7 +319,7 @@ namespace EncosyTower.Modules.Data.SourceGen
 
                     propArrayBuilder.Add(propRef);
 
-                    if (string.Equals(property.Name, "Id", StringComparison.Ordinal))
+                    if (withoutId == false && string.Equals(property.Name, "Id", StringComparison.Ordinal))
                     {
                         if (propRef.PropertyCollection.Kind != CollectionKind.NotCollection)
                         {

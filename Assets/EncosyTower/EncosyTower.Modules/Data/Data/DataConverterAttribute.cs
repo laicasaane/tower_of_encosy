@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace EncosyTower.Modules.Data
 {
@@ -19,12 +19,12 @@ namespace EncosyTower.Modules.Data
     /// {
     ///     public float Convert(int value) => value;
     /// }
-    /// 
+    ///
     /// public class MyData : IData
     /// {
     ///     [DataProperty, DataConverter(typeof(IntToFloatConverter))]
     ///     public float Hp { get; set; }
-    ///     
+    ///
     ///     [JsonProperty, DataConverter(typeof(IntToFloatConverter))]
     ///     private float _atk;
     /// }
