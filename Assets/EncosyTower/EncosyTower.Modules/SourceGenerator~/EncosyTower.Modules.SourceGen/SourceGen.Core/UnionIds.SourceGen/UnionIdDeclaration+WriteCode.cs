@@ -44,24 +44,32 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             {
                 WriteFields(ref p);
                 WriteConstructors(ref p, typeName);
-                WriteConstructorIdKindString(ref p, typeName);
-                WriteConstructorStringString(ref p, typeName);
-                WriteConstructorIdKindSpan(ref p, typeName);
-                WriteConstructorSpanSpan(ref p, typeName);
+                WriteConstructor_IdKind_IdString(ref p, typeName);
+                WriteConstructor_IdKindString_IdString(ref p, typeName);
+                WriteConstructor_IdKindString_IdUnsigned(ref p, typeName);
+                WriteConstructor_IdKindString_IdSigned(ref p, typeName);
+                WriteConstructor_IdKind_IdSpan(ref p, typeName, false);
+                WriteConstructor_IdKindSpan_IdSpan(ref p, typeName, false);
+                WriteConstructor_IdKindSpan_IdUnsigned(ref p, typeName);
+                WriteConstructor_IdKindSpan_IdSigned(ref p, typeName);
                 WritePartialTryParseMethods(ref p);
-                WriteTryParseIdKindString(ref p, typeName);
-                WriteTryParseStringString(ref p, typeName);
-                WriteTryParseIdKindSpan(ref p, typeName);
-                WriteTryParseSpanSpan(ref p, typeName);
+                WriteTryParse_IdKind_IdString(ref p, typeName);
+                WriteTryParse_IdKindString_IdString(ref p, typeName);
+                WriteTryParse_IdKindString_IdUnsigned(ref p, typeName);
+                WriteTryParse_IdKindString_IdSigned(ref p, typeName);
+                WriteTryParse_IdKind_IdSpan(ref p, typeName);
+                WriteTryParse_IdKindSpan_IdSpan(ref p, typeName);
+                WriteTryParse_IdKindSpan_IdUnsigned(ref p, typeName);
+                WriteTryParse_IdKindSpan_IdSigned(ref p, typeName);
                 WriteCommonMethods(ref p, typeName);
-                WriteToString(ref p);
-                WriteToDisplayString(ref p);
-                WriteToFixedString(ref p);
-                WriteToDisplayFixedString(ref p);
-                WriteGetIdStringFast(ref p);
-                WriteGetIdDisplayStringFast(ref p);
-                WriteGetIdFixedString(ref p);
-                WriteGetIdDisplayFixedString(ref p);
+                WriteToString(ref p, false);
+                WriteToDisplayString(ref p, false);
+                WriteToFixedString(ref p, false);
+                WriteToDisplayFixedString(ref p, false);
+                WriteGetIdStringFast(ref p, false);
+                WriteGetIdDisplayStringFast(ref p, false);
+                WriteGetIdFixedString(ref p, false);
+                WriteGetIdDisplayFixedString(ref p, false);
                 WritePartialAppendMethods(ref p);
                 WriteIdKindEnum(ref p);
                 WriteSerializable(ref p, typeName);
@@ -95,7 +103,18 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                     p.PrintLineIf(References.odin, ODIN_PROPERTY_ORDER, order);
                 }
 
-                p.PrintBeginLine("public readonly ").Print(IdRawTypeName).Print(" Id").PrintEndLine(";");
+                p.PrintBeginLine("public readonly ").Print(IdRawUnsignedTypeName).Print(" IdUnsigned").PrintEndLine(";");
+                p.PrintEndLine();
+
+                p.PrintLine(FIELD_OFFSET, 0);
+
+                if (KindRefs.Count < 1)
+                {
+                    p.PrintLineIf(References.odin, ODIN_SHOW_IN_INSPECTOR);
+                    p.PrintLineIf(References.odin, ODIN_PROPERTY_ORDER, order);
+                }
+
+                p.PrintBeginLine("public readonly ").Print(IdRawSignedTypeName).Print(" IdSigned").PrintEndLine(";");
                 p.PrintEndLine();
 
                 if (KindRefs.Count > 0)
@@ -149,10 +168,20 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public ").Print(typeName).Print("(IdKind kind, ").Print(IdRawTypeName).PrintEndLine(" id) : this()");
+            p.PrintBeginLine("public ").Print(typeName).Print("(IdKind kind, ").Print(IdRawUnsignedTypeName).PrintEndLine(" id) : this()");
             p.OpenScope();
             {
-                p.PrintBeginLine("Id").PrintEndLine(" = id;");
+                p.PrintBeginLine("IdUnsigned").PrintEndLine(" = id;");
+                p.PrintLine("Kind = kind;");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(typeName).Print("(IdKind kind, ").Print(IdRawSignedTypeName).PrintEndLine(" id) : this()");
+            p.OpenScope();
+            {
+                p.PrintBeginLine("IdSigned").PrintEndLine(" = id;");
                 p.PrintLine("Kind = kind;");
             }
             p.CloseScope();
@@ -190,7 +219,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             }
         }
 
-        private void WriteConstructorIdKindString(ref Printer p, string typeName)
+        private void WriteConstructor_IdKind_IdString(ref Printer p, string typeName)
         {
             p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(typeName)
@@ -203,7 +232,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
-        private void WriteConstructorStringString(ref Printer p, string typeName)
+        private void WriteConstructor_IdKindString_IdString(ref Printer p, string typeName)
         {
             p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(typeName)
@@ -216,23 +245,87 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
-        private void WriteConstructorIdKindSpan(ref Printer p, string typeName)
+        private void WriteConstructor_IdKindString_IdLong(ref Printer p, string typeName)
+        {
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(typeName)
+                .Print("(string kind, long id, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)")
+                .PrintEndLine(" : this(global::System.MemoryExtensions.AsSpan(kind), id, ignoreCase, allowMatchingMetadataAttribute)");
+            p.OpenScope();
+            {
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteConstructor_IdKindString_IdUnsigned(ref Printer p, string typeName)
+        {
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(typeName).Print("(string kind, ")
+                .Print(IdRawUnsignedTypeName).Print(" id")
+                .Print(", bool ignoreCase = true")
+                .Print(", bool allowMatchingMetadataAttribute = true)")
+                .PrintEndLine(" : this(global::System.MemoryExtensions.AsSpan(kind), id, ignoreCase, allowMatchingMetadataAttribute)");
+            p.OpenScope();
+            {
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteConstructor_IdKindString_IdSigned(ref Printer p, string typeName)
+        {
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(typeName).Print("(string kind, ")
+                .Print(IdRawSignedTypeName).Print(" id")
+                .Print(", bool ignoreCase = true")
+                .Print(", bool allowMatchingMetadataAttribute = true)")
+                .PrintEndLine(" : this(global::System.MemoryExtensions.AsSpan(kind), id, ignoreCase, allowMatchingMetadataAttribute)");
+            p.OpenScope();
+            {
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteConstructor_IdKind_IdSpan(ref Printer p, string typeName, bool isSerializableStruct)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public ").Print(typeName).PrintEndLine("(IdKind kind, global::System.ReadOnlySpan<char> id, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true) : this()");
+            p.PrintBeginLine("public ").Print(typeName).Print("(IdKind kind")
+                .Print(", global::System.ReadOnlySpan<char> id")
+                .Print(", bool ignoreCase = true")
+                .Print(", bool allowMatchingMetadataAttribute = true")
+                .PrintEndLine(") : this()");
             p.OpenScope();
             {
                 if (KindRefs.Count < 1)
                 {
-                    p.PrintBeginLine("if (").Print(IdRawTypeName).PrintEndLine(".TryParse(id, out var idValue) == false)");
-                    p.OpenScope();
+                    if (isSerializableStruct)
                     {
-                        p.PrintLine("idValue = default;");
+                        p.PrintBeginLine("if (long.TryParse(id, out var idValue))");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("Id = idValue;");
+                        }
+                        p.CloseScope();
                     }
-                    p.CloseScope();
-                    p.PrintEndLine();
+                    else
+                    {
+                        p.PrintBeginLine("if (").Print(IdRawUnsignedTypeName).PrintEndLine(".TryParse(id, out var idUnsigned))");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("IdUnsigned = idUnsigned;");
+                        }
+                        p.CloseScope();
+                        p.PrintBeginLine("else if (").Print(IdRawSignedTypeName).PrintEndLine(".TryParse(id, out var idSigned))");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("IdSigned = idSigned;");
+                        }
+                        p.CloseScope();
+                    }
 
-                    p.PrintLine("Id = idValue;");
+                    p.PrintEndLine();
                 }
                 else
                 {
@@ -290,10 +383,14 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
-        private void WriteConstructorSpanSpan(ref Printer p, string typeName)
+        private void WriteConstructor_IdKindSpan_IdSpan(ref Printer p, string typeName, bool isSerializableStruct)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public ").Print(typeName).PrintEndLine("(global::System.ReadOnlySpan<char> kind, global::System.ReadOnlySpan<char> id, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true) : this()");
+            p.PrintBeginLine("public ").Print(typeName).Print("(global::System.ReadOnlySpan<char> kind")
+                .Print(", global::System.ReadOnlySpan<char> id")
+                .Print(", bool ignoreCase = true")
+                .Print(", bool allowMatchingMetadataAttribute = true")
+                .PrintEndLine(") : this()");
             p.OpenScope();
             {
                 if (KindRefs.Count < 1)
@@ -306,15 +403,32 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintBeginLine("if (").Print(IdRawTypeName).PrintEndLine(".TryParse(id, out var idValue) == false)");
-                    p.OpenScope();
+                    if (isSerializableStruct)
                     {
-                        p.PrintLine("idValue = default;");
+                        p.PrintBeginLine("if (long.TryParse(id, out var idValue))");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("Id = idValue;");
+                        }
+                        p.CloseScope();
                     }
-                    p.CloseScope();
-                    p.PrintEndLine();
+                    else
+                    {
+                        p.PrintBeginLine("if (").Print(IdRawUnsignedTypeName).PrintEndLine(".TryParse(id, out var idUnsigned))");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("IdUnsigned = idUnsigned;");
+                        }
+                        p.CloseScope();
+                        p.PrintBeginLine("else if (").Print(IdRawSignedTypeName).PrintEndLine(".TryParse(id, out var idSigned))");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("IdSigned = idSigned;");
+                        }
+                        p.CloseScope();
+                    }
 
-                    p.PrintLine("Id = idValue;");
+                    p.PrintEndLine();
                     p.PrintLine("Kind = (IdKind)kindValue;");
                 }
                 else
@@ -382,6 +496,132 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
+        private void WriteConstructor_IdKindSpan_IdLong(ref Printer p, string typeName)
+        {
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(typeName).Print("(global::System.ReadOnlySpan<char> kind")
+                .Print(", long id")
+                .Print(", bool ignoreCase = true")
+                .Print(", bool allowMatchingMetadataAttribute = true")
+                .PrintEndLine(") : this()");
+            p.OpenScope();
+            {
+                p.PrintLine("Id = id;").PrintEndLine();
+
+                if (KindRefs.Count < 1)
+                {
+                    p.PrintBeginLine("if (").Print(KindRawTypeName).PrintEndLine(".TryParse(kind, out var kindValue) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("kindValue = default;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("Kind = (IdKind)kindValue;");
+                }
+                else
+                {
+                    p.PrintBeginLine("if (").Print(KindExtensionsRef.ExtensionsName)
+                        .PrintEndLine(".TryParse(kind, out var kindValue, ignoreCase, allowMatchingMetadataAttribute) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("kindValue = default;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("Kind = kindValue;");
+                }
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteConstructor_IdKindSpan_IdUnsigned(ref Printer p, string typeName)
+        {
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(typeName).Print("(global::System.ReadOnlySpan<char> kind, ")
+                .Print(IdRawUnsignedTypeName).Print(" id")
+                .Print(", bool ignoreCase = true")
+                .Print(", bool allowMatchingMetadataAttribute = true")
+                .PrintEndLine(") : this()");
+            p.OpenScope();
+            {
+                p.PrintLine("IdUnsigned = id;").PrintEndLine();
+
+                if (KindRefs.Count < 1)
+                {
+                    p.PrintBeginLine("if (").Print(KindRawTypeName).PrintEndLine(".TryParse(kind, out var kindValue) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("kindValue = default;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("Kind = (IdKind)kindValue;");
+                }
+                else
+                {
+                    p.PrintBeginLine("if (").Print(KindExtensionsRef.ExtensionsName)
+                        .PrintEndLine(".TryParse(kind, out var kindValue, ignoreCase, allowMatchingMetadataAttribute) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("kindValue = default;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("Kind = kindValue;");
+                }
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteConstructor_IdKindSpan_IdSigned(ref Printer p, string typeName)
+        {
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(typeName).Print("(global::System.ReadOnlySpan<char> kind, ")
+                .Print(IdRawSignedTypeName).Print(" id")
+                .Print(", bool ignoreCase = true")
+                .Print(", bool allowMatchingMetadataAttribute = true")
+                .PrintEndLine(") : this()");
+            p.OpenScope();
+            {
+                p.PrintLine("IdSigned = id;").PrintEndLine();
+
+                if (KindRefs.Count < 1)
+                {
+                    p.PrintBeginLine("if (").Print(KindRawTypeName).PrintEndLine(".TryParse(kind, out var kindValue) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("kindValue = default;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("Kind = (IdKind)kindValue;");
+                }
+                else
+                {
+                    p.PrintBeginLine("if (").Print(KindExtensionsRef.ExtensionsName)
+                        .PrintEndLine(".TryParse(kind, out var kindValue, ignoreCase, allowMatchingMetadataAttribute) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("kindValue = default;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("Kind = kindValue;");
+                }
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
         private void WritePartialTryParseMethods(ref Printer p)
         {
             foreach (var kind in KindRefs)
@@ -401,7 +641,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             }
         }
 
-        private void WriteTryParseIdKindString(ref Printer p, string typeName)
+        private void WriteTryParse_IdKind_IdString(ref Printer p, string typeName)
         {
             p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public bool TryParse(IdKind kind, string id, out ")
@@ -415,7 +655,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
-        private void WriteTryParseStringString(ref Printer p, string typeName)
+        private void WriteTryParse_IdKindString_IdString(ref Printer p, string typeName)
         {
             p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public bool TryParse(string kind, string id, out ")
@@ -429,7 +669,35 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
-        private void WriteTryParseIdKindSpan(ref Printer p, string typeName)
+        private void WriteTryParse_IdKindString_IdUnsigned(ref Printer p, string typeName)
+        {
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public bool TryParse(string kind, ")
+                .Print(IdRawUnsignedTypeName).Print(" id, out ").Print(typeName)
+                .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
+            p.OpenScope();
+            {
+                p.PrintLine("return TryParse(global::System.MemoryExtensions.AsSpan(kind), id, out result, ignoreCase, allowMatchingMetadataAttribute);");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteTryParse_IdKindString_IdSigned(ref Printer p, string typeName)
+        {
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public bool TryParse(string kind, ")
+                .Print(IdRawSignedTypeName).Print(" id, out ").Print(typeName)
+                .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
+            p.OpenScope();
+            {
+                p.PrintLine("return TryParse(global::System.MemoryExtensions.AsSpan(kind), id, out result, ignoreCase, allowMatchingMetadataAttribute);");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteTryParse_IdKind_IdSpan(ref Printer p, string typeName)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public bool TryParse(IdKind kind, global::System.ReadOnlySpan<char> id, out ")
@@ -439,7 +707,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             {
                 if (KindRefs.Count < 1)
                 {
-                    p.PrintBeginLine("if (").Print(IdRawTypeName).PrintEndLine(".TryParse(id, out var idValue))");
+                    p.PrintBeginLine("if (").Print(IdRawUnsignedTypeName).PrintEndLine(".TryParse(id, out var idValue))");
                     p.OpenScope();
                     {
                         p.PrintLine("result = new(kind, idValue);");
@@ -510,17 +778,17 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                     }
                     p.CloseScope();
                     p.PrintEndLine();
-                }
 
-                p.PrintLine("FAILED:");
-                p.PrintLine("result = default;");
-                p.PrintLine("return false;");
+                    p.PrintLine("FAILED:");
+                    p.PrintLine("result = default;");
+                    p.PrintLine("return false;");
+                }
             }
             p.CloseScope();
             p.PrintEndLine();
         }
 
-        private void WriteTryParseSpanSpan(ref Printer p, string typeName)
+        private void WriteTryParse_IdKindSpan_IdSpan(ref Printer p, string typeName)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public bool TryParse(global::System.ReadOnlySpan<char> kind, global::System.ReadOnlySpan<char> id, out ")
@@ -539,7 +807,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintBeginLine("if (").Print(IdRawTypeName).PrintEndLine(".TryParse(id, out var idValue) == false)");
+                    p.PrintBeginLine("if (").Print(IdRawUnsignedTypeName).PrintEndLine(".TryParse(id, out var idValue) == false)");
                     p.OpenScope();
                     {
                         p.PrintLine("result = default;");
@@ -632,6 +900,90 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
+        private void WriteTryParse_IdKindSpan_IdUnsigned(ref Printer p, string typeName)
+        {
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public bool TryParse(global::System.ReadOnlySpan<char> kind, ")
+                .Print(IdRawUnsignedTypeName).Print(" id, out ").Print(typeName)
+                .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
+            p.OpenScope();
+            {
+                if (KindRefs.Count < 1)
+                {
+                    p.PrintBeginLine("if (").Print(KindRawTypeName).PrintEndLine(".TryParse(kind, out var kindValue) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("result = default;");
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("result = new((IdKind)kindValue, id);");
+                    p.PrintLine("return true;");
+                }
+                else
+                {
+                    p.PrintBeginLine("if (").Print(KindExtensionsRef.ExtensionsName)
+                        .PrintEndLine(".TryParse(kind, out var kindValue, ignoreCase, allowMatchingMetadataAttribute) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("result = default;");
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("result = new(kindValue, id);");
+                    p.PrintLine("return true;");
+                }
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteTryParse_IdKindSpan_IdSigned(ref Printer p, string typeName)
+        {
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public bool TryParse(global::System.ReadOnlySpan<char> kind, ")
+                .Print(IdRawSignedTypeName).Print(" id, out ").Print(typeName)
+                .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
+            p.OpenScope();
+            {
+                if (KindRefs.Count < 1)
+                {
+                    p.PrintBeginLine("if (").Print(KindRawTypeName).PrintEndLine(".TryParse(kind, out var kindValue) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("result = default;");
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("result = new((IdKind)kindValue, id);");
+                    p.PrintLine("return true;");
+                }
+                else
+                {
+                    p.PrintBeginLine("if (").Print(KindExtensionsRef.ExtensionsName)
+                        .PrintEndLine(".TryParse(kind, out var kindValue, ignoreCase, allowMatchingMetadataAttribute) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("result = default;");
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("result = new(kindValue, id);");
+                    p.PrintLine("return true;");
+                }
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
         private void WriteCommonMethods(ref Printer p, string typeName)
         {
             p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
@@ -704,7 +1056,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             }
         }
 
-        private void WriteToString(ref Printer p)
+        private void WriteToString(ref Printer p, bool isSerializableStruct)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly override string ToString()");
@@ -712,7 +1064,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             {
                 if (KindRefs.Count < 1)
                 {
-                    p.PrintLine("return Id.ToString();");
+                    p.PrintLineIf(isSerializableStruct, "return Id.ToString();", "return IdUnsigned.ToString();");
                 }
                 else
                 {
@@ -740,7 +1092,11 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                             }
                         }
 
-                        p.PrintLine("_ => $\"{Kind.ToStringFast()}-{Id}\",");
+                        p.PrintLineIf(
+                              isSerializableStruct
+                            , "_ => $\"{Kind.ToStringFast()}-{Id}\","
+                            , "_ => $\"{Kind.ToStringFast()}-{IdUnsigned}\","
+                        );
                     }
                     p.CloseScope("};");
                 }
@@ -749,7 +1105,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
-        private void WriteToDisplayString(ref Printer p)
+        private void WriteToDisplayString(ref Printer p, bool isSerializableStruct)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly string ToDisplayString()");
@@ -757,7 +1113,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             {
                 if (KindRefs.Count < 1)
                 {
-                    p.PrintLine("return Id.ToString();");
+                    p.PrintLineIf(isSerializableStruct, "return Id.ToString();", "return IdUnsigned.ToString();");
                 }
                 else
                 {
@@ -785,7 +1141,11 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                             }
                         }
 
-                        p.PrintLine("_ => $\"{Kind.ToDisplayStringFast()}-{Id}\",");
+                        p.PrintLineIf(
+                              isSerializableStruct
+                            , "_ => $\"{Kind.ToDisplayStringFast()}-{Id}\","
+                            , "_ => $\"{Kind.ToDisplayStringFast()}-{IdUnsigned}\","
+                        );
                     }
                     p.CloseScope("};");
                 }
@@ -794,11 +1154,9 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
-        private void WriteToFixedString(ref Printer p)
+        private void WriteToFixedString(ref Printer p, bool isSerializableStruct)
         {
-            if (References.unityCollections == false
-                || string.IsNullOrEmpty(FixedStringType)
-            )
+            if (References.unityCollections == false || string.IsNullOrEmpty(FixedStringType))
             {
                 return;
             }
@@ -811,7 +1169,11 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
 
                 if (KindRefs.Count < 1)
                 {
-                    p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);");
+                    p.PrintLineIf(
+                          isSerializableStruct
+                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
+                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                    );
                 }
                 else
                 {
@@ -855,7 +1217,12 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                         p.PrintLine("default:");
                         p.OpenScope();
                         {
-                            p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);");
+                            p.PrintLineIf(
+                                  isSerializableStruct
+                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
+                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                            );
+
                             p.PrintLine("break;");
                         }
                         p.CloseScope();
@@ -870,11 +1237,9 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
-        private void WriteToDisplayFixedString(ref Printer p)
+        private void WriteToDisplayFixedString(ref Printer p, bool isSerializableStruct)
         {
-            if (References.unityCollections == false
-                || string.IsNullOrEmpty(FixedStringType)
-            )
+            if (References.unityCollections == false || string.IsNullOrEmpty(FixedStringType))
             {
                 return;
             }
@@ -887,7 +1252,11 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
 
                 if (KindRefs.Count < 1)
                 {
-                    p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);");
+                    p.PrintLineIf(
+                          isSerializableStruct
+                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
+                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                    );
                 }
                 else
                 {
@@ -931,7 +1300,12 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                         p.PrintLine("default:");
                         p.OpenScope();
                         {
-                            p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);");
+                            p.PrintLineIf(
+                                  isSerializableStruct
+                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
+                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                            );
+
                             p.PrintLine("break;");
                         }
                         p.CloseScope();
@@ -946,7 +1320,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
-        private void WriteGetIdStringFast(ref Printer p)
+        private void WriteGetIdStringFast(ref Printer p, bool isSerializableStruct)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly string GetIdStringFast()");
@@ -954,7 +1328,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             {
                 if (KindRefs.Count < 1)
                 {
-                    p.PrintLine("return Id.ToString();");
+                    p.PrintLineIf(isSerializableStruct, "return Id.ToString();", "return IdUnsigned.ToString();");
                 }
                 else
                 {
@@ -980,7 +1354,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                             }
                         }
 
-                        p.PrintLine("_ => Id.ToString(),");
+                        p.PrintLineIf(isSerializableStruct, "_ => Id.ToString(),", "_ => IdUnsigned.ToString(),");
                     }
                     p.CloseScope("};");
                 }
@@ -989,7 +1363,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
-        private void WriteGetIdDisplayStringFast(ref Printer p)
+        private void WriteGetIdDisplayStringFast(ref Printer p, bool isSerializableStruct)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly string GetIdDisplayStringFast()");
@@ -997,7 +1371,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             {
                 if (KindRefs.Count < 1)
                 {
-                    p.PrintLine("return Id.ToString();");
+                    p.PrintLineIf(isSerializableStruct, "return Id.ToString();", "return IdUnsigned.ToString();");
                 }
                 else
                 {
@@ -1023,7 +1397,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                             }
                         }
 
-                        p.PrintLine("_ => Id.ToString(),");
+                        p.PrintLineIf(isSerializableStruct, "_ => Id.ToString(),", "_ => IdUnsigned.ToString(),");
                     }
                     p.CloseScope("};");
                 }
@@ -1032,11 +1406,9 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
-        private void WriteGetIdFixedString(ref Printer p)
+        private void WriteGetIdFixedString(ref Printer p, bool isSerializableStruct)
         {
-            if (References.unityCollections == false
-                || string.IsNullOrEmpty(FixedStringType)
-            )
+            if (References.unityCollections == false || string.IsNullOrEmpty(FixedStringType))
             {
                 return;
             }
@@ -1049,7 +1421,11 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
 
                 if (KindRefs.Count < 1)
                 {
-                    p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);");
+                    p.PrintLineIf(
+                          isSerializableStruct
+                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
+                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                    );
                 }
                 else
                 {
@@ -1091,7 +1467,12 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                         p.PrintLine("default:");
                         p.OpenScope();
                         {
-                            p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);");
+                            p.PrintLineIf(
+                                  isSerializableStruct
+                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
+                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                            );
+
                             p.PrintLine("break;");
                         }
                         p.CloseScope();
@@ -1106,11 +1487,9 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             p.PrintEndLine();
         }
 
-        private void WriteGetIdDisplayFixedString(ref Printer p)
+        private void WriteGetIdDisplayFixedString(ref Printer p, bool isSerializableStruct)
         {
-            if (References.unityCollections == false
-                || string.IsNullOrEmpty(FixedStringType)
-            )
+            if (References.unityCollections == false || string.IsNullOrEmpty(FixedStringType))
             {
                 return;
             }
@@ -1123,7 +1502,11 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
 
                 if (KindRefs.Count < 1)
                 {
-                    p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);");
+                    p.PrintLineIf(
+                          isSerializableStruct
+                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
+                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                    );
                 }
                 else
                 {
@@ -1165,7 +1548,12 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                         p.PrintLine("default:");
                         p.OpenScope();
                         {
-                            p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);");
+                            p.PrintLineIf(
+                                  isSerializableStruct
+                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
+                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                            );
+
                             p.PrintLine("break;");
                         }
                         p.CloseScope();
@@ -1277,7 +1665,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
 
                 p.PrintLineIf(References.unity, SERIALIZE_FIELD);
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"public {IdRawTypeName} Id;");
+                p.PrintLine("public long Id;");
                 p.PrintEndLine();
 
                 if (KindRefs.Count > 0)
@@ -1302,12 +1690,26 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                         p.PrintBeginLine("public ").Print(fullName).Print(" Id_").PrintEndLine(kindName);
                         p.OpenScope();
                         {
-                            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                            p.PrintBeginLine("get => (").Print(fullName).PrintEndLine(")Id;");
-                            p.PrintEndLine();
+                            if (kind.signed)
+                            {
+                                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                                p.PrintBeginLine("get => (").Print(fullName).Print(")(")
+                                    .Print(IdRawSignedTypeName).PrintEndLine(")Id;");
+                                p.PrintEndLine();
 
-                            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                            p.PrintBeginLine("set => Id = (").Print(IdRawTypeName).PrintEndLine(")value;");
+                                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                                p.PrintBeginLine("set => Id = (").Print(IdRawSignedTypeName).PrintEndLine(")value;");
+                            }
+                            else
+                            {
+                                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                                p.PrintBeginLine("get => (").Print(fullName).Print(")(")
+                                    .Print(IdRawUnsignedTypeName).PrintEndLine(")Id;");
+                                p.PrintEndLine();
+
+                                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                                p.PrintBeginLine("set => Id = (long)(").Print(IdRawUnsignedTypeName).PrintEndLine(")value;");
+                            }
                         }
                         p.CloseScope();
                         p.PrintEndLine();
@@ -1316,7 +1718,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                     }
                 }
 
-                p.PrintBeginLine("public Serializable").Print("(IdKind kind, ").Print(IdRawTypeName).PrintEndLine(" id) : this()");
+                p.PrintBeginLine("public Serializable").PrintEndLine("(IdKind kind, long id) : this()");
                 p.OpenScope();
                 {
                     p.PrintLine("Kind = kind;");
@@ -1337,17 +1739,27 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                         p.OpenScope();
                         {
                             p.PrintBeginLine("Kind = IdKind.").Print(kindName).PrintEndLine(";");
-                            p.PrintBeginLine("Id = (").Print(IdRawTypeName).PrintEndLine(")id;");
+
+                            if (kind.signed)
+                            {
+                                p.PrintBeginLine("Id = (long)(").Print(IdRawSignedTypeName).PrintEndLine(")id;");
+                            }
+                            else
+                            {
+                                p.PrintBeginLine("Id = (long)(").Print(IdRawUnsignedTypeName).PrintEndLine(")id;");
+                            }
                         }
                         p.CloseScope();
                         p.PrintEndLine();
                     }
                 }
 
-                WriteConstructorIdKindString(ref p, "Serializable");
-                WriteConstructorStringString(ref p, "Serializable");
-                WriteConstructorIdKindSpan(ref p, "Serializable");
-                WriteConstructorSpanSpan(ref p, "Serializable");
+                WriteConstructor_IdKind_IdString(ref p, "Serializable");
+                WriteConstructor_IdKindString_IdString(ref p, "Serializable");
+                WriteConstructor_IdKindString_IdLong(ref p, "Serializable");
+                WriteConstructor_IdKind_IdSpan(ref p, "Serializable", true);
+                WriteConstructor_IdKindSpan_IdSpan(ref p, "Serializable", true);
+                WriteConstructor_IdKindSpan_IdLong(ref p, "Serializable");
 
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public readonly bool TryConvert(out ").Print(typeName).PrintEndLine(" result)");
@@ -1355,7 +1767,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                 {
                     if (KindRefs.Count < 1)
                     {
-                        p.PrintLine("result = new(Id);");
+                        p.PrintBeginLine("result = new((").Print(IdRawUnsignedTypeName).PrintEndLine(")Id);");
                         p.PrintLine("return true;");
                     }
                     else
@@ -1429,20 +1841,21 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                 p.CloseScope();
                 p.PrintEndLine();
 
-                WriteToString(ref p);
-                WriteToDisplayString(ref p);
-                WriteToFixedString(ref p);
-                WriteToDisplayFixedString(ref p);
-                WriteGetIdStringFast(ref p);
-                WriteGetIdDisplayStringFast(ref p);
-                WriteGetIdFixedString(ref p);
-                WriteGetIdDisplayFixedString(ref p);
+                WriteToString(ref p, true);
+                WriteToDisplayString(ref p, true);
+                WriteToFixedString(ref p, true);
+                WriteToDisplayFixedString(ref p, true);
+                WriteGetIdStringFast(ref p, true);
+                WriteGetIdDisplayStringFast(ref p, true);
+                WriteGetIdFixedString(ref p, true);
+                WriteGetIdDisplayFixedString(ref p, true);
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public static explicit operator ").Print(RawTypeName).PrintEndLine("(Serializable value)");
                 p.OpenScope();
                 {
-                    p.PrintLine("return new Union { id = value.Id, kind = value.Kind }.raw;");
+                    p.PrintBeginLine("return new Union { id = (").Print(IdRawUnsignedTypeName)
+                        .PrintEndLine(")value.Id, kind = value.Kind }.raw;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -1489,7 +1902,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                     p.PrintEndLine();
 
                     p.PrintLine(FIELD_OFFSET, 0);
-                    p.PrintBeginLine("public ").Print(IdRawTypeName).Print(" id").PrintEndLine(";");
+                    p.PrintBeginLine("public ").Print(IdRawUnsignedTypeName).Print(" id").PrintEndLine(";");
                     p.PrintEndLine();
 
                     p.PrintLine(FIELD_OFFSET, KindFieldOffset);

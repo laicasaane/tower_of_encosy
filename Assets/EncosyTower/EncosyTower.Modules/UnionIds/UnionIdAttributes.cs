@@ -39,12 +39,15 @@ namespace EncosyTower.Modules.UnionIds
 
         public string DisplayName { get; }
 
+        public bool Signed { get; }
+
         /// <param name="kindType">The type size must be 8 bytes or lesser.</param>
-        public UnionIdKindAttribute(Type kindType, ulong order, string displayName = "")
+        public UnionIdKindAttribute(Type kindType, ulong order, string displayName = "", bool signed = false)
         {
             KindType = kindType;
             Order = order;
             DisplayName = displayName;
+            Signed = signed;
         }
     }
 
@@ -65,12 +68,15 @@ namespace EncosyTower.Modules.UnionIds
 
         public string DisplayName { get; }
 
+        public bool Signed { get; }
+
         /// <param name="idType">The type that is annotated with [UnionId].</param>
-        public KindForUnionIdAttribute(Type idType, ulong order, string displayName = "")
+        public KindForUnionIdAttribute(Type idType, ulong order, string displayName = "", bool signed = false)
         {
             IdType = idType;
             Order = order;
             DisplayName = displayName;
+            Signed = signed;
         }
     }
 }

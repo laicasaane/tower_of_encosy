@@ -26,7 +26,9 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
 
         public string RawTypeName { get; }
 
-        public string IdRawTypeName { get; }
+        public string IdRawUnsignedTypeName { get; }
+
+        public string IdRawSignedTypeName { get; }
 
         public bool KindEnumIsEmpty { get; }
 
@@ -168,7 +170,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                     order = order,
                     size = size,
                     isEnum = isEnum,
-                    //hasTryParse = CheckTryParse(kindSymbol),
+                    signed = candidate.signed,
                     hasTryParseSpan = CheckTryParseSpan(kindSymbol),
                     hasToFixedString = hasToFixedString,
                 });
@@ -217,8 +219,9 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             if (KindEnumIsEmpty)
             {
                 var typeSize = ToSize(Size, idSize);
-                RawTypeName = ToRawTypeName(typeSize);
-                IdRawTypeName = kindRefs.Count > 0 ? kindRefs[0].fullName : ToRawTypeName(idSize);
+                RawTypeName = ToUnsignedTypeName(typeSize);
+                IdRawUnsignedTypeName = kindRefs.Count > 0 ? kindRefs[0].fullName : ToUnsignedTypeName(idSize);
+                IdRawSignedTypeName = kindRefs.Count > 0 ? kindRefs[0].fullName : ToSignedTypeName(idSize);
                 KindRawTypeName = RawTypeName;
                 KindFieldOffset = 0;
             }
@@ -238,9 +241,10 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                     kindRefs.RemoveAt(kindRefs.Count - 1);
                 }
 
-                RawTypeName = ToRawTypeName(typeSize);
-                IdRawTypeName = ToRawTypeName(idSize);
-                KindRawTypeName = ToRawTypeName(kindSize);
+                RawTypeName = ToUnsignedTypeName(typeSize);
+                IdRawUnsignedTypeName = ToUnsignedTypeName(idSize);
+                IdRawSignedTypeName = ToSignedTypeName(idSize);
+                KindRawTypeName = ToUnsignedTypeName(kindSize);
                 KindFieldOffset = typeSize - kindSize;
             }
 
@@ -313,13 +317,17 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                         continue;
                     }
 
-                    if (arg.Value is ulong ulongVal)
+                    if (i == 1 && arg.Value is ulong ulongVal)
                     {
                         candidate.order = ulongVal;
                     }
-                    else if (arg.Value is string stringVal)
+                    else if (i == 2 && arg.Value is string stringVal)
                     {
                         candidate.displayName = stringVal;
+                    }
+                    else if (i == 3 && arg.Value is bool boolVal)
+                    {
+                        candidate.signed = boolVal;
                     }
                 }
 
@@ -335,55 +343,6 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             }
 
             return name;
-        }
-
-        private static bool CheckTryParse(INamedTypeSymbol symbol)
-        {
-            if (symbol.TypeKind == TypeKind.Enum)
-            {
-                return true;
-            }
-
-            var members = symbol.GetMembers("TryParse");
-            var result = false;
-
-            foreach (var member in members)
-            {
-                if (member is not IMethodSymbol method
-                    || method.DeclaredAccessibility != Accessibility.Public
-                    || method.IsStatic == false
-                    || method.ReturnsVoid
-                    || method.ReturnType.SpecialType != SpecialType.System_Boolean
-                )
-                {
-                    continue;
-                }
-
-                var parameters = method.Parameters;
-
-                if (parameters.Length != 2)
-                {
-                    continue;
-                }
-
-                if (parameters[0].Type.SpecialType != SpecialType.System_String)
-                {
-                    continue;
-                }
-
-                var secondParam = parameters[1];
-
-                if (secondParam.RefKind != RefKind.Out
-                    || SymbolEqualityComparer.Default.Equals(secondParam.Type, symbol) == false
-                )
-                {
-                    continue;
-                }
-
-                return true;
-            }
-
-            return result;
         }
 
         private static bool CheckTryParseSpan(INamedTypeSymbol symbol)
@@ -479,13 +438,22 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             return false;
         }
 
-        private static string ToRawTypeName(int value)
+        private static string ToUnsignedTypeName(int value)
             => value switch {
                 <= 0 => string.Empty,
                 <= 1 => "byte",
                 <= 2 => "ushort",
                 <= 4 => "uint",
                 _ => "ulong",
+            };
+
+        private static string ToSignedTypeName(int value)
+            => value switch {
+                <= 0 => string.Empty,
+                <= 1 => "sbyte",
+                <= 2 => "short",
+                <= 4 => "int",
+                _ => "long",
             };
 
         private static int NormalizeSize(int value)
@@ -597,7 +565,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             public ulong order;
             public int size;
             public bool isEnum;
-            //public bool hasTryParse;
+            public bool signed;
             public bool hasTryParseSpan;
             public bool hasToFixedString;
         }

@@ -200,13 +200,17 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
                     continue;
                 }
 
-                if (arg.Value is ulong ulongVal)
+                if (i == 1 && arg.Value is ulong ulongVal)
                 {
                     candidate.order = ulongVal;
                 }
-                else if (arg.Value is string stringVal)
+                else if (i == 2 && arg.Value is string stringVal)
                 {
                     candidate.displayName = stringVal;
+                }
+                else if (i == 3 && arg.Value is bool boolVal)
+                {
+                    candidate.signed = boolVal;
                 }
             }
 
