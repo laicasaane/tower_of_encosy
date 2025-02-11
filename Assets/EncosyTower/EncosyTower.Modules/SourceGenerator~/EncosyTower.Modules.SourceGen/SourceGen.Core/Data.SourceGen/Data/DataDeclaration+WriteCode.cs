@@ -140,7 +140,9 @@ namespace EncosyTower.Modules.Data.SourceGen
             p.PrintEndLine();
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
-            p.PrintLine($"private void Set_{prop.Property.Name}({propTypeName} value)");
+            p.PrintBeginLine($"private void Set_{prop.Property.Name}(")
+                .PrintIf(prop.ImplicitlyConvertible, propTypeName, fieldTypeName)
+                .PrintEndLine(" value)");
             p.OpenScope();
             {
                 p.PrintBeginLine($"this.{fieldName} = ");
