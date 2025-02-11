@@ -15,8 +15,8 @@ namespace EncosyTower.Modules.Editor.UIElements
             self.Bind(property.serializedObject);
         }
 
-        public static void Bind<T>(this T self, SerializedProperty property)
-            where T : VisualElement, IHasBindingPath
+        public static void Bind<TBindableElement>(this TBindableElement self, SerializedProperty property)
+            where TBindableElement : VisualElement, IHasBindingPath
         {
             self.BindingPath = property.propertyPath;
             self.Bind(property.serializedObject);

@@ -1,0 +1,42 @@
+{
+    "name": "EncosyTower.Samples.Data",
+    "rootNamespace": "EncosyTower.Samples.Data",
+    "references": [
+        "BakingSheet",
+        "BakingSheet.Csv",
+        "BakingSheet.Editor",
+        "BakingSheet.Excel",
+        "BakingSheet.Google",
+        "BakingSheet.Json",
+        "BakingSheet.ScriptableObject",
+        "EncosyTower.Modules",
+        "EncosyTower.Modules.Data.Authoring"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_EDITOR || INCLUDE_ENCOSY_SAMPLES_DATA"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.textmeshpro",
+            "expression": "",
+            "define": "UNITY_TEXTMESHPRO"
+        },
+        {
+            "name": "com.unity.ugui",
+            "expression": "",
+            "define": "UNITY_UGUI"
+        },
+        {
+            "name": "com.unity.ugui",
+            "expression": "2.0.0",
+            "define": "UNITY_TEXTMESHPRO"
+        }
+    ],
+    "noEngineReferences": false
+}

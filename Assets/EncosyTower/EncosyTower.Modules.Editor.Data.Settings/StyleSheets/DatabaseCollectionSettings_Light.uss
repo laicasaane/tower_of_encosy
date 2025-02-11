@@ -1,0 +1,12 @@
+:root {
+    --database-border-color: #7F7F7F;
+    --sub-text-active: #090909;
+    --sub-text-active-background: #00902c;
+    --sub-text-inactive: #FFFFFF;
+    --sub-text-inactive-background: #B10C0C;
+    --button-highlight-enabled-text: #090909;
+    --button-highlight-enabled-background: #00902c;
+    --button-highlight-hover-background: #009C2F;
+    --button-highlight-disabled-text: #090909;
+    --button-highlight-disabled-background: #9B9B9B;
+}

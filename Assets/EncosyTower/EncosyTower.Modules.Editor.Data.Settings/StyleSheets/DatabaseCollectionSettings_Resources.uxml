@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<engine:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:engine="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+>
+    <engine:Label name="database-invalid" text="MUST select a database type." />
+    <engine:Label name="relative-path" text="The path must be relative to the project folder." />
+    <engine:Label name="input-folder-invalid" text="`Assets` folder is NOT allowed.&#10;MUST use a different folder." />
+    <engine:Label name="input-folder-missing" text="The input folder does NOT exist." />
+    <engine:Label name="output-folder-invalid" text="`Assets` folder is NOT allowed.&#10;MUST use a different folder." />
+    <engine:Label name="output-folder-missing" text="The output folder currently does NOT exist.&#10;
+However, it will be created upon download." />
+
+    <engine:Label name="google-sheet__service-account"
+                  text="Google Service Account Credential is required to use this functionality.&#10;
+    1. Create a Google Cloud project on &lt;a href=&quot;https://console.cloud.google.com/ &quot; &gt;this site&lt;/a&gt;.&#10;
+    2. Enable Google Sheets API for the project on &lt;a href=&quot;https://console.developers.google.com/apis/api/sheets.googleapis.com &quot; &gt;this site&lt;/a&gt;.&#10;
+    3. Enable Google Drive API for the project on &lt;a href=&quot;https://console.developers.google.com/apis/api/drive.googleapis.com &quot; &gt;this site&lt;/a&gt;.&#10;
+    4. Create a credential following &lt;a href=&quot;https://github.com/cathei/BakingSheet/blob/master/docs/google-sheet-import.md#create-google-service-account &quot; &gt;this tutorial&lt;/a&gt;.&#10;
+    5. Share your SpreadSheet to that account following &lt;a href=&quot;https://github.com/cathei/BakingSheet/blob/master/docs/google-sheet-import.md#invite-service-account-to-your-google-sheet &quot; &gt;this tutorial&lt;/a&gt;.
+" />
+
+    <engine:Label name="google-sheet__service-account-missing" text="The service account file does NOT exist." />
+
+    <engine:Label name="google-sheet__spreadsheet"
+                  text="A SpreadSheet should conform to one of the following formats:&#10;
+    1. A SpreadSheet contains a list of files. See &lt;a href=&quot;https://docs.google.com/spreadsheets/d/1MCEi9N9EVYHvbIPr8Vlf9g39aGOmAayaxDH99-wnyi8/edit?usp=sharing &quot; &gt;this template&lt;/a&gt;.&#10;
+    2. A SpreadSheet contains all data. See &lt;a href=&quot;https://docs.google.com/spreadsheets/d/1HJOkFiVH4snsQ0h23m66ZOazYLmU8o5STx0Y1PD47uY/edit?usp=sharing &quot; &gt;this template&lt;/a&gt;.&#10;&#10;
+The SpreadSheet ID can be retrieved following &lt;a href=&quot;https://github.com/cathei/BakingSheet/blob/master/docs/google-sheet-import.md#get-your-sheet-identifier &quot; &gt;this tutorial&lt;/a&gt;.
+" />
+
+    <engine:Label name="google-sheet__spreadsheet-invalid" text="SpreadSheet ID MUST be a valid string." />
+</engine:UXML>

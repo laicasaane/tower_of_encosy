@@ -1,0 +1,190 @@
+.unity-list-view__empty-label {
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+.database-selector .name {
+    font-size: 12px;
+    height: 22px;
+    -unity-text-align: middle-left;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+.database-selector-list .unity-collection-view__item--selected:checked {
+    background-color: var(--unity-colors-highlight-background);
+}
+
+.database-collection .left-panel {
+    margin-right: 3px;
+    min-width: 100px;
+}
+
+.database-collection .right-panel {
+    margin-left: 3px;
+    margin-right: 3px;
+    min-width: 100px;
+}
+
+.database {
+    padding: 3px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    border-width: 1px;
+    border-color: var(--database-border-color);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.unity-inspector-element__custom-inspector-container .database {
+    padding: 3px 0px 3px 0px;
+}
+
+.sub-text-container {
+    align-content: center;
+    justify-content: center;
+    border-radius: 8px;
+    flex-direction: row;
+}
+
+.sub-text-container.active {
+    background-color: var(--sub-text-active-background);
+    color: var(--sub-text-active);
+    max-width: 53px;
+    min-width: 53px;
+}
+
+.sub-text-container.inactive {
+    background-color: var(--sub-text-inactive-background);
+    color: var(--sub-text-inactive);
+    max-width: 64px;
+    min-width: 64px;
+}
+
+.sub-text-container .enableable-foldout__sub-text {
+    margin: 0px;
+    padding: 0px;
+}
+
+.visual-separator {
+    height: 6px;
+}
+
+.database-template-list {
+    flex-direction: row;
+    padding-left: 4px;
+}
+
+.database-template-list .unity-button {
+    min-width: 77px;
+    max-width: 77px;
+}
+
+.database-template-list .unity-button > .unity-button__image {
+    width: 20px;
+    height: 20px;
+}
+
+.database-template-list .icon-button {
+    min-width: 30px;
+}
+
+.database-template-list .icon-button > .unity-button__image {
+    width: 15px;
+    height: 15px;
+}
+
+.template-dropdown {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 23px;
+}
+
+.name-dropdown {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 23px;
+}
+
+.database .button-text-field > .unity-button {
+    min-width: 77px;
+    max-width: 77px;
+}
+
+.database .button-text-field > .unity-button > .unity-button__image {
+    width: 20px;
+    height: 20px;
+}
+
+.database .settings-group {
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-color: var(--database-border-color);
+    margin-top: -1px;
+    margin-left: -3px;
+    margin-right: -3px;
+}
+
+.database-collection .database .settings-group {
+    padding: 3px;
+}
+
+.unity-inspector-element__custom-inspector-container .database .settings-group {
+    padding: 3px 8px 3px 18px;
+}
+
+.settings-group .unity-foldout:checked .unity-foldout__content {
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
+.database .sub-field-info {
+    flex-direction: row;
+    flex-grow: 1;
+    flex-shrink: 1;
+    background-color: var(--unity-colors-helpbox-background);
+    border-color: var(--unity-colors-helpbox-border);
+    border-width: 1px;
+    border-radius: 3px;
+    color: var(--unity-colors-helpbox-text);
+    font-size: 90%;
+    overflow: hidden;
+    margin-top: 2px;
+    margin-left: 155px;
+    padding-left: 8px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.database-template-list .unity-base-field__aligned .unity-label {
+    min-width: 150px;
+    max-width: 150px;
+}
+
+.database .unity-base-field__aligned .unity-label {
+    min-width: 150px;
+    max-width: 150px;
+}
+
+.unity-inspector-element__custom-inspector-container .database .convert-button {
+    display: none;
+}
+
+.database .convert-button {
+    min-height: 25px;
+    background-color: var(--button-highlight-enabled-background);
+    color: var(--button-highlight-enabled-text);
+}
+
+.database .convert-button:hover {
+    background-color: var(--button-highlight-hover-background);
+}
+
+.database .convert-button:disabled {
+    background-color: var(--button-highlight-disabled-background);
+    color: var(--button-highlight-disabled-text);
+}
+
+.database .convert-button:active {
+    background-color: var(--unity-colors-button-background-pressed);
+}

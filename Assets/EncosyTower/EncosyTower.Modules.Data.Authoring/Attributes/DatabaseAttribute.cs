@@ -18,6 +18,8 @@ namespace EncosyTower.Modules.Data.Authoring
 
         public Type[] Converters { get; }
 
+        public string AssetName { get; set; }
+
         public DatabaseAttribute(params Type[] converters)
         {
             Converters = converters ?? Array.Empty<Type>();

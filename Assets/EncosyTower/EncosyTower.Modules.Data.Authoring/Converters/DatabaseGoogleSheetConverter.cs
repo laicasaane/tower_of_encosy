@@ -18,14 +18,15 @@ namespace EncosyTower.Modules.Data.Authoring
 {
     public class DatabaseGoogleSheetConverter : DatabaseRawSheetImporter
     {
-        private readonly string _gsheetAddress;
+        public readonly string SpreadsheetId;
+
         private readonly ICredential _credential;
         private readonly Dictionary<string, List<Page>> _pages;
 
         private Spreadsheet _spreadsheet;
 
         public DatabaseGoogleSheetConverter(
-              string gsheetAddress
+              string spreadsheetId
             , string credential
             , TimeZoneInfo timeZoneInfo = null
             , IFormatProvider formatProvider = null
@@ -33,7 +34,8 @@ namespace EncosyTower.Modules.Data.Authoring
         )
             : base(timeZoneInfo, formatProvider, emptyRowStreakThreshold)
         {
-            _gsheetAddress = gsheetAddress;
+            SpreadsheetId = spreadsheetId;
+
             _credential = GoogleCredential
                 .FromJson(credential)
                 .CreateScoped(new[] { DriveService.Scope.DriveReadonly });
@@ -41,18 +43,18 @@ namespace EncosyTower.Modules.Data.Authoring
             _pages = new Dictionary<string, List<Page>>();
         }
 
-        public async Task<DateTime> FetchModifiedTime()
+        public async Task<GoogleFileMetadata> FetchMetadata()
         {
             using var service = new DriveService(new BaseClientService.Initializer {
                 HttpClientInitializer = _credential
             });
 
-            var fileReq = service.Files.Get(_gsheetAddress);
+            var fileReq = service.Files.Get(SpreadsheetId);
             fileReq.SupportsTeamDrives = true;
-            fileReq.Fields = "modifiedTime";
+            fileReq.Fields = "name,modifiedTime";
 
             var file = await fileReq.ExecuteAsync();
-            return file.ModifiedTime ?? default;
+            return new(file.Name, file.ModifiedTime ?? default);
         }
 
         public override void Reset()
@@ -74,7 +76,7 @@ namespace EncosyTower.Modules.Data.Authoring
                 HttpClientInitializer = _credential
             }))
             {
-                var sheetReq = service.Spreadsheets.Get(_gsheetAddress);
+                var sheetReq = service.Spreadsheets.Get(SpreadsheetId);
                 sheetReq.Fields = "properties,sheets(properties,data.rowData.values.formattedValue)";
                 _spreadsheet = await sheetReq.ExecuteAsync();
             }

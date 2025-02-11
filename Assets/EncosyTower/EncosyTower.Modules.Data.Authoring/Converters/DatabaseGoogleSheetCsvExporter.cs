@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -15,55 +14,65 @@ namespace EncosyTower.Modules.Data.Authoring
 {
     public class DatabaseGoogleSheetCsvExporter
     {
-        private readonly string _gsheetAddress;
+        public readonly string SpreadsheetId;
+
         private readonly ICredential _credential;
         private readonly IExtendedFileSystem _fileSystem;
+        private readonly ITransform<string, string> _spreadsheetNameTransformer;
+        private readonly ITransform<string, string> _sheetNameTransformer;
 
         private Spreadsheet _spreadsheet;
         private bool _isLoaded;
 
         public DatabaseGoogleSheetCsvExporter(
-              string gsheetAddress
+              string spreadsheetId
             , string credential
             , IExtendedFileSystem fileSystem = null
+            , ITransform<string, string> spreadsheetNameTransformer = null
+            , ITransform<string, string> sheetNameTransformer = null
         )
         {
-            _gsheetAddress = gsheetAddress;
+            SpreadsheetId = spreadsheetId;
+
             _credential = GoogleCredential
                 .FromJson(credential)
                 .CreateScoped(new[] { DriveService.Scope.DriveReadonly });
 
             _fileSystem = fileSystem ?? new DatabaseFileSystem();
+            _spreadsheetNameTransformer = spreadsheetNameTransformer;
+            _sheetNameTransformer = sheetNameTransformer;
         }
 
-        public async Task<DateTime> FetchModifiedTime()
+        public async Task<GoogleFileMetadata> FetchMetadata()
         {
             using var service = new DriveService(new BaseClientService.Initializer {
                 HttpClientInitializer = _credential
             });
 
-            var fileReq = service.Files.Get(_gsheetAddress);
+            var fileReq = service.Files.Get(SpreadsheetId);
             fileReq.SupportsTeamDrives = true;
-            fileReq.Fields = "modifiedTime";
+            fileReq.Fields = "name,modifiedTime";
 
             var file = await fileReq.ExecuteAsync();
-            return file.ModifiedTime ?? default;
+            return new(file.Name, file.ModifiedTime ?? default);
         }
 
         public async Task Export(
               string savePath
-            , bool spreadsheetAsFolder
             , bool cleanOutputFolder
             , NamingStrategy namingStrategy
+            , HashSet<string> existingFolderNames = null
         )
         {
+            var spreadsheetId = SpreadsheetId;
+
             if (_isLoaded == false)
             {
                 using (var service = new SheetsService(new BaseClientService.Initializer {
                     HttpClientInitializer = _credential
                 }))
                 {
-                    var sheetReq = service.Spreadsheets.Get(_gsheetAddress);
+                    var sheetReq = service.Spreadsheets.Get(spreadsheetId);
                     sheetReq.Fields = "properties,sheets(properties,data.rowData.values.formattedValue)";
                     _spreadsheet = await sheetReq.ExecuteAsync();
                 }
@@ -78,11 +87,12 @@ namespace EncosyTower.Modules.Data.Authoring
 
             var fileSystem = _fileSystem;
             var validSpreadsheet = SheetUtility.ValidateSheetName(spreadsheetName);
-            var ignoreOuputPath = Path.Combine(savePath, $"{spreadsheetName}~");
+            var folderName = _spreadsheetNameTransformer?.Transform(spreadsheetName) ?? spreadsheetName;
 
-            var outputPath = validSpreadsheet
-                ? spreadsheetAsFolder ? Path.Combine(savePath, spreadsheetName) : savePath
-                : ignoreOuputPath;
+            EnsureUniqueFolderName(existingFolderNames, ref folderName);
+
+            var ignoreOuputPath = Path.Combine(savePath, $"{folderName}~");
+            var outputPath = validSpreadsheet ? Path.Combine(savePath, folderName) : ignoreOuputPath;
 
             if (cleanOutputFolder)
             {
@@ -101,6 +111,7 @@ namespace EncosyTower.Modules.Data.Authoring
             var sheetCount = sheets.Count;
             var outputPathExists = false;
             var ignoreOutputPathExists = false;
+            var sheetNameTransformer = _sheetNameTransformer;
 
             for (var i = 0; i < sheetCount; i++)
             {
@@ -117,9 +128,10 @@ namespace EncosyTower.Modules.Data.Authoring
                     , namingStrategy
                 );
 
-
-                var canBeIgnored = CanBeIgnored(spreadsheetName, sheetName);
-                var filePath = Path.Combine(canBeIgnored ? ignoreOuputPath : outputPath, $"{sheetName}.csv");
+                var validSheet = SheetUtility.ValidateSheetName(sheetName);
+                var canBeIgnored = validSheet == false || validSpreadsheet == false;
+                var fileName = sheetNameTransformer?.Transform(sheetName) ?? sheetName;
+                var filePath = Path.Combine(canBeIgnored ? ignoreOuputPath : outputPath, $"{fileName}.csv");
 
                 if (canBeIgnored)
                 {
@@ -197,10 +209,19 @@ namespace EncosyTower.Modules.Data.Authoring
             return result;
         }
 
-        private static bool CanBeIgnored(string spreadsheetName, string sheetName)
+        private void EnsureUniqueFolderName(HashSet<string> existingFolderNames, ref string folderName)
         {
-            return SheetUtility.ValidateSheetName(sheetName) == false
-                || SheetUtility.ValidateSheetName(spreadsheetName) == false;
+            if (existingFolderNames == null)
+            {
+                return;
+            }
+
+            if (existingFolderNames.Contains(folderName))
+            {
+                folderName = $"{folderName}_{SpreadsheetId}";
+            }
+
+            existingFolderNames.Add(folderName);
         }
 
         private static void EnsureOutputPath(IExtendedFileSystem fileSystem, string ouputPath, ref bool exists)

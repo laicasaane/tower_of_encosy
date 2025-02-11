@@ -8,3 +8,11 @@
 .enableable-foldout .unity-foldout__text {
     margin-left: 20px;
 }
+
+.unity-inspector-element__custom-inspector-container .enableable-foldout__enable_toggle {
+    margin-left: 6px;
+}
+
+.unity-inspector-element__custom-inspector-container .enableable-foldout .unity-foldout__content {
+    margin-left: 3px;
+}

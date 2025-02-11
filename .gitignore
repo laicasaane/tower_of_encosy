@@ -9,6 +9,9 @@
 [Mm]emory[Cc]aptures/
 [Ss]erialized[Bb]uild[Ii]nfo/
 
+# For security purposes
+[Gg]oogle[Ss]ervices/
+
 # Never ignore folders inside Assets
 ![Aa]ssets/**/[Ll]ibrary/
 

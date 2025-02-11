@@ -6,10 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using EncosyTower.Modules.Editor;
 using EncosyTower.Modules.Logging;
-using EncosyTower.Modules.Types;
 using UnityEditor;
 using UnityEngine;
 
@@ -135,10 +133,6 @@ namespace EncosyTower.Modules.Settings
 
             return s_instance;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected static string GetNameWithoutSuffix()
-            => typeof(T).GetNameWithoutSuffix(nameof(Settings<T>));
 
         /// <summary>
         /// Called to validate settings changes.
