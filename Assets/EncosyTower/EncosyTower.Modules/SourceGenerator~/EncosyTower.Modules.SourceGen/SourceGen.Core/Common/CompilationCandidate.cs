@@ -15,7 +15,7 @@ namespace EncosyTower.Modules.SourceGen
 
             foreach (var assembly in compilation.ReferencedAssemblyNames)
             {
-                if (assembly.Name.StartsWith("Sirenix.OdinInspector.Attributes"))
+                if (assembly.Name is "Sirenix.OdinInspector.Attributes")
                 {
                     references.odin = true;
                     continue;
@@ -27,7 +27,7 @@ namespace EncosyTower.Modules.SourceGen
                     continue;
                 }
 
-                if (assembly.Name.StartsWith("Unity.Collections"))
+                if (assembly.Name is "Unity.Collections")
                 {
                     references.unityCollections = true;
                     continue;
