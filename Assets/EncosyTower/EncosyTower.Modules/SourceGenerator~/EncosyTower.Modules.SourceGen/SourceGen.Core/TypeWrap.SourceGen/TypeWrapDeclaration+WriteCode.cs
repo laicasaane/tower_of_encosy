@@ -1010,6 +1010,7 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
             var operatorArgTypesMap = OperatorArgTypesMap;
             var fullTypeName = FullTypeName;
             var fieldTypeSymbol = FieldTypeSymbol;
+            var fieldTypeName = FieldTypeName;
             var fieldSpecialType = fieldTypeSymbol.SpecialType;
             var fieldUnderlyingSpecialType = SpecialType.None;
             var fieldName = FieldName;
@@ -1043,6 +1044,7 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
                       ref p
                     , operatorKind
                     , fullTypeName
+                    , fieldTypeName
                     , fieldName
                     , opReturnType
                     , opArgTypes
@@ -1060,6 +1062,7 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
               ref Printer p
             , OperatorKind kind
             , string fullTypeName
+            , string fieldTypeName
             , string fieldName
             , OpType opReturnType
             , OpArgTypes opArgTypes
@@ -1092,15 +1095,16 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
 
                         if (opReturnType.IsWrapper)
                         {
-                            p.Print("new ").Print(fullTypeName).Print("(").Print(op).Print("(");
+                            p.Print("new ").Print(fullTypeName).Print("((").Print(fieldTypeName).Print(")(")
+                                .Print(op).Print("(");
                             WriteParam(ref p, firstType, firstName, fieldName);
-                            p.Print("))");
+                            p.Print(")))");
                         }
                         else
                         {
-                            p.Print(op).Print("(");
+                            p.Print("(").Print(fieldTypeName).Print(")(").Print(op).Print("(");
                             WriteParam(ref p, firstType, firstName, fieldName);
-                            p.Print(")");
+                            p.Print("))");
                         }
 
                         p.PrintEndLine(";");
@@ -1120,11 +1124,12 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
 
                         if (opReturnType.IsWrapper)
                         {
-                            p.PrintBeginLine("return new ").Print(fullTypeName).PrintEndLine("(tempValue);");
+                            p.PrintBeginLine("return new ").Print(fullTypeName).Print("((").Print(fieldTypeName)
+                                .PrintEndLine(")(tempValue));");
                         }
                         else
                         {
-                            p.PrintLine("return tempValue;");
+                            p.PrintBeginLine("return (").Print(fieldTypeName).PrintEndLine(")tempValue;");
                         }
                         break;
                     }
@@ -1149,16 +1154,16 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
 
                         if (opReturnType.IsWrapper)
                         {
-                            p.Print("new ").Print(fullTypeName).Print("(");
+                            p.Print("new ").Print(fullTypeName).Print("((").Print(fieldTypeName).Print(")(");
                             WriteParam(ref p, firstType, firstName, fieldName);
-                            p.Print(" ").Print(op).Print(" ").Print(secondName)
-                                .Print(")");
+                            p.Print(" ").Print(op).Print(" ").Print(secondName).Print("))");
                         }
                         else
                         {
+                            p.Print("(").Print(fieldTypeName).Print(")(");
                             WriteParam(ref p, firstType, firstName, fieldName);
-                            p.Print(" ").Print(op).Print(" ")
-                                .Print(secondName);
+                            p.Print(" ").Print(op).Print(" ").Print(secondName);
+                            p.Print(")");
                         }
 
                         p.PrintEndLine(";");
@@ -1177,17 +1182,19 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
 
                         if (opReturnType.IsWrapper)
                         {
-                            p.Print("new ").Print(fullTypeName).Print("(");
+                            p.Print("new ").Print(fullTypeName).Print("((").Print(fieldTypeName).Print(")(");
+                            WriteParam(ref p, firstType, firstName, fieldName);
+                            p.Print(" ").Print(op).Print(" ");
+                            WriteParam(ref p, secondType, secondName, fieldName);
+                            p.Print("))");
+                        }
+                        else
+                        {
+                            p.Print("(").Print(fieldTypeName).Print(")(");
                             WriteParam(ref p, firstType, firstName, fieldName);
                             p.Print(" ").Print(op).Print(" ");
                             WriteParam(ref p, secondType, secondName, fieldName);
                             p.Print(")");
-                        }
-                        else
-                        {
-                            WriteParam(ref p, firstType, firstName, fieldName);
-                            p.Print(" ").Print(op).Print(" ");
-                            WriteParam(ref p, secondType, secondName, fieldName);
                         }
 
                         p.PrintEndLine(";");
@@ -1220,17 +1227,19 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
 
                         if (opReturnType.IsWrapper)
                         {
-                            p.Print("new ").Print(fullTypeName).Print("(");
+                            p.Print("new ").Print(fullTypeName).Print("((").Print(fieldTypeName).Print(")(");
+                            WriteParam(ref p, firstType, firstName, fieldName);
+                            p.Print(" ").Print(op).Print(" ");
+                            WriteParam(ref p, secondType, secondName, fieldName);
+                            p.Print("))");
+                        }
+                        else
+                        {
+                            p.Print("(").Print(fieldTypeName).Print(")(");
                             WriteParam(ref p, firstType, firstName, fieldName);
                             p.Print(" ").Print(op).Print(" ");
                             WriteParam(ref p, secondType, secondName, fieldName);
                             p.Print(")");
-                        }
-                        else
-                        {
-                            WriteParam(ref p, firstType, firstName, fieldName);
-                            p.Print(" ").Print(op).Print(" ");
-                            WriteParam(ref p, secondType, secondName, fieldName);
                         }
 
                         p.PrintEndLine(";");
