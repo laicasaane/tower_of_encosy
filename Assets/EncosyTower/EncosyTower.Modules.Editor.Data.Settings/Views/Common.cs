@@ -24,7 +24,7 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
         public const string NAME = "name";
         public const string LEFT_PANEL = "left-panel";
         public const string RIGHT_PANEL = "right-panel";
-        public const string TEMPLATE_DROPDOWN = "template-dropdown";
+        public const string PRESET_DROPDOWN = "preset-dropdown";
         public const string NAME_DROPDOWN = "name-dropdown";
         public const string SETTINGS_GROUP = "settings-group";
         public const string ICON_BUTTON = "icon-button";

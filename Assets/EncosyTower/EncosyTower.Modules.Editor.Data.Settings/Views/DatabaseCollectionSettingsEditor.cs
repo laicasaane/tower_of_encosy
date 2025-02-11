@@ -77,9 +77,9 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
             var dbListProperty = _dbListProperty
                 = serializedSettings.FindProperty(nameof(DatabaseCollectionSettings._databases));
 
-            var templateListView = new DatabaseTemplateListView();
-            templateListView.TemplateSelected += TemplateListView_TemplateSelected;
-            rightPanel.Add(templateListView);
+            var presetListView = new DatabasePresetListView();
+            presetListView.PresetSelected += PresetListView_PresetSelected;
+            rightPanel.Add(presetListView);
             rightPanel.Add(new VisualSeparator());
 
             var dbView = _dbView = new DatabaseSettingsView(false, resources) { userData = context };
@@ -131,14 +131,14 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
             }
         }
 
-        private void TemplateListView_TemplateSelected(DatabaseSettingsTemplate template)
+        private void PresetListView_PresetSelected(DatabaseSettingsPreset preset)
         {
             if (_dbView.userData is not Context context)
             {
                 return;
             }
 
-            CopyTemplate(context, template);
+            CopyFromPreset(context, preset);
 
             var serializedObject = context.SerializedObject;
             serializedObject.ApplyModifiedProperties();

@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.Modules.Editor.Data.Settings.Views
 {
-    [UnityEditor.CustomEditor(typeof(DatabaseSettingsTemplate), true)]
+    [UnityEditor.CustomEditor(typeof(DatabaseSettingsPreset), true)]
     public class DatabaseSettingsTemplateEditor : UnityEditor.Editor
     {
         private DatabaseSettingsView _dbView;
@@ -13,9 +13,9 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
             DatabaseTypeVault.Initialize();
 
             var resources = DatabaseViewAPI.GetResources();
-            var target = this.target as DatabaseSettingsTemplate;
+            var target = this.target as DatabaseSettingsPreset;
             var database = target._database;
-            var databaseProperty = serializedObject.FindProperty(nameof(DatabaseSettingsTemplate._database));
+            var databaseProperty = serializedObject.FindProperty(nameof(DatabaseSettingsPreset._database));
             var context = new DatabaseSettingsContext();
             context.Initialize(database, databaseProperty);
 

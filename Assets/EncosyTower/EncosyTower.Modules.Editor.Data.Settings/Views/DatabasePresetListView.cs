@@ -6,26 +6,26 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.Modules.Editor.Data.Settings.Views
 {
-    internal sealed class DatabaseTemplateListView : VisualElement
+    internal sealed class DatabasePresetListView : VisualElement
     {
-        private const string USS_CLASS_NAME = "database-template-list";
+        private const string USS_CLASS_NAME = "database-preset-list";
 
-        public event Action<DatabaseSettingsTemplate> TemplateSelected;
+        public event Action<DatabaseSettingsPreset> PresetSelected;
 
-        private readonly GenericMenuPopup _menu = new(new MenuItemNode(), "Templates");
-        private readonly DropdownField _templateDropdown;
+        private readonly GenericMenuPopup _menu = new(new MenuItemNode(), "Presets");
+        private readonly DropdownField _presetDropdown;
         private readonly Button _copyButton;
         private readonly Button _locateButton;
 
-        public DatabaseTemplateListView() : base()
+        public DatabasePresetListView() : base()
         {
             AddToClassList(USS_CLASS_NAME);
 
             {
-                var dropdown = _templateDropdown = new("Template");
+                var dropdown = _presetDropdown = new("Preset");
                 dropdown.value = Constants.UNDEFINED;
-                dropdown.AddToClassList(Constants.TEMPLATE_DROPDOWN);
-                dropdown.RegisterCallback<PointerUpEvent>(TemplateDropdown_OnPointerUpEvent);
+                dropdown.AddToClassList(Constants.PRESET_DROPDOWN);
+                dropdown.RegisterCallback<PointerUpEvent>(PresetDropdown_OnPointerUpEvent);
 
                 hierarchy.Add(dropdown.AddToAlignFieldClass());
             }
@@ -38,7 +38,7 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
                 button.text = "Copy";
                 hierarchy.Add(button);
 
-                button.clicked += CopyTemplate;
+                button.clicked += CopyPreset;
             }
 
             {
@@ -48,34 +48,34 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
 
                 var icon = EditorAPI.GetIcon("d_pick", "pick");
                 button.iconImage = Background.FromTexture2D(icon.image as Texture2D);
-                button.tooltip = "Locate Selected Template";
+                button.tooltip = "Locate Selected Preset";
                 button.AddToClassList(Constants.ICON_BUTTON);
                 hierarchy.Add(button);
 
-                button.clicked += LocateSelectedTemplate;
+                button.clicked += LocateSelectedPreset;
             }
 
             {
                 var button = new Button();
                 var icon = EditorAPI.GetIcon("d_refresh", "refresh");
                 button.iconImage = Background.FromTexture2D(icon.image as Texture2D);
-                button.tooltip = "Refresh Template List";
+                button.tooltip = "Refresh Preset List";
                 button.AddToClassList(Constants.ICON_BUTTON);
                 hierarchy.Add(button);
 
-                button.clicked += RefreshTemplates;
+                button.clicked += RefreshPresets;
             }
 
-            RefreshTemplates();
+            RefreshPresets();
         }
 
-        private void RefreshTemplates()
+        private void RefreshPresets()
         {
             var rootNode = _menu.RootNode;
             rootNode.Reset();
 
-            var templates = AssetDatabaseAPI.FindAllObjectsByGlobalQualifiedType<DatabaseSettingsTemplate>();
-            var count = templates.Count;
+            var presets = AssetDatabaseAPI.FindAllObjectsByGlobalQualifiedType<DatabaseSettingsPreset>();
+            var count = presets.Count;
 
             GenericMenu.MenuFunction2 func2 = Menu_OnSelect;
 
@@ -88,14 +88,14 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
 
             for (var i = 0; i < count; i++)
             {
-                var template = templates[i];
+                var preset = presets[i];
 
-                if (template.IsInvalid())
+                if (preset.IsInvalid())
                 {
                     continue;
                 }
 
-                if (template._database is not { } database)
+                if (preset._database is not { } database)
                 {
                     continue;
                 }
@@ -105,15 +105,15 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
                     continue;
                 }
 
-                var name = $"{template.name}\n[{database.name}]";
+                var name = $"{preset.name}\n[{database.name}]";
                 var currentNode = rootNode.CreateNode(name);
                 currentNode.func2 = func2;
-                currentNode.userData = template;
+                currentNode.userData = preset;
                 currentNode.on = false;
             }
         }
 
-        private void TemplateDropdown_OnPointerUpEvent(PointerUpEvent evt)
+        private void PresetDropdown_OnPointerUpEvent(PointerUpEvent evt)
         {
             var menu = _menu;
             menu.width = 300;
@@ -125,42 +125,42 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
 
         private void Menu_OnSelect(object userData)
         {
-            if (userData is not DatabaseSettingsTemplate template || template.IsInvalid())
+            if (userData is not DatabaseSettingsPreset preset || preset.IsInvalid())
             {
-                _templateDropdown.value = Constants.UNDEFINED;
-                _templateDropdown.dataSource = null;
+                _presetDropdown.value = Constants.UNDEFINED;
+                _presetDropdown.dataSource = null;
                 _copyButton.enabledSelf = false;
                 _locateButton.enabledSelf = false;
                 return;
             }
 
-            _templateDropdown.value = $"{template.name} [{template._database.name}]";
-            _templateDropdown.dataSource = template;
+            _presetDropdown.value = $"{preset.name} [{preset._database.name}]";
+            _presetDropdown.dataSource = preset;
             _copyButton.enabledSelf = true;
             _locateButton.enabledSelf = true;
         }
 
-        private void LocateSelectedTemplate()
+        private void LocateSelectedPreset()
         {
-            if (_templateDropdown.dataSource is not DatabaseSettingsTemplate template || template.IsInvalid())
+            if (_presetDropdown.dataSource is not DatabaseSettingsPreset preset || preset.IsInvalid())
             {
                 return;
             }
 
-            EditorGUIUtility.PingObject(template);
+            EditorGUIUtility.PingObject(preset);
         }
 
-        private void CopyTemplate()
+        private void CopyPreset()
         {
-            if (_templateDropdown.dataSource is not DatabaseSettingsTemplate template
-                || template.IsInvalid()
-                || template._database is not { } database
+            if (_presetDropdown.dataSource is not DatabaseSettingsPreset preset
+                || preset.IsInvalid()
+                || preset._database is not { } database
             )
             {
                 return;
             }
 
-            TemplateSelected?.Invoke(template);
+            PresetSelected?.Invoke(preset);
         }
     }
 }

@@ -34,4 +34,4 @@ MonoBehaviour:
       inputRelativeFolderPath: 
       outputRelativeFolderPath: 
       enabled: 0
-      liveConversion: 0
+      liveConversion: 1

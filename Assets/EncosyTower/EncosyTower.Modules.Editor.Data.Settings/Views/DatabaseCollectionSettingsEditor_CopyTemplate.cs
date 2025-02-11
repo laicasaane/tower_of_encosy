@@ -4,9 +4,9 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
 
     internal partial class DatabaseCollectionSettingsEditor
     {
-        private void CopyTemplate(Context destContext, DatabaseSettingsTemplate template)
+        private void CopyFromPreset(Context destContext, DatabaseSettingsPreset preset)
         {
-            var database = template._database;
+            var database = preset._database;
 
             // DatabaseSettings
             {
