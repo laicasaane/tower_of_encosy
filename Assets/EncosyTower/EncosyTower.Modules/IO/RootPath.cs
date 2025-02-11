@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 
 namespace EncosyTower.Modules.IO
 {
@@ -72,10 +73,36 @@ namespace EncosyTower.Modules.IO
             return Directory.Exists(path);
         }
 
+        public void CreateRelativeFile(string relativePath)
+        {
+            var path = GetFileAbsolutePath(relativePath);
+            File.WriteAllText(path, string.Empty, Encoding.UTF8);
+        }
+
         public void CreateRelativeFolder(string relativePath)
         {
             var path = GetFolderAbsolutePath(relativePath);
             Directory.CreateDirectory(path);
+        }
+
+        public void DeleteRelativeFile(string relativePath)
+        {
+            var path = GetFileAbsolutePath(relativePath);
+
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+
+        public void DeleteRelativeFolder(string relativePath, bool recursive = true)
+        {
+            var path = GetFolderAbsolutePath(relativePath);
+
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, recursive);
+            }
         }
     }
 }

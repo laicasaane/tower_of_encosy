@@ -15,11 +15,11 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
     {
         private static readonly string[] s_jsonFilter = new[] { "JSON", "json" };
 
-        private readonly ButtonTextField _serviceAccountFileText;
+        private readonly FolderTextField _serviceAccountFileText;
         private readonly HelpBox _serviceAccountFileHelp;
         private readonly ButtonTextField _spreadsheetIdText;
         private readonly HelpBox _spreadsheetIdHelp;
-        private readonly ButtonTextField _outputFolderText;
+        private readonly FolderTextField _outputFolderText;
         private readonly HelpBox _outputFolderHelp;
         private readonly EnumField _outputFileTypeEnum;
         private readonly Toggle _cleanOutputFolderToggle;
@@ -87,7 +87,15 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
             });
 
             _downloadButton.AddToClassList("convert-button");
+            _downloadButton.AddToClassList("function-button");
             _downloadButton.clicked += DownloadButton_OnClicked;
+
+            Add(new VisualSeparator());
+
+            var cleanOutputFolderButton = new Button() { text = "Clean Output Folder" };
+            cleanOutputFolderButton.AddToClassList("function-button");
+            cleanOutputFolderButton.clicked += CleanOutputFolderButton_OnClicked;
+            Add(cleanOutputFolderButton);
 
             RegisterValueChangedCallbacks();
         }
@@ -238,6 +246,12 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
         {
             var owner = _context.Property.serializedObject.targetObject;
             _context.DatabaseSettings?.Convert(DataSourceFlags.GoogleSheet, owner);
+        }
+
+        private void CleanOutputFolderButton_OnClicked()
+        {
+            _context.DatabaseSettings?.CleanOutputFolder(DataSourceFlags.GoogleSheet);
+            AssetDatabase.Refresh();
         }
     }
 }

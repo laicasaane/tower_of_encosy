@@ -116,6 +116,15 @@
     height: 20px;
 }
 
+.database .folder-text-field .icon-button {
+    min-width: 30px;
+}
+
+.database .folder-text-field .icon-button > .unity-button__image {
+    width: 15px;
+    height: 15px;
+}
+
 .database .settings-group {
     border-top-width: 1px;
     border-bottom-width: 1px;
@@ -170,8 +179,11 @@
     display: none;
 }
 
-.database .convert-button {
+.database .function-button {
     min-height: 25px;
+}
+
+.database .convert-button {
     background-color: var(--button-highlight-enabled-background);
     color: var(--button-highlight-enabled-text);
 }

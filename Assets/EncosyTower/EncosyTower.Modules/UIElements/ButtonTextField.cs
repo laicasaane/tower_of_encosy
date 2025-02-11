@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.Modules.UIElements
 {
-    public sealed class ButtonTextField : VisualElement, IHasBindingPath, INotifyValueChanged<string>
+    public class ButtonTextField : VisualElement, IHasBindingPath, INotifyValueChanged<string>
     {
         public static readonly string UssClassName = "button-text-field";
 

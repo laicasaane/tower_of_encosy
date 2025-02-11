@@ -1,5 +1,6 @@
 using EncosyTower.Modules.Editor.UIElements;
 using EncosyTower.Modules.UIElements;
+using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
@@ -10,9 +11,9 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
     internal sealed class LocalFolderSettingsView : SettingsView
     {
         private readonly DataSourceFlags _source;
-        private readonly ButtonTextField _inputFolderText;
+        private readonly FolderTextField _inputFolderText;
         private readonly HelpBox _inputFolderHelp;
-        private readonly ButtonTextField _outputFolderText;
+        private readonly FolderTextField _outputFolderText;
         private readonly HelpBox _outputFolderHelp;
         private readonly Toggle _liveConversionToggle;
         private readonly Button _convertButton;
@@ -62,7 +63,15 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
             });
 
             _convertButton.AddToClassList("convert-button");
+            _convertButton.AddToClassList("function-button");
             _convertButton.clicked += ConvertButton_OnClicked;
+
+            Add(new VisualSeparator());
+
+            var cleanOutputFolderButton = new Button() { text = "Clean Output Folder" };
+            cleanOutputFolderButton.AddToClassList("function-button");
+            cleanOutputFolderButton.clicked += CleanOutputFolderButton_OnClicked;
+            Add(cleanOutputFolderButton);
 
             RegisterValueChangedCallbacks();
         }
@@ -161,6 +170,12 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
         {
             var owner = _context.Property.serializedObject.targetObject;
             _context.DatabaseSettings?.Convert(_source, owner);
+        }
+
+        private void CleanOutputFolderButton_OnClicked()
+        {
+            _context.DatabaseSettings?.CleanOutputFolder(_source);
+            AssetDatabase.Refresh();
         }
     }
 }
