@@ -1,0 +1,5 @@
+id,,,$,name,$,stat,,
+id,,rarity,,,,hp,atk,
+kind,id,,,,,,,
+Enemy,1,1,,Wolf,,1,1,
+Enemy,1,2,,Goblin,,2,2,
