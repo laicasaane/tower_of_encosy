@@ -13,7 +13,7 @@ using NReco.Csv;
 
 namespace EncosyTower.Modules.Data.Authoring
 {
-    public class DatabaseGoogleSheetExporter
+    public class DatabaseGoogleSheetCsvExporter
     {
         private readonly string _gsheetAddress;
         private readonly ICredential _credential;
@@ -22,7 +22,7 @@ namespace EncosyTower.Modules.Data.Authoring
         private Spreadsheet _spreadsheet;
         private bool _isLoaded;
 
-        public DatabaseGoogleSheetExporter(
+        public DatabaseGoogleSheetCsvExporter(
               string gsheetAddress
             , string credential
             , IExtendedFileSystem fileSystem = null
@@ -52,9 +52,9 @@ namespace EncosyTower.Modules.Data.Authoring
 
         public async Task Export(
               string savePath
-            , bool spreadsheetAsFolder = true
-            , bool cleanOutputFolder = true
-            , ITransformFileName fileNameTransformer = null
+            , bool spreadsheetAsFolder
+            , bool cleanOutputFolder
+            , NamingStrategy namingStrategy
         )
         {
             if (_isLoaded == false)
@@ -71,22 +71,36 @@ namespace EncosyTower.Modules.Data.Authoring
                 _isLoaded = true;
             }
 
-            var spreadsheetName = SheetUtility.ToFileName(_spreadsheet.Properties.Title);
-            var outputPath = spreadsheetAsFolder
-                ? Path.Combine(savePath, spreadsheetName)
-                : savePath;
+            var spreadsheetName = NamingMap.ConvertName(
+                  SheetUtility.ToFileName(_spreadsheet.Properties.Title)
+                , namingStrategy
+            );
 
             var fileSystem = _fileSystem;
+            var validSpreadsheet = SheetUtility.ValidateSheetName(spreadsheetName);
+            var ignoreOuputPath = Path.Combine(savePath, $"{spreadsheetName}~");
 
-            if (cleanOutputFolder && fileSystem.DirectoryExists(outputPath))
+            var outputPath = validSpreadsheet
+                ? spreadsheetAsFolder ? Path.Combine(savePath, spreadsheetName) : savePath
+                : ignoreOuputPath;
+
+            if (cleanOutputFolder)
             {
-                fileSystem.DeleteDirectory(outputPath);
-            }
+                if (fileSystem.DirectoryExists(ignoreOuputPath))
+                {
+                    fileSystem.DeleteDirectory(ignoreOuputPath, true);
+                }
 
-            fileSystem.CreateDirectory(outputPath);
+                if (fileSystem.DirectoryExists(outputPath))
+                {
+                    fileSystem.DeleteDirectory(outputPath, true);
+                }
+            }
 
             var sheets = _spreadsheet.Sheets;
             var sheetCount = sheets.Count;
+            var outputPathExists = false;
+            var ignoreOutputPathExists = false;
 
             for (var i = 0; i < sheetCount; i++)
             {
@@ -98,62 +112,64 @@ namespace EncosyTower.Modules.Data.Authoring
                     continue;
                 }
 
-                var sheetName = SheetUtility.ToFileName(gSheet.Properties.Title, i);
-                string fileName;
+                var sheetName = NamingMap.ConvertName(
+                      SheetUtility.ToFileName(gSheet.Properties.Title, i)
+                    , namingStrategy
+                );
 
-                if (fileNameTransformer != null)
+
+                var canBeIgnored = CanBeIgnored(spreadsheetName, sheetName);
+                var filePath = Path.Combine(canBeIgnored ? ignoreOuputPath : outputPath, $"{sheetName}.csv");
+
+                if (canBeIgnored)
                 {
-                    fileName = fileNameTransformer.Transform(new ITransformFileName.Args {
-                        spreadsheetName = spreadsheetName,
-                        sheetName = sheetName,
-                    });
+                    EnsureOutputPath(fileSystem, ignoreOuputPath, ref ignoreOutputPathExists);
                 }
                 else
                 {
-                    fileName = sheetName;
+                    EnsureOutputPath(fileSystem, outputPath, ref outputPathExists);
                 }
 
-                var file = Path.Combine(outputPath, $"{fileName}.csv");
-
-                await using var stream = fileSystem.OpenWrite(file);
+                await using var stream = fileSystem.OpenWrite(filePath);
                 await using var writer = new StreamWriter(stream);
-                var rows = data.RowData;
 
-                if (rows == null || rows.Count < 1)
+                var rows = data.RowData;
+                var rowCount = rows?.Count ?? 0;
+
+                if (rowCount < 1)
                 {
                     continue;
                 }
 
-                var rowCount = rows.Count;
-                var totalColCount = CountColumns(rows);
+                var totalColumnCount = CountColumns(rows);
 
-                if (totalColCount < 1)
+                if (totalColumnCount < 1)
                 {
                     continue;
                 }
 
                 var csv = new CsvWriter(writer);
 
-                for (var r = 0; r < rowCount; r++)
+                for (var rowIndex = 0; rowIndex < rowCount; rowIndex++)
                 {
-                    var row = rows[r];
-                    var cols = row.Values;
+                    var row = rows[rowIndex];
+                    var columns = row.Values;
 
-                    if (cols == null || cols.Count < 1)
+                    if (columns == null || columns.Count < 1)
                     {
                         continue;
                     }
 
-                    var colCount = cols.Count;
+                    var columnCount = columns.Count;
 
-                    for (var c = 0; c < colCount; c++)
+                    for (var columnIndex = 0; columnIndex < columnCount; columnIndex++)
                     {
-                        csv.WriteField(cols[c]?.FormattedValue);
+                        csv.WriteField(columns[columnIndex]?.FormattedValue);
                     }
 
-                    var emptyCount = totalColCount - colCount;
+                    var emptyCount = totalColumnCount - columnCount;
 
-                    for (var c = 0; c <= emptyCount; c++)
+                    for (var columnIndex = 0; columnIndex <= emptyCount; columnIndex++)
                     {
                         csv.WriteField(string.Empty);
                     }
@@ -181,14 +197,24 @@ namespace EncosyTower.Modules.Data.Authoring
             return result;
         }
 
-        public interface ITransformFileName
+        private static bool CanBeIgnored(string spreadsheetName, string sheetName)
         {
-            string Transform(Args args);
+            return SheetUtility.ValidateSheetName(sheetName) == false
+                || SheetUtility.ValidateSheetName(spreadsheetName) == false;
+        }
 
-            public struct Args
+        private static void EnsureOutputPath(IExtendedFileSystem fileSystem, string ouputPath, ref bool exists)
+        {
+            if (exists)
             {
-                public string spreadsheetName;
-                public string sheetName;
+                return;
+            }
+
+            exists = fileSystem.Exists(ouputPath);
+
+            if (exists == false)
+            {
+                fileSystem.CreateDirectory(ouputPath);
             }
         }
     }
