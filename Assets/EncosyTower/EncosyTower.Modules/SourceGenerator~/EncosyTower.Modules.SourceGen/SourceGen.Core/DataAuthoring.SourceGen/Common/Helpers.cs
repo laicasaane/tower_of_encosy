@@ -45,7 +45,7 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
         public const string GENERATED_PROPERTY_FROM_FIELD = $"global::{DATA_NAMESPACE}.SourceGen.GeneratedPropertyFromFieldAttribute";
         public const string GENERATED_FIELD_FROM_PROPERTY = $"global::{DATA_NAMESPACE}.SourceGen.GeneratedFieldFromPropertyAttribute";
         public const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"{DATA_NAMESPACE}.DatabaseGenerator\", \"1.8.2\")]";
+        public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"{DATA_NAMESPACE}.DatabaseGenerator\", \"{SourceGenVersion.VALUE}\")]";
         public const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
 
         public static void Process(this MemberRef memberRef)

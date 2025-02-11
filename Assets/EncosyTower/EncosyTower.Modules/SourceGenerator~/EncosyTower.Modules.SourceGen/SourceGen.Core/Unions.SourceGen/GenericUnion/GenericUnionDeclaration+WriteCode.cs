@@ -10,17 +10,18 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
     partial class GenericUnionDeclaration
     {
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Unions.GenericUnionGenerator\", \"1.0.0\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"{NAMESPACE}.GenericUnionGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
+        public const string NAMESPACE = "EncosyTower.Modules.Unions";
         public const string STRUCT_LAYOUT = "[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit)]";
-        public const string META_OFFSET = "[global::System.Runtime.InteropServices.FieldOffset(global::EncosyTower.Modules.Unions.UnionBase.META_OFFSET)]";
-        public const string DATA_OFFSET = "[global::System.Runtime.InteropServices.FieldOffset(global::EncosyTower.Modules.Unions.UnionBase.DATA_OFFSET)]";
-        public const string UNION_TYPE = "global::EncosyTower.Modules.Unions.Union";
-        public const string UNION_DATA_TYPE = "global::EncosyTower.Modules.Unions.UnionData";
-        public const string UNION_TYPE_KIND = "global::EncosyTower.Modules.Unions.UnionTypeKind";
+        public const string META_OFFSET = $"[global::System.Runtime.InteropServices.FieldOffset(global::{NAMESPACE}.UnionBase.META_OFFSET)]";
+        public const string DATA_OFFSET = $"[global::System.Runtime.InteropServices.FieldOffset(global::{NAMESPACE}.UnionBase.DATA_OFFSET)]";
+        public const string UNION_TYPE = $"global::{NAMESPACE}.Union";
+        public const string UNION_DATA_TYPE = $"global::{NAMESPACE}.UnionData";
+        public const string UNION_TYPE_KIND = $"global::{NAMESPACE}.UnionTypeKind";
         public const string DOES_NOT_RETURN = "[global::System.Diagnostics.CodeAnalysis.DoesNotReturn]";
         public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.BeforeSplashScreen)]";
-        public const string GENERATED_GENERIC_UNIONS = "[global::EncosyTower.Modules.Unions.SourceGen.GeneratedGenericUnions]";
+        public const string GENERATED_GENERIC_UNIONS = $"[global::{NAMESPACE}.SourceGen.GeneratedGenericUnions]";
         public const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
 
         public const string GENERATOR_NAME = nameof(GenericUnionDeclaration);
@@ -136,12 +137,12 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            p.PrintLine($"namespace EncosyTower.Modules.Unions.__Generics.{assemblyName.ToValidIdentifier()}");
+            p.PrintLine($"namespace {NAMESPACE}.__Generics.{assemblyName.ToValidIdentifier()}");
             p.OpenScope();
             {
                 p.PrintLine("/// <summary>");
                 p.PrintLine("/// Automatically registers generic unions");
-                p.PrintLine("/// to <see cref=\"EncosyTower.Modules.Unions.Converters.UnionConverter\"/>");
+                p.PrintLine($"/// to <see cref=\"{NAMESPACE}.Converters.UnionConverter\"/>");
                 p.PrintLine("/// on Unity3D platform.");
                 p.PrintLine("/// </summary>");
                 p.PrintLine(GENERATED_GENERIC_UNIONS).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine("[Preserve]");
@@ -231,7 +232,7 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine("[Preserve]");
             p.OpenScope("private static void Register<T>(");
             {
-                p.PrintLine("  global::EncosyTower.Modules.Unions.Converters.IUnionConverter<T> converter");
+                p.PrintLine($"  global::{NAMESPACE}.Converters.IUnionConverter<T> converter");
                 p.Print("#if UNITY_EDITOR && MODULE_MVVM_CORE_LOG_GENERIC_UNION_REGISTRIES").PrintEndLine();
                 p.PrintLine(", string typeName");
                 p.Print("#endif").PrintEndLine();
@@ -243,7 +244,7 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
                 p.PrintLine("var result =");
                 p.Print("#endif").PrintEndLine();
 
-                p.PrintLine("global::EncosyTower.Modules.Unions.Converters.UnionConverter.TryRegister<T>(converter);");
+                p.PrintLine($"global::{NAMESPACE}.Converters.UnionConverter.TryRegister<T>(converter);");
                 p.PrintEndLine();
 
                 p.Print("#if UNITY_EDITOR && MODULE_MVVM_CORE_LOG_GENERIC_UNION_REGISTRIES").PrintEndLine();

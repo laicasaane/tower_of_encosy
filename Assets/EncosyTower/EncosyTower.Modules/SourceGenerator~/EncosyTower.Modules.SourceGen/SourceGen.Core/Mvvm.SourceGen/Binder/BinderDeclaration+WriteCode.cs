@@ -7,14 +7,17 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
     partial class BinderDeclaration
     {
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Mvvm.SourceGen.Binders.BinderGenerator\", \"1.0.0\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Mvvm.SourceGen.Binders.BinderGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
+        private const string NAMESPACE_BINDING = "EncosyTower.Modules.Mvvm.ViewBinding";
+        private const string NAMESPACE_MODEL = "EncosyTower.Modules.Mvvm.ComponentModel";
+        private const string NAMESPACE_INPUT = "EncosyTower.Modules.Mvvm.Input";
         private const string OBSOLETE_METHOD = "[global::System.Obsolete(\"This method is not intended to be use directly by user code.\")]";
         private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
-        private const string GENERATED_BINDING_PROPERTY = "[global::EncosyTower.Modules.Mvvm.ViewBinding.SourceGen.GeneratedBindingProperty({0}, typeof({1}))]";
-        private const string GENERATED_BINDING_COMMAND = "[global::EncosyTower.Modules.Mvvm.ViewBinding.SourceGen.GeneratedBindingCommand(";
-        private const string GENERATED_CONVERTER = "[global::EncosyTower.Modules.Mvvm.ViewBinding.SourceGen.GeneratedConverter({0}, typeof({1}))]";
-        private const string IADAPTER = "global::EncosyTower.Modules.Mvvm.ViewBinding.IAdapter";
+        private const string GENERATED_BINDING_PROPERTY = $"[global::{NAMESPACE_BINDING}.SourceGen.GeneratedBindingProperty({{0}}, typeof({{1}}))]";
+        private const string GENERATED_BINDING_COMMAND = $"[global::{NAMESPACE_BINDING}.SourceGen.GeneratedBindingCommand(";
+        private const string GENERATED_CONVERTER = $"[global::{NAMESPACE_BINDING}.SourceGen.GeneratedConverter({{0}}, typeof({{1}}))]";
+        private const string IADAPTER = $"global::{NAMESPACE_BINDING}.IAdapter";
         private const string CACHED_UNION_CONVERTER = "global::EncosyTower.Modules.Unions.Converters.CachedUnionConverter";
 
         public string WriteCode()
@@ -35,7 +38,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
 
             if (HasBaseBinder)
             {
-                p.Print(" : global::EncosyTower.Modules.Mvvm.ViewBinding.IBinder");
+                p.Print($" : global::{NAMESPACE_BINDING}.IBinder");
             }
 
             p.PrintEndLine();
@@ -86,7 +89,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
                 var paramType = param != null ? param.Type.ToFullName() : "void";
 
                 p.PrintBeginLine()
-                    .Print("[global::EncosyTower.Modules.Mvvm.ViewBinding.SourceGen.BindingPropertyMethodInfo(")
+                    .Print($"[global::{NAMESPACE_BINDING}.SourceGen.BindingPropertyMethodInfo(")
                     .Print($"\"{member.Symbol.Name}\", typeof(")
                     .Print(paramType)
                     .PrintEndLine("))]");
@@ -98,7 +101,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
             foreach (var member in BindingCommandRefs)
             {
                 p.PrintBeginLine()
-                    .Print("[global::EncosyTower.Modules.Mvvm.ViewBinding.SourceGen.BindingCommandMethodInfo(")
+                    .Print($"[global::{NAMESPACE_BINDING}.SourceGen.BindingCommandMethodInfo(")
                     .Print($"\"{member.Symbol.Name}\", ");
 
                 if (member.Parameter == null)
@@ -193,7 +196,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
                 var paramType = param != null ? param.Type.ToFullName() : "void";
 
                 p.PrintLine(string.Format(GENERATED_BINDING_PROPERTY, ConstName(member), paramType));
-                p.PrintLine($"private {readonlyKeyword}global::EncosyTower.Modules.Mvvm.ViewBinding.BindingProperty {BindingPropertyName(member)} =  new global::EncosyTower.Modules.Mvvm.ViewBinding.BindingProperty();");
+                p.PrintLine($"private {readonlyKeyword}global::{NAMESPACE_BINDING}.BindingProperty {BindingPropertyName(member)} =  new global::{NAMESPACE_BINDING}.BindingProperty();");
                 p.PrintEndLine();
             }
 
@@ -237,7 +240,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
 
                 p.PrintLine(GENERATED_CODE);
                 p.PrintLine(string.Format(GENERATED_CONVERTER, ConstName(member), typeName));
-                p.PrintLine($"private {readonlyKeyword}global::EncosyTower.Modules.Mvvm.ViewBinding.Converter {ConverterName(member)} = new global::EncosyTower.Modules.Mvvm.ViewBinding.Converter();");
+                p.PrintLine($"private {readonlyKeyword}global::{NAMESPACE_BINDING}.Converter {ConverterName(member)} = new global::{NAMESPACE_BINDING}.Converter();");
                 p.PrintEndLine();
             }
 
@@ -293,7 +296,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
 
                 p.Print(")]").PrintEndLine();
 
-                p.PrintLine($"private {readonlyKeyword}global::EncosyTower.Modules.Mvvm.ViewBinding.BindingCommand {BindingCommandName(member)} =  new global::EncosyTower.Modules.Mvvm.ViewBinding.BindingCommand();");
+                p.PrintLine($"private {readonlyKeyword}global::{NAMESPACE_BINDING}.BindingCommand {BindingCommandName(member)} =  new global::{NAMESPACE_BINDING}.BindingCommand();");
                 p.PrintEndLine();
             }
 
@@ -334,7 +337,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
                 p.PrintLine($"/// to the property chosen by <see cref=\"{BindingPropertyName(member)}\"/>.");
                 p.PrintLine($"/// </summary>");
                 p.PrintLine(GENERATED_CODE).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private readonly global::EncosyTower.Modules.Mvvm.ComponentModel.PropertyChangeEventListener<{ClassName}> {ListenerName(member)};");
+                p.PrintLine($"private readonly global::{NAMESPACE_MODEL}.PropertyChangeEventListener<{ClassName}> {ListenerName(member)};");
                 p.PrintEndLine();
             }
 
@@ -358,11 +361,11 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
 
                 if (member.Parameter == null)
                 {
-                    p.PrintLine($"private global::EncosyTower.Modules.Mvvm.Input.IRelayCommand {RelayCommandName(member)};");
+                    p.PrintLine($"private global::{NAMESPACE_INPUT}.IRelayCommand {RelayCommandName(member)};");
                 }
                 else
                 {
-                    p.PrintLine($"private global::EncosyTower.Modules.Mvvm.Input.IRelayCommand<{member.Parameter.Type.ToFullName()}> {RelayCommandName(member)};");
+                    p.PrintLine($"private global::{NAMESPACE_INPUT}.IRelayCommand<{member.Parameter.Type.ToFullName()}> {RelayCommandName(member)};");
                 }
 
                 p.PrintEndLine();
@@ -410,7 +413,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
                     var methodName = MethodName(member);
                     var param = member.Parameter;
 
-                    p.PrintLine($"this.{ListenerName(member)} = new global::EncosyTower.Modules.Mvvm.ComponentModel.PropertyChangeEventListener<{ClassName}>(this)");
+                    p.PrintLine($"this.{ListenerName(member)} = new global::{NAMESPACE_MODEL}.PropertyChangeEventListener<{ClassName}>(this)");
                     p.OpenScope();
 
                     if (param == null)
@@ -456,7 +459,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
             p.PrintLine("/// <inheritdoc/>");
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(keyword)
-                .Print("global::EncosyTower.Modules.Mvvm.ComponentModel.IObservableObject Context")
+                .Print($"global::{NAMESPACE_MODEL}.IObservableObject Context")
                 .PrintEndLine(" { get; private set; }");
             p.PrintEndLine();
         }
@@ -497,7 +500,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
 
                 if (BindingPropertyRefs.Length > 0)
                 {
-                    p.PrintLine("if (this.Context is global::EncosyTower.Modules.Mvvm.ComponentModel.INotifyPropertyChanged inpc)");
+                    p.PrintLine($"if (this.Context is global::{NAMESPACE_MODEL}.INotifyPropertyChanged inpc)");
                     p.OpenScope();
                     {
                         foreach (var member in BindingPropertyRefs)
@@ -517,7 +520,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
 
                 if (BindingCommandRefs.Length > 0)
                 {
-                    p.PrintLine("if (this.Context is global::EncosyTower.Modules.Mvvm.Input.ICommandListener cl)");
+                    p.PrintLine($"if (this.Context is global::{NAMESPACE_INPUT}.ICommandListener cl)");
                     p.OpenScope();
                     {
                         foreach (var member in BindingCommandRefs)
@@ -543,13 +546,13 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
         {
             if (BindingPropertyRefs.Length > 0 && HasOnBindPropertyFailedMethod == false)
             {
-                p.PrintLine("partial void OnBindPropertyFailed(global::EncosyTower.Modules.Mvvm.ViewBinding.BindingProperty bindingProperty);");
+                p.PrintLine($"partial void OnBindPropertyFailed(global::{NAMESPACE_BINDING}.BindingProperty bindingProperty);");
                 p.PrintEndLine();
             }
 
             if (BindingCommandRefs.Length > 0 && HasOnBindCommandFailedMethod == false)
             {
-                p.PrintLine("partial void OnBindCommandFailed(global::EncosyTower.Modules.Mvvm.ViewBinding.BindingCommand bindingCommand);");
+                p.PrintLine($"partial void OnBindCommandFailed(global::{NAMESPACE_BINDING}.BindingCommand bindingCommand);");
                 p.PrintEndLine();
             }
         }
@@ -916,7 +919,7 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
 
                 if (BindingPropertyRefs.Length > 0)
                 {
-                    p.PrintLine("if (this.Context is global::EncosyTower.Modules.Mvvm.ComponentModel.INotifyPropertyChanged inpc)");
+                    p.PrintLine($"if (this.Context is global::{NAMESPACE_MODEL}.INotifyPropertyChanged inpc)");
                     p.OpenScope();
                     {
                         foreach (var member in BindingPropertyRefs)

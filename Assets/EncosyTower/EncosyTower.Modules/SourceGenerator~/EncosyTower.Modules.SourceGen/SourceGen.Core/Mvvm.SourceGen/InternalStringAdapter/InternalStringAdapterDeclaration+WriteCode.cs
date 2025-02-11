@@ -9,7 +9,7 @@ namespace EncosyTower.Modules.Mvvm.InternalStringAdapterSourceGen
     partial class InternalStringAdapterDeclaration
     {
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Mvvm.InternalStringAdapterGenerator\", \"1.0.0\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Mvvm.InternalStringAdapterGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string IADAPTER = "global::EncosyTower.Modules.Mvvm.ViewBinding.IAdapter";
         private const string ADAPTER_ATTRIBUTE = "[global::EncosyTower.Modules.Mvvm.ViewBinding.Adapter(sourceType: typeof({0}), destType: typeof(string), order: 1)]";

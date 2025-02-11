@@ -5,7 +5,7 @@ namespace EncosyTower.Modules.Entities.SourceGen
     internal abstract class LookupCodeWriter
     {
         protected const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        protected const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Entities.SourceGen.LookupGenerator\", \"1.0.0\")]";
+        protected const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Entities.SourceGen.LookupGenerator\", \"{SourceGenVersion.VALUE}\")]";
         protected const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         protected const string ENTITY = "global::Unity.Entities.Entity";
         protected const string BOOL = "global::EncosyTower.Modules.Bool<";

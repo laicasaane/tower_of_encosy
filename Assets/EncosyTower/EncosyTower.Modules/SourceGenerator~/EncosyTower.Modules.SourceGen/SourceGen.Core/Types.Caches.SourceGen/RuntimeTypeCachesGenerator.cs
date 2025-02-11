@@ -19,7 +19,7 @@ namespace EncosyTower.Modules.Types.Caches.SourceGen
         public const string GENERATOR_NAME = nameof(RuntimeTypeCachesGenerator);
 
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"{NAMESPACE}.SourceGen.RuntimeTypeCachesGenerator\", \"1.0.0\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"{NAMESPACE}.SourceGen.RuntimeTypeCachesGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string RUNTIME_TYPE_CACHE = "global::EncosyTower.Modules.Types.RuntimeTypeCache";
         private const string GENERATED_RUNTIME_TYPE_CACHES = $"[{NAMESPACE_PREFIX}.SourceGen.GeneratedRuntimeTypeCaches]";

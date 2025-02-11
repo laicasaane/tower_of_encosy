@@ -8,19 +8,20 @@ namespace EncosyTower.Modules.Mvvm.ObservablePropertySourceGen
     partial class ObservablePropertyDeclaration
     {
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = "[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Mvvm.ObservablePropertyGenerator\", \"1.2.0\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Modules.Mvvm.ObservablePropertyGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
-        private const string GENERATED_OBSERVABLE_PROPERTY = "[global::EncosyTower.Modules.Mvvm.ComponentModel.SourceGen.GeneratedObservableProperty]";
-        private const string GENERATED_PROPERTY_CHANGING_HANDLER = "[global::EncosyTower.Modules.Mvvm.ComponentModel.SourceGen.GeneratedPropertyChangingEventHandler]";
-        private const string GENERATED_PROPERTY_CHANGED_HANDLER = "[global::EncosyTower.Modules.Mvvm.ComponentModel.SourceGen.GeneratedPropertyChangedEventHandler]";
-        private const string GENERATED_PROPERTY_NAME_CONSTANT = "[global::EncosyTower.Modules.Mvvm.ComponentModel.SourceGen.GeneratedPropertyNameConstant]";
-        private const string IS_OBSERVABLE_OBJECT = "[global::EncosyTower.Modules.Mvvm.ComponentModel.SourceGen.IsObservableObject(typeof({0}))]";
+        private const string NAMESPACE = "EncosyTower.Modules.Mvvm.ComponentModel";
+        private const string GENERATED_OBSERVABLE_PROPERTY = $"[global::{NAMESPACE}.SourceGen.GeneratedObservableProperty]";
+        private const string GENERATED_PROPERTY_CHANGING_HANDLER = $"[global::{NAMESPACE}.SourceGen.GeneratedPropertyChangingEventHandler]";
+        private const string GENERATED_PROPERTY_CHANGED_HANDLER = $"[global::{NAMESPACE}.SourceGen.GeneratedPropertyChangedEventHandler]";
+        private const string GENERATED_PROPERTY_NAME_CONSTANT = $"[global::{NAMESPACE}.SourceGen.GeneratedPropertyNameConstant]";
+        private const string IS_OBSERVABLE_OBJECT = $"[global::{NAMESPACE}.SourceGen.IsObservableObject(typeof({{0}}))]";
         private const string UNION = "global::EncosyTower.Modules.Unions.Union";
         private const string CACHED_UNION_CONVERTER = "global::EncosyTower.Modules.Unions.Converters.CachedUnionConverter";
-        private const string INOTIFY_PROPERTY_CHANGING_INTERFACE = "global::EncosyTower.Modules.Mvvm.ComponentModel.INotifyPropertyChanging";
-        private const string INOTIFY_PROPERTY_CHANGED_INTERFACE = "global::EncosyTower.Modules.Mvvm.ComponentModel.INotifyPropertyChanged";
-        private const string PROPERTY_CHANGE_EVENT_LISTENER = "global::EncosyTower.Modules.Mvvm.ComponentModel.PropertyChangeEventListener";
-        private const string PROPERTY_CHANGE_EVENT_ARGS = "global::EncosyTower.Modules.Mvvm.ComponentModel.PropertyChangeEventArgs";
+        private const string INOTIFY_PROPERTY_CHANGING_INTERFACE = $"global::{NAMESPACE}.INotifyPropertyChanging";
+        private const string INOTIFY_PROPERTY_CHANGED_INTERFACE = $"global::{NAMESPACE}.INotifyPropertyChanged";
+        private const string PROPERTY_CHANGE_EVENT_LISTENER = $"global::{NAMESPACE}.PropertyChangeEventListener";
+        private const string PROPERTY_CHANGE_EVENT_ARGS = $"global::{NAMESPACE}.PropertyChangeEventArgs";
         private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
 
         public string WriteCodeWithoutMember()
@@ -272,22 +273,22 @@ namespace EncosyTower.Modules.Mvvm.ObservablePropertySourceGen
             foreach (var member in FieldRefs)
             {
                 p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGING_HANDLER).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private event global::EncosyTower.Modules.Mvvm.ComponentModel.PropertyChangingEventHandler {OnChangingEventName(member)};");
+                p.PrintLine($"private event global::{NAMESPACE}.PropertyChangingEventHandler {OnChangingEventName(member)};");
                 p.PrintEndLine();
 
                 p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGED_HANDLER).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private event global::EncosyTower.Modules.Mvvm.ComponentModel.PropertyChangedEventHandler {OnChangedEventName(member)};");
+                p.PrintLine($"private event global::{NAMESPACE}.PropertyChangedEventHandler {OnChangedEventName(member)};");
                 p.PrintEndLine();
             }
 
             foreach (var member in PropRefs)
             {
                 p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGING_HANDLER).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private event global::EncosyTower.Modules.Mvvm.ComponentModel.PropertyChangingEventHandler {OnChangingEventName(member)};");
+                p.PrintLine($"private event global::{NAMESPACE}.PropertyChangingEventHandler {OnChangingEventName(member)};");
                 p.PrintEndLine();
 
                 p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGED_HANDLER).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private event global::EncosyTower.Modules.Mvvm.ComponentModel.PropertyChangedEventHandler {OnChangedEventName(member)};");
+                p.PrintLine($"private event global::{NAMESPACE}.PropertyChangedEventHandler {OnChangedEventName(member)};");
                 p.PrintEndLine();
             }
 
@@ -307,7 +308,7 @@ namespace EncosyTower.Modules.Mvvm.ObservablePropertySourceGen
             foreach (var property in properties.Values)
             {
                 p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGED_HANDLER);
-                p.PrintLine($"private event global::EncosyTower.Modules.Mvvm.ComponentModel.PropertyChangedEventHandler {OnChangedEventName(property)};");
+                p.PrintLine($"private event global::{NAMESPACE}.PropertyChangedEventHandler {OnChangedEventName(property)};");
                 p.PrintEndLine();
             }
         }
@@ -1116,7 +1117,7 @@ namespace EncosyTower.Modules.Mvvm.ObservablePropertySourceGen
 
         private void WriteNotifyPropertyChangingInfoAttributes(ref Printer p)
         {
-            const string ATTRIBUTE = "[global::EncosyTower.Modules.Mvvm.ComponentModel.SourceGen.NotifyPropertyChangingInfo(\"{0}\", typeof({1}))]";
+            const string ATTRIBUTE = $"[global::{NAMESPACE}.SourceGen.NotifyPropertyChangingInfo(\"{{0}}\", typeof({{1}}))]";
 
             foreach (var member in FieldRefs)
             {
@@ -1137,7 +1138,7 @@ namespace EncosyTower.Modules.Mvvm.ObservablePropertySourceGen
 
         private void WriteNotifyPropertyChangedInfoAttributes(ref Printer p)
         {
-            const string ATTRIBUTE = "[global::EncosyTower.Modules.Mvvm.ComponentModel.SourceGen.NotifyPropertyChangedInfo(\"{0}\", typeof({1}))]";
+            const string ATTRIBUTE = $"[global::{NAMESPACE}.SourceGen.NotifyPropertyChangedInfo(\"{{0}}\", typeof({{1}}))]";
 
             var additionalProperties = new Dictionary<string, IPropertySymbol>();
 

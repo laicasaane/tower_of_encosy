@@ -1,3 +1,5 @@
+using EncosyTower.Modules.SourceGen;
+
 namespace EncosyTower.Modules.Data.SourceGen
 {
     public static class Helpers
@@ -20,7 +22,7 @@ namespace EncosyTower.Modules.Data.SourceGen
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
 
         public const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"{NAMESPACE}.DataGenerator\", \"1.8.2\")]";
+        public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"{NAMESPACE}.DataGenerator\", \"{SourceGenVersion.VALUE}\")]";
         public const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         public const string LIST_TYPE_T = "global::System.Collections.Generic.List<";
         public const string DICTIONARY_TYPE_T = "global::System.Collections.Generic.Dictionary<";
