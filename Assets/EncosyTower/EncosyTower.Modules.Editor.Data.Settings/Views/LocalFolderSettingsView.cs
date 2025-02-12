@@ -115,19 +115,37 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
 
         private void RegisterValueChangedCallbacks()
         {
-            _inputFolderText.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
-            _outputFolderText.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
+            _inputFolderText.TextField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
+            _outputFolderText.TextField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
             _liveConversionToggle.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
 
-            _inputFolderText.RegisterValueChangedCallback(InputFolder_OnChanged);
-            _outputFolderText.RegisterValueChangedCallback(OutputFolder_OnChanged);
+            _inputFolderText.TextField.RegisterValueChangedCallback(InputFolder_OnChanged);
+            _outputFolderText.TextField.RegisterValueChangedCallback(OutputFolder_OnChanged);
         }
 
         private void InputFolder_OnChanged(ChangeEvent<string> evt)
-            => TryDisplayInputFolderHelp(evt.newValue);
+        {
+            if (evt.newValue.Contains('<'))
+            {
+                /// README
+                /// <seealso cref="Notes.ThrowsIllegalCharactersWhenSearchWindow"/>
+                return;
+            }
+
+            TryDisplayInputFolderHelp(evt.newValue);
+        }
 
         private void OutputFolder_OnChanged(ChangeEvent<string> evt)
-            => TryDisplayOutputFolderHelp(evt.newValue);
+        {
+            if (evt.newValue.Contains('<'))
+            {
+                /// README
+                /// <seealso cref="Notes.ThrowsIllegalCharactersWhenSearchWindow"/>
+                return;
+            }
+
+            TryDisplayOutputFolderHelp(evt.newValue);
+        }
 
         private void TryDisplayInputFolderHelp(string relativePath)
         {

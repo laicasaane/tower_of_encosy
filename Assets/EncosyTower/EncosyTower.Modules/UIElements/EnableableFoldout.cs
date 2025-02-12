@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.Modules.UIElements
 {
-    public class EnableableFoldout : VisualElement, IHasBindingPath, INotifyValueChanged<bool>
+    public class EnableableFoldout : VisualElement, IHasBindingPath
     {
         public static readonly string InputUssClassName = Foldout.inputUssClassName;
         public static readonly string TextUssClassName = Foldout.textUssClassName;
@@ -13,9 +13,10 @@ namespace EncosyTower.Modules.UIElements
 
         public event Action<EnableableFoldout, ChangeEvent<bool>> ValueChanged;
 
-        private readonly Foldout _foldout;
+        public readonly Foldout Foldout;
+        public readonly Toggle EnableToggle;
+
         private readonly Toggle _foldToggle;
-        private readonly Toggle _enableToggle;
         private bool _linkToggleToFoldout;
 
         public EnableableFoldout(string text, bool linkToggleToFoldout = false) : base()
@@ -24,7 +25,7 @@ namespace EncosyTower.Modules.UIElements
 
             AddToClassList(UssClassName);
 
-            var foldout = _foldout = new Foldout { text = text };
+            var foldout = Foldout = new Foldout { text = text };
 
             if (linkToggleToFoldout)
             {
@@ -39,19 +40,19 @@ namespace EncosyTower.Modules.UIElements
                 foldToggle.enabledSelf = false;
             }
 
-            var enableToggle = _enableToggle = new Toggle(string.Empty);
+            var enableToggle = EnableToggle = new Toggle(string.Empty);
             enableToggle.AddToClassList(EnableToggleUssClassName);
             foldout.hierarchy.Insert(1, enableToggle);
 
             enableToggle.RegisterValueChangedCallback(EnableToggle_OnValueChanged);
         }
 
-        public override VisualElement contentContainer => _foldout.contentContainer;
+        public override VisualElement contentContainer => Foldout.contentContainer;
 
         public string BindingPath
         {
-            get => _enableToggle.bindingPath;
-            set => _enableToggle.bindingPath = value;
+            get => EnableToggle.bindingPath;
+            set => EnableToggle.bindingPath = value;
         }
 
         public bool LinkToggleToFoldout
@@ -74,18 +75,9 @@ namespace EncosyTower.Modules.UIElements
 
         public bool Expand
         {
-            get => _foldout.value;
-            set => _foldout.value = value;
+            get => Foldout.value;
+            set => Foldout.value = value;
         }
-
-        public bool value
-        {
-            get => _enableToggle.value;
-            set => _enableToggle.value = value;
-        }
-
-        public void SetValueWithoutNotify(bool newValue)
-            => _enableToggle.SetValueWithoutNotify(newValue);
 
         private void EnableToggle_OnValueChanged(ChangeEvent<bool> evt)
         {
@@ -93,7 +85,7 @@ namespace EncosyTower.Modules.UIElements
             {
                 if (evt.newValue == false)
                 {
-                    _foldout.value = false;
+                    Foldout.value = false;
                 }
 
                 _foldToggle.enabledSelf = evt.newValue;

@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.Modules.UIElements
 {
-    public class ButtonTextField : VisualElement, IHasBindingPath, INotifyValueChanged<string>
+    public class ButtonTextField : VisualElement, IHasBindingPath
     {
         public static readonly string UssClassName = "button-text-field";
 
@@ -34,15 +34,6 @@ namespace EncosyTower.Modules.UIElements
             get => TextField.bindingPath;
             set => TextField.bindingPath = value;
         }
-
-        public string value
-        {
-            get => TextField.value;
-            set => TextField.value = value;
-        }
-
-        public void SetValueWithoutNotify(string newValue)
-            => TextField.SetValueWithoutNotify(newValue);
 
         private void Button_OnClick()
         {

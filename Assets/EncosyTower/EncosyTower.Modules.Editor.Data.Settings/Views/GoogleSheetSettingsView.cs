@@ -168,16 +168,16 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
 
         private void RegisterValueChangedCallbacks()
         {
-            _serviceAccountFileText.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
-            _spreadsheetIdText.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
-            _outputFolderText.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
+            _serviceAccountFileText.TextField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
+            _spreadsheetIdText.TextField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
+            _outputFolderText.TextField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
             _outputFileTypeEnum.RegisterValueChangedCallback(OnValueChanged_ComparableUntyped);
             _cleanOutputFolderToggle.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
             _alwaysDownloadAllToggle.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
 
-            _serviceAccountFileText.RegisterValueChangedCallback(ServiceAccountFile_OnChanged);
-            _spreadsheetIdText.RegisterValueChangedCallback(SpreadSheetId_OnChanged);
-            _outputFolderText.RegisterValueChangedCallback(OutputFolder_OnChanged);
+            _serviceAccountFileText.TextField.RegisterValueChangedCallback(ServiceAccountFile_OnChanged);
+            _spreadsheetIdText.TextField.RegisterValueChangedCallback(SpreadSheetId_OnChanged);
+            _outputFolderText.TextField.RegisterValueChangedCallback(OutputFolder_OnChanged);
             _outputFileTypeEnum.RegisterValueChangedCallback(OutputFileType_OnChanged);
         }
 
@@ -188,16 +188,43 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
             => DirectoryAPI.OpenFilePanel(sender.TextField, "Select Service Account File", s_jsonFilter);
 
         private void OpenSpreadSheetUrl(ButtonTextField sender)
-            => Application.OpenURL($"https://docs.google.com/spreadsheets/d/{sender.value}");
+            => Application.OpenURL($"https://docs.google.com/spreadsheets/d/{sender.TextField.value}");
 
         private void ServiceAccountFile_OnChanged(ChangeEvent<string> evt)
-            => TryDisplayServiceAccountFileHelp(evt.newValue);
+        {
+            if (evt.newValue.Contains('<'))
+            {
+                /// README
+                /// <seealso cref="Notes.ThrowsIllegalCharactersWhenSearchWindow"/>
+                return;
+            }
+
+            TryDisplayServiceAccountFileHelp(evt.newValue);
+        }
 
         private void SpreadSheetId_OnChanged(ChangeEvent<string> evt)
-            => TryDisplaySpreadSheetIdHelp(evt.newValue);
+        {
+            if (evt.newValue.Contains('<'))
+            {
+                /// README
+                /// <seealso cref="Notes.ThrowsIllegalCharactersWhenSearchWindow"/>
+                return;
+            }
+
+            TryDisplaySpreadSheetIdHelp(evt.newValue);
+        }
 
         private void OutputFolder_OnChanged(ChangeEvent<string> evt)
-            => TryDisplayOutputFolderHelp(evt.newValue);
+        {
+            if (evt.newValue.Contains('<'))
+            {
+                /// README
+                /// <seealso cref="Notes.ThrowsIllegalCharactersWhenSearchWindow"/>
+                return;
+            }
+
+            TryDisplayOutputFolderHelp(evt.newValue);
+        }
 
         private void OutputFileType_OnChanged(ChangeEvent<Enum> evt)
         {

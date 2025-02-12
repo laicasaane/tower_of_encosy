@@ -123,7 +123,14 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
             element.Button.text = "Browse";
             element.Clicked += onClicked;
 
-            element.RegisterValueChangedCallback(evt => {
+            element.TextField.RegisterValueChangedCallback(evt => {
+                if (evt.newValue.Contains('<'))
+                {
+                    /// README
+                    /// <seealso cref="Notes.ThrowsIllegalCharactersWhenSearchWindow"/>
+                    return;
+                }
+
                 info.text = pathType == PathType.File
                     ? DirectoryAPI.ProjectPath.GetFileAbsolutePath(evt.newValue)
                     : DirectoryAPI.ProjectPath.GetFolderAbsolutePath(evt.newValue);
