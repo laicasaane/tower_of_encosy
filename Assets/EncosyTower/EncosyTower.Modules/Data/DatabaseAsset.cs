@@ -207,37 +207,6 @@ namespace EncosyTower.Modules.Data
             return false;
         }
 
-        [Obsolete("Use other TryGetDataTableAsset overloads instead.", false)]
-        public bool TryGetDataTableAsset([NotNull] Type type, [NotNull] string name, out DataTableAssetBase tableAsset)
-        {
-            if (Initialized == false)
-            {
-                LogErrorDatabaseIsNotInitialized(this);
-                tableAsset = null;
-                return false;
-            }
-
-            if (_nameToAsset.TryGetValue(name, out var asset))
-            {
-                if (asset.GetType() == type)
-                {
-                    tableAsset = asset;
-                    return true;
-                }
-                else
-                {
-                    LogErrorFoundAssetIsNotValidType(type, asset);
-                }
-            }
-            else
-            {
-                LogErrorCannotFindAsset(name, this);
-            }
-
-            tableAsset = null;
-            return false;
-        }
-
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorReferenceIsInvalid(int index, DatabaseAsset context)
         {
@@ -272,12 +241,6 @@ namespace EncosyTower.Modules.Data
         private static void LogErrorFoundAssetIsNotValidType<T>(DataTableAssetBase context)
         {
             DevLoggerAPI.LogError(context, $"The data table asset is not an instance of {typeof(T)}");
-        }
-
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void LogErrorFoundAssetIsNotValidType(Type type, DataTableAssetBase context)
-        {
-            DevLoggerAPI.LogError(context, $"The data table asset is not an instance of {type}");
         }
     }
 }
