@@ -1,8 +1,11 @@
-﻿namespace EncosyTower.Modules.Editor.Data.Settings.Views
+using System.Diagnostics;
+
+namespace EncosyTower.Modules.Editor.Data.Settings.Views
 {
     internal static class Notes
     {
-        public static void ThrowsIllegalCharactersWhenSearchWindow()
+        [Conditional("__UNDEFINED__")]
+        public static void ToPreventIllegalCharsExceptionWhenSearch()
         {
             // NOTE 1:
             // When performing search in the Project Settings window

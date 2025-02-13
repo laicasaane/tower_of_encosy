@@ -127,7 +127,7 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
                 if (evt.newValue.Contains('<'))
                 {
                     /// README
-                    /// <seealso cref="Notes.ThrowsIllegalCharactersWhenSearchWindow"/>
+                    Notes.ToPreventIllegalCharsExceptionWhenSearch();
                     return;
                 }
 
