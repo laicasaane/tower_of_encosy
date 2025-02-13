@@ -12,4 +12,44 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7950f517b17166f4897c29d0c5445408, type: 3}
   m_Name: HeroTableAsset
   m_EditorClassIdentifier: 
-  _entries: []
+  _entries:
+  - _id:
+      _kind: Hero
+      _subId: 1
+    _name: Richard
+    _stat:
+      _hp: 10
+      _atk: 1
+    _multipliers:
+    - _level: 1
+      _multiplier:
+        _hp: 1
+        _atk: 1
+    - _level: 2
+      _multiplier:
+        _hp: 2
+        _atk: 2
+    - _level: 3
+      _multiplier:
+        _hp: 3
+        _atk: 3
+  - _id:
+      _kind: Hero
+      _subId: 2
+    _name: Maverick
+    _stat:
+      _hp: 8
+      _atk: 2
+    _multipliers:
+    - _level: 1
+      _multiplier:
+        _hp: 1
+        _atk: 1
+    - _level: 2
+      _multiplier:
+        _hp: 1
+        _atk: 3
+    - _level: 3
+      _multiplier:
+        _hp: 2
+        _atk: 4

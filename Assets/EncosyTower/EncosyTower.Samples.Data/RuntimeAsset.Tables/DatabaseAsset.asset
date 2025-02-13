@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: DatabaseAsset
   m_EditorClassIdentifier: 
   _assetRefs:
-  - {fileID: 11400000, guid: 6c7739f0f24536a4e8adaa48115da061, type: 2}
-  - {fileID: 11400000, guid: f8de96dfb45d6cc47b3b1afe11a46375, type: 2}
+  - {fileID: 11400000, guid: 3318bbc3ed36a0749976bcc762c3d21c, type: 2}
+  - {fileID: 11400000, guid: 77c6854b897190d468c16cc852d784a3, type: 2}
   _redundantAssetRefs: []

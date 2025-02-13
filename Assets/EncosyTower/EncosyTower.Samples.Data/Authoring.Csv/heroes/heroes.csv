@@ -1,5 +1,5 @@
 id,,$,name,$,stat,,$,multipliers,,,
-kind,id,,,,hp,atk,,level,multiplier,,
+kind,sub_id,,,,hp,atk,,level,multiplier,,
 ,,,,,,,,,hp,atk,
 Hero,1,,Richard,,10,1,,1,1,1,
 ,,,,,,,,2,2,2,

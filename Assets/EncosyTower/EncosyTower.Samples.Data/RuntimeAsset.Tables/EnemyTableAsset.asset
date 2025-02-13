@@ -12,4 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8b87255c8cb9e146aef69e370fc75f0, type: 3}
   m_Name: EnemyTableAsset
   m_EditorClassIdentifier: 
-  _entries: []
+  _entries:
+  - _id:
+      _entityId:
+        _kind: Enemy
+        _subId: 1
+      _rarity: 1
+    _name: Wolf
+    _stat:
+      _hp: 1
+      _atk: 1
+  - _id:
+      _entityId:
+        _kind: Enemy
+        _subId: 1
+      _rarity: 2
+    _name: Goblin
+    _stat:
+      _hp: 2
+      _atk: 2

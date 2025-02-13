@@ -1,5 +1,5 @@
 id,,,$,name,$,stat,,
-id,,rarity,,,,hp,atk,
-kind,id,,,,,,,
+entity_id,,rarity,,,,hp,atk,
+kind,sub_id,,,,,,,
 Enemy,1,1,,Wolf,,1,1,
 Enemy,1,2,,Goblin,,2,2,
