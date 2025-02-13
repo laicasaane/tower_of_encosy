@@ -175,10 +175,6 @@
     max-width: 150px;
 }
 
-.unity-inspector-element__custom-inspector-container .database .function-button {
-    display: none;
-}
-
 .database .function-button {
     min-height: 25px;
 }
