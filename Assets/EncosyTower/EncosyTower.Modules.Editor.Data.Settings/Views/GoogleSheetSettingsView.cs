@@ -124,12 +124,12 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
                 TryDisplayOutputFolderHelp(prop.stringValue);
             }
 
-            _cleanOutputFolderToggle.Bind(context.GetCleanOutputFolderProperty());
-            _alwaysDownloadAllToggle.Bind(context.GetAlwaysDownloadAllProperty());
+            _cleanOutputFolderToggle.BindProperty(context.GetCleanOutputFolderProperty());
+            _alwaysDownloadAllToggle.BindProperty(context.GetAlwaysDownloadAllProperty());
 
             {
                 var prop = context.GetOutputFileTypeProperty();
-                _outputFileTypeEnum.Bind(prop);
+                _outputFileTypeEnum.BindProperty(prop);
                 InitDownloadButton((OutputFileType)prop.enumValueIndex);
             }
         }

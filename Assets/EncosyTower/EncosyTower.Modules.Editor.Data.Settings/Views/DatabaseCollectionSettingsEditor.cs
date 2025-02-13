@@ -332,8 +332,7 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
                     .FindPropertyRelative(nameof(DatabaseSettings.name));
 
                 var label = root.Q<Label>(className: Constants.NAME);
-                label.bindingPath = nameProperty.propertyPath;
-                label.Bind(nameProperty.serializedObject);
+                label.BindProperty(nameProperty);
             }
         }
 

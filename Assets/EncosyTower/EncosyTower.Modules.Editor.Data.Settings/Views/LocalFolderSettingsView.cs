@@ -94,7 +94,7 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
                 TryDisplayOutputFolderHelp(prop.stringValue);
             }
 
-            _liveConversionToggle.Bind(context.GetLiveConversionProperty());
+            _liveConversionToggle.BindProperty(context.GetLiveConversionProperty());
         }
 
         public override void Unbind()
