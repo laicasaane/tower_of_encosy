@@ -4,7 +4,7 @@ using EncosyTower.Modules.Data.Authoring;
 
 namespace EncosyTower.Samples.Data.Authoring
 {
-    [Database(AssetName = "DatabaseAsset")]
+    [Database(NamingStrategy.SnakeCase, AssetName = "DatabaseAsset")]
     public partial class SampleDatabase
     {
         [Table] public HeroTableAsset Heroes { get; }

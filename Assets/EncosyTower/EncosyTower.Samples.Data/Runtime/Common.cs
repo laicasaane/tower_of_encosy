@@ -55,13 +55,13 @@ namespace EncosyTower.Samples.Data
     {
         [DataProperty] public readonly string Kind => Get_Kind();
 
-        [DataProperty] public readonly short Id => Get_Id();
+        [DataProperty] public readonly short SubId => Get_SubId();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator EntityId(EntityIdData data)
         {
             var @default = default(EntityId);
-            var result = @default.TryParse(data._kind, data._id, out var value, false, true);
+            var result = @default.TryParse(data._kind, data._subId, out var value, false, true);
 
             return result ? value : @default;
         }
@@ -70,13 +70,13 @@ namespace EncosyTower.Samples.Data
     [DataWithoutId]
     public partial struct EntityUidData : IData
     {
-        [DataProperty] public readonly EntityIdData Id => Get_Id();
+        [DataProperty] public readonly EntityIdData EntityId => Get_EntityId();
 
         [DataProperty] public readonly byte Rarity => Get_Rarity();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator EntityUid(EntityUidData data)
-            => new((EntityId)data._id, data._rarity);
+            => new((EntityId)data._entityId, data._rarity);
     }
 
     public partial struct EntityStatData : IData
