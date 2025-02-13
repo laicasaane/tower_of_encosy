@@ -332,7 +332,17 @@ namespace EncosyTower.Modules.Editor.Data.Settings.Views
                     .FindPropertyRelative(nameof(DatabaseSettings.name));
 
                 var label = root.Q<Label>(className: Constants.NAME);
-                label.BindProperty(nameProperty);
+
+                /// README
+                Notes.ToPreventTwoWayBindingWhenSearch();
+
+                var labelNotifier = (INotifyValueChanged<string>)label;
+                labelNotifier.SetValueWithoutNotify(nameProperty.stringValue);
+
+                label.Unbind();
+                label.TrackPropertyValue(nameProperty, prop => {
+                    labelNotifier.SetValueWithoutNotify(prop.stringValue);
+                });
             }
         }
 
