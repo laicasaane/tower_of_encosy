@@ -131,7 +131,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.2d.aseprite": {
-      "version": "1.1.7",
+      "version": "1.1.8",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -330,7 +330,7 @@
         "com.unity.2d.spriteshape": "10.0.7",
         "com.unity.2d.tilemap": "1.0.0",
         "com.unity.2d.tilemap.extras": "4.1.0",
-        "com.unity.2d.aseprite": "1.1.7"
+        "com.unity.2d.aseprite": "1.1.8"
       }
     },
     "com.unity.ide.rider": {
@@ -352,7 +352,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.inputsystem": {
-      "version": "1.11.2",
+      "version": "1.13.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
