@@ -3,8 +3,8 @@
     "rootNamespace": "EncosyTower.Tests",
     "references": [
         "AnnulusGames.UnityCodeGen.Editor",
-        "EncosyTower.Modules",
-        "EncosyTower.Modules.Editor",
+        "EncosyTower.Core",
+        "EncosyTower.Editor",
         "Latios.Core",
         "Latios.Psyshock",
         "Latios.Transforms",

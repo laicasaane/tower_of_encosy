@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
-using EncosyTower.Modules.Buffers;
-using EncosyTower.Modules.Collections;
+using EncosyTower.Buffers;
+using EncosyTower.Collections;
 using NUnit.Framework;
 
 namespace EncosyTower.Tests.Collections

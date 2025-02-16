@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "EncosyTower.Modules.SourceGen": {
-      "commandName": "DebugRoslynComponent",
-      "targetProject": "../EncosyTower.Modules.SourceGen.Tests/EncosyTower.Modules.SourceGen.Tests.csproj"
-    }
-  }
-}

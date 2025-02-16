@@ -2,7 +2,7 @@
     "name": "Game.Entities.Systems",
     "rootNamespace": "Game.Entities.Systems",
     "references": [
-        "EncosyTower.Modules",
+        "EncosyTower.Core",
         "Game.Common",
         "Game.Entities.Components",
         "Game.Inputs",

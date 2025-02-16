@@ -1,5 +1,5 @@
-using EncosyTower.Modules.Mvvm.ComponentModel;
-using EncosyTower.Modules.Mvvm.Input;
+using EncosyTower.Mvvm.ComponentModel;
+using EncosyTower.Mvvm.Input;
 using UnityEngine;
 
 namespace EncosyTower.Samples.Mvvm

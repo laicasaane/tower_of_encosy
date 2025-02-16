@@ -1,5 +1,5 @@
 using System;
-using EncosyTower.Modules.Entities;
+using EncosyTower.Entities;
 using Latios;
 using Module.EntityComponents;
 using Unity.Entities;

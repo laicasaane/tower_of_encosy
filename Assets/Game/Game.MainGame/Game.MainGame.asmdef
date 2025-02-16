@@ -3,7 +3,7 @@
     "rootNamespace": "Game.MainGame",
     "references": [
         "DebugUI",
-        "EncosyTower.Modules",
+        "EncosyTower.Core",
         "Game.Common",
         "Game.Inputs",
         "UniTask",

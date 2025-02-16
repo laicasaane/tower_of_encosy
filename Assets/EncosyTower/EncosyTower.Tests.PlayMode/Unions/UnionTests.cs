@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using EncosyTower.Modules.Unions;
+using EncosyTower.Unions;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
 using UnityEngine.Profiling;

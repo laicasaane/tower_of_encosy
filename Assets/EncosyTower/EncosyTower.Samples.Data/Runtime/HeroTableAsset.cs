@@ -1,5 +1,5 @@
 using System;
-using EncosyTower.Modules.Data;
+using EncosyTower.Data;
 
 namespace EncosyTower.Samples.Data
 {

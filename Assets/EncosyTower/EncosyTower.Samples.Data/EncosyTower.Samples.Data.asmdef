@@ -9,8 +9,8 @@
         "BakingSheet.Google",
         "BakingSheet.Json",
         "BakingSheet.ScriptableObject",
-        "EncosyTower.Modules",
-        "EncosyTower.Modules.Data.Authoring"
+        "EncosyTower.Core",
+        "EncosyTower.Data.Authoring"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -22,6 +22,11 @@
         "UNITY_EDITOR || INCLUDE_ENCOSY_SAMPLES_DATA"
     ],
     "versionDefines": [
+        {
+            "name": "com.cathei.bakingsheet",
+            "expression": "",
+            "define": "ENCOSY_DATA_AUTHORING"
+        },
         {
             "name": "com.unity.textmeshpro",
             "expression": "",

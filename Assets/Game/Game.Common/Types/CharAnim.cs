@@ -1,4 +1,4 @@
-using EncosyTower.Modules.EnumExtensions;
+using EncosyTower.EnumExtensions;
 
 namespace Module.GameCommon
 {

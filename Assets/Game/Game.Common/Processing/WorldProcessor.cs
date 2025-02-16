@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using EncosyTower.Modules.Processing;
+using EncosyTower.Processing;
 using UnityEngine;
 
 namespace Module.GameCommon.Processing

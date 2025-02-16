@@ -1,1 +1,0 @@
-[assembly: EncosyTower.Modules.Unions.SkipSourceGenForAssembly]

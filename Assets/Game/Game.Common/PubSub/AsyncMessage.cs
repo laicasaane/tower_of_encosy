@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using EncosyTower.Modules.PubSub;
+using EncosyTower.PubSub;
 
 namespace Module.GameCommon.PubSub
 {

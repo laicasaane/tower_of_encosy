@@ -1,7 +1,7 @@
 using System;
-using EncosyTower.Modules;
-using EncosyTower.Modules.Mvvm.ViewBinding;
-using EncosyTower.Modules.Unions;
+using EncosyTower.Annotations;
+using EncosyTower.Mvvm.ViewBinding;
+using EncosyTower.Unions;
 using UnityEngine;
 
 namespace EncosyTower.Samples.Mvvm

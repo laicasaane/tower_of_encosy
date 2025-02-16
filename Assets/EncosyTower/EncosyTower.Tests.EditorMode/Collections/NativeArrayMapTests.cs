@@ -1,4 +1,4 @@
-using EncosyTower.Modules.Collections;
+using EncosyTower.Collections;
 using NUnit.Framework;
 using Unity.Collections;
 

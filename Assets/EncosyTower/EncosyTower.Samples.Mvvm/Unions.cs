@@ -1,4 +1,4 @@
-using EncosyTower.Modules.Unions;
+using EncosyTower.Unions;
 using UnityEngine;
 
 namespace EncosyTower.Samples.Mvvm

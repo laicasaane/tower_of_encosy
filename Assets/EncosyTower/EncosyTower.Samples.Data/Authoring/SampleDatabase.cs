@@ -1,6 +1,6 @@
-#if UNITY_EDITOR
+#if UNITY_EDITOR && ENCOSY_DATA_AUTHORING
 
-using EncosyTower.Modules.Data.Authoring;
+using EncosyTower.Data.Authoring;
 
 namespace EncosyTower.Samples.Data.Authoring
 {

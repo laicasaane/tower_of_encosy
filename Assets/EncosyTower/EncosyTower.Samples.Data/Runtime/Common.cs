@@ -1,9 +1,9 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using EncosyTower.Modules.Data;
-using EncosyTower.Modules.TypeWrap;
-using EncosyTower.Modules.UnionIds;
+using EncosyTower.Data;
+using EncosyTower.TypeWraps;
+using EncosyTower.UnionIds;
 
 namespace EncosyTower.Samples.Data
 {

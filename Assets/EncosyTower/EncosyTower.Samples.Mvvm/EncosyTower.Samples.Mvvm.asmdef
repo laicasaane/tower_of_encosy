@@ -2,7 +2,7 @@
     "name": "EncosyTower.Samples.Mvvm",
     "rootNamespace": "EncosyTower.Samples.Mvvm",
     "references": [
-        "EncosyTower.Modules",
+        "EncosyTower.Core",
         "Unity.TextMeshPro"
     ],
     "includePlatforms": [],

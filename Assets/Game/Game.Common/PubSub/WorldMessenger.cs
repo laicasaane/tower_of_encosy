@@ -1,4 +1,4 @@
-using EncosyTower.Modules.PubSub;
+using EncosyTower.PubSub;
 using UnityEngine;
 
 namespace Module.GameCommon.PubSub

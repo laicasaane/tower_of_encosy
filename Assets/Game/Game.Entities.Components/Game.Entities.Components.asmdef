@@ -2,7 +2,7 @@
     "name": "Game.Entities.Components",
     "rootNamespace": "Game.Entities.Components",
     "references": [
-        "EncosyTower.Modules",
+        "EncosyTower.Core",
         "Game.Common",
         "Latios.Calligraphics",
         "Latios.Core",

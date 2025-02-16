@@ -2,7 +2,7 @@
     "name": "Game.Entities.Authoring",
     "rootNamespace": "Game.Entities.Authoring",
     "references": [
-        "EncosyTower.Modules",
+        "EncosyTower.Core",
         "Game.Common",
         "Game.Entities.Components",
         "Game.Inputs",

@@ -1,4 +1,4 @@
-using EncosyTower.Modules.UnionIds;
+using EncosyTower.UnionIds;
 
 namespace Module.GameCommon
 {

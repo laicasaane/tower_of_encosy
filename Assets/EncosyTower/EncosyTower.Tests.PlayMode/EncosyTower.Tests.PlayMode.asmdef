@@ -2,7 +2,7 @@
     "name": "EncosyTower.Tests.PlayMode",
     "rootNamespace": "EncosyTower.Tests",
     "references": [
-        "EncosyTower.Modules",
+        "EncosyTower.Core",
         "Latios.Core",
         "Latios.Psyshock",
         "Latios.Transforms",

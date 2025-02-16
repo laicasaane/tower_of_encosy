@@ -692,13 +692,13 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8109321786255212778
-      type: {class: UnityObjectBindingContext, ns: EncosyTower.Modules.Mvvm.ViewBinding.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _object: {fileID: 1603940289}
     - rid: 8109321786255212780
-      type: {class: TransformBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: TransformBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _subtitle: 
         _presetBindings:
@@ -706,8 +706,8 @@ MonoBehaviour:
         _presetTargets:
         - {fileID: 343873117}
     - rid: 8109321786255212784
-      type: {class: TransformBindingLocalRotation, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: TransformBindingLocalRotation, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _bindingFieldForSetLocalRotation:
           <TargetPropertyName>k__BackingField: ScrollPosition
@@ -721,8 +721,8 @@ MonoBehaviour:
         _toEuler: {x: 180, y: 180, z: 0}
         _reversed: 1
     - rid: 8109321786255212786
-      type: {class: TransformBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: TransformBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _subtitle: 
         _presetBindings:
@@ -730,8 +730,8 @@ MonoBehaviour:
         _presetTargets:
         - {fileID: 402938463}
     - rid: 8109321786255212787
-      type: {class: TransformBindingLocalScale, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: TransformBindingLocalScale, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _bindingFieldForSetLocalScale:
           <TargetPropertyName>k__BackingField: ScrollPosition
@@ -1179,13 +1179,13 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 7562154210548776971
-      type: {class: UnityObjectBindingContext, ns: EncosyTower.Modules.Mvvm.ViewBinding.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _object: {fileID: 1603940289}
     - rid: 7562154620754329610
-      type: {class: ScrollRectBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: ScrollRectBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _subtitle: 
         _presetBindings:
@@ -1193,8 +1193,8 @@ MonoBehaviour:
         _presetTargets:
         - {fileID: 1529285863}
     - rid: 7562154620754329612
-      type: {class: ScrollRectBindingVerticalNormalizedPosition, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: ScrollRectBindingVerticalNormalizedPosition, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _bindingFieldForSetVerticalNormalizedPosition:
           <TargetPropertyName>k__BackingField: ScrollPosition
@@ -1202,12 +1202,12 @@ MonoBehaviour:
           <Adapter>k__BackingField:
             rid: 7562154620754329615
     - rid: 7562154620754329615
-      type: {class: FloatToFloatAdapter, ns: EncosyTower.Modules.Mvvm.ViewBinding.Adapters,
-        asm: EncosyTower.Modules}
+      type: {class: FloatToFloatAdapter, ns: EncosyTower.Mvvm.ViewBinding.Adapters,
+        asm: EncosyTower.Core}
       data: 
     - rid: 7562154620754329616
-      type: {class: TMP_TextBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: TMP_TextBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _subtitle: scroll position
         _presetBindings:
@@ -1215,8 +1215,8 @@ MonoBehaviour:
         _presetTargets:
         - {fileID: 555238475}
     - rid: 7562154620754329617
-      type: {class: TMP_TextBindingText, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: TMP_TextBindingText, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _bindingFieldForSetText:
           <TargetPropertyName>k__BackingField: ScrollPosition
@@ -1227,8 +1227,8 @@ MonoBehaviour:
       type: {class: ScrollPositionTextAdapter, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data: 
     - rid: 7562154620754329620
-      type: {class: ImageBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: ImageBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _subtitle: 
         _presetBindings:
@@ -1236,8 +1236,8 @@ MonoBehaviour:
         _presetTargets:
         - {fileID: 860427089}
     - rid: 7562154620754329621
-      type: {class: ImageBindingColor, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: ImageBindingColor, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _bindingFieldForSetColor:
           <TargetPropertyName>k__BackingField: ScrollPosition
@@ -1245,8 +1245,8 @@ MonoBehaviour:
           <Adapter>k__BackingField:
             rid: 8482649283664543744
     - rid: 7562154631834632208
-      type: {class: ButtonBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: ButtonBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _subtitle: 
         _presetBindings:
@@ -1254,14 +1254,14 @@ MonoBehaviour:
         _presetTargets:
         - {fileID: 1289389104}
     - rid: 7562154631834632209
-      type: {class: ButtonBindingOnClick, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: ButtonBindingOnClick, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _bindingCommandForOnClick:
           <TargetCommandName>k__BackingField: OnStopCommand
     - rid: 7562154631834632210
-      type: {class: TMP_TextBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: TMP_TextBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _subtitle: status
         _presetBindings:
@@ -1269,8 +1269,8 @@ MonoBehaviour:
         _presetTargets:
         - {fileID: 743286631}
     - rid: 7562154631834632211
-      type: {class: TMP_TextBindingText, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: TMP_TextBindingText, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _bindingFieldForSetText:
           <TargetPropertyName>k__BackingField: Status
@@ -1278,8 +1278,8 @@ MonoBehaviour:
           <Adapter>k__BackingField:
             rid: 7562154631834632212
     - rid: 7562154631834632212
-      type: {class: StringToStringAdapter, ns: EncosyTower.Modules.Mvvm.ViewBinding.Adapters,
-        asm: EncosyTower.Modules}
+      type: {class: StringToStringAdapter, ns: EncosyTower.Mvvm.ViewBinding.Adapters,
+        asm: EncosyTower.Core}
       data: 
     - rid: 8482649283664543744
       type: {class: LerpColorAdapter, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
@@ -1569,13 +1569,13 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8109321786255212789
-      type: {class: UnityObjectBindingContext, ns: EncosyTower.Modules.Mvvm.ViewBinding.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _object: {fileID: 1603940289}
     - rid: 8109321786255212790
-      type: {class: TransformBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: TransformBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _subtitle: 
         _presetBindings:
@@ -1583,8 +1583,8 @@ MonoBehaviour:
         _presetTargets:
         - {fileID: 752059393}
     - rid: 8109321786255212791
-      type: {class: TransformBindingLocalEulerAngles, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: TransformBindingLocalEulerAngles, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _bindingFieldForSetLocalEulerAngles:
           <TargetPropertyName>k__BackingField: ScrollPosition
@@ -2422,13 +2422,13 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 7562154620754329622
-      type: {class: UnityObjectBindingContext, ns: EncosyTower.Modules.Mvvm.ViewBinding.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _object: {fileID: 1289389108}
     - rid: 7562154620754329623
-      type: {class: ButtonBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: ButtonBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _subtitle: 
         _presetBindings:
@@ -2436,14 +2436,14 @@ MonoBehaviour:
         _presetTargets:
         - {fileID: 1289389104}
     - rid: 7562154620754329624
-      type: {class: ButtonBindingOnClick, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: ButtonBindingOnClick, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _bindingCommandForOnClick:
           <TargetCommandName>k__BackingField: OnClickCommand
     - rid: 7562154620754329625
-      type: {class: GameObjectBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: GameObjectBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _subtitle: Stopped
         _presetBindings:
@@ -2451,8 +2451,8 @@ MonoBehaviour:
         _presetTargets:
         - {fileID: 296471785}
     - rid: 7562154620754329626
-      type: {class: GameObjectBindingActiveSelf, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: GameObjectBindingActiveSelf, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _bindingFieldForSetActive:
           <TargetPropertyName>k__BackingField: Stopped
@@ -2460,8 +2460,8 @@ MonoBehaviour:
           <Adapter>k__BackingField:
             rid: 7562154631834632206
     - rid: 7562154620754329653
-      type: {class: GameObjectBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: GameObjectBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _subtitle: Started
         _presetBindings:
@@ -2469,8 +2469,8 @@ MonoBehaviour:
         _presetTargets:
         - {fileID: 964636075}
     - rid: 7562154620754329654
-      type: {class: GameObjectBindingActiveSelf, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: GameObjectBindingActiveSelf, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _bindingFieldForSetActive:
           <TargetPropertyName>k__BackingField: Stopped
@@ -2478,8 +2478,8 @@ MonoBehaviour:
           <Adapter>k__BackingField:
             rid: 7562154631834632207
     - rid: 7562154620754329656
-      type: {class: ImageBinder, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: ImageBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _subtitle: 
         _presetBindings:
@@ -2487,8 +2487,8 @@ MonoBehaviour:
         _presetTargets:
         - {fileID: 1289389105}
     - rid: 7562154620754329657
-      type: {class: ImageBindingColor, ns: EncosyTower.Modules.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Modules.Mvvm.Unity}
+      type: {class: ImageBindingColor, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
+        asm: EncosyTower.Mvvm.Unity}
       data:
         _bindingFieldForSetColor:
           <TargetPropertyName>k__BackingField: Stopped
@@ -2502,12 +2502,12 @@ MonoBehaviour:
         _stop: {r: 0.1882353, g: 0.7490196, b: 0.2509804, a: 1}
         _invert: 0
     - rid: 7562154631834632206
-      type: {class: BoolToNotBoolAdapter, ns: EncosyTower.Modules.Mvvm.ViewBinding.Adapters,
-        asm: EncosyTower.Modules}
+      type: {class: BoolToNotBoolAdapter, ns: EncosyTower.Mvvm.ViewBinding.Adapters,
+        asm: EncosyTower.Core}
       data: 
     - rid: 7562154631834632207
-      type: {class: BoolToBoolAdapter, ns: EncosyTower.Modules.Mvvm.ViewBinding.Adapters,
-        asm: EncosyTower.Modules}
+      type: {class: BoolToBoolAdapter, ns: EncosyTower.Mvvm.ViewBinding.Adapters,
+        asm: EncosyTower.Core}
       data: 
 --- !u!114 &1289389108
 MonoBehaviour:

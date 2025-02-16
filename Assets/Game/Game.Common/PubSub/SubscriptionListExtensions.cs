@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using EncosyTower.Modules.PubSub;
+using EncosyTower.PubSub;
 
 namespace Module.GameCommon.PubSub
 {
