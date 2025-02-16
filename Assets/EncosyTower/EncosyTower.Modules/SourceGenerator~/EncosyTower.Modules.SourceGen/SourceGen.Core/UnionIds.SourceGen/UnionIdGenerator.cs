@@ -57,7 +57,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
             token.ThrowIfCancellationRequested();
 
             return syntaxNode is StructDeclarationSyntax structSyntax
-                && structSyntax.HasAttributeCandidate("EncosyTower.Modules", "UnionId");
+                && structSyntax.HasAttributeCandidate("EncosyTower.Modules.UnionIds", "UnionId");
         }
 
         private static bool IsSyntaxMatchKind(SyntaxNode syntaxNode, CancellationToken token)
@@ -66,7 +66,7 @@ namespace EncosyTower.Modules.UnionIds.SourceGen
 
             return syntaxNode is BaseTypeDeclarationSyntax typeSyntax
                 && typeSyntax.Kind() is SyntaxKind.EnumDeclaration or SyntaxKind.StructDeclaration or SyntaxKind.RecordStructDeclaration
-                && typeSyntax.GetAttribute("EncosyTower.Modules", "KindForUnionId") is AttributeSyntax attribSyntax
+                && typeSyntax.GetAttribute("EncosyTower.Modules.UnionIds", "KindForUnionId") is AttributeSyntax attribSyntax
                 && attribSyntax.ArgumentList != null
                 && attribSyntax.ArgumentList.Arguments.Count > 0
                 && attribSyntax.ArgumentList.Arguments[0].Expression is TypeOfExpressionSyntax;
