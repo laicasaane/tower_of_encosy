@@ -45,6 +45,10 @@ namespace EncosyTower.Vaults
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Awaitable<Option<T>> TryGetAsync<T>(Id2 id, UnityObject context = null, CancellationToken token = default)
             => s_vault.TryGetAsync<T>(id, context, token);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Awaitable<Option<object>> TryGetAsync(Id2 id, UnityObject context = null, CancellationToken token = default)
+            => s_vault.TryGetAsync(id, context, token);
     }
 }
 

@@ -74,5 +74,9 @@ namespace EncosyTower.Vaults
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryGet<T>(Id2 id, out T obj)
             => s_vault.TryGet<T>(id, out obj);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryGet(Id2 id, out object obj)
+            => s_vault.TryGet(id, out obj);
     }
 }

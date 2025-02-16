@@ -77,6 +77,23 @@ namespace EncosyTower.Vaults
 
             return TryCast<T>(id, _map[id], context);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public async Awaitable<Option<object>> TryGetAsync(
+              Id2 id
+            , UnityObject context
+            , CancellationToken token
+        )
+        {
+            await WaitUntilContains(id, token);
+
+            if (token.IsCancellationRequested)
+            {
+                return default;
+            }
+
+            return TryCast(id, _map[id], context);
+        }
     }
 }
 

@@ -8,6 +8,7 @@ using EncosyTower.Ids;
 using EncosyTower.Logging;
 using EncosyTower.PresetIds;
 using EncosyTower.Types;
+using EncosyTower.UnityExtensions;
 using UnityEngine;
 
 namespace EncosyTower.Vaults
@@ -115,6 +116,20 @@ namespace EncosyTower.Vaults
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryGet(Id2 id, out object obj)
+        {
+            if (_map.TryGetValue(id, out var weakRef))
+            {
+                var result = TryCast(id, weakRef);
+                obj = result.ValueOrDefault();
+                return result.HasValue;
+            }
+
+            obj = default;
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Id2 ToId2<T>(Id<T> id)
             => Type<T>.Id.ToId2(id);
 
@@ -149,6 +164,28 @@ namespace EncosyTower.Vaults
         FAILED:
             ErrorIfTypeMismatch<T>(id, obj, context);
             return default;
+        }
+
+        private static Option<object> TryCast(Id2 id, object obj, UnityObject context = null)
+        {
+            if (obj is UnityObject unityObj)
+            {
+                if (unityObj.IsValid())
+                {
+                    return new(unityObj);
+                }
+
+                ErrorIfRegisteredObjectIsNull(id, context);
+                return default;
+            }
+
+            if (obj == null)
+            {
+                ErrorIfRegisteredObjectIsNull(id, context);
+                return default;
+            }
+
+            return new(obj);
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
