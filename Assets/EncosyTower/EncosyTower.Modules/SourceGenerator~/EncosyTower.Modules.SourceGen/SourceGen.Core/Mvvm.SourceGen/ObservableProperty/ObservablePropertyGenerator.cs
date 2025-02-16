@@ -103,28 +103,24 @@ namespace EncosyTower.Modules.Mvvm.ObservablePropertySourceGen
                     source = declaration.WriteCodeWithoutMember();
                 }
 
-                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(compilation.Assembly.Name, GENERATOR_NAME);
-                var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
-                      sourceFilePath
+                var hintName = syntaxTree.GetGeneratedSourceFileName(
+                      GENERATOR_NAME
+                    , candidate
+                    , declaration.Symbol.ToValidIdentifier()
+                );
+
+                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                      compilation.Assembly.Name
+                    , GENERATOR_NAME
+                );
+
+                context.OutputSource(
+                      outputSourceGenFiles
                     , candidate
                     , source
-                    , context.CancellationToken
+                    , hintName
+                    , sourceFilePath
                 );
-
-                context.AddSource(
-                      syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, candidate, declaration.Symbol.ToValidIdentifier())
-                    , outputSource
-                );
-
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(
-                          context
-                        , candidate.GetLocation()
-                        , sourceFilePath
-                        , outputSource
-                    );
-                }
             }
             catch (Exception e)
             {

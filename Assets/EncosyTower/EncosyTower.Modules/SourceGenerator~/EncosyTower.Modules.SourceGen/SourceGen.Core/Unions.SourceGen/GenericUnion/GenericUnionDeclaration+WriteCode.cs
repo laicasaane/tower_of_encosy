@@ -40,31 +40,17 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
                 var syntaxTree = syntax.SyntaxTree;
                 var assemblyName = compilation.Assembly.Name;
                 var source = WriteStaticClass(ValueTypeRefs, RefTypeRefs, assemblyName);
+                var fileName = $"GenericUnions_{assemblyName}";
+                var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, fileName, syntax);
                 var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME);
 
-                var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
-                      sourceFilePath
+                context.OutputSource(
+                      outputSourceGenFiles
                     , syntax
                     , source
-                    , context.CancellationToken
+                    , hintName
+                    , sourceFilePath
                 );
-
-                var fileName = $"GenericUnions_{assemblyName}";
-
-                context.AddSource(
-                      syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, fileName, syntax)
-                    , outputSource
-                );
-
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(
-                          context
-                        , syntax.GetLocation()
-                        , sourceFilePath
-                        , outputSource
-                    );
-                }
             }
             catch (Exception e)
             {
@@ -90,29 +76,24 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
                     var syntax = structRef.Syntax;
                     var syntaxTree = syntax.SyntaxTree;
                     var source = WriteRedundantType(structRef);
-                    var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(compilation.Assembly.Name, GENERATOR_NAME);
+                    var hintName = syntaxTree.GetGeneratedSourceFileName(
+                          GENERATOR_NAME
+                        , syntax
+                        , structRef.Symbol.ToValidIdentifier()
+                    );
 
-                    var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
-                          sourceFilePath
+                    var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                          compilation.Assembly.Name
+                        , GENERATOR_NAME
+                    );
+
+                    context.OutputSource(
+                          outputSourceGenFiles
                         , syntax
                         , source
-                        , context.CancellationToken
+                        , hintName
+                        , sourceFilePath
                     );
-
-                    context.AddSource(
-                          syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, structRef.Symbol.ToValidIdentifier())
-                        , outputSource
-                    );
-
-                    if (outputSourceGenFiles)
-                    {
-                        SourceGenHelpers.OutputSourceToFile(
-                              context
-                            , syntax.GetLocation()
-                            , sourceFilePath
-                            , outputSource
-                        );
-                    }
                 }
                 catch (Exception e)
                 {

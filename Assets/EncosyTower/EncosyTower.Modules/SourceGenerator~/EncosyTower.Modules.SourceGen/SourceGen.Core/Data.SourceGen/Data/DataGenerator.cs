@@ -110,15 +110,23 @@ namespace EncosyTower.Modules.Data.SourceGen
 
                 if (declaration.FieldRefs.Length > 0 || declaration.PropRefs.Length > 0)
                 {
-                    var assemblyName = compilation.Assembly.Name;
+                    var hintName = syntaxTree.GetGeneratedSourceFileName(
+                          DATA_GENERATOR_NAME
+                        , declaration.Syntax
+                        , declaration.Symbol.ToValidIdentifier()
+                    );
 
-                    OutputSource(
-                          context
-                        , outputSourceGenFiles
+                    var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                          compilation.Assembly.Name
+                        , DATA_GENERATOR_NAME
+                    );
+
+                    context.OutputSource(
+                          outputSourceGenFiles
                         , declaration.Syntax
                         , declaration.WriteCode()
-                        , syntaxTree.GetGeneratedSourceFileName(DATA_GENERATOR_NAME, declaration.Syntax, declaration.Symbol.ToValidIdentifier())
-                        , syntaxTree.GetGeneratedSourceFilePath(assemblyName, DATA_GENERATOR_NAME)
+                        , hintName
+                        , sourceFilePath
                     );
                 }
 
@@ -137,35 +145,6 @@ namespace EncosyTower.Modules.Data.SourceGen
                     , syntax.GetLocation()
                     , e.ToUnityPrintableString()
                 ));
-            }
-        }
-
-        private static void OutputSource(
-              SourceProductionContext context
-            , bool outputSourceGenFiles
-            , SyntaxNode syntax
-            , string source
-            , string hintName
-            , string sourceFilePath
-        )
-        {
-            var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
-                  sourceFilePath
-                , syntax
-                , source
-                , context.CancellationToken
-            );
-
-            context.AddSource(hintName, outputSource);
-
-            if (outputSourceGenFiles)
-            {
-                SourceGenHelpers.OutputSourceToFile(
-                      context
-                    , syntax.GetLocation()
-                    , sourceFilePath
-                    , outputSource
-                );
             }
         }
 

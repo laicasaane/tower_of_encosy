@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 
 namespace EncosyTower.Modules.Data.Authoring
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field)]
     public sealed class TableAttribute : Attribute
     {
         /// <summary>
-        /// How the names of the sheet and its properties are serialized.
+        /// Determines the naming case for each sheet and its properties.
         /// </summary>
         public NamingStrategy NamingStrategy { get; }
 

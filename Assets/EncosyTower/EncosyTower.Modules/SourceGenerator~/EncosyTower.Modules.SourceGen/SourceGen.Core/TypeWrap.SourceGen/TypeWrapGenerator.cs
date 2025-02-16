@@ -408,28 +408,24 @@ namespace EncosyTower.Modules.TypeWrap.SourceGen
                 );
 
                 var source = declaration.WriteCode();
-                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(compilation.Assembly.Name, GENERATOR_NAME);
-                var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
-                      sourceFilePath
+                var hintName = syntaxTree.GetGeneratedSourceFileName(
+                      GENERATOR_NAME
+                    , declaration.Syntax
+                    , declaration.Symbol.ToValidIdentifier()
+                );
+
+                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                      compilation.Assembly.Name
+                    , GENERATOR_NAME
+                );
+
+                context.OutputSource(
+                      outputSourceGenFiles
                     , candidate.syntax
                     , source
-                    , context.CancellationToken
+                    , hintName
+                    , sourceFilePath
                 );
-
-                context.AddSource(
-                      syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, declaration.Syntax, declaration.Symbol.ToValidIdentifier())
-                    , outputSource
-                );
-
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(
-                          context
-                        , candidate.syntax.GetLocation()
-                        , sourceFilePath
-                        , outputSource
-                    );
-                }
             }
             catch (Exception e)
             {

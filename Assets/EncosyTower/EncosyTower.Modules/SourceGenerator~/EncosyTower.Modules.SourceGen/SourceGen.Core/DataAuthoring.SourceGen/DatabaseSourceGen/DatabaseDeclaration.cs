@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using EncosyTower.Modules.SourceGen;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.Modules.DataAuthoring.SourceGen
 {
@@ -50,6 +51,7 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
 
         private void InitializeTables(SourceProductionContext context)
         {
+            var uniqueTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
             var tables = new List<TableRef>();
             var databaseRef = DatabaseRef;
             var members = databaseRef.Symbol.GetMembers();
@@ -58,22 +60,17 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
 
             foreach (var member in members)
             {
-                INamedTypeSymbol type;
-
-                if (member is IFieldSymbol field)
-                {
-                    type = field.Type as INamedTypeSymbol;
-                }
-                else if (member is IPropertySymbol property)
-                {
-                    type = property.Type as INamedTypeSymbol;
-                }
-                else
+                if (member is not IFieldSymbol field)
                 {
                     continue;
                 }
 
-                if (type == null)
+                if (field.Type is not INamedTypeSymbol type)
+                {
+                    continue;
+                }
+
+                if (uniqueTypes.Contains(type))
                 {
                     continue;
                 }
@@ -82,6 +79,35 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
 
                 if (attrib == null)
                 {
+                    continue;
+                }
+
+                if (field.DeclaringSyntaxReferences.Length < 1)
+                {
+                    continue;
+                }
+
+                var variableSyntax = field.DeclaringSyntaxReferences[0].GetSyntax(context.CancellationToken);
+
+                if (variableSyntax?.Parent?.Parent is not FieldDeclarationSyntax fieldSyntax)
+                {
+                    continue;
+                }
+
+                var fieldVariables = fieldSyntax.Declaration.Variables;
+
+                if (fieldVariables.Count > 1)
+                {
+                    for (var variableIndex = 1; variableIndex < fieldVariables.Count; variableIndex++)
+                    {
+                        var fieldVariable = fieldVariables[variableIndex];
+
+                        context.ReportDiagnostic(
+                              TableDiagnosticDescriptors.MustBeASeparatedField
+                            , fieldVariable
+                            , fieldVariable.Identifier.Text
+                        );
+                    }
                     continue;
                 }
 
@@ -118,6 +144,7 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
                 }
 
                 var table = new TableRef {
+                    FieldSyntax = fieldSyntax,
                     Type = type,
                     BaseType = baseType,
                     SheetName = member.Name,
@@ -136,9 +163,10 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
                     }
                 }
 
-                tables.Add(table);
-
                 GetHorizontalLists(context, databaseRef, member, table);
+
+                tables.Add(table);
+                uniqueTypes.Add(type);
             }
 
             if (tables.Count > 0)

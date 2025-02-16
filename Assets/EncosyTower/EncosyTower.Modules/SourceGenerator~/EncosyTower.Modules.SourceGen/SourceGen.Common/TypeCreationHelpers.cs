@@ -206,105 +206,49 @@ namespace EncosyTower.Modules.SourceGen
             };
         }
 
-        static (string start, StringBuilder end) GetBaseDeclaration(SyntaxNode typeSyntax)
-        {
-            var builderStart = "";
-            var builderEnd = new StringBuilder();
-            var curliesToClose = 0;
-            var parentSyntax = typeSyntax.Parent as MemberDeclarationSyntax;
-
-            while (parentSyntax != null && (
-                   parentSyntax.IsKind(SyntaxKind.RecordDeclaration)
-                || parentSyntax.IsKind(SyntaxKind.RecordStructDeclaration)
-                || parentSyntax.IsKind(SyntaxKind.StructDeclaration)
-                || parentSyntax.IsKind(SyntaxKind.ClassDeclaration)
-                || parentSyntax.IsKind(SyntaxKind.InterfaceDeclaration)
-                || parentSyntax.IsKind(SyntaxKind.NamespaceDeclaration)
-            ))
-            {
-                switch (parentSyntax)
-                {
-                    case RecordDeclarationSyntax parentRecordSyntax:
-                    {
-                        var keyword = parentRecordSyntax.ClassOrStructKeyword.ValueText; // e.g. class/struct
-                        var typeName = parentRecordSyntax.Identifier.ToString() + parentRecordSyntax.TypeParameterList; // e.g. Outer/Generic<T>
-                        var constraint = parentRecordSyntax.ConstraintClauses.ToString(); // e.g. where T: new()
-                        builderStart = $"partial record {keyword} {typeName} {constraint} {{{NEWLINE}{builderStart}";
-                        break;
-                    }
-
-                    case TypeDeclarationSyntax parentTypeSyntax:
-                    {
-                        var keyword = parentTypeSyntax.Keyword.ValueText; // e.g. class/struct/interface
-                        var typeName = parentTypeSyntax.Identifier.ToString() + parentTypeSyntax.TypeParameterList; // e.g. Outer/Generic<T>
-                        var constraint = parentTypeSyntax.ConstraintClauses.ToString(); // e.g. where T: new()
-                        builderStart = $"partial {keyword} {typeName} {constraint} {{{NEWLINE}{builderStart}";
-                        break;
-                    }
-
-                    case NamespaceDeclarationSyntax parentNameSpaceSyntax:
-                    {
-                        var usings = parentNameSpaceSyntax.Usings.ToString();
-
-                        if (string.IsNullOrWhiteSpace(usings) == false)
-                        {
-                            builderStart = $"{usings}{NEWLINE}{NEWLINE}{builderStart}";
-                        }
-
-                        builderStart = $"namespace {parentNameSpaceSyntax.Name} {{{NEWLINE}{NEWLINE}{builderStart}";
-                        break;
-                    }
-                }
-
-                curliesToClose++;
-                parentSyntax = parentSyntax.Parent as MemberDeclarationSyntax;
-            }
-
-            builderEnd.AppendLine();
-            builderEnd.Append('}', curliesToClose);
-
-            return (builderStart, builderEnd);
-        }
-
         public static SourceText GenerateSourceTextForRootNodes(
               string generatedSourceFilePath
+            , SyntaxNode containingSyntax
             , SyntaxNode originalSyntax
             , string generatedSyntax
             , CancellationToken cancellationToken
         )
         {
-            var syntaxTreeSourceBuilder = new StringWriter(new StringBuilder());
-            var (start, end) = GetBaseDeclaration(originalSyntax);
-            var usings = originalSyntax.SyntaxTree.GetCompilationUnitRoot(cancellationToken).Usings;
+            var printer = Printer.DefaultLarge;
+            var result = WriteOpeningSyntax_AndReturnClosingSyntax(
+                  ref printer
+                , containingSyntax
+                , originalSyntax
+                , cancellationToken
+            );
 
-            foreach (var @using in usings)
+            printer.PrintLine(generatedSyntax);
+
+            var (numClosingBracesRequired, numNotClosedIfDirectives) = result;
+
+            if (numClosingBracesRequired > 0)
             {
-                if (@using.ContainsDirectives)
-                {
-                    var numberOfNotClosedIfDirectives = 0;
-                    foreach (var token in @using.ChildTokens())
-                        foreach (var trivia in token.LeadingTrivia)
-                            if (trivia.IsDirective)
-                            {
-                                if (trivia.IsKind(SyntaxKind.IfDirectiveTrivia))
-                                    numberOfNotClosedIfDirectives++;
-                                else if (trivia.IsKind(SyntaxKind.EndIfDirectiveTrivia))
-                                    numberOfNotClosedIfDirectives--;
-                            }
-                    end.Insert(0, NEWLINE + "#endif", numberOfNotClosedIfDirectives);
-                }
+                printer.PrintEndLine();
             }
 
-            syntaxTreeSourceBuilder.Write(usings.ToFullString());
-            syntaxTreeSourceBuilder.Write(NEWLINE);
-            syntaxTreeSourceBuilder.Write(start);
-            syntaxTreeSourceBuilder.Write(generatedSyntax);
-            syntaxTreeSourceBuilder.Write(NEWLINE);
-            syntaxTreeSourceBuilder.Write(end.Replace("\r\n", NEWLINE).ToString());
-            syntaxTreeSourceBuilder.Flush();
+            for (int i = 0; i < numClosingBracesRequired; i++)
+            {
+                printer = printer.DecreasedIndent();
+                printer.PrintLine("}");
+            }
+
+            if (numNotClosedIfDirectives > 0)
+            {
+                printer.PrintEndLine();
+            }
+
+            for (int i = 0; i < numNotClosedIfDirectives; i++)
+            {
+                printer.PrintLine("#endif");
+            }
 
             // Output as source
-            var sourceTextForNewClass = SourceText.From(syntaxTreeSourceBuilder.ToString(), Encoding.UTF8)
+            var sourceTextForNewClass = SourceText.From(printer.Result, Encoding.UTF8)
                 .WithInitialLineDirectiveToGeneratedSource(generatedSourceFilePath)
                 .WithIgnoreUnassignedVariableWarning();
 
@@ -314,6 +258,7 @@ namespace EncosyTower.Modules.SourceGen
             foreach (var line in sourceTextForNewClass.Lines)
             {
                 var lineText = line.ToString();
+
                 if (lineText.Contains(GENERATED_LINE_TRIVIA_TO_GENERATED_SOURCE))
                 {
                     textChanges.Add(new TextChange(
@@ -323,8 +268,13 @@ namespace EncosyTower.Modules.SourceGen
                             , $"#line {line.LineNumber + 2} \"{generatedSourceFilePath}\""
                         )
                     ));
+
+                    continue;
                 }
-                else if (lineText.Contains("#line") && lineText.TrimStart().IndexOf("#line", StringComparison.Ordinal) != 0)
+
+                if (lineText.Contains("#line")
+                    && lineText.TrimStart().IndexOf("#line", StringComparison.Ordinal) != 0
+                )
                 {
                     var indexOfLineDirective = lineText.IndexOf("#line", StringComparison.Ordinal);
 
@@ -334,10 +284,332 @@ namespace EncosyTower.Modules.SourceGen
                             + NEWLINE
                             + lineText.Substring(indexOfLineDirective)
                     ));
+
+                    continue;
                 }
             }
 
             return sourceTextForNewClass.WithChanges(textChanges);
         }
+
+        private static ClosingSyntax WriteOpeningSyntax_AndReturnClosingSyntax(
+              ref Printer printer
+            , SyntaxNode containingTypeSyntax
+            , SyntaxNode originalSyntax
+            , CancellationToken cancellationToken
+        )
+        {
+            var (openingSyntaxes, numClosingBraces) = GetOpeningSyntaxes(containingTypeSyntax);
+
+            var directives = new Stack<SyntaxTrivia>();
+            var numNotClosedDirectives = 0;
+
+            GetDirectivesFromSelfAndParents(
+                  originalSyntax as MemberDeclarationSyntax
+                , directives
+                , ref numNotClosedDirectives
+            );
+
+            var uniqueUsings = new HashSet<string>();
+            var usings = SyntaxFactory.List<UsingDirectiveSyntax>();
+
+            GetUsings(containingTypeSyntax?.SyntaxTree, uniqueUsings, ref usings, cancellationToken);
+
+            foreach (var @using in usings)
+            {
+                GetDirectivesFromSelf(@using, directives, ref numNotClosedDirectives);
+            }
+
+            printer.PrintEndLine();
+
+            var firstDirective = true;
+
+            foreach (var directive in directives)
+            {
+                if (firstDirective && directive.IsKind(SyntaxKind.IfDirectiveTrivia) == false)
+                {
+                    continue;
+                }
+
+                firstDirective = false;
+
+                printer.PrintLine(directive.ToString());
+            }
+
+            if (directives.Count > 0)
+            {
+                printer.PrintEndLine();
+            }
+
+            foreach (var @using in usings)
+            {
+                printer.PrintLine(@using.ToString());
+            }
+
+            if (usings.Count > 0)
+            {
+                printer.PrintEndLine();
+            }
+
+            foreach (var (openingValue, addIndentAfter) in openingSyntaxes)
+            {
+                printer.PrintLine(openingValue);
+
+                if (addIndentAfter)
+                {
+                    printer = printer.IncreasedIndent();
+                }
+            }
+
+            if (openingSyntaxes.Count > 0)
+            {
+                printer.PrintEndLine();
+            }
+
+            return new(numClosingBraces, numNotClosedDirectives);
+
+            static void GetUsings(
+                  SyntaxTree syntaxTree
+                , HashSet<string> uniqueUsings
+                , ref SyntaxList<UsingDirectiveSyntax> usings
+                , CancellationToken cancellationToken
+            )
+            {
+                if (syntaxTree == null)
+                {
+                    return;
+                }
+
+                var currentUsings = syntaxTree.GetCompilationUnitRoot(cancellationToken).Usings;
+
+                foreach (var @using in currentUsings)
+                {
+                    if (uniqueUsings.Add(@using.Name.ToString()))
+                    {
+                        usings = usings.Add(@using);
+                    }
+                }
+            }
+        }
+
+        private static OpeningSyntaxes GetOpeningSyntaxes(SyntaxNode node)
+        {
+            var opening = new Stack<OpeningSyntax>();
+            var numBracesToClose = 0;
+            var parentSyntax = node?.Parent;
+
+            while (parentSyntax != null)
+            {
+                switch (parentSyntax)
+                {
+                    case RecordDeclarationSyntax recordSyntax:
+                    {
+                        // e.g. class/struct
+                        var keyword = recordSyntax.ClassOrStructKeyword.ValueText;
+
+                        // e.g. Outer/Generic<T>
+                        var typeName = recordSyntax.Identifier.ToString() + recordSyntax.TypeParameterList;
+
+                        // e.g. where T: new()
+                        var constraint = recordSyntax.ConstraintClauses.ToString();
+
+                        opening.Push(new("{", AddIndentAfter: true));
+                        opening.Push(new($"partial record {keyword} {typeName} {constraint}", AddIndentAfter: false));
+                        numBracesToClose++;
+                        break;
+                    }
+
+                    case TypeDeclarationSyntax typeSyntax:
+                    {
+                        // e.g. class/struct
+                        var keyword = typeSyntax.Keyword.ValueText;
+
+                        // e.g. Outer/Generic<T>
+                        var typeName = typeSyntax.Identifier.ToString() + typeSyntax.TypeParameterList;
+
+                        // e.g. where T: new()
+                        var constraint = typeSyntax.ConstraintClauses.ToString();
+
+                        opening.Push(new("{", AddIndentAfter: true));
+                        opening.Push(new($"partial {keyword} {typeName} {constraint}", AddIndentAfter: false));
+                        numBracesToClose++;
+                        break;
+                    }
+
+                    case NamespaceDeclarationSyntax namespaceSyntax:
+                    {
+                        foreach (var usingDir in namespaceSyntax.Usings)
+                        {
+                            opening.Push(new($"{usingDir}", AddIndentAfter: false));
+                        }
+
+                        opening.Push(new("{", AddIndentAfter: true));
+                        opening.Push(new($"namespace {namespaceSyntax.Name}", AddIndentAfter: false));
+                        numBracesToClose++;
+                        break;
+                    }
+                }
+
+                parentSyntax = parentSyntax.Parent;
+            }
+
+            return new(opening, numBracesToClose);
+        }
+
+        private static void GetDirectivesFromSelfAndParents(
+              MemberDeclarationSyntax originalSyntax
+            , Stack<SyntaxTrivia> directives
+            , ref int numNotClosedDirectives
+        )
+        {
+            GetDirectivesFromSelf(originalSyntax, directives, ref numNotClosedDirectives);
+
+            var parentSyntax = originalSyntax?.Parent;
+
+            while (parentSyntax != null)
+            {
+                switch (parentSyntax)
+                {
+                    case NamespaceDeclarationSyntax namespaceSyntax:
+                    {
+                        GetDirectives(namespaceSyntax.NamespaceKeyword, directives, ref numNotClosedDirectives);
+                        GetDirectives(namespaceSyntax.OpenBraceToken, directives, ref numNotClosedDirectives);
+                        break;
+                    }
+
+                    case BaseNamespaceDeclarationSyntax namespaceSyntax:
+                    {
+                        GetDirectives(namespaceSyntax.NamespaceKeyword, directives, ref numNotClosedDirectives);
+                        break;
+                    }
+
+                    case RecordDeclarationSyntax recordSyntax:
+                    {
+                        GetDirectives(recordSyntax.OpenBraceToken, directives, ref numNotClosedDirectives);
+                        GetDirectives(recordSyntax.Keyword, directives, ref numNotClosedDirectives);
+                        break;
+                    }
+
+                    case ClassDeclarationSyntax classSyntax:
+                    {
+                        GetDirectives(classSyntax.OpenBraceToken, directives, ref numNotClosedDirectives);
+                        GetDirectives(classSyntax.Keyword, directives, ref numNotClosedDirectives);
+                        break;
+                    }
+
+                    case StructDeclarationSyntax structSyntax:
+                    {
+                        GetDirectives(structSyntax.OpenBraceToken, directives, ref numNotClosedDirectives);
+                        GetDirectives(structSyntax.Keyword, directives, ref numNotClosedDirectives);
+                        break;
+                    }
+
+                    case InterfaceDeclarationSyntax interfaceSyntax:
+                    {
+                        GetDirectives(interfaceSyntax.OpenBraceToken, directives, ref numNotClosedDirectives);
+                        GetDirectives(interfaceSyntax.Keyword, directives, ref numNotClosedDirectives);
+                        break;
+                    }
+
+                    case BaseTypeDeclarationSyntax typeSyntax:
+                    {
+                        GetDirectives(typeSyntax.OpenBraceToken, directives, ref numNotClosedDirectives);
+                        break;
+                    }
+                }
+
+                GetDirectivesFromSelf(parentSyntax as MemberDeclarationSyntax, directives, ref numNotClosedDirectives);
+                parentSyntax = parentSyntax.Parent;
+            }
+        }
+
+        private static void GetDirectivesFromSelf(
+              UsingDirectiveSyntax node
+            , Stack<SyntaxTrivia> directives
+            , ref int numNotClosedDirectives
+        )
+        {
+            if (node.ContainsDirectives == false)
+            {
+                return;
+            }
+
+            var tokens = node.ChildTokens();
+
+            if (tokens == null)
+            {
+                return;
+            }
+
+            foreach (var token in tokens)
+            {
+                GetDirectives(token, directives, ref numNotClosedDirectives);
+            }
+        }
+
+        private static void GetDirectivesFromSelf(
+              MemberDeclarationSyntax node
+            , Stack<SyntaxTrivia> directives
+            , ref int numNotClosedDirectives
+        )
+        {
+            if (node == null)
+            {
+                return;
+            }
+
+            var tokens = node.Modifiers;
+
+            for (var i = tokens.Count - 1; i >= 0; i--)
+            {
+                GetDirectives(tokens[i], directives, ref numNotClosedDirectives);
+            }
+
+            var attribLists = node.AttributeLists;
+
+            for (var i = attribLists.Count - 1; i >= 0; i--)
+            {
+                var token = attribLists[i].OpenBracketToken;
+                GetDirectives(token, directives, ref numNotClosedDirectives);
+            }
+        }
+
+        private static void GetDirectives(
+              SyntaxToken token
+            , Stack<SyntaxTrivia> directives
+            , ref int numNotClosedDirectives
+        )
+        {
+            var list = token.LeadingTrivia;
+
+            for (var i = list.Count - 1; i >= 0; i--)
+            {
+                var trivia = list[i];
+
+                if (trivia.IsDirective == false)
+                {
+                    continue;
+                }
+
+                directives.Push(trivia);
+
+                if (trivia.IsKind(SyntaxKind.IfDirectiveTrivia)
+                    || trivia.IsKind(SyntaxKind.ElifDirectiveTrivia)
+                )
+                {
+                    numNotClosedDirectives++;
+                }
+                else if (trivia.IsKind(SyntaxKind.EndIfDirectiveTrivia))
+                {
+                    numNotClosedDirectives--;
+                }
+            }
+        }
+
+        private record struct ClosingSyntax(int NumClosingBraces, int NumNotClosedDirectives);
+
+        private record struct OpeningSyntax(string Value, bool AddIndentAfter);
+
+        private record struct OpeningSyntaxes(Stack<OpeningSyntax> Syntaxes, int NumClosingBraces);
     }
 }

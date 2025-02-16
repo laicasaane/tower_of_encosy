@@ -16,6 +16,7 @@ namespace EncosyTower.Modules.SourceGen
             var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
                   sourceFilePath
                 , syntax
+                , syntax
                 , source
                 , context.CancellationToken
             );
@@ -27,6 +28,37 @@ namespace EncosyTower.Modules.SourceGen
                 SourceGenHelpers.OutputSourceToFile(
                       context
                     , syntax.GetLocation()
+                    , sourceFilePath
+                    , outputSource
+                );
+            }
+        }
+
+        public static void OutputSource(
+              this ref SourceProductionContext context
+            , bool outputSourceGenFiles
+            , SyntaxNode containingSyntax
+            , SyntaxNode originalSyntax
+            , string source
+            , string hintName
+            , string sourceFilePath
+        )
+        {
+            var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
+                  sourceFilePath
+                , containingSyntax
+                , originalSyntax
+                , source
+                , context.CancellationToken
+            );
+
+            context.AddSource(hintName, outputSource);
+
+            if (outputSourceGenFiles)
+            {
+                SourceGenHelpers.OutputSourceToFile(
+                      context
+                    , originalSyntax.GetLocation()
                     , sourceFilePath
                     , outputSource
                 );

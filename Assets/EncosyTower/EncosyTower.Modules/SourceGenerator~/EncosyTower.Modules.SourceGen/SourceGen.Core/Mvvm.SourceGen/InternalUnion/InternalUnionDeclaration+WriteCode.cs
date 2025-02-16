@@ -38,32 +38,17 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
             {
                 var syntaxTree = syntax.SyntaxTree;
                 var assemblyName = compilation.Assembly.Name;
-                var source = GetSourceForInternalClass(ValueTypeRefs, RefTypeRefs, assemblyName);
+                var fileName = $"InternalUnions_{assemblyName}";
+                var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, fileName, syntax);
                 var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME);
 
-                var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
-                      sourceFilePath
+                context.OutputSource(
+                      outputSourceGenFiles
                     , syntax
-                    , source
-                    , context.CancellationToken
+                    , GetSourceForInternalClass(ValueTypeRefs, RefTypeRefs, assemblyName)
+                    , hintName
+                    , sourceFilePath
                 );
-
-                var fileName = $"InternalUnions_{assemblyName}";
-
-                context.AddSource(
-                      syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, fileName, syntax)
-                    , outputSource
-                );
-
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(
-                          context
-                        , syntax.GetLocation()
-                        , sourceFilePath
-                        , outputSource
-                    );
-                }
             }
             catch (Exception e)
             {

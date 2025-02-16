@@ -91,30 +91,16 @@ namespace EncosyTower.Modules.Mvvm.SourceGen.Binders
                 var syntaxTree = candidate.SyntaxTree;
                 var semanticModel = compilation.GetSemanticModel(syntaxTree);
                 var declaration = new BinderDeclaration(candidate, semanticModel, context.CancellationToken);
-
-                var source = declaration.WriteCode();
+                var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, candidate);
                 var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(compilation.Assembly.Name, GENERATOR_NAME);
-                var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
-                      sourceFilePath
+
+                context.OutputSource(
+                      outputSourceGenFiles
                     , candidate
-                    , source
-                    , context.CancellationToken
+                    , declaration.WriteCode()
+                    , hintName
+                    , sourceFilePath
                 );
-
-                context.AddSource(
-                      syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, candidate)
-                    , outputSource
-                );
-
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(
-                          context
-                        , candidate.GetLocation()
-                        , sourceFilePath
-                        , outputSource
-                    );
-                }
             }
             catch (Exception e)
             {

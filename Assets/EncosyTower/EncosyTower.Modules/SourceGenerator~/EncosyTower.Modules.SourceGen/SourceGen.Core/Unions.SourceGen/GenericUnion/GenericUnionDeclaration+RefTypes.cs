@@ -19,30 +19,24 @@ namespace EncosyTower.Modules.Mvvm.GenericUnionSourceGen
                 {
                     var syntax = structRef.Syntax;
                     var syntaxTree = syntax.SyntaxTree;
-                    var source = WriteGenericUnionForRefType(structRef);
-                    var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(compilation.Assembly.Name, GENERATOR_NAME);
-
-                    var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
-                          sourceFilePath
+                    var hintName = syntaxTree.GetGeneratedSourceFileName(
+                          GENERATOR_NAME
                         , syntax
-                        , source
-                        , context.CancellationToken
+                        , structRef.Symbol.ToValidIdentifier()
                     );
 
-                    context.AddSource(
-                          syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, structRef.Symbol.ToValidIdentifier())
-                        , outputSource
+                    var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                          compilation.Assembly.Name
+                        , GENERATOR_NAME
                     );
 
-                    if (outputSourceGenFiles)
-                    {
-                        SourceGenHelpers.OutputSourceToFile(
-                              context
-                            , syntax.GetLocation()
-                            , sourceFilePath
-                            , outputSource
-                        );
-                    }
+                    context.OutputSource(
+                          outputSourceGenFiles
+                        , syntax
+                        , WriteGenericUnionForRefType(structRef)
+                        , hintName
+                        , sourceFilePath
+                    );
                 }
                 catch (Exception e)
                 {

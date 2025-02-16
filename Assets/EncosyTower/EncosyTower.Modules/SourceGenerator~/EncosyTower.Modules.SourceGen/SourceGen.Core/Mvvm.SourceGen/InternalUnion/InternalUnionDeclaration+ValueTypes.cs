@@ -19,30 +19,25 @@ namespace EncosyTower.Modules.Mvvm.InternalUnionSourceGen
                 {
                     var syntax = typeRef.Syntax;
                     var syntaxTree = syntax.SyntaxTree;
-                    var source = GetSourceForInternalUnionForValueType(typeRef, compilation.Assembly.Name);
-                    var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(compilation.Assembly.Name, GENERATOR_NAME);
-
-                    var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
-                          sourceFilePath
+                    var hintName = syntaxTree.GetGeneratedSourceFileName(
+                          GENERATOR_NAME
                         , syntax
-                        , source
-                        , context.CancellationToken
+                        , typeRef.Symbol.ToValidIdentifier()
                     );
 
-                    context.AddSource(
-                          syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, typeRef.Symbol.ToValidIdentifier())
-                        , outputSource
+                    var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                          compilation.Assembly.Name
+                        , GENERATOR_NAME
                     );
 
-                    if (outputSourceGenFiles)
-                    {
-                        SourceGenHelpers.OutputSourceToFile(
-                              context
-                            , syntax.GetLocation()
-                            , sourceFilePath
-                            , outputSource
-                        );
-                    }
+                    context.OutputSource(
+                          outputSourceGenFiles
+                        , null
+                        , syntax
+                        , GetSourceForInternalUnionForValueType(typeRef, compilation.Assembly.Name)
+                        , hintName
+                        , sourceFilePath
+                    );
                 }
                 catch (Exception e)
                 {

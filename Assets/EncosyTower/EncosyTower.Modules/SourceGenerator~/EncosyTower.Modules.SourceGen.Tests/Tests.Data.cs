@@ -275,6 +275,7 @@ namespace EncosyTower.Modules.Tests.Data.Authoring
     using EncosyTower.Modules.Tests.Data.Heroes;
     using EncosyTower.Modules.Tests.Data.Enemies;
 
+#if UNITY_EDITOR
     [Database(NamingStrategy.SnakeCase, typeof(IntWrapperConverter))]
     public partial class Database
     {
@@ -282,31 +283,23 @@ namespace EncosyTower.Modules.Tests.Data.Authoring
         {
         }
     }
+#endif
 
     partial class Database
     {
-        [Table] public HeroDataTableAsset Hero { get; }
-
-        partial class HeroDataTableAsset_HeroDataSheet
-        {
-        }
+        [Table] public HeroDataTableAsset heroes;
     }
 
     partial class Database
     {
         [Horizontal(typeof(NewHeroData), nameof(NewHeroData.Multipliers))]
-        [Table] public NewHeroDataTableAsset NewHero { get; }
+        [Table] public NewHeroDataTableAsset newHeroes;
     }
 
     partial class Database
     {
-        [Table] public EnemyDataTableAsset Enemy { get; }
-
-        [Table] public NewEnemyDataTableAsset NewEnemy { get; }
-
-        partial class EnemyDataTableAsset_EnemyDataSheet
-        {
-        }
+        [Table] public EnemyDataTableAsset enemies;
+        [Table] public NewEnemyDataTableAsset newEnemies;
     }
 }
 #endif

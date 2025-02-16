@@ -8,7 +8,7 @@ namespace EncosyTower.Modules.Editor.Data.Settings
     [Database(NamingStrategy.SnakeCase)]
     internal partial class FileDatabase
     {
-        [Table] public FileTableAsset FileList { get; }
+        [Table] public FileTableAsset fileList;
     }
 
     internal sealed partial class FileTableAsset : DataTableAsset<int, FileData>, IDataTableAsset { }

@@ -11,5 +11,7 @@ namespace EncosyTower.Modules.Tests.UnionTests
         public object objValue;
     }
 
+#if UNITY_EDITOR
     public readonly partial struct StructWithRefsUnion : IUnion<StructWithRefs> { }
+#endif
 }

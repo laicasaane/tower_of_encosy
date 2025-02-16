@@ -2,10 +2,11 @@
 using System.Collections.Immutable;
 using EncosyTower.Modules.SourceGen;
 using Microsoft.CodeAnalysis;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace EncosyTower.Modules.Mvvm.InternalStringAdapterSourceGen
 {
+    using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
     partial class InternalStringAdapterDeclaration
     {
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
@@ -31,32 +32,17 @@ namespace EncosyTower.Modules.Mvvm.InternalStringAdapterSourceGen
             {
                 var syntaxTree = syntax.SyntaxTree;
                 var assemblyName = compilation.Assembly.Name;
-                var source = WriteAdapter(TypeRefs, assemblyName);
+                var fileName = $"InternalStringAdapters_{assemblyName}";
+                var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, fileName, syntax);
                 var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME);
 
-                var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
-                      sourceFilePath
+                context.OutputSource(
+                      outputSourceGenFiles
                     , syntax
-                    , source
-                    , context.CancellationToken
+                    , WriteAdapter(TypeRefs, assemblyName)
+                    , hintName
+                    , sourceFilePath
                 );
-
-                var fileName = $"InternalStringAdapters_{assemblyName}";
-
-                context.AddSource(
-                      syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, fileName, syntax)
-                    , outputSource
-                );
-
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(
-                          context
-                        , syntax.GetLocation()
-                        , sourceFilePath
-                        , outputSource
-                    );
-                }
             }
             catch (Exception e)
             {

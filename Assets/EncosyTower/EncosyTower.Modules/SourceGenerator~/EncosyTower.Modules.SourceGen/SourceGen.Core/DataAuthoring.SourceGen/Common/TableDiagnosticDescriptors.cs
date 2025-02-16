@@ -50,5 +50,15 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
             , isEnabledByDefault: true
             , description: "The type must be derived from either DataTableAsset<TDataId, TData> or DataTableAsset<TDataId, TData, TConvertedId>."
         );
+
+        public static readonly DiagnosticDescriptor MustBeASeparatedField = new DiagnosticDescriptor(
+              id: "DATABASE_TABLE_0006"
+            , title: "A [Table] field must contain only 1 variable"
+            , messageFormat: "Variable \"{0}\" must be a separated field because a [Table] field can only contain 1 variable"
+            , category: "DatabaseGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: "Each variable must be a separated field because a [Table] field can only contain 1 variable."
+        );
     }
 }

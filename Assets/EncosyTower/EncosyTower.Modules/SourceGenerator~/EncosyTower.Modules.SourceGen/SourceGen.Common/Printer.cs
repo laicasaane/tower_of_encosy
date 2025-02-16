@@ -10,7 +10,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -28,22 +27,15 @@ namespace EncosyTower.Modules.SourceGen
     public struct Printer
     {
         public const string NEWLINE = "\n";
-
-        public StringBuilder builder;
-        private int _currentIndentIndex;
-
-        public string CurrentIndent => s_tabs[_currentIndentIndex];
-
-        public int IndentDepth => _currentIndentIndex;
-
-        // Array of indent string for each depth level starting with "" and up to 31 tabs.
-        private static readonly string[] s_tabs = Enumerable.Range(start: 0, count: 32)
-            .Select(i => string.Join("", Enumerable.Repeat(element: "\t", count: i)))
-            .ToArray();
+        public const string INDENT = "    ";
 
         public static Printer Default => new(0);
 
         public static Printer DefaultLarge => new(0, 1024 * 16);
+
+        public StringBuilder builder;
+
+        private int _currentIndentIndex;
 
         /// <summary>
         /// Get a copy of this printer with the same setting but new output.
@@ -54,23 +46,22 @@ namespace EncosyTower.Modules.SourceGen
 
         public Printer(int indentCount)
         {
-            System.Diagnostics.Debug.Assert(indentCount < s_tabs.Length);
             builder = new StringBuilder();
             _currentIndentIndex = indentCount;
         }
         public Printer(int indentCount, int capacity)
         {
-            System.Diagnostics.Debug.Assert(indentCount < s_tabs.Length);
             builder = new StringBuilder(capacity);
             _currentIndentIndex = indentCount;
         }
 
         public Printer(StringBuilder builder, int indentCount)
         {
-            System.Diagnostics.Debug.Assert(indentCount < s_tabs.Length);
             this.builder = builder;
             _currentIndentIndex = indentCount;
         }
+
+        public int IndentDepth => _currentIndentIndex;
 
         /// <summary>
         /// Allows to continue inline printing using a different printer
@@ -145,7 +136,6 @@ namespace EncosyTower.Modules.SourceGen
         /// <returns></returns>
         public Printer ClearAndIndent(int indentCount)
         {
-            System.Diagnostics.Debug.Assert(indentCount < s_tabs.Length);
             builder.Clear();
             _currentIndentIndex = indentCount;
             return this;
@@ -160,7 +150,6 @@ namespace EncosyTower.Modules.SourceGen
         /// <returns></returns>
         public Printer Print(string text)
         {
-            //DebugTrace.Write(text);
             builder.Append(text);
             return this;
         }
@@ -170,7 +159,16 @@ namespace EncosyTower.Modules.SourceGen
         /// </summary>
         /// <returns></returns>
         public Printer PrintBeginLine()
-            => Print(CurrentIndent);
+        {
+            var depth = IndentDepth;
+
+            for (var i = 0; i < depth; i++)
+            {
+                Print(INDENT);
+            }
+
+            return this;
+        }
 
         /// <summary>
         /// Print indent and a string
@@ -178,7 +176,7 @@ namespace EncosyTower.Modules.SourceGen
         /// <param name="text"></param>
         /// <returns></returns>
         public Printer PrintBeginLine(string text)
-            => Print(CurrentIndent).Print(text);
+            => PrintBeginLine().Print(text);
 
         public Printer PrintBeginLineIf(bool condition, string trueText)
         {
@@ -440,7 +438,6 @@ namespace EncosyTower.Modules.SourceGen
         /// <returns>this</returns>
         public Printer OpenScope(string scopeOpen = "{")
         {
-            //PrintEndLine();
             PrintLine(scopeOpen);
             IncreasedIndent();
             return this;

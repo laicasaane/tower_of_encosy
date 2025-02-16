@@ -2,7 +2,6 @@
 using EncosyTower.Modules.Mvvm.ComponentModel;
 using EncosyTower.Modules.Mvvm.Input;
 using EncosyTower.Modules.Mvvm.ViewBinding;
-using UnityEngine;
 
 namespace EncosyTower.Modules.Tests.MvvmTests
 {
@@ -23,7 +22,7 @@ namespace EncosyTower.Modules.Tests.MvvmTests
     public partial class Binder : IBinder
     {
         [BindingProperty]
-        [field: HideInInspector]
+        [field: UnityEngine.HideInInspector]
         private void SetIntValue(int value)
         {
         }

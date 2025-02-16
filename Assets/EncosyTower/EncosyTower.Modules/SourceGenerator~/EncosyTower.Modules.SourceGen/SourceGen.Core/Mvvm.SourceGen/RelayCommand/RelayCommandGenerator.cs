@@ -76,29 +76,24 @@ namespace EncosyTower.Modules.Mvvm.RelayCommandSourceGen
                     return;
                 }
 
-                var source = declaration.WriteCode();
-                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(compilation.Assembly.Name, GENERATOR_NAME);
-                var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
-                      sourceFilePath
+                var hintName = syntaxTree.GetGeneratedSourceFileName(
+                      GENERATOR_NAME
                     , candidate
-                    , source
-                    , context.CancellationToken
+                    , declaration.Symbol.ToValidIdentifier()
                 );
 
-                context.AddSource(
-                      syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, candidate, declaration.Symbol.ToValidIdentifier())
-                    , outputSource
+                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                      compilation.Assembly.Name
+                    , GENERATOR_NAME
                 );
 
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(
-                          context
-                        , candidate.GetLocation()
-                        , sourceFilePath
-                        , outputSource
-                    );
-                }
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , candidate
+                    , declaration.WriteCode()
+                    , hintName
+                    , sourceFilePath
+                );
             }
             catch (Exception e)
             {

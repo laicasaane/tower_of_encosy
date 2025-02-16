@@ -165,29 +165,24 @@ namespace EncosyTower.Modules.Data.SourceGen
                     return;
                 }
 
-                var source = declaration.WriteCode();
-                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(compilation.Assembly.Name, DATA_TABLE_ASSET_GENERATOR_NAME);
-                var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
-                      sourceFilePath
+                var hintName = syntaxTree.GetGeneratedSourceFileName(
+                      DATA_TABLE_ASSET_GENERATOR_NAME
                     , syntax
-                    , source
-                    , context.CancellationToken
+                    , declaration.TypeRef.Symbol.ToValidIdentifier()
                 );
 
-                context.AddSource(
-                      syntaxTree.GetGeneratedSourceFileName(DATA_TABLE_ASSET_GENERATOR_NAME, syntax, declaration.TypeRef.Symbol.ToValidIdentifier())
-                    , outputSource
+                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                      compilation.Assembly.Name
+                    , DATA_TABLE_ASSET_GENERATOR_NAME
                 );
 
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(
-                          context
-                        , syntax.GetLocation()
-                        , sourceFilePath
-                        , outputSource
-                    );
-                }
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , syntax
+                    , declaration.WriteCode()
+                    , hintName
+                    , sourceFilePath
+                );
             }
             catch (Exception e)
             {

@@ -104,6 +104,7 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
                 try
                 {
                     var declaration = new DatabaseDeclaration(context, candidate);
+                    var databaseRef = declaration.DatabaseRef;
                     var syntaxTree = candidate.Syntax.SyntaxTree;
                     var databaseIdentifier = candidate.Symbol.ToValidIdentifier();
 
@@ -118,12 +119,11 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
                         , GENERATOR_NAME
                     );
 
-                    if (declaration.DatabaseRef.Tables.Length < 1)
+                    if (databaseRef.Tables.Length < 1)
                     {
-                        OutputSource(
-                              context
-                            , outputSourceGenFiles
-                            , declaration.DatabaseRef.Syntax
+                        context.OutputSource(
+                              outputSourceGenFiles
+                            , databaseRef.Syntax
                             , declaration.WriteContainer(null, null)
                             , databaseHintName
                             , databaseSourceFilePath
@@ -135,16 +135,15 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
                     var dataMap = BuildDataMap(context, declaration);
                     var dataTableAssetRefMap = BuildDataTableAssetRefMap(declaration, dataMap);
 
-                    OutputSource(
-                          context
-                        , outputSourceGenFiles
-                        , declaration.DatabaseRef.Syntax
+                    context.OutputSource(
+                          outputSourceGenFiles
+                        , databaseRef.Syntax
                         , declaration.WriteContainer(dataTableAssetRefMap, dataMap)
                         , databaseHintName
                         , databaseSourceFilePath
                     );
 
-                    var tables = declaration.DatabaseRef.Tables;
+                    var tables = databaseRef.Tables;
 
                     foreach (var table in tables)
                     {
@@ -170,10 +169,10 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
                             , assemblyName
                         );
 
-                        OutputSource(
-                              context
-                            , outputSourceGenFiles
-                            , declaration.DatabaseRef.Syntax
+                        context.OutputSource(
+                              outputSourceGenFiles
+                            , databaseRef.Syntax
+                            , table.FieldSyntax
                             , declaration.WriteSheet(table, dataTableAssetRef, dataTypeDeclaration, dataMap, objectType)
                             , sheetHintName
                             , sheetSourceFilePath
@@ -233,35 +232,6 @@ namespace EncosyTower.Modules.DataAuthoring.SourceGen
             }
 
             return $"Temp/GeneratedCode/{assemblyName}";
-        }
-
-        private static void OutputSource(
-              SourceProductionContext context
-            , bool outputSourceGenFiles
-            , SyntaxNode syntax
-            , string source
-            , string hintName
-            , string sourceFilePath
-        )
-        {
-            var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
-                  sourceFilePath
-                , syntax
-                , source
-                , context.CancellationToken
-            );
-
-            context.AddSource(hintName, outputSource);
-
-            if (outputSourceGenFiles)
-            {
-                SourceGenHelpers.OutputSourceToFile(
-                      context
-                    , syntax.GetLocation()
-                    , sourceFilePath
-                    , outputSource
-                );
-            }
         }
 
         private static Dictionary<ITypeSymbol, DataDeclaration> BuildDataMap(
