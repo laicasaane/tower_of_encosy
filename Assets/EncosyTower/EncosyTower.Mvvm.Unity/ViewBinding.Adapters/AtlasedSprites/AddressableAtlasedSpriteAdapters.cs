@@ -2,13 +2,14 @@
 
 using System;
 using System.Diagnostics;
+using EncosyTower.AddressableKeys;
 using EncosyTower.Annotations;
 using EncosyTower.AtlasedSprites;
 using EncosyTower.Logging;
 using EncosyTower.Unions;
 using EncosyTower.Unions.Converters;
+using EncosyTower.UnityExtensions;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using UnityEngine.U2D;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters.AtlasedSprites
@@ -23,10 +24,10 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AtlasedSprites
         {
             if (TryGetNames(union, out var atlasName, out var spriteName))
             {
-                var handle = Addressables.LoadAssetAsync<SpriteAtlas>(atlasName);
-                var atlas = handle.WaitForCompletion();
+                var key = new AddressableKey<SpriteAtlas>(atlasName);
+                var result = key.TryLoad();
 
-                if (atlas)
+                if (result.TryValue(out var atlas) && atlas.IsValid())
                 {
                     var sprite = atlas.GetSprite(spriteName);
 
