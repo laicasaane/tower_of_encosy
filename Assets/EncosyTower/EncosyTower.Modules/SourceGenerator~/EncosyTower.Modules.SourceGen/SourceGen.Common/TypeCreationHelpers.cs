@@ -11,7 +11,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -214,6 +213,11 @@ namespace EncosyTower.Modules.SourceGen
             , CancellationToken cancellationToken
         )
         {
+            // DO NOT worry about #if directives
+            // Because source generators run after preprocessors,
+            // every disabled code will be removed from the compilation context.
+            // So there might be no generated code to worry about.
+
             var printer = Printer.DefaultLarge;
             var result = WriteOpeningSyntax_AndReturnClosingSyntax(
                   ref printer
@@ -224,27 +228,17 @@ namespace EncosyTower.Modules.SourceGen
 
             printer.PrintLine(generatedSyntax);
 
-            var (numClosingBracesRequired, numNotClosedIfDirectives) = result;
+            var numClosingBraces = result.NumClosingBraces;
 
-            if (numClosingBracesRequired > 0)
+            if (numClosingBraces > 0)
             {
                 printer.PrintEndLine();
             }
 
-            for (int i = 0; i < numClosingBracesRequired; i++)
+            for (int i = 0; i < numClosingBraces; i++)
             {
                 printer = printer.DecreasedIndent();
                 printer.PrintLine("}");
-            }
-
-            if (numNotClosedIfDirectives > 0)
-            {
-                printer.PrintEndLine();
-            }
-
-            for (int i = 0; i < numNotClosedIfDirectives; i++)
-            {
-                printer.PrintLine("#endif");
             }
 
             // Output as source
@@ -301,45 +295,12 @@ namespace EncosyTower.Modules.SourceGen
         {
             var (openingSyntaxes, numClosingBraces) = GetOpeningSyntaxes(containingTypeSyntax);
 
-            var directives = new Stack<SyntaxTrivia>();
-            var numNotClosedDirectives = 0;
-
-            GetDirectivesFromSelfAndParents(
-                  originalSyntax as MemberDeclarationSyntax
-                , directives
-                , ref numNotClosedDirectives
-            );
-
             var uniqueUsings = new HashSet<string>();
             var usings = SyntaxFactory.List<UsingDirectiveSyntax>();
 
             GetUsings(containingTypeSyntax?.SyntaxTree, uniqueUsings, ref usings, cancellationToken);
 
-            foreach (var @using in usings)
-            {
-                GetDirectivesFromSelf(@using, directives, ref numNotClosedDirectives);
-            }
-
             printer.PrintEndLine();
-
-            var firstDirective = true;
-
-            foreach (var directive in directives)
-            {
-                if (firstDirective && directive.IsKind(SyntaxKind.IfDirectiveTrivia) == false)
-                {
-                    continue;
-                }
-
-                firstDirective = false;
-
-                printer.PrintLine(directive.ToString());
-            }
-
-            if (directives.Count > 0)
-            {
-                printer.PrintEndLine();
-            }
 
             foreach (var @using in usings)
             {
@@ -366,7 +327,7 @@ namespace EncosyTower.Modules.SourceGen
                 printer.PrintEndLine();
             }
 
-            return new(numClosingBraces, numNotClosedDirectives);
+            return new(numClosingBraces);
 
             static void GetUsings(
                   SyntaxTree syntaxTree
@@ -456,157 +417,7 @@ namespace EncosyTower.Modules.SourceGen
             return new(opening, numBracesToClose);
         }
 
-        private static void GetDirectivesFromSelfAndParents(
-              MemberDeclarationSyntax originalSyntax
-            , Stack<SyntaxTrivia> directives
-            , ref int numNotClosedDirectives
-        )
-        {
-            GetDirectivesFromSelf(originalSyntax, directives, ref numNotClosedDirectives);
-
-            var parentSyntax = originalSyntax?.Parent;
-
-            while (parentSyntax != null)
-            {
-                switch (parentSyntax)
-                {
-                    case NamespaceDeclarationSyntax namespaceSyntax:
-                    {
-                        GetDirectives(namespaceSyntax.NamespaceKeyword, directives, ref numNotClosedDirectives);
-                        GetDirectives(namespaceSyntax.OpenBraceToken, directives, ref numNotClosedDirectives);
-                        break;
-                    }
-
-                    case BaseNamespaceDeclarationSyntax namespaceSyntax:
-                    {
-                        GetDirectives(namespaceSyntax.NamespaceKeyword, directives, ref numNotClosedDirectives);
-                        break;
-                    }
-
-                    case RecordDeclarationSyntax recordSyntax:
-                    {
-                        GetDirectives(recordSyntax.OpenBraceToken, directives, ref numNotClosedDirectives);
-                        GetDirectives(recordSyntax.Keyword, directives, ref numNotClosedDirectives);
-                        break;
-                    }
-
-                    case ClassDeclarationSyntax classSyntax:
-                    {
-                        GetDirectives(classSyntax.OpenBraceToken, directives, ref numNotClosedDirectives);
-                        GetDirectives(classSyntax.Keyword, directives, ref numNotClosedDirectives);
-                        break;
-                    }
-
-                    case StructDeclarationSyntax structSyntax:
-                    {
-                        GetDirectives(structSyntax.OpenBraceToken, directives, ref numNotClosedDirectives);
-                        GetDirectives(structSyntax.Keyword, directives, ref numNotClosedDirectives);
-                        break;
-                    }
-
-                    case InterfaceDeclarationSyntax interfaceSyntax:
-                    {
-                        GetDirectives(interfaceSyntax.OpenBraceToken, directives, ref numNotClosedDirectives);
-                        GetDirectives(interfaceSyntax.Keyword, directives, ref numNotClosedDirectives);
-                        break;
-                    }
-
-                    case BaseTypeDeclarationSyntax typeSyntax:
-                    {
-                        GetDirectives(typeSyntax.OpenBraceToken, directives, ref numNotClosedDirectives);
-                        break;
-                    }
-                }
-
-                GetDirectivesFromSelf(parentSyntax as MemberDeclarationSyntax, directives, ref numNotClosedDirectives);
-                parentSyntax = parentSyntax.Parent;
-            }
-        }
-
-        private static void GetDirectivesFromSelf(
-              UsingDirectiveSyntax node
-            , Stack<SyntaxTrivia> directives
-            , ref int numNotClosedDirectives
-        )
-        {
-            if (node.ContainsDirectives == false)
-            {
-                return;
-            }
-
-            var tokens = node.ChildTokens();
-
-            if (tokens == null)
-            {
-                return;
-            }
-
-            foreach (var token in tokens)
-            {
-                GetDirectives(token, directives, ref numNotClosedDirectives);
-            }
-        }
-
-        private static void GetDirectivesFromSelf(
-              MemberDeclarationSyntax node
-            , Stack<SyntaxTrivia> directives
-            , ref int numNotClosedDirectives
-        )
-        {
-            if (node == null)
-            {
-                return;
-            }
-
-            var tokens = node.Modifiers;
-
-            for (var i = tokens.Count - 1; i >= 0; i--)
-            {
-                GetDirectives(tokens[i], directives, ref numNotClosedDirectives);
-            }
-
-            var attribLists = node.AttributeLists;
-
-            for (var i = attribLists.Count - 1; i >= 0; i--)
-            {
-                var token = attribLists[i].OpenBracketToken;
-                GetDirectives(token, directives, ref numNotClosedDirectives);
-            }
-        }
-
-        private static void GetDirectives(
-              SyntaxToken token
-            , Stack<SyntaxTrivia> directives
-            , ref int numNotClosedDirectives
-        )
-        {
-            var list = token.LeadingTrivia;
-
-            for (var i = list.Count - 1; i >= 0; i--)
-            {
-                var trivia = list[i];
-
-                if (trivia.IsDirective == false)
-                {
-                    continue;
-                }
-
-                directives.Push(trivia);
-
-                if (trivia.IsKind(SyntaxKind.IfDirectiveTrivia)
-                    || trivia.IsKind(SyntaxKind.ElifDirectiveTrivia)
-                )
-                {
-                    numNotClosedDirectives++;
-                }
-                else if (trivia.IsKind(SyntaxKind.EndIfDirectiveTrivia))
-                {
-                    numNotClosedDirectives--;
-                }
-            }
-        }
-
-        private record struct ClosingSyntax(int NumClosingBraces, int NumNotClosedDirectives);
+        private record struct ClosingSyntax(int NumClosingBraces);
 
         private record struct OpeningSyntax(string Value, bool AddIndentAfter);
 

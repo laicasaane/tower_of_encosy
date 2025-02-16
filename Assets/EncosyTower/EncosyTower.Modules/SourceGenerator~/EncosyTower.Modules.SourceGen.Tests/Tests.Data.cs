@@ -275,7 +275,6 @@ namespace EncosyTower.Modules.Tests.Data.Authoring
     using EncosyTower.Modules.Tests.Data.Heroes;
     using EncosyTower.Modules.Tests.Data.Enemies;
 
-#if UNITY_EDITOR
     [Database(NamingStrategy.SnakeCase, typeof(IntWrapperConverter))]
     public partial class Database
     {
@@ -283,7 +282,6 @@ namespace EncosyTower.Modules.Tests.Data.Authoring
         {
         }
     }
-#endif
 
     partial class Database
     {
