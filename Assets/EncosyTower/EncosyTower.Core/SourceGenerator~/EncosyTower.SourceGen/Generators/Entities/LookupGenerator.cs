@@ -8,7 +8,7 @@ namespace EncosyTower.SourceGen.Generators.Entities
     internal abstract class LookupGenerator : IIncrementalGenerator
     {
         private const string NAMESPACE = "EncosyTower.Entities";
-        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
 
         protected abstract string Interface { get; }
 

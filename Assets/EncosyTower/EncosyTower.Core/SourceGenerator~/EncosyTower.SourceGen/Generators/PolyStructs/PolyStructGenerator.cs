@@ -23,9 +23,9 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
         public const string POLY_STRUCT_ATTRIBUTE = $"global::{NAMESPACE}.PolyStructAttribute";
 
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"{NAMESPACE}.PolyStructSourceGen.PolymorphicStructGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.PolyStructs.PolyStructSourceGen.PolymorphicStructGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
-        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {

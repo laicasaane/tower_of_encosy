@@ -4,7 +4,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 {
     partial class RelayCommandDeclaration
     {
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Mvvm.RelayCommandGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.RelayCommands.RelayCommandGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string GENERATED_RELAY_COMMAND = "[global::EncosyTower.Mvvm.Input.SourceGen.GeneratedRelayCommand({0})]";
         private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";

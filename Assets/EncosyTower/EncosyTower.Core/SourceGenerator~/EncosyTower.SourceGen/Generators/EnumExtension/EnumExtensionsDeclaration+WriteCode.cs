@@ -5,7 +5,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
     partial class EnumExtensionsDeclaration
     {
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.EnumExtensions.SourceGen.EnumExtensionsGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.EnumExtensions.EnumExtensionsGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string UNITY_COLLECTIONS_ALLOCATOR = "global::Unity.Collections.AllocatorManager.AllocatorHandle";
         private const string CLASS_VALUES = "Values";

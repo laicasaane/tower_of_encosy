@@ -7,7 +7,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
     partial class ObservablePropertyDeclaration
     {
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Mvvm.ObservablePropertyGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties.ObservablePropertyGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string NAMESPACE = "EncosyTower.Mvvm.ComponentModel";
         private const string GENERATED_OBSERVABLE_PROPERTY = $"[global::{NAMESPACE}.SourceGen.GeneratedObservableProperty]";
@@ -259,6 +259,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 var name = property.Name;
 
                 p.PrintLine($"/// <summary>The name of <see cref=\"{name}\"/></summary>");
+                p.PrintLine(GENERATED_PROPERTY_NAME_CONSTANT);
                 p.PrintLine(GENERATED_CODE);
                 p.PrintLine($"public const string {ConstName(property)} = nameof({ClassName}.{name});");
                 p.PrintEndLine();

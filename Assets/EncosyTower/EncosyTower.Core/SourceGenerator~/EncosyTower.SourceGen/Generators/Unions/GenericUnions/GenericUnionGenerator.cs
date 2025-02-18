@@ -11,7 +11,7 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
     public class GenericUnionGenerator : IIncrementalGenerator
     {
         public const string NAMESPACE = "EncosyTower.Unions";
-        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
         public const string IUNION_T = $"global::{NAMESPACE}.IUnion<";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)

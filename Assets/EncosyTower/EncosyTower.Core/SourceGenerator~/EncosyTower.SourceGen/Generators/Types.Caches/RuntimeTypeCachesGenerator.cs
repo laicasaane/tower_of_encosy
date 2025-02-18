@@ -14,11 +14,10 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
     {
         public const string NAMESPACE = "EncosyTower.Types.Caches";
         public const string NAMESPACE_PREFIX = $"global::{NAMESPACE}";
-        public const string SKIP_ATTRIBUTE = $"{NAMESPACE_PREFIX}.SkipSourceGenForAssemblyAttribute";
+        public const string SKIP_ATTRIBUTE = $"{NAMESPACE_PREFIX}.SkipSourceGeneratorsForAssemblyAttribute";
         public const string GENERATOR_NAME = nameof(RuntimeTypeCachesGenerator);
 
-        private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"{NAMESPACE}.SourceGen.RuntimeTypeCachesGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Types.Caches.RuntimeTypeCachesGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string RUNTIME_TYPE_CACHE = "global::EncosyTower.Types.RuntimeTypeCache";
         private const string GENERATED_RUNTIME_TYPE_CACHES = $"[{NAMESPACE_PREFIX}.SourceGen.GeneratedRuntimeTypeCaches]";

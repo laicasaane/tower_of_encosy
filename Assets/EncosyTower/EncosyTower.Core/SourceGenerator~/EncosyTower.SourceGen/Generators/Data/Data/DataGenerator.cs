@@ -110,14 +110,14 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 if (declaration.FieldRefs.Length > 0 || declaration.PropRefs.Length > 0)
                 {
                     var hintName = syntaxTree.GetGeneratedSourceFileName(
-                          DATA_GENERATOR_NAME
+                          GENERATOR_NAME
                         , declaration.Syntax
                         , declaration.Symbol.ToValidIdentifier()
                     );
 
                     var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
                           compilation.Assembly.Name
-                        , DATA_GENERATOR_NAME
+                        , GENERATOR_NAME
                     );
 
                     context.OutputSource(

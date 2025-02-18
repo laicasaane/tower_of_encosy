@@ -5,7 +5,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
     partial class EnumTemplateDeclaration
     {
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.EnumTemplates.SourceGen.EnumTemplateGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.EnumTemplates.EnumTemplateGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string IENUM_TEMPLATE = "global::EncosyTower.EnumExtensions.IEnumTemplate<{0}>";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
 

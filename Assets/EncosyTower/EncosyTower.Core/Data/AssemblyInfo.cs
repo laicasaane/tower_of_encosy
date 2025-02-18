@@ -1,2 +1,1 @@
-[assembly: global::EncosyTower.Data.SkipSourceGenForAssembly]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("EncosyTower.Data.Authoring")]
+[assembly: global::EncosyTower.Databases.SkipSourceGeneratorsForAssembly]

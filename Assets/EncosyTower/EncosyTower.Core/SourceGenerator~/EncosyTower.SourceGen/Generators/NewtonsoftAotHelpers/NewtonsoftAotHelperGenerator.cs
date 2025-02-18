@@ -14,7 +14,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
     internal class NewtonsoftAotHelperGenerator : IIncrementalGenerator
     {
         private const string NAMESPACE = "EncosyTower.NewtonsoftAot";
-        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
         public const string GENERATOR_NAME = nameof(NewtonsoftAotHelperGenerator);
         private const string ATTRIBUTE = $"global::{NAMESPACE}.NewtonsoftAotHelperAttribute";
 

@@ -14,7 +14,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         public const string ENUM_TEMPLATE_ATTRIBUTE = $"global::{NAMESPACE}.EnumTemplateAttribute";
         public const string ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE = $"global::{NAMESPACE}.EnumMembersForTemplateAttribute";
         public const string TYPE_MEMBER_FOR_ENUM_TEMPLATE_ATTRIBUTE = $"global::{NAMESPACE}.TypeNameMemberForEnumTemplateAttribute";
-        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
         public const string GENERATOR_NAME = nameof(EnumTemplateGenerator);
 
         public void Initialize(IncrementalGeneratorInitializationContext context)

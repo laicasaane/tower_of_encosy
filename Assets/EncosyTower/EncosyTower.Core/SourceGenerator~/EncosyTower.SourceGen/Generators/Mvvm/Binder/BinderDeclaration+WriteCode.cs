@@ -6,7 +6,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
     partial class BinderDeclaration
     {
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Mvvm.SourceGen.Binders.BinderGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.Binders.BinderGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string NAMESPACE_BINDING = "EncosyTower.Mvvm.ViewBinding";
         private const string NAMESPACE_MODEL = "EncosyTower.Mvvm.ComponentModel";

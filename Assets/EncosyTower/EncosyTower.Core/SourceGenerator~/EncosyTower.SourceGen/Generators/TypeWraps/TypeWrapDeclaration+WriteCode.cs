@@ -6,7 +6,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
     partial class TypeWrapDeclaration
     {
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.TypeWraps.SourceGen.TypeWrapGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.TypeWraps.TypeWrapGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string OBSOLETE_REF_STRUCT = "[global::System.Obsolete(\"Not supported for ref struct\")]";
         private const string IWRAP = "global::EncosyTower.TypeWraps.IWrap<";

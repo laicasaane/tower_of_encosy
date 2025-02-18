@@ -9,7 +9,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm
     public static class MvvmGeneratorHelpers
     {
         public const string NAMESPACE = "EncosyTower.Mvvm";
-        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
 
         private const string COMPONENT_MODEL_NS = $"global::{NAMESPACE}.ComponentModel";
 

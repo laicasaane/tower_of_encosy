@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using EncosyTower.Data;
+using EncosyTower.Databases;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -271,35 +272,40 @@ namespace EncosyTower.Tests.Data.ConvertibleIds
 }
 
 #if UNITY_EDITOR
-namespace EncosyTower.Tests.Data.Authoring
+namespace EncosyTower.Tests.Databases.Authoring
 {
-    using EncosyTower.Data.Authoring;
+    using EncosyTower.Databases.Authoring;
+    using EncosyTower.Naming;
     using EncosyTower.Tests.Data.Heroes;
     using EncosyTower.Tests.Data.Enemies;
+    using EncosyTower.Tests.Data;
 
     [Database(NamingStrategy.SnakeCase, typeof(IntWrapperConverter))]
-    public partial class Database
+    public partial struct Database
     {
         partial class SheetContainer
         {
         }
     }
 
-    partial class Database
+    partial struct Database
     {
-        [Table] public HeroDataTableAsset heroes;
+        [Table] public readonly HeroDataTableAsset Heroes => Get_Heroes();
+
+        [Table] public readonly HeroDataTableAsset HeroesX => Get_HeroesX();
     }
 
-    partial class Database
+    partial struct Database
     {
         [Horizontal(typeof(NewHeroData), nameof(NewHeroData.Multipliers))]
-        [Table] public NewHeroDataTableAsset newHeroes;
+        [Table] public readonly NewHeroDataTableAsset NewHeroes => Get_NewHeroes();
     }
 
-    partial class Database
+    partial struct Database
     {
-        [Table] public EnemyDataTableAsset enemies;
-        [Table] public NewEnemyDataTableAsset newEnemies;
+        [Table] public readonly EnemyDataTableAsset Enemies => Get_Enemies();
+
+        [Table] public readonly NewEnemyDataTableAsset NewEnemies => Get_NewEnemies();
     }
 }
 #endif

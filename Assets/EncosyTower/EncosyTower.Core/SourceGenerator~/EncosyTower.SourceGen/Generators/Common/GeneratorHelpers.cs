@@ -9,7 +9,7 @@ namespace EncosyTower.SourceGen.Generators
 {
     public static class GeneratorHelpers
     {
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.Generator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         private const string SKIP_ATTRIBUTE = "global::EncosyTower.CodeGen.SkipSourceGeneratorsForAssemblyAttribute";
         private const string ALLOW_ATTRIBUTE = "global::EncosyTower.CodeGen.AllowSourceGeneratorsForAssemblyAttribute";

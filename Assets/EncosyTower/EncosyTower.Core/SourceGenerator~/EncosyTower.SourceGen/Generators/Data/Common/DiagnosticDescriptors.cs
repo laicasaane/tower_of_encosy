@@ -85,15 +85,5 @@ namespace EncosyTower.SourceGen.Generators.Data
             , isEnabledByDefault: true
             , description: "Collection type is not applicable for the property."
         );
-
-        public static readonly DiagnosticDescriptor MustBeApplicableForTypeArgument = new DiagnosticDescriptor(
-              id: "DATA_0010"
-            , title: "Must be either a struct, a class or an enum to replace type argument"
-            , messageFormat: "Type \"{0}\" is not applicable to replace \"{1}\", must be either a struct, a class or an enum"
-            , category: "DataTableAssetGenerator"
-            , defaultSeverity: DiagnosticSeverity.Error
-            , isEnabledByDefault: true
-            , description: "Must be either a struct, a class or an enum."
-        );
     }
 }

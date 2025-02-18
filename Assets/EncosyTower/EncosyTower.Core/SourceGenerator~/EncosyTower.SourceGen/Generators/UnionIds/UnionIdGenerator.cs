@@ -11,7 +11,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
     internal class UnionIdGenerator : IIncrementalGenerator
     {
         public const string NAMESPACE = "EncosyTower.UnionIds";
-        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
         public const string UNION_ID_ATTRIBUTE = $"global::{NAMESPACE}.UnionIdAttribute";
         public const string UNION_ID_KIND_ATTRIBUTE = $"global::{NAMESPACE}.KindForUnionIdAttribute";
         public const string GENERATOR_NAME = nameof(UnionIdGenerator);

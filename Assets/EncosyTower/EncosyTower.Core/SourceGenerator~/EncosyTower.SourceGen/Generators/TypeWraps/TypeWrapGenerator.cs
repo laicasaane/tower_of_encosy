@@ -17,7 +17,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         public const string WRAP_RECORD = "WrapRecord";
         public const string WRAP_RECORD_ATTRIBUTE = $"global::{NAMESPACE}.WrapRecordAttribute";
         public const string GENERATOR_NAME = nameof(TypeWrapGenerator);
-        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {

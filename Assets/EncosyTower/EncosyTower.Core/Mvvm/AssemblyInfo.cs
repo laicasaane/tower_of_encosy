@@ -1,1 +1,1 @@
-[assembly: global::EncosyTower.Mvvm.SkipSourceGenForAssembly]
+[assembly: global::EncosyTower.Mvvm.SkipSourceGeneratorsForAssembly]

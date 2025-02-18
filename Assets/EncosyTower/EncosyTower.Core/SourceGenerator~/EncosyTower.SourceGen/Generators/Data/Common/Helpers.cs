@@ -1,9 +1,8 @@
-namespace EncosyTower.SourceGen.Generators.Data
+﻿namespace EncosyTower.SourceGen.Generators.Data
 {
     public static class Helpers
     {
-        public const string DATA_GENERATOR_NAME = "DataGenerator";
-        public const string DATA_TABLE_ASSET_GENERATOR_NAME = "DataTableAssetGenerator";
+        public const string GENERATOR_NAME = "DataGenerator";
 
         public const string NAMESPACE = "EncosyTower.Data";
         public const string IDATA = $"global::{NAMESPACE}.IData";
@@ -18,10 +17,10 @@ namespace EncosyTower.SourceGen.Generators.Data
         public const string DATA_FIELD_POLICY_ATTRIBUTE = $"global::{NAMESPACE}.DataFieldPolicyAttribute";
         public const string PROPERTY_TYPE_ATTRIBUTE = $"global::{NAMESPACE}.PropertyTypeAttribute";
         public const string DATA_WITHOUT_ID_ATTRIBUTE = $"global::{NAMESPACE}.DataWithoutIdAttribute";
-        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
 
         public const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"{NAMESPACE}.DataGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Data.DataGenerator\", \"{SourceGenVersion.VALUE}\")]";
         public const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         public const string LIST_TYPE_T = "global::System.Collections.Generic.List<";
         public const string DICTIONARY_TYPE_T = "global::System.Collections.Generic.Dictionary<";

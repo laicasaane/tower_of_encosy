@@ -15,7 +15,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
     {
         public const string GENERATOR_NAME = nameof(UserDataAccessProviderGenerator);
         private const string NAMESPACE = "EncosyTower.UserDataStores";
-        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
         private const string ATTRIBUTE = $"global::{NAMESPACE}.UserDataAccessProviderAttribute";
         private const string IUSER_DATA_ACCESS = $"global::{NAMESPACE}.IUserDataAccess";
 

@@ -10,7 +10,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
     public class EnumExtensionsForGenerator : IIncrementalGenerator
     {
         private const string NAMESPACE = "EncosyTower.EnumExtensions";
-        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGenForAssemblyAttribute";
+        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
         public const string ENUM_EXTENSIONS_FOR_ATTRIBUTE = $"global::{NAMESPACE}.EnumExtensionsForAttribute";
         public const string FLAGS_ATTRIBUTE = "global::System.FlagsAttribute";
         public const string GENERATOR_NAME = nameof(EnumExtensionsGenerator);
