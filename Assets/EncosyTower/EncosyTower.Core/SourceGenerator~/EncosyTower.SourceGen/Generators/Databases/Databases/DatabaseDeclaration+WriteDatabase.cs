@@ -90,6 +90,24 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly void Initialize()");
+                p.OpenScope();
+                {
+                    p.PrintLine("_asset.Initialize();");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly void Deinitialize()");
+                p.OpenScope();
+                {
+                    p.PrintLine("_asset.Deinitialize();");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
                 foreach (var table in tables)
                 {
                     var tableTypeName = table.Type.ToFullName();
