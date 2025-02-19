@@ -6,8 +6,8 @@ namespace EncosyTower.Samples.Data
     [Database(NamingStrategy.SnakeCase, AssetName = $"{nameof(SampleDatabase)}Asset")]
     public readonly partial struct SampleDatabase
     {
-        [Table] public HeroTableAsset Heroes { get; }
+        [Table] public readonly HeroTableAsset Heroes => Get_Heroes();
 
-        [Table] public EnemyTableAsset Enemies { get; }
+        [Table] public readonly EnemyTableAsset Enemies => Get_Enemies();
     }
 }
