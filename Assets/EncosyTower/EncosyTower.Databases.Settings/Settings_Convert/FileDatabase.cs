@@ -9,7 +9,7 @@ namespace EncosyTower.Databases.Settings
     [Database(NamingStrategy.SnakeCase)]
     internal readonly partial struct FileDatabase
     {
-        [Table] public FileTableAsset FileList { get; }
+        [Table] public readonly FileTableAsset FileList => Get_FileList();
     }
 
     internal sealed partial class FileTableAsset : DataTableAsset<int, FileData>, IDataTableAsset { }
