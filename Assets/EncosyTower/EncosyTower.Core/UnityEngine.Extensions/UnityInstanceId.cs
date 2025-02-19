@@ -76,7 +76,7 @@ namespace EncosyTower.UnityExtensions
         [Conditional("__ENCOSY_VALIDATION__")]
         private static void ThrowIfInvalid(UnityEngine.Object obj)
         {
-            if (obj == false || obj == null)
+            if (obj.IsInvalid())
             {
                 throw new ArgumentNullException(nameof(obj));
             }
@@ -87,7 +87,9 @@ namespace EncosyTower.UnityExtensions
         {
             if (value == false)
             {
-                throw new InvalidOperationException("UnityInstanceId must be created properly");
+                throw new InvalidOperationException(
+                    "UnityInstanceId must be created using the constructor that takes a UnityEngine.Object."
+                );
             }
         }
     }
