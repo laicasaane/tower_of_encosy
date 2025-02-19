@@ -9,6 +9,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
     {
         private static GUIStyle s_rootTabViewStyle;
         private static GUIStyle s_rootTabLabelStyle;
+        private static GUIStyle s_tabLabelStyle;
         private static GUIStyle s_toolbarLeftButtonStyle;
         private static GUIStyle s_toolbarMidButtonStyle;
         private static GUIStyle s_toolbarRightButtonStyle;
@@ -39,6 +40,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
         private static GUIContent s_resetIconLabel;
         private static Color s_headerColor;
         private static Color s_selectedColor;
+        private static Color s_selectedColor2;
         private static Color s_menuColor;
         private static Color s_backColor;
         private static Color s_altBackColor;
@@ -61,6 +63,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
         );
 
         private static readonly GUIContent s_bindingsLabel = new("Bindings");
+        private static readonly GUIContent s_adaptersLabel = new("Adapters");
         private static readonly GUIContent s_targetsLabel = new(
             "Targets", "Can also drag and drop GameObject or Component here to add to the list."
         );
@@ -86,6 +89,11 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
             s_rootTabLabelStyle = new(EditorStyles.boldLabel) {
                 alignment = TextAnchor.MiddleCenter,
                 fontSize = EditorStyles.boldLabel.fontSize + 1,
+            };
+
+            s_tabLabelStyle = new(EditorStyles.boldLabel) {
+                alignment = TextAnchor.MiddleCenter,
+                fontSize = EditorStyles.boldLabel.fontSize - 1,
             };
 
             s_toolbarLeftButtonStyle = new(EditorStyles.miniButtonMid) {
@@ -266,6 +274,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
             }
 
             s_selectedColor = EditorAPI.GetColor("#2C5D87", "#3A72B0");
+            s_selectedColor2 = EditorAPI.GetColor("#2D7B87", "#3A98B0");
             s_headerColor = EditorAPI.GetColor("#474747", "#D6D6D6");
             s_backColor = EditorAPI.GetColor("#383838", "#C8C8C8");
             s_altBackColor = EditorAPI.GetColor("#3F3F3F", "#CACACA");

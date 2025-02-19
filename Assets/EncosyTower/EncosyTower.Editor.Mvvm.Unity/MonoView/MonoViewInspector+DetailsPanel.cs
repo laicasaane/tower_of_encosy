@@ -141,8 +141,11 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
 
                 var headerRect = EditorGUILayout.BeginHorizontal(layoutWidth, GUILayout.Height(30f));
                 {
+                    var offset = new Rect(0f, 0f, 0f, -1f);
+                    var expandOffset = new Rect(0f, 0f, 0f, -2f);
+
                     EditorGUILayout.Space(30f);
-                    DrawPanelHeaderFoldout(headerRect, targetsProp, s_targetsLabel, new Rect(0f, 0f, 0f, -2f));
+                    DrawPanelHeaderFoldout(headerRect, targetsProp, s_targetsLabel, offset, expandOffset);
                 }
                 EditorGUILayout.EndHorizontal();
 
@@ -224,7 +227,12 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
 
             if (length < 1)
             {
-                EditorGUILayout.LabelField("This target list is empty.", s_noBinderStyle, GUILayout.Height(30));
+                EditorGUILayout.LabelField(
+                    "This target list is empty."
+                    , s_noBinderStyle
+                    , GUILayout.Height(30)
+                    , GUILayout.MinWidth(0)
+                );
 
                 if (eventData is { Type: EventType.MouseDown, Button: 1 }
                     && sectionRect.Contains(eventData.MousePos)
@@ -237,6 +245,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
 
             var indexLabel = new GUIContent();
             var indexLabelWidth = GUILayout.Width(30);
+            var minWidth = GUILayout.MinWidth(0);
             var itemLabelStyle = s_indexLabelStyle;
             var selectedColor = s_selectedColor;
             var backColor = s_backColor;
@@ -270,7 +279,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                     }
 
                     indexLabel.text = i.ToString();
-                    EditorGUILayout.LabelField(indexLabel, itemLabelStyle, indexLabelWidth);
+                    EditorGUILayout.LabelField(indexLabel, itemLabelStyle, indexLabelWidth, minWidth);
 
                     {
                         var labelRect = rect;
@@ -285,7 +294,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                     }
 
                     var oldValue = elementProp.objectReferenceValue;
-                    var newValue = EditorGUILayout.ObjectField(oldValue, targetType, true);
+                    var newValue = EditorGUILayout.ObjectField(oldValue, targetType, true, minWidth);
 
                     if (oldValue != newValue)
                     {
@@ -330,9 +339,11 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
             EditorGUILayout.BeginVertical(s_rootTabViewStyle);
             {
                 var layoutWidth = GUILayout.ExpandWidth(true);
+                var minWidth = GUILayout.MinWidth(0);
+
                 var headerRect = EditorGUILayout.BeginHorizontal(s_panelHeaderStyle, GUILayout.Height(30));
                 {
-                    DrawPanelHeaderLabel(s_bindingsLabel, layoutWidth, headerRect);
+                    DrawPanelHeaderLabel(s_bindingsLabel, layoutWidth, headerRect, guiMinWidth: minWidth);
                 }
                 EditorGUILayout.EndHorizontal();
 
@@ -350,7 +361,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                     GUI.Label(iconRect, iconWarning);
                 }
 
-                var contentRect = EditorGUILayout.BeginVertical(layoutWidth);
+                var contentRect = EditorGUILayout.BeginVertical();
                 {
                     eventResult = DrawDetailsPanel_Bindings_Content(eventData, contentRect, binderProp, targetType);
                     GUILayout.Space(6f);
@@ -369,8 +380,8 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
             , Type targetType
         )
         {
-            var property = _presetBindingsProp;
-            var toolbarButton = DrawDetailsPanel_ToolbarButtons(property.ArraySize, false);
+            var presetBindingsProp = _presetBindingsProp;
+            var toolbarButton = DrawDetailsPanel_ToolbarButtons(presetBindingsProp.ArraySize, false);
 
             switch (toolbarButton)
             {
@@ -382,32 +393,55 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
 
                 case DetailsToolbarButton.Remove:
                 {
-                    property.DeleteSelected();
+                    presetBindingsProp.DeleteSelected();
                     break;
                 }
 
                 case DetailsToolbarButton.Menu:
                 {
-                    ShowMenuContextMenu(property);
+                    ShowMenuContextMenu(presetBindingsProp);
                     break;
                 }
             }
 
-            var length = property.ArraySize;
+            var length = presetBindingsProp.ArraySize;
+            var minWidth = GUILayout.MinWidth(0);
 
             if (length < 1)
             {
-                EditorGUILayout.LabelField("This binding list is empty.", s_noBinderStyle, GUILayout.Height(30));
+                EditorGUILayout.LabelField(
+                      "This binding list is empty."
+                    , s_noBinderStyle
+                    , minWidth
+                    , GUILayout.Height(30)
+                );
 
                 if (eventData is { Type: EventType.MouseDown, Button: 1 }
                     && sectionRect.Contains(eventData.MousePos)
                 )
                 {
-                    ShowRightClickContextMenuEmpty(property);
+                    ShowRightClickContextMenuEmpty(presetBindingsProp);
                 }
                 return EventResult.None;
             }
 
+            return DrawDetailsPanel_Bindings_Content_Binding(
+                  eventData
+                , sectionRect
+                , binderProp
+                , targetType
+                , minWidth
+            );
+        }
+
+        private EventResult DrawDetailsPanel_Bindings_Content_Binding(
+              in EventData eventData
+            , in Rect sectionRect
+            , SerializedProperty binderProp
+            , Type targetType
+            , GUILayoutOption minWidth
+        )
+        {
             var propertyLabel = s_propertyBindingLabel;
             var commandLabel = s_commandBindingLabel;
             var converterLabel = s_converterLabel;
@@ -430,7 +464,6 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
             var selectedColor = s_selectedColor;
             var backColor = s_backColor;
             var altBackColor = s_altBackColor;
-            var selectedIndex = property.SelectedIndex;
             var mouseDownIndex = -1;
             var mousePos = eventData.MousePos;
             var bindingProperyMap = s_bindingPropertyMap;
@@ -441,13 +474,20 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
             var targetLabel = new GUIContent();
             var adapterLabel = new GUIContent();
             var adapterMemberLabel = new GUIContent();
+            var adapterMemberLabelWidth = GUILayout.Width(80f);
             var resetIconLabel = s_resetIconLabel;
+            var presetAdaptersProp = _presetAdaptersProp;
+            var hasSequentialAdapter = presetAdaptersProp.Property != null;
+
+            var presetBindingsProp = _presetBindingsProp;
+            var length = presetBindingsProp.ArraySize;
+            var selectedIndex = presetBindingsProp.SelectedIndex;
 
             for (var i = 0; i < length; i++)
             {
-                var elementProp = property.GetElementAt(i);
+                var bindingProp = presetBindingsProp.GetElementAt(i);
 
-                if (elementProp.managedReferenceValue is not MonoBinding binding)
+                if (bindingProp.managedReferenceValue is not MonoBinding binding)
                 {
                     continue;
                 }
@@ -481,12 +521,13 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                 }
 
                 EditorGUILayout.Space(2f);
+
                 var rect = EditorGUILayout.BeginVertical();
                 {
                     var backRect = rect;
                     backRect.x += 1f;
                     backRect.y -= 4f;
-                    backRect.width += 1f;
+                    backRect.width += hasSequentialAdapter ? -2f : 1f;
                     backRect.height += 7f + 4f;
 
                     // Draw background and select button
@@ -503,10 +544,10 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                     var labelRect = EditorGUILayout.BeginHorizontal();
                     {
                         indexLabel.text = i.ToString();
-                        EditorGUILayout.LabelField(indexLabel, indexLabelStyle, indexLabelWidth);
+                        EditorGUILayout.LabelField(indexLabel, indexLabelStyle, indexLabelWidth, minWidth);
 
                         headerLabel.text = attrib?.Label ?? type.Name;
-                        EditorGUILayout.LabelField(headerLabel, headerLabelStyle);
+                        EditorGUILayout.LabelField(headerLabel, headerLabelStyle, minWidth);
                         GUILayout.Space(4f);
                     }
                     EditorGUILayout.EndHorizontal();
@@ -520,8 +561,8 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                             subHeaderLabel.text = bindingParamType.GetFriendlyName(true);
                             subHeaderLabel.tooltip = bindingParamType.FullName;
 
-                            EditorGUILayout.LabelField(GUIContent.none, indexLabelStyle, indexLabelWidth);
-                            EditorGUILayout.LabelField(subHeaderLabel, subHeaderLabelStyle);
+                            EditorGUILayout.LabelField(GUIContent.none, indexLabelStyle, indexLabelWidth, minWidth);
+                            EditorGUILayout.LabelField(subHeaderLabel, subHeaderLabelStyle, minWidth);
                             GUILayout.Space(4f);
                         }
                         EditorGUILayout.EndHorizontal();
@@ -571,8 +612,8 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
 
                                 var targetPropertyPath = $"{bindingPrefix}{bindingMethodName}{bindingSuffix}";
                                 var adapterPath = $"_converterFor{bindingMethodName}.<Adapter>k__BackingField";
-                                var targetMemberProp = elementProp.FindPropertyRelative(targetPropertyPath);
-                                var adapterProp = elementProp.FindPropertyRelative(adapterPath);
+                                var targetMemberProp = bindingProp.FindPropertyRelative(targetPropertyPath);
+                                var adapterProp = bindingProp.FindPropertyRelative(adapterPath);
 
                                 if (targetMemberProp == null)
                                 {
@@ -644,7 +685,8 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                                     EditorGUILayout.EndHorizontal();
 
                                     DrawAdapterProp(
-                                          converterLabel
+                                          eventData
+                                        , converterLabel
                                         , itemLabelStyle
                                         , itemLabelWidth
                                         , popupStyle
@@ -652,7 +694,9 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                                         , adapterLabel
                                         , adapterMemberLabel
                                         , resetIconLabel
+                                        , adapterMemberLabelWidth
                                         , bindingParamType
+                                        , presetAdaptersProp
                                         , adapterProp
                                         , targetMemberType
                                     );
@@ -668,7 +712,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                         && backRect.Contains(mousePos)
                     )
                     {
-                        property.SetSelectedIndex(i);
+                        presetBindingsProp.SetSelectedIndex(i);
                         EditorGUILayout.EndVertical();
                         return EventResult.Consume;
                     }
@@ -679,14 +723,15 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
 
             if (mouseDownIndex >= 0)
             {
-                ShowRightClickContextMenu(property, mouseDownIndex);
+                ShowRightClickContextMenu(presetBindingsProp, mouseDownIndex);
             }
 
             return EventResult.None;
         }
 
         private static void DrawAdapterProp(
-              GUIContent converterLabel
+              in EventData eventData
+            , GUIContent converterLabel
             , GUIStyle itemLabelStyle
             , float itemLabelWidth
             , GUIStyle popupStyle
@@ -694,7 +739,9 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
             , GUIContent adapterLabel
             , GUIContent adapterMemberLabel
             , GUIContent resetIconLabel
+            , GUILayoutOption adapterMemberLabelWidth
             , Type bindingParamType
+            , SerializedArrayProperty presetAdaptersProp
             , SerializedProperty adapterProp
             , Type targetMemberType
         )
@@ -709,7 +756,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                 , adapterLabel
                 , out var adapterType
                 , out var scriptableAdapter
-                , out var compositeAdapter
+                , out var sequentialAdapter
             );
 
             var converterRect = EditorGUILayout.BeginHorizontal();
@@ -729,13 +776,12 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                     ShowAdapterPropertyMenu(
                           bindingParamType
                         , targetMemberType
+                        , null
                         , adapterProp
                         , adapterType
+                        , includeSequentialAdapter: true
                     );
                 }
-
-                var guiEnabled = GUI.enabled;
-                GUI.enabled = adapterProp.managedReferenceValue != null;
 
                 if (GUILayout.Button(resetIconLabel, iconStyle, GUILayout.Width(20)))
                 {
@@ -752,8 +798,6 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                         serializedObject.Update();
                     }
                 }
-
-                GUI.enabled = guiEnabled;
             }
             EditorGUILayout.EndHorizontal();
 
@@ -763,18 +807,23 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                 return;
             }
 
-            if (compositeAdapter != null)
+            if (sequentialAdapter != null)
             {
-                EditorGUILayout.HelpBox(
-                      "Composite Adapter is not yet supported."
-                    , MessageType.Warning
+                DrawSequentialAdapter(
+                      eventData
+                    , presetAdaptersProp
+                    , adapterProp
+                    , sequentialAdapter
+                    , bindingParamType
+                    , targetMemberType
+                    , adapterLabel
                 );
                 return;
             }
 
             if (adapterType != null)
             {
-                DrawAdapterType(adapterType, adapterProp, adapterMemberLabel);
+                DrawAdapterType(adapterType, adapterProp, adapterMemberLabel, adapterMemberLabelWidth);
             }
         }
 
@@ -783,11 +832,6 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
             , ScriptableAdapter scriptableAdapter
         )
         {
-            if (scriptableAdapter == null)
-            {
-                return;
-            }
-
             var assetProp = adapterProp.FindPropertyRelative("_asset");
 
             if (assetProp == null)
@@ -795,58 +839,65 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                 return;
             }
 
-            EditorGUI.indentLevel++;
-
-            EditorGUI.BeginChangeCheck();
-
-            EditorGUILayout.PropertyField(assetProp, GUIContent.none, false);
-
-            if (EditorGUI.EndChangeCheck())
+            EditorGUILayout.BeginHorizontal();
             {
-                var serializedObject = adapterProp.serializedObject;
-                serializedObject.ApplyModifiedProperties();
-                serializedObject.Update();
-            }
+                GUILayout.Space(84f);
+                EditorGUI.BeginChangeCheck();
 
-            EditorGUI.indentLevel--;
+                EditorGUILayout.PropertyField(assetProp, GUIContent.none, false);
+
+                if (EditorGUI.EndChangeCheck())
+                {
+                    var serializedObject = adapterProp.serializedObject;
+                    serializedObject.ApplyModifiedProperties();
+                    serializedObject.Update();
+                }
+            }
+            EditorGUILayout.EndHorizontal();
         }
 
         private static void DrawAdapterType(
               Type adapterType
             , SerializedProperty adapterProp
             , GUIContent adapterMemberLabel
+            , GUILayoutOption adapterMemberLabelWidth
         )
         {
-            var fieldNames = adapterType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                .Where(static x => x.IsPublic || x.GetCustomAttribute<SerializeField>() != null)
-                .Select(static x => x.Name);
+            TryInitAdapterFieldNames(adapterType);
 
-            EditorGUI.BeginChangeCheck();
+            if (s_adapterFieldNamesMap.TryGetValue(adapterType, out var fieldNames) == false
+                || fieldNames.Length < 1
+            )
+            {
+                return;
+            }
 
             EditorGUI.indentLevel++;
-
-            foreach (var name in fieldNames)
             {
-                var prop = adapterProp.FindPropertyRelative(name);
-                adapterMemberLabel.text = ObjectNames.NicifyVariableName(name);
-                adapterMemberLabel.tooltip = adapterMemberLabel.text;
+                EditorGUI.BeginChangeCheck();
 
-                EditorGUILayout.BeginHorizontal();
+                foreach (var name in fieldNames)
                 {
-                    EditorGUILayout.LabelField(adapterMemberLabel, GUILayout.Width(80));
-                    EditorGUILayout.PropertyField(prop, GUIContent.none, true);
+                    var prop = adapterProp.FindPropertyRelative(name);
+                    adapterMemberLabel.text = ObjectNames.NicifyVariableName(name);
+                    adapterMemberLabel.tooltip = adapterMemberLabel.text;
+
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        EditorGUILayout.LabelField(adapterMemberLabel, adapterMemberLabelWidth);
+                        EditorGUILayout.PropertyField(prop, GUIContent.none, true);
+                    }
+                    EditorGUILayout.EndHorizontal();
                 }
-                EditorGUILayout.EndHorizontal();
-            }
 
+                if (EditorGUI.EndChangeCheck())
+                {
+                    var serializedObject = adapterProp.serializedObject;
+                    serializedObject.ApplyModifiedProperties();
+                    serializedObject.Update();
+                }
+            }
             EditorGUI.indentLevel--;
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                var serializedObject = adapterProp.serializedObject;
-                serializedObject.ApplyModifiedProperties();
-                serializedObject.Update();
-            }
         }
 
         private static void ShowBindingDropdown(
@@ -1420,7 +1471,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
 
             {
                 var node = root.CreateNode("< None >");
-                node.func2 = RemoveBindingProperty;
+                node.func2 = RemoveBindingCommand;
                 node.on = false;
                 node.userData = targetCommandProp;
             }
@@ -1523,7 +1574,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
             , GUIContent label
             , out Type adapterType
             , out ScriptableAdapter scriptableAdapter
-            , out CompositeAdapter compositeAdapter
+            , out SequentialAdapter sequentialAdapter
         )
         {
             if (adapterProp?.managedReferenceValue is IAdapter adapter)
@@ -1537,29 +1588,49 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                 label.tooltip = $"{keyword} <b>{adapterType.Name}</b>\nnamespace {adapterType.Namespace}";
 
                 scriptableAdapter = adapter as ScriptableAdapter;
-                compositeAdapter = adapter as CompositeAdapter;
+                sequentialAdapter = adapter as SequentialAdapter;
             }
             else
             {
                 adapterType = null;
                 scriptableAdapter = null;
-                compositeAdapter = null;
+                sequentialAdapter = null;
                 label.text = "< Undefined >";
                 label.tooltip = string.Empty;
             }
         }
 
+        private static void TryInitAdapterFieldNames(Type type)
+        {
+            if (type == null || s_adapterFieldNamesMap.ContainsKey(type))
+            {
+                return;
+            }
+
+            var fieldNames = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(static x => x.IsPublic || x.GetCustomAttribute<SerializeField>() != null)
+                .Select(static x => x.Name);
+
+            s_adapterFieldNamesMap[type] = fieldNames.ToArray();
+        }
+
         private static void ShowAdapterPropertyMenu(
               Type bindingParamType
             , Type targetMemberType
+            , SerializedArrayProperty adaptersProp
             , SerializedProperty adapterProp
             , Type adapterTypeSaved
+            , bool includeSequentialAdapter
         )
         {
-            var adapterTypes = new List<Type> {
-                typeof(CompositeAdapter),
-                typeof(ScriptableAdapter)
-            };
+            var adapterTypes = new List<Type>(2);
+
+            if (includeSequentialAdapter)
+            {
+                adapterTypes.Add(typeof(SequentialAdapter));
+            }
+
+            adapterTypes.Add(typeof(ScriptableAdapter));
 
             try
             {
@@ -1583,6 +1654,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
             var root = new MenuItemNode();
             var menu = new GenericMenuPopup(root, "Adapters");
 
+            if (adaptersProp == null)
             {
                 var node = root.CreateNode("< None >");
                 node.on = false;
@@ -1592,6 +1664,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
 
             AddAdapterTypesToMenu(
                   root
+                , adaptersProp
                 , adapterProp
                 , adapterTypeSaved
                 , adapterTypes
@@ -1602,6 +1675,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
 
             AddAdapterTypesToMenu(
                   root
+                , adaptersProp
                 , adapterProp
                 , adapterTypeSaved
                 , GetOtherAdapterTypesExcludeSourceType(targetMemberType)
@@ -1620,6 +1694,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
 
         private static void AddAdapterTypesToMenu(
               MenuItemNode root
+            , SerializedArrayProperty adaptersProp
             , SerializedProperty adapterProp
             , Type adapterTypeSaved
             , List<Type> adapterTypes
@@ -1652,8 +1727,17 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
 
                 node = node.CreateNode(labelText, tooltip);
                 node.on = adapterType == adapterTypeSaved;
-                node.func2 = SetAdapterProperty;
-                node.userData = (adapterProp, adapterType);
+
+                if (adaptersProp == null)
+                {
+                    node.func2 = SetAdapterProperty;
+                    node.userData = (adapterProp, adapterType);
+                }
+                else
+                {
+                    node.func2 = AddAdapterProperty;
+                    node.userData = (adaptersProp, adapterType);
+                }
             }
         }
 
@@ -1692,6 +1776,45 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                 Undo.RecordObject(target, $"Set {adapterProp.propertyPath}");
 
                 adapterProp.managedReferenceValue = Activator.CreateInstance(selectedAdapterType);
+                serializedObject.ApplyModifiedProperties();
+                serializedObject.Update();
+            }
+            catch (Exception ex)
+            {
+                DevLoggerAPI.LogException(target, ex);
+            }
+        }
+
+        private static void AddAdapterProperty(object param)
+        {
+            if (param is not (
+                  SerializedArrayProperty adaptersProp
+                , Type selectedAdapterType
+            ))
+            {
+                return;
+            }
+
+            var property = adaptersProp.Property;
+
+            if (property == null)
+            {
+                return;
+            }
+
+            var serializedObject = property.serializedObject;
+            var target = serializedObject.targetObject;
+
+            try
+            {
+                Undo.RecordObject(target, $"Add {property.propertyPath}");
+
+                var index = property.arraySize;
+                property.arraySize += 1;
+
+                var elementProp = property.GetArrayElementAtIndex(index);
+                elementProp.managedReferenceValue = Activator.CreateInstance(selectedAdapterType);
+
                 serializedObject.ApplyModifiedProperties();
                 serializedObject.Update();
             }

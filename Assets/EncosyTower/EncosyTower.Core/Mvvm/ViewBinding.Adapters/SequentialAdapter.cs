@@ -8,8 +8,8 @@ using UnityEngine;
 namespace EncosyTower.Mvvm.ViewBinding.Adapters
 {
     [Serializable]
-    [Label("Composite Adapter", "Default")]
-    public sealed class CompositeAdapter : IAdapter, ISerializationCallbackReceiver
+    [Label("Sequence of Adapters", "Default")]
+    public sealed class SequentialAdapter : IAdapter, ISerializationCallbackReceiver
     {
         [SerializeField]
         [SerializeReference]

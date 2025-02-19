@@ -26,7 +26,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
         /// </summary>
         /// <remarks>
         /// Does not include <see cref="EncosyTower.Mvvm.ViewBinding.Adapters.Unity.ScriptableAdapter"/>
-        /// and <see cref="EncosyTower.Mvvm.ViewBinding.Adapters.CompositeAdapter"/>
+        /// and <see cref="EncosyTower.Mvvm.ViewBinding.Adapters.SequentialAdapter"/>
         /// </remarks>
         private readonly static Dictionary<DestType, Dictionary<SourceType, HashSet<Type>>> s_adapterMap = new(128);
         private readonly static GenericMenuPopup s_binderMenu = new(new MenuItemNode(), "Binders");
@@ -38,6 +38,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
         private readonly static Dictionary<Type, MemberMap> s_bindingCommandMap = new(128);
         private readonly static Dictionary<Type, GenericMenuPopup> s_targetTypeToBindingMenuMap = new(128);
         private readonly static Dictionary<Type, Type> s_contextToInspectorMap = new(4);
+        private readonly static Dictionary<Type, string[]> s_adapterFieldNamesMap = new(128);
         private readonly static PropertyRef s_contextPropRef = new();
         private readonly static PropertyRef s_bindersPropRef = new();
         private readonly static PropertyRef s_binderPropRef = new();
@@ -56,6 +57,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
         private const string PROP_PRESET_BINDERS = "_presetBinders";
         private const string PROP_PRESET_BINDINGS = "_presetBindings";
         private const string PROP_PRESET_TARGETS = "_presetTargets";
+        private const string PROP_PRESET_ADAPTERS = "_presetAdapters";
         private const string PROP_SUBTITLE = "_subtitle";
 
         private MonoView _view;
@@ -69,6 +71,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
         private SerializedArrayProperty _presetBindersProp;
         private SerializedArrayProperty _presetBindingsProp;
         private SerializedArrayProperty _presetTargetsProp;
+        private SerializedArrayProperty _presetAdaptersProp;
         private BindingContextInspector _contextInspector;
 
         private readonly GUIContent _settingsLabel = new("Settings");
@@ -113,7 +116,14 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                 , OnValidatePasteSingleTarget
             );
 
-            _presetBindersProp.Intialize(serializedObject.FindProperty(PROP_PRESET_BINDERS));
+            _presetAdaptersProp = new(
+                  "SequentialAdapter"
+                , static (src, dest) => dest.objectReferenceValue = src.objectReferenceValue
+                , OnValidatePasteAllAdapters
+                , OnValidatePasteSingleAdapter
+            );
+
+            _presetBindersProp.Initialize(serializedObject.FindProperty(PROP_PRESET_BINDERS));
             _presetBindersProp.LoadSelectedIndex();
             _presetBindersProp.SetSelectedIndex(_presetBindersProp.SelectedIndex);
 
@@ -303,6 +313,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
             , in Rect rect
             , in Rect offset = default
             , GUIContent icon = null
+            , GUILayoutOption guiMinWidth = null
         )
         {
             var labelStyle = s_rootTabLabelStyle;
@@ -343,20 +354,29 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                 GUI.DrawTexture(iconRect, tex, mode, true, 1f, Color.white, borders, radius);
             }
 
-            EditorGUILayout.LabelField(label, labelStyle, guiWidth, GUILayout.Height(26));
+            guiMinWidth ??= guiWidth;
+
+            EditorGUILayout.LabelField(label, labelStyle, guiWidth, guiMinWidth, GUILayout.Height(26));
         }
 
-        private static void DrawPanelHeaderFoldout(in Rect rect, SerializedProperty property, GUIContent label, in Rect offset = default)
+        private static void DrawPanelHeaderFoldout(
+              in Rect rect
+            , SerializedProperty property
+            , GUIContent label
+            , in Rect offset = default
+            , in Rect expandOffset = default
+            , GUIStyle labelStyle = default
+        )
         {
             var isExpanded = property.isExpanded;
 
             // Draw background
             {
                 var backRect = rect;
-                backRect.x += 1f + offset.x;
-                backRect.y += 1f + offset.y;
-                backRect.width -= 3f + offset.width;
-                backRect.height -= isExpanded ? (3f + offset.height) : 2f;
+                backRect.x += isExpanded ? (1f + expandOffset.x) : (1f + offset.x);
+                backRect.y += isExpanded ? (1f + expandOffset.y) : (1f + offset.y);
+                backRect.width -= isExpanded ? (3f + expandOffset.width) : (3f + offset.width);
+                backRect.height -= isExpanded ? (3f + expandOffset.height) : (3f + offset.height);
 
                 var tex = Texture2D.whiteTexture;
                 var mode = ScaleMode.StretchToFill;
@@ -371,7 +391,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
                 var labelRect = rect;
                 labelRect.y += 1f;
 
-                if (GUI.Button(rect, label, s_rootTabLabelStyle))
+                if (GUI.Button(rect, label, labelStyle ?? s_rootTabLabelStyle))
                 {
                     isExpanded = property.isExpanded = !isExpanded;
                 }
@@ -397,15 +417,16 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
         {
             if (_presetBindersProp.TryGetAtSelectedIndex(out var binderProperty))
             {
-                _presetBindingsProp.Intialize(binderProperty.FindPropertyRelative(PROP_PRESET_BINDINGS));
-                _presetTargetsProp.Intialize(binderProperty.FindPropertyRelative(PROP_PRESET_TARGETS));
+                _presetBindingsProp.Initialize(binderProperty.FindPropertyRelative(PROP_PRESET_BINDINGS));
+                _presetTargetsProp.Initialize(binderProperty.FindPropertyRelative(PROP_PRESET_TARGETS));
             }
             else
             {
                 _presetBindingsProp.SetSelectedIndex(null);
                 _presetTargetsProp.SetSelectedIndex(null);
-                _presetBindingsProp.Intialize(null);
-                _presetTargetsProp.Intialize(null);
+                _presetBindingsProp.Initialize(null);
+                _presetTargetsProp.Initialize(null);
+                _presetAdaptersProp.Initialize(null);
             }
         }
 
@@ -413,16 +434,17 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
         {
             _presetBindingsProp.SetSelectedIndex(null);
             _presetTargetsProp.SetSelectedIndex(null);
+            _presetAdaptersProp.Initialize(null);
 
             if (property.TryGetAtSelectedIndex(out var binderProperty))
             {
-                _presetBindingsProp.Intialize(binderProperty.FindPropertyRelative(PROP_PRESET_BINDINGS));
-                _presetTargetsProp.Intialize(binderProperty.FindPropertyRelative(PROP_PRESET_TARGETS));
+                _presetBindingsProp.Initialize(binderProperty.FindPropertyRelative(PROP_PRESET_BINDINGS));
+                _presetTargetsProp.Initialize(binderProperty.FindPropertyRelative(PROP_PRESET_TARGETS));
             }
             else
             {
-                _presetBindingsProp.Intialize(null);
-                _presetTargetsProp.Intialize(null);
+                _presetBindingsProp.Initialize(null);
+                _presetTargetsProp.Initialize(null);
             }
         }
 
@@ -907,10 +929,13 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
 
             var destParent = dest.Property.FindParentProperty();
 
-            return destParent is { propertyType: SerializedPropertyType.ManagedReference, managedReferenceValue: MonoBinder destBinder }
-                   && s_binderToTargetTypeMap.TryGetValue(destBinder.GetType(), out var destTargetType)
-                   && s_bindingToTargetTypeMap.TryGetValue(srcBinding.GetType(), out var srcTargetType)
-                   && srcTargetType == destTargetType;
+            return destParent is {
+                    propertyType: SerializedPropertyType.ManagedReference,
+                    managedReferenceValue: MonoBinder destBinder,
+                }
+                && s_binderToTargetTypeMap.TryGetValue(destBinder.GetType(), out var destTargetType)
+                && s_bindingToTargetTypeMap.TryGetValue(srcBinding.GetType(), out var srcTargetType)
+                && srcTargetType == destTargetType;
         }
 
         private static bool OnValidatePasteAllTargets(SerializedProperty src, SerializedArrayProperty dest)
@@ -930,9 +955,27 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
             var destParent = dest.Property.FindParentProperty();
 
             return srcObject
-                && destParent is { propertyType: SerializedPropertyType.ManagedReference, managedReferenceValue: MonoBinder destBinder }
+                && destParent is {
+                    propertyType: SerializedPropertyType.ManagedReference,
+                    managedReferenceValue: MonoBinder destBinder,
+                }
                 && s_binderToTargetTypeMap.TryGetValue(destBinder.GetType(), out var destTargetType)
                 && destTargetType.IsAssignableFrom(srcObject.GetType());
+        }
+
+        private static bool OnValidatePasteAllAdapters(SerializedProperty src, SerializedArrayProperty dest)
+        {
+            return src.isArray
+                && src.propertyPath.EndsWith(PROP_PRESET_ADAPTERS, StringComparison.Ordinal)
+                && dest.Property.propertyPath.Equals(PROP_PRESET_ADAPTERS, StringComparison.Ordinal);
+        }
+
+        private static bool OnValidatePasteSingleAdapter(SerializedProperty src, SerializedArrayProperty dest)
+        {
+            return src.isArray == false
+                && src.propertyType == SerializedPropertyType.ManagedReference
+                && src.managedReferenceValue is IAdapter
+                && dest.Property.propertyPath.Equals(PROP_PRESET_ADAPTERS, StringComparison.Ordinal);
         }
 
         private static bool ValidatePasteAll(

@@ -57,7 +57,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
 
             public int ArraySize => _property?.arraySize ?? 0;
 
-            public void Intialize(SerializedProperty property)
+            public void Initialize(SerializedProperty property)
             {
                 _property = property;
             }
