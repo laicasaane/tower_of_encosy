@@ -11,6 +11,7 @@ namespace EncosyTower.SourceGen.Generators
             , string source
             , string hintName
             , string sourceFilePath
+            , Printer? overridePrinter = default
         )
         {
             var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
@@ -19,6 +20,7 @@ namespace EncosyTower.SourceGen.Generators
                 , syntax
                 , source
                 , context.CancellationToken
+                , overridePrinter
             );
 
             context.AddSource(hintName, outputSource);
@@ -42,6 +44,7 @@ namespace EncosyTower.SourceGen.Generators
             , string source
             , string hintName
             , string sourceFilePath
+            , Printer? overridePrinter = default
         )
         {
             var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
@@ -50,6 +53,7 @@ namespace EncosyTower.SourceGen.Generators
                 , originalSyntax
                 , source
                 , context.CancellationToken
+                , overridePrinter
             );
 
             context.AddSource(hintName, outputSource);

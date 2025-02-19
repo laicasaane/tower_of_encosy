@@ -211,6 +211,7 @@ namespace EncosyTower.SourceGen
             , SyntaxNode originalSyntax
             , string generatedSyntax
             , CancellationToken cancellationToken
+            , Printer? overridePrinter = default
         )
         {
             // DO NOT worry about #if directives
@@ -218,7 +219,8 @@ namespace EncosyTower.SourceGen
             // every disabled code will be removed from the compilation context.
             // So there might be no generated code to worry about.
 
-            var printer = Printer.DefaultLarge;
+            var printer = overridePrinter ?? Printer.DefaultLarge;
+
             var result = WriteOpeningSyntax_AndReturnClosingSyntax(
                   ref printer
                 , containingSyntax

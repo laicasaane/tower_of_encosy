@@ -144,12 +144,25 @@ namespace EncosyTower.SourceGen.Generators.Databases
                             , GENERATOR_NAME
                         );
 
+                        var printer = Printer.DefaultLarge;
+
+                        {
+                            printer.PrintEndLine();
+                            printer.Print("#if !(UNITY_EDITOR || DEBUG) || DISABLE_ENCOSY_CHECKS").PrintEndLine();
+                            printer.Print("#define __ENCOSY_NO_VALIDATION__").PrintEndLine();
+                            printer.Print("#else").PrintEndLine();
+                            printer.Print("#define __ENCOSY_VALIDATION__").PrintEndLine();
+                            printer.Print("#endif").PrintEndLine();
+                            printer.PrintEndLine();
+                        }
+
                         context.OutputSource(
                               outputSourceGenFiles
                             , databaseRef.Syntax
                             , declaration.WriteDatabase(databaseRef.AssetName, databaseRef.NamingStrategy, tables)
                             , databaseHintName
                             , databaseSourceFilePath
+                            , printer
                         );
                     }
 
