@@ -151,10 +151,9 @@ namespace EncosyTower.Databases.Settings
 
                 var databaseAttrib = databaseType.GetCustomAttribute<DatabaseAttribute>(true);
 
-                if (string.IsNullOrWhiteSpace(databaseAttrib.AssetName) == false)
-                {
-                    databaseAssetName = databaseAttrib.AssetName;
-                }
+                databaseAssetName = string.IsNullOrWhiteSpace(databaseAttrib.AssetName)
+                    ? $"{databaseAssetName}_{databaseType.Name}"
+                    : databaseAttrib.AssetName;
 
                 databaseAssetName = NamingMap.ConvertName(databaseAssetName, databaseAttrib.NamingStrategy);
 

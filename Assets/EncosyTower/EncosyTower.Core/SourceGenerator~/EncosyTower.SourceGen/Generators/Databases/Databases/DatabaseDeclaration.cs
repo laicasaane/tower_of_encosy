@@ -23,6 +23,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
         {
             var attrib = DatabaseRef.Attribute;
             var args = attrib.NamedArguments;
+            var databaseAssetName = string.Empty;
 
             foreach (var arg in args)
             {
@@ -31,10 +32,14 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     && arg.Value.Value?.ToString() is string assetName
                 )
                 {
-                    DatabaseRef.AssetName = assetName;
+                    databaseAssetName = assetName;
                     break;
                 }
             }
+
+            DatabaseRef.AssetName = string.IsNullOrWhiteSpace(databaseAssetName)
+                ? $"DatabaseAsset_{DatabaseRef.Syntax.Identifier.Text}"
+                : databaseAssetName;
         }
 
         private void InitializeNamingStrategy()
