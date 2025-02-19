@@ -41,11 +41,12 @@ and source generator[^1].
 
 ## Debugging
 
-These requirements are needed to debug a source generator project:
+Requirements for debugging a source generator project:
 
 1. Must install the [.NET Compiler Platform SDK][net-compiler-installing].
 2. Set the source generator project as the startup project[^3].
-3. The [launchSettings.json][launch-settings-json] file locates at the `Properties/` folder specifies the target project on which source generators will run.
+3. The [launchSettings.json][launch-settings-json] file locates at the `Properties/` folder specifies
+the target project on which source generators will run.
 
 ```json
 {
