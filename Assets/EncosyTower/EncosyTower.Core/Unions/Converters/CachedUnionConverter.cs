@@ -8,6 +8,8 @@ namespace EncosyTower.Unions.Converters
 
         private IUnionConverter<T> _converter;
 
+        private CachedUnionConverter() { }
+
         public IUnionConverter<T> Converter
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -22,27 +24,27 @@ namespace EncosyTower.Unions.Converters
                 return value.ToString();
             }
 
-            return this.Converter.ToString(union);
+            return Converter.ToString(union);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Union ToUnion(T value)
-            => this.Converter.ToUnion(value);
+            => Converter.ToUnion(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Union<T> ToUnionT(T value)
-            => this.Converter.ToUnionT(value);
+            => Converter.ToUnionT(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetValue(in Union union)
-            => this.Converter.GetValue(union);
+            => Converter.GetValue(union);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetValue(in Union union, out T result)
-            => this.Converter.TryGetValue(union, out result);
+            => Converter.TryGetValue(union, out result);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TrySetValueTo(in Union union, ref T dest)
-            => this.Converter.TrySetValueTo(union, ref dest);
+            => Converter.TrySetValueTo(union, ref dest);
     }
 }

@@ -30,7 +30,7 @@ namespace EncosyTower.Mvvm.Input
 
         private event MvvmEventHandler _canExecuteChanged;
 
-        private readonly CachedUnionConverter<T> _converter = new();
+        private readonly CachedUnionConverter<T> _converter = CachedUnionConverter<T>.Default;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RelayCommand{T}"/> class that can always execute.
