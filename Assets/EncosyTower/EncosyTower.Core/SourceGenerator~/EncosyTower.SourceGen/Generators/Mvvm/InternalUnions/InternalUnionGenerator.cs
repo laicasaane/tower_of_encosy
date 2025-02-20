@@ -7,6 +7,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.InternalUnions
 {
+    using TypeRef = Unions.InternalUnions.TypeRef;
+    using InternalUnionDeclaration = Unions.InternalUnions.InternalUnionDeclaration;
+
     [Generator]
     public class InternalUnionGenerator : IIncrementalGenerator
     {
@@ -18,6 +21,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalUnions
         private const string INPUT_NS = $"{NAMESPACE}.Input";
         private const string IOBSERVABLE_OBJECT = $"global::{NAMESPACE}.ComponentModel.IObservableObject";
         private const string IUNION_T = "global::EncosyTower.Unions.IUnion<";
+        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.InternalUnions.InternalUnionGenerator\", \"{SourceGenVersion.VALUE}\")]";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -229,7 +233,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalUnions
             {
                 SourceGenHelpers.ProjectPath = projectPath;
 
-                var declaration = new InternalUnionDeclaration(candidates, candidatesToIgnore);
+                var declaration = new InternalUnionDeclaration(candidates, candidatesToIgnore) {
+                    InternalUnionsNamespace = "EncosyTower.Mvvm.__InternalUnions__",
+                    GeneratedCodeAttribute = GENERATED_CODE,
+                };
 
                 declaration.GenerateUnionForValueTypes(
                       context
@@ -263,9 +270,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalUnions
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_INTERNAL_UNIONS_01"
-                , "Internal Union Generator Error"
-                , "This error indicates a bug in the Internal Union source generators. Error message: '{0}'."
+            = new("SG_MVVM_INTERNAL_UNIONS_01"
+                , "Mvvm Internal Union Generator Error"
+                , "This error indicates a bug in the Mvvm Internal Union source generators. Error message: '{0}'."
                 , $"{NAMESPACE}.IObservableObject"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true

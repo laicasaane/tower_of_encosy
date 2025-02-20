@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace EncosyTower.SourceGen.Generators.Mvvm.InternalUnions
+namespace EncosyTower.SourceGen.Generators.Unions.InternalUnions
 {
     public partial class InternalUnionDeclaration
     {

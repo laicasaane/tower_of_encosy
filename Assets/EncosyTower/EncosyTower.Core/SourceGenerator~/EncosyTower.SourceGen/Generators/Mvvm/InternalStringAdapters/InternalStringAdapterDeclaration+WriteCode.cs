@@ -77,7 +77,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                     p.OpenScope();
                     {
                         p.PrintLine(GENERATED_CODE);
-                        p.PrintLine($"private readonly {CACHED_UNION_CONVERTER}<{typeName}> _converter = new {CACHED_UNION_CONVERTER}<{typeName}>();");
+                        p.PrintLine($"private readonly {CACHED_UNION_CONVERTER}<{typeName}> _converter = {CACHED_UNION_CONVERTER}<{typeName}>.Default;");
                         p.PrintEndLine();
 
                         p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);

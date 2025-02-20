@@ -2,28 +2,22 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
-namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
+namespace EncosyTower.SourceGen.Generators.Unions.InternalUnions
 {
     using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+    using static UnionPrinter;
 
-    partial class GenericUnionDeclaration
+    partial class InternalUnionDeclaration
     {
-        private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
-        public const string NAMESPACE = "EncosyTower.Unions";
-        public const string STRUCT_LAYOUT = "[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit)]";
-        public const string META_OFFSET = $"[global::System.Runtime.InteropServices.FieldOffset(global::{NAMESPACE}.UnionBase.META_OFFSET)]";
-        public const string DATA_OFFSET = $"[global::System.Runtime.InteropServices.FieldOffset(global::{NAMESPACE}.UnionBase.DATA_OFFSET)]";
-        public const string UNION_TYPE = $"global::{NAMESPACE}.Union";
-        public const string UNION_DATA_TYPE = $"global::{NAMESPACE}.UnionData";
-        public const string UNION_TYPE_KIND = $"global::{NAMESPACE}.UnionTypeKind";
-        public const string DOES_NOT_RETURN = "[global::System.Diagnostics.CodeAnalysis.DoesNotReturn]";
-        public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.BeforeSplashScreen)]";
-        public const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
+        private const string CONVERTER_DEFAULT = "Union__{0}.Converter.Default";
+        public const string GENERATED_INTERNAL_UNIONS = $"[global::{NAMESPACE}.SourceGen.GeneratedInternalUnions]";
+        public const string GENERATOR_NAME = nameof(InternalUnionGenerator);
 
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Unions.GenericUnions.GenericUnionGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        private const string CONVERTER_DEFAULT = "{0}.Converter.Default";
-        public const string GENERATED_GENERIC_UNIONS = $"[global::{NAMESPACE}.SourceGen.GeneratedGenericUnions]";
-        public const string GENERATOR_NAME = nameof(GenericUnionDeclaration);
+        public string InternalUnionsNamespace { get; set; }
+            = "EncosyTower.Unions.__InternalUnions__";
+
+        public string GeneratedCodeAttribute { get; set; }
+            = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Unions.InternalUnions.InternalUnionGenerator\", \"{SourceGenVersion.VALUE}\")]";
 
         public void GenerateStaticClass(
               SourceProductionContext context
@@ -38,7 +32,7 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
             {
                 var syntaxTree = syntax.SyntaxTree;
                 var assemblyName = compilation.Assembly.Name;
-                var fileName = $"GenericUnions_{assemblyName}";
+                var fileName = $"InternalUnions_{assemblyName}";
                 var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, fileName, syntax);
                 var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME);
 
@@ -60,98 +54,41 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
             }
         }
 
-        public void GenerateRedundantTypes(
-              SourceProductionContext context
-            , Compilation compilation
-            , bool outputSourceGenFiles
-            , DiagnosticDescriptor errorDescriptor
-        )
-        {
-            foreach (var typeRef in Redundants)
-            {
-                try
-                {
-                    var syntax = typeRef.Syntax;
-                    var syntaxTree = syntax.SyntaxTree;
-                    var hintName = syntaxTree.GetGeneratedSourceFileName(
-                          GENERATOR_NAME
-                        , syntax
-                        , typeRef.Symbol.ToValidIdentifier()
-                    );
-
-                    var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                          compilation.Assembly.Name
-                        , GENERATOR_NAME
-                    );
-
-                    context.OutputSource(
-                          outputSourceGenFiles
-                        , syntax
-                        , WriteRedundantType(typeRef)
-                        , hintName
-                        , sourceFilePath
-                    );
-                }
-                catch (Exception e)
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                          errorDescriptor
-                        , typeRef.Syntax.GetLocation()
-                        , e.ToUnityPrintableString()
-                    ));
-                }
-            }
-        }
-
-        private static string WriteRedundantType(TypeRef structRef)
-        {
-            var typeName = structRef.TypeArgument.ToFullName();
-            var structName = structRef.Syntax.Identifier.Text;
-
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, structRef.Syntax.Parent);
-            var p = scopePrinter.printer;
-
-            p = p.IncreasedIndent();
-
-            p.PrintLine("/// <summary>");
-            p.PrintLine($"/// A union has already been implemented for <see cref=\"{typeName}\"/.");
-            p.PrintLine("/// This declaration is redundant and can be removed.");
-            p.PrintLine("/// </summary>");
-            p.PrintLine($"[global::System.Obsolete(\"A union has already been implemented for {typeName}. This declaration is redundant and can be removed.\")]");
-            p.PrintLine($"partial struct {structName} {{ }}");
-
-            p = p.DecreasedIndent();
-            return p.Result;
-        }
-
-        private static string WriteStaticClass(
+        private string WriteStaticClass(
               ImmutableArray<TypeRef> valueTypes
             , ImmutableArray<TypeRef> refTypes
             , string assemblyName
         )
         {
             var p = Printer.DefaultLarge;
-            var unionPrinter = new UnionPrinter(GENERATED_CODE);
+            var unionPrinter = new UnionPrinter(GeneratedCodeAttribute);
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            p.PrintLine($"namespace {NAMESPACE}.__GenericUnions__.{assemblyName.ToValidIdentifier()}");
+            p.PrintBeginLine("namespace ").Print(InternalUnionsNamespace)
+                .Print(".").PrintEndLine(assemblyName.ToValidIdentifier());
             p.OpenScope();
             {
                 p.PrintLine("/// <summary>");
-                p.PrintLine("/// Automatically registers generic unions");
+                p.PrintLine("/// Contains auto-generated unions for types that are the type of either");
+                p.PrintLine("/// [ObservableProperty] properties or the parameter of [RelayCommand] methods.");
+                p.PrintLine("/// <br/>");
+                p.PrintLine("/// Automatically register these unions");
                 p.PrintLine($"/// to <see cref=\"{NAMESPACE}.Converters.UnionConverter\"/>");
                 p.PrintLine("/// on Unity3D platform.");
+                p.PrintLine("/// <br/>");
+                p.PrintLine("/// These unions are not intended to be used directly by user-code");
+                p.PrintLine("/// thus they are declared <c>private</c> inside this class.");
                 p.PrintLine("/// </summary>");
-                p.PrintLine(GENERATED_GENERIC_UNIONS)
-                    .PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
-                p.PrintLine("public static partial class GenericUnions");
+                p.PrintLine(GENERATED_INTERNAL_UNIONS)
+                    .PrintLine(GeneratedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+                p.PrintLine("public static partial class InternalUnions");
                 p.OpenScope();
                 {
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
-                    p.PrintLine("static GenericUnions()");
+                    p.PrintLine(GeneratedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+                    p.PrintLine("static InternalUnions()");
                     p.OpenScope();
                     {
                         p.PrintLine("Init();");
@@ -159,17 +96,25 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
                     p.CloseScope();
                     p.PrintEndLine();
 
+                    p.PrintLine("/// <summary>");
+                    p.PrintLine("/// Register all unions inside this class");
+                    p.PrintLine($"/// to <see cref=\"{NAMESPACE}.Converters.UnionConverter\"/>");
+                    p.PrintLine("/// </summary>");
+                    p.PrintLine(GeneratedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+                    p.PrintLine("public static void Register() => Init();");
+                    p.PrintEndLine();
+
                     p.PrintLine(RUNTIME_INITIALIZE_ON_LOAD_METHOD);
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+                    p.PrintLine(GeneratedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
                     p.PrintLine("private static void Init()");
                     p.OpenScope();
                     {
                         foreach (var typeRef in valueTypes)
                         {
                             var symbol = typeRef.Symbol;
-                            var typeName = typeRef.TypeArgument.ToFullName();
-                            var simpleTypeName = typeRef.TypeArgument.ToSimpleName();
-                            var identifier = symbol.ToFullName();
+                            var typeName = symbol.ToFullName();
+                            var simpleTypeName = symbol.ToSimpleName();
+                            var identifier = symbol.ToValidIdentifier();
                             var converterDefault = string.Format(CONVERTER_DEFAULT, identifier);
 
                             unionPrinter.WriteRegister(
@@ -186,9 +131,9 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
                         foreach (var typeRef in refTypes)
                         {
                             var symbol = typeRef.Symbol;
-                            var typeName = typeRef.TypeArgument.ToFullName();
-                            var simpleTypeName = typeRef.TypeArgument.ToSimpleName();
-                            var identifier = symbol.ToFullName();
+                            var typeName = symbol.ToFullName();
+                            var simpleTypeName = symbol.ToSimpleName();
+                            var identifier = symbol.ToValidIdentifier();
                             var converterDefault = string.Format(CONVERTER_DEFAULT, identifier);
 
                             unionPrinter.WriteRegister(
@@ -238,8 +183,9 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
 
                     context.OutputSource(
                           outputSourceGenFiles
+                        , null
                         , syntax
-                        , WriteUnion(typeRef, true)
+                        , WriteUnion(typeRef, compilation.Assembly.Name, true)
                         , hintName
                         , sourceFilePath
                     );
@@ -281,8 +227,9 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
 
                     context.OutputSource(
                           outputSourceGenFiles
+                        , null
                         , syntax
-                        , WriteUnion(typeRef, false)
+                        , WriteUnion(typeRef, compilation.Assembly.Name, false)
                         , hintName
                         , sourceFilePath
                     );
@@ -298,38 +245,48 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
             }
         }
 
-        private static string WriteUnion(TypeRef typeRef, bool isValueType)
+        private string WriteUnion(TypeRef typeRef, string assemblyName, bool isValueType)
         {
-            var symbol = typeRef.TypeArgument;
+            var symbol = typeRef.Symbol;
             var typeName = symbol.ToFullName();
-            var structName = typeRef.Syntax.Identifier.Text;
+            var identifier = symbol.ToValidIdentifier();
+            var structName = $"Union__{identifier}";
             var unionName = $"global::EncosyTower.Unions.Union<{typeName}>";
 
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, typeRef.Syntax.Parent);
-            var p = scopePrinter.printer;
-            var unionPrinter = new UnionPrinter(GENERATED_CODE);
+            var p = Printer.DefaultLarge;
+            var unionPrinter = new UnionPrinter(GeneratedCodeAttribute);
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            p = p.IncreasedIndent();
+            p.PrintBeginLine("namespace ").Print(InternalUnionsNamespace)
+                .Print(".").PrintEndLine(assemblyName.ToValidIdentifier());
+            p.OpenScope();
             {
-                p.PrintLineIf(isValueType, STRUCT_LAYOUT);
-                p.PrintBeginLine()
-                    .Print("partial struct ").Print(structName)
-                    .PrintEndLine();
+                p.PrintLine("static partial class InternalUnions");
+                p.OpenScope();
+                {
+                    p.PrintLine(GeneratedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+                    p.PrintLineIf(isValueType, STRUCT_LAYOUT);
+                    p.PrintBeginLine()
+                        .Print("private partial struct ").Print(structName)
+                        .Print($" : global::EncosyTower.Unions.IUnion<{typeName}>")
+                        .PrintEndLine();
 
-                unionPrinter.WriteUnionBody(
-                    ref p
-                    , isValueType
-                    , isValueType || typeRef.Symbol.TypeKind != TypeKind.Interface
-                    , typeName
-                    , structName
-                    , unionName
-                );
+                    unionPrinter.WriteUnionBody(
+                          ref p
+                        , isValueType
+                        , isValueType || typeRef.Symbol.TypeKind != TypeKind.Interface
+                        , typeName
+                        , structName
+                        , unionName
+                    );
+                }
+                p.CloseScope();
             }
-            p = p.DecreasedIndent();
+            p.CloseScope();
+
             return p.Result;
         }
     }

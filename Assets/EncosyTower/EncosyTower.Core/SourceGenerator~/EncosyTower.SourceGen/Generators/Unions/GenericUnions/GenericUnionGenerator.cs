@@ -50,7 +50,7 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
                 );
         }
 
-        public static StructRef GetStructSemanticMatch(
+        public static TypeRef GetStructSemanticMatch(
               GeneratorSyntaxContext context
             , CancellationToken token
         )
@@ -78,7 +78,7 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
                        && interfaceSymbol.ToFullName().StartsWith(IUNION_T)
                     )
                     {
-                        return new StructRef {
+                        return new TypeRef {
                             Syntax = structSyntax,
                             TypeArgument = interfaceSymbol.TypeArguments[0],
                         };
@@ -89,7 +89,7 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
                     || TryGetMatchTypeArgument(typeInfo.Type.AllInterfaces, out type)
                 )
                 {
-                    return new StructRef {
+                    return new TypeRef {
                         Syntax = structSyntax,
                         TypeArgument = type,
                     };
@@ -123,7 +123,7 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
         private static void GenerateOutput(
               SourceProductionContext context
             , Compilation compilation
-            , ImmutableArray<StructRef> candidates
+            , ImmutableArray<TypeRef> candidates
             , string projectPath
             , bool outputSourceGenFiles
         )

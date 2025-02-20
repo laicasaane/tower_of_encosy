@@ -12,4 +12,12 @@ namespace EncosyTower.Tests.UnionTests
     }
 
     public readonly partial struct StructWithRefsUnion : IUnion<StructWithRefs> { }
+
+    public class UnionTest
+    {
+        public void DoSomething()
+        {
+            var _ = Union<Vector2>.GetConverter();
+        }
+    }
 }

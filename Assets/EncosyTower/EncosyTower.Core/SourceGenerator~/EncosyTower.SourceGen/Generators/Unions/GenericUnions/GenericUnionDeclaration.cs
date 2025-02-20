@@ -9,21 +9,21 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
 {
     public partial class GenericUnionDeclaration
     {
-        public ImmutableArray<StructRef> ValueTypeRefs { get; }
+        public ImmutableArray<TypeRef> ValueTypeRefs { get; }
 
-        public ImmutableArray<StructRef> RefTypeRefs { get; }
+        public ImmutableArray<TypeRef> RefTypeRefs { get; }
 
-        public ImmutableArray<StructRef> Redundants { get; }
+        public ImmutableArray<TypeRef> Redundants { get; }
 
         public GenericUnionDeclaration(
-              ImmutableArray<StructRef> candidates
+              ImmutableArray<TypeRef> candidates
             , Compilation compilation
             , CancellationToken token
         )
         {
-            using var redundants = ImmutableArrayBuilder<StructRef>.Rent();
-            var valueTypeFiltered = new Dictionary<string, StructRef>();
-            var refTypeFiltered = new Dictionary<string, StructRef>();
+            using var redundants = ImmutableArrayBuilder<TypeRef>.Rent();
+            var valueTypeFiltered = new Dictionary<string, TypeRef>();
+            var refTypeFiltered = new Dictionary<string, TypeRef>();
 
             foreach (var candidate in candidates)
             {
@@ -67,8 +67,8 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
                 }
             }
 
-            using var valueTypeRefs = ImmutableArrayBuilder<StructRef>.Rent();
-            using var refTypeRefs = ImmutableArrayBuilder<StructRef>.Rent();
+            using var valueTypeRefs = ImmutableArrayBuilder<TypeRef>.Rent();
+            using var refTypeRefs = ImmutableArrayBuilder<TypeRef>.Rent();
 
             valueTypeRefs.AddRange(valueTypeFiltered.Values);
             refTypeRefs.AddRange(refTypeFiltered.Values);
@@ -79,7 +79,7 @@ namespace EncosyTower.SourceGen.Generators.Unions.GenericUnions
         }
     }
 
-    public class StructRef
+    public class TypeRef
     {
         public StructDeclarationSyntax Syntax { get; set; }
 

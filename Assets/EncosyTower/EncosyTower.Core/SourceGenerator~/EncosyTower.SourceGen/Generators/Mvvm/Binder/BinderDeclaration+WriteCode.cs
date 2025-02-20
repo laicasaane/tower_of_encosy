@@ -315,7 +315,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 var propertyName = type.ToValidIdentifier().AsSpan().ToTitleCase();
 
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"private readonly {CACHED_UNION_CONVERTER}<{typeName}> _unionConverter{propertyName} = new {CACHED_UNION_CONVERTER}<{typeName}>();");
+                p.PrintLine($"private readonly {CACHED_UNION_CONVERTER}<{typeName}> _unionConverter{propertyName} = {CACHED_UNION_CONVERTER}<{typeName}>.Default;");
                 p.PrintEndLine();
             }
 

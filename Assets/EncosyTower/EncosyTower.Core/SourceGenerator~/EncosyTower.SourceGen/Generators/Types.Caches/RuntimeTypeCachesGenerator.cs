@@ -113,10 +113,10 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
 
             var member = syntax.Name as GenericNameSyntax;
             var typeArgList = member.TypeArgumentList;
-            var containingSyntax = GetContainingType(syntax);
-
-            var containingType = semanticModel.GetDeclaredSymbol(containingSyntax, token);
             var typeInfo = semanticModel.GetTypeInfo(typeArgList.Arguments[0], token);
+
+            var containingSyntax = GetContainingType(syntax);
+            var containingType = semanticModel.GetDeclaredSymbol(containingSyntax, token);
 
             var cacheAttributeType = member.Identifier.ValueText switch {
                 METHOD_GET_INFO => CacheAttributeType.CacheType,
@@ -206,11 +206,13 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
 
                 try
                 {
+                    var identifier = containingType.ToValidIdentifier();
+
                     context.OutputSource(
                           outputSourceGenFiles
                         , containingSyntax
                         , WriteCode(containingSyntax, containingType, list)
-                        , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, containingSyntax, containingType.ToValidIdentifier())
+                        , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, containingSyntax, identifier)
                         , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME)
                     );
                 }
