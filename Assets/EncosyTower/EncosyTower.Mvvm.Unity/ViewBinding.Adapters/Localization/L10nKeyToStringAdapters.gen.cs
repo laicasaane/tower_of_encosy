@@ -17,6 +17,7 @@ using System;
 using EncosyTower.Annotations;
 using EncosyTower.Localization;
 using EncosyTower.Unions;
+using EncosyTower.Unions.Converters;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
 {
@@ -25,11 +26,11 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
     [Adapter(sourceType: typeof(L10nKey), destType: typeof(string), order: 0)]
     public class L10nKeyToEntryKeyAdapter : IAdapter
     {
+        private readonly CachedUnionConverter<L10nKey> _converter = CachedUnionConverter<L10nKey>.Default;
+
         public Union Convert(in Union union)
         {
-            var converter = Union<L10nKey>.GetConverter();
-
-            if (converter.TryGetValue(union, out L10nKey key) && key.IsValid)
+            if (_converter.TryGetValue(union, out L10nKey key) && key.IsValid)
             {
                 return key.Entry.Key;
             }
@@ -43,11 +44,11 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
     [Adapter(sourceType: typeof(L10nKey), destType: typeof(string), order: 1)]
     public class L10nKeyToTableCollectionNameAdapter : IAdapter
     {
+        private readonly CachedUnionConverter<L10nKey> _converter = CachedUnionConverter<L10nKey>.Default;
+
         public Union Convert(in Union union)
         {
-            var converter = Union<L10nKey>.GetConverter();
-
-            if (converter.TryGetValue(union, out L10nKey key) && key.IsValid)
+            if (_converter.TryGetValue(union, out L10nKey key) && key.IsValid)
             {
                 return key.Table.TableCollectionName;
             }
@@ -61,11 +62,11 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
     [Adapter(sourceType: typeof(L10nKey), destType: typeof(string), order: 2)]
     public class L10nKeyToTableAndKeyFormatAdapter : IAdapter
     {
+        private readonly CachedUnionConverter<L10nKey> _converter = CachedUnionConverter<L10nKey>.Default;
+
         public Union Convert(in Union union)
         {
-            var converter = Union<L10nKey>.GetConverter();
-
-            if (converter.TryGetValue(union, out L10nKey key) && key.IsValid)
+            if (_converter.TryGetValue(union, out L10nKey key) && key.IsValid)
             {
                 return key.ToString();
             }
@@ -79,11 +80,11 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
     [Adapter(sourceType: typeof(L10nKey<string>), destType: typeof(string), order: 0)]
     public class L10nKeyStringToEntryKeyAdapter : IAdapter
     {
+        private readonly CachedUnionConverter<L10nKey<string>> _converter = CachedUnionConverter<L10nKey<string>>.Default;
+
         public Union Convert(in Union union)
         {
-            var converter = Union<L10nKey<string>>.GetConverter();
-
-            if (converter.TryGetValue(union, out L10nKey<string> key) && key.IsValid)
+            if (_converter.TryGetValue(union, out L10nKey<string> key) && key.IsValid)
             {
                 return key.Entry.Key;
             }
@@ -97,11 +98,11 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
     [Adapter(sourceType: typeof(L10nKey<string>), destType: typeof(string), order: 1)]
     public class L10nKeyStringToTableCollectionNameAdapter : IAdapter
     {
+        private readonly CachedUnionConverter<L10nKey<string>> _converter = CachedUnionConverter<L10nKey<string>>.Default;
+
         public Union Convert(in Union union)
         {
-            var converter = Union<L10nKey<string>>.GetConverter();
-
-            if (converter.TryGetValue(union, out L10nKey<string> key) && key.IsValid)
+            if (_converter.TryGetValue(union, out L10nKey<string> key) && key.IsValid)
             {
                 return key.Table.TableCollectionName;
             }
@@ -115,119 +116,11 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
     [Adapter(sourceType: typeof(L10nKey<string>), destType: typeof(string), order: 2)]
     public class L10nKeyStringToTableAndKeyFormatAdapter : IAdapter
     {
+        private readonly CachedUnionConverter<L10nKey<string>> _converter = CachedUnionConverter<L10nKey<string>>.Default;
+
         public Union Convert(in Union union)
         {
-            var converter = Union<L10nKey<string>>.GetConverter();
-
-            if (converter.TryGetValue(union, out L10nKey<string> key) && key.IsValid)
-            {
-                return key.ToString();
-            }
-
-            return union;
-        }
-    }
-
-    [Serializable]
-    [Label("L10nKey.Serializable ⇒ Entry Key", "Default")]
-    [Adapter(sourceType: typeof(L10nKey.Serializable), destType: typeof(string), order: 0)]
-    public class L10nKeySerializableToEntryKeyAdapter : IAdapter
-    {
-        public Union Convert(in Union union)
-        {
-            var converter = Union<L10nKey.Serializable>.GetConverter();
-
-            if (converter.TryGetValue(union, out L10nKey.Serializable key) && key.IsValid)
-            {
-                return key.Entry.Key;
-            }
-
-            return union;
-        }
-    }
-
-    [Serializable]
-    [Label("L10nKey.Serializable ⇒ Table Collection Name", "Default")]
-    [Adapter(sourceType: typeof(L10nKey.Serializable), destType: typeof(string), order: 1)]
-    public class L10nKeySerializableToTableCollectionNameAdapter : IAdapter
-    {
-        public Union Convert(in Union union)
-        {
-            var converter = Union<L10nKey.Serializable>.GetConverter();
-
-            if (converter.TryGetValue(union, out L10nKey.Serializable key) && key.IsValid)
-            {
-                return key.Table.TableCollectionName;
-            }
-
-            return union;
-        }
-    }
-
-    [Serializable]
-    [Label("L10nKey.Serializable ⇒ Table & Key Format: \"table,key\"", "Default")]
-    [Adapter(sourceType: typeof(L10nKey.Serializable), destType: typeof(string), order: 2)]
-    public class L10nKeySerializableToTableAndKeyFormatAdapter : IAdapter
-    {
-        public Union Convert(in Union union)
-        {
-            var converter = Union<L10nKey.Serializable>.GetConverter();
-
-            if (converter.TryGetValue(union, out L10nKey.Serializable key) && key.IsValid)
-            {
-                return key.ToString();
-            }
-
-            return union;
-        }
-    }
-
-    [Serializable]
-    [Label("L10nKey.Serializable<string> ⇒ Entry Key", "Default")]
-    [Adapter(sourceType: typeof(L10nKey.Serializable<string>), destType: typeof(string), order: 0)]
-    public class L10nKeyStringSerializableToEntryKeyAdapter : IAdapter
-    {
-        public Union Convert(in Union union)
-        {
-            var converter = Union<L10nKey.Serializable<string>>.GetConverter();
-
-            if (converter.TryGetValue(union, out L10nKey.Serializable<string> key) && key.IsValid)
-            {
-                return key.Entry.Key;
-            }
-
-            return union;
-        }
-    }
-
-    [Serializable]
-    [Label("L10nKey.Serializable<string> ⇒ Table Collection Name", "Default")]
-    [Adapter(sourceType: typeof(L10nKey.Serializable<string>), destType: typeof(string), order: 1)]
-    public class L10nKeyStringSerializableToTableCollectionNameAdapter : IAdapter
-    {
-        public Union Convert(in Union union)
-        {
-            var converter = Union<L10nKey.Serializable<string>>.GetConverter();
-
-            if (converter.TryGetValue(union, out L10nKey.Serializable<string> key) && key.IsValid)
-            {
-                return key.Table.TableCollectionName;
-            }
-
-            return union;
-        }
-    }
-
-    [Serializable]
-    [Label("L10nKey.Serializable<string> ⇒ Table & Key Format: \"table,key\"", "Default")]
-    [Adapter(sourceType: typeof(L10nKey.Serializable<string>), destType: typeof(string), order: 2)]
-    public class L10nKeyStringSerializableToTableAndKeyFormatAdapter : IAdapter
-    {
-        public Union Convert(in Union union)
-        {
-            var converter = Union<L10nKey.Serializable<string>>.GetConverter();
-
-            if (converter.TryGetValue(union, out L10nKey.Serializable<string> key) && key.IsValid)
+            if (_converter.TryGetValue(union, out L10nKey<string> key) && key.IsValid)
             {
                 return key.ToString();
             }

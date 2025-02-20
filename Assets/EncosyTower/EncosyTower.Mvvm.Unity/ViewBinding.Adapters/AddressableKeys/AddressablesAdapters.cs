@@ -13,7 +13,12 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
     public abstract class AddressablesAdapter<T> : IAdapter
        where T : UnityEngine.Object
     {
-        private readonly CachedUnionConverter<T> _converter = new();
+        private readonly CachedUnionConverter<T> _assetConverter;
+
+        protected AddressablesAdapter(CachedUnionConverter<T> assetConverter)
+        {
+            _assetConverter = assetConverter;
+        }
 
         protected virtual bool TryGetAddressPath(in Union union, out string result)
         {
@@ -30,7 +35,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
 
                 if (result.TryValue(out var asset))
                 {
-                    return _converter.ToUnionT(asset);
+                    return _assetConverter.ToUnionT(asset);
                 }
 
                 ErrorFoundNoAsset(typeof(T), address);
@@ -52,38 +57,27 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
     public abstract class AddressableStringAdapter<T> : AddressablesAdapter<T>
         where T : UnityEngine.Object
     {
+        protected AddressableStringAdapter(CachedUnionConverter<T> assetConverter) : base(assetConverter) { }
+
         protected sealed override bool TryGetAddressPath(in Union union, out string result)
         {
             return union.TryGetValue(out result);
         }
     }
 
-    public abstract class AddressableKeyUntypedAdapter<T> : AddressablesAdapter<T>
+    public abstract class AddressableKeyAdapter<T> : AddressablesAdapter<T>
         where T : UnityEngine.Object
     {
-        protected sealed override bool TryGetAddressPath(in Union union, out string result)
+        private readonly CachedUnionConverter<AddressableKey> _keyConverter;
+
+        protected AddressableKeyAdapter(CachedUnionConverter<T> assetConverter) : base(assetConverter)
         {
-            var converter = Union<AddressableKey>.GetConverter();
-
-            if (converter.TryGetValue(union, out var key) && key.IsValid)
-            {
-                result = (string)key.Value;
-                return true;
-            }
-
-            result = string.Empty;
-            return false;
+            _keyConverter = CachedUnionConverter<AddressableKey>.Default;
         }
-    }
 
-    public abstract class AddressableKeyTypedAdapter<T> : AddressablesAdapter<T>
-        where T : UnityEngine.Object
-    {
         protected sealed override bool TryGetAddressPath(in Union union, out string result)
         {
-            var converter = Union<AddressableKey<T>>.GetConverter();
-
-            if (converter.TryGetValue(union, out var key) && key.IsValid)
+            if (_keyConverter.TryGetValue(union, out var key) && key.IsValid)
             {
                 result = (string)key.Value;
                 return true;

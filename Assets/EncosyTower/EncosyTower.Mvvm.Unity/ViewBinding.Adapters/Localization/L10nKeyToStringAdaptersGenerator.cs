@@ -12,8 +12,6 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Adapters.Localization
         private readonly static TypeData[] s_types = new TypeData[] {
             new($"L10nKey", "L10nKey"),
             new($"L10nKey<string>", "L10nKeyString"),
-            new($"L10nKey.Serializable", "L10nKeySerializable"),
-            new($"L10nKey.Serializable<string>", "L10nKeyStringSerializable"),
         };
 
         private readonly static ReturnExpData[] s_returnExps = new ReturnExpData[] {
@@ -44,6 +42,7 @@ using System;
 using EncosyTower.Annotations;
 using EncosyTower.Localization;
 using EncosyTower.Unions;
+using EncosyTower.Unions.Converters;
 ");
 
             p.PrintLine("namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization");
@@ -64,13 +63,13 @@ using EncosyTower.Unions;
                         p.PrintLine($"public class {typeName}{expName}Adapter : IAdapter");
                         p.OpenScope();
                         {
+                            p.PrintLine($"private readonly CachedUnionConverter<{type}> _converter = CachedUnionConverter<{type}>.Default;");
+                            p.PrintEndLine();
+
                             p.PrintLine("public Union Convert(in Union union)");
                             p.OpenScope();
                             {
-                                p.PrintLine($"var converter = Union<{type}>.GetConverter();");
-                                p.PrintEndLine();
-
-                                p.PrintLine($"if (converter.TryGetValue(union, out {type} key) && key.IsValid)");
+                                p.PrintLine($"if (_converter.TryGetValue(union, out {type} key) && key.IsValid)");
                                 p.OpenScope();
                                 {
                                     p.PrintLine($"return {returnExp};");

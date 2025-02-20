@@ -7,7 +7,12 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
     public abstract class ResourcesAdapter<T> : IAdapter
        where T : UnityEngine.Object
     {
-        private readonly CachedUnionConverter<T> _converter = new();
+        private readonly CachedUnionConverter<T> _converter;
+
+        protected ResourcesAdapter(CachedUnionConverter<T> converter)
+        {
+            _converter = converter;
+        }
 
         public Union Convert(in Union union)
         {

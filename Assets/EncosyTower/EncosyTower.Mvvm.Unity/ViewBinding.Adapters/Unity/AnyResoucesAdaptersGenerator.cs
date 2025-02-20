@@ -3,19 +3,12 @@
 using System;
 using EncosyTower.CodeGen;
 using UnityCodeGen;
-using UnityEngine;
 
 namespace EncosyTower.Editor.Mvvm.ViewBinding.Adapters.Unity
 {
     [Generator]
     internal class AnyResoucesAdaptersGenerator : ICodeGenerator
     {
-        private readonly static string[] s_unityTypes = new string[] {
-            nameof(Sprite),
-            nameof(GameObject),
-            nameof(AudioClip),
-        };
-
         public void Execute(GeneratorContext context)
         {
             var nameofGenerator = nameof(AnyResoucesAdaptersGenerator);
@@ -33,22 +26,34 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Adapters.Unity
 
 using System;
 using EncosyTower.Annotations;
-using UnityEngine;
+using EncosyTower.Unions.Converters;
 ");
 
+            p.PrintEndLine();
             p.PrintLine("namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity");
             p.OpenScope();
             {
-                var unityTypes = s_unityTypes.AsSpan();
+                var unityTypes = MvvmCodeGenAPI.UnityTypes.AsSpan();
 
                 for (var i = 0; i < unityTypes.Length; i++)
                 {
                     var type = unityTypes[i];
+                    var name = type.Name;
+                    var typeName = type.FullName;
 
                     p.PrintLine($"[Serializable]");
-                    p.PrintLine($"[Label(\"Resources.Load<{type}>(string)\", \"Default\")]");
-                    p.PrintLine($"[Adapter(sourceType: typeof(string), destType: typeof({type}), order: 0)]");
-                    p.PrintLine($"public sealed class {type}ResourcesAdapter : ResourcesAdapter<{type}> {{ }}");
+                    p.PrintLine($"[Label(\"Resources.Load<{typeName}>(string)\", \"Default\")]");
+                    p.PrintLine($"[Adapter(sourceType: typeof(string), destType: typeof({typeName}), order: 0)]");
+                    p.PrintLine($"public sealed class {name}ResourcesAdapter : ResourcesAdapter<{typeName}>");
+                    p.OpenScope();
+                    {
+                        p.PrintBeginLine($"public ")
+                            .Print(name)
+                            .Print("ResourcesAdapter() : base(CachedUnionConverter<")
+                            .Print(typeName)
+                            .PrintEndLine(">.Default) { }");
+                    }
+                    p.CloseScope();
                     p.PrintEndLine();
                 }
             }

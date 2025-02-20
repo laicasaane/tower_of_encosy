@@ -4,19 +4,12 @@ using System;
 using System.Globalization;
 using EncosyTower.CodeGen;
 using UnityCodeGen;
-using UnityEngine;
 
 namespace EncosyTower.Editor.Mvvm.ViewBinding.Adapters.AddressableKeys
 {
     [Generator]
     internal class AnyAddressablesAdaptersGenerator : ICodeGenerator
     {
-        private readonly static string[] s_unityTypes = new string[] {
-            nameof(Sprite),
-            nameof(GameObject),
-            nameof(AudioClip),
-        };
-
         public void Execute(GeneratorContext context)
         {
             var nameofGenerator = nameof(AnyAddressablesAdaptersGenerator);
@@ -37,21 +30,24 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Adapters.AddressableKeys
 using System;
 using EncosyTower.AddressableKeys;
 using EncosyTower.Annotations;
-using UnityEngine;
+using EncosyTower.Unions.Converters;
 ");
 
+            p.PrintEndLine();
             p.PrintLine("namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys");
             p.OpenScope();
             {
-                var unityTypes = s_unityTypes.AsSpan();
+                var unityTypes = MvvmCodeGenAPI.UnityTypes.AsSpan();
                 var serializables = new bool[] { false };
 
                 for (var i = 0; i < unityTypes.Length; i++)
                 {
                     var type = unityTypes[i];
+                    var name = type.Name;
+                    var typeName = type.FullName;
 
-                    p.PrintBeginLine("#region    ").PrintEndLine(type.ToUpper(CultureInfo.InvariantCulture));
-                    p.PrintBeginLine("#endregion ").Print('=', type.Length).PrintEndLine();
+                    p.PrintBeginLine("#region    ").PrintEndLine(typeName.ToUpper(CultureInfo.InvariantCulture));
+                    p.PrintBeginLine("#endregion ").Print('=', typeName.Length).PrintEndLine();
                     p.PrintEndLine();
 
                     foreach (var serializable in serializables)
@@ -60,22 +56,34 @@ using UnityEngine;
                         var affix = serializable ? "Serializable" : "";
 
                         p.PrintLine($"[Serializable]");
-                        p.PrintLine($"[Label(\"AddressableKey{subType}<{type}>.Load()\", \"Default\")]");
-                        p.PrintLine($"[Adapter(sourceType: typeof(AddressableKey{subType}<{type}>), destType: typeof({type}), order: 0)]");
-                        p.PrintLine($"public sealed class AddressableKeyTyped{affix}To{type}Adapter : AddressableKeyTyped{affix}Adapter<{type}> {{ }}");
-                        p.PrintEndLine();
-
-                        p.PrintLine($"[Serializable]");
-                        p.PrintLine($"[Label(\"AddressableKey{subType}.Load<{type}>()\", \"Default\")]");
-                        p.PrintLine($"[Adapter(sourceType: typeof(AddressableKey{subType}), destType: typeof({type}), order: 1)]");
-                        p.PrintLine($"public sealed class AddressableKeyUntyped{affix}To{type}Adapter : AddressableKeyUntyped{affix}Adapter<{type}> {{ }}");
+                        p.PrintLine($"[Label(\"AddressableKey{subType}<{typeName}>.Load()\", \"Default\")]");
+                        p.PrintLine($"[Adapter(sourceType: typeof(AddressableKey{subType}<{typeName}>), destType: typeof({typeName}), order: 0)]");
+                        p.PrintLine($"public sealed class AddressableKey{affix}To{name}Adapter : AddressableKey{affix}Adapter<{typeName}>");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine($"public ")
+                                .Print($"AddressableKey{affix}To{name}Adapter")
+                                .Print("() : base(CachedUnionConverter<")
+                                .Print(typeName)
+                                .PrintEndLine(">.Default) { }");
+                        }
+                        p.CloseScope();
                         p.PrintEndLine();
                     }
 
                     p.PrintLine($"[Serializable]");
-                    p.PrintLine($"[Label(\"Addressables.Load<{type}>(string)\", \"Default\")]");
-                    p.PrintLine($"[Adapter(sourceType: typeof(string), destType: typeof({type}), order: 2)]");
-                    p.PrintLine($"public sealed class AddressableStringTo{type}Adapter : AddressableStringAdapter<{type}> {{ }}");
+                    p.PrintLine($"[Label(\"Addressables.Load<{typeName}>(string)\", \"Default\")]");
+                    p.PrintLine($"[Adapter(sourceType: typeof(string), destType: typeof({typeName}), order: 2)]");
+                    p.PrintLine($"public sealed class AddressableStringTo{name}Adapter : AddressableStringAdapter<{typeName}>");
+                    p.OpenScope();
+                    {
+                        p.PrintBeginLine($"public ")
+                            .Print($"AddressableStringTo{name}Adapter")
+                            .Print("() : base(CachedUnionConverter<")
+                            .Print(typeName)
+                            .PrintEndLine(">.Default) { }");
+                    }
+                    p.CloseScope();
                     p.PrintEndLine();
                 }
             }

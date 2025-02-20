@@ -11,24 +11,138 @@
 
 using System;
 using EncosyTower.Annotations;
-using UnityEngine;
+using EncosyTower.Unions.Converters;
+
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
 {
     [Serializable]
-    [Label("Resources.Load<Sprite>(string)", "Default")]
-    [Adapter(sourceType: typeof(string), destType: typeof(Sprite), order: 0)]
-    public sealed class SpriteResourcesAdapter : ResourcesAdapter<Sprite> { }
+    [Label("Resources.Load<UnityEngine.AnimationClip>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.AnimationClip), order: 0)]
+    public sealed class AnimationClipResourcesAdapter : ResourcesAdapter<UnityEngine.AnimationClip>
+    {
+        public AnimationClipResourcesAdapter() : base(CachedUnionConverter<UnityEngine.AnimationClip>.Default) { }
+    }
 
     [Serializable]
-    [Label("Resources.Load<GameObject>(string)", "Default")]
-    [Adapter(sourceType: typeof(string), destType: typeof(GameObject), order: 0)]
-    public sealed class GameObjectResourcesAdapter : ResourcesAdapter<GameObject> { }
+    [Label("Resources.Load<UnityEngine.AudioClip>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.AudioClip), order: 0)]
+    public sealed class AudioClipResourcesAdapter : ResourcesAdapter<UnityEngine.AudioClip>
+    {
+        public AudioClipResourcesAdapter() : base(CachedUnionConverter<UnityEngine.AudioClip>.Default) { }
+    }
 
     [Serializable]
-    [Label("Resources.Load<AudioClip>(string)", "Default")]
-    [Adapter(sourceType: typeof(string), destType: typeof(AudioClip), order: 0)]
-    public sealed class AudioClipResourcesAdapter : ResourcesAdapter<AudioClip> { }
+    [Label("Resources.Load<UnityEngine.Audio.AudioMixer>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Audio.AudioMixer), order: 0)]
+    public sealed class AudioMixerResourcesAdapter : ResourcesAdapter<UnityEngine.Audio.AudioMixer>
+    {
+        public AudioMixerResourcesAdapter() : base(CachedUnionConverter<UnityEngine.Audio.AudioMixer>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.TextCore.Text.FontAsset>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.TextCore.Text.FontAsset), order: 0)]
+    public sealed class FontAssetResourcesAdapter : ResourcesAdapter<UnityEngine.TextCore.Text.FontAsset>
+    {
+        public FontAssetResourcesAdapter() : base(CachedUnionConverter<UnityEngine.TextCore.Text.FontAsset>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.GameObject>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.GameObject), order: 0)]
+    public sealed class GameObjectResourcesAdapter : ResourcesAdapter<UnityEngine.GameObject>
+    {
+        public GameObjectResourcesAdapter() : base(CachedUnionConverter<UnityEngine.GameObject>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.Material>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Material), order: 0)]
+    public sealed class MaterialResourcesAdapter : ResourcesAdapter<UnityEngine.Material>
+    {
+        public MaterialResourcesAdapter() : base(CachedUnionConverter<UnityEngine.Material>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.UIElements.PanelSettings>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.PanelSettings), order: 0)]
+    public sealed class PanelSettingsResourcesAdapter : ResourcesAdapter<UnityEngine.UIElements.PanelSettings>
+    {
+        public PanelSettingsResourcesAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.PanelSettings>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.Playables.PlayableAsset>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Playables.PlayableAsset), order: 0)]
+    public sealed class PlayableAssetResourcesAdapter : ResourcesAdapter<UnityEngine.Playables.PlayableAsset>
+    {
+        public PlayableAssetResourcesAdapter() : base(CachedUnionConverter<UnityEngine.Playables.PlayableAsset>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.ScriptableObject>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.ScriptableObject), order: 0)]
+    public sealed class ScriptableObjectResourcesAdapter : ResourcesAdapter<UnityEngine.ScriptableObject>
+    {
+        public ScriptableObjectResourcesAdapter() : base(CachedUnionConverter<UnityEngine.ScriptableObject>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.Sprite>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Sprite), order: 0)]
+    public sealed class SpriteResourcesAdapter : ResourcesAdapter<UnityEngine.Sprite>
+    {
+        public SpriteResourcesAdapter() : base(CachedUnionConverter<UnityEngine.Sprite>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.U2D.SpriteAtlas>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.U2D.SpriteAtlas), order: 0)]
+    public sealed class SpriteAtlasResourcesAdapter : ResourcesAdapter<UnityEngine.U2D.SpriteAtlas>
+    {
+        public SpriteAtlasResourcesAdapter() : base(CachedUnionConverter<UnityEngine.U2D.SpriteAtlas>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.UIElements.StyleSheet>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.StyleSheet), order: 0)]
+    public sealed class StyleSheetResourcesAdapter : ResourcesAdapter<UnityEngine.UIElements.StyleSheet>
+    {
+        public StyleSheetResourcesAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.StyleSheet>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.Texture>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Texture), order: 0)]
+    public sealed class TextureResourcesAdapter : ResourcesAdapter<UnityEngine.Texture>
+    {
+        public TextureResourcesAdapter() : base(CachedUnionConverter<UnityEngine.Texture>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.UIElements.ThemeStyleSheet>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.ThemeStyleSheet), order: 0)]
+    public sealed class ThemeStyleSheetResourcesAdapter : ResourcesAdapter<UnityEngine.UIElements.ThemeStyleSheet>
+    {
+        public ThemeStyleSheetResourcesAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.ThemeStyleSheet>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<TMPro.TMP_FontAsset>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(TMPro.TMP_FontAsset), order: 0)]
+    public sealed class TMP_FontAssetResourcesAdapter : ResourcesAdapter<TMPro.TMP_FontAsset>
+    {
+        public TMP_FontAssetResourcesAdapter() : base(CachedUnionConverter<TMPro.TMP_FontAsset>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.UIElements.VisualTreeAsset>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.VisualTreeAsset), order: 0)]
+    public sealed class VisualTreeAssetResourcesAdapter : ResourcesAdapter<UnityEngine.UIElements.VisualTreeAsset>
+    {
+        public VisualTreeAssetResourcesAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.VisualTreeAsset>.Default) { }
+    }
 
 }
 

@@ -8,10 +8,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
 {
-    public abstract class ResourceKeyAdapter<T> : IAdapter
+    public abstract class ResourcesAdapter<T> : IAdapter
        where T : UnityEngine.Object
     {
-        private readonly CachedUnionConverter<T> _converter = new();
+        private readonly CachedUnionConverter<T> _converter;
+
+        protected ResourcesAdapter(CachedUnionConverter<T> converter)
+        {
+            _converter = converter;
+        }
 
         protected virtual bool TryGetAddressPath(in Union union, out string result)
         {
@@ -47,41 +52,30 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
         }
     }
 
-    public abstract class ResourceStringAdapter<T> : ResourceKeyAdapter<T>
+    public abstract class ResourceStringAdapter<T> : ResourcesAdapter<T>
         where T : UnityEngine.Object
     {
+        protected ResourceStringAdapter(CachedUnionConverter<T> converter) : base(converter) { }
+
         protected sealed override bool TryGetAddressPath(in Union union, out string result)
         {
             return union.TryGetValue(out result);
         }
     }
 
-    public abstract class ResourceKeyUntypedAdapter<T> : ResourceKeyAdapter<T>
+    public abstract class ResourceKeyAdapter<T> : ResourcesAdapter<T>
         where T : UnityEngine.Object
     {
-        protected sealed override bool TryGetAddressPath(in Union union, out string result)
+        private readonly CachedUnionConverter<ResourceKey> _keyConverter;
+
+        protected ResourceKeyAdapter(CachedUnionConverter<T> converter) : base(converter)
         {
-            var converter = Union<ResourceKey>.GetConverter();
-
-            if (converter.TryGetValue(union, out var key) && key.IsValid)
-            {
-                result = (string)key.Value;
-                return true;
-            }
-
-            result = string.Empty;
-            return false;
+            _keyConverter = CachedUnionConverter<ResourceKey>.Default;
         }
-    }
 
-    public abstract class ResourceKeyTypedAdapter<T> : ResourceKeyAdapter<T>
-        where T : UnityEngine.Object
-    {
         protected sealed override bool TryGetAddressPath(in Union union, out string result)
         {
-            var converter = Union<ResourceKey<T>>.GetConverter();
-
-            if (converter.TryGetValue(union, out var key) && key.IsValid)
+            if (_keyConverter.TryGetValue(union, out var key) && key.IsValid)
             {
                 result = (string)key.Value;
                 return true;

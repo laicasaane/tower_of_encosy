@@ -14,63 +14,314 @@
 using System;
 using EncosyTower.AddressableKeys;
 using EncosyTower.Annotations;
-using UnityEngine;
+using EncosyTower.Unions.Converters;
+
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
 {
-    #region    SPRITE
-    #endregion ======
+    #region    UNITYENGINE.ANIMATIONCLIP
+    #endregion =========================
 
     [Serializable]
-    [Label("AddressableKey<Sprite>.Load()", "Default")]
-    [Adapter(sourceType: typeof(AddressableKey<Sprite>), destType: typeof(Sprite), order: 0)]
-    public sealed class AddressableKeyTypedToSpriteAdapter : AddressableKeyTypedAdapter<Sprite> { }
+    [Label("AddressableKey<UnityEngine.AnimationClip>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.AnimationClip>), destType: typeof(UnityEngine.AnimationClip), order: 0)]
+    public sealed class AddressableKeyToAnimationClipAdapter : AddressableKeyAdapter<UnityEngine.AnimationClip>
+    {
+        public AddressableKeyToAnimationClipAdapter() : base(CachedUnionConverter<UnityEngine.AnimationClip>.Default) { }
+    }
 
     [Serializable]
-    [Label("AddressableKey.Load<Sprite>()", "Default")]
-    [Adapter(sourceType: typeof(AddressableKey), destType: typeof(Sprite), order: 1)]
-    public sealed class AddressableKeyUntypedToSpriteAdapter : AddressableKeyUntypedAdapter<Sprite> { }
+    [Label("Addressables.Load<UnityEngine.AnimationClip>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.AnimationClip), order: 2)]
+    public sealed class AddressableStringToAnimationClipAdapter : AddressableStringAdapter<UnityEngine.AnimationClip>
+    {
+        public AddressableStringToAnimationClipAdapter() : base(CachedUnionConverter<UnityEngine.AnimationClip>.Default) { }
+    }
+
+    #region    UNITYENGINE.AUDIOCLIP
+    #endregion =====================
 
     [Serializable]
-    [Label("Addressables.Load<Sprite>(string)", "Default")]
-    [Adapter(sourceType: typeof(string), destType: typeof(Sprite), order: 2)]
-    public sealed class AddressableStringToSpriteAdapter : AddressableStringAdapter<Sprite> { }
-
-    #region    GAMEOBJECT
-    #endregion ==========
-
-    [Serializable]
-    [Label("AddressableKey<GameObject>.Load()", "Default")]
-    [Adapter(sourceType: typeof(AddressableKey<GameObject>), destType: typeof(GameObject), order: 0)]
-    public sealed class AddressableKeyTypedToGameObjectAdapter : AddressableKeyTypedAdapter<GameObject> { }
+    [Label("AddressableKey<UnityEngine.AudioClip>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.AudioClip>), destType: typeof(UnityEngine.AudioClip), order: 0)]
+    public sealed class AddressableKeyToAudioClipAdapter : AddressableKeyAdapter<UnityEngine.AudioClip>
+    {
+        public AddressableKeyToAudioClipAdapter() : base(CachedUnionConverter<UnityEngine.AudioClip>.Default) { }
+    }
 
     [Serializable]
-    [Label("AddressableKey.Load<GameObject>()", "Default")]
-    [Adapter(sourceType: typeof(AddressableKey), destType: typeof(GameObject), order: 1)]
-    public sealed class AddressableKeyUntypedToGameObjectAdapter : AddressableKeyUntypedAdapter<GameObject> { }
+    [Label("Addressables.Load<UnityEngine.AudioClip>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.AudioClip), order: 2)]
+    public sealed class AddressableStringToAudioClipAdapter : AddressableStringAdapter<UnityEngine.AudioClip>
+    {
+        public AddressableStringToAudioClipAdapter() : base(CachedUnionConverter<UnityEngine.AudioClip>.Default) { }
+    }
+
+    #region    UNITYENGINE.AUDIO.AUDIOMIXER
+    #endregion ============================
 
     [Serializable]
-    [Label("Addressables.Load<GameObject>(string)", "Default")]
-    [Adapter(sourceType: typeof(string), destType: typeof(GameObject), order: 2)]
-    public sealed class AddressableStringToGameObjectAdapter : AddressableStringAdapter<GameObject> { }
-
-    #region    AUDIOCLIP
-    #endregion =========
-
-    [Serializable]
-    [Label("AddressableKey<AudioClip>.Load()", "Default")]
-    [Adapter(sourceType: typeof(AddressableKey<AudioClip>), destType: typeof(AudioClip), order: 0)]
-    public sealed class AddressableKeyTypedToAudioClipAdapter : AddressableKeyTypedAdapter<AudioClip> { }
+    [Label("AddressableKey<UnityEngine.Audio.AudioMixer>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.Audio.AudioMixer>), destType: typeof(UnityEngine.Audio.AudioMixer), order: 0)]
+    public sealed class AddressableKeyToAudioMixerAdapter : AddressableKeyAdapter<UnityEngine.Audio.AudioMixer>
+    {
+        public AddressableKeyToAudioMixerAdapter() : base(CachedUnionConverter<UnityEngine.Audio.AudioMixer>.Default) { }
+    }
 
     [Serializable]
-    [Label("AddressableKey.Load<AudioClip>()", "Default")]
-    [Adapter(sourceType: typeof(AddressableKey), destType: typeof(AudioClip), order: 1)]
-    public sealed class AddressableKeyUntypedToAudioClipAdapter : AddressableKeyUntypedAdapter<AudioClip> { }
+    [Label("Addressables.Load<UnityEngine.Audio.AudioMixer>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Audio.AudioMixer), order: 2)]
+    public sealed class AddressableStringToAudioMixerAdapter : AddressableStringAdapter<UnityEngine.Audio.AudioMixer>
+    {
+        public AddressableStringToAudioMixerAdapter() : base(CachedUnionConverter<UnityEngine.Audio.AudioMixer>.Default) { }
+    }
+
+    #region    UNITYENGINE.TEXTCORE.TEXT.FONTASSET
+    #endregion ===================================
 
     [Serializable]
-    [Label("Addressables.Load<AudioClip>(string)", "Default")]
-    [Adapter(sourceType: typeof(string), destType: typeof(AudioClip), order: 2)]
-    public sealed class AddressableStringToAudioClipAdapter : AddressableStringAdapter<AudioClip> { }
+    [Label("AddressableKey<UnityEngine.TextCore.Text.FontAsset>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.TextCore.Text.FontAsset>), destType: typeof(UnityEngine.TextCore.Text.FontAsset), order: 0)]
+    public sealed class AddressableKeyToFontAssetAdapter : AddressableKeyAdapter<UnityEngine.TextCore.Text.FontAsset>
+    {
+        public AddressableKeyToFontAssetAdapter() : base(CachedUnionConverter<UnityEngine.TextCore.Text.FontAsset>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.TextCore.Text.FontAsset>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.TextCore.Text.FontAsset), order: 2)]
+    public sealed class AddressableStringToFontAssetAdapter : AddressableStringAdapter<UnityEngine.TextCore.Text.FontAsset>
+    {
+        public AddressableStringToFontAssetAdapter() : base(CachedUnionConverter<UnityEngine.TextCore.Text.FontAsset>.Default) { }
+    }
+
+    #region    UNITYENGINE.GAMEOBJECT
+    #endregion ======================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.GameObject>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.GameObject>), destType: typeof(UnityEngine.GameObject), order: 0)]
+    public sealed class AddressableKeyToGameObjectAdapter : AddressableKeyAdapter<UnityEngine.GameObject>
+    {
+        public AddressableKeyToGameObjectAdapter() : base(CachedUnionConverter<UnityEngine.GameObject>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.GameObject>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.GameObject), order: 2)]
+    public sealed class AddressableStringToGameObjectAdapter : AddressableStringAdapter<UnityEngine.GameObject>
+    {
+        public AddressableStringToGameObjectAdapter() : base(CachedUnionConverter<UnityEngine.GameObject>.Default) { }
+    }
+
+    #region    UNITYENGINE.MATERIAL
+    #endregion ====================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.Material>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.Material>), destType: typeof(UnityEngine.Material), order: 0)]
+    public sealed class AddressableKeyToMaterialAdapter : AddressableKeyAdapter<UnityEngine.Material>
+    {
+        public AddressableKeyToMaterialAdapter() : base(CachedUnionConverter<UnityEngine.Material>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.Material>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Material), order: 2)]
+    public sealed class AddressableStringToMaterialAdapter : AddressableStringAdapter<UnityEngine.Material>
+    {
+        public AddressableStringToMaterialAdapter() : base(CachedUnionConverter<UnityEngine.Material>.Default) { }
+    }
+
+    #region    UNITYENGINE.UIELEMENTS.PANELSETTINGS
+    #endregion ====================================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.UIElements.PanelSettings>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.UIElements.PanelSettings>), destType: typeof(UnityEngine.UIElements.PanelSettings), order: 0)]
+    public sealed class AddressableKeyToPanelSettingsAdapter : AddressableKeyAdapter<UnityEngine.UIElements.PanelSettings>
+    {
+        public AddressableKeyToPanelSettingsAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.PanelSettings>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.UIElements.PanelSettings>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.PanelSettings), order: 2)]
+    public sealed class AddressableStringToPanelSettingsAdapter : AddressableStringAdapter<UnityEngine.UIElements.PanelSettings>
+    {
+        public AddressableStringToPanelSettingsAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.PanelSettings>.Default) { }
+    }
+
+    #region    UNITYENGINE.PLAYABLES.PLAYABLEASSET
+    #endregion ===================================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.Playables.PlayableAsset>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.Playables.PlayableAsset>), destType: typeof(UnityEngine.Playables.PlayableAsset), order: 0)]
+    public sealed class AddressableKeyToPlayableAssetAdapter : AddressableKeyAdapter<UnityEngine.Playables.PlayableAsset>
+    {
+        public AddressableKeyToPlayableAssetAdapter() : base(CachedUnionConverter<UnityEngine.Playables.PlayableAsset>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.Playables.PlayableAsset>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Playables.PlayableAsset), order: 2)]
+    public sealed class AddressableStringToPlayableAssetAdapter : AddressableStringAdapter<UnityEngine.Playables.PlayableAsset>
+    {
+        public AddressableStringToPlayableAssetAdapter() : base(CachedUnionConverter<UnityEngine.Playables.PlayableAsset>.Default) { }
+    }
+
+    #region    UNITYENGINE.SCRIPTABLEOBJECT
+    #endregion ============================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.ScriptableObject>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.ScriptableObject>), destType: typeof(UnityEngine.ScriptableObject), order: 0)]
+    public sealed class AddressableKeyToScriptableObjectAdapter : AddressableKeyAdapter<UnityEngine.ScriptableObject>
+    {
+        public AddressableKeyToScriptableObjectAdapter() : base(CachedUnionConverter<UnityEngine.ScriptableObject>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.ScriptableObject>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.ScriptableObject), order: 2)]
+    public sealed class AddressableStringToScriptableObjectAdapter : AddressableStringAdapter<UnityEngine.ScriptableObject>
+    {
+        public AddressableStringToScriptableObjectAdapter() : base(CachedUnionConverter<UnityEngine.ScriptableObject>.Default) { }
+    }
+
+    #region    UNITYENGINE.SPRITE
+    #endregion ==================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.Sprite>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.Sprite>), destType: typeof(UnityEngine.Sprite), order: 0)]
+    public sealed class AddressableKeyToSpriteAdapter : AddressableKeyAdapter<UnityEngine.Sprite>
+    {
+        public AddressableKeyToSpriteAdapter() : base(CachedUnionConverter<UnityEngine.Sprite>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.Sprite>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Sprite), order: 2)]
+    public sealed class AddressableStringToSpriteAdapter : AddressableStringAdapter<UnityEngine.Sprite>
+    {
+        public AddressableStringToSpriteAdapter() : base(CachedUnionConverter<UnityEngine.Sprite>.Default) { }
+    }
+
+    #region    UNITYENGINE.U2D.SPRITEATLAS
+    #endregion ===========================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.U2D.SpriteAtlas>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.U2D.SpriteAtlas>), destType: typeof(UnityEngine.U2D.SpriteAtlas), order: 0)]
+    public sealed class AddressableKeyToSpriteAtlasAdapter : AddressableKeyAdapter<UnityEngine.U2D.SpriteAtlas>
+    {
+        public AddressableKeyToSpriteAtlasAdapter() : base(CachedUnionConverter<UnityEngine.U2D.SpriteAtlas>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.U2D.SpriteAtlas>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.U2D.SpriteAtlas), order: 2)]
+    public sealed class AddressableStringToSpriteAtlasAdapter : AddressableStringAdapter<UnityEngine.U2D.SpriteAtlas>
+    {
+        public AddressableStringToSpriteAtlasAdapter() : base(CachedUnionConverter<UnityEngine.U2D.SpriteAtlas>.Default) { }
+    }
+
+    #region    UNITYENGINE.UIELEMENTS.STYLESHEET
+    #endregion =================================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.UIElements.StyleSheet>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.UIElements.StyleSheet>), destType: typeof(UnityEngine.UIElements.StyleSheet), order: 0)]
+    public sealed class AddressableKeyToStyleSheetAdapter : AddressableKeyAdapter<UnityEngine.UIElements.StyleSheet>
+    {
+        public AddressableKeyToStyleSheetAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.StyleSheet>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.UIElements.StyleSheet>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.StyleSheet), order: 2)]
+    public sealed class AddressableStringToStyleSheetAdapter : AddressableStringAdapter<UnityEngine.UIElements.StyleSheet>
+    {
+        public AddressableStringToStyleSheetAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.StyleSheet>.Default) { }
+    }
+
+    #region    UNITYENGINE.TEXTURE
+    #endregion ===================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.Texture>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.Texture>), destType: typeof(UnityEngine.Texture), order: 0)]
+    public sealed class AddressableKeyToTextureAdapter : AddressableKeyAdapter<UnityEngine.Texture>
+    {
+        public AddressableKeyToTextureAdapter() : base(CachedUnionConverter<UnityEngine.Texture>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.Texture>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Texture), order: 2)]
+    public sealed class AddressableStringToTextureAdapter : AddressableStringAdapter<UnityEngine.Texture>
+    {
+        public AddressableStringToTextureAdapter() : base(CachedUnionConverter<UnityEngine.Texture>.Default) { }
+    }
+
+    #region    UNITYENGINE.UIELEMENTS.THEMESTYLESHEET
+    #endregion ======================================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.UIElements.ThemeStyleSheet>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.UIElements.ThemeStyleSheet>), destType: typeof(UnityEngine.UIElements.ThemeStyleSheet), order: 0)]
+    public sealed class AddressableKeyToThemeStyleSheetAdapter : AddressableKeyAdapter<UnityEngine.UIElements.ThemeStyleSheet>
+    {
+        public AddressableKeyToThemeStyleSheetAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.ThemeStyleSheet>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.UIElements.ThemeStyleSheet>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.ThemeStyleSheet), order: 2)]
+    public sealed class AddressableStringToThemeStyleSheetAdapter : AddressableStringAdapter<UnityEngine.UIElements.ThemeStyleSheet>
+    {
+        public AddressableStringToThemeStyleSheetAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.ThemeStyleSheet>.Default) { }
+    }
+
+    #region    TMPRO.TMP_FONTASSET
+    #endregion ===================
+
+    [Serializable]
+    [Label("AddressableKey<TMPro.TMP_FontAsset>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<TMPro.TMP_FontAsset>), destType: typeof(TMPro.TMP_FontAsset), order: 0)]
+    public sealed class AddressableKeyToTMP_FontAssetAdapter : AddressableKeyAdapter<TMPro.TMP_FontAsset>
+    {
+        public AddressableKeyToTMP_FontAssetAdapter() : base(CachedUnionConverter<TMPro.TMP_FontAsset>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<TMPro.TMP_FontAsset>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(TMPro.TMP_FontAsset), order: 2)]
+    public sealed class AddressableStringToTMP_FontAssetAdapter : AddressableStringAdapter<TMPro.TMP_FontAsset>
+    {
+        public AddressableStringToTMP_FontAssetAdapter() : base(CachedUnionConverter<TMPro.TMP_FontAsset>.Default) { }
+    }
+
+    #region    UNITYENGINE.UIELEMENTS.VISUALTREEASSET
+    #endregion ======================================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.UIElements.VisualTreeAsset>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.UIElements.VisualTreeAsset>), destType: typeof(UnityEngine.UIElements.VisualTreeAsset), order: 0)]
+    public sealed class AddressableKeyToVisualTreeAssetAdapter : AddressableKeyAdapter<UnityEngine.UIElements.VisualTreeAsset>
+    {
+        public AddressableKeyToVisualTreeAssetAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.VisualTreeAsset>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.UIElements.VisualTreeAsset>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.VisualTreeAsset), order: 2)]
+    public sealed class AddressableStringToVisualTreeAssetAdapter : AddressableStringAdapter<UnityEngine.UIElements.VisualTreeAsset>
+    {
+        public AddressableStringToVisualTreeAssetAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.VisualTreeAsset>.Default) { }
+    }
 
 }
 
