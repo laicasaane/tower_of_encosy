@@ -23,7 +23,7 @@ namespace EncosyTower.NameKeys
         public static Option<bool> GetPlayerPref(this NameKey<bool> self)
         {
             var key = self.ToStringGlobal();
-            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetInt(key) != 0 : default;
+            return PlayerPrefs.HasKey(key) && PlayerPrefs.GetInt(key) != 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
