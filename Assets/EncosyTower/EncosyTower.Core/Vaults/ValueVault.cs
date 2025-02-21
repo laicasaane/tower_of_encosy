@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Ids;
-using EncosyTower.PresetIds;
 using EncosyTower.Types;
 
 namespace EncosyTower.Vaults
@@ -35,25 +34,6 @@ namespace EncosyTower.Vaults
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TrySet<T>(Id<T> id, TValue value)
             => TrySet(ToId2(id), value);
-
-        #region    PRESET_ID
-        #endregion =========
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Contains(PresetId id)
-            => Contains((Id2)id);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryRemove(PresetId id)
-            => TryRemove((Id2)id);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGet(PresetId id, out TValue value)
-            => TryGet((Id2)id, out value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TrySet(PresetId id, TValue value)
-            => TrySet((Id2)id, value);
 
         #region    ID2
         #endregion ===

@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Ids;
-using EncosyTower.PresetIds;
 
 namespace EncosyTower.Vaults
 {
@@ -35,25 +34,6 @@ namespace EncosyTower.Vaults
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryGet<T>(Id<T> id, out T obj)
-            => s_vault.TryGet<T>(id, out obj);
-
-        #region    PRESET_ID
-        #endregion =========
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Contains(PresetId id)
-            => s_vault.Contains(id);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryAdd<T>(PresetId id, [NotNull] T obj)
-            => s_vault.TryAdd(id, obj);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryRemove<T>(PresetId id, out T obj)
-            => s_vault.TryRemove(id, out obj);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryGet<T>(PresetId id, out T obj)
             => s_vault.TryGet<T>(id, out obj);
 
         #region    ID2

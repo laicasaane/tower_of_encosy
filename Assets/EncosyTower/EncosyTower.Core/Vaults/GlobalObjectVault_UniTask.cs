@@ -5,7 +5,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using EncosyTower.Common;
 using EncosyTower.Ids;
-using EncosyTower.PresetIds;
 
 namespace EncosyTower.Vaults
 {
@@ -23,17 +22,6 @@ namespace EncosyTower.Vaults
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UniTask<Option<T>> TryGetAsync<T>(Id<T> id, UnityObject context = null, CancellationToken token = default)
             => s_vault.TryGetAsync(id, context, token);
-
-        #region    PRESET_ID
-        #endregion =========
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UniTask WaitUntilContains(PresetId id, CancellationToken token = default)
-            => s_vault.WaitUntilContains(id, token);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UniTask<Option<T>> TryGetAsync<T>(PresetId id, UnityObject context = null, CancellationToken token = default)
-            => s_vault.TryGetAsync<T>(id, context, token);
 
         #region    ID2
         #endregion ===
