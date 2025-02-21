@@ -1,6 +1,6 @@
 using System;
 
-namespace EncosyTower.Mvvm.ViewBinding.Unity
+namespace EncosyTower.Mvvm.ViewBinding.Components
 {
     [Serializable]
     public sealed class MonoViewSettings

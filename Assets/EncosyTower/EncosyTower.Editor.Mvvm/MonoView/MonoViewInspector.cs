@@ -9,12 +9,12 @@ using EncosyTower.Mvvm.ComponentModel.SourceGen;
 using EncosyTower.Mvvm.Input;
 using EncosyTower.Mvvm.ViewBinding;
 using EncosyTower.Mvvm.ViewBinding.SourceGen;
-using EncosyTower.Mvvm.ViewBinding.Unity;
+using EncosyTower.Mvvm.ViewBinding.Components;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEngine;
 
-namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
+namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 {
     using TypeCache = UnityEditor.TypeCache;
 

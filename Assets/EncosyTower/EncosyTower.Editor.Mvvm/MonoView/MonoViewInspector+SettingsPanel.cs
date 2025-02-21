@@ -4,7 +4,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
+namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 {
     partial class MonoViewInspector
     {

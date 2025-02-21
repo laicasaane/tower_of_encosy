@@ -7,7 +7,7 @@ using EncosyTower.Logging;
 using EncosyTower.Mvvm.ComponentModel;
 using UnityEngine;
 
-namespace EncosyTower.Mvvm.ViewBinding.Unity
+namespace EncosyTower.Mvvm.ViewBinding.Components
 {
     /// <summary>
     /// Represents a collection of <see cref="MonoBinding"/>.

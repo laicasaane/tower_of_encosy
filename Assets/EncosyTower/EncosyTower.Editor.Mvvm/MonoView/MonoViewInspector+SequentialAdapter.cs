@@ -9,13 +9,13 @@ using EncosyTower.Logging;
 using EncosyTower.Mvvm.ViewBinding;
 using EncosyTower.Mvvm.ViewBinding.Adapters;
 using EncosyTower.Mvvm.ViewBinding.Adapters.Unity;
-using EncosyTower.Mvvm.ViewBinding.Unity;
+using EncosyTower.Mvvm.ViewBinding.Components;
 using EncosyTower.Types;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEngine;
 
-namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
+namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 {
     partial class MonoViewInspector
     {

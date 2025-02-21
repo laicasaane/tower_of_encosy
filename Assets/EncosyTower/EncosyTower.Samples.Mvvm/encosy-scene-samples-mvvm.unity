@@ -692,7 +692,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8109321786255212778
-      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Unity,
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Components,
         asm: EncosyTower.Mvvm}
       data:
         _object: {fileID: 1603940289}
@@ -1179,7 +1179,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 7562154210548776971
-      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Unity,
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Components,
         asm: EncosyTower.Mvvm}
       data:
         _object: {fileID: 1603940289}
@@ -1569,7 +1569,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8109321786255212789
-      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Unity,
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Components,
         asm: EncosyTower.Mvvm}
       data:
         _object: {fileID: 1603940289}
@@ -2422,7 +2422,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 7562154620754329622
-      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Unity,
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Components,
         asm: EncosyTower.Mvvm}
       data:
         _object: {fileID: 1289389108}

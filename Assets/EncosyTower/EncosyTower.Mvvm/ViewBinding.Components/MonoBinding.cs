@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Mvvm.ComponentModel;
 
-namespace EncosyTower.Mvvm.ViewBinding.Unity
+namespace EncosyTower.Mvvm.ViewBinding.Components
 {
     /// <summary>
     /// Represents a binding mechanism between a view and a view model.

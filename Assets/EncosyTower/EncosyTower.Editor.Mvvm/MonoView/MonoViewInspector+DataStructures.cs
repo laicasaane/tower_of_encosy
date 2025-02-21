@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using EncosyTower.TypeWraps;
 using UnityEditor;
 
-namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
+namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 {
     partial class MonoViewInspector
     {

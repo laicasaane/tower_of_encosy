@@ -1,6 +1,6 @@
 using System;
 using EncosyTower.Annotations;
-using EncosyTower.Mvvm.ViewBinding.Unity;
+using EncosyTower.Mvvm.ViewBinding.Components;
 using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D

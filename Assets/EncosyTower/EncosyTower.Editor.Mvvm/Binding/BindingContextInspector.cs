@@ -4,10 +4,10 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using EncosyTower.Debugging;
 using EncosyTower.Mvvm.ViewBinding;
-using EncosyTower.Mvvm.ViewBinding.Unity;
+using EncosyTower.Mvvm.ViewBinding.Components;
 using UnityEditor;
 
-namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
+namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 {
     public abstract class BindingContextInspector
     {

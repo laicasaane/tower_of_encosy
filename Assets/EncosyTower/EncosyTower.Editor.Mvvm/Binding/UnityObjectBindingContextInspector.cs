@@ -1,11 +1,11 @@
 #if UNITY_EDITOR
 
 using EncosyTower.Mvvm.ComponentModel;
-using EncosyTower.Mvvm.ViewBinding.Unity;
+using EncosyTower.Mvvm.ViewBinding.Components;
 using UnityEditor;
 using UnityEngine;
 
-namespace EncosyTower.Editor.Mvvm.ViewBinding.Unity
+namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 {
     [BindingContextInspector(typeof(UnityObjectBindingContext))]
     public sealed class UnityObjectBindingContextInspector : BindingContextInspector

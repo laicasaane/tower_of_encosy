@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using EncosyTower.Mvvm.ComponentModel;
 using UnityEngine;
 
-namespace EncosyTower.Mvvm.ViewBinding.Unity
+namespace EncosyTower.Mvvm.ViewBinding.Components
 {
     public partial class MonoView
     {

@@ -3,7 +3,7 @@
 using System;
 using System.Text;
 using EncosyTower.Annotations;
-using EncosyTower.Mvvm.ViewBinding.Unity;
+using EncosyTower.Mvvm.ViewBinding.Components;
 using EncosyTower.Unions;
 using TMPro;
 using UnityEngine;
