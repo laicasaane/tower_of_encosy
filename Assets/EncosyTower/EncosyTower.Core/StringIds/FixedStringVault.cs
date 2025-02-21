@@ -27,6 +27,7 @@ namespace EncosyTower.StringIds
         private FixedHashMap<StringHash, Id, MapData> _map;
         private FixedArray<FixedString32Bytes, StringArrayData> _strings;
         private FixedArray<Option<StringHash>, HashArrayData> _hashes;
+        private int _count;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public FixedStringVault()
@@ -34,69 +35,82 @@ namespace EncosyTower.StringIds
             _map = new(default);
             _strings = new(default);
             _hashes = new(default);
+            _count = 0;
         }
 
         public readonly int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _map.Capacity;
+            get => MAX_CAPACITY;
         }
 
         public readonly int Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _map.Count;
+            get => _count;
         }
 
         public Id MakeId(in FixedString32Bytes str)
         {
-            if (TryGetId(str, out var id) == false)
+            var hash = str.GetHashCode();
+            var registered = _map.TryGetValue(hash, out var id);
+
+            if (registered)
             {
-                var result = TryAdd(str, out id);
-                ThrowIfFailedRegistering(result, str, id);
+                TryGetString(id, out var registeredString);
+
+                if (str == registeredString)
+                {
+                    return id;
+                }
+
+                var index = _count;
+                id = new Id(index);
+
+                _strings[index] = str;
+                _hashes[index] = new(hash);
+                _count += 1;
+            }
+            else
+            {
+                var index = _count;
+                id = new Id(index);
+
+                if (_map.TryAdd(hash, id))
+                {
+                    _strings[index] = str;
+                    _hashes[index] = new(hash);
+                    _count += 1;
+                }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                else
+                {
+                    ThrowIfFailedRegistering(false, str, id);
+                }
+#endif
             }
 
             return id;
         }
 
-        public bool TryAdd(in FixedString32Bytes str, out Id id)
-        {
-            var index = _map.Count;
-            var hash = str.GetHashCode();
-            id = new Id(index);
-
-            if (_map.TryAdd(hash, id))
-            {
-                _strings[index] = str;
-                _hashes[index] = new(hash);
-                return true;
-            }
-
-            return default;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool TryGetId(in FixedString32Bytes str, out Id id)
-        {
-            var hash = str.GetHashCode();
-            return _map.TryGetValue(hash, out id);
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryGetString(Id id, out FixedString32Bytes str)
         {
-            var index = (int)(uint)id;
-            var hash = _hashes[index];
-            str = hash.HasValue ? _strings[index] : default;
-            return hash.HasValue;
+            var indexUnsigned = (uint)id;
+            var index = (int)indexUnsigned;
+            var validIndex = indexUnsigned < (uint)_hashes.Length;
+
+            str = validIndex ? _strings[index] : default;
+            return validIndex ? _hashes[index].HasValue : false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool ContainsId(Id id)
         {
-            var index = (int)(uint)id;
-            var hash = _hashes[index];
-            return hash.HasValue;
+            var indexUnsigned = (uint)id;
+            var index = (int)indexUnsigned;
+            var validIndex = indexUnsigned < (uint)_hashes.Length;
+            return validIndex ? _hashes[index].HasValue : false;
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]

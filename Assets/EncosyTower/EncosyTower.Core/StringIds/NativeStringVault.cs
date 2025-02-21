@@ -8,79 +8,114 @@ using EncosyTower.Common;
 using EncosyTower.Ids;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace EncosyTower.StringIds
 {
-    public partial struct NativeStringVault
+    public partial struct NativeStringVault : IDisposable
     {
         private NativeHashMap<StringHash, Id> _map;
         private NativeList<FixedString32Bytes> _strings;
         private NativeList<Option<StringHash>> _hashes;
+        private NativeReference<int> _count;
 
         public NativeStringVault(int initialCapacity, Allocator allocator)
         {
             _map = new(initialCapacity, allocator);
             _strings = new(initialCapacity, allocator);
             _hashes = new(initialCapacity, allocator);
+            _count = new(allocator);
+        }
+
+        public readonly bool IsCreated
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _map.IsCreated;
         }
 
         public readonly int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _strings.Capacity;
+            get => _strings.Length;
         }
 
         public readonly int Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _map.Count;
+            get => _count.Value;
+        }
+
+        public void Dispose()
+        {
+            _map.Dispose();
+            _strings.Dispose();
+            _hashes.Dispose();
+            _count.Dispose();
         }
 
         public Id MakeId(in FixedString32Bytes str)
         {
-            if (TryGetId(str, out var id) == false)
+            var hash = str.GetHashCode();
+            var registered = _map.TryGetValue(hash, out var id);
+
+            if (registered)
             {
-                var result = TryAdd(str, out id);
-                ThrowIfFailedRegistering(result, str, id);
+                TryGetString(id, out var registeredString);
+
+                if (str == registeredString)
+                {
+                    return id;
+                }
+
+                var index = _count.Value;
+                id = new Id(index);
+
+                _count.Value += 1;
+                EnsureCapacity();
+
+                _strings[index] = str;
+                _hashes[index] = new Option<StringHash>(hash);
+            }
+            else
+            {
+                var index = _count.Value;
+                id = new Id(index);
+
+                if (_map.TryAdd(hash, id))
+                {
+                    _count.Value += 1;
+                    EnsureCapacity();
+
+                    _strings[index] = str;
+                    _hashes[index] = new Option<StringHash>(hash);
+                }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                else
+                {
+                    ThrowIfFailedRegistering(false, str, id);
+                }
+#endif
             }
 
             return id;
         }
 
-        public bool TryAdd(in FixedString32Bytes str, out Id id)
-        {
-            var index = _map.Count;
-            var hash = str.GetHashCode();
-            id = new Id(index);
-
-            if (_map.TryAdd(hash, id) == false)
-            {
-                return default;
-            }
-
-            EnsureCapacity();
-            _strings.Add(str);
-
-            ref var elem = ref _hashes.ElementAt(index);
-            elem = new(hash);
-
-            return true;
-        }
-
         private readonly void EnsureCapacity()
         {
-            var hashes = _hashes;
-            var oldCapacity = hashes.Capacity;
-            var newCapacity = _strings.Capacity;
+            var oldCapacity = math.min(_hashes.Capacity, _strings.Capacity);
+            var newCapacity = math.max(_map.Capacity, _count.Value);
 
-            if (newCapacity <= oldCapacity)
+            if (newCapacity <= oldCapacity || newCapacity < 1)
             {
                 return;
             }
 
-            hashes.SetCapacity(newCapacity);
-            hashes.AddReplicate(default, newCapacity - oldCapacity);
+            _hashes.SetCapacity(newCapacity);
+            _hashes.AddReplicate(default, math.max(newCapacity - _hashes.Length, 0));
+
+            _strings.SetCapacity(newCapacity);
+            _strings.AddReplicate(default, math.max(newCapacity - _strings.Length, 0));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,18 +128,21 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetString(Id id, out FixedString32Bytes str)
         {
-            var index = (int)(uint)id;
-            var hash = _hashes[index];
-            str = hash.HasValue ? _strings[index] : default;
-            return hash.HasValue;
+            var indexUnsigned = (uint)id;
+            var index = (int)indexUnsigned;
+            var validIndex = indexUnsigned < (uint)_hashes.Length;
+
+            str = validIndex ? _strings[index] : default;
+            return validIndex ? _hashes[index].HasValue : false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ContainsId(Id id)
         {
-            var index = (int)(uint)id;
-            var hash = _hashes[index];
-            return hash.HasValue;
+            var indexUnsigned = (uint)id;
+            var index = (int)indexUnsigned;
+            var validIndex = indexUnsigned < (uint)_hashes.Length;
+            return validIndex ? _hashes[index].HasValue : false;
         }
 
         [BurstDiscard]

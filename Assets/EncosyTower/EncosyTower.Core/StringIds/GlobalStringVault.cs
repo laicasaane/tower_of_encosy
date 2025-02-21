@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using EncosyTower.Ids;
 using UnityEngine;
 
 namespace EncosyTower.StringIds
@@ -26,7 +25,7 @@ namespace EncosyTower.StringIds
 #pragma warning disable CS0618 // Type or member is obsolete
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static StringId<T> MakeId(string str)
+        public static StringId<T> MakeId([NotNull] string str)
             => new(s_vault.MakeId(str), false);
 
 #pragma warning restore CS0618 // Type or member is obsolete

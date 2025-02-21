@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -12,94 +11,113 @@ namespace EncosyTower.StringIds
 {
     public partial class StringVault
     {
-        private readonly Dictionary<StringHash, Id> _map;
+        private readonly ArrayMap<StringHash, Id> _map;
         private readonly FasterList<string> _strings;
         private readonly FasterList<Option<StringHash>> _hashes;
+        private int _count;
 
         public StringVault(int initialCapacity)
         {
             _map = new(initialCapacity);
             _strings = new(initialCapacity);
             _hashes = new(initialCapacity);
+            _count = 0;
         }
 
         public int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _strings.Capacity;
+            get => _strings.Count;
         }
 
         public int Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _map.Count;
+            get => _count;
         }
 
-        public Id MakeId(string str)
+        public Id MakeId([NotNull] string str)
         {
-            if (TryGetId(str, out var id) == false)
+            var hash = str.GetHashCode(StringComparison.Ordinal);
+            var registered = _map.TryGetValue(hash, out var id);
+
+            if (registered)
             {
-                var result = TryAdd(str, out id);
-                ThrowIfFailedRegistering(result, str, id);
+                TryGetString(id, out var registeredString);
+
+                if (string.Equals(str, registeredString, StringComparison.Ordinal))
+                {
+                    return id;
+                }
+
+                var index = _count;
+                id = new Id(index);
+
+                _count += 1;
+                EnsureCapacity();
+
+                _strings[index] = str;
+                _hashes[index] = new Option<StringHash>(hash);
+            }
+            else
+            {
+                var index = _count;
+                id = new Id(index);
+
+                if (_map.TryAdd(hash, id))
+                {
+                    _count += 1;
+                    EnsureCapacity();
+
+                    _strings[index] = str;
+                    _hashes[index] = new Option<StringHash>(hash);
+                }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                else
+                {
+                    ThrowIfFailedRegistering(false, str, id);
+                }
+#endif
             }
 
             return id;
         }
 
-        public bool TryAdd(string str, out Id id)
-        {
-            var index = _map.Count;
-            var hash = str.GetHashCode(StringComparison.Ordinal);
-            id = new Id(index);
-
-            if (_map.TryAdd(hash, id))
-            {
-                EnsureCapacity();
-                _strings.Add(str);
-                _hashes[index] = new(hash);
-                return true;
-            }
-
-            return default;
-        }
-
         private void EnsureCapacity()
         {
-            var hashes = _hashes;
-            var oldCapacity = hashes.Capacity;
-            var newCapacity = _strings.Capacity;
+            var oldCapacity = Math.Min(_hashes.Capacity, _strings.Capacity);
+            var newCapacity = Math.Max(_map.Capacity, _count);
 
-            if (newCapacity <= oldCapacity)
+            if (newCapacity <= oldCapacity || newCapacity < 1)
             {
                 return;
             }
 
-            hashes.IncreaseCapacityTo(newCapacity);
-            hashes.AddReplicateNoInit(newCapacity - oldCapacity);
-        }
+            _hashes.IncreaseCapacityTo(newCapacity);
+            _hashes.AddReplicateNoInit(Math.Max(newCapacity - _hashes.Count, 0));
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetId(string str, out Id id)
-        {
-            var hash = str.GetHashCode(StringComparison.Ordinal);
-            return _map.TryGetValue(hash, out id);
+            _strings.IncreaseCapacityTo(newCapacity);
+            _strings.AddReplicateNoInit(Math.Max(newCapacity - _strings.Count, 0));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetString(Id id, out string str)
         {
-            var index = (int)(uint)id;
-            var hash = _hashes[index];
-            str = hash.HasValue ? _strings[index] : default;
-            return hash.HasValue;
+            var indexUnsigned = (uint)id;
+            var index = (int)indexUnsigned;
+            var validIndex = indexUnsigned < (uint)_hashes.Count;
+
+            str = validIndex ? _strings[index] : default;
+            return validIndex ? _hashes[index].HasValue : false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ContainsId(Id id)
         {
-            var index = (int)(uint)id;
-            var hash = _hashes[index];
-            return hash.HasValue;
+            var indexUnsigned = (uint)id;
+            var index = (int)indexUnsigned;
+            var validIndex = indexUnsigned < (uint)_hashes.Count;
+            return validIndex ? _hashes[index].HasValue : false;
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
