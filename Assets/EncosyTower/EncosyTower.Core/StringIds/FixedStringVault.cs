@@ -11,21 +11,28 @@ using EncosyTower.Ids;
 using Unity.Collections;
 using UnityEngine;
 
-namespace EncosyTower.NameKeys
+namespace EncosyTower.StringIds
 {
-    public partial struct FixedNameVault
+    /// <summary>
+    /// The vault to store instances of <see cref="FixedString32Bytes"/>.
+    /// </summary>
+    /// <remarks>
+    /// Due to technical limitations of <see cref="Unity.Burst.SharedStatic{T}"/>
+    /// the vault can only store up to 256 unique strings.
+    /// </remarks>
+    public partial struct FixedStringVault
     {
         public const int MAX_CAPACITY = 256;
 
-        private FixedHashMap<NameHash, Id, MapData> _map;
-        private FixedArray<FixedString32Bytes, NameArrayData> _names;
-        private FixedArray<Option<NameHash>, HashArrayData> _hashes;
+        private FixedHashMap<StringHash, Id, MapData> _map;
+        private FixedArray<FixedString32Bytes, StringArrayData> _strings;
+        private FixedArray<Option<StringHash>, HashArrayData> _hashes;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FixedNameVault()
+        public FixedStringVault()
         {
             _map = new(default);
-            _names = new(default);
+            _strings = new(default);
             _hashes = new(default);
         }
 
@@ -41,26 +48,26 @@ namespace EncosyTower.NameKeys
             get => _map.Count;
         }
 
-        public Id NameToId(in FixedString32Bytes name)
+        public Id MakeId(in FixedString32Bytes str)
         {
-            if (TryGetId(name, out var id) == false)
+            if (TryGetId(str, out var id) == false)
             {
-                var result = TryAdd(name, out id);
-                ThrowIfFailedRegistering(result, name, id);
+                var result = TryAdd(str, out id);
+                ThrowIfFailedRegistering(result, str, id);
             }
 
             return id;
         }
 
-        public bool TryAdd(in FixedString32Bytes name, out Id id)
+        public bool TryAdd(in FixedString32Bytes str, out Id id)
         {
             var index = _map.Count;
-            var hash = name.GetHashCode();
+            var hash = str.GetHashCode();
             id = new Id(index);
 
             if (_map.TryAdd(hash, id))
             {
-                _names[index] = name;
+                _strings[index] = str;
                 _hashes[index] = new(hash);
                 return true;
             }
@@ -69,18 +76,18 @@ namespace EncosyTower.NameKeys
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool TryGetId(in FixedString32Bytes name, out Id id)
+        public readonly bool TryGetId(in FixedString32Bytes str, out Id id)
         {
-            var hash = name.GetHashCode();
+            var hash = str.GetHashCode();
             return _map.TryGetValue(hash, out id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool TryGetName(Id id, out FixedString32Bytes name)
+        public readonly bool TryGetString(Id id, out FixedString32Bytes str)
         {
             var index = (int)(uint)id;
             var hash = _hashes[index];
-            name = hash.HasValue ? _names[index] : default;
+            str = hash.HasValue ? _strings[index] : default;
             return hash.HasValue;
         }
 
@@ -95,14 +102,14 @@ namespace EncosyTower.NameKeys
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfFailedRegistering(
               [DoesNotReturnIf(false)] bool result
-            , in FixedString32Bytes name
+            , in FixedString32Bytes str
             , Id id
         )
         {
             if (result == false)
             {
                 throw new InvalidOperationException(
-                    $"Cannot register a NameKey by the same name \"{name}\" with different id \"{id}\"."
+                    $"Cannot register a StringId by the same value \"{str}\" with different id \"{id}\"."
                 );
             }
         }
@@ -111,7 +118,7 @@ namespace EncosyTower.NameKeys
         private struct MapData { }
 
         [StructLayout(LayoutKind.Explicit, Size = MAX_CAPACITY * 32)]
-        private struct NameArrayData { }
+        private struct StringArrayData { }
 
         [StructLayout(LayoutKind.Explicit, Size = MAX_CAPACITY * 8)]
         private struct HashArrayData { }

@@ -2,13 +2,14 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.Ids;
 using UnityEngine;
 
-namespace EncosyTower.NameKeys
+namespace EncosyTower.StringIds
 {
-    internal static class GlobalNameVault<T>
+    internal static class GlobalStringVault<T>
     {
-        private readonly static NameVault s_vault = new(256);
+        private readonly static StringVault s_vault = new(256);
 
         public static int Capacity
         {
@@ -23,25 +24,25 @@ namespace EncosyTower.NameKeys
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NameKey<T> NameToKey(string name)
-            => new(s_vault.NameToId(name), false);
+        public static StringId<T> MakeId(string str)
+            => new(s_vault.MakeId(str), false);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string KeyToName(NameKey<T> key)
-            => s_vault.TryGetName(key.Id, out var name) ? name : string.Empty;
+        public static string GetString(StringId<T> key)
+            => s_vault.TryGetString(key.Id, out var str) ? str : string.Empty;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsDefined(NameKey<T> key)
+        public static bool IsDefined(StringId<T> key)
             => s_vault.ContainsId(key.Id);
 
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        public static void ThrowIfNotDefined([DoesNotReturnIf(false)] bool isDefined, NameKey<T> key)
+        public static void ThrowIfNotDefined([DoesNotReturnIf(false)] bool isDefined, StringId<T> key)
         {
             if (isDefined == false)
             {
                 throw new InvalidOperationException(
-                    $"No NameKey<{typeof(T).Name}> has not been globally defined with id \"{key}\". " +
-                    $"To define one, use NameToKey.Get() API."
+                    $"No StringId<{typeof(T).Name}> has not been globally defined with id \"{key}\". " +
+                    $"To define one, use StringToId.Get() API."
                 );
             }
         }

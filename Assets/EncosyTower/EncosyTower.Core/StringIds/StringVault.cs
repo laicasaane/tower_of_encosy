@@ -8,25 +8,25 @@ using EncosyTower.Common;
 using EncosyTower.Ids;
 using UnityEngine;
 
-namespace EncosyTower.NameKeys
+namespace EncosyTower.StringIds
 {
-    public partial class NameVault
+    public partial class StringVault
     {
-        private readonly Dictionary<NameHash, Id> _map;
-        private readonly FasterList<string> _names;
-        private readonly FasterList<Option<NameHash>> _hashes;
+        private readonly Dictionary<StringHash, Id> _map;
+        private readonly FasterList<string> _strings;
+        private readonly FasterList<Option<StringHash>> _hashes;
 
-        public NameVault(int initialCapacity)
+        public StringVault(int initialCapacity)
         {
             _map = new(initialCapacity);
-            _names = new(initialCapacity);
+            _strings = new(initialCapacity);
             _hashes = new(initialCapacity);
         }
 
         public int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _names.Capacity;
+            get => _strings.Capacity;
         }
 
         public int Count
@@ -35,27 +35,27 @@ namespace EncosyTower.NameKeys
             get => _map.Count;
         }
 
-        public Id NameToId(string name)
+        public Id MakeId(string str)
         {
-            if (TryGetId(name, out var id) == false)
+            if (TryGetId(str, out var id) == false)
             {
-                var result = TryAdd(name, out id);
-                ThrowIfFailedRegistering(result, name, id);
+                var result = TryAdd(str, out id);
+                ThrowIfFailedRegistering(result, str, id);
             }
 
             return id;
         }
 
-        public bool TryAdd(string name, out Id id)
+        public bool TryAdd(string str, out Id id)
         {
             var index = _map.Count;
-            var hash = name.GetHashCode(StringComparison.Ordinal);
+            var hash = str.GetHashCode(StringComparison.Ordinal);
             id = new Id(index);
 
             if (_map.TryAdd(hash, id))
             {
                 EnsureCapacity();
-                _names.Add(name);
+                _strings.Add(str);
                 _hashes[index] = new(hash);
                 return true;
             }
@@ -67,7 +67,7 @@ namespace EncosyTower.NameKeys
         {
             var hashes = _hashes;
             var oldCapacity = hashes.Capacity;
-            var newCapacity = _names.Capacity;
+            var newCapacity = _strings.Capacity;
 
             if (newCapacity <= oldCapacity)
             {
@@ -79,18 +79,18 @@ namespace EncosyTower.NameKeys
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetId(string name, out Id id)
+        public bool TryGetId(string str, out Id id)
         {
-            var hash = name.GetHashCode(StringComparison.Ordinal);
+            var hash = str.GetHashCode(StringComparison.Ordinal);
             return _map.TryGetValue(hash, out id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetName(Id id, out string name)
+        public bool TryGetString(Id id, out string str)
         {
             var index = (int)(uint)id;
             var hash = _hashes[index];
-            name = hash.HasValue ? _names[index] : default;
+            str = hash.HasValue ? _strings[index] : default;
             return hash.HasValue;
         }
 
@@ -103,12 +103,12 @@ namespace EncosyTower.NameKeys
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, string name, Id id)
+        private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, string str, Id id)
         {
             if (result == false)
             {
                 throw new InvalidOperationException(
-                    $"Cannot register a NameKey by the same name \"{name}\" with different id \"{id}\"."
+                    $"Cannot register a StringId by the same value \"{str}\" with different id \"{id}\"."
                 );
             }
         }
