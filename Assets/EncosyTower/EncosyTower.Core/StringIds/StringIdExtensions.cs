@@ -8,7 +8,7 @@ namespace EncosyTower.StringIds
         public static string ToStringGlobal<T>(this StringId<T> self)
         {
 #if UNITY_BURST && UNITY_COLLECTIONS
-            if (self.IsFixed)
+            if (self.IsFixedString)
             {
                 GlobalFixedStringVault<T>.ThrowIfNotDefined(GlobalFixedStringVault<T>.IsDefined(self), self);
                 return GlobalFixedStringVault<T>.GetString(self).ToString();
@@ -23,7 +23,7 @@ namespace EncosyTower.StringIds
         public static bool IsDefinedGlobal<T>(this StringId<T> self)
         {
 #if UNITY_BURST && UNITY_COLLECTIONS
-            return self.IsFixed ? GlobalFixedStringVault<T>.IsDefined(self) : GlobalStringVault<T>.IsDefined(self);
+            return self.IsFixedString ? GlobalFixedStringVault<T>.IsDefined(self) : GlobalStringVault<T>.IsDefined(self);
 #else
             return GlobalStringVault<T>.IsDefined(self);
 #endif

@@ -23,9 +23,13 @@ namespace EncosyTower.StringIds
             get => s_vault.Count;
         }
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static StringId<T> MakeId(string str)
             => new(s_vault.MakeId(str), false);
+
+#pragma warning restore CS0618 // Type or member is obsolete
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetString(StringId<T> key)

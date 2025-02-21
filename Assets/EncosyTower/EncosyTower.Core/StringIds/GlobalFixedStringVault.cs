@@ -51,12 +51,16 @@ namespace EncosyTower.StringIds
             return MakeId(fixedString);
         }
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static StringId<T> MakeId(in FixedString32Bytes str)
         {
             ref var vault = ref s_vault.Data;
             return new(vault.MakeId(str), true);
         }
+
+#pragma warning restore CS0618 // Type or member is obsolete
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static FixedString32Bytes GetString(StringId<T> key)
