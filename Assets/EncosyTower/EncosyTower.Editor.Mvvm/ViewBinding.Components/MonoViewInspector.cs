@@ -293,11 +293,15 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             }
 
             var (contextType, inspectorType, propRef) = menuItem;
-            var contextInspector = Activator.CreateInstance(inspectorType) as BindingContextInspector;
-            contextInspector.ContextType = contextType;
-            propRef.Inspector._contextInspector = contextInspector;
+            var propInspector = propRef.Inspector;
+            var currentInspectorType = propInspector._contextInspector?.GetType();
 
-            var property = propRef.Inspector._contextProp;
+            if (currentInspectorType == inspectorType)
+            {
+                return;
+            }
+
+            var property = propInspector._contextProp;
             var serializedObject = property.serializedObject;
             var target = serializedObject.targetObject;
 
@@ -306,6 +310,9 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             property.managedReferenceValue = Activator.CreateInstance(contextType);
             serializedObject.ApplyModifiedProperties();
             serializedObject.Update();
+
+            // MUST be null to properly reset the context inspector
+            propInspector._contextInspector = null;
         }
 
         private static void DrawPanelHeaderLabel(
@@ -629,7 +636,15 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             property.MoveSelectedItemDown();
         }
 
-        private static void InitContextToInspector()
+        private static void InitInspector()
+        {
+            InitContextToInspectorMap();
+            InitAdapterMap();
+            InitBinderMenu();
+            InitBindingMenuMap();
+        }
+
+        private static void InitContextToInspectorMap()
         {
             if (s_contextToInspectorMap.Count > 0)
             {
@@ -683,14 +698,6 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 currentNode.userData = new MenuItemContext(contextType, inspectorType, s_contextPropRef);
                 currentNode.on = false;
             }
-        }
-
-        private static void InitInspector()
-        {
-            InitContextToInspector();
-            InitAdapterMap();
-            InitBinderMenu();
-            InitBindingMenuMap();
         }
 
         private static void InitAdapterMap()
