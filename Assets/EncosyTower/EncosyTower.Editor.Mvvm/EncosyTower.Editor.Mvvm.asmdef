@@ -1,20 +1,10 @@
 {
-    "name": "EncosyTower.Mvvm.Unity",
-    "rootNamespace": "EncosyTower.Mvvm.Unity",
+    "name": "EncosyTower.Editor.Mvvm",
+    "rootNamespace": "EncosyTower.Editor.Mvvm",
     "references": [
-        "AnnulusGames.UnityCodeGen.Editor",
         "EncosyTower.Core",
-        "UniTask",
-        "UniTask.Addressables",
-        "Unity.Addressables",
-        "Unity.Burst",
-        "Unity.Collections",
-        "Unity.Localization",
-        "Unity.Logging",
-        "Unity.Mathematics",
-        "Unity.ResourceManager",
-        "Unity.Serialization",
-        "Unity.TextMeshPro"
+        "EncosyTower.Editor",
+        "EncosyTower.Mvvm"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -22,7 +12,9 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "UNITY_EDITOR"
+    ],
     "versionDefines": [
         {
             "name": "com.annulusgames.unity-codegen",

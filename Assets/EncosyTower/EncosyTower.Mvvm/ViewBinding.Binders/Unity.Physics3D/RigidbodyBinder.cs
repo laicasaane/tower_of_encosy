@@ -3,21 +3,21 @@ using EncosyTower.Annotations;
 using EncosyTower.Mvvm.ViewBinding.Unity;
 using UnityEngine;
 
-namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
+namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
 {
     [Serializable]
-    [Label("Rigidbody 2D", "Physics 2D")]
-    public sealed partial class Rigidbody2DBinder : MonoBinder<Rigidbody2D>
+    [Label("Rigidbody", "Physics 3D")]
+    public sealed partial class RigidbodyBinder : MonoBinder<Rigidbody>
     {
     }
 
     [Serializable]
 #if UNITY_6000_0_OR_NEWER
-    [Obsolete("Use Rigidbody2DBindingAngularDamping instead")]
+    [Obsolete("Use RigidbodyBindingAngularDamping instead")]
 #else
-    [Label("Angular Drag", "Rigidbody 2D")]
+    [Label("Angular Drag", "Rigidbody")]
 #endif
-    public sealed partial class Rigidbody2DBindingAngularDrag : MonoBindingProperty<Rigidbody2D>, IBinder
+    public sealed partial class RigidbodyBindingAngularDrag : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -35,13 +35,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 
 #if UNITY_6000_0_OR_NEWER
     [Serializable]
-    [Label("Angular Damping", "Rigidbody 2D")]
+    [Label("Angular Damping", "Rigidbody")]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true
-        , "EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D"
-        , "EncosyTower.Mvvm.Unity"
-        , "Rigidbody2DBindingAngularDrag"
+        , "EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D"
+        , "EncosyTower.Mvvm"
+        , "RigidbodyBindingAngularDrag"
     )]
-    public sealed partial class Rigidbody2DBindingAngularDamping : MonoBindingProperty<Rigidbody2D>, IBinder
+    public sealed partial class RigidbodyBindingAngularDamping : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -59,12 +59,12 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 #endif
 
     [Serializable]
-    [Label("Angular Velocity", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingAngularVelocity : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Angular Velocity", "Rigidbody")]
+    public sealed partial class RigidbodyBindingAngularVelocity : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetAngularVelocity(float value)
+        private void SetAngularVelocity(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -77,30 +77,48 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
-    [Label("Body Type", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingBodyType : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Automatic Center Of Mass", "Rigidbody")]
+    public sealed partial class RigidbodyBindingAutomaticCenterOfMass : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetBodyType(RigidbodyType2D value)
+        private void SetAutomaticCenterOfMass(bool value)
         {
             var targets = Targets;
             var length = targets.Length;
 
             for (var i = 0; i < length; i++)
             {
-                targets[i].bodyType = value;
+                targets[i].automaticCenterOfMass = value;
             }
         }
     }
 
     [Serializable]
-    [Label("Center Of Mass", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingCenterOfMass : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Automatic Inertia Tensor", "Rigidbody")]
+    public sealed partial class RigidbodyBindingAutomaticInertiaTensor : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetCenterOfMass(Vector2 value)
+        private void SetAutomaticInertiaTensor(bool value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].automaticInertiaTensor = value;
+            }
+        }
+    }
+
+    [Serializable]
+    [Label("Center Of Mass", "Rigidbody")]
+    public sealed partial class RigidbodyBindingCenterOfMass : MonoBindingProperty<Rigidbody>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetCenterOfMass(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -113,12 +131,12 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
-    [Label("Collision Detection Mode", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingCollisionDetectionMode : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Collision Detection Mode", "Rigidbody")]
+    public sealed partial class RigidbodyBindingCollisionDetectionMode : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetCollisionDetectionMode(CollisionDetectionMode2D value)
+        private void SetCollisionDetectionMode(CollisionDetectionMode value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -131,12 +149,12 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
-    [Label("Constraints", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingConstraints : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Constraints", "Rigidbody")]
+    public sealed partial class RigidbodyBindingConstraints : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetConstraints(RigidbodyConstraints2D value)
+        private void SetConstraints(RigidbodyConstraints value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -149,12 +167,30 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
+    [Label("Detect Collisions", "Rigidbody")]
+    public sealed partial class RigidbodyBindingDetectCollisions : MonoBindingProperty<Rigidbody>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetDetectCollisions(bool value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].detectCollisions = value;
+            }
+        }
+    }
+
+    [Serializable]
 #if UNITY_6000_0_OR_NEWER
-    [Obsolete("Use Rigidbody2DBindingLinearDamping instead")]
+    [Obsolete("Use RigidbodyBindingLinearDamping instead")]
 #else
-    [Label("Drag", "Rigidbody 2D")]
+    [Label("Drag", "Rigidbody")]
 #endif
-    public sealed partial class Rigidbody2DBindingDrag : MonoBindingProperty<Rigidbody2D>, IBinder
+    public sealed partial class RigidbodyBindingDrag : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -172,13 +208,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 
 #if UNITY_6000_0_OR_NEWER
     [Serializable]
-    [Label("Linear Damping", "Rigidbody 2D")]
+    [Label("Linear Damping", "Rigidbody")]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true
-        , "EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D"
-        , "EncosyTower.Mvvm.Unity"
-        , "Rigidbody2DBindingDrag"
+        , "EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D"
+        , "EncosyTower.Mvvm"
+        , "RigidbodyBindingDrag"
     )]
-    public sealed partial class Rigidbody2DBindingLinearDamping : MonoBindingProperty<Rigidbody2D>, IBinder
+    public sealed partial class RigidbodyBindingLinearDamping : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -196,8 +232,8 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 #endif
 
     [Serializable]
-    [Label("Exclude Layers", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingExcludeLayers : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Exclude Layers", "Rigidbody")]
+    public sealed partial class RigidbodyBindingExcludeLayers : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -214,8 +250,8 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
-    [Label("Freeze Rotation", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingFreezeRotation : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Freeze Rotation", "Rigidbody")]
+    public sealed partial class RigidbodyBindingFreezeRotation : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -232,26 +268,8 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
-    [Label("Gravity Scale", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingGravityScale : MonoBindingProperty<Rigidbody2D>, IBinder
-    {
-        [BindingProperty]
-        [field: HideInInspector]
-        private void SetGravityScale(float value)
-        {
-            var targets = Targets;
-            var length = targets.Length;
-
-            for (var i = 0; i < length; i++)
-            {
-                targets[i].gravityScale = value;
-            }
-        }
-    }
-
-    [Serializable]
-    [Label("Include Layers", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingIncludeLayers : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Include Layers", "Rigidbody")]
+    public sealed partial class RigidbodyBindingIncludeLayers : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -268,30 +286,48 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
-    [Label("Inertia", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingInertia : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Inertia Tensor", "Rigidbody")]
+    public sealed partial class RigidbodyBindingInertiaTensor : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetInertia(float value)
+        private void SetInertiaTensor(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
 
             for (var i = 0; i < length; i++)
             {
-                targets[i].inertia = value;
+                targets[i].inertiaTensor = value;
             }
         }
     }
 
     [Serializable]
-    [Label("Interpolation", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingInterpolation : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Inertia Tensor Rotation", "Rigidbody")]
+    public sealed partial class RigidbodyBindingInertiaTensorRotation : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetInterpolation(RigidbodyInterpolation2D value)
+        private void SetInertiaTensorRotation(in Quaternion value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].inertiaTensorRotation = value;
+            }
+        }
+    }
+
+    [Serializable]
+    [Label("Interpolation", "Rigidbody")]
+    public sealed partial class RigidbodyBindingInterpolation : MonoBindingProperty<Rigidbody>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetInterpolation(RigidbodyInterpolation value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -304,12 +340,8 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
-#if UNITY_6000_0_OR_NEWER
-    [Obsolete("Use Rigidbody2DBindingBodyType instead")]
-#else
-    [Label("Is Kinematic", "Rigidbody 2D")]
-#endif
-    public sealed partial class Rigidbody2DBindingIsKinematic : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Is Kinematic", "Rigidbody")]
+    public sealed partial class RigidbodyBindingIsKinematic : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -326,8 +358,8 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
-    [Label("Mass", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingMass : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Mass", "Rigidbody")]
+    public sealed partial class RigidbodyBindingMass : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -344,12 +376,66 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
-    [Label("Position", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingPosition : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Max Angular Velocity", "Rigidbody")]
+    public sealed partial class RigidbodyBindingMaxAngularVelocity : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetPosition(Vector2 value)
+        private void SetMaxAngularVelocity(float value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].maxAngularVelocity = value;
+            }
+        }
+    }
+
+    [Serializable]
+    [Label("Max Depenetration Velocity", "Rigidbody")]
+    public sealed partial class RigidbodyBindingMaxDepenetrationVelocity : MonoBindingProperty<Rigidbody>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetMaxDepenetrationVelocity(float value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].maxDepenetrationVelocity = value;
+            }
+        }
+    }
+
+    [Serializable]
+    [Label("Max Linear Velocity", "Rigidbody")]
+    public sealed partial class RigidbodyBindingMaxLinearVelocity : MonoBindingProperty<Rigidbody>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetMaxLinearVelocity(float value)
+        {
+            var targets = Targets;
+            var length = targets.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                targets[i].maxLinearVelocity = value;
+            }
+        }
+    }
+
+    [Serializable]
+    [Label("Position", "Rigidbody")]
+    public sealed partial class RigidbodyBindingPosition : MonoBindingProperty<Rigidbody>, IBinder
+    {
+        [BindingProperty]
+        [field: HideInInspector]
+        private void SetPosition(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -362,12 +448,12 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
-    [Label("Rotation", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingRotation : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Rotation", "Rigidbody")]
+    public sealed partial class RigidbodyBindingRotation : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetRotation(float value)
+        private void SetRotation(in Quaternion value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -380,142 +466,88 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
     [Serializable]
-    [Label("Shared Material", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingSharedMaterial : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Sleep Threshold", "Rigidbody")]
+    public sealed partial class RigidbodyBindingSleepThreshold : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetSharedMaterial(PhysicsMaterial2D value)
+        private void SetSleepThreshold(float value)
         {
             var targets = Targets;
             var length = targets.Length;
 
             for (var i = 0; i < length; i++)
             {
-                targets[i].sharedMaterial = value;
+                targets[i].sleepThreshold = value;
             }
         }
     }
 
     [Serializable]
-    [Label("Simulated", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingSimulated : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Solver Iterations", "Rigidbody")]
+    public sealed partial class RigidbodyBindingSolverIterations : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetSimulated(bool value)
+        private void SetSolverIterations(int value)
         {
             var targets = Targets;
             var length = targets.Length;
 
             for (var i = 0; i < length; i++)
             {
-                targets[i].simulated = value;
+                targets[i].solverIterations = value;
             }
         }
     }
 
     [Serializable]
-    [Label("Sleep Mode", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingSleepMode : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Solver Velocity Iterations", "Rigidbody")]
+    public sealed partial class RigidbodyBindingSolverVelocityIterations : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetSleepMode(RigidbodySleepMode2D value)
+        private void SetSolverVelocityIterations(int value)
         {
             var targets = Targets;
             var length = targets.Length;
 
             for (var i = 0; i < length; i++)
             {
-                targets[i].sleepMode = value;
+                targets[i].solverVelocityIterations = value;
             }
         }
     }
 
     [Serializable]
-    [Label("Total Force", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingTotalForce : MonoBindingProperty<Rigidbody2D>, IBinder
+    [Label("Use Gravity", "Rigidbody")]
+    public sealed partial class RigidbodyBindingUseGravity : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetTotalForce(Vector2 value)
+        private void SetUseGravity(bool value)
         {
             var targets = Targets;
             var length = targets.Length;
 
             for (var i = 0; i < length; i++)
             {
-                targets[i].totalForce = value;
-            }
-        }
-    }
-
-    [Serializable]
-    [Label("Total Torque", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingTotalTorque : MonoBindingProperty<Rigidbody2D>, IBinder
-    {
-        [BindingProperty]
-        [field: HideInInspector]
-        private void SetTotalTorque(float value)
-        {
-            var targets = Targets;
-            var length = targets.Length;
-
-            for (var i = 0; i < length; i++)
-            {
-                targets[i].totalTorque = value;
-            }
-        }
-    }
-
-    [Serializable]
-    [Label("Use Auto Mass", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingUseAutoMass : MonoBindingProperty<Rigidbody2D>, IBinder
-    {
-        [BindingProperty]
-        [field: HideInInspector]
-        private void SetUseAutoMass(bool value)
-        {
-            var targets = Targets;
-            var length = targets.Length;
-
-            for (var i = 0; i < length; i++)
-            {
-                targets[i].useAutoMass = value;
-            }
-        }
-    }
-
-    [Serializable]
-    [Label("Use Full Kinematic Contacts", "Rigidbody 2D")]
-    public sealed partial class Rigidbody2DBindingUseFullKinematicContacts : MonoBindingProperty<Rigidbody2D>, IBinder
-    {
-        [BindingProperty]
-        [field: HideInInspector]
-        private void SetUseFullKinematicContacts(bool value)
-        {
-            var targets = Targets;
-            var length = targets.Length;
-
-            for (var i = 0; i < length; i++)
-            {
-                targets[i].useFullKinematicContacts = value;
+                targets[i].useGravity = value;
             }
         }
     }
 
     [Serializable]
 #if UNITY_6000_0_OR_NEWER
-    [Obsolete("Use Rigidbody2DBindingLinearVelocity instead")]
+    [Obsolete("Use RigidbodyBindingLinearVelocity instead")]
 #else
-    [Label("Velocity", "Rigidbody 2D")]
+    [Label("Velocity", "Rigidbody")]
 #endif
-    public sealed partial class Rigidbody2DBindingVelocity : MonoBindingProperty<Rigidbody2D>, IBinder
+    public sealed partial class RigidbodyBindingVelocity : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetVelocity(Vector2 value)
+        private void SetVelocity(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
@@ -529,17 +561,17 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 
 #if UNITY_6000_0_OR_NEWER
     [Serializable]
-    [Label("Linear Velocity", "Rigidbody 2D")]
+    [Label("Linear Velocity", "Rigidbody")]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true
-        , "EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D"
-        , "EncosyTower.Mvvm.Unity"
-        , "Rigidbody2DBindingVelocity"
+        , "EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D"
+        , "EncosyTower.Mvvm"
+        , "RigidbodyBindingVelocity"
     )]
-    public sealed partial class Rigidbody2DBindingLinearVelocity : MonoBindingProperty<Rigidbody2D>, IBinder
+    public sealed partial class RigidbodyBindingLinearVelocity : MonoBindingProperty<Rigidbody>, IBinder
     {
         [BindingProperty]
         [field: HideInInspector]
-        private void SetLinearVelocity(Vector2 value)
+        private void SetLinearVelocity(in Vector3 value)
         {
             var targets = Targets;
             var length = targets.Length;
