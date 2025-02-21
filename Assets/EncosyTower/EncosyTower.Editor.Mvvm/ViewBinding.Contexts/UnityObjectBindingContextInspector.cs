@@ -2,10 +2,11 @@
 
 using EncosyTower.Mvvm.ComponentModel;
 using EncosyTower.Mvvm.ViewBinding.Components;
+using EncosyTower.Mvvm.ViewBinding.Contexts;
 using UnityEditor;
 using UnityEngine;
 
-namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
+namespace EncosyTower.Editor.Mvvm.ViewBinding.Contexts
 {
     [BindingContextInspector(typeof(UnityObjectBindingContext))]
     public sealed class UnityObjectBindingContextInspector : BindingContextInspector

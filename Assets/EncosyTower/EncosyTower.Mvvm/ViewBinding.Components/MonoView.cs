@@ -4,6 +4,7 @@ using EncosyTower.Buffers;
 using EncosyTower.Collections;
 using EncosyTower.Logging;
 using EncosyTower.Mvvm.ComponentModel;
+using EncosyTower.Mvvm.ViewBinding.Contexts;
 using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Components
@@ -48,11 +49,11 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
 
             if (settings.initializeAsync)
             {
-                await InitializeAsync(settings.startListeningOnInitialized, destroyCancellationToken);
+                await InitializeAsync(settings.startAfterInitialization, destroyCancellationToken);
             }
             else
             {
-                Initialize(settings.startListeningOnInitialized);
+                Initialize(settings.startAfterInitialization);
             }
         }
 
@@ -67,11 +68,11 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
 
             if (settings.initializeAsync)
             {
-                await InitializeAsync(settings.startListeningOnInitialized, destroyCancellationToken);
+                await InitializeAsync(settings.startAfterInitialization, destroyCancellationToken);
             }
             else
             {
-                Initialize(settings.startListeningOnInitialized);
+                Initialize(settings.startAfterInitialization);
             }
         }
 

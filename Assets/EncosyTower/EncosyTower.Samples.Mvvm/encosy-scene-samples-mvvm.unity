@@ -682,7 +682,7 @@ MonoBehaviour:
   _settings:
     initializeOn: 0
     initializeAsync: 1
-    startListeningOnInitialized: 1
+    startAfterInitialization: 1
   _context:
     rid: 8109321786255212778
   _presetBinders:
@@ -692,7 +692,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8109321786255212778
-      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Components,
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Contexts,
         asm: EncosyTower.Mvvm}
       data:
         _object: {fileID: 1603940289}
@@ -1166,7 +1166,7 @@ MonoBehaviour:
   _settings:
     initializeOn: 0
     initializeAsync: 1
-    startListeningOnInitialized: 1
+    startAfterInitialization: 1
   _context:
     rid: 7562154210548776971
   _presetBinders:
@@ -1179,7 +1179,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 7562154210548776971
-      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Components,
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Contexts,
         asm: EncosyTower.Mvvm}
       data:
         _object: {fileID: 1603940289}
@@ -1560,16 +1560,16 @@ MonoBehaviour:
   _settings:
     initializeOn: 0
     initializeAsync: 1
-    startListeningOnInitialized: 1
+    startAfterInitialization: 1
   _context:
-    rid: 8109321786255212789
+    rid: 1154242496108167262
   _presetBinders:
   - rid: 8109321786255212790
   references:
     version: 2
     RefIds:
-    - rid: 8109321786255212789
-      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Components,
+    - rid: 1154242496108167262
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Contexts,
         asm: EncosyTower.Mvvm}
       data:
         _object: {fileID: 1603940289}
@@ -2410,7 +2410,7 @@ MonoBehaviour:
   _settings:
     initializeOn: 0
     initializeAsync: 1
-    startListeningOnInitialized: 1
+    startAfterInitialization: 1
   _context:
     rid: 7562154620754329622
   _presetBinders:
@@ -2422,7 +2422,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 7562154620754329622
-      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Components,
+      type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Contexts,
         asm: EncosyTower.Mvvm}
       data:
         _object: {fileID: 1289389108}

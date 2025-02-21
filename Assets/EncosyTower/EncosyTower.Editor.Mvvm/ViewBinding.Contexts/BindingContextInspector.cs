@@ -7,7 +7,7 @@ using EncosyTower.Mvvm.ViewBinding;
 using EncosyTower.Mvvm.ViewBinding.Components;
 using UnityEditor;
 
-namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
+namespace EncosyTower.Editor.Mvvm.ViewBinding.Contexts
 {
     public abstract class BindingContextInspector
     {

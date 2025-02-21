@@ -7,7 +7,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
     {
         public InitializationMethod initializeOn = InitializationMethod.Awake;
         public bool initializeAsync = true;
-        public bool startListeningOnInitialized = true;
+        public bool startAfterInitialization = true;
     }
 
     public enum InitializationMethod

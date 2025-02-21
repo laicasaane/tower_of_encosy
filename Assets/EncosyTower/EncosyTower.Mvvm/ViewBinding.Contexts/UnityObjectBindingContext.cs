@@ -3,7 +3,7 @@ using EncosyTower.Annotations;
 using EncosyTower.Mvvm.ComponentModel;
 using UnityEngine;
 
-namespace EncosyTower.Mvvm.ViewBinding.Components
+namespace EncosyTower.Mvvm.ViewBinding.Contexts
 {
     [Label("Unity Object")]
     [Serializable]
