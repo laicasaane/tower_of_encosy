@@ -50,10 +50,12 @@ namespace EncosyTower.Collections
     /// For this goal is N times faster than the standard Dictionary. This map is also faster than
     /// the standard Dictionary for most of the operations, but the difference is negligible. The only slower operation
     /// is resizing the memory on add, as this implementation needs to use two separate arrays compared to the standard
-    /// one
-    /// note: ArrayMap is not thread safe. A thread safe version should take care of possible setting of
-    /// value with shared hash hence bucket list index.
+    /// one.
     /// </summary>
+    /// <remarks>
+    /// ArrayMap is not thread safe. A thread safe version should take care of possible setting of
+    /// value with shared hash hence bucket list index.
+    /// </remarks>
     [DebuggerTypeProxy(typeof(NativeArrayMapDebugProxy<,>))]
     public struct NativeArrayMap<TKey, TValue> : IDisposable, IClearable
         where TKey : unmanaged, IEquatable<TKey>
@@ -113,6 +115,12 @@ namespace EncosyTower.Collections
                 _fastModBucketsMultiplier.Value = HashHelpers.GetFastModMultiplier((uint)capacity);
         }
 
+        public readonly int Capacity
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _values.Capacity;
+        }
+
         public readonly int Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -143,6 +151,16 @@ namespace EncosyTower.Collections
 
                 _values[index] = value;
             }
+        }
+
+        public void Dispose()
+        {
+            _valuesInfo.Dispose();
+            _values.Dispose();
+            _buckets.Dispose();
+            _freeValueCellIndex.Dispose();
+            _collisions.Dispose();
+            _fastModBucketsMultiplier.Dispose();
         }
 
         /// <remarks>
@@ -726,16 +744,6 @@ namespace EncosyTower.Collections
                 get => _map._valuesInfo[_index].key;
             }
         }
-
-        public void Dispose()
-        {
-            _valuesInfo.Dispose();
-            _values.Dispose();
-            _buckets.Dispose();
-            _freeValueCellIndex.Dispose();
-            _collisions.Dispose();
-            _fastModBucketsMultiplier.Dispose();
-        }
     }
 
     public struct NativeArrayMapKeyValueEnumerator<TKey, TValue>
@@ -779,7 +787,7 @@ namespace EncosyTower.Collections
             return false;
         }
 
-        public NativeKeyValuePairFast<TKey, TValue> Current
+        public NativeArrayMapKeyValuePairFast<TKey, TValue> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(_map._valuesInfo[_index].key, _map._values, _index);
@@ -801,8 +809,8 @@ namespace EncosyTower.Collections
     }
 
     [DebuggerDisplay("[{Key}] = {Value}")]
-    [DebuggerTypeProxy(typeof(NativeKeyValuePairFastDebugProxy<,>))]
-    public readonly struct NativeKeyValuePairFast<TKey, TValue>
+    [DebuggerTypeProxy(typeof(NativeArrayMapKeyValuePairFastDebugProxy<,>))]
+    public readonly struct NativeArrayMapKeyValuePairFast<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -811,7 +819,7 @@ namespace EncosyTower.Collections
         private readonly int _index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public NativeKeyValuePairFast(in TKey key, in NativeStrategy<TValue> mapValues, int index)
+        public NativeArrayMapKeyValuePairFast(in TKey key, in NativeStrategy<TValue> mapValues, int index)
         {
             _mapValues = mapValues;
             _index = index;
@@ -824,7 +832,7 @@ namespace EncosyTower.Collections
             get => _key;
         }
 
-        public ref TValue Value
+        public readonly ref readonly TValue Value
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => ref _mapValues[_index];
@@ -838,14 +846,14 @@ namespace EncosyTower.Collections
         }
     }
 
-    internal sealed class NativeKeyValuePairFastDebugProxy<TKey, TValue>
+    internal sealed class NativeArrayMapKeyValuePairFastDebugProxy<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
 
-        private readonly NativeKeyValuePairFast<TKey, TValue> _keyValue;
+        private readonly NativeArrayMapKeyValuePairFast<TKey, TValue> _keyValue;
 
-        public NativeKeyValuePairFastDebugProxy(in NativeKeyValuePairFast<TKey, TValue> keyValue)
+        public NativeArrayMapKeyValuePairFastDebugProxy(in NativeArrayMapKeyValuePairFast<TKey, TValue> keyValue)
         {
             _keyValue = keyValue;
         }
@@ -882,12 +890,12 @@ namespace EncosyTower.Collections
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public NativeKeyValuePairFast<TKey, TValue>[] KeyValues
+        public NativeArrayMapKeyValuePairFast<TKey, TValue>[] KeyValues
         {
             get
             {
                 var map = _map;
-                var array = new NativeKeyValuePairFast<TKey, TValue>[map.Count];
+                var array = new NativeArrayMapKeyValuePairFast<TKey, TValue>[map.Count];
                 var i = 0;
 
                 foreach (var keyValue in map)
