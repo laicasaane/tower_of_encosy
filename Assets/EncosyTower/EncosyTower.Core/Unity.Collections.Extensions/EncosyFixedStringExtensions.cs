@@ -108,43 +108,43 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> AsSpan(this ref FixedString32Bytes self)
+        public static unsafe Span<byte> AsSpan(this in FixedString32Bytes self)
             => new(self.GetUnsafePtr(), self.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this ref FixedString32Bytes self)
+        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString32Bytes self)
             => new(self.GetUnsafePtr(), self.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> AsSpan(this ref FixedString64Bytes self)
+        public static unsafe Span<byte> AsSpan(this in FixedString64Bytes self)
             => new(self.GetUnsafePtr(), self.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this ref FixedString64Bytes self)
+        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString64Bytes self)
             => new(self.GetUnsafePtr(), self.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> AsSpan(this ref FixedString128Bytes self)
+        public static unsafe Span<byte> AsSpan(this in FixedString128Bytes self)
             => new(self.GetUnsafePtr(), self.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this ref FixedString128Bytes self)
+        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString128Bytes self)
             => new(self.GetUnsafePtr(), self.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> AsSpan(this ref FixedString512Bytes self)
+        public static unsafe Span<byte> AsSpan(this in FixedString512Bytes self)
             => new(self.GetUnsafePtr(), self.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this ref FixedString512Bytes self)
+        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString512Bytes self)
             => new(self.GetUnsafePtr(), self.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> AsSpan(this ref FixedString4096Bytes self)
+        public static unsafe Span<byte> AsSpan(this in FixedString4096Bytes self)
             => new(self.GetUnsafePtr(), self.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this ref FixedString4096Bytes self)
+        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString4096Bytes self)
             => new(self.GetUnsafePtr(), self.Length);
     }
 }

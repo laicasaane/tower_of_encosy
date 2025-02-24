@@ -7,7 +7,7 @@ namespace EncosyTower.Buffers
     public static class ManagedStrategyExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ShiftLeft<T>(this ref ManagedStrategy<T> self, int index, int count)
+        public static void ShiftLeft<T>(this ManagedStrategy<T> self, int index, int count)
         {
             Checks.IsTrue(index < self.Capacity, "Out of bounds index");
             Checks.IsTrue(count < self.Capacity, "Out of bounds count");
@@ -21,7 +21,7 @@ namespace EncosyTower.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ShiftRight<T>(this ref ManagedStrategy<T> self, int index, int count)
+        public static void ShiftRight<T>(this ManagedStrategy<T> self, int index, int count)
         {
             Checks.IsTrue(index < self.Capacity, "Out of bounds index");
             Checks.IsTrue(count < self.Capacity, "Out of bounds count");

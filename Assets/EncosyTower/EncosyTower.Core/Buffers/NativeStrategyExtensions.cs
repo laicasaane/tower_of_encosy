@@ -9,7 +9,7 @@ namespace EncosyTower.Buffers
     public static class NativeStrategyExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ShiftLeft<T>(this ref NativeStrategy<T> self, int index, int count)
+        public static void ShiftLeft<T>(this NativeStrategy<T> self, int index, int count)
             where T : struct
         {
             Checks.IsTrue(index < self.Capacity, "Out of bounds index");
@@ -25,7 +25,7 @@ namespace EncosyTower.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ShiftRight<T>(this ref NativeStrategy<T> self, int index, int count)
+        public static void ShiftRight<T>(this NativeStrategy<T> self, int index, int count)
             where T : struct
         {
             Checks.IsTrue(index < self.Capacity, "Out of bounds index");

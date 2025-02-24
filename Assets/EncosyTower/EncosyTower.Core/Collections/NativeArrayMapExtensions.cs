@@ -8,7 +8,7 @@ namespace EncosyTower.Collections
     public static class NativeArrayMapExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<TValue> GetValues<TKey, TValue>(this ref NativeArrayMap<TKey, TValue> self)
+        public static Span<TValue> GetValues<TKey, TValue>(this in NativeArrayMap<TKey, TValue> self)
             where TKey : unmanaged, IEquatable<TKey>
             where TValue : unmanaged
         {
