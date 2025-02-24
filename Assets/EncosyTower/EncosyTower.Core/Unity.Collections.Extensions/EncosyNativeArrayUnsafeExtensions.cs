@@ -21,18 +21,61 @@ namespace EncosyTower.Collections.Unsafe
             return ref UnsafeUtility.ArrayElementAsRef<T>(array.GetUnsafeReadOnlyPtr(), index);
         }
 
-        public static unsafe void MemoryMove<T>(this ref NativeArray<T> array, int sourceStartIndex, int destinationStartIndex, int count)
+        public static unsafe void MemoryCopyUnsafe<T>(
+              this NativeArray<T> array
+            , int sourceIndex
+            , int destinationIndex
+            , int length
+        )
             where T : struct
         {
+            var arrayLength = array.Length;
             var sizeOf = UnsafeUtility.SizeOf<T>();
-            var sizeOfInBytes = sizeOf * count;
             var ptr = (IntPtr)array.GetUnsafePtr();
 
             Buffer.MemoryCopy(
-                  (void*)(ptr + sourceStartIndex * sizeOf)
-                , (void*)(ptr + destinationStartIndex * sizeOf)
-                , sizeOfInBytes
-                , sizeOfInBytes
+                  (void*)(ptr + sourceIndex * sizeOf)
+                , (void*)(ptr + destinationIndex * sizeOf)
+                , (arrayLength - length - destinationIndex) * sizeOf
+                , (arrayLength - sourceIndex) * sizeOf
+            );
+        }
+
+        public static unsafe void MemoryCopyUnsafe<T>(
+              this NativeArray<T> source
+            , int sourceIndex
+            , NativeArray<T> destination
+            , int destinationIndex
+            , int length
+        ) where T : struct
+        {
+            var sizeOfT = UnsafeUtility.SizeOf<T>();
+            var dstPtr = (IntPtr)destination.GetUnsafePtr();
+            var srcPtr = (IntPtr)source.GetUnsafePtr();
+
+            UnsafeUtility.MemCpy(
+                  destination: (void*)(dstPtr + destinationIndex * sizeOfT)
+                , source: (void*)(srcPtr + sourceIndex * sizeOfT)
+                , size: length * sizeOfT
+            );
+        }
+
+        public static unsafe void MemoryCopyUnsafeWithoutChecks<T>(
+              this NativeArray<T> source
+            , int sourceIndex
+            , NativeArray<T> destination
+            , int destinationIndex
+            , int length
+        ) where T : struct
+        {
+            var sizeOfT = UnsafeUtility.SizeOf<T>();
+            var srcPtr = (IntPtr)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(source);
+            var dstPtr = (IntPtr)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(destination);
+
+            UnsafeUtility.MemCpy(
+                  destination: (void*)(dstPtr + destinationIndex * sizeOfT)
+                , source: (void*)(srcPtr + sourceIndex * sizeOfT)
+                , size: length * sizeOfT
             );
         }
     }

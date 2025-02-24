@@ -21,7 +21,7 @@ namespace EncosyTower.Buffers
             Checks.IsTrue(count > index, "Count is lesser than index");
 
             var array = self._realBuffer.ToNativeArray();
-            array.MemoryMove(index + 1, index, count - index);
+            array.MemoryCopyUnsafe(index + 1, index, count - index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -37,7 +37,7 @@ namespace EncosyTower.Buffers
             Checks.IsTrue(count > index, "Count is lesser than index");
 
             var array = self._realBuffer.ToNativeArray();
-            array.MemoryMove(index, index + 1, count - index);
+            array.MemoryCopyUnsafe(index, index + 1, count - index);
         }
     }
 }
