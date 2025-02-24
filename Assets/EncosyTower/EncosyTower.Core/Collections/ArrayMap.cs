@@ -34,6 +34,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Buffers;
 using EncosyTower.Common;
@@ -558,7 +559,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Intersect<UValue>(in ArrayMap<TKey, UValue> otherMapKeys)
+        public void Intersect<UValue>([NotNull] ArrayMap<TKey, UValue> otherMapKeys)
         {
             var keys = _valuesInfo.AsSpan();
 
@@ -570,7 +571,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Exclude<UValue>(in ArrayMap<TKey, UValue> otherMapKeys)
+        public void Exclude<UValue>([NotNull] ArrayMap<TKey, UValue> otherMapKeys)
         {
             var keys = _valuesInfo.AsSpan();
 
@@ -582,7 +583,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Union(in ArrayMap<TKey, TValue> otherMapKeys)
+        public void Union([NotNull] ArrayMap<TKey, TValue> otherMapKeys)
         {
             foreach (var other in otherMapKeys)
             {
@@ -761,7 +762,7 @@ namespace EncosyTower.Collections
             private readonly ArrayMap<TKey, TValue> _map;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public KeyEnumerable(in ArrayMap<TKey, TValue> map)
+            public KeyEnumerable([NotNull] ArrayMap<TKey, TValue> map)
             {
                 _map = map;
             }
@@ -779,7 +780,7 @@ namespace EncosyTower.Collections
             private int _index;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public KeyEnumerator(in ArrayMap<TKey, TValue> map) : this()
+            public KeyEnumerator([NotNull] ArrayMap<TKey, TValue> map) : this()
             {
                 _map = map;
                 _index = -1;
@@ -821,7 +822,7 @@ namespace EncosyTower.Collections
         private int _count;
         private int _index;
 
-        public ArrayMapKeyValueEnumerator(ArrayMap<TKey, TValue> map) : this()
+        public ArrayMapKeyValueEnumerator([NotNull] ArrayMap<TKey, TValue> map) : this()
         {
             _map = map;
             _index = -1;
@@ -952,7 +953,7 @@ namespace EncosyTower.Collections
 
         private readonly ArrayMap<TKey, TValue> _map;
 
-        public ArrayMapDebugProxy(in ArrayMap<TKey, TValue> map)
+        public ArrayMapDebugProxy([NotNull] ArrayMap<TKey, TValue> map)
         {
             _map = map;
         }
