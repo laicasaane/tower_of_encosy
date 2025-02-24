@@ -8,7 +8,7 @@ namespace EncosyTower.Collections.Unsafe
         public static void GetBufferUnsafe<T>(this FasterList<T> list, out T[] buffer, out int count)
         {
             buffer = list._buffer;
-            count = list.Count;
+            count = list._count;
         }
     }
 }

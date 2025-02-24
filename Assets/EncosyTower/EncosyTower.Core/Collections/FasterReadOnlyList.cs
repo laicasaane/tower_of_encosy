@@ -41,7 +41,7 @@ namespace EncosyTower.Collections
         public int Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _list.Count;
+            get => _list._count;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -53,7 +53,7 @@ namespace EncosyTower.Collections
             => new(list._list);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FasterListEnumerator<T> GetEnumerator()
+        public ReadOnlySpan<T>.Enumerator GetEnumerator()
             => _list.GetEnumerator();
 
         public ref T this[int index]

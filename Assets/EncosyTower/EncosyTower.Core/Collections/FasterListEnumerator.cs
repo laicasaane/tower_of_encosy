@@ -24,45 +24,8 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Debugging;
-
-namespace EncosyTower.Collections
-{
-    public ref struct FasterListEnumerator<T>
-    {
-        private readonly T[] _buffer;
-        private int _counter;
-        private readonly int _size;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FasterListEnumerator([NotNull] T[] buffer, int size)
-        {
-            _size = size;
-            _counter = 0;
-            _buffer = buffer;
-        }
-
-        public readonly ref T Current
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                Checks.IsTrue(_counter <= _size);
-                return ref _buffer[_counter - 1];
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool MoveNext()
-            => _counter++ < _size;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Reset()
-            => _counter = 0;
-    }
-}
 
 namespace EncosyTower.Collections.Internals
 {
@@ -73,7 +36,7 @@ namespace EncosyTower.Collections.Internals
         private readonly int _size;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FasterListEnumerator(in T[] buffer, int size)
+        internal FasterListEnumerator(in T[] buffer, int size)
         {
             _size = size;
             _counter = 0;
