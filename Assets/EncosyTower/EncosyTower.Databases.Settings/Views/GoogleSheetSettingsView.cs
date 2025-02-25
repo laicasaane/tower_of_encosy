@@ -83,19 +83,20 @@ namespace EncosyTower.Databases.Settings.Views
 
             Add(new VisualSeparator());
 
-            Add(_downloadButton = new() {
+            Add(_downloadButton = new(DownloadButton_OnClicked) {
                 enabledSelf = false,
             });
 
             _downloadButton.AddToClassList("convert-button");
             _downloadButton.AddToClassList("function-button");
-            _downloadButton.clicked += DownloadButton_OnClicked;
 
             Add(new VisualSeparator());
 
-            var cleanOutputFolderButton = new Button() { text = "Clean Output Folder" };
+            var cleanOutputFolderButton = new Button(CleanOutputFolderButton_OnClicked) {
+                text = "Clean Output Folder",
+            };
+
             cleanOutputFolderButton.AddToClassList("function-button");
-            cleanOutputFolderButton.clicked += CleanOutputFolderButton_OnClicked;
             Add(cleanOutputFolderButton);
 
             RegisterValueChangedCallbacks();

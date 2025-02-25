@@ -64,13 +64,14 @@ namespace EncosyTower.Databases.Settings.Views
 
             _convertButton.AddToClassList("convert-button");
             _convertButton.AddToClassList("function-button");
-            _convertButton.clicked += ConvertButton_OnClicked;
 
             Add(new VisualSeparator());
 
-            var cleanOutputFolderButton = new Button() { text = "Clean Output Folder" };
+            var cleanOutputFolderButton = new Button(CleanOutputFolderButton_OnClicked) {
+                text = "Clean Output Folder"
+            };
+
             cleanOutputFolderButton.AddToClassList("function-button");
-            cleanOutputFolderButton.clicked += CleanOutputFolderButton_OnClicked;
             Add(cleanOutputFolderButton);
 
             RegisterValueChangedCallbacks();

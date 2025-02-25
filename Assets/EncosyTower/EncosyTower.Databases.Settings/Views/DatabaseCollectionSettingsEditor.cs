@@ -318,9 +318,8 @@ namespace EncosyTower.Databases.Settings.Views
                 var root = new VisualElement();
                 root.AddToClassList(Constants.DATABASE_SELECTOR);
 
-                var label = new Label();
+                var label = new Label { text = Constants.UNDEFINED };
                 label.AddToClassList(Constants.NAME);
-                label.text = Constants.UNDEFINED;
 
                 root.Add(label);
                 return root;

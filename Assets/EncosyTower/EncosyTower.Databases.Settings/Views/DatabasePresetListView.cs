@@ -33,39 +33,37 @@ namespace EncosyTower.Databases.Settings.Views
             }
 
             {
-                var button = _copyButton = new() {
+                var button = _copyButton = new(CopyPreset) {
                     enabledSelf = false,
+                    text = "Copy",
                 };
 
-                button.text = "Copy";
                 hierarchy.Add(button);
-
-                button.clicked += CopyPreset;
             }
 
             {
-                var button = _locateButton = new() {
-                    enabledSelf = false,
-                };
-
                 var icon = EditorAPI.GetIcon("d_pick", "pick");
-                button.iconImage = Background.FromTexture2D(icon.image as Texture2D);
-                button.tooltip = "Locate Selected Preset";
+                var iconImage = Background.FromTexture2D(icon.image as Texture2D);
+
+                var button = _locateButton = new(iconImage, LocateSelectedPreset) {
+                    enabledSelf = false,
+                    tooltip = "Locate Selected Preset",
+                };
+
                 button.AddToClassList(Constants.ICON_BUTTON);
                 hierarchy.Add(button);
-
-                button.clicked += LocateSelectedPreset;
             }
 
             {
-                var button = new Button();
                 var icon = EditorAPI.GetIcon("d_refresh", "refresh");
-                button.iconImage = Background.FromTexture2D(icon.image as Texture2D);
-                button.tooltip = "Refresh Preset List";
+                var iconImage = Background.FromTexture2D(icon.image as Texture2D);
+
+                var button = new Button(iconImage, RefreshPresets) {
+                    tooltip = "Refresh Preset List"
+                };
+
                 button.AddToClassList(Constants.ICON_BUTTON);
                 hierarchy.Add(button);
-
-                button.clicked += RefreshPresets;
             }
 
             RefreshPresets();

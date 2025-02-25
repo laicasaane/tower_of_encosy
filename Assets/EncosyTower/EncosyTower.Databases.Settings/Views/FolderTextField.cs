@@ -16,15 +16,15 @@ namespace EncosyTower.Databases.Settings.Views
         {
             AddToClassList(USS_CLASS_NAME);
 
-            var button = new Button();
             var icon = EditorAPI.GetIcon("d_pick", "pick");
-            button.iconImage = Background.FromTexture2D(icon.image as Texture2D);
-            button.tooltip = "Locate Selected Template";
+            var iconImage = Background.FromTexture2D(icon.image as Texture2D);
+
+            var button = new Button(iconImage, LocateFolder) {
+                tooltip = "Locate Selected Template"
+            };
+
             button.AddToClassList(Constants.ICON_BUTTON);
-
             hierarchy.Add(button);
-
-            button.clicked += LocateFolder;
         }
 
         private void LocateFolder()
