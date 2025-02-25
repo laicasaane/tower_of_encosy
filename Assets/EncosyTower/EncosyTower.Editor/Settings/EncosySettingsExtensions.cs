@@ -35,5 +35,25 @@ namespace EncosyTower.Editor.Settings
 
             return new ScriptableObjectSettingsProvider(self, scope, $"{path}{displayPath}", useImgui);
         }
+
+        public static void OpenSettingsWindow<T>(this Settings<T> self)
+            where T : Settings<T>
+        {
+            var attribute = Settings<T>.Attribute;
+            var scope = attribute.Usage == SettingsUsage.EditorUser
+                ? SettingsScope.User
+                : SettingsScope.Project;
+
+            var path = attribute.Usage == SettingsUsage.EditorUser
+                ? PREFERENCES_PATH
+                : PROJECT_PATH;
+
+            var displayPath = string.IsNullOrEmpty(attribute.DisplayPath)
+                ? ObjectNames.NicifyVariableName(typeof(T).GetNameWithoutSuffix(nameof(Settings<T>)))
+                : attribute.DisplayPath;
+
+            var settingsPath = $"{path}{displayPath}";
+            SettingsService.OpenProjectSettings(settingsPath);
+        }
     }
 }

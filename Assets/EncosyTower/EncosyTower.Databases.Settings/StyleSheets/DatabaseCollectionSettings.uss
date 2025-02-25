@@ -1,3 +1,7 @@
+.button-open-settings-windows {
+    min-height: 30px;
+}
+
 .unity-list-view__empty-label {
     margin-left: 3px;
     margin-right: 3px;

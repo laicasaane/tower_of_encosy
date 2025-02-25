@@ -45,6 +45,7 @@ namespace EncosyTower.Databases.Settings.Views
             hierarchy.Add(_databaseHelp.SetDisplay(DisplayStyle.None));
 
             var container = _container = new();
+            container.AddToClassList("settings-groups-list");
             hierarchy.Add(container.SetDisplay(DisplayStyle.None));
 
             var googleSheetView = _googleSheetView = new(resources);

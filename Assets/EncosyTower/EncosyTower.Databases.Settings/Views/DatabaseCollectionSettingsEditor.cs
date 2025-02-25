@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EncosyTower.Editor.Settings;
 using EncosyTower.Types;
 using EncosyTower.UIElements;
+using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -27,7 +28,11 @@ namespace EncosyTower.Databases.Settings.Views
             , VisualElement root
         )
         {
-            return Instance = new DatabaseCollectionSettingsEditor(provider, root);
+            return Instance = new DatabaseCollectionSettingsEditor(
+                  provider.Settings
+                , provider.SerializedSettings
+                , root
+            );
         }
 
         public static void Dispose()
@@ -36,14 +41,15 @@ namespace EncosyTower.Databases.Settings.Views
         }
 
         private DatabaseCollectionSettingsEditor(
-              ScriptableObjectSettingsProvider provider
+              ScriptableObject settings
+            , SerializedObject serializedSettings
             , VisualElement root
         )
         {
             DatabaseViewAPI.ApplyStyleSheetsTo(root, Constants.PROJECT_SETTINGS_STYLE_SHEET);
 
             var resources = DatabaseViewAPI.GetResources();
-            var context = new Context(provider.Settings);
+            var context = new Context(settings);
             var titleBar = new VisualElement();
             var titleLabel = new Label() {
                 text = ObjectNames.NicifyVariableName(context.Name),
@@ -59,7 +65,6 @@ namespace EncosyTower.Databases.Settings.Views
             root.Add(scrollView);
 
             var container = scrollView.Q("unity-content-container");
-            container.AddToClassList("project-settings-section");
             container.AddToClassList(Constants.DATABASE_COLLECTION);
 
             var splitter = new TwoPaneSplitView(0, 200f, TwoPaneSplitViewOrientation.Horizontal);
@@ -73,7 +78,6 @@ namespace EncosyTower.Databases.Settings.Views
             rightPanel.AddToClassList(Constants.RIGHT_PANEL);
             splitter.Add(rightPanel);
 
-            var serializedSettings = provider.SerializedSettings;
             var dbListProperty = _dbListProperty
                 = serializedSettings.FindProperty(nameof(DatabaseCollectionSettings._databases));
 
@@ -357,11 +361,44 @@ namespace EncosyTower.Databases.Settings.Views
                 _settings = so as DatabaseCollectionSettings;
 
                 Type = _settings.GetType();
-                Name = Type.GetNameWithoutSuffix(nameof(_settings));
+                Name = Type.GetNameWithoutSuffix("Settings");
             }
 
             public void Initialize(SerializedProperty databaseProperty, int databaseIndex)
                 => Initialize(_settings._databases[databaseIndex], databaseProperty);
+        }
+
+        [CustomEditor(typeof(DatabaseCollectionSettings), true)]
+        private sealed class Editor : UnityEditor.Editor
+        {
+            private DatabaseCollectionSettings _settings;
+
+            private void OnEnable()
+            {
+                _settings = target as DatabaseCollectionSettings;
+            }
+
+            public override VisualElement CreateInspectorGUI()
+            {
+                var root = new VisualElement();
+                DatabaseViewAPI.ApplyStyleSheetsTo(root, Constants.PROJECT_SETTINGS_STYLE_SHEET);
+
+                var button = new Button(OpenSettingsWindow) {
+                    text = "Open Database Collection Settings Window",
+                };
+
+                button.AddToClassList("button-open-settings-windows");
+                root.Add(button);
+                return root;
+            }
+
+            private void OpenSettingsWindow()
+            {
+                if (_settings.IsValid())
+                {
+                    _settings.OpenSettingsWindow();
+                }
+            }
         }
     }
 }
