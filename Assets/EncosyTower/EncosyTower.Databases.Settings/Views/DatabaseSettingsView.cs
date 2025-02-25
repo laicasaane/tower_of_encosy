@@ -2,7 +2,6 @@ using System;
 using EncosyTower.Editor;
 using EncosyTower.UIElements;
 using UnityEditor.UIElements;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace EncosyTower.Databases.Settings.Views

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using EncosyTower.Databases;
 using UnityEngine;
 
 namespace EncosyTower.Databases.Authoring
