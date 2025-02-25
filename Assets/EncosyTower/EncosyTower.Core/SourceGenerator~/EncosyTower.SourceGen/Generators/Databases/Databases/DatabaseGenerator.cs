@@ -273,7 +273,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 return saveToDirectory + fileName;
             }
 
-            return $"Temp/GeneratedCode/{assemblyName}";
+            return $"Temp/GeneratedCode/{assemblyName}/{fileName}";
         }
 
         private static Dictionary<ITypeSymbol, DataDeclaration> BuildDataMap(
