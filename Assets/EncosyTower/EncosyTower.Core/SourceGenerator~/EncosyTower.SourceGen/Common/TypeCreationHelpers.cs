@@ -23,11 +23,6 @@ namespace EncosyTower.SourceGen
 {
     public static class TypeCreationHelpers
     {
-        /// <summary>
-        /// Line to replace with on generated source.
-        /// </summary>
-        public const string GENERATED_LINE_TRIVIA_TO_GENERATED_SOURCE = "// __generatedline__";
-
         public const string NEWLINE = "\n";
 
         /// <summary>
@@ -63,40 +58,10 @@ namespace EncosyTower.SourceGen
                 .Replace('\\', '/');
 
             // Output as source
-            var sourceTextForNewClass = compilationUnit.GetText(Encoding.UTF8)
+            return compilationUnit.GetText(Encoding.UTF8)
+                .WithIgnoreUnassignedVariableWarning()
                 .WithInitialLineDirectiveToGeneratedSource(generatedSourceFilePath)
-                .WithIgnoreUnassignedVariableWarning();
-
-            // Add line directives for lines with `GeneratedLineTriviaToGeneratedSource` or #line
-            var textChanges = new List<TextChange>();
-
-            foreach (var line in sourceTextForNewClass.Lines)
-            {
-                var lineText = line.ToString();
-
-                if (lineText.Contains(GENERATED_LINE_TRIVIA_TO_GENERATED_SOURCE))
-                {
-                    textChanges.Add(new TextChange(
-                          line.Span
-                        , lineText.Replace(
-                              GENERATED_LINE_TRIVIA_TO_GENERATED_SOURCE
-                            , $"#line {line.LineNumber + 2} \"{generatedSourceFilePath}\""
-                        )
-                    ));
-                }
-                else if (lineText.Contains("#line") && lineText.TrimStart().IndexOf("#line", StringComparison.Ordinal) != 0)
-                {
-                    var indexOfLineDirective = lineText.IndexOf("#line", StringComparison.Ordinal);
-                    textChanges.Add(new TextChange(
-                          line.Span
-                        , lineText.Substring(0, indexOfLineDirective - 1)
-                            + NEWLINE
-                            + lineText.Substring(indexOfLineDirective)
-                    ));
-                }
-            }
-
-            return sourceTextForNewClass.WithChanges(textChanges);
+                ;
         }
 
         /// <summary>
@@ -244,48 +209,10 @@ namespace EncosyTower.SourceGen
             }
 
             // Output as source
-            var sourceTextForNewClass = SourceText.From(printer.Result, Encoding.UTF8)
+            return SourceText.From(printer.Result, Encoding.UTF8)
+                .WithIgnoreUnassignedVariableWarning()
                 .WithInitialLineDirectiveToGeneratedSource(generatedSourceFilePath)
-                .WithIgnoreUnassignedVariableWarning();
-
-            // Add line directives for lines with `GeneratedLineTriviaToGeneratedSource` or #line
-            var textChanges = new List<TextChange>();
-
-            foreach (var line in sourceTextForNewClass.Lines)
-            {
-                var lineText = line.ToString();
-
-                if (lineText.Contains(GENERATED_LINE_TRIVIA_TO_GENERATED_SOURCE))
-                {
-                    textChanges.Add(new TextChange(
-                          line.Span
-                        , lineText.Replace(
-                              GENERATED_LINE_TRIVIA_TO_GENERATED_SOURCE
-                            , $"#line {line.LineNumber + 2} \"{generatedSourceFilePath}\""
-                        )
-                    ));
-
-                    continue;
-                }
-
-                if (lineText.Contains("#line")
-                    && lineText.TrimStart().IndexOf("#line", StringComparison.Ordinal) != 0
-                )
-                {
-                    var indexOfLineDirective = lineText.IndexOf("#line", StringComparison.Ordinal);
-
-                    textChanges.Add(new TextChange(
-                          line.Span
-                        , lineText.Substring(0, indexOfLineDirective - 1)
-                            + NEWLINE
-                            + lineText.Substring(indexOfLineDirective)
-                    ));
-
-                    continue;
-                }
-            }
-
-            return sourceTextForNewClass.WithChanges(textChanges);
+                ;
         }
 
         private static ClosingSyntax WriteOpeningSyntax_AndReturnClosingSyntax(

@@ -15,10 +15,11 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace EncosyTower.SourceGen
 {
+    using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
     public static class SyntaxNodeExt
     {
         public static IEnumerable<MemberDeclarationSyntax> GetContainingTypesAndNamespacesFromMostToLeastNested(
@@ -113,13 +114,15 @@ namespace EncosyTower.SourceGen
         public static string GetGeneratedSourceFilePath(this SyntaxTree syntaxTree, string assemblyName, string generatorName)
         {
             var fileName = GetGeneratedSourceFileName(syntaxTree, generatorName);
+
             if (SourceGenHelpers.CanWriteToProjectPath)
             {
                 var saveToDirectory = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
                 Directory.CreateDirectory(saveToDirectory);
-                return saveToDirectory + fileName;
+                return $"{saveToDirectory}{fileName}";
             }
-            return $"Temp/GeneratedCode/{assemblyName}";
+
+            return $"Temp/GeneratedCode/{assemblyName}/{fileName}";
         }
 
         public static (bool IsSuccess, string FileName) TryGetFileNameWithoutExtension(this SyntaxTree syntaxTree)

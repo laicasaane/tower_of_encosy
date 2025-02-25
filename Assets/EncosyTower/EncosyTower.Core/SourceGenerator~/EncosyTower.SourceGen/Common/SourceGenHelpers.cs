@@ -13,17 +13,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace EncosyTower.SourceGen
 {
+    using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
     public static class SourceGenHelpers
     {
         public const string TRACKED_NODE_ANNOTATION_USED_BY_ROSLYN = "Id";
+
+        /// <summary>
+        /// Line to replace with on generated source.
+        /// </summary>
+        public const string GENERATED_LINE_TRIVIA_TO_GENERATED_SOURCE = "// __generatedline__";
 
         public const string NEWLINE = "\n";
 
@@ -219,7 +226,7 @@ namespace EncosyTower.SourceGen
             var firstLine = sourceText.Lines.FirstOrDefault();
             return sourceText.WithChanges(new TextChange(
                   firstLine.Span
-                , $"#line 1 \"{generatedSourceFilePath}\"" + NEWLINE + firstLine
+                , $"#line 1 \"{generatedSourceFilePath}\"{NEWLINE}{firstLine}"
             ));
         }
 
@@ -228,8 +235,79 @@ namespace EncosyTower.SourceGen
             var firstLine = sourceText.Lines.FirstOrDefault();
             return sourceText.WithChanges(new TextChange(
                   firstLine.Span
-                , $"#pragma warning disable 0219" + NEWLINE + firstLine
+                , $"#pragma warning disable 0219{NEWLINE}{firstLine}"
             ));
+        }
+
+        public static SourceText WithGeneratedLineDirectives(this SourceText sourceText, string generatedSourceFilePath)
+        {
+            // Add line directives for lines with `GeneratedLineTriviaToGeneratedSource` or #line
+            var textChanges = new List<TextChange>();
+            var lineBuilder = new StringBuilder();
+            var buffer = new char[32 * 1024];
+
+            foreach (var line in sourceText.Lines)
+            {
+                if (line.Text is not { } text || text.Length < 1)
+                {
+                    continue;
+                }
+
+                var lineText = BuildLine(lineBuilder, buffer, text, line.Span);
+
+                if (lineText.Contains(GENERATED_LINE_TRIVIA_TO_GENERATED_SOURCE))
+                {
+                    textChanges.Add(new TextChange(
+                          line.Span
+                        , lineText.Replace(
+                              GENERATED_LINE_TRIVIA_TO_GENERATED_SOURCE
+                            , $"#line {line.LineNumber + 2} \"{generatedSourceFilePath}\""
+                        )
+                    ));
+                }
+                else if (lineText.Contains("#line") && lineText.TrimStart().IndexOf("#line", StringComparison.Ordinal) != 0)
+                {
+                    var indexOfLineDirective = lineText.IndexOf("#line", StringComparison.Ordinal);
+                    textChanges.Add(new TextChange(
+                          line.Span
+                        , lineText.Substring(0, indexOfLineDirective - 1)
+                            + NEWLINE
+                            + lineText.Substring(indexOfLineDirective)
+                    ));
+                }
+            }
+
+            return sourceText.WithChanges(textChanges);
+
+            static string BuildLine(StringBuilder builder, char[] buffer, SourceText text, in TextSpan span)
+            {
+                builder.Clear();
+
+                var textLength = text.Length;
+
+                if (span.End > textLength)
+                {
+                    return string.Empty;
+                }
+
+                int position = Math.Max(Math.Min(span.Start, textLength), 0);
+                int length = Math.Min(span.End, textLength) - position;
+
+                builder.EnsureCapacity(length);
+
+                while (position < textLength && length > 0)
+                {
+                    int copyLength = Math.Min(buffer.Length, length);
+
+                    text.CopyTo(position, buffer, 0, copyLength);
+                    builder.Append(buffer, 0, copyLength);
+
+                    length -= copyLength;
+                    position += copyLength;
+                }
+
+                return builder.ToString();
+            }
         }
 
         // Stable version of String.GetHashCode
