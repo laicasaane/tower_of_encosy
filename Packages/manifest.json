@@ -2,7 +2,7 @@
   "dependencies": {
     "cat.natsuneko.power-rename": "0.1.0",
     "com.annulusgames.unity-codegen": "1.0.0",
-    "com.browar.editor-toolbox": "0.13.2",
+    "com.browar.editor-toolbox": "0.14.0",
     "com.cathei.bakingsheet": "4.1.3",
     "com.cysharp.unitask": "2.5.10",
     "com.kaykit.character-pack.adventurers": "file:com.kaykit.character-pack.adventurers-1.0.0.tgz",

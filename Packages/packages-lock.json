@@ -21,7 +21,7 @@
       "url": "https://package.openupm.com"
     },
     "com.browar.editor-toolbox": {
-      "version": "0.13.2",
+      "version": "0.14.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
