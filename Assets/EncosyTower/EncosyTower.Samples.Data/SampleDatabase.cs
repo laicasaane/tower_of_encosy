@@ -1,4 +1,4 @@
-using EncosyTower.Databases.Authoring;
+using EncosyTower.Databases;
 using EncosyTower.Naming;
 
 namespace EncosyTower.Samples.Data

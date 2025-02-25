@@ -1,7 +1,7 @@
 using System;
 using EncosyTower.Naming;
 
-namespace EncosyTower.Databases.Authoring
+namespace EncosyTower.Databases
 {
     /// <summary>
     /// Defines a database which utilizes BakingSheet mechanism to import data from sources.
@@ -9,7 +9,7 @@ namespace EncosyTower.Databases.Authoring
     /// <remarks>
     /// By default, collections are automatically typed <see cref="Cathei.BakingSheet.VerticalList{T}"/>.
     /// <br/>
-    /// In case this behavior is not desired, use <see cref="HorizontalAttribute"/>
+    /// In case this behavior is not desired, use <see cref="Authoring.HorizontalAttribute"/>
     /// to signify that the property should be a horizontal list.
     /// </remarks>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]

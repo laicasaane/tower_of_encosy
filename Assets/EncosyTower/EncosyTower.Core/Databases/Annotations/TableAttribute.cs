@@ -1,7 +1,7 @@
 using System;
 using EncosyTower.Naming;
 
-namespace EncosyTower.Databases.Authoring
+namespace EncosyTower.Databases
 {
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class TableAttribute : Attribute

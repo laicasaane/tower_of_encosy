@@ -14,8 +14,8 @@ namespace EncosyTower.SourceGen.Generators.Databases
         public const string IDATABASE = $"global::{DATABASES_NAMESPACE}.IDatabase";
         public const string DATABASE_ASSET = $"global::{DATABASES_NAMESPACE}.DatabaseAsset";
 
-        public const string DATABASE_ATTRIBUTE = $"global::{DATABASES_AUTHORING_NAMESPACE}.DatabaseAttribute";
-        public const string TABLE_ATTRIBUTE = $"global::{DATABASES_AUTHORING_NAMESPACE}.TableAttribute";
+        public const string DATABASE_ATTRIBUTE = $"global::{DATABASES_NAMESPACE}.DatabaseAttribute";
+        public const string TABLE_ATTRIBUTE = $"global::{DATABASES_NAMESPACE}.TableAttribute";
         public const string HORIZONTAL_LIST_ATTRIBUTE = $"global::{DATABASES_AUTHORING_NAMESPACE}.HorizontalAttribute";
         public const string ICONTAINS = $"global::{DATABASES_AUTHORING_NAMESPACE}.SourceGen.IContains";
         public const string DATA_SHEET_CONTAINER_BASE = $"{DATABASES_AUTHORING_NAMESPACE}.DataSheetContainerBase";
