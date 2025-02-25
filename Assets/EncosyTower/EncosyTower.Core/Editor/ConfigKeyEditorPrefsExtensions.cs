@@ -8,7 +8,25 @@ namespace EncosyTower.Editor.ConfigKeys
     public static class ConfigKeyEditorPrefExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasEditorPref<T>(this ConfigKey<T> self)
+        public static bool HasEditorPref(this ConfigKey<string> self)
+        {
+            return EditorPrefs.HasKey(self.Value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool HasEditorPref(this ConfigKey<bool> self)
+        {
+            return EditorPrefs.HasKey(self.Value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool HasEditorPref(this ConfigKey<int> self)
+        {
+            return EditorPrefs.HasKey(self.Value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool HasEditorPref(this ConfigKey<float> self)
         {
             return EditorPrefs.HasKey(self.Value);
         }
@@ -130,7 +148,25 @@ namespace EncosyTower.Editor.ConfigKeys
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DeleteEditorPref<T>(this ConfigKey<T> self)
+        public static void DeleteEditorPref(this ConfigKey<string> self)
+        {
+            EditorPrefs.DeleteKey(self.Value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DeleteEditorPref(this ConfigKey<bool> self)
+        {
+            EditorPrefs.DeleteKey(self.Value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DeleteEditorPref(this ConfigKey<int> self)
+        {
+            EditorPrefs.DeleteKey(self.Value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DeleteEditorPref(this ConfigKey<float> self)
         {
             EditorPrefs.DeleteKey(self.Value);
         }

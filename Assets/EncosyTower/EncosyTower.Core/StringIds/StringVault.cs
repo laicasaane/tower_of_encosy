@@ -1,3 +1,7 @@
+#if UNITY_COLLECTIONS
+#define __ENCOSY_SHARED_STRING_VAULT__
+#endif
+
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -9,11 +13,23 @@ using UnityEngine;
 
 namespace EncosyTower.StringIds
 {
+#if __ENCOSY_SHARED_STRING_VAULT__
+    using StringHashToIdMap = SharedArrayMap<StringHash, Id>;
+    using StringList = SharedList<Unity.Collections.FixedString64Bytes>;
+    using StringHashList = SharedList<Option<StringHash>>;
+    using String = Unity.Collections.FixedString64Bytes;
+#else
+    using StringHashToIdMap = ArrayMap<StringHash, Id>;
+    using StringList = FasterList<string>;
+    using StringHashList = FasterList<Option<StringHash>>;
+    using String = System.String;
+#endif
+
     public partial class StringVault
     {
-        private readonly ArrayMap<StringHash, Id> _map;
-        private readonly FasterList<string> _strings;
-        private readonly FasterList<Option<StringHash>> _hashes;
+        private readonly StringHashToIdMap _map;
+        private readonly StringList _strings;
+        private readonly StringHashList _hashes;
         private int _count;
 
         public StringVault(int initialCapacity)
@@ -36,16 +52,36 @@ namespace EncosyTower.StringIds
             get => _count;
         }
 
-        public Id MakeId([NotNull] string str)
+        public void Clear()
         {
+            _map.Clear();
+            _strings.Clear();
+            _hashes.Clear();
+            _count = 0;
+        }
+
+        public Id MakeId(
+#if __ENCOSY_SHARED_STRING_VAULT__
+            in
+#else
+            [NotNull]
+#endif
+            String str
+        )
+        {
+#if __ENCOSY_SHARED_STRING_VAULT__
+            var hash = str.GetHashCode();
+#else
             var hash = str.GetHashCode(StringComparison.Ordinal);
+#endif
+
             var registered = _map.TryGetValue(hash, out var id);
 
             if (registered)
             {
                 TryGetString(id, out var registeredString);
 
-                if (string.Equals(str, registeredString, StringComparison.Ordinal))
+                if (str == registeredString)
                 {
                     return id;
                 }
@@ -101,7 +137,7 @@ namespace EncosyTower.StringIds
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetString(Id id, out string str)
+        public bool TryGetString(Id id, out String str)
         {
             var indexUnsigned = (uint)id;
             var index = (int)indexUnsigned;
@@ -121,7 +157,7 @@ namespace EncosyTower.StringIds
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, string str, Id id)
+        private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, in String str, Id id)
         {
             if (result == false)
             {

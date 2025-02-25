@@ -56,7 +56,6 @@ namespace EncosyTower.Vaults
             => s_vault.TrySet(id, value);
     }
 
-
 #if UNITY_EDITOR
     internal static partial class GlobalValueVaultEditor
     {

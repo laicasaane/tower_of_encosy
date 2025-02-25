@@ -10,7 +10,34 @@ namespace EncosyTower.ConfigKeys
         /// Returns true if the given key exists in PlayerPrefs, otherwise returns false.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasPlayerPref<T>(this ConfigKey<T> self)
+        public static bool HasPlayerPref(this ConfigKey<string> self)
+        {
+            return PlayerPrefs.HasKey(self.Value);
+        }
+
+        /// <summary>
+        /// Returns true if the given key exists in PlayerPrefs, otherwise returns false.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool HasPlayerPref(this ConfigKey<bool> self)
+        {
+            return PlayerPrefs.HasKey(self.Value);
+        }
+
+        /// <summary>
+        /// Returns true if the given key exists in PlayerPrefs, otherwise returns false.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool HasPlayerPref(this ConfigKey<int> self)
+        {
+            return PlayerPrefs.HasKey(self.Value);
+        }
+
+        /// <summary>
+        /// Returns true if the given key exists in PlayerPrefs, otherwise returns false.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool HasPlayerPref(this ConfigKey<float> self)
         {
             return PlayerPrefs.HasKey(self.Value);
         }
@@ -196,7 +223,37 @@ namespace EncosyTower.ConfigKeys
         /// If the key does not exist, DeleteKey has no impact.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DeletePlayerPref<T>(this ConfigKey<T> self)
+        public static void DeletePlayerPref(this ConfigKey<string> self)
+        {
+            PlayerPrefs.DeleteKey(self.Value);
+        }
+
+        /// <summary>
+        /// Removes the given key from the PlayerPrefs.
+        /// If the key does not exist, DeleteKey has no impact.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DeletePlayerPref(this ConfigKey<bool> self)
+        {
+            PlayerPrefs.DeleteKey(self.Value);
+        }
+
+        /// <summary>
+        /// Removes the given key from the PlayerPrefs.
+        /// If the key does not exist, DeleteKey has no impact.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DeletePlayerPref(this ConfigKey<int> self)
+        {
+            PlayerPrefs.DeleteKey(self.Value);
+        }
+
+        /// <summary>
+        /// Removes the given key from the PlayerPrefs.
+        /// If the key does not exist, DeleteKey has no impact.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DeletePlayerPref(this ConfigKey<float> self)
         {
             PlayerPrefs.DeleteKey(self.Value);
         }

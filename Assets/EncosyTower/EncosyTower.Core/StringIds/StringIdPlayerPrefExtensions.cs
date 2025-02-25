@@ -10,10 +10,46 @@ namespace EncosyTower.StringIds
         /// Returns true if the given key exists in PlayerPrefs, otherwise returns false.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasPlayerPref<T>(this StringId<T> self)
+        public static bool HasPlayerPref(this StringId<string> self)
+        {
+            return PlayerPrefs.HasKey(self.ToStringGlobal());
+        }
+
+        /// <summary>
+        /// Returns true if the given key exists in PlayerPrefs, otherwise returns false.
+        /// </summary>
+        /// <remarks>
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool HasPlayerPref(this StringId<bool> self)
+        {
+            return PlayerPrefs.HasKey(self.ToStringGlobal());
+        }
+
+        /// <summary>
+        /// Returns true if the given key exists in PlayerPrefs, otherwise returns false.
+        /// </summary>
+        /// <remarks>
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool HasPlayerPref(this StringId<int> self)
+        {
+            return PlayerPrefs.HasKey(self.ToStringGlobal());
+        }
+
+        /// <summary>
+        /// Returns true if the given key exists in PlayerPrefs, otherwise returns false.
+        /// </summary>
+        /// <remarks>
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool HasPlayerPref(this StringId<float> self)
         {
             return PlayerPrefs.HasKey(self.ToStringGlobal());
         }
@@ -22,7 +58,7 @@ namespace EncosyTower.StringIds
         /// Returns the value corresponding to key in the preference file if it exists.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<string> GetPlayerPref(this StringId<string> self)
@@ -35,7 +71,7 @@ namespace EncosyTower.StringIds
         /// Returns the value corresponding to key in the preference file if it exists.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<bool> GetPlayerPref(this StringId<bool> self)
@@ -48,7 +84,7 @@ namespace EncosyTower.StringIds
         /// Returns the value corresponding to key in the preference file if it exists.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<int> GetPlayerPref(this StringId<int> self)
@@ -61,7 +97,7 @@ namespace EncosyTower.StringIds
         /// Returns the value corresponding to key in the preference file if it exists.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<float> GetPlayerPref(this StringId<float> self)
@@ -74,7 +110,7 @@ namespace EncosyTower.StringIds
         /// Returns the value corresponding to key in the preference file if it exists.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetPlayerPref(this StringId<string> self, string defaultValue)
@@ -86,7 +122,7 @@ namespace EncosyTower.StringIds
         /// Returns the value corresponding to key in the preference file if it exists.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool GetPlayerPref(this StringId<bool> self, bool defaultValue)
@@ -98,7 +134,7 @@ namespace EncosyTower.StringIds
         /// Returns the value corresponding to key in the preference file if it exists.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetPlayerPref(this StringId<int> self, int defaultValue)
@@ -110,7 +146,7 @@ namespace EncosyTower.StringIds
         /// Returns the value corresponding to key in the preference file if it exists.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetPlayerPref(this StringId<float> self, float defaultValue)
@@ -122,7 +158,7 @@ namespace EncosyTower.StringIds
         /// Sets a single string value for the preference identified by the given key.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetPlayerPref(this StringId<string> self, string value)
@@ -134,7 +170,7 @@ namespace EncosyTower.StringIds
         /// Sets a single boolean value for the preference identified by the given key.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetPlayerPref(this StringId<bool> self, bool value)
@@ -146,7 +182,7 @@ namespace EncosyTower.StringIds
         /// Sets a single integer value for the preference identified by the given key.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetPlayerPref(this StringId<int> self, int value)
@@ -158,7 +194,7 @@ namespace EncosyTower.StringIds
         /// Sets a single float value for the preference identified by the given key.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetPlayerPref(this StringId<float> self, float value)
@@ -173,7 +209,7 @@ namespace EncosyTower.StringIds
         /// Determines whether the value of the given key can be overridden if existing.
         /// </param>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         public static void SetPlayerPref(this StringId<string> self, string value, bool overrideExisting)
         {
@@ -192,7 +228,7 @@ namespace EncosyTower.StringIds
         /// Determines whether the value of the given key can be overridden if existing.
         /// </param>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         public static void SetPlayerPref(this StringId<bool> self, bool value, bool overrideExisting)
         {
@@ -211,7 +247,7 @@ namespace EncosyTower.StringIds
         /// Determines whether the value of the given key can be overridden if existing.
         /// </param>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         public static void SetPlayerPref(this StringId<int> self, int value, bool overrideExisting)
         {
@@ -230,7 +266,7 @@ namespace EncosyTower.StringIds
         /// Determines whether the value of the given key can be overridden if existing.
         /// </param>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         public static void SetPlayerPref(this StringId<float> self, float value, bool overrideExisting)
         {
@@ -247,10 +283,62 @@ namespace EncosyTower.StringIds
         /// If the key does not exist, DeleteKey has no impact.
         /// </summary>
         /// <remarks>
-        /// This API uses <see cref="GlobalStringVault{T}"/> to convert <paramref name="self"/> into key value.
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void DeletePlayerPref<T>(this StringId<T> self)
+        {
+            PlayerPrefs.DeleteKey(self.ToStringGlobal());
+        }
+
+        /// <summary>
+        /// Removes the given key from the PlayerPrefs.
+        /// If the key does not exist, DeleteKey has no impact.
+        /// </summary>
+        /// <remarks>
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DeletePlayerPref(this StringId<string> self)
+        {
+            PlayerPrefs.DeleteKey(self.ToStringGlobal());
+        }
+
+        /// <summary>
+        /// Removes the given key from the PlayerPrefs.
+        /// If the key does not exist, DeleteKey has no impact.
+        /// </summary>
+        /// <remarks>
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DeletePlayerPref(this StringId<bool> self)
+        {
+            PlayerPrefs.DeleteKey(self.ToStringGlobal());
+        }
+
+        /// <summary>
+        /// Removes the given key from the PlayerPrefs.
+        /// If the key does not exist, DeleteKey has no impact.
+        /// </summary>
+        /// <remarks>
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DeletePlayerPref(this StringId<int> self)
+        {
+            PlayerPrefs.DeleteKey(self.ToStringGlobal());
+        }
+
+        /// <summary>
+        /// Removes the given key from the PlayerPrefs.
+        /// If the key does not exist, DeleteKey has no impact.
+        /// </summary>
+        /// <remarks>
+        /// This API uses <see cref="GlobalStringVault"/> to convert <paramref name="self"/> into key value.
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DeletePlayerPref(this StringId<float> self)
         {
             PlayerPrefs.DeleteKey(self.ToStringGlobal());
         }
