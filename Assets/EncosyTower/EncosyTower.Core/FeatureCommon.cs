@@ -6,8 +6,8 @@ namespace EncosyTower.Common
 {
     [Feature("0. EncosyTower: Common")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.burst", "1.8.19")]
-    [RequiresPackage(PackageRegistry.Unity, "com.unity.collections", "2.5.2")]
-    [RequiresPackage(PackageRegistry.Unity, "com.unity.logging", "1.3.5")]
+    [RequiresPackage(PackageRegistry.Unity, "com.unity.collections", "2.5.3")]
+    [RequiresPackage(PackageRegistry.Unity, "com.unity.logging", "1.3.6")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.mathematics", "1.3.2")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.nuget.newtonsoft-json", "3.2.1")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.serialization", "3.1.2")]
@@ -19,10 +19,10 @@ namespace EncosyTower.Common
 
     [RequiresPackage(PackageRegistry.OpenUpm, "com.annulusgames.unity-codegen")]
 
-#if !UNITY_6000_0_OR_NEWER
-    [RequiresPackage(PackageRegistry.OpenUpm, "com.cysharp.unitask")]
-#else
+#if UNITY_6000_0_OR_NEWER
     [RequiresPackage(PackageRegistry.OpenUpm, "com.cysharp.unitask", isOptional: true)]
+#else
+    [RequiresPackage(PackageRegistry.OpenUpm, "com.cysharp.unitask")]
 #endif
 
     [RequiresPackage(PackageRegistry.OpenUpm, "com.needle.console", isOptional: true)]
