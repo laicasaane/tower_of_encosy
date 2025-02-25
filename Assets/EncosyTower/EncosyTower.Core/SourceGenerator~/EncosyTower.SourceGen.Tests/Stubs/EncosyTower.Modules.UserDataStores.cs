@@ -1,7 +1,7 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
 using EncosyTower.Encryption;
-using EncosyTower.NameKeys;
+using EncosyTower.StringIds;
 
 namespace EncosyTower.UserDataStores
 {
@@ -31,7 +31,7 @@ namespace EncosyTower.UserDataStores
 
     public sealed class UserDataStorage<T> where T : IUserData, new()
     {
-        public UserDataStorage(NameKey<string> key, EncryptionBase encryption) { }
+        public UserDataStorage(StringId<string> key, EncryptionBase encryption) { }
 
         public string UserId { get; set; }
 

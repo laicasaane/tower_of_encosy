@@ -431,8 +431,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
                 {
                     var name = StringUtils.ToSnakeCase(def.DataType.Name).ToUpperInvariant();
 
-                    p.PrintBeginLine("public static readonly global::EncosyTower.NameKeys.NameKey<string> ").Print(name)
-                        .Print(" = global::EncosyTower.NameKeys.NameToKey.Get<string>(nameof(").Print(name).PrintEndLine("));")
+                    p.PrintBeginLine("public static readonly global::EncosyTower.StringIds.StringId<string> ").Print(name)
+                        .Print(" = global::EncosyTower.StringIds.StringToId.Get<string>(nameof(").Print(name).PrintEndLine("));")
                         .PrintEndLine();
                 }
             }
