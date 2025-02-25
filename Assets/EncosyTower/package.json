@@ -2,7 +2,7 @@
   "name": "com.laicasaane.encosy-tower",
   "displayName": "Encosy Tower",
   "version": "0.1.0",
-  "unity": "2022.3",
+  "unity": "6000.0",
   "dependencies": {
     "com.unity.burst": "1.8.18",
     "com.unity.collections": "2.5.1",
