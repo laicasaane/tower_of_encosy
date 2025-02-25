@@ -488,6 +488,7 @@ namespace EncosyTower.Collections
                 AllocateMore(newCount);
             }
 
+            _buffer.AsSpan().Slice(oldCount, amount).Fill(default);
             _count.ValueRW = newCount;
         }
 
@@ -505,6 +506,22 @@ namespace EncosyTower.Collections
             }
 
             _buffer.AsSpan().Slice(oldCount, amount).Fill(value);
+            _count.ValueRW = newCount;
+        }
+
+        public void AddReplicateNoInit(int amount)
+        {
+            _version.ValueRW++;
+
+            var oldCount = _count.ValueRO;
+            var newCount = amount + oldCount;
+            var offset = newCount - _buffer.Length;
+
+            if (offset > 0)
+            {
+                AllocateMore(newCount);
+            }
+
             _count.ValueRW = newCount;
         }
 

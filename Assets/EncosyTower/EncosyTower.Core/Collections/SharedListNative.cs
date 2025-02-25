@@ -332,6 +332,7 @@ namespace EncosyTower.Collections
 
             Checks.IsTrue(offset < 1, "the capacity of SharedListNative<T> is immutable and cannot change");
 
+            _buffer.AsSpan().Slice(oldCount, amount).Fill(default);
             CountRW = newCount;
         }
 
@@ -346,6 +347,19 @@ namespace EncosyTower.Collections
             Checks.IsTrue(offset < 1, "the capacity of SharedListNative<T> is immutable and cannot change");
 
             _buffer.AsSpan().Slice(oldCount, amount).Fill(value);
+            CountRW = newCount;
+        }
+
+        public void AddReplicateNoInit(int amount)
+        {
+            VersionRW++;
+
+            var oldCount = Count;
+            var newCount = amount + oldCount;
+            var offset = newCount - _buffer.Length;
+
+            Checks.IsTrue(offset < 1, "the capacity of SharedListNative<T> is immutable and cannot change");
+
             CountRW = newCount;
         }
 
