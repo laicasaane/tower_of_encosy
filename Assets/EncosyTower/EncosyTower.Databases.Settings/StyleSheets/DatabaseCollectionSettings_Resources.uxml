@@ -15,9 +15,9 @@ However, it will be created upon download." />
 
     <engine:Label name="google-sheet__service-account"
                   text="Google Service Account Credential is required to use this functionality.&#10;
-    1. Create a Google Cloud project on &lt;a href=&quot;https://console.cloud.google.com/ &quot; &gt;this site&lt;/a&gt;.&#10;
-    2. Enable Google Sheets API for the project on &lt;a href=&quot;https://console.developers.google.com/apis/api/sheets.googleapis.com &quot; &gt;this site&lt;/a&gt;.&#10;
-    3. Enable Google Drive API for the project on &lt;a href=&quot;https://console.developers.google.com/apis/api/drive.googleapis.com &quot; &gt;this site&lt;/a&gt;.&#10;
+    1. Create a &lt;a href=&quot;https://console.cloud.google.com/ &quot; &gt;Google Cloud project&lt;/a&gt;.&#10;
+    2. Enable &lt;a href=&quot;https://console.developers.google.com/apis/api/sheets.googleapis.com &quot; &gt;Google Sheets API&lt;/a&gt; for the project.&#10;
+    3. Enable &lt;a href=&quot;https://console.developers.google.com/apis/api/drive.googleapis.com &quot; &gt;Google Drive API&lt;/a&gt; for the project.&#10;
     4. Create a credential following &lt;a href=&quot;https://github.com/cathei/BakingSheet/blob/master/docs/google-sheet-import.md#create-google-service-account &quot; &gt;this tutorial&lt;/a&gt;.&#10;
     5. Share your SpreadSheet to that account following &lt;a href=&quot;https://github.com/cathei/BakingSheet/blob/master/docs/google-sheet-import.md#invite-service-account-to-your-google-sheet &quot; &gt;this tutorial&lt;/a&gt;.
 " />
