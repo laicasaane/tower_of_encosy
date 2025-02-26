@@ -61,42 +61,43 @@ namespace EncosyTower.Databases.Settings.Views
             titleBar.Add(titleLabel);
             root.Add(titleBar);
 
-            var scrollView = new ScrollView();
-            root.Add(scrollView);
-
-            var container = scrollView.Q("unity-content-container");
+            var container = new VisualElement();
             container.AddToClassList(Constants.DATABASE_COLLECTION);
+            root.Add(container);
 
             var splitter = new TwoPaneSplitView(0, 200f, TwoPaneSplitViewOrientation.Horizontal);
             container.Add(splitter);
 
-            var leftPanel = new VisualElement();
+            var leftPanel = new ScrollView();
             leftPanel.AddToClassList(Constants.LEFT_PANEL);
             splitter.Add(leftPanel);
 
-            var rightPanel = new VisualElement();
+            var rightPanel = new ScrollView();
             rightPanel.AddToClassList(Constants.RIGHT_PANEL);
             splitter.Add(rightPanel);
+
+            var leftPanelContainer = leftPanel.Q("unity-content-container");
+            var rightPanelContainer = rightPanel.Q("unity-content-container");
 
             var dbListProperty = _dbListProperty
                 = serializedSettings.FindProperty(nameof(DatabaseCollectionSettings._databases));
 
             var presetListView = new DatabasePresetListView();
             presetListView.PresetSelected += PresetListView_PresetSelected;
-            rightPanel.Add(presetListView);
-            rightPanel.Add(new VisualSeparator());
+            rightPanelContainer.Add(presetListView);
+            rightPanelContainer.Add(new VisualSeparator());
 
             var dbView = _dbView = new DatabaseSettingsView(false, resources) { userData = context };
             dbView.DatabaseTypeSelected += DbView_OnDatabaseTypeSelected;
             dbView.OtherValueUpdated += DbView_OnOtherValueUpdated;
-            rightPanel.Add(dbView);
+            rightPanelContainer.Add(dbView);
 
             var dbListView = _dbListView = CreateDatabaseListView(dbListProperty);
             dbListView.selectedIndicesChanged += DbListView_SelectedIndicesChanged;
             dbListView.itemsAdded += DbListView_ItemsAdded;
             dbListView.itemsRemoved += DbListView_ItemRemoved;
             dbListView.itemIndexChanged += DbListView_ItemIndexChanged;
-            leftPanel.Add(dbListView);
+            leftPanelContainer.Add(dbListView);
 
             container.Bind(serializedSettings);
         }
