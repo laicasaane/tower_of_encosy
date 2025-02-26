@@ -3,9 +3,9 @@ using System.Collections.Immutable;
 using EncosyTower.SourceGen.Generators.Data;
 using Microsoft.CodeAnalysis;
 
-namespace EncosyTower.SourceGen.Generators.Databases
+namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
-    using static EncosyTower.SourceGen.Generators.Databases.Helpers;
+    using static EncosyTower.SourceGen.Generators.DatabaseAuthoring.Helpers;
 
     partial class DataDeclaration
     {

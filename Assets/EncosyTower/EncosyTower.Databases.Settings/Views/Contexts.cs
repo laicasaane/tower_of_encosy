@@ -50,8 +50,11 @@ namespace EncosyTower.Databases.Settings.Views
         public SerializedProperty GetNameProperty()
             => Property.FindPropertyRelative(nameof(DatabaseSettings.name));
 
-        public SerializedProperty GetTypeProperty()
-            => Property.FindPropertyRelative(nameof(DatabaseSettings.type));
+        public SerializedProperty GetAuthorTypeProperty()
+            => Property.FindPropertyRelative(nameof(DatabaseSettings.authorType));
+
+        public SerializedProperty GetDatabaseTypeProperty()
+            => Property.FindPropertyRelative(nameof(DatabaseSettings.databaseType));
     }
 
     internal readonly record struct GoogleSheetContext(

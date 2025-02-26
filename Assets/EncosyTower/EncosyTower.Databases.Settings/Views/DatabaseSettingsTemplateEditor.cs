@@ -36,24 +36,27 @@ namespace EncosyTower.Databases.Settings.Views
             _dbView?.Update();
         }
 
-        private void DbView_OnDatabaseTypeSelected(DatabaseSettingsView dbView, DatabaseType type)
+        private void DbView_OnDatabaseTypeSelected(DatabaseSettingsView dbView, DatabaseRecord record)
         {
             var context = dbView.userData as DatabaseSettingsContext;
             var serializedObject = context.SerializedObject;
 
             var nameProperty = context.Database.GetNameProperty();
-            var typeProperty = context.Database.GetTypeProperty();
+            var authorProperty = context.Database.GetAuthorTypeProperty();
+            var databaseProperty = context.Database.GetDatabaseTypeProperty();
 
-            if (type?.Type == null)
+            if (record?.AuthorType == null)
             {
                 nameProperty.stringValue = Constants.UNDEFINED;
-                typeProperty.stringValue = Constants.UNDEFINED;
+                authorProperty.stringValue = Constants.UNDEFINED;
+                databaseProperty.stringValue = Constants.UNDEFINED;
                 dbView.ToggleDisplayContainer(false);
             }
             else
             {
-                nameProperty.stringValue = type.Name;
-                typeProperty.stringValue = type.Type.AssemblyQualifiedName;
+                nameProperty.stringValue = record.Name;
+                authorProperty.stringValue = record.AuthorType.AssemblyQualifiedName;
+                databaseProperty.stringValue = record.DatabaseType.AssemblyQualifiedName;
                 dbView.ToggleDisplayContainer(true);
             }
 

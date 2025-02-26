@@ -3,9 +3,9 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json.Utilities;
 
-namespace EncosyTower.SourceGen.Generators.Databases
+namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
-    using static EncosyTower.SourceGen.Generators.Databases.Helpers;
+    using static EncosyTower.SourceGen.Generators.DatabaseAuthoring.Helpers;
 
     partial class DatabaseDeclaration
     {
@@ -17,9 +17,8 @@ namespace EncosyTower.SourceGen.Generators.Databases
         {
             var syntax = DatabaseRef.Syntax;
             var tables = DatabaseRef.Tables;
-            var isDatabaseStruct = DatabaseRef.Symbol.IsValueType;
             var databaseTypeName = syntax.Identifier.Text;
-            var databaseTypeKeyword = isDatabaseStruct ? "struct" : "class";
+            var databaseTypeKeyword = DatabaseRef.Symbol.IsValueType ? "struct" : "class";
 
             var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, syntax.Parent);
             var p = scopePrinter.printer;
@@ -29,15 +28,15 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            p.Print(DIRECTIVE).PrintEndLine();
-            p.PrintEndLine();
-
             p.PrintBeginLine()
                 .Print($"partial ").Print(databaseTypeKeyword).Print(" ").Print(databaseTypeName)
                 .Print($" : {ICONTAINS}<{databaseTypeName}.SheetContainer>")
                 .PrintEndLine();
             p.OpenScope();
             {
+                p.Print(DIRECTIVE).PrintEndLine();
+                p.PrintEndLine();
+
                 p.PrintLine(SERIALIZABLE).PrintLine(GENERATED_SHEET_CONTAINER);
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine($"public partial class SheetContainer")
@@ -114,12 +113,19 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 p.PrintEndLine();
 
                 WriteRefList(ref p, maxFieldOfSameTable);
+
+                p.Print("#else").PrintEndLine().PrintEndLine();
+
+                p.PrintLine(SERIALIZABLE).PrintLine(GENERATED_SHEET_CONTAINER);
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine("public partial class SheetContainer { }");
+                p.PrintEndLine();
+
+                p.Print("#endif").PrintEndLine().PrintEndLine();
+
                 WriteDerivedSheetClasses(ref p, tables);
             }
             p.CloseScope();
-
-            p.Print("#endif").PrintEndLine();
-            p.PrintEndLine();
 
             p = p.DecreasedIndent();
             return p.Result;
@@ -241,17 +247,5 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.CloseScope();
             p.PrintEndLine();
         }
-
-        public static string GetUniqueSheetName(TableRef table)
-            => GetUniqueSheetName(table.Type, table.DataType, table.PropertyName);
-
-        public static string GetSheetName(TableRef table)
-            => GetSheetName(table.Type, table.DataType);
-
-        public static string GetUniqueSheetName(INamedTypeSymbol tableType, ITypeSymbol dataType, string memberName)
-            => $"{GetSheetName(tableType, dataType)}__{memberName}";
-
-        public static string GetSheetName(INamedTypeSymbol tableType, ITypeSymbol dataType)
-            => $"{tableType.Name}_{dataType.Name}Sheet";
     }
 }

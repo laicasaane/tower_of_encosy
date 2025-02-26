@@ -46,7 +46,7 @@ namespace EncosyTower.Databases.Settings
                 Progress(ProgressMessageType.ReadFileTable);
 
                 var timeZone = TimeZoneInfo.Utc;
-                var fileContainer = new FileDatabase.SheetContainer();
+                var fileContainer = new FileDatabaseAuthoring.SheetContainer();
                 var fileConverter = new DatabaseGoogleSheetConverter(spreadsheetId, serviceAccountJson, timeZone);
                 var fileBakeTask = fileContainer.Bake(fileConverter).AsUniTask();
 
@@ -133,7 +133,7 @@ namespace EncosyTower.Databases.Settings
                 Progress(ProgressMessageType.ReadFileTable);
 
                 var timeZone = TimeZoneInfo.Utc;
-                var fileContainer = new FileDatabase.SheetContainer();
+                var fileContainer = new FileDatabaseAuthoring.SheetContainer();
                 var fileConverter = new DatabaseGoogleSheetConverter(spreadsheetId, serviceAccountJson, timeZone);
                 var fileBakeTask = fileContainer.Bake(fileConverter).AsUniTask();
 

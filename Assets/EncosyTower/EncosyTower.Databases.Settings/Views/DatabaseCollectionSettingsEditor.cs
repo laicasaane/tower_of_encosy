@@ -151,7 +151,7 @@ namespace EncosyTower.Databases.Settings.Views
             EditorUtility.SetDirty(serializedObject.targetObject);
             AssetDatabase.SaveAssetIfDirty(serializedObject.targetObject);
 
-            if (string.IsNullOrEmpty(context.Database.GetTypeProperty().stringValue))
+            if (string.IsNullOrEmpty(context.Database.GetAuthorTypeProperty().stringValue))
             {
                 _dbView.ToggleDisplayContainer(false);
             }
@@ -205,10 +205,12 @@ namespace EncosyTower.Databases.Settings.Views
             {
                 var item = dbListProperty.GetArrayElementAtIndex(index);
                 var nameProperty = item.FindPropertyRelative(nameof(DatabaseSettings.name));
-                var typeProperty = item.FindPropertyRelative(nameof(DatabaseSettings.type));
+                var authorTypeProperty = item.FindPropertyRelative(nameof(DatabaseSettings.authorType));
+                var databaseTypeProperty = item.FindPropertyRelative(nameof(DatabaseSettings.databaseType));
 
                 nameProperty.stringValue = Constants.UNDEFINED;
-                typeProperty.stringValue = Constants.UNDEFINED;
+                authorTypeProperty.stringValue = Constants.UNDEFINED;
+                databaseTypeProperty.stringValue = Constants.UNDEFINED;
             }
 
             var serializedObject = dbListProperty.serializedObject;
@@ -245,24 +247,27 @@ namespace EncosyTower.Databases.Settings.Views
             SetSelectedIndex(newIndex);
         }
 
-        private void DbView_OnDatabaseTypeSelected(DatabaseSettingsView dbView, DatabaseType type)
+        private void DbView_OnDatabaseTypeSelected(DatabaseSettingsView dbView, DatabaseRecord record)
         {
             var context = dbView.userData as Context;
             var serializedObject = context.SerializedObject;
 
             var nameProperty = context.Database.GetNameProperty();
-            var typeProperty = context.Database.GetTypeProperty();
+            var authorTypeProperty = context.Database.GetAuthorTypeProperty();
+            var databaseTypeProperty = context.Database.GetDatabaseTypeProperty();
 
-            if (type?.Type == null)
+            if (record?.AuthorType == null || record?.DatabaseType == null)
             {
                 nameProperty.stringValue = Constants.UNDEFINED;
-                typeProperty.stringValue = Constants.UNDEFINED;
+                authorTypeProperty.stringValue = Constants.UNDEFINED;
+                databaseTypeProperty.stringValue = Constants.UNDEFINED;
                 dbView.ToggleDisplayContainer(false);
             }
             else
             {
-                nameProperty.stringValue = type.Name;
-                typeProperty.stringValue = type.Type.AssemblyQualifiedName;
+                nameProperty.stringValue = record.Name;
+                authorTypeProperty.stringValue = record.AuthorType.AssemblyQualifiedName;
+                databaseTypeProperty.stringValue = record.DatabaseType.AssemblyQualifiedName;
                 dbView.ToggleDisplayContainer(true);
             }
 

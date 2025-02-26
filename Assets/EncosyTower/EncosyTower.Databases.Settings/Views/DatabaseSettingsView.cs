@@ -10,7 +10,7 @@ namespace EncosyTower.Databases.Settings.Views
     {
         private const string USS_CLASS_NAME = "database";
 
-        public event Action<DatabaseSettingsView, DatabaseType> DatabaseTypeSelected;
+        public event Action<DatabaseSettingsView, DatabaseRecord> DatabaseTypeSelected;
         public event Action<DatabaseSettingsView> OtherValueUpdated;
 
         private readonly GenericMenuPopup _menu = new(new MenuItemNode(), "Databases");
@@ -116,14 +116,14 @@ namespace EncosyTower.Databases.Settings.Views
                 return;
             }
 
-            var types = DatabaseTypeVault.Types.AsSpan();
+            var records = DatabaseTypeVault.Records.AsSpan();
 
-            for (var i = 0; i < types.Length; i++)
+            for (var i = 0; i < records.Length; i++)
             {
-                var type = types[i];
-                var currentNode = rootNode.CreateNode(type.Name);
-                currentNode.func2 = userData => DatabaseTypeSelected?.Invoke(this, userData as DatabaseType);
-                currentNode.userData = type;
+                var record = records[i];
+                var currentNode = rootNode.CreateNode(record.Name);
+                currentNode.func2 = userData => DatabaseTypeSelected?.Invoke(this, userData as DatabaseRecord);
+                currentNode.userData = record;
                 currentNode.on = false;
             }
         }

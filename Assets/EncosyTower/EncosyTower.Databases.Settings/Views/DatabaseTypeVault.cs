@@ -7,52 +7,63 @@ using UnityEngine;
 
 namespace EncosyTower.Databases.Settings.Views
 {
-    internal record DatabaseType(Type Type, string Name);
+    internal record DatabaseRecord(Type AuthorType, Type DatabaseType, string Name);
 
     internal static class DatabaseTypeVault
     {
         public static readonly ArrayMap<Type, int> TypeToIndexMap = new();
-        public static readonly FasterList<DatabaseType> Types = new();
+        public static readonly FasterList<DatabaseRecord> Records = new();
 
         public static void Initialize()
         {
             var map = TypeToIndexMap;
-            var types = Types;
+            var records = Records;
 
             map.Clear();
-            types.Clear();
+            records.Clear();
 
-            var candidates = TypeCache.GetTypesWithAttribute<DatabaseAttribute>();
-            var capacity = candidates.Count;
+            var authoringTypes = TypeCache.GetTypesWithAttribute<AuthorDatabaseAttribute>();
+            var capacity = authoringTypes.Count;
 
             map.EnsureCapacity(capacity);
-            types.IncreaseCapacityTo(capacity + 1);
-            types.Add(new(null, Constants.UNDEFINED));
+            records.IncreaseCapacityTo(capacity + 1);
+            records.Add(new(null, null, Constants.UNDEFINED));
 
-            foreach (var candidate in candidates)
+            foreach (var authoringType in authoringTypes)
             {
-                if (candidate.IsClass == false
-                    || candidate.IsAbstract
-                    || candidate.ContainsGenericParameters
+                if (authoringType.IsAbstract
+                    || authoringType.ContainsGenericParameters
                 )
                 {
                     continue;
                 }
 
-                var hideAttrib = candidate.GetCustomAttribute<HideInInspector>();
+                var hideAttrib = authoringType.GetCustomAttribute<HideInInspector>();
 
                 if (hideAttrib != null)
                 {
                     continue;
                 }
 
-                if (map.TryAdd(candidate, types.Count) == false)
+                if (authoringType.GetNestedType("SheetContainer", BindingFlags.Public) == null)
                 {
                     continue;
                 }
 
-                var name = ObjectNames.NicifyVariableName(candidate.Name);
-                types.Add(new(candidate, name));
+                var authorAttribute = authoringType.GetCustomAttribute<AuthorDatabaseAttribute>();
+
+                if (authorAttribute.DatabaseType is not Type databaseType)
+                {
+                    continue;
+                }
+
+                if (map.TryAdd(authoringType, records.Count) == false)
+                {
+                    continue;
+                }
+
+                var name = ObjectNames.NicifyVariableName(databaseType.Name);
+                records.Add(new(authoringType, databaseType, name));
             }
         }
     }

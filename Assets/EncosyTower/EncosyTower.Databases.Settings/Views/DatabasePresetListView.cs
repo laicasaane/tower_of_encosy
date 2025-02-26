@@ -100,7 +100,10 @@ namespace EncosyTower.Databases.Settings.Views
                     continue;
                 }
 
-                if (database.name == Constants.UNDEFINED || string.IsNullOrEmpty(database.type))
+                if (database.name == Constants.UNDEFINED
+                    || string.IsNullOrEmpty(database.authorType)
+                    || string.IsNullOrEmpty(database.databaseType)
+                )
                 {
                     continue;
                 }

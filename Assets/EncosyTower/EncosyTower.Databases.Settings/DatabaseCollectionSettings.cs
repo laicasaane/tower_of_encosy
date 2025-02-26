@@ -19,7 +19,8 @@ namespace EncosyTower.Databases.Settings
         internal partial class DatabaseSettings : SubSettings
         {
             public string name;
-            public string type;
+            public string authorType;
+            public string databaseType;
             public string assetName;
             public GoogleSheetSettings googleSheetSettings = new();
             public LocalCsvFolderSettings csvSettings = new();

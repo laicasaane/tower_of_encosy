@@ -129,7 +129,12 @@ namespace EncosyTower.Databases.Settings
                     return ValidationResult.DatabaseNameIsNullOrInvalid;
                 }
 
-                if (string.IsNullOrWhiteSpace(type))
+                if (string.IsNullOrWhiteSpace(authorType))
+                {
+                    return ValidationResult.AuthorTypeIsNullOrInvalid;
+                }
+
+                if (string.IsNullOrWhiteSpace(databaseType))
                 {
                     return ValidationResult.DatabaseTypeIsNullOrInvalid;
                 }
@@ -139,10 +144,16 @@ namespace EncosyTower.Databases.Settings
 
             private ValidationResult TryGetData(out string databaseAssetName, out Type sheetContainerType)
             {
-                var databaseType = Type.GetType(type, false, false);
+                var authorType = Type.GetType(this.authorType, false, false);
+                var databaseType = Type.GetType(this.databaseType, false, false);
 
                 databaseAssetName = nameof(DatabaseAsset);
                 sheetContainerType = default;
+
+                if (authorType == null)
+                {
+                    return ValidationResult.AuthorTypeDoesNotExist;
+                }
 
                 if (databaseType == null)
                 {
@@ -157,7 +168,7 @@ namespace EncosyTower.Databases.Settings
 
                 databaseAssetName = NamingMap.ConvertName(databaseAssetName, databaseAttrib.NamingStrategy);
 
-                var candidates = databaseType.GetMember(
+                var candidates = authorType.GetMember(
                       "SheetContainer"
                     , MemberTypes.NestedType
                     , BindingFlags.Public
@@ -198,16 +209,24 @@ namespace EncosyTower.Databases.Settings
                         DevLoggerAPI.LogError($"Database name is null or invalid: '{name}'");
                         break;
 
+                    case ValidationResult.AuthorTypeIsNullOrInvalid:
+                        DevLoggerAPI.LogError($"Authoring type is null or invalid: '{authorType}'");
+                        break;
+
                     case ValidationResult.DatabaseTypeIsNullOrInvalid:
-                        DevLoggerAPI.LogError($"Database type is null or invalid: '{type}'");
+                        DevLoggerAPI.LogError($"Database type is null or invalid: '{databaseType}'");
+                        break;
+
+                    case ValidationResult.AuthorTypeDoesNotExist:
+                        DevLoggerAPI.LogError($"Authoring type does not exist: '{authorType}'");
                         break;
 
                     case ValidationResult.DatabaseTypeDoesNotExist:
-                        DevLoggerAPI.LogError($"Database type does not exist: '{type}'");
+                        DevLoggerAPI.LogError($"Database type does not exist: '{databaseType}'");
                         break;
 
                     case ValidationResult.CannotFindSheetContainerTypeInsideType:
-                        DevLoggerAPI.LogError($"Cannot find the type 'SheetContainer' inside type '{type}'");
+                        DevLoggerAPI.LogError($"Cannot find the type 'SheetContainer' inside type '{authorType}'");
                         break;
 
                     case ValidationResult.SheetContainerIsInvalid:
@@ -240,7 +259,9 @@ namespace EncosyTower.Databases.Settings
             {
                 Success,
                 DatabaseNameIsNullOrInvalid,
+                AuthorTypeIsNullOrInvalid,
                 DatabaseTypeIsNullOrInvalid,
+                AuthorTypeDoesNotExist,
                 DatabaseTypeDoesNotExist,
                 CannotFindSheetContainerTypeInsideType,
                 SheetContainerIsInvalid,

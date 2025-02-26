@@ -14,7 +14,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
         private const string UNITY_IS_INVALID = $"{UNITY_EXTENSIONS}.IsInvalid";
         private const string DOES_NOT_RETURN_IF_FALSE = "[global::System.Diagnostics.CodeAnalysis.DoesNotReturnIf(false)]";
 
-        public string WriteDatabase(
+        public string WriteCode(
               string databaseAssetName
             , NamingStrategy databaseNamingStrategy
             , ImmutableArray<TableRef> tables

@@ -41,7 +41,7 @@ namespace EncosyTower.Databases.Settings
                 }
 
                 var timeZone = TimeZoneInfo.Utc;
-                var fileContainer = new FileDatabase.SheetContainer();
+                var fileContainer = new FileDatabaseAuthoring.SheetContainer();
                 var fileConverter = new DatabaseGoogleSheetConverter(spreadsheetId, serviceAccountJson, timeZone);
 
                 await fileContainer.Bake(fileConverter)
@@ -115,7 +115,7 @@ namespace EncosyTower.Databases.Settings
                 }
 
                 var timeZone = TimeZoneInfo.Utc;
-                var fileContainer = new FileDatabase.SheetContainer();
+                var fileContainer = new FileDatabaseAuthoring.SheetContainer();
                 var fileConverter = new DatabaseGoogleSheetConverter(spreadsheetId, serviceAccountJson, timeZone);
 
                 await fileContainer.Bake(fileConverter).ConfigureAwait(continueOnCapturedContext);

@@ -15,7 +15,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
             DatabaseRef = databaseRef;
             InitializeAssetName();
             InitializeNamingStrategy();
-            InitializeConverters(context);
             InitializeTables(context);
         }
 
@@ -57,27 +56,11 @@ namespace EncosyTower.SourceGen.Generators.Databases
             }
         }
 
-        private void InitializeConverters(SourceProductionContext context)
-        {
-            var attrib = DatabaseRef.Attribute;
-            var args = attrib.ConstructorArguments;
-
-            foreach (var arg in args)
-            {
-                if (arg.Kind == TypedConstantKind.Array)
-                {
-                    arg.Values.MakeConverterMap(context, DatabaseRef.Syntax, attrib, DatabaseRef.ConverterMap, 0);
-                    break;
-                }
-            }
-        }
-
         private void InitializeTables(SourceProductionContext context)
         {
             var tables = new List<TableRef>();
             var databaseRef = DatabaseRef;
             var members = databaseRef.Symbol.GetMembers();
-            var outerNode = databaseRef.Syntax;
             var namingStrategy = databaseRef.NamingStrategy;
 
             foreach (var member in members)
@@ -104,8 +87,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     continue;
                 }
 
-                var syntaxNode = property.DeclaringSyntaxReferences[0].GetSyntax(context.CancellationToken);
-
                 if (type.IsAbstract)
                 {
                     context.ReportDiagnostic(
@@ -127,7 +108,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 }
 
                 if (type.BaseType == null
-                    || type.TryGetGenericType(DATA_TABLE_ASSET, 3, 2, out var baseType) == false
+                    || type.TryGetGenericType(DATA_TABLE_ASSET, 3, 2, out _) == false
                 )
                 {
                     context.ReportDiagnostic(
@@ -139,26 +120,12 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 }
 
                 var table = new TableRef {
-                    SyntaxNode = syntaxNode,
                     Type = type,
-                    BaseType = baseType,
                     PropertyName = property.Name,
                     NamingStrategy = namingStrategy,
                 };
 
-                foreach (var arg in attrib.ConstructorArguments)
-                {
-                    if (arg.Kind != TypedConstantKind.Array && arg.Value != null)
-                    {
-                        table.NamingStrategy = arg.Value.ToNamingStrategy();
-                    }
-                    else if (arg.Kind == TypedConstantKind.Array)
-                    {
-                        arg.Values.MakeConverterMap(context, outerNode, attrib, table.ConverterMap, 2);
-                    }
-                }
-
-                GetHorizontalLists(context, databaseRef, member, table);
+                ValidateHorizontalLists(context, member);
 
                 tables.Add(table);
             }
@@ -171,14 +138,8 @@ namespace EncosyTower.SourceGen.Generators.Databases
             }
         }
 
-        private static void GetHorizontalLists(
-              SourceProductionContext context
-            , DatabaseRef databaseRef
-            , ISymbol member
-            , TableRef tableRef
-        )
+        private static void ValidateHorizontalLists(SourceProductionContext context, ISymbol member)
         {
-            var horizontalListMap = databaseRef.HorizontalListMap;
             var attributes = member.GetAttributes(HORIZONTAL_LIST_ATTRIBUTE);
 
             foreach (var attrib in attributes)
@@ -227,20 +188,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     );
                     continue;
                 }
-
-                var tableType = tableRef.Type;
-
-                if (horizontalListMap.TryGetValue(targetType, out var innerMap) == false)
-                {
-                    horizontalListMap[targetType] = innerMap = new(SymbolEqualityComparer.Default);
-                }
-
-                if (innerMap.TryGetValue(tableType, out var propertNames) == false)
-                {
-                    innerMap[tableType] = propertNames = new();
-                }
-
-                propertNames.Add(propertyName);
             }
         }
     }

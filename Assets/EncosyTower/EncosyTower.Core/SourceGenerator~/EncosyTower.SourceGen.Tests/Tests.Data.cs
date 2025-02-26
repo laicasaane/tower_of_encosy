@@ -1,13 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using EncosyTower.Data;
-using EncosyTower.Databases;
-using Newtonsoft.Json;
-using UnityEngine;
+﻿namespace EncosyTower.Tests.Databases
+{
+    using EncosyTower.Databases.Authoring;
+    using EncosyTower.Naming;
+    using EncosyTower.Tests.Data.Heroes;
+    using EncosyTower.Tests.Data.Enemies;
+    using EncosyTower.Tests.DataConverters;
+    using EncosyTower.Databases;
+
+    [Database(NamingStrategy.SnakeCase, typeof(IntWrapperConverter))]
+    public partial struct SampleDatabase
+    {
+        [Table] public readonly HeroDataTableAsset Heroes => Get_Heroes();
+
+        [Table] public readonly HeroDataTableAsset HeroesX => Get_HeroesX();
+
+        [Horizontal(typeof(NewHeroData), nameof(NewHeroData.Multipliers))]
+        [Table] public readonly NewHeroDataTableAsset NewHeroes => Get_NewHeroes();
+
+        [Table] public readonly EnemyDataTableAsset Enemies => Get_Enemies();
+
+        [Table] public readonly NewEnemyDataTableAsset NewEnemies => Get_NewEnemies();
+    }
+}
+
+#if UNITY_EDITOR
+namespace EncosyTower.Tests.DatabaseAuthoring
+{
+    using EncosyTower.Databases.Authoring;
+    using EncosyTower.Tests.Databases;
+
+    [AuthorDatabase(typeof(SampleDatabase))]
+    public partial struct SampleDatabaseAuthoring
+    {
+
+    }
+}
+#endif
 
 namespace EncosyTower.Tests.Data
 {
+    using System;
+    using System.Runtime.InteropServices;
+    using EncosyTower.Data;
+    using EncosyTower.Tests.DataConverters;
+    using Newtonsoft.Json;
+    using UnityEngine;
+
     public enum EntityKind
     {
         Hero,
@@ -27,59 +65,13 @@ namespace EncosyTower.Tests.Data
         public int Id => Get_Id();
     }
 
-    public interface IConvert<in TFrom, out TTo>
-    {
-        TTo Convert(TFrom value);
-    }
-
-    [Serializable]
-    public struct IntWrapper : IConvert<int, IntWrapper>
-    {
-        public int value;
-
-        public IntWrapper(int value)
-        {
-            this.value = value;
-        }
-
-        public readonly IntWrapper Convert(int value) => new(value);
-    }
-
-    [Serializable]
-    public struct FloatWrapper : IConvert<float, FloatWrapper>
-    {
-        public float value;
-
-        public FloatWrapper(float value)
-        {
-            this.value = value;
-        }
-
-        public readonly FloatWrapper Convert(float value) => new(value);
-    }
-
-    public struct IntWrapperConverter
-    {
-        public static IntWrapper Convert(int value) => new(value);
-    }
-
-    public struct FloatWrapperConverter
-    {
-        public readonly FloatWrapper Convert(float value) => new(value);
-    }
-
-    public struct WrapperConverter<TFrom, TTo> where TTo : struct, IConvert<TFrom, TTo>
-    {
-        public readonly TTo Convert(TFrom value) => default(TTo).Convert(value);
-    }
-
     public partial class StatData : IData
     {
-        [DataProperty, DataConverter(typeof(WrapperConverter<float, FloatWrapper>))]
-        public FloatWrapper Hp => Get_Hp();
+        [DataConverter(typeof(WrapperConverter<float, FloatWrapper>))]
+        [DataProperty] public FloatWrapper Hp => Get_Hp();
 
-        [JsonProperty, DataConverter(typeof(FloatWrapperConverter))]
-        private FloatWrapper _atk;
+        [DataConverter(typeof(FloatWrapperConverter))]
+        [JsonProperty] private FloatWrapper _atk;
     }
 
     public partial class GenericData<T> : IData
@@ -98,11 +90,8 @@ namespace EncosyTower.Tests.Data
     [StructLayout(LayoutKind.Auto)]
     public partial struct StatMultiplierData : IData
     {
-        [SerializeField]
-        private IntWrapper _level;
-
-        [SerializeField]
-        private FloatWrapper _hp;
+        [SerializeField] private IntWrapper _level;
+        [SerializeField] private FloatWrapper _hp;
 
         [DataProperty]
         public readonly float Atk => Get_Atk();
@@ -117,6 +106,12 @@ namespace EncosyTower.Tests.Data
 
 namespace EncosyTower.Tests.Data.Heroes
 {
+    using System;
+    using System.Collections.Generic;
+    using EncosyTower.Data;
+    using EncosyTower.Databases;
+    using UnityEngine;
+
     [DataMutable(true)]
     public partial class MutableData : IData
     {
@@ -132,20 +127,11 @@ namespace EncosyTower.Tests.Data.Heroes
 
     public partial class HeroData : IData
     {
-        [SerializeField]
-        private IdData _id;
-
-        [SerializeField]
-        private string _name;
-
-        [SerializeField]
-        private StatData _stat;
-
-        [SerializeField]
-        private int[] _values;
-
-        [SerializeField]
-        private List<float> _floats;
+        [SerializeField] private IdData _id;
+        [SerializeField] private string _name;
+        [SerializeField] private StatData _stat;
+        [SerializeField] private int[] _values;
+        [SerializeField] private List<float> _floats;
 
         [DataProperty(typeof(Dictionary<int, string>))]
         public ReadDictionary<int, string> StringMap { get => Get_StringMap(); init => Set_StringMap(value); }
@@ -200,27 +186,20 @@ namespace EncosyTower.Tests.Data.Heroes
 
 namespace EncosyTower.Tests.Data.Enemies
 {
+    using System.Collections.Generic;
     using EncosyTower.Common;
+    using EncosyTower.Data;
+    using EncosyTower.Databases;
+    using UnityEngine;
 
     public partial class EnemyData : IData, IInitializable
     {
-        [SerializeField]
-        private IdData _id;
-
-        [SerializeField]
-        private string _name;
-
-        [SerializeField]
-        private StatData _stat;
-
-        [SerializeField]
-        private HashSet<int> _intSet;
-
-        [SerializeField]
-        private Queue<float> _floatQueue;
-
-        [SerializeField]
-        private Stack<float> _floatStack;
+        [SerializeField] private IdData _id;
+        [SerializeField] private string _name;
+        [SerializeField] private StatData _stat;
+        [SerializeField] private HashSet<int> _intSet;
+        [SerializeField] private Queue<float> _floatQueue;
+        [SerializeField] private Stack<float> _floatStack;
 
         public void Initialize()
         {
@@ -246,12 +225,65 @@ namespace EncosyTower.Tests.Data.Enemies
     public partial class GenericDataTableAsset : GenericDataTableAsset<int>, IDataTableAsset { }
 }
 
+namespace EncosyTower.Tests.DataConverters
+{
+    using System;
+
+    public interface IConvert<in TFrom, out TTo>
+    {
+        TTo Convert(TFrom value);
+    }
+
+    [Serializable]
+    public struct IntWrapper : IConvert<int, IntWrapper>
+    {
+        public int value;
+
+        public IntWrapper(int value)
+        {
+            this.value = value;
+        }
+
+        public readonly IntWrapper Convert(int value) => new(value);
+    }
+
+    [Serializable]
+    public struct FloatWrapper : IConvert<float, FloatWrapper>
+    {
+        public float value;
+
+        public FloatWrapper(float value)
+        {
+            this.value = value;
+        }
+
+        public readonly FloatWrapper Convert(float value) => new(value);
+    }
+
+    public struct IntWrapperConverter
+    {
+        public static IntWrapper Convert(int value) => new(value);
+    }
+
+    public struct FloatWrapperConverter
+    {
+        public readonly FloatWrapper Convert(float value) => new(value);
+    }
+
+    public struct WrapperConverter<TFrom, TTo> where TTo : struct, IConvert<TFrom, TTo>
+    {
+        public readonly TTo Convert(TFrom value) => default(TTo).Convert(value);
+    }
+}
+
 namespace EncosyTower.Tests.Data.ConvertibleIds
 {
+    using EncosyTower.Data;
+    using EncosyTower.Databases;
+
     public partial struct IdData : IData
     {
-        [DataProperty]
-        public readonly int Value => Get_Value();
+        [DataProperty] public readonly int Value => Get_Value();
 
         public static implicit operator int(IdData id)
             => id.Value;
@@ -259,53 +291,12 @@ namespace EncosyTower.Tests.Data.ConvertibleIds
 
     public partial struct ItemData : IData
     {
-        [DataProperty]
-        public readonly IdData Id => Get_Id();
+        [DataProperty] public readonly IdData Id => Get_Id();
 
-        [DataProperty]
-        public readonly float Amount => Get_Amount();
+        [DataProperty] public readonly float Amount => Get_Amount();
     }
 
     public sealed partial class ItemTableAsset : DataTableAsset<IdData, ItemData, int>, IDataTableAsset
     {
     }
 }
-
-#if UNITY_EDITOR
-namespace EncosyTower.Tests.Databases.Authoring
-{
-    using EncosyTower.Databases.Authoring;
-    using EncosyTower.Naming;
-    using EncosyTower.Tests.Data.Heroes;
-    using EncosyTower.Tests.Data.Enemies;
-    using EncosyTower.Tests.Data;
-
-    [Database(NamingStrategy.SnakeCase, typeof(IntWrapperConverter))]
-    public partial struct Database
-    {
-        partial class SheetContainer
-        {
-        }
-    }
-
-    partial struct Database
-    {
-        [Table] public readonly HeroDataTableAsset Heroes => Get_Heroes();
-
-        [Table] public readonly HeroDataTableAsset HeroesX => Get_HeroesX();
-    }
-
-    partial struct Database
-    {
-        [Horizontal(typeof(NewHeroData), nameof(NewHeroData.Multipliers))]
-        [Table] public readonly NewHeroDataTableAsset NewHeroes => Get_NewHeroes();
-    }
-
-    partial struct Database
-    {
-        [Table] public readonly EnemyDataTableAsset Enemies => Get_Enemies();
-
-        [Table] public readonly NewEnemyDataTableAsset NewEnemies => Get_NewEnemies();
-    }
-}
-#endif

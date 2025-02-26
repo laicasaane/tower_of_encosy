@@ -1,14 +1,20 @@
 using EncosyTower.Data;
+using EncosyTower.Databases.Authoring;
 using EncosyTower.Naming;
 using UnityEngine;
 
 namespace EncosyTower.Databases.Settings
 {
-    [HideInInspector]
     [Database(NamingStrategy.SnakeCase)]
     internal readonly partial struct FileDatabase
     {
         [Table] public readonly FileTableAsset FileList => Get_FileList();
+    }
+
+    [HideInInspector]
+    [AuthorDatabase(typeof(FileDatabase))]
+    internal readonly partial struct FileDatabaseAuthoring
+    {
     }
 
     internal sealed partial class FileTableAsset : DataTableAsset<int, FileData>, IDataTableAsset { }

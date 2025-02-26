@@ -1,4 +1,4 @@
-﻿namespace EncosyTower.SourceGen.Generators.Databases
+﻿namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
     public enum ConverterKind
     {

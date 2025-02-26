@@ -1,7 +1,7 @@
 ﻿using EncosyTower.SourceGen.Generators.Data;
 using Microsoft.CodeAnalysis;
 
-namespace EncosyTower.SourceGen.Generators.Databases
+namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
     public class CollectionTypeRef
     {

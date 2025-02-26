@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _databases:
   - name: Sample Database
-    type: EncosyTower.Samples.Data.SampleDatabase, EncosyTower.Samples.Data, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
+    authorType: EncosyTower.Samples.DatabaseAuthoring.SampleDatabaseAuthoring, EncosyTower.Samples.Data,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    databaseType: EncosyTower.Samples.Data.SampleDatabase, EncosyTower.Samples.Data,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     assetName: 
     googleSheetSettings:
       serviceAccountRelativeFilePath: GoogleServices/tower-of-encosy-service-account-google-sheets.json

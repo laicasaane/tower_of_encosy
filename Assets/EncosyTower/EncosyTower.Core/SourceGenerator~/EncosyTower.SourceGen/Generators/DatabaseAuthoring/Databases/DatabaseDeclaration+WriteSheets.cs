@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
-namespace EncosyTower.SourceGen.Generators.Databases
+namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
-    using static EncosyTower.SourceGen.Generators.Databases.Helpers;
+    using static EncosyTower.SourceGen.Generators.DatabaseAuthoring.Helpers;
 
     partial class DatabaseDeclaration
     {
@@ -37,15 +37,15 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            p.Print(DIRECTIVE).PrintEndLine();
-            p.PrintEndLine();
-
             p.PrintBeginLine()
                 .Print($"partial ").Print(databaseTypeKeyword).Print(" ").Print(databaseClassName)
                 .Print($" : {ICONTAINS}<{databaseClassName}.{sheetName}>")
                 .PrintEndLine();
             p.OpenScope();
             {
+                p.Print(DIRECTIVE).PrintEndLine();
+                p.PrintEndLine();
+
                 p.PrintLine(SERIALIZABLE);
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine()
@@ -119,10 +119,19 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     }
                 }
                 p.CloseScope();
+                p.PrintEndLine();
+
+                p.Print("#else").PrintEndLine().PrintEndLine();
+
+                p.PrintLine(SERIALIZABLE);
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintBeginLine("public abstract partial class ").Print(sheetName).PrintEndLine(" { }");
+                p.PrintEndLine();
+
+                p.Print("#endif").PrintEndLine().PrintEndLine();
             }
             p.CloseScope();
 
-            p.Print("#endif").PrintEndLine().PrintEndLine();
             p = p.DecreasedIndent();
             return p.Result;
         }

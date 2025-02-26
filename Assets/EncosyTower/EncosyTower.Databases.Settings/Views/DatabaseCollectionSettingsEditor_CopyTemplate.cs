@@ -19,8 +19,13 @@ namespace EncosyTower.Databases.Settings.Views
                 }
 
                 {
-                    var prop = context.GetTypeProperty();
-                    prop.stringValue = settings.type;
+                    var prop = context.GetAuthorTypeProperty();
+                    prop.stringValue = settings.authorType;
+                }
+
+                {
+                    var prop = context.GetDatabaseTypeProperty();
+                    prop.stringValue = settings.databaseType;
                 }
             }
 
