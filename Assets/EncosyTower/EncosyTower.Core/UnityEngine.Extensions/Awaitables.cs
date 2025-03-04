@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -38,12 +39,10 @@ namespace EncosyTower.UnityExtensions
         /// the <paramref name="condition"/> returns true.
         /// </summary>
         public static async Awaitable WaitUntil(
-              Func<bool> condition
+              [NotNull] Func<bool> condition
             , CancellationToken token = default
         )
         {
-            Checks.IsTrue(condition != null);
-
             while (condition() == false)
             {
                 token.ThrowIfCancellationRequested();
@@ -56,14 +55,45 @@ namespace EncosyTower.UnityExtensions
         /// the <paramref name="condition"/> returns true.
         /// </summary>
         public static async Awaitable WaitUntil<TState>(
-              TState state
-            , Func<TState, bool> condition
+              [NotNull] TState state
+            , [NotNull] Func<TState, bool> condition
             , CancellationToken token = default
         )
         {
-            Checks.IsTrue(condition != null);
-
             while (condition(state) == false)
+            {
+                token.ThrowIfCancellationRequested();
+                await Awaitable.NextFrameAsync();
+            }
+        }
+
+        /// <summary>
+        /// Gets an <see cref="Awaitable"/> that will complete when
+        /// the <paramref name="condition"/> returns false.
+        /// </summary>
+        public static async Awaitable WaitWhile(
+              [NotNull] Func<bool> condition
+            , CancellationToken token = default
+        )
+        {
+            while (condition())
+            {
+                token.ThrowIfCancellationRequested();
+                await Awaitable.NextFrameAsync();
+            }
+        }
+
+        /// <summary>
+        /// Gets an <see cref="Awaitable"/> that will complete when
+        /// the <paramref name="condition"/> returns false.
+        /// </summary>
+        public static async Awaitable WaitWhile<TState>(
+              [NotNull] TState state
+            , [NotNull] Func<TState, bool> condition
+            , CancellationToken token = default
+        )
+        {
+            while (condition(state))
             {
                 token.ThrowIfCancellationRequested();
                 await Awaitable.NextFrameAsync();
@@ -149,7 +179,7 @@ namespace EncosyTower.UnityExtensions
         /// <summary>
         /// Dismiss warning on fire-and-forget calls.
         /// </summary>
-        public static void Forget(this Awaitable self)
+        public static void Forget([NotNull] this Awaitable self)
         {
             var awaiter = self.GetAwaiter();
 
@@ -189,7 +219,7 @@ namespace EncosyTower.UnityExtensions
         /// <summary>
         /// Dismiss warning on fire-and-forget calls.
         /// </summary>
-        public static void Forget<TResult>(this Awaitable<TResult> self)
+        public static void Forget<TResult>([NotNull] this Awaitable<TResult> self)
         {
             var awaiter = self.GetAwaiter();
 
@@ -231,10 +261,9 @@ namespace EncosyTower.UnityExtensions
         /// On completion, rethrows any exception raised during execution.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Run(this Awaitable self)
+        public static void Run([NotNull] this Awaitable self)
         {
 #if !__ENCOSY_NO_VALIDATION__
-            Checks.IsTrue(self != null);
             Checks.IsTrue(HasContinuation(self) == false, "Awaitable already have a continuation, is it already awaited?");
 #endif
 
@@ -247,10 +276,8 @@ namespace EncosyTower.UnityExtensions
         /// On completion, rethrow any exception raised during execution.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Run(IEnumerable<Awaitable> list)
+        public static void Run([NotNull] IEnumerable<Awaitable> list)
         {
-            Checks.IsTrue(list != null);
-
             foreach (var item in list)
             {
                 Checks.IsTrue(item != null);
@@ -265,11 +292,8 @@ namespace EncosyTower.UnityExtensions
         /// then execute the continuation, once completed.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Awaitable WithContinuation(this Awaitable self, Action continuation)
+        public static Awaitable WithContinuation([NotNull] this Awaitable self, [NotNull] Action continuation)
         {
-            Checks.IsTrue(self != null);
-            Checks.IsTrue(continuation != null);
-
             if (self.IsCompleted == false)
             {
                 return AwaitAndContinue(self, continuation);
@@ -296,11 +320,8 @@ namespace EncosyTower.UnityExtensions
         /// This is an unusual method to use, be sure what you are doing.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ContinueWith(this Awaitable self, Action continuation)
+        public static void ContinueWith([NotNull] this Awaitable self, [NotNull] Action continuation)
         {
-            Checks.IsTrue(self != null);
-            Checks.IsTrue(continuation != null);
-
             if (self.IsCompleted == false)
             {
                 var awaiter = self.GetAwaiter();
@@ -316,7 +337,7 @@ namespace EncosyTower.UnityExtensions
             }
         }
 
-        public static Awaitable AsAwaitable(this Task task, bool useCurrentSynchronizationContext = true)
+        public static Awaitable AsAwaitable([NotNull] this Task task, bool useCurrentSynchronizationContext = true)
         {
             var completionSource = new AwaitableCompletionSource();
 
@@ -354,7 +375,7 @@ namespace EncosyTower.UnityExtensions
             }
         }
 
-        public static Awaitable<T> AsAwaitable<T>(this Task<T> task, bool useCurrentSynchronizationContext = true)
+        public static Awaitable<T> AsAwaitable<T>([NotNull] this Task<T> task, bool useCurrentSynchronizationContext = true)
         {
             var completionSource = new AwaitableCompletionSource<T>();
 
