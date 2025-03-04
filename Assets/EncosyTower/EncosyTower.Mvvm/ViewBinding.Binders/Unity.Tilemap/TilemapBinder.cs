@@ -1,4 +1,6 @@
-#if ENABLE_TILEMAP
+#if UNITY_TILEMAP
+
+#pragma warning disable CS0657
 
 using System;
 using EncosyTower.Annotations;

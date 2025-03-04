@@ -1,5 +1,7 @@
 #if UNITY_TEXTMESHPRO
 
+#pragma warning disable CS0657, IDE0005
+
 using System;
 using System.Collections.Generic;
 using EncosyTower.Annotations;

@@ -1,3 +1,7 @@
+#if UNITY_PHYSICS_3D
+
+#pragma warning disable CS0657
+
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.Mvvm.ViewBinding.Components;
@@ -83,3 +87,5 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 }
+
+#endif

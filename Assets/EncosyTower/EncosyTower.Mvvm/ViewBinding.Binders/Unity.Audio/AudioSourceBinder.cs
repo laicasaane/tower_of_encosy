@@ -1,9 +1,13 @@
+#if UNITY_AUDIO
+
+#pragma warning disable CS0657
+
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.Mvvm.ViewBinding.Components;
 using UnityEngine;
 
-namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
+namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Audio
 {
     [Serializable]
     [Label("Audio Source")]
@@ -65,3 +69,5 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 }
+
+#endif

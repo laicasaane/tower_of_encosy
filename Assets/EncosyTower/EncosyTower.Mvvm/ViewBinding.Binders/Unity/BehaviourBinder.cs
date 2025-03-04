@@ -1,3 +1,5 @@
+#pragma warning disable CS0657
+
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.Mvvm.ViewBinding.Components;
