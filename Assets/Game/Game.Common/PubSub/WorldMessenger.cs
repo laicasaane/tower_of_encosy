@@ -1,3 +1,5 @@
+using System.Buffers;
+using Cysharp.Threading.Tasks;
 using EncosyTower.PubSub;
 using UnityEngine;
 
@@ -9,7 +11,7 @@ namespace Module.GameCommon.PubSub
 
         public static MessageSubscriber Subscriber => Instance.Subscriber;
 
-        private static Messenger Instance => s_instance ??= new();
+        private static Messenger Instance => s_instance ??= new(ArrayPool<UniTask>.Shared);
 
         private static Messenger s_instance;
 

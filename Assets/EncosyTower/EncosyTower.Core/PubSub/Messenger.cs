@@ -1,7 +1,9 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 using System;
-using EncosyTower.Pooling;
+using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
+using Cysharp.Threading.Tasks;
 using EncosyTower.PubSub.Internals;
 using EncosyTower.Vaults;
 
@@ -11,17 +13,10 @@ namespace EncosyTower.PubSub
     {
         private readonly SingletonVault<MessageBroker> _brokers = new();
 
-#if UNITASK
-        private readonly CappedArrayPool<Cysharp.Threading.Tasks.UniTask> _taskArrayPool;
-#else
-        private readonly CappedArrayPool<UnityEngine.Awaitable> _taskArrayPool;
-#endif
-
-        public Messenger()
+        public Messenger([NotNull] ArrayPool<UniTask> taskArrayPool)
         {
-            _taskArrayPool = new(8);
-            Subscriber = new(_brokers, _taskArrayPool);
-            Publisher = new(_brokers, _taskArrayPool);
+            Subscriber = new(_brokers, taskArrayPool);
+            Publisher = new(_brokers, taskArrayPool);
         }
 
         public MessageSubscriber Subscriber { get; }

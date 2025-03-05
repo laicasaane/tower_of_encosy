@@ -1,6 +1,6 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
-using EncosyTower.Pooling;
+using System.Buffers;
 using EncosyTower.PubSub.Internals;
 using EncosyTower.Vaults;
 
@@ -14,11 +14,11 @@ namespace EncosyTower.PubSub
 
     public partial class MessagePublisher
     {
-        private readonly CappedArrayPool<UnityTask> _taskArrayPool;
+        private readonly ArrayPool<UnityTask> _taskArrayPool;
 
         internal MessagePublisher(
               SingletonVault<MessageBroker> brokers
-            , CappedArrayPool<UnityTask> taskArrayPool
+            , ArrayPool<UnityTask> taskArrayPool
         )
         {
             _brokers = brokers;

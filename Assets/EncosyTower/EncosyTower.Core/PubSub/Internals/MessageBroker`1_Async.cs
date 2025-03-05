@@ -7,11 +7,11 @@
 #endif
 
 using System;
+using System.Buffers;
 using System.Threading;
 using EncosyTower.Collections;
 using EncosyTower.Collections.Unsafe;
 using EncosyTower.Logging;
-using EncosyTower.Pooling;
 using EncosyTower.Tasks;
 
 namespace EncosyTower.PubSub.Internals
@@ -24,11 +24,11 @@ namespace EncosyTower.PubSub.Internals
 
     partial class MessageBroker<TMessage>
     {
-        private CappedArrayPool<UnityTask> _taskArrayPool;
+        private ArrayPool<UnityTask> _taskArrayPool;
 
-        public CappedArrayPool<UnityTask> TaskArrayPool
+        public ArrayPool<UnityTask> TaskArrayPool
         {
-            get => _taskArrayPool ?? CappedArrayPool<UnityTask>.Shared8Limit;
+            get => _taskArrayPool ?? ArrayPool<UnityTask>.Shared;
             set => _taskArrayPool = value ?? throw new ArgumentNullException(nameof(value));
         }
 
@@ -79,7 +79,7 @@ namespace EncosyTower.PubSub.Internals
             , TMessage message
             , PublishingContext context
             , CancellationToken token
-            , CappedArrayPool<UnityTask> taskArrayPool
+            , ArrayPool<UnityTask> taskArrayPool
             , ILogger logger
         )
         {

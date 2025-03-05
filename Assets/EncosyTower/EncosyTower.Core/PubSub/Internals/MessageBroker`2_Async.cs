@@ -1,8 +1,8 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+using System.Buffers;
 using System.Threading;
 using EncosyTower.Logging;
-using EncosyTower.Pooling;
 using EncosyTower.Tasks;
 
 namespace EncosyTower.PubSub.Internals
@@ -36,7 +36,7 @@ namespace EncosyTower.PubSub.Internals
               TScope scope
             , IHandler<TMessage> handler
             , int order
-            , CappedArrayPool<UnityTask> taskArrayPool
+            , ArrayPool<UnityTask> taskArrayPool
             , ILogger logger
         )
         {
@@ -54,7 +54,7 @@ namespace EncosyTower.PubSub.Internals
             }
         }
 
-        public MessageBroker<TMessage> Cache(TScope scope, CappedArrayPool<UnityTask> taskArrayPool)
+        public MessageBroker<TMessage> Cache(TScope scope, ArrayPool<UnityTask> taskArrayPool)
         {
             var scopedBrokers = _scopedBrokers;
 
