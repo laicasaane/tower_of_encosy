@@ -7,10 +7,17 @@ namespace EncosyTower.Databases.Settings.Views
 {
     internal static class Constants
     {
-        public const string PROJECT_SETTINGS_STYLE_SHEET = "StyleSheets/ProjectSettings/ProjectSettingsCommon.uss";
+        private const string ROOT = "Assets/EncosyTower";
 
-        private const string ROOT_PATH = "Assets/EncosyTower/EncosyTower.Databases.Settings";
-        private const string STYLE_SHEETS_PATH = $"{ROOT_PATH}/StyleSheets";
+#if UNITY_6000_0_OR_NEWER
+        public const string PROJECT_SETTINGS_STYLE_SHEET = "StyleSheets/ProjectSettings/ProjectSettingsCommon.uss";
+#else
+        private const string CORE_ROOT = $"{ROOT}/SuperGame.Core/UIElements/Resources";
+        public const string PROJECT_SETTINGS_STYLE_SHEET = $"{CORE_ROOT}/Common_2022_3.uss";
+#endif
+
+        private const string MODULE_ROOT = $"{ROOT}/EncosyTower.Databases.Settings";
+        private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
         private const string FILE_NAME = "DatabaseCollectionSettings";
 
         public const string THEME_STYLE_SHEET = $"{STYLE_SHEETS_PATH}/{FILE_NAME}.tss";
