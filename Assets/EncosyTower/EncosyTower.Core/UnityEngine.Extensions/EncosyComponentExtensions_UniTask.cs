@@ -9,24 +9,6 @@ namespace EncosyTower.UnityExtensions
     public static partial class EncosyComponentExtensions
     {
         /// <summary>
-        /// SetActive(false) => 1 frame => SetActive(true);
-        /// </summary>
-        public static UniTask ActivateAsync([NotNull] this Component self)
-        {
-            ThrowIfComponentInvalid(self);
-            return self.gameObject.ActivateAsync();
-        }
-
-        /// <summary>
-        /// SetActive(false) => N frame => SetActive(true);
-        /// </summary>
-        public static UniTask ActivateAsync([NotNull] this Component self, int delayFrames)
-        {
-            ThrowIfComponentInvalid(self);
-            return self.ActivateAsync(delayFrames);
-        }
-
-        /// <summary>
         /// .enabled = false => 1 frame => enabled = true;
         /// </summary>
         public static async UniTask EnableAsync([NotNull] this Behaviour self)
