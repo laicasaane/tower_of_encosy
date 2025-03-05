@@ -37,7 +37,12 @@ namespace EncosyTower.UIElements
             if (linkToggleToFoldout)
             {
                 var foldToggle = _foldToggle = foldout.Q<Toggle>(className: ToggleUssClassName);
+
+#if UNITY_6000_0_OR_NEWER
                 foldToggle.enabledSelf = false;
+#else
+                foldToggle.SetEnabled(false);
+#endif
             }
 
             var enableToggle = EnableToggle = new Toggle(string.Empty);
@@ -68,7 +73,11 @@ namespace EncosyTower.UIElements
 
                 if (_linkToggleToFoldout == false)
                 {
+#if UNITY_6000_0_OR_NEWER
                     _foldToggle.enabledSelf = true;
+#else
+                    _foldToggle.SetEnabled(true);
+#endif
                 }
             }
         }
@@ -88,7 +97,11 @@ namespace EncosyTower.UIElements
                     Foldout.value = false;
                 }
 
+#if UNITY_6000_0_OR_NEWER
                 _foldToggle.enabledSelf = evt.newValue;
+#else
+                _foldToggle.SetEnabled(evt.newValue);
+#endif
             }
 
             ValueChanged?.Invoke(this, evt);

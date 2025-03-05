@@ -23,7 +23,12 @@ namespace EncosyTower.UIElements
             AddToClassList(UssClassName);
 
             TextField = new(textLabel);
+
+#if UNITY_6000_0_OR_NEWER
             Button = new(iconImage, Button_OnClick);
+#else
+            Button = ButtonAPI.CreateButton(iconImage, Button_OnClick);
+#endif
 
             hierarchy.Add(TextField);
             hierarchy.Add(Button);

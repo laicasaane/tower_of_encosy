@@ -1,0 +1,84 @@
+.project-settings-title-bar {
+    margin-bottom: 8px;
+    min-height: 20px;
+    flex-direction: row;
+    padding-left: 11px;
+}
+
+.project-settings-title-bar__label {
+    margin-top: 2px;
+    font-size: var(--unity-metrics-default-font_very_big_size);
+    -unity-font-style: bold;
+    flex-grow: 1;
+}
+
+.project-settings-text-helper {
+    white-space: normal;
+    padding-top: 3px;
+}
+
+.project-settings-section {
+    padding-left: 13px;
+    padding-right: 3px;
+    padding-bottom: 12px;
+}
+
+.project-settings-section__header {
+    -unity-font-style: bold;
+    font-size: 13px;
+}
+
+.project-settings-section__subheader {
+    -unity-font-style: bold;
+}
+
+.project-settings-section__content {
+    padding-bottom: 3px;
+}
+
+.project-settings-section__content-followup {
+    margin-top: -3px;
+}
+
+.project-settings-section > * {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.project-settings-section Label {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.project-settings-section-label {
+    padding-top: 3px;
+}
+
+.project-settings__child-no-margin > * {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.project-settings-top-spacer {
+    min-height: 8px;
+}
+
+.project-settings-bottom-spacer {
+    min-height: 12px;
+}
+
+.unity-button--with-icon {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.unity-button--with-icon .unity-button__image {
+    display: flex;
+    --unity-image-size: scale-to-fit;
+    padding-right: 4px;
+}
+
+.unity-button--with-icon-only .unity-button__image {
+    padding-right: initial;
+}
