@@ -20,19 +20,13 @@ namespace EncosyTower.PubSub
         public Messenger()
         {
             _taskArrayPool = new(8);
-            MessageSubscriber = new(_brokers, _taskArrayPool);
-            MessagePublisher = new(_brokers, _taskArrayPool);
-            AnonSubscriber = new(_brokers, _taskArrayPool);
-            AnonPublisher = new(_brokers, _taskArrayPool);
+            Subscriber = new(_brokers, _taskArrayPool);
+            Publisher = new(_brokers, _taskArrayPool);
         }
 
-        public MessageSubscriber MessageSubscriber { get; }
+        public MessageSubscriber Subscriber { get; }
 
-        public MessagePublisher MessagePublisher { get; }
-
-        public AnonSubscriber AnonSubscriber { get; }
-
-        public AnonPublisher AnonPublisher { get; }
+        public MessagePublisher Publisher { get; }
 
         public void Dispose()
         {

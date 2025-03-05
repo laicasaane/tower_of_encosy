@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using EncosyTower.Buffers;
 using EncosyTower.Collections;
 using EncosyTower.Logging;
@@ -9,6 +10,14 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Components
 {
+#if UNITASK
+    using UnityTask = Cysharp.Threading.Tasks.UniTask;
+#elif UNITY_6000_0_OR_NEWER
+    using UnityTask = UnityEngine.Awaitable;
+#else
+    using UnityTask = System.Threading.Tasks.ValueTask;
+#endif
+
     /// <summary>
     /// Represents a collection of <see cref="MonoBinder"/>.
     /// </summary>
@@ -84,6 +93,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
                 return;
             }
 
+            InitializeInternal(context, alsoStartListening);
+            Initialized = true;
+        }
+
+        public async UnityTask InitializeAsync(bool alsoStartListening, CancellationToken token = default)
+        {
+            var context = await GetContextAsync(token);
             InitializeInternal(context, alsoStartListening);
             Initialized = true;
         }

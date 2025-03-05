@@ -219,7 +219,7 @@ namespace EncosyTower.UnityExtensions
         /// <summary>
         /// Dismiss warning on fire-and-forget calls.
         /// </summary>
-        public static void Forget<TResult>([NotNull] this Awaitable<TResult> self)
+        public static void Forget<T>([NotNull] this Awaitable<T> self)
         {
             var awaiter = self.GetAwaiter();
 

@@ -5,13 +5,9 @@ namespace Module.GameCommon.PubSub
 {
     public static class WorldMessenger
     {
-        public static MessagePublisher Publisher => Instance.MessagePublisher;
+        public static MessagePublisher Publisher => Instance.Publisher;
 
-        public static MessageSubscriber Subscriber => Instance.MessageSubscriber;
-
-        public static AnonPublisher AnonPublisher => Instance.AnonPublisher;
-
-        public static AnonSubscriber AnonSubscriber => Instance.AnonSubscriber;
+        public static MessageSubscriber Subscriber => Instance.Subscriber;
 
         private static Messenger Instance => s_instance ??= new();
 

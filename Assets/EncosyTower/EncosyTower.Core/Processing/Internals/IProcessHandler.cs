@@ -1,5 +1,6 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+using System.Threading;
 using EncosyTower.Types;
 
 namespace EncosyTower.Processing.Internals
@@ -18,43 +19,25 @@ namespace EncosyTower.Processing.Internals
     {
         TResult Process(TRequest request);
     }
-}
-
-#endif
-
-#if UNITASK
-
-namespace EncosyTower.Processing.Internals
-{
-    using System.Threading;
-    using Cysharp.Threading.Tasks;
 
     internal interface IAsyncProcessHandler<in TRequest> : IProcessHandler
     {
-        UniTask ProcessAsync(TRequest request, CancellationToken token);
+#if UNITASK
+        Cysharp.Threading.Tasks.UniTask
+#else
+        UnityEngine.Awaitable
+#endif
+        ProcessAsync(TRequest request, CancellationToken token);
     }
 
     internal interface IAsyncProcessHandler<in TRequest, TResult> : IProcessHandler
     {
-        UniTask<TResult> ProcessAsync(TRequest request, CancellationToken token);
-    }
-}
-
-#elif UNITY_6000_0_OR_NEWER
-
-namespace EncosyTower.Processing.Internals
-{
-    using System.Threading;
-    using UnityEngine;
-
-    internal interface IAsyncProcessHandler<TRequest> : IProcessHandler
-    {
-        Awaitable ProcessAsync(TRequest request, CancellationToken token);
-    }
-
-    internal interface IAsyncProcessHandler<TRequest, TResult> : IProcessHandler
-    {
-        Awaitable<TResult> ProcessAsync(TRequest request, CancellationToken token);
+#if UNITASK
+        Cysharp.Threading.Tasks.UniTask<TResult>
+#else
+        UnityEngine.Awaitable<TResult>
+#endif
+        ProcessAsync(TRequest request, CancellationToken token);
     }
 }
 

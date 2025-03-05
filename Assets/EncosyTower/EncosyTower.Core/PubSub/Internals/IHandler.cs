@@ -11,10 +11,11 @@ namespace EncosyTower.PubSub.Internals
         DelegateId Id { get; }
 
 #if UNITASK
-        Cysharp.Threading.Tasks.UniTask Handle(TMessage message, PublishingContext context, CancellationToken token);
+        Cysharp.Threading.Tasks.UniTask
 #else
-        UnityEngine.Awaitable Handle(TMessage message, PublishingContext context, CancellationToken token);
+        UnityEngine.Awaitable
 #endif
+        Handle(TMessage message, PublishingContext context, CancellationToken token);
     }
 }
 
