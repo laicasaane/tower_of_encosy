@@ -2,7 +2,6 @@ using EncosyTower.EnumExtensions;
 
 namespace EncosyTower.Unions
 {
-    [EnumExtensions]
     public enum UnionTypeKind : byte
     {
         Undefined = 0,
@@ -22,4 +21,7 @@ namespace EncosyTower.Unions
         Object    = 14,
         ValueType = 15,
     }
+
+    [EnumExtensionsFor(typeof(UnionTypeKind))]
+    public static partial class UnionTypeKindExtensions { }
 }
