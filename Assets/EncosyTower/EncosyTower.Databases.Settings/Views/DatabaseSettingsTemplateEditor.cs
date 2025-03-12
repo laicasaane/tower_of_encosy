@@ -12,7 +12,7 @@ namespace EncosyTower.Databases.Settings.Views
         {
             DatabaseTypeVault.Initialize();
 
-            var resources = DatabaseViewAPI.GetResources();
+            var resources = ViewAPI.GetResources();
             var target = this.target as DatabaseSettingsPreset;
             var database = target._database;
             var databaseProperty = serializedObject.FindProperty(nameof(DatabaseSettingsPreset._database));
@@ -20,7 +20,7 @@ namespace EncosyTower.Databases.Settings.Views
             context.Initialize(database, databaseProperty);
 
             var root = new VisualElement();
-            DatabaseViewAPI.ApplyStyleSheetsTo(root);
+            ViewAPI.ApplyStyleSheetsTo(root);
 
             var dbView = _dbView = new DatabaseSettingsView(true, resources) { userData = context };
             dbView.DatabaseTypeSelected += DbView_OnDatabaseTypeSelected;

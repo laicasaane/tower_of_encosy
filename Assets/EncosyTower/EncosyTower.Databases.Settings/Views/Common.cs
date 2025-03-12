@@ -18,7 +18,7 @@ namespace EncosyTower.Databases.Settings.Views
 
         private const string MODULE_ROOT = $"{ROOT}/EncosyTower.Databases.Settings";
         private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
-        private const string FILE_NAME = "DatabaseCollectionSettings";
+        private const string FILE_NAME = nameof(DatabaseCollectionSettings);
 
         public const string THEME_STYLE_SHEET = $"{STYLE_SHEETS_PATH}/{FILE_NAME}.tss";
         public const string STYLE_SHEET_DARK = $"{STYLE_SHEETS_PATH}/{FILE_NAME}_Dark.uss";

@@ -15,40 +15,21 @@ namespace EncosyTower.Databases.Settings.Views
 
     internal partial class DatabaseCollectionSettingsEditor
     {
-        public static DatabaseCollectionSettingsEditor Instance { get; private set; }
-
         private readonly ListView _dbListView;
         private readonly SerializedProperty _dbListProperty;
         private readonly DatabaseSettingsView _dbView;
 
         private bool _appliedOldIndex;
 
-        public static DatabaseCollectionSettingsEditor Create(
-              ScriptableObjectSettingsProvider provider
-            , VisualElement root
-        )
-        {
-            return Instance = new DatabaseCollectionSettingsEditor(
-                  provider.Settings
-                , provider.SerializedSettings
-                , root
-            );
-        }
-
-        public static void Dispose()
-        {
-            Instance = null;
-        }
-
-        private DatabaseCollectionSettingsEditor(
+        public DatabaseCollectionSettingsEditor(
               ScriptableObject settings
             , SerializedObject serializedSettings
             , VisualElement root
         )
         {
-            DatabaseViewAPI.ApplyStyleSheetsTo(root, Constants.PROJECT_SETTINGS_STYLE_SHEET);
+            ViewAPI.ApplyStyleSheetsTo(root, Constants.PROJECT_SETTINGS_STYLE_SHEET);
 
-            var resources = DatabaseViewAPI.GetResources();
+            var resources = ViewAPI.GetResources();
             var context = new Context(settings);
             var titleBar = new VisualElement();
             var titleLabel = new Label() {
@@ -375,7 +356,7 @@ namespace EncosyTower.Databases.Settings.Views
         }
 
         [CustomEditor(typeof(DatabaseCollectionSettings), true)]
-        private sealed class Editor : UnityEditor.Editor
+        private sealed class Inspector : UnityEditor.Editor
         {
             private DatabaseCollectionSettings _settings;
 
@@ -387,7 +368,7 @@ namespace EncosyTower.Databases.Settings.Views
             public override VisualElement CreateInspectorGUI()
             {
                 var root = new VisualElement();
-                DatabaseViewAPI.ApplyStyleSheetsTo(root, Constants.PROJECT_SETTINGS_STYLE_SHEET);
+                ViewAPI.ApplyStyleSheetsTo(root, Constants.PROJECT_SETTINGS_STYLE_SHEET);
 
                 var button = new Button(OpenSettingsWindow) {
                     text = "Open Database Collection Settings Window",

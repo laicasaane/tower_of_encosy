@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.Databases.Settings.Views
 {
-    internal static class DatabaseViewAPI
+    internal static class ViewAPI
     {
         public static void ApplyStyleSheetsTo(VisualElement root, string builtinStyleSheet = "")
         {
