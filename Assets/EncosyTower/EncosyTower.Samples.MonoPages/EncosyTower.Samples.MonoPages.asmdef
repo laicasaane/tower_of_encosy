@@ -1,0 +1,26 @@
+{
+    "name": "EncosyTower.Samples.MonoPages",
+    "rootNamespace": "EncosyTower.Samples.MonoPages",
+    "references": [
+        "EncosyTower.Core",
+        "EncosyTower.Mvvm",
+        "UniTask",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.cysharp.unitask",
+            "expression": "",
+            "define": "UNITASK"
+        }
+    ],
+    "noEngineReferences": false
+}
