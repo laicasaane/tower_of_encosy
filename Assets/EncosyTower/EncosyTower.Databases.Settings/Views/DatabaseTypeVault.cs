@@ -45,10 +45,12 @@ namespace EncosyTower.Databases.Settings.Views
                     continue;
                 }
 
+#if UNITY_6000_0_OR_NEWER
                 if (authoringType.GetNestedType("SheetContainer", BindingFlags.Public) == null)
                 {
                     continue;
                 }
+#endif
 
                 var authorAttribute = authoringType.GetCustomAttribute<AuthorDatabaseAttribute>();
 
