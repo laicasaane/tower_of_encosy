@@ -15,14 +15,14 @@ namespace EncosyTower.UnityExtensions
     public readonly struct UnityInstanceId<T> : IEquatable<UnityInstanceId<T>>
         where T : UnityEngine.Object
     {
-        private readonly int _instanceId;
+        private readonly int _value;
         private readonly ByteBool _isValid;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UnityInstanceId(UnityEngine.Object obj)
+        public UnityInstanceId(T obj)
         {
             ThrowIfInvalid(obj);
-            _instanceId = obj.GetInstanceID();
+            _value = obj.GetInstanceID();
             _isValid = ByteBool.True;
         }
 
@@ -32,49 +32,53 @@ namespace EncosyTower.UnityExtensions
             get => _isValid;
         }
 
-        public int InstanceId
+        public int Value
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _instanceId;
+            get => _value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T ToObject()
         {
             ThrowIfNotCreated(IsValid);
-            return UnityEngine.Resources.InstanceIDToObject(_instanceId) as T;
+            return UnityEngine.Resources.InstanceIDToObject(_value) as T;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(UnityInstanceId<T> other)
-            => _isValid == other._isValid && _instanceId == other._instanceId;
+            => _isValid == other._isValid && _value == other._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
-            => obj is UnityInstanceId<T> other && _isValid == other._isValid && _instanceId == other._instanceId;
+            => obj is UnityInstanceId<T> other && _isValid == other._isValid && _value == other._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashCode.Combine(_isValid, _instanceId);
+            => HashCode.Combine(_isValid, _value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
-            => _isValid ? ToObject().ToString() : _instanceId.ToString();
+            => _isValid ? ToObject().ToString() : _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator UnityInstanceId<T>([NotNull] UnityEngine.Object obj)
+        public static explicit operator int(UnityInstanceId<T> instanceId)
+            => instanceId._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator UnityInstanceId<T>([NotNull] T obj)
             => new(obj);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(UnityInstanceId<T> left, UnityInstanceId<T> right)
-            => left._isValid == right._isValid && left._instanceId == right._instanceId;
+            => left._isValid == right._isValid && left._value == right._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(UnityInstanceId<T> left, UnityInstanceId<T> right)
-            => left._isValid != right._isValid || left._instanceId != right._instanceId;
+            => left._isValid != right._isValid || left._value != right._value;
 
         [Conditional("__ENCOSY_VALIDATION__")]
-        private static void ThrowIfInvalid(UnityEngine.Object obj)
+        private static void ThrowIfInvalid(T obj)
         {
             if (obj.IsInvalid())
             {
