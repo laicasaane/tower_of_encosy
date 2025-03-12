@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Collections.Unsafe;
@@ -14,17 +13,17 @@ namespace EncosyTower.Pooling
     using Location = GameObjectPrefab.Location;
     using UnityObject = UnityEngine.Object;
 
-    public class GameObjectPool
+    public class GameObjectPool : IDisposable
     {
-        private readonly GameObjectPrefab _prefab;
         private readonly FasterList<GameObject> _unusedObjects;
         private readonly FasterList<int> _unusedInstanceIds;
         private readonly FasterList<int> _unusedTransformIds;
         private readonly List<UnityObject> _objectList;
 
-        public GameObjectPool([NotNull] GameObjectPrefab prefab)
+        private GameObjectPrefab _prefab;
+
+        public GameObjectPool()
         {
-            _prefab = prefab;
             _unusedObjects = new();
             _unusedInstanceIds = new();
             _unusedTransformIds = new();
@@ -41,53 +40,62 @@ namespace EncosyTower.Pooling
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _prefab;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => _prefab = value ?? throw new NullReferenceException(nameof(Prefab));
         }
 
         public bool TrimCloneSuffix { get; set; }
 
-        public void Prepool(int amount)
+        public bool Prepool(int amount)
         {
+            if (_prefab == null)
+            {
+                throw new NullReferenceException(nameof(Prefab));
+            }
+
             if (amount <= 0)
             {
-                return;
+                return false;
             }
 
             if (amount <= 1)
             {
-                PrepoolOne();
+                return PrepoolOne();
             }
             else
             {
-                PrepoolMany(amount);
-            }
-
-            void PrepoolOne()
-            {
-                var go = _prefab.Instantiate(Location.Parent, Location.PoolScene, Location.Scene);
-
-                if (go.IsInvalid())
-                {
-                    return;
-                }
-
-                if (TrimCloneSuffix)
-                {
-                    go.TrimCloneSuffix();
-                }
-
-                _unusedObjects.IncreaseCapacityBy(1);
-                _unusedInstanceIds.IncreaseCapacityBy(1);
-                _unusedTransformIds.IncreaseCapacityBy(1);
-
-                _unusedObjects.Add(go);
-                _unusedInstanceIds.Add(go.GetInstanceID());
-                _unusedTransformIds.Add(go.transform.GetInstanceID());
-
-                go.SetActive(false);
+                return PrepoolMany(amount);
             }
         }
 
-        private void PrepoolMany(int amount)
+        private bool PrepoolOne()
+        {
+            var go = _prefab.Instantiate(Location.Parent, Location.PoolScene, Location.Scene);
+
+            if (go.IsInvalid())
+            {
+                return false;
+            }
+
+            if (TrimCloneSuffix)
+            {
+                go.TrimCloneSuffix();
+            }
+
+            _unusedObjects.IncreaseCapacityBy(1);
+            _unusedInstanceIds.IncreaseCapacityBy(1);
+            _unusedTransformIds.IncreaseCapacityBy(1);
+
+            _unusedObjects.Add(go);
+            _unusedInstanceIds.Add(go.GetInstanceID());
+            _unusedTransformIds.Add(go.transform.GetInstanceID());
+
+            go.SetActive(false);
+            return true;
+        }
+
+        private bool PrepoolMany(int amount)
         {
             if (_prefab.Instantiate(amount
                 , Allocator.Temp
@@ -96,7 +104,7 @@ namespace EncosyTower.Pooling
                 , Location.Parent, Location.PoolScene, Location.Scene
             ) == false)
             {
-                return;
+                return false;
             }
 
             _objectList.Clear();
@@ -136,6 +144,7 @@ namespace EncosyTower.Pooling
             _objectList.Clear();
 
             GameObject.SetGameObjectsActive(instanceIds, false);
+            return true;
         }
 
         public void ReleaseInstances(int keep, Action<GameObject> onReleased = null)
@@ -426,7 +435,7 @@ namespace EncosyTower.Pooling
             GameObject.SetGameObjectsActive(postIds, false);
         }
 
-        public void ReturnInstanceIds(NativeArray<int> instanceIds)
+        public void ReturnInstanceIds(ReadOnlySpan<int> instanceIds)
         {
             var length = instanceIds.Length;
 
@@ -438,7 +447,10 @@ namespace EncosyTower.Pooling
             _objectList.Clear();
             _objectList.Capacity = Mathf.Max(_objectList.Capacity, length);
 
-            Resources.InstanceIDToObjectList(instanceIds, _objectList);
+            var instanceIdArray = NativeArray.CreateFast<int>(length, Allocator.Temp);
+            instanceIds.CopyTo(instanceIdArray);
+
+            Resources.InstanceIDToObjectList(instanceIdArray, _objectList);
 
             var unusedObjects = _unusedObjects;
             var unusedInstanceIds = _unusedInstanceIds;
@@ -474,7 +486,7 @@ namespace EncosyTower.Pooling
             GameObject.SetGameObjectsActive(postIds, false);
         }
 
-        public void ReturnTransformIds(NativeArray<int> transformIds)
+        public void ReturnTransformIds(ReadOnlySpan<int> transformIds)
         {
             var length = transformIds.Length;
 
@@ -486,7 +498,10 @@ namespace EncosyTower.Pooling
             _objectList.Clear();
             _objectList.Capacity = Mathf.Max(_objectList.Capacity, length);
 
-            Resources.InstanceIDToObjectList(transformIds, _objectList);
+            var transformIdArray = NativeArray.CreateFast<int>(length, Allocator.Temp);
+            transformIds.CopyTo(transformIdArray);
+
+            Resources.InstanceIDToObjectList(transformIdArray, _objectList);
 
             var unusedObjects = _unusedObjects;
             var unusedInstanceIds = _unusedInstanceIds;
@@ -527,6 +542,15 @@ namespace EncosyTower.Pooling
             postIds = postIds.GetSubArray(0, postIdsLength);
             Prefab.MoveToScene(postIds, true);
             GameObject.SetGameObjectsActive(postIds, false);
+        }
+
+        public void Dispose()
+        {
+            _prefab = null;
+            _unusedInstanceIds.Clear();
+            _unusedTransformIds.Clear();
+            _unusedObjects.Clear();
+            _objectList.Clear();
         }
     }
 }

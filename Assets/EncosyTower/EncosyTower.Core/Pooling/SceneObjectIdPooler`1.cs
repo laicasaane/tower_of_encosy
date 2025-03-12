@@ -55,6 +55,7 @@ namespace EncosyTower.Pooling
 
         private void OnDestroy()
         {
+            _pool?.Dispose();
             DisposeNativeCollections();
         }
 

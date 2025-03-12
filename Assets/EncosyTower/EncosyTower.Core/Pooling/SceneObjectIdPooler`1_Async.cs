@@ -28,7 +28,9 @@ namespace EncosyTower.Pooling
                 return;
             }
 
-            _pool = new(scene, prefab) {
+            _pool = new SceneObjectIdPool() {
+                Scene = scene,
+                Source = prefab,
                 TrimCloneSuffix = TrimCloneSuffix,
             };
 

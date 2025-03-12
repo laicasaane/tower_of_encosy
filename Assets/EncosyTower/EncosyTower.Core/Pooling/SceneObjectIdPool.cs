@@ -14,30 +14,17 @@ namespace EncosyTower.Pooling
 {
     using UnityObject = UnityEngine.Object;
 
-    public class SceneObjectIdPool
+    public class SceneObjectIdPool : IDisposable
     {
-        private readonly Scene _scene;
-        private readonly GameObject _source;
-
         private readonly FasterList<int> _unusedInstanceIds;
         private readonly FasterList<int> _unusedTransformIds;
         private readonly List<UnityObject> _objectList;
 
-        public SceneObjectIdPool(Scene scene, [NotNull] GameObject source)
+        private Scene _scene;
+        private GameObject _source;
+
+        public SceneObjectIdPool()
         {
-            if (scene.IsValid() == false)
-            {
-                throw new MissingReferenceException(nameof(scene));
-            }
-
-            if (source.IsInvalid())
-            {
-                throw new MissingReferenceException(nameof(source));
-            }
-
-            _source = source;
-            _scene = scene;
-
             _unusedInstanceIds = new(32);
             _unusedTransformIds = new(32);
             _objectList = new(32);
@@ -53,21 +40,53 @@ namespace EncosyTower.Pooling
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _source;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set
+            {
+                if (value.IsInvalid())
+                {
+                    throw new MissingReferenceException(nameof(Source));
+                }
+
+                _source = value;
+            }
         }
 
         public Scene Scene
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _scene;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set
+            {
+                if (value.IsValid() == false)
+                {
+                    throw new MissingReferenceException(nameof(Scene));
+                }
+
+                _scene = value;
+            }
         }
 
         public bool TrimCloneSuffix { get; set; }
 
-        public void Prepool(int amount)
+        public bool Prepool(int amount)
         {
+            if (_scene.IsValid() == false)
+            {
+                throw new MissingReferenceException(nameof(Scene));
+            }
+
+            if (_source.IsInvalid())
+            {
+                throw new MissingReferenceException(nameof(Source));
+            }
+
             if (amount <= 0)
             {
-                return;
+                return false;
             }
 
             var instanceIds = NativeArray.CreateFast<int>(amount, Allocator.Temp);
@@ -93,6 +112,7 @@ namespace EncosyTower.Pooling
             _unusedTransformIds.AddRange(transformIds.AsReadOnlySpan());
 
             GameObject.SetGameObjectsActive(instanceIds, false);
+            return true;
 
             static void TrimCloneSuffixFrom(NativeArray<int> instanceIds, List<UnityObject> objectList)
             {
@@ -428,6 +448,15 @@ namespace EncosyTower.Pooling
 
             postIds = postIds.GetSubArray(0, postIdsLength);
             GameObject.SetGameObjectsActive(postIds, false);
+        }
+
+        public void Dispose()
+        {
+            _source = null;
+            _scene = default;
+            _unusedInstanceIds.Clear();
+            _unusedTransformIds.Clear();
+            _objectList.Clear();
         }
     }
 }

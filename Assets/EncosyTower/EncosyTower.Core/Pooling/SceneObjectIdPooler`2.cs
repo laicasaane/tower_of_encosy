@@ -55,6 +55,12 @@ namespace EncosyTower.Pooling
 
         private void OnDestroy()
         {
+            foreach (var pool in _poolMap.Values)
+            {
+                pool.Dispose();
+            }
+
+            _poolMap.Clear();
             DisposeNativeCollections();
         }
 
