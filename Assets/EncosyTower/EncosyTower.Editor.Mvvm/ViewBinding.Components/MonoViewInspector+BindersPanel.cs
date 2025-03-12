@@ -44,10 +44,6 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             EditorGUILayout.EndVertical();
         }
 
-        //private void OnDropCreateBinders(Memory<UnityEngine.Object> objects)
-        //{
-        //}
-
         private void DrawBindersPanel_Toolbar()
         {
             EditorGUILayout.BeginHorizontal();
