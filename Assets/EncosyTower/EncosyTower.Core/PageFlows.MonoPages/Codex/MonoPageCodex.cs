@@ -3,6 +3,7 @@
 using System;
 using System.Buffers;
 using EncosyTower.Collections;
+using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.PubSub;
 using EncosyTower.UnityExtensions;
@@ -21,7 +22,8 @@ namespace EncosyTower.PageFlows.MonoPages
         [SerializeField] internal FlowDefinition[] _flows;
         [SerializeField] internal MonoPageFlowContext _flowContext = new();
 
-        private readonly ArrayMap<string, PageFlowScope> _scopeMap = new();
+        private readonly ArrayMap<string, FlowScopeRecord> _recordMap = new();
+        private readonly FasterList<MonoPageFlow> _monoPageFlows = new();
 
         public Func<MessagePublisher> GetPublisher { get; set; }
 
@@ -65,8 +67,11 @@ namespace EncosyTower.PageFlows.MonoPages
             }
 
             var parent = GetComponent<RectTransform>();
-            var scopeMap = _scopeMap;
-            scopeMap.EnsureCapacity(length);
+            var recordMap = _recordMap;
+            recordMap.EnsureCapacity(length);
+
+            var monoPageFlows = _monoPageFlows;
+            monoPageFlows.IncreaseCapacityTo(length);
 
             for (var i = 0; i < length; i++)
             {
@@ -82,7 +87,7 @@ namespace EncosyTower.PageFlows.MonoPages
                     continue;
                 }
 
-                if (scopeMap.ContainsKey(identifier))
+                if (recordMap.ContainsKey(identifier))
                 {
                     ErrorIfDuplicateIdentifier(i, identifier, this);
                     continue;
@@ -102,12 +107,17 @@ namespace EncosyTower.PageFlows.MonoPages
                     continue;
                 }
 
-                if (scopeMap.TryAdd(identifier, flow.Context.FlowScope) == false)
+                var scope = flow.Context.FlowScope;
+                var index = monoPageFlows.Count;
+
+                if (recordMap.TryAdd(identifier, new(scope, index)) == false)
                 {
                     ErrorIfUnexpectedErrorWhenRegister(i, identifier, this);
                     Destroy(flow.gameObject);
                     continue;
                 }
+
+                monoPageFlows.Add(flow);
 
                 if (definition.overrideSortingLayer == false)
                 {
@@ -123,8 +133,15 @@ namespace EncosyTower.PageFlows.MonoPages
             IsInitialized = true;
         }
 
-        public bool TryGetFlowScope(string identifier, out PageFlowScope result)
-            => _scopeMap.TryGetValue(identifier, out result);
+        public bool TryGetFlowScopeRecord(string identifier, out FlowScopeRecord result)
+            => _recordMap.TryGetValue(identifier, out result);
+
+        public Option<MonoPageFlow> GetFlowAt(int index)
+        {
+            return (uint)index < (uint)_monoPageFlows.Count
+                ? _monoPageFlows[index]
+                : default;
+        }
 
         private void Awake()
         {
@@ -132,6 +149,11 @@ namespace EncosyTower.PageFlows.MonoPages
             {
                 Initialize(_flowContext);
             }
+        }
+
+        private void OnDestroy()
+        {
+            _monoPageFlows.Clear();
         }
 
         [HideInCallstack]
@@ -175,6 +197,8 @@ namespace EncosyTower.PageFlows.MonoPages
             public SortingLayerId sortingLayer;
             public int sortingOrderInLayer;
         }
+
+        public readonly record struct FlowScopeRecord(PageFlowScope Scope, int Index);
     }
 }
 

@@ -9,23 +9,27 @@ namespace EncosyTower.Samples.MonoPages
     [RequireComponent(typeof(MonoPageCodex))]
     public class GamePageCodex : MonoBehaviour
     {
-        public static bool IsInitialized { get; private set; }
-
-        public static PageFlowScope ScreenScope { get; private set; }
-
-        public static PageFlowScope PopupScope { get; private set; }
-
-        public static PageFlowScope FreeTopScope { get; private set; }
+        private static MonoPageCodex.FlowScopeRecord s_screenRecord;
+        private static MonoPageCodex.FlowScopeRecord s_popupRecord;
+        private static MonoPageCodex.FlowScopeRecord s_freeTopRecord;
 
         private MonoPageCodex _codex;
+
+        public static bool IsInitialized { get; private set; }
+
+        public static PageFlowScope ScreenScope => s_screenRecord.Scope;
+
+        public static PageFlowScope PopupScope => s_popupRecord.Scope;
+
+        public static PageFlowScope FreeTopScope => s_freeTopRecord.Scope;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Init()
         {
             IsInitialized = false;
-            ScreenScope = default;
-            PopupScope = default;
-            FreeTopScope = default;
+            s_screenRecord = default;
+            s_popupRecord = default;
+            s_freeTopRecord = default;
         }
 
         private async void Awake()
@@ -34,15 +38,15 @@ namespace EncosyTower.Samples.MonoPages
 
             await UniTask.WaitUntil(this, static state => state._codex.IsInitialized);
 
-            ScreenScope = GetFlowScope("Screen");
-            PopupScope = GetFlowScope("Popup");
-            FreeTopScope = GetFlowScope("FreeTop");
+            s_screenRecord = GetFlowScopeRecord("Screen");
+            s_popupRecord = GetFlowScopeRecord("Popup");
+            s_freeTopRecord = GetFlowScopeRecord("FreeTop");
 
             IsInitialized = true;
         }
 
-        private PageFlowScope GetFlowScope(string identifier)
-            => _codex.TryGetFlowScope(identifier, out var result)
+        private MonoPageCodex.FlowScopeRecord GetFlowScopeRecord(string identifier)
+            => _codex.TryGetFlowScopeRecord(identifier, out var result)
             ? result
             : throw new InvalidOperationException($"Cannot find PageFlowScope for identifier '{identifier}'");
     }

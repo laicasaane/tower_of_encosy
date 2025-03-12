@@ -146,7 +146,7 @@ namespace EncosyTower.PageFlows.MonoPages
         public UnityTask PrepoolPageAsync(string pageAssetKey, int amount, CancellationToken token)
         {
             var pageKey = MakePageKey(pageAssetKey);
-            return PrepoolPageAsync(pageKey, amount, token);
+            return PrepoolPageAsync(pageKey, Mathf.Max(amount, 0), token);
         }
 
         /// <summary>
@@ -391,18 +391,12 @@ namespace EncosyTower.PageFlows.MonoPages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async UnityTask HandleAsync(PrepoolPageAsyncMessage msg, CancellationToken token)
-        {
-            var pageKey = MakePageKey(msg.AssetKey);
-            await PrepoolPageAsync(pageKey, Mathf.Max(msg.Amount, 0), token);
-        }
+        private UnityTask HandleAsync(PrepoolPageAsyncMessage msg, CancellationToken token)
+            => PrepoolPageAsync(msg.AssetKey, msg.Amount, token);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Handle(TrimPoolMessage msg)
-        {
-            var pageKey = MakePageKey(msg.AssetKey);
-            TrimPool(pageKey, msg.AmountToKeep);
-        }
+            => TrimPool(msg.AssetKey, msg.AmountToKeep);
 
         [HideInCallstack]
         private static void ThrowIfNotInitialized(MonoPageFlow context)

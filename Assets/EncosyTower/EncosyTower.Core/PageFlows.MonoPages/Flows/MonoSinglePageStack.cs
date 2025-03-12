@@ -1,5 +1,6 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Collections;
 using EncosyTower.PubSub;
@@ -18,6 +19,63 @@ namespace EncosyTower.PageFlows.MonoPages
     public class MonoSinglePageStack : MonoPageFlow
     {
         private SinglePageStack<IMonoPage> _flow;
+
+        public async UnityTask ShowPageAsync(string assetKey, PageContext context, CancellationToken token)
+        {
+            var pageKey = MakePageKey(assetKey);
+
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+
+            var identifierOpt = await RentPageAsync(pageKey, context, token);
+
+            if (identifierOpt.TryValue(out var identifier) == false)
+            {
+                return;
+            }
+
+            if (token.IsCancellationRequested)
+            {
+                ReturnPageToPool(identifier, context);
+                return;
+            }
+
+            identifier.GameObject.SetActive(true);
+            identifier.Transform.SetParent(RectTransform);
+
+            var oldPageOpt = _flow.CurrentPage;
+            var result = await _flow.PushAsync(identifier.Page, context, token);
+
+            if (token.IsCancellationRequested || result == false)
+            {
+                ReturnPageToPool(identifier, context);
+                return;
+            }
+
+            if (oldPageOpt.TryValue(out var oldPage))
+            {
+                ReturnPageToPool(oldPage, context);
+            }
+        }
+
+        public async UnityTask HideActivePageAsync(PageContext context, CancellationToken token)
+        {
+            var pageOpt = _flow.CurrentPage;
+
+            if (pageOpt.TryValue(out var page) == false)
+            {
+                return;
+            }
+
+            var result = await _flow.PopAsync(context, token);
+
+            if (token.IsCancellationRequested == false && result)
+            {
+                ReturnPageToPool(page, context);
+            }
+        }
 
         protected override void OnInitialize(InitializationContext context)
         {
@@ -40,62 +98,13 @@ namespace EncosyTower.PageFlows.MonoPages
             _flow?.Dispose();
         }
 
-        private async UnityTask HandleAsync(ShowPageAsyncMessage msg, CancellationToken token)
-        {
-            var pageKey = MakePageKey(msg.AssetKey);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private UnityTask HandleAsync(ShowPageAsyncMessage msg, CancellationToken token)
+            => ShowPageAsync(msg.AssetKey, msg.Context, token);
 
-            if (token.IsCancellationRequested)
-            {
-                return;
-            }
-
-            var identifierOpt = await RentPageAsync(pageKey, msg.Context, token);
-
-            if (identifierOpt.TryValue(out var identifier) == false)
-            {
-                return;
-            }
-
-            if (token.IsCancellationRequested)
-            {
-                ReturnPageToPool(identifier, msg.Context);
-                return;
-            }
-
-            identifier.GameObject.SetActive(true);
-            identifier.Transform.SetParent(RectTransform);
-
-            var oldPageOpt = _flow.CurrentPage;
-            var result = await _flow.PushAsync(identifier.Page, msg.Context, token);
-
-            if (token.IsCancellationRequested || result == false)
-            {
-                ReturnPageToPool(identifier, msg.Context);
-                return;
-            }
-
-            if (oldPageOpt.TryValue(out var oldPage))
-            {
-                ReturnPageToPool(oldPage, msg.Context);
-            }
-        }
-
-        private async UnityTask HandleAsync(HideActivePageAsyncMessage msg, CancellationToken token)
-        {
-            var pageOpt = _flow.CurrentPage;
-
-            if (pageOpt.TryValue(out var page) == false)
-            {
-                return;
-            }
-
-            var result = await _flow.PopAsync(msg.Context, token);
-
-            if (token.IsCancellationRequested == false && result)
-            {
-                ReturnPageToPool(page, msg.Context);
-            }
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private UnityTask HandleAsync(HideActivePageAsyncMessage msg, CancellationToken token)
+            => HideActivePageAsync(msg.Context, token);
     }
 }
 
