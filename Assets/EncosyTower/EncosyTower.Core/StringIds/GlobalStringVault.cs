@@ -1,7 +1,3 @@
-#if UNITY_COLLECTIONS
-#define __ENCOSY_SHARED_STRING_VAULT__
-#endif
-
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -10,12 +6,6 @@ using UnityEngine;
 
 namespace EncosyTower.StringIds
 {
-#if __ENCOSY_SHARED_STRING_VAULT__
-    using String = Unity.Collections.FixedString64Bytes;
-#else
-    using String = System.String;
-#endif
-
     internal static class GlobalStringVault
     {
         private readonly static StringVault s_vault = new(256);
@@ -40,42 +30,38 @@ namespace EncosyTower.StringIds
             get => s_vault.Count;
         }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static StringId MakeId(
-#if __ENCOSY_SHARED_STRING_VAULT__
-            in
-#else
-            [NotNull]
-#endif
-            String str
-        )
-        {
-            return new(s_vault.MakeId(str));
-        }
-
-#pragma warning restore CS0618 // Type or member is obsolete
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static String GetString(StringId key)
-        {
-            return s_vault.TryGetString(key.Id, out var str)
-                ? str
-#if __ENCOSY_SHARED_STRING_VAULT__
-                : default
-#else
-                : string.Empty
-#endif
-                ;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsDefined(StringId key)
             => s_vault.ContainsId(key.Id);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static StringId MakeId(in UnmanagedString str)
+        {
+            return new(s_vault.MakeIdFromUnmanaged(str));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static StringId MakeIdFromManaged([NotNull] string str)
+        {
+            return new(s_vault.MakeIdFromManaged(str));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UnmanagedString GetUnmanagedString(StringId key)
+        {
+            s_vault.TryGetUnmanagedString(key.Id, out var result);
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string GetManagedString(StringId key)
+        {
+            s_vault.TryGetManagedString(key.Id, out var result);
+            return result;
+        }
+
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        public static void ThrowIfNotDefined([DoesNotReturnIf(false)] bool isDefined, StringId key)
+        internal static void ThrowIfNotDefined([DoesNotReturnIf(false)] bool isDefined, StringId key)
         {
             if (isDefined == false)
             {

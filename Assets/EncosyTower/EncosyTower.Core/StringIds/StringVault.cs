@@ -1,9 +1,4 @@
-#if UNITY_COLLECTIONS
-#define __ENCOSY_SHARED_STRING_VAULT__
-#endif
-
 using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
@@ -13,37 +8,27 @@ using UnityEngine;
 
 namespace EncosyTower.StringIds
 {
-#if __ENCOSY_SHARED_STRING_VAULT__
-    using StringHashToIdMap = SharedArrayMap<StringHash, Id>;
-    using StringList = SharedList<Unity.Collections.FixedString64Bytes>;
-    using StringHashList = SharedList<Option<StringHash>>;
-    using String = Unity.Collections.FixedString64Bytes;
-#else
-    using StringHashToIdMap = ArrayMap<StringHash, Id>;
-    using StringList = FasterList<string>;
-    using StringHashList = FasterList<Option<StringHash>>;
-    using String = System.String;
-#endif
-
     public partial class StringVault
     {
-        private readonly StringHashToIdMap _map;
-        private readonly StringList _strings;
-        private readonly StringHashList _hashes;
+        private readonly SharedArrayMap<StringHash, Id> _map;
+        private readonly SharedList<UnmanagedString> _unmanagedStrings;
+        private readonly FasterList<string> _managedStrings;
+        private readonly SharedList<Option<StringHash>> _hashes;
         private int _count;
 
         public StringVault(int initialCapacity)
         {
             _map = new(initialCapacity);
-            _strings = new(initialCapacity);
+            _unmanagedStrings = new(initialCapacity);
+            _managedStrings = new(initialCapacity);
             _hashes = new(initialCapacity);
-            _count = 0;
+            Clear();
         }
 
         public int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _strings.Count;
+            get => _hashes.Count;
         }
 
         public int Count
@@ -55,31 +40,27 @@ namespace EncosyTower.StringIds
         public void Clear()
         {
             _map.Clear();
-            _strings.Clear();
+            _unmanagedStrings.Clear();
+            _managedStrings.Clear();
             _hashes.Clear();
-            _count = 0;
+
+            // The first item represent an invalid id
+            _map.Add(default, default);
+            _unmanagedStrings.Add(default);
+            _managedStrings.Add(string.Empty);
+            _hashes.Add(default);
+
+            _count = 1;
         }
 
-        public Id MakeId(
-#if __ENCOSY_SHARED_STRING_VAULT__
-            in
-#else
-            [NotNull]
-#endif
-            String str
-        )
+        public Id MakeIdFromUnmanaged(in UnmanagedString str)
         {
-#if __ENCOSY_SHARED_STRING_VAULT__
             var hash = str.GetHashCode();
-#else
-            var hash = str.GetHashCode(StringComparison.Ordinal);
-#endif
-
             var registered = _map.TryGetValue(hash, out var id);
 
             if (registered)
             {
-                TryGetString(id, out var registeredString);
+                TryGetUnmanagedString(id, out var registeredString);
 
                 if (str == registeredString)
                 {
@@ -92,7 +73,8 @@ namespace EncosyTower.StringIds
                 _count += 1;
                 EnsureCapacity();
 
-                _strings[index] = str;
+                _unmanagedStrings[index] = str;
+                _managedStrings[index] = str.ToString();
                 _hashes[index] = new Option<StringHash>(hash);
             }
             else
@@ -105,15 +87,60 @@ namespace EncosyTower.StringIds
                     _count += 1;
                     EnsureCapacity();
 
-                    _strings[index] = str;
+                    _unmanagedStrings[index] = str;
+                    _managedStrings[index] = str.ToString();
                     _hashes[index] = new Option<StringHash>(hash);
                 }
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 else
                 {
                     ThrowIfFailedRegistering(false, str, id);
                 }
-#endif
+            }
+
+            return id;
+        }
+
+        public Id MakeIdFromManaged([NotNull] string str)
+        {
+            var hash = str.GetHashCode(StringComparison.Ordinal);
+            var registered = _map.TryGetValue(hash, out var id);
+
+            if (registered)
+            {
+                TryGetManagedString(id, out var registeredString);
+
+                if (str == registeredString)
+                {
+                    return id;
+                }
+
+                var index = _count;
+                id = new Id(index);
+
+                _count += 1;
+                EnsureCapacity();
+
+                _unmanagedStrings[index] = str;
+                _managedStrings[index] = str;
+                _hashes[index] = new Option<StringHash>(hash);
+            }
+            else
+            {
+                var index = _count;
+                id = new Id(index);
+
+                if (_map.TryAdd(hash, id))
+                {
+                    _count += 1;
+                    EnsureCapacity();
+                    _unmanagedStrings[index] = str;
+                    _managedStrings[index] = str;
+                    _hashes[index] = new Option<StringHash>(hash);
+                }
+                else
+                {
+                    ThrowIfFailedRegistering(false, str, id);
+                }
             }
 
             return id;
@@ -121,29 +148,51 @@ namespace EncosyTower.StringIds
 
         private void EnsureCapacity()
         {
-            var oldCapacity = Math.Min(_hashes.Capacity, _strings.Capacity);
+            var oldCapacity = Math.Min(_hashes.Capacity, _unmanagedStrings.Capacity);
             var newCapacity = Math.Max(_map.Capacity, _count);
 
-            if (newCapacity <= oldCapacity || newCapacity < 1)
+            if (newCapacity > 0 && newCapacity > oldCapacity)
             {
-                return;
+                _hashes.IncreaseCapacityTo(newCapacity);
+                _unmanagedStrings.IncreaseCapacityTo(newCapacity);
+                _managedStrings.IncreaseCapacityTo(newCapacity);
             }
 
-            _hashes.IncreaseCapacityTo(newCapacity);
-            _hashes.AddReplicateNoInit(Math.Max(newCapacity - _hashes.Count, 0));
+            if (_hashes.Count < newCapacity)
+            {
+                _hashes.AddReplicateNoInit(Math.Max(newCapacity - _hashes.Count, 0));
+            }
 
-            _strings.IncreaseCapacityTo(newCapacity);
-            _strings.AddReplicateNoInit(Math.Max(newCapacity - _strings.Count, 0));
+            if (_unmanagedStrings.Count < newCapacity)
+            {
+                _unmanagedStrings.AddReplicateNoInit(Math.Max(newCapacity - _unmanagedStrings.Count, 0));
+            }
+
+            if (_managedStrings.Count < newCapacity)
+            {
+                _managedStrings.AddReplicateNoInit(Math.Max(newCapacity - _managedStrings.Count, 0));
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetString(Id id, out String str)
+        public bool TryGetUnmanagedString(Id id, out UnmanagedString str)
         {
             var indexUnsigned = (uint)id;
             var index = (int)indexUnsigned;
             var validIndex = indexUnsigned < (uint)_hashes.Count;
 
-            str = validIndex ? _strings[index] : default;
+            str = validIndex ? _unmanagedStrings[index] : default;
+            return validIndex ? _hashes[index].HasValue : false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryGetManagedString(Id id, out string str)
+        {
+            var indexUnsigned = (uint)id;
+            var index = (int)indexUnsigned;
+            var validIndex = indexUnsigned < (uint)_hashes.Count;
+
+            str = validIndex ? _managedStrings[index] : string.Empty;
             return validIndex ? _hashes[index].HasValue : false;
         }
 
@@ -156,8 +205,19 @@ namespace EncosyTower.StringIds
             return validIndex ? _hashes[index].HasValue : false;
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, in String str, Id id)
+        [HideInCallstack]
+        private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, in UnmanagedString str, Id id)
+        {
+            if (result == false)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot register a StringId by the same value \"{str}\" with different id \"{id}\"."
+                );
+            }
+        }
+
+        [HideInCallstack]
+        private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, string str, Id id)
         {
             if (result == false)
             {

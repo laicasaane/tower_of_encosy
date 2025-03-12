@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using EncosyTower.Ids;
 using EncosyTower.TypeWraps;
 
@@ -13,7 +14,14 @@ namespace EncosyTower.StringIds
     /// guarantee the uniqueness of a string or its (assumingly) associative ID.
     /// </remarks>
     [WrapRecord]
-    public readonly partial record struct StringId(Id Id);
+    public readonly partial record struct StringId(Id Id)
+    {
+        public bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Id > 0;
+        }
+    }
 
     /// <summary>
     /// Represents a lightweight typed handle for a string.
@@ -27,9 +35,17 @@ namespace EncosyTower.StringIds
     [WrapRecord]
     public readonly partial record struct StringId<T>(Id Id)
     {
+        public bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Id > 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator StringId<T>(StringId id)
             => new(id);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator StringId(StringId<T> id)
             => new(id);
     }
@@ -37,6 +53,18 @@ namespace EncosyTower.StringIds
     /// <summary>
     /// Represents the hash value of a string.
     /// </summary>
-    [WrapRecord]
-    internal readonly partial record struct StringHash(int Hash);
+    internal readonly partial record struct StringHash(int Value)
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode()
+            => Value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator StringHash(int value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator int(StringHash hash)
+            => hash.Value;
+    }
 }

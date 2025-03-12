@@ -15,7 +15,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool HasPlayerPref(this StringId<string> self)
         {
-            return PlayerPrefs.HasKey(self.ToStringGlobal());
+            return PlayerPrefs.HasKey(IdToString.GetManaged(self));
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool HasPlayerPref(this StringId<bool> self)
         {
-            return PlayerPrefs.HasKey(self.ToStringGlobal());
+            return PlayerPrefs.HasKey(IdToString.GetManaged(self));
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool HasPlayerPref(this StringId<int> self)
         {
-            return PlayerPrefs.HasKey(self.ToStringGlobal());
+            return PlayerPrefs.HasKey(IdToString.GetManaged(self));
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool HasPlayerPref(this StringId<float> self)
         {
-            return PlayerPrefs.HasKey(self.ToStringGlobal());
+            return PlayerPrefs.HasKey(IdToString.GetManaged(self));
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<string> GetPlayerPref(this StringId<string> self)
         {
-            var key = self.ToStringGlobal();
+            var key = IdToString.GetManaged(self);
             return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : default;
         }
 
@@ -76,7 +76,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<bool> GetPlayerPref(this StringId<bool> self)
         {
-            var key = self.ToStringGlobal();
+            var key = IdToString.GetManaged(self);
             return PlayerPrefs.HasKey(key) && PlayerPrefs.GetInt(key) != 0;
         }
 
@@ -89,7 +89,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<int> GetPlayerPref(this StringId<int> self)
         {
-            var key = self.ToStringGlobal();
+            var key = IdToString.GetManaged(self);
             return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetInt(key) : default;
         }
 
@@ -102,7 +102,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<float> GetPlayerPref(this StringId<float> self)
         {
-            var key = self.ToStringGlobal();
+            var key = IdToString.GetManaged(self);
             return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetFloat(key) : default;
         }
 
@@ -115,7 +115,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetPlayerPref(this StringId<string> self, string defaultValue)
         {
-            return PlayerPrefs.GetString(self.ToStringGlobal(), defaultValue);
+            return PlayerPrefs.GetString(IdToString.GetManaged(self), defaultValue);
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool GetPlayerPref(this StringId<bool> self, bool defaultValue)
         {
-            return PlayerPrefs.GetInt(self.ToStringGlobal(), defaultValue ? 1 : 0) != 0;
+            return PlayerPrefs.GetInt(IdToString.GetManaged(self), defaultValue ? 1 : 0) != 0;
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetPlayerPref(this StringId<int> self, int defaultValue)
         {
-            return PlayerPrefs.GetInt(self.ToStringGlobal(), defaultValue);
+            return PlayerPrefs.GetInt(IdToString.GetManaged(self), defaultValue);
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetPlayerPref(this StringId<float> self, float defaultValue)
         {
-            return PlayerPrefs.GetFloat(self.ToStringGlobal(), defaultValue);
+            return PlayerPrefs.GetFloat(IdToString.GetManaged(self), defaultValue);
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetPlayerPref(this StringId<string> self, string value)
         {
-            PlayerPrefs.SetString(self.ToStringGlobal(), value);
+            PlayerPrefs.SetString(IdToString.GetManaged(self), value);
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetPlayerPref(this StringId<bool> self, bool value)
         {
-            PlayerPrefs.SetInt(self.ToStringGlobal(), value ? 1 : 0);
+            PlayerPrefs.SetInt(IdToString.GetManaged(self), value ? 1 : 0);
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetPlayerPref(this StringId<int> self, int value)
         {
-            PlayerPrefs.SetInt(self.ToStringGlobal(), value);
+            PlayerPrefs.SetInt(IdToString.GetManaged(self), value);
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetPlayerPref(this StringId<float> self, float value)
         {
-            PlayerPrefs.SetFloat(self.ToStringGlobal(), value);
+            PlayerPrefs.SetFloat(IdToString.GetManaged(self), value);
         }
 
         /// <summary>
@@ -213,7 +213,7 @@ namespace EncosyTower.StringIds
         /// </remarks>
         public static void SetPlayerPref(this StringId<string> self, string value, bool overrideExisting)
         {
-            var key = self.ToStringGlobal();
+            var key = IdToString.GetManaged(self);
 
             if (overrideExisting || PlayerPrefs.HasKey(key) == false)
             {
@@ -232,7 +232,7 @@ namespace EncosyTower.StringIds
         /// </remarks>
         public static void SetPlayerPref(this StringId<bool> self, bool value, bool overrideExisting)
         {
-            var key = self.ToStringGlobal();
+            var key = IdToString.GetManaged(self);
 
             if (overrideExisting || PlayerPrefs.HasKey(key) == false)
             {
@@ -251,7 +251,7 @@ namespace EncosyTower.StringIds
         /// </remarks>
         public static void SetPlayerPref(this StringId<int> self, int value, bool overrideExisting)
         {
-            var key = self.ToStringGlobal();
+            var key = IdToString.GetManaged(self);
 
             if (overrideExisting || PlayerPrefs.HasKey(key) == false)
             {
@@ -270,7 +270,7 @@ namespace EncosyTower.StringIds
         /// </remarks>
         public static void SetPlayerPref(this StringId<float> self, float value, bool overrideExisting)
         {
-            var key = self.ToStringGlobal();
+            var key = IdToString.GetManaged(self);
 
             if (overrideExisting || PlayerPrefs.HasKey(key) == false)
             {
@@ -288,7 +288,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void DeletePlayerPref<T>(this StringId<T> self)
         {
-            PlayerPrefs.DeleteKey(self.ToStringGlobal());
+            PlayerPrefs.DeleteKey(IdToString.GetManaged(self));
         }
 
         /// <summary>
@@ -301,7 +301,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void DeletePlayerPref(this StringId<string> self)
         {
-            PlayerPrefs.DeleteKey(self.ToStringGlobal());
+            PlayerPrefs.DeleteKey(IdToString.GetManaged(self));
         }
 
         /// <summary>
@@ -314,7 +314,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void DeletePlayerPref(this StringId<bool> self)
         {
-            PlayerPrefs.DeleteKey(self.ToStringGlobal());
+            PlayerPrefs.DeleteKey(IdToString.GetManaged(self));
         }
 
         /// <summary>
@@ -327,7 +327,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void DeletePlayerPref(this StringId<int> self)
         {
-            PlayerPrefs.DeleteKey(self.ToStringGlobal());
+            PlayerPrefs.DeleteKey(IdToString.GetManaged(self));
         }
 
         /// <summary>
@@ -340,7 +340,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void DeletePlayerPref(this StringId<float> self)
         {
-            PlayerPrefs.DeleteKey(self.ToStringGlobal());
+            PlayerPrefs.DeleteKey(IdToString.GetManaged(self));
         }
     }
 }
