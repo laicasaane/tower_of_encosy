@@ -24,7 +24,7 @@ namespace EncosyTower.Localization
     /// </summary>
     public static partial class L10n
     {
-        public static readonly Id<Localization> PresetId = Type<Localization>.Id;
+        public static readonly Id<Localization> TypeId = Type<Localization>.Id;
 
         private static readonly Dictionary<string, Locale> s_codeToLocaleMap = new();
         private static Func<ReadOnlyMemory<L10nLanguage>> s_getLanguages;
@@ -37,7 +37,7 @@ namespace EncosyTower.Localization
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void Init()
         {
-            GlobalValueVault<bool>.TrySet(PresetId, false);
+            GlobalValueVault<bool>.TrySet(TypeId, false);
 
             s_getLanguages = null;
             s_toLanguage = null;
@@ -50,7 +50,7 @@ namespace EncosyTower.Localization
             , [NotNull] Func<SystemLanguage, L10nLanguage> toLanguage
         )
         {
-            GlobalValueVault<bool>.TrySet(PresetId, false);
+            GlobalValueVault<bool>.TrySet(TypeId, false);
 
             s_getLanguages = getLanguages;
             s_toLanguage = toLanguage;
@@ -63,12 +63,12 @@ namespace EncosyTower.Localization
                 s_codeToLocaleMap.TryAdd(locale.Identifier.Code, locale);
             }
 
-            GlobalValueVault<bool>.TrySet(PresetId, true);
+            GlobalValueVault<bool>.TrySet(TypeId, true);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsReady()
-            => GlobalValueVault<bool>.TryGet(PresetId, out var value) && value;
+            => GlobalValueVault<bool>.TryGet(TypeId, out var value) && value;
 
         public static bool TryGetDefaultLocaleCode(out string localeCode)
         {
