@@ -119,9 +119,17 @@ namespace EncosyTower.Databases.Settings.Views
             Add(infoContainer);
 
             var icon = EditorAPI.GetIcon("d_folderopened icon", "folderopened icon");
-            element.TextField.tooltip = Resources.RelativePath;
-            element.Button.iconImage = Background.FromTexture2D(icon.image as Texture2D);
+            var iconImage = Background.FromTexture2D(icon.image as Texture2D);
+
+#if UNITY_6000_0_OR_NEWER
+            element.Button.iconImage = iconImage;
             element.Button.text = "Browse";
+#else
+            element.Button.SetToImageElement(iconImage);
+            element.Button.SetToTextElement("Browse");
+#endif
+
+            element.TextField.tooltip = Resources.RelativePath;
             element.Clicked += onClicked;
 
             element.TextField.RegisterValueChangedCallback(evt => {

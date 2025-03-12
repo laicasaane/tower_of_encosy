@@ -1,3 +1,4 @@
+using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEngine.UIElements;
 
@@ -7,9 +8,11 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
     {
         public static void ApplyStyleSheetsTo(VisualElement root, string builtinStyleSheet = "")
         {
-            if (string.IsNullOrWhiteSpace(builtinStyleSheet) == false)
+            if (string.IsNullOrWhiteSpace(builtinStyleSheet) == false
+                && EditorGUIUtility.Load(builtinStyleSheet) is StyleSheet commonUss
+                && commonUss.IsValid()
+            )
             {
-                var commonUss = EditorGUIUtility.Load(builtinStyleSheet) as StyleSheet;
                 root.styleSheets.Add(commonUss);
             }
 

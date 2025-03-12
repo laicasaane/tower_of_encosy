@@ -287,8 +287,6 @@ namespace EncosyTower.Databases.Settings.Views
             var listView = new ListView {
                 bindingPath = dbListProperty.propertyPath,
                 reorderable = true,
-                allowAdd = true,
-                allowRemove = true,
                 showAddRemoveFooter = true,
                 showFoldoutHeader = false,
                 showBorder = true,
@@ -298,6 +296,10 @@ namespace EncosyTower.Databases.Settings.Views
                 selectionType = SelectionType.Single,
                 makeItem = MakeItem,
                 bindItem = (root, index) => BindItem(root, index, dbListProperty),
+#if UNITY_6000_0_OR_NEWER
+                allowAdd = true,
+                allowRemove = true,
+#endif
             };
 
             listView.AddToClassList(Constants.DATABASE_SELECTOR_LIST);

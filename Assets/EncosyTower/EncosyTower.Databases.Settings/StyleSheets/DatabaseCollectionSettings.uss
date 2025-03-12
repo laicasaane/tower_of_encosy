@@ -2,6 +2,14 @@
     min-height: 30px;
 }
 
+.project-settings-container {
+    flex-grow: 1;
+}
+
+.database-collection {
+    flex-grow: 1;
+}
+
 .unity-list-view__empty-label {
     margin-left: 3px;
     margin-right: 3px;

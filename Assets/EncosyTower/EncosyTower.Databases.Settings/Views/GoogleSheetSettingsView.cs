@@ -84,11 +84,17 @@ namespace EncosyTower.Databases.Settings.Views
             Add(new VisualSeparator());
 
             Add(_downloadButton = new(DownloadButton_OnClicked) {
+#if UNITY_6000_0_OR_NEWER
                 enabledSelf = false,
+#endif
             });
 
             _downloadButton.AddToClassList("convert-button");
             _downloadButton.AddToClassList("function-button");
+
+#if !UNITY_6000_0_OR_NEWER
+            _downloadButton.SetEnabled(false);
+#endif
 
             Add(new VisualSeparator());
 
@@ -163,8 +169,16 @@ namespace EncosyTower.Databases.Settings.Views
             Add(element.AddToAlignFieldClass());
 
             var icon = EditorAPI.GetIcon("d_buildsettings.web.small", "buildsettings.web.small");
-            element.Button.iconImage = Background.FromTexture2D(icon.image as Texture2D);
+            var iconImage = Background.FromTexture2D(icon.image as Texture2D);
+
+#if UNITY_6000_0_OR_NEWER
+            element.Button.iconImage = iconImage;
             element.Button.text = "Open";
+#else
+            element.Button.SetToImageElement(iconImage);
+            element.Button.SetToTextElement("Open");
+#endif
+
             element.Clicked += onClicked;
         }
 
@@ -265,10 +279,16 @@ namespace EncosyTower.Databases.Settings.Views
 
         private void RefreshDownloadButton()
         {
-            _downloadButton.enabledSelf = Enabled
+            var value = Enabled
                 && _serviceAccountFileValid
                 && _spreadsheetIdValid
                 && _outputFolderValid;
+
+#if UNITY_6000_0_OR_NEWER
+            _downloadButton.enabledSelf = value;
+#else
+            _downloadButton.SetEnabled(value);
+#endif
         }
 
         private void DownloadButton_OnClicked()

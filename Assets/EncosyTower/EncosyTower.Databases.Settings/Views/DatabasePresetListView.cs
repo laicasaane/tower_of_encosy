@@ -34,7 +34,9 @@ namespace EncosyTower.Databases.Settings.Views
 
             {
                 var button = _copyButton = new(CopyPreset) {
+#if UNITY_6000_0_OR_NEWER
                     enabledSelf = false,
+#endif
                     text = "Copy",
                 };
 
@@ -45,11 +47,16 @@ namespace EncosyTower.Databases.Settings.Views
                 var icon = EditorAPI.GetIcon("d_pick", "pick");
                 var iconImage = Background.FromTexture2D(icon.image as Texture2D);
 
+#if UNITY_6000_0_OR_NEWER
                 var button = _locateButton = new(iconImage, LocateSelectedPreset) {
                     enabledSelf = false,
-                    tooltip = "Locate Selected Preset",
                 };
+#else
+                var button = _locateButton = ButtonAPI.CreateButton(iconImage, LocateSelectedPreset);
+                button.AddToClassList(ButtonAPI.IconOnlyUssClassName);
+#endif
 
+                button.tooltip = "Locate Selected Preset";
                 button.AddToClassList(Constants.ICON_BUTTON);
                 hierarchy.Add(button);
             }
@@ -58,13 +65,21 @@ namespace EncosyTower.Databases.Settings.Views
                 var icon = EditorAPI.GetIcon("d_refresh", "refresh");
                 var iconImage = Background.FromTexture2D(icon.image as Texture2D);
 
-                var button = new Button(iconImage, RefreshPresets) {
-                    tooltip = "Refresh Preset List"
-                };
+#if UNITY_6000_0_OR_NEWER
+                var button = new Button(iconImage, RefreshPresets);
+#else
+                var button = ButtonAPI.CreateButton(iconImage, RefreshPresets);
+#endif
 
+                button.tooltip = "Refresh Preset List";
                 button.AddToClassList(Constants.ICON_BUTTON);
                 hierarchy.Add(button);
             }
+
+#if !UNITY_6000_0_OR_NEWER
+            _copyButton.SetEnabled(false);
+            _locateButton.SetEnabled(false);
+#endif
 
             RefreshPresets();
         }
@@ -131,21 +146,34 @@ namespace EncosyTower.Databases.Settings.Views
             if (userData is not DatabaseSettingsPreset preset || preset.IsInvalid())
             {
                 _presetDropdown.value = Constants.UNDEFINED;
-                _presetDropdown.dataSource = null;
+                _presetDropdown.userData = null;
+
+#if UNITY_6000_0_OR_NEWER
                 _copyButton.enabledSelf = false;
                 _locateButton.enabledSelf = false;
+#else
+                _copyButton.SetEnabled(false);
+                _locateButton.SetEnabled(false);
+#endif
+
                 return;
             }
 
             _presetDropdown.value = $"{preset.name} [{preset._database.name}]";
-            _presetDropdown.dataSource = preset;
+            _presetDropdown.userData = preset;
+
+#if UNITY_6000_0_OR_NEWER
             _copyButton.enabledSelf = true;
             _locateButton.enabledSelf = true;
+#else
+            _copyButton.SetEnabled(true);
+            _locateButton.SetEnabled(true);
+#endif
         }
 
         private void LocateSelectedPreset()
         {
-            if (_presetDropdown.dataSource is not DatabaseSettingsPreset preset || preset.IsInvalid())
+            if (_presetDropdown.userData is not DatabaseSettingsPreset preset || preset.IsInvalid())
             {
                 return;
             }
@@ -155,7 +183,7 @@ namespace EncosyTower.Databases.Settings.Views
 
         private void CopyPreset()
         {
-            if (_presetDropdown.dataSource is not DatabaseSettingsPreset preset
+            if (_presetDropdown.userData is not DatabaseSettingsPreset preset
                 || preset.IsInvalid()
                 || preset._database is not { } database
             )

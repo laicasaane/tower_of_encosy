@@ -19,25 +19,7 @@ namespace EncosyTower.UIElements
         public static Button CreateButton(Background iconImage, Action clickEvent = null)
         {
             var button = new Button(clickEvent);
-
-            if (iconImage.texture || iconImage.sprite)
-            {
-                var imageElement = new Image();
-                imageElement.AddToClassList(ImageUssClassName);
-
-                if (iconImage.texture)
-                {
-                    imageElement.image = iconImage.texture;
-                }
-                else
-                {
-                    imageElement.sprite = iconImage.sprite;
-                }
-
-                button.hierarchy.Add(imageElement);
-                button.AddToClassList(IconUssClassName);
-            }
-
+            button.SetToImageElement(iconImage);
             return button;
         }
 
@@ -45,25 +27,44 @@ namespace EncosyTower.UIElements
         {
             var textElement = button.Q<TextElement>(className: TextUssClassName);
 
-            if (textElement is not null)
+            if (textElement is null)
             {
-                textElement.text = text ?? string.Empty;
+                textElement = new TextElement();
+                textElement.AddToClassList(TextUssClassName);
+
+                button.hierarchy.Add(textElement);
                 button.EnableInClassList(IconOnlyUssClassName, false);
-                return;
             }
 
-            if (string.IsNullOrEmpty(text))
+            textElement.text = text ?? string.Empty;
+        }
+
+        public static void SetToImageElement([NotNull] this Button button, Background iconImage)
+        {
+            var imageElement = button.Q<Image>(className: ImageUssClassName);
+
+            if (imageElement is null)
+            {
+                imageElement = new Image();
+                imageElement.AddToClassList(ImageUssClassName);
+
+                button.hierarchy.Add(imageElement);
+                button.AddToClassList(IconUssClassName);
+            }
+
+            if (iconImage.texture.IsInvalid() && iconImage.sprite.IsInvalid())
             {
                 return;
             }
 
-            textElement = new TextElement() {
-                text = text,
-            };
-
-            textElement.AddToClassList(TextUssClassName);
-            button.hierarchy.Add(textElement);
-            button.EnableInClassList(IconOnlyUssClassName, false);
+            if (iconImage.texture)
+            {
+                imageElement.image = iconImage.texture;
+            }
+            else
+            {
+                imageElement.sprite = iconImage.sprite;
+            }
         }
     }
 }
