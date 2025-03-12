@@ -1,0 +1,3 @@
+.button-open-settings-windows {
+    min-height: 30px;
+}
