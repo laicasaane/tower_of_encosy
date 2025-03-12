@@ -1,5 +1,7 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+#pragma warning disable IDE0005
+
 namespace EncosyTower.Tasks
 {
 #if UNITASK

@@ -23,8 +23,16 @@ namespace EncosyTower.Tasks
             => Awaitable.NextFrameAsync(token);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Awaitable WaitUntil(Func<bool> predicate, CancellationToken token)
+            => Awaitables.WaitUntil(predicate, token);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Awaitable WaitUntil<T>(T state, Func<T, bool> predicate, CancellationToken token)
             => Awaitables.WaitUntil<T>(state, predicate, token);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Awaitable WaitWhile<T>(T state, Func<T, bool> predicate, CancellationToken token)
+            => Awaitables.WaitWhile<T>(state, predicate, token);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Awaitable WhenAll(Awaitable[] tasks)

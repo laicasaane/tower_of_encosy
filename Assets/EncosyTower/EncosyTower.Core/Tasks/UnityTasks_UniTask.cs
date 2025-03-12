@@ -22,8 +22,16 @@ namespace EncosyTower.Tasks
             => UniTask.NextFrame(token);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UniTask WaitUntil(Func<bool> predicate, CancellationToken token)
+            => UniTask.WaitUntil(predicate, cancellationToken: token);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UniTask WaitUntil<T>(T state, Func<T, bool> predicate, CancellationToken token)
             => UniTask.WaitUntil<T>(state, predicate, cancellationToken: token);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UniTask WaitWhile<T>(T state, Func<T, bool> predicate, CancellationToken token)
+            => UniTask.WaitWhile<T>(state, predicate, cancellationToken: token);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UniTask WhenAll(UniTask[] tasks)
