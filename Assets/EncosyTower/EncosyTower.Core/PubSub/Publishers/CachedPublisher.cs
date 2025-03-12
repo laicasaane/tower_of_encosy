@@ -38,29 +38,14 @@ namespace EncosyTower.PubSub
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void Publish(
-              CancellationToken token = default
-            , ILogger logger = null
-            , CallerInfo callerInfo = default
+              PublishingContext context = default
+            , CancellationToken token = default
         )
         {
-            Publish(new TMessage(), token, logger, callerInfo);
+            Publish(new TMessage(), context, token);
         }
 
 #if __ENCOSY_VALIDATION__
-        private readonly bool Validate(ILogger logger)
-        {
-            if (_broker != null)
-            {
-                return true;
-            }
-
-            (logger ?? DevLogger.Default).LogError(
-                $"{GetType()} must be retrieved via `{nameof(MessagePublisher)}.{nameof(MessagePublisher.Cache)}` API"
-            );
-
-            return false;
-        }
-
         private readonly bool Validate(TMessage message, ILogger logger)
         {
             if (_broker == null)

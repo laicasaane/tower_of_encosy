@@ -8,7 +8,6 @@
 
 using System.Runtime.CompilerServices;
 using System.Threading;
-using EncosyTower.Logging;
 using EncosyTower.Tasks;
 
 namespace EncosyTower.PubSub
@@ -27,9 +26,8 @@ namespace EncosyTower.PubSub
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public UnityTask PublishAsync<TMessage>(
-                  CancellationToken token = default
-                , ILogger logger = null
-                , CallerInfo callerInfo = default
+                  PublishingContext context = default
+                , CancellationToken token = default
             )
 #if ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : new()
@@ -38,13 +36,13 @@ namespace EncosyTower.PubSub
 #endif
             {
 #if __ENCOSY_VALIDATION__
-                if (Validate(logger) == false)
+                if (Validate(context.Logger) == false)
                 {
                     return UnityTasks.GetCompleted();
                 }
 #endif
 
-                return _publisher.PublishAsync<TMessage>(token, logger, callerInfo);
+                return _publisher.PublishAsync<TMessage>(context, token);
             }
 
 #if __ENCOSY_NO_VALIDATION__
@@ -52,22 +50,21 @@ namespace EncosyTower.PubSub
 #endif
             public UnityTask PublishAsync<TMessage>(
                   TMessage message
+                , PublishingContext context = default
                 , CancellationToken token = default
-                , ILogger logger = null
-                , CallerInfo callerInfo = default
             )
 #if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
 #if __ENCOSY_VALIDATION__
-                if (Validate(logger) == false)
+                if (Validate(context.Logger) == false)
                 {
                     return UnityTasks.GetCompleted();
                 }
 #endif
 
-                return _publisher.PublishAsync(message, token, logger, callerInfo);
+                return _publisher.PublishAsync(message, context, token);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

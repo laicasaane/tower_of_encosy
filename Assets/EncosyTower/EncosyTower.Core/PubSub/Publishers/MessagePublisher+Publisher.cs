@@ -113,9 +113,14 @@ namespace EncosyTower.PubSub
                 return false;
             }
 
-            private static void LogWarning<TMessage>(TScope scope, ILogger logger)
+            private static void LogWarning<TMessage>(TScope scope, PublishingContext context)
             {
-                (logger ?? DevLogger.Default).LogWarning(
+                if (context.IgnoreEmptySubscriber)
+                {
+                    return;
+                }
+
+                context.Logger.LogWarning(
                     $"Found no subscription for `{typeof(TMessage)}` in scope `{scope}`"
                 );
             }

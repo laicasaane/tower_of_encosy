@@ -8,7 +8,6 @@
 
 using System.Runtime.CompilerServices;
 using System.Threading;
-using EncosyTower.Logging;
 using EncosyTower.PubSub.Internals;
 using EncosyTower.Tasks;
 
@@ -28,9 +27,8 @@ namespace EncosyTower.PubSub
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Publish<TMessage>(
-                  CancellationToken token = default
-                , ILogger logger = null
-                , CallerInfo callerInfo = default
+                  PublishingContext context = default
+                , CancellationToken token = default
             )
 #if ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : new()
@@ -39,7 +37,7 @@ namespace EncosyTower.PubSub
 #endif
             {
 #if __ENCOSY_VALIDATION__
-                if (Validate(logger) == false)
+                if (Validate(context.Logger) == false)
                 {
                     return;
                 }
@@ -47,12 +45,12 @@ namespace EncosyTower.PubSub
 
                 if (_publisher._brokers.TryGet<MessageBroker<TScope, TMessage>>(out var broker))
                 {
-                    broker.PublishAsync(Scope, new TMessage(), new(callerInfo), token, logger ?? DevLogger.Default).Forget();
+                    broker.PublishAsync(Scope, new TMessage(), context, token).Forget();
                 }
 #if __ENCOSY_VALIDATION__
                 else
                 {
-                    LogWarning<TMessage>(Scope, logger);
+                    LogWarning<TMessage>(Scope, context);
                 }
 #endif
             }
@@ -62,16 +60,15 @@ namespace EncosyTower.PubSub
 #endif
             public void Publish<TMessage>(
                   TMessage message
+                , PublishingContext context = default
                 , CancellationToken token = default
-                , ILogger logger = null
-                , CallerInfo callerInfo = default
             )
 #if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
 #if __ENCOSY_VALIDATION__
-                if (Validate(message, logger) == false)
+                if (Validate(message, context.Logger) == false)
                 {
                     return;
                 }
@@ -79,12 +76,12 @@ namespace EncosyTower.PubSub
 
                 if (_publisher._brokers.TryGet<MessageBroker<TScope, TMessage>>(out var broker))
                 {
-                    broker.PublishAsync(Scope, message, new(callerInfo), token, logger ?? DevLogger.Default).Forget();
+                    broker.PublishAsync(Scope, message, context, token).Forget();
                 }
 #if __ENCOSY_VALIDATION__
                 else
                 {
-                    LogWarning<TMessage>(Scope, logger);
+                    LogWarning<TMessage>(Scope, context);
                 }
 #endif
             }
@@ -93,9 +90,8 @@ namespace EncosyTower.PubSub
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public UnityTask PublishAsync<TMessage>(
-                  CancellationToken token = default
-                , ILogger logger = null
-                , CallerInfo callerInfo = default
+                  PublishingContext context = default
+                , CancellationToken token = default
             )
 #if ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : new()
@@ -104,7 +100,7 @@ namespace EncosyTower.PubSub
 #endif
             {
 #if __ENCOSY_VALIDATION__
-                if (Validate(logger) == false)
+                if (Validate(context.Logger) == false)
                 {
                     return UnityTasks.GetCompleted();
                 }
@@ -112,13 +108,13 @@ namespace EncosyTower.PubSub
 
                 if (_publisher._brokers.TryGet<MessageBroker<TScope, TMessage>>(out var broker))
                 {
-                    return broker.PublishAsync(Scope, new TMessage(), new(callerInfo), token, logger ?? DevLogger.Default);
+                    return broker.PublishAsync(Scope, new TMessage(), context, token);
                 }
 
 #if __ENCOSY_VALIDATION__
                 else
                 {
-                    LogWarning<TMessage>(Scope, logger);
+                    LogWarning<TMessage>(Scope, context);
                 }
 #endif
 
@@ -130,16 +126,15 @@ namespace EncosyTower.PubSub
 #endif
             public UnityTask PublishAsync<TMessage>(
                   TMessage message
+                , PublishingContext context = default
                 , CancellationToken token = default
-                , ILogger logger = null
-                , CallerInfo callerInfo = default
             )
 #if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
 #if __ENCOSY_VALIDATION__
-                if (Validate(message, logger) == false)
+                if (Validate(message, context.Logger) == false)
                 {
                     return UnityTasks.GetCompleted();
                 }
@@ -147,13 +142,13 @@ namespace EncosyTower.PubSub
 
                 if (_publisher._brokers.TryGet<MessageBroker<TScope, TMessage>>(out var broker))
                 {
-                    return broker.PublishAsync(Scope, message, new(callerInfo), token, logger ?? DevLogger.Default);
+                    return broker.PublishAsync(Scope, message, context, token);
                 }
 
 #if __ENCOSY_VALIDATION__
                 else
                 {
-                    LogWarning<TMessage>(Scope, logger);
+                    LogWarning<TMessage>(Scope, context);
                 }
 #endif
 

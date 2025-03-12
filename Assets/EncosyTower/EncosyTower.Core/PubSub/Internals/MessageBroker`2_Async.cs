@@ -16,10 +16,10 @@ namespace EncosyTower.PubSub.Internals
     internal sealed partial class MessageBroker<TScope, TMessage>
     {
         public UnityTask PublishAsync(
-              TScope scope, TMessage message
+              TScope scope
+            , TMessage message
             , PublishingContext context
             , CancellationToken token
-            , ILogger logger
         )
         {
             var scopedBrokers = _scopedBrokers;
@@ -27,7 +27,7 @@ namespace EncosyTower.PubSub.Internals
             lock (scopedBrokers)
             {
                 return scopedBrokers.TryGetValue(scope, out var broker)
-                    ? broker.PublishAsync(message, context, token, logger)
+                    ? broker.PublishAsync(message, context, token)
                     : UnityTasks.GetCompleted();
             }
         }

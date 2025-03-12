@@ -8,7 +8,6 @@
 
 using System.Runtime.CompilerServices;
 using System.Threading;
-using EncosyTower.Logging;
 using EncosyTower.Tasks;
 
 namespace EncosyTower.PubSub
@@ -26,29 +25,27 @@ namespace EncosyTower.PubSub
 #endif
         public readonly void Publish(
               TMessage message
+            , PublishingContext context = default
             , CancellationToken token = default
-            , ILogger logger = null
-            , CallerInfo callerInfo = default
         )
         {
 #if __ENCOSY_VALIDATION__
-            if (Validate(message, logger) == false)
+            if (Validate(message, context.Logger) == false)
             {
                 return;
             }
 #endif
 
-            _broker.PublishAsync(message, new(callerInfo), token, logger ?? DevLogger.Default).Forget();
+            _broker.PublishAsync(message, context, token).Forget();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly UnityTask PublishAsync(
-              CancellationToken token = default
-            , ILogger logger = null
-            , CallerInfo callerInfo = default
+              PublishingContext context = default
+            , CancellationToken token = default
         )
         {
-            return PublishAsync(new TMessage(), token, logger, callerInfo);
+            return PublishAsync(new TMessage(), context, token);
         }
 
 #if __ENCOSY_NO_VALIDATION__
@@ -56,19 +53,18 @@ namespace EncosyTower.PubSub
 #endif
         public readonly UnityTask PublishAsync(
               TMessage message
+            , PublishingContext context = default
             , CancellationToken token = default
-            , ILogger logger = null
-            , CallerInfo callerInfo = default
         )
         {
 #if __ENCOSY_VALIDATION__
-            if (Validate(message, logger) == false)
+            if (Validate(message, context.Logger) == false)
             {
                 return UnityTasks.GetCompleted();
             }
 #endif
 
-            return _broker.PublishAsync(message, new(callerInfo), token, logger ?? DevLogger.Default);
+            return _broker.PublishAsync(message, context, token);
         }
     }
 }

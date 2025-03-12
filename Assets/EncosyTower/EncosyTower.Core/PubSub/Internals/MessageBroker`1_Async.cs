@@ -11,7 +11,6 @@ using System.Buffers;
 using System.Threading;
 using EncosyTower.Collections;
 using EncosyTower.Collections.Unsafe;
-using EncosyTower.Logging;
 using EncosyTower.Tasks;
 
 namespace EncosyTower.PubSub.Internals
@@ -36,15 +35,15 @@ namespace EncosyTower.PubSub.Internals
               TMessage message
             , PublishingContext context
             , CancellationToken token
-            , ILogger logger
         )
         {
-            var handlerListList = GetHandlerListList(logger);
+            var handlerListList = GetHandlerListList(context.Logger);
 
 #if __ENCOSY_VALIDATION__
             try
 #endif
             {
+                var taskArrayPool = TaskArrayPool;
                 handlerListList.GetBufferUnsafe(out var handlerListArray, out var length);
 
                 for (var i = 0; i < length; i++)
@@ -54,7 +53,7 @@ namespace EncosyTower.PubSub.Internals
                         break;
                     }
 
-                    await PublishAsync(handlerListArray[i], message, context, token, TaskArrayPool, logger);
+                    await PublishAsync(handlerListArray[i], message, context, token, taskArrayPool);
 
                     if (token.IsCancellationRequested)
                     {
@@ -65,7 +64,7 @@ namespace EncosyTower.PubSub.Internals
 #if __ENCOSY_VALIDATION__
             catch (Exception ex)
             {
-                logger?.LogException(ex);
+                context.Logger.LogException(ex);
             }
             finally
 #endif
@@ -80,7 +79,6 @@ namespace EncosyTower.PubSub.Internals
             , PublishingContext context
             , CancellationToken token
             , ArrayPool<UnityTask> taskArrayPool
-            , ILogger logger
         )
         {
             if (handlerList.Count < 1)
@@ -89,53 +87,53 @@ namespace EncosyTower.PubSub.Internals
             }
 
             var tasks = taskArrayPool.Rent(handlerList.Count);
-            ToTasks(handlerList, message, context, token, logger, tasks);
 
 #if __ENCOSY_VALIDATION__
             try
 #endif
             {
+                ToTasks(handlerList, message, context, token, tasks);
+
                 await UnityTasks.WhenAll(tasks);
             }
 #if __ENCOSY_VALIDATION__
             catch (Exception ex)
             {
-                logger?.LogException(ex);
+                context.Logger.LogException(ex);
             }
             finally
 #endif
             {
-                taskArrayPool.Return(tasks);
+                taskArrayPool.Return(tasks, true);
             }
+        }
 
-            static void ToTasks(
-                  FasterList<IHandler<TMessage>> handlerList
-                , TMessage message
-                , PublishingContext context
-                , CancellationToken token
-                , ILogger logger
-                , UnityTask[] result
-            )
+        private static void ToTasks(
+              FasterList<IHandler<TMessage>> handlerList
+            , TMessage message
+            , PublishingContext context
+            , CancellationToken token
+            , UnityTask[] result
+        )
+        {
+            var handlers = handlerList.AsReadOnlySpan();
+            var handlersLength = handlerList.Count;
+
+            for (var i = 0; i < handlersLength; i++)
             {
-                var handlers = handlerList.AsReadOnlySpan();
-                var handlersLength = handlerList.Count;
-
-                for (var i = 0; i < handlersLength; i++)
+#if __ENCOSY_VALIDATION__
+                try
+#endif
                 {
-#if __ENCOSY_VALIDATION__
-                    try
-#endif
-                    {
-                        result[i] = handlers[i]?.Handle(message, context, token) ?? UnityTasks.GetCompleted();
-                    }
-#if __ENCOSY_VALIDATION__
-                    catch (Exception ex)
-                    {
-                        result[i] = UnityTasks.GetCompleted();
-                        logger?.LogException(ex);
-                    }
-#endif
+                    result[i] = handlers[i]?.Handle(message, context, token) ?? UnityTasks.GetCompleted();
                 }
+#if __ENCOSY_VALIDATION__
+                catch (Exception ex)
+                {
+                    result[i] = UnityTasks.GetCompleted();
+                    context.Logger.LogException(ex);
+                }
+#endif
             }
         }
     }

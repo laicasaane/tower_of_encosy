@@ -54,9 +54,8 @@ namespace EncosyTower.PubSub
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             public void Publish<TMessage>(
-                  CancellationToken token = default
-                , ILogger logger = null
-                , CallerInfo callerInfo = default
+                  PublishingContext context = default
+                , CancellationToken token = default
             )
 #if ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : new()
@@ -65,13 +64,13 @@ namespace EncosyTower.PubSub
 #endif
             {
 #if __ENCOSY_VALIDATION__
-                if (Validate(logger) == false)
+                if (Validate(context.Logger) == false)
                 {
                     return;
                 }
 #endif
 
-                _publisher.Publish<TMessage>(token, logger, callerInfo);
+                _publisher.Publish<TMessage>(context, token);
             }
 
 #if __ENCOSY_NO_VALIDATION__
@@ -79,22 +78,21 @@ namespace EncosyTower.PubSub
 #endif
             public void Publish<TMessage>(
                   TMessage message
+                , PublishingContext context = default
                 , CancellationToken token = default
-                , ILogger logger = null
-                , CallerInfo callerInfo = default
             )
 #if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
 #if __ENCOSY_VALIDATION__
-                if (Validate(logger) == false)
+                if (Validate(context.Logger) == false)
                 {
                     return;
                 }
 #endif
 
-                _publisher.Publish(message, token, logger, callerInfo);
+                _publisher.Publish(message, context, token);
             }
 
 #if __ENCOSY_VALIDATION__
