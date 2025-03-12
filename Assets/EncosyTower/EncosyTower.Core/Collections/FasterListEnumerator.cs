@@ -48,7 +48,7 @@ namespace EncosyTower.Collections.Internals
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                Checks.IsTrue(_counter <= _size);
+                Checks.IsTrue(_counter <= _size, "_counter must be lesser than or equal to _size");
                 return _buffer[_counter - 1];
             }
         }

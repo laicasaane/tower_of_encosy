@@ -29,7 +29,7 @@ namespace EncosyTower.Collections
 
         private static void SwapIfGreater(Span<T> keys, TComparer comparer, int i, int j)
         {
-            Checks.IsTrue(i != j);
+            Checks.IsTrue(i != j, "i and j must be different");
 
             if (comparer.Compare(keys[i], keys[j]) > 0)
             {
@@ -42,7 +42,7 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Swap(Span<T> a, int i, int j)
         {
-            Checks.IsTrue(i != j);
+            Checks.IsTrue(i != j, "i and j must be different");
 
             T t = a[i];
             a[i] = a[j];
@@ -54,9 +54,10 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void IntroSort(Span<T> keys, int depthLimit, TComparer comparer)
         {
-            Checks.IsTrue(depthLimit >= 0);
+            Checks.IsTrue(depthLimit >= 0, "depthLimit must be positive");
 
             int partitionSize = keys.Length;
+
             while (partitionSize > 1)
             {
                 if (partitionSize <= INTROSORT_SIZE_THRESHOLD)
@@ -97,7 +98,10 @@ namespace EncosyTower.Collections
 
         private static int PickPivotAndPartition(Span<T> keys, TComparer comparer)
         {
-            Checks.IsTrue(keys.Length >= INTROSORT_SIZE_THRESHOLD);
+            Checks.IsTrue(
+                  keys.Length >= INTROSORT_SIZE_THRESHOLD
+                , "keys.Length must be greater than or equal to INTROSORT_SIZE_THRESHOLD"
+            );
 
             int hi = keys.Length - 1;
 

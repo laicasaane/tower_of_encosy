@@ -145,14 +145,14 @@ namespace EncosyTower.Collections
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                Checks.IsTrue((uint)index < (uint)_count.ValueRO, "index is outside the range of valid indexes for the SharedList<T>");
+                Checks.IsTrue((uint)index < (uint)_count.ValueRO, "index is outside the range of valid indices for the SharedList<T>");
                 return _buffer.AsReadOnlySpan()[index];
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
-                Checks.IsTrue((uint)index < (uint)_count.ValueRO, "index is outside the range of valid indexes for the SharedList<T>");
+                Checks.IsTrue((uint)index < (uint)_count.ValueRO, "index is outside the range of valid indices for the SharedList<T>");
                 _version.ValueRW++;
                 _buffer.AsSpan()[index] = value;
             }
@@ -198,7 +198,7 @@ namespace EncosyTower.Collections
 
             ref var count = ref _count.ValueRW;
 
-            Checks.IsTrue((uint)index < (uint)count, "index is outside the range of valid indexes for the SharedList<T>");
+            Checks.IsTrue((uint)index < (uint)count, "index is outside the range of valid indices for the SharedList<T>");
 
             if (count == _buffer.Length)
                 AllocateMore();
@@ -217,7 +217,7 @@ namespace EncosyTower.Collections
 
             ref var count = ref _count.ValueRW;
 
-            Checks.IsTrue((uint)index < (uint)count, "index is outside the range of valid indexes for the SharedList<T>");
+            Checks.IsTrue((uint)index < (uint)count, "index is outside the range of valid indices for the SharedList<T>");
 
             if (count == _buffer.Length)
                 AllocateMore();
@@ -232,7 +232,7 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T ElementAt(int index)
         {
-            Checks.IsTrue((uint)index < (uint)_count.ValueRO, "index is outside the range of valid indexes for the SharedList<T>");
+            Checks.IsTrue((uint)index < (uint)_count.ValueRO, "index is outside the range of valid indices for the SharedList<T>");
             return ref _buffer.AsSpan()[index];
         }
 
@@ -401,7 +401,7 @@ namespace EncosyTower.Collections
 
             _count.ValueRW -= length;
 
-            if (end == _count.ValueRO)
+            if (end >= _count.ValueRO)
             {
                 return;
             }

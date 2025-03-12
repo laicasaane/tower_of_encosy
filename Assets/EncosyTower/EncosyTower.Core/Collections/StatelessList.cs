@@ -765,7 +765,7 @@ namespace EncosyTower.Collections
 
             _count -= length;
 
-            if (end == count)
+            if (end >= count)
             {
                 if (s_shouldPerformMemClear)
                 {

@@ -276,7 +276,7 @@ namespace EncosyTower.Collections
 
             CountRW -= length;
 
-            if (end == Count)
+            if (end >= Count)
             {
                 return;
             }
