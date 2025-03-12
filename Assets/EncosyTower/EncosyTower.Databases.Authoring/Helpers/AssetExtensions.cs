@@ -1,54 +1,32 @@
-using System;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace EncosyTower.Databases.Authoring
 {
-    using LazyTableLoadReference = LazyLoadReference<DataTableAssetBase>;
-
     public static class AssetExtensions
     {
         public static void AddRange<TDatabaseAsset>(
               this TDatabaseAsset target
-            , DataTableAssetBase[] assets
+            , DataTableAssetBase[] tables
         )
             where TDatabaseAsset : DatabaseAsset
         {
-            target._assetRefs = assets.ToRefArray();
+            target._tables = tables;
         }
 
         public static void AddRange<TDatabaseAsset>(
               this TDatabaseAsset target
-            , DataTableAssetBase[] assets
-            , DataTableAssetBase[] redundantAssets
+            , DataTableAssetBase[] tables
+            , DataTableAssetBase[] redundantTables
         )
             where TDatabaseAsset : DatabaseAsset
         {
-            target._assetRefs = assets.ToRefArray();
-            target._redundantAssetRefs = redundantAssets.ToRefArray();
+            target._tables = tables;
+            target._redundantTabless = redundantTables;
         }
 
         public static void Clear<TDatabaseAsset>(this TDatabaseAsset target)
             where TDatabaseAsset : DatabaseAsset
         {
-            target._assetRefs = new LazyTableLoadReference[0];
-            target._redundantAssetRefs = new LazyTableLoadReference[0];
-        }
-
-        public static LazyTableLoadReference[] ToRefArray(this DataTableAssetBase[] assets)
-        {
-            var span = assets.AsSpan();
-            var list = new List<LazyTableLoadReference>(span.Length);
-
-            foreach (var asset in span)
-            {
-                if (asset)
-                {
-                    list.Add(asset);
-                }
-            }
-
-            return list.ToArray();
+            target._tables = new DataTableAssetBase[0];
+            target._redundantTabless = new DataTableAssetBase[0];
         }
     }
 }

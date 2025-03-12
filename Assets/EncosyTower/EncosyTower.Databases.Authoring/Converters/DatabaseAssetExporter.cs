@@ -92,14 +92,14 @@ namespace EncosyTower.Databases.Authoring
 
             var redundantAssets = new HashSet<DataTableAssetBase>();
 
-            foreach (var assetRef in databaseAsset._assetRefs)
+            foreach (var table in databaseAsset._tables)
             {
-                redundantAssets.Add(assetRef.asset);
+                redundantAssets.Add(table);
             }
 
-            foreach (var assetRef in databaseAsset._redundantAssetRefs)
+            foreach (var table in databaseAsset._redundantTabless)
             {
-                redundantAssets.Add(assetRef.asset);
+                redundantAssets.Add(table);
             }
 
             databaseAsset.Clear();

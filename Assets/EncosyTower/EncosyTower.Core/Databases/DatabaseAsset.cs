@@ -5,19 +5,18 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.Logging;
+using EncosyTower.UnityExtensions;
 using UnityEngine;
 
 namespace EncosyTower.Databases
 {
-    using LazyTableLoadReference = LazyLoadReference<DataTableAssetBase>;
-
     public class DatabaseAsset : ScriptableObject, IInitializable, IDeinitializable
     {
         [SerializeField]
-        internal LazyTableLoadReference[] _assetRefs = new LazyTableLoadReference[0];
+        internal DataTableAssetBase[] _tables = new DataTableAssetBase[0];
 
         [SerializeField]
-        internal LazyTableLoadReference[] _redundantAssetRefs = new LazyTableLoadReference[0];
+        internal DataTableAssetBase[] _redundantTabless = new DataTableAssetBase[0];
 
         private readonly Dictionary<string, DataTableAssetBase> _nameToAsset = new();
         private readonly Dictionary<Type, DataTableAssetBase> _typeToAsset = new();
@@ -27,9 +26,9 @@ namespace EncosyTower.Databases
 
         protected IReadOnlyDictionary<Type, DataTableAssetBase> TypeToAsset => _typeToAsset;
 
-        protected ReadOnlyMemory<LazyTableLoadReference> AssetRefs => _assetRefs;
+        protected ReadOnlyMemory<DataTableAssetBase> Tables => _tables;
 
-        protected ReadOnlyMemory<LazyTableLoadReference> RedundantAssetRefs => _redundantAssetRefs;
+        protected ReadOnlyMemory<DataTableAssetBase> RedundantTables => _redundantTabless;
 
         public bool Initialized { get; protected set; }
 
@@ -40,8 +39,8 @@ namespace EncosyTower.Databases
                 return;
             }
 
-            var assetRefs = AssetRefs.Span;
-            var assetsLength = assetRefs.Length;
+            var tables = Tables.Span;
+            var assetsLength = tables.Length;
             var nameToAsset = _nameToAsset;
             var typeToAsset = _typeToAsset;
             var typeToNames = _typeToNames;
@@ -57,26 +56,18 @@ namespace EncosyTower.Databases
 
             for (var i = 0; i < assetsLength; i++)
             {
-                var assetRef = assetRefs[i];
+                var table = tables[i];
 
-                if (assetRef.isSet == false || assetRef.isBroken)
-                {
-                    LogErrorReferenceIsInvalid(i, this);
-                    continue;
-                }
-
-                var asset = assetRef.asset;
-
-                if (asset == false)
+                if (table.IsInvalid())
                 {
                     LogErrorAssetIsInvalid(i, this);
                     continue;
                 }
 
-                var type = asset.GetType();
-                var name = asset.name;
+                var type = table.GetType();
+                var name = table.name;
 
-                nameToAsset[name] = asset;
+                nameToAsset[name] = table;
 
                 if (typeToAsset.TryGetValue(type, out var otherAsset))
                 {
@@ -84,7 +75,7 @@ namespace EncosyTower.Databases
                 }
                 else
                 {
-                    typeToAsset[type] = asset;
+                    typeToAsset[type] = table;
                 }
 
                 if (typeToNames.TryGetValue(type, out var names) == false)
@@ -93,7 +84,7 @@ namespace EncosyTower.Databases
                 }
 
                 names.Add(name);
-                asset.Initialize();
+                table.Initialize();
             }
 
             Initialized = true;
@@ -226,12 +217,6 @@ namespace EncosyTower.Databases
 
             tableAsset = null;
             return false;
-        }
-
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void LogErrorReferenceIsInvalid(int index, DatabaseAsset context)
-        {
-            DevLoggerAPI.LogError(context, $"Table asset reference at index {index} is invalid.");
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
