@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 14929049574427138}
   - component: {fileID: 8842541239446812189}
+  - component: {fileID: 5285129224731750026}
   - component: {fileID: 5202721680907774872}
   - component: {fileID: 9194338025798553488}
   m_Layer: 5
@@ -55,20 +56,47 @@ MonoBehaviour:
   _pageOptions:
     showOptions:
       showThisPage:
-        forceUse: 0
+        forceUse: 1
         transitionOptions: 4
       hideOtherPage:
-        forceUse: 0
+        forceUse: 1
         transitionOptions: 3
     hideOptions:
       hideThisPage:
-        forceUse: 0
+        forceUse: 1
         transitionOptions: 4
       showOtherPage:
-        forceUse: 0
+        forceUse: 1
         transitionOptions: 3
   _buttonOpen: {fileID: 7574448413672172340}
   _buttonClose: {fileID: 1654245927115043203}
+--- !u!114 &5285129224731750026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1106112510372778219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e82b3fb7efc683e4f8625f4ba7e7773c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _pageOptions:
+    showOptions:
+      showThisPage:
+        forceUse: 1
+        transitionOptions: 4
+      hideOtherPage:
+        forceUse: 1
+        transitionOptions: 3
+    hideOptions:
+      hideThisPage:
+        forceUse: 1
+        transitionOptions: 4
+      showOtherPage:
+        forceUse: 1
+        transitionOptions: 3
 --- !u!114 &5202721680907774872
 MonoBehaviour:
   m_ObjectHideFlags: 0
