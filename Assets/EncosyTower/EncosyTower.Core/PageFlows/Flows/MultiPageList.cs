@@ -142,7 +142,7 @@ namespace EncosyTower.PageFlows
             IsInTransition = true;
 
             var pageToHide = pages[index];
-            var result = await _flow.TransitionAsync(pageToHide, default, context, token);
+            var result = await _flow.TransitionAsync(PageTransition.Hide, pageToHide, default, context, token);
 
             IsInTransition = false;
             return result;
@@ -322,7 +322,7 @@ namespace EncosyTower.PageFlows
             IsInTransition = true;
 
             var pageToShow = pages[index];
-            var result = await _flow.TransitionAsync(default, pageToShow, context, token);
+            var result = await _flow.TransitionAsync(PageTransition.Show, default, pageToShow, context, token);
 
             IsInTransition = false;
             return result;

@@ -17,14 +17,14 @@ namespace EncosyTower.PageFlows
         bool ForceRunShow { get; }
 
         UnityTask OnBeforeTransitionAsync(
-              PageTransitionOperation operation
+              PageTransition transition
             , PageTransitionOptions showOptions
             , PageTransitionOptions hideOptions
             , CancellationToken token
         );
 
         void OnAfterTransition(
-              PageTransitionOperation operation
+              PageTransition transition
             , PageTransitionOptions showOptions
             , PageTransitionOptions hideOptions
         );
@@ -37,7 +37,7 @@ namespace EncosyTower.PageFlows
     public interface IPageBeforeTransitionAsync : IPage
     {
         UnityTask OnBeforeTransitionAsync(
-              PageTransitionOperation operation
+              PageTransition transition
             , PageContext context
             , CancellationToken token
         );
@@ -45,7 +45,7 @@ namespace EncosyTower.PageFlows
 
     public interface IPageAfterTransition : IPage
     {
-        void OnAfterTransition(PageTransitionOperation operation, PageContext context);
+        void OnAfterTransition(PageTransition transition, PageContext context);
     }
 
     public interface IPageShowAsync : IPage

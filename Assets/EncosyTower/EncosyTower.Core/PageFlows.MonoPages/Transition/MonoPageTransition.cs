@@ -20,14 +20,14 @@ namespace EncosyTower.PageFlows.MonoPages
         public abstract bool ForceRunShow { get; }
 
         public abstract UnityTask OnBeforeTransitionAsync(
-              PageTransitionOperation operation
+              PageTransition transition
             , PageTransitionOptions showOptions
             , PageTransitionOptions hideOptions
             , CancellationToken token
         );
 
         public abstract void OnAfterTransition(
-              PageTransitionOperation operation
+              PageTransition transition
             , PageTransitionOptions showOptions
             , PageTransitionOptions hideOptions
         );

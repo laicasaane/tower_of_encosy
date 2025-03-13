@@ -33,7 +33,7 @@ namespace EncosyTower.PageFlows.MonoPages
         }
 
         public UnityTask OnBeforeTransitionAsync(
-              PageTransitionOperation operation
+              PageTransition transition
             , PageTransitionOptions showOptions
             , PageTransitionOptions hideOptions
             , CancellationToken token
@@ -45,14 +45,14 @@ namespace EncosyTower.PageFlows.MonoPages
 
             for (var i = 0; i < length; i++)
             {
-                tasks[i] = transitions[i].OnBeforeTransitionAsync(operation, showOptions, hideOptions, token);
+                tasks[i] = transitions[i].OnBeforeTransitionAsync(transition, showOptions, hideOptions, token);
             }
 
             return UnityTasks.WhenAll(_tasks);
         }
 
         public void OnAfterTransition(
-              PageTransitionOperation operation
+              PageTransition transition
             , PageTransitionOptions showOptions
             , PageTransitionOptions hideOptions
         )
@@ -62,7 +62,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
             for (var i = 0; i < length; i++)
             {
-                transitions[i].OnAfterTransition(operation, showOptions, hideOptions);
+                transitions[i].OnAfterTransition(transition, showOptions, hideOptions);
             }
         }
 

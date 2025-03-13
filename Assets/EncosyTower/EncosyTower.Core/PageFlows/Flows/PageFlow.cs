@@ -3,8 +3,8 @@
 using System;
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading;
-using EncosyTower.Collections;
 using EncosyTower.Debugging;
 using EncosyTower.Logging;
 using EncosyTower.PubSub;
@@ -166,7 +166,8 @@ namespace EncosyTower.PageFlows
         }
 
         public async UnityTaskBool TransitionAsync(
-              IPage pageToHide
+              PageTransition transition
+            , IPage pageToHide
             , IPage pageToShow
             , PageContext context
             , CancellationToken token
@@ -177,38 +178,6 @@ namespace EncosyTower.PageFlows
             var sequentialTasks = taskArrayPool.Rent(2);
             var defaultPage = DefaultPage;
             var result = true;
-
-            context = context with {
-                ShowOptions = TrySetZeroDuration(
-                      context.ShowOptions
-                    , PageTransitionOptions.OnlyFirstPageHasDuration
-                    , (pageToHide is null && pageToShow is not null) == false
-                )
-            };
-
-            context = context with {
-                ShowOptions = TrySetZeroDuration(
-                      context.ShowOptions
-                    , PageTransitionOptions.OnlyLastPageHasDuration
-                    , (pageToHide is not null && pageToShow is not null) == false
-                )
-            };
-
-            context = context with {
-                HideOptions = TrySetZeroDuration(
-                      context.HideOptions
-                    , PageTransitionOptions.OnlyFirstPageHasDuration
-                    , (pageToShow is null && pageToHide is not null) == false
-                )
-            };
-
-            context = context with {
-                HideOptions = TrySetZeroDuration(
-                      context.HideOptions
-                    , PageTransitionOptions.OnlyLastPageHasDuration
-                    , (pageToShow is not null && pageToHide is not null) == false
-                )
-            };
 
             try
             {
@@ -225,19 +194,24 @@ namespace EncosyTower.PageFlows
                     result = false;
                 }
 
+                context = ApplyPageOptionsToContext(transition, pageToHide, pageToShow, context);
+                context = ProcessContext(pageToHide, pageToShow, context);
+
                 IPageTransition pageToHideTransition = null;
                 IPageTransition pageToShowTransition = null;
 
-                if (pageToHide is ITryGet<IPageTransition> hideTransitionGetter)
+                if (pageToHide is IPageHasTransition hasHideTransition
+                    && hasHideTransition.PageTransition is { } hideTransition
+                )
                 {
-                    hideTransitionGetter.TryGet(out var transition);
-                    pageToHideTransition = transition;
+                    pageToHideTransition = hideTransition;
                 }
 
-                if (pageToShow is ITryGet<IPageTransition> showTransitionGetter)
+                if (pageToShow is IPageHasTransition hasShowTransition
+                    && hasShowTransition.PageTransition is { } showTransition
+                )
                 {
-                    showTransitionGetter.TryGet(out var transition);
-                    pageToShowTransition = transition;
+                    pageToShowTransition = showTransition;
                 }
 
                 if (token.IsCancellationRequested == false)
@@ -292,7 +266,7 @@ namespace EncosyTower.PageFlows
                 if (token.IsCancellationRequested == false)
                 {
                     {
-                        var operation = PageTransitionOperation.Show;
+                        var operation = PageTransition.Show;
 
                         (pageToShow as IPageAfterTransition)?.OnAfterTransition(operation, context);
 
@@ -304,7 +278,7 @@ namespace EncosyTower.PageFlows
                     }
 
                     {
-                        var operation = PageTransitionOperation.Hide;
+                        var operation = PageTransition.Hide;
 
                         (pageToHide as IPageAfterTransition)?.OnAfterTransition(operation, context);
 
@@ -339,19 +313,85 @@ namespace EncosyTower.PageFlows
             return result;
         }
 
-        private static PageTransitionOptions TrySetZeroDuration(
-              PageTransitionOptions options
-            , PageTransitionOptions checkValue
-            , bool checkCondition
+        private static PageContext ProcessContext(
+              IPage pageToHide
+            , IPage pageToShow
+            , PageContext context
         )
         {
-            if (options.Contains(checkValue) && checkCondition)
-            {
-                options = options.Unset(checkValue);
-                options |= PageTransitionOptions.ZeroDuration;
-            }
+            context = context with {
+                ShowOptions = TrySetZeroDuration(
+                      context.ShowOptions
+                    , PageTransitionOptions.OnlyFirstPageHasDuration
+                    , (pageToHide is null && pageToShow is not null) == false
+                )
+            };
 
-            return options;
+            context = context with {
+                ShowOptions = TrySetZeroDuration(
+                      context.ShowOptions
+                    , PageTransitionOptions.OnlyLastPageHasDuration
+                    , (pageToHide is not null && pageToShow is not null) == false
+                )
+            };
+
+            context = context with {
+                HideOptions = TrySetZeroDuration(
+                      context.HideOptions
+                    , PageTransitionOptions.OnlyFirstPageHasDuration
+                    , (pageToShow is null && pageToHide is not null) == false
+                )
+            };
+
+            context = context with {
+                HideOptions = TrySetZeroDuration(
+                      context.HideOptions
+                    , PageTransitionOptions.OnlyLastPageHasDuration
+                    , (pageToShow is not null && pageToHide is not null) == false
+                )
+            };
+
+            return context;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static PageTransitionOptions TrySetZeroDuration(
+                  PageTransitionOptions options
+                , PageTransitionOptions checkValue
+                , bool checkCondition
+            )
+            {
+                if (options.Contains(checkValue) && checkCondition)
+                {
+                    options = options.Unset(checkValue);
+                    options |= PageTransitionOptions.ZeroDuration;
+                }
+
+                return options;
+            }
+        }
+
+        private static PageContext ApplyPageOptionsToContext(
+              PageTransition transition
+            , IPage pageToHide
+            , IPage pageToShow
+            , PageContext context
+        )
+        {
+            PageOptions pageToHideOptions = (pageToHide as IPageHasOptions)?.PageOptions ?? default;
+            PageOptions pageToShowOptions = (pageToShow as IPageHasOptions)?.PageOptions ?? default;
+
+            var hideOptions = PageOptions.SelectHideOptions(transition, pageToHideOptions, pageToShowOptions)
+                .GetTransitionOptions()
+                .ValueOrDefault(context.HideOptions);
+
+            var showOptions = PageOptions.SelectShowOptions(transition, pageToHideOptions, pageToShowOptions)
+                .GetTransitionOptions()
+                .ValueOrDefault(context.ShowOptions);
+
+            return context with {
+                ShowOptions = showOptions,
+                HideOptions = hideOptions,
+            };
         }
 
         private static async UnityTask BeginTransitionAsync(
@@ -364,11 +404,11 @@ namespace EncosyTower.PageFlows
             , CancellationToken token
         )
         {
-            var showOptions = context.ShowOptions;
-            var hideOptions = context.HideOptions;
+            PageTransitionOptions showOptions = context.ShowOptions;
+            PageTransitionOptions hideOptions = context.HideOptions;
 
             {
-                var direction = PageTransitionOperation.Show;
+                var direction = PageTransition.Show;
 
                 tasks[0] = (pageToShow as IPageBeforeTransitionAsync)
                     ?.OnBeforeTransitionAsync(direction, context, token)
@@ -380,7 +420,7 @@ namespace EncosyTower.PageFlows
             }
 
             {
-                var direction = PageTransitionOperation.Hide;
+                var direction = PageTransition.Hide;
 
                 tasks[2] = (pageToHide as IPageBeforeTransitionAsync)
                     ?.OnBeforeTransitionAsync(direction, context, token)
@@ -404,8 +444,8 @@ namespace EncosyTower.PageFlows
             , CancellationToken token
         )
         {
-            var showOptions = context.ShowOptions;
-            var hideOptions = context.HideOptions;
+            PageTransitionOptions showOptions = context.ShowOptions;
+            PageTransitionOptions hideOptions = context.HideOptions;
             var withShow = showOptions.Contains(PageTransitionOptions.NoTransition) == false;
             var withHide = hideOptions.Contains(PageTransitionOptions.NoTransition) == false;
 
@@ -463,8 +503,8 @@ namespace EncosyTower.PageFlows
             , CancellationToken token
         )
         {
-            var showOptions = context.ShowOptions;
-            var hideOptions = context.HideOptions;
+            PageTransitionOptions showOptions = context.ShowOptions;
+            PageTransitionOptions hideOptions = context.HideOptions;
             var withShow = showOptions.Contains(PageTransitionOptions.NoTransition) == false;
             var withHide = hideOptions.Contains(PageTransitionOptions.NoTransition) == false;
 

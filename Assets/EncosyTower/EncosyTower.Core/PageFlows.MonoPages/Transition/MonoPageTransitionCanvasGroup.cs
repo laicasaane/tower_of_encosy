@@ -5,6 +5,7 @@ using System.Threading;
 using EncosyTower.Tasks;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace EncosyTower.PageFlows.MonoPages
 {
@@ -18,8 +19,12 @@ namespace EncosyTower.PageFlows.MonoPages
     {
         public CanvasGroup canvasGroup;
         public bool disableTweening;
-        public Options onShowOptions = Options.DefaultShow;
-        public Options onHideOptions = Options.DefaultHide;
+
+        [FormerlySerializedAs("onShowOptions")]
+        public Options showOperationOptions = Options.DefaultShow;
+
+        [FormerlySerializedAs("onHideOptions")]
+        public Options hideOperationOptions = Options.DefaultHide;
 
         private bool _isTransitioning;
         private bool _zeroShowDuration;
@@ -41,12 +46,12 @@ namespace EncosyTower.PageFlows.MonoPages
             }
         }
 
-        public override bool ForceRunHide => onHideOptions.forceRun;
+        public override bool ForceRunHide => hideOperationOptions.forceRun;
 
-        public override bool ForceRunShow => onShowOptions.forceRun;
+        public override bool ForceRunShow => showOperationOptions.forceRun;
 
         public override UnityTask OnBeforeTransitionAsync(
-              PageTransitionOperation operation
+              PageTransition transition
             , PageTransitionOptions showOptions
             , PageTransitionOptions hideOptions
             , CancellationToken token
@@ -56,40 +61,40 @@ namespace EncosyTower.PageFlows.MonoPages
             _elapsedTime = 0f;
 
             _zeroShowDuration = showOptions.Contains(PageTransitionOptions.ZeroDuration)
-                && onShowOptions.disableZeroDuration == false;
+                && showOperationOptions.disableZeroDuration == false;
 
             _zeroHideDuration = hideOptions.Contains(PageTransitionOptions.ZeroDuration)
-                && onHideOptions.disableZeroDuration == false;
+                && hideOperationOptions.disableZeroDuration == false;
 
             return UnityTasks.GetCompleted();
         }
 
         public override void OnAfterTransition(
-              PageTransitionOperation operation
+              PageTransition transition
             , PageTransitionOptions showOptions
             , PageTransitionOptions hideOptions
         )
         {
             var cg = CanvasGroup;
-            cg.blocksRaycasts = onHideOptions.blockRaycast == BlockRaycastStrategy.Always
-                || operation == PageTransitionOperation.Show;
+            cg.blocksRaycasts = hideOperationOptions.blockRaycast == BlockRaycastStrategy.Always
+                || transition == PageTransition.Show;
         }
 
         public override UnityTask OnShowAsync(PageTransitionOptions _, CancellationToken token)
         {
             var cg = CanvasGroup;
-            cg.blocksRaycasts = onShowOptions.blockRaycast == BlockRaycastStrategy.Always;
+            cg.blocksRaycasts = showOperationOptions.blockRaycast == BlockRaycastStrategy.Always;
 
             return disableTweening
                 ? UnityTasks.GetCompleted()
-                : Transition(onShowOptions, _zeroShowDuration, token);
+                : Transition(showOperationOptions, _zeroShowDuration, token);
         }
 
         public override UnityTask OnHideAsync(PageTransitionOptions _, CancellationToken token)
         {
             return disableTweening
                 ? UnityTasks.GetCompleted()
-                : Transition(onHideOptions, _zeroHideDuration, token);
+                : Transition(hideOperationOptions, _zeroHideDuration, token);
         }
 
         private async UnityTask Transition(Options options, bool zeroDuration, CancellationToken token)

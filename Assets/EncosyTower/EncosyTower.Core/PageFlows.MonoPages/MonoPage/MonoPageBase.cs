@@ -1,28 +1,45 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
-using EncosyTower.Collections;
+using EncosyTower.UnityExtensions;
 using UnityEngine;
 
 namespace EncosyTower.PageFlows.MonoPages
 {
-    public abstract class MonoPageBase : MonoBehaviour, IMonoPage, ITryGet<IPageTransition>
+    public abstract class MonoPageBase : MonoBehaviour
+        , IMonoPage
+        , IPageHasOptions
+        , IPageHasTransition
     {
-        public bool TryGet(out IPageTransition result)
+        [SerializeField] private PageOptions _pageOptions;
+
+        private IPageTransition _transition;
+
+        public PageOptions PageOptions
         {
-            if (TryGetComponent<MonoPageTransitionCollection>(out var collection))
-            {
-                result = collection;
-                return true;
-            }
+            get => _pageOptions;
+            set => _pageOptions = value;
+        }
 
-            if (TryGetComponent<MonoPageTransition>(out var transition))
+        public IPageTransition PageTransition
+        {
+            get
             {
-                result = transition;
-                return true;
-            }
+                if (_transition is null)
+                {
+                    var transitions = GetComponents<MonoPageTransition>();
 
-            result = default;
-            return false;
+                    if (transitions.Length > 1)
+                    {
+                        _transition = this.GetOrAddComponent<MonoPageTransitionCollection>();
+                    }
+                    else if (transitions.Length == 1)
+                    {
+                        _transition = transitions[0];
+                    }
+                }
+
+                return _transition;
+            }
         }
     }
 }

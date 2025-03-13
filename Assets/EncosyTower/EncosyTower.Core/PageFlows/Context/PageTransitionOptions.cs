@@ -5,7 +5,7 @@ using EncosyTower.EnumExtensions;
 
 namespace EncosyTower.PageFlows
 {
-    public enum PageTransitionOperation
+    public enum PageTransition
     {
         Show,
         Hide,

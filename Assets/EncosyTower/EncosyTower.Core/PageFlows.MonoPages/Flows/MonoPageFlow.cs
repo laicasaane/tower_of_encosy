@@ -289,8 +289,8 @@ namespace EncosyTower.PageFlows.MonoPages
         protected Option<MonoPageIdentifier> GetPageIdentifierAt(int index)
         {
             return (uint)index < (uint)_pageIds.Count
-                ? new(_pageIds[index])
-                : default;
+                ? _pageIds[index]
+                : default(Option<MonoPageIdentifier>);
         }
 
         protected bool ReturnPageToPool(IMonoPage page, PageContext context)

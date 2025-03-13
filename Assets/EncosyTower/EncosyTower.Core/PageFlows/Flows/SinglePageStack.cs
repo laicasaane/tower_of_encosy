@@ -33,7 +33,7 @@ namespace EncosyTower.PageFlows
             _flow = new(context.TaskArrayPool, publisher, _logger);
         }
 
-        public Option<TPage> CurrentPage => _pages.TryPeek(out var page) ? page : default;
+        public Option<TPage> CurrentPage => _pages.TryPeek(out var page) ? page : default(Option<TPage>);
 
         public bool IsInTransition { get; private set; }
 
@@ -67,7 +67,7 @@ namespace EncosyTower.PageFlows
             _pages.TryPop(out var pageToHide);
             _pages.TryPeek(out var pageToShow);
 
-            var result = await _flow.TransitionAsync(pageToHide, pageToShow, context, token);
+            var result = await _flow.TransitionAsync(PageTransition.Hide, pageToHide, pageToShow, context, token);
 
             if (result)
             {
@@ -106,7 +106,7 @@ namespace EncosyTower.PageFlows
 
             if (result)
             {
-                result = await _flow.TransitionAsync(pageToHide, page, context, token);
+                result = await _flow.TransitionAsync(PageTransition.Show, pageToHide, page, context, token);
             }
 
             if (result && pageToHide is not null)
