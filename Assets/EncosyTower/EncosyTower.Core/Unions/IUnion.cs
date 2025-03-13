@@ -1,4 +1,4 @@
-﻿namespace EncosyTower.Unions
+namespace EncosyTower.Unions
 {
     /// <summary>
     /// Any struct implements this interface is eligible
