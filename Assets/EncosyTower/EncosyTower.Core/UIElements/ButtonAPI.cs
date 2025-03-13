@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using EncosyTower.UnityExtensions;
 using UnityEngine.UIElements;
 
 namespace EncosyTower.UIElements
