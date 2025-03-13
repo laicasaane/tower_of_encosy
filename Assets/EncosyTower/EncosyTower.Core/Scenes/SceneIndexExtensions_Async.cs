@@ -71,7 +71,7 @@ namespace EncosyTower.Scenes
             }
 
             return token.IsCancellationRequested
-                ? default
+                ? default(Option<Scene>)
                 : SceneManager.GetSceneByBuildIndex(index.Index);
         }
 

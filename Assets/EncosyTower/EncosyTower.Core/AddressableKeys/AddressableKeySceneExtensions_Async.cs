@@ -84,7 +84,9 @@ namespace EncosyTower.AddressableKeys
                 return default;
             }
 
-            return handle.Status != AsyncOperationStatus.Succeeded ? default : handle.Result;
+            return handle.Status != AsyncOperationStatus.Succeeded
+                ? default(Option<SceneInstance>)
+                : handle.Result;
         }
     }
 }

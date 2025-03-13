@@ -35,28 +35,28 @@ namespace EncosyTower.Editor.ConfigKeys
         public static Option<string> GetEditorPref(this ConfigKey<string> self)
         {
             string key = self.Value;
-            return EditorPrefs.HasKey(key) ? EditorPrefs.GetString(key) : default;
+            return EditorPrefs.HasKey(key) ? EditorPrefs.GetString(key) : default(Option<string>);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<bool> GetEditorPref(this ConfigKey<bool> self)
         {
             string key = self.Value;
-            return EditorPrefs.HasKey(key) && EditorPrefs.GetInt(key) != 0;
+            return EditorPrefs.HasKey(key) ? new Option<bool>(EditorPrefs.GetInt(key) != 0) : default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<int> GetEditorPref(this ConfigKey<int> self)
         {
             string key = self.Value;
-            return EditorPrefs.HasKey(key) ? EditorPrefs.GetInt(key) : default;
+            return EditorPrefs.HasKey(key) ? EditorPrefs.GetInt(key) : default(Option<int>);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<float> GetEditorPref(this ConfigKey<float> self)
         {
             string key = self.Value;
-            return EditorPrefs.HasKey(key) ? EditorPrefs.GetFloat(key) : default;
+            return EditorPrefs.HasKey(key) ? EditorPrefs.GetFloat(key) : default(Option<float>);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

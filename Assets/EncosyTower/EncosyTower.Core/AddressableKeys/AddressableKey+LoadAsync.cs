@@ -71,7 +71,7 @@ namespace EncosyTower.AddressableKeys
             var asset = handle.Result;
 
             return (asset is UnityEngine.Object obj && obj) || asset != null
-                ? asset : default;
+                ? asset : default(Option<T>);
         }
     }
 }

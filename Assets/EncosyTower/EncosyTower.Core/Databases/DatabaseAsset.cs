@@ -111,7 +111,7 @@ namespace EncosyTower.Databases
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<DataTableAssetBase> GetDataTableAsset([NotNull] string name)
-            => TryGetDataTableAsset(name, out var asset) ? asset : default;
+            => TryGetDataTableAsset(name, out var asset) ? asset : default(Option<DataTableAssetBase>);
 
         public bool TryGetDataTableAsset([NotNull] string name, out DataTableAssetBase tableAsset)
         {
@@ -133,7 +133,7 @@ namespace EncosyTower.Databases
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<DataTableAssetBase> GetDataTableAsset([NotNull] Type type)
-            => TryGetDataTableAsset(type, out var asset) ? asset : default;
+            => TryGetDataTableAsset(type, out var asset) ? asset : default(Option<DataTableAssetBase>);
 
         public bool TryGetDataTableAsset([NotNull] Type type, out DataTableAssetBase tableAsset)
         {
@@ -156,7 +156,7 @@ namespace EncosyTower.Databases
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<T> GetDataTableAsset<T>() where T : DataTableAssetBase
-            => TryGetDataTableAsset<T>(out var asset) ? asset : default;
+            => TryGetDataTableAsset<T>(out var asset) ? asset : default(Option<T>);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetDataTableAsset<T>(out T tableAsset)
@@ -191,7 +191,7 @@ namespace EncosyTower.Databases
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<T> GetDataTableAsset<T>([NotNull] string name) where T : DataTableAssetBase
-            => TryGetDataTableAsset<T>(name, out var asset) ? asset : default;
+            => TryGetDataTableAsset<T>(name, out var asset) ? asset : default(Option<T>);
 
         public bool TryGetDataTableAsset<T>([NotNull] string name, out T tableAsset)
             where T : DataTableAssetBase

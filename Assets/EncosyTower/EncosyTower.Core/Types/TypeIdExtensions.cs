@@ -28,7 +28,7 @@ namespace EncosyTower.Types
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<TypeId<T>> AsTyped<T>(this TypeId self)
-            => self.IsType<T>() ? Type<T>.Id : default;
+            => self.IsType<T>() ? Type<T>.Id : default(Option<TypeId<T>>);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Id2 ToId2(this TypeId self)

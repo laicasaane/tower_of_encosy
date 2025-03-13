@@ -70,7 +70,9 @@ namespace EncosyTower.AddressableKeys
                 return default;
             }
 
-            return result.Value().TryGetComponent<TComponent>(out var comp) ? comp : default;
+            return result.Value().TryGetComponent<TComponent>(out var comp)
+                ? comp
+                : default(Option<TComponent>);
         }
 
         private static Option<GameObject> InstantiateInternal(
