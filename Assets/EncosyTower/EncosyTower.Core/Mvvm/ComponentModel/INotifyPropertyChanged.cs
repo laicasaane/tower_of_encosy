@@ -1,4 +1,4 @@
-﻿namespace EncosyTower.Mvvm.ComponentModel
+namespace EncosyTower.Mvvm.ComponentModel
 {
     /// <summary>
     /// Notifies clients that a property value has changed.
@@ -13,8 +13,11 @@
         /// <param name="propertyName">The observable property whose notifications will be listened to.</param>
         /// <param name="listener">The event listener to receive the notifications.</param>
         /// <see langword="true"/> if the specified property exists; otherwise <see langword="false"/>.
-        bool AttachPropertyChangedListener<TInstance>(string propertyName, PropertyChangeEventListener<TInstance> listener)
-            where TInstance : class;
+        public bool AttachPropertyChangedListener<TInstance>(string propertyName, PropertyChangeEventListener<TInstance> listener)
+            where TInstance : class
+        {
+            return false;
+        }
 
         /// <summary>
         /// Force an observable property to send its current value to <paramref name="listener"/>.
@@ -25,8 +28,11 @@
         /// <returns>
         /// <see langword="true"/> if the specified property exists; otherwise <see langword="false"/>.
         /// </returns>
-        bool NotifyPropertyChanged<TInstance>(string propertyName, PropertyChangeEventListener<TInstance> listener)
-            where TInstance : class;
+        public bool NotifyPropertyChanged<TInstance>(string propertyName, PropertyChangeEventListener<TInstance> listener)
+            where TInstance : class
+        {
+            return false;
+        }
 
         /// <summary>
         /// Force an observable property to send its current value to the attached listeners.
@@ -35,11 +41,16 @@
         /// <returns>
         /// <see langword="true"/> if the specified property exists; otherwise <see langword="false"/>.
         /// </returns>
-        bool NotifyPropertyChanged(string propertyName);
+        public bool NotifyPropertyChanged(string propertyName)
+        {
+            return false;
+        }
 
         /// <summary>
         /// Force all observable properties to send their current value to the attached listeners.
         /// </summary>
-        void NotifyPropertyChanged();
+        public void NotifyPropertyChanged()
+        {
+        }
     }
 }

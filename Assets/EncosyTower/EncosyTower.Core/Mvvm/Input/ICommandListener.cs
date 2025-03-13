@@ -1,7 +1,12 @@
-﻿namespace EncosyTower.Mvvm.Input
+namespace EncosyTower.Mvvm.Input
 {
     public interface ICommandListener
     {
-        bool TryGetCommand<TCommand>(string commandName, out TCommand command) where TCommand : ICommand;
+        public bool TryGetCommand<TCommand>(string commandName, out TCommand command)
+            where TCommand : ICommand
+        {
+            command = default;
+            return false;
+        }
     }
 }

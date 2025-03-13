@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace EncosyTower.Mvvm.ComponentModel
 {
@@ -10,6 +10,10 @@ namespace EncosyTower.Mvvm.ComponentModel
     /// <seealso cref="EncosyTower.Mvvm.Input.RelayCommandAttribute"/>
     public interface IObservableObject
     {
-        bool TryGetMemberObservableObject(Queue<string> names, out IObservableObject result);
+        public bool TryGetMemberObservableObject(Queue<string> names, out IObservableObject result)
+        {
+            result = default;
+            return false;
+        }
     }
 }

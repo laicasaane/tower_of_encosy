@@ -1,4 +1,4 @@
-﻿namespace EncosyTower.Mvvm.ComponentModel
+namespace EncosyTower.Mvvm.ComponentModel
 {
     /// <summary>
     /// Notifies clients that a property value is changing.
@@ -13,7 +13,10 @@
         /// <param name="propertyName">The observable property whose notifications will be listened to.</param>
         /// <param name="listener">The event listener to receive the notifications.</param>
         /// <see langword="true"/> if the specified property exists; otherwise <see langword="false"/>.
-        bool AttachPropertyChangingListener<TInstance>(string propertyName, PropertyChangeEventListener<TInstance> listener)
-            where TInstance : class;
+        public bool AttachPropertyChangingListener<TInstance>(string propertyName, PropertyChangeEventListener<TInstance> listener)
+            where TInstance : class
+        {
+            return false;
+        }
     }
 }
