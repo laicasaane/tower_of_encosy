@@ -26,10 +26,7 @@ namespace EncosyTower.Samples.MonoPages
         private void OnOpenPopupClick()
         {
             var publisher = GlobalMessenger.Publisher.Scope(GamePageCodex.PopupScope);
-            publisher.Publish(new ShowPageAsyncMessage("prefab-popup-gray", new PageContext {
-                ShowOptions = PageTransitionOptions.OnlyFirstPageHasDuration,
-                HideOptions = PageTransitionOptions.NoTransition | PageTransitionOptions.ZeroDuration,
-            }));
+            publisher.Publish(new ShowPageAsyncMessage("prefab-popup-gray", new PageContext()));
         }
     }
 }

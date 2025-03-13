@@ -445,7 +445,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4123970957227086166}
   - component: {fileID: 4638513117719452247}
-  - component: {fileID: 6619218210048454891}
   - component: {fileID: 5134683470363139215}
   - component: {fileID: 3878061530408072943}
   m_Layer: 5
@@ -488,22 +487,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2370c446929546429c740e04f31b1de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _pageOptions:
+    showOptions:
+      showThisPage:
+        forceUse: 0
+        transitionOptions: 4
+      hideOtherPage:
+        forceUse: 0
+        transitionOptions: 3
+    hideOptions:
+      hideThisPage:
+        forceUse: 0
+        transitionOptions: 4
+      showOtherPage:
+        forceUse: 0
+        transitionOptions: 3
   _buttonOpen: {fileID: 2444291598020680275}
   _buttonClose: {fileID: 5472039449263611149}
---- !u!114 &6619218210048454891
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3833275893157022135}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f52d34b5d74c9e48b5fdec695d46f8a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  alwaysEnableEnter: 1
-  alwaysEnableExit: 1
 --- !u!114 &5134683470363139215
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -519,7 +519,7 @@ MonoBehaviour:
   identifier: root-panel
   canvasGroup: {fileID: 7932861852367809406}
   disableTweening: 0
-  onShowOptions:
+  showOperationOptions:
     forceRun: 0
     disableZeroDuration: 1
     duration: 0.2
@@ -527,7 +527,7 @@ MonoBehaviour:
     alpha:
       start: 0
       end: 1
-  onHideOptions:
+  hideOperationOptions:
     forceRun: 0
     disableZeroDuration: 1
     duration: 0.2
@@ -550,14 +550,14 @@ MonoBehaviour:
   identifier: backdrop-image
   graphic: {fileID: 5253766932745720450}
   disableTweening: 0
-  onShowOptions:
+  showOperationOptions:
     forceRun: 1
     disableZeroDuration: 0
     duration: 0.2
     alpha:
       start: 0
       end: 0.6
-  onHideOptions:
+  hideOperationOptions:
     forceRun: 1
     disableZeroDuration: 0
     duration: 0.2

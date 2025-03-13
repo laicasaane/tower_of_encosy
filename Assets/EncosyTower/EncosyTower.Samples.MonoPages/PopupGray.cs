@@ -11,9 +11,6 @@ namespace EncosyTower.Samples.MonoPages
         [SerializeField] private Button _buttonOpen;
         [SerializeField] private Button _buttonClose;
 
-        [SerializeField] private PageTransitionOptions _pageToShowOptions;
-        [SerializeField] private PageTransitionOptions _pageToHideOptions;
-
         private void Awake()
         {
             _buttonOpen.onClick.AddListener(OnOpenClick);
@@ -23,19 +20,13 @@ namespace EncosyTower.Samples.MonoPages
         private void OnOpenClick()
         {
             var publisher = GlobalMessenger.Publisher.Scope(GamePageCodex.PopupScope);
-            publisher.Publish(new ShowPageAsyncMessage("prefab-popup-green", new PageContext {
-                ShowOptions = PageTransitionOptions.OnlyFirstPageHasDuration,
-                HideOptions = PageTransitionOptions.NoTransition | PageTransitionOptions.ZeroDuration,
-            }));
+            publisher.Publish(new ShowPageAsyncMessage("prefab-popup-green", new PageContext()));
         }
 
         private void OnCloseClick()
         {
             var publisher = GlobalMessenger.Publisher.Scope(GamePageCodex.PopupScope);
-            publisher.Publish(new HideActivePageAsyncMessage(new PageContext {
-                ShowOptions = PageTransitionOptions.NoTransition | PageTransitionOptions.ZeroDuration,
-                HideOptions = PageTransitionOptions.OnlyFirstPageHasDuration,
-            }));
+            publisher.Publish(new HideActivePageAsyncMessage(new PageContext()));
         }
     }
 }
