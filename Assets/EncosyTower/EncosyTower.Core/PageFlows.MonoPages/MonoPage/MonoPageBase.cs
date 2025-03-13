@@ -10,32 +10,29 @@ namespace EncosyTower.PageFlows.MonoPages
         , IPageHasOptions
         , IPageHasTransition
     {
-        [SerializeField] private PageOptions _pageOptions;
-
-        private IPageTransition _transition;
+        private MonoPageOptions _options;
+        private MonoPageTransitionCollection _transition;
 
         public PageOptions PageOptions
         {
-            get => _pageOptions;
-            set => _pageOptions = value;
+            get
+            {
+                if (_options.IsInvalid())
+                {
+                    _options = this.GetOrAddComponent<MonoPageOptions>();
+                }
+
+                return _options.PageOptions;
+            }
         }
 
         public IPageTransition PageTransition
         {
             get
             {
-                if (_transition is null)
+                if (_transition.IsInvalid())
                 {
-                    var transitions = GetComponents<MonoPageTransition>();
-
-                    if (transitions.Length > 1)
-                    {
-                        _transition = this.GetOrAddComponent<MonoPageTransitionCollection>();
-                    }
-                    else if (transitions.Length == 1)
-                    {
-                        _transition = transitions[0];
-                    }
+                    _transition = this.GetOrAddComponent<MonoPageTransitionCollection>();
                 }
 
                 return _transition;
