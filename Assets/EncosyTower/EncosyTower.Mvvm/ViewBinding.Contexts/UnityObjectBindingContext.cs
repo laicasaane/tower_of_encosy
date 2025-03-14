@@ -1,6 +1,7 @@
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.Mvvm.ComponentModel;
+using EncosyTower.UnityExtensions;
 using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Contexts
@@ -13,14 +14,26 @@ namespace EncosyTower.Mvvm.ViewBinding.Contexts
 
         public bool TryGetContext(out IObservableObject result)
         {
-            result = _object as IObservableObject;
-            return result != null;
+            if (_object.IsInvalid() || _object is not IObservableObject obj)
+            {
+                result = null;
+                return false;
+            }
+
+            result = obj;
+            return true;
         }
 
         public bool TryGetContextType(out Type result)
         {
-            result = _object ? _object.GetType() : null;
-            return result != null;
+            if (_object.IsInvalid())
+            {
+                result = default;
+                return false;
+            }
+
+            result = _object.GetType();
+            return true;
         }
     }
 }
