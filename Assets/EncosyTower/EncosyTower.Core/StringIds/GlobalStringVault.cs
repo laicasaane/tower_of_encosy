@@ -35,7 +35,7 @@ namespace EncosyTower.StringIds
             => s_vault.ContainsId(key.Id);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static StringId MakeId(in UnmanagedString str)
+        public static StringId MakeIdFromUnmanaged(in UnmanagedString str)
         {
             return new(s_vault.MakeIdFromUnmanaged(str));
         }

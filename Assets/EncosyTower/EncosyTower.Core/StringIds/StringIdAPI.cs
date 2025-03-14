@@ -17,7 +17,7 @@ namespace EncosyTower.StringIds
         /// <inheritdoc cref="GlobalStringVault"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static StringId MakeFromUnmanaged(in UnmanagedString str)
-            => GlobalStringVault.MakeId(str);
+            => GlobalStringVault.MakeIdFromUnmanaged(str);
 
         /// <inheritdoc cref="GlobalStringVault"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -39,7 +39,7 @@ namespace EncosyTower.StringIds
 
         /// <inheritdoc cref="GlobalStringVault"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UnmanagedString Get(StringId id)
+        public static UnmanagedString GetUnmanaged(StringId id)
         {
             GlobalStringVault.ThrowIfNotDefined(GlobalStringVault.IsDefined(id), id);
             return GlobalStringVault.GetUnmanagedString(id);
