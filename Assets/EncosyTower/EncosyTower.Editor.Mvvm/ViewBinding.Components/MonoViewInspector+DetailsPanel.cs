@@ -1305,7 +1305,15 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             else
             {
                 targetMemberType = memberType;
+
                 var memberTypeName = memberType.GetFriendlyName();
+
+                if (isCommand)
+                {
+                    var index = candidate.LastIndexOf("Command");
+                    candidate = candidate[..index];
+                }
+
                 var candidateName = ObjectNames.NicifyVariableName(candidate);
 
                 label.text = isCommand
@@ -1478,9 +1486,11 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 
             foreach (var (commandName, commandType) in targetCommandMap)
             {
+                var index = commandName.LastIndexOf("Command");
+                var displayCommandName = ObjectNames.NicifyVariableName(commandName[..index]);
                 var label = commandType == null
-                    ? commandName
-                    : $"<b>{ObjectNames.NicifyVariableName(commandName)}</b> ( {commandType.GetFriendlyName()} )";
+                    ? displayCommandName
+                    : $"<b>{displayCommandName}</b> ( {commandType.GetFriendlyName()} )";
 
                 var node = root.CreateNode(label, commandType.FullName);
                 node.func2 = SetBindingCommand;
