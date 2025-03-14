@@ -432,7 +432,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
                     var name = StringUtils.ToSnakeCase(def.DataType.Name).ToUpperInvariant();
 
                     p.PrintBeginLine("public static readonly global::EncosyTower.StringIds.StringId<string> ").Print(name)
-                        .Print(" = global::EncosyTower.StringIds.StringToId.Get(nameof(").Print(name).PrintEndLine("));")
+                        .Print(" = global::EncosyTower.StringIds.StringToId.MakeFromManaged(nameof(").Print(name).PrintEndLine("));")
                         .PrintEndLine();
                 }
             }

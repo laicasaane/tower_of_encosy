@@ -154,19 +154,6 @@ namespace EncosyTower.SourceGen
                 yield return @interface.ToDisplayString(QualifiedFormat);
         }
 
-        public static bool IsInt(this ITypeSymbol symbol)
-            => symbol.SpecialType == SpecialType.System_Int32;
-
-        public static bool IsDynamicBuffer(this ITypeSymbol symbol)
-            => symbol.Name == "DynamicBuffer"
-            && symbol.ContainingNamespace.ToDisplayString(QualifiedFormat) == "global::Unity.Entities";
-
-        public static bool IsSharedComponent(this ITypeSymbol symbol)
-            => symbol.InheritsFromInterface("Unity.Entities.ISharedComponentData");
-
-        public static bool IsComponent(this ITypeSymbol symbol)
-            => symbol.InheritsFromInterface("Unity.Entities.IComponentData");
-
         public static bool IsZeroSizedComponent(this ITypeSymbol symbol, HashSet<ITypeSymbol> seenSymbols = null)
         {
             seenSymbols ??= new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default) { symbol };
@@ -282,9 +269,6 @@ namespace EncosyTower.SourceGen
                 }
             }
         }
-
-        public static bool IsEnableableComponent(this ITypeSymbol symbol)
-               => symbol.InheritsFromInterface("Unity.Entities.IEnableableComponent");
 
         public static string ToFullName(this ITypeSymbol symbol)
             => symbol.ToDisplayString(QualifiedFormat);
@@ -459,43 +443,6 @@ namespace EncosyTower.SourceGen
             }
 
             return strBuilder.ToString();
-        }
-
-        public static bool IsAspect(this ITypeSymbol typeSymbol)
-            => typeSymbol.InheritsFromInterface("Unity.Entities.IAspect");
-
-        public static TypedConstantKind GetTypedConstantKind(this ITypeSymbol type)
-        {
-            switch (type.SpecialType)
-            {
-                case SpecialType.System_Boolean:
-                case SpecialType.System_SByte:
-                case SpecialType.System_Int16:
-                case SpecialType.System_Int32:
-                case SpecialType.System_Int64:
-                case SpecialType.System_Byte:
-                case SpecialType.System_UInt16:
-                case SpecialType.System_UInt32:
-                case SpecialType.System_UInt64:
-                case SpecialType.System_Single:
-                case SpecialType.System_Double:
-                case SpecialType.System_Char:
-                case SpecialType.System_String:
-                case SpecialType.System_Object:
-                    return TypedConstantKind.Primitive;
-
-                default:
-                    switch (type.TypeKind)
-                    {
-                        case TypeKind.Array:
-                            return TypedConstantKind.Array;
-                        case TypeKind.Enum:
-                            return TypedConstantKind.Enum;
-                        case TypeKind.Error:
-                            return TypedConstantKind.Error;
-                    }
-                    return TypedConstantKind.Type;
-            }
         }
 
         private static string PrependGlobalIfMissing(this string typeOrNamespaceName)
@@ -715,11 +662,10 @@ namespace EncosyTower.SourceGen
         /// <summary>
         /// Gathers all forwarded attributes for the generated property.
         /// </summary>
-        /// <param name="fieldSymbol">The input <see cref="IMethodSymbol"/> instance to process.</param>
+        /// <param name="fieldSymbol">The input <see cref="IFieldSymbol"/> instance to process.</param>
         /// <param name="semanticModel">The <see cref="SemanticModel"/> instance for the current run.</param>
         /// <param name="token">The cancellation token for the current operation.</param>
         /// <param name="diagnostics">The current collection of gathered diagnostics.</param>
-        /// <param name="fieldAttributes">The resulting field attributes to forward.</param>
         /// <param name="propertyAttributes">The resulting property attributes to forward.</param>
         public static void GatherForwardedAttributes(
               this IFieldSymbol fieldSymbol
@@ -778,7 +724,7 @@ namespace EncosyTower.SourceGen
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
                         if (!semanticModel.GetSymbolInfo(attribute, token)
-                                .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol)
+                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol)
                         )
                         {
                             diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);
@@ -808,13 +754,13 @@ namespace EncosyTower.SourceGen
         /// <summary>
         /// Gathers all forwarded attributes for the generated field.
         /// </summary>
-        /// <param name="fieldSymbol">The input <see cref="IMethodSymbol"/> instance to process.</param>
+        /// <param name="propertySymbol">The input <see cref="IPropertySymbol"/> instance to process.</param>
         /// <param name="semanticModel">The <see cref="SemanticModel"/> instance for the current run.</param>
         /// <param name="token">The cancellation token for the current operation.</param>
         /// <param name="diagnostics">The current collection of gathered diagnostics.</param>
         /// <param name="fieldAttributes">The resulting field attributes to forward.</param>
         public static void GatherForwardedAttributes(
-              this IPropertySymbol fieldSymbol
+              this IPropertySymbol propertySymbol
             , SemanticModel semanticModel
             , CancellationToken token
             , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
@@ -825,7 +771,7 @@ namespace EncosyTower.SourceGen
             using var fieldAttributesInfo = ImmutableArrayBuilder<AttributeInfo>.Rent();
 
             GatherForwardedAttributes(
-                  fieldSymbol
+                  propertySymbol
                 , semanticModel
                 , token
                 , in diagnostics
@@ -853,7 +799,7 @@ namespace EncosyTower.SourceGen
 
                 var syntax = syntaxReference.GetSyntax(token);
 
-                if (syntax.Parent?.Parent is not PropertyDeclarationSyntax propDeclaration)
+                if (syntax is not PropertyDeclarationSyntax propDeclaration)
                 {
                     return;
                 }
@@ -870,7 +816,7 @@ namespace EncosyTower.SourceGen
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
                         if (!semanticModel.GetSymbolInfo(attribute, token)
-                                .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol)
+                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol)
                         )
                         {
                             diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);
@@ -900,14 +846,13 @@ namespace EncosyTower.SourceGen
         /// <summary>
         /// Gathers all forwarded attributes for the generated field.
         /// </summary>
-        /// <param name="fieldSymbol">The input <see cref="IMethodSymbol"/> instance to process.</param>
+        /// <param name="propertySymbol">The input <see cref="IPropertySymbol"/> instance to process.</param>
         /// <param name="semanticModel">The <see cref="SemanticModel"/> instance for the current run.</param>
         /// <param name="token">The cancellation token for the current operation.</param>
         /// <param name="diagnostics">The current collection of gathered diagnostics.</param>
         /// <param name="fieldAttributes">The resulting field attributes to forward.</param>
-        /// <param name="fieldAttributes">The resulting property attributes to forward.</param>
         public static void GatherForwardedAttributes(
-              this IPropertySymbol fieldSymbol
+              this IPropertySymbol propertySymbol
             , SemanticModel semanticModel
             , CancellationToken token
             , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
@@ -918,7 +863,7 @@ namespace EncosyTower.SourceGen
             using var fieldAttributesInfo = ImmutableArrayBuilder<(string, AttributeInfo)>.Rent();
 
             GatherForwardedAttributes(
-                  fieldSymbol
+                  propertySymbol
                 , semanticModel
                 , token
                 , in diagnostics
@@ -963,7 +908,7 @@ namespace EncosyTower.SourceGen
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
                         if (!semanticModel.GetSymbolInfo(attribute, token)
-                                .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol)
+                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol)
                         )
                         {
                             diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);

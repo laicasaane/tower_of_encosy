@@ -7,8 +7,10 @@ namespace EncosyTower.Tests.MvvmTests
 {
     public partial class Model : IObservableObject
     {
+        [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(Progress))]
-        [ObservableProperty] public int Value { get => Get_Value(); set => Set_Value(value); }
+        [field: UnityEngine.SerializeField]
+        public int Value { get => Get_Value(); set => Set_Value(value); }
 
         public float Progress => Value / 100f;
 
