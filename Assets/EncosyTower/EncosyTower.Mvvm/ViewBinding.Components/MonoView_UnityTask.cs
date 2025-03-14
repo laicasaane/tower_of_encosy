@@ -22,6 +22,11 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
                 , token
             );
 
+            if (token.IsCancellationRequested)
+            {
+                return null;
+            }
+
             return _context.TryGetContext(out var context) ? context : null;
         }
     }
