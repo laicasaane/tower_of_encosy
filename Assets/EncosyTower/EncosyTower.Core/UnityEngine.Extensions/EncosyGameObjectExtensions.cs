@@ -9,6 +9,19 @@ namespace EncosyTower.UnityExtensions
 {
     public static partial class EncosyGameObjectExtensions
     {
+        public static Component GetOrAddComponent([NotNull] this GameObject self, [NotNull] Type componentType)
+        {
+            ThrowIfGameObjectInvalid(self);
+            ThrowIfComponentTypeInvalid(componentType);
+
+            if (self.TryGetComponent(componentType, out var component) == false)
+            {
+                component = self.AddComponent(componentType);
+            }
+
+            return component;
+        }
+
         public static T GetOrAddComponent<T>([NotNull] this GameObject self) where T : Component
         {
             ThrowIfGameObjectInvalid(self);
@@ -71,6 +84,15 @@ namespace EncosyTower.UnityExtensions
             if (self.IsInvalid())
             {
                 throw new ArgumentNullException(nameof(self));
+            }
+        }
+
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void ThrowIfComponentTypeInvalid(Type type)
+        {
+            if (typeof(Component).IsAssignableFrom(type) == false)
+            {
+                throw new InvalidOperationException($"{type} is not derived from 'UnityEngine.Component'");
             }
         }
 

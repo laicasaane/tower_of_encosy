@@ -22,7 +22,8 @@
         "Unity.ScriptableBuildPipeline",
         "Unity.ScriptableBuildPipeline.Editor",
         "Unity.Serialization",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "UnityEditor.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

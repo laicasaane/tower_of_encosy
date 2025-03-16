@@ -10,7 +10,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Contexts
     [Serializable]
     public sealed class UnityObjectBindingContext : IBindingContext
     {
-        [SerializeField] private UnityEngine.Object _object;
+        [SerializeField] internal UnityEngine.Object _object;
 
         public bool TryGetContext(out IObservableObject result)
         {
