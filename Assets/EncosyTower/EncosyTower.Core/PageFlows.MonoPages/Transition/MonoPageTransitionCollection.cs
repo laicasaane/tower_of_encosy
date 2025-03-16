@@ -18,6 +18,7 @@ namespace EncosyTower.PageFlows.MonoPages
     {
         public bool alwaysEnableEnter = true;
         public bool alwaysEnableExit = true;
+        public ChildrenOptions childrenOptions = ChildrenOptions.Default;
 
         private MonoPageTransition[] _transitions;
         private UnityTask[] _tasks;
@@ -28,7 +29,15 @@ namespace EncosyTower.PageFlows.MonoPages
 
         private void Awake()
         {
-            _transitions = GetComponents<MonoPageTransition>();
+            if (childrenOptions.include)
+            {
+                _transitions = GetComponentsInChildren<MonoPageTransition>(childrenOptions.includeInactive);
+            }
+            else
+            {
+                _transitions = GetComponents<MonoPageTransition>();
+            }
+
             _tasks = new UnityTask[_transitions.Length];
         }
 
@@ -102,6 +111,17 @@ namespace EncosyTower.PageFlows.MonoPages
             }
 
             return UnityTasks.WhenAll(_tasks);
+        }
+
+        [Serializable]
+        public struct ChildrenOptions
+        {
+            public bool include;
+            public bool includeInactive;
+
+            public static ChildrenOptions Default => new() {
+                include = true,
+            };
         }
     }
 }
