@@ -12,7 +12,7 @@ namespace EncosyTower.EnumExtensions
     /// <code>
     /// [EnumTemplate]
     /// public readonly struct ProductType_EnumTemplate { }
-    /// 
+    ///
     /// // Will generate an enum named 'ProductType'
     /// </code>
     /// </example>
@@ -91,13 +91,13 @@ namespace EncosyTower.EnumExtensions
     /// <code>
     /// [EnumMembersForTemplate(typeof(ProductType_EnumTemplate), 000)]
     /// public enum FruitType { Apple, Orange }
-    /// 
+    ///
     /// [EnumMembersForTemplate(typeof(ProductType_EnumTemplate), 100)]
     /// public enum GrainType { Rice, Wheat }
     /// </code>
     /// </example>
     /// <seealso cref="EnumTemplateAttribute"/>
-    [AttributeUsage(AttributeTargets.Enum)]
+    [AttributeUsage(AttributeTargets.Enum, AllowMultiple = true)]
     public sealed class EnumMembersForTemplateAttribute : Attribute
     {
         public Type TemplateType { get; }
@@ -126,10 +126,11 @@ namespace EncosyTower.EnumExtensions
     /// </example>
     /// <seealso cref="EnumTemplateAttribute"/>
     [AttributeUsage(
-        AttributeTargets.Class
+          AttributeTargets.Class
         | AttributeTargets.Struct
         | AttributeTargets.Enum
         | AttributeTargets.Interface
+        , AllowMultiple = true
     )]
     public sealed class TypeNameMemberForEnumTemplateAttribute : Attribute
     {
