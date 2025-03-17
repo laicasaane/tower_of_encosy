@@ -11,5 +11,13 @@ namespace EncosyTower.Databases.SourceGen
     /// However, it can be used in other contexts, such as reflection.
     /// </remarks>
     [AttributeUsage(AttributeTargets.Field)]
-    public sealed class GeneratedAssetNameConstantAttribute : Attribute { }
+    public sealed class GeneratedAssetNameConstantAttribute : Attribute
+    {
+        public Type AssetType { get; }
+
+        public GeneratedAssetNameConstantAttribute(Type assetType)
+        {
+            AssetType = assetType;
+        }
+    }
 }

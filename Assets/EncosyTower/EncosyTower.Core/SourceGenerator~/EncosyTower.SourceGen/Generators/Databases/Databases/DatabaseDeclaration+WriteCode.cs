@@ -45,7 +45,8 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 {
                     var fieldValue = databaseAssetName.ToNamingCase(databaseNamingStrategy);
 
-                    p.PrintLine(GENERATED_ASSET_NAME).PrintLine(GENERATED_CODE);
+                    p.PrintLine(string.Format(GENERATED_ASSET_NAME, DATABASE_ASSET));
+                    p.PrintLine(GENERATED_CODE);
                     p.PrintBeginLine("public const string ").Print(DATABASE_ASSET_NAME)
                         .Print(" = \"").Print(fieldValue).PrintEndLine("\";");
                     p.PrintEndLine();
@@ -53,12 +54,14 @@ namespace EncosyTower.SourceGen.Generators.Databases
 
                 foreach (var table in tables)
                 {
+                    var fullTypeName = table.Type.ToFullName();
                     var typeName = table.Type.Name;
                     var name = table.PropertyName;
                     var fieldName = $"{StringUtils.ToSnakeCase(name).ToUpper()}_{TABLE_ASSET_NAME}";
                     var fieldValue = $"{typeName}_{name}".ToNamingCase(table.NamingStrategy);
 
-                    p.PrintLine(GENERATED_ASSET_NAME).PrintLine(GENERATED_CODE);
+                    p.PrintLine(string.Format(GENERATED_ASSET_NAME, fullTypeName));
+                    p.PrintLine(GENERATED_CODE);
                     p.PrintBeginLine("public const string ").Print(fieldName)
                         .Print(" = \"").Print(fieldValue).PrintEndLine("\";");
                     p.PrintEndLine();

@@ -1,9 +1,11 @@
-﻿using EncosyTower.UnionIds;
+﻿using EncosyTower.TypeWraps;
+using EncosyTower.UnionIds;
 
 namespace EncosyTower.Tests.UnionIds
 {
     [UnionId]
-    [UnionIdKind(typeof(MusicType), 0)]
+    [UnionIdKind(typeof(MusicType), 0, "Music")]
+    [UnionIdKind(typeof(SpecialId), 4)]
     public readonly partial struct AudioId
     {
     }
@@ -33,6 +35,9 @@ namespace EncosyTower.Tests.UnionIds
 
     [UnionId(KindSettings = UnionIdKindSettings.PreserveOrder)]
     public readonly partial struct ResourceId { }
+
+    [WrapRecord]
+    public readonly partial record struct SpecialId(uint Id);
 
     static partial class ResourceIdEnumeration
     {
