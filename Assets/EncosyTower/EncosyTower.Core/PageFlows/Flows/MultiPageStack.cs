@@ -110,7 +110,7 @@ namespace EncosyTower.PageFlows
 
             if (result)
             {
-                result = await _flow.TransitionAsync(PageTransition.Hide, pageToHide, page, context, token);
+                result = await _flow.TransitionAsync(PageTransition.Show, pageToHide, page, context, token);
             }
 
             if (result == false)
