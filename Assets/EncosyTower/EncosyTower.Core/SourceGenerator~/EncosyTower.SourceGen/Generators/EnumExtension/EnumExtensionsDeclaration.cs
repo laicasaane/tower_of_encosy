@@ -125,7 +125,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
                 ADD_DISPLAY_NAME:
                 {
-                    if (displayName is not null && isDisplayAttributeUsed == false)
+                    if (string.IsNullOrEmpty(displayName) == false && isDisplayAttributeUsed == false)
                     {
                         isDisplayAttributeUsed = true;
                     }

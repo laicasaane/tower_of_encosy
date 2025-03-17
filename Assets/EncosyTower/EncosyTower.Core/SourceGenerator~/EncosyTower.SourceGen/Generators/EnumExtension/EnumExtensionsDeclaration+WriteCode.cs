@@ -480,7 +480,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 {
                     p.PrintLine(GeneratedCode);
 
-                    if (member.displayName is not null)
+                    if (string.IsNullOrEmpty(member.displayName) == false)
                     {
                         p.PrintLine($"public const string {member.name} = \"{member.displayName}\";");
                     }
@@ -761,7 +761,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                             {
                                 foreach (var member in Members)
                                 {
-                                    if (member.displayName is not null)
+                                    if (string.IsNullOrEmpty(member.displayName) == false)
                                     {
                                         p.PrintLine($"case string s when s.Equals({CLASS_DISPLAY_NAMES}.{member.name}, global::System.StringComparison.OrdinalIgnoreCase):");
                                         p.OpenScope();
@@ -786,7 +786,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                             {
                                 foreach (var member in Members)
                                 {
-                                    if (member.displayName is not null)
+                                    if (string.IsNullOrEmpty(member.displayName) == false)
                                     {
                                         p.PrintLine($"case {CLASS_DISPLAY_NAMES}.{member.name}:");
                                         p.OpenScope();
@@ -980,7 +980,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                             {
                                 foreach (var member in Members)
                                 {
-                                    if (member.displayName is not null)
+                                    if (string.IsNullOrEmpty(member.displayName) == false)
                                     {
                                         p.PrintLine($"case {SPAN} s when global::System.MemoryExtensions.Equals(s, global::System.MemoryExtensions.AsSpan({CLASS_DISPLAY_NAMES}.{member.name}), global::System.StringComparison.OrdinalIgnoreCase):");
                                         p.OpenScope();
@@ -1005,7 +1005,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                             {
                                 foreach (var member in Members)
                                 {
-                                    if (member.displayName is not null)
+                                    if (string.IsNullOrEmpty(member.displayName) == false)
                                     {
                                         p.PrintLine($"case {SPAN} s when global::System.MemoryExtensions.Equals(s, global::System.MemoryExtensions.AsSpan({CLASS_DISPLAY_NAMES}.{member.name}), global::System.StringComparison.Ordinal):");
                                         p.OpenScope();
@@ -1231,7 +1231,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                         {
                             foreach (var member in Members)
                             {
-                                if (member.displayName is not null)
+                                if (string.IsNullOrEmpty(member.displayName) == false)
                                 {
                                     p.PrintLine($"{CLASS_DISPLAY_NAMES}.{member.name} => true,");
                                 }

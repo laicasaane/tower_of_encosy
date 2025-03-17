@@ -41,7 +41,7 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
                 .OfType<PropertyDeclarationSyntax>()
                 .FirstOrDefault();
 
-            if (declaration?.Identifier.Text is null)
+            if (string.IsNullOrEmpty(declaration?.Identifier.Text))
             {
                 return;
             }
