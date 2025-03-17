@@ -42,6 +42,41 @@ namespace EncosyTower.Editor
         }
 
         /// <summary>
+        /// Find first object by name and global qualified type name (i.e. with `global::` prefix).
+        /// </summary>
+        public static bool FindFirstObjectByNameAndGlobalQualifiedType<T>(
+              string name
+            , out T result
+            , out string resultPath
+        )
+            where T : UnityEngine.Object
+        {
+            var candidates = AssetDatabase.FindAssets($"{name} t:global::{typeof(T).FullName}");
+
+            if (candidates.Length > 0)
+            {
+                foreach (var candidate in candidates)
+                {
+                    var path = AssetDatabase.GUIDToAssetPath(candidate);
+                    var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+
+                    if (asset.IsInvalid())
+                    {
+                        continue;
+                    }
+
+                    result = asset;
+                    resultPath = path;
+                    return true;
+                }
+            }
+
+            result = default;
+            resultPath = default;
+            return false;
+        }
+
+        /// <summary>
         /// Find all objects by global qualified type name (i.e. with `global::` prefix).
         /// </summary>
         public static FasterList<T> FindAllObjectsByGlobalQualifiedType<T>()
