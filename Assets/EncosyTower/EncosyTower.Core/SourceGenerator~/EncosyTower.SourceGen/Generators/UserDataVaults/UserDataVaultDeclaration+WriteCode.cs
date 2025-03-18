@@ -246,20 +246,24 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintBeginLine("private readonly ").Print(ENCRYPTION_BASE).PrintEndLine(" _encryption;");
                 p.PrintEndLine();
 
+                p.PrintBeginLine("private readonly ").Print(ILOGGER).PrintEndLine(" _logger;");
+                p.PrintEndLine();
+
                 p.PrintBeginLine("public DataStorage(")
-                    .Print(NOT_NULL).Print(" ")
-                    .Print(ENCRYPTION_BASE).Print(" encryption")
+                    .Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).Print(" encryption, ")
+                    .Print(NOT_NULL).Print(" ").Print(ILOGGER).Print(" logger")
                     .PrintEndLine(")");
                 p.OpenScope();
                 {
                     p.PrintLine("_encryption = encryption;");
+                    p.PrintLine("_logger = logger;");
                     p.PrintEndLine();
 
                     foreach (var def in defs)
                     {
                         p.PrintBeginLine(def.DataType.Name).Print(" = new(")
                             .Print("Collections.").Print(StringUtils.ToSnakeCase(def.DataType.Name).ToUpperInvariant())
-                            .PrintEndLine(", _encryption);");
+                            .PrintEndLine(", encryption, logger);");
                     }
                 }
                 p.CloseScope();

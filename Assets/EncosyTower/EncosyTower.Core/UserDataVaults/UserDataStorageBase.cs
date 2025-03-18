@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using EncosyTower.Encryption;
+using EncosyTower.Logging;
 using EncosyTower.StringIds;
 
 namespace EncosyTower.UserDataVaults
@@ -14,15 +15,22 @@ namespace EncosyTower.UserDataVaults
 
     public abstract class UserDataStorageBase<T> where T : IUserData, new()
     {
-        protected UserDataStorageBase(StringId<string> key, [NotNull] EncryptionBase encryption)
+        protected UserDataStorageBase(
+              StringId<string> key
+            , [NotNull] EncryptionBase encryption
+            , [NotNull] ILogger logger
+        )
         {
             Key = key;
             Encryption = encryption;
+            Logger = logger;
         }
 
         public StringId<string> Key { get; }
 
         public EncryptionBase Encryption { get; }
+
+        public ILogger Logger { get; }
 
         public abstract string UserId { get; set; }
 

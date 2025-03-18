@@ -1,5 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 using EncosyTower.Encryption;
+using EncosyTower.Logging;
 using EncosyTower.StringIds;
 using EncosyTower.UserDataVaults;
 
@@ -25,8 +26,11 @@ namespace EncosyTower.Tests.UserDataVaults
     public sealed class UserDataStorage<T> : UserDataStorageBase<T>
         where T : IUserData, new()
     {
-        public UserDataStorage(StringId<string> key, EncryptionBase encryption)
-            : base(key, encryption)
+        public UserDataStorage(
+            StringId<string> key
+            , EncryptionBase encryption
+            , ILogger logger
+        ) : base(key, encryption, logger)
         {
         }
 
