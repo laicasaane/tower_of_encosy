@@ -71,6 +71,11 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 }
                 else
                 {
+                    foreach (var attribute in memberRef.attributes)
+                    {
+                        p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
+                    }
+
                     p.PrintBeginLine(member.name).Print(" = ")
                         .Print(member.order.ToString()).PrintEndLine(",");
                 }

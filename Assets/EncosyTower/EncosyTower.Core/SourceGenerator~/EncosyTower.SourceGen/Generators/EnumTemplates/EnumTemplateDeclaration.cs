@@ -128,6 +128,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     memberRefs.Add(new EnumMemberRef {
                         typeSymbol = typeSymbol,
                         baseOrder = currentBaseOrder,
+                        attributes = ImmutableArray<AttributeInfo>.Empty,
                         member = new EnumMemberDeclaration {
                             name = typeName,
                             order = currentBaseOrder,
@@ -180,6 +181,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                         baseOrder = currentBaseOrder,
                         value = value,
                         fromEnumType = true,
+                        attributes = field.GatherAttributes(),
                         member = new EnumMemberDeclaration {
                             name = memberName,
                             order = order,
@@ -504,6 +506,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             public bool isComment;
             public bool fromEnumType;
             public EnumMemberDeclaration member;
+            public ImmutableArray<AttributeInfo> attributes;
         }
 
         public readonly struct IndexOrIndices

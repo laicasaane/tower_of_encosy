@@ -936,6 +936,24 @@ namespace EncosyTower.SourceGen
             }
         }
 
+        /// <summary>
+        /// Gathers all attributes on a symbol.
+        /// </summary>
+        /// <param name="symbol">The input <see cref="ISymbol"/> instance to process.</param>
+        public static ImmutableArray<AttributeInfo> GatherAttributes(this ISymbol symbol)
+        {
+            using var attributesArrayBuilder = ImmutableArrayBuilder<AttributeInfo>.Rent();
+            var candidates = symbol.GetAttributes();
+
+            foreach (var candidate in candidates)
+            {
+                var attributeInfo = AttributeInfo.From(candidate);
+                attributesArrayBuilder.Add(attributeInfo);
+            }
+
+            return attributesArrayBuilder.ToImmutable();
+        }
+
         public static bool DoesMatchInterface(in this ImmutableArray<INamedTypeSymbol> interfaces, string typeName)
         {
             foreach (var interfaceSymbol in interfaces)
