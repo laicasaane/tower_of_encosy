@@ -226,7 +226,7 @@ namespace EncosyTower.SourceGen
             var firstLine = sourceText.Lines.FirstOrDefault();
             return sourceText.WithChanges(new TextChange(
                   firstLine.Span
-                , $"#line 1 \"{generatedSourceFilePath}\"{NEWLINE}{firstLine}"
+                , $"#line 2 \"{generatedSourceFilePath}\"{NEWLINE}{firstLine}"
             ));
         }
 

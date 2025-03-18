@@ -4,9 +4,11 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json.Utilities;
 
-namespace EncosyTower.SourceGen.Generators.UserDataStores
+namespace EncosyTower.SourceGen.Generators.UserDataVaults
 {
-    partial class UserDataProviderDeclaration
+    using static Helpers;
+
+    partial class UserDataVaultDeclaration
     {
         public string WriteCode()
         {
@@ -35,6 +37,15 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
 
             var staticKeyword = Symbol.IsStatic ? "static " : "";
             var fieldPrefix = Symbol.IsStatic ? "s_" : "_";
+
+            p.PrintEndLine();
+            p.Print("#if UNITASK").PrintEndLine();
+            p.Print("    using UnityTask = global::Cysharp.Threading.Tasks.UniTask;").PrintEndLine();
+            p.Print("#elif UNITY_6000_0_OR_NEWER").PrintEndLine();
+            p.Print("    using UnityTask = global::UnityEngine.Awaitable;").PrintEndLine();
+            p.Print("#else").PrintEndLine();
+            p.Print("    using UnityTask = global::System.Threading.Tasks.ValueTask;").PrintEndLine();
+            p.Print("#endif").PrintEndLine();
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
@@ -165,7 +176,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
                 {
                     var type = kv.Key;
 
-                    p.PrintBeginLine("global::EncosyTower.Logging.DevLogger.LogError(")
+                    p.PrintBeginLine(LOG_ERROR).Print("(")
                         .Print("\"Detect cycling dependency in the constructor of type \\\"")
                         .Print(type.Name)
                         .PrintEndLine("\\\"\");");
@@ -232,14 +243,16 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
             p.PrintLine("partial class DataStorage : global::System.IDisposable");
             p.OpenScope();
             {
-                p.PrintLine("private readonly global::EncosyTower.Encryption.RijndaelEncryption _encryption;");
+                p.PrintBeginLine("private readonly ").Print(ENCRYPTION_BASE).PrintEndLine(" _encryption;");
                 p.PrintEndLine();
 
-                p.PrintLine("public DataStorage(string secret, byte[] iv)");
+                p.PrintBeginLine("public DataStorage(")
+                    .Print(NOT_NULL).Print(" ")
+                    .Print(ENCRYPTION_BASE).Print(" encryption")
+                    .PrintEndLine(")");
                 p.OpenScope();
                 {
-                    p.PrintLine("var key = global::System.Convert.FromBase64String(secret);");
-                    p.PrintLine("_encryption = new(key, iv);");
+                    p.PrintLine("_encryption = encryption;");
                     p.PrintEndLine();
 
                     foreach (var def in defs)
@@ -262,8 +275,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
 
                 foreach (var def in defs)
                 {
-                    p.PrintBeginLine("public global::EncosyTower.UserDataStores.UserDataStorage<")
-                        .Print(def.DataType.ToFullName()).Print("> ")
+                    p.PrintBeginLine("public ")
+                        .Print(def.StorageType.ToFullName()).Print(" ")
                         .Print(def.DataType.Name).PrintEndLine(" { get; }")
                         .PrintEndLine();
                 }
@@ -291,18 +304,18 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public async global::Cysharp.Threading.Tasks.UniTask LoadFromDevice()");
+                p.PrintLine("public async UnityTask LoadFromDeviceAsync()");
                 p.OpenScope();
                 {
                     foreach (var def in defs)
                     {
-                        p.PrintBeginLine("await ").Print(def.DataType.Name).PrintEndLine(".LoadFromDevice();");
+                        p.PrintBeginLine("await ").Print(def.DataType.Name).PrintEndLine(".LoadFromDeviceAsync();");
                     }
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public async global::Cysharp.Threading.Tasks.UniTask LoadFromFirestore(");
+                p.PrintLine("public async UnityTask LoadFromCloudAsync(");
                 p = p.IncreasedIndent();
                 {
                     for (var i = 0; i < defs.Length; i++)
@@ -332,7 +345,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
                         p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
                         p.OpenScope();
                         {
-                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".LoadFromFirestore();");
+                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".LoadFromCloudAsync();");
                         }
                         p.CloseScope();
                         p.PrintEndLine();
@@ -341,12 +354,12 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public async global::Cysharp.Threading.Tasks.UniTask SaveToFirestoreAsync()");
+                p.PrintLine("public async UnityTask SaveToCloudAsync()");
                 p.OpenScope();
                 {
                     foreach (var def in defs)
                     {
-                        p.PrintBeginLine("await ").Print(def.DataType.Name).PrintEndLine(".SaveToFirestoreAsync();");
+                        p.PrintBeginLine("await ").Print(def.DataType.Name).PrintEndLine(".SaveToCloudAsync();");
                     }
                 }
                 p.CloseScope();
@@ -374,34 +387,34 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public void Save(bool forceToFirestore)");
+                p.PrintLine("public void Save(bool forceToCloud)");
                 p.OpenScope();
                 {
                     foreach (var def in defs)
                     {
-                        p.PrintBeginLine(def.DataType.Name).PrintEndLine(".Save(forceToFirestore);");
+                        p.PrintBeginLine(def.DataType.Name).PrintEndLine(".Save(forceToCloud);");
                     }
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public async global::Cysharp.Threading.Tasks.UniTask SaveAsync(bool forceToFirestore)");
+                p.PrintLine("public async UnityTask SaveAsync(bool forceToCloud)");
                 p.OpenScope();
                 {
                     foreach (var def in defs)
                     {
-                        p.PrintBeginLine("await ").Print(def.DataType.Name).PrintEndLine(".SaveAsync(forceToFirestore);");
+                        p.PrintBeginLine("await ").Print(def.DataType.Name).PrintEndLine(".SaveAsync(forceToCloud);");
                     }
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public void DeepCloneDataFromFirestoreToDevice()");
+                p.PrintLine("public void DeepCloneDataFromCloudToDevice()");
                 p.OpenScope();
                 {
                     foreach (var def in defs)
                     {
-                        p.PrintBeginLine(def.DataType.Name).PrintEndLine(".DeepCloneDataFromFirestoreToDevice();");
+                        p.PrintBeginLine(def.DataType.Name).PrintEndLine(".DeepCloneDataFromCloudToDevice();");
                     }
                 }
                 p.CloseScope();
@@ -431,8 +444,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
                 {
                     var name = StringUtils.ToSnakeCase(def.DataType.Name).ToUpperInvariant();
 
-                    p.PrintBeginLine("public static readonly global::EncosyTower.StringIds.StringId<string> ").Print(name)
-                        .Print(" = global::EncosyTower.StringIds.StringToId.MakeFromManaged(nameof(").Print(name).PrintEndLine("));")
+                    p.PrintBeginLine("public static readonly ").Print(STRING_ID).Print(" ").Print(name)
+                        .Print(" = ").Print(STRING_ID_MAKE).Print("(nameof(").Print(name).PrintEndLine("));")
                         .PrintEndLine();
                 }
             }
@@ -478,9 +491,9 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("[Sirenix.OdinInspector.Button]");
-                p.PrintLine("[Sirenix.OdinInspector.PropertyOrder(1001)]");
-                p.PrintLine("private void FromFirestore()");
+                p.PrintLine("[global::Sirenix.OdinInspector.Button]");
+                p.PrintLine("[global::Sirenix.OdinInspector.PropertyOrder(1001)]");
+                p.PrintLine("private void FromCloud()");
                 p.OpenScope();
                 {
                     foreach (var def in defs)
@@ -488,7 +501,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
                         var name = def.DataType.Name;
 
                         p.PrintBeginLine(name).Print(" = s_storage.")
-                            .Print(name).PrintEndLine(".GetDataFromFirestore();");
+                            .Print(name).PrintEndLine(".GetDataFromCloud();");
                     }
                 }
                 p.CloseScope();

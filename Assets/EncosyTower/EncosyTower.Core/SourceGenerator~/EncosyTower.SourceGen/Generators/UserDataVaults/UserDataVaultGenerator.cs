@@ -8,16 +8,14 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace EncosyTower.SourceGen.Generators.UserDataStores
+namespace EncosyTower.SourceGen.Generators.UserDataVaults
 {
+    using static Helpers;
+
     [Generator]
-    internal class UserDataAccessProviderGenerator : IIncrementalGenerator
+    internal class UserDataVaultGenerator : IIncrementalGenerator
     {
-        public const string GENERATOR_NAME = nameof(UserDataAccessProviderGenerator);
-        private const string NAMESPACE = "EncosyTower.UserDataStores";
-        private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
-        private const string ATTRIBUTE = $"global::{NAMESPACE}.UserDataAccessProviderAttribute";
-        private const string IUSER_DATA_ACCESS = $"global::{NAMESPACE}.IUserDataAccess";
+        public const string GENERATOR_NAME = nameof(UserDataVaultGenerator);
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -59,10 +57,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
             token.ThrowIfCancellationRequested();
 
             return syntaxNode is ClassDeclarationSyntax syntax
-                && syntax.HasAttributeCandidate(NAMESPACE, "UserDataAccessProvider");
+                && syntax.HasAttributeCandidate(NAMESPACE, "UserDataVault");
         }
 
-        private static UserDataProviderCandidate GetProviderCandidate(
+        private static UserDataVaultCandidate GetProviderCandidate(
               GeneratorSyntaxContext context
             , CancellationToken token
         )
@@ -86,7 +84,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
                 return default;
             }
 
-            var candidate = new UserDataProviderCandidate {
+            var candidate = new UserDataVaultCandidate {
                 syntax = syntax,
                 symbol = symbol,
             };
@@ -167,15 +165,15 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationCandidate compilationCandidate
-            , UserDataProviderCandidate providerCandidate
+            , UserDataVaultCandidate vaultCandidate
             , ImmutableArray<INamedTypeSymbol> accessCandidates
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
             if (compilationCandidate.compilation == null
-                || providerCandidate.syntax == null
-                || providerCandidate.symbol == null
+                || vaultCandidate.syntax == null
+                || vaultCandidate.symbol == null
                 || accessCandidates.Length < 1
             )
             {
@@ -186,11 +184,11 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
 
             try
             {
-                var providerSyntax = providerCandidate.syntax;
+                var providerSyntax = vaultCandidate.syntax;
                 var accessDeclarations = new List<UserDataAccessDefinition>(accessCandidates.Length);
                 var sb = new StringBuilder();
-                var prefix = providerCandidate.prefix;
-                var suffix = providerCandidate.suffix;
+                var prefix = vaultCandidate.prefix;
+                var suffix = vaultCandidate.suffix;
 
                 for (var i = 0; i < accessCandidates.Length; i++)
                 {
@@ -221,11 +219,11 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
                 });
 
                 var syntaxTree = providerSyntax.SyntaxTree;
-                var providerSymbol = providerCandidate.symbol;
+                var providerSymbol = vaultCandidate.symbol;
                 var compilation = compilationCandidate.compilation;
                 var assemblyName = compilation.Assembly.Name;
 
-                var declaration = new UserDataProviderDeclaration(
+                var declaration = new UserDataVaultDeclaration(
                       providerSyntax
                     , providerSymbol
                     , accessDeclarations
@@ -250,17 +248,17 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
 
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
-                    , providerCandidate.syntax.GetLocation()
+                    , vaultCandidate.syntax.GetLocation()
                     , e.ToUnityPrintableString()
                 ));
             }
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_USER_DATA_ACCESS_PROVIDER_01"
-                , "UserDataAccessProvider Generator Error"
-                , "This error indicates a bug in the UserDataAccessProvider source generators. Error message: '{0}'."
-                , $"{NAMESPACE}.UserDataAccessProviderAttribute"
+            = new("SG_USER_DATA_VAULT_01"
+                , "UserDataVault Generator Error"
+                , "This error indicates a bug in the UserDataVault source generators. Error message: '{0}'."
+                , $"{NAMESPACE}.UserDataVaultAttribute"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""

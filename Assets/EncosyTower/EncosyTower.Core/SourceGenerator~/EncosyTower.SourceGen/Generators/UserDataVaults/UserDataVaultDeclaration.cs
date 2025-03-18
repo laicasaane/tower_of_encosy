@@ -2,9 +2,9 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace EncosyTower.SourceGen.Generators.UserDataStores
+namespace EncosyTower.SourceGen.Generators.UserDataVaults
 {
-    internal partial class UserDataProviderDeclaration
+    internal partial class UserDataVaultDeclaration
     {
         public ClassDeclarationSyntax Syntax { get; }
 
@@ -12,7 +12,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
 
         public List<UserDataAccessDefinition> AccessDefs { get; }
 
-        public UserDataProviderDeclaration(
+        public UserDataVaultDeclaration(
               ClassDeclarationSyntax syntax
             , INamedTypeSymbol symbol
             , List<UserDataAccessDefinition> accessDefs

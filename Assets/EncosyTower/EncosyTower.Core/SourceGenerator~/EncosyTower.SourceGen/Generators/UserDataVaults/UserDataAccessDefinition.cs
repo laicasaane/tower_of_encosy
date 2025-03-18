@@ -5,8 +5,10 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace EncosyTower.SourceGen.Generators.UserDataStores
+namespace EncosyTower.SourceGen.Generators.UserDataVaults
 {
+    using static Helpers;
+
     internal class UserDataAccessDefinition
     {
         public bool IsValid { get; }
@@ -116,9 +118,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
 
     internal readonly struct ParamDefinition
     {
-        public const string USER_DATA_STORAGE = "global::EncosyTower.UserDataStores.UserDataStorage<";
-        private const string IUSER_DATA_ACCESS = "global::EncosyTower.UserDataStores.IUserDataAccess";
-
         public readonly StorageDefinition StorageDef;
         public readonly ITypeSymbol Type;
 
@@ -146,18 +145,13 @@ namespace EncosyTower.SourceGen.Generators.UserDataStores
             }
 
             if (type is INamedTypeSymbol namedType
-                && namedType.ToFullName().AsSpan().StartsWith(USER_DATA_STORAGE.AsSpan())
+                && namedType.TryGetGenericType(USER_DATA_STORAGE_BASE, 1, out var baseType)
+                && baseType.TypeArguments.Length == 1
+                && baseType.TypeArguments[0].IsAbstract == false
             )
             {
-                var args = namedType.TypeArguments;
-
-                if (args.Length == 1 && args[0].IsAbstract == false)
-                {
-                    argType = args[0];
-                    return true;
-                }
-
-                return false;
+                argType = baseType.TypeArguments[0];
+                return true;
             }
 
             return type.Interfaces.DoesMatchInterface(IUSER_DATA_ACCESS)
