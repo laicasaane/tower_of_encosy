@@ -19,7 +19,7 @@ namespace EncosyTower.Editor
     /// </remarks>
     /// <example>
     /// <code>
-    /// using SuperGame.Editor;
+    /// using EncosyTower.Editor;
     ///
     /// [MenuItemProvider]
     /// private static MenuItem CustomMenuItem()
@@ -29,7 +29,7 @@ namespace EncosyTower.Editor
     /// </code>
     /// <code>
     /// using System.Collections.Generic;
-    /// using SuperGame.Editor;
+    /// using EncosyTower.Editor;
     ///
     /// [MenuItemProvider]
     /// private static List&lt;MenuItem&gt; CustomMenuItems()

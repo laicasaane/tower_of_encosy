@@ -9,7 +9,7 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
 #if UNITY_6000_0_OR_NEWER
         public const string PROJECT_SETTINGS_STYLE_SHEET = "StyleSheets/ProjectSettings/ProjectSettingsCommon.uss";
 #else
-        private const string CORE_ROOT = $"{ROOT}/SuperGame.Core/UIElements/Resources";
+        private const string CORE_ROOT = $"{ROOT}/EncosyTower.Core/UIElements/Resources";
         public const string PROJECT_SETTINGS_STYLE_SHEET = $"{CORE_ROOT}/Common_2022_3.uss";
 #endif
 
