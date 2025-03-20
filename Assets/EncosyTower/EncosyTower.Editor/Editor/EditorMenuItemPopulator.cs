@@ -20,6 +20,7 @@ namespace EncosyTower.Editor
         private static void VerifyCreateMenu()
         {
             var providers = TypeCache.GetMethodsWithAttribute<MenuItemProviderAttribute>();
+            var typeOfMenuItem = typeof(EditorMenuItem);
             var typeOfEnumerable = typeof(IEnumerable<EditorMenuItem>);
 
             foreach (var provider in providers)
@@ -33,7 +34,7 @@ namespace EncosyTower.Editor
                     continue;
                 }
 
-                if (provider.ReturnType == typeof(EditorMenuItem))
+                if (provider.ReturnType == typeOfMenuItem)
                 {
                     EncosyMenu.AddMenuItem(provider.Invoke(null, null) as EditorMenuItem);
                     continue;
