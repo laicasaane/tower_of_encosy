@@ -9,6 +9,8 @@ namespace EncosyTower.SourceGen.Generators.Databases
     {
         private const string DATABASE_ASSET_NAME = nameof(DATABASE_ASSET_NAME);
         private const string TABLE_ASSET_NAME = nameof(TABLE_ASSET_NAME);
+        private const string DATABASE_ASSET_KEY = nameof(DATABASE_ASSET_KEY);
+        private const string TABLE_ASSET_KEY = nameof(TABLE_ASSET_KEY);
         private const string DATABASE_ID = nameof(DATABASE_ID);
         private const string TABLE_ID = nameof(TABLE_ID);
         private const string UNITY_EXTENSIONS = "global::EncosyTower.UnityExtensions.EncosyUnityObjectExtensions";
@@ -19,6 +21,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
         private const string MAKE_ID = "global::EncosyTower.StringIds.StringToId.MakeFromManaged";
         public const string NOT_NULL = "[global::System.Diagnostics.CodeAnalysis.NotNull]";
         public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.BeforeSplashScreen)]";
+        public const string ASSET_KEY = "global::EncosyTower.AssetKeys.AssetKey";
 
         public string WriteCode(ImmutableArray<TableRef> tables)
         {
@@ -45,6 +48,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.OpenScope();
             {
                 WriteConstNames(ref p, DatabaseRef, tables);
+                WriteStaticKeys(ref p, tables);
                 WriteStaticIds(ref p, tables);
                 WriteInstanceMembers(ref p, typeName, isStruct);
                 WriteGetMethods(ref p, tables, isStruct);
@@ -102,6 +106,32 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 p.PrintLine(GENERATED_CODE);
                 p.PrintBeginLine("public const string ").Print(fieldName)
                     .Print(" = \"").Print(fieldValue).PrintEndLine("\";");
+                p.PrintEndLine();
+            }
+        }
+
+        private static void WriteStaticKeys(ref Printer p, ImmutableArray<TableRef> tables)
+        {
+            {
+                p.PrintLine(GENERATED_CODE);
+                p.PrintBeginLine("public static readonly ").Print(ASSET_KEY)
+                    .Print("<").Print(DATABASE_ASSET).Print("> ")
+                    .Print(DATABASE_ASSET_KEY).Print(" = new").PrintEndLine("(DATABASE_ASSET_NAME);");
+                p.PrintEndLine();
+            }
+
+            foreach (var table in tables)
+            {
+                var name = table.PropertyName;
+                var tableTypeName = table.Type.ToFullName();
+                var nameUpper = StringUtils.ToSnakeCase(name).ToUpper();
+                var fieldName = $"{TABLE_ASSET_KEY}_{nameUpper}";
+                var fieldValue = $"{TABLE_ASSET_NAME}_{nameUpper}";
+
+                p.PrintLine(GENERATED_CODE);
+                p.PrintBeginLine("public static readonly ").Print(ASSET_KEY)
+                    .Print("<").Print(tableTypeName).Print("> ")
+                    .Print(fieldName).Print(" = new").Print("(").Print(fieldValue).PrintEndLine(");");
                 p.PrintEndLine();
             }
         }
