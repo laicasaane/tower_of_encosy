@@ -56,8 +56,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             {
                 WriteFields(ref p, staticKeyword, fieldPrefix);
                 WriteProperties(ref p, staticKeyword, accessDefs);
+                WriteInitialize(ref p, staticKeyword, fieldPrefix, accessDefs);
                 WriteInitOnDomainReload(ref p, staticKeyword, fieldPrefix, accessDefs);
-                WriteInitializeUserDataAccess(ref p, staticKeyword, fieldPrefix, accessDefs);
                 WriteDataStorageClass(ref p, orderedStorageDefs);
                 WriteCollectionsClass(ref p, orderedStorageDefs);
                 WriteDataInspector(ref p, orderedStorageDefs);
@@ -90,32 +90,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
         }
 
-        private void WriteInitOnDomainReload(
-              ref Printer p
-            , string staticKeyword
-            , string fieldPrefix
-            , List<UserDataAccessDefinition> defs
-        )
-        {
-            p.Print("#if UNITY_EDITOR").PrintEndLine();
-            {
-                p.PrintBeginLine("internal ").Print(staticKeyword).PrintEndLine("void InitOnDomainReload()");
-                p.OpenScope();
-                {
-                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage = default;");
-                    p.PrintEndLine();
-
-                    foreach (var def in defs)
-                    {
-                        p.PrintBeginLine(def.FieldName).PrintEndLine(" = null;");
-                    }
-                }
-                p.CloseScope();
-            }
-            p.Print("#endif").PrintEndLine().PrintEndLine();
-        }
-
-        private static void WriteInitializeUserDataAccess(
+        private static void WriteInitialize(
               ref Printer p
             , string staticKeyword
             , string fieldPrefix
@@ -131,9 +106,21 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 queue.Enqueue(def);
             }
 
-            p.PrintBeginLine("private ").Print(staticKeyword).PrintEndLine("void InitializeUserDataAccess()");
+            p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("void Initialize(");
+            p = p.IncreasedIndent();
+            {
+                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
+            }
+            p = p.DecreasedIndent();
+            p.PrintLine(")");
             p.OpenScope();
             {
+                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage = new(encryption, logger, taskArrayPool);");
+                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.Initialize();");
+                p.PrintEndLine();
+
                 var loopBreakCondition = defs.Count;
 
                 while (queue.Count > 0)
@@ -204,7 +191,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         }
                     }
 
-                    p.PrintEndLine(");").PrintEndLine();
+                    p.PrintEndLine(");");
                 }
                 else
                 {
@@ -233,9 +220,35 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         }
                     }
                     p = p.DecreasedIndent();
-                    p.PrintLine(");").PrintEndLine();
+                    p.PrintLine(");");
                 }
             }
+        }
+
+        private void WriteInitOnDomainReload(
+              ref Printer p
+            , string staticKeyword
+            , string fieldPrefix
+            , List<UserDataAccessDefinition> defs
+        )
+        {
+            p.Print("#if UNITY_EDITOR").PrintEndLine();
+            {
+                p.PrintBeginLine("internal ").Print(staticKeyword).PrintEndLine("void InitOnDomainReload()");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.Dispose();");
+                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage = default;");
+                    p.PrintEndLine();
+
+                    foreach (var def in defs)
+                    {
+                        p.PrintBeginLine(def.FieldName).PrintEndLine(" = null;");
+                    }
+                }
+                p.CloseScope();
+            }
+            p.Print("#endif").PrintEndLine().PrintEndLine();
         }
 
         private void WriteDataStorageClass(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
@@ -244,19 +257,24 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.OpenScope();
             {
                 p.PrintBeginLine("private readonly ").Print(ENCRYPTION_BASE).PrintEndLine(" _encryption;");
-                p.PrintEndLine();
-
                 p.PrintBeginLine("private readonly ").Print(ILOGGER).PrintEndLine(" _logger;");
+                p.PrintBeginLine("private readonly ").Print(TASK_ARRAY_POOL).PrintEndLine(" _taskArrayPool;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine("public DataStorage(")
-                    .Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).Print(" encryption, ")
-                    .Print(NOT_NULL).Print(" ").Print(ILOGGER).Print(" logger")
-                    .PrintEndLine(")");
+                p.PrintLine("public DataStorage(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
+                    p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
+                    p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
                 p.OpenScope();
                 {
                     p.PrintLine("_encryption = encryption;");
                     p.PrintLine("_logger = logger;");
+                    p.PrintLine("_taskArrayPool = taskArrayPool;");
                     p.PrintEndLine();
 
                     foreach (var def in defs)
@@ -308,24 +326,42 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public async UnityTask LoadFromDeviceAsync()");
+                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ").PrintEndLine("UnityTask LoadFromDeviceAsync()");
                 p.OpenScope();
                 {
-                    foreach (var def in defs)
+                    if (defs.Length > 1)
                     {
-                        p.PrintBeginLine("await ").Print(def.DataType.Name).PrintEndLine(".LoadFromDeviceAsync();");
+                        p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
+                        p.PrintEndLine();
+
+                        for (var i = 0; i < defs.Length; i++)
+                        {
+                            p.PrintBeginLine($"tasks[{i}] = ").Print(defs[i].DataType.Name).PrintEndLine(".LoadFromDeviceAsync();");
+                        }
+
+                        p.PrintEndLine();
+                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
+
+                        p.PrintEndLine();
+                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
+                    }
+                    else if (defs.Length == 1)
+                    {
+                        p.PrintBeginLine("await ").Print(defs[0].DataType.Name).PrintEndLine(".LoadFromDeviceAsync();");
+                    }
+                    else
+                    {
+                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
                     }
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public async UnityTask LoadFromCloudAsync(");
+                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ").PrintEndLine("UnityTask LoadFromCloudAsync(");
                 p = p.IncreasedIndent();
                 {
                     for (var i = 0; i < defs.Length; i++)
                     {
-                        var def = defs[i];
-
                         if (i == 0)
                         {
                             p.PrintBeginLine("  ");
@@ -335,16 +371,44 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                             p.PrintBeginLine(", ");
                         }
 
-                        p.Print("bool include").Print(def.DataType.Name).PrintEndLine(" = true");
+                        p.Print("bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
                     }
                 }
                 p = p.DecreasedIndent();
                 p.PrintLine(")");
                 p.OpenScope();
                 {
-                    foreach (var def in defs)
+                    if (defs.Length > 1)
                     {
-                        var name = def.DataType.Name;
+                        p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
+                        p.PrintEndLine();
+
+                        var lastIndex = defs.Length - 1;
+
+                        for (var i = 0; i < defs.Length; i++)
+                        {
+                            var name = defs[i].DataType.Name;
+
+                            p.PrintBeginLine($"tasks[{i}] = include").PrintEndLine(name);
+                            p = p.IncreasedIndent();
+                            {
+                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".LoadFromCloudAsync()");
+                                p.PrintBeginLine(": ").Print(COMPLETED_TASK).PrintEndLine(";");
+                            }
+                            p = p.DecreasedIndent();
+
+                            p.PrintEndLineIf(i < lastIndex, "");
+                        }
+
+                        p.PrintEndLine();
+                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
+
+                        p.PrintEndLine();
+                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
+                    }
+                    else if (defs.Length == 1)
+                    {
+                        var name = defs[0].DataType.Name;
 
                         p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
                         p.OpenScope();
@@ -354,16 +418,40 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         p.CloseScope();
                         p.PrintEndLine();
                     }
+                    else
+                    {
+                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
+                    }
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public async UnityTask SaveToCloudAsync()");
+                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ").PrintEndLine("UnityTask SaveToCloudAsync()");
                 p.OpenScope();
                 {
-                    foreach (var def in defs)
+                    if (defs.Length > 1)
                     {
-                        p.PrintBeginLine("await ").Print(def.DataType.Name).PrintEndLine(".SaveToCloudAsync();");
+                        p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
+                        p.PrintEndLine();
+
+                        for (var i = 0; i < defs.Length; i++)
+                        {
+                            p.PrintBeginLine($"tasks[{i}] = ").Print(defs[i].DataType.Name).PrintEndLine(".SaveToCloudAsync();");
+                        }
+
+                        p.PrintEndLine();
+                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
+
+                        p.PrintEndLine();
+                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
+                    }
+                    else if (defs.Length == 1)
+                    {
+                        p.PrintBeginLine("await ").Print(defs[0].DataType.Name).PrintEndLine(".SaveToCloudAsync();");
+                    }
+                    else
+                    {
+                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
                     }
                 }
                 p.CloseScope();
@@ -402,12 +490,32 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public async UnityTask SaveAsync(bool forceToCloud)");
+                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ").PrintEndLine("UnityTask SaveAsync(bool forceToCloud)");
                 p.OpenScope();
                 {
-                    foreach (var def in defs)
+                    if (defs.Length > 1)
                     {
-                        p.PrintBeginLine("await ").Print(def.DataType.Name).PrintEndLine(".SaveAsync(forceToCloud);");
+                        p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
+                        p.PrintEndLine();
+
+                        for (var i = 0; i < defs.Length; i++)
+                        {
+                            p.PrintBeginLine($"tasks[{i}] = ").Print(defs[i].DataType.Name).PrintEndLine(".SaveAsync(forceToCloud);");
+                        }
+
+                        p.PrintEndLine();
+                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
+
+                        p.PrintEndLine();
+                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
+                    }
+                    else if (defs.Length == 1)
+                    {
+                        p.PrintBeginLine("await ").Print(defs[0].DataType.Name).PrintEndLine(".SaveAsync(forceToCloud);");
+                    }
+                    else
+                    {
+                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
                     }
                 }
                 p.CloseScope();

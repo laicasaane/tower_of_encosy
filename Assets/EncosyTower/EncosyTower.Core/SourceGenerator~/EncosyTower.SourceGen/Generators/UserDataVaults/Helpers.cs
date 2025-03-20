@@ -9,6 +9,9 @@
         public const string USER_DATA_STORAGE_BASE = $"global::{NAMESPACE}.UserDataStorageBase<";
         public const string ENCRYPTION_BASE = "global::EncosyTower.Encryption.EncryptionBase";
         public const string ILOGGER = "global::EncosyTower.Logging.ILogger";
+        public const string TASK_ARRAY_POOL = "global::System.Buffers.ArrayPool<UnityTask>";
+        public const string COMPLETED_TASK = "global::EncosyTower.Tasks.UnityTasks.GetCompleted()";
+        public const string WHEN_ALL_TASKS = "global::EncosyTower.Tasks.UnityTasks.WhenAll(tasks)";
         public const string NOT_NULL = "[global::System.Diagnostics.CodeAnalysis.NotNull]";
         public const string LOG_ERROR = "global::EncosyTower.Logging.DevLoggerAPI.LogError";
         public const string STRING_ID = "global::EncosyTower.StringIds.StringId<string>";

@@ -13,9 +13,21 @@ namespace EncosyTower.Tests.UserDataVaults
         public string Version { get; set; }
     }
 
+    internal partial class UserEventData : IUserData
+    {
+        public string Id { get; set; }
+
+        public string Version { get; set; }
+    }
+
     public sealed class UserCommonDataAccess : IUserDataAccess
     {
         internal UserCommonDataAccess(UserDataStorage<UserCommonData> storage) { }
+    }
+
+    public sealed class UserEventDataAccess : IUserDataAccess
+    {
+        internal UserEventDataAccess(UserDataStorage<UserEventData> storage) { }
     }
 
     [UserDataVault]
