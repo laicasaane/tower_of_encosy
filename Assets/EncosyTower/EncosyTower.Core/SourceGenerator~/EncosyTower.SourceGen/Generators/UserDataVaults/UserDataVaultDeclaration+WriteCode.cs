@@ -237,7 +237,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintBeginLine("internal ").Print(staticKeyword).PrintEndLine("void InitOnDomainReload()");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.Dispose();");
+                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage?.Dispose();");
                     p.PrintBeginLine(fieldPrefix).PrintEndLine("storage = default;");
                     p.PrintEndLine();
 
