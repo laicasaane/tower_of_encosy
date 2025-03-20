@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using EncosyTower.AssetKeys;
 using EncosyTower.Common;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
@@ -9,6 +10,14 @@ namespace EncosyTower.ResourceKeys
 
     public static partial class ResourceKeyExtensions
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ResourceKey AsResource(this AssetKey key)
+            => new(key);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ResourceKey<T> AsResource<T>(this AssetKey<T> key) where T : UnityObject
+            => new(key);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Load<T>(this ResourceKey key) where T : UnityObject
             => ((ResourceKey<T>)key).Load();

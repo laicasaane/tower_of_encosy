@@ -1,6 +1,7 @@
 #if UNITY_ADDRESSABLES
 
 using System.Runtime.CompilerServices;
+using EncosyTower.AssetKeys;
 using EncosyTower.Common;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
@@ -10,6 +11,14 @@ namespace EncosyTower.AddressableKeys
 {
     public static partial class AddressableKeyExtensions
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static AddressableKey AsAddressable(this AssetKey key)
+            => new(key);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static AddressableKey<T> AsAddressable<T>(this AssetKey<T> key)
+            => new(key);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Load<T>(this AddressableKey key)
             => ((AddressableKey<T>)key).Load();
