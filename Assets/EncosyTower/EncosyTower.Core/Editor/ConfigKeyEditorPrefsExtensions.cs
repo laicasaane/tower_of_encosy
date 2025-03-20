@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.ConfigKeys;
@@ -172,3 +174,5 @@ namespace EncosyTower.Editor.ConfigKeys
         }
     }
 }
+
+#endif
