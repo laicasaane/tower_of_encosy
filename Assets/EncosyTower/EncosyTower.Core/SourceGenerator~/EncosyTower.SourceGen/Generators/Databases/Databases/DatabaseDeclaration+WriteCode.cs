@@ -294,7 +294,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             var isStruct = dbRef.Symbol.IsValueType;
             var typeName = syntax.Identifier.Text;
 
-            p.PrintLine("public static class Instance");
+            p.PrintLine("public static partial class Instance");
             p.OpenScope();
             {
                 p.PrintLine(GENERATED_CODE);
