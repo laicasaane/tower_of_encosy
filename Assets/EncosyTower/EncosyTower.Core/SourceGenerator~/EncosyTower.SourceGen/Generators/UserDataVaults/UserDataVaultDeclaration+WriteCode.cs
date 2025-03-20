@@ -72,6 +72,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private void WriteFields(ref Printer p, string staticKeyword, string fieldPrefix)
         {
+            p.PrintLine(GENERATED_CODE);
             p.PrintBeginLine("private ").Print(staticKeyword).Print("DataStorage ")
                 .Print(fieldPrefix).PrintEndLine("storage;");
             p.PrintEndLine();
@@ -84,6 +85,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 var typeName = def.Symbol.ToFullName();
                 var fieldName = def.FieldName;
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ").Print(staticKeyword).Print(typeName).Print(" ")
                     .Print(fieldName).PrintEndLine(" { get; private set; }")
                     .PrintEndLine();
@@ -106,6 +108,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 queue.Enqueue(def);
             }
 
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("void Initialize(");
             p = p.IncreasedIndent();
             {
@@ -234,6 +237,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         {
             p.Print("#if UNITY_EDITOR").PrintEndLine();
             {
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(RUNTIME_INITIALIZE_ON_LOAD_METHOD);
                 p.PrintBeginLine("internal ").Print(staticKeyword).PrintEndLine("void InitOnDomainReload()");
                 p.OpenScope();
                 {
@@ -256,11 +261,19 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintLine("partial class DataStorage : global::System.IDisposable");
             p.OpenScope();
             {
-                p.PrintBeginLine("private readonly ").Print(ENCRYPTION_BASE).PrintEndLine(" _encryption;");
-                p.PrintBeginLine("private readonly ").Print(ILOGGER).PrintEndLine(" _logger;");
+                p.PrintLine(GENERATED_CODE);
+                p.PrintBeginLine("private readonly ").Print(ENCRYPTION_BASE).PrintEndLine(" _encryption;")
+                    .PrintEndLine();
+
+                p.PrintLine(GENERATED_CODE);
+                p.PrintBeginLine("private readonly ").Print(ILOGGER).PrintEndLine(" _logger;")
+                    .PrintEndLine();
+
+                p.PrintLine(GENERATED_CODE);
                 p.PrintBeginLine("private readonly ").Print(TASK_ARRAY_POOL).PrintEndLine(" _taskArrayPool;");
                 p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public DataStorage(");
                 p = p.IncreasedIndent();
                 {
@@ -287,6 +300,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public void Dispose()");
                 p.OpenScope();
                 {
@@ -303,6 +317,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         .PrintEndLine();
                 }
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public void Initialize()");
                 p.OpenScope();
                 {
@@ -315,6 +330,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public void MarkDirty(bool isDirty)");
                 p.OpenScope();
                 {
@@ -326,6 +342,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ").PrintEndLine("UnityTask LoadFromDeviceAsync()");
                 p.OpenScope();
                 {
@@ -357,6 +374,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ").PrintEndLine("UnityTask LoadFromCloudAsync(");
                 p = p.IncreasedIndent();
                 {
@@ -426,6 +444,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ").PrintEndLine("UnityTask SaveToCloudAsync()");
                 p.OpenScope();
                 {
@@ -457,6 +476,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public void CreateData()");
                 p.OpenScope();
                 {
@@ -468,6 +488,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public void SaveToDevice()");
                 p.OpenScope();
                 {
@@ -479,6 +500,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public void Save(bool forceToCloud)");
                 p.OpenScope();
                 {
@@ -490,6 +512,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ").PrintEndLine("UnityTask SaveAsync(bool forceToCloud)");
                 p.OpenScope();
                 {
@@ -521,6 +544,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public void DeepCloneDataFromCloudToDevice()");
                 p.OpenScope();
                 {
@@ -532,6 +556,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public void SetUserData(string userId, string version)");
                 p.OpenScope();
                 {
@@ -549,6 +574,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private static void WriteCollectionsClass(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
         {
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public static class Collections");
             p.OpenScope();
             {
@@ -556,6 +582,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     var name = StringUtils.ToSnakeCase(def.DataType.Name).ToUpperInvariant();
 
+                    p.PrintLine(GENERATED_CODE);
                     p.PrintBeginLine("public static readonly ").Print(STRING_ID).Print(" ").Print(name)
                         .Print(" = ").Print(STRING_ID_MAKE).Print("(nameof(").Print(name).PrintEndLine("));")
                         .PrintEndLine();
