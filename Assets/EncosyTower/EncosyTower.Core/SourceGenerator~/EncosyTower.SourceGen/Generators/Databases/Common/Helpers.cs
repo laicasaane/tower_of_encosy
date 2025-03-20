@@ -14,7 +14,7 @@
         public const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
         public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Databases.DatabaseGenerator\", \"{SourceGenVersion.VALUE}\")]";
         public const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
-        public const string GENERATED_ASSET_NAME = $"[global::{DATABASES_NAMESPACE}.SourceGen.GeneratedAssetNameConstant(typeof({{0}}))]";
+        public const string GENERATED_ASSET_NAME = $"[global::{DATABASES_NAMESPACE}.SourceGen.GeneratedAssetNameConstant(typeof({{0}}), typeof({{1}}))]";
         public const string STRUCT_LAYOUT_AUTO = "[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Auto)]";
 
         public const string DATA_NAMESPACE = "EncosyTower.Data";

@@ -13,10 +13,13 @@ namespace EncosyTower.Databases.SourceGen
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class GeneratedAssetNameConstantAttribute : Attribute
     {
+        public Type ContainerType { get; }
+
         public Type AssetType { get; }
 
-        public GeneratedAssetNameConstantAttribute(Type assetType)
+        public GeneratedAssetNameConstantAttribute(Type containerType, Type assetType)
         {
+            ContainerType = containerType;
             AssetType = assetType;
         }
     }
