@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.Logging;
+using EncosyTower.StringIds;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
 
@@ -18,11 +19,11 @@ namespace EncosyTower.Databases
         [SerializeField]
         internal DataTableAssetBase[] _redundantTabless = new DataTableAssetBase[0];
 
-        private readonly Dictionary<string, DataTableAssetBase> _nameToAsset = new();
+        private readonly Dictionary<StringId, DataTableAssetBase> _idToAsset = new();
         private readonly Dictionary<Type, DataTableAssetBase> _typeToAsset = new();
-        private readonly Dictionary<Type, List<string>> _typeToNames = new();
+        private readonly Dictionary<Type, List<StringId>> _typeToIds = new();
 
-        protected IReadOnlyDictionary<string, DataTableAssetBase> NameToAsset => _nameToAsset;
+        protected IReadOnlyDictionary<StringId, DataTableAssetBase> IdToAsset => _idToAsset;
 
         protected IReadOnlyDictionary<Type, DataTableAssetBase> TypeToAsset => _typeToAsset;
 
@@ -41,18 +42,18 @@ namespace EncosyTower.Databases
 
             var tables = Tables.Span;
             var assetsLength = tables.Length;
-            var nameToAsset = _nameToAsset;
+            var idToAsset = _idToAsset;
             var typeToAsset = _typeToAsset;
-            var typeToNames = _typeToNames;
+            var typeToIds = _typeToIds;
 
-            nameToAsset.Clear();
-            nameToAsset.EnsureCapacity(assetsLength);
+            idToAsset.Clear();
+            idToAsset.EnsureCapacity(assetsLength);
 
             typeToAsset.Clear();
             typeToAsset.EnsureCapacity(assetsLength);
 
-            typeToNames.Clear();
-            typeToNames.EnsureCapacity(assetsLength);
+            typeToIds.Clear();
+            typeToIds.EnsureCapacity(assetsLength);
 
             for (var i = 0; i < assetsLength; i++)
             {
@@ -66,8 +67,9 @@ namespace EncosyTower.Databases
 
                 var type = table.GetType();
                 var name = table.name;
+                var id = StringToId.MakeFromManaged(name);
 
-                nameToAsset[name] = table;
+                idToAsset[id] = table;
 
                 if (typeToAsset.TryGetValue(type, out var otherAsset))
                 {
@@ -78,12 +80,12 @@ namespace EncosyTower.Databases
                     typeToAsset[type] = table;
                 }
 
-                if (typeToNames.TryGetValue(type, out var names) == false)
+                if (typeToIds.TryGetValue(type, out var ids) == false)
                 {
-                    typeToNames[type] = names = new(1);
+                    typeToIds[type] = ids = new(1);
                 }
 
-                names.Add(name);
+                ids.Add(id);
                 table.Initialize();
             }
 
@@ -99,32 +101,40 @@ namespace EncosyTower.Databases
 
             Initialized = false;
 
-            foreach (var asset in _nameToAsset.Values)
+            foreach (var asset in _idToAsset.Values)
             {
                 asset.Deinitialize();
             }
 
-            _nameToAsset.Clear();
+            _idToAsset.Clear();
             _typeToAsset.Clear();
-            _typeToNames.Clear();
+            _typeToIds.Clear();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<DataTableAssetBase> GetDataTableAsset([NotNull] string name)
             => TryGetDataTableAsset(name, out var asset) ? asset : default(Option<DataTableAssetBase>);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetDataTableAsset([NotNull] string name, out DataTableAssetBase tableAsset)
+            => TryGetDataTableAsset(StringToId.MakeFromManaged(name), out tableAsset);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<DataTableAssetBase> GetDataTableAsset(StringId id)
+            => TryGetDataTableAsset(id, out var asset) ? asset : default(Option<DataTableAssetBase>);
+
+        public bool TryGetDataTableAsset(StringId id, out DataTableAssetBase tableAsset)
         {
             ThrowsDatabaseIsNotInitialized();
 
-            if (_nameToAsset.TryGetValue(name, out var asset))
+            if (_idToAsset.TryGetValue(id, out var asset))
             {
                 tableAsset = asset;
                 return true;
             }
             else
             {
-                LogErrorCannotFindAsset(name, this);
+                LogErrorCannotFindAsset(id, this);
             }
 
             tableAsset = null;
@@ -138,7 +148,7 @@ namespace EncosyTower.Databases
         public bool TryGetDataTableAsset([NotNull] Type type, out DataTableAssetBase tableAsset)
         {
             ThrowsDatabaseIsNotInitialized();
-            LogWarningAmbiguousTypeAtGetDataTableAsset(type, _typeToNames, this);
+            LogWarningAmbiguousTypeAtGetDataTableAsset(type, _typeToIds, this);
 
             if (_typeToAsset.TryGetValue(type, out var asset))
             {
@@ -166,7 +176,7 @@ namespace EncosyTower.Databases
 
             var type = typeof(T);
 
-            LogWarningAmbiguousTypeAtGetDataTableAsset(type, _typeToNames, this);
+            LogWarningAmbiguousTypeAtGetDataTableAsset(type, _typeToIds, this);
 
             if (_typeToAsset.TryGetValue(type, out var asset))
             {
@@ -190,15 +200,26 @@ namespace EncosyTower.Databases
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<T> GetDataTableAsset<T>([NotNull] string name) where T : DataTableAssetBase
+        public Option<T> GetDataTableAsset<T>([NotNull] string name)
+            where T : DataTableAssetBase
             => TryGetDataTableAsset<T>(name, out var asset) ? asset : default(Option<T>);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetDataTableAsset<T>([NotNull] string name, out T tableAsset)
+            where T : DataTableAssetBase
+            => TryGetDataTableAsset<T>(StringToId.MakeFromManaged(name), out tableAsset);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<T> GetDataTableAsset<T>(StringId id)
+            where T : DataTableAssetBase
+            => TryGetDataTableAsset<T>(id, out var asset) ? asset : default(Option<T>);
+
+        public bool TryGetDataTableAsset<T>(StringId id, out T tableAsset)
             where T : DataTableAssetBase
         {
             ThrowsDatabaseIsNotInitialized();
 
-            if (_nameToAsset.TryGetValue(name, out var asset))
+            if (_idToAsset.TryGetValue(id, out var asset))
             {
                 if (asset is T assetT)
                 {
@@ -212,7 +233,7 @@ namespace EncosyTower.Databases
             }
             else
             {
-                LogErrorCannotFindAsset(name, this);
+                LogErrorCannotFindAsset(id, this);
             }
 
             tableAsset = null;
@@ -252,9 +273,14 @@ namespace EncosyTower.Databases
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void LogErrorCannotFindAsset(string name, DatabaseAsset context)
+        private static void LogErrorCannotFindAsset(StringId id, DatabaseAsset context)
         {
-            DevLoggerAPI.LogError(context, $"Cannot find any table asset by the name '{name}'.");
+            var name = IdToString.GetManaged(id);
+            var info = string.IsNullOrEmpty(name)
+                ? $"id '{id}'"
+                : $"name '{name}'";
+
+            DevLoggerAPI.LogError(context, $"Cannot find any table asset by {info}.");
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
@@ -272,20 +298,25 @@ namespace EncosyTower.Databases
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogWarningAmbiguousTypeAtGetDataTableAsset(
               Type type
-            , Dictionary<Type, List<string>> typeToNames
+            , Dictionary<Type, List<StringId>> typeToIds
             , DatabaseAsset context
         )
         {
-            if (typeToNames.TryGetValue(type, out var names) == false || names.Count < 2)
+            if (typeToIds.TryGetValue(type, out var ids) == false || ids.Count < 2)
             {
                 return;
             }
+
+            var name = IdToString.GetManaged(ids[0]);
+            var info =  string.IsNullOrEmpty(name)
+                ? $"by id '{ids[0]}'"
+                : $"named '{name}'";
 
             DevLoggerAPI.LogWarning(
                   context
                 , $"It is unreliable to get a table asset by the type '{type}' " +
                   $"because it is the type of multiple assets of different names.\n" +
-                  $"The method overload always returns the asset named '{names[0]}' " +
+                  $"The method overload always returns the asset {info} " +
                   $"because it is the first that was registered.\n" +
                   $"Please use the overload that takes asset names into account."
             );

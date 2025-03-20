@@ -21,6 +21,8 @@ namespace EncosyTower.Databases
 
         public string AssetName { get; set; }
 
+        public bool WithInstanceAPI { get; set; }
+
         public DatabaseAttribute(params Type[] converters)
         {
             Converters = converters ?? Array.Empty<Type>();

@@ -19,6 +19,8 @@ namespace EncosyTower.SourceGen.Generators.Databases
 
         public string AssetName { get; set; }
 
+        public bool WithInstanceAPI { get; set; }
+
         public DatabaseRef(TypeDeclarationSyntax syntax, ITypeSymbol symbol, AttributeData attribute)
         {
             Syntax = syntax;

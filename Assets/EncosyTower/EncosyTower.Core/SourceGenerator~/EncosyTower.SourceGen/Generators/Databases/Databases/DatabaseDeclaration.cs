@@ -23,6 +23,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             var attrib = DatabaseRef.Attribute;
             var args = attrib.NamedArguments;
             var databaseAssetName = string.Empty;
+            var withInstanceAPI = false;
 
             foreach (var arg in args)
             {
@@ -32,13 +33,24 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 )
                 {
                     databaseAssetName = assetName;
-                    break;
+                    continue;
+                }
+
+                if (arg.Key == "WithInstanceAPI"
+                    && arg.Value.Kind == TypedConstantKind.Primitive
+                    && arg.Value.Value is bool withAPI
+                )
+                {
+                    withInstanceAPI = withAPI;
+                    continue;
                 }
             }
 
             DatabaseRef.AssetName = string.IsNullOrWhiteSpace(databaseAssetName)
                 ? $"DatabaseAsset_{DatabaseRef.Syntax.Identifier.Text}"
                 : databaseAssetName;
+
+            DatabaseRef.WithInstanceAPI = withInstanceAPI;
         }
 
         private void InitializeNamingStrategy()

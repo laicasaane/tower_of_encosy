@@ -7,7 +7,7 @@
     using EncosyTower.Tests.DataConverters;
     using EncosyTower.Databases;
 
-    [Database(NamingStrategy.SnakeCase, typeof(IntWrapperConverter))]
+    [Database(NamingStrategy.SnakeCase, typeof(IntWrapperConverter), WithInstanceAPI = true)]
     public partial struct SampleDatabase
     {
         [Table] public readonly HeroDataTableAsset Heroes => Get_Heroes();

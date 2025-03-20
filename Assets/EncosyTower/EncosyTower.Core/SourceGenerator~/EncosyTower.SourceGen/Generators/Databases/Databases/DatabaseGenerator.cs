@@ -43,6 +43,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             token.ThrowIfCancellationRequested();
 
             return node is TypeDeclarationSyntax typeSyntax
+                && typeSyntax.Modifiers.Any(SyntaxKind.StaticKeyword) == false
                 && IsSupportedTypeSyntax(typeSyntax)
                 && typeSyntax.AttributeLists.Count > 0
                 && typeSyntax.HasAttributeCandidate("EncosyTower.Databases", "Database");
@@ -57,6 +58,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
 
             if (context.SemanticModel.Compilation.IsValidCompilation(DATABASES_NAMESPACE, SKIP_ATTRIBUTE) == false
                 || context.Node is not TypeDeclarationSyntax typeSyntax
+                || typeSyntax.Modifiers.Any(SyntaxKind.StaticKeyword)
                 || IsSupportedTypeSyntax(typeSyntax) == false
             )
             {
@@ -143,7 +145,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                         context.OutputSource(
                               outputSourceGenFiles
                             , databaseRef.Syntax
-                            , declaration.WriteCode(databaseRef.AssetName, databaseRef.NamingStrategy, tables)
+                            , declaration.WriteCode(tables)
                             , databaseHintName
                             , databaseSourceFilePath
                             , printer
