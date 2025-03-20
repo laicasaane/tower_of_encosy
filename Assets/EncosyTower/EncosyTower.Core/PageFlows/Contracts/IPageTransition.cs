@@ -34,18 +34,24 @@ namespace EncosyTower.PageFlows
         UnityTask OnHideAsync(PageTransitionOptions options, CancellationToken token);
     }
 
-    public interface IPageBeforeTransitionAsync : IPage
+    public interface IPageBeforeShowAsync : IPage
     {
-        UnityTask OnBeforeTransitionAsync(
-              PageTransition transition
-            , PageContext context
-            , CancellationToken token
-        );
+        UnityTask OnBeforeShowAsync(PageContext context, CancellationToken token);
     }
 
-    public interface IPageAfterTransition : IPage
+    public interface IPageBeforeHideAsync : IPage
     {
-        void OnAfterTransition(PageTransition transition, PageContext context);
+        UnityTask OnBeforeHideAsync(PageContext context, CancellationToken token);
+    }
+
+    public interface IPageAfterShow : IPage
+    {
+        void OnAfterShow(PageContext context);
+    }
+
+    public interface IPageAfterHide : IPage
+    {
+        void OnAfterHide(PageContext context);
     }
 
     public interface IPageShowAsync : IPage

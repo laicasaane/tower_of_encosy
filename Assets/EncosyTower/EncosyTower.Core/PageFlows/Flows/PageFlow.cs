@@ -265,29 +265,21 @@ namespace EncosyTower.PageFlows
 
                 if (token.IsCancellationRequested == false)
                 {
-                    {
-                        var operation = PageTransition.Show;
+                    (pageToShow as IPageAfterShow)?.OnAfterShow(context);
 
-                        (pageToShow as IPageAfterTransition)?.OnAfterTransition(operation, context);
+                    pageToShowTransition?.OnAfterTransition(
+                          PageTransition.Show
+                        , context.ShowOptions
+                        , context.HideOptions
+                    );
 
-                        pageToShowTransition?.OnAfterTransition(
-                              operation
-                            , context.ShowOptions
-                            , context.HideOptions
-                        );
-                    }
+                    (pageToHide as IPageAfterHide)?.OnAfterHide(context);
 
-                    {
-                        var operation = PageTransition.Hide;
-
-                        (pageToHide as IPageAfterTransition)?.OnAfterTransition(operation, context);
-
-                        pageToHideTransition?.OnAfterTransition(
-                              operation
-                            , context.ShowOptions
-                            , context.HideOptions
-                        );
-                    }
+                    pageToHideTransition?.OnAfterTransition(
+                          PageTransition.Hide
+                        , context.ShowOptions
+                        , context.HideOptions
+                    );
 
                     await Publisher.PublishAsync(
                           new EndTransitionMessage(pageToHide, pageToShow, token)
@@ -407,29 +399,21 @@ namespace EncosyTower.PageFlows
             PageTransitionOptions showOptions = context.ShowOptions;
             PageTransitionOptions hideOptions = context.HideOptions;
 
-            {
-                var direction = PageTransition.Show;
+            tasks[0] = (pageToShow as IPageBeforeShowAsync)
+                ?.OnBeforeShowAsync(context, token)
+                ?? UnityTasks.GetCompleted();
 
-                tasks[0] = (pageToShow as IPageBeforeTransitionAsync)
-                    ?.OnBeforeTransitionAsync(direction, context, token)
-                    ?? UnityTasks.GetCompleted();
+            tasks[1] = pageToShowTransition
+                ?.OnBeforeTransitionAsync(PageTransition.Show, showOptions, hideOptions, token)
+                ?? UnityTasks.GetCompleted();
 
-                tasks[1] = pageToShowTransition
-                    ?.OnBeforeTransitionAsync(direction, showOptions, hideOptions, token)
-                    ?? UnityTasks.GetCompleted();
-            }
+            tasks[2] = (pageToHide as IPageBeforeHideAsync)
+                ?.OnBeforeHideAsync(context, token)
+                ?? UnityTasks.GetCompleted();
 
-            {
-                var direction = PageTransition.Hide;
-
-                tasks[2] = (pageToHide as IPageBeforeTransitionAsync)
-                    ?.OnBeforeTransitionAsync(direction, context, token)
-                    ?? UnityTasks.GetCompleted();
-
-                tasks[3] = pageToHideTransition
-                    ?.OnBeforeTransitionAsync(direction, showOptions, hideOptions, token)
-                    ?? UnityTasks.GetCompleted();
-            }
+            tasks[3] = pageToHideTransition
+                ?.OnBeforeTransitionAsync(PageTransition.Hide, showOptions, hideOptions, token)
+                ?? UnityTasks.GetCompleted();
 
             await UnityTasks.WhenAll(tasks);
         }
