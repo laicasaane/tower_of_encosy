@@ -8,6 +8,10 @@ namespace EncosyTower.Serialization
     public abstract class ParsableStructConverter<T> : TypeConverter
         where T : struct, ITryParse<T>
     {
+        public virtual bool IgnoreCase => true;
+
+        public virtual bool AllowMatchingMetadataAttribute => true;
+
         public sealed override bool CanConvertFrom(
               ITypeDescriptorContext context
             , Type sourceType
@@ -22,8 +26,9 @@ namespace EncosyTower.Serialization
             , object value
         )
         {
-            var defaultValue = default(T);
-            return value is string str ? (defaultValue.TryParse(str, out var result) ? result : defaultValue) : value;
+            return value is string str
+                ? (default(T).TryParse(str, out var result, IgnoreCase, AllowMatchingMetadataAttribute) ? result : default)
+                : value;
         }
     }
 }

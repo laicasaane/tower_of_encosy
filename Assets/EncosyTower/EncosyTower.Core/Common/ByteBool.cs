@@ -1,12 +1,15 @@
 namespace EncosyTower.Common
 {
     using System;
+    using System.ComponentModel;
     using System.Runtime.CompilerServices;
     using EncosyTower.Conversion;
+    using EncosyTower.Serialization;
 
     /// <summary>
     /// Represents a boolean value as a byte.
     /// </summary>
+    [TypeConverter(typeof(TypeConverter))]
     public readonly partial struct ByteBool : IEquatable<bool>, IEquatable<ByteBool>
         , IComparable, IComparable<bool>, IComparable<ByteBool>
         , ITryParse<ByteBool>, ITryParseSpan<ByteBool>
@@ -99,10 +102,22 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryParse(string str, out ByteBool result)
-            => TryParse(str.AsSpan(), out result);
+        public bool TryParse(
+              string str
+            , out ByteBool result
+            , bool ignoreCase = true
+            , bool allowMatchingMetadataAttribute = false
+        )
+        {
+            return TryParse(str.AsSpan(), out result);
+        }
 
-        public bool TryParse(ReadOnlySpan<char> str, out ByteBool result)
+        public bool TryParse(
+              ReadOnlySpan<char> str
+            , out ByteBool result
+            , bool ignoreCase = true
+            , bool allowMatchingMetadataAttribute = false
+        )
         {
             var parseResult = bool.TryParse(str, out var value);
             result = value;
@@ -184,6 +199,10 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator false(ByteBool value)
             => value._raw == FALSE;
+
+        public sealed class TypeConverter : ParsableStructConverter<ByteBool>
+        {
+        }
     }
 }
 
