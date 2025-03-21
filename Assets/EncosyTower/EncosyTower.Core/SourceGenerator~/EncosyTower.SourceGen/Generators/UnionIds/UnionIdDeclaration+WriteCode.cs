@@ -1784,8 +1784,7 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintBeginLine("result = ").Print(kindName)
-                                .PrintEndLine("Extensions.FixedNames.AsNativeArray(allocator);");
+                            p.PrintBeginLine(kindName).PrintEndLine("Extensions.FixedNames.Get(allocator, out result);");
                             p.PrintLine("return true;");
                         }
                         else
@@ -1840,8 +1839,7 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintBeginLine("result = ").Print(kindName)
-                                .PrintEndLine("Extensions.FixedDisplayNames.AsNativeArray(allocator);");
+                            p.PrintBeginLine(kindName).PrintEndLine("Extensions.FixedDisplayNames.Get(allocator, out result);");
                             p.PrintLine("return true;");
                         }
                         else

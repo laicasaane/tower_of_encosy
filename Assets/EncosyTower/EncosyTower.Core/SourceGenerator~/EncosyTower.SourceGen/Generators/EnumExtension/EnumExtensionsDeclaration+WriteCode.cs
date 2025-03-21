@@ -379,6 +379,31 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.CloseScope();
                 p.PrintEndLine();
 
+                foreach (var fixedTypeName in GeneratorHelpers.FullyQualifiedFixedStringTypeNames)
+                {
+                    p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine($"public static void Get({UNITY_COLLECTIONS_ALLOCATOR} allocator, out global::Unity.Collections.NativeArray<{fixedTypeName}> names)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine($"names = global::Unity.Collections.CollectionHelper.CreateNativeArray<{fixedTypeName}>({ExtensionsName}.Length, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+
+                        var index = 0;
+
+                        foreach (var member in Members)
+                        {
+                            p.PrintLine($"names[{index}] = ({fixedTypeName}){CLASS_DISPLAY_NAMES}.{member.name};");
+                            index++;
+
+                            if (index >= Members.Count)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
+
                 p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value)");
                 p = p.IncreasedIndent();
@@ -446,6 +471,31 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 }
                 p.CloseScope();
                 p.PrintEndLine();
+
+                foreach (var fixedTypeName in GeneratorHelpers.FullyQualifiedFixedStringTypeNames)
+                {
+                    p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine($"public static void Get({UNITY_COLLECTIONS_ALLOCATOR} allocator, out global::Unity.Collections.NativeArray<{fixedTypeName}> names)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine($"names = global::Unity.Collections.CollectionHelper.CreateNativeArray<{fixedTypeName}>({ExtensionsName}.Length, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+
+                        var index = 0;
+
+                        foreach (var member in Members)
+                        {
+                            p.PrintLine($"names[{index}] = ({fixedTypeName}){CLASS_NAMES}.{member.name};");
+                            index++;
+
+                            if (index >= Members.Count)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
 
                 p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value)");

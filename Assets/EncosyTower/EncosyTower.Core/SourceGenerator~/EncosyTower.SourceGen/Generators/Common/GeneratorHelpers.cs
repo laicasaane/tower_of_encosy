@@ -17,6 +17,14 @@ namespace EncosyTower.SourceGen.Generators
         public const string FIELD_PREFIX_UNDERSCORE = "_";
         public const string FIELD_PREFIX_M_UNDERSCORE = "m_";
 
+        public readonly static string[] FullyQualifiedFixedStringTypeNames = new string[] {
+            "global::Unity.Collections.FixedString32Bytes",
+            "global::Unity.Collections.FixedString64Bytes",
+            "global::Unity.Collections.FixedString128Bytes",
+            "global::Unity.Collections.FixedString512Bytes",
+            "global::Unity.Collections.FixedString4096Bytes",
+        };
+
         public static bool IsValidCompilation(
               this Compilation compilation
             , string generatorNamespace
