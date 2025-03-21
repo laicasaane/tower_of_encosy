@@ -33,9 +33,12 @@
             p.PrintEndLine();
 
             p.PrintLine(STRUCT_LAYOUT);
+            p.PrintLine("[global::System.ComponentModel.TypeConverter(typeof(TypeConverter))]");
             p.PrintBeginLine("partial struct ").Print(typeName).Print(" ")
                 .Print(": global::System.IEquatable<").Print(typeName).Print(">")
                 .Print(", global::System.IComparable<").Print(typeName).Print(">")
+                .Print(", global::EncosyTower.Conversion.ITryParse<").Print(typeName).Print(">")
+                .Print(", global::EncosyTower.Conversion.ITryParseSpan<").Print(typeName).Print(">")
                 .PrintEndLine();
 
             p.OpenScope();
@@ -51,6 +54,8 @@
                 WriteConstructor_IdKindSpan_IdUnsigned(ref p, typeName);
                 WriteConstructor_IdKindSpan_IdSigned(ref p, typeName);
                 WritePartialTryParseMethods(ref p);
+                WriteTryParse_String(ref p, typeName);
+                WriteTryParse_Span(ref p, typeName);
                 WriteTryParse_IdKind_IdString(ref p, typeName);
                 WriteTryParse_IdKindString_IdString(ref p, typeName);
                 WriteTryParse_IdKindString_IdUnsigned(ref p, typeName);
@@ -70,6 +75,7 @@
                 WriteGetIdDisplayFixedString(ref p, false);
                 WritePartialAppendMethods(ref p);
                 WriteIdKindEnum(ref p);
+                WriteTypeConverter(ref p, typeName);
                 WriteSerializable(ref p, typeName);
                 WriteIdEnumExtensions(ref p);
             }
@@ -637,6 +643,94 @@
                     p.PrintEndLine();
                 }
             }
+        }
+
+        private void WriteTryParse_String(ref Printer p, string typeName)
+        {
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public bool TryParse(string str, out ")
+                .Print(typeName)
+                .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
+            p.OpenScope();
+            {
+                p.PrintLine("return TryParse(global::System.MemoryExtensions.AsSpan(str), out result, ignoreCase, allowMatchingMetadataAttribute);");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteTryParse_Span(ref Printer p, string typeName)
+        {
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public bool TryParse(global::System.ReadOnlySpan<char> str, out ")
+                .Print(typeName)
+                .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
+            p.OpenScope();
+            {
+                p.PrintLine("if (str.IsEmpty)");
+                p.OpenScope();
+                {
+                    p.PrintLine("result = default;");
+                    p.PrintLine("return false;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.Print("#if NET9_0_OR_GREATER").PrintEndLine();
+                p.PrintLine("var ranges = global::System.Buffers.MemoryExtensions.Split(str, '-');");
+                p.Print("#else").PrintEndLine();
+                p.PrintLine("var ranges = global::System.Buffers.SpanSplitExtensions.Split(str, '-');");
+                p.Print("#endif").PrintEndLine();
+                p.PrintEndLine();
+
+                p.PrintLine("global::System.Range? kindRange = default;");
+                p.PrintLine("global::System.Range? idRange = default;");
+                p.PrintEndLine();
+
+                p.PrintLine("foreach (var range in ranges)");
+                p.OpenScope();
+                {
+                    p.PrintLine("if (kindRange.HasValue == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("kindRange = range;");
+                        p.PrintLine("continue;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (idRange.HasValue == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("idRange = range;");
+                        p.PrintLine("continue;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("result = default;");
+                    p.PrintLine("return false;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("if (kindRange.HasValue == false || idRange.HasValue == false)");
+                p.OpenScope();
+                {
+                    p.PrintLine("result = default;");
+                    p.PrintLine("return false;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("var kindSpan = str[kindRange.Value];");
+                p.PrintLine("var idSpan = str[idRange.Value];");
+                p.PrintEndLine();
+
+                p.PrintLine("return TryParse(kindSpan, idSpan, out result, ignoreCase, allowMatchingMetadataAttribute);");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
         }
 
         private void WriteTryParse_IdKind_IdString(ref Printer p, string typeName)
@@ -1618,6 +1712,22 @@
 
                     order += 1;
                 }
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteTypeConverter(ref Printer p, string typeName)
+        {
+            p.PrintBeginLine("public sealed class TypeConverter : ")
+                .Print("global::EncosyTower.Serialization.ParsableStructConverter<")
+                .Print(typeName).PrintEndLine(">");
+            p.OpenScope();
+            {
+                p.PrintLine("public override bool IgnoreCase => false;");
+                p.PrintEndLine();
+
+                p.PrintLine("public override bool AllowMatchingMetadataAttribute => false;");
             }
             p.CloseScope();
             p.PrintEndLine();
