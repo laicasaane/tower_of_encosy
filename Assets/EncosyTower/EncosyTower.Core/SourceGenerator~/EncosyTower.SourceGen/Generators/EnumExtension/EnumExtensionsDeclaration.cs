@@ -42,6 +42,8 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         public bool OnlyClass { get; set; }
 
+        public bool WithoutTryParse { get; set; }
+
         public EnumExtensionsDeclaration(
               INamedTypeSymbol symbol
             , bool parentIsNamespace

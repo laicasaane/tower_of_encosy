@@ -291,8 +291,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p = p.DecreasedIndent();
                 p.PrintEndLine();
 
-                WriteTryParse(ref p, @this);
-                WriteTryParseSpan(ref p, @this);
+                if (WithoutTryParse == false)
+                {
+                    WriteTryParse(ref p, @this);
+                    WriteTryParseSpan(ref p, @this);
+                }
 
                 if (OnlyNames == false)
                 {
@@ -352,32 +355,29 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
                 }
 
-                if (OnlyNames == false)
+                p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine($"public static global::Unity.Collections.NativeArray<{FixedStringTypeFullyQualifiedName}> AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
+                p.OpenScope();
                 {
-                    p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintLine($"public static global::Unity.Collections.NativeArray<{FixedStringTypeFullyQualifiedName}>.ReadOnly AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
-                    p.OpenScope();
+                    p.PrintLine($"var names = global::Unity.Collections.CollectionHelper.CreateNativeArray<{FixedStringTypeFullyQualifiedName}>({ExtensionsName}.Length, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+
+                    var index = 0;
+
+                    foreach (var member in Members)
                     {
-                        p.PrintLine($"var names = global::Unity.Collections.CollectionHelper.CreateNativeArray<{FixedStringTypeFullyQualifiedName}>({ExtensionsName}.Length, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+                        p.PrintLine($"names[{index}] = {member.name};");
+                        index++;
 
-                        var index = 0;
-
-                        foreach (var member in Members)
+                        if (index >= Members.Count)
                         {
-                            p.PrintLine($"names[{index}] = {member.name};");
-                            index++;
-
-                            if (index >= Members.Count)
-                            {
-                                break;
-                            }
+                            break;
                         }
-
-                        p.PrintLine("return names.AsReadOnly();");
                     }
-                    p.CloseScope();
-                    p.PrintEndLine();
+
+                    p.PrintLine("return names;");
                 }
+                p.CloseScope();
+                p.PrintEndLine();
 
                 p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value)");
@@ -423,32 +423,29 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
                 }
 
-                if (OnlyNames == false)
+                p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine($"public static global::Unity.Collections.NativeArray<{FixedStringTypeFullyQualifiedName}> AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
+                p.OpenScope();
                 {
-                    p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintLine($"public static global::Unity.Collections.NativeArray<{FixedStringTypeFullyQualifiedName}>.ReadOnly AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
-                    p.OpenScope();
+                    p.PrintLine($"var names = global::Unity.Collections.CollectionHelper.CreateNativeArray<{FixedStringTypeFullyQualifiedName}>({ExtensionsName}.Length, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+
+                    var index = 0;
+
+                    foreach (var member in Members)
                     {
-                        p.PrintLine($"var names = global::Unity.Collections.CollectionHelper.CreateNativeArray<{FixedStringTypeFullyQualifiedName}>({ExtensionsName}.Length, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+                        p.PrintLine($"names[{index}] = {member.name};");
+                        index++;
 
-                        var index = 0;
-
-                        foreach (var member in Members)
+                        if (index >= Members.Count)
                         {
-                            p.PrintLine($"names[{index}] = {member.name};");
-                            index++;
-
-                            if (index >= Members.Count)
-                            {
-                                break;
-                            }
+                            break;
                         }
-
-                        p.PrintLine("return names.AsReadOnly();");
                     }
-                    p.CloseScope();
-                    p.PrintEndLine();
+
+                    p.PrintLine("return names;");
                 }
+                p.CloseScope();
+                p.PrintEndLine();
 
                 p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value)");
@@ -492,27 +489,24 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
                 }
 
-                if (OnlyNames == false)
+                p.PrintLine($"private static readonly string[] s_names = new string[]");
+                p.OpenScope();
                 {
-                    p.PrintLine($"private static readonly string[] s_names = new string[]");
-                    p.OpenScope();
+                    foreach (var member in Members)
                     {
-                        foreach (var member in Members)
-                        {
-                            p.PrintLine($"{member.name},");
-                        }
+                        p.PrintLine($"{member.name},");
                     }
-                    p.CloseScope("};");
-                    p.PrintEndLine();
-
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintLine("public static global::System.ReadOnlyMemory<string> AsMemory() => s_names;");
-                    p.PrintEndLine();
-
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintLine("public static global::System.ReadOnlySpan<string> AsSpan() => s_names;");
-                    p.PrintEndLine();
                 }
+                p.CloseScope("};");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine("public static global::System.ReadOnlyMemory<string> AsMemory() => s_names;");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine("public static global::System.ReadOnlySpan<string> AsSpan() => s_names;");
+                p.PrintEndLine();
 
                 p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"public static string Get({FullyQualifiedName} value)");
@@ -547,27 +541,24 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
                 }
 
-                if (OnlyNames == false)
+                p.PrintLine($"private static readonly string[] s_names = new string[]");
+                p.OpenScope();
                 {
-                    p.PrintLine($"private static readonly string[] s_names = new string[]");
-                    p.OpenScope();
+                    foreach (var member in Members)
                     {
-                        foreach (var member in Members)
-                        {
-                            p.PrintLine($"{member.name},");
-                        }
+                        p.PrintLine($"{member.name},");
                     }
-                    p.CloseScope("};");
-                    p.PrintEndLine();
-
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintLine("public static global::System.ReadOnlyMemory<string> AsMemory() => s_names;");
-                    p.PrintEndLine();
-
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintLine("public static global::System.ReadOnlySpan<string> AsSpan() => s_names;");
-                    p.PrintEndLine();
                 }
+                p.CloseScope("};");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine("public static global::System.ReadOnlyMemory<string> AsMemory() => s_names;");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine("public static global::System.ReadOnlySpan<string> AsSpan() => s_names;");
+                p.PrintEndLine();
 
                 p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"public static string Get({FullyQualifiedName} value)");
@@ -618,9 +609,9 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
 
                     p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintLine($"public static global::Unity.Collections.NativeArray<{UnderlyingTypeName}>.ReadOnly AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
+                    p.PrintLine($"public static global::Unity.Collections.NativeArray<{UnderlyingTypeName}> AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
                     p = p.IncreasedIndent();
-                    p.PrintLine($"=> global::Unity.Collections.CollectionHelper.CreateNativeArray<{UnderlyingTypeName}>(s_values, allocator).AsReadOnly();");
+                    p.PrintLine($"=> global::Unity.Collections.CollectionHelper.CreateNativeArray<{UnderlyingTypeName}>(s_values, allocator);");
                     p = p.DecreasedIndent();
                 }
             }
@@ -657,9 +648,9 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
 
                     p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintLine($"public static global::Unity.Collections.NativeArray<{FullyQualifiedName}>.ReadOnly AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
+                    p.PrintLine($"public static global::Unity.Collections.NativeArray<{FullyQualifiedName}> AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
                     p = p.IncreasedIndent();
-                    p.PrintLine($"=> global::Unity.Collections.CollectionHelper.CreateNativeArray<{FullyQualifiedName}>(s_values, allocator).AsReadOnly();");
+                    p.PrintLine($"=> global::Unity.Collections.CollectionHelper.CreateNativeArray<{FullyQualifiedName}>(s_values, allocator);");
                     p = p.DecreasedIndent();
                 }
             }

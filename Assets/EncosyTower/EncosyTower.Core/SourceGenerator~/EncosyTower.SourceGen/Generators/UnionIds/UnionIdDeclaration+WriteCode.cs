@@ -73,6 +73,10 @@
                 WriteGetIdDisplayStringFast(ref p, false);
                 WriteGetIdFixedString(ref p, false);
                 WriteGetIdDisplayFixedString(ref p, false);
+                WriteTryGetNames(ref p);
+                WriteTryGetDisplayNames(ref p);
+                WriteTryGetFixedNames(ref p);
+                WriteTryGetFixedDisplayNames(ref p);
                 WritePartialAppendMethods(ref p);
                 WriteIdKindEnum(ref p);
                 WriteTypeConverter(ref p, typeName);
@@ -1655,6 +1659,212 @@
                 }
 
                 p.PrintLine("return fs;");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteTryGetNames(ref Printer p)
+        {
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public static bool TryGetNames(")
+                .PrintEndLine("IdKind kind, out global::System.ReadOnlyMemory<string> result)");
+            p.OpenScope();
+            {
+                p.PrintLine("switch (kind)");
+                p.OpenScope();
+                {
+                    foreach (var kind in KindRefs)
+                    {
+                        var kindName = kind.name;
+
+                        p.PrintBeginLine("case IdKind.").Print(kindName).PrintEndLine(":");
+                        p.OpenScope();
+
+                        if (kind.isEnum)
+                        {
+                            p.PrintBeginLine("result = ").Print(kindName)
+                                .PrintEndLine("Extensions.Names.AsMemory();");
+                            p.PrintLine("return true;");
+                        }
+                        else
+                        {
+                            p.PrintLine("goto default;");
+                        }
+
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+
+                    p.PrintLine("default:");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("result = global::System.Array.Empty<string>();");
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
+                p.CloseScope();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteTryGetDisplayNames(ref Printer p)
+        {
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public static bool TryGetDisplayNames(")
+                .PrintEndLine("IdKind kind, out global::System.ReadOnlyMemory<string> result)");
+            p.OpenScope();
+            {
+                p.PrintLine("switch (kind)");
+                p.OpenScope();
+                {
+                    foreach (var kind in KindRefs)
+                    {
+                        var kindName = kind.name;
+
+                        p.PrintBeginLine("case IdKind.").Print(kindName).PrintEndLine(":");
+                        p.OpenScope();
+
+                        if (kind.isEnum)
+                        {
+                            p.PrintBeginLine("result = ").Print(kindName)
+                                .PrintEndLine("Extensions.DisplayNames.AsMemory();");
+                            p.PrintLine("return true;");
+                        }
+                        else
+                        {
+                            p.PrintLine("goto default;");
+                        }
+
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+
+                    p.PrintLine("default:");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("result = global::System.Array.Empty<string>();");
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
+                p.CloseScope();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteTryGetFixedNames(ref Printer p)
+        {
+            if (References.unityCollections == false)
+            {
+                return;
+            }
+
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public static bool TryGetFixedNames(")
+                .Print("IdKind kind, global::Unity.Collections.AllocatorManager.AllocatorHandle allocator, ")
+                .Print("out global::Unity.Collections.NativeArray<").Print(FixedStringType)
+                .PrintEndLine("> result)");
+            p.OpenScope();
+            {
+                p.PrintLine("switch (kind)");
+                p.OpenScope();
+                {
+                    foreach (var kind in KindRefs)
+                    {
+                        var kindName = kind.name;
+
+                        p.PrintBeginLine("case IdKind.").Print(kindName).PrintEndLine(":");
+                        p.OpenScope();
+
+                        if (kind.isEnum)
+                        {
+                            p.PrintBeginLine("result = ").Print(kindName)
+                                .PrintEndLine("Extensions.FixedNames.AsNativeArray(allocator);");
+                            p.PrintLine("return true;");
+                        }
+                        else
+                        {
+                            p.PrintLine("goto default;");
+                        }
+
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+
+                    p.PrintLine("default:");
+                    p.OpenScope();
+                    {
+                        p.PrintBeginLine("result = global::Unity.Collections.CollectionHelper.CreateNativeArray<")
+                            .Print(FixedStringType)
+                            .PrintEndLine(">(0, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
+                p.CloseScope();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteTryGetFixedDisplayNames(ref Printer p)
+        {
+            if (References.unityCollections == false)
+            {
+                return;
+            }
+
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public static bool TryGetFixedDisplayNames(")
+                .Print("IdKind kind, global::Unity.Collections.AllocatorManager.AllocatorHandle allocator, ")
+                .Print("out global::Unity.Collections.NativeArray<").Print(FixedStringType)
+                .PrintEndLine("> result)");
+            p.OpenScope();
+            {
+                p.PrintLine("switch (kind)");
+                p.OpenScope();
+                {
+                    foreach (var kind in KindRefs)
+                    {
+                        var kindName = kind.name;
+
+                        p.PrintBeginLine("case IdKind.").Print(kindName).PrintEndLine(":");
+                        p.OpenScope();
+
+                        if (kind.isEnum)
+                        {
+                            p.PrintBeginLine("result = ").Print(kindName)
+                                .PrintEndLine("Extensions.FixedDisplayNames.AsNativeArray(allocator);");
+                            p.PrintLine("return true;");
+                        }
+                        else
+                        {
+                            p.PrintLine("goto default;");
+                        }
+
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+
+                    p.PrintLine("default:");
+                    p.OpenScope();
+                    {
+                        p.PrintBeginLine("result = global::Unity.Collections.CollectionHelper.CreateNativeArray<")
+                            .Print(FixedStringType)
+                            .PrintEndLine(">(0, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
+                p.CloseScope();
             }
             p.CloseScope();
             p.PrintEndLine();
