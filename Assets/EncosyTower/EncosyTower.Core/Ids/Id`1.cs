@@ -3,11 +3,14 @@ namespace EncosyTower.Ids
     using System;
     using System.Runtime.CompilerServices;
     using EncosyTower.Conversion;
+    using EncosyTower.Serialization;
     using UnityEngine;
 
     public readonly partial struct Id<T>
         : IEquatable<Id<T>>
         , IComparable<Id<T>>
+        , ITryParse<Id<T>>
+        , ITryParseSpan<Id<T>>
     {
         private readonly uint _value;
 
@@ -50,7 +53,43 @@ namespace EncosyTower.Ids
             , ReadOnlySpan<char> format = default
             , IFormatProvider provider = null
         )
-            => _value.TryFormat(destination, out charsWritten, format, provider);
+        {
+            return _value.TryFormat(destination, out charsWritten, format, provider);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryParse(
+              string str
+            , out Id<T> result
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
+        {
+            return TryParse(str.AsSpan(), out result, ignoreCase, allowMatchingMetadataAttribute);
+        }
+
+        public bool TryParse(
+              ReadOnlySpan<char> str
+            , out Id<T> result
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
+        {
+            if (str.IsEmpty)
+            {
+                goto FAILED;
+            }
+
+            if (uint.TryParse(str, out var value))
+            {
+                result = new(value);
+                return true;
+            }
+
+        FAILED:
+            result = default;
+            return false;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Id<T>(int value)
@@ -95,6 +134,13 @@ namespace EncosyTower.Ids
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator >=(Id<T> left, Id<T> right)
             => left._value >= right._value;
+
+        public sealed class TypeConverter : ParsableStructConverter<Id>
+        {
+            public override bool IgnoreCase => false;
+
+            public override bool AllowMatchingMetadataAttribute => false;
+        }
     }
 
     partial struct Id

@@ -1,24 +1,30 @@
 namespace EncosyTower.Ids
 {
     using System;
+    using System.Buffers;
+    using System.ComponentModel;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using EncosyTower.Conversion;
+    using EncosyTower.Serialization;
     using UnityEngine;
 
     [StructLayout(LayoutKind.Explicit)]
-    public readonly partial struct Id2
+    [TypeConverter(typeof(TypeConverter))]
+    public readonly partial record struct Id2
         : IEquatable<Id2>
         , IComparable<Id2>
+        , ITryParse<Id2>
+        , ITryParseSpan<Id2>
     {
         [FieldOffset(0)]
         private readonly ulong _value;
 
         [FieldOffset(0)]
-        public readonly Id Y;
+        private readonly Id _y;
 
         [FieldOffset(4)]
-        public readonly Id X;
+        private readonly Id _x;
 
         // ReSharper disable once UnusedMember.Local
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -30,24 +36,38 @@ namespace EncosyTower.Ids
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Id2(Id x, Id y) : this()
         {
-            Y = y;
-            X = x;
+            _y = y;
+            _x = x;
+        }
+
+        public Id X
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _x;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            init => _x = value;
+        }
+
+        public Id Y
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _y;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            init => _y = value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Deconstruct(out Id x, out Id y)
         {
-            x = this.X;
-            y = this.Y;
+            x = _x;
+            y = _y;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Id2 other)
             => _value == other._value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
-            => obj is Id2 other && _value == other._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
@@ -56,12 +76,6 @@ namespace EncosyTower.Ids
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CompareTo(Id2 other)
             => _value.CompareTo(other._value);
-
-#if !UNITY_COLLECTIONS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString()
-            => $"({X}, {Y})";
-#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryFormat(
@@ -87,7 +101,7 @@ namespace EncosyTower.Ids
             destination[openQuoteChars++] = '(';
             destination = destination[openQuoteChars..];
 
-            if (X.TryFormat(destination, out var xChars, format, provider) == false)
+            if (_x.TryFormat(destination, out var xChars, format, provider) == false)
             {
                 return False(out charsWritten);
             }
@@ -104,7 +118,7 @@ namespace EncosyTower.Ids
             destination[delimiterChars++] = ' ';
             destination = destination[delimiterChars..];
 
-            if (Y.TryFormat(destination, out var yChars, format, provider) == false)
+            if (_y.TryFormat(destination, out var yChars, format, provider) == false)
             {
                 return False(out charsWritten);
             }
@@ -121,6 +135,69 @@ namespace EncosyTower.Ids
 
             charsWritten = openQuoteChars + xChars + delimiterChars + yChars + closeQuoteChars;
             return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryParse(
+              string str
+            , out Id2 result
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
+        {
+            return TryParse(str.AsSpan(), out result, ignoreCase, allowMatchingMetadataAttribute);
+        }
+
+        public bool TryParse(
+              ReadOnlySpan<char> str
+            , out Id2 result
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
+        {
+            if (str.IsEmpty)
+            {
+                goto FAILED;
+            }
+
+            var ranges = str.Split('-');
+            Range? xRange = default;
+            Range? yRange = default;
+
+            foreach (var range in ranges)
+            {
+                if (xRange.HasValue == false)
+                {
+                    xRange = range;
+                    continue;
+                }
+
+                if (yRange.HasValue == false)
+                {
+                    yRange = range;
+                    continue;
+                }
+
+                goto FAILED;
+            }
+
+            if (xRange.HasValue == false || yRange.HasValue == false)
+            {
+                goto FAILED;
+            }
+
+            var xSpan = str[xRange.Value];
+            var ySpan = str[yRange.Value];
+
+            if (uint.TryParse(xSpan, out var x) && uint.TryParse(ySpan, out var y))
+            {
+                result = new(x, y);
+                return true;
+            }
+
+        FAILED:
+            result = default;
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -154,6 +231,13 @@ namespace EncosyTower.Ids
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator <=(in Id2 left, in Id2 right)
             => left._value <= right._value;
+
+        public sealed class TypeConverter : ParsableStructConverter<Id2>
+        {
+            public override bool IgnoreCase => false;
+
+            public override bool AllowMatchingMetadataAttribute => false;
+        }
 
         [Serializable]
         public partial struct Serializable : ITryConvert<Id2>
@@ -213,7 +297,7 @@ namespace EncosyTower.Ids
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Serializable(Id2 value)
-                => new(value.X, value.Y);
+                => new(value._x, value._y);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(Serializable left, Serializable right)
@@ -249,7 +333,7 @@ namespace EncosyTower.Ids
     using System.Runtime.CompilerServices;
     using Unity.Collections;
 
-    public readonly partial struct Id2
+    partial record struct Id2
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override string ToString()
@@ -258,12 +342,9 @@ namespace EncosyTower.Ids
         public readonly FixedString32Bytes ToFixedString()
         {
             var fs = new FixedString32Bytes();
-            fs.Append('(');
-            fs.Append(X);
-            fs.Append(',');
-            fs.Append(' ');
-            fs.Append(Y);
-            fs.Append(')');
+            fs.Append(_x);
+            fs.Append('-');
+            fs.Append(_y);
             return fs;
         }
 
@@ -286,6 +367,20 @@ namespace EncosyTower.Ids
                 return fs;
             }
         }
+    }
+}
+
+#else
+
+namespace EncosyTower.Ids
+{
+    using System.Runtime.CompilerServices;
+
+    partial record struct Id2
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override string ToString()
+            => $"{X}-{Y}";
     }
 }
 

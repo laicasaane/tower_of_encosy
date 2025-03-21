@@ -2,13 +2,18 @@
 namespace EncosyTower.Ids
 {
     using System;
+    using System.ComponentModel;
     using System.Runtime.CompilerServices;
     using EncosyTower.Conversion;
+    using EncosyTower.Serialization;
     using UnityEngine;
 
+    [TypeConverter(typeof(TypeConverter))]
     public readonly partial struct LongId
         : IEquatable<LongId>
         , IComparable<LongId>
+        , ITryParse<LongId>
+        , ITryParseSpan<LongId>
     {
         private readonly ulong _value;
 
@@ -45,7 +50,43 @@ namespace EncosyTower.Ids
             , ReadOnlySpan<char> format = default
             , IFormatProvider provider = null
         )
-            => _value.TryFormat(destination, out charsWritten, format, provider);
+        {
+            return _value.TryFormat(destination, out charsWritten, format, provider);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryParse(
+              string str
+            , out LongId result
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
+        {
+            return TryParse(str.AsSpan(), out result, ignoreCase, allowMatchingMetadataAttribute);
+        }
+
+        public bool TryParse(
+              ReadOnlySpan<char> str
+            , out LongId result
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
+        {
+            if (str.IsEmpty)
+            {
+                goto FAILED;
+            }
+
+            if (ulong.TryParse(str, out var value))
+            {
+                result = new(value);
+                return true;
+            }
+
+        FAILED:
+            result = default;
+            return false;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator LongId(ulong value)
@@ -78,6 +119,13 @@ namespace EncosyTower.Ids
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator >=(in LongId left, in LongId right)
             => left._value >= right._value;
+
+        public sealed class TypeConverter : ParsableStructConverter<LongId>
+        {
+            public override bool IgnoreCase => false;
+
+            public override bool AllowMatchingMetadataAttribute => false;
+        }
 
         [Serializable]
         public partial struct Serializable : ITryConvert<LongId>
