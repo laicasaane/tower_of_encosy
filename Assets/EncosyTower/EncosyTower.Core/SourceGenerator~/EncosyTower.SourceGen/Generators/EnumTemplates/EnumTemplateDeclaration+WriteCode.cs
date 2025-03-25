@@ -9,6 +9,8 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         private const string IENUM_TEMPLATE = "global::EncosyTower.EnumExtensions.IEnumTemplate<{0}>";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
 
+        private readonly static (string, string)[] s_equalityOps = new[] { ("==", ""), ("!=", "!") };
+
         public string WriteCode()
         {
             var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, Syntax.Parent);
@@ -36,7 +38,8 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             p.PrintEndLine();
 
             ExtensionsRef.WriteCode(ref p);
-            WriteConvertMethods(ref p);
+            WriteAdditionalWrapper(ref p);
+            WriteAdditionalExtensions(ref p);
 
             p = p.DecreasedIndent();
             return p.Result;
@@ -84,12 +87,111 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             }
         }
 
-        private void WriteConvertMethods(ref Printer p)
+        private void WriteAdditionalWrapper(ref Printer p)
+        {
+            var memberRefs = MemberRefs;
+            var map = MemberIndexMap;
+
+            p.PrintBeginLine("partial struct ").PrintEndLine(ExtensionsRef.ExtensionsWrapperName);
+            p = p.IncreasedIndent();
+            {
+                var isFirst = true;
+
+                foreach (var kvp in map)
+                {
+                    var typeSymbol = kvp.Key;
+                    var otherName = typeSymbol.ToFullName();
+                    var indexOrIndices = kvp.Value;
+
+                    if (indexOrIndices.Indices is { })
+                    {
+                        p.PrintBeginLineIf(isFirst, ":", ",")
+                            .Print(" global::System.IEquatable<").Print(otherName).PrintEndLine(">");
+
+                        isFirst = false;
+                    }
+                }
+            }
+            p = p.DecreasedIndent();
+            p.OpenScope();
+            {
+                foreach (var kvp in map)
+                {
+                    var typeSymbol = kvp.Key;
+                    var thisName = ExtensionsRef.ExtensionsWrapperName;
+                    var otherName = typeSymbol.ToFullName();
+                    var extensionsName = ExtensionsRef.ExtensionsName;
+                    var indexOrIndices = kvp.Value;
+
+                    if (indexOrIndices.Indices is { } indices)
+                    {
+                        WriteXXXMethods(
+                              ref p
+                            , memberRefs
+                            , thisName
+                            , otherName
+                            , indices
+                            , extensionsName
+                        );
+                    }
+                }
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private static void WriteXXXMethods(
+              ref Printer p
+            , List<EnumMemberRef> memberRefs
+            , string thisName
+            , string otherName
+            , List<int> indices
+            , string extensionsName
+        )
+        {
+            foreach (var index in indices)
+            {
+                var memberRef = memberRefs[index];
+
+                if (memberRef.isComment)
+                {
+                    continue;
+                }
+
+                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintBeginLine("public readonly bool Equals(").Print(otherName).Print(" other)")
+                    .Print(" => ").Print(extensionsName)
+                    .PrintEndLine(".Equals(Value, other);");
+                p.PrintEndLine();
+
+                foreach (var (op1, op2) in s_equalityOps)
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static bool operator ").Print(op1)
+                        .Print("(").Print(thisName).Print(" left, ").Print(otherName).Print(" right)")
+                        .Print(" => ").Print(op2).Print(extensionsName)
+                        .PrintEndLine(".Equals(left.Value, right);");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static bool operator ").Print(op1)
+                        .Print("(").Print(otherName).Print(" left, ").Print(thisName).Print(" right)")
+                        .Print(" => ").Print(op2).Print(extensionsName)
+                        .PrintEndLine(".Equals(right.Value, left);");
+                    p.PrintEndLine();
+                }
+
+                break;
+            }
+        }
+
+        private void WriteAdditionalExtensions(ref Printer p)
         {
             var memberRefs = MemberRefs;
             var map = MemberIndexMap;
             var @this = ExtensionsRef.ParentIsNamespace ? "this " : "";
             var thisName = EnumName;
+            var underTypeName = UnderlyingTypeName;
 
             p.PrintBeginLine("static partial class ").PrintEndLine(ExtensionsRef.ExtensionsName);
             p.OpenScope();
@@ -102,8 +204,8 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
                     if (indexOrIndices.Indices is { } indices)
                     {
-                        WriteToEnumTypeXXXMethod(ref p, memberRefs, @this, thisName, otherName, indices);
-                        WriteTryConvertXXXMethod(ref p, memberRefs, @this, thisName, otherName, indices);
+                        WriteXXXExtensions(ref p, memberRefs, @this, thisName, otherName, indices, underTypeName);
+                        WriteTryConvertXXXExtensions(ref p, memberRefs, @this, thisName, otherName, indices);
                     }
                     else if (indexOrIndices.Index.HasValue)
                     {
@@ -115,7 +217,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
                 if (memberRefs.Count > 0)
                 {
-                    WriteTryConvertMethod(ref p, memberRefs, @this, thisName);
+                    WriteTryConvertExtension(ref p, memberRefs, @this, thisName);
                 }
             }
             p.CloseScope();
@@ -145,48 +247,67 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             p.PrintEndLine();
         }
 
-        private static void WriteToEnumTypeXXXMethod(
+        private static void WriteXXXExtensions(
               ref Printer p
             , List<EnumMemberRef> memberRefs
             , string @this
             , string thisName
             , string otherName
             , List<int> indices
+            , string underlyingTypeName
         )
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public static ").Print(thisName).Print(" To").Print(thisName)
-                .Print("(").Print(@this).Print(otherName).PrintEndLine(" self)");
-            p.OpenScope();
+            foreach (var index in indices)
             {
-                p.PrintBeginLine("return self switch").PrintEndLine();
+                var memberRef = memberRefs[index];
+
+                if (memberRef.isComment)
+                {
+                    continue;
+                }
+
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintBeginLine("public static bool Equals(")
+                    .Print(@this).Print(thisName).Print(" self, ").Print(otherName).PrintEndLine(" other)");
                 p.OpenScope();
                 {
-                    foreach (var index in indices)
-                    {
-                        var memberRef = memberRefs[index];
-
-                        if (memberRef.isComment)
-                        {
-                            continue;
-                        }
-
-                        var member = memberRef.member;
-
-                        p.PrintBeginLine(otherName).Print(".").Print(member.name)
-                            .Print(" => ").Print(thisName).Print(".").Print(member.name)
-                            .PrintEndLine(",");
-                    }
-
-                    p.PrintLine("_ => default,");
+                    p.PrintBeginLine("var valueSelf = (").Print(underlyingTypeName).PrintEndLine(")self;");
+                    p.PrintBeginLine("var valueOther = (").Print(underlyingTypeName).PrintEndLine(")other;");
+                    p.PrintLine($"return (valueSelf - {memberRef.baseOrder}) == valueOther;");
                 }
-                p.CloseScope("};");
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintBeginLine("public static ").Print(thisName).Print(" To").Print(thisName)
+                    .Print("(").Print(@this).Print(otherName).PrintEndLine(" self)");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("var value = (").Print(underlyingTypeName).PrintEndLine(")self;");
+                    p.PrintBeginLine("return (").Print(thisName)
+                        .Print(")(").Print(underlyingTypeName)
+                        .PrintEndLine($")(value + {memberRef.baseOrder});");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintBeginLine("public static void Convert(")
+                    .Print(@this).Print(thisName).Print(" self, out ").Print(otherName).PrintEndLine(" result)");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("var value = (").Print(underlyingTypeName).PrintEndLine(")self;");
+                    p.PrintBeginLine("result = (").Print(otherName).Print(")(")
+                        .Print(ToTypeName(memberRef.underlyingType))
+                        .PrintEndLine($")(value - {memberRef.baseOrder});");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+                break;
             }
-            p.CloseScope();
-            p.PrintEndLine();
         }
 
-        private static void WriteTryConvertXXXMethod(
+        private static void WriteTryConvertXXXExtensions(
               ref Printer p
             , List<EnumMemberRef> memberRefs
             , string @this
@@ -234,7 +355,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             p.PrintEndLine();
         }
 
-        private static void WriteTryConvertMethod(
+        private static void WriteTryConvertExtension(
               ref Printer p
             , List<EnumMemberRef> memberRefs
             , string @this

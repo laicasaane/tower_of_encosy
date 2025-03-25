@@ -181,6 +181,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                         baseOrder = currentBaseOrder,
                         value = value,
                         fromEnumType = true,
+                        underlyingType = typeSymbol.EnumUnderlyingType.SpecialType,
                         attributes = field.GatherAttributes(),
                         member = new EnumMemberDeclaration {
                             name = memberName,
@@ -366,6 +367,17 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             };
         }
 
+        private static string ToTypeName(SpecialType type)
+        {
+            return type switch {
+                SpecialType.System_Byte => "byte",
+                SpecialType.System_UInt16 => "ushort",
+                SpecialType.System_UInt32 => "uint",
+                SpecialType.System_UInt64 => "ulong",
+                _ => "uint",
+            };
+        }
+
         private static int GetByteCount(string value)
         {
             if (value == null)
@@ -503,6 +515,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             public INamedTypeSymbol typeSymbol;
             public ulong baseOrder;
             public ulong value;
+            public SpecialType underlyingType;
             public bool isComment;
             public bool fromEnumType;
             public EnumMemberDeclaration member;
