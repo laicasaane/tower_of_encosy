@@ -267,12 +267,10 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.PrintLine("public static partial class Keys");
             p.OpenScope();
             {
-                {
-                    p.PrintLine(GENERATED_CODE);
-                    p.PrintBeginLine("public static readonly ").Print(ASSET_KEY)
-                        .Print("<").Print(DATABASE_ASSET).PrintEndLine("> Database = new(Names.DATABASE);");
-                    p.PrintEndLine();
-                }
+                p.PrintLine(GENERATED_CODE);
+                p.PrintBeginLine("public static readonly ").Print(ASSET_KEY)
+                    .Print("<").Print(DATABASE_ASSET).PrintEndLine("> Database = new(Names.DATABASE);");
+                p.PrintEndLine();
 
                 p.PrintLine("public static partial class Tables");
                 p.OpenScope();
@@ -302,22 +300,29 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.PrintLine("public static partial class Ids");
             p.OpenScope();
             {
+                p.PrintLine(GENERATED_CODE);
+                p.PrintBeginLine("private static ").Print(STRING_ID).PrintEndLine(" s_database;");
+                p.PrintEndLine();
 
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintBeginLine("public static ").Print(STRING_ID).PrintEndLine(" Database");
+                p.OpenScope();
                 {
-                    p.PrintLine(GENERATED_CODE);
-                    p.PrintBeginLine("private static ").Print(STRING_ID).PrintEndLine(" s_database;");
-                    p.PrintEndLine();
-
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintBeginLine("public static ").Print(STRING_ID).PrintEndLine(" Database");
-                    p.OpenScope();
-                    {
-                        p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintLine("get => s_database;");
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => s_database;");
                 }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine("public static void Initialize()");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("s_database = ").Print(MAKE_ID).PrintEndLine("(Names.DATABASE);");
+                    p.PrintLine("Tables.Initialize();");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
 
                 p.PrintLine("public static partial class Tables");
                 p.OpenScope();
@@ -361,15 +366,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 }
                 p.CloseScope();
                 p.PrintEndLine();
-
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintLine("public static void Initialize()");
-                p.OpenScope();
-                {
-                    p.PrintBeginLine("s_database = ").Print(MAKE_ID).PrintEndLine("(Names.DATABASE);");
-                    p.PrintLine("Tables.Initialize();");
-                }
-                p.CloseScope();
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -431,28 +427,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public static partial class Tables");
-                p.OpenScope();
-                {
-                    foreach (var table in tables)
-                    {
-                        var tableTypeName = table.Type.ToFullName();
-                        var propName = table.PropertyName;
-
-                        p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                        p.PrintBeginLine("public static ").Print(tableTypeName).Print(" ").PrintEndLine(propName);
-                        p.OpenScope();
-                        {
-                            p.PrintLine(AGGRESSIVE_INLINING);
-                            p.PrintBeginLine("get => s_instance.").Print(propName).PrintEndLine(";");
-                        }
-                        p.CloseScope();
-                        p.PrintEndLine();
-                    }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public static void Initialize(")
                     .PrintIf(isStruct == false, NOT_NULL).PrintIf(isStruct == false, " ")
@@ -492,7 +466,29 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     p.CloseScope();
                 }
                 p.Print("#endif").PrintEndLine();
+                p.PrintEndLine();
 
+                p.PrintLine("public static partial class Tables");
+                p.OpenScope();
+                {
+                    foreach (var table in tables)
+                    {
+                        var tableTypeName = table.Type.ToFullName();
+                        var propName = table.PropertyName;
+
+                        p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                        p.PrintBeginLine("public static ").Print(tableTypeName).Print(" ").PrintEndLine(propName);
+                        p.OpenScope();
+                        {
+                            p.PrintLine(AGGRESSIVE_INLINING);
+                            p.PrintBeginLine("get => s_instance.").Print(propName).PrintEndLine(";");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
             }
             p.CloseScope();
         }
