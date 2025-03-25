@@ -277,7 +277,7 @@ namespace EncosyTower.Common
             }
 
             var dateSpan = str[dateRange.Value];
-            var dateRanges = dateSpan.Split('-');
+            var dateRanges = dateSpan.Split('_');
             Range? yearRange = default;
             Range? monthRange = default;
             Range? dayRange = default;
@@ -435,10 +435,10 @@ namespace EncosyTower.Common
         {
             var fs = new FixedString128Bytes();
             fs.Append(_year);
-            fs.Append('-');
+            fs.Append('_');
             if (_month < 10) fs.Append('0');
             fs.Append(_month);
-            fs.Append('-');
+            fs.Append('_');
             if (_day < 10) fs.Append('0');
             fs.Append(_day);
             fs.Append('T');
@@ -469,10 +469,10 @@ namespace EncosyTower.Common
         {
             var fs = new StringBuilder(32);
             fs.Append(_year);
-            fs.Append('-');
+            fs.Append('_');
             if (_month < 10) fs.Append('0');
             fs.Append(_month);
-            fs.Append('-');
+            fs.Append('_');
             if (_day < 10) fs.Append('0');
             fs.Append(_day);
             fs.Append('T');
