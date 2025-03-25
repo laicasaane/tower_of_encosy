@@ -13,10 +13,8 @@
         public const string COMPLETED_TASK = "global::EncosyTower.Tasks.UnityTasks.GetCompleted()";
         public const string WHEN_ALL_TASKS = "global::EncosyTower.Tasks.UnityTasks.WhenAll(tasks)";
         public const string NOT_NULL = "[global::System.Diagnostics.CodeAnalysis.NotNull]";
-        public const string LOG_ERROR = "global::EncosyTower.Logging.DevLoggerAPI.LogError";
         public const string STRING_ID = "global::EncosyTower.StringIds.StringId<string>";
         public const string STRING_ID_MAKE = "global::EncosyTower.StringIds.StringToId.MakeFromManaged";
-        public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.BeforeSplashScreen)]";
         public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.UserDataVaults.UserDataVaultGenerator\", \"{SourceGenVersion.VALUE}\")]";
         public const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         public const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";

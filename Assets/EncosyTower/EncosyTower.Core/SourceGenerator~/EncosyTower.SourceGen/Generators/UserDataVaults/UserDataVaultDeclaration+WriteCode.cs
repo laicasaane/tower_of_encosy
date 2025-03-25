@@ -57,8 +57,9 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 WriteFields(ref p, staticKeyword, fieldPrefix);
                 WriteProperties(ref p, staticKeyword, accessDefs);
                 WriteInitialize(ref p, staticKeyword, fieldPrefix, accessDefs);
+                WriteDeinitialize(ref p, staticKeyword, fieldPrefix, accessDefs);
                 WriteOnUserDataLoaded(ref p, staticKeyword, accessDefs);
-                WriteInitOnDomainReload(ref p, staticKeyword, fieldPrefix, accessDefs);
+                WriteSave(ref p, staticKeyword, fieldPrefix);
                 WriteDataStorageClass(ref p, orderedStorageDefs);
                 WriteIdsClass(ref p, orderedStorageDefs);
                 WriteDataInspector(ref p, orderedStorageDefs);
@@ -76,6 +77,11 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintLine(GENERATED_CODE);
             p.PrintBeginLine("private ").Print(staticKeyword).Print("DataStorage ")
                 .Print(fieldPrefix).PrintEndLine("storage;");
+            p.PrintEndLine();
+
+            p.PrintLine(GENERATED_CODE);
+            p.PrintBeginLine("private ").Print(staticKeyword).Print("bool ")
+                .Print(fieldPrefix).PrintEndLine("isSavedOnLoaded;");
             p.PrintEndLine();
         }
 
@@ -110,12 +116,13 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("void Initialize(");
+            p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine(" async UnityTask InitializeAsync(");
             p = p.IncreasedIndent();
             {
                 p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
                 p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
                 p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
+                p.PrintLine(", bool loadFromCloud");
             }
             p = p.DecreasedIndent();
             p.PrintLine(")");
@@ -166,16 +173,36 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     Write(ref p, fieldPrefix, def);
                 }
 
+                p.PrintEndLine();
+
                 foreach (var kv in loopMap)
                 {
                     var type = kv.Key;
 
-                    p.PrintBeginLine(LOG_ERROR).Print("(")
+                    p.PrintBeginLine("logger.LogError(")
                         .Print("\"Detect cycling dependency in the constructor of type \\\"")
                         .Print(type.Name)
                         .PrintEndLine("\\\"\");");
                     p.PrintEndLine();
                 }
+
+                p.PrintLine("if (loadFromCloud)");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("await ").Print(fieldPrefix).PrintEndLine("storage.LoadFromCloudAsync();");
+                }
+                p.CloseScope();
+                p.PrintLine("else");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("await ").Print(fieldPrefix).PrintEndLine("storage.LoadFromDeviceAsync();");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.CreateDataIfNotExist();");
+                p.PrintLine("OnUserDataLoaded();");
+                p.PrintLine("Save();");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -232,6 +259,58 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
         }
 
+        private void WriteDeinitialize(
+              ref Printer p
+            , string staticKeyword
+            , string fieldPrefix
+            , List<UserDataAccessDefinition> defs
+        )
+        {
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("internal ").Print(staticKeyword).PrintEndLine("void Deinitialize()");
+            p.OpenScope();
+            {
+                p.PrintBeginLine(fieldPrefix).PrintEndLine("isSavedOnLoaded = false;");
+                p.PrintEndLine();
+
+                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage?.Dispose();");
+                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage = default;");
+                p.PrintEndLine();
+
+                foreach (var def in defs)
+                {
+                    p.PrintBeginLine(def.FieldName).PrintEndLine(" = null;");
+                }
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteSave(
+              ref Printer p
+            , string staticKeyword
+            , string fieldPrefix
+        )
+        {
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("void Save(bool forceToCloud = false)");
+            p.OpenScope();
+            {
+                p.PrintBeginLine("if (").Print(fieldPrefix).PrintEndLine("isSavedOnLoaded == false)");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine(fieldPrefix).PrintEndLine("isSavedOnLoaded = true;");
+                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.MarkDirty(true);");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.Save(forceToCloud);");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
         private static void WriteOnUserDataLoaded(
               ref Printer p
             , string staticKeyword
@@ -252,34 +331,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
             p.CloseScope();
             p.PrintEndLine();
-        }
-
-        private void WriteInitOnDomainReload(
-              ref Printer p
-            , string staticKeyword
-            , string fieldPrefix
-            , List<UserDataAccessDefinition> defs
-        )
-        {
-            p.Print("#if UNITY_EDITOR").PrintEndLine();
-            {
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintLine(RUNTIME_INITIALIZE_ON_LOAD_METHOD);
-                p.PrintBeginLine("internal ").Print(staticKeyword).PrintEndLine("void InitOnDomainReload()");
-                p.OpenScope();
-                {
-                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage?.Dispose();");
-                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage = default;");
-                    p.PrintEndLine();
-
-                    foreach (var def in defs)
-                    {
-                        p.PrintBeginLine(def.FieldName).PrintEndLine(" = null;");
-                    }
-                }
-                p.CloseScope();
-            }
-            p.Print("#endif").PrintEndLine().PrintEndLine();
         }
 
         private void WriteDataStorageClass(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
@@ -497,6 +548,24 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     else
                     {
                         p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine("public void CreateDataIfNotExist()");
+                p.OpenScope();
+                {
+                    foreach (var def in defs)
+                    {
+                        p.PrintBeginLine("if (").Print(def.DataType.Name).PrintEndLine(".IsDataValid == false)");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine(def.DataType.Name).PrintEndLine(".CreateData();");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
                     }
                 }
                 p.CloseScope();
