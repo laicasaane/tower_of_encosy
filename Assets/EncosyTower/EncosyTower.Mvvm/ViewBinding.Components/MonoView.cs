@@ -45,7 +45,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
             get => _binders ??= new(this);
         }
 
-        public bool Initialized { get; private set; }
+        public bool IsInitialized { get; private set; }
 
         protected async void Awake()
         {
@@ -94,14 +94,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
             }
 
             InitializeInternal(context, alsoStartListening);
-            Initialized = true;
+            IsInitialized = true;
         }
 
         public async UnityTask InitializeAsync(bool alsoStartListening, CancellationToken token = default)
         {
             var context = await GetContextAsync(token);
             InitializeInternal(context, alsoStartListening);
-            Initialized = true;
+            IsInitialized = true;
         }
 
         private void InitializeInternal(IObservableObject context, bool alsoStartListening)
@@ -117,7 +117,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
 
         public void StartListening()
         {
-            if (Initialized == false)
+            if (IsInitialized == false)
             {
                 ErrorNotInitialized(this);
                 return;
