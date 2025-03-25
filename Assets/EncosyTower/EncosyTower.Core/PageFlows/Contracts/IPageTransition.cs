@@ -44,6 +44,16 @@ namespace EncosyTower.PageFlows
         UnityTask OnBeforeHideAsync(PageContext context, CancellationToken token);
     }
 
+    public interface IPageBeforeShow : IPage
+    {
+        void OnBeforeShow(PageContext context);
+    }
+
+    public interface IPageBeforeHide : IPage
+    {
+        void OnBeforeHide(PageContext context);
+    }
+
     public interface IPageAfterShow : IPage
     {
         void OnAfterShow(PageContext context);

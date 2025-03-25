@@ -416,6 +416,14 @@ namespace EncosyTower.PageFlows
                 ?? UnityTasks.GetCompleted();
 
             await UnityTasks.WhenAll(tasks);
+
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+
+            (pageToShow as IPageBeforeShow)?.OnBeforeShow(context);
+            (pageToHide as IPageBeforeHide)?.OnBeforeHide(context);
         }
 
         private static async UnityTask ParallelTransitionAsync(
