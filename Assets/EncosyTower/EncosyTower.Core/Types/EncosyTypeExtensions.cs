@@ -76,7 +76,7 @@ namespace EncosyTower.Types
                 return VOID_TYPE_NAME;
             }
 
-            var friendlyName = fullName ? type.GetName() : type.GetFullName();
+            var friendlyName = fullName ? type.GetFullName() : type.GetName();
 
             if (type.IsGenericType)
             {
