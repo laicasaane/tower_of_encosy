@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
+using EncosyTower.Initialization;
 using EncosyTower.Logging;
 using EncosyTower.StringIds;
 using EncosyTower.UnityExtensions;

@@ -1,4 +1,4 @@
-using EncosyTower.Common;
+using EncosyTower.Initialization;
 
 namespace EncosyTower.Databases
 {

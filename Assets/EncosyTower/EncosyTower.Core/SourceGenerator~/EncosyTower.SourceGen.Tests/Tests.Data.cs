@@ -187,9 +187,9 @@ namespace EncosyTower.Tests.Data.Heroes
 namespace EncosyTower.Tests.Data.Enemies
 {
     using System.Collections.Generic;
-    using EncosyTower.Common;
     using EncosyTower.Data;
     using EncosyTower.Databases;
+    using EncosyTower.Initialization;
     using UnityEngine;
 
     public partial class EnemyData : IData, IInitializable

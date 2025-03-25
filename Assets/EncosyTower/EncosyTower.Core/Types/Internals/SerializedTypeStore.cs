@@ -28,7 +28,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
-using EncosyTower.Common;
+using EncosyTower.Initialization;
 using EncosyTower.Logging;
 using UnityEngine;
 

@@ -1,4 +1,4 @@
-namespace EncosyTower.Common
+namespace EncosyTower.Initialization
 {
     public interface IDeinitializable
     {
