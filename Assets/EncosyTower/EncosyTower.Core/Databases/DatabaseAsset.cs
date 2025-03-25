@@ -31,11 +31,11 @@ namespace EncosyTower.Databases
 
         protected ReadOnlyMemory<DataTableAssetBase> RedundantTables => _redundantTabless;
 
-        public bool Initialized { get; protected set; }
+        public bool IsInitialized { get; protected set; }
 
         public virtual void Initialize()
         {
-            if (Initialized)
+            if (IsInitialized)
             {
                 return;
             }
@@ -89,17 +89,17 @@ namespace EncosyTower.Databases
                 table.Initialize();
             }
 
-            Initialized = true;
+            IsInitialized = true;
         }
 
         public virtual void Deinitialize()
         {
-            if (Initialized == false)
+            if (IsInitialized == false)
             {
                 return;
             }
 
-            Initialized = false;
+            IsInitialized = false;
 
             foreach (var asset in _idToAsset.Values)
             {
@@ -125,7 +125,7 @@ namespace EncosyTower.Databases
 
         public bool TryGetDataTableAsset(StringId id, out DataTableAssetBase tableAsset)
         {
-            ThrowsDatabaseIsNotInitialized();
+            ThrowsDatabaseIsNotInitialized(IsInitialized);
 
             if (_idToAsset.TryGetValue(id, out var asset))
             {
@@ -147,7 +147,7 @@ namespace EncosyTower.Databases
 
         public bool TryGetDataTableAsset([NotNull] Type type, out DataTableAssetBase tableAsset)
         {
-            ThrowsDatabaseIsNotInitialized();
+            ThrowsDatabaseIsNotInitialized(IsInitialized);
             LogWarningAmbiguousTypeAtGetDataTableAsset(type, _typeToIds, this);
 
             if (_typeToAsset.TryGetValue(type, out var asset))
@@ -172,7 +172,7 @@ namespace EncosyTower.Databases
         public bool TryGetDataTableAsset<T>(out T tableAsset)
             where T : DataTableAssetBase
         {
-            ThrowsDatabaseIsNotInitialized();
+            ThrowsDatabaseIsNotInitialized(IsInitialized);
 
             var type = typeof(T);
 
@@ -217,7 +217,7 @@ namespace EncosyTower.Databases
         public bool TryGetDataTableAsset<T>(StringId id, out T tableAsset)
             where T : DataTableAssetBase
         {
-            ThrowsDatabaseIsNotInitialized();
+            ThrowsDatabaseIsNotInitialized(IsInitialized);
 
             if (_idToAsset.TryGetValue(id, out var asset))
             {
@@ -264,8 +264,13 @@ namespace EncosyTower.Databases
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowsDatabaseIsNotInitialized()
+        private static void ThrowsDatabaseIsNotInitialized(bool initialized)
         {
+            if (initialized)
+            {
+                return;
+            }
+
             throw new InvalidOperationException(
                 $"The database is not yet initialized. " +
                 $"Please call '{nameof(Initialize)}' method once before using."

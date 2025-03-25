@@ -103,6 +103,24 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ")
                 .PrintIf(isDatabaseStruct, "readonly ")
+                .PrintEndLine("bool IsInitialized");
+            p.OpenScope();
+            {
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("get");
+                p.OpenScope();
+                {
+                    p.PrintLine("ThrowIfNotCreated(IsValid);");
+                    p.PrintLine("return _database.IsInitialized;");
+                }
+                p.CloseScope();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ")
+                .PrintIf(isDatabaseStruct, "readonly ")
                 .Print(DATABASE_ASSET).PrintEndLine(" Database");
             p.OpenScope();
             {
@@ -112,17 +130,22 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly void Initialize()");
             p.OpenScope();
             {
                 p.PrintLine("ThrowIfNotCreated(IsValid);");
+                p.PrintEndLine();
+
+                p.PrintLine("Ids.Initialize();");
+                p.PrintEndLine();
+
                 p.PrintLine("_database.Initialize();");
             }
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly void Deinitialize()");
             p.OpenScope();
             {
@@ -279,10 +302,20 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.PrintLine("public static partial class Ids");
             p.OpenScope();
             {
+
                 {
                     p.PrintLine(GENERATED_CODE);
-                    p.PrintBeginLine("public static readonly ").Print(STRING_ID)
-                        .Print(" Database = ").Print(MAKE_ID).PrintEndLine("(Names.DATABASE);");
+                    p.PrintBeginLine("private static ").Print(STRING_ID).PrintEndLine(" s_database;");
+                    p.PrintEndLine();
+
+                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static ").Print(STRING_ID).PrintEndLine(" Database");
+                    p.OpenScope();
+                    {
+                        p.PrintLine(AGGRESSIVE_INLINING);
+                        p.PrintLine("get => s_database;");
+                    }
+                    p.CloseScope();
                     p.PrintEndLine();
                 }
 
@@ -292,14 +325,49 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     foreach (var table in tables)
                     {
                         var name = table.PropertyName;
-                        var nameUpper = StringUtils.ToSnakeCase(name).ToUpper();
+                        var nameLower = StringUtils.ToCamelCase(name);
 
                         p.PrintLine(GENERATED_CODE);
-                        p.PrintBeginLine("public static readonly ").Print(STRING_ID).Print(" ")
-                            .Print(name).Print(" = ")
-                            .Print(MAKE_ID).Print("(Names.Tables.").Print(nameUpper).PrintEndLine(");");
+                        p.PrintBeginLine("private static ").Print(STRING_ID).Print(" s_")
+                            .Print(nameLower).PrintEndLine(";");
+                        p.PrintEndLine();
+
+                        p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                        p.PrintBeginLine("public static ").Print(STRING_ID).Print(" ").PrintEndLine(name);
+                        p.OpenScope();
+                        {
+                            p.PrintLine(AGGRESSIVE_INLINING);
+                            p.PrintBeginLine("get => s_").Print(nameLower).Print(";");
+                        }
+                        p.CloseScope();
                         p.PrintEndLine();
                     }
+
+                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine("public static void Initialize()");
+                    p.OpenScope();
+                    {
+                        foreach (var table in tables)
+                        {
+                            var name = table.PropertyName;
+                            var nameLower = StringUtils.ToCamelCase(name);
+                            var nameUpper = StringUtils.ToSnakeCase(name).ToUpper();
+
+                            p.PrintBeginLine("s_").Print(nameLower).Print(" = ")
+                                .Print(MAKE_ID).Print("(Names.Tables.").Print(nameUpper).PrintEndLine(");");
+                        }
+                    }
+                    p.CloseScope();
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine("public static void Initialize()");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("s_database = ").Print(MAKE_ID).PrintEndLine("(Names.DATABASE);");
+                    p.PrintLine("Tables.Initialize();");
                 }
                 p.CloseScope();
             }
@@ -326,8 +394,31 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 p.PrintEndLine();
 
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public static bool IsInitialized => s_instance")
-                    .PrintEndLineIf(isStruct, ".IsValid;", "?.IsValid ?? false;");
+                p.PrintBeginLine("public static bool IsInitialized");
+
+                if (isStruct)
+                {
+                    p.PrintEndLine(" => s_instance.IsValid && s_instance.IsInitialized;");
+                }
+                else
+                {
+                    p.PrintEndLine();
+                    p.PrintLine("get");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("if (s_instance is not null)");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("return s_instance.IsValid && s_instance.IsInitialized;");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+
+                        p.PrintLine("return false");
+                    }
+                    p.CloseScope();
+                }
+
                 p.PrintEndLine();
 
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
@@ -391,7 +482,12 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     p.PrintLine("private static void InitOnDomainReload()");
                     p.OpenScope();
                     {
-                        p.PrintLine("s_instance = default;");
+                        p.PrintLine("if (IsInitialized)");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("Deinitialize();");
+                        }
+                        p.CloseScope();
                     }
                     p.CloseScope();
                 }
