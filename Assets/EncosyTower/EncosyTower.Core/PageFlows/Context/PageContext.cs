@@ -12,9 +12,11 @@ namespace EncosyTower.PageFlows
 
         public PageTransitionOptions HideOptions { get; init; }
 
-        public bool SequentialTransition { get; init; }
+        public long FlowId { get; init; }
 
         public int DefaultIndex { get; init; }
+
+        public bool SequentialTransition { get; init; }
 
         public object UserData { get; init; }
     }

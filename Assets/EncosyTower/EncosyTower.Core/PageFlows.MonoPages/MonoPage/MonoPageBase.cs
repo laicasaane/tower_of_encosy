@@ -7,11 +7,14 @@ namespace EncosyTower.PageFlows.MonoPages
 {
     public abstract class MonoPageBase : MonoBehaviour
         , IMonoPage
+        , IPageHasFlowId
         , IPageHasOptions
         , IPageHasTransition
     {
         private MonoPageOptions _options;
         private MonoPageTransitionCollection _transition;
+
+        public long FlowId { get; set; }
 
         public PageOptions PageOptions
         {

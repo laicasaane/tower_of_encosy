@@ -89,6 +89,11 @@ namespace EncosyTower.PageFlows
 
         public async UnityTaskBool AttachAsync(IPageFlow flow, IPage page, PageContext context, CancellationToken token)
         {
+            if (page is IPageHasFlowId flowId)
+            {
+                flowId.FlowId = context.FlowId;
+            }
+
             if (token.IsCancellationRequested == false)
             {
                 await Publisher.PublishAsync(

@@ -32,6 +32,11 @@ namespace EncosyTower.PageFlows
         UnityTask OnDetachFromFlowAsync(IPageFlow flow, PageContext context, CancellationToken token);
     }
 
+    public interface IPageHasFlowId : IPage
+    {
+        long FlowId { get; set; }
+    }
+
     public interface IPageHasOptions : IPage
     {
         PageOptions PageOptions { get; }
