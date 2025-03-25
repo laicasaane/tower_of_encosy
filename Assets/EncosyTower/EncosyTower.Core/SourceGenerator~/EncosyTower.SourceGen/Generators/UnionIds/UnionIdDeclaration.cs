@@ -170,8 +170,10 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     size = size,
                     isEnum = isEnum,
                     signed = candidate.signed,
-                    hasTryParseSpan = CheckTryParseSpan(kindSymbol),
                     hasToFixedString = hasToFixedString,
+                    tryParseSpan = CheckTryParseSpan(kindSymbol),
+                    equals = CheckEquals(kindSymbol),
+                    operatorEquality = CheckOpEquality(kindSymbol),
                 });
 
                 enumMembers.Add(new EnumMemberDeclaration {
@@ -344,21 +346,99 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             return name;
         }
 
-        private static bool CheckTryParseSpan(INamedTypeSymbol symbol)
+        private static MethodRef CheckEquals(INamedTypeSymbol symbol)
         {
             if (symbol.TypeKind == TypeKind.Enum)
             {
-                return true;
+                return new MethodRef {
+                    doesExist = true,
+                    isStatic = true,
+                };
             }
 
-            var members = symbol.GetMembers("TryParse");
-            var result = false;
+            var members = symbol.GetMembers("Equals");
 
             foreach (var member in members)
             {
                 if (member is not IMethodSymbol method
                     || method.DeclaredAccessibility != Accessibility.Public
+                    || method.ReturnsVoid
+                    || method.ReturnType.SpecialType != SpecialType.System_Boolean
+                    || method.Parameters.Length != 0
+                )
+                {
+                    continue;
+                }
+
+                return new MethodRef {
+                    doesExist = true,
+                    isStatic = method.IsStatic,
+                };
+            }
+
+            return default;
+        }
+
+        private static MethodRef CheckOpEquality(INamedTypeSymbol symbol)
+        {
+            if (symbol.TypeKind == TypeKind.Enum)
+            {
+                return new MethodRef {
+                    doesExist = true,
+                    isStatic = true,
+                };
+            }
+
+            var members = symbol.GetMembers("op_Equality");
+            var comparer = SymbolEqualityComparer.Default;
+
+            foreach (var member in members)
+            {
+                if (member is not IMethodSymbol method
+                    || method.DeclaredAccessibility != Accessibility.Public
+                    || method.ReturnsVoid
                     || method.IsStatic == false
+                    || method.ReturnType.SpecialType != SpecialType.System_Boolean
+                )
+                {
+                    continue;
+                }
+
+                var parameters = method.Parameters;
+
+                if (parameters.Length != 2
+                    || comparer.Equals(parameters[0].Type, symbol) == false
+                    || comparer.Equals(parameters[1].Type, symbol) == false
+                )
+                {
+                    continue;
+                }
+
+                return new MethodRef {
+                    doesExist = true,
+                    isStatic = method.IsStatic,
+                };
+            }
+
+            return default;
+        }
+
+        private static MethodRef CheckTryParseSpan(INamedTypeSymbol symbol)
+        {
+            if (symbol.TypeKind == TypeKind.Enum)
+            {
+                return new MethodRef {
+                    doesExist = true,
+                    isStatic = true,
+                };
+            }
+
+            var members = symbol.GetMembers("TryParse");
+
+            foreach (var member in members)
+            {
+                if (member is not IMethodSymbol method
+                    || method.DeclaredAccessibility != Accessibility.Public
                     || method.ReturnsVoid
                     || method.ReturnType.SpecialType != SpecialType.System_Boolean
                 )
@@ -368,12 +448,9 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
                 var parameters = method.Parameters;
 
-                if (parameters.Length != 2)
-                {
-                    continue;
-                }
-
-                if (parameters[0].Type.Is("global::System.ReadOnlySpan<char>", false) == false)
+                if (parameters.Length != 2
+                    || parameters[0].Type.Is("global::System.ReadOnlySpan<char>", false) == false
+                )
                 {
                     continue;
                 }
@@ -387,10 +464,13 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     continue;
                 }
 
-                return true;
+                return new MethodRef {
+                    doesExist = true,
+                    isStatic = method.IsStatic,
+                };
             }
 
-            return result;
+            return default;
         }
 
         private static bool CheckToFixedString(INamedTypeSymbol symbol, out int byteCount)
@@ -565,8 +645,16 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             public int size;
             public bool isEnum;
             public bool signed;
-            public bool hasTryParseSpan;
             public bool hasToFixedString;
+            public MethodRef tryParseSpan;
+            public MethodRef equals;
+            public MethodRef operatorEquality;
+        }
+
+        public struct MethodRef
+        {
+            public bool doesExist;
+            public bool isStatic;
         }
     }
 }

@@ -18,7 +18,8 @@
         private const string SERIALIZE_FIELD = "[global::UnityEngine.SerializeField]";
 
         private readonly static string[] s_operators = new[] { "==", "!=", "<", "<=", ">", ">=" };
-        private readonly static string[] s_comparers = new[] { "<", "<=", ">", ">=" };
+        private readonly static string[] s_comparerOps = new[] { "<", "<=", ">", ">=" };
+        private readonly static (string, string, string)[] s_equalityOps = new[] { ("==", "&&", ""), ("!=", "||", "!") };
 
         public string WriteCode()
         {
@@ -37,10 +38,21 @@
             p.PrintBeginLine("partial struct ").Print(typeName).Print(" ")
                 .Print(": global::System.IEquatable<").Print(typeName).Print(">")
                 .Print(", global::System.IComparable<").Print(typeName).Print(">")
-                .Print(", global::EncosyTower.Conversion.ITryParse<").Print(typeName).Print(">")
-                .Print(", global::EncosyTower.Conversion.ITryParseSpan<").Print(typeName).Print(">")
                 .PrintEndLine();
+            p = p.IncreasedIndent();
+            {
+                p.PrintBeginLine(", global::EncosyTower.Conversion.ITryParse<").Print(typeName).PrintEndLine(">");
+                p.PrintBeginLine(", global::EncosyTower.Conversion.ITryParseSpan<").Print(typeName).PrintEndLine(">");
 
+                foreach (var kind in KindRefs)
+                {
+                    if (kind.equals.doesExist || kind.operatorEquality.doesExist)
+                    {
+                        p.PrintBeginLine(", global::System.IEquatable<").Print(kind.fullName).PrintEndLine(">");
+                    }
+                }
+            }
+            p = p.DecreasedIndent();
             p.OpenScope();
             {
                 WriteFields(ref p);
@@ -357,9 +369,11 @@
                                 }
                                 else
                                 {
-                                    if (kind.hasTryParseSpan)
+                                    var tryParse = kind.tryParseSpan;
+
+                                    if (tryParse.doesExist)
                                     {
-                                        p.PrintBeginLine(fullName)
+                                        p.PrintBeginLineIf(tryParse.isStatic, fullName, $"default({fullName})")
                                             .PrintEndLine(".TryParse(id, out var idValue);");
                                     }
                                     else
@@ -470,9 +484,11 @@
                                 }
                                 else
                                 {
-                                    if (kind.hasTryParseSpan)
+                                    var tryParse = kind.tryParseSpan;
+
+                                    if (tryParse.doesExist)
                                     {
-                                        p.PrintBeginLine(fullName)
+                                        p.PrintBeginLineIf(tryParse.isStatic, fullName, $"default({fullName})")
                                             .PrintEndLine(".TryParse(id, out var idValue);");
                                     }
                                     else
@@ -639,7 +655,9 @@
                     continue;
                 }
 
-                if (kind.hasTryParseSpan == false)
+                var tryParse = kind.tryParseSpan;
+
+                if (tryParse.doesExist == false)
                 {
                     p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintBeginLine("static partial void TryParse_").Print(kind.name)
@@ -841,9 +859,12 @@
                                 }
                                 else
                                 {
-                                    if (kind.hasTryParseSpan)
+                                    var tryParse = kind.tryParseSpan;
+
+                                    if (tryParse.doesExist)
                                     {
-                                        p.PrintBeginLine("var idResult = ").Print(fullName)
+                                        p.PrintBeginLine("var idResult = ")
+                                            .PrintIf(tryParse.isStatic, fullName, $"default({fullName})")
                                             .PrintEndLine(".TryParse(id, out var idValue);");
                                     }
                                     else
@@ -951,9 +972,12 @@
                                 }
                                 else
                                 {
-                                    if (kind.hasTryParseSpan)
+                                    var tryParse = kind.tryParseSpan;
+
+                                    if (tryParse.doesExist)
                                     {
-                                        p.PrintBeginLine("var idResult = ").Print(fullName)
+                                        p.PrintBeginLine("var idResult = ")
+                                            .PrintIf(tryParse.isStatic, fullName, $"default({fullName})")
                                             .PrintEndLine(".TryParse(id, out var idValue);");
                                     }
                                     else
@@ -1149,6 +1173,100 @@
                 }
                 p.CloseScope();
                 p.PrintEndLine();
+            }
+
+            foreach (var kind in KindRefs)
+            {
+                var kindName = kind.name;
+                var fullName = kind.fullName;
+                var equals = kind.equals;
+                var equality = kind.operatorEquality;
+
+                if (equals.doesExist == false && equality.doesExist == false)
+                {
+                    continue;
+                }
+
+                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintBeginLine("public readonly bool Equals(").Print(fullName).PrintEndLine(" other)");
+                p.OpenScope();
+                {
+                    if (equality.doesExist)
+                    {
+                        p.PrintBeginLine("return Kind == IdKind.").Print(kindName)
+                            .Print(" && Id_").Print(kindName).PrintEndLine(" == other;");
+                    }
+                    else if (equals.isStatic)
+                    {
+                        p.PrintBeginLine("return Kind == IdKind.").Print(kindName)
+                            .Print(" && ").Print(fullName)
+                            .Print(".Equals(Id_").Print(kindName).PrintEndLine(", other);");
+                    }
+                    else
+                    {
+                        p.PrintBeginLine("return Kind == IdKind.").Print(kindName)
+                            .Print(" && Id_").Print(kindName).PrintEndLine(".Equals(other);");
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                foreach (var (op1, op2, op3) in s_equalityOps)
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static bool operator ").Print(op1)
+                        .Print("(").Print(typeName).Print(" left, ").Print(fullName).PrintEndLine(" right)");
+                    p.OpenScope();
+                    {
+                        if (equality.doesExist)
+                        {
+                            p.PrintBeginLine("return left.Kind ").Print(op1).Print(" IdKind.").Print(kindName)
+                                .Print(" ").Print(op2).Print(" left.Id_").Print(kindName).Print(" ")
+                                .Print(op1).PrintEndLine(" right;");
+                        }
+                        else if (equals.isStatic)
+                        {
+                            p.PrintBeginLine("return left.Kind ").Print(op1).Print(" IdKind.").Print(kindName)
+                                .Print(" ").Print(op2).Print(" ").Print(op3).Print(fullName)
+                                .Print(".Equals(left.Id_").Print(kindName).PrintEndLine(", right);");
+                        }
+                        else
+                        {
+                            p.PrintBeginLine("return left.Kind ").Print(op1).Print(" IdKind.").Print(kindName)
+                                .Print(" ").Print(op2).Print(" ").Print(op3).Print("left.Id_").Print(kindName)
+                                .PrintEndLine(".Equals(right);");
+                        }
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static bool operator ").Print(op1)
+                        .Print("(").Print(fullName).Print(" left, ").Print(typeName).PrintEndLine(" right)");
+                    p.OpenScope();
+                    {
+                        if (equality.doesExist)
+                        {
+                            p.PrintBeginLine("return right.Kind ").Print(op1).Print(" IdKind.").Print(kindName)
+                                .Print(" ").Print(op2).Print(" right.Id_").Print(kindName).Print(" ")
+                                .Print(op1).PrintEndLine(" left;");
+                        }
+                        else if (equals.isStatic)
+                        {
+                            p.PrintBeginLine("return right.Kind ").Print(op1).Print(" IdKind.").Print(kindName)
+                                .Print(" ").Print(op2).Print(" ").Print(op3).Print(fullName)
+                                .Print(".Equals(right.Id_").Print(kindName).PrintEndLine(", left);");
+                        }
+                        else
+                        {
+                            p.PrintBeginLine("return right.Kind ").Print(op1).Print(" IdKind.").Print(kindName)
+                                .Print(" ").Print(op2).Print(" ").Print(op3).Print("right.Id_").Print(kindName)
+                                .PrintEndLine(".Equals(left);");
+                        }
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
             }
         }
 
@@ -2194,7 +2312,7 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                foreach (var op in s_comparers)
+                foreach (var op in s_comparerOps)
                 {
                     p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintBeginLine("public static bool operator ").Print(op)
