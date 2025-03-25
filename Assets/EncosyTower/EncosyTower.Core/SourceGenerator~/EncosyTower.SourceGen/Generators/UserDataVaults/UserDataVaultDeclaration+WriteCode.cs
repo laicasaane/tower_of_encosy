@@ -59,7 +59,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 WriteInitialize(ref p, staticKeyword, fieldPrefix, accessDefs);
                 WriteInitOnDomainReload(ref p, staticKeyword, fieldPrefix, accessDefs);
                 WriteDataStorageClass(ref p, orderedStorageDefs);
-                WriteCollectionsClass(ref p, orderedStorageDefs);
+                WriteIdsClass(ref p, orderedStorageDefs);
                 WriteDataInspector(ref p, orderedStorageDefs);
 
             }
@@ -120,6 +120,9 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintLine(")");
             p.OpenScope();
             {
+                p.PrintLine("Ids.Initialize();");
+                p.PrintEndLine();
+
                 p.PrintBeginLine(fieldPrefix).PrintEndLine("storage = new(encryption, logger, taskArrayPool);");
                 p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.Initialize();");
                 p.PrintEndLine();
@@ -293,7 +296,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     foreach (var def in defs)
                     {
                         p.PrintBeginLine(def.DataType.Name).Print(" = new(")
-                            .Print("Collections.").Print(StringUtils.ToSnakeCase(def.DataType.Name).ToUpperInvariant())
+                            .Print("Ids.").Print(StringUtils.ToSnakeCase(def.DataType.Name).ToUpperInvariant())
                             .PrintEndLine(", encryption, logger);");
                     }
                 }
@@ -572,21 +575,46 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private static void WriteCollectionsClass(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
+        private static void WriteIdsClass(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine("public static class Collections");
+            p.PrintLine("public static class Ids");
             p.OpenScope();
             {
                 foreach (var def in defs)
                 {
-                    var name = StringUtils.ToSnakeCase(def.DataType.Name).ToUpperInvariant();
+                    var name = StringUtils.ToSnakeCase(def.DataType.Name);
+                    var nameUpper = name.ToUpperInvariant();
 
                     p.PrintLine(GENERATED_CODE);
-                    p.PrintBeginLine("public static readonly ").Print(STRING_ID).Print(" ").Print(name)
-                        .Print(" = ").Print(STRING_ID_MAKE).Print("(nameof(").Print(name).PrintEndLine("));")
-                        .PrintEndLine();
+                    p.PrintBeginLine("private static ").Print(STRING_ID).Print(" s_").Print(name).PrintEndLine(";");
+                    p.PrintEndLine();
+
+                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static ").Print(STRING_ID).Print(" ").PrintEndLine(nameUpper);
+                    p.OpenScope();
+                    {
+                        p.PrintLine(AGGRESSIVE_INLINING);
+                        p.PrintBeginLine("get => s_").Print(name).PrintEndLine(";");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
                 }
+
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine("internal static void Initialize()");
+                p.OpenScope();
+                {
+                    foreach (var def in defs)
+                    {
+                        var name = StringUtils.ToSnakeCase(def.DataType.Name);
+                        var nameUpper = name.ToUpperInvariant();
+
+                        p.PrintBeginLine("s_").Print(name).Print(" = ")
+                            .Print(STRING_ID_MAKE).Print("(nameof(").Print(nameUpper).PrintEndLine("));");
+                    }
+                }
+                p.CloseScope();
             }
             p.CloseScope();
             p.PrintEndLine();
