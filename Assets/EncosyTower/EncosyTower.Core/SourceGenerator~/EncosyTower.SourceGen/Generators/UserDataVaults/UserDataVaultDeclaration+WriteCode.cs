@@ -57,6 +57,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 WriteFields(ref p, staticKeyword, fieldPrefix);
                 WriteProperties(ref p, staticKeyword, accessDefs);
                 WriteInitialize(ref p, staticKeyword, fieldPrefix, accessDefs);
+                WriteOnUserDataLoaded(ref p, staticKeyword, accessDefs);
                 WriteInitOnDomainReload(ref p, staticKeyword, fieldPrefix, accessDefs);
                 WriteDataStorageClass(ref p, orderedStorageDefs);
                 WriteIdsClass(ref p, orderedStorageDefs);
@@ -229,6 +230,28 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintLine(");");
                 }
             }
+        }
+
+        private static void WriteOnUserDataLoaded(
+              ref Printer p
+            , string staticKeyword
+            , List<UserDataAccessDefinition> defs
+        )
+        {
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("void OnUserDataLoaded()");
+            p.OpenScope();
+            {
+                foreach (var def in defs)
+                {
+                    if (def.Symbol.InheritsFromInterface("global::EncosyTower.Initialization.IInitializable"))
+                    {
+                        p.PrintBeginLine(def.FieldName).PrintEndLine("?.Initialize();");
+                    }
+                }
+            }
+            p.CloseScope();
+            p.PrintEndLine();
         }
 
         private void WriteInitOnDomainReload(
