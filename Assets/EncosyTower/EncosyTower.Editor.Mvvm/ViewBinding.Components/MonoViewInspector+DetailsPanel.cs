@@ -1316,10 +1316,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 
                 var candidateName = ObjectNames.NicifyVariableName(candidate);
 
-                label.text = isCommand
-                    ? $"<b>{candidateName}</b> ( {memberTypeName} )"
-                    : $"<b>{candidateName}</b> : {memberTypeName}";
-
+                label.text = isCommand ? $"{candidateName} ( )" : candidateName;
                 label.tooltip = $"{word} {candidateName} : {memberTypeName}\n" +
                     $"class {contextType.Name}\n" +
                     $"namespace {contextType.Namespace}";
