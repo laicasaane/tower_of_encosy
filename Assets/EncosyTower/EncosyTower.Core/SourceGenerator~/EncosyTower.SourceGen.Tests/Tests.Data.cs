@@ -112,7 +112,7 @@ namespace EncosyTower.Tests.Data.Heroes
     using EncosyTower.Databases;
     using UnityEngine;
 
-    [DataMutable(true)]
+    [DataMutable(DataMutableOptions.WithoutPropertySetters | DataMutableOptions.WithReadOnlyView)]
     public partial class MutableData : IData
     {
         [SerializeField]

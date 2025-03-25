@@ -20,10 +20,10 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
             p.PrintLine("[global::System.Serializable]");
             p.PrintBeginLine()
-                .Print($"partial {keyword} ").Print(ClassName)
+                .Print($"partial {keyword} ").Print(TypeName)
                 .Print(" : ")
                 .PrintIf(HasBaseType, $"{BaseTypeName}, ")
-                .Print($"global::System.IEquatable<{ClassName}>");
+                .Print($"global::System.IEquatable<{TypeName}>");
 
             if (IdPropertyType != null)
             {
@@ -46,10 +46,14 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                     WriteOverrideIEquatableMethod(ref p);
                 }
 
+                WriteAsReadOnlyMethod(ref p);
                 WriteSetValues_TypeMethod(ref p);
                 WriteEqualityOperators(ref p);
             }
             p.CloseScope();
+            p.PrintEndLine();
+
+            WriteReadOnlyStruct(ref p);
 
             p = p.DecreasedIndent();
             return p.Result;
@@ -146,7 +150,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             {
                 p.PrintBeginLine($"this.{fieldName} = ");
 
-                if ((IsMutable && WithoutPropertySetter == false)
+                if ((IsMutable && WithoutPropertySetters == false)
                     || (IsMutable && prop.FieldCollection.Kind == CollectionKind.Array)
                     || sameType
                 )
@@ -172,7 +176,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
         private void WriteProperty(ref Printer p, FieldRef field)
         {
-            if (field.PropertyIsImplemented)
+            if (field.ImplementedProperty is not null)
             {
                 return;
             }
@@ -211,7 +215,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
                 var casting = mustCast ? $"({field.FieldType.ToFullName()})" : string.Empty;
 
-                if (IsMutable && WithoutPropertySetter == false)
+                if (IsMutable && WithoutPropertySetters == false)
                 {
                     p.PrintBeginLine($"set => this.{fieldName} = ")
                         .PrintIf(mustCast, casting)
@@ -314,7 +318,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             p.PrintLine("public override bool Equals(object obj)");
             p.OpenScope();
             {
-                p.PrintLine($"return obj is {ClassName} other && Equals(other);");
+                p.PrintLine($"return obj is {TypeName} other && Equals(other);");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -328,7 +332,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 p.PrintLine($"public override bool Equals({typeName} other)");
                 p.OpenScope();
                 {
-                    p.PrintLine($"if (other is not {ClassName} otherDerived) return false;");
+                    p.PrintLine($"if (other is not {TypeName} otherDerived) return false;");
                     p.PrintLine("if (ReferenceEquals(this, otherDerived)) return true;");
                     p.PrintEndLine();
 
@@ -348,7 +352,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLineIf(IsSealed, "public ", "public virtual ");
-            p.PrintEndLine($"bool Equals({ClassName} other)");
+            p.PrintEndLine($"bool Equals({TypeName} other)");
             p.OpenScope();
             {
                 if (Symbol.IsValueType)
@@ -372,7 +376,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLineIf(IsSealed, "private ", "protected ")
-                .PrintEndLine($"bool EqualsInternal({ClassName} other)");
+                .PrintEndLine($"bool EqualsInternal({TypeName} other)");
             p.OpenScope();
             {
                 p.PrintBeginLine("return")
@@ -461,7 +465,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
         private void WriteEqualityOperators(ref Printer p)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
-            p.PrintLine($"public static bool operator ==({ClassName} left, {ClassName} right)");
+            p.PrintLine($"public static bool operator ==({TypeName} left, {TypeName} right)");
             p.OpenScope();
             {
                 if (Symbol.IsValueType == false)
@@ -481,7 +485,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             p.PrintEndLine();
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
-            p.PrintLine($"public static bool operator !=({ClassName} left, {ClassName} right)");
+            p.PrintLine($"public static bool operator !=({TypeName} left, {TypeName} right)");
             p.OpenScope();
             {
                 if (Symbol.IsValueType == false)
@@ -496,6 +500,148 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 }
 
                 p.PrintLine("return !left.Equals(right);");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteAsReadOnlyMethod(ref Printer p)
+        {
+            if (WithReadOnlyStruct == false)
+            {
+                return;
+            }
+
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine($"public ReadOnly").Print(TypeName).PrintEndLine(" AsReadOnly()");
+            p.OpenScope();
+            {
+                p.PrintLine("return new(this);");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteReadOnlyStruct(ref Printer p)
+        {
+            if (WithReadOnlyStruct == false)
+            {
+                return;
+            }
+
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public readonly partial struct ReadOnly").PrintEndLine(TypeName);
+            p.OpenScope();
+            {
+                p.PrintLine(GENERATED_CODE);
+                p.PrintBeginLine("private readonly ").Print(TypeName).PrintEndLine(" _data;");
+                p.PrintEndLine();
+
+                p.PrintLine(GENERATED_CODE);
+                p.PrintLine("private readonly bool _isValid;");
+                p.PrintEndLine();
+
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine(Symbol.DeclaredAccessibility.ToKeyword())
+                    .Print(" ReadOnly").Print(TypeName).Print("(")
+                    .PrintIf(Symbol.IsValueType, "in ")
+                    .Print(TypeName)
+                    .PrintEndLine(" data)");
+                p.OpenScope();
+                {
+                    p.PrintLine("_data = data;");
+
+                    if (Symbol.IsValueType)
+                    {
+                        p.PrintLine("_isValid = true;");
+                    }
+                    else
+                    {
+                        p.PrintLine("_isValid = data is not null;");
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine("public readonly bool IsValid");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => _isValid;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                var orders = Orders;
+                var propRefs = PropRefs;
+                var fieldRefs = FieldRefs;
+
+                foreach (var order in orders)
+                {
+                    var index = order.index;
+
+                    if (order.isPropRef)
+                    {
+                        var propRef = propRefs[index];
+
+                        if (propRef.Property.DeclaredAccessibility != Accessibility.Public)
+                        {
+                            continue;
+                        }
+
+                        var propName = propRef.Property.Name;
+
+                        GetTypeNames(
+                              propRef.PropertyType
+                            , propRef.FieldCollection
+                            , out var _
+                            , out var immutableTypeName
+                            , out var _
+                        );
+
+                        p.PrintBeginLine("public readonly ").Print(immutableTypeName)
+                            .Print(" ").PrintEndLine(propName);
+                        p.OpenScope();
+                        {
+                            p.PrintLine(AGGRESSIVE_INLINING);
+                            p.PrintBeginLine("get => _data.").Print(propName).PrintEndLine(";");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+                    else
+                    {
+                        var fieldRef = fieldRefs[index];
+
+                        if (fieldRef.ImplementedProperty is IPropertySymbol prop
+                            && prop.DeclaredAccessibility != Accessibility.Public
+                        )
+                        {
+                            continue;
+                        }
+
+                        var propName = fieldRef.PropertyName;
+
+                        GetTypeNames(
+                              fieldRef.PropertyType
+                            , fieldRef.FieldCollection
+                            , out var _
+                            , out var immutableTypeName
+                            , out var _
+                        );
+
+                        p.PrintBeginLine("public readonly ").Print(immutableTypeName)
+                            .Print(" ").PrintEndLine(propName);
+                        p.OpenScope();
+                        {
+                            p.PrintLine(AGGRESSIVE_INLINING);
+                            p.PrintBeginLine("get => _data.").Print(propName).PrintEndLine(";");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+                }
             }
             p.CloseScope();
             p.PrintEndLine();
