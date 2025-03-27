@@ -14,7 +14,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
         private const string STRING_ID = "global::EncosyTower.StringIds.StringId";
         private const string MAKE_ID = "global::EncosyTower.StringIds.StringToId.MakeFromManaged";
         public const string NOT_NULL = "[global::System.Diagnostics.CodeAnalysis.NotNull]";
-        public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.BeforeSplashScreen)]";
+        public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.AfterAssembliesLoaded)]";
         public const string ASSET_KEY = "global::EncosyTower.AssetKeys.AssetKey";
 
         public string WriteCode(ImmutableArray<TableRef> tables)
@@ -453,7 +453,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 {
                     p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintLine(RUNTIME_INITIALIZE_ON_LOAD_METHOD);
-                    p.PrintLine("private static void InitOnDomainReload()");
+                    p.PrintLine("private static void InitWhenDomainReloadDisabled()");
                     p.OpenScope();
                     {
                         p.PrintLine("if (IsInitialized)");

@@ -13,7 +13,7 @@
         public const string UNION_DATA_TYPE = $"global::{NAMESPACE}.UnionData";
         public const string UNION_TYPE_KIND = $"global::{NAMESPACE}.UnionTypeKind";
         public const string DOES_NOT_RETURN = "[global::System.Diagnostics.CodeAnalysis.DoesNotReturn]";
-        public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.BeforeSplashScreen)]";
+        public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.BeforeSceneLoad)]";
         public const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
 
         private readonly string _generatedCodeAttribute;
