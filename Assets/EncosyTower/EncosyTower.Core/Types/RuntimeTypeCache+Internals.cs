@@ -1,5 +1,5 @@
 #if UNITY_EDITOR && !ENFORCE_ENCOSY_RUNTIME_TYPECACHE
-#define __ENCOSY_RUNTIME_TYPECACHE_AUTO__
+#define __RUNTIME_TYPECACHE_AUTO__
 #endif
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
@@ -20,7 +20,7 @@ namespace EncosyTower.Types
     {
         private static readonly ConcurrentDictionary<Type, TypeInfo> s_vault = new();
 
-#if __ENCOSY_RUNTIME_TYPECACHE_AUTO__
+#if __RUNTIME_TYPECACHE_AUTO__
         private static readonly TypeCacheSourceEditor s_source = default;
 #else
         private static readonly TypeCacheSourceRuntime s_source;
@@ -30,7 +30,7 @@ namespace EncosyTower.Types
         {
             InitTypeIdVault();
 
-#if !__ENCOSY_RUNTIME_TYPECACHE_AUTO__
+#if !__RUNTIME_TYPECACHE_AUTO__
 #if UNITY_EDITOR
             s_source = LoadTypeCacheSourceRuntime_EnforcedMode();
 #else
@@ -75,6 +75,10 @@ namespace EncosyTower.Types
         [Preserve]
         private static TypeCacheSourceRuntime LoadTypeCacheSourceRuntime()
         {
+#if UNITY_EDITOR
+            SerializedTypeCacheAsset.InitWhenDomainReloadDisabled();
+#endif
+
             var asset = SerializedTypeCacheAsset.GetInstance();
             return new(new(asset._cache));
         }

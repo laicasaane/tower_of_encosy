@@ -22,18 +22,53 @@
 //
 // https://github.com/thebeardphantom/Runtime-TypeCache
 
-using System.Linq;
+using EncosyTower.UnityExtensions;
 using UnityEngine;
 
 namespace EncosyTower.Types.Internals
 {
     internal class SerializedTypeCacheAsset : ScriptableObject
     {
+        private static SerializedTypeCacheAsset s_instance;
+
         [SerializeField] internal SerializedTypeCache _cache = new();
 
         public static SerializedTypeCacheAsset GetInstance()
         {
-            return Resources.FindObjectsOfTypeAll<SerializedTypeCacheAsset>().First();
+            if (s_instance.IsInvalid())
+            {
+                try
+                {
+                    s_instance = Resources.Load<SerializedTypeCacheAsset>(nameof(SerializedTypeCacheAsset));
+                }
+                catch
+                {
+                    throw GetMissingReferenceException();
+                }
+                finally
+                {
+                    if (s_instance.IsInvalid())
+                    {
+                        throw GetMissingReferenceException();
+                    }
+                }
+            }
+
+            return s_instance;
+
+            static MissingReferenceException GetMissingReferenceException()
+            {
+                return new MissingReferenceException(
+                    $"Cannot find asset of type {nameof(SerializedTypeCacheAsset)}."
+                );
+            }
         }
+
+#if UNITY_EDITOR
+        internal static void InitWhenDomainReloadDisabled()
+        {
+            s_instance = null;
+        }
+#endif
     }
 }

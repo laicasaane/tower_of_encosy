@@ -148,6 +148,9 @@ namespace EncosyTower.Types.Editor
                     asset.name = ASSET_FILE_NAME;
                     AssetDatabase.CreateAsset(asset, ASSET_FILE_PATH);
 
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.Refresh();
+
                     var preloadedAssets = PlayerSettings.GetPreloadedAssets().ToList();
 
                     preloadedAssets.Add(asset);

@@ -1,5 +1,5 @@
 #if UNITY_EDITOR && !ENFORCE_ENCOSY_RUNTIME_TYPECACHE
-#define __ENCOSY_RUNTIME_TYPECACHE_AUTO__
+#define __RUNTIME_TYPECACHE_AUTO__
 #endif
 
 // MIT License
@@ -26,7 +26,7 @@
 //
 // https://github.com/thebeardphantom/Runtime-TypeCache
 
-#if __ENCOSY_RUNTIME_TYPECACHE_AUTO__
+#if __RUNTIME_TYPECACHE_AUTO__
 
 using System;
 using System.Reflection;
