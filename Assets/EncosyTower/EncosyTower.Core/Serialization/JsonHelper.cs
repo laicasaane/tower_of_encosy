@@ -44,7 +44,7 @@ namespace EncosyTower.Serialization
 
 #if UNITY_EDITOR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Init()
+        private static void InitWhenDomainReloadDisabled()
         {
             s_settings = null;
         }

@@ -18,7 +18,7 @@ namespace EncosyTower.PubSub
 
 #if UNITY_EDITOR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        static void Init()
+        private static void InitWhenDomainReloadDisabled()
         {
             s_instance?.Dispose();
             s_instance = null;

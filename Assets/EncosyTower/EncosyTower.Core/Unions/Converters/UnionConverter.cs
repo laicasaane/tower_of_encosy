@@ -17,7 +17,9 @@ namespace EncosyTower.Unions.Converters
             Init();
         }
 
+#if UNITY_EDITOR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+#endif
         private static void Init()
         {
             s_converters = new();

@@ -10,7 +10,7 @@ namespace EncosyTower.Vaults
 
 #if UNITY_EDITOR
         [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Init()
+        private static void InitWhenDomainReloadDisabled()
         {
             s_vault?.Dispose();
             s_vault = new();

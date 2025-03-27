@@ -12,7 +12,7 @@ namespace Module.GameCommon.Processing
 
 #if UNITY_EDITOR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Init()
+        private static void InitWhenDomainReloadDisabled()
         {
             s_instance?.Dispose();
             s_instance = null;

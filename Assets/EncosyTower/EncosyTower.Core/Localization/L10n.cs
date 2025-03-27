@@ -33,9 +33,8 @@ namespace EncosyTower.Localization
         public static IReadOnlyDictionary<string, Locale> LocaleMap => s_codeToLocaleMap;
 
 #if UNITY_EDITOR
-        // Hỗ trợ khi tắt Domain Reload trên editor
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Init()
+        private static void InitWhenDomainReloadDisabled()
         {
             GlobalValueVault<bool>.TrySet(TypeId, false);
 

@@ -23,14 +23,16 @@ namespace EncosyTower.Samples.MonoPages
 
         public static PageFlowScope FreeTopScope => s_freeTopRecord.Scope;
 
+#if UNITY_EDITOR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Init()
+        private static void InitWhenDomainReloadDisabled()
         {
             IsInitialized = false;
             s_screenRecord = default;
             s_popupRecord = default;
             s_freeTopRecord = default;
         }
+#endif
 
         private async void Awake()
         {
