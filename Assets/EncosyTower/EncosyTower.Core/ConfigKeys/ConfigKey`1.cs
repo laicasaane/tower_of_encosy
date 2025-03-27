@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using EncosyTower.Common;
 using EncosyTower.Conversion;
 using UnityEngine;
 
@@ -222,7 +223,7 @@ namespace EncosyTower.ConfigKeys
             public readonly bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => string.IsNullOrEmpty(_value) == false;
+                get => _value.IsNotEmpty();
             }
 
             /// <summary>

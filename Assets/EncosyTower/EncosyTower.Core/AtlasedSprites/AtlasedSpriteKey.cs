@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.AssetKeys;
+using EncosyTower.Common;
 using EncosyTower.Conversion;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -69,7 +70,7 @@ namespace EncosyTower.AtlasedSprites
             public readonly bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => string.IsNullOrEmpty(_atlas) == false && string.IsNullOrEmpty(_sprite) == false;
+                get => _atlas.IsNotEmpty() && _sprite.IsNotEmpty();
             }
 
             public readonly string Atlas

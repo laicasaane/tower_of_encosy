@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using EncosyTower.Common;
 using EncosyTower.Conversion;
 using UnityEngine;
 using UnityEngine.Localization.Tables;
@@ -24,9 +25,9 @@ namespace EncosyTower.Localization
 
         public bool IsValid
             => Table.ReferenceType == TableReference.Type.Name
-            && string.IsNullOrEmpty(Table.TableCollectionName) == false
+            && Table.TableCollectionName.IsNotEmpty()
             && Entry.ReferenceType == TableEntryReference.Type.Name
-            && string.IsNullOrEmpty(Entry.Key) == false
+            && Entry.Key.IsNotEmpty()
             ;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,7 +74,7 @@ namespace EncosyTower.Localization
             public readonly bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => string.IsNullOrEmpty(_table) == false && string.IsNullOrEmpty(_entry) == false;
+                get => _table.IsNotEmpty() && _entry.IsNotEmpty();
             }
 
             public readonly TableReference Table

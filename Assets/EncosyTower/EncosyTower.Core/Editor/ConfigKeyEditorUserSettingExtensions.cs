@@ -41,7 +41,7 @@ namespace EncosyTower.Editor.ConfigKeys
         public static string GetEditorUserSetting(this ConfigKey<string> self, string defaultValue)
         {
             var str = EditorUserSettings.GetConfigValue(self.Value);
-            return string.IsNullOrEmpty(str) ? defaultValue : str;
+            return str.NotEmptyOr(defaultValue);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

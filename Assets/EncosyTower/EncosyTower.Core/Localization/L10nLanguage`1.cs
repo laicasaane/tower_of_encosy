@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.Common;
 using EncosyTower.Conversion;
 using UnityEngine;
 
@@ -98,7 +99,7 @@ namespace EncosyTower.Localization
             public readonly bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => string.IsNullOrEmpty(_code) == false;
+                get => _code.IsNotEmpty();
             }
 
             public readonly ushort Value

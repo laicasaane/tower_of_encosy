@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using EncosyTower.Common;
 using EncosyTower.Conversion;
 using UnityEngine;
 
@@ -20,7 +21,7 @@ namespace EncosyTower.Scenes
         public bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => string.IsNullOrEmpty(Name) == false;
+            get => Name.IsNotEmpty();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -67,7 +68,7 @@ namespace EncosyTower.Scenes
             public readonly bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => string.IsNullOrEmpty(_name) == false;
+                get => _name.IsNotEmpty();
             }
 
             public readonly int Index

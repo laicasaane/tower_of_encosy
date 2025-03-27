@@ -5,6 +5,7 @@
 using UnityEditor;
 using EncosyTower.Settings;
 using EncosyTower.Types;
+using EncosyTower.Common;
 
 namespace EncosyTower.Editor.Settings
 {
@@ -29,9 +30,9 @@ namespace EncosyTower.Editor.Settings
                 ? PREFERENCES_PATH
                 : PROJECT_PATH;
 
-            var displayPath = string.IsNullOrEmpty(attribute.DisplayPath)
-                ? ObjectNames.NicifyVariableName(typeof(T).GetNameWithoutSuffix(nameof(Settings<T>)))
-                : attribute.DisplayPath;
+            var displayPath = attribute.DisplayPath.NotEmptyOr(
+                ObjectNames.NicifyVariableName(typeof(T).GetNameWithoutSuffix(nameof(Settings<T>)))
+            );
 
             return new ScriptableObjectSettingsProvider(self, scope, $"{path}{displayPath}", useImgui);
         }
@@ -48,9 +49,9 @@ namespace EncosyTower.Editor.Settings
                 ? PREFERENCES_PATH
                 : PROJECT_PATH;
 
-            var displayPath = string.IsNullOrEmpty(attribute.DisplayPath)
-                ? ObjectNames.NicifyVariableName(typeof(T).GetNameWithoutSuffix(nameof(Settings<T>)))
-                : attribute.DisplayPath;
+            var displayPath = attribute.DisplayPath.NotEmptyOr(
+                ObjectNames.NicifyVariableName(typeof(T).GetNameWithoutSuffix(nameof(Settings<T>)))
+            );
 
             var settingsPath = $"{path}{displayPath}";
             SettingsService.OpenProjectSettings(settingsPath);

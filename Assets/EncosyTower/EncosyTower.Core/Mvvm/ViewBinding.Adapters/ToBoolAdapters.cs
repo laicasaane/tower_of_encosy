@@ -1,5 +1,6 @@
 using System;
 using EncosyTower.Annotations;
+using EncosyTower.Common;
 using EncosyTower.Unions;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters
@@ -34,7 +35,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
                     return value;
                 }
 
-                return string.IsNullOrEmpty(result) == false;
+                return result.IsNotEmpty();
             }
 
             return union;
@@ -87,7 +88,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
                     return !value;
                 }
 
-                return string.IsNullOrEmpty(result) == false;
+                return result.IsNotEmpty();
             }
 
             return union;
