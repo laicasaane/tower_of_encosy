@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using EncosyTower.Databases.Authoring;
 using EncosyTower.Logging;
+using EncosyTower.Naming;
 
 namespace EncosyTower.Databases.Settings
 {
