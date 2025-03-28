@@ -592,6 +592,18 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlyArrayMap<TKey, TValue> AsReadOnly()
+        {
+            return new ReadOnlyArrayMap<TKey, TValue>(this);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator ReadOnlyArrayMap<TKey, TValue>(ArrayMap<TKey, TValue> map)
+        {
+            return map.AsReadOnly();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool AddValue(TKey key, out int indexSet)
         {
             var hash = key.GetHashCode(); //IEquatable doesn't enforce the override of GetHashCode
