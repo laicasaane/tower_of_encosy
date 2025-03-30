@@ -1,0 +1,115 @@
+:root {
+    --icon-cursor-horizontal: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-cursor-resize-horizontal.png') 64 64;
+    --icon-close: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-close.png') 64 64;
+    --icon-execute: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-execute.png') 64 64;
+}
+
+.visual-commander {
+    flex-grow: 1;
+    -unity-font-definition: resource("Fonts & Materials/Baloo-Regular SDF");
+    font-size: 26px;
+}
+
+.visual-commander .unity-two-pane-split-view__dragline--horizontal {
+    cursor: var(--icon-cursor-horizontal);
+}
+
+.visual-commander .unity-two-pane-split-view__dragline-anchor--horizontal {
+    width: 5px;
+    background-color: gray;
+}
+
+.visual-commander__header {
+    flex-direction: row-reverse;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.visual-commander__header-button__close {
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
+}
+
+.visual-commander__header-button__close-icon {
+    --unity-image: var(--icon-close);
+    padding: 5px;
+}
+
+.visual-commander__content {
+    flex: 1 0 auto;
+}
+
+.visual-directory {
+    margin: 0px;
+    height: 80px;
+    min-height: 80px;
+}
+
+.visual-directory .unity-radio-button__checkmark-background {
+    border-radius: 0px;
+    padding: 0px;
+    height: auto;
+    width: auto;
+    flex-grow: 1;
+    flex-direction: row;
+    border-width: 0px;
+}
+
+.visual-directory .unity-radio-button__checkmark {
+    border-radius: 0px;
+    width: 80px;
+    height: 80px;
+    flex: 1 0 auto;
+    flex-direction: row;
+    background-color: transparent;
+}
+
+.visual-directory .unity-radio-button__input:checked .unity-radio-button__checkmark {
+    background-color: aquamarine;
+}
+
+.visual-directory__label {
+    margin: 0px;
+    padding: 0px;
+    width: 80px;
+    height: 80px;
+    flex: 1 0 auto;
+    -unity-text-align: middle-center;
+}
+
+.visual-command__header {
+    flex-direction: row;
+    background-color: aliceblue;
+    height: 100px;
+}
+
+.visual-command__header-label {
+    -unity-text-align: middle-left;
+    margin-left: 20px;
+    flex: 1 0 auto;
+    font-size: 32px;
+}
+
+.visual-command__header-button__execute {
+    width: 100px;
+}
+
+.visual-command__header-button__execute-icon {
+    --unity-image: var(--icon-execute);
+    padding: 5px;
+}
+
+.visual-property {
+    flex-direction: row;
+    flex: 1 0 auto;
+}
+
+.visual-property__label {
+    -unity-text-align: middle-left;
+    min-width: 350px;
+}
+
+.visual-property__content {
+    flex: 1 0 auto;
+}
