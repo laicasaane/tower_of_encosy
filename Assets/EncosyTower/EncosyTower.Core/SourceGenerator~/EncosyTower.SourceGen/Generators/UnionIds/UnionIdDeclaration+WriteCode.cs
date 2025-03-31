@@ -85,6 +85,8 @@
                 WriteGetIdDisplayStringFast(ref p, false);
                 WriteGetIdFixedString(ref p, false);
                 WriteGetIdDisplayFixedString(ref p, false);
+                WriteTryGetIListNames(ref p);
+                WriteTryGetIListDisplayNames(ref p);
                 WriteTryGetNames(ref p);
                 WriteTryGetDisplayNames(ref p);
                 WriteTryGetFixedNames(ref p);
@@ -1777,6 +1779,137 @@
                 }
 
                 p.PrintLine("return fs;");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteTryGetIListNames(ref Printer p)
+        {
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public static bool TryGetNames(")
+                .PrintEndLine("IdKind kind, global::System.Collections.Generic.IList<string> result)");
+            p.OpenScope();
+            {
+                p.PrintLine("switch (kind)");
+                p.OpenScope();
+                {
+                    foreach (var kind in KindRefs)
+                    {
+                        var kindName = kind.name;
+
+                        p.PrintBeginLine("case IdKind.").Print(kindName).PrintEndLine(":");
+                        p.OpenScope();
+
+                        if (kind.isEnum)
+                        {
+                            p.PrintLine("if (result is global::EncosyTower.Collections.FasterList<string> fasterList)");
+                            p.OpenScope();
+                            {
+                                p.PrintBeginLine("fasterList.AddRange(").Print(kindName)
+                                    .PrintEndLine("Extensions.Names.AsSpan());");
+                            }
+                            p.CloseScope();
+                            p.PrintLine("else");
+                            p.OpenScope();
+                            {
+                                p.PrintBeginLine("foreach (var name in ").Print(kindName)
+                                    .PrintEndLine("Extensions.Names.AsSpan())");
+                                p.OpenScope();
+                                {
+                                    p.PrintLine("result.Add(name);");
+                                }
+                                p.CloseScope();
+                            }
+                            p.CloseScope();
+                            p.PrintEndLine();
+
+                            p.PrintLine("return true;");
+                        }
+                        else
+                        {
+                            p.PrintLine("goto default;");
+                        }
+
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+
+                    p.PrintLine("default:");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
+                p.CloseScope();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteTryGetIListDisplayNames(ref Printer p)
+        {
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public static bool TryGetDisplayNames(")
+                .PrintEndLine("IdKind kind, global::System.Collections.Generic.IList<string> result)");
+            p.OpenScope();
+            {
+                p.PrintLine("switch (kind)");
+                p.OpenScope();
+                {
+                    foreach (var kind in KindRefs)
+                    {
+                        var kindName = kind.name;
+
+                        p.PrintBeginLine("case IdKind.").Print(kindName).PrintEndLine(":");
+                        p.OpenScope();
+
+                        if (kind.isEnum)
+                        {
+                            p.PrintLine("if (result is global::EncosyTower.Collections.FasterList<string> fasterList)");
+                            p.OpenScope();
+                            {
+                                p.PrintBeginLine("fasterList.AddRange(").Print(kindName)
+                                    .PrintEndLine("Extensions.DisplayNames.AsSpan());");
+                            }
+                            p.CloseScope();
+                            p.PrintLine("else");
+                            p.OpenScope();
+                            {
+                                p.PrintBeginLine("foreach (var name in ").Print(kindName)
+                                    .PrintEndLine("Extensions.DisplayNames.AsSpan())");
+                                p.OpenScope();
+                                {
+                                    p.PrintLine("result.Add(name);");
+                                }
+                                p.CloseScope();
+                            }
+                            p.CloseScope();
+                            p.PrintEndLine();
+
+                            p.PrintLine("return true;");
+                        }
+                        else
+                        {
+                            p.PrintLine("goto default;");
+                        }
+
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+
+                    p.PrintLine("default:");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("result = global::System.Array.Empty<string>();");
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
+                p.CloseScope();
             }
             p.CloseScope();
             p.PrintEndLine();
