@@ -33,10 +33,6 @@ namespace EncosyTower.VisualCommands.Editor
             _view = null;
         }
 
-        private void OnGUI()
-        {
-        }
-
         private static void ApplyStyleSheetsTo(VisualElement root, string builtinStyleSheet = "")
         {
             if (string.IsNullOrWhiteSpace(builtinStyleSheet) == false
