@@ -80,8 +80,9 @@ namespace EncosyTower.VisualCommands
         private GenericDropdownMenu Create()
         {
             var menu = new GenericDropdownMenu();
+            object obj = _optionsGetter.IsStatic ? null : _command;
 
-            if (_optionsGetter.Invoke(_command, null) is IReadOnlyList<string> options
+            if (_optionsGetter.Invoke(obj, null) is IReadOnlyList<string> options
                 && options.Count > 0
             )
             {
