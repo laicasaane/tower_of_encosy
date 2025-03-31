@@ -4,10 +4,10 @@ namespace EncosyTower.PageFlows
 {
     public enum PageAsyncOperation
     {
-        Sequential,
         Drop,
         DropError,
         Exception,
+        Sequential,
     }
 }
 
