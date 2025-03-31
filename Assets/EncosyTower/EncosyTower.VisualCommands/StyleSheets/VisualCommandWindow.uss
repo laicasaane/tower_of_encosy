@@ -126,6 +126,7 @@
 }
 
 .visual-property__content {
+    flex-direction: row;
     flex: 1 0 auto;
     color: var(--visual-property-content-color);
     min-width: 150px;
@@ -134,8 +135,19 @@
 
 .visual-property__content .unity-base-field {
     margin: 0px;
+    flex: 1 0 auto;
 }
 
 .visual-property__content .unity-base-field:focus > .unity-label {
     color: var(--visual-commander-color-focus);
+}
+
+.visual-options {
+    width: 16px;
+    height: 16px;
+    padding: 2px 0px 3px 0px;
+}
+
+.visual-options__icon {
+    --unity-image: var(--icon-options);
 }

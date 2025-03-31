@@ -1,5 +1,6 @@
 :root {
     --icon-execute: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-execute.png') 64 64;
+    --icon-options: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-options.png') 12 12;
     --visual-commander-color-focus: #9FEF3D;
     --visual-directory-background: #353535;
     --visual-directory-highlight-background: #2C5D87;

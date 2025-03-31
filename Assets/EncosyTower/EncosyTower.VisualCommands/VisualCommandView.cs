@@ -113,12 +113,12 @@ namespace EncosyTower.VisualCommands
             }
 
             var views = _propertyViews;
-            var viewPool = _propertyViewPool;
+            var propertyViewPool = _propertyViewPool;
             var container = _view.Container;
 
             foreach (var property in properties)
             {
-                var view = viewPool.Get();
+                var view = propertyViewPool.Get();
 
                 if (view.userData is not VisualPropertyViewController controller)
                 {

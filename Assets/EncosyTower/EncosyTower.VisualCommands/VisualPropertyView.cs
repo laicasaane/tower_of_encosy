@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using EncosyTower.Mvvm.ComponentModel;
 using EncosyTower.VisualCommands.Bindings;
 using UnityEngine.UIElements;
 
@@ -47,18 +46,22 @@ namespace EncosyTower.VisualCommands
             _view.userData = this;
         }
 
-        public void Initialize([NotNull] VisualPropertyData data, [NotNull] IVisualCommand command)
+        public void Initialize(
+              [NotNull] VisualPropertyData data
+            , [NotNull] IVisualCommand command
+        )
         {
             _data = data;
             _view.name = data.Name;
             _view.SetLabel(data.Label);
 
             VisualPropertyBindingAPI.Create(
-                  data.Type
+                  command
+                , data.Type
                 , data.DefaultEnumValue
                 , data.Name
                 , data.PropertyName
-                , command as IObservableObject
+                , data.Options
                 , _view.Content
             );
         }

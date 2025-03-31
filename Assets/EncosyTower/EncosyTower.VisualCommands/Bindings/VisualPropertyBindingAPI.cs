@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using EncosyTower.Mvvm.ComponentModel;
 using UnityEngine.UIElements;
 
@@ -6,17 +7,21 @@ namespace EncosyTower.VisualCommands.Bindings
 {
     internal static class VisualPropertyBindingAPI
     {
+        private const string BINDING_PROPERTY_NAME = "SetValue";
+        private const string BINDING_COMMAND_NAME = "OnValueChanged";
+
         public static void Create(
-              VisualPropertyType type
+              IVisualCommand command
+            , VisualPropertyType type
             , Enum defaultEnumValue
             , string name
             , string propertyName
-            , IObservableObject context
+            , VisualOptionsData optionsData
             , VisualElement root
         )
         {
             if (string.IsNullOrEmpty(propertyName)
-                || context is null
+                || command is not IObservableObject context
                 || root is null
             )
             {
@@ -24,9 +29,6 @@ namespace EncosyTower.VisualCommands.Bindings
             }
 
             name = $"{name}-field";
-
-            const string BINDING_PROPERTY_NAME = "SetValue";
-            const string BINDING_COMMAND_NAME = "OnValueChanged";
 
             VisualPropertyBinding binding = null;
 
@@ -269,6 +271,31 @@ namespace EncosyTower.VisualCommands.Bindings
             binding.SetContext(context);
             binding.SetTargetPropertyName(BINDING_PROPERTY_NAME, propertyName);
             binding.SetTargetCommandName(BINDING_COMMAND_NAME, $"Set{propertyName}Command");
+            binding.StartListening();
+
+            CreateOptions(command, context, optionsData, root);
+        }
+
+        private static void CreateOptions(
+              IVisualCommand command
+            , IObservableObject context
+            , VisualOptionsData data
+            , VisualElement root
+        )
+        {
+            if (data is null)
+            {
+                return;
+            }
+
+            var (optionsGetter, commandName, isDataStatic) = data;
+            var menu = new VisualOptionMenu(command, optionsGetter, isDataStatic);
+            var view = new VisualOptionsView(menu);
+            root.Add(view);
+
+            var binding = new VisualOptionsViewBinding(view);
+            binding.SetContext(context);
+            binding.SetTargetCommandName(BINDING_COMMAND_NAME, commandName);
             binding.StartListening();
         }
     }

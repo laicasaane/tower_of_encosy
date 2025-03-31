@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using EncosyTower.StringIds;
 
 namespace EncosyTower.VisualCommands
@@ -35,6 +36,7 @@ namespace EncosyTower.VisualCommands
         , int Order
         , string Label
         , Enum DefaultEnumValue = default
+        , VisualOptionsData Options = default
     );
 
     public record VisualDirectoryData([NotNull] string Name, string Label, StringId Id);
@@ -47,4 +49,12 @@ namespace EncosyTower.VisualCommands
         , string Label
         , VisualDirectoryData Directory
     );
+
+    public record VisualOptionsData(
+          [NotNull] MethodInfo OptionsGetter
+        , [NotNull] string SetOptionIndexCommandName
+        , bool IsDataStatic
+    );
+
+    public record VisualOption(int Index, string Value);
 }

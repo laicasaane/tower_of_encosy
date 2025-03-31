@@ -1,5 +1,6 @@
 :root {
     --icon-execute: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-execute.png') 64 64;
+    --icon-options: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-options.png') 12 12;
     --visual-commander-color-focus: #9FEF3D;
     --visual-directory-background: #353535;
     --visual-directory-highlight-background: #2C5D87;
@@ -12,7 +13,7 @@
     --visual-command-button-execute-background-active: #5F7247;
     --visual-command-button-execute-border-color-active: #9FEF3D;
     --visual-command-button-execute-icon-color: #8BBB50;
-    --visual-command-header-background: #383838;
+    --visual-command-header-background: #5F5F5F;
     --visual-command-border-color: #232323;
     --visual-command-header-label-color: #84CDF9;
     --visual-property-content-color: black;

@@ -2,19 +2,20 @@
     --icon-cursor-horizontal: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-cursor-resize-horizontal.png') 64 64;
     --icon-close: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-close.png') 64 64;
     --icon-execute: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-execute.png') 64 64;
+    --icon-options: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-options.png') 64 64;
     --visual-commander-background: #282828;
     --visual-commander-color: #EEEEEE;
     --visual-commander-color-focus: #9FEF3D;
     --visual-commander-split-view-dragline-background: gray;
-    --visual-commander-button-close-background: #585858;
-    --visual-commander-button-close-border-color: #303030;
-    --visual-commander-button-close-background-hover: #676767;
-    --visual-commander-button-close-border-color-hover: #242424;
-    --visual-commander-button-close-background-focus: #6E6E6E;
-    --visual-commander-button-close-border-color-focus: #7BAEFA;
-    --visual-commander-button-close-background-active: #46607C;
-    --visual-commander-button-close-border-color-active: #0D0D0D;
-    --visual-commander-button-close-icon-color: #EEEEEE;
+    --visual-commander-button-background: #585858;
+    --visual-commander-button-border-color: #303030;
+    --visual-commander-button-background-hover: #676767;
+    --visual-commander-button-border-color-hover: #242424;
+    --visual-commander-button-background-focus: #6E6E6E;
+    --visual-commander-button-border-color-focus: #7BAEFA;
+    --visual-commander-button-background-active: #46607C;
+    --visual-commander-button-border-color-active: #0D0D0D;
+    --visual-commander-button-icon-color: #EEEEEE;
     --visual-directory-background: #353535;
     --visual-directory-highlight-background: #2C5D87;
     --visual-command-button-execute-background: #585858;
@@ -29,7 +30,10 @@
     --visual-command-border-color: #999999;
     --visual-command-header-background: #383838;
     --visual-command-header-label-color: #84CDF9;
-    --visual-property-content-color: black;
+    --visual-property-content-background: #F0F0F0;
+    --visual-property-content-color: #090909;
+    --visual-property-dropdown-background: #515151;
+    --visual-property-dropdown-color: #E4E4E4;
 }
 
 .visual-commander {
@@ -61,28 +65,28 @@
 }
 
 .visual-commander__header-button__close.unity-button {
-    background-color: var(--visual-commander-button-close-background);
-    border-color: var(--visual-commander-button-close-border-color);
+    background-color: var(--visual-commander-button-background);
+    border-color: var(--visual-commander-button-border-color);
 }
 
 .visual-commander__header-button__close.unity-button:hover {
-    background-color: var(--visual-commander-button-close-background-hover);
-    border-color: var(--visual-commander-button-close-border-color-hover);
+    background-color: var(--visual-commander-button-background-hover);
+    border-color: var(--visual-commander-button-border-color-hover);
 }
 
 .visual-commander__header-button__close.unity-button:focus {
-    background-color: var(--visual-commander-button-close-background-focus);
-    border-color: var(--visual-commander-button-close-border-color-focus);
+    background-color: var(--visual-commander-button-background-focus);
+    border-color: var(--visual-commander-button-border-color-focus);
 }
 
 .visual-commander__header-button__close.unity-button:active {
-    background-color: var(--visual-commander-button-close-background-active);
-    border-color: var(--visual-commander-button-close-border-color-active);
+    background-color: var(--visual-commander-button-background-active);
+    border-color: var(--visual-commander-button-border-color-active);
 }
 
 .visual-commander__header-button__close-icon {
     --unity-image: var(--icon-close);
-    --unity-image-tint-color: var(--visual-commander-button-close-icon-color);
+    --unity-image-tint-color: var(--visual-commander-button-icon-color);
     padding: 5px;
 }
 
@@ -133,7 +137,7 @@
     border-width: 2px;
     border-color: var(--visual-command-border-color);
     border-radius: 6px;
-    margin: 0px 8px 12px 6px;
+    margin: 0px 8px 24px 6px;
 }
 
 .visual-command__header {
@@ -207,6 +211,7 @@
 }
 
 .visual-property__content {
+    flex-direction: row;
     flex: 1 0 auto;
     color: var(--visual-property-content-color);
     min-width: 250px;
@@ -219,6 +224,11 @@
 
 .visual-property__content .unity-base-field {
     margin: 0px;
+    flex: 1 0 auto;
+}
+
+.visual-property__content .unity-base-field__input {
+    border-radius: 6px;
 }
 
 .visual-property__content .unity-label {
@@ -236,4 +246,44 @@
 
 .visual-property__content .unity-enum-field__input {
     margin-left: 0px;
+    background-color: var(--visual-property-content-background);
+}
+
+.visual-options {
+    width: 50px;
+    height: 50px;
+}
+
+.visual-options.unity-button {
+    background-color: var(--visual-commander-button-background);
+    border-color: var(--visual-commander-button-border-color);
+}
+
+.visual-options.unity-button:hover {
+    background-color: var(--visual-commander-button-background-hover);
+    border-color: var(--visual-commander-button-border-color-hover);
+}
+
+.visual-options.unity-button:focus {
+    background-color: var(--visual-commander-button-background-focus);
+    border-color: var(--visual-commander-button-border-color-focus);
+}
+
+.visual-options.unity-button:active {
+    background-color: var(--visual-commander-button-background-active);
+    border-color: var(--visual-commander-button-border-color-active);
+}
+
+.visual-options__icon {
+    --unity-image: var(--icon-options);
+    --unity-image-tint-color: var(--visual-commander-button-icon-color);
+}
+
+.unity-base-dropdown .unity-scroll-view {
+    background-color: var(--visual-property-dropdown-background);
+    color: var(--visual-property-dropdown-color);
+}
+
+.unity-base-dropdown__item:checked > .unity-base-dropdown__checkmark {
+    -unity-background-image-tint-color: var(--visual-property-dropdown-color);
 }

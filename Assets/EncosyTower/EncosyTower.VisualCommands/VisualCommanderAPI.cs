@@ -58,14 +58,20 @@ namespace EncosyTower.VisualCommands
 
             static FasterList<VisualCommandData> Filter(ReadOnlySpan<Type> commandTypes)
             {
+                var typeOfVoid = typeof(void);
+                var typeOfOption = typeof(VisualOption);
                 var typeOfEnum = typeof(Enum);
+                var typeOfStringList = typeof(IReadOnlyList<string>);
                 var typeOfObservableObject = typeof(IObservableObject);
                 var orderedProperties = new FasterList<VisualPropertyData>();
                 var unorderedProperties = new FasterList<VisualPropertyData>();
                 var orderedCommands = new FasterList<VisualCommandData>(commandTypes.Length);
                 var unorderedCommands = new FasterList<VisualCommandData>(commandTypes.Length);
                 var commandMap = new Dictionary<string, Type>();
-                var bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+                var propertyFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+                var optionsFlags = propertyFlags | BindingFlags.Static;
+                var commandNameFormat = "Set{0}Command";
+                var setOptionForCommandNameFormat = "SetOptionFor{0}Command";
 
                 foreach (var commandType in commandTypes)
                 {
@@ -91,7 +97,6 @@ namespace EncosyTower.VisualCommands
                     }
 
                     var propertyInfoCandidates = commandType.GetCustomAttributes<NotifyPropertyChangedInfoAttribute>();
-                    var commandNameFormat = "Set{0}Command";
 
                     foreach (var propertyInfo in propertyInfoCandidates)
                     {
@@ -105,7 +110,7 @@ namespace EncosyTower.VisualCommands
                             continue;
                         }
 
-                        var property = commandType.GetProperty(propertyName, bindingFlags);
+                        var property = commandType.GetProperty(propertyName, propertyFlags);
 
                         if (property == null
                             || property.GetCustomAttribute<VisualIgnoredAttribute>() != null
@@ -114,17 +119,41 @@ namespace EncosyTower.VisualCommands
                             continue;
                         }
 
-                        var commandName = string.Format(commandNameFormat, propertyName);
-                        var argType = visualPropType == VisualPropertyType.Enum
-                            ? typeOfEnum
-                            : propType;
+                        {
+                            var commandName = string.Format(commandNameFormat, propertyName);
+                            var argType = visualPropType == VisualPropertyType.Enum
+                                ? typeOfEnum
+                                : propType;
 
-                        if (commandMap.TryGetValue(commandName, out var commandArgType) == false
-                            || argType != commandArgType
+                            if (commandMap.TryGetValue(commandName, out var commandArgType) == false
+                                || argType != commandArgType
+                            )
+                            {
+                                LogWarningMissingRelayCommand(commandType, propertyName, argType);
+                                continue;
+                            }
+                        }
+
+                        VisualOptionsData optionsData = null;
+
+                        if (property.GetCustomAttribute<VisualOptionsAttribute>() is { } optionsAttrib
+                            && commandType.GetMethod(optionsAttrib.OptionsGetter, propertyFlags) is { } optionsGetter
+                            && typeOfStringList.IsAssignableFrom(optionsGetter.ReturnType)
+                            && optionsGetter.GetParameters().Length == 0
                         )
                         {
-                            LogWarningMissingRelayCommand(commandArgType, propertyName, argType);
-                            continue;
+                            var commandName = string.Format(setOptionForCommandNameFormat, propertyName);
+
+                            if (commandMap.TryGetValue(commandName, out var commandArgType) == false
+                                || commandArgType != typeOfOption
+                            )
+                            {
+                                LogWarningMissingSetOptionForCommand(commandType, propertyName, typeOfOption);
+                            }
+                            else
+                            {
+                                optionsData = new(optionsGetter, commandName, optionsAttrib.IsDataStatic);
+                            }
                         }
 
                         var propertyOrder = property.GetCustomAttribute<VisualOrderAttribute>()?.Order;
@@ -144,6 +173,7 @@ namespace EncosyTower.VisualCommands
                             , propertyOrder ?? 0
                             , propertyLabel
                             , defaultEnumValue
+                            , optionsData
                         ));
                     }
 
@@ -270,7 +300,7 @@ namespace EncosyTower.VisualCommands
         private static void LogErrorNotApplicableCommandType(Type type)
         {
             DevLoggerAPI.LogError(
-                $"Type '{type.FullName}' is not applicable as an {nameof(IVisualCommand)}. " +
+                $"Type '{type}' is not applicable as an {nameof(IVisualCommand)}. " +
                 $"It must be a sealed class that also implements {nameof(IObservableObject)} interface " +
                 "and has a default constructor."
             );
@@ -279,7 +309,7 @@ namespace EncosyTower.VisualCommands
         private static void LogWarningNotApplicablePropertyType(Type type, string propertyName)
         {
             DevLoggerAPI.LogWarning(
-                $"Property '{propertyName}' of type '{type.FullName}' must only return one of the following types: " +
+                $"Property '{propertyName}' of type '{type}' must only return one of the following types: " +
                 "bool, double, float, int, long, string, uint, ulong, " +
                 "Bounds, BoundsInt, DateTime, Rect, RectInt, Vector2, Vector2Int, Vector3, Vector3Int, Vector4, " +
                 "or an enum."
@@ -289,8 +319,17 @@ namespace EncosyTower.VisualCommands
         private static void LogWarningMissingRelayCommand(Type type, string propertyName, Type argType)
         {
             DevLoggerAPI.LogWarning(
-                $"Property '{propertyName}' of type '{type.FullName}' must have a corresponding method " +
+                $"Property '{propertyName}' of type '{type}' must have a corresponding method " +
                 $"named 'Set{propertyName}'. The method must be annotated with [RelayCommand], " +
+                $"and has a single parameter of type '{argType}'."
+            );
+        }
+
+        private static void LogWarningMissingSetOptionForCommand(Type type, string propertyName, Type argType)
+        {
+            DevLoggerAPI.LogWarning(
+                $"Property '{propertyName}' of type '{type}' must have a corresponding method " +
+                $"named 'SetOptionFor{propertyName}'. The method must be annotated with [RelayCommand], " +
                 $"and has a single parameter of type '{argType}'."
             );
         }
