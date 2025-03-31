@@ -14,8 +14,10 @@ namespace EncosyTower.VisualCommands
         public static readonly string CloseButtonUssClassName = $"{HeaderUssClassName}-button__close";
         public static readonly string CloseIconUssClassName = $"{CloseButtonUssClassName}-icon";
         public static readonly string ContentUssClassName = $"{UssClassName}__content";
-        public static readonly string DirectoryScrollUssClassName = $"{UssClassName}__directory--container";
-        public static readonly string CommandScrollUssClassName = $"{UssClassName}__command--container";
+        public static readonly string DirectoryScrollUssClassName = $"{UssClassName}__directory--scoll";
+        public static readonly string DirectoryContainerUssClassName = $"{UssClassName}__directory--container";
+        public static readonly string CommandScrollUssClassName = $"{UssClassName}__command--scroll";
+        public static readonly string CommandContainerUssClassName = $"{UssClassName}__command--container";
 
         public event Action OnClose;
 
@@ -25,7 +27,7 @@ namespace EncosyTower.VisualCommands
         // Detect redundant Dispose() calls.
         private bool _isDisposed;
 
-        public VisualCommanderView(float directoryListWidth, bool horizontal)
+        public VisualCommanderView(float directoryListWidth)
         {
             AddToClassList(UssClassName);
 
@@ -46,22 +48,19 @@ namespace EncosyTower.VisualCommands
             content.AddToClassList(ContentUssClassName);
             Add(content);
 
-            var orientation = horizontal
-                ? TwoPaneSplitViewOrientation.Horizontal
-                : TwoPaneSplitViewOrientation.Vertical;
-
-            var splitter = new TwoPaneSplitView(0, directoryListWidth, orientation);
+            var splitter = new TwoPaneSplitView(0, directoryListWidth, TwoPaneSplitViewOrientation.Horizontal);
             content.Add(splitter);
 
-            var directoryContainer = CreateContainer(
+            var directoryScroll = CreateContainer(
                   splitter
                 , DirectoryScrollUssClassName
             );
 
-            directoryContainer = directoryContainer.Q("unity-content-container");
+            directoryScroll = directoryScroll.Q("unity-content-container");
 
             var radioGroup = new RadioButtonGroup(string.Empty);
-            directoryContainer.Add(radioGroup);
+            radioGroup.AddToClassList(DirectoryContainerUssClassName);
+            directoryScroll.Add(radioGroup);
 
             _directoryContainer = radioGroup;
 
@@ -71,6 +70,7 @@ namespace EncosyTower.VisualCommands
             );
 
             _commandContainer = commandContainer.Q("unity-content-container");
+            _commandContainer.AddToClassList(CommandContainerUssClassName);
         }
 
         public VisualElement DirectoryContainer => _directoryContainer;

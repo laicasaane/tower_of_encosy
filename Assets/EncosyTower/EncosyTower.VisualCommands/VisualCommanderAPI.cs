@@ -22,15 +22,11 @@ namespace EncosyTower.VisualCommands
         private static ArrayMap<StringId, FasterList<VisualCommandData>> s_directoryToCommands;
         private static FasterList<VisualDirectoryData> s_directories;
 
-        public static VisualCommanderView CreateView(
-              [NotNull] VisualElement root
-            , float directoryListWidth
-            , bool horizontal
-        )
+        public static VisualCommanderView CreateView([NotNull] VisualElement root, float directoryListWidth)
         {
             AggregateCommands();
 
-            var view = new VisualCommanderView(directoryListWidth, horizontal);
+            var view = new VisualCommanderView(directoryListWidth);
             var controller = new VisualCommanderViewController(view);
             controller.Initialize(s_directoryToCommands, s_directories.AsMemory());
 

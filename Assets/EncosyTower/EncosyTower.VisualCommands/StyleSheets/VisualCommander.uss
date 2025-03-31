@@ -2,12 +2,41 @@
     --icon-cursor-horizontal: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-cursor-resize-horizontal.png') 64 64;
     --icon-close: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-close.png') 64 64;
     --icon-execute: url('project://database/Assets/EncosyTower/EncosyTower.VisualCommands/StyleSheets/image-execute.png') 64 64;
+    --visual-commander-background: #282828;
+    --visual-commander-color: #EEEEEE;
+    --visual-commander-color-focus: #9FEF3D;
+    --visual-commander-split-view-dragline-background: gray;
+    --visual-commander-button-close-background: #585858;
+    --visual-commander-button-close-border-color: #303030;
+    --visual-commander-button-close-background-hover: #676767;
+    --visual-commander-button-close-border-color-hover: #242424;
+    --visual-commander-button-close-background-focus: #6E6E6E;
+    --visual-commander-button-close-border-color-focus: #7BAEFA;
+    --visual-commander-button-close-background-active: #46607C;
+    --visual-commander-button-close-border-color-active: #0D0D0D;
+    --visual-commander-button-close-icon-color: #EEEEEE;
+    --visual-directory-background: #353535;
+    --visual-directory-highlight-background: #2C5D87;
+    --visual-command-button-execute-background: #585858;
+    --visual-command-button-execute-border-color: #303030;
+    --visual-command-button-execute-background-hover: #676767;
+    --visual-command-button-execute-border-color-hover: #9FEF3D;
+    --visual-command-button-execute-background-focus: #6E6E6E;
+    --visual-command-button-execute-border-color-focus: #BCF14B;
+    --visual-command-button-execute-background-active: #5F7247;
+    --visual-command-button-execute-border-color-active: #9FEF3D;
+    --visual-command-button-execute-icon-color: #8BBB50;
+    --visual-command-border-color: #999999;
+    --visual-command-header-background: #383838;
+    --visual-command-header-label-color: #84CDF9;
+    --visual-property-content-color: black;
 }
 
 .visual-commander {
     flex-grow: 1;
-    -unity-font-definition: resource("Fonts & Materials/Baloo-Regular SDF");
     font-size: 26px;
+    background-color: var(--visual-commander-background);
+    color: var(--visual-commander-color);
 }
 
 .visual-commander .unity-two-pane-split-view__dragline--horizontal {
@@ -15,8 +44,8 @@
 }
 
 .visual-commander .unity-two-pane-split-view__dragline-anchor--horizontal {
-    width: 5px;
-    background-color: gray;
+    width: 4px;
+    background-color: var(--visual-commander-split-view-dragline-background);
 }
 
 .visual-commander__header {
@@ -28,12 +57,37 @@
 .visual-commander__header-button__close {
     width: 60px;
     height: 60px;
-    border-radius: 20px;
+    border-radius: 8px;
+}
+
+.visual-commander__header-button__close.unity-button {
+    background-color: var(--visual-commander-button-close-background);
+    border-color: var(--visual-commander-button-close-border-color);
+}
+
+.visual-commander__header-button__close.unity-button:hover {
+    background-color: var(--visual-commander-button-close-background-hover);
+    border-color: var(--visual-commander-button-close-border-color-hover);
+}
+
+.visual-commander__header-button__close.unity-button:focus {
+    background-color: var(--visual-commander-button-close-background-focus);
+    border-color: var(--visual-commander-button-close-border-color-focus);
+}
+
+.visual-commander__header-button__close.unity-button:active {
+    background-color: var(--visual-commander-button-close-background-active);
+    border-color: var(--visual-commander-button-close-border-color-active);
 }
 
 .visual-commander__header-button__close-icon {
     --unity-image: var(--icon-close);
+    --unity-image-tint-color: var(--visual-commander-button-close-icon-color);
     padding: 5px;
+}
+
+.visual-commander__directory--container {
+    margin: 0px;
 }
 
 .visual-commander__content {
@@ -58,30 +112,38 @@
 
 .visual-directory .unity-radio-button__checkmark {
     border-radius: 0px;
-    width: 80px;
     height: 80px;
     flex: 1 0 auto;
     flex-direction: row;
-    background-color: transparent;
+    background-color: var(--visual-directory-background);
 }
 
 .visual-directory .unity-radio-button__input:checked .unity-radio-button__checkmark {
-    background-color: aquamarine;
+    background-color: var(--visual-directory-highlight-background);
 }
 
 .visual-directory__label {
     margin: 0px;
     padding: 0px;
-    width: 80px;
-    height: 80px;
     flex: 1 0 auto;
     -unity-text-align: middle-center;
 }
 
+.visual-command {
+    border-width: 2px;
+    border-color: var(--visual-command-border-color);
+    border-radius: 6px;
+    margin: 0px 8px 12px 6px;
+}
+
 .visual-command__header {
     flex-direction: row;
-    background-color: aliceblue;
-    height: 100px;
+    height: 80px;
+    background-color: var(--visual-command-header-background);
+    border-bottom-width: 2px;
+    border-color: var(--visual-command-border-color);
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
 }
 
 .visual-command__header-label {
@@ -89,27 +151,89 @@
     margin-left: 20px;
     flex: 1 0 auto;
     font-size: 32px;
+    color: var(--visual-command-header-label-color);
 }
 
 .visual-command__header-button__execute {
-    width: 100px;
+    width: 80px;
+    padding: 12px;
+    margin: 0px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.visual-command__header-button__execute.unity-button {
+    background-color: var(--visual-command-button-execute-background);
+    border-color: var(--visual-command-button-execute-border-color);
+}
+
+.visual-command__header-button__execute.unity-button:hover {
+    background-color: var(--visual-command-button-execute-background-hover);
+    border-color: var(--visual-command-button-execute-border-color-hover);
+}
+
+.visual-command__header-button__execute.unity-button:focus {
+    background-color: var(--visual-command-button-execute-background-focus);
+    border-color: var(--visual-command-button-execute-border-color-focus);
+}
+
+.visual-command__header-button__execute.unity-button:active {
+    background-color: var(--visual-command-button-execute-background-active);
+    border-color: var(--visual-command-button-execute-border-color-active);
 }
 
 .visual-command__header-button__execute-icon {
     --unity-image: var(--icon-execute);
-    padding: 5px;
+    --unity-image-tint-color: var(--visual-command-button-execute-icon-color);
+}
+
+.visual-command__content {
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .visual-property {
     flex-direction: row;
     flex: 1 0 auto;
+    padding-bottom: 6px;
 }
 
 .visual-property__label {
     -unity-text-align: middle-left;
     min-width: 350px;
+    padding-left: 10px;
 }
 
 .visual-property__content {
     flex: 1 0 auto;
+    color: var(--visual-property-content-color);
+    min-width: 250px;
+    padding-right: 10px;
+}
+
+.visual-property__content .unity-label {
+    color: var(--visual-commander-color);
+}
+
+.visual-property__content .unity-base-field {
+    margin: 0px;
+}
+
+.visual-property__content .unity-label {
+    min-width: 50px;
+}
+
+.visual-property__content .unity-base-field:focus > .unity-label {
+    color: var(--visual-commander-color-focus);
+}
+
+.visual-property__content .unity-toggle__checkmark {
+    height: 40px;
+    width: 40px;
+}
+
+.visual-property__content .unity-enum-field__input {
+    margin-left: 0px;
 }
