@@ -1,0 +1,19 @@
+{
+    "name": "EncosyTower.Samples.VisualCommands",
+    "rootNamespace": "EncosyTower.Samples.VisualCommands",
+    "references": [
+        "EncosyTower.Core",
+        "EncosyTower.VisualCommands"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_EDITOR || INCLUDE_ENCOSY_SAMPLES_VISUAL_COMMANDS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
