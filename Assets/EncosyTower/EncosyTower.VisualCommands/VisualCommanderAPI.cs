@@ -8,7 +8,7 @@ using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.Mvvm.ComponentModel;
 using EncosyTower.Mvvm.ComponentModel.SourceGen;
-using EncosyTower.Mvvm.Input;
+using EncosyTower.Mvvm.Input.SourceGen;
 using EncosyTower.Naming;
 using EncosyTower.StringIds;
 using EncosyTower.Types;

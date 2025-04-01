@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using EncosyTower.Annotations;
 using EncosyTower.Mvvm.ComponentModel.SourceGen;
-using EncosyTower.Mvvm.Input;
+using EncosyTower.Mvvm.Input.SourceGen;
 using EncosyTower.Mvvm.ViewBinding;
 using EncosyTower.Mvvm.ViewBinding.SourceGen;
 using EncosyTower.Mvvm.ViewBinding.Components;

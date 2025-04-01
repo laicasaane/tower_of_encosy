@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace EncosyTower.Mvvm.Input
+namespace EncosyTower.Mvvm.Input.SourceGen
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class RelayCommandInfoAttribute : Attribute

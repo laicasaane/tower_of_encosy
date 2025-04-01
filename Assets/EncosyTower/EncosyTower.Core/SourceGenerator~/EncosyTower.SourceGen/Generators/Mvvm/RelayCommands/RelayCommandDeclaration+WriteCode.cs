@@ -45,7 +45,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                 var propName = CommandPropertyName(member);
 
                 p.PrintBeginLine()
-                    .Print($"[global::EncosyTower.Mvvm.Input.RelayCommandInfo(\"{propName}\", ");
+                    .Print($"[global::EncosyTower.Mvvm.Input.SourceGen.RelayCommandInfo(\"{propName}\", ");
 
                 if (member.Member.Parameters.Length > 0)
                 {
