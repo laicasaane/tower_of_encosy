@@ -1,5 +1,6 @@
 using System;
 using EncosyTower.Editor.Settings;
+using EncosyTower.Editor.UIElements;
 using EncosyTower.Logging;
 using EncosyTower.PageFlows.MonoPages;
 using EncosyTower.UIElements;
@@ -13,6 +14,11 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
 {
     public class MonoPageFlowSettingsEditor
     {
+        public static readonly string ProjectSettingsUssClassName = "project-settings";
+        public static readonly string ProjectSettingsTitleBarUssClassName = $"{ProjectSettingsUssClassName}-title-bar";
+        public static readonly string ProjectSettingsTitleBarLabelUssClassName = $"{ProjectSettingsTitleBarUssClassName}__label";
+        public static readonly string UssClassName = "mono-page-flow";
+
         private readonly SerializedContext _context;
 
         private bool _valueUpdated;
@@ -23,23 +29,23 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
             , VisualElement root
         )
         {
-            ViewAPI.ApplyStyleSheetsTo(root, Constants.PROJECT_SETTINGS_STYLE_SHEET);
+            root.ApplyEditorBuiltInStyleSheet(EditorStyleSheetPaths.PROJECT_SETTINGS_STYLE_SHEET);
+            root.ApplyEditorStyleSheet(Constants.THEME_STYLE_SHEET);
 
-            var resources = ViewAPI.GetResources();
             var context = _context = new SerializedContext(settings, serializedSettings);
             var titleBar = new VisualElement();
             var titleLabel = new Label() {
                 text = ObjectNames.NicifyVariableName(context.Name),
             };
 
-            titleBar.AddToClassList("project-settings-title-bar");
-            titleLabel.AddToClassList("project-settings-title-bar__label");
+            titleBar.AddToClassList(ProjectSettingsTitleBarUssClassName);
+            titleLabel.AddToClassList(ProjectSettingsTitleBarLabelUssClassName);
 
             titleBar.Add(titleLabel);
             root.Add(titleBar);
 
             var container = new ScrollView();
-            container.AddToClassList(Constants.MONO_PAGE_FLOW);
+            container.AddToClassList(UssClassName);
             root.Add(container);
 
             var contentContainer = container.Q("unity-content-container");
@@ -99,7 +105,8 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
             public override VisualElement CreateInspectorGUI()
             {
                 var root = new VisualElement();
-                ViewAPI.ApplyStyleSheetsTo(root, Constants.PROJECT_SETTINGS_STYLE_SHEET);
+                root.ApplyEditorBuiltInStyleSheet(EditorStyleSheetPaths.PROJECT_SETTINGS_STYLE_SHEET);
+                root.ApplyEditorStyleSheet(Constants.THEME_STYLE_SHEET);
 
                 var button = new Button(OpenSettingsWindow) {
                     text = "Open Mono Page Flow Settings Window",
