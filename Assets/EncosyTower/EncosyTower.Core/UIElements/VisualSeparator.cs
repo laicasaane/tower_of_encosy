@@ -2,11 +2,18 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.UIElements
 {
-    public class VisualSeparator : VisualElement
+#if UNITY_6000_0_OR_NEWER
+    [UxmlElement]
+#endif
+    public partial class VisualSeparator : VisualElement
     {
         public static readonly string UssClassName = "visual-separator";
 
-        public VisualSeparator(string additionalUssClassName = "") : base()
+        public VisualSeparator() : this(string.Empty)
+        {
+        }
+
+        public VisualSeparator(string additionalUssClassName) : base()
         {
             AddToClassList(UssClassName);
 

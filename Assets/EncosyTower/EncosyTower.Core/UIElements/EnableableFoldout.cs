@@ -3,7 +3,10 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.UIElements
 {
-    public class EnableableFoldout : VisualElement, IHasBindingPath
+#if UNITY_6000_0_OR_NEWER
+    [UxmlElement]
+#endif
+    public partial class EnableableFoldout : VisualElement, IHasBindingPath
     {
         public static readonly string InputUssClassName = Foldout.inputUssClassName;
         public static readonly string TextUssClassName = Foldout.textUssClassName;
@@ -18,6 +21,10 @@ namespace EncosyTower.UIElements
 
         private readonly Toggle _foldToggle;
         private bool _linkToggleToFoldout;
+
+        public EnableableFoldout() : this(string.Empty)
+        {
+        }
 
         public EnableableFoldout(string text, bool linkToggleToFoldout = false) : base()
         {

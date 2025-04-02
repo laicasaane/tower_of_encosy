@@ -3,7 +3,10 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.UIElements
 {
-    public class ButtonTextField : VisualElement, IHasBindingPath
+#if UNITY_6000_0_OR_NEWER
+    [UxmlElement]
+#endif
+    public partial class ButtonTextField : VisualElement, IHasBindingPath
     {
         public static readonly string UssClassName = "button-text-field";
 
@@ -11,6 +14,10 @@ namespace EncosyTower.UIElements
         public readonly Button Button;
 
         public event Action<ButtonTextField> Clicked;
+
+        public ButtonTextField() : this(string.Empty)
+        {
+        }
 
         public ButtonTextField(string textLabel)
             : this(textLabel, default)
