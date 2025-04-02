@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 // Copied from: com.unity.scriptablebuildpipeline@2.1.4
 
 // Scriptable Build Pipeline copyright © 2020 Unity Technologies ApS
@@ -282,4 +284,5 @@ namespace UnityEditor.Build.Pipeline.Utilities
     }
 }
 
+#endif
 #endif

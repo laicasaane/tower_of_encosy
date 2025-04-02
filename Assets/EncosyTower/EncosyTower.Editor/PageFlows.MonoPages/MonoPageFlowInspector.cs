@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using EncosyTower.Editor.Settings;
 using EncosyTower.PageFlows.MonoPages;
 using UnityEditor;
@@ -44,3 +46,5 @@ namespace EncosyTower.Editor.PageFlows.MonoPages
         }
     }
 }
+
+#endif

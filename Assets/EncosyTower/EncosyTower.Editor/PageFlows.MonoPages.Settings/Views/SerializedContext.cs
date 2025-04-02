@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System;
 using EncosyTower.PageFlows.MonoPages;
 using EncosyTower.Types;
@@ -31,3 +33,5 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
             => Object.FindProperty(nameof(MonoPageFlowSettings.logEnvironment));
     }
 }
+
+#endif

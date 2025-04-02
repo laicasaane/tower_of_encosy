@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System;
 using EncosyTower.Editor.Settings;
 using EncosyTower.Editor.UIElements;
@@ -12,7 +14,7 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
 {
-    public class MonoPageFlowSettingsEditor
+    internal class MonoPageFlowSettingsEditor
     {
         public static readonly string ProjectSettingsUssClassName = "project-settings";
         public static readonly string ProjectSettingsTitleBarUssClassName = $"{ProjectSettingsUssClassName}-title-bar";
@@ -127,3 +129,5 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
         }
     }
 }
+
+#endif

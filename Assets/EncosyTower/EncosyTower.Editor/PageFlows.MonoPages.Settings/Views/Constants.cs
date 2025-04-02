@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using EncosyTower.Editor.UIElements;
 using EncosyTower.PageFlows.MonoPages;
 
@@ -12,3 +14,5 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
         public const string THEME_STYLE_SHEET = $"{STYLE_SHEETS_PATH}/{FILE_NAME}.tss";
     }
 }
+
+#endif

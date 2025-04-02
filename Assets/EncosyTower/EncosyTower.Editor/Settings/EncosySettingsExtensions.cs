@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 // Copyright 2021 by Hextant Studios. https://HextantStudios.com
 // This work is licensed under CC BY 4.0. http://creativecommons.org/licenses/by/4.0/
 // https://github.com/hextantstudios/com.hextantstudios.utilities/blob/master/Editor/Settings/SettingsExtensions.cs
@@ -58,3 +60,5 @@ namespace EncosyTower.Editor.Settings
         }
     }
 }
+
+#endif
