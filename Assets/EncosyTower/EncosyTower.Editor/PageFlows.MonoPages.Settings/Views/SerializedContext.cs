@@ -22,12 +22,12 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
         }
 
         public SerializedProperty GetLoaderStrategyProperty()
-            => Object.FindProperty(nameof(MonoPageFlowSettings._loaderStrategy));
+            => Object.FindProperty(nameof(MonoPageFlowSettings.loaderStrategy));
 
         public SerializedProperty GetMessageScopeProperty()
-            => Object.FindProperty(nameof(MonoPageFlowSettings._messageScope));
+            => Object.FindProperty(nameof(MonoPageFlowSettings.messageScope));
 
         public SerializedProperty GetLogEnvironmentProperty()
-            => Object.FindProperty(nameof(MonoPageFlowSettings._logEnvironment));
+            => Object.FindProperty(nameof(MonoPageFlowSettings.logEnvironment));
     }
 }

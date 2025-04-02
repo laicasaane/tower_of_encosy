@@ -46,7 +46,7 @@ namespace EncosyTower.PageFlows.MonoPages
             {
                 MonoPageFlowSettings settings = null;
 
-                if (flowContext.UseProjectSettings)
+                if (flowContext.useProjectSettings)
                 {
                     settings = MonoPageFlowSettings.Instance;
                 }
@@ -79,7 +79,7 @@ namespace EncosyTower.PageFlows.MonoPages
                 var identifier = definition.identifier;
 
                 var context = flowContext.CloneWithoutOwner();
-                context.AutoInitializeOnAwake = false;
+                context.autoInitializeOnAwake = false;
 
                 if (string.IsNullOrEmpty(identifier))
                 {
@@ -145,7 +145,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
         private void Awake()
         {
-            if (_flowContext.AutoInitializeOnAwake)
+            if (_flowContext.autoInitializeOnAwake)
             {
                 Initialize(_flowContext);
             }
@@ -159,7 +159,7 @@ namespace EncosyTower.PageFlows.MonoPages
         [HideInCallstack]
         private static void ErrorIfDefinitionIdentifierIsEmpty(int index, MonoPageCodex context)
         {
-            context.GetLogger(context._flowContext.LogEnvironment).LogError(
+            context.GetLogger(context._flowContext.logEnvironment).LogError(
                 $"Cannot create a flow for definition at index {index} because its identifier is null or empty."
             );
         }
@@ -167,7 +167,7 @@ namespace EncosyTower.PageFlows.MonoPages
         [HideInCallstack]
         private static void ErrorIfUnexpectedErrorWhenCreate(int index, MonoPageCodex context)
         {
-            context.GetLogger(context._flowContext.LogEnvironment).LogError(
+            context.GetLogger(context._flowContext.logEnvironment).LogError(
                 $"An unexpected error occured when create a flow for definition at index {index}."
             );
         }
@@ -175,7 +175,7 @@ namespace EncosyTower.PageFlows.MonoPages
         [HideInCallstack]
         private static void ErrorIfDuplicateIdentifier(int index, string identifier, MonoPageCodex context)
         {
-            context.GetLogger(context._flowContext.LogEnvironment).LogError(
+            context.GetLogger(context._flowContext.logEnvironment).LogError(
                 $"The identifier '{identifier}' of definition at index {index} is duplicate thus will be ignored."
             );
         }
@@ -183,7 +183,7 @@ namespace EncosyTower.PageFlows.MonoPages
         [HideInCallstack]
         private static void ErrorIfUnexpectedErrorWhenRegister(int index, string identifier, MonoPageCodex context)
         {
-            context.GetLogger(context._flowContext.LogEnvironment).LogError(
+            context.GetLogger(context._flowContext.logEnvironment).LogError(
                 $"An unexpected error occured when register the flow '{identifier}' at index {index}."
             );
         }

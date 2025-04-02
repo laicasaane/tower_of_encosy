@@ -369,11 +369,11 @@ MonoBehaviour:
       id: 0
     sortingOrderInLayer: 3000
   _flowContext:
-    _autoInitializeOnAwake: 1
-    _useProjectSettings: 0
-    _loadStrategy: 1
-    _messageScope: 0
-    _logEnvironment: 0
+    autoInitializeOnAwake: 1
+    useProjectSettings: 0
+    loadStrategy: 1
+    messageScope: 0
+    logEnvironment: 0
 --- !u!224 &1207036174
 RectTransform:
   m_ObjectHideFlags: 0

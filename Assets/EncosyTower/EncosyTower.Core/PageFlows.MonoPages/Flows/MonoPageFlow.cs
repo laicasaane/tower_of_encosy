@@ -92,7 +92,7 @@ namespace EncosyTower.PageFlows.MonoPages
             {
                 MonoPageFlowSettings settings = null;
 
-                if (context.UseProjectSettings)
+                if (context.useProjectSettings)
                 {
                     settings = MonoPageFlowSettings.Instance;
                 }
@@ -115,7 +115,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
         protected void Awake()
         {
-            if (_context.AutoInitializeOnAwake)
+            if (_context.autoInitializeOnAwake)
             {
                 var rectTransform = GetComponent<RectTransform>();
                 Initialize(rectTransform, _context);
@@ -269,7 +269,7 @@ namespace EncosyTower.PageFlows.MonoPages
                 pool.Initialize(source);
             }
 
-            var identifierOpt = pool.Rent(pageKey.Id, pageKey.Value, this.GetLogger(Context.LogEnvironment));
+            var identifierOpt = pool.Rent(pageKey.Id, pageKey.Value, this.GetLogger(Context.logEnvironment));
 
             if (identifierOpt.TryValue(out var identifier) && identifier.Page is IPageCreateAsync create)
             {
@@ -413,7 +413,7 @@ namespace EncosyTower.PageFlows.MonoPages
         [HideInCallstack]
         private static void WarningIfAmountLesserThanOne(MonoPageFlow context)
         {
-            context.GetLogger(context.Context.LogEnvironment).LogWarning(
+            context.GetLogger(context.Context.logEnvironment).LogWarning(
                 $"The amount of preloaded instances should be greater than 0."
             );
         }
@@ -421,7 +421,7 @@ namespace EncosyTower.PageFlows.MonoPages
         [HideInCallstack]
         private static void ErrorIfCannotReturnToPool(string key, MonoPageFlow context)
         {
-            context.GetLogger(context.Context.LogEnvironment).LogError(
+            context.GetLogger(context.Context.logEnvironment).LogError(
                 $"Cannot return the page on the instance originated from '{key}' to pool. " +
                 $"The pool may not be created properly."
             );
@@ -430,7 +430,7 @@ namespace EncosyTower.PageFlows.MonoPages
         [HideInCallstack]
         private static void ErrorIfPageIsNotComponent(IMonoPage page, MonoPageFlow context)
         {
-            context.GetLogger(context.Context.LogEnvironment).LogError(
+            context.GetLogger(context.Context.logEnvironment).LogError(
                 $"The page '{page.GetType()}' is not derived from 'UnityEngine.Component'."
             );
         }
@@ -438,7 +438,7 @@ namespace EncosyTower.PageFlows.MonoPages
         [HideInCallstack]
         private static void ErrorIfPageMissingIdentifier(IMonoPage page, MonoPageFlow context)
         {
-            context.GetLogger(context.Context.LogEnvironment).LogError(
+            context.GetLogger(context.Context.logEnvironment).LogError(
                 $"Cannot found any {nameof(MonoPageIdentifier)} component on the page '{page.GetType()}'. " +
                 $"The page might not be created correctly."
             );
@@ -447,7 +447,7 @@ namespace EncosyTower.PageFlows.MonoPages
         [HideInCallstack]
         private static void ErrorIfPageIsDestroyedOrNotInited(IMonoPage page, MonoPageFlow context)
         {
-            context.GetLogger(context.Context.LogEnvironment).LogError(
+            context.GetLogger(context.Context.logEnvironment).LogError(
                 $"The page '{page.GetType()}' might have already been destroyed, " +
                 $"or not properly initialized via pooling mechanism of MonoPageFlow."
             );
@@ -456,7 +456,7 @@ namespace EncosyTower.PageFlows.MonoPages
         [HideInCallstack]
         private static void ErrorIfCannotLoadAsset(PageKey pageKey, MonoPageFlow context)
         {
-            context.GetLogger(context.Context.LogEnvironment).LogError(
+            context.GetLogger(context.Context.logEnvironment).LogError(
                 $"Cannot load asset by the key '{pageKey.Value}'"
             );
         }

@@ -21,7 +21,7 @@ namespace EncosyTower.Editor.PageFlows.MonoPages
 
             EditorGUILayout.Space();
 
-            if (_codex._flowContext.UseProjectSettings)
+            if (_codex._flowContext.useProjectSettings)
             {
                 EditorGUILayout.HelpBox(
                       "The option 'Use Project Settings' has been turned on.\n" +

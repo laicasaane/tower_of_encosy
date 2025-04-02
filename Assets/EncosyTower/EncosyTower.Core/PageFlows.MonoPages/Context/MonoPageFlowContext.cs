@@ -31,11 +31,11 @@ namespace EncosyTower.PageFlows.MonoPages
     [Serializable]
     public sealed class MonoPageFlowContext : IPageFlowContext
     {
-        [SerializeField] private bool _autoInitializeOnAwake;
-        [SerializeField] private bool _useProjectSettings = true;
-        [SerializeField] private MonoPageLoaderStrategy _loadStrategy;
-        [SerializeField] private MonoMessageScope _messageScope;
-        [SerializeField] private LogEnvironment _logEnvironment;
+        public bool autoInitializeOnAwake;
+        public bool useProjectSettings = true;
+        public MonoPageLoaderStrategy loadStrategy;
+        public MonoMessageScope messageScope;
+        public LogEnvironment logEnvironment;
 
         private MessageSubscriber _subscriber;
         private MessagePublisher _publisher;
@@ -44,36 +44,6 @@ namespace EncosyTower.PageFlows.MonoPages
         public Component Owner { get; set; }
 
         public bool IsInitialized { get; private set; }
-
-        public bool UseProjectSettings
-        {
-            get => _useProjectSettings;
-            set => _useProjectSettings = value;
-        }
-
-        public bool AutoInitializeOnAwake
-        {
-            get => _autoInitializeOnAwake;
-            set => _autoInitializeOnAwake = value;
-        }
-
-        public MonoPageLoaderStrategy LoadStrategy
-        {
-            get => _loadStrategy;
-            set => _loadStrategy = value;
-        }
-
-        public MonoMessageScope MessageScope
-        {
-            get => _messageScope;
-            set => _messageScope = value;
-        }
-
-        public LogEnvironment LogEnvironment
-        {
-            get => _logEnvironment;
-            set => _logEnvironment = value;
-        }
 
         public ArrayPool<UnityTask> TaskArrayPool
         {
@@ -84,7 +54,7 @@ namespace EncosyTower.PageFlows.MonoPages
         public PageFlowScope FlowScope
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _messageScope == MonoMessageScope.Component
+            get => messageScope == MonoMessageScope.Component
                 ? new(new((Id<MonoPageFlow>)Type<MonoPageFlow>.Id, Owner.GetInstanceID()))
                 : new(new((Id<GameObject>)Type<GameObject>.Id, Owner.gameObject.GetInstanceID()));
         }
@@ -104,7 +74,7 @@ namespace EncosyTower.PageFlows.MonoPages
         public Logging.ILogger Logger
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _logEnvironment == LogEnvironment.Runtime ? RuntimeLogger.Default : DevLogger.Default;
+            get => logEnvironment == LogEnvironment.Runtime ? RuntimeLogger.Default : DevLogger.Default;
         }
 
         public void Initialize(
@@ -116,11 +86,11 @@ namespace EncosyTower.PageFlows.MonoPages
         {
             IsInitialized = true;
 
-            if (settings.IsValid() && _useProjectSettings)
+            if (settings.IsValid() && useProjectSettings)
             {
-                _loadStrategy = settings.LoaderStrategy;
-                _messageScope = settings.MessageScope;
-                _logEnvironment = settings.LogEnvironment;
+                loadStrategy = settings.loaderStrategy;
+                messageScope = settings.messageScope;
+                logEnvironment = settings.logEnvironment;
                 Logger.LogInfo($"Initialize {nameof(MonoPageFlowContext)} using Project Settings");
             }
 
@@ -131,11 +101,11 @@ namespace EncosyTower.PageFlows.MonoPages
 
         public MonoPageFlowContext CloneWithoutOwner()
             => new() {
-                _autoInitializeOnAwake = _autoInitializeOnAwake,
-                _useProjectSettings = _useProjectSettings,
-                _loadStrategy = _loadStrategy,
-                _messageScope = _messageScope,
-                _logEnvironment = _logEnvironment,
+                autoInitializeOnAwake = autoInitializeOnAwake,
+                useProjectSettings = useProjectSettings,
+                loadStrategy = loadStrategy,
+                messageScope = messageScope,
+                logEnvironment = logEnvironment,
                 _subscriber = _subscriber,
                 _publisher = _publisher,
                 _taskArrayPool = _taskArrayPool,
@@ -153,7 +123,7 @@ namespace EncosyTower.PageFlows.MonoPages
         public async UnityTaskObject LoadAssetAsync(string assetKey, CancellationToken token)
         {
 #if UNITY_ADDRESSABLES
-            if (_loadStrategy == MonoPageLoaderStrategy.Addressables)
+            if (loadStrategy == MonoPageLoaderStrategy.Addressables)
             {
                 return await new AddressableKey(assetKey).TryLoadAsync<GameObject>(token);
             }
