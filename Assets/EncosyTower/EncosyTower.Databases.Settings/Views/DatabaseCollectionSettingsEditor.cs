@@ -27,7 +27,7 @@ namespace EncosyTower.Databases.Settings.Views
             , VisualElement root
         )
         {
-            ViewAPI.ApplyStyleSheetsTo(root, Constants.PROJECT_SETTINGS_STYLE_SHEET);
+            ViewAPI.ApplyStyleSheetsTo(root, true);
 
             var resources = ViewAPI.GetResources();
             var context = new Context(settings);
@@ -370,7 +370,7 @@ namespace EncosyTower.Databases.Settings.Views
             public override VisualElement CreateInspectorGUI()
             {
                 var root = new VisualElement();
-                ViewAPI.ApplyStyleSheetsTo(root, Constants.PROJECT_SETTINGS_STYLE_SHEET);
+                ViewAPI.ApplyStyleSheetsTo(root, true);
 
                 var button = new Button(OpenSettingsWindow) {
                     text = "Open Database Collection Settings Window",

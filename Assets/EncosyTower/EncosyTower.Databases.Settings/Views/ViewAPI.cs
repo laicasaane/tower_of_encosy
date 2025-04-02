@@ -1,5 +1,4 @@
-using EncosyTower.Editor;
-using EncosyTower.UnityExtensions;
+using EncosyTower.Editor.UIElements;
 using UnityEditor;
 using UnityEngine.UIElements;
 
@@ -7,22 +6,15 @@ namespace EncosyTower.Databases.Settings.Views
 {
     internal static class ViewAPI
     {
-        public static void ApplyStyleSheetsTo(VisualElement root, string builtinStyleSheet = "")
+        public static void ApplyStyleSheetsTo(VisualElement root, bool withBuiltInStyleSheet)
         {
-            if (string.IsNullOrWhiteSpace(builtinStyleSheet) == false
-                && EditorGUIUtility.Load(builtinStyleSheet) is StyleSheet commonUss
-                && commonUss.IsValid()
-            )
+            if (withBuiltInStyleSheet)
             {
-                root.styleSheets.Add(commonUss);
+                root.ApplyEditorBuiltInStyleSheet(EditorStyleSheetPaths.PROJECT_SETTINGS_STYLE_SHEET);
             }
 
-            var settingsTss = AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>(Constants.THEME_STYLE_SHEET);
-            root.styleSheets.Add(settingsTss);
-
-            var styleSheetPalette = EditorAPI.IsDark ? Constants.STYLE_SHEET_DARK : Constants.STYLE_SHEET_LIGHT;
-            var settingsPaletteUss = AssetDatabase.LoadAssetAtPath<StyleSheet>(styleSheetPalette);
-            root.styleSheets.Add(settingsPaletteUss);
+            root.ApplyEditorStyleSheet(Constants.THEME_STYLE_SHEET);
+            root.ApplyEditorStyleSheet(Constants.STYLE_SHEET_DARK, Constants.STYLE_SHEET_LIGHT);
         }
 
         public static VisualElement GetResources()

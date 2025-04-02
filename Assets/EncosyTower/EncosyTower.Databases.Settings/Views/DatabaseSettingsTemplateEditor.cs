@@ -20,7 +20,7 @@ namespace EncosyTower.Databases.Settings.Views
             context.Initialize(database, databaseProperty);
 
             var root = new VisualElement();
-            ViewAPI.ApplyStyleSheetsTo(root);
+            ViewAPI.ApplyStyleSheetsTo(root, false);
 
             var dbView = _dbView = new DatabaseSettingsView(true, resources) { userData = context };
             dbView.DatabaseTypeSelected += DbView_OnDatabaseTypeSelected;
