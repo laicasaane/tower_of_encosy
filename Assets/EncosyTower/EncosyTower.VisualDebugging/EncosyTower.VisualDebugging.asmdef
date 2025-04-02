@@ -58,6 +58,11 @@
             "define": "UNITY_MATHEMATICS"
         },
         {
+            "name": "com.unity.modules.androidjni",
+            "expression": "",
+            "define": "UNITY_ANDROID_JNI"
+        },
+        {
             "name": "com.unity.inputsystem",
             "expression": "",
             "define": "UNITY_INPUT_SYSTEM"
