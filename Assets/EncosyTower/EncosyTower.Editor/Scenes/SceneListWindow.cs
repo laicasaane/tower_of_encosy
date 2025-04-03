@@ -134,7 +134,6 @@ namespace EncosyTower.Editor.Scenes
 
             if (guids.Length < 1)
             {
-                EditorUtility.DisplayDialog(LIST_TITLE, "No scene found in the project.", "I understand");
                 result = default;
                 return false;
             }

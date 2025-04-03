@@ -228,7 +228,6 @@ namespace EncosyTower.Editor.ProjectSetup
 
             if (items.Count < 1)
             {
-                EditorUtility.DisplayDialog(LIST_TITLE, "No empty folder found in the project.", "I understand");
                 result = default;
                 return false;
             }
