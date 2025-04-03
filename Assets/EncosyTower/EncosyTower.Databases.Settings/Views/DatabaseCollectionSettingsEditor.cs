@@ -90,6 +90,11 @@ namespace EncosyTower.Databases.Settings.Views
             _dbView.Update();
         }
 
+        public void Save()
+        {
+            _dbView.Save();
+        }
+
         private void RefreshSelectedIndex()
         {
             var dbListView = _dbListView;

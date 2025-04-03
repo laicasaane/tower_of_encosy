@@ -1,6 +1,7 @@
 using System;
 using EncosyTower.Editor;
 using EncosyTower.UIElements;
+using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
@@ -9,6 +10,7 @@ namespace EncosyTower.Databases.Settings.Views
     internal sealed class DatabaseSettingsView : VisualElement
     {
         private const string USS_CLASS_NAME = "database";
+        private const float SAVE_DELAY = 0.5f;
 
         public event Action<DatabaseSettingsView, DatabaseRecord> DatabaseTypeSelected;
         public event Action<DatabaseSettingsView> OtherValueUpdated;
@@ -25,6 +27,7 @@ namespace EncosyTower.Databases.Settings.Views
         // An optimization to limit the chance the
         // frequent of OtherValueUpdated being invoked.
         private bool _otherValueUpdated;
+        private double _markTime;
 
         public DatabaseSettingsView(bool visible, ViewResources resources) : base()
         {
@@ -87,6 +90,21 @@ namespace EncosyTower.Databases.Settings.Views
         {
             // Only invoke `OtherValueUpdated` once if possible,
             // because it is going to invoke saving asset to disk.
+            if (_otherValueUpdated == false)
+            {
+                return;
+            }
+
+            var time = EditorApplication.timeSinceStartup - _markTime;
+
+            if (time >= SAVE_DELAY)
+            {
+                Save();
+            }
+        }
+
+        public void Save()
+        {
             if (_otherValueUpdated)
             {
                 OtherValueUpdated?.Invoke(this);
@@ -139,6 +157,9 @@ namespace EncosyTower.Databases.Settings.Views
         }
 
         private void OnValueUpdated()
-            => _otherValueUpdated = true;
+        {
+            _markTime = EditorApplication.timeSinceStartup;
+            _otherValueUpdated = true;
+        }
     }
 }

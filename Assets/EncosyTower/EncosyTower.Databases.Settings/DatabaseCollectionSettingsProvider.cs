@@ -45,6 +45,7 @@ namespace EncosyTower.Databases.Settings
 
         private static void Dispose()
         {
+            s_instance?.Save();
             s_instance = null;
         }
     }
