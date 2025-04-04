@@ -6,8 +6,8 @@ namespace EncosyTower.Editor.VisualDebugging.Commands
 {
     public static class Constants
     {
-        private const string MODULE_ROOT = $"{EditorStyleSheetPaths.ROOT}/EncosyTower.VisualDebugging";
-        private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
+        private const string MODULE_ROOT = $"{EditorStyleSheetPaths.ROOT}/EncosyTower.Editor.VisualDebugging";
+        private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/Commands";
         private const string FILE_NAME = nameof(VisualCommandWindow);
 
         public const string THEME_STYLE_SHEET = $"{STYLE_SHEETS_PATH}/{FILE_NAME}.tss";

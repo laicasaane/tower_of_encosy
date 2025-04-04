@@ -27,8 +27,17 @@ namespace EncosyTower.Editor.VisualDebugging.Commands
         private void CreateGUI()
         {
             var root = rootVisualElement;
-            root.styleSheets.Add(_themeStyleSheet);
-            root.ApplyEditorStyleSheet(_dark, _light);
+
+            if (Application.isPlaying == false)
+            {
+                root.styleSheets.Add(_themeStyleSheet);
+                root.ApplyEditorStyleSheet(_dark, _light);
+            }
+            else
+            {
+                root.ApplyEditorStyleSheet(Constants.THEME_STYLE_SHEET);
+                root.ApplyEditorStyleSheet(Constants.STYLE_SHEET_DARK, Constants.STYLE_SHEET_LIGHT);
+            }
 
             _view = VisualCommanderAPI.CreateView(root, 150f);
         }
