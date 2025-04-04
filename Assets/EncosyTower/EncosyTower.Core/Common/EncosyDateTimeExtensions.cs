@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Common
 {
-    public static class EncosyTowerDateTimeExtensions
+    public static class EncosyDateTimeExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static DateTimeId ToId(this DateTime self)
