@@ -162,18 +162,27 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     idFixedStringBytes = Math.Max(idFixedStringBytes, byteCount);
                 }
 
+                var tryParseSpan = kindSymbol.FindTryParseSpan();
+
+                if (tryParseSpan.IsNullable)
+                {
+                    tryParseSpan = default;
+                }
+
+                var equality = kindSymbol.DetermineEquality();
+
                 kindRefs.Add(new KindRef {
                     name = kindName,
                     fullName = kindSymbol.ToFullName(),
+                    fullNameFromNullable = equality.IsNullable ? kindSymbol.GetTypeFromNullable().ToFullName() : "",
                     displayName = candidate.displayName,
                     order = order,
                     size = size,
                     isEnum = isEnum,
                     signed = candidate.signed,
                     hasToFixedString = hasToFixedString,
-                    tryParseSpan = CheckTryParseSpan(kindSymbol),
-                    equals = CheckEquals(kindSymbol),
-                    operatorEquality = CheckOpEquality(kindSymbol),
+                    tryParseSpan = tryParseSpan,
+                    equality = equality,
                 });
 
                 enumMembers.Add(new EnumMemberDeclaration {
@@ -346,133 +355,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             return name;
         }
 
-        private static MethodRef CheckEquals(INamedTypeSymbol symbol)
-        {
-            if (symbol.TypeKind == TypeKind.Enum)
-            {
-                return new MethodRef {
-                    doesExist = true,
-                    isStatic = true,
-                };
-            }
-
-            var members = symbol.GetMembers("Equals");
-
-            foreach (var member in members)
-            {
-                if (member is not IMethodSymbol method
-                    || method.DeclaredAccessibility != Accessibility.Public
-                    || method.ReturnsVoid
-                    || method.ReturnType.SpecialType != SpecialType.System_Boolean
-                    || method.Parameters.Length != 0
-                )
-                {
-                    continue;
-                }
-
-                return new MethodRef {
-                    doesExist = true,
-                    isStatic = method.IsStatic,
-                };
-            }
-
-            return default;
-        }
-
-        private static MethodRef CheckOpEquality(INamedTypeSymbol symbol)
-        {
-            if (symbol.TypeKind == TypeKind.Enum)
-            {
-                return new MethodRef {
-                    doesExist = true,
-                    isStatic = true,
-                };
-            }
-
-            var members = symbol.GetMembers("op_Equality");
-            var comparer = SymbolEqualityComparer.Default;
-
-            foreach (var member in members)
-            {
-                if (member is not IMethodSymbol method
-                    || method.DeclaredAccessibility != Accessibility.Public
-                    || method.ReturnsVoid
-                    || method.IsStatic == false
-                    || method.ReturnType.SpecialType != SpecialType.System_Boolean
-                )
-                {
-                    continue;
-                }
-
-                var parameters = method.Parameters;
-
-                if (parameters.Length != 2
-                    || comparer.Equals(parameters[0].Type, symbol) == false
-                    || comparer.Equals(parameters[1].Type, symbol) == false
-                )
-                {
-                    continue;
-                }
-
-                return new MethodRef {
-                    doesExist = true,
-                    isStatic = method.IsStatic,
-                };
-            }
-
-            return default;
-        }
-
-        private static MethodRef CheckTryParseSpan(INamedTypeSymbol symbol)
-        {
-            if (symbol.TypeKind == TypeKind.Enum)
-            {
-                return new MethodRef {
-                    doesExist = true,
-                    isStatic = true,
-                };
-            }
-
-            var members = symbol.GetMembers("TryParse");
-
-            foreach (var member in members)
-            {
-                if (member is not IMethodSymbol method
-                    || method.DeclaredAccessibility != Accessibility.Public
-                    || method.ReturnsVoid
-                    || method.ReturnType.SpecialType != SpecialType.System_Boolean
-                )
-                {
-                    continue;
-                }
-
-                var parameters = method.Parameters;
-
-                if (parameters.Length != 2
-                    || parameters[0].Type.Is("global::System.ReadOnlySpan<char>", false) == false
-                )
-                {
-                    continue;
-                }
-
-                var secondParam = parameters[1];
-
-                if (secondParam.RefKind != RefKind.Out
-                    || SymbolEqualityComparer.Default.Equals(secondParam.Type, symbol) == false
-                )
-                {
-                    continue;
-                }
-
-                return new MethodRef {
-                    doesExist = true,
-                    isStatic = method.IsStatic,
-                };
-            }
-
-            return default;
-        }
-
         private static bool CheckToFixedString(INamedTypeSymbol symbol, out int byteCount)
         {
             var members = symbol.GetMembers("ToFixedString");
@@ -640,21 +522,15 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         {
             public string name;
             public string fullName;
+            public string fullNameFromNullable;
             public string displayName;
             public ulong order;
             public int size;
             public bool isEnum;
             public bool signed;
             public bool hasToFixedString;
-            public MethodRef tryParseSpan;
-            public MethodRef equals;
-            public MethodRef operatorEquality;
-        }
-
-        public struct MethodRef
-        {
-            public bool doesExist;
-            public bool isStatic;
+            public MemberExistence tryParseSpan;
+            public Equality equality;
         }
     }
 }

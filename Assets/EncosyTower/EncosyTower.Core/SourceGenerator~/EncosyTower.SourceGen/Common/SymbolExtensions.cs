@@ -966,6 +966,269 @@ namespace EncosyTower.SourceGen
 
             return false;
         }
+
+        public static ITypeSymbol GetTypeFromNullable(this ITypeSymbol symbol)
+        {
+            if (symbol.SpecialType == SpecialType.System_Nullable_T
+                && symbol is INamedTypeSymbol nullableType
+                && nullableType.TypeArguments.FirstOrDefault() is { } typeArgument
+            )
+            {
+                return typeArgument;
+            }
+
+            return symbol;
+        }
+
+        public static MemberExistence FindTryParseSpan(this ITypeSymbol symbol)
+        {
+            if (symbol.IsUnmanagedType
+                && symbol is INamedTypeSymbol namedType
+                && namedType.EnumUnderlyingType is not null
+            )
+            {
+                return new(true, true, false);
+            }
+
+            switch (symbol.SpecialType)
+            {
+                case SpecialType.System_Boolean:
+                case SpecialType.System_Char:
+                case SpecialType.System_SByte:
+                case SpecialType.System_Byte:
+                case SpecialType.System_Int16:
+                case SpecialType.System_UInt16:
+                case SpecialType.System_Int32:
+                case SpecialType.System_UInt32:
+                case SpecialType.System_Int64:
+                case SpecialType.System_UInt64:
+                case SpecialType.System_Decimal:
+                case SpecialType.System_Single:
+                case SpecialType.System_Double:
+                case SpecialType.System_String:
+                case SpecialType.System_IntPtr:
+                case SpecialType.System_UIntPtr:
+                case SpecialType.System_DateTime:
+                    return new(true, true, false);
+
+                case SpecialType.System_Nullable_T:
+                {
+                    if (symbol is INamedTypeSymbol nullableType
+                        && nullableType.TypeArguments.FirstOrDefault() is { } typeArgument
+                    )
+                    {
+                        var (doestExist, isStatic, _) = FindTryParseSpan(typeArgument);
+                        return new(doestExist, isStatic, true);
+                    }
+
+                    return new(false, false, true);
+                }
+            }
+
+            var members = symbol.GetMembers("TryParse");
+
+            foreach (var member in members)
+            {
+                if (member is not IMethodSymbol method
+                    || method.DeclaredAccessibility != Accessibility.Public
+                    || method.ReturnsVoid
+                    || method.ReturnType.SpecialType != SpecialType.System_Boolean
+                )
+                {
+                    continue;
+                }
+
+                var parameters = method.Parameters;
+
+                if (parameters.Length != 2
+                    || parameters[0].Type.Is("global::System.ReadOnlySpan<char>", false) == false
+                )
+                {
+                    continue;
+                }
+
+                var secondParam = parameters[1];
+
+                if (secondParam.RefKind != RefKind.Out
+                    || SymbolEqualityComparer.Default.Equals(secondParam.Type, symbol) == false
+                )
+                {
+                    continue;
+                }
+
+                return new(true, method.IsStatic, false);
+            }
+
+            return default;
+        }
+
+        public static MemberExistence FindEquals(this ITypeSymbol symbol)
+        {
+            if (symbol.IsUnmanagedType
+                && symbol is INamedTypeSymbol namedType
+                && namedType.EnumUnderlyingType is not null
+            )
+            {
+                return new(true, true, false);
+            }
+
+            switch (symbol.SpecialType)
+            {
+                case SpecialType.System_Enum:
+                    return new(true, false, false);
+
+                case SpecialType.System_Boolean:
+                case SpecialType.System_Char:
+                case SpecialType.System_SByte:
+                case SpecialType.System_Byte:
+                case SpecialType.System_Int16:
+                case SpecialType.System_UInt16:
+                case SpecialType.System_Int32:
+                case SpecialType.System_UInt32:
+                case SpecialType.System_Int64:
+                case SpecialType.System_UInt64:
+                case SpecialType.System_Decimal:
+                case SpecialType.System_Single:
+                case SpecialType.System_Double:
+                case SpecialType.System_String:
+                case SpecialType.System_IntPtr:
+                case SpecialType.System_UIntPtr:
+                case SpecialType.System_DateTime:
+                    return new(true, true, false);
+
+                case SpecialType.System_Nullable_T:
+                {
+                    if (symbol is INamedTypeSymbol nullableType
+                        && nullableType.IsGenericType
+                        && nullableType.TypeArguments.FirstOrDefault() is { } typeArgument
+                    )
+                    {
+                        var (doestExist, isStatic, _) = FindEquals(typeArgument);
+                        return new(doestExist, isStatic, true);
+                    }
+
+                    return new(false, false, true);
+                }
+            }
+
+            var members = symbol.GetMembers("Equals");
+
+            foreach (var member in members)
+            {
+                if (member is not IMethodSymbol method
+                    || method.DeclaredAccessibility != Accessibility.Public
+                    || method.ReturnsVoid
+                    || method.ReturnType.SpecialType != SpecialType.System_Boolean
+                    || method.Parameters.Length != 0
+                )
+                {
+                    continue;
+                }
+
+                return new(true, method.IsStatic, false);
+            }
+
+            return default;
+        }
+
+        public static MemberExistence FindOpEquality(this ITypeSymbol symbol)
+        {
+            if (symbol.IsUnmanagedType
+                && symbol is INamedTypeSymbol namedType
+                && namedType.EnumUnderlyingType is not null
+            )
+            {
+                return new(true, true, false);
+            }
+
+            switch (symbol.SpecialType)
+            {
+                case SpecialType.System_Enum:
+                    return new(false, false, false);
+
+                case SpecialType.System_Boolean:
+                case SpecialType.System_Char:
+                case SpecialType.System_SByte:
+                case SpecialType.System_Byte:
+                case SpecialType.System_Int16:
+                case SpecialType.System_UInt16:
+                case SpecialType.System_Int32:
+                case SpecialType.System_UInt32:
+                case SpecialType.System_Int64:
+                case SpecialType.System_UInt64:
+                case SpecialType.System_Decimal:
+                case SpecialType.System_Single:
+                case SpecialType.System_Double:
+                case SpecialType.System_String:
+                case SpecialType.System_IntPtr:
+                case SpecialType.System_UIntPtr:
+                case SpecialType.System_DateTime:
+                    return new(true, true, false);
+
+                case SpecialType.System_Nullable_T:
+                {
+                    if (symbol is INamedTypeSymbol nullableType
+                        && nullableType.IsGenericType
+                        && nullableType.TypeArguments.FirstOrDefault() is { } typeArgument
+                    )
+                    {
+                        var (doestExist, isStatic, _) = FindOpEquality(typeArgument);
+                        return new(doestExist, isStatic, true);
+                    }
+
+                    return new(false, false, true);
+                }
+            }
+
+            var members = symbol.GetMembers("op_Equality");
+            var comparer = SymbolEqualityComparer.Default;
+
+            foreach (var member in members)
+            {
+                if (member is not IMethodSymbol method
+                    || method.DeclaredAccessibility != Accessibility.Public
+                    || method.ReturnsVoid
+                    || method.IsStatic == false
+                    || method.ReturnType.SpecialType != SpecialType.System_Boolean
+                )
+                {
+                    continue;
+                }
+
+                var parameters = method.Parameters;
+
+                if (parameters.Length != 2
+                    || comparer.Equals(parameters[0].Type, symbol) == false
+                    || comparer.Equals(parameters[1].Type, symbol) == false
+                )
+                {
+                    continue;
+                }
+
+                return new(true, method.IsStatic, false);
+            }
+
+            return default;
+        }
+
+        public static Equality DetermineEquality(this ITypeSymbol type)
+        {
+            var (doesExist, isStatic, isNullable) = type.FindOpEquality();
+
+            if (doesExist)
+            {
+                return new(EqualityStrategy.Operator, isStatic, isNullable);
+            }
+
+            (doesExist, isStatic, isNullable) = type.FindEquals();
+
+            if (doesExist)
+            {
+                return new(EqualityStrategy.Equals, isStatic, isNullable);
+            }
+
+            return default(Equality) with { IsNullable = isNullable };
+        }
     }
 }
 

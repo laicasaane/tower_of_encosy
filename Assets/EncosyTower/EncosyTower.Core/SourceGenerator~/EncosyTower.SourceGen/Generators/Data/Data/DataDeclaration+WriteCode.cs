@@ -396,26 +396,93 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 {
                     var fieldRef = FieldRefs[i];
                     var fieldName = fieldRef.Field.Name;
-                    var fieldType = fieldRef.FieldType.ToFullName();
+                    var equality = fieldRef.FieldEquality;
+                    var fieldType = equality.IsNullable ? fieldRef.FieldType.GetTypeFromNullable() : fieldRef.FieldType;
+                    var fieldTypeName = fieldType.ToFullName();
                     var and = i == 0 && previous == false ? "  " : "&&";
                     previous = true;
 
-                    p.PrintLine($"{and} global::System.Collections.Generic.EqualityComparer<{fieldType}>.Default.Equals(this.{fieldName}, other.{fieldName})");
+                    WriteEquality(ref p, fieldName, fieldTypeName, equality, and, "&&", fieldType.IsReferenceType);
                 }
 
                 for (var i = 0; i < PropRefs.Length; i++)
                 {
                     var propRef = PropRefs[i];
                     var fieldName = propRef.FieldName;
-                    var fieldType = GetFieldTypeName(propRef.FieldType, propRef.FieldCollection);
+                    var equality = propRef.FieldEquality;
+                    var fieldType = equality.IsNullable ? propRef.FieldType.GetTypeFromNullable() : propRef.FieldType;
+                    var fieldTypeName = GetFieldTypeName(fieldType, propRef.FieldCollection);
                     var and = i == 0 && previous == false ? "  " : "&&";
                     previous = true;
 
-                    p.PrintLine($"{and} global::System.Collections.Generic.EqualityComparer<{fieldType}>.Default.Equals(this.{fieldName}, other.{fieldName})");
+                    WriteEquality(ref p, fieldName, fieldTypeName, equality, and, "&&", fieldType.IsReferenceType);
                 }
             }
             p = p.DecreasedIndent();
             p.PrintLine(";");
+
+            static void WriteEquality(
+                  ref Printer p
+                , string fieldName
+                , string fieldTypeName
+                , Equality equality
+                , string and
+                , string and2
+                , bool isReferenceType
+            )
+            {
+                if (equality.IsNullable)
+                {
+                    p.PrintBeginLine(and).Print(" (this.").Print(fieldName).Print(".HasValue == other.")
+                        .Print(fieldName).Print(".HasValue) ");
+
+                    and = and2;
+
+                    p.Print(and).Print(" this.").Print(fieldName).PrintEndLine(".HasValue");
+
+                    fieldName = $"{fieldName}.Value";
+                }
+
+                switch (equality.Strategy)
+                {
+                    case EqualityStrategy.Operator:
+                    {
+                        p.PrintBeginLine(and).Print(" (this.").Print(fieldName).Print(" == other.")
+                            .Print(fieldName).PrintEndLine(")");
+                        break;
+                    }
+
+                    case EqualityStrategy.Equals:
+                    {
+                        if (equality.IsStatic)
+                        {
+                            p.PrintBeginLine(and).Print(" ").Print(fieldTypeName).Print(".Equals(this.").Print(fieldName)
+                                .Print(", other.").Print(fieldName).PrintEndLine(")");
+                        }
+                        else if (isReferenceType)
+                        {
+                            p.PrintBeginLine(and).Print(" (this.").Print(fieldName)
+                                .Print("?.Equals(other.")
+                                .Print(fieldName).PrintEndLine(") ?? false)");
+                        }
+                        else
+                        {
+                            p.PrintBeginLine(and).Print(" this.").Print(fieldName)
+                                .Print(".Equals(other.")
+                                .Print(fieldName).PrintEndLine(")");
+                        }
+                        break;
+                    }
+
+                    default:
+                    {
+                        p.PrintBeginLine(and).Print(" global::System.Collections.Generic.EqualityComparer<")
+                            .Print(fieldTypeName).Print(">.Default.Equals(this.").Print(fieldName).Print(", other.")
+                            .Print(fieldName).PrintEndLine(")");
+                        break;
+                    }
+                }
+            }
         }
 
         private void WriteSetValues_TypeMethod(ref Printer p)

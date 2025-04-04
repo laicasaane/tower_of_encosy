@@ -194,6 +194,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
                     ITypeSymbol propertyType;
                     bool implicitlyConvertible;
+                    var fieldType = field.Type;
 
                     if (field.TryGetAttribute(PROPERTY_TYPE_ATTRIBUTE, out var propertyTypeAttrib)
                         && propertyTypeAttrib.ConstructorArguments is { Length: > 0 } args
@@ -204,7 +205,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                     }
                     else
                     {
-                        propertyType = field.Type;
+                        propertyType = fieldType;
                         implicitlyConvertible = false;
                     }
 
@@ -217,14 +218,25 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                     );
 
                     var propertyName = field.ToPropertyName();
+                    var fieldEquality = fieldType.DetermineEquality();
+
+                    if (fieldType.InheritsFromInterface(IDATA))
+                    {
+                        fieldEquality = new Equality(EqualityStrategy.Equals, false, false);
+                    }
+                    else if (fieldType.HasAttribute(UNION_ID_ATTRIBUTE))
+                    {
+                        fieldEquality = new Equality(EqualityStrategy.Operator, false, false);
+                    }
 
                     var fieldRef = new FieldRef {
                         Field = field,
-                        FieldType = field.Type,
+                        FieldType = fieldType,
+                        FieldEquality = fieldEquality,
                         PropertyType = propertyType,
                         PropertyName = propertyName,
                         ForwardedPropertyAttributes = propertyAttributes,
-                        FieldCollection = GetCollection(field.Type),
+                        FieldCollection = GetCollection(fieldType),
                         ImplicitlyConvertible = implicitlyConvertible,
                     };
 
@@ -303,10 +315,21 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                     );
 
                     var fieldName = property.ToFieldName();
+                    var fieldEquality = fieldType.DetermineEquality();
+
+                    if (fieldType.InheritsFromInterface(IDATA))
+                    {
+                        fieldEquality = new Equality(EqualityStrategy.Equals, false, false);
+                    }
+                    else if (fieldType.HasAttribute(UNION_ID_ATTRIBUTE))
+                    {
+                        fieldEquality = new Equality(EqualityStrategy.Operator, false, false);
+                    }
 
                     var propRef = new PropertyRef {
                         Property = property,
                         FieldType = fieldType,
+                        FieldEquality = fieldEquality,
                         PropertyType = property.Type,
                         FieldName = fieldName,
                         FieldIsImplemented = existingFields.Contains(fieldName),
@@ -592,6 +615,8 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             public CollectionRef FieldCollection { get; set; }
 
             public CollectionRef PropertyCollection { get; set; }
+
+            public Equality FieldEquality { get; set; }
 
             public bool ImplicitlyConvertible { get; set; }
         }

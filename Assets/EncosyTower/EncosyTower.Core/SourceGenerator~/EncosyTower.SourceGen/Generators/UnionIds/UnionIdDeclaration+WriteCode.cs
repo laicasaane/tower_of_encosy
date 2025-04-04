@@ -19,7 +19,7 @@
 
         private readonly static string[] s_operators = new[] { "==", "!=", "<", "<=", ">", ">=" };
         private readonly static string[] s_comparerOps = new[] { "<", "<=", ">", ">=" };
-        private readonly static (string, string, string)[] s_equalityOps = new[] { ("==", "&&", ""), ("!=", "||", "!") };
+        private readonly static (string, string)[] s_equalityOps = new[] { ("==", ""), ("!=", "!") };
 
         public string WriteCode()
         {
@@ -46,7 +46,7 @@
 
                 foreach (var kind in KindRefs)
                 {
-                    if (kind.equals.doesExist || kind.operatorEquality.doesExist)
+                    if (kind.equality.Strategy != EqualityStrategy.Default)
                     {
                         p.PrintBeginLine(", global::System.IEquatable<").Print(kind.fullName).PrintEndLine(">");
                     }
@@ -373,9 +373,9 @@
                                 {
                                     var tryParse = kind.tryParseSpan;
 
-                                    if (tryParse.doesExist)
+                                    if (tryParse.DoesExist)
                                     {
-                                        p.PrintBeginLineIf(tryParse.isStatic, fullName, $"default({fullName})")
+                                        p.PrintBeginLineIf(tryParse.IsStatic, fullName, $"default({fullName})")
                                             .PrintEndLine(".TryParse(id, out var idValue);");
                                     }
                                     else
@@ -488,9 +488,9 @@
                                 {
                                     var tryParse = kind.tryParseSpan;
 
-                                    if (tryParse.doesExist)
+                                    if (tryParse.DoesExist)
                                     {
-                                        p.PrintBeginLineIf(tryParse.isStatic, fullName, $"default({fullName})")
+                                        p.PrintBeginLineIf(tryParse.IsStatic, fullName, $"default({fullName})")
                                             .PrintEndLine(".TryParse(id, out var idValue);");
                                     }
                                     else
@@ -659,7 +659,7 @@
 
                 var tryParse = kind.tryParseSpan;
 
-                if (tryParse.doesExist == false)
+                if (tryParse.DoesExist == false)
                 {
                     p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintBeginLine("static partial void TryParse_").Print(kind.name)
@@ -863,10 +863,10 @@
                                 {
                                     var tryParse = kind.tryParseSpan;
 
-                                    if (tryParse.doesExist)
+                                    if (tryParse.DoesExist)
                                     {
                                         p.PrintBeginLine("var idResult = ")
-                                            .PrintIf(tryParse.isStatic, fullName, $"default({fullName})")
+                                            .PrintIf(tryParse.IsStatic, fullName, $"default({fullName})")
                                             .PrintEndLine(".TryParse(id, out var idValue);");
                                     }
                                     else
@@ -976,10 +976,10 @@
                                 {
                                     var tryParse = kind.tryParseSpan;
 
-                                    if (tryParse.doesExist)
+                                    if (tryParse.DoesExist)
                                     {
                                         p.PrintBeginLine("var idResult = ")
-                                            .PrintIf(tryParse.isStatic, fullName, $"default({fullName})")
+                                            .PrintIf(tryParse.IsStatic, fullName, $"default({fullName})")
                                             .PrintEndLine(".TryParse(id, out var idValue);");
                                     }
                                     else
@@ -1181,10 +1181,10 @@
             {
                 var kindName = kind.name;
                 var fullName = kind.fullName;
-                var equals = kind.equals;
-                var equality = kind.operatorEquality;
+                var fullNameFromNullable = kind.fullNameFromNullable;
+                var equality = kind.equality;
 
-                if (equals.doesExist == false && equality.doesExist == false)
+                if (equality.Strategy == EqualityStrategy.Default)
                 {
                     continue;
                 }
@@ -1193,51 +1193,80 @@
                 p.PrintBeginLine("public readonly bool Equals(").Print(fullName).PrintEndLine(" other)");
                 p.OpenScope();
                 {
-                    if (equality.doesExist)
+                    if (equality.Strategy == EqualityStrategy.Operator)
                     {
-                        p.PrintBeginLine("return Kind == IdKind.").Print(kindName)
-                            .Print(" && Id_").Print(kindName).PrintEndLine(" == other;");
+                        if (equality.IsNullable)
+                        {
+                            p.PrintBeginLine("return (Kind == IdKind.").Print(kindName).Print(")")
+                                .Print(" && (Id_").Print(kindName).Print(".HasValue == other.HasValue)")
+                                .Print(" && other.HasValue ")
+                                .Print(" && (Id_").Print(kindName).PrintEndLine(".Value == other.Value);");
+                        }
+                        else
+                        {
+                            p.PrintBeginLine("return Kind == IdKind.").Print(kindName)
+                                .Print(" && Id_").Print(kindName).PrintEndLine(" == other;");
+                        }
                     }
-                    else if (equals.isStatic)
+                    else if (equality.Strategy == EqualityStrategy.Equals)
                     {
-                        p.PrintBeginLine("return Kind == IdKind.").Print(kindName)
-                            .Print(" && ").Print(fullName)
-                            .Print(".Equals(Id_").Print(kindName).PrintEndLine(", other);");
+                        if (equality.IsNullable)
+                        {
+                            p.PrintBeginLine("return (Kind == IdKind.").Print(kindName).Print(")")
+                                .Print(" && (Id_").Print(kindName).Print(".HasValue == other.HasValue)")
+                                .Print(" && other.HasValue ");
+
+                            if (equality.IsStatic)
+                            {
+                                p.Print(" && ").Print(fullNameFromNullable)
+                                    .Print(".Equals(Id_").Print(kindName).PrintEndLine(".Value, other.Value);");
+                            }
+                            else
+                            {
+                                p.Print(" && Id_").Print(kindName).PrintEndLine(".Value.Equals(other.Value);");
+                            }
+                        }
+                        else
+                        {
+                            p.PrintBeginLine("return Kind == IdKind.").Print(kindName);
+
+                            if (equality.IsStatic)
+                            {
+                                p.Print(" && ").Print(fullName)
+                                    .Print(".Equals(Id_").Print(kindName).PrintEndLine(", other);");
+                            }
+                            else
+                            {
+                                p.Print(" && Id_").Print(kindName).PrintEndLine(".Equals(other);");
+                            }
+                        }
+                    }
+                    else if (equality.IsNullable)
+                    {
+                        p.PrintBeginLine("return (Kind == IdKind.").Print(kindName).Print(")")
+                            .Print(" && (Id_").Print(kindName).Print(".HasValue == other.HasValue)")
+                            .Print(" && other.HasValue ")
+                            .Print(" && global::System.Collections.Generic.EqualityComparer<").Print(fullNameFromNullable)
+                            .Print(">.Default.Equals(Id_").Print(kindName).PrintEndLine(".Value, other.Value);");
                     }
                     else
                     {
                         p.PrintBeginLine("return Kind == IdKind.").Print(kindName)
-                            .Print(" && Id_").Print(kindName).PrintEndLine(".Equals(other);");
+                            .Print(" && global::System.Collections.Generic.EqualityComparer<").Print(fullName)
+                            .Print(">.Default.Equals(Id_").Print(kindName).PrintEndLine(", other);");
                     }
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                foreach (var (op1, op2, op3) in s_equalityOps)
+                foreach (var (op1, op2) in s_equalityOps)
                 {
                     p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintBeginLine("public static bool operator ").Print(op1)
                         .Print("(").Print(typeName).Print(" left, ").Print(fullName).PrintEndLine(" right)");
                     p.OpenScope();
                     {
-                        if (equality.doesExist)
-                        {
-                            p.PrintBeginLine("return left.Kind ").Print(op1).Print(" IdKind.").Print(kindName)
-                                .Print(" ").Print(op2).Print(" left.Id_").Print(kindName).Print(" ")
-                                .Print(op1).PrintEndLine(" right;");
-                        }
-                        else if (equals.isStatic)
-                        {
-                            p.PrintBeginLine("return left.Kind ").Print(op1).Print(" IdKind.").Print(kindName)
-                                .Print(" ").Print(op2).Print(" ").Print(op3).Print(fullName)
-                                .Print(".Equals(left.Id_").Print(kindName).PrintEndLine(", right);");
-                        }
-                        else
-                        {
-                            p.PrintBeginLine("return left.Kind ").Print(op1).Print(" IdKind.").Print(kindName)
-                                .Print(" ").Print(op2).Print(" ").Print(op3).Print("left.Id_").Print(kindName)
-                                .PrintEndLine(".Equals(right);");
-                        }
+                        p.PrintBeginLine("return ").Print(op2).PrintEndLine("left.Equals(right);");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
@@ -1247,24 +1276,7 @@
                         .Print("(").Print(fullName).Print(" left, ").Print(typeName).PrintEndLine(" right)");
                     p.OpenScope();
                     {
-                        if (equality.doesExist)
-                        {
-                            p.PrintBeginLine("return right.Kind ").Print(op1).Print(" IdKind.").Print(kindName)
-                                .Print(" ").Print(op2).Print(" right.Id_").Print(kindName).Print(" ")
-                                .Print(op1).PrintEndLine(" left;");
-                        }
-                        else if (equals.isStatic)
-                        {
-                            p.PrintBeginLine("return right.Kind ").Print(op1).Print(" IdKind.").Print(kindName)
-                                .Print(" ").Print(op2).Print(" ").Print(op3).Print(fullName)
-                                .Print(".Equals(right.Id_").Print(kindName).PrintEndLine(", left);");
-                        }
-                        else
-                        {
-                            p.PrintBeginLine("return right.Kind ").Print(op1).Print(" IdKind.").Print(kindName)
-                                .Print(" ").Print(op2).Print(" ").Print(op3).Print("right.Id_").Print(kindName)
-                                .PrintEndLine(".Equals(left);");
-                        }
+                        p.PrintBeginLine("return ").Print(op2).PrintEndLine("right.Equals(left);");
                     }
                     p.CloseScope();
                     p.PrintEndLine();

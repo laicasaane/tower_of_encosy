@@ -789,133 +789,67 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintBeginLine("var stringComparison = ignoreCase ? ")
+                    .Print("global::System.StringComparison.OrdinalIgnoreCase : ")
+                    .PrintEndLine("global::System.StringComparison.Ordinal;");
+                p.PrintEndLine();
+
                 if (IsDisplayAttributeUsed)
                 {
                     p.PrintLine("if (allowMatchingMetadataAttribute)");
                     p.OpenScope();
                     {
-                        p.PrintLine("if (ignoreCase)");
+                        p.PrintLine("switch (name)");
                         p.OpenScope();
                         {
-                            p.PrintLine("switch (name)");
-                            p.OpenScope();
+                            foreach (var member in Members)
                             {
-                                foreach (var member in Members)
+                                if (string.IsNullOrEmpty(member.displayName) == false)
                                 {
-                                    if (string.IsNullOrEmpty(member.displayName) == false)
+                                    p.PrintLine($"case string s when s.Equals({CLASS_DISPLAY_NAMES}.{member.name}, stringComparison):");
+                                    p.OpenScope();
                                     {
-                                        p.PrintLine($"case string s when s.Equals({CLASS_DISPLAY_NAMES}.{member.name}, global::System.StringComparison.OrdinalIgnoreCase):");
-                                        p.OpenScope();
-                                        {
-                                            p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
-                                            p.PrintLine("return true;");
-                                        }
-                                        p.CloseScope();
+                                        p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
+                                        p.PrintLine("return true;");
                                     }
+                                    p.CloseScope();
                                 }
-
-                                p.PrintLine("default: break;");
                             }
-                            p.CloseScope();
-                        }
-                        p.CloseScope();
-                        p.PrintLine("else");
-                        p.OpenScope();
-                        {
-                            p.PrintLine("switch (name)");
-                            p.OpenScope();
-                            {
-                                foreach (var member in Members)
-                                {
-                                    if (string.IsNullOrEmpty(member.displayName) == false)
-                                    {
-                                        p.PrintLine($"case {CLASS_DISPLAY_NAMES}.{member.name}:");
-                                        p.OpenScope();
-                                        {
-                                            p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
-                                            p.PrintLine("return true;");
-                                        }
-                                        p.CloseScope();
-                                    }
-                                }
 
-                                p.PrintLine("default: break;");
-                            }
-                            p.CloseScope();
+                            p.PrintLine("default: break;");
                         }
                         p.CloseScope();
                     }
                     p.CloseScope();
                 }
 
-                p.PrintLine("if (ignoreCase)");
+                p.PrintLine("switch (name)");
                 p.OpenScope();
                 {
-                    p.PrintLine("switch (name)");
-                    p.OpenScope();
+                    foreach (var member in Members)
                     {
-                        foreach (var member in Members)
-                        {
-                            p.PrintLine($"case string s when s.Equals({CLASS_NAMES}.{member.name}, global::System.StringComparison.OrdinalIgnoreCase):");
-                            p.OpenScope();
-                            {
-                                p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
-                                p.PrintLine("return true;");
-                            }
-                            p.CloseScope();
-                        }
-
-                        p.PrintLine($"case string s when {UnderlyingTypeName}.TryParse(name, out var underlyingValue):");
+                        p.PrintLine($"case string s when s.Equals({CLASS_NAMES}.{member.name}, stringComparison):");
                         p.OpenScope();
                         {
-                            p.PrintLine($"value = ({FullyQualifiedName})underlyingValue;");
+                            p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
                             p.PrintLine("return true;");
-                        }
-                        p.CloseScope();
-
-                        p.PrintLine("default:");
-                        p.OpenScope();
-                        {
-                            p.PrintLine("value = default;");
-                            p.PrintLine("return false;");
                         }
                         p.CloseScope();
                     }
-                    p.CloseScope();
-                }
-                p.CloseScope();
-                p.PrintLine("else");
-                p.OpenScope();
-                {
-                    p.PrintLine("switch (name)");
+
+                    p.PrintLine($"case string s when {UnderlyingTypeName}.TryParse(name, out var underlyingValue):");
                     p.OpenScope();
                     {
-                        foreach (var member in Members)
-                        {
-                            p.PrintLine($"case {CLASS_NAMES}.{member.name}:");
-                            p.OpenScope();
-                            {
-                                p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
-                                p.PrintLine("return true;");
-                            }
-                            p.CloseScope();
-                        }
+                        p.PrintLine($"value = ({FullyQualifiedName})underlyingValue;");
+                        p.PrintLine("return true;");
+                    }
+                    p.CloseScope();
 
-                        p.PrintLine($"case string s when {UnderlyingTypeName}.TryParse(name, out var underlyingValue):");
-                        p.OpenScope();
-                        {
-                            p.PrintLine($"value = ({FullyQualifiedName})underlyingValue;");
-                            p.PrintLine("return true;");
-                        }
-                        p.CloseScope();
-
-                        p.PrintLine("default:");
-                        p.OpenScope();
-                        {
-                            p.PrintLine("value = default;");
-                            p.PrintLine("return false;");
-                        }
-                        p.CloseScope();
+                    p.PrintLine("default:");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("value = default;");
+                        p.PrintLine("return false;");
                     }
                     p.CloseScope();
                 }
@@ -1008,133 +942,67 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintBeginLine("var stringComparison = ignoreCase ? ")
+                    .Print("global::System.StringComparison.OrdinalIgnoreCase : ")
+                    .PrintEndLine("global::System.StringComparison.Ordinal;");
+                p.PrintEndLine();
+
                 if (IsDisplayAttributeUsed)
                 {
                     p.PrintLine("if (allowMatchingMetadataAttribute)");
                     p.OpenScope();
                     {
-                        p.PrintLine("if (ignoreCase)");
+                        p.PrintLine("switch (name)");
                         p.OpenScope();
                         {
-                            p.PrintLine("switch (name)");
-                            p.OpenScope();
+                            foreach (var member in Members)
                             {
-                                foreach (var member in Members)
+                                if (string.IsNullOrEmpty(member.displayName) == false)
                                 {
-                                    if (string.IsNullOrEmpty(member.displayName) == false)
+                                    p.PrintLine($"case {SPAN} s when global::System.MemoryExtensions.Equals(s, global::System.MemoryExtensions.AsSpan({CLASS_DISPLAY_NAMES}.{member.name}), stringComparison):");
+                                    p.OpenScope();
                                     {
-                                        p.PrintLine($"case {SPAN} s when global::System.MemoryExtensions.Equals(s, global::System.MemoryExtensions.AsSpan({CLASS_DISPLAY_NAMES}.{member.name}), global::System.StringComparison.OrdinalIgnoreCase):");
-                                        p.OpenScope();
-                                        {
-                                            p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
-                                            p.PrintLine("return true;");
-                                        }
-                                        p.CloseScope();
+                                        p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
+                                        p.PrintLine("return true;");
                                     }
+                                    p.CloseScope();
                                 }
-
-                                p.PrintLine("default: break;");
                             }
-                            p.CloseScope();
-                        }
-                        p.CloseScope();
-                        p.PrintLine("else");
-                        p.OpenScope();
-                        {
-                            p.PrintLine("switch (name)");
-                            p.OpenScope();
-                            {
-                                foreach (var member in Members)
-                                {
-                                    if (string.IsNullOrEmpty(member.displayName) == false)
-                                    {
-                                        p.PrintLine($"case {SPAN} s when global::System.MemoryExtensions.Equals(s, global::System.MemoryExtensions.AsSpan({CLASS_DISPLAY_NAMES}.{member.name}), global::System.StringComparison.Ordinal):");
-                                        p.OpenScope();
-                                        {
-                                            p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
-                                            p.PrintLine("return true;");
-                                        }
-                                        p.CloseScope();
-                                    }
-                                }
 
-                                p.PrintLine("default: break;");
-                            }
-                            p.CloseScope();
+                            p.PrintLine("default: break;");
                         }
                         p.CloseScope();
                     }
                     p.CloseScope();
                 }
 
-                p.PrintLine("if (ignoreCase)");
+                p.PrintLine("switch (name)");
                 p.OpenScope();
                 {
-                    p.PrintLine("switch (name)");
-                    p.OpenScope();
+                    foreach (var member in Members)
                     {
-                        foreach (var member in Members)
-                        {
-                            p.PrintLine($"case {SPAN} s when global::System.MemoryExtensions.Equals(s, global::System.MemoryExtensions.AsSpan({CLASS_NAMES}.{member.name}), global::System.StringComparison.OrdinalIgnoreCase):");
-                            p.OpenScope();
-                            {
-                                p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
-                                p.PrintLine("return true;");
-                            }
-                            p.CloseScope();
-                        }
-
-                        p.PrintLine($"case {SPAN} s when {UnderlyingTypeName}.TryParse(name, out var underlyingValue):");
+                        p.PrintLine($"case {SPAN} s when global::System.MemoryExtensions.Equals(s, global::System.MemoryExtensions.AsSpan({CLASS_NAMES}.{member.name}), stringComparison):");
                         p.OpenScope();
                         {
-                            p.PrintLine($"value = ({FullyQualifiedName})underlyingValue;");
+                            p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
                             p.PrintLine("return true;");
-                        }
-                        p.CloseScope();
-
-                        p.PrintLine("default:");
-                        p.OpenScope();
-                        {
-                            p.PrintLine("value = default;");
-                            p.PrintLine("return false;");
                         }
                         p.CloseScope();
                     }
-                    p.CloseScope();
-                }
-                p.CloseScope();
-                p.PrintLine("else");
-                p.OpenScope();
-                {
-                    p.PrintLine("switch (name)");
+
+                    p.PrintLine($"case {SPAN} s when {UnderlyingTypeName}.TryParse(name, out var underlyingValue):");
                     p.OpenScope();
                     {
-                        foreach (var member in Members)
-                        {
-                            p.PrintLine($"case {SPAN} s when global::System.MemoryExtensions.Equals(s, global::System.MemoryExtensions.AsSpan({CLASS_NAMES}.{member.name}), global::System.StringComparison.Ordinal):");
-                            p.OpenScope();
-                            {
-                                p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
-                                p.PrintLine("return true;");
-                            }
-                            p.CloseScope();
-                        }
+                        p.PrintLine($"value = ({FullyQualifiedName})underlyingValue;");
+                        p.PrintLine("return true;");
+                    }
+                    p.CloseScope();
 
-                        p.PrintLine($"case {SPAN} s when {UnderlyingTypeName}.TryParse(name, out var underlyingValue):");
-                        p.OpenScope();
-                        {
-                            p.PrintLine($"value = ({FullyQualifiedName})underlyingValue;");
-                            p.PrintLine("return true;");
-                        }
-                        p.CloseScope();
-
-                        p.PrintLine("default:");
-                        p.OpenScope();
-                        {
-                            p.PrintLine("value = default;");
-                            p.PrintLine("return false;");
-                        }
-                        p.CloseScope();
+                    p.PrintLine("default:");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("value = default;");
+                        p.PrintLine("return false;");
                     }
                     p.CloseScope();
                 }
