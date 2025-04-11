@@ -59,7 +59,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
             return syntaxNode is TypeDeclarationSyntax syntax
                 && syntax.Kind() is (SyntaxKind.ClassDeclaration or SyntaxKind.StructDeclaration)
-                && syntax.HasAttributeCandidate("Newtonsoft.Json.Utilities", "NewtonsoftAotHelper");
+                && syntax.HasAttributeCandidate("EncosyTower.NewtonsoftAot", "NewtonsoftAotHelper");
         }
 
         private static HelperCandidate GetHelperCandidate(
@@ -105,9 +105,15 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             token.ThrowIfCancellationRequested();
 
             return syntaxNode is TypeDeclarationSyntax syntax
-                && syntax.Kind() is (SyntaxKind.ClassDeclaration or SyntaxKind.StructDeclaration)
-                && syntax.BaseList != null
-                && syntax.BaseList.Types.Count > 0;
+                && IsSupported(syntax.Kind());
+
+            static bool IsSupported(SyntaxKind kind)
+                => kind is (
+                       SyntaxKind.ClassDeclaration
+                    or SyntaxKind.StructDeclaration
+                    or SyntaxKind.RecordDeclaration
+                    or SyntaxKind.RecordStructDeclaration
+                );
         }
 
         public static INamedTypeSymbol GetType(
@@ -117,8 +123,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
         {
             if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
                 || context.Node is not TypeDeclarationSyntax syntax
-                || syntax.BaseList == null
-                || syntax.BaseList.Types.Count < 1
             )
             {
                 return default;
@@ -129,7 +133,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
             if (symbol == null
                 || symbol.IsAbstract
-                || symbol.IsUnboundGenericType
+                || symbol.IsGenericType
             )
             {
                 return default;
@@ -171,10 +175,9 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
             try
             {
-                var types = new List<INamedTypeSymbol>(typeCandidates.Length);
-                var sb = new StringBuilder();
-                var baseType = helperCandidate.baseType;
                 var equalityComparer = SymbolEqualityComparer.Default;
+                var types = new HashSet<INamedTypeSymbol>(equalityComparer);
+                var baseType = helperCandidate.baseType;
 
                 for (var i = 0; i < typeCandidates.Length; i++)
                 {
@@ -183,7 +186,9 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
                     while (candidateBaseType != null)
                     {
-                        if (equalityComparer.Equals(candidateBaseType, baseType))
+                        if (candidateBaseType.SpecialType.IsSystemType() == false
+                            && equalityComparer.Equals(candidateBaseType, baseType)
+                        )
                         {
                             types.Add(candidate);
                             break;
@@ -191,6 +196,11 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
                         candidateBaseType = candidateBaseType.BaseType;
                     }
+                }
+
+                if (types.Count < 1)
+                {
+                    return;
                 }
 
                 var helperSyntax = helperCandidate.syntax;

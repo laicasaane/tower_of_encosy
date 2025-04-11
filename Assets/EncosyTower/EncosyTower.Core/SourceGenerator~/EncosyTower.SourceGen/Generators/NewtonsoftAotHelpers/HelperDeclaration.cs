@@ -10,22 +10,26 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
         public string WriteCode(
               HelperCandidate helper
-            , List<INamedTypeSymbol> types
+            , IEnumerable<INamedTypeSymbol> types
         )
         {
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, helper.syntax.Parent);
+            var syntax = helper.syntax;
+            var symbol = helper.symbol;
+
+            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, syntax.Parent);
             var p = scopePrinter.printer;
             p = p.IncreasedIndent();
 
-            var staticKeyword = helper.symbol.IsStatic ? "static " : "";
-            var typeKeyword = helper.symbol.TypeKind == TypeKind.Class ? "class " : "struct ";
+            var staticKeyword = symbol.IsStatic ? "static " : "";
+            var recordKeyword = symbol.IsRecord ? "record " : "";
+            var typeKeyword = symbol.TypeKind == TypeKind.Class ? "class " : "struct ";
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            p.PrintBeginLine(staticKeyword).Print("partial ").Print(typeKeyword)
-                .PrintEndLine(helper.syntax.Identifier.Text);
+            p.PrintBeginLine(staticKeyword).Print("partial ").Print(recordKeyword).Print(typeKeyword)
+                .PrintEndLine(syntax.Identifier.Text);
             p.OpenScope();
             {
                 p.PrintLine("[global::UnityEngine.Scripting.Preserve]");
@@ -55,7 +59,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
                                     WriteType(ref p, fieldType);
 
-                                    if (fieldType.IsGenericType == false)
+                                    if (fieldType.IsGenericType == false || fieldType.IsUnboundGenericType)
                                     {
                                         continue;
                                     }
@@ -102,8 +106,8 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
         private static void WriteType(ref Printer p, INamedTypeSymbol type)
         {
             if (type.IsAbstract
-                || type.TypeKind != TypeKind.Struct
-                || type.TypeKind != TypeKind.Class
+                || type.SpecialType.IsSystemType()
+                || type.TypeKind is not (TypeKind.Struct or TypeKind.Class)
             )
             {
                 return;
