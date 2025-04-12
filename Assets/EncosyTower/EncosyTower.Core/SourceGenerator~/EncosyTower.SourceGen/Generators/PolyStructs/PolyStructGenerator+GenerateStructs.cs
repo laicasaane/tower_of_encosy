@@ -63,6 +63,7 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
             p.OpenScope();
             {
                 WriteConstructor(ref p, structRef);
+                WriteDeconstruct(ref p, structRef);
 
                 foreach (var interfaceRef in structRef.Interfaces.Values)
                 {
@@ -97,7 +98,7 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
                     var field = fields[i];
                     var comma = i > 0 ? ", " : "  ";
 
-                    p.PrintLine($"{comma}{field.Type.ToFullName()} arg_{field.Name}");
+                    p.PrintLine($"{comma}{field.Type.ToFullName()} {field.Name}");
                 }
             }
             p = p.DecreasedIndent();
@@ -106,7 +107,44 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
             {
                 foreach (var field in structRef.Fields)
                 {
-                    p.PrintLine($"this.{field.Name} = arg_{field.Name};");
+                    p.PrintLine($"this.{field.Name} = {field.Name};");
+                }
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private static void WriteDeconstruct(
+              ref Printer p
+            , StructRef structRef
+        )
+        {
+            var fields = structRef.Fields;
+
+            if (fields.Length < 1)
+            {
+                return;
+            }
+
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public void Deconstruct(");
+            p = p.IncreasedIndent();
+            {
+                for (var i = 0; i < fields.Length; i++)
+                {
+                    var field = fields[i];
+                    var comma = i > 0 ? ", out " : "  out ";
+
+                    p.PrintLine($"{comma}{field.Type.ToFullName()} {field.Name}");
+                }
+            }
+            p = p.DecreasedIndent();
+            p.PrintLine(")");
+            p.OpenScope();
+            {
+                foreach (var field in structRef.Fields)
+                {
+                    p.PrintLine($"{field.Name} = this.{field.Name};");
                 }
             }
             p.CloseScope();

@@ -18,6 +18,9 @@ namespace EncosyTower.Tests.PolyStructs
     [PolyStruct]
     public partial struct TaskA : ITask
     {
+        public int data1;
+        public float data2;
+
         public bool IsValid => true;
 
         public void DoSomething(int value, in Vector2 position)
@@ -40,6 +43,9 @@ namespace EncosyTower.Tests.PolyStructs
     [PolyStruct]
     public partial struct TaskB : ITask
     {
+        public int data1;
+        public string data2;
+
         public bool IsValid => false;
 
         public void DoSomething(int value, in Vector2 position)
