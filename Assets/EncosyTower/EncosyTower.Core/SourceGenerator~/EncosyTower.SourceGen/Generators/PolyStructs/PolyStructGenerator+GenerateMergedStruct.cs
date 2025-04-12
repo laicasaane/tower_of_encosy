@@ -174,7 +174,7 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
 
         private static void WriteFields(ref Printer p, IReadOnlyCollection<MergedFieldRef> mergedFieldRefList)
         {
-            p.PrintLine("public TypeId CurrentTypeId;");
+            p.PrintLine("public TypeId typeId;");
             p.PrintEndLine();
 
             if (mergedFieldRefList.Count < 1)
@@ -208,7 +208,7 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
                 p.PrintLine("get");
                 p.OpenScope();
                 {
-                    p.PrintLine("return this.CurrentTypeId switch {");
+                    p.PrintLine("return this.typeId switch {");
                     p = p.IncreasedIndent();
                     {
                         foreach (var structRef in structRefs)
@@ -239,7 +239,7 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
             p.PrintLine($"public readonly bool IsType<T>() where T : struct, {interfaceRef.FullName}");
             p.OpenScope();
             {
-                p.PrintLine($"return GetTypeId<T>() == this.CurrentTypeId;");
+                p.PrintLine($"return GetTypeId<T>() == this.typeId;");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -250,7 +250,7 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
                 p.PrintLine($"public readonly bool IsType({structRef.FullName} _)");
                 p.OpenScope();
                 {
-                    p.PrintLine($"return GetTypeId<{structRef.FullName}>() == this.CurrentTypeId;");
+                    p.PrintLine($"return GetTypeId<{structRef.FullName}>() == this.typeId;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -739,7 +739,7 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
 
             p.OpenScope();
             {
-                p.PrintLine("switch (this.CurrentTypeId)");
+                p.PrintLine("switch (this.typeId)");
                 p.OpenScope();
                 {
                     foreach (var structRef in structRefs)

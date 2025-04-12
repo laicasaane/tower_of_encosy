@@ -347,7 +347,7 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
                         }
 
                         mergedField.Type = field.Type;
-                        mergedField.Name = $"Field_{field.Type.ToValidIdentifier()}_{newListIndex}";
+                        mergedField.Name = $"field_{field.Type.ToValidIdentifier()}_{newListIndex}";
                         mergedField.StructToFieldMap.Add(structSymbol, field.Name);
 
                         field.MergedName = mergedField.Name;

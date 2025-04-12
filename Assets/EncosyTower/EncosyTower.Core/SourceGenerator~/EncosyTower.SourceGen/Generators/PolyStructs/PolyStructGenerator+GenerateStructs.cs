@@ -209,7 +209,7 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
                 p.PrintLine($"return new {mergedStructName} {{");
                 p = p.IncreasedIndent();
                 {
-                    p.PrintLine($"CurrentTypeId = {mergedStructName}.TypeId.{typeId},");
+                    p.PrintLine($"typeId = {mergedStructName}.TypeId.{typeId},");
 
                     foreach (var field in fields)
                     {
