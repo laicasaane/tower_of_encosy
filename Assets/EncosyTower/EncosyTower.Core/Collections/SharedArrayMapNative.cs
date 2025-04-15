@@ -80,6 +80,12 @@ namespace EncosyTower.Collections
             get => new(this);
         }
 
+        public NativeSlice<TValueNative> Values
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _values.Slice(0, _freeValueCellIndex.AsSpan()[0]);
+        }
+
         public TValueNative this[TKey key]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

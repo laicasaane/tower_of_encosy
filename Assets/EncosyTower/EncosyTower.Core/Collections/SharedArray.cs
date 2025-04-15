@@ -167,9 +167,15 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator T[]([NotNull] SharedArray<T, TNative> self)
+        public static implicit operator T[]([NotNull] SharedArray<T, TNative> self)
         {
             return self.AsManagedArray();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator ArraySegment<T>([NotNull] SharedArray<T, TNative> self)
+        {
+            return self.AsArraySegment();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -295,6 +301,16 @@ namespace EncosyTower.Collections
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] AsManagedArray()
+        {
+#if UNITY_EDITOR && !DISABLE_SHAREDARRAY_SAFETY
+            AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
+#endif
+
+            return managed;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ArraySegment<T> AsArraySegment()
         {
 #if UNITY_EDITOR && !DISABLE_SHAREDARRAY_SAFETY
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);

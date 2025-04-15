@@ -88,6 +88,29 @@ namespace EncosyTower.Collections
                 _fastModBucketsMultiplier = HashHelpers.GetFastModMultiplier((uint)capacity);
         }
 
+        public ArrayMap([NotNull] ArrayMap<TKey, TValue> source)
+        {
+            var capacity = source.Capacity;
+
+            _valuesInfo = default;
+            _valuesInfo.Alloc(capacity, default);
+            _values = default;
+            _values.Alloc(capacity, default);
+            _buckets = default;
+            _buckets.Alloc(HashHelpers.GetPrime(capacity), default);
+
+            source._valuesInfo.AsSpan().CopyTo(_valuesInfo.AsSpan());
+            source._values.AsSpan().CopyTo(_values.AsSpan());
+            source._buckets.AsSpan().CopyTo(_buckets.AsSpan());
+
+            _freeValueCellIndex = source._freeValueCellIndex;
+            _collisions = source._collisions;
+            _fastModBucketsMultiplier = source._fastModBucketsMultiplier;
+        }
+
+        public ArrayMap(ReadOnlyArrayMap<TKey, TValue> source) : this(source._map)
+        { }
+
         public int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -110,6 +133,12 @@ namespace EncosyTower.Collections
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(this);
+        }
+
+        public ArraySegment<TValue> Values
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _values.AsArraySegment().Slice(0, _freeValueCellIndex);
         }
 
         bool ICollection<ArrayMapKeyValuePairFast<TKey, TValue>>.IsReadOnly
@@ -769,7 +798,7 @@ namespace EncosyTower.Collections
             return Remove(item.Key);
         }
 
-        public readonly struct KeyEnumerable
+        public readonly struct KeyEnumerable : IEnumerable<TKey>
         {
             private readonly ArrayMap<TKey, TValue> _map;
 
@@ -779,12 +808,26 @@ namespace EncosyTower.Collections
                 _map = map;
             }
 
+            public bool IsValid
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _map?.IsValid ?? false;
+            }
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public KeyEnumerator GetEnumerator()
                 => new(_map);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator()
+                => GetEnumerator();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            IEnumerator IEnumerable.GetEnumerator()
+                => GetEnumerator();
         }
 
-        public struct KeyEnumerator
+        public struct KeyEnumerator : IEnumerator<TKey>
         {
             private readonly ArrayMap<TKey, TValue> _map;
             private readonly int _count;
@@ -797,6 +840,18 @@ namespace EncosyTower.Collections
                 _map = map;
                 _index = -1;
                 _count = map.Count;
+            }
+
+            public readonly bool IsValid
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _map?.IsValid ?? false;
+            }
+
+            public readonly TKey Current
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _map._valuesInfo[_index].key;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -815,11 +870,17 @@ namespace EncosyTower.Collections
                 return false;
             }
 
-            public readonly TKey Current
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Reset()
             {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _map._valuesInfo[_index].key;
+                _index = -1;
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly void Dispose()
+            { }
+
+            readonly object IEnumerator.Current => Current;
         }
     }
 
@@ -843,6 +904,12 @@ namespace EncosyTower.Collections
 #if __ENCOSY_VALIDATION__
             _startCount = map.Count;
 #endif
+        }
+
+        public readonly bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _map?.IsValid ?? false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -915,6 +982,12 @@ namespace EncosyTower.Collections
             _mapValues = mapValues;
             _index = index;
             _key = key;
+        }
+
+        public bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _mapValues.IsValid;
         }
 
         public TKey Key

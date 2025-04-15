@@ -200,6 +200,12 @@ namespace EncosyTower.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public NativeSlice<T> AsNativeSlice()
+        {
+            return new NativeSlice<T>(_buffer);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span<T> AsSpan()
         {
             return _buffer.AsSpan();

@@ -87,8 +87,53 @@ namespace EncosyTower.Collections
 
             if (capacity > 0)
             {
-                _fastModBucketsMultiplier.AsSpan()[0] = HashHelpers.GetFastModMultiplier((uint)capacity);
+                _fastModBucketsMultiplier.ValueRW = HashHelpers.GetFastModMultiplier((uint)capacity);
             }
+        }
+
+        public SharedArrayMap([NotNull] SharedArrayMap<TKey, TValue, TValueNative> source)
+        {
+            var capacity = source.Capacity;
+
+            _valuesInfo = new(capacity);
+            _values = new(capacity);
+            _buckets = new(HashHelpers.GetPrime(capacity));
+            _freeValueCellIndex = new(1);
+            _collisions = new(1);
+            _fastModBucketsMultiplier = new(1);
+
+            source._valuesInfo.AsSpan().CopyTo(_valuesInfo.AsSpan());
+            source._values.AsSpan().CopyTo(_values.AsSpan());
+            source._buckets.AsSpan().CopyTo(_buckets.AsSpan());
+
+            _freeValueCellIndex.ValueRW = source._freeValueCellIndex.ValueRO;
+            _collisions.ValueRW = source._collisions.ValueRO;
+            _fastModBucketsMultiplier.ValueRW = source._fastModBucketsMultiplier.ValueRO;
+        }
+
+        public SharedArrayMap(SharedArrayMapNative<TKey, TValue, TValueNative> source)
+        {
+            if (source.IsCreated == false)
+            {
+                throw new InvalidOperationException("Source map is not valid.");
+            }
+
+            var capacity = source.Capacity;
+
+            _valuesInfo = new(capacity);
+            _values = new(capacity);
+            _buckets = new(HashHelpers.GetPrime(capacity));
+            _freeValueCellIndex = new(1);
+            _collisions = new(1);
+            _fastModBucketsMultiplier = new(1);
+
+            source._valuesInfo.AsSpan().CopyTo(_valuesInfo.AsSpan());
+            source._values.AsSpan().CopyTo(_values.AsNativeArray());
+            source._buckets.AsSpan().CopyTo(_buckets.AsSpan());
+
+            _freeValueCellIndex.ValueRW = source._freeValueCellIndex[0];
+            _collisions.ValueRW = source._collisions[0];
+            _fastModBucketsMultiplier.ValueRW = source._fastModBucketsMultiplier[0];
         }
 
         public int Capacity
@@ -107,6 +152,12 @@ namespace EncosyTower.Collections
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(this);
+        }
+
+        public ArraySegment<TValue> Values
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _values.AsArraySegment().Slice(0, _freeValueCellIndex.ValueRO);
         }
 
         bool ICollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>.IsReadOnly
@@ -710,7 +761,7 @@ namespace EncosyTower.Collections
             return Remove(item.Key);
         }
 
-        public readonly struct KeyEnumerable
+        public readonly struct KeyEnumerable : IEnumerable<TKey>
         {
             private readonly SharedArrayMap< TKey, TValue, TValueNative > _map;
 
@@ -720,12 +771,26 @@ namespace EncosyTower.Collections
                 _map = map;
             }
 
+            public bool IsValid
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _map != null;
+            }
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public KeyEnumerator GetEnumerator()
                 => new(_map);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator()
+                => GetEnumerator();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            IEnumerator IEnumerable.GetEnumerator()
+                => GetEnumerator();
         }
 
-        public struct KeyEnumerator
+        public struct KeyEnumerator : IEnumerator<TKey>
         {
             private readonly SharedArrayMap< TKey, TValue, TValueNative > _map;
             private readonly int _count;
@@ -738,6 +803,18 @@ namespace EncosyTower.Collections
                 _map = map;
                 _index = -1;
                 _count = map.Count;
+            }
+
+            public readonly bool IsValid
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _map != null;
+            }
+
+            public readonly TKey Current
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _map._valuesInfo.AsReadOnlySpan()[_index].key;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -756,11 +833,17 @@ namespace EncosyTower.Collections
                 return false;
             }
 
-            public readonly TKey Current
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Reset()
             {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _map._valuesInfo.AsReadOnlySpan()[_index].key;
+                _index = -1;
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly void Dispose()
+            { }
+
+            readonly object IEnumerator.Current => Current;
         }
     }
 
@@ -788,6 +871,12 @@ namespace EncosyTower.Collections
 #if __ENCOSY_VALIDATION__
             _startCount = map.Count;
 #endif
+        }
+
+        public readonly bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _map != null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -863,6 +952,12 @@ namespace EncosyTower.Collections
             _mapValues = mapValues;
             _index = index;
             _key = key;
+        }
+
+        public bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _mapValues != null;
         }
 
         public TKey Key

@@ -132,6 +132,10 @@ namespace EncosyTower.Buffers
             => _realBuffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly NativeSlice<T> AsNativeSlice()
+            => _realBuffer.AsNativeSlice();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Span<T> AsSpan()
             => _realBuffer.AsSpan();
 

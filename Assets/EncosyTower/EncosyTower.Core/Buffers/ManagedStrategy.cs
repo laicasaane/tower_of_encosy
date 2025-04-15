@@ -130,12 +130,18 @@ namespace EncosyTower.Buffers
             => _realBuffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ArraySegment<T> AsArraySegment()
+            => _realBuffer.AsArraySegment();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Span<T> AsSpan()
             => _realBuffer.AsSpan();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ReadOnlySpan<T> AsReadOnlySpan()
             => _realBuffer.AsSpan();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void Dispose() { }
     }
 }

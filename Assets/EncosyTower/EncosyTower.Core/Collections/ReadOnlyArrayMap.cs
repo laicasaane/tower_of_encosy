@@ -44,6 +44,12 @@ namespace EncosyTower.Collections
             get => new(_map);
         }
 
+        public ArraySegment<TValue> Values
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _map.Values;
+        }
+
         public TValue this[TKey key]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

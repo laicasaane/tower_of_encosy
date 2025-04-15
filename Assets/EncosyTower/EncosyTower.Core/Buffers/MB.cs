@@ -196,6 +196,12 @@ namespace EncosyTower.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ArraySegment<T> AsArraySegment()
+        {
+            return new ArraySegment<T>(_buffer);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Span<T> AsSpan()
         {
             return _buffer;
