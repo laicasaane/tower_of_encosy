@@ -739,6 +739,8 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
 
             p.OpenScope();
             {
+                var resultVarName = GetResultVarName(method);
+
                 p.PrintLine("switch (this.typeId)");
                 p.OpenScope();
                 {
@@ -756,15 +758,15 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
                             {
                                 if (method.RefKind == RefKind.Ref)
                                 {
-                                    p.Print("ref var result = ref ");
+                                    p.Print("ref var ").Print(resultVarName).Print(" = ref ");
                                 }
                                 else if (method.RefKind == RefKind.RefReadOnly)
                                 {
-                                    p.Print("ref readonly var result = ref ");
+                                    p.Print("ref readonly var ").Print(resultVarName).Print(" = ref ");
                                 }
                                 else
                                 {
-                                    p.Print("var result = ");
+                                    p.Print("var ").Print(resultVarName).Print(" = ");
                                 }
                             }
 
@@ -790,7 +792,7 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
                                     p.Print("ref ");
                                 }
 
-                                p.PrintEndLine("result;");
+                                p.Print(resultVarName).PrintEndLine(";");
                             }
                         }
                         p.CloseScope();
@@ -981,11 +983,14 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
             p.PrintEndLine();
         }
 
+        private static string GetResultVarName(IMethodSymbol method)
+            => $"result_{method.Name}";
+
         private static string GetDefaultMethodName(IMethodSymbol method)
             => $"{method.Name}_Default";
 
         private static string GetDefaultResultVarName(IMethodSymbol method)
-            => $"{GetDefaultMethodName(method)}_result";
+            => $"result_{GetDefaultMethodName(method)}";
 
         private static string GetReturnRefKind(RefKind refKind)
         {
