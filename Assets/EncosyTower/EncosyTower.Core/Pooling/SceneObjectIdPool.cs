@@ -174,8 +174,8 @@ namespace EncosyTower.Pooling
 
             _objectList.Clear();
 
-            _unusedInstanceIds.RemoveAt(keep, removeCount);
-            _unusedTransformIds.RemoveAt(keep, removeCount);
+            _unusedInstanceIds.RemoveRange(keep, removeCount);
+            _unusedTransformIds.RemoveRange(keep, removeCount);
         }
 
         public int RentInstanceId(bool activate = false)
@@ -241,8 +241,8 @@ namespace EncosyTower.Pooling
             _unusedInstanceIds.CopyTo(startIndex, instanceIds);
             _unusedTransformIds.CopyTo(startIndex, transformIds);
 
-            _unusedInstanceIds.RemoveAt(startIndex, length);
-            _unusedTransformIds.RemoveAt(startIndex, length);
+            _unusedInstanceIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
 
             if (activate)
             {
@@ -261,8 +261,8 @@ namespace EncosyTower.Pooling
             var startIndex = UnusedCount - length;
             _unusedInstanceIds.CopyTo(startIndex, instanceIds);
 
-            _unusedInstanceIds.RemoveAt(startIndex, length);
-            _unusedTransformIds.RemoveAt(startIndex, length);
+            _unusedInstanceIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
 
             if (activate)
             {
@@ -284,8 +284,8 @@ namespace EncosyTower.Pooling
             _unusedTransformIds.CopyTo(startIndex, transformIds);
             _unusedInstanceIds.CopyTo(startIndex, instanceIds);
 
-            _unusedInstanceIds.RemoveAt(startIndex, length);
-            _unusedTransformIds.RemoveAt(startIndex, length);
+            _unusedInstanceIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
 
             if (activate)
             {
@@ -306,8 +306,8 @@ namespace EncosyTower.Pooling
             _unusedTransformIds.CopyTo(startIndex, transformIds);
             _unusedInstanceIds.CopyTo(startIndex, instanceIds);
 
-            _unusedInstanceIds.RemoveAt(startIndex, amount);
-            _unusedTransformIds.RemoveAt(startIndex, amount);
+            _unusedInstanceIds.RemoveRange(startIndex, amount);
+            _unusedTransformIds.RemoveRange(startIndex, amount);
 
             _objectList.Clear();
             _objectList.Capacity = Mathf.Max(_objectList.Capacity, amount);

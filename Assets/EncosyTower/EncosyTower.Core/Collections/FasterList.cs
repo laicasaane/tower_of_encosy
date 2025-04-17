@@ -783,34 +783,33 @@ namespace EncosyTower.Collections
             }
         }
 
-        public void RemoveAt(int startIndex, int length)
+        public void RemoveRange(int startIndex, int length)
         {
             _version++;
 
-            Checks.IsTrue((uint)startIndex < (uint)_count, "out of bound start index");
+            var count = _count;
+
+            Checks.IsTrue((uint)startIndex < (uint)count, "out of bound start index");
 
             var end = startIndex + length;
 
-            Checks.IsTrue((uint)end <= (uint)_count, "out of bound length");
+            Checks.IsTrue((uint)end <= (uint)count, "out of bound length");
 
-            _count -= length;
-
-            if (end >= _count)
+            if (length < 1)
             {
-                if (s_shouldPerformMemClear)
-                {
-                    Array.Clear(_buffer, startIndex, length);
-                }
-
                 return;
             }
 
-            Array.Copy(_buffer, end, _buffer, startIndex, length);
+            count = _count -= length;
+
+            if (startIndex < count)
+            {
+                Array.Copy(_buffer, startIndex + length, _buffer, startIndex, count - startIndex);
+            }
 
             if (s_shouldPerformMemClear)
             {
-                startIndex += length;
-                Array.Clear(_buffer, startIndex, _count - startIndex);
+                Array.Clear(_buffer, count, length);
             }
         }
 

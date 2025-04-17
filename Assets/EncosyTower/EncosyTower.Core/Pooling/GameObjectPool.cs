@@ -167,9 +167,9 @@ namespace EncosyTower.Pooling
                 UnityObject.Destroy(go);
             }
 
-            _unusedObjects.RemoveAt(keep, removeCount);
-            _unusedInstanceIds.RemoveAt(keep, removeCount);
-            _unusedTransformIds.RemoveAt(keep, removeCount);
+            _unusedObjects.RemoveRange(keep, removeCount);
+            _unusedInstanceIds.RemoveRange(keep, removeCount);
+            _unusedTransformIds.RemoveRange(keep, removeCount);
         }
 
         public GameObject RentGameObject(bool activate = false)
@@ -259,9 +259,9 @@ namespace EncosyTower.Pooling
             _unusedInstanceIds.CopyTo(startIndex, instanceIds);
             _unusedTransformIds.CopyTo(startIndex, transformIds);
 
-            _unusedObjects.RemoveAt(startIndex, length);
-            _unusedInstanceIds.RemoveAt(startIndex, length);
-            _unusedTransformIds.RemoveAt(startIndex, length);
+            _unusedObjects.RemoveRange(startIndex, length);
+            _unusedInstanceIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
 
             Prefab.MoveToScene(instanceIds);
 
@@ -290,9 +290,9 @@ namespace EncosyTower.Pooling
             _unusedInstanceIds.CopyTo(startIndex, instanceIds);
             _unusedTransformIds.CopyTo(startIndex, transformIds);
 
-            _unusedObjects.RemoveAt(startIndex, length);
-            _unusedInstanceIds.RemoveAt(startIndex, length);
-            _unusedTransformIds.RemoveAt(startIndex, length);
+            _unusedObjects.RemoveRange(startIndex, length);
+            _unusedInstanceIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
 
             Prefab.MoveToScene(instanceIds);
 
@@ -316,9 +316,9 @@ namespace EncosyTower.Pooling
             _unusedObjects.CopyTo(startIndex, objects);
             _unusedInstanceIds.CopyTo(startIndex, instanceIds);
 
-            _unusedObjects.RemoveAt(startIndex, length);
-            _unusedInstanceIds.RemoveAt(startIndex, length);
-            _unusedTransformIds.RemoveAt(startIndex, length);
+            _unusedObjects.RemoveRange(startIndex, length);
+            _unusedInstanceIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
 
             Prefab.MoveToScene(instanceIds);
 
@@ -339,9 +339,9 @@ namespace EncosyTower.Pooling
             var startIndex = UnusedCount - length;
             _unusedInstanceIds.CopyTo(startIndex, instanceIds);
 
-            _unusedObjects.RemoveAt(startIndex, length);
-            _unusedInstanceIds.RemoveAt(startIndex, length);
-            _unusedTransformIds.RemoveAt(startIndex, length);
+            _unusedObjects.RemoveRange(startIndex, length);
+            _unusedInstanceIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
 
             Prefab.MoveToScene(instanceIds);
 
@@ -365,9 +365,9 @@ namespace EncosyTower.Pooling
             _unusedTransformIds.CopyTo(startIndex, transformIds);
             _unusedInstanceIds.CopyTo(startIndex, instanceIds);
 
-            _unusedObjects.RemoveAt(startIndex, length);
-            _unusedInstanceIds.RemoveAt(startIndex, length);
-            _unusedTransformIds.RemoveAt(startIndex, length);
+            _unusedObjects.RemoveRange(startIndex, length);
+            _unusedInstanceIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
 
             Prefab.MoveToScene(instanceIds);
 
