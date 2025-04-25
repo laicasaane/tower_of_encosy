@@ -23,6 +23,12 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
             Name = Type.GetNameWithoutSuffix("Settings");
         }
 
+        public SerializedProperty GetSlimPublishingContext()
+            => Object.FindProperty(nameof(MonoPageFlowSettings.slimPublishingContext));
+
+        public SerializedProperty GetIgnoreEmptySubscriber()
+            => Object.FindProperty(nameof(MonoPageFlowSettings.ignoreEmptySubscriber));
+
         public SerializedProperty GetLoaderStrategyProperty()
             => Object.FindProperty(nameof(MonoPageFlowSettings.loaderStrategy));
 

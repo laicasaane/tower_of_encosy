@@ -27,6 +27,8 @@ namespace EncosyTower.PageFlows
         public PageFlow(
               [NotNull] ArrayPool<UnityTaskUntyped> taskArrayPool
             , MessagePublisher.Publisher<PageFlowScope> publisher
+            , bool slimPublisingContext
+            , bool ignoreEmptySubscriber
             , [NotNull] ILogger logger
         )
         {
@@ -34,6 +36,8 @@ namespace EncosyTower.PageFlows
 
             TaskArrayPool = taskArrayPool;
             Publisher = publisher;
+            SlimPublishingContext = slimPublisingContext;
+            IgnoreEmptySubscriber = ignoreEmptySubscriber;
             Logger = logger;
         }
 
@@ -42,6 +46,10 @@ namespace EncosyTower.PageFlows
         public ArrayPool<UnityTaskUntyped> TaskArrayPool { get; private init; }
 
         public MessagePublisher.Publisher<PageFlowScope> Publisher { get; private init; }
+
+        public bool SlimPublishingContext { get; private init; }
+
+        public bool IgnoreEmptySubscriber { get; private init; }
 
         public ILogger Logger { get; private init; }
 
@@ -96,9 +104,13 @@ namespace EncosyTower.PageFlows
 
             if (token.IsCancellationRequested == false)
             {
+                var publishingContext = SlimPublishingContext
+                    ? PublishingContext.GetSlim(IgnoreEmptySubscriber, Logger)
+                    : PublishingContext.Get(IgnoreEmptySubscriber, Logger);
+
                 await Publisher.PublishAsync(
                       new AttachPageMessage(flow, page ?? DefaultPage, token)
-                    , PublishingContext.Get(true, Logger)
+                    , publishingContext
                     , token
                 );
             }
@@ -138,9 +150,13 @@ namespace EncosyTower.PageFlows
 
             if (token.IsCancellationRequested == false)
             {
+                var publishingContext = SlimPublishingContext
+                    ? PublishingContext.GetSlim(IgnoreEmptySubscriber, Logger)
+                    : PublishingContext.Get(IgnoreEmptySubscriber, Logger);
+
                 await Publisher.PublishAsync(
                       new DetachPageMessage(flow, page ?? DefaultPage, token)
-                    , PublishingContext.Get(true, Logger)
+                    , publishingContext
                     , token
                 );
             }
@@ -156,9 +172,13 @@ namespace EncosyTower.PageFlows
         {
             if (token.IsCancellationRequested == false)
             {
+                var publishingContext = SlimPublishingContext
+                    ? PublishingContext.GetSlim(IgnoreEmptySubscriber, Logger)
+                    : PublishingContext.Get(IgnoreEmptySubscriber, Logger);
+
                 await Publisher.PublishAsync(
                       new DetachPageMessage(flow, page ?? DefaultPage, token)
-                    , PublishingContext.Get(true, Logger)
+                    , publishingContext
                     , token
                 );
             }
@@ -188,9 +208,13 @@ namespace EncosyTower.PageFlows
             {
                 if (token.IsCancellationRequested == false)
                 {
+                    var publishingContext = SlimPublishingContext
+                    ? PublishingContext.GetSlim(IgnoreEmptySubscriber, Logger)
+                    : PublishingContext.Get(IgnoreEmptySubscriber, Logger);
+
                     await Publisher.PublishAsync(
                           new BeginTransitionMessage(pageToHide ?? defaultPage, pageToShow ?? defaultPage, token)
-                        , PublishingContext.Get(true, Logger)
+                        , publishingContext
                         , token
                     );
                 }
@@ -286,9 +310,13 @@ namespace EncosyTower.PageFlows
                         , context.HideOptions
                     );
 
+                    var publishingContext = SlimPublishingContext
+                        ? PublishingContext.GetSlim(IgnoreEmptySubscriber, Logger)
+                        : PublishingContext.Get(IgnoreEmptySubscriber, Logger);
+
                     await Publisher.PublishAsync(
                           new EndTransitionMessage(pageToHide, pageToShow, token)
-                        , PublishingContext.Get(true, Logger)
+                        , publishingContext
                         , token
                     );
                 }

@@ -34,6 +34,8 @@ namespace EncosyTower.PageFlows.MonoPages
     {
         public bool autoInitializeOnAwake;
         public bool useProjectSettings = true;
+        public bool slimPublishingContext = true;
+        public bool ignoreEmptySubscriber = true;
         public MonoPageLoaderStrategy loadStrategy;
         public MonoMessageScope messageScope;
         public LogEnvironment logEnvironment;
@@ -79,6 +81,18 @@ namespace EncosyTower.PageFlows.MonoPages
             get => _processor.Scope(FlowScope);
         }
 
+        public bool SlimPublishingContext
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => slimPublishingContext;
+        }
+
+        public bool IgnoreEmptySubscriber
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ignoreEmptySubscriber;
+        }
+
         public Logging.ILogger Logger
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -97,6 +111,8 @@ namespace EncosyTower.PageFlows.MonoPages
 
             if (settings.IsValid() && useProjectSettings)
             {
+                slimPublishingContext = settings.slimPublishingContext;
+                ignoreEmptySubscriber = settings.ignoreEmptySubscriber;
                 loadStrategy = settings.loaderStrategy;
                 messageScope = settings.messageScope;
                 logEnvironment = settings.logEnvironment;
@@ -113,6 +129,8 @@ namespace EncosyTower.PageFlows.MonoPages
             => new() {
                 autoInitializeOnAwake = autoInitializeOnAwake,
                 useProjectSettings = useProjectSettings,
+                slimPublishingContext = slimPublishingContext,
+                ignoreEmptySubscriber = ignoreEmptySubscriber,
                 loadStrategy = loadStrategy,
                 messageScope = messageScope,
                 logEnvironment = logEnvironment,

@@ -52,18 +52,26 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
 
             var contentContainer = container.Q("unity-content-container");
 
+            var slimPublishingContext = new Toggle("Slim Publishing Context");
+            var ignoreEmptySubscriber = new Toggle("Ignore Empty Subscriber");
             var loaderStrategy = new EnumField("Loader Strategy", default(MonoPageLoaderStrategy));
             var messageScope = new EnumField("Message Scope", default(MonoMessageScope));
             var logEnvironment = new EnumField("Log Environment", default(LogEnvironment));
 
+            contentContainer.Add(slimPublishingContext.AddToAlignFieldClass());
+            contentContainer.Add(ignoreEmptySubscriber.AddToAlignFieldClass());
             contentContainer.Add(loaderStrategy.AddToAlignFieldClass());
             contentContainer.Add(messageScope.AddToAlignFieldClass());
             contentContainer.Add(logEnvironment.AddToAlignFieldClass());
 
+            slimPublishingContext.RegisterValueChangedCallback(OnValueChanged);
+            ignoreEmptySubscriber.RegisterValueChangedCallback(OnValueChanged);
             loaderStrategy.RegisterValueChangedCallback(OnValueChanged);
             messageScope.RegisterValueChangedCallback(OnValueChanged);
             logEnvironment.RegisterValueChangedCallback(OnValueChanged);
 
+            slimPublishingContext.BindProperty(context.GetSlimPublishingContext());
+            ignoreEmptySubscriber.BindProperty(context.GetIgnoreEmptySubscriber());
             loaderStrategy.BindProperty(context.GetLoaderStrategyProperty());
             messageScope.BindProperty(context.GetMessageScopeProperty());
             logEnvironment.BindProperty(context.GetLogEnvironmentProperty());
@@ -86,8 +94,26 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
             }
         }
 
+        private void OnValueChanged(ChangeEvent<bool> evt)
+        {
+            if (evt == null)
+            {
+                return;
+            }
+
+            if (evt.newValue.Equals(evt.previousValue) == false)
+            {
+                _valueUpdated = true;
+            }
+        }
+
         private void OnValueChanged(ChangeEvent<Enum> evt)
         {
+            if (evt == null)
+            {
+                return;
+            }
+
             if (evt.newValue.Equals(evt.previousValue) == false)
             {
                 _valueUpdated = true;

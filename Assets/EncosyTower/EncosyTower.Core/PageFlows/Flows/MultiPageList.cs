@@ -31,7 +31,13 @@ namespace EncosyTower.PageFlows
             Checks.IsTrue(publisher.IsValid, "Publisher must be created correctly.");
 
             _logger = context.Logger ?? DevLogger.Default;
-            _flow = new(context.TaskArrayPool, publisher, _logger);
+            _flow = new PageFlow(
+                  context.TaskArrayPool
+                , publisher
+                , context.SlimPublishingContext
+                , context.IgnoreEmptySubscriber
+                , _logger
+            );
         }
 
         public IReadOnlyList<TPage> Pages => _pages;

@@ -20,6 +20,10 @@ namespace EncosyTower.PageFlows
 
         MessagePublisher.Publisher<PageFlowScope> Publisher { get; }
 
+        bool SlimPublishingContext { get; }
+
+        bool IgnoreEmptySubscriber { get; }
+
         ILogger Logger { get; }
     }
 }
