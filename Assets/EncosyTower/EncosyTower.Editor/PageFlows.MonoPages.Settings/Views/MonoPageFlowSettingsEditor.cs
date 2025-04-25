@@ -114,10 +114,14 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
                 return;
             }
 
-            if (evt.newValue.Equals(evt.previousValue) == false)
+            try
             {
-                _valueUpdated = true;
+                if (evt.newValue.Equals(evt.previousValue) == false)
+                {
+                    _valueUpdated = true;
+                }
             }
+            catch { }
         }
 
         [CustomEditor(typeof(MonoPageFlowSettings), true)]
