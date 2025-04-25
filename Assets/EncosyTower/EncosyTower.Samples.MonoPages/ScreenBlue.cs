@@ -10,11 +10,13 @@ namespace EncosyTower.Samples.MonoPages
     {
         [SerializeField] private Button _buttonOpenScreen;
         [SerializeField] private Button _buttonOpenPopup;
+        [SerializeField] private Button _buttonCloseScreen;
 
         private void Awake()
         {
             _buttonOpenScreen.onClick.AddListener(OnOpenSceneClick);
             _buttonOpenPopup.onClick.AddListener(OnOpenPopupClick);
+            _buttonCloseScreen.onClick.AddListener(OnCloseScreenClick);
         }
 
         private void OnOpenSceneClick()
@@ -30,6 +32,12 @@ namespace EncosyTower.Samples.MonoPages
                 ShowOptions = PageTransitionOptions.OnlyFirstPageHasDuration,
                 HideOptions = PageTransitionOptions.NoTransition,
             }));
+        }
+
+        private void OnCloseScreenClick()
+        {
+            var publisher = GlobalMessenger.Publisher.Scope(GamePageCodex.ScreenScope);
+            publisher.Publish(new HideActivePageAsyncMessage(default));
         }
     }
 }

@@ -352,21 +352,21 @@ MonoBehaviour:
   _flows:
   - identifier: Screen
     kind: 0
-    overrideSortingLayer: 0
+    overrideSortingLayer: 1
     sortingLayer:
-      id: 0
+      value: -525422305
     sortingOrderInLayer: 0
   - identifier: Popup
     kind: 1
     overrideSortingLayer: 1
     sortingLayer:
-      id: 0
+      value: -525422305
     sortingOrderInLayer: 1000
   - identifier: FreeTop
     kind: 3
     overrideSortingLayer: 1
     sortingLayer:
-      id: 0
+      value: -525422305
     sortingOrderInLayer: 3000
   _flowContext:
     autoInitializeOnAwake: 1
