@@ -1,6 +1,7 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 using System;
+using System.Collections.Generic;
 using EncosyTower.Collections;
 using EncosyTower.Common;
 using EncosyTower.Logging;
@@ -14,7 +15,7 @@ namespace EncosyTower.PageFlows.MonoPages
     internal class MonoPagePool : IDisposable
     {
         private readonly GameObjectPool _pool = new();
-        private readonly ArrayMap<UnityInstanceId<GameObject>, int> _idToPageIndex = new();
+        private readonly HashSet<UnityInstanceId<GameObject>> _instanceIds = new();
         private readonly FasterList<MonoPageIdentifier> _pageIds;
 
         public MonoPagePool(Transform poolParent, Transform activeParent, FasterList<MonoPageIdentifier> pageIds)
@@ -50,7 +51,7 @@ namespace EncosyTower.PageFlows.MonoPages
         {
             if (_pool.Prepool(amount))
             {
-                _idToPageIndex.IncreaseCapacityBy(amount);
+                _instanceIds.EnsureCapacity(amount);
                 _pageIds.IncreaseCapacityBy(amount);
             }
         }
@@ -93,7 +94,7 @@ namespace EncosyTower.PageFlows.MonoPages
             identifier.GameObjectId = gameObject;
             identifier.Page = page;
 
-            if (_idToPageIndex.TryAdd(identifier.GameObjectId, _pageIds.Count))
+            if (_instanceIds.Add(identifier.GameObjectId))
             {
                 _pageIds.Add(identifier);
             }
@@ -107,9 +108,9 @@ namespace EncosyTower.PageFlows.MonoPages
 
         public void Return(MonoPageIdentifier identifier)
         {
-            if (_idToPageIndex.Remove(identifier.GameObjectId, out _, out var index))
+            if (_instanceIds.Remove(identifier.GameObjectId))
             {
-                _pageIds.RemoveAt(index);
+                _pageIds.Remove(identifier);
             }
 
             identifier.Transform.SetParent(_pool.Prefab.Parent, false);
@@ -130,17 +131,17 @@ namespace EncosyTower.PageFlows.MonoPages
 
         private void ReturnActives()
         {
-            var length = _idToPageIndex.Count;
+            var length = _instanceIds.Count;
             var array = NativeArray.CreateFast<int>(length, Unity.Collections.Allocator.Temp);
             var index = 0;
 
-            foreach (var instanceId in _idToPageIndex.Keys)
+            foreach (var instanceId in _instanceIds)
             {
                 array[index] = (int)instanceId;
                 index++;
             }
 
-            _idToPageIndex.Clear();
+            _instanceIds.Clear();
             _pageIds.Clear();
             _pool.ReturnInstanceIds(array);
         }
