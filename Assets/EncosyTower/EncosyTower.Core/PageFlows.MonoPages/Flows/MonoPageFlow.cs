@@ -351,7 +351,9 @@ namespace EncosyTower.PageFlows.MonoPages
                 , typeof(Canvas)
                 , typeof(CanvasGroup)
                 , typeof(LayoutElement)
-            );
+            ) {
+                layer = 2, // Ignore Raycast
+            };
 
             PoolTransform = poolGO.GetOrAddComponent<RectTransform>();
             PoolTransform.SetParent(parent, false);

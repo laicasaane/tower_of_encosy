@@ -17,17 +17,19 @@ namespace EncosyTower.PageFlows.MonoPages
         private readonly GameObjectPool _pool = new();
         private readonly HashSet<UnityInstanceId<GameObject>> _instanceIds = new();
         private readonly FasterList<MonoPageIdentifier> _pageIds;
+        private readonly Transform _poolParent;
+        private readonly Transform _activeParent;
+        private readonly int _poolLayer;
+        private readonly int _activeLayer;
 
         public MonoPagePool(Transform poolParent, Transform activeParent, FasterList<MonoPageIdentifier> pageIds)
         {
-            PoolParent = poolParent;
-            ActiveParent = activeParent;
+            _poolParent = poolParent;
+            _activeParent = activeParent;
             _pageIds = pageIds;
+            _poolLayer = poolParent.gameObject.layer;
+            _activeLayer = activeParent.gameObject.layer;
         }
-
-        public Transform PoolParent { get; }
-
-        public Transform ActiveParent { get; }
 
         public bool IsInitialized => _pool.Prefab != null;
 
@@ -41,7 +43,7 @@ namespace EncosyTower.PageFlows.MonoPages
             }
 
             _pool.Prefab = new GameObjectPrefab {
-                Parent = PoolParent,
+                Parent = _poolParent,
                 Source = source,
                 InstantiateInWorldSpace = false,
             };
@@ -62,24 +64,25 @@ namespace EncosyTower.PageFlows.MonoPages
             , UnityObjectLogger logger
         )
         {
-            var obj = _pool.RentGameObject(false);
-            var findResult = obj.TryGetComponent<IMonoPage>(out var page);
+            var gameObject = _pool.RentGameObject(false);
+            var findResult = gameObject.TryGetComponent<IMonoPage>(out var page);
 
             if (findResult == false)
             {
-                UnityEngine.Object.Destroy(obj);
+                UnityEngine.Object.Destroy(gameObject);
                 ErrorIfFoundNoPage(pageAssetKey, logger);
                 return default;
             }
 
             if (page is not Component component)
             {
-                UnityEngine.Object.Destroy(obj);
+                UnityEngine.Object.Destroy(gameObject);
                 ErrorIfPageIsNotComponent(page, pageAssetKey, logger);
                 return default;
             }
 
-            var gameObject = component.gameObject;
+            gameObject.layer = _activeLayer;
+
             var transform = component.transform;
             var identifier = gameObject.GetOrAddComponent<MonoPageIdentifier>();
 
@@ -90,7 +93,7 @@ namespace EncosyTower.PageFlows.MonoPages
             identifier.Transform = transform;
             identifier.GameObject = gameObject;
             identifier.CanvasGroup = canvasGroup;
-            identifier.Transform.SetParent(ActiveParent, false);
+            identifier.Transform.SetParent(_activeParent, false);
             identifier.GameObjectId = gameObject;
             identifier.Page = page;
 
@@ -113,13 +116,16 @@ namespace EncosyTower.PageFlows.MonoPages
                 _pageIds.Remove(identifier);
             }
 
-            identifier.Transform.SetParent(_pool.Prefab.Parent, false);
+            identifier.GameObject.layer = _poolLayer;
+            identifier.Transform.SetParent(_poolParent, false);
+
             _pool.Return(identifier.GameObject);
         }
 
         public void Dispose()
         {
             ReturnActives();
+
             _pool.ReleaseInstances(0);
             _pool.Dispose();
         }

@@ -73,6 +73,8 @@ namespace EncosyTower.PageFlows.MonoPages
             var monoPageFlows = _monoPageFlows;
             monoPageFlows.IncreaseCapacityTo(length);
 
+            var layer = gameObject.layer;
+
             for (var i = 0; i < length; i++)
             {
                 var definition = definitions[i];
@@ -125,8 +127,9 @@ namespace EncosyTower.PageFlows.MonoPages
                 }
 
                 var canvas = flow.Canvas;
+                canvas.gameObject.layer = layer;
                 canvas.overrideSorting = true;
-                canvas.sortingLayerID = definition.sortingLayer.Layer;
+                canvas.sortingLayerID = definition.sortingLayer;
                 canvas.sortingOrder = definition.sortingOrderInLayer;
             }
 
