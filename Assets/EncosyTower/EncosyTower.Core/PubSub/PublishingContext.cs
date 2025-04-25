@@ -11,6 +11,7 @@ namespace EncosyTower.PubSub
         private readonly ILogger _logger;
         private readonly CallerInfo _callerInfo;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private PublishingContext(bool ignoreEmptySubscriber, ILogger logger, CallerInfo callerInfo)
         {
             _ignoreEmptySubscriber = ignoreEmptySubscriber;
@@ -18,6 +19,7 @@ namespace EncosyTower.PubSub
             _callerInfo = callerInfo;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static PublishingContext Get(
               bool ignoreEmptySubscriber = false
             , ILogger logger = default
@@ -28,6 +30,15 @@ namespace EncosyTower.PubSub
         {
             var callerInfo = new CallerInfo(lineNumber, memberName, filePath);
             return new(ignoreEmptySubscriber, logger, callerInfo);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static PublishingContext GetSlim(
+              bool ignoreEmptySubscriber = false
+            , ILogger logger = default
+        )
+        {
+            return new(ignoreEmptySubscriber, logger, default);
         }
 
         public ILogger Logger => _logger ?? DevLogger.Default;
