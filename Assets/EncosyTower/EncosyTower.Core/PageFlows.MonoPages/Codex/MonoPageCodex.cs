@@ -5,6 +5,7 @@ using System.Buffers;
 using EncosyTower.Collections;
 using EncosyTower.Common;
 using EncosyTower.Logging;
+using EncosyTower.Processing;
 using EncosyTower.PubSub;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
@@ -28,6 +29,8 @@ namespace EncosyTower.PageFlows.MonoPages
         public Func<MessagePublisher> GetPublisher { get; set; }
 
         public Func<MessageSubscriber> GetSubscriber { get; set; }
+
+        public Func<Processor> GetProcessor { get; set; }
 
         public Func<ArrayPool<UnityTask>> GetTaskArrayPool { get; set; }
 
@@ -53,9 +56,10 @@ namespace EncosyTower.PageFlows.MonoPages
 
                 var subscriber = GetSubscriber?.Invoke();
                 var publisher = GetPublisher?.Invoke();
+                var processor = GetProcessor?.Invoke();
                 var taskArrayPool = GetTaskArrayPool?.Invoke();
 
-                flowContext.Initialize(subscriber, publisher, settings, taskArrayPool);
+                flowContext.Initialize(subscriber, publisher, processor, settings, taskArrayPool);
             }
 
             var definitions = _flows.AsSpan();

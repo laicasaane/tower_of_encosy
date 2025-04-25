@@ -17,6 +17,7 @@ namespace EncosyTower.PageFlows.MonoPages
 {
 #if UNITY_ADDRESSABLES
     using EncosyTower.AddressableKeys;
+    using EncosyTower.Processing;
     using EncosyTower.UnityExtensions;
 #endif
 
@@ -39,6 +40,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
         private MessageSubscriber _subscriber;
         private MessagePublisher _publisher;
+        private Processor _processor;
         private ArrayPool<UnityTask> _taskArrayPool;
 
         public Component Owner { get; set; }
@@ -71,6 +73,12 @@ namespace EncosyTower.PageFlows.MonoPages
             get => _publisher.Scope(FlowScope);
         }
 
+        public ProcessHub<PageFlowScope> ProcessHub
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _processor.Scope(FlowScope);
+        }
+
         public Logging.ILogger Logger
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,6 +88,7 @@ namespace EncosyTower.PageFlows.MonoPages
         public void Initialize(
               MessageSubscriber subscriber = null
             , MessagePublisher publisher = null
+            , Processor processor = null
             , MonoPageFlowSettings settings = null
             , ArrayPool<UnityTask> taskArrayPool = null
         )
@@ -96,6 +105,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
             _subscriber = subscriber ?? GlobalMessenger.Subscriber;
             _publisher = publisher ?? GlobalMessenger.Publisher;
+            _processor = processor ?? GlobalProcessor.Instance;
             _taskArrayPool = taskArrayPool ?? ArrayPool<UnityTask>.Shared;
         }
 
@@ -108,6 +118,7 @@ namespace EncosyTower.PageFlows.MonoPages
                 logEnvironment = logEnvironment,
                 _subscriber = _subscriber,
                 _publisher = _publisher,
+                _processor = _processor,
                 _taskArrayPool = _taskArrayPool,
                 IsInitialized = IsInitialized,
             };

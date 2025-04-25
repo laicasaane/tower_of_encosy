@@ -3,6 +3,8 @@
 using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Collections;
+using EncosyTower.Common;
+using EncosyTower.Processing;
 using EncosyTower.PubSub;
 using UnityEngine;
 
@@ -91,6 +93,17 @@ namespace EncosyTower.PageFlows.MonoPages
             subscriber
                 .Subscribe<HideActivePageAsyncMessage>(static (state, msg, _, tkn) => state.HandleAsync(msg, tkn))
                 .AddTo(subscriptions);
+
+            var processHub = context.ProcessHub.WithState(this);
+            var processRegistries = context.ProcessRegistries;
+
+            processHub
+                .Register<IsInTransitionRequest, bool>(static (state, proc) => state.Process(proc))
+                .AddTo(processRegistries);
+
+            processHub
+                .Register<GetCurrentPageRequest, Option<IMonoPage>>(static (state, proc) => state.Process(proc))
+                .AddTo(processRegistries);
         }
 
         protected override void OnDispose()
@@ -105,6 +118,14 @@ namespace EncosyTower.PageFlows.MonoPages
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private UnityTask HandleAsync(HideActivePageAsyncMessage msg, CancellationToken token)
             => HideActivePageAsync(msg.Context, token);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool Process(IsInTransitionRequest _)
+            => _flow.IsInTransition;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Option<IMonoPage> Process(GetCurrentPageRequest _)
+            => _flow.CurrentPage;
     }
 }
 

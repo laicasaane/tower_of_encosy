@@ -9,8 +9,10 @@ using System.Threading;
 using EncosyTower.Collections;
 using EncosyTower.Common;
 using EncosyTower.Logging;
+using EncosyTower.Processing;
 using EncosyTower.PubSub;
 using EncosyTower.StringIds;
+using EncosyTower.Types;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
 using UnityEngine.UI;
@@ -34,12 +36,15 @@ namespace EncosyTower.PageFlows.MonoPages
         private readonly Dictionary<StringId, MonoPagePool> _pageIdToPool = new();
         private readonly FasterList<MonoPageIdentifier> _pageIds = new();
         private readonly FasterList<ISubscription> _subscriptions = new();
+        private readonly FasterList<ProcessRegistry> _processRegistries = new();
 
         public bool IsInitialized { get; private set; }
 
         public Func<MessagePublisher> GetPublisher { get; set; }
 
         public Func<MessageSubscriber> GetSubscriber { get; set; }
+
+        public Func<Processor> GetProcessor { get; set; }
 
         public Func<ArrayPool<UnityTask>> GetTaskArrayPool { get; set; }
 
@@ -99,12 +104,19 @@ namespace EncosyTower.PageFlows.MonoPages
 
                 var subscriber = GetSubscriber?.Invoke();
                 var publisher = GetPublisher?.Invoke();
+                var processor = GetProcessor?.Invoke();
                 var taskArrayPool = GetTaskArrayPool?.Invoke();
 
-                context.Initialize(subscriber, publisher, settings, taskArrayPool);
+                context.Initialize(subscriber, publisher, processor, settings, taskArrayPool);
             }
 
-            var initContext = new InitializationContext(context.Subscriber, _subscriptions);
+            var initContext = new InitializationContext(
+                  context.Subscriber
+                , context.ProcessHub
+                , _subscriptions
+                , _processRegistries
+            );
+
             SubscribeMessages(initContext);
             OnInitialize(initContext);
 
@@ -125,6 +137,7 @@ namespace EncosyTower.PageFlows.MonoPages
         protected void OnDestroy()
         {
             _subscriptions.Unsubscribe();
+            _processRegistries.Unregister();
             _pageIds.Clear();
 
             OnDispose();
@@ -465,7 +478,9 @@ namespace EncosyTower.PageFlows.MonoPages
 
         protected readonly record struct InitializationContext(
               MessageSubscriber.Subscriber<PageFlowScope> Subscriber
+            , ProcessHub<PageFlowScope> ProcessHub
             , FasterList<ISubscription> Subscriptions
+            , FasterList<ProcessRegistry> ProcessRegistries
         );
 
         protected readonly record struct PageKey(string Value, StringId Id);
