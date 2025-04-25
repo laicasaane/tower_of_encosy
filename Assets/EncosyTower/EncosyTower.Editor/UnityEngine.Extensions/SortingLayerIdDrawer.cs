@@ -1,7 +1,6 @@
 #if UNITY_EDITOR
 
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using EncosyTower.Logging;
 using EncosyTower.UnityExtensions;
@@ -13,11 +12,11 @@ namespace EncosyTower.Editor.UnityExtensions
     [CustomPropertyDrawer(typeof(SortingLayerId), true)]
     public class SortingLayerIdDrawer : PropertyDrawer
     {
-        private readonly List<GUIContent> _layerNames = new();
+        private GUIContent[] _layerNames;
 
         public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
         {
-            var idProperty = property.FindPropertyRelative(nameof(SortingLayerId.id));
+            var idProperty = property.FindPropertyRelative(nameof(SortingLayerId.value));
 
             if (idProperty == null)
             {
@@ -25,7 +24,7 @@ namespace EncosyTower.Editor.UnityExtensions
                 return;
             }
 
-            GetData(idProperty.intValue, _layerNames, out var index);
+            GetData(idProperty.intValue, ref _layerNames, out var index);
 
             if (index < 0)
             {
@@ -51,22 +50,33 @@ namespace EncosyTower.Editor.UnityExtensions
                 label.tooltip = tooltipAttrib.tooltip;
             }
 
-            index = EditorGUI.Popup(rect, label, index, _layerNames.ToArray());
+            index = EditorGUI.Popup(rect, label, index, _layerNames);
             idProperty.intValue = SortingLayer.layers[index].id;
         }
 
-        private static void GetData(int id, List<GUIContent> layerNames, out int index)
+        private static void GetData(int id, ref GUIContent[] layerNames, out int index)
         {
-            layerNames.Clear();
-
             var layers = SortingLayer.layers.AsSpan();
             var length = layers.Length;
             index = length < 1 ? -1 : 0;
 
+            if (layerNames == null || layerNames.Length != length)
+            {
+                layerNames = new GUIContent[length];
+            }
+
             for (var i = 0; i < length; i++)
             {
                 ref var layer = ref layers[i];
-                layerNames.Add(new GUIContent(layer.name));
+
+                if (layerNames[i] == null)
+                {
+                    layerNames[i] = new GUIContent(layer.name);
+                }
+                else
+                {
+                    layerNames[i].text = layer.name;
+                }
 
                 if (layer.id == id)
                 {

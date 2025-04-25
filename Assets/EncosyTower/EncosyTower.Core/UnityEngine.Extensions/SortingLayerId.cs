@@ -7,66 +7,60 @@ namespace EncosyTower.UnityExtensions
     [Serializable]
     public struct SortingLayerId : IEquatable<SortingLayerId>
     {
-        public int id;
+        public int value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SortingLayerId(int value)
         {
-            id = value;
+            this.value = value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SortingLayerId(string name)
         {
-            id = SortingLayer.NameToID(name);
-        }
-
-        public readonly int Layer
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => SortingLayer.GetLayerValueFromID(id);
+            value = SortingLayer.NameToID(name);
         }
 
         public readonly string Name
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => SortingLayer.IDToName(id);
+            get => SortingLayer.IDToName(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override int GetHashCode()
-            => id.GetHashCode();
+            => value.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override bool Equals(object obj)
-            => obj is SortingLayerId other && id == other.id;
+            => obj is SortingLayerId other && value == other.value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(SortingLayerId other)
-            => id == other.id;
+            => value == other.value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override string ToString()
-            => id.ToString();
+            => value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator int(SortingLayerId value)
-            => value.id;
+            => value.value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator SortingLayerId(int value)
             => new(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator SortingLayerId(string value)
-            => new(value);
+        public static implicit operator SortingLayerId(string name)
+            => new(name);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(SortingLayerId lhs, SortingLayerId rhs)
-            => lhs.id == rhs.id;
+            => lhs.value == rhs.value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(SortingLayerId lhs, SortingLayerId rhs)
-            => lhs.id != rhs.id;
+            => lhs.value != rhs.value;
     }
 }
