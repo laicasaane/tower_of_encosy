@@ -361,11 +361,7 @@ namespace EncosyTower.Collections
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int IndexOf(T item)
-            => IndexOf(item, Comparer<T>.Default);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int IndexOf(T item, [NotNull] IComparer<T> comparer)
-            => AsReadOnlySpan().BinarySearch(item, comparer);
+            => IndexOf(item, 0);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int IndexOf(T item, int index)
@@ -382,11 +378,7 @@ namespace EncosyTower.Collections
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int IndexOf(in T item)
-            => IndexOf(in item, Comparer<T>.Default);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int IndexOf(in T item, [NotNull] IComparer<T> comparer)
-            => AsReadOnlySpan().BinarySearch(item, comparer);
+            => IndexOf(in item, 0);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int IndexOf(in T item, int index)
@@ -714,7 +706,29 @@ namespace EncosyTower.Collections
         {
             _version++;
 
-            var index = AsSpan().BinarySearch(item, Comparer<T>.Default);
+            var index = IndexOf(item);
+
+            if ((uint)index >= (uint)_count)
+                return false;
+
+            if (index < --_count)
+            {
+                Array.Copy(_buffer, index + 1, _buffer, index, _count - index);
+            }
+
+            if (s_shouldPerformMemClear)
+            {
+                _buffer[_count] = default;
+            }
+
+            return true;
+        }
+
+        public bool Remove(in T item)
+        {
+            _version++;
+
+            var index = IndexOf(in item);
 
             if ((uint)index >= (uint)_count)
                 return false;
