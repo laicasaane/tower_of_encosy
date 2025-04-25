@@ -152,40 +152,6 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int BinarySearch(T item)
-            => BinarySearch(0, _count, item, Comparer<T>.Default);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int BinarySearch(T item, [NotNull] IComparer<T> comparer)
-            => BinarySearch(0, _count, item, comparer);
-
-        public int BinarySearch(int index, int count, T item, [NotNull] IComparer<T> comparer)
-        {
-            Checks.IsTrue(index >= 0, "index is less than 0");
-            Checks.IsTrue(count >= 0, "count is less than 0");
-            Checks.IsTrue(_count - index >= count, "index and count do not denote a valid range in the FasterList<T>");
-
-            return AsReadOnlySpan().BinarySearch(item, comparer);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int BinarySearch(in T item)
-            => BinarySearch(0, _count, in item, Comparer<T>.Default);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int BinarySearch(in T item, [NotNull] IComparer<T> comparer)
-            => BinarySearch(0, _count, in item, comparer);
-
-        public int BinarySearch(int index, int count, in T item, [NotNull] IComparer<T> comparer)
-        {
-            Checks.IsTrue(index >= 0, "index is less than 0");
-            Checks.IsTrue(count >= 0, "count is less than 0");
-            Checks.IsTrue(_count - index >= count, "index and count do not denote a valid range in the FasterList<T>");
-
-            return AsReadOnlySpan().BinarySearch(item, comparer);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Exists([NotNull] Predicate<T> match)
             => FindIndex(match) != -1;
 
