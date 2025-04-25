@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using EncosyTower.Common;
 using EncosyTower.Types;
 using UnityEngine;
 
@@ -31,7 +30,7 @@ namespace EncosyTower.Processing.Internals
     {
         private readonly Dictionary<TypeId, IProcessHandler> _map = new();
 
-        public Option<TypeId> Register(IProcessHandler handler)
+        public ProcessRegistry Register(IProcessHandler handler)
         {
             if (handler == null)
             {
@@ -48,7 +47,7 @@ namespace EncosyTower.Processing.Internals
 
             _map[id] = handler;
 
-            return id;
+            return new(this, id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

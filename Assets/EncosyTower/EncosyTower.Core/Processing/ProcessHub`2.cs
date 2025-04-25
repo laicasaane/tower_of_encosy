@@ -8,7 +8,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using EncosyTower.Common;
 using EncosyTower.Types;
 
 namespace EncosyTower.Processing
@@ -49,7 +48,10 @@ namespace EncosyTower.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public Option<TypeId> Register<TRequest>([NotNull] Action<TState, TRequest> process)
+        public ProcessRegistry Register<TRequest>([NotNull] Action<TState, TRequest> process)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IRequest
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
@@ -61,7 +63,10 @@ namespace EncosyTower.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public Option<TypeId> Register<TRequest, TResult>([NotNull] Func<TState, TRequest, TResult> process)
+        public ProcessRegistry Register<TRequest, TResult>([NotNull] Func<TState, TRequest, TResult> process)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IRequest<TResult>
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
@@ -77,6 +82,9 @@ namespace EncosyTower.Processing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Unregister<TRequest>(Action<TState, TRequest> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IRequest
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
@@ -88,37 +96,16 @@ namespace EncosyTower.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public bool Unregister<TRequest>(Func<TState, TRequest, bool> _)
-        {
-#if __ENCOSY_PROCESSING_VALIDATION__
-            if (Validate() == false) return default;
-#endif
-
-            return _hub.Unregister((TypeId)Type<Func<TState, TRequest, bool>>.Id);
-        }
-
-#if __ENCOSY_PROCESSING_NO_VALIDATION__
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
         public bool Unregister<TRequest, TResult>(Func<TState, TRequest, TResult> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IRequest<TResult>
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
 #endif
 
             return _hub.Unregister((TypeId)Type<Func<TState, TRequest, TResult>>.Id);
-        }
-
-#if __ENCOSY_PROCESSING_NO_VALIDATION__
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public bool Unregister<TRequest, TResult>(Func<TState, TRequest, Option<TResult>> _)
-        {
-#if __ENCOSY_PROCESSING_VALIDATION__
-            if (Validate() == false) return default;
-#endif
-
-            return _hub.Unregister((TypeId)Type<Func<TState, TRequest, Option<TResult>>>.Id);
         }
 
 #if __ENCOSY_PROCESSING_NO_VALIDATION__

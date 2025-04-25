@@ -39,13 +39,19 @@ namespace EncosyTower.Processing
         #endregion ===============
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TypeId> Register<TRequest>([NotNull] Action<TRequest> process)
+        public ProcessRegistry Register<TRequest>([NotNull] Action<TRequest> process)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IRequest
+#endif
         {
             return Register(new Internals.Sync.ProcessHandler<TRequest>(process));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TypeId> Register<TRequest, TResult>([NotNull] Func<TRequest, TResult> process)
+        public ProcessRegistry Register<TRequest, TResult>([NotNull] Func<TRequest, TResult> process)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IRequest<TResult>
+#endif
         {
             return Register(new Internals.Sync.ProcessHandler<TRequest, TResult>(process));
         }
@@ -53,7 +59,7 @@ namespace EncosyTower.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        internal Option<TypeId> Register(IProcessHandler handler)
+        internal ProcessRegistry Register(IProcessHandler handler)
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false)
@@ -70,26 +76,20 @@ namespace EncosyTower.Processing
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest>(Action<TRequest> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IRequest
+#endif
         {
             return Unregister((TypeId)Type<Action<TRequest>>.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Unregister<TRequest>(Func<TRequest, bool> _)
-        {
-            return Unregister((TypeId)Type<Func<TRequest, bool>>.Id);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, TResult> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IRequest<TResult>
+#endif
         {
             return Unregister((TypeId)Type<Func<TRequest, TResult>>.Id);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Unregister<TRequest, TResult>(Func<TRequest, Option<TResult>> _)
-        {
-            return Unregister((TypeId)Type<Func<TRequest, Option<TResult>>>.Id);
         }
 
 #if __ENCOSY_PROCESSING_NO_VALIDATION__

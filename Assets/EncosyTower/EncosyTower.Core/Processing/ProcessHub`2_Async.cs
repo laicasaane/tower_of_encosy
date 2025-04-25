@@ -10,17 +10,14 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using EncosyTower.Common;
 using EncosyTower.Types;
 
 namespace EncosyTower.Processing
 {
 #if UNITASK
     using UnityTask = Cysharp.Threading.Tasks.UniTask;
-    using UnityTaskBool = Cysharp.Threading.Tasks.UniTask<bool>;
 #else
     using UnityTask = UnityEngine.Awaitable;
-    using UnityTaskBool = UnityEngine.Awaitable<bool>;
 #endif
 
     public readonly partial struct ProcessHub<TScope, TState>
@@ -32,7 +29,10 @@ namespace EncosyTower.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public Option<TypeId> Register<TRequest>([NotNull] Func<TState, TRequest, UnityTask> process)
+        public ProcessRegistry Register<TRequest>([NotNull] Func<TState, TRequest, UnityTask> process)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
@@ -44,13 +44,16 @@ namespace EncosyTower.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public Option<TypeId> Register<TRequest, TResult>(
+        public ProcessRegistry Register<TRequest, TResult>(
 #if UNITASK
             [NotNull] Func<TState, TRequest, Cysharp.Threading.Tasks.UniTask<TResult>> process
 #else
             [NotNull] Func<TState, TRequest, UnityEngine.Awaitable<TResult>> process
 #endif
         )
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest<TResult>
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
@@ -62,7 +65,10 @@ namespace EncosyTower.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public Option<TypeId> Register<TRequest>([NotNull] Func<TState, TRequest, CancellationToken, UnityTask> process)
+        public ProcessRegistry Register<TRequest>([NotNull] Func<TState, TRequest, CancellationToken, UnityTask> process)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
@@ -74,13 +80,16 @@ namespace EncosyTower.Processing
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public Option<TypeId> Register<TRequest, TResult>(
+        public ProcessRegistry Register<TRequest, TResult>(
 #if UNITASK
             [NotNull] Func<TState, TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<TResult>> process
 #else
             [NotNull] Func<TState, TRequest, CancellationToken, UnityEngine.Awaitable<TResult>> process
 #endif
         )
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest<TResult>
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
@@ -96,6 +105,9 @@ namespace EncosyTower.Processing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Unregister<TRequest>(Func<TState, TRequest, UnityTask> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
@@ -104,23 +116,15 @@ namespace EncosyTower.Processing
             return _hub.Unregister((TypeId)Type<Func<TState, TRequest, UnityTask>>.Id);
         }
 
-#if __ENCOSY_PROCESSING_NO_VALIDATION__
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public bool Unregister<TRequest>(Func<TState, TRequest, UnityTaskBool> _)
-        {
-#if __ENCOSY_PROCESSING_VALIDATION__
-            if (Validate() == false) return default;
-#endif
-
-            return _hub.Unregister((TypeId)Type<Func<TState, TRequest, UnityTaskBool>>.Id);
-        }
-
 #if UNITASK
+
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Unregister<TRequest, TResult>(Func<TState, TRequest, Cysharp.Threading.Tasks.UniTask<TResult>> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest<TResult>
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
@@ -129,22 +133,15 @@ namespace EncosyTower.Processing
             return _hub.Unregister((TypeId)Type<Func<TState, TRequest, Cysharp.Threading.Tasks.UniTask<TResult>>>.Id);
         }
 
-#if __ENCOSY_PROCESSING_NO_VALIDATION__
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public bool Unregister<TRequest, TResult>(Func<TState, TRequest, Cysharp.Threading.Tasks.UniTask<Option<TResult>>> _)
-        {
-#if __ENCOSY_PROCESSING_VALIDATION__
-            if (Validate() == false) return default;
-#endif
-
-            return _hub.Unregister((TypeId)Type<Func<TState, TRequest, Cysharp.Threading.Tasks.UniTask<Option<TResult>>>>.Id);
-        }
 #else // UNITY_6000_0_OR_NEWER
+
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Unregister<TRequest, TResult>(Func<TState, TRequest, UnityEngine.Awaitable<TResult>> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest<TResult>
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
@@ -153,23 +150,15 @@ namespace EncosyTower.Processing
             return _hub.Unregister((TypeId)Type<Func<TState, TRequest, UnityEngine.Awaitable<TResult>>>.Id);
         }
 
-#if __ENCOSY_PROCESSING_NO_VALIDATION__
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public bool Unregister<TRequest, TResult>(Func<TState, TRequest, UnityEngine.Awaitable<Option<TResult>>> _)
-        {
-#if __ENCOSY_PROCESSING_VALIDATION__
-            if (Validate() == false) return default;
-#endif
-
-            return _hub.Unregister((TypeId)Type<Func<TState, TRequest, UnityEngine.Awaitable<Option<TResult>>>>.Id);
-        }
 #endif
 
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Unregister<TRequest>(Func<TState, TRequest, CancellationToken, UnityTask> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
@@ -178,23 +167,15 @@ namespace EncosyTower.Processing
             return _hub.Unregister((TypeId)Type<Func<TState, TRequest, CancellationToken, UnityTask>>.Id);
         }
 
-#if __ENCOSY_PROCESSING_NO_VALIDATION__
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public bool Unregister<TRequest>(Func<TState, TRequest, CancellationToken, UnityTaskBool> _)
-        {
-#if __ENCOSY_PROCESSING_VALIDATION__
-            if (Validate() == false) return default;
-#endif
-
-            return _hub.Unregister((TypeId)Type<Func<TState, TRequest, CancellationToken, UnityTaskBool>>.Id);
-        }
-
 #if UNITASK
+
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Unregister<TRequest, TResult>(Func<TState, TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<TResult>> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest<TResult>
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
@@ -203,22 +184,15 @@ namespace EncosyTower.Processing
             return _hub.Unregister((TypeId)Type<Func<TState, TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<TResult>>>.Id);
         }
 
-#if __ENCOSY_PROCESSING_NO_VALIDATION__
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public bool Unregister<TRequest, TResult>(Func<TState, TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<Option<TResult>>> _)
-        {
-#if __ENCOSY_PROCESSING_VALIDATION__
-            if (Validate() == false) return default;
-#endif
-
-            return _hub.Unregister((TypeId)Type<Func<TState, TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<Option<TResult>>>>.Id);
-        }
 #else // UNITY_6000_0_OR_NEWER
+
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Unregister<TRequest, TResult>(Func<TState, TRequest, CancellationToken, UnityEngine.Awaitable<TResult>> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest<TResult>
+#endif
         {
 #if __ENCOSY_PROCESSING_VALIDATION__
             if (Validate() == false) return default;
@@ -227,17 +201,6 @@ namespace EncosyTower.Processing
             return _hub.Unregister((TypeId)Type<Func<TState, TRequest, CancellationToken, UnityEngine.Awaitable<TResult>>>.Id);
         }
 
-#if __ENCOSY_PROCESSING_NO_VALIDATION__
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public bool Unregister<TRequest, TResult>(Func<TState, TRequest, CancellationToken, UnityEngine.Awaitable<Option<TResult>>> _)
-        {
-#if __ENCOSY_PROCESSING_VALIDATION__
-            if (Validate() == false) return default;
-#endif
-
-            return _hub.Unregister((TypeId)Type<Func<TState, TRequest, CancellationToken, UnityEngine.Awaitable<Option<TResult>>>>.Id);
-        }
 #endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -33,37 +33,49 @@ namespace EncosyTower.Processing
         #endregion ================
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TypeId> Register<TRequest>([NotNull] Func<TRequest, UnityTask> process)
+        public ProcessRegistry Register<TRequest>([NotNull] Func<TRequest, UnityTask> process)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest
+#endif
         {
             return Register(new Internals.Async.AsyncProcessHandler<TRequest>(process));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TypeId> Register<TRequest, TResult>(
+        public ProcessRegistry Register<TRequest, TResult>(
 #if UNITASK
             [NotNull] Func<TRequest, Cysharp.Threading.Tasks.UniTask<TResult>> process
 #else
             [NotNull] Func<TRequest, UnityEngine.Awaitable<TResult>> process
 #endif
         )
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest<TResult>
+#endif
         {
             return Register(new Internals.Async.AsyncProcessHandler<TRequest, TResult>(process));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TypeId> Register<TRequest>([NotNull] Func<TRequest, CancellationToken, UnityTask> process)
+        public ProcessRegistry Register<TRequest>([NotNull] Func<TRequest, CancellationToken, UnityTask> process)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest
+#endif
         {
             return Register(new Internals.Async.CancellableAsyncProcessHandler<TRequest>(process));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TypeId> Register<TRequest, TResult>(
+        public ProcessRegistry Register<TRequest, TResult>(
 #if UNITASK
             [NotNull] Func<TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<TResult>> process
 #else
             [NotNull] Func<TRequest, CancellationToken, UnityEngine.Awaitable<TResult>> process
 #endif
         )
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest<TResult>
+#endif
         {
             return Register(new Internals.Async.CancellableAsyncProcessHandler<TRequest, TResult>(process));
         }
@@ -73,77 +85,66 @@ namespace EncosyTower.Processing
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest>(Func<TRequest, UnityTask> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest
+#endif
         {
             return Unregister((TypeId)Type<Func<TRequest, UnityTask>>.Id);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Unregister<TRequest>(Func<TRequest, UnityTaskBool> _)
-        {
-            return Unregister((TypeId)Type<Func<TRequest, UnityTaskBool>>.Id);
-        }
-
 #if UNITASK
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, Cysharp.Threading.Tasks.UniTask<TResult>> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest<TResult>
+#endif
         {
             return Unregister((TypeId)Type<Func<TRequest, Cysharp.Threading.Tasks.UniTask<TResult>>>.Id);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Unregister<TRequest, TResult>(Func<TRequest, Cysharp.Threading.Tasks.UniTask<Option<TResult>>> _)
-        {
-            return Unregister((TypeId)Type<Func<TRequest, Cysharp.Threading.Tasks.UniTask<Option<TResult>>>>.Id);
-        }
-#else
+#else // UNITY_6000_0_OR_NEWER
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, UnityEngine.Awaitable<TResult>> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest<TResult>
+#endif
         {
             return Unregister((TypeId)Type<Func<TRequest, UnityEngine.Awaitable<TResult>>>.Id);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Unregister<TRequest, TResult>(Func<TRequest, UnityEngine.Awaitable<Option<TResult>>> _)
-        {
-            return Unregister((TypeId)Type<Func<TRequest, UnityEngine.Awaitable<Option<TResult>>>>.Id);
-        }
 #endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest>(Func<TRequest, CancellationToken, UnityTask> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest
+#endif
         {
             return Unregister((TypeId)Type<Func<TRequest, CancellationToken, UnityTask>>.Id);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Unregister<TRequest>(Func<TRequest, CancellationToken, UnityTaskBool> _)
-        {
-            return Unregister((TypeId)Type<Func<TRequest, CancellationToken, UnityTaskBool>>.Id);
-        }
-
 #if UNITASK
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Unregister<TRequest, TResult>(Func<TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<TResult>> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest<TResult>
+#endif
         {
             return Unregister((TypeId)Type<Func<TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<TResult>>>.Id);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Unregister<TRequest, TResult>(Func<TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<Option<TResult>>> _)
-        {
-            return Unregister((TypeId)Type<Func<TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<Option<TResult>>>>.Id);
-        }
-#else
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Unregister<TRequest, TResult>(Func<TRequest, CancellationToken, UnityEngine.Awaitable<TResult>> _)
-        {
-            return Unregister((TypeId)Type<Func<TRequest, CancellationToken, UnityEngine.Awaitable<TResult>>>.Id);
-        }
+#else // UNITY_6000_0_OR_NEWER
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Unregister<TRequest, TResult>(Func<TRequest, CancellationToken, UnityEngine.Awaitable<Option<TResult>>> _)
+        public bool Unregister<TRequest, TResult>(Func<TRequest, CancellationToken, UnityEngine.Awaitable<TResult>> _)
+#if !ENCOSY_PROCESSING_RELAX_MODE
+            where TRequest : IAsyncRequest<TResult>
+#endif
         {
-            return Unregister((TypeId)Type<Func<TRequest, CancellationToken, UnityEngine.Awaitable<Option<TResult>>>>.Id);
+            return Unregister((TypeId)Type<Func<TRequest, CancellationToken, UnityEngine.Awaitable<TResult>>>.Id);
         }
 #endif
 
