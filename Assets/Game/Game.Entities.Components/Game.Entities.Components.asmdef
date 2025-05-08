@@ -9,6 +9,7 @@
         "Latios.Kinemation",
         "Latios.Psyshock",
         "Latios.Transforms",
+        "Latios.Unika",
         "Unity.Burst",
         "Unity.Collections",
         "Unity.Entities",
