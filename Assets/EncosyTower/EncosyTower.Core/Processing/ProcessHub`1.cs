@@ -178,7 +178,7 @@ namespace EncosyTower.Processing
 
         public Option<TResult> TryProcess<TRequest, TResult>(TRequest request, bool silent = false)
         {
-            if (TryGet((TypeId)Type<Func<TRequest, TRequest>>.Id, out var result)
+            if (TryGet((TypeId)Type<Func<TRequest, TResult>>.Id, out var result)
                 && result is IProcessHandler<TRequest, TResult> handler
             )
             {
