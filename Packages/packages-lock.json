@@ -1,18 +1,5 @@
 {
   "dependencies": {
-    "cat.natsuneko.power-rename": {
-      "version": "0.1.0",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://package.openupm.com"
-    },
-    "com.0x7c13.unityeditor-darkmode": {
-      "version": "file:com.0x7c13.unityeditor-darkmode",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "com.annulusgames.unity-codegen": {
       "version": "1.0.0",
       "depth": 0,
