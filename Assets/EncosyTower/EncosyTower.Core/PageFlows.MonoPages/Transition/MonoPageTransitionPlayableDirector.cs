@@ -86,7 +86,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
         public override UnityTask OnHideAsync(PageTransitionOptions _, CancellationToken token)
         {
-            return showOperationOptions.playableAsset.IsInvalid()
+            return hideOperationOptions.playableAsset.IsInvalid()
                 ? UnityTasks.GetCompleted()
                 : Transition(hideOperationOptions, _zeroHideDuration, token);
         }
