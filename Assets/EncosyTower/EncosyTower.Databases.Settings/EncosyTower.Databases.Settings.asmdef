@@ -94,11 +94,6 @@
             "define": "UNITY_LOCALIZATION"
         },
         {
-            "name": "com.unity.logging",
-            "expression": "",
-            "define": "UNITY_LOGGING"
-        },
-        {
             "name": "com.unity.nuget.newtonsoft-json",
             "expression": "",
             "define": "UNITY_NEWTONSOFT_JSON"

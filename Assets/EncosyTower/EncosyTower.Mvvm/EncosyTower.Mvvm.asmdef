@@ -10,7 +10,6 @@
         "Unity.Burst",
         "Unity.Collections",
         "Unity.Localization",
-        "Unity.Logging",
         "Unity.Mathematics",
         "Unity.ResourceManager",
         "Unity.Serialization",
@@ -78,11 +77,6 @@
             "name": "com.unity.localization",
             "expression": "",
             "define": "UNITY_LOCALIZATION"
-        },
-        {
-            "name": "com.unity.logging",
-            "expression": "",
-            "define": "UNITY_LOGGING"
         },
         {
             "name": "com.unity.nuget.newtonsoft-json",

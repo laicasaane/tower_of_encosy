@@ -24,7 +24,6 @@
         "Unity.Entities.Hybrid",
         "Unity.Entities.UI",
         "Unity.InputSystem",
-        "Unity.Logging",
         "Unity.Mathematics",
         "Unity.ResourceManager",
         "Unity.Serialization"

@@ -12,7 +12,6 @@
         "Unity.Burst",
         "Unity.Collections",
         "Unity.InputSystem",
-        "Unity.Logging",
         "Unity.Mathematics",
         "Unity.ResourceManager",
         "Unity.TextMeshPro",

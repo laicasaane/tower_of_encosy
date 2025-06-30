@@ -16,7 +16,6 @@
         "Unity.Entities",
         "Unity.Entities.Hybrid",
         "Unity.Localization",
-        "Unity.Logging",
         "Unity.Mathematics",
         "Unity.PerformanceTesting",
         "Unity.ResourceManager",
@@ -88,11 +87,6 @@
             "name": "com.unity.localization",
             "expression": "",
             "define": "UNITY_LOCALIZATION"
-        },
-        {
-            "name": "com.unity.logging",
-            "expression": "",
-            "define": "UNITY_LOGGING"
         },
         {
             "name": "com.unity.nuget.newtonsoft-json",
