@@ -27,11 +27,13 @@ MonoBehaviour:
     m_IsDefault: 1
     m_Capabilities: 7
     m_ConfigSource: 0
+    m_Compliance:
+      m_Status: 0
+      m_Violations: []
   - m_Id: scoped:project:package.openupm.com
     m_Name: package.openupm.com
     m_Url: https://package.openupm.com
     m_Scopes:
-    - cat.natsuneko.power-rename
     - com.annulusgames.unity-codegen
     - com.browar.editor-toolbox
     - com.cathei.bakingsheet
@@ -46,11 +48,14 @@ MonoBehaviour:
     m_IsDefault: 0
     m_Capabilities: 0
     m_ConfigSource: 4
+    m_Compliance:
+      m_Status: 0
+      m_Violations: []
   m_UserSelectedRegistryName: package.openupm.com
   m_UserAddingNewScopedRegistry: 0
   m_RegistryInfoDraft:
     m_Modified: 0
     m_ErrorMessage: 
-    m_UserModificationsInstanceId: -868
-    m_OriginalInstanceId: -870
+    m_UserModificationsInstanceId: -880
+    m_OriginalInstanceId: -884
   m_LoadAssets: 50
