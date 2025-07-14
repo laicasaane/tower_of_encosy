@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46ca9470d365fdd40b867be0e44246f4, type: 3}
   m_Name: MonoPageFlowSettings
   m_EditorClassIdentifier: 
+  slimPublishingContext: 1
+  ignoreEmptySubscriber: 1
   loaderStrategy: 0
   messageScope: 0
   logEnvironment: 0
