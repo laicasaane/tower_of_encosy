@@ -63,7 +63,7 @@
       "dependencies": {}
     },
     "com.latios.latiosframework": {
-      "version": "0.12.7",
+      "version": "0.13.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -338,7 +338,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.inputsystem": {
-      "version": "1.14.0",
+      "version": "1.14.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -347,11 +347,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.localization": {
-      "version": "1.5.4",
+      "version": "1.5.5",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.addressables": "1.22.2",
+        "com.unity.addressables": "1.25.0",
         "com.unity.nuget.newtonsoft-json": "3.0.2"
       },
       "url": "https://packages.unity.com"
@@ -552,7 +552,7 @@
       "url": "https://package.openupm.com"
     },
     "jp.co.cyberagent.smartaddresser": {
-      "version": "1.0.10",
+      "version": "1.1.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
