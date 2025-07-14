@@ -20,9 +20,12 @@ MonoBehaviour:
       Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     assetName: 
     googleSheetSettings:
-      serviceAccountRelativeFilePath: GoogleServices/tower-of-encosy-service-account-google-sheets.json
+      credentialRelativeFilePath: 
+      apiKeyRelativeFilePath: GoogleServices/api-key.txt
+      credentialTokenRelativeFolderPath: GoogleServices
       spreadsheetId: 1MCEi9N9EVYHvbIPr8Vlf9g39aGOmAayaxDH99-wnyi8
       outputRelativeFolderPath: Assets/EncosyTower/EncosyTower.Samples.Data/Authoring.Csv
+      authentication: 1
       outputFileType: 1
       enabled: 1
       cleanOutputFolder: 1

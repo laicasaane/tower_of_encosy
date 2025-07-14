@@ -7,22 +7,30 @@
 >
     <engine:Label name="database-invalid" text="MUST select a database type." />
     <engine:Label name="relative-path" text="The path must be relative to the project folder." />
+
     <engine:Label name="input-folder-invalid" text="`Assets` folder is NOT allowed.&#10;MUST use a different folder." />
     <engine:Label name="input-folder-missing" text="The input folder does NOT exist." />
+
     <engine:Label name="output-folder-invalid" text="`Assets` folder is NOT allowed.&#10;MUST use a different folder." />
     <engine:Label name="output-folder-missing" text="The output folder currently does NOT exist.&#10;
 However, it will be created upon download." />
 
-    <engine:Label name="google-sheet__service-account"
-                  text="Google Service Account Credential is required to use this functionality.&#10;
+    <engine:Label name="token-folder-invalid" text="`Assets` folder is NOT allowed.&#10;MUST use a different folder." />
+    <engine:Label name="token-folder-missing" text="The token folder currently does NOT exist.&#10;
+However, it will be created upon download." />
+
+    <engine:Label name="google-sheet__credential"
+                  text="Google Credential is required to use this functionality.&#10;
     1. Create a &lt;a href=&quot;https://console.cloud.google.com/ &quot; &gt;Google Cloud project&lt;/a&gt;.&#10;
     2. Enable &lt;a href=&quot;https://console.developers.google.com/apis/api/sheets.googleapis.com &quot; &gt;Google Sheets API&lt;/a&gt; for the project.&#10;
     3. Enable &lt;a href=&quot;https://console.developers.google.com/apis/api/drive.googleapis.com &quot; &gt;Google Drive API&lt;/a&gt; for the project.&#10;
-    4. Create a credential following &lt;a href=&quot;https://github.com/cathei/BakingSheet/blob/master/docs/google-sheet-import.md#create-google-service-account &quot; &gt;this tutorial&lt;/a&gt;.&#10;
-    5. Share your SpreadSheet to that account following &lt;a href=&quot;https://github.com/cathei/BakingSheet/blob/master/docs/google-sheet-import.md#invite-service-account-to-your-google-sheet &quot; &gt;this tutorial&lt;/a&gt;.
+    4. Create an &lt;a href=&quot;https://docs.unity3d.com/Packages/com.unity.localization@1.5/manual/Google-Sheets-Configuring-Authentication.html &quot; &gt;OAuth 2.0 credential or API Key&lt;/a&gt; for authentication.
 " />
 
-    <engine:Label name="google-sheet__service-account-missing" text="The service account file does NOT exist." />
+    <engine:Label name="google-sheet__auth_oauth" text="Allows public and private access." />
+    <engine:Label name="google-sheet__auth_apikey" text="Allows only public access." />
+    <engine:Label name="google-sheet__credential-missing" text="The OAuth 2.0 credential file does NOT exist." />
+    <engine:Label name="google-sheet__api-key-missing" text="The API Key file does NOT exist." />
 
     <engine:Label name="google-sheet__spreadsheet"
                   text="A SpreadSheet should conform to one of the following formats:&#10;

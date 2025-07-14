@@ -35,19 +35,21 @@ namespace EncosyTower.Databases.Settings.Views
             AddToClassList(Constants.SETTINGS_GROUP);
             Add((_inputFolderHelp = new()).SetDisplay(DisplayStyle.None));
 
-            InitPathField(
-                  _inputFolderText = new("Input Folder")
+            _inputFolderText = CreatePathField(
+                  "Input Folder"
                 , BrowseFolder
                 , PathType.Folder
+                , out _
             );
 
             Add(new VisualSeparator());
             Add((_outputFolderHelp = new()).SetDisplay(DisplayStyle.None));
 
-            InitPathField(
-                  _outputFolderText = new("Output Folder")
+            _outputFolderText = CreatePathField(
+                  "Output Folder"
                 , BrowseFolder
                 , PathType.Folder
+                , out _
             );
 
             Add(new VisualSeparator());
@@ -203,8 +205,12 @@ namespace EncosyTower.Databases.Settings.Views
 
         private void ConvertButton_OnClicked()
         {
-            var owner = _context.Property.serializedObject.targetObject;
-            _context.DatabaseSettings?.Convert(_source, owner);
+            ConversionTask.Run(
+                  _context.DatabaseSettings
+                , _source
+                , _context.Property.serializedObject.targetObject
+                , DatabaseCollectionSettings.LocalFolderSettings.GetProgressTitle(_source)
+            );
         }
 
         private void CleanOutputFolderButton_OnClicked()

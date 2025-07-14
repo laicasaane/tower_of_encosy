@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using EncosyTower.Conversion;
 using EncosyTower.Databases.Authoring;
 using EncosyTower.IO;
-using EncosyTower.Logging;
 using EncosyTower.Naming;
 using UnityEditor;
 
@@ -19,30 +18,34 @@ namespace EncosyTower.Databases.Settings
                   RootPath rootPath
                 , string databaseAssetName
                 , DataSheetContainerBase sheetContainer
+                , CancellationToken token
                 , bool continueOnCapturedContext
             )
             {
-                var serviceAccountFilePath = rootPath.GetFileAbsolutePath(serviceAccountRelativeFilePath);
-                string serviceAccountJson = null;
+                var prepareResult = Prepare(
+                      rootPath
+                    , databaseAssetName
+                    , out var tokenFolderPath
+                    , out var credentialText
+                    , out var secrets
+                    , out var timeZone
+                    , out var fileContainer
+                );
 
-                try
+                if (prepareResult == false)
                 {
-                    serviceAccountJson = File.ReadAllText(serviceAccountFilePath);
-                }
-                catch (Exception ex)
-                {
-                    DevLoggerAPI.LogException(ex);
-                }
-
-                if (string.IsNullOrWhiteSpace(serviceAccountJson))
-                {
-                    Log(LogMessageType.ServiceAccountJsonUndefined);
                     return false;
                 }
 
-                var timeZone = TimeZoneInfo.Utc;
-                var fileContainer = new FileDatabaseAuthoring.SheetContainer();
-                var fileConverter = new DatabaseGoogleSheetConverter(spreadsheetId, serviceAccountJson, timeZone);
+                var initializer = await ConnectAsync(
+                      credentialText
+                    , secrets
+                    , tokenFolderPath
+                    , token
+                    , continueOnCapturedContext
+                ).ConfigureAwait(continueOnCapturedContext);
+
+                var fileConverter = new DatabaseGoogleSheetConverter(spreadsheetId, initializer, timeZone);
 
                 await fileContainer.Bake(fileConverter)
                     .ConfigureAwait(continueOnCapturedContext);
@@ -60,7 +63,7 @@ namespace EncosyTower.Databases.Settings
                             continue;
                         }
 
-                        converters.Add(new(row.FileId, serviceAccountJson, timeZone));
+                        converters.Add(new(row.FileId, initializer, timeZone));
                     }
                 }
                 else
@@ -92,38 +95,43 @@ namespace EncosyTower.Databases.Settings
 
             private async Task<bool> DownloadCsvAsync(
                   RootPath rootPath
+                , string databaseAssetName
                 , DataSheetContainerBase sheetContainer
+                , CancellationToken token
                 , bool continueOnCapturedContext
             )
             {
-                var serviceAccountFilePath = rootPath.GetFileAbsolutePath(serviceAccountRelativeFilePath);
-                string serviceAccountJson = null;
+                var prepareResult = Prepare(
+                      rootPath
+                    , databaseAssetName
+                    , out var tokenFolderPath
+                    , out var credentialText
+                    , out var secrets
+                    , out var timeZone
+                    , out var fileContainer
+                );
 
-                try
+                if (prepareResult == false)
                 {
-                    serviceAccountJson = File.ReadAllText(serviceAccountFilePath);
-                }
-                catch (Exception ex)
-                {
-                    DevLoggerAPI.LogException(ex);
-                }
-
-                if (string.IsNullOrWhiteSpace(serviceAccountJson))
-                {
-                    Log(LogMessageType.ServiceAccountJsonUndefined);
                     return false;
                 }
 
-                var timeZone = TimeZoneInfo.Utc;
-                var fileContainer = new FileDatabaseAuthoring.SheetContainer();
-                var fileConverter = new DatabaseGoogleSheetConverter(spreadsheetId, serviceAccountJson, timeZone);
+                var initializer = await ConnectAsync(
+                      credentialText
+                    , secrets
+                    , tokenFolderPath
+                    , token
+                    , continueOnCapturedContext
+                ).ConfigureAwait(continueOnCapturedContext);
+
+                var fileConverter = new DatabaseGoogleSheetConverter(spreadsheetId, initializer, timeZone);
 
                 await fileContainer.Bake(fileConverter).ConfigureAwait(continueOnCapturedContext);
 
                 var fileSystem = new DatabaseFileSystem();
                 var fileSheetExporter = new DatabaseGoogleSheetCsvExporter(
                       spreadsheetId
-                    , serviceAccountJson
+                    , initializer
                     , fileSystem
                     , IgnoredNameTransformer.Default
                     , IgnoredNameTransformer.Default
@@ -144,7 +152,7 @@ namespace EncosyTower.Databases.Settings
                             continue;
                         }
 
-                        exporters.TryAdd(id, new(row.FileId, serviceAccountJson, fileSystem));
+                        exporters.TryAdd(id, new(row.FileId, initializer, fileSystem));
                         id += 1;
                     }
                 }

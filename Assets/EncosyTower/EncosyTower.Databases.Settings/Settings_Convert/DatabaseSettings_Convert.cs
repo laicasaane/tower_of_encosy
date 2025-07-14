@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using EncosyTower.Databases.Authoring;
 using EncosyTower.Logging;
@@ -11,14 +13,20 @@ namespace EncosyTower.Databases.Settings
     {
         partial class DatabaseSettings
         {
-            public void Convert(DataSourceFlags sources, UnityEngine.Object owner)
+            public async Task<bool> ConvertEditorAsync(
+                  DataSourceFlags sources
+                , UnityEngine.Object owner
+                , [NotNull] ReportAction reporter
+                , CancellationToken token
+                , bool continueOnCapturedContext
+            )
             {
                 var result = Validate();
 
                 if (result != ValidationResult.Success)
                 {
                     Log(result);
-                    return;
+                    return false;
                 }
 
                 result = TryGetData(out var databaseAssetName, out var sheetContainerType);
@@ -26,7 +34,7 @@ namespace EncosyTower.Databases.Settings
                 if (result != ValidationResult.Success)
                 {
                     Log(result, sheetContainerType);
-                    return;
+                    return false;
                 }
 
                 result = TryCreateSheetContainer(sheetContainerType, out var sheetContainer);
@@ -34,28 +42,44 @@ namespace EncosyTower.Databases.Settings
                 if (result != ValidationResult.Success)
                 {
                     Log(result, sheetContainerType);
-                    return;
+                    return false;
                 }
 
                 if (sources.HasFlag(DataSourceFlags.GoogleSheet) && googleSheetSettings.enabled)
                 {
-                    googleSheetSettings.Convert(new(databaseAssetName, sheetContainer, owner));
+                    return await googleSheetSettings.ConvertEditorAsync(
+                          new(databaseAssetName, sheetContainer, owner)
+                        , reporter
+                        , token
+                        , continueOnCapturedContext
+                    );
                 }
 
                 if (sources.HasFlag(DataSourceFlags.Csv) && csvSettings.enabled)
                 {
-                    csvSettings.Convert(new(databaseAssetName, sheetContainer, owner));
+                    return await csvSettings.ConvertEditorAsync(
+                          new(databaseAssetName, sheetContainer, owner)
+                        , reporter
+                        , continueOnCapturedContext
+                    );
                 }
 
                 if (sources.HasFlag(DataSourceFlags.Excel) && excelSettings.enabled)
                 {
-                    excelSettings.Convert(new(databaseAssetName, sheetContainer, owner));
+                    return await excelSettings.ConvertEditorAsync(
+                          new(databaseAssetName, sheetContainer, owner)
+                        , reporter
+                        , continueOnCapturedContext
+                    );
                 }
+
+                return false;
             }
 
             public async Task<DataSourceFlags> ConvertAsync(
                   DataSourceFlags sources
                 , UnityEngine.Object owner
+                , CancellationToken token
                 , bool continueOnCapturedContext
             )
             {
@@ -89,6 +113,7 @@ namespace EncosyTower.Databases.Settings
                 {
                     if (await googleSheetSettings.ConvertAsync(
                           new(databaseAssetName, sheetContainer, owner)
+                        , token
                         , continueOnCapturedContext
                     ))
                     {

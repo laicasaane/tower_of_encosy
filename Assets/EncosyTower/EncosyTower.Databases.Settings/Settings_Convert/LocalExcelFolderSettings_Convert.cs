@@ -8,9 +8,9 @@ namespace EncosyTower.Databases.Settings
     {
         partial class LocalExcelFolderSettings
         {
-            private static readonly string s_progressTitle = "Convert CSV Files";
+            public const string PROGRESS_TITLE = "Convert CSV Files";
 
-            protected override string ProgressTitle => s_progressTitle;
+            public override string ProgressTitle => PROGRESS_TITLE;
 
             protected override ISheetImporter GetImporter(string inputFolderPath, TimeZoneInfo timeZone)
                 => new DatabaseExcelSheetConverter(inputFolderPath, timeZone);

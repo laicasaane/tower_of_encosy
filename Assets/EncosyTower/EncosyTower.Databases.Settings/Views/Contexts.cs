@@ -62,8 +62,17 @@ namespace EncosyTower.Databases.Settings.Views
         , DatabaseSettings DatabaseSettings
     )
     {
-        public SerializedProperty GetServiceAccountRelativeFilePathProperty()
-            => Property.FindPropertyRelative(nameof(GoogleSheetSettings.serviceAccountRelativeFilePath));
+        public SerializedProperty GetAuthenticationProperty()
+            => Property.FindPropertyRelative(nameof(GoogleSheetSettings.authentication));
+
+        public SerializedProperty GetCredentialRelativeFilePathProperty()
+            => Property.FindPropertyRelative(nameof(GoogleSheetSettings.credentialRelativeFilePath));
+
+        public SerializedProperty GetApiKeyRelativeFilePathProperty()
+            => Property.FindPropertyRelative(nameof(GoogleSheetSettings.apiKeyRelativeFilePath));
+
+        public SerializedProperty GetCredentialTokenRelativeFolderPathProperty()
+            => Property.FindPropertyRelative(nameof(GoogleSheetSettings.credentialTokenRelativeFolderPath));
 
         public SerializedProperty GetSpreadsheetIdProperty()
             => Property.FindPropertyRelative(nameof(GoogleSheetSettings.spreadsheetId));

@@ -35,8 +35,23 @@ namespace EncosyTower.Databases.Settings.Views
                 var settings = database.googleSheetSettings;
 
                 {
-                    var prop = context.GetServiceAccountRelativeFilePathProperty();
-                    prop.stringValue = settings.serviceAccountRelativeFilePath;
+                    var prop = context.GetAuthenticationProperty();
+                    prop.enumValueIndex = (int)settings.authentication;
+                }
+
+                {
+                    var prop = context.GetCredentialRelativeFilePathProperty();
+                    prop.stringValue = settings.credentialRelativeFilePath;
+                }
+
+                {
+                    var prop = context.GetApiKeyRelativeFilePathProperty();
+                    prop.stringValue = settings.apiKeyRelativeFilePath;
+                }
+
+                {
+                    var prop = context.GetCredentialTokenRelativeFolderPathProperty();
+                    prop.stringValue = settings.credentialTokenRelativeFolderPath;
                 }
 
                 {

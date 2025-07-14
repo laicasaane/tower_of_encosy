@@ -10,10 +10,7 @@
         "BakingSheet.Json",
         "EncosyTower.Core",
         "EncosyTower.Databases.Authoring",
-        "EncosyTower.Editor",
-        "UniTask",
-        "Unity.Addressables",
-        "Unity.EditorCoroutines.Editor"
+        "EncosyTower.Editor"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -23,9 +20,7 @@
     "autoReferenced": true,
     "defineConstraints": [
         "BAKING_SHEET",
-        "UNITY_EDITOR",
-        "UNITY_EDITOR_COROUTINES",
-        "UNITASK || UNITY_6000_0_OR_NEWER"
+        "UNITY_EDITOR"
     ],
     "versionDefines": [
         {
@@ -37,11 +32,6 @@
             "name": "com.cathei.bakingsheet",
             "expression": "",
             "define": "BAKING_SHEET"
-        },
-        {
-            "name": "com.cysharp.unitask",
-            "expression": "",
-            "define": "UNITASK"
         },
         {
             "name": "com.latios.latiosframework",
@@ -62,11 +52,6 @@
             "name": "com.unity.collections",
             "expression": "",
             "define": "UNITY_COLLECTIONS"
-        },
-        {
-            "name": "com.unity.editorcoroutines",
-            "expression": "",
-            "define": "UNITY_EDITOR_COROUTINES"
         },
         {
             "name": "com.unity.entities",

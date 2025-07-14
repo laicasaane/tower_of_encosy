@@ -12,7 +12,12 @@ namespace EncosyTower.Databases.Settings.Views
         private const string USS_CLASS_NAME = "folder-text-field";
 
         public FolderTextField(string textLabel)
-            : base(textLabel, default)
+            : this(textLabel, default)
+        {
+        }
+
+        public FolderTextField(string textLabel, Background iconImage)
+            : base(textLabel, iconImage)
         {
             AddToClassList(USS_CLASS_NAME);
 
@@ -28,6 +33,7 @@ namespace EncosyTower.Databases.Settings.Views
 
             button.tooltip = "Locate Selected Template";
             button.AddToClassList(Constants.ICON_BUTTON);
+
             hierarchy.Add(button);
         }
 

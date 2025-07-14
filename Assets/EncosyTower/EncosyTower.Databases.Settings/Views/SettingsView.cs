@@ -1,11 +1,10 @@
 using System;
-using EncosyTower.UIElements;
+using EncosyTower.Editor;
 using EncosyTower.Editor.UIElements;
+using EncosyTower.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
-using UnityEngine;
 using UnityEngine.UIElements;
-using EncosyTower.Editor;
 
 namespace EncosyTower.Databases.Settings.Views
 {
@@ -103,29 +102,31 @@ namespace EncosyTower.Databases.Settings.Views
             }
         }
 
-        protected void InitPathField(
-              ButtonTextField element
+        protected FolderTextField CreatePathField(
+              string textLabel
             , Action<ButtonTextField> onClicked
             , PathType pathType
+            , out VisualElement infoContainer
         )
         {
             var info = new Label();
 
-            var infoContainer = new VisualElement();
+            infoContainer = new();
             infoContainer.AddToClassList("sub-field-info");
             infoContainer.Add(info);
+
+            var icon = EditorAPI.GetIcon("d_folderopened icon", "folderopened icon");
+            var iconImage = Background.FromTexture2D(icon.image as UnityEngine.Texture2D);
+
+            var element = new FolderTextField(textLabel, iconImage);
+            element.TextField.tooltip = Resources.RelativePath;
 
             Add(element.AddToAlignFieldClass());
             Add(infoContainer);
 
-            var icon = EditorAPI.GetIcon("d_folderopened icon", "folderopened icon");
-            var iconImage = Background.FromTexture2D(icon.image as Texture2D);
-
 #if UNITY_6000_0_OR_NEWER
-            element.Button.iconImage = iconImage;
             element.Button.text = "Browse";
 #else
-            element.Button.SetToImageElement(iconImage);
             element.Button.SetToTextElement("Browse");
 #endif
 
@@ -144,6 +145,8 @@ namespace EncosyTower.Databases.Settings.Views
                     ? DirectoryAPI.ProjectPath.GetFileAbsolutePath(evt.newValue)
                     : DirectoryAPI.ProjectPath.GetFolderAbsolutePath(evt.newValue);
             });
+
+            return element;
         }
 
         protected void TryDisplayFolderHelp(

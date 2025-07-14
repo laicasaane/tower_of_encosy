@@ -1,12 +1,12 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Cathei.BakingSheet;
 using EncosyTower.Databases.Authoring;
+using EncosyTower.Editor;
 using EncosyTower.IO;
 using EncosyTower.Logging;
-using Unity.EditorCoroutines.Editor;
 using UnityEditor;
-using EncosyTower.Editor;
 
 namespace EncosyTower.Databases.Settings
 {
@@ -14,9 +14,13 @@ namespace EncosyTower.Databases.Settings
     {
         partial class LocalFolderSettings
         {
-            protected abstract string ProgressTitle { get; }
+            public abstract string ProgressTitle { get; }
 
-            public void Convert(ConversionArgs args)
+            public async Task<bool> ConvertEditorAsync(
+                  ConversionArgs args
+                , [NotNull] ReportAction reporter
+                , bool continueOnCapturedContext
+            )
             {
                 var rootPath = new RootPath(EditorAPI.ProjectPath);
                 var validationResult = Validate(rootPath);
@@ -24,20 +28,32 @@ namespace EncosyTower.Databases.Settings
                 if (validationResult != ValidationResult.Success)
                 {
                     Log(validationResult);
-                    return;
+                    return false;
                 }
 
-                rootPath.CreateRelativeFolder(outputRelativeFolderPath);
+                try
+                {
+                    rootPath.CreateRelativeFolder(outputRelativeFolderPath);
 
-                AssetDatabase.Refresh();
+                    if (continueOnCapturedContext)
+                    {
+                        AssetDatabase.Refresh();
+                    }
 
-                var coroutine = ConvertCoroutine(
-                      rootPath
-                    , args.DatabaseAssetName
-                    , args.SheetContainer
-                );
+                    reporter(ProgressTitle, "Converting all files...");
 
-                EditorCoroutineUtility.StartCoroutine(coroutine, args.Owner);
+                    return await ConvertAsync(
+                          rootPath
+                        , args.DatabaseAssetName
+                        , args.SheetContainer
+                        , continueOnCapturedContext
+                    );
+                }
+                catch (Exception ex)
+                {
+                    DevLoggerAPI.LogException(ex);
+                    return false;
+                }
             }
 
             public async Task<bool> ConvertAsync(ConversionArgs args, bool continueOnCapturedContext)
@@ -75,23 +91,29 @@ namespace EncosyTower.Databases.Settings
                 , bool continueOnCapturedContext
             )
             {
-                var inputFolderPath = rootPath.GetFolderAbsolutePath(inputRelativeFolderPath);
-                var converter = GetImporter(inputFolderPath, TimeZoneInfo.Utc);
-
-                await sheetContainer.Bake(converter)
-                    .ConfigureAwait(continueOnCapturedContext);
-
-                var exporter = new DatabaseAssetExporter<DatabaseAsset>(outputRelativeFolderPath, databaseAssetName);
-
-                await sheetContainer.Store(exporter)
-                    .ConfigureAwait(continueOnCapturedContext);
-
-                if (continueOnCapturedContext)
+                try
                 {
-                    AssetDatabase.Refresh();
-                }
+                    var inputFolderPath = rootPath.GetFolderAbsolutePath(inputRelativeFolderPath);
+                    var converter = GetImporter(inputFolderPath, TimeZoneInfo.Utc);
 
-                return true;
+                    await sheetContainer.Bake(converter).ConfigureAwait(continueOnCapturedContext);
+
+                    var exporter = new DatabaseAssetExporter<DatabaseAsset>(outputRelativeFolderPath, databaseAssetName);
+
+                    await sheetContainer.Store(exporter).ConfigureAwait(continueOnCapturedContext);
+
+                    if (continueOnCapturedContext)
+                    {
+                        AssetDatabase.Refresh();
+                    }
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    DevLoggerAPI.LogException(ex);
+                    return false;
+                }
             }
 
             private ValidationResult Validate(RootPath rootPath)

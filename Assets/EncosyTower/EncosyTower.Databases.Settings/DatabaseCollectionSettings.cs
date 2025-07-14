@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EncosyTower.EnumExtensions;
 using EncosyTower.Settings;
 using UnityEngine;
 
@@ -30,9 +31,12 @@ namespace EncosyTower.Databases.Settings
         [Serializable]
         internal partial class GoogleSheetSettings
         {
-            public string serviceAccountRelativeFilePath = string.Empty;
+            public string credentialRelativeFilePath = string.Empty;
+            public string apiKeyRelativeFilePath = string.Empty;
+            public string credentialTokenRelativeFolderPath = string.Empty;
             public string spreadsheetId = string.Empty;
             public string outputRelativeFolderPath = string.Empty;
+            public AuthenticationType authentication = default;
             public OutputFileType outputFileType = default;
             public bool enabled = false;
             public bool cleanOutputFolder = true;
@@ -46,6 +50,15 @@ namespace EncosyTower.Databases.Settings
             public string outputRelativeFolderPath = string.Empty;
             public bool enabled = false;
             public bool liveConversion = true;
+
+            public static string GetProgressTitle(DataSourceFlags source)
+            {
+                return source switch {
+                    DataSourceFlags.Csv => LocalCsvFolderSettings.PROGRESS_TITLE,
+                    DataSourceFlags.Excel => LocalExcelFolderSettings.PROGRESS_TITLE,
+                    _ => "Converting Local Folder"
+                };
+            }
         }
 
         [Serializable]
@@ -58,10 +71,25 @@ namespace EncosyTower.Databases.Settings
         {
         }
 
+        internal enum AuthenticationType
+        {
+            [InspectorName("OAuth 2.0")]
+            OAuth = 0,
+
+            [InspectorName("API Key")]
+            ApiKey,
+        }
+
         internal enum OutputFileType
         {
-            DataTable = 0,
+            [InspectorName("Data Table Asset")]
+            DataTableAsset = 0,
+
+            [InspectorName("CSV")]
             Csv,
         }
     }
+
+    [EnumExtensionsFor(typeof(DatabaseCollectionSettings.OutputFileType))]
+    internal static partial class OutputFileTypeExtensions { }
 }

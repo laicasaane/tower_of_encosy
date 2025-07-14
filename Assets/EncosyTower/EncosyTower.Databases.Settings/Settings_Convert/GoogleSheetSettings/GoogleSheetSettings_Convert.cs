@@ -1,8 +1,8 @@
+using System.Threading;
 using System.Threading.Tasks;
 using EncosyTower.Editor;
 using EncosyTower.IO;
 using EncosyTower.Logging;
-using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 
 namespace EncosyTower.Databases.Settings
@@ -11,49 +11,12 @@ namespace EncosyTower.Databases.Settings
     {
         partial class GoogleSheetSettings
         {
-            public void Convert(ConversionArgs args)
-            {
-                var rootPath = new RootPath(EditorAPI.ProjectPath);
-                var validationResult = Validate(rootPath);
-
-                if (validationResult != ValidationResult.Success)
-                {
-                    Log(validationResult);
-                    return;
-                }
-
-                rootPath.CreateRelativeFolder(outputRelativeFolderPath);
-
-                AssetDatabase.Refresh();
-
-                switch (outputFileType)
-                {
-                    case OutputFileType.DataTable:
-                    {
-                        var coroutine = DownloadDataTableCoroutine(
-                              rootPath
-                            , args.DatabaseAssetName
-                            , args.SheetContainer
-                        );
-
-                        EditorCoroutineUtility.StartCoroutine(coroutine, args.Owner);
-                        return;
-                    }
-
-                    case OutputFileType.Csv:
-                    {
-                        var coroutine = DownloadCsvCoroutine(
-                              rootPath
-                            , args.SheetContainer
-                        );
-
-                        EditorCoroutineUtility.StartCoroutine(coroutine, args.Owner);
-                        return;
-                    }
-                }
-            }
-
-            public async Task<bool> ConvertAsync(ConversionArgs args, bool continueOnCapturedContext)
+            public async Task<bool> ConvertEditorAsync(
+                  ConversionArgs args
+                , ReportAction reporter
+                , CancellationToken token
+                , bool continueOnCapturedContext
+            )
             {
                 var rootPath = new RootPath(EditorAPI.ProjectPath);
                 var validationResult = Validate(rootPath);
@@ -73,12 +36,65 @@ namespace EncosyTower.Databases.Settings
 
                 switch (outputFileType)
                 {
-                    case OutputFileType.DataTable:
+                    case OutputFileType.DataTableAsset:
+                    {
+                        return await DownloadDataTableEditorAsync(
+                              rootPath
+                            , args.DatabaseAssetName
+                            , args.SheetContainer
+                            , reporter
+                            , token
+                            , continueOnCapturedContext
+                        );
+                    }
+
+                    case OutputFileType.Csv:
+                    {
+                        return await DownloadCsvEditorAsync(
+                              rootPath
+                            , args.DatabaseAssetName
+                            , args.SheetContainer
+                            , reporter
+                            , token
+                            , continueOnCapturedContext
+                        );
+                    }
+                }
+
+                return false;
+            }
+
+            public async Task<bool> ConvertAsync(
+                  ConversionArgs args
+                , CancellationToken token
+                , bool continueOnCapturedContext
+            )
+            {
+                var rootPath = new RootPath(EditorAPI.ProjectPath);
+                var validationResult = Validate(rootPath);
+
+                if (validationResult != ValidationResult.Success)
+                {
+                    Log(validationResult);
+                    return false;
+                }
+
+                rootPath.CreateRelativeFolder(outputRelativeFolderPath);
+
+                if (continueOnCapturedContext)
+                {
+                    AssetDatabase.Refresh();
+                }
+
+                switch (outputFileType)
+                {
+                    case OutputFileType.DataTableAsset:
                     {
                         return await DownloadDataTableAsync(
                               rootPath
                             , args.DatabaseAssetName
                             , args.SheetContainer
+                            , token
                             , continueOnCapturedContext
                         );
                     }
@@ -87,7 +103,9 @@ namespace EncosyTower.Databases.Settings
                     {
                         return await DownloadCsvAsync(
                               rootPath
+                            , args.DatabaseAssetName
                             , args.SheetContainer
+                            , token
                             , continueOnCapturedContext
                         );
                     }
@@ -98,9 +116,25 @@ namespace EncosyTower.Databases.Settings
 
             private ValidationResult Validate(RootPath rootPath)
             {
-                if (rootPath.ExistsRelativeFile(serviceAccountRelativeFilePath) == false)
+                if (authentication != AuthenticationType.OAuth
+                    && authentication != AuthenticationType.ApiKey
+                )
                 {
-                    return ValidationResult.ServiceAccountFileDoesNotExist;
+                    return ValidationResult.UnknownAuthentication;
+                }
+
+                if (authentication == AuthenticationType.OAuth
+                    && rootPath.ExistsRelativeFile(credentialRelativeFilePath) == false
+                )
+                {
+                    return ValidationResult.OAuth2CredentialFileDoesNotExist;
+                }
+
+                if (authentication == AuthenticationType.ApiKey
+                    && rootPath.ExistsRelativeFile(apiKeyRelativeFilePath) == false
+                )
+                {
+                    return ValidationResult.ApiKeyFileDoesNotExist;
                 }
 
                 if (string.IsNullOrWhiteSpace(spreadsheetId))
@@ -120,8 +154,16 @@ namespace EncosyTower.Databases.Settings
             {
                 switch (validationResult)
                 {
-                    case ValidationResult.ServiceAccountFileDoesNotExist:
-                        DevLoggerAPI.LogError($"Service account file does not exist: '{serviceAccountRelativeFilePath}'");
+                    case ValidationResult.UnknownAuthentication:
+                        DevLoggerAPI.LogError($"Unknown authentication type: '{authentication}'");
+                        break;
+
+                    case ValidationResult.OAuth2CredentialFileDoesNotExist:
+                        DevLoggerAPI.LogError($"OAuth 2.0 credential file does not exist: '{credentialRelativeFilePath}'");
+                        break;
+
+                    case ValidationResult.ApiKeyFileDoesNotExist:
+                        DevLoggerAPI.LogError($"API Key file does not exist: '{apiKeyRelativeFilePath}'");
                         break;
 
                     case ValidationResult.SpreadSheetIdIsNullOrInvalid:
@@ -137,7 +179,9 @@ namespace EncosyTower.Databases.Settings
             private enum ValidationResult
             {
                 Success,
-                ServiceAccountFileDoesNotExist,
+                UnknownAuthentication,
+                OAuth2CredentialFileDoesNotExist,
+                ApiKeyFileDoesNotExist,
                 SpreadSheetIdIsNullOrInvalid,
                 OutputFolderIsNullOrInvalid,
             }

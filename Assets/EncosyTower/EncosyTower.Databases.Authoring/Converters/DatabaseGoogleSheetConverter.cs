@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Cathei.BakingSheet.Internal;
@@ -18,16 +19,21 @@ namespace EncosyTower.Databases.Authoring
 {
     public class DatabaseGoogleSheetConverter : DatabaseRawSheetImporter
     {
+        public static readonly string[] Scopes = new[] { DriveService.Scope.DriveReadonly };
+
         public readonly string SpreadsheetId;
 
+        private readonly string _applicationName;
         private readonly ICredential _credential;
+        private readonly BaseClientService.Initializer _initializer;
         private readonly Dictionary<string, List<Page>> _pages;
 
         private Spreadsheet _spreadsheet;
 
         public DatabaseGoogleSheetConverter(
-              string spreadsheetId
-            , string credential
+              [NotNull] string spreadsheetId
+            , [NotNull] string credential
+            , [NotNull] string applicationName
             , TimeZoneInfo timeZoneInfo = null
             , IFormatProvider formatProvider = null
             , int emptyRowStreakThreshold = 5
@@ -36,17 +42,34 @@ namespace EncosyTower.Databases.Authoring
         {
             SpreadsheetId = spreadsheetId;
 
+            _applicationName = applicationName;
             _credential = GoogleCredential
                 .FromJson(credential)
-                .CreateScoped(new[] { DriveService.Scope.DriveReadonly });
+                .CreateScoped(Scopes);
 
+            _pages = new Dictionary<string, List<Page>>();
+        }
+
+        public DatabaseGoogleSheetConverter(
+              [NotNull] string spreadsheetId
+            , [NotNull] BaseClientService.Initializer initializer
+            , TimeZoneInfo timeZoneInfo = null
+            , IFormatProvider formatProvider = null
+            , int emptyRowStreakThreshold = 5
+        )
+            : base(timeZoneInfo, formatProvider, emptyRowStreakThreshold)
+        {
+            SpreadsheetId = spreadsheetId;
+
+            _initializer = initializer;
             _pages = new Dictionary<string, List<Page>>();
         }
 
         public async Task<GoogleFileMetadata> FetchMetadata()
         {
-            using var service = new DriveService(new BaseClientService.Initializer {
-                HttpClientInitializer = _credential
+            using var service = new DriveService(_initializer ?? new BaseClientService.Initializer {
+                HttpClientInitializer = _credential,
+                ApplicationName = _applicationName,
             });
 
             var fileReq = service.Files.Get(SpreadsheetId);
@@ -72,8 +95,9 @@ namespace EncosyTower.Databases.Authoring
 
         protected override async Task<bool> LoadData()
         {
-            using (var service = new SheetsService(new BaseClientService.Initializer() {
-                HttpClientInitializer = _credential
+            using (var service = new SheetsService(_initializer ?? new BaseClientService.Initializer() {
+                HttpClientInitializer = _credential,
+                ApplicationName = _applicationName,
             }))
             {
                 var sheetReq = service.Spreadsheets.Get(SpreadsheetId);

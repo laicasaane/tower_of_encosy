@@ -33,17 +33,26 @@ namespace EncosyTower.Databases.Settings.Views
         {
             private const string BASE = "google-sheet";
 
-            public string ServiceAccount
-                => Resources.GetLabelText($"{BASE}__service-account");
+            public string Credential
+                => Resources.GetLabelText($"{BASE}__credential");
 
-            public string ServiceAccountMissing
-                => Resources.GetLabelText($"{BASE}__service-account-missing");
+            public string CredentialMissing
+                => Resources.GetLabelText($"{BASE}__credential-missing");
+
+            public string ApiKeyMissing
+                => Resources.GetLabelText($"{BASE}__api-key-missing");
 
             public string SpreadSheetId
                 => Resources.GetLabelText($"{BASE}__spreadsheet");
 
             public string SpreadSheetIdInvalid
                 => Resources.GetLabelText($"{BASE}__spreadsheet-invalid");
+
+            public string TokenFolderInvalid
+                => Resources.GetLabelText("token-folder-invalid");
+
+            public string TokenFolderMissing
+                => Resources.GetLabelText("token-folder-missing");
 
             public string OutputFolderInvalid
                 => Resources.GetLabelText("output-folder-invalid");

@@ -1,5 +1,4 @@
 using System;
-using EncosyTower.Editor;
 using EncosyTower.Editor.UIElements;
 using EncosyTower.UIElements;
 using UnityEditor;
@@ -7,19 +6,33 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+#if UNITY_6000_0_OR_NEWER
+using EncosyTower.Editor;
+#endif
+
 namespace EncosyTower.Databases.Settings.Views
 {
-    using OutputFileType = DatabaseCollectionSettings.OutputFileType;
+    using AuthenticationType = DatabaseCollectionSettings.AuthenticationType;
     using HelpType = HelpBoxMessageType;
+    using OutputFileType = DatabaseCollectionSettings.OutputFileType;
 
     internal sealed class GoogleSheetSettingsView : SettingsView
     {
-        private static readonly string[] s_jsonFilter = new[] { "JSON", "json" };
+        private static readonly string[] s_fileExts = new[] { "ALL", "*", "JSON", "json", "TXT", "txt" };
 
-        private readonly FolderTextField _serviceAccountFileText;
-        private readonly HelpBox _serviceAccountFileHelp;
+        private readonly FolderTextField _credentialFileText;
+        private readonly VisualElement _credentialFileSubInfo;
+        private readonly FolderTextField _apiKeyFileText;
+        private readonly VisualElement _apiKeyFileSubInfo;
+        private readonly EnumField _authenticationEnum;
+        private readonly HelpBox _credentialFileHelp;
+        private readonly HelpBox _apiKeyFileHelp;
         private readonly ButtonTextField _spreadsheetIdText;
         private readonly HelpBox _spreadsheetIdHelp;
+        private readonly VisualSeparator _tokenSeparator;
+        private readonly FolderTextField _tokenFolderText;
+        private readonly VisualElement _tokenSubInfo;
+        private readonly HelpBox _tokenFolderHelp;
         private readonly FolderTextField _outputFolderText;
         private readonly HelpBox _outputFolderHelp;
         private readonly EnumField _outputFileTypeEnum;
@@ -27,8 +40,10 @@ namespace EncosyTower.Databases.Settings.Views
         private readonly Toggle _alwaysDownloadAllToggle;
         private readonly Button _downloadButton;
 
-        private bool _serviceAccountFileValid;
+        private bool _credentialFileValid;
+        private bool _apiKeyFileValid;
         private bool _spreadsheetIdValid;
+        private bool _tokenFolderValid;
         private bool _outputFolderValid;
 
         private GoogleSheetContext _context;
@@ -39,16 +54,46 @@ namespace EncosyTower.Databases.Settings.Views
             AddToClassList("google-sheet");
             AddToClassList(Constants.SETTINGS_GROUP);
 
-            Add(new HelpBox(resources.GoogleSheet.ServiceAccount, HelpType.Info));
+            Add(new HelpBox(resources.GoogleSheet.Credential, HelpType.Info));
 
-            _serviceAccountFileHelp = new(resources.GoogleSheet.ServiceAccountMissing, HelpType.Error);
-            Add(_serviceAccountFileHelp.SetDisplay(DisplayStyle.None));
+            _authenticationEnum = new("Authentication", default(AuthenticationType));
+            Add(_authenticationEnum.AddToAlignFieldClass());
 
-            InitPathField(
-                  _serviceAccountFileText = new("Service Account File")
-                , BrowseServiceAccountFile
+            Add(new VisualSeparator());
+
+            _credentialFileHelp = new(resources.GoogleSheet.CredentialMissing, HelpType.Error);
+            Add(_credentialFileHelp.SetDisplay(DisplayStyle.None));
+
+            _credentialFileText = CreatePathField(
+                  "Credential File"
+                , BrowseCredentialFile
                 , PathType.File
+                , out _credentialFileSubInfo
             );
+
+            _apiKeyFileHelp = new(resources.GoogleSheet.ApiKeyMissing, HelpType.Error);
+            Add(_apiKeyFileHelp.SetDisplay(DisplayStyle.None));
+
+            _apiKeyFileText = CreatePathField(
+                  "API Key File"
+                , BrowseApiKeyFile
+                , PathType.File
+                , out _apiKeyFileSubInfo
+            );
+
+            Add(new VisualSeparator());
+
+            Add(_tokenSeparator = new VisualSeparator());
+            Add((_tokenFolderHelp = new()).SetDisplay(DisplayStyle.None));
+
+            _tokenFolderText = CreatePathField(
+                  "Auth Token Folder"
+                , BrowseFolder
+                , PathType.Folder
+                , out _tokenSubInfo
+            );
+
+            SetDisplayToTokenControls(DisplayStyle.None);
 
             Add(new VisualSeparator());
             Add(new HelpBox(resources.GoogleSheet.SpreadSheetId, HelpType.Info));
@@ -64,10 +109,11 @@ namespace EncosyTower.Databases.Settings.Views
             Add(new VisualSeparator());
             Add((_outputFolderHelp = new()).SetDisplay(DisplayStyle.None));
 
-            InitPathField(
-                  _outputFolderText = new("Output Folder")
+            _outputFolderText = CreatePathField(
+                  "Output Folder"
                 , BrowseFolder
                 , PathType.Folder
+                , out _
             );
 
             Add(new VisualSeparator());
@@ -115,15 +161,27 @@ namespace EncosyTower.Databases.Settings.Views
             BindFoldout(context.GetEnabledProperty());
 
             {
-                var prop = context.GetServiceAccountRelativeFilePathProperty();
-                _serviceAccountFileText.Bind(prop);
-                TryDisplayServiceAccountFileHelp(prop.stringValue);
+                var prop = context.GetCredentialRelativeFilePathProperty();
+                _credentialFileText.Bind(prop);
+                TryDisplayCredentialFileHelp(prop.stringValue);
+            }
+
+            {
+                var prop = context.GetApiKeyRelativeFilePathProperty();
+                _apiKeyFileText.Bind(prop);
+                TryDisplayApiKeyFileHelp(prop.stringValue);
             }
 
             {
                 var prop = context.GetSpreadsheetIdProperty();
                 _spreadsheetIdText.Bind(prop);
                 TryDisplaySpreadSheetIdHelp(prop.stringValue);
+            }
+
+            {
+                var prop = context.GetCredentialTokenRelativeFolderPathProperty();
+                _tokenFolderText.Bind(prop);
+                TryDisplayTokenFolderHelp(prop.stringValue);
             }
 
             {
@@ -140,6 +198,11 @@ namespace EncosyTower.Databases.Settings.Views
                 _outputFileTypeEnum.BindProperty(prop);
                 InitDownloadButton((OutputFileType)prop.enumValueIndex);
             }
+
+            {
+                var prop = context.GetAuthenticationProperty();
+                _authenticationEnum.BindProperty(prop);
+            }
         }
 
         public override void Unbind()
@@ -148,8 +211,11 @@ namespace EncosyTower.Databases.Settings.Views
 
             base.Unbind();
 
-            _serviceAccountFileText.Unbind();
+            _credentialFileText.Unbind();
+            _apiKeyFileText.Unbind();
+            _authenticationEnum.Unbind();
             _spreadsheetIdText.Unbind();
+            _tokenFolderText.Unbind();
             _outputFolderText.Unbind();
             _outputFileTypeEnum.Unbind();
             _cleanOutputFolderToggle.Unbind();
@@ -184,29 +250,83 @@ namespace EncosyTower.Databases.Settings.Views
 
         private void RegisterValueChangedCallbacks()
         {
-            _serviceAccountFileText.TextField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
+            _credentialFileText.TextField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
+            _apiKeyFileText.TextField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
+            _authenticationEnum.RegisterValueChangedCallback(OnValueChanged_ComparableUntyped);
             _spreadsheetIdText.TextField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
+            _tokenFolderText.TextField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
             _outputFolderText.TextField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
             _outputFileTypeEnum.RegisterValueChangedCallback(OnValueChanged_ComparableUntyped);
             _cleanOutputFolderToggle.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
             _alwaysDownloadAllToggle.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
 
-            _serviceAccountFileText.TextField.RegisterValueChangedCallback(ServiceAccountFile_OnChanged);
+            _authenticationEnum.RegisterValueChangedCallback(AuthenticationType_OnChanged);
+            _credentialFileText.TextField.RegisterValueChangedCallback(CredentialFile_OnChanged);
+            _apiKeyFileText.TextField.RegisterValueChangedCallback(ApiKeyFile_OnChanged);
             _spreadsheetIdText.TextField.RegisterValueChangedCallback(SpreadSheetId_OnChanged);
+            _tokenFolderText.TextField.RegisterValueChangedCallback(TokenFolder_OnChanged);
             _outputFolderText.TextField.RegisterValueChangedCallback(OutputFolder_OnChanged);
             _outputFileTypeEnum.RegisterValueChangedCallback(OutputFileType_OnChanged);
         }
 
-        private void InitDownloadButton(OutputFileType fileType)
-            => _downloadButton.text = $"Download to {ObjectNames.NicifyVariableName(fileType.ToString())}";
+        private void SetDisplayToTokenControls(DisplayStyle style)
+        {
+            _tokenSeparator.SetDisplay(style);
+            _tokenFolderHelp.SetDisplay(style);
+            _tokenFolderText.SetDisplay(style);
+            _tokenSubInfo.SetDisplay(style);
+        }
 
-        private void BrowseServiceAccountFile(ButtonTextField sender)
-            => DirectoryAPI.OpenFilePanel(sender.TextField, "Select Service Account File", s_jsonFilter);
+        private void SetDisplayToCredentialControls(DisplayStyle style)
+        {
+            _credentialFileText.SetDisplay(style);
+            _credentialFileHelp.SetDisplay(style);
+            _credentialFileSubInfo.SetDisplay(style);
+        }
+
+        private void SetDisplayToApiKeyControls(DisplayStyle style)
+        {
+            _apiKeyFileText.SetDisplay(style);
+            _apiKeyFileHelp.SetDisplay(style);
+            _apiKeyFileSubInfo.SetDisplay(style);
+        }
+
+        private void InitDownloadButton(OutputFileType fileType)
+            => _downloadButton.text = $"Download to {fileType.ToDisplayStringFast()}";
+
+        private void BrowseCredentialFile(ButtonTextField sender)
+            => DirectoryAPI.OpenFilePanel(sender.TextField, "Select Credential File", s_fileExts);
+
+        private void BrowseApiKeyFile(ButtonTextField sender)
+            => DirectoryAPI.OpenFilePanel(sender.TextField, "Select API Key File", s_fileExts);
 
         private void OpenSpreadSheetUrl(ButtonTextField sender)
             => Application.OpenURL($"https://docs.google.com/spreadsheets/d/{sender.TextField.value}");
 
-        private void ServiceAccountFile_OnChanged(ChangeEvent<string> evt)
+        private void AuthenticationType_OnChanged(ChangeEvent<Enum> evt)
+        {
+            if (evt.newValue is AuthenticationType authentication
+                && authentication == AuthenticationType.OAuth
+            )
+            {
+                var prop = _context.GetCredentialTokenRelativeFolderPathProperty();
+
+                SetDisplayToCredentialControls(DisplayStyle.Flex);
+                SetDisplayToApiKeyControls(DisplayStyle.None);
+                SetDisplayToTokenControls(DisplayStyle.Flex);
+                TryDisplayTokenFolderHelp(prop.stringValue);
+                TryDisplayCredentialFileHelp(_credentialFileText.TextField.value);
+            }
+            else
+            {
+                SetDisplayToCredentialControls(DisplayStyle.None);
+                SetDisplayToApiKeyControls(DisplayStyle.Flex);
+                SetDisplayToTokenControls(DisplayStyle.None);
+                TryDisplayApiKeyFileHelp(_apiKeyFileText.TextField.value);
+            }
+        }
+
+        private void CredentialFile_OnChanged(ChangeEvent<string> evt)
         {
             if (evt.newValue.Contains('<'))
             {
@@ -215,7 +335,19 @@ namespace EncosyTower.Databases.Settings.Views
                 return;
             }
 
-            TryDisplayServiceAccountFileHelp(evt.newValue);
+            TryDisplayCredentialFileHelp(evt.newValue);
+        }
+
+        private void ApiKeyFile_OnChanged(ChangeEvent<string> evt)
+        {
+            if (evt.newValue.Contains('<'))
+            {
+                /// README
+                Notes.ToPreventIllegalCharsExceptionWhenSearch();
+                return;
+            }
+
+            TryDisplayApiKeyFileHelp(evt.newValue);
         }
 
         private void SpreadSheetId_OnChanged(ChangeEvent<string> evt)
@@ -228,6 +360,18 @@ namespace EncosyTower.Databases.Settings.Views
             }
 
             TryDisplaySpreadSheetIdHelp(evt.newValue);
+        }
+
+        private void TokenFolder_OnChanged(ChangeEvent<string> evt)
+        {
+            if (evt.newValue.Contains('<'))
+            {
+                /// README
+                Notes.ToPreventIllegalCharsExceptionWhenSearch();
+                return;
+            }
+
+            TryDisplayTokenFolderHelp(evt.newValue);
         }
 
         private void OutputFolder_OnChanged(ChangeEvent<string> evt)
@@ -250,9 +394,15 @@ namespace EncosyTower.Databases.Settings.Views
             }
         }
 
-        private void TryDisplayServiceAccountFileHelp(string relativePath)
+        private void TryDisplayCredentialFileHelp(string relativePath)
         {
-            _serviceAccountFileValid = DisplayIfFileNotExist(_serviceAccountFileHelp, relativePath);
+            _credentialFileValid = DisplayIfFileNotExist(_credentialFileHelp, relativePath);
+            RefreshDownloadButton();
+        }
+
+        private void TryDisplayApiKeyFileHelp(string relativePath)
+        {
+            _apiKeyFileValid = DisplayIfFileNotExist(_apiKeyFileHelp, relativePath);
             RefreshDownloadButton();
         }
 
@@ -260,6 +410,26 @@ namespace EncosyTower.Databases.Settings.Views
         {
             _spreadsheetIdValid = DisplayIfStringEmpty(_spreadsheetIdHelp, value);
             RefreshDownloadButton();
+        }
+
+        private void TryDisplayTokenFolderHelp(string relativePath)
+        {
+            var prop = _context.GetAuthenticationProperty();
+
+            if ((AuthenticationType)prop.enumValueIndex != AuthenticationType.OAuth)
+            {
+                return;
+            }
+
+            var resources = Resources.GoogleSheet;
+
+            TryDisplayFolderHelp(
+                  _tokenFolderHelp
+                , relativePath
+                , new(resources.TokenFolderInvalid, HelpType.Error, false)
+                , new(resources.TokenFolderMissing, HelpType.Warning, true)
+                , ref _tokenFolderValid
+            );
         }
 
         private void TryDisplayOutputFolderHelp(string relativePath)
@@ -279,8 +449,12 @@ namespace EncosyTower.Databases.Settings.Views
 
         private void RefreshDownloadButton()
         {
+            var authentication = (AuthenticationType)_context.GetAuthenticationProperty().enumValueIndex;
+            var credentialFileValid = authentication == AuthenticationType.OAuth && _credentialFileValid;
+            var apiKeyFileValid = authentication == AuthenticationType.ApiKey && _apiKeyFileValid;
+
             var value = Enabled
-                && _serviceAccountFileValid
+                && (credentialFileValid || apiKeyFileValid)
                 && _spreadsheetIdValid
                 && _outputFolderValid;
 
@@ -293,8 +467,12 @@ namespace EncosyTower.Databases.Settings.Views
 
         private void DownloadButton_OnClicked()
         {
-            var owner = _context.Property.serializedObject.targetObject;
-            _context.DatabaseSettings?.Convert(DataSourceFlags.GoogleSheet, owner);
+            ConversionTask.Run(
+                  _context.DatabaseSettings
+                , DataSourceFlags.GoogleSheet
+                , _context.Property.serializedObject.targetObject
+                , DatabaseCollectionSettings.GoogleSheetSettings.PROGRESS_TITLE
+            );
         }
 
         private void CleanOutputFolderButton_OnClicked()

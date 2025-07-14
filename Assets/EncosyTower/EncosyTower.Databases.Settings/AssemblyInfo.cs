@@ -2,4 +2,5 @@
 [assembly: EncosyTower.CodeGen.AllowSourceGeneratorsForAssembly(
       "EncosyTower.Data"
     , "EncosyTower.Databases"
+    , "EncosyTower.EnumExtensions"
 )]

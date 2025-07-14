@@ -83,7 +83,12 @@ namespace EncosyTower.Databases.Settings
                 return;
             }
 
-            databaseSettings.Convert(source, owner);
+            ConversionTask.Run(
+                  databaseSettings
+                , source
+                , owner
+                , DatabaseCollectionSettings.LocalFolderSettings.GetProgressTitle(source)
+            );
         }
 
         private static void Filter(

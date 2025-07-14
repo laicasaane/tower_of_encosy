@@ -16,9 +16,13 @@ namespace EncosyTower.Databases.Authoring
 {
     public class DatabaseGoogleSheetCsvExporter
     {
+        public static readonly string[] Scopes = new[] { DriveService.Scope.DriveReadonly };
+
         public readonly string SpreadsheetId;
 
+        private readonly string _applicationName;
         private readonly ICredential _credential;
+        private readonly BaseClientService.Initializer _initializer;
         private readonly IExtendedFileSystem _fileSystem;
         private readonly ITransform<string, string> _spreadsheetNameTransformer;
         private readonly ITransform<string, string> _sheetNameTransformer;
@@ -27,8 +31,9 @@ namespace EncosyTower.Databases.Authoring
         private bool _isLoaded;
 
         public DatabaseGoogleSheetCsvExporter(
-              string spreadsheetId
-            , string credential
+              [NotNull] string spreadsheetId
+            , [NotNull] string credential
+            , [NotNull] string applicationName
             , IExtendedFileSystem fileSystem = null
             , ITransform<string, string> spreadsheetNameTransformer = null
             , ITransform<string, string> sheetNameTransformer = null
@@ -36,10 +41,27 @@ namespace EncosyTower.Databases.Authoring
         {
             SpreadsheetId = spreadsheetId;
 
+            _applicationName = applicationName;
             _credential = GoogleCredential
                 .FromJson(credential)
-                .CreateScoped(new[] { DriveService.Scope.DriveReadonly });
+                .CreateScoped(Scopes);
 
+            _fileSystem = fileSystem ?? new DatabaseFileSystem();
+            _spreadsheetNameTransformer = spreadsheetNameTransformer;
+            _sheetNameTransformer = sheetNameTransformer;
+        }
+
+        public DatabaseGoogleSheetCsvExporter(
+              [NotNull] string spreadsheetId
+            , [NotNull] BaseClientService.Initializer initializer
+            , IExtendedFileSystem fileSystem = null
+            , ITransform<string, string> spreadsheetNameTransformer = null
+            , ITransform<string, string> sheetNameTransformer = null
+        )
+        {
+            SpreadsheetId = spreadsheetId;
+
+            _initializer = initializer;
             _fileSystem = fileSystem ?? new DatabaseFileSystem();
             _spreadsheetNameTransformer = spreadsheetNameTransformer;
             _sheetNameTransformer = sheetNameTransformer;
@@ -47,8 +69,9 @@ namespace EncosyTower.Databases.Authoring
 
         public async Task<GoogleFileMetadata> FetchMetadata()
         {
-            using var service = new DriveService(new BaseClientService.Initializer {
-                HttpClientInitializer = _credential
+            using var service = new DriveService(_initializer ?? new BaseClientService.Initializer {
+                HttpClientInitializer = _credential,
+                ApplicationName = _applicationName,
             });
 
             var fileReq = service.Files.Get(SpreadsheetId);
@@ -70,8 +93,9 @@ namespace EncosyTower.Databases.Authoring
 
             if (_isLoaded == false)
             {
-                using (var service = new SheetsService(new BaseClientService.Initializer {
-                    HttpClientInitializer = _credential
+                using (var service = new SheetsService(_initializer ?? new BaseClientService.Initializer {
+                    HttpClientInitializer = _credential,
+                    ApplicationName = _applicationName,
                 }))
                 {
                     var sheetReq = service.Spreadsheets.Get(spreadsheetId);

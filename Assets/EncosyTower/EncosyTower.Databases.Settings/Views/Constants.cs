@@ -1,8 +1,4 @@
-using EncosyTower.Editor;
 using EncosyTower.Editor.UIElements;
-using EncosyTower.IO;
-using UnityEditor;
-using UnityEngine.UIElements;
 
 namespace EncosyTower.Databases.Settings.Views
 {
@@ -29,43 +25,5 @@ namespace EncosyTower.Databases.Settings.Views
         public const string ICON_BUTTON = "icon-button";
 
         public const string UNDEFINED = "<Undefined>";
-    }
-
-    internal static class PrefKeys
-    {
-        private const string BASE = "database_collection_settings";
-
-        public const string SELECTED_INDEX = $"{BASE}__selected_index";
-    }
-
-    internal static class DirectoryAPI
-    {
-        public static RootPath ProjectPath => EditorAPI.ProjectPath;
-
-        public static void OpenFilePanel(TextField textField, string title, string[] filters)
-        {
-            var oldPath = ProjectPath.GetFileAbsolutePath(textField.value);
-            var newPath = EditorUtility.OpenFilePanelWithFilters(title, oldPath, filters);
-
-            if (string.IsNullOrWhiteSpace(newPath))
-            {
-                return;
-            }
-
-            textField.value = ProjectPath.GetRelativePath(newPath);
-        }
-
-        public static void OpenFolderPanel(TextField textField, string title)
-        {
-            var oldPath = ProjectPath.GetFolderAbsolutePath(textField.value);
-            var newPath = EditorUtility.OpenFolderPanel(title, oldPath, string.Empty);
-
-            if (string.IsNullOrWhiteSpace(newPath))
-            {
-                return;
-            }
-
-            textField.value = ProjectPath.GetRelativePath(newPath);
-        }
     }
 }
