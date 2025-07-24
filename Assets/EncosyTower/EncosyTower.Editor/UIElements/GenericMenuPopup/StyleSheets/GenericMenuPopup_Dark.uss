@@ -1,0 +1,6 @@
+:root {
+    --menu-node-color: #505050;
+    --menu-node-path-color: #606060;
+    --menu-node-root-color: #606060;
+    --menu-node-hover-color: #31516b;
+}

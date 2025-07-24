@@ -1,5 +1,6 @@
 using System;
 using EncosyTower.Editor;
+using EncosyTower.Editor.UIElements;
 using EncosyTower.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -127,7 +128,7 @@ namespace EncosyTower.Databases.Settings.Views
 
         private void InitMenu()
         {
-            var rootNode = _menu.RootNode;
+            var rootNode = _menu.rootNode;
 
             if (rootNode.Nodes.Count > 0)
             {

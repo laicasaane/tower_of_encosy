@@ -1,5 +1,6 @@
 using System;
 using EncosyTower.Editor;
+using EncosyTower.Editor.UIElements;
 using EncosyTower.UIElements;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
@@ -15,6 +16,7 @@ namespace EncosyTower.Databases.Settings.Views
         public event Action<DatabaseSettingsPreset> PresetSelected;
 
         private readonly GenericMenuPopup _menu = new(new MenuItemNode(), "Presets");
+
         private readonly DropdownField _presetDropdown;
         private readonly Button _copyButton;
         private readonly Button _locateButton;
@@ -86,7 +88,7 @@ namespace EncosyTower.Databases.Settings.Views
 
         private void RefreshPresets()
         {
-            var rootNode = _menu.RootNode;
+            var rootNode = _menu.rootNode;
             rootNode.Reset();
 
             var presets = AssetDatabaseAPI.FindAllObjectsByGlobalQualifiedType<DatabaseSettingsPreset>();

@@ -1,0 +1,10 @@
+:root {
+    --table-header-color: #3c3c3c;
+
+    --odd-row-color: #3c3c3c;
+    --even-row-color: #303030;
+
+    --column-divider-color: #1f1f1f;
+
+    --row-hover-color: #31516b;
+}

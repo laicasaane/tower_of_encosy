@@ -1,0 +1,55 @@
+.menu-node {
+    flex-direction: row;
+
+    min-height: 20px;
+
+    padding-top: 2.5px;
+    padding-bottom: 2.5px;
+    margin-bottom: 2.5px;
+
+    background-color: var(--menu-node-color);
+
+    border-width: 1px;
+    border-color: #1f1f1f;
+    border-radius: 2.5px;
+}
+
+.menu-node-path {
+    background-color: var(--menu-node-path-color);
+}
+
+.menu-node-root {
+    height: 25px;
+
+    background-color: var(--menu-node-root-color);
+}
+
+.menu-node:hover {
+    background-color: var(--menu-node-hover-color);
+}
+
+.node-title {
+    flex-grow: 1;
+
+    margin-left: 15px;
+
+    font-size: 13px;
+    -unity-text-align: middle-left;
+}
+
+.node-title-path {
+    -unity-font-style: bold;
+}
+
+.node-title-root {
+    font-size: 15px;
+    -unity-font-style: bold;
+}
+
+.plus-sign {
+    height: 15px;
+
+    font-size: 20px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}

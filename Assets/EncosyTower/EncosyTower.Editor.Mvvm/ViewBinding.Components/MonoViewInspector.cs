@@ -5,15 +5,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using EncosyTower.Annotations;
+using EncosyTower.Editor.Mvvm.ViewBinding.Contexts;
+using EncosyTower.Editor.UIElements;
 using EncosyTower.Mvvm.ComponentModel.SourceGen;
 using EncosyTower.Mvvm.Input.SourceGen;
 using EncosyTower.Mvvm.ViewBinding;
-using EncosyTower.Mvvm.ViewBinding.SourceGen;
 using EncosyTower.Mvvm.ViewBinding.Components;
+using EncosyTower.Mvvm.ViewBinding.SourceGen;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEngine;
-using EncosyTower.Editor.Mvvm.ViewBinding.Contexts;
 
 namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 {
@@ -30,8 +31,8 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
         /// and <see cref="EncosyTower.Mvvm.ViewBinding.Adapters.SequentialAdapter"/>
         /// </remarks>
         private readonly static Dictionary<DestType, Dictionary<SourceType, HashSet<Type>>> s_adapterMap = new(128);
-        private readonly static GenericMenuPopup s_binderMenu = new(new MenuItemNode(), "Binders");
-        private readonly static GenericMenuPopup s_contextMenu = new(new MenuItemNode(), "Contexts");
+        private readonly static GenericMenuPopup s_binderMenu = new GenericMenuPopup(new MenuItemNode(), "Binders");
+        private readonly static GenericMenuPopup s_contextMenu = new GenericMenuPopup(new MenuItemNode(), "Contexts");
         private readonly static Dictionary<Type, Type> s_binderToTargetTypeMap = new(128);
         private readonly static Dictionary<Type, Type> s_targetTypeToBinderMap = new(128);
         private readonly static Dictionary<Type, Type> s_bindingToTargetTypeMap = new(128);
@@ -657,7 +658,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 .Where(static x => x.Item2 is { ContextType: not null });
 
             var typeMap = s_contextToInspectorMap;
-            var rootNode = s_contextMenu.RootNode;
+            var rootNode = s_contextMenu.rootNode;
 
             foreach (var (inspectorType, inspectorAttrib) in contextTypes)
             {
@@ -730,7 +731,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 
         private static void InitBinderMenu()
         {
-            var rootNode = s_binderMenu.RootNode;
+            var rootNode = s_binderMenu.rootNode;
 
             if (rootNode.Nodes.Count > 0)
             {
@@ -789,7 +790,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             {
                 if (menuMap.TryGetValue(targetType, out var menu) == false)
                 {
-                    menuMap[targetType] = menu = new(new MenuItemNode(), "Bindings");
+                    menuMap[targetType] = menu = new GenericMenuPopup(new MenuItemNode(), "Bindings");
                 }
 
                 bindingMap[bindingType] = targetType;
@@ -818,7 +819,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                     commandMap.TryAdd(attrib.MethodName, attrib.ParameterType);
                 }
 
-                var currentNode = menu.RootNode;
+                var currentNode = menu.rootNode;
                 currentNode = currentNode.CreateNode(label);
 
                 currentNode.content = new(label);
@@ -938,9 +939,9 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             var destParent = dest.Property.FindParentProperty();
 
             return destParent is {
-                    propertyType: SerializedPropertyType.ManagedReference,
-                    managedReferenceValue: MonoBinder destBinder,
-                }
+                propertyType: SerializedPropertyType.ManagedReference,
+                managedReferenceValue: MonoBinder destBinder,
+            }
                 && s_binderToTargetTypeMap.TryGetValue(destBinder.GetType(), out var destTargetType)
                 && s_bindingToTargetTypeMap.TryGetValue(srcBinding.GetType(), out var srcTargetType)
                 && srcTargetType == destTargetType;

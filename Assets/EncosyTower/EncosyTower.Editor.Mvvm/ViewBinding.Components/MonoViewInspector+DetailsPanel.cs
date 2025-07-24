@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using EncosyTower.Annotations;
+using EncosyTower.Editor.UIElements;
 using EncosyTower.Logging;
 using EncosyTower.Mvvm.ViewBinding;
 using EncosyTower.Mvvm.ViewBinding.Adapters;
@@ -1346,7 +1347,6 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 
             var root = new MenuItemNode();
             var menu = new GenericMenuPopup(root, "Properties");
-
             {
                 var node = root.CreateNode("< None >");
                 node.func2 = RemoveBindingProperty;
@@ -1473,7 +1473,6 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 
             var root = new MenuItemNode();
             var menu = new GenericMenuPopup(root, "Properties");
-
             {
                 var node = root.CreateNode("< None >");
                 node.func2 = RemoveBindingCommand;

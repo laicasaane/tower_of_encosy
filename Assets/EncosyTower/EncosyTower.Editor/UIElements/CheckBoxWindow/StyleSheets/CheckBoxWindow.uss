@@ -1,0 +1,47 @@
+.list-view {
+    flex-grow: 1;
+}
+
+.select-button {
+    width: 80px;
+}
+
+.search-field {
+    flex-grow: 1;
+
+    margin-right: 5px;
+}
+
+.tool-field {
+    flex-grow: 1;
+    flex-direction: row;
+
+    min-height: 25px;
+    max-height: 25px;
+
+    padding-top: 2.5px;
+    padding-bottom: 2.5px;
+}
+
+.accept-button {
+    width: 50%;
+    margin-right: 0px;
+}
+
+.cancel-button {
+    width: 50%;
+    margin-right: 5px;
+}
+
+.button-field {
+    flex-grow: 1;
+    flex-direction: row;
+
+    min-height: 25px;
+    max-height: 25px;
+
+    padding-top: 2.5px;
+    padding-bottom: 2.5px;
+
+    margin-right: 9px;
+}

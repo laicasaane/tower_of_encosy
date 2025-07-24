@@ -1,0 +1,48 @@
+:root {
+    --drag-line-thickness: 2px;
+
+    --pane-padding-top: 0px;
+    --pane-padding-left: 0px;
+    --pane-padding-bottom: 0px;
+    --pane-padding-right: 10px;
+}
+
+.first-pane {
+    padding-top: var(--pane-padding-top);
+    padding-left: var(--pane-padding-left);
+    padding-bottom: var(--pane-padding-bottom);
+    padding-right: var(--pane-padding-right);
+}
+
+.second-pane {
+    flex-grow: 1;
+
+    padding-top: var(--pane-padding-top);
+    padding-left: var(--pane-padding-left);
+    padding-bottom: var(--pane-padding-bottom);
+    padding-right: var(--pane-padding-right);
+}
+
+.drag-line {
+    background-color: var(--drag-line-color);
+
+    cursor: arrow;
+}
+
+.drag-line.horizontal {
+    min-width: var(--drag-line-thickness);
+    min-height: auto;
+}
+
+.drag-line.horizontal:hover {
+    cursor: resize-horizontal;
+}
+
+.drag-line.vertical {
+    min-width: auto;
+    min-height: var(--drag-line-thickness);
+}
+
+.drag-line.vertical:hover {
+    cursor: resize-vertical;
+}

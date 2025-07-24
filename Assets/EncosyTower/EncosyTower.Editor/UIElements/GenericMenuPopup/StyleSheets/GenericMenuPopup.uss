@@ -1,0 +1,43 @@
+.menu-popup {
+    padding: 5px;
+
+    border-width: 1px;
+    border-color: #7f7f7f;
+}
+
+.menu-title {
+    margin: 0 0 5px 0;
+
+    font-size: 15px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.menu-tooltip {
+    height: 25px;
+
+    font-size: 10px;
+
+    -unity-text-align: lower-left;
+}
+
+.search-field {
+    width: auto;
+
+    margin: 0 0 5px 0;
+}
+
+.scroll-view {
+    flex-grow: 1;
+}
+
+.search-label {
+    height: 20px;
+
+    margin-bottom: 2.5px;
+    margin-top: 5px;
+
+    font-size: 15px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+}

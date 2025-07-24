@@ -4,10 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using EncosyTower.Editor.UIElements;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace EncosyTower.Editor.AssemblyDefs
 {
@@ -20,7 +23,6 @@ namespace EncosyTower.Editor.AssemblyDefs
         private const string NO_ASMDEF_MSG = "No assembly definition found in the project.";
 
         private static GUIStyle s_headerStyle;
-        private static GUIStyle s_separatorStyle;
 
         static AssemblyDefinitionInspector()
         {
@@ -164,36 +166,39 @@ namespace EncosyTower.Editor.AssemblyDefs
                 return;
             }
 
-            CheckBoxWindow.OpenWindow(SELECT_REFS_LABEL, data.Items, data, OnApply, new(DrawItem, ItemHeight, DrawSeparator));
+            CheckBoxWindow.OpenWindow(
+                  SELECT_REFS_LABEL
+                , data.Items
+                , data
+                , OnApply
+                , OnMakeReferenceField
+                , OnBindReferenceField
+                , onCreateWindow: OnCreateWindow
+            );
         }
 
-        private static int ItemHeight()
-            => 22;
-
-        private static void DrawItem(Rect rect, GUIContent label, int index, IItemInfo item)
+        private static ReferenceField OnMakeReferenceField()
         {
-            GUILayout.Space(2f);
-            EditorGUILayout.BeginHorizontal();
-            {
-                item.IsChecked = EditorGUILayout.ToggleLeft(label, item.IsChecked);
-                EditorGUILayout.ObjectField(((ItemInfo)item).asset, typeof(AssemblyDefinitionAsset), false);
-            }
-            EditorGUILayout.EndHorizontal();
+            return new(string.Empty, null);
         }
 
-        private static void DrawSeparator(Rect rect, GUIContent label, int index, IItemInfo item)
+        private static void OnBindReferenceField(VisualElement element, int index, IReadOnlyList<IItemInfo> items)
         {
-            s_separatorStyle ??= new GUIStyle(EditorStyles.boldLabel) {
-                alignment = TextAnchor.MiddleCenter
-            };
-
-            label.text = ((ItemInfo)item).separatorText;
-
-            EditorGUILayout.BeginHorizontal();
+            if (element is not ReferenceField refField)
             {
-                EditorGUILayout.LabelField(label, s_separatorStyle);
+                return;
             }
-            EditorGUILayout.EndHorizontal();
+
+            refField.UpdateSeparator(
+                  items[index].Name
+                , items[index]
+                , items[index].Separator
+            );
+        }
+
+        private static void OnCreateWindow(CheckBoxWindow window)
+        {
+            window.rootVisualElement.ApplyEditorStyleSheet(ReferenceField.STYLE_SHEET);
         }
 
         private static void OnApply(IReadOnlyList<IItemInfo> _, object userData)
@@ -333,6 +338,13 @@ namespace EncosyTower.Editor.AssemblyDefs
             return true;
         }
 
+        private record Data(
+              string AssetPath
+            , AssemblyDef AssemblyDef
+            , bool UseGuid
+            , ItemInfo[] Items
+        );
+
         private class ItemInfo : IItemInfo
         {
             public AssemblyDefinitionAsset asset;
@@ -349,12 +361,103 @@ namespace EncosyTower.Editor.AssemblyDefs
                 => StringComparer.OrdinalIgnoreCase.Compare(x.Name, y.Name);
         }
 
-        private record Data(
-              string AssetPath
-            , AssemblyDef AssemblyDef
-            , bool UseGuid
-            , ItemInfo[] Items
-        );
+        private class ReferenceField : VisualElement
+        {
+            private const string MODULE_ROOT = $"{EditorStyleSheetPaths.ROOT}/EncosyTower.Editor/AssemblyDefs";
+            private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
+            private const string FILE_NAME = $"{nameof(AssemblyDefinitionInspector)}+{nameof(ReferenceField)}";
+
+            public const string STYLE_SHEET = $"{STYLE_SHEETS_PATH}/{FILE_NAME}.uss";
+
+            public static readonly string ReferenceFieldUssClassName = "reference-field";
+            public static readonly string ReferenceToggleUssClassName = "reference-toggle";
+            public static readonly string ReferenceLabelUssClassName = "reference-label";
+            public static readonly string ReferenceObjectUssClassName = "reference-object";
+            public static readonly string ReferenceBarUssClassName = "reference-bar";
+
+            public bool isSeparator = false;
+            public IItemInfo item;
+
+            private readonly Toggle _toggle;
+            private readonly Label _label;
+            private readonly ObjectField _objectField;
+            private readonly VisualElement _bar;
+
+            public ReferenceField(string label, IItemInfo item, bool isSeparator = false)
+            {
+                AddToClassList(ReferenceFieldUssClassName);
+
+                _toggle = new(string.Empty);
+                _toggle.AddToClassList(ReferenceToggleUssClassName);
+                _toggle.RegisterValueChangedCallback(Toggle_OnValueChanged);
+
+                Add(_toggle);
+
+                _bar = new();
+                _bar.AddToClassList(ReferenceBarUssClassName);
+
+                _label = new(label);
+                _label.AddToClassList(ReferenceLabelUssClassName);
+
+                _objectField = new(string.Empty) {
+                    objectType = typeof(AssemblyDefinitionAsset)
+                };
+
+                _objectField.AddToClassList(ReferenceObjectUssClassName);
+
+                _bar.Add(_label);
+                _bar.Add(_objectField);
+
+                Add(_bar);
+
+                UpdateSeparator(label, item, isSeparator);
+            }
+
+            public void UpdateSeparator(string label, IItemInfo item, bool isSeparator)
+            {
+                this.isSeparator = isSeparator;
+                this.item = item;
+
+                if (item == null)
+                {
+                    return;
+                }
+
+                if (this.isSeparator)
+                {
+                    focusable = false;
+
+                    _toggle.EnableInClassList($"{ReferenceToggleUssClassName}-separator", true);
+
+                    _label.text = ((ItemInfo)item).separatorText;
+                    _label.EnableInClassList($"{ReferenceLabelUssClassName}-separator", true);
+
+                    _objectField.EnableInClassList($"{ReferenceObjectUssClassName}-separator", true);
+
+                    _bar.EnableInClassList($"{ReferenceBarUssClassName}-separator", true);
+                }
+                else
+                {
+                    focusable = true;
+
+                    _toggle.EnableInClassList($"{ReferenceToggleUssClassName}-separator", false);
+                    _toggle.value = item.IsChecked;
+
+                    _label.text = label;
+                    _label.EnableInClassList($"{ReferenceLabelUssClassName}-separator", false);
+
+                    _objectField.EnableInClassList($"{ReferenceObjectUssClassName}-separator", false);
+                    _objectField.value = ((ItemInfo)item).asset;
+
+                    _bar.EnableInClassList($"{ReferenceBarUssClassName}-separator", false);
+                }
+            }
+
+            private void Toggle_OnValueChanged(ChangeEvent<bool> evt)
+            {
+                item.IsChecked = evt.newValue;
+            }
+        }
     }
 }
 
