@@ -2,19 +2,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace EncosyTower.Editor.UIElements
 {
-    public class SimpleTableView<TData> : MultiColumnListView
+    public class SimpleTableView<TItem> : MultiColumnListView
     {
         public const float DEFAULT_ROW_HEIGHT = 20;
 
         private const string MODULE_ROOT = $"{EditorStyleSheetPaths.ROOT}/EncosyTower.Editor/UIElements/SimpleTableView";
         private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
-        private const string FILE_NAME = nameof(SimpleTableView<TData>);
+        private const string FILE_NAME = nameof(SimpleTableView<TItem>);
 
         private const string THEME_STYLE_SHEET = $"{STYLE_SHEETS_PATH}/{FILE_NAME}.tss";
         private const string STYLE_SHEET_DARK = $"{STYLE_SHEETS_PATH}/{FILE_NAME}_Dark.uss";
@@ -29,13 +27,12 @@ namespace EncosyTower.Editor.UIElements
         public static readonly string OddRowUssClassName = "odd-row";
         public static readonly string EvenRowUssClassName = "even-row";
 
-        public float rowHeight = 0;
         public bool showDivider = true;
+        public bool alternateRows = true;
 
-        private List<TData> _data = new();
-
-        private readonly List<ColumnDef> _columns = new();
         private readonly List<Label> _sortIndicators = new();
+
+        private List<TItem> _items = new();
 
         public SimpleTableView()
         {
@@ -50,187 +47,162 @@ namespace EncosyTower.Editor.UIElements
             selectionType = SelectionType.None;
         }
 
-        public void ClearColumn()
+        public List<TItem> Items
         {
-            _data.Clear();
-            itemsSource = null;
-            Rebuild();
-        }
+            get => _items;
 
-        public ColumnDef AddColumn(
-              string title
-            , float minWidth
-            , Func<VisualElement> makeCell
-            , Action<VisualElement, TData> bindCell
-        )
-        {
-            var column = new ColumnDef {
-                _title = title,
-                _minWidth = minWidth,
-                _makeCell = makeCell,
-                _bindCell = bindCell
-            };
-
-            _columns.Add(column);
-
-            return column;
-        }
-
-        public void SetData([NotNull] List<TData> data)
-        {
-            itemsSource = _data = data;
-        }
-
-        public void DrawTable()
-        {
-            columns.Clear();
-
-            foreach (var columnDef in _columns)
+            set
             {
-                var column = CreateColumn(columnDef);
+                if (value == null)
+                {
+                    _items.Clear();
+                    return;
+                }
 
-                CreateHeader(column, columnDef);
+                if (_items == value)
+                {
+                    return;
+                }
 
-                columns.Add(column);
+                _items = value;
             }
         }
 
-        private Column CreateColumn(ColumnDef columnDef)
+        public Column AddColumn(
+              string title
+            , float minWidth
+            , Func<VisualElement> makeCell = null
+            , Action<VisualElement, TItem> bindCell = null
+            , ColumnHeader header = default
+        )
         {
+            var table = this;
             var column = new Column {
-                title = columnDef._title,
-                minWidth = columnDef._minWidth,
+                title = title,
+                minWidth = minWidth,
                 stretchable = true,
-                makeCell = columnDef._makeCell,
             };
+
+            if (makeCell != null)
+            {
+                column.makeCell = makeCell;
+            }
 
             column.bindCell = (element, index) => {
-                if (index < _data.Count)
+                if ((uint)index >= (uint)_items.Count)
                 {
-                    var parent = element.parent;
-                    var grandParent = parent.parent;
-                    grandParent.AddToClassList(TableRowUssClassName);
-                    grandParent.AddToClassList(index % 2 == 0 ? EvenRowUssClassName : OddRowUssClassName);
-
-                    parent.AddToClassList(TableRowUssClassName);
-
-                    if (rowHeight != 0)
-                    {
-                        parent.style.minHeight = rowHeight;
-                    }
-
-                    if (column != columns[^1] && showDivider)
-                    {
-                        parent.style.borderRightWidth = 1;
-                    }
-
-                    columnDef._bindCell(element, _data[index]);
+                    return;
                 }
+
+                var parent = element.parent;
+                parent.AddToClassList(TableRowUssClassName);
+
+                var grandParent = parent.parent;
+                grandParent.AddToClassList(TableRowUssClassName);
+
+                grandParent.RemoveFromClassList(EvenRowUssClassName);
+                grandParent.RemoveFromClassList(OddRowUssClassName);
+
+                if (alternateRows)
+                {
+                    grandParent.AddToClassList(index % 2 == 0 ? EvenRowUssClassName : OddRowUssClassName);
+                }
+                else
+                {
+                    grandParent.AddToClassList(OddRowUssClassName);
+                }
+
+                if (column != columns[^1] && showDivider)
+                {
+                    parent.style.borderRightWidth = 1;
+                }
+
+                bindCell?.Invoke(element, _items[index]);
             };
 
-            return column;
-        }
-
-        private void CreateHeader(Column column, ColumnDef columnDef)
-        {
             column.makeHeader = () => {
-                var headerLabel = new Label(columnDef._title);
-                {
-                    headerLabel.focusable = true;
-                    headerLabel.style.unityTextAlign = columnDef._headerAlignment;
-                    headerLabel.AddToClassList(HeaderLabelUssClassName);
-                }
 
-                var sortIndicator = new Label("▲");
+                var sortIndicator = new Label(GetSortIndicatorIcon(header.IsAscending));
                 {
-                    sortIndicator.AddToClassList(SortIndicatorUssClassName);
                     sortIndicator.style.display = DisplayStyle.None;
+                    sortIndicator.AddToClassList(SortIndicatorUssClassName);
+
                     _sortIndicators.Add(sortIndicator);
                 }
 
-                var headerContainer = new VisualElement();
+                var label = new Label(column.title);
                 {
-                    headerContainer.AddToClassList(HeaderContainerUssClassName);
-                    headerContainer.AddToClassList(TableHeaderUssClassName);
-                    headerContainer.AddToClassList(TableRowUssClassName);
+                    label.focusable = true;
+                    label.AddToClassList(HeaderLabelUssClassName);
+                    label.userData = new HeaderData {
+                        table = table,
+                        sortIndicator = sortIndicator,
+                        onSort = header.OnSort,
+                        isAscending = header.IsAscending,
+                    };
+                }
 
-                    if (rowHeight != 0)
+                var container = new VisualElement();
+                {
+                    container.AddToClassList(HeaderContainerUssClassName);
+                    container.AddToClassList(TableHeaderUssClassName);
+                    container.AddToClassList(TableRowUssClassName);
+
+                    container.Add(label);
+                    container.Add(sortIndicator);
+
+                    if (header.OnSort != null)
                     {
-                        headerContainer.style.minHeight = rowHeight;
-                    }
-
-                    headerContainer.Add(headerLabel);
-                    headerContainer.Add(sortIndicator);
-
-                    if (columnDef._onSort != null)
-                    {
-                        headerLabel.RegisterCallback<PointerDownEvent>(_ => {
-                            foreach (var indicator in _sortIndicators)
-                            {
-                                indicator.style.display = DisplayStyle.None;
-                            }
-
-                            _data.Sort((a, b) => columnDef._isAscending
-                                ? columnDef._onSort(a, b)
-                                : -columnDef._onSort(a, b));
-
-                            columnDef._isAscending = !columnDef._isAscending;
-                            sortIndicator.text = columnDef._isAscending ? "▲" : "▼";
-                            sortIndicator.style.display = DisplayStyle.Flex;
-
-                            Rebuild();
-                        });
+                        label.RegisterCallback<PointerDownEvent>(HeaderLabel_OnPointerDown);
                     }
                 }
 
-                return headerContainer;
+                return container;
             };
+
+            columns.Add(column);
+
+            return column;
         }
 
-        public class ColumnDef
+        private static string GetSortIndicatorIcon(bool isAscending)
+            => isAscending ? "▲" : "▼";
+
+        private static void HeaderLabel_OnPointerDown(PointerDownEvent evt)
         {
-            internal string _title;
-            internal float _minWidth;
-            internal float _maxWidth;
-            internal string _tooltip;
-            internal bool _autoResize;
-            internal TextAnchor _headerAlignment = TextAnchor.MiddleLeft;
-
-            internal Func<VisualElement> _makeCell;
-            internal Action<VisualElement, TData> _bindCell;
-            internal Comparison<TData> _onSort;
-            internal bool _isAscending = true;
-
-            public ColumnDef SetMaxWidth(float maxWidth)
+            if (evt.currentTarget is not Label label || label.userData is not HeaderData header)
             {
-                _maxWidth = maxWidth;
-                return this;
+                return;
             }
 
-            public ColumnDef SetTooltip(string tooltip)
+            var table = header.table;
+
+            foreach (var indicator in table._sortIndicators)
             {
-                _tooltip = tooltip;
-                return this;
+                indicator.style.display = DisplayStyle.None;
             }
 
-            public ColumnDef SetAutoResize(bool autoResize)
-            {
-                _autoResize = autoResize;
-                return this;
-            }
+            table._items.Sort((a, b) => header.isAscending ? header.onSort(a, b) : -header.onSort(a, b));
 
-            public ColumnDef SetHeaderAlignment(TextAnchor alignment)
-            {
-                _headerAlignment = alignment;
-                return this;
-            }
+            header.isAscending = !header.isAscending;
+            header.sortIndicator.text = GetSortIndicatorIcon(header.isAscending);
+            header.sortIndicator.style.display = DisplayStyle.Flex;
 
-            public ColumnDef SetSorting(Comparison<TData> sortFunction)
-            {
-                _onSort = sortFunction;
-                return this;
-            }
+            table.Rebuild();
         }
+
+        private class HeaderData
+        {
+            public SimpleTableView<TItem> table;
+            public Label sortIndicator;
+            public Comparison<TItem> onSort;
+            public bool isAscending;
+        }
+
+        public readonly record struct ColumnHeader(
+              Comparison<TItem> OnSort
+            , bool IsAscending = true
+        );
     }
 }
 

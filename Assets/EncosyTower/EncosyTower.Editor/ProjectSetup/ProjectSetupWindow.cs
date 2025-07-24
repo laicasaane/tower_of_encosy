@@ -6,10 +6,15 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using EncosyTower.Common;
+using EncosyTower.Editor.UIElements;
+using EncosyTower.UIElements;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace EncosyTower.Editor.ProjectSetup
 {
@@ -36,92 +41,38 @@ namespace EncosyTower.Editor.ProjectSetup
         private const string UNITY_UPM_URL = "https://docs.unity3d.com/Packages/{0}@latest";
         private const string OPEN_UPM_URL = "https://openupm.com/packages/{0}";
 
+        private const float DEFAULT_LEFT_PANE_WIDTH = 300f;
+
         private static ListRequest s_listRequest;
         private static AddAndRemoveRequest s_addRequest;
         private static StringBuilder s_openUpmSb;
         private static List<string> s_unityIdentifiers;
 
-        private Dictionary<string, PackageInfo[]> _features;
-        private SimpleTableView<PackageInfo> _table;
-        private PackageInfo[] _selectedPackages = Array.Empty<PackageInfo>();
-        private GUIStyle _featureButtonStyle;
-        private Vector2 _scrollViewPos;
-        private float? _featureTitleWidth;
+        [SerializeField] private ThemeStyleSheet _themeStyleSheet;
 
-        private readonly GUIContent _featureTitle = new();
+        [SerializeField, HideInInspector]
+        private FeatureCollectionAsset _featureCollectionAsset;
 
-        private static Dictionary<string, PackageInfo[]> GetFeatures(HashSet<string> installedPackages)
-        {
-            var types = UnityEditor.TypeCache.GetTypesWithAttribute<FeatureAttribute>();
-            var result = new Dictionary<string, PackageInfo[]>(StringComparer.Ordinal);
-            var packages = new HashSet<PackageInfo>();
-            foreach (var type in types)
-            {
-                var featureAttrib = type.GetCustomAttribute<FeatureAttribute>();
+        [SerializeField, HideInInspector]
+        private PackageCollectionAsset _packageCollectionAsset;
 
-                if (string.IsNullOrWhiteSpace(featureAttrib?.Name))
-                {
-                    continue;
-                }
+        private readonly List<string> _features = new();
+        private readonly Dictionary<string, PackageInfo[]> _featureMap = new(StringComparer.Ordinal);
+        private readonly List<PackageInfo> _selectedPackages = new();
 
-                packages.Clear();
-                var featureName = featureAttrib.Name;
+        private bool _initAfterRequest = false;
+        private SimpleTableView<string> _featureTable;
+        private SimpleTableView<PackageInfo> _packageTable;
 
-                if (result.Remove(featureName, out var featurePackages))
-                {
-                    foreach (var package in featurePackages)
-                    {
-                        packages.Add(package);
-                    }
-                }
-
-                var packageAttribs = type.GetCustomAttributes<RequiresPackageAttribute>();
-
-                foreach (var packageAttrib in packageAttribs)
-                {
-                    if (string.IsNullOrWhiteSpace(packageAttrib?.PackageName))
-                    {
-                        continue;
-                    }
-
-                    var packageName = packageAttrib.PackageName;
-
-                    var package = new PackageInfo {
-                        registry = packageAttrib.Registry,
-                        name = packageName,
-                        version = packageAttrib.Version ?? string.Empty,
-                        isOptional = packageAttrib.IsOptional,
-                        isInstalled = installedPackages.Contains(packageName),
-                        isChosen = !packageAttrib.IsOptional,
-                        url = packageAttrib.Registry switch {
-                            PackageRegistry.Unity => string.Format(UNITY_UPM_URL, packageName),
-                            PackageRegistry.OpenUpm => string.Format(OPEN_UPM_URL, packageName),
-                            PackageRegistry.GitUrl => packageName,
-                            _ => string.Empty,
-                        },
-                    };
-
-                    packages.Add(package);
-                }
-
-                if (packages.Count < 1)
-                {
-                    continue;
-                }
-
-                result[featureName] = packages
-                    .OrderBy(static x => x.name)
-                    .ThenBy(static x => x.registry)
-                    .ToArray();
-            }
-
-            return result;
-        }
+        private VisualElement _requestInfoContainer;
+        private VisualElement _featureContainer;
+        private Button _installButton;
 
         public void OnEnable()
         {
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 
+            _initAfterRequest = false;
             s_listRequest = Client.List(true, true);
             EditorApplication.update += ListRequestProgress;
         }
@@ -199,194 +150,432 @@ namespace EncosyTower.Editor.ProjectSetup
                 installedPackages.Add(name);
             }
 
-            _features = GetFeatures(installedPackages);
+            GetFeatures(installedPackages, _features, _featureMap);
         }
 
-        public void OnGUI()
+        private void CreateGUI()
         {
-            var features = _features;
+            rootVisualElement.styleSheets.Add(_themeStyleSheet);
 
-            if (features == null || features.Count < 1)
-            {
-                EditorGUILayout.LabelField(LIST_MSG);
-                return;
-            }
-
-            BuildTable();
-
-            var featureTitle = _featureTitle;
-            var featureButtonStyle = _featureButtonStyle;
-
-            EditorGUILayout.BeginHorizontal();
-            {
-                var isPressed = false;
-                var selectedPackages = _selectedPackages.AsSpan();
-                var selectedPackagesLength = selectedPackages.Length;
-                var selectedCount = 0;
-
-                for (var i = 0; i < selectedPackagesLength; i++)
-                {
-                    ref readonly var package = ref selectedPackages[i];
-                    selectedCount += package.ShouldBeInstalled() ? 1 : 0;
-                }
-
-                if (selectedCount < 1)
-                {
-                    var enabled = GUI.enabled;
-                    GUI.enabled = false;
-                    GUILayout.Button(INSTALL_TITLE);
-                    GUI.enabled = enabled;
-                }
-                else
-                {
-                    isPressed = GUILayout.Button(INSTALL_TITLE);
-                }
-
-                if (isPressed)
-                {
-                    ApplySelectedPackages(_selectedPackages);
-                }
-            }
-            EditorGUILayout.EndHorizontal();
-            EditorGUILayout.Space();
-
-            EditorGUILayout.BeginHorizontal();
-
-            if (_featureTitleWidth.HasValue == false)
-            {
-                var maxValue = 0f;
-
-                foreach (var (feature, _) in features)
-                {
-                    featureTitle.text = feature;
-                    featureButtonStyle.CalcMinMaxWidth(featureTitle, out _, out var max);
-
-                    maxValue = Math.Max(max, maxValue);
-                }
-
-                _featureTitleWidth = maxValue;
-            }
-
-            var featureTitleWidth = _featureTitleWidth ?? 200f;
-            var scrollWidth = featureTitleWidth + 40f;
-
-            _scrollViewPos = EditorGUILayout.BeginScrollView(_scrollViewPos, GUILayout.MinWidth(scrollWidth));
-
-            featureButtonStyle.contentOffset = new((scrollWidth - featureTitleWidth) / 2f, 0f);
-
-            foreach (var (feature, packages) in features.OrderBy(static x => x.Key))
-            {
-                featureTitle.text = feature;
-
-                if (GUILayout.Button(featureTitle, featureButtonStyle))
-                {
-                    _selectedPackages = packages;
-                }
-            }
-
-            EditorGUILayout.EndScrollView();
-            EditorGUILayout.Space();
-            EditorGUILayout.BeginVertical();
-            _table.DrawTableGUI(_selectedPackages, rowHeight: EditorGUIUtility.singleLineHeight * 1.3f);
-            EditorGUILayout.EndVertical();
-            EditorGUILayout.EndHorizontal();
-        }
-
-        private void BuildTable()
-        {
-            if (_table != null)
-            {
-                return;
-            }
-
-            _featureButtonStyle = new(GUI.skin.button) {
-                alignment = TextAnchor.MiddleLeft,
+            var requestInfoContainer = _requestInfoContainer = new VisualElement() {
+                name = "request-info-container",
             };
 
-            var table = _table = new();
+            rootVisualElement.Add(requestInfoContainer);
 
-            table.AddColumn("Install", 60, TableColumn_Choose)
-                .SetMaxWidth(60);
+            var refreshButton = new Button(Refresh) {
+                text = "Refresh"
+            };
+            refreshButton.AddToClassList("refresh-button");
 
-            table.AddColumn("Registry", 80, TableColumn_Registry)
-                .SetMaxWidth(80)
-                .SetSorting(static (a, b) => a.registry - b.registry);
+            requestInfoContainer.Add(refreshButton);
 
-            table.AddColumn("Package Name", 200, TableColumn_Name)
-                .SetAutoResize(true)
-                .SetSorting((a, b) => string.Compare(a.name, b.name, StringComparison.Ordinal));
+            requestInfoContainer.Add(new Label(LIST_MSG) {
+                name = "request-info-label",
+            });
 
-            table.AddColumn("Version", 150, TableColumn_Version)
-                .SetMaxWidth(150);
+            var featureContainer = _featureContainer = new VisualElement() {
+                name = "feature-container",
+            };
+
+            rootVisualElement.Add(featureContainer);
+
+            featureContainer.SetDisplay(DisplayStyle.None);
+
+            var buttonGroup = new VisualElement() {
+                name = "button-group",
+            };
+
+            featureContainer.Add(buttonGroup);
+
+            buttonGroup.Add(refreshButton = new Button(Refresh) {
+                text = "Refresh",
+            });
+
+            refreshButton.AddToClassList("refresh-button");
+
+            buttonGroup.Add(_installButton = new Button(Install) {
+                text = "Install",
+                name = "install-button",
+                enabledSelf = false,
+            });
+
+            var splitter = new TwoPaneSplitView(0, DEFAULT_LEFT_PANE_WIDTH, TwoPaneSplitViewOrientation.Horizontal);
+
+            CreateFeatureTable(splitter);
+            CreatePackageTable(splitter);
+
+            featureContainer.Add(splitter);
         }
 
-        private static void TableColumn_Choose(Rect rect, PackageInfo item)
+        private void OnGUI()
         {
-            rect.xMin += 20;
+            if (_initAfterRequest == false
+                && s_listRequest == null
+                && _requestInfoContainer != null
+                && _featureContainer != null
+            )
+            {
+                _initAfterRequest = true;
+                _requestInfoContainer.SetDisplay(DisplayStyle.None);
+                _featureContainer.SetDisplay(DisplayStyle.Flex);
+
+                _featureCollectionAsset.features = _featureTable.Items = _features;
+                _packageCollectionAsset.packages = _packageTable.Items = _selectedPackages;
+            }
+
+            var packages = _selectedPackages;
+
+            if (_initAfterRequest == false || packages.Count < 1)
+            {
+                return;
+            }
+
+            var count = 0;
+
+            foreach (var package in packages)
+            {
+                if (package.ShouldBeInstalled())
+                {
+                    count += 1;
+                }
+            }
+
+            _installButton.enabledSelf = count > 0;
+        }
+
+        private void Refresh()
+        {
+            _requestInfoContainer.SetDisplay(DisplayStyle.Flex);
+            _featureContainer.SetDisplay(DisplayStyle.None);
+
+            _features.Clear();
+            _featureMap.Clear();
+            _selectedPackages.Clear();
+
+            OnEnable();
+        }
+
+        private void Install()
+        {
+            ApplySelectedPackages(_selectedPackages);
+        }
+
+        private void CreateFeatureTable(VisualElement container)
+        {
+            var table = _featureTable = new() {
+                name = "feature-table",
+                alternateRows = false,
+                bindingPath = nameof(FeatureCollectionAsset.features),
+                showBoundCollectionSize = false,
+            };
+
+            container.Add(table);
+
+            var column = table.AddColumn("Features"
+                , DEFAULT_LEFT_PANE_WIDTH
+                , FeatureTableColumn_MakeCell_Feature
+                , FeatureTableColumn_BindCell_Feature
+                , header: new(static (a, b) => string.Compare(a, b, StringComparison.Ordinal))
+            );
+
+            column.resizable = true;
+            column.sortable = true;
+
+            var asset = _featureCollectionAsset = CreateInstance<FeatureCollectionAsset>();
+            var serializedObject = new SerializedObject(asset);
+            _featureTable.Bind(serializedObject);
+        }
+
+        private Button FeatureTableColumn_MakeCell_Feature()
+        {
+            var button = new Button();
+            button.AddToClassList("feature-button");
+
+            button.clicked += () => {
+                if (button.userData is string feature && feature.IsNotEmpty())
+                {
+                    _selectedPackages.Clear();
+
+                    if (_featureMap.TryGetValue(feature, out var packages))
+                    {
+                        _selectedPackages.AddRange(packages);
+                    }
+                }
+            };
+
+            return button;
+        }
+
+        private static void FeatureTableColumn_BindCell_Feature(VisualElement element, string item)
+        {
+            if (element is not Button button || string.IsNullOrEmpty(item))
+            {
+                return;
+            }
+
+            button.text = item;
+            button.userData = item;
+        }
+
+        private void CreatePackageTable(VisualElement container)
+        {
+            var table = _packageTable = new() {
+                name = "package-table",
+                bindingPath = nameof(PackageCollectionAsset.packages),
+                showBoundCollectionSize = false,
+            };
+
+            container.Add(table);
+
+            var column = table.AddColumn("Install"
+                , 60
+                , PackageTableColumn_MakeCell_Install
+                , PackageTableColumn_BindCell_Install
+            );
+
+            column.maxWidth = 60;
+
+            column = table.AddColumn("Registry"
+                , 80
+                , PackageTableColumn_MakeCell_Registry
+                , PackageTableColumn_BindCell_Registry
+                , header: new(PackageInfo.CompareRegistries)
+            );
+
+            column.maxWidth = 80;
+            column.sortable = true;
+
+            column = table.AddColumn("Package Name"
+                , 200
+                , PackageTableColumn_MakeCell_PackageName
+                , PackageTableColumn_BindCell_PackageName
+                , header: new(PackageInfo.CompareNames)
+            );
+
+            column.resizable = true;
+            column.sortable = true;
+
+            column = table.AddColumn("Version"
+                , 150
+                , PackageTableColumn_MakeCell_Version
+                , PackageTableColumn_BindCell_Version
+            );
+
+            column.maxWidth = 150;
+
+            var asset = _packageCollectionAsset = CreateInstance<PackageCollectionAsset>();
+            var serializedObject = new SerializedObject(asset);
+            _packageTable.Bind(serializedObject);
+        }
+
+        private static ToggleOrImage PackageTableColumn_MakeCell_Install()
+        {
+            var toi = new ToggleOrImage();
+            toi.Image.image = EditorGUIUtility.IconContent("Installed").image;
+            toi.Image.tooltip = "Installed";
+            toi.AddToClassList("install-toggle-or-image");
+
+            return toi;
+        }
+
+        private static void PackageTableColumn_BindCell_Install(VisualElement element, PackageInfo item)
+        {
+            if (element is not ToggleOrImage tol || item is null)
+            {
+                return;
+            }
+
+            tol.Toggle.userData = null;
+            tol.Toggle.UnregisterValueChangedCallback(OnValueChanged);
+
+            tol.SetToggle(item.isInstalled == false);
 
             if (item.isInstalled)
             {
-                var iconSize = rect.height - 4f;
-                var iconRect = new Rect(rect.x - 3f, rect.y + 2f, iconSize, iconSize);
-                var icon = EditorGUIUtility.IconContent("Installed@2x");
-                icon.tooltip = "Installed";
-                EditorGUI.LabelField(iconRect, icon);
                 return;
             }
 
-            if (item.isOptional)
+            if (item.isOptional == false)
             {
-                item.isChosen = EditorGUI.Toggle(position: rect, value: item.isChosen);
+                tol.Toggle.SetValueWithoutNotify(true);
+                return;
             }
-            else
+
+            tol.Toggle.SetValueWithoutNotify(item.isChosen);
+            tol.Toggle.userData = item;
+            tol.Toggle.RegisterValueChangedCallback(OnValueChanged);
+
+            static void OnValueChanged(ChangeEvent<bool> evt)
             {
-                var enabled = GUI.enabled;
-                GUI.enabled = false;
-                EditorGUI.Toggle(position: rect, value: true);
-                GUI.enabled = enabled;
+                if (evt.currentTarget is not Toggle toggle || toggle.userData is not PackageInfo item)
+                {
+                    return;
+                }
+
+                item.isChosen = evt.newValue;
             }
         }
 
-        private static void TableColumn_Registry(Rect rect, PackageInfo item)
+        private static Label PackageTableColumn_MakeCell_Registry()
         {
-            var label = item.registry switch
+            var label = new Label();
+            label.AddToClassList("registry-label");
+
+            return label;
+        }
+
+        private static void PackageTableColumn_BindCell_Registry(VisualElement element, PackageInfo item)
+        {
+            if (element is not Label label || item is null)
             {
+                return;
+            }
+
+            label.text = item.registry switch {
                 PackageRegistry.Unity => "Unity",
                 PackageRegistry.OpenUpm => "OpenUPM",
                 PackageRegistry.GitUrl => "Git URL",
                 _ => "Unknown",
             };
-
-            EditorGUI.SelectableLabel(rect, label);
         }
 
-        private static void TableColumn_Name(Rect rect, PackageInfo item)
+        private static Label PackageTableColumn_MakeCell_PackageName()
         {
-            if (string.IsNullOrWhiteSpace(item.url))
+            var label = new Label();
+            label.AddToClassList("package-name-label");
+
+            return label;
+        }
+
+        private static void PackageTableColumn_BindCell_PackageName(VisualElement element, PackageInfo item)
+        {
+            if (element is not Label label || item is null)
             {
                 return;
             }
 
-            var label = new GUIContent(item.name, tooltip: item.url);
-            EditorStyles.linkLabel.CalcMinMaxWidth(label, out _, out var maxW);
+            label.UnregisterCallback<PointerDownEvent>(OnPointerDown);
 
-            rect.height = EditorGUIUtility.singleLineHeight;
-            rect.width = Mathf.Min(rect.width, maxW);
-
-            if (EditorGUI.LinkButton(rect, label))
+            if (string.IsNullOrEmpty(item.url))
             {
-                Application.OpenURL(item.url);
+                label.text = string.Empty;
+                label.tooltip = string.Empty;
+                label.userData = null;
+                return;
+            }
+
+            label.text = item.name;
+            label.tooltip = item.url;
+            label.userData = item.url;
+            label.RegisterCallback<PointerDownEvent>(OnPointerDown);
+
+            static void OnPointerDown(PointerDownEvent evt)
+            {
+                if (evt.currentTarget is Label label && label.userData is string url)
+                {
+                    Application.OpenURL(url);
+                }
             }
         }
 
-        private static void TableColumn_Version(Rect rect, PackageInfo item)
+        private static Label PackageTableColumn_MakeCell_Version()
         {
-            EditorGUI.SelectableLabel(rect, text: item.version);
+            var label = new Label();
+            label.AddToClassList("version-label");
+
+            return label;
         }
 
-        private static void ApplySelectedPackages(PackageInfo[] packages)
+        private static void PackageTableColumn_BindCell_Version(VisualElement element, PackageInfo item)
         {
-            if (packages == null || packages.Length < 1)
+            if (element is not Label label || item is null)
+            {
+                return;
+            }
+
+            label.text = item.version;
+        }
+
+        private static void GetFeatures(
+              HashSet<string> installedPackages
+            , List<string> features
+            , Dictionary<string, PackageInfo[]> featureMap
+        )
+        {
+            features.Clear();
+            featureMap.Clear();
+
+            var types = UnityEditor.TypeCache.GetTypesWithAttribute<FeatureAttribute>();
+            var packages = new HashSet<PackageInfo>();
+
+            foreach (var type in types)
+            {
+                var featureAttrib = type.GetCustomAttribute<FeatureAttribute>();
+
+                if (string.IsNullOrWhiteSpace(featureAttrib?.Name))
+                {
+                    continue;
+                }
+
+                packages.Clear();
+
+                var featureName = featureAttrib.Name;
+
+                if (featureMap.Remove(featureName, out var featurePackages))
+                {
+                    foreach (var package in featurePackages)
+                    {
+                        packages.Add(package);
+                    }
+                }
+
+                var packageAttribs = type.GetCustomAttributes<RequiresPackageAttribute>();
+
+                foreach (var packageAttrib in packageAttribs)
+                {
+                    if (string.IsNullOrWhiteSpace(packageAttrib?.PackageName))
+                    {
+                        continue;
+                    }
+
+                    var packageName = packageAttrib.PackageName;
+
+                    var package = new PackageInfo {
+                        registry = packageAttrib.Registry,
+                        name = packageName,
+                        version = packageAttrib.Version ?? string.Empty,
+                        isOptional = packageAttrib.IsOptional,
+                        isInstalled = installedPackages.Contains(packageName),
+                        isChosen = !packageAttrib.IsOptional,
+                        url = packageAttrib.Registry switch {
+                            PackageRegistry.Unity => string.Format(UNITY_UPM_URL, packageName),
+                            PackageRegistry.OpenUpm => string.Format(OPEN_UPM_URL, packageName),
+                            PackageRegistry.GitUrl => packageName,
+                            _ => string.Empty,
+                        },
+                    };
+
+                    packages.Add(package);
+                }
+
+                if (packages.Count < 1)
+                {
+                    continue;
+                }
+
+                featureMap[featureName] = packages
+                    .OrderBy(static x => x.name)
+                    .ThenBy(static x => x.registry)
+                    .ToArray();
+            }
+
+            features.AddRange(featureMap.Keys.OrderBy(static x => x));
+        }
+
+        private static void ApplySelectedPackages(List<PackageInfo> packages)
+        {
+            if (packages == null || packages.Count < 1)
             {
                 return;
             }
@@ -407,14 +596,14 @@ namespace EncosyTower.Editor.ProjectSetup
 
             EditorUtility.DisplayProgressBar(INSTALL_TITLE, INSTALLING_MSG, 0.25f);
 
-            var length = packages.Length;
+            var length = packages.Count;
             var unityIdentifiers = s_unityIdentifiers = new List<string>(length);
             var openUpmSb = s_openUpmSb = new StringBuilder();
             var firstOpenUpm = true;
 
             for (var i = 0; i < length; i++)
             {
-                ref readonly var package = ref packages[i];
+                var package = packages[i];
                 var shouldBeInstalled = package.ShouldBeInstalled();
 
                 if (shouldBeInstalled == false || string.IsNullOrWhiteSpace(package.name))
@@ -515,7 +704,7 @@ namespace EncosyTower.Editor.ProjectSetup
             s_unityIdentifiers = null;
         }
 
-        public static bool ExistsOnPath(string exeName)
+        private static bool ExistsOnPath(string exeName)
         {
             try
             {
@@ -533,6 +722,12 @@ namespace EncosyTower.Editor.ProjectSetup
             }
         }
 
+        private class FeatureCollectionAsset : ScriptableObject
+        {
+            public List<string> features;
+        }
+
+        [Serializable]
         private class PackageInfo : IEquatable<PackageInfo>
         {
             public PackageRegistry registry;
@@ -542,6 +737,12 @@ namespace EncosyTower.Editor.ProjectSetup
             public bool isOptional;
             public bool isInstalled;
             public bool isChosen;
+
+            public static int CompareNames(PackageInfo a, PackageInfo b)
+                => string.Compare(a.name, b.name, StringComparison.Ordinal);
+
+            public static int CompareRegistries(PackageInfo a, PackageInfo b)
+                => a.registry - b.registry;
 
             public override int GetHashCode()
                 => HashCode.Combine(name);
@@ -554,6 +755,40 @@ namespace EncosyTower.Editor.ProjectSetup
 
             public bool ShouldBeInstalled()
                 => isInstalled == false && (isOptional == false || isChosen);
+        }
+
+        private class PackageCollectionAsset : ScriptableObject
+        {
+            public List<PackageInfo> packages;
+        }
+
+        private class ToggleOrImage : VisualElement
+        {
+            public static readonly string UssClassName = "toggle-or-image";
+            public static readonly string ToggleUssClassName = $"{UssClassName}__toggle";
+            public static readonly string ImageUssClassName = $"{UssClassName}__image";
+
+            public readonly Toggle Toggle;
+            public readonly Image Image;
+
+            public ToggleOrImage()
+            {
+                AddToClassList(UssClassName);
+
+                Add(Toggle = new());
+                Toggle.AddToClassList(ToggleUssClassName);
+                Toggle.SetDisplay(DisplayStyle.Flex);
+
+                Add(Image = new());
+                Image.AddToClassList(ImageUssClassName);
+                Image.SetDisplay(DisplayStyle.None);
+            }
+
+            public void SetToggle(bool value)
+            {
+                Toggle.SetDisplay(value ? DisplayStyle.Flex : DisplayStyle.None);
+                Image.SetDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
+            }
         }
     }
 }

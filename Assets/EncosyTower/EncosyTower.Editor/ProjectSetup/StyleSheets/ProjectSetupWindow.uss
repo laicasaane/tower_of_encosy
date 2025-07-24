@@ -1,0 +1,89 @@
+#button-group {
+    margin-top: 4px;
+    flex-direction: row;
+}
+
+#button-group * {
+    height: 28px;
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+#request-info-label,
+.unity-two-pane-split-view {
+    margin-top: 10px;
+}
+
+#request-info-container {
+    flex-grow: 1;
+}
+
+.refresh-button {
+    height: 28px;
+    flex-grow: 0;
+}
+
+#request-info-label {
+    -unity-text-align: middle-center;
+    -unity-font-style: italic;
+}
+
+.unity-list-view__empty-label {
+    -unity-text-align: middle-center;
+    -unity-font-style: italic;
+}
+
+.unity-multi-column-header {
+    height: 28px;
+}
+
+.header-container .header-label {
+    -unity-text-align: middle-center;
+}
+
+#feature-table #unity-multi-column-view__row-container {
+    height: 36px;
+}
+
+#package-table #unity-multi-column-view__row-container {
+    height: 28px;
+}
+
+.table-row {
+    flex-grow: 1;
+}
+
+.feature-button {
+    flex-grow: 1;
+    margin: 4px 6px;
+    padding-left: 16px;
+    -unity-text-align: middle-left;
+}
+
+.install-toggle-or-image,
+.toggle-or-image .unity-toggle,
+.registry-label,
+.package-name-label,
+.version-label {
+    flex-grow: 1;
+}
+
+.toggle-or-image {
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-or-image .unity-image {
+    --unity-image-tint-color: lime;
+}
+
+.registry-label {
+    -unity-text-align: middle-left;
+    padding-left: 9px;
+}
+
+.package-name-label,
+.version-label {
+    -unity-text-align: middle-left;
+    padding-left: 16px;
+}

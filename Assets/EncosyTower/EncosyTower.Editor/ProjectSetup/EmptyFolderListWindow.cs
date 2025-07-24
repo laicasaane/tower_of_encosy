@@ -4,8 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using EncosyTower.Collections.Unsafe;
+using EncosyTower.Editor.UIElements;
+using EncosyTower.UnityExtensions;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace EncosyTower.Editor.ProjectSetup
 {
@@ -15,146 +20,46 @@ namespace EncosyTower.Editor.ProjectSetup
         public static void OpenWindow()
         {
             var window = GetWindow<EmptyFolderListWindow>();
-            window.titleContent = new GUIContent(LIST_TITLE);
+            window.titleContent = new GUIContent("Empty Folders");
             window.ShowPopup();
         }
 
-        private const string LIST_TITLE = "Empty Folders";
-        private const string LIST_ZERO_MSG = "Found 0 empty folder...";
+        [SerializeField] private ThemeStyleSheet _themeStyleSheet;
 
-        private ItemInfo[] _items;
         private SimpleTableView<ItemInfo> _table;
 
-        public void OnEnable()
+        private void CreateGUI()
         {
-            if (FindItems(out var items) == false)
-            {
-                return;
-            }
+            rootVisualElement.styleSheets.Add(_themeStyleSheet);
 
-            _items = items;
+            var buttonGroup = new VisualElement() {
+                name = "button-group",
+            };
+
+            rootVisualElement.Add(buttonGroup);
+
+            buttonGroup.Add(new Button(Refresh) {
+                text = "Refresh",
+                name = "refresh-button",
+            });
+
+            buttonGroup.Add(new Button(Delete) {
+                text = "Delete",
+                name = "delete-button",
+            });
+
+            CreateTable();
+            Refresh();
         }
 
-        public void OnGUI()
+        private void Refresh()
         {
-            EditorGUILayout.Space();
-
-            EditorGUILayout.BeginHorizontal();
-            {
-                if (GUILayout.Button("Refresh", GUILayout.Height(22)))
-                {
-                    OnEnable();
-                    EditorGUILayout.EndHorizontal();
-                    return;
-                }
-
-                if (GUILayout.Button("Delete", GUILayout.Height(22)))
-                {
-                    Delete();
-                    EditorGUILayout.EndHorizontal();
-                    return;
-                }
-            }
-            EditorGUILayout.EndHorizontal();
-
-            var items = _items.AsSpan();
-
-            if (items.Length < 1)
-            {
-                EditorGUILayout.LabelField(LIST_ZERO_MSG);
-                return;
-            }
-
-            BuildTable();
-
-            EditorGUILayout.Space();
-
-            _table.DrawTableGUI(_items, rowHeight: EditorGUIUtility.singleLineHeight * 1.7f);
-            _table.ResizeToFit();
-        }
-
-        private void BuildTable()
-        {
-            if (_table != null)
-            {
-                return;
-            }
-
-            var table = _table = new();
-
-            table.AddColumn(" ", 10, TableColumn_Empty)
-                .SetMaxWidth(10);
-
-            table.AddColumn("Delete?", 60, TableColumn_Select)
-                .SetMaxWidth(60);
-
-            table.AddColumn("Folder", 200, TableColumn_Folder)
-                .SetAutoResize(true)
-                .SetSorting((a, b) => string.Compare(a.asset.name, b.asset.name, StringComparison.Ordinal));
-
-            table.AddColumn("Path", 200, TableColumn_Path)
-                .SetAutoResize(true)
-                .SetSorting((a, b) => string.Compare(a.path, b.path, StringComparison.Ordinal));
-        }
-
-        private static void TableColumn_Empty(Rect rect, ItemInfo item)
-        {
-
-        }
-
-        private static void TableColumn_Select(Rect rect, ItemInfo item)
-        {
-            if (item == null)
-            {
-                return;
-            }
-
-            rect.x += 30f - (GUI.skin.toggle.fixedWidth / 2f);
-            rect.width = GUI.skin.toggle.fixedWidth;
-
-            item.selected = EditorGUI.Toggle(rect, item.selected);
-        }
-
-        private static void TableColumn_Folder(Rect rect, ItemInfo item)
-        {
-            if (item == null || item.asset == false)
-            {
-                return;
-            }
-
-            var height = rect.height;
-
-            rect.height = 20f;
-            rect.width -= 24f;
-            rect.x += 12f;
-            rect.y += (height - 20f) / 2f;
-
-            EditorGUI.ObjectField(rect, item.asset, typeof(DefaultAsset), false);
-        }
-
-        private static void TableColumn_Path(Rect rect, ItemInfo item)
-        {
-            if (item == null || string.IsNullOrWhiteSpace(item.path))
-            {
-                return;
-            }
-
-            var label = new GUIContent(item.path);
-            EditorStyles.linkLabel.CalcMinMaxWidth(label, out _, out var maxW);
-
-            rect.height = EditorGUIUtility.singleLineHeight;
-            rect.width = Mathf.Min(rect.width, maxW);
-            rect.y += 4f;
-
-            if (EditorGUI.LinkButton(rect, label))
-            {
-                Selection.activeObject = item.asset;
-            }
+            FindItems(_table.Items);
         }
 
         private void Delete()
         {
-            var span = _items.AsSpan();
+            var span = _table.Items.AsSpanUnsafe();
             var length = span.Length;
             var items = new List<ItemInfo>(length);
             var paths = new List<string>(length);
@@ -173,7 +78,8 @@ namespace EncosyTower.Editor.ProjectSetup
                 paths.Add(path);
             }
 
-            _items = items.ToArray();
+            _table.Items.Clear();
+            _table.Items.AddRange(items);
 
             if (paths.Count < 1)
             {
@@ -184,8 +90,122 @@ namespace EncosyTower.Editor.ProjectSetup
             AssetDatabase.DeleteAssets(paths.ToArray(), failed);
         }
 
-        private static bool FindItems(out ItemInfo[] result)
+        private void CreateTable()
         {
+            var table = _table = new() {
+                bindingPath = nameof(ItemCollectionAsset.items),
+                showBoundCollectionSize = false,
+            };
+
+            rootVisualElement.Add(table);
+
+            var column = table.AddColumn(" ", 10);
+            column.maxWidth = 10;
+
+            column = table.AddColumn("Delete?"
+                , 60
+                , TableColumn_MakeCell_Select
+                , TableColumn_BindCell_Select
+            );
+
+            column.maxWidth = 60;
+
+            column = table.AddColumn("Folder"
+                , 200
+                , TableColumn_MakeCell_Folder
+                , TableColumn_BindCell_Folder
+                , header: new(ItemInfo.CompareNames)
+            );
+
+            column.resizable = true;
+            column.sortable = true;
+
+            column = table.AddColumn("Path"
+                , 200
+                , TableColumn_MakeCell_Path
+                , TableColumn_BindCell_Path
+                , header: new(ItemInfo.ComparePaths)
+            );
+
+            column.resizable = true;
+            column.sortable = true;
+
+            var asset = CreateInstance<ItemCollectionAsset>();
+            asset.items = _table.Items;
+
+            var serializedObject = new SerializedObject(asset);
+            _table.Bind(serializedObject);
+        }
+
+        private static Toggle TableColumn_MakeCell_Select()
+        {
+            var field = new Toggle();
+            field.AddToClassList("select-field");
+
+            return field;
+        }
+
+        private static void TableColumn_BindCell_Select(VisualElement element, ItemInfo item)
+        {
+            if (element is not Toggle field || item is null)
+            {
+                return;
+            }
+
+            field.value = item.selected;
+        }
+
+        private static ObjectField TableColumn_MakeCell_Folder()
+        {
+            var field = new ObjectField {
+                allowSceneObjects = false
+            };
+
+            field.AddToClassList("folder-field");
+
+            return field;
+        }
+
+        private static void TableColumn_BindCell_Folder(VisualElement element, ItemInfo item)
+        {
+            if (element is not ObjectField field || item is null)
+            {
+                return;
+            }
+
+            field.value = item.asset;
+        }
+
+        private static Label TableColumn_MakeCell_Path()
+        {
+            var label = new Label();
+            label.AddToClassList("folder-path");
+
+            label.RegisterCallback<PointerDownEvent>(_ => {
+                if (label.userData is SceneAsset asset && asset.IsValid())
+                {
+                    EditorGUIUtility.PingObject(asset);
+                }
+            });
+
+            return label;
+        }
+
+        private static void TableColumn_BindCell_Path(VisualElement element, ItemInfo item)
+        {
+            if (element is not Label label || item is null)
+            {
+                return;
+            }
+
+            label.text = item.path;
+            label.userData = item.asset;
+        }
+
+        private static void FindItems(List<ItemInfo> result)
+        {
+            result.Clear();
+
             var directoryInfo = new DirectoryInfo(Application.dataPath);
             var rootPath = Path.Combine(Application.dataPath, "..");
             var items = new List<ItemInfo>();
@@ -229,11 +249,11 @@ namespace EncosyTower.Editor.ProjectSetup
             if (items.Count < 1)
             {
                 result = default;
-                return false;
+                return;
             }
 
-            result = items.ToArray();
-            return true;
+            result.AddRange(items);
+            return;
 
             static bool IsNotMeta(FileInfo file)
             {
@@ -241,11 +261,23 @@ namespace EncosyTower.Editor.ProjectSetup
             }
         }
 
+        [Serializable]
         private class ItemInfo
         {
             public DefaultAsset asset;
             public string path;
             public bool selected;
+
+            public static int CompareNames(ItemInfo a, ItemInfo b)
+                => string.Compare(a.asset.name, b.asset.name, StringComparison.Ordinal);
+
+            public static int ComparePaths(ItemInfo a, ItemInfo b)
+                => string.Compare(a.path, b.path, StringComparison.Ordinal);
+        }
+
+        private class ItemCollectionAsset : ScriptableObject
+        {
+            public List<ItemInfo> items;
         }
     }
 }
