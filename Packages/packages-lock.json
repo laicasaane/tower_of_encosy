@@ -63,7 +63,7 @@
       "dependencies": {}
     },
     "com.latios.latiosframework": {
-      "version": "0.13.1",
+      "version": "0.13.2",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -84,7 +84,7 @@
       "hash": "0c0a6f4504dc3e9a02a1da704480b7920787439f"
     },
     "com.needle.console": {
-      "version": "2.4.3",
+      "version": "2.4.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -226,7 +226,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.burst": {
-      "version": "1.8.23",
+      "version": "1.8.24",
       "depth": 0,
       "source": "registry",
       "dependencies": {
