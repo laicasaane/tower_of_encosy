@@ -212,10 +212,16 @@ namespace EncosyTower.Collections
 
 #if __ENCOSY_VALIDATION__
             if (itemAdded == false)
+            {
                 throw new InvalidOperationException("Key already present");
+            }
+            else
+#else
+            if (itemAdded)
 #endif
-
-            _values[index] = value;
+            {
+                _values[index] = value;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -236,10 +242,16 @@ namespace EncosyTower.Collections
 
 #if __ENCOSY_VALIDATION__
             if (itemAdded)
+            {
                 throw new InvalidOperationException("Trying to set a value on a not existing key");
+            }
+            else
+#else
+            if (itemAdded == false)
 #endif
-
-            _values[index] = value;
+            {
+                _values[index] = value;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

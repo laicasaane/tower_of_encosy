@@ -207,10 +207,16 @@ namespace EncosyTower.Collections
 
 #if __ENCOSY_VALIDATION__
             if (itemAdded == false)
+            {
                 throw new InvalidOperationException("Key already present");
+            }
+            else
+#else
+            if (itemAdded)
 #endif
-
-            _values.AsSpan()[index] = value;
+            {
+                _values.AsSpan()[index] = value;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -242,10 +248,16 @@ namespace EncosyTower.Collections
 
 #if __ENCOSY_VALIDATION__
             if (itemAdded)
+            {
                 throw new InvalidOperationException("Trying to set a value on a not existing key");
+            }
+            else
+#else
+            if (itemAdded == false)
 #endif
-
-            _values.AsSpan()[index] = value;
+            {
+                _values.AsSpan()[index] = value;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -322,7 +334,6 @@ namespace EncosyTower.Collections
 
             throw new KeyNotFoundException("Key not found");
 #else
-            // Burst is not able to vectorise code if throw is found, regardless if it's actually ever thrown
             TryFindIndex(key, out var findIndex);
 
             return ref _values.AsSpan()[findIndex];
@@ -522,7 +533,6 @@ namespace EncosyTower.Collections
 
             throw new KeyNotFoundException("Key not found");
 #else
-            //Burst is not able to vectorise code if throw is found, regardless if it's actually ever thrown
             TryFindIndex(key, out var findIndex);
 
             return findIndex;
@@ -752,7 +762,7 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void ICollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>.CopyTo(SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>[] array, int arrayIndex)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("This method is not implemented by design.");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -824,6 +834,7 @@ namespace EncosyTower.Collections
                 if (_count != _map.Count)
                     throw new InvalidOperationException("Cannot modify a map while it is being iterated");
 #endif
+
                 if (_index < _count - 1)
                 {
                     ++_index;
