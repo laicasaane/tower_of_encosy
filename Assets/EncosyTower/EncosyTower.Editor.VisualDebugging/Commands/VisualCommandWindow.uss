@@ -44,6 +44,10 @@
     -unity-text-align: middle-center;
 }
 
+.visual-directory:checked .visual-directory__label {
+    color: var(--visual-directory-label-color);
+}
+
 .visual-command {
     border-width: 1px;
     border-color: var(--visual-command-border-color);
