@@ -75,23 +75,26 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
             loaderStrategy.BindProperty(context.GetLoaderStrategyProperty());
             messageScope.BindProperty(context.GetMessageScopeProperty());
             logEnvironment.BindProperty(context.GetLogEnvironmentProperty());
+
             contentContainer.Bind(serializedSettings);
         }
 
         public void Update()
         {
-            if (_valueUpdated)
+            if (_valueUpdated == false)
             {
-                _valueUpdated = false;
-
-                var serializedObject = _context.Object;
-
-                serializedObject.ApplyModifiedProperties();
-                serializedObject.Update();
-
-                EditorUtility.SetDirty(serializedObject.targetObject);
-                AssetDatabase.SaveAssetIfDirty(serializedObject.targetObject);
+                return;
             }
+
+            _valueUpdated = false;
+
+            var serializedObject = _context.Object;
+
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+
+            EditorUtility.SetDirty(serializedObject.targetObject);
+            AssetDatabase.SaveAssetIfDirty(serializedObject.targetObject);
         }
 
         private void OnValueChanged(ChangeEvent<bool> evt)

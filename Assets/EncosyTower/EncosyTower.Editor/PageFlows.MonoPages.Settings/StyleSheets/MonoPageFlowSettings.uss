@@ -1,3 +1,15 @@
+:root {
+    --label-min-width: 200px;
+}
+
+.mono-page-flow .unity-base-field__aligned > .unity-base-field__label {
+    min-width: var(--label-min-width);
+}
+
+.mono-page-flow .unity-base-field {
+    height: 19px;
+}
+
 .button-open-settings-windows {
     min-height: 30px;
 }
