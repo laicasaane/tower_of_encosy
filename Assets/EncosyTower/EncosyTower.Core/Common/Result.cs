@@ -7,6 +7,8 @@ namespace EncosyTower.Common
     {
         bool IsValid { get; }
 
+        public bool IsOk { get; }
+
         TOk Ok();
 
         TOk OkOrDefault(TOk defaultOkValue = default);
@@ -17,6 +19,8 @@ namespace EncosyTower.Common
     public interface IResultError<TError>
     {
         bool IsValid { get; }
+
+        public bool IsError { get; }
 
         TError Error();
 
@@ -52,6 +56,18 @@ namespace EncosyTower.Common
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _ok.HasValue || _error.IsValid;
+        }
+
+        public bool IsOk
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _ok.HasValue;
+        }
+
+        public bool IsError
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => !IsOk;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -169,6 +185,18 @@ namespace EncosyTower.Common
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _ok.HasValue || _error.HasValue;
+        }
+
+        public bool IsOk
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _ok.HasValue;
+        }
+
+        public bool IsError
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => !IsOk;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
