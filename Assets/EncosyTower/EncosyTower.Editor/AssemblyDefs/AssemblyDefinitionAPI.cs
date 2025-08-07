@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using EncosyTower.Common;
+using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEditorInternal;
 
@@ -64,6 +65,19 @@ namespace EncosyTower.Editor.AssemblyDefs
             , [NotNull] AssemblyDefinitionInfo assemblyDef
         )
         {
+            var assemblyAsset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(assetPath);
+
+            return assemblyAsset.IsInvalid()
+                ? new FileNotFoundException($"Assembly Definition asset not found at {assetPath}")
+                : TryGetData(assetPath, assemblyAsset, assemblyDef);
+        }
+
+        public static Result<AssemblyData> TryGetData(
+              [NotNull] string assetPath
+            , [NotNull] AssemblyDefinitionAsset assemblyAsset
+            , [NotNull] AssemblyDefinitionInfo assemblyDef
+        )
+        {
             var guidStrings = AssetDatabase
                 .FindAssets($"t:{nameof(AssemblyDefinitionAsset)}")
                 .AsSpan();
@@ -117,7 +131,7 @@ namespace EncosyTower.Editor.AssemblyDefs
                 var path = AssetDatabase.GUIDToAssetPath(guidString);
                 var asset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
 
-                if (asset == false
+                if (asset.IsInvalid()
                     || GUID.TryParse(guidString, out var guid) == false
                     || TryGetInfo(asset.text).TryOk(out var info) == false
                 )
@@ -207,7 +221,6 @@ namespace EncosyTower.Editor.AssemblyDefs
 
             suggestedReferences.Sort(AssemblyReferenceData.CompareName);
 
-            var assemblyAsset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(assetPath);
             var result = new AssemblyData(
                   assetPath
                 , assemblyAsset
