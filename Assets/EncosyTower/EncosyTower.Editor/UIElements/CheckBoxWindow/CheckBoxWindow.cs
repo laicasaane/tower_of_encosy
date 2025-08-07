@@ -136,7 +136,7 @@ namespace EncosyTower.Editor.UIElements
         private void OnCreateGUI(OnCreateWindow onCreateWindow)
         {
             rootVisualElement.styleSheets.Add(_themeStyleSheet);
-            rootVisualElement.styleSheets.Add(EditorGUIUtility.isProSkin ? _darkThemeStyleSheet : _lightThemeStyleSheet);
+            rootVisualElement.ApplyEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
 
             _listView = null;
 

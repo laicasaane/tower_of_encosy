@@ -51,7 +51,7 @@ namespace EncosyTower.Editor.UIElements
             _currentNode = popup.rootNode;
 
             rootVisualElement.styleSheets.Add(_themeStyleSheet);
-            rootVisualElement.styleSheets.Add(EditorGUIUtility.isProSkin ? _darkThemeStyleSheet : _lightThemeStyleSheet);
+            rootVisualElement.ApplyEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
             rootVisualElement.AddToClassList(MenuPopupUssClassName);
 
             rootVisualElement.Clear();

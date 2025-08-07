@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using EncosyTower.Editor.UIElements;
 using EncosyTower.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -68,7 +69,7 @@ namespace EncosyTower.Editor.AssemblyDefs
             }
 
             rootVisualElement.styleSheets.Add(_themeStyleSheet);
-            rootVisualElement.styleSheets.Add(EditorGUIUtility.isProSkin ? _darkThemeStyleSheet : _lightThemeStyleSheet);
+            rootVisualElement.ApplyEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
 
             _tabAll = new AssemblyReferenceTab("All", Close);
             _tabSuggested = new AssemblyReferenceTab("Suggestions", Close);

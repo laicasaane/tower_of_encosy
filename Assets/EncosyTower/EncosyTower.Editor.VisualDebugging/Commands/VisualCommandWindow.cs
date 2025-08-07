@@ -11,8 +11,8 @@ namespace EncosyTower.Editor.VisualDebugging.Commands
     internal class VisualCommandWindow : EditorWindow
     {
         [SerializeField] private ThemeStyleSheet _themeStyleSheet;
-        [SerializeField] private StyleSheet _dark;
-        [SerializeField] private StyleSheet _light;
+        [SerializeField] private StyleSheet _darkThemeStyleSheet;
+        [SerializeField] private StyleSheet _lightThemeStyleSheet;
 
         private VisualCommanderView _view;
 
@@ -27,17 +27,8 @@ namespace EncosyTower.Editor.VisualDebugging.Commands
         private void CreateGUI()
         {
             var root = rootVisualElement;
-
-            if (Application.isPlaying == false)
-            {
-                root.styleSheets.Add(_themeStyleSheet);
-                root.ApplyEditorStyleSheet(_dark, _light);
-            }
-            else
-            {
-                root.ApplyEditorStyleSheet(Constants.THEME_STYLE_SHEET);
-                root.ApplyEditorStyleSheet(Constants.STYLE_SHEET_DARK, Constants.STYLE_SHEET_LIGHT);
-            }
+            root.styleSheets.Add(_themeStyleSheet);
+            root.ApplyEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
 
             _view = VisualCommanderAPI.CreateView(root, 150f);
         }
