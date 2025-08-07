@@ -1,0 +1,123 @@
+.unity-tab-view__header-container {
+    min-height: 30px;
+    max-height: 30px;
+}
+
+.unity-list-view__item {
+    padding: 0px 10px;
+}
+
+.unity-list-view__item.item-as-header {
+    background-color: var(--header-background-color);
+    margin: 0px -10px;
+}
+
+.list-empty-label {
+    -unity-text-align: middle-center;
+    -unity-font-style: italic;
+}
+
+.list-view {
+    flex-grow: 1;
+    margin-top: 5px;
+}
+
+.select-button {
+    width: 80px;
+}
+
+.search-field {
+    flex-grow: 1;
+    margin-right: 5px;
+}
+
+.tool-field {
+    flex-grow: 1;
+    flex-direction: row;
+    min-height: 25px;
+    max-height: 25px;
+    padding-top: 2.5px;
+    padding-bottom: 2.5px;
+}
+
+.apply-button {
+    width: 50%;
+    margin-right: 0px;
+}
+
+.cancel-button {
+    width: 50%;
+    margin-right: 5px;
+}
+
+.apply-button-group {
+    flex-direction: row;
+    min-height: 25px;
+    max-height: 25px;
+    margin-top: 5px;
+}
+
+.apply-group {
+    flex-grow: 1;
+    flex-direction: column;
+    min-height: 70px;
+    max-height: 70px;
+    padding-top: 10px;
+    margin-right: 9px;
+}
+
+.apply-assembly {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.apply-assembly .unity-object-field__label {
+    margin-right: 10px;
+    -unity-font-style: bold;
+}
+
+.reference-field {
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: center;
+}
+
+.reference-toggle {
+    display: flex;
+    max-width: 22.5px;
+}
+
+.reference-bar {
+    background-color: transparent;
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: center;
+    min-height: 22.5px;
+    padding-right: 5px;
+}
+
+.reference-label {
+    width: 50%;
+    -unity-text-align: middle-left;
+}
+
+.reference-object {
+    display: flex;
+    width: 50%;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.item-as-header .reference-toggle {
+    display: none;
+}
+
+.item-as-header .reference-label {
+    width: 100%;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.item-as-header .reference-object {
+    display: none;
+}

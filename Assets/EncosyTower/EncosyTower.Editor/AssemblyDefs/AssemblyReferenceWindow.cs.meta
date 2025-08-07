@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 29f35568d8f6501438a72e136c4b79c5
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - m_ViewDataDictionary: {instanceID: 0}
+  - _themeStyleSheet: {fileID: -4733365628477956816, guid: 0c72c3c37bd06e8418daceb47445c5c1,
+      type: 3}
+  - _darkThemeStyleSheet: {fileID: 7433441132597879392, guid: aa11beda56ee5054398ce895341d7ed3,
+      type: 3}
+  - _lightThemeStyleSheet: {fileID: 7433441132597879392, guid: ffcef0711aec113459c8a31885a116e6,
+      type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

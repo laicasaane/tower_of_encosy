@@ -5,7 +5,7 @@ using System;
 namespace EncosyTower.Editor.AssemblyDefs
 {
     [Serializable]
-    public class AssemblyDef
+    public class AssemblyDefinitionInfo
     {
         public string name = string.Empty;
         public string rootNamespace = string.Empty;
@@ -17,12 +17,12 @@ namespace EncosyTower.Editor.AssemblyDefs
         public string[] precompiledReferences = Array.Empty<string>();
         public bool autoReferenced;
         public string[] defineConstraints = Array.Empty<string>();
-        public VersionDef[] versionDefines = Array.Empty<VersionDef>();
+        public VersionDefineInfo[] versionDefines = Array.Empty<VersionDefineInfo>();
         public bool noEngineReferences;
     }
 
     [Serializable]
-    public class VersionDef
+    public class VersionDefineInfo
     {
         public string name = string.Empty;
         public string expression = string.Empty;
