@@ -28,12 +28,12 @@
     flex-grow: 1;
 }
 
-.scene-button {
+.asset-button {
     flex-grow: 1;
     margin: 6px;
 }
 
-.scene-path {
+.asset-path {
     flex-grow: 1;
     margin: 4px;
     -unity-text-align: middle-left;

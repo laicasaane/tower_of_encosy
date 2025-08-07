@@ -89,7 +89,7 @@ namespace EncosyTower.Editor.Scenes
         private static Button TableColumn_MakeCell_Scene()
         {
             var button = new Button();
-            button.AddToClassList("scene-button");
+            button.AddToClassList("asset-button");
 
             button.clicked += () => {
                 if (button.userData is string path && path.IsNotEmpty())
@@ -115,7 +115,7 @@ namespace EncosyTower.Editor.Scenes
         private static Label TableColumn_MakeCell_Path()
         {
             var label = new Label();
-            label.AddToClassList("scene-path");
+            label.AddToClassList("asset-path");
 
             label.RegisterCallback<PointerDownEvent>(_ => {
                 if (label.userData is SceneAsset asset && asset.IsValid())
@@ -158,7 +158,7 @@ namespace EncosyTower.Editor.Scenes
                 var path = AssetDatabase.GUIDToAssetPath(guid);
                 var asset = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
 
-                if (asset == false)
+                if (asset.IsInvalid())
                 {
                     continue;
                 }

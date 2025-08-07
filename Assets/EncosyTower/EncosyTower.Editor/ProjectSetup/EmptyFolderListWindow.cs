@@ -234,7 +234,7 @@ namespace EncosyTower.Editor.ProjectSetup
 
                 var asset = AssetDatabase.LoadAssetAtPath<DefaultAsset>(path);
 
-                if (asset == false)
+                if (asset.IsInvalid())
                 {
                     continue;
                 }
