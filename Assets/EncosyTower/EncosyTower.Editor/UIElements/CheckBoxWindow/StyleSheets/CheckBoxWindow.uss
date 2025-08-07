@@ -2,6 +2,15 @@
     flex-grow: 1;
 }
 
+.unity-list-view__item {
+    padding: 0px 10px;
+}
+
+.unity-list-view__item .item-as-header {
+    background-color: var(--header-background-color);
+    margin: 0px -10px;
+}
+
 .select-button {
     width: 80px;
 }

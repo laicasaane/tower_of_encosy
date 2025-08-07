@@ -42,6 +42,7 @@ namespace EncosyTower.Editor.UIElements
         public static readonly string AcceptButtonUssClassName = "accept-button";
         public static readonly string CancelButtonUssClassName = "cancel-button";
         public static readonly string ButtonFieldUssClassName = "button-field";
+        public static readonly string ItemAsHeaderUssClassName = "item-as-header";
 
         public delegate void OnOk(IReadOnlyList<IItemInfo> items);
 
@@ -217,7 +218,7 @@ namespace EncosyTower.Editor.UIElements
             {
                 var name = item.Name ?? string.Empty;
 
-                if (item.Separator)
+                if (item.IsHeader)
                 {
                     itemInfoList.Add(item);
                     continue;
@@ -282,7 +283,7 @@ namespace EncosyTower.Editor.UIElements
 
             bool IsChecked { get; set; }
 
-            bool Separator { get; }
+            bool IsHeader { get; }
         }
 
         public sealed class ItemInfo : IItemInfo
@@ -291,13 +292,13 @@ namespace EncosyTower.Editor.UIElements
 
             public bool IsChecked { get; set; }
 
-            public bool Separator { get; set; }
+            public bool IsHeader { get; set; }
 
-            public ItemInfo(string name, bool isChecked, bool separator = false)
+            public ItemInfo(string name, bool isChecked, bool isHeader = false)
             {
                 Name = name;
                 IsChecked = isChecked;
-                Separator = separator;
+                IsHeader = isHeader;
             }
         }
     }
