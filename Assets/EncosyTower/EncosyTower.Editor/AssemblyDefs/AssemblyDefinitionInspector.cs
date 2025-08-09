@@ -41,9 +41,9 @@ namespace EncosyTower.Editor.AssemblyDefs
 
                 EditorGUILayout.BeginHorizontal();
                 {
-                    if (GUILayout.Button(label.WithText("Select"), EditorStyles.miniButtonLeft))
+                    if (GUILayout.Button(label.WithText("Edit"), EditorStyles.miniButtonLeft))
                     {
-                        SelectReferences(importer);
+                        EditReferences(importer);
                     }
 
                     if (GUILayout.Button(label.WithText("Sort"), EditorStyles.miniButtonRight))
@@ -129,7 +129,7 @@ namespace EncosyTower.Editor.AssemblyDefs
             }
         }
 
-        private static void SelectReferences(AssemblyDefinitionImporter importer)
+        private static void EditReferences(AssemblyDefinitionImporter importer)
         {
             var infoResult = AssemblyDefinitionAPI.TryGetInfo(importer);
 

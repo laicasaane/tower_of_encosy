@@ -59,7 +59,7 @@ namespace EncosyTower.Editor.AssemblyDefs
             var column = table.AddColumn(" ", 10);
             column.maxWidth = 10;
 
-            column = table.AddColumn("Select References"
+            column = table.AddColumn("Edit References"
                 , 200
                 , TableColumn_MakeCell_References
                 , TableColumn_BindCell_References
