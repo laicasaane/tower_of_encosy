@@ -465,7 +465,7 @@ namespace EncosyTower.Collections
             public readonly T Current
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _current.Value();
+                get => _current.GetValueOrThrow();
             }
 
             public bool MoveNext()

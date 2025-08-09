@@ -3,17 +3,17 @@ using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Common
 {
-    public interface IResultOk<TOk>
+    public interface IResultSuccess<TValue>
     {
         bool IsValid { get; }
 
-        public bool IsOk { get; }
+        public bool IsSuccess { get; }
 
-        TOk Ok();
+        TValue GetValueOrThrow();
 
-        TOk OkOrDefault(TOk defaultOkValue = default);
+        TValue GetValueOrDefault(TValue defaultOkValue = default);
 
-        bool TryOk(out TOk value);
+        bool TryGetValue(out TValue value);
     }
 
     public interface IResultError<TError>
@@ -22,118 +22,118 @@ namespace EncosyTower.Common
 
         public bool IsError { get; }
 
-        TError Error();
+        TError GetErrorOrThrow();
 
-        TError ErrorOrDefault(TError defaultErrorValue = default);
+        TError GetErrorOrDefault(TError defaultErrorValue = default);
 
-        bool TryError(out TError value);
+        bool TryGetError(out TError value);
     }
 
-    public interface IResult<TOk, TError> : IResultOk<TOk>, IResultError<TError>
+    public interface IResult<TValue, TError> : IResultSuccess<TValue>, IResultError<TError>
     {
     }
 
-    public readonly struct Result<TOk> : IEquatable<Result<TOk>>, IResult<TOk, Error>
+    public readonly struct Result<TValue> : IEquatable<Result<TValue>>, IResult<TValue, Error>
     {
-        private readonly Option<TOk> _ok;
+        private readonly Option<TValue> _value;
         private readonly Error _error;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result(TOk ok)
+        public Result(TValue value)
         {
-            _ok = new Option<TOk>(ok);
+            _value = value;
             _error = default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(Error error)
         {
-            _ok = default;
+            _value = default;
             _error = error;
         }
 
         public bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _ok.HasValue || _error.IsValid;
+            get => _value.HasValue || _error.IsValid;
         }
 
-        public bool IsOk
+        public bool IsSuccess
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _ok.HasValue;
+            get => _value.HasValue;
         }
 
         public bool IsError
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => !IsOk;
+            get => !IsSuccess;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deconstruct(out Option<TOk> ok, out Error error)
+        public void Deconstruct(out Option<TValue> value, out Error error)
         {
-            ok = _ok;
+            value = _value;
             error = _error;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TOk Ok()
-            => _ok.Value();
+        public TValue GetValueOrThrow()
+            => _value.GetValueOrThrow();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryOk(out TOk value)
-            => _ok.TryValue(out value);
+        public bool TryGetValue(out TValue value)
+            => _value.TryGetValue(out value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TOk OkOrDefault(TOk defaultOkValue = default)
-            => _ok.ValueOrDefault(defaultOkValue);
+        public TValue GetValueOrDefault(TValue defaultValue = default)
+            => _value.GetValueOrDefault(defaultValue);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Error Error()
+        public Error GetErrorOrThrow()
             => _error;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryError(out Error value)
+        public bool TryGetError(out Error error)
         {
             if (_error.IsValid)
             {
-                value = _error;
+                error = _error;
                 return true;
             }
             else
             {
-                value = default;
+                error = default;
                 return false;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Error ErrorOrDefault(Error defaultErrorValue = default)
-            => _error.IsValid ? _error : defaultErrorValue;
+        public Error GetErrorOrDefault(Error defaultError = default)
+            => _error.IsValid ? _error : defaultError;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(Result<TOk> other)
-            => _ok.Equals(other._ok) && _error.Equals(other._error);
+        public bool Equals(Result<TValue> other)
+            => _value.Equals(other._value) && _error.Equals(other._error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
-            => obj is Result<TOk, Error> other && Equals(other);
+            => obj is Result<TValue, Error> other && Equals(other);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashCode.Combine(_ok, _error);
+            => HashCode.Combine(_value, _error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
-            if (TryOk(out var okValue))
+            if (TryGetValue(out var value))
             {
-                return $"Result+Ok({okValue})";
+                return $"Result+Value({value})";
             }
-            else if (TryError(out var errorValue))
+            else if (TryGetError(out var error))
             {
-                return $"Result+Error({errorValue})";
+                return $"Result+Error({error})";
             }
             else
             {
@@ -142,116 +142,116 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Result<TOk>(TOk ok)
-            => new(ok);
+        public static implicit operator Result<TValue>(TValue value)
+            => new(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Result<TOk>(Error error)
+        public static implicit operator Result<TValue>(Error error)
             => new(error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Result<TOk>(Exception exception)
-            => new(new Error(exception));
+        public static implicit operator Result<TValue>(Exception error)
+            => new(new Error(error));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Result<TOk> left, Result<TOk> right)
+        public static bool operator ==(Result<TValue> left, Result<TValue> right)
             => left.Equals(right);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Result<TOk> left, Result<TOk> right)
+        public static bool operator !=(Result<TValue> left, Result<TValue> right)
             => !left.Equals(right);
     }
 
-    public readonly struct Result<TOk, TError> : IEquatable<Result<TOk, TError>>, IResult<TOk, TError>
+    public readonly struct Result<TValue, TError> : IEquatable<Result<TValue, TError>>, IResult<TValue, TError>
     {
-        private readonly Option<TOk> _ok;
+        private readonly Option<TValue> _value;
         private readonly Option<TError> _error;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result(TOk ok)
+        public Result(TValue value)
         {
-            _ok = new Option<TOk>(ok);
+            _value = new Option<TValue>(value);
             _error = default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(TError error)
         {
-            _ok = default;
+            _value = default;
             _error = new Option<TError>(error);
         }
 
         public bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _ok.HasValue || _error.HasValue;
+            get => _value.HasValue || _error.HasValue;
         }
 
-        public bool IsOk
+        public bool IsSuccess
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _ok.HasValue;
+            get => _value.HasValue;
         }
 
         public bool IsError
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => !IsOk;
+            get => !IsSuccess;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deconstruct(out Option<TOk> ok, out Option<TError> error)
+        public void Deconstruct(out Option<TValue> value, out Option<TError> error)
         {
-            ok = _ok;
+            value = _value;
             error = _error;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TOk Ok()
-            => _ok.Value();
+        public TValue GetValueOrThrow()
+            => _value.GetValueOrThrow();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryOk(out TOk value)
-            => _ok.TryValue(out value);
+        public bool TryGetValue(out TValue value)
+            => _value.TryGetValue(out value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TOk OkOrDefault(TOk defaultOkValue = default)
-            => _ok.ValueOrDefault(defaultOkValue);
+        public TValue GetValueOrDefault(TValue defaultValue = default)
+            => _value.GetValueOrDefault(defaultValue);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TError Error()
-            => _error.Value();
+        public TError GetErrorOrThrow()
+            => _error.GetValueOrThrow();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryError(out TError value)
-            => _error.TryValue(out value);
+        public bool TryGetError(out TError error)
+            => _error.TryGetValue(out error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TError ErrorOrDefault(TError defaultErrorValue = default)
-            => _error.ValueOrDefault(defaultErrorValue);
+        public TError GetErrorOrDefault(TError defaultError = default)
+            => _error.GetValueOrDefault(defaultError);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(Result<TOk, TError> other)
-            => _ok.Equals(other._ok) && _error.Equals(other._error);
+        public bool Equals(Result<TValue, TError> other)
+            => _value.Equals(other._value) && _error.Equals(other._error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
-            => obj is Result<TOk, TError> other && Equals(other);
+            => obj is Result<TValue, TError> other && Equals(other);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashCode.Combine(_ok, _error);
+            => HashCode.Combine(_value, _error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
-            if (TryOk(out var okValue))
+            if (TryGetValue(out var value))
             {
-                return $"Result+Ok({okValue})";
+                return $"Result+Value({value})";
             }
-            else if (TryError(out var errorValue))
+            else if (TryGetError(out var error))
             {
-                return $"Result+Error({errorValue})";
+                return $"Result+Error({error})";
             }
             else
             {
@@ -260,19 +260,19 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Result<TOk, TError>(TOk ok)
-            => new(ok);
+        public static implicit operator Result<TValue, TError>(TValue value)
+            => new(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Result<TOk, TError>(TError error)
+        public static implicit operator Result<TValue, TError>(TError error)
             => new(error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Result<TOk, TError> left, Result<TOk, TError> right)
+        public static bool operator ==(Result<TValue, TError> left, Result<TValue, TError> right)
             => left.Equals(right);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Result<TOk, TError> left, Result<TOk, TError> right)
+        public static bool operator !=(Result<TValue, TError> left, Result<TValue, TError> right)
             => !left.Equals(right);
     }
 }

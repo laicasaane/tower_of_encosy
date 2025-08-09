@@ -31,12 +31,12 @@ namespace EncosyTower.Editor.AssemblyDefs
 
             var tryResult = TryGetInfo(json);
 
-            if (tryResult.TryOk(out var result))
+            if (tryResult.TryGetValue(out var result))
             {
                 return result;
             }
 
-            if (tryResult.TryError(out var error))
+            if (tryResult.TryGetError(out var error))
             {
                 return error;
             }
@@ -133,7 +133,7 @@ namespace EncosyTower.Editor.AssemblyDefs
 
                 if (asset.IsInvalid()
                     || GUID.TryParse(guidString, out var guid) == false
-                    || TryGetInfo(asset.text).TryOk(out var info) == false
+                    || TryGetInfo(asset.text).TryGetValue(out var info) == false
                 )
                 {
                     continue;
@@ -168,7 +168,7 @@ namespace EncosyTower.Editor.AssemblyDefs
             {
                 var refInfoResult = TryGetInfo(refData.asset.text);
 
-                if (refInfoResult.TryOk(out var refInfo) == false)
+                if (refInfoResult.TryGetValue(out var refInfo) == false)
                 {
                     continue;
                 }

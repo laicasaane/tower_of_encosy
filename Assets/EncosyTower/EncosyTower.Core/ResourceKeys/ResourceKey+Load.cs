@@ -9,7 +9,7 @@ namespace EncosyTower.ResourceKeys
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly T Load()
-            => TryLoad().ValueOrDefault();
+            => TryLoad().GetValueOrDefault();
 
         public readonly Option<T> TryLoad()
         {

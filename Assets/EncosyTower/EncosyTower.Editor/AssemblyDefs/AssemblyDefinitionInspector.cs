@@ -61,9 +61,9 @@ namespace EncosyTower.Editor.AssemblyDefs
         {
             var infoResult = AssemblyDefinitionAPI.TryGetInfo(importer);
 
-            if (infoResult.TryOk(out var assemblyDef) == false)
+            if (infoResult.TryGetValue(out var assemblyDef) == false)
             {
-                EditorUtility.DisplayDialog(importer.name, infoResult.Error().ToString(), "I understand");
+                EditorUtility.DisplayDialog(importer.name, infoResult.GetErrorOrThrow().ToString(), "I understand");
                 return;
             }
 
@@ -133,17 +133,17 @@ namespace EncosyTower.Editor.AssemblyDefs
         {
             var infoResult = AssemblyDefinitionAPI.TryGetInfo(importer);
 
-            if (infoResult.TryOk(out var assemblyDef) == false)
+            if (infoResult.TryGetValue(out var assemblyDef) == false)
             {
-                EditorUtility.DisplayDialog(importer.name, infoResult.Error().ToString(), "I understand");
+                EditorUtility.DisplayDialog(importer.name, infoResult.GetErrorOrThrow().ToString(), "I understand");
                 return;
             }
 
             var dataResult = AssemblyDefinitionAPI.TryGetData(importer.assetPath, assemblyDef);
 
-            if (dataResult.TryOk(out var data) == false)
+            if (dataResult.TryGetValue(out var data) == false)
             {
-                EditorUtility.DisplayDialog(importer.name, dataResult.Error().ToString(), "I understand");
+                EditorUtility.DisplayDialog(importer.name, dataResult.GetErrorOrThrow().ToString(), "I understand");
                 return;
             }
 

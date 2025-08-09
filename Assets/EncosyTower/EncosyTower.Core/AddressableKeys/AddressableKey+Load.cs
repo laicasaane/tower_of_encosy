@@ -11,7 +11,7 @@ namespace EncosyTower.AddressableKeys
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Load()
-            => TryLoad().ValueOrDefault();
+            => TryLoad().GetValueOrDefault();
 
         public Option<T> TryLoad()
         {

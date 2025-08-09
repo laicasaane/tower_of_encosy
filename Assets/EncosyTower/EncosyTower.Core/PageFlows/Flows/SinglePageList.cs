@@ -89,7 +89,7 @@ namespace EncosyTower.PageFlows
 
         public async UnityTaskBool HideAsync(PageContext context, CancellationToken token)
         {
-            if (CurrentPage.TryValue(out var pageToHide) == false)
+            if (CurrentPage.TryGetValue(out var pageToHide) == false)
             {
                 _flow.LogWarningNoActivePage();
                 return false;
@@ -317,7 +317,7 @@ namespace EncosyTower.PageFlows
 
             IsInTransition = true;
 
-            var pageToHide = CurrentPage.ValueOrDefault();
+            var pageToHide = CurrentPage.GetValueOrDefault();
             var result = await _flow.TransitionAsync(PageTransition.Show, pageToHide, pageToShow, context, token);
 
             CurrentPage = result ? pageToShow : pageToHide;

@@ -127,7 +127,7 @@ namespace EncosyTower.Localization
             }
             else
             {
-                var locale = localeOpt.Value();
+                var locale = localeOpt.GetValueOrThrow();
                 InfoChangeLanguage(locale.LocaleName);
                 LocalizationSettings.SelectedLocale = locale;
             }

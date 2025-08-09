@@ -35,7 +35,7 @@ namespace EncosyTower.ResourceKeys
         )
         {
             return InstantiateInternal(key, parent, inWorldSpace, trimCloneSuffix)
-                .ValueOrDefault();
+                .GetValueOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -48,7 +48,7 @@ namespace EncosyTower.ResourceKeys
             where TComponent : Component
         {
             var result = InstantiateInternal(key, parent, inWorldSpace, trimCloneSuffix);
-            return result.HasValue ? result.Value().GetComponent<TComponent>() : default;
+            return result.HasValue ? result.GetValueOrThrow().GetComponent<TComponent>() : default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,7 +75,7 @@ namespace EncosyTower.ResourceKeys
 
             if (result.HasValue)
             {
-                if (result.Value().TryGetComponent<TComponent>(out var comp))
+                if (result.GetValueOrThrow().TryGetComponent<TComponent>(out var comp))
                 {
                     return comp;
                 }
@@ -94,7 +94,7 @@ namespace EncosyTower.ResourceKeys
 
             var goOpt = key.TryLoad();
 
-            if (goOpt.HasValue == false || goOpt.TryValue(out var prefab) == false)
+            if (goOpt.HasValue == false || goOpt.TryGetValue(out var prefab) == false)
             {
                 return default;
             }

@@ -122,7 +122,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
-            => Value.TryValue(out var value)
+            => Value.TryGetValue(out var value)
                 ? value.ToString()
                 : InnerError.ToString();
 

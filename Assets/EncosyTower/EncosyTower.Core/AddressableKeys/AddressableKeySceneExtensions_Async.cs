@@ -32,7 +32,7 @@ namespace EncosyTower.AddressableKeys
         )
         {
             var result = await TryLoadAsyncInternal(key, mode, activateOnLoad, priority, token);
-            return result.ValueOrDefault();
+            return result.GetValueOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

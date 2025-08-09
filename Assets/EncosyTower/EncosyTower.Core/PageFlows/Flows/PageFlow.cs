@@ -407,11 +407,11 @@ namespace EncosyTower.PageFlows
 
             var hideOptions = PageOptions.SelectHideOptions(transition, pageToHideOptions, pageToShowOptions)
                 .GetTransitionOptions()
-                .ValueOrDefault(context.HideOptions);
+                .GetValueOrDefault(context.HideOptions);
 
             var showOptions = PageOptions.SelectShowOptions(transition, pageToHideOptions, pageToShowOptions)
                 .GetTransitionOptions()
-                .ValueOrDefault(context.ShowOptions);
+                .GetValueOrDefault(context.ShowOptions);
 
             return context with {
                 ShowOptions = showOptions,

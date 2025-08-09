@@ -172,7 +172,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 {
                     p.PrintLine("ThrowIfNotCreated(IsValid);");
                     p.PrintBeginLine("return _database.GetDataTableAsset<").Print(tableTypeName)
-                        .Print(">(Ids.Tables.").Print(name).PrintEndLine(").ValueOrDefault();");
+                        .Print(">(Ids.Tables.").Print(name).PrintEndLine(").GetValueOrDefault();");
                 }
                 p.CloseScope();
                 p.PrintEndLine();

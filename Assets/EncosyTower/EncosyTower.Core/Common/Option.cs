@@ -30,21 +30,21 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Value()
+        public T GetValueOrThrow()
         {
             ThrowIfHasNoValue(HasValue);
             return _value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryValue(out T value)
+        public bool TryGetValue(out T value)
         {
             value = HasValue ? _value : default;
             return HasValue;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T ValueOrDefault(T defaultValue = default)
+        public T GetValueOrDefault(T defaultValue = default)
             => HasValue ? _value : defaultValue;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

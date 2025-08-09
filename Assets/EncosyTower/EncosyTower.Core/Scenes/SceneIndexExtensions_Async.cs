@@ -27,7 +27,7 @@ namespace EncosyTower.Scenes
         )
         {
             var result = await TryLoadAsyncInternal(index, mode, token);
-            return result.ValueOrDefault();
+            return result.GetValueOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

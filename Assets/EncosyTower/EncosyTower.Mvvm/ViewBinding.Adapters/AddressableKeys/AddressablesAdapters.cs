@@ -33,7 +33,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
                 var key = new AddressableKey<T>(new(address));
                 var result = key.TryLoad();
 
-                if (result.TryValue(out var asset))
+                if (result.TryGetValue(out var asset))
                 {
                     return _assetConverter.ToUnionT(asset);
                 }

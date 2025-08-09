@@ -87,7 +87,7 @@ namespace EncosyTower.Vaults
             if (_map.TryGetValue(id, out var weakRef))
             {
                 var result = TryCast<T>(id, weakRef);
-                obj = result.ValueOrDefault();
+                obj = result.GetValueOrDefault();
                 return result.HasValue;
             }
 
@@ -101,7 +101,7 @@ namespace EncosyTower.Vaults
             if (_map.TryGetValue(id, out var weakRef))
             {
                 var result = TryCast(id, weakRef);
-                obj = result.ValueOrDefault();
+                obj = result.GetValueOrDefault();
                 return result.HasValue;
             }
 

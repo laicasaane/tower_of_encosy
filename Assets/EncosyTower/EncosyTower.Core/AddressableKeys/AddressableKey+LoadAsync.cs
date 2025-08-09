@@ -23,7 +23,7 @@ namespace EncosyTower.AddressableKeys
             LoadAsync(CancellationToken token = default)
         {
             var result = await TryLoadAsync(token);
-            return result.ValueOrDefault();
+            return result.GetValueOrDefault();
         }
 
         public async

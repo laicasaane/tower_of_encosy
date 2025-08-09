@@ -33,7 +33,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
             var identifierOpt = await RentPageAsync(pageKey, context, token);
 
-            if (identifierOpt.TryValue(out var identifier) == false)
+            if (identifierOpt.TryGetValue(out var identifier) == false)
             {
                 return;
             }
@@ -56,7 +56,7 @@ namespace EncosyTower.PageFlows.MonoPages
                 return;
             }
 
-            if (oldPageOpt.TryValue(out var oldPage))
+            if (oldPageOpt.TryGetValue(out var oldPage))
             {
                 ReturnPageToPool(oldPage, context);
             }
@@ -66,7 +66,7 @@ namespace EncosyTower.PageFlows.MonoPages
         {
             var pageOpt = _flow.CurrentPage;
 
-            if (pageOpt.TryValue(out var page) == false)
+            if (pageOpt.TryGetValue(out var page) == false)
             {
                 return;
             }

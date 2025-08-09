@@ -99,17 +99,17 @@ namespace EncosyTower.Editor.AssemblyDefs
 
                 var infoResult = AssemblyDefinitionAPI.TryGetInfo(item.asset.text);
 
-                if (infoResult.TryOk(out var assemblyDef) == false)
+                if (infoResult.TryGetValue(out var assemblyDef) == false)
                 {
-                    EditorUtility.DisplayDialog(item.name, infoResult.Error().ToString(), "I understand");
+                    EditorUtility.DisplayDialog(item.name, infoResult.GetErrorOrThrow().ToString(), "I understand");
                     return;
                 }
 
                 var dataResult = AssemblyDefinitionAPI.TryGetData(item.path, item.asset, assemblyDef);
 
-                if (dataResult.TryOk(out var data) == false)
+                if (dataResult.TryGetValue(out var data) == false)
                 {
-                    EditorUtility.DisplayDialog(item.name, dataResult.Error().ToString(), "I understand");
+                    EditorUtility.DisplayDialog(item.name, dataResult.GetErrorOrThrow().ToString(), "I understand");
                     return;
                 }
 

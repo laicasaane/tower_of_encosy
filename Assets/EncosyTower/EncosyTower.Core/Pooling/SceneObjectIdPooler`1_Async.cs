@@ -23,7 +23,7 @@ namespace EncosyTower.Pooling
 
             var prefabOpt = await GetKey().TryLoadAsync(token);
 
-            if (prefabOpt.TryValue(out var prefab) == false)
+            if (prefabOpt.TryGetValue(out var prefab) == false)
             {
                 return;
             }

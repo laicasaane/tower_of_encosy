@@ -36,7 +36,7 @@ namespace EncosyTower.AddressableKeys
         )
         {
             return InstantiateInternal(key, parent, inWorldSpace, trimCloneSuffix)
-                .ValueOrDefault();
+                .GetValueOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -49,7 +49,7 @@ namespace EncosyTower.AddressableKeys
             where TComponent : Component
         {
             var result = InstantiateInternal(key, parent, inWorldSpace, trimCloneSuffix);
-            return result.HasValue ? result.Value().GetComponent<TComponent>() : default;
+            return result.HasValue ? result.GetValueOrThrow().GetComponent<TComponent>() : default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,7 +79,7 @@ namespace EncosyTower.AddressableKeys
                 return default;
             }
 
-            return result.Value().TryGetComponent<TComponent>(out var comp)
+            return result.GetValueOrThrow().TryGetComponent<TComponent>(out var comp)
                 ? comp
                 : default(Option<TComponent>);
         }

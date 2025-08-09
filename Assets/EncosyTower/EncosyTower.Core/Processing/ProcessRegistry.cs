@@ -22,7 +22,7 @@ namespace EncosyTower.Processing
 
         public void Unregister()
         {
-            if (_map != null && _id.TryValue(out var id) && _map.TryGetTarget(out var map))
+            if (_map != null && _id.TryGetValue(out var id) && _map.TryGetTarget(out var map))
             {
                 map.Unregister(id);
             }

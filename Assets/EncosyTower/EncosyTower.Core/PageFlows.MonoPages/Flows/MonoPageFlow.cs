@@ -212,7 +212,7 @@ namespace EncosyTower.PageFlows.MonoPages
                     return;
                 }
 
-                if (sourceOpt.TryValue(out var source) == false
+                if (sourceOpt.TryGetValue(out var source) == false
                     || source.IsInvalid()
                 )
                 {
@@ -271,7 +271,7 @@ namespace EncosyTower.PageFlows.MonoPages
                     return default;
                 }
 
-                if (sourceOpt.TryValue(out var source) == false
+                if (sourceOpt.TryGetValue(out var source) == false
                     || source.IsInvalid()
                 )
                 {
@@ -284,7 +284,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
             var identifierOpt = pool.Rent(pageKey.Id, pageKey.Value, this.GetLogger(Context.logEnvironment));
 
-            if (identifierOpt.TryValue(out var identifier) && identifier.Page is IPageCreateAsync create)
+            if (identifierOpt.TryGetValue(out var identifier) && identifier.Page is IPageCreateAsync create)
             {
                 await create.OnCreateAsync(context, token);
 

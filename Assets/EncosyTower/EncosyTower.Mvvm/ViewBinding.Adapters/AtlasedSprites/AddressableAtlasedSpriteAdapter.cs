@@ -37,7 +37,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AtlasedSprites
                 var key = new AddressableKey<SpriteAtlas>(atlasName);
                 var result = key.TryLoad();
 
-                if (result.TryValue(out var atlas) && atlas.IsValid())
+                if (result.TryGetValue(out var atlas) && atlas.IsValid())
                 {
                     var sprite = atlas.GetSprite(spriteName);
 

@@ -39,14 +39,14 @@ namespace EncosyTower.AtlasedSprites
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Sprite Load()
-            => TryLoad().ValueOrDefault();
+            => TryLoad().GetValueOrDefault();
 
         public Option<Sprite> TryLoad()
         {
             if (string.IsNullOrEmpty(Sprite)) return default;
 
             var atlasOpt = Atlas.TryLoad();
-            return atlasOpt.HasValue ? atlasOpt.Value().TryGetSprite(Sprite) : default;
+            return atlasOpt.HasValue ? atlasOpt.GetValueOrThrow().TryGetSprite(Sprite) : default;
         }
     }
 

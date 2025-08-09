@@ -34,7 +34,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
             var identifierOpt = await RentPageAsync(pageKey, context, token);
 
-            if (identifierOpt.TryValue(out var identifier) == false)
+            if (identifierOpt.TryGetValue(out var identifier) == false)
             {
                 return;
             }
@@ -60,7 +60,7 @@ namespace EncosyTower.PageFlows.MonoPages
         {
             var identifierOpt = GetPageIdentifierAt(index);
 
-            if (identifierOpt.TryValue(out var identifier) == false)
+            if (identifierOpt.TryGetValue(out var identifier) == false)
             {
                 return;
             }
@@ -79,7 +79,7 @@ namespace EncosyTower.PageFlows.MonoPages
         {
             var pageOpt = _flow.CurrentPage;
 
-            if (pageOpt.TryValue(out var page) == false)
+            if (pageOpt.TryGetValue(out var page) == false)
             {
                 return;
             }
@@ -100,7 +100,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
             var identifierOpt = GetPageIdentifierAt(index);
 
-            if (identifierOpt.TryValue(out var identifier))
+            if (identifierOpt.TryGetValue(out var identifier))
             {
                 identifier.GameObject.SetActive(false);
             }

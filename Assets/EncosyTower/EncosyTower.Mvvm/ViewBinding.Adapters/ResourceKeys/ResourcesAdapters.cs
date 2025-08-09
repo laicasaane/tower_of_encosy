@@ -31,7 +31,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
                 var key = new ResourceKey<T>(new(address));
                 var result = key.TryLoad();
 
-                if (result.TryValue(out var asset))
+                if (result.TryGetValue(out var asset))
                 {
                     return _converter.ToUnionT(asset);
                 }

@@ -21,7 +21,7 @@ namespace EncosyTower.AtlasedSprites
         public async UnityTask LoadAsync(CancellationToken token = default)
         {
             var result = await TryLoadAsync(token);
-            return result.ValueOrDefault();
+            return result.GetValueOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -30,7 +30,7 @@ namespace EncosyTower.AtlasedSprites
             if (string.IsNullOrEmpty(Sprite)) return default;
 
             var atlasOpt = await Atlas.TryLoadAsync(token);
-            return atlasOpt.HasValue ? atlasOpt.Value().TryGetSprite(Sprite) : default;
+            return atlasOpt.HasValue ? atlasOpt.GetValueOrThrow().TryGetSprite(Sprite) : default;
         }
     }
 }

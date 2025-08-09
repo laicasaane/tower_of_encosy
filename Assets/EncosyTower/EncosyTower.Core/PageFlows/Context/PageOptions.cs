@@ -60,7 +60,7 @@ namespace EncosyTower.PageFlows
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void SetTransitionOptions(Option<PageTransitionOptions> value)
-                => transitionOptions = value.ValueOrDefault(transitionOptions);
+                => transitionOptions = value.GetValueOrDefault(transitionOptions);
         }
     }
 }
