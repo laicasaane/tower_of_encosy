@@ -22,7 +22,7 @@ namespace EncosyTower.Editor.AssemblyDefs
 
         private TabView _tabView;
         private AssemblyReferenceTab _tabAll;
-        private AssemblyReferenceTab _tabSuggested;
+        private AssemblyReferenceTab _tabFiltered;
 
         public static void OpenWindow(AssemblyData assemblyData)
         {
@@ -39,7 +39,7 @@ namespace EncosyTower.Editor.AssemblyDefs
             var allReferences = (IReadOnlyList<AssemblyReferenceData>)assemblyData?.AllReferences
                 ?? Array.Empty<AssemblyReferenceData>();
 
-            var suggestedReferences = (IReadOnlyList<AssemblyReferenceData>)assemblyData?.SuggestedReferences
+            var filteredReferences = (IReadOnlyList<AssemblyReferenceData>)assemblyData?.FilteredReferences
                 ?? Array.Empty<AssemblyReferenceData>();
 
             OnCreateGUI();
@@ -52,12 +52,12 @@ namespace EncosyTower.Editor.AssemblyDefs
                 allReferences
             );
 
-            _tabSuggested.Update(
+            _tabFiltered.Update(
                 assemblyData.AssetPath,
                 assemblyData.Asset,
                 assemblyData.AssemblyDefinition,
                 assemblyData.UseGuid,
-                suggestedReferences
+                filteredReferences
             );
         }
 
@@ -72,11 +72,11 @@ namespace EncosyTower.Editor.AssemblyDefs
             rootVisualElement.ApplyEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
 
             _tabAll = new AssemblyReferenceTab("All", Close);
-            _tabSuggested = new AssemblyReferenceTab("Suggestions", Close);
+            _tabFiltered = new AssemblyReferenceTab("Filtered", Close);
 
             _tabView = new TabView();
             _tabView.Add(_tabAll);
-            _tabView.Add(_tabSuggested);
+            _tabView.Add(_tabFiltered);
 
             rootVisualElement.Add(_tabView);
         }
@@ -145,14 +145,14 @@ namespace EncosyTower.Editor.AssemblyDefs
                 _label.focusable = !isHeader;
                 _objectField.enabledSelf = !isHeader;
 
-                _toggle.value = !isHeader && data.Selected;
+                _toggle.value = !isHeader && data.selected;
                 _label.text = isHeader ? data.headerText : label;
                 _objectField.value = isHeader ? null : data.asset;
             }
 
             private void Toggle_OnValueChanged(ChangeEvent<bool> evt)
             {
-                data.Selected = evt.newValue;
+                data.selected = evt.newValue;
             }
         }
 
@@ -335,7 +335,7 @@ namespace EncosyTower.Editor.AssemblyDefs
             {
                 foreach (var item in _references)
                 {
-                    item.Selected = true;
+                    item.selected = true;
                 }
             }
 
@@ -343,7 +343,7 @@ namespace EncosyTower.Editor.AssemblyDefs
             {
                 foreach (var item in _references)
                 {
-                    item.Selected = false;
+                    item.selected = false;
                 }
             }
 
@@ -378,7 +378,7 @@ namespace EncosyTower.Editor.AssemblyDefs
                 assemblyDef.references = references
                     .Where(static x => x != null)
                     .Where(static x => x.IsHeader == false)
-                    .Where(static x => x.Selected)
+                    .Where(static x => x.selected)
                     .Select(x => useGuid ? x.guidString : x.Name)
                     .ToArray();
 

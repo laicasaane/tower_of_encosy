@@ -122,7 +122,7 @@ namespace EncosyTower.Editor.AssemblyDefs
             var nameToRefMap = new Dictionary<string, AssemblyReferenceData>(guidStringsLength);
             var otherReferences = new List<AssemblyReferenceData>(guidStringsLength);
             var allReferences = new List<AssemblyReferenceData>(guidStringsLength);
-            var suggestedReferences = new List<AssemblyReferenceData>(guidStringsLength);
+            var filteredReferences = new List<AssemblyReferenceData>(guidStringsLength);
             var suggestedSet = new HashSet<GUID>(guidStringsLength);
 
             for (var i = 0; i < guidStringsLength; i++)
@@ -144,7 +144,7 @@ namespace EncosyTower.Editor.AssemblyDefs
                     asset = asset,
                     name = info.name,
                     guidString = guidString,
-                    Selected = useGuid ? refGuids.Contains(guid) : refNames.Contains(info.name),
+                    selected = useGuid ? refGuids.Contains(guid) : refNames.Contains(info.name),
                 };
 
                 guidToRefMap[guid] = data;
@@ -154,7 +154,7 @@ namespace EncosyTower.Editor.AssemblyDefs
                 // When we finally combine that list with `otherReferences`,
                 // the selected references will be grouped at the top.
 
-                if (data.Selected)
+                if (data.selected)
                 {
                     allReferences.Add(data);
                 }
@@ -182,14 +182,14 @@ namespace EncosyTower.Editor.AssemblyDefs
                         if (string.IsNullOrEmpty(suggestedRef)
                             || GUID.TryParse(suggestedRef.Replace("GUID:", ""), out var guid) == false
                             || guidToRefMap.TryGetValue(guid, out var suggestedData) == false
-                            || suggestedData.Selected
+                            || suggestedData.selected
                             || suggestedSet.Contains(suggestedData.guid)
                         )
                         {
                             continue;
                         }
 
-                        suggestedReferences.Add(suggestedData);
+                        filteredReferences.Add(suggestedData);
                         suggestedSet.Add(suggestedData.guid);
                     }
                 }
@@ -199,14 +199,14 @@ namespace EncosyTower.Editor.AssemblyDefs
                     {
                         if (string.IsNullOrWhiteSpace(suggestedRef)
                             || nameToRefMap.TryGetValue(suggestedRef, out var suggestedData) == false
-                            || suggestedData.Selected
+                            || suggestedData.selected
                             || suggestedSet.Contains(suggestedData.guid)
                         )
                         {
                             continue;
                         }
 
-                        suggestedReferences.Add(suggestedData);
+                        filteredReferences.Add(suggestedData);
                         suggestedSet.Add(suggestedData.guid);
                     }
                 }
@@ -215,11 +215,13 @@ namespace EncosyTower.Editor.AssemblyDefs
             allReferences.Sort(AssemblyReferenceData.CompareName);
             allReferences.Insert(0, new() { IsHeader = true, headerText = "Pre-selected References" });
 
+            filteredReferences.Sort(AssemblyReferenceData.CompareName);
+            filteredReferences.Insert(0, new() { IsHeader = true, headerText = "Other References" });
+            filteredReferences.InsertRange(0, allReferences);
+
             allReferences.Add(new() { IsHeader = true, headerText = "Other References" });
             otherReferences.Sort(AssemblyReferenceData.CompareName);
             allReferences.AddRange(otherReferences);
-
-            suggestedReferences.Sort(AssemblyReferenceData.CompareName);
 
             var result = new AssemblyData(
                   assetPath
@@ -227,7 +229,7 @@ namespace EncosyTower.Editor.AssemblyDefs
                 , assemblyDef
                 , useGuid
                 , allReferences
-                , suggestedReferences
+                , filteredReferences
             );
 
             return result;

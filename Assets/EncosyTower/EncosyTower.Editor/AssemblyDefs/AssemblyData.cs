@@ -11,7 +11,7 @@ namespace EncosyTower.Editor.AssemblyDefs
         , AssemblyDefinitionInfo AssemblyDefinition
         , bool UseGuid
         , List<AssemblyReferenceData> AllReferences
-        , List<AssemblyReferenceData> SuggestedReferences
+        , List<AssemblyReferenceData> FilteredReferences
     );
 }
 

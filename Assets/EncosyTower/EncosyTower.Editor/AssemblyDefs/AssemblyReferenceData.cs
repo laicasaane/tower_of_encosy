@@ -14,10 +14,9 @@ namespace EncosyTower.Editor.AssemblyDefs
         public string name;
         public string guidString;
         public string headerText;
+        public bool selected;
 
         public string Name => asset ? asset.name : string.Empty;
-
-        public bool Selected { get; set; }
 
         public bool IsHeader { get; init; }
 
