@@ -31,7 +31,6 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using EncosyTower.Types;
 using Unity.Collections;
 
 namespace EncosyTower.Buffers
@@ -43,10 +42,12 @@ namespace EncosyTower.Buffers
     /// </summary>
     public struct NativeStrategy<T> : IBufferStrategy<T> where T : struct
     {
+        internal static readonly bool s_isTUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
+
 #if DEBUG && !PROFILE_SVELTO
         static NativeStrategy()
         {
-            if (Type<T>.IsUnmanaged == false)
+            if (s_isTUnmanaged == false)
                 throw new InvalidOperationException("Only unmanaged data can be stored natively");
         }
 #endif

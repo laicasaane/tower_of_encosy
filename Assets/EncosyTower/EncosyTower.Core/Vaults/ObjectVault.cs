@@ -171,10 +171,14 @@ namespace EncosyTower.Vaults
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfNotReferenceType<T>()
         {
-            if (Type<T>.IsUnmanaged || Type<T>.IsValueType)
+            var typeOfT = typeof(T);
+            var isValueType = typeOfT.IsValueType;
+            var isUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
+
+            if (isUnmanaged || isValueType)
             {
                 throw new InvalidCastException(
-                    $"\"{Type<T>.Value}\" is not a reference type"
+                    $"\"{typeOfT}\" is not a reference type"
                 );
             }
         }

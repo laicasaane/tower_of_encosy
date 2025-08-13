@@ -29,7 +29,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.Debugging;
-using EncosyTower.Types;
 
 namespace EncosyTower.Collections
 {
@@ -39,7 +38,7 @@ namespace EncosyTower.Collections
         , IClearable
     {
         internal static readonly EqualityComparer<T> s_comp = EqualityComparer<T>.Default;
-        internal static readonly bool s_shouldPerformMemClear = Type<T>.IsUnmanaged == false;
+        internal static readonly bool s_shouldPerformMemClear = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 
         internal T[] _buffer;
         internal int _count;

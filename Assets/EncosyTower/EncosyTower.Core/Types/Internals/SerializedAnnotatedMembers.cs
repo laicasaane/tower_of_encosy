@@ -37,6 +37,6 @@ namespace EncosyTower.Types.Internals
     {
         [SerializeField] internal string _assemblyName = string.Empty;
         [SerializeField] internal SerializedType _attributeType;
-        [SerializeField] internal List<T> _matches = new();
+        [SerializeField] internal List<T> _matches;
     }
 }

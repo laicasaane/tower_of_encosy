@@ -32,7 +32,6 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using EncosyTower.Types;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -128,10 +127,12 @@ namespace EncosyTower.Buffers
 
     internal readonly struct NBInternal<T> : IBuffer<T> where T : struct
     {
+        internal static readonly bool s_isTUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
+
         static NBInternal()
         {
 #if __ENCOSY_VALIDATION__
-            if (Type<T>.IsUnmanaged == false)
+            if (s_isTUnmanaged == false)
                 throw new InvalidOperationException("NativeBuffer (NB) supports only unmanaged types");
 #endif
         }
