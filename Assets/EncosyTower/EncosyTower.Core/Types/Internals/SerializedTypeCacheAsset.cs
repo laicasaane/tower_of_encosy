@@ -45,13 +45,11 @@ namespace EncosyTower.Types.Internals
                 {
                     throw GetMissingReferenceException();
                 }
-                finally
-                {
-                    if (s_instance.IsInvalid())
-                    {
-                        throw GetMissingReferenceException();
-                    }
-                }
+            }
+
+            if (s_instance.IsInvalid())
+            {
+                throw GetMissingReferenceException();
             }
 
             return s_instance;

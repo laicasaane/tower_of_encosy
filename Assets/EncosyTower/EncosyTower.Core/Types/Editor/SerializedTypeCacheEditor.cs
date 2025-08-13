@@ -285,10 +285,10 @@ namespace EncosyTower.Types.Editor
             , List<TempSerializedDerivedTypes> result
         )
         {
+            var filteredTypes = new List<Type>();
+
             foreach (var (baseType, assemblyNames) in assemblyNameMap)
             {
-                var filteredTypes = new List<Type>();
-
                 foreach (var assemblyName in assemblyNames)
                 {
                     filteredTypes.Clear();
@@ -338,10 +338,10 @@ namespace EncosyTower.Types.Editor
             , List<TempSerializedAnnonatedMembers<Type>> result
         )
         {
+            var filteredTypes = new List<Type>();
+
             foreach (var (attribType, assemblyNames) in assemblyNameMap)
             {
-                var filteredTypes = new List<Type>();
-
                 foreach (var assemblyName in assemblyNames)
                 {
                     filteredTypes.Clear();
@@ -395,10 +395,10 @@ namespace EncosyTower.Types.Editor
             , List<TempSerializedAnnonatedMembers<FieldInfo>> result
         )
         {
+            var filteredMembers = new List<FieldInfo>();
+
             foreach (var (attribType, assemblyNames) in assemblyNameMap)
             {
-                var filteredMembers = new List<FieldInfo>();
-
                 foreach (var assemblyName in assemblyNames)
                 {
                     filteredMembers.Clear();
@@ -457,10 +457,10 @@ namespace EncosyTower.Types.Editor
             , List<TempSerializedAnnonatedMembers<MethodInfo>> result
         )
         {
+            var filteredMembers = new List<MethodInfo>();
+
             foreach (var (attribType, assemblyNames) in assemblyNameMap)
             {
-                var filteredMembers = new List<MethodInfo>();
-
                 foreach (var assemblyName in assemblyNames)
                 {
                     filteredMembers.Clear();
