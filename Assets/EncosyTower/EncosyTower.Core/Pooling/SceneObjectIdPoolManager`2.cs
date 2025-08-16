@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Debugging;
 using EncosyTower.Loaders;
@@ -14,7 +15,7 @@ using UnityEngine.SceneManagement;
 
 namespace EncosyTower.Pooling
 {
-    public abstract partial class SceneObjectIdPooler<TKey, TId> : MonoBehaviour
+    public abstract partial class SceneObjectIdManager<TKey, TId> : MonoBehaviour
         where TKey : ITryLoadAsync<GameObject>
         where TId : unmanaged, IEquatable<TId>
     {
@@ -105,7 +106,11 @@ namespace EncosyTower.Pooling
             _positions.Capacity = capacity;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Prepool(TId id, int amount)
+            => Prepool(id, amount, default);
+
+        public void Prepool(TId id, int amount, PooledGameObjectStrategy pooledStrategy)
         {
             AssertInitialization(this);
 
@@ -119,11 +124,16 @@ namespace EncosyTower.Pooling
                 return;
             }
 
-            pool.Prepool(amount);
+            pool.Prepool(amount, pooledStrategy);
+
             IncreaseCapacityBy(amount);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Prepool(ReadOnlySpan<TId> ids, int amount)
+            => Prepool(ids, amount, default);
+
+        public void Prepool(ReadOnlySpan<TId> ids, int amount, PooledGameObjectStrategy pooledStrategy)
         {
             AssertInitialization(this);
 
@@ -141,7 +151,7 @@ namespace EncosyTower.Pooling
                     continue;
                 }
 
-                pool.Prepool(amount);
+                pool.Prepool(amount, pooledStrategy);
                 count += 1;
             }
 
@@ -151,15 +161,11 @@ namespace EncosyTower.Pooling
             }
         }
 
-        public bool RentTransforms(
-              TId id
-            , int amount
-            , ref NativeList<GameObjectInfo> transforms
-        )
+        public bool Rent(TId id, int amount, ref NativeList<GameObjectInfo> result)
         {
             AssertInitialization(this);
 
-            if (transforms.IsCreated == false)
+            if (result.IsCreated == false)
             {
                 return false;
             }
@@ -188,7 +194,7 @@ namespace EncosyTower.Pooling
                 if (goInfoMap.TryGetValue(transformId, out var goInfo))
                 {
                     var transformArrayIndex = goInfo.transformArrayIndex;
-                    transforms.Add(goInfo);
+                    result.Add(goInfo);
                     positions[transformArrayIndex] = defaultPosition;
                     transformArray[transformArrayIndex].SetPositionAndRotation(defaultPosition, defaultRotation);
                 }
@@ -213,7 +219,7 @@ namespace EncosyTower.Pooling
                 transformArray[index].SetPositionAndRotation(defaultPosition, defaultRotation);
 
                 goInfoMap.Add(transformId, transform);
-                transforms.Add(transform);
+                result.Add(transform);
             }
 
             if (newTransformsLength > 0)
@@ -224,10 +230,15 @@ namespace EncosyTower.Pooling
             return true;
         }
 
-        public void ReturnTransforms(
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Return(TId id, ReadOnlySpan<int> instanceIds, ReadOnlySpan<int> transformIds)
+            => Return(id, instanceIds, transformIds, default);
+
+        public void Return(
               TId id
-            , NativeArray<int> instanceIds
-            , NativeArray<int> transformIds
+            , ReadOnlySpan<int> instanceIds
+            , ReadOnlySpan<int> transformIds
+            , PooledGameObjectStrategy pooledStrategy
         )
         {
             AssertInitialization(this);
@@ -237,13 +248,24 @@ namespace EncosyTower.Pooling
                 return;
             }
 
-            pool.Return(instanceIds, transformIds);
+            pool.Return(instanceIds, transformIds, pooledStrategy);
         }
 
-        public void ReturnTransforms(
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Return(
               NativeHashMap<TId, Range> idToRangeMap
-            , NativeArray<int> instanceIds
-            , NativeArray<int> transformIds
+            , ReadOnlySpan<int> instanceIds
+            , ReadOnlySpan<int> transformIds
+        )
+        {
+            Return(idToRangeMap, instanceIds, transformIds, default);
+        }
+
+        public void Return(
+              NativeHashMap<TId, Range> idToRangeMap
+            , ReadOnlySpan<int> instanceIds
+            , ReadOnlySpan<int> transformIds
+            , PooledGameObjectStrategy pooledStrategy
         )
         {
             AssertInitialization(this);
@@ -264,12 +286,118 @@ namespace EncosyTower.Pooling
                     continue;
                 }
 
-                pool.Return(instanceIds.GetSubArray(start, length), transformIds.GetSubArray(start, length));
+                pool.Return(
+                      instanceIds.Slice(start, length)
+                    , transformIds.Slice(start, length)
+                    , pooledStrategy
+                );
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ReturnInstanceIds(TId id, ReadOnlySpan<int> instanceIds)
+            => ReturnInstanceIds(id, instanceIds, default);
+
+        public void ReturnInstanceIds(TId id, ReadOnlySpan<int> instanceIds, PooledGameObjectStrategy pooledStrategy)
+        {
+            AssertInitialization(this);
+
+            if (_poolMap.TryGetValue(id, out var pool) == false)
+            {
+                return;
+            }
+
+            pool.ReturnInstanceIds(instanceIds, pooledStrategy);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ReturnInstanceIds(NativeHashMap<TId, Range> idToRangeMap, ReadOnlySpan<int> instanceIds)
+            => ReturnInstanceIds(idToRangeMap, instanceIds, PooledGameObjectStrategy.Default);
+
+        public void ReturnInstanceIds(
+              NativeHashMap<TId, Range> idToRangeMap
+            , ReadOnlySpan<int> instanceIds
+            , PooledGameObjectStrategy pooledStrategy
+        )
+        {
+            AssertInitialization(this);
+
+            var poolMap = _poolMap;
+
+            foreach (var (id, range) in idToRangeMap)
+            {
+                var (start, length) = range.GetOffsetAndLength(instanceIds.Length);
+
+                if (length < 1)
+                {
+                    continue;
+                }
+
+                if (poolMap.TryGetValue(id, out var pool) == false)
+                {
+                    continue;
+                }
+
+                pool.ReturnInstanceIds(
+                      instanceIds.Slice(start, length)
+                    , pooledStrategy
+                );
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ReturnTransformIds(TId id, ReadOnlySpan<int> transformIds)
+            => ReturnTransformIds(id, transformIds, default);
+
+        public void ReturnTransformIds(TId id, ReadOnlySpan<int> transformIds, PooledGameObjectStrategy pooledStrategy)
+        {
+            AssertInitialization(this);
+
+            if (_poolMap.TryGetValue(id, out var pool) == false)
+            {
+                return;
+            }
+
+            pool.ReturnTransformIds(transformIds, pooledStrategy);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ReturnTransformIds(NativeHashMap<TId, Range> idToRangeMap, ReadOnlySpan<int> transformIds)
+            => Return(idToRangeMap, transformIds, default);
+
+        public void ReturnTransformIds(
+              NativeHashMap<TId, Range> idToRangeMap
+            , ReadOnlySpan<int> transformIds
+            , PooledGameObjectStrategy pooledStrategy
+        )
+        {
+            AssertInitialization(this);
+
+            var poolMap = _poolMap;
+
+            foreach (var (id, range) in idToRangeMap)
+            {
+                var (start, length) = range.GetOffsetAndLength(transformIds.Length);
+
+                if (length < 1)
+                {
+                    continue;
+                }
+
+                if (poolMap.TryGetValue(id, out var pool) == false)
+                {
+                    continue;
+                }
+
+                pool.ReturnTransformIds(
+                      transformIds.Slice(start, length)
+                    , pooledStrategy
+                );
             }
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void AssertInitialization(SceneObjectIdPooler<TKey, TId> pooler)
+        private static void AssertInitialization(SceneObjectIdManager<TKey, TId> pooler)
         {
             Checks.IsTrue(pooler._transformArray.isCreated, "Pooler must be initialized first!");
             Checks.IsTrue(pooler._goInfoMap.IsCreated, "Pooler must be initialized first!");

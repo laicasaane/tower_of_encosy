@@ -14,7 +14,7 @@ namespace EncosyTower.Pooling
 {
     using UnityObject = UnityEngine.Object;
 
-    public class SceneObjectIdPool : IDisposable
+    public sealed class SceneObjectIdPool : IDisposable
     {
         private readonly FasterList<int> _unusedInstanceIds;
         private readonly FasterList<int> _unusedTransformIds;
@@ -29,6 +29,8 @@ namespace EncosyTower.Pooling
             _unusedTransformIds = new(32);
             _objectList = new(32);
         }
+
+        public PooledGameObjectStrategy PooledStrategy { get; set; }
 
         public int UnusedCount
         {
@@ -72,7 +74,11 @@ namespace EncosyTower.Pooling
 
         public bool TrimCloneSuffix { get; set; }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Prepool(int amount)
+            => Prepool(amount, default);
+
+        public bool Prepool(int amount, PooledGameObjectStrategy pooledStrategy)
         {
             if (_scene.IsValid() == false)
             {
@@ -111,7 +117,11 @@ namespace EncosyTower.Pooling
             _unusedInstanceIds.AddRange(instanceIds.AsReadOnlySpan());
             _unusedTransformIds.AddRange(transformIds.AsReadOnlySpan());
 
-            GameObject.SetGameObjectsActive(instanceIds, false);
+            if (new PooledGameObjectOperation(PooledStrategy, pooledStrategy).ShouldDeactivate())
+            {
+                GameObject.SetGameObjectsActive(instanceIds, false);
+            }
+
             return true;
 
             static void TrimCloneSuffixFrom(NativeArray<int> instanceIds, List<UnityObject> objectList)
@@ -331,7 +341,15 @@ namespace EncosyTower.Pooling
             _objectList.Clear();
         }
 
-        public void Return(Span<int> instanceIds, Span<int> transformIds)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Return(ReadOnlySpan<int> instanceIds, ReadOnlySpan<int> transformIds)
+            => Return(instanceIds, transformIds, default);
+
+        public void Return(
+              ReadOnlySpan<int> instanceIds
+            , ReadOnlySpan<int> transformIds
+            , PooledGameObjectStrategy pooledStrategy
+        )
         {
             var length = instanceIds.Length;
 
@@ -352,10 +370,17 @@ namespace EncosyTower.Pooling
             unusedInstanceIds.AddRange(instanceIds);
             unusedTransformIds.AddRange(transformIds);
 
-            GameObject.SetGameObjectsActive(instanceIds, false);
+            if (new PooledGameObjectOperation(PooledStrategy, pooledStrategy).ShouldDeactivate())
+            {
+                GameObject.SetGameObjectsActive(instanceIds, false);
+            }
         }
 
-        public void ReturnInstanceIds(NativeArray<int> instanceIds)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ReturnInstanceIds(ReadOnlySpan<int> instanceIds)
+            => ReturnInstanceIds(instanceIds, default);
+
+        public void ReturnInstanceIds(ReadOnlySpan<int> instanceIds, PooledGameObjectStrategy pooledStrategy)
         {
             var length = instanceIds.Length;
 
@@ -367,7 +392,7 @@ namespace EncosyTower.Pooling
             _objectList.Clear();
             _objectList.Capacity = Mathf.Max(_objectList.Capacity, length);
 
-            Resources.InstanceIDToObjectList(instanceIds, _objectList);
+            ResourceAPI.InstanceIDToObjectList(instanceIds, _objectList);
 
             var unusedInstanceIds = _unusedInstanceIds;
             var unusedTransformIds = _unusedTransformIds;
@@ -396,10 +421,18 @@ namespace EncosyTower.Pooling
             _objectList.Clear();
 
             postIds = postIds.GetSubArray(0, postIdsLength);
-            GameObject.SetGameObjectsActive(postIds, false);
+
+            if (new PooledGameObjectOperation(PooledStrategy, pooledStrategy).ShouldDeactivate())
+            {
+                GameObject.SetGameObjectsActive(postIds, true);
+            }
         }
 
-        public void ReturnTransformIds(NativeArray<int> transformIds)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ReturnTransformIds(ReadOnlySpan<int> transformIds)
+            => ReturnTransformIds(transformIds, default);
+
+        public void ReturnTransformIds(ReadOnlySpan<int> transformIds, PooledGameObjectStrategy pooledStrategy)
         {
             var length = transformIds.Length;
 
@@ -411,7 +444,7 @@ namespace EncosyTower.Pooling
             _objectList.Clear();
             _objectList.Capacity = Mathf.Max(_objectList.Capacity, length);
 
-            Resources.InstanceIDToObjectList(transformIds, _objectList);
+            ResourceAPI.InstanceIDToObjectList(transformIds, _objectList);
 
             var unusedInstanceIds = _unusedInstanceIds;
             var unusedTransformIds = _unusedTransformIds;
@@ -447,7 +480,11 @@ namespace EncosyTower.Pooling
             _objectList.Clear();
 
             postIds = postIds.GetSubArray(0, postIdsLength);
-            GameObject.SetGameObjectsActive(postIds, false);
+
+            if (new PooledGameObjectOperation(PooledStrategy, pooledStrategy).ShouldDeactivate())
+            {
+                GameObject.SetGameObjectsActive(postIds, true);
+            }
         }
 
         public void Dispose()

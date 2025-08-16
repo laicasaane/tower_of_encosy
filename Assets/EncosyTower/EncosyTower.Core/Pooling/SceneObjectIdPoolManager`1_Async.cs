@@ -15,38 +15,26 @@ namespace EncosyTower.Pooling
     using UnityTask = UnityEngine.Awaitable;
 #endif
 
-    partial class SceneObjectIdPooler<TKey, TId>
+    partial class SceneObjectIdManager<TKey>
     {
         public async UnityTask InitializeAsync(Scene scene, CancellationToken token = default)
         {
             DisposeNativeCollections();
 
-            var entries = GetEntries();
-            var poolMap = _poolMap;
-            var trimCloneSuffix = TrimCloneSuffix;
+            var prefabOpt = await GetKey().TryLoadAsync(token);
 
-            foreach (var (id, key) in entries)
+            if (prefabOpt.TryGetValue(out var prefab) == false)
             {
-                if (poolMap.ContainsKey(id))
-                {
-                    continue;
-                }
-
-                var prefabOpt = await key.TryLoadAsync(token);
-
-                if (prefabOpt.TryGetValue(out var prefab) == false)
-                {
-                    continue;
-                }
-
-                poolMap[id] = new SceneObjectIdPool() {
-                    Scene = scene,
-                    Source = prefab,
-                    TrimCloneSuffix = trimCloneSuffix,
-                };
+                return;
             }
 
-            var capacity = EstimateCapacity(poolMap.Count) + 1;
+            _pool = new SceneObjectIdPool() {
+                Scene = scene,
+                Source = prefab,
+                TrimCloneSuffix = TrimCloneSuffix,
+            };
+
+            var capacity = EstimateCapacity() + 1;
 
             TransformAccessArray.Allocate(capacity, -1, out _transformArray);
             _goInfoMap = new(capacity, Allocator.Persistent);
