@@ -7,8 +7,19 @@ using UnityEngine;
 
 namespace EncosyTower.Common
 {
+    public readonly struct Option
+    {
+        public readonly static Option None = default;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Option<T> Some<T>(T value)
+            => new(value);
+    }
+
     public readonly struct Option<T> : IEquatable<Option<T>>
     {
+        public readonly static Option<T> None = default;
+
         private readonly T _value;
 
         public readonly ByteBool HasValue;
@@ -61,11 +72,15 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
-            => HasValue ? $"Optional+Value({_value})" : "Optional+None";
+            => HasValue ? $"Option+Value({_value})" : "Option+None";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Option<T>(T value)
             => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Option<T>(Option _)
+            => default;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Option<T> left, Option<T> right)
