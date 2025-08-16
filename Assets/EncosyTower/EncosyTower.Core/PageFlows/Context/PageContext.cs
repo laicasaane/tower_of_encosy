@@ -1,5 +1,7 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+using EncosyTower.Common;
+
 namespace EncosyTower.PageFlows
 {
     public readonly record struct PageContext
@@ -18,7 +20,7 @@ namespace EncosyTower.PageFlows
 
         public bool SequentialTransition { get; init; }
 
-        public object UserData { get; init; }
+        public Option<object> UserData { get; init; }
     }
 }
 

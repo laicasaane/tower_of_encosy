@@ -2,23 +2,24 @@
 
 using System;
 using System.Buffers;
-using System.Threading;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using EncosyTower.Common;
 using EncosyTower.Ids;
 using EncosyTower.Logging;
+using EncosyTower.Pooling;
+using EncosyTower.Processing;
 using EncosyTower.PubSub;
 using EncosyTower.ResourceKeys;
 using EncosyTower.StringIds;
 using EncosyTower.Types;
+using EncosyTower.UnityExtensions;
 using UnityEngine;
 
 namespace EncosyTower.PageFlows.MonoPages
 {
 #if UNITY_ADDRESSABLES
     using EncosyTower.AddressableKeys;
-    using EncosyTower.Processing;
-    using EncosyTower.UnityExtensions;
 #endif
 
 #if UNITASK
@@ -37,6 +38,7 @@ namespace EncosyTower.PageFlows.MonoPages
         public bool slimPublishingContext = true;
         public bool ignoreEmptySubscriber = true;
         public MonoPageLoaderStrategy loadStrategy;
+        public PooledGameObjectStrategy pooledGameObjectStrategy;
         public MonoMessageScope messageScope;
         public LogEnvironment logEnvironment;
 
@@ -114,6 +116,7 @@ namespace EncosyTower.PageFlows.MonoPages
                 slimPublishingContext = settings.slimPublishingContext;
                 ignoreEmptySubscriber = settings.ignoreEmptySubscriber;
                 loadStrategy = settings.loaderStrategy;
+                pooledGameObjectStrategy = settings.pooledGameObjectStrategy;
                 messageScope = settings.messageScope;
                 logEnvironment = settings.logEnvironment;
                 Logger.LogInfo($"Initialize {nameof(MonoPageFlowContext)} using Project Settings");
@@ -132,6 +135,7 @@ namespace EncosyTower.PageFlows.MonoPages
                 slimPublishingContext = slimPublishingContext,
                 ignoreEmptySubscriber = ignoreEmptySubscriber,
                 loadStrategy = loadStrategy,
+                pooledGameObjectStrategy = pooledGameObjectStrategy,
                 messageScope = messageScope,
                 logEnvironment = logEnvironment,
                 _subscriber = _subscriber,

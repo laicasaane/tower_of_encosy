@@ -12,7 +12,6 @@ using EncosyTower.Logging;
 using EncosyTower.Processing;
 using EncosyTower.PubSub;
 using EncosyTower.StringIds;
-using EncosyTower.Types;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
 using UnityEngine.UI;
@@ -84,9 +83,9 @@ namespace EncosyTower.PageFlows.MonoPages
             CanvasGroup = this.GetOrAddComponent<CanvasGroup>();
 
             if (parent.IsValid())
-                CreatePool(parent);
+                CreateRootForPooling(parent);
             else
-                CreatePool(GetComponent<RectTransform>());
+                CreateRootForPooling(GetComponent<RectTransform>());
 
             context ??= _context;
             _context = context;
@@ -253,7 +252,11 @@ namespace EncosyTower.PageFlows.MonoPages
             pool.Destroy(amountToDestroy);
         }
 
-        protected async UnityTaskPageOpt RentPageAsync(PageKey pageKey, PageContext context, CancellationToken token)
+        protected async UnityTaskPageOpt RentPageAsync(
+              PageKey pageKey
+            , PageContext context
+            , CancellationToken token
+        )
         {
             if (token.IsCancellationRequested)
             {
@@ -357,7 +360,7 @@ namespace EncosyTower.PageFlows.MonoPages
             return true;
         }
 
-        private void CreatePool(RectTransform parent)
+        private void CreateRootForPooling(RectTransform parent)
         {
             var poolGO = new GameObject(
                   $"[Pool] {name}"
@@ -385,7 +388,12 @@ namespace EncosyTower.PageFlows.MonoPages
         {
             if (_pageIdToPool.TryGetValue(pageKey.Id, out var pool) == false)
             {
-                _pageIdToPool[pageKey.Id] = pool = new MonoPagePool(PoolTransform, RectTransform, _pageIds);
+                _pageIdToPool[pageKey.Id] = pool = new MonoPagePool(
+                      PoolTransform
+                    , RectTransform
+                    , _pageIds
+                    , _context.pooledGameObjectStrategy
+                );
             }
 
             return pool;

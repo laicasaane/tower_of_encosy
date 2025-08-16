@@ -371,7 +371,10 @@ MonoBehaviour:
   _flowContext:
     autoInitializeOnAwake: 1
     useProjectSettings: 0
+    slimPublishingContext: 1
+    ignoreEmptySubscriber: 1
     loadStrategy: 1
+    pooledGameObjectStrategy: 0
     messageScope: 0
     logEnvironment: 0
 --- !u!224 &1207036174

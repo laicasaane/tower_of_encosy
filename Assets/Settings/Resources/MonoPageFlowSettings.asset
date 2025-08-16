@@ -15,5 +15,6 @@ MonoBehaviour:
   slimPublishingContext: 1
   ignoreEmptySubscriber: 1
   loaderStrategy: 0
+  pooledGameObjectStrategy: 0
   messageScope: 0
   logEnvironment: 0

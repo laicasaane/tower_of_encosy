@@ -26,10 +26,10 @@ namespace EncosyTower.Editor.PageFlows.MonoPages
             if (_codex._flowContext.useProjectSettings)
             {
                 EditorGUILayout.HelpBox(
-                      "The option 'Use Project Settings' has been turned on.\n" +
+                      "The option 'Use Project Settings' has been turned ON.\n" +
                       "Some configurations on the local flow context will be overwritten at runtime.\n" +
                       "If you do not wish to use configurations from Project Settings, " +
-                      "please turn off the option 'Use Project Settings' on the context."
+                      "please turn it OFF."
                     , MessageType.Warning
                 );
             }

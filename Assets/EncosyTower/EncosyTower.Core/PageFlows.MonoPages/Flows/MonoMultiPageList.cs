@@ -73,6 +73,7 @@ namespace EncosyTower.PageFlows.MonoPages
                 identifier.GameObject.SetActive(false);
             }
         }
+
         public async UnityTask HidePageAtIndexAsync(int index, PageContext context, CancellationToken token)
         {
             var identifierOpt = GetPageIdentifierAt(index);

@@ -55,6 +55,7 @@ namespace EncosyTower.PageFlows.MonoPages
                 ReturnPageToPool(identifier, context);
             }
         }
+
         public async UnityTask HideActivePageAsync(PageContext context, CancellationToken token)
         {
             var pageOpt = _flow.CurrentPage;

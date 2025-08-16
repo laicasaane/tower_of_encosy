@@ -53,21 +53,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01e8a625394f4bd45b3d081d11d05e0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _pageOptions:
-    showOptions:
-      showThisPage:
-        forceUse: 1
-        transitionOptions: 4
-      hideOtherPage:
-        forceUse: 1
-        transitionOptions: 3
-    hideOptions:
-      hideThisPage:
-        forceUse: 1
-        transitionOptions: 4
-      showOtherPage:
-        forceUse: 1
-        transitionOptions: 3
   _buttonOpen: {fileID: 7574448413672172340}
   _buttonClose: {fileID: 1654245927115043203}
 --- !u!114 &5285129224731750026
@@ -82,6 +67,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e82b3fb7efc683e4f8625f4ba7e7773c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _pooledStrategy: 0
   _pageOptions:
     showOptions:
       showThisPage:

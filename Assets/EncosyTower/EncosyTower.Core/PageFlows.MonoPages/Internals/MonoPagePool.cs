@@ -22,13 +22,21 @@ namespace EncosyTower.PageFlows.MonoPages
         private readonly int _poolLayer;
         private readonly int _activeLayer;
 
-        public MonoPagePool(Transform poolParent, Transform activeParent, FasterList<MonoPageIdentifier> pageIds)
+        private Option<MonoPageOptions> _options;
+
+        public MonoPagePool(
+              Transform poolParent
+            , Transform activeParent
+            , FasterList<MonoPageIdentifier> pageIds
+            , PooledGameObjectStrategy pooledStrategy
+        )
         {
             _poolParent = poolParent;
             _activeParent = activeParent;
             _pageIds = pageIds;
             _poolLayer = poolParent.gameObject.layer;
             _activeLayer = activeParent.gameObject.layer;
+            _pool.PooledStrategy = pooledStrategy;
         }
 
         public bool IsInitialized => _pool.Prefab != null;
@@ -47,11 +55,15 @@ namespace EncosyTower.PageFlows.MonoPages
                 Source = source,
                 InstantiateInWorldSpace = false,
             };
+
+            _options = source.TryGetComponent<MonoPageOptions>(out var options)
+                ? options
+                : Option.None;
         }
 
         public void Prepool(int amount)
         {
-            if (_pool.Prepool(amount))
+            if (_pool.Prepool(amount, GetPooledStrategy()))
             {
                 _instanceIds.EnsureCapacity(amount);
                 _pageIds.IncreaseCapacityBy(amount);
@@ -119,15 +131,16 @@ namespace EncosyTower.PageFlows.MonoPages
             identifier.GameObject.layer = _poolLayer;
             identifier.Transform.SetParent(_poolParent, false);
 
-            _pool.Return(identifier.GameObject);
+            _pool.Return(identifier.GameObject, GetPooledStrategy());
         }
 
         public void Dispose()
         {
-            ReturnActives();
+            ReturnActiveObjects();
 
             _pool.ReleaseInstances(0);
             _pool.Dispose();
+            _options = default;
         }
 
         public void Destroy(int amountToDestroy)
@@ -135,7 +148,7 @@ namespace EncosyTower.PageFlows.MonoPages
             _pool.ReleaseInstances(_pool.UnusedCount - amountToDestroy);
         }
 
-        private void ReturnActives()
+        private void ReturnActiveObjects()
         {
             var length = _instanceIds.Count;
             var array = NativeArray.CreateFast<int>(length, Unity.Collections.Allocator.Temp);
@@ -151,6 +164,11 @@ namespace EncosyTower.PageFlows.MonoPages
             _pageIds.Clear();
             _pool.ReturnInstanceIds(array);
         }
+
+        private PooledGameObjectStrategy GetPooledStrategy()
+            => _options.TryGetValue(out var options)
+                ? options.PooledStrategy
+                : PooledGameObjectStrategy.Default;
 
         [HideInCallstack]
         private static void ErrorIfFoundNoPage(string key, UnityObjectLogger logger)

@@ -32,6 +32,9 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
         public SerializedProperty GetLoaderStrategyProperty()
             => Object.FindProperty(nameof(MonoPageFlowSettings.loaderStrategy));
 
+        public SerializedProperty GetPooledGameObjectStrategyProperty()
+            => Object.FindProperty(nameof(MonoPageFlowSettings.pooledGameObjectStrategy));
+
         public SerializedProperty GetMessageScopeProperty()
             => Object.FindProperty(nameof(MonoPageFlowSettings.messageScope));
 

@@ -502,6 +502,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e82b3fb7efc683e4f8625f4ba7e7773c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _pooledStrategy: 0
   _pageOptions:
     showOptions:
       showThisPage:

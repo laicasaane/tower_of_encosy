@@ -1,4 +1,5 @@
 using EncosyTower.Logging;
+using EncosyTower.Pooling;
 using EncosyTower.Settings;
 
 namespace EncosyTower.PageFlows.MonoPages
@@ -9,6 +10,7 @@ namespace EncosyTower.PageFlows.MonoPages
         public bool slimPublishingContext = true;
         public bool ignoreEmptySubscriber = true;
         public MonoPageLoaderStrategy loaderStrategy;
+        public PooledGameObjectStrategy pooledGameObjectStrategy;
         public MonoMessageScope messageScope;
         public LogEnvironment logEnvironment;
     }
