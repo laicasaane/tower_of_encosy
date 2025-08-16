@@ -17,6 +17,17 @@ namespace EncosyTower.Collections
             return new NativeArray<T>(length, allocator, NativeArrayOptions.UninitializedMemory);
         }
 
+        /// <summary>
+        /// Create a NativeArray from a <see cref="ReadOnlySpan{T}"/>.
+        /// </summary>
+        public static NativeArray<T> CreateFrom<T>(ReadOnlySpan<T> source, Allocator allocator)
+            where T : unmanaged
+        {
+            var array = CreateFast<T>(source.Length, allocator);
+            source.CopyTo(array);
+            return array;
+        }
+
 #if UNITY_COLLECTIONS
 
         /// <summary>
@@ -40,15 +51,18 @@ namespace EncosyTower.Collections
             return CollectionHelper.CreateNativeArray<T>(length, allocator, NativeArrayOptions.UninitializedMemory);
         }
 
-#endif
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetRange<T>(this NativeArray<T> array, Range range, T value)
-            where T : struct
+        /// <summary>
+        /// Create a NativeArray from a <see cref="ReadOnlySpan{T}"/>.
+        /// </summary>
+        public static NativeArray<T> CreateFrom<T>(ReadOnlySpan<T> source, AllocatorManager.AllocatorHandle allocator)
+            where T : unmanaged
         {
-            var (start, length) = range.GetOffsetAndLength(array.Length);
-            array.AsSpan().Slice(start, length).Fill(value);
+            var array = CreateFast<T>(source.Length, allocator);
+            source.CopyTo(array);
+            return array;
         }
+
+#endif
     }
 
     public static class EncosyNativeArrayExtensions
@@ -107,14 +121,35 @@ namespace EncosyTower.Collections
 
 #endif
 
+        /// <summary>
+        /// Fill the NativeArray with a specified value.
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T ElementAtOrDefault<T>(ref this NativeArray<T> array, int index)
+        public static void Fill<T>(this NativeArray<T> array, T value)
+            where T : struct
+        {
+            array.AsSpan().Fill(value);
+        }
+
+        /// <summary>
+        /// Fill a range of the NativeArray with a specified value.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Fill<T>(this NativeArray<T> array, Range range, T value)
+            where T : struct
+        {
+            var (start, length) = range.GetOffsetAndLength(array.Length);
+            array.AsSpan().Slice(start, length).Fill(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T ElementAtOrDefault<T>(this NativeArray<T> array, int index)
             where T : struct
         {
             return (uint)index < (uint)array.Length ? array[index] : default;
         }
 
-        public static void DisposeUnset<T>(ref this NativeArray<T> array)
+        public static void DisposeUnset<T>(this NativeArray<T> array)
             where T : struct
         {
             if (array.IsCreated)
