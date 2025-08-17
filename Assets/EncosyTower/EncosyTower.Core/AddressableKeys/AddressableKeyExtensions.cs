@@ -76,12 +76,11 @@ namespace EncosyTower.AddressableKeys
 
             if (result.HasValue == false)
             {
-                return default;
+                return Option.None;
             }
 
             return result.GetValueOrThrow().TryGetComponent<TComponent>(out var comp)
-                ? comp
-                : default(Option<TComponent>);
+                ? comp : Option.None;
         }
 
         private static Option<GameObject> InstantiateInternal(
@@ -91,14 +90,14 @@ namespace EncosyTower.AddressableKeys
             , bool trimCloneSuffix
         )
         {
-            if (key.IsValid == false) return default;
+            if (key.IsValid == false) return Option.None;
 
             var handle = Addressables.InstantiateAsync(key.Value.Value, parent.Transform, inWorldSpace);
             var go = handle.WaitForCompletion();
 
             if (go.IsInvalid())
             {
-                return default;
+                return Option.None;
             }
 
             if (parent is { IsValid: true, IsScene: true })

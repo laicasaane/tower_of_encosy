@@ -41,10 +41,10 @@ namespace EncosyTower.AtlasedSprites
 
         public Option<Sprite> TryLoad()
         {
-            if (string.IsNullOrEmpty(Sprite)) return default;
+            if (string.IsNullOrEmpty(Sprite)) return Option.None;
 
             var atlasOpt = Atlas.TryLoad();
-            return atlasOpt.HasValue ? atlasOpt.GetValueOrThrow().TryGetSprite(Sprite) : default;
+            return atlasOpt.HasValue ? atlasOpt.GetValueOrThrow().TryGetSprite(Sprite) : Option.None;
         }
     }
 

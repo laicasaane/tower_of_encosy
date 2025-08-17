@@ -3,6 +3,7 @@
 
 using System.Runtime.CompilerServices;
 using System.Threading;
+using EncosyTower.Common;
 using EncosyTower.Loaders;
 using UnityEngine;
 
@@ -10,10 +11,10 @@ namespace EncosyTower.AtlasedSprites
 {
 #if UNITASK
     using UnityTask = Cysharp.Threading.Tasks.UniTask<Sprite>;
-    using UnityTaskOpt = Cysharp.Threading.Tasks.UniTask<Common.Option<Sprite>>;
+    using UnityTaskOpt = Cysharp.Threading.Tasks.UniTask<Option<Sprite>>;
 #else
     using UnityTask = UnityEngine.Awaitable<UnityEngine.Sprite>;
-    using UnityTaskOpt = UnityEngine.Awaitable<Common.Option<UnityEngine.Sprite>>;
+    using UnityTaskOpt = UnityEngine.Awaitable<Option<UnityEngine.Sprite>>;
 #endif
 
     public readonly partial struct AtlasedSpriteKeyAddressables : ILoadAsync<Sprite>, ITryLoadAsync<Sprite>
@@ -28,10 +29,10 @@ namespace EncosyTower.AtlasedSprites
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async UnityTaskOpt TryLoadAsync(CancellationToken token = default)
         {
-            if (string.IsNullOrEmpty(Sprite)) return default;
+            if (string.IsNullOrEmpty(Sprite)) return Option.None;
 
             var result = await Atlas.TryLoadAsync(token);
-            return result.HasValue ? result.GetValueOrThrow().TryGetSprite(Sprite) : default;
+            return result.HasValue ? result.GetValueOrThrow().TryGetSprite(Sprite) : Option.None;
         }
     }
 }

@@ -46,13 +46,13 @@ namespace EncosyTower.Scenes
             , CancellationToken token
         )
         {
-            if (index.IsValid == false) return default;
+            if (index.IsValid == false) return Option.None;
 
             var handle =  SceneManager.LoadSceneAsync(index.Index, mode);
 
             if (handle == null)
             {
-                return default;
+                return Option.None;
             }
 
             while (handle.isDone == false)
@@ -71,7 +71,7 @@ namespace EncosyTower.Scenes
             }
 
             return token.IsCancellationRequested
-                ? default(Option<Scene>)
+                ? Option.None
                 : SceneManager.GetSceneByBuildIndex(index.Index);
         }
 

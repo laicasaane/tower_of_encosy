@@ -11,6 +11,6 @@ namespace EncosyTower.Types
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<TypeInfo<T>> AsTyped<T>(this TypeInfo self)
-            => self.IsType<T>() ? Type<T>.Info : default(Option<TypeInfo<T>>);
+            => self.IsType<T>() ? Type<T>.Info : Option.None;
     }
 }

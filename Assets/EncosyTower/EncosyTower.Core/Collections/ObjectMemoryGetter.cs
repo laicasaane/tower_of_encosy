@@ -29,7 +29,7 @@ namespace EncosyTower.Collections
             }
             else
             {
-                result = default;
+                result = Option.None;
             }
 
             return this;
@@ -47,7 +47,7 @@ namespace EncosyTower.Collections
             }
             else
             {
-                result = default;
+                result = Option.None;
             }
 
             return new(buffer, _index + 1);

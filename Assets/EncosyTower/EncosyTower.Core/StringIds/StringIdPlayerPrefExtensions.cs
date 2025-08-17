@@ -64,7 +64,7 @@ namespace EncosyTower.StringIds
         public static Option<string> GetPlayerPref(this StringId<string> self)
         {
             var key = IdToString.GetManaged(self);
-            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : default(Option<string>);
+            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : Option.None;
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace EncosyTower.StringIds
         public static Option<bool> GetPlayerPref(this StringId<bool> self)
         {
             var key = IdToString.GetManaged(self);
-            return PlayerPrefs.HasKey(key) ? new Option<bool>(PlayerPrefs.GetInt(key) != 0) : default;
+            return PlayerPrefs.HasKey(key) ? new Option<bool>(PlayerPrefs.GetInt(key) != 0) : Option.None;
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace EncosyTower.StringIds
         public static Option<int> GetPlayerPref(this StringId<int> self)
         {
             var key = IdToString.GetManaged(self);
-            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetInt(key) : default(Option<int>);
+            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetInt(key) : Option.None;
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace EncosyTower.StringIds
         public static Option<float> GetPlayerPref(this StringId<float> self)
         {
             var key = IdToString.GetManaged(self);
-            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetFloat(key) : default(Option<float>);
+            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetFloat(key) : Option.None;
         }
 
         /// <summary>

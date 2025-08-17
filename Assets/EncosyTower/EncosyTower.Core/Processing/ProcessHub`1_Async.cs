@@ -260,7 +260,7 @@ namespace EncosyTower.Processing
                 ErrorNotFound(Scope);
             }
 
-            return default;
+            return Option.None;
 
             [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
@@ -381,7 +381,7 @@ namespace EncosyTower.Processing
                 ErrorNotFound(Scope);
             }
 
-            return default;
+            return Option.None;
 
             [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)

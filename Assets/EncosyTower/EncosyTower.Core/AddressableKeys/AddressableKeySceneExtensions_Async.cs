@@ -55,13 +55,13 @@ namespace EncosyTower.AddressableKeys
             , CancellationToken token
         )
         {
-            if (key.IsValid == false) return default;
+            if (key.IsValid == false) return Option.None;
 
             var handle = Addressables.LoadSceneAsync(key.Value.Value, mode, activateOnLoad, priority);
 
             if (handle.IsValid() == false)
             {
-                return default;
+                return Option.None;
             }
 
             while (handle.IsDone == false)
@@ -81,12 +81,12 @@ namespace EncosyTower.AddressableKeys
 
             if (token.IsCancellationRequested)
             {
-                return default;
+                return Option.None;
             }
 
-            return handle.Status != AsyncOperationStatus.Succeeded
-                ? default(Option<SceneInstance>)
-                : handle.Result;
+            return handle.Status == AsyncOperationStatus.Succeeded
+                ? handle.Result
+                : Option.None;
         }
     }
 }

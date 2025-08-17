@@ -111,12 +111,11 @@ namespace EncosyTower.AddressableKeys
 
             if (result.HasValue == false)
             {
-                return default;
+                return Option.None;
             }
 
             return result.GetValueOrThrow().TryGetComponent<TComponent>(out var comp)
-                ? comp
-                : default(Option<TComponent>);
+                ? comp : Option.None;
         }
 
         private static async
@@ -133,13 +132,13 @@ namespace EncosyTower.AddressableKeys
             , CancellationToken token
         )
         {
-            if (key.IsValid == false) return default;
+            if (key.IsValid == false) return Option.None;
 
             var handle = Addressables.InstantiateAsync(key.Value.Value, parent.Transform, inWorldSpace);
 
             if (handle.IsValid() == false)
             {
-                return default;
+                return Option.None;
             }
 
             while (handle.IsDone == false)
@@ -159,19 +158,19 @@ namespace EncosyTower.AddressableKeys
 
             if (token.IsCancellationRequested)
             {
-                return default;
+                return Option.None;
             }
 
             if (handle.Status != AsyncOperationStatus.Succeeded)
             {
-                return default;
+                return Option.None;
             }
 
             var go = handle.Result;
 
             if (go.IsInvalid())
             {
-                return default;
+                return Option.None;
             }
 
             if (parent is { IsValid: true, IsScene: true })

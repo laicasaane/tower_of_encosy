@@ -32,7 +32,7 @@ namespace EncosyTower.ResourceKeys
 #endif
             TryLoadAsync(CancellationToken token = default)
         {
-            if (IsValid == false) return default;
+            if (IsValid == false) return Option.None;
 
             try
             {
@@ -40,7 +40,7 @@ namespace EncosyTower.ResourceKeys
 
                 if (handle == null)
                 {
-                    return default;
+                    return Option.None;
                 }
 
                 while (handle.isDone == false)
@@ -60,7 +60,7 @@ namespace EncosyTower.ResourceKeys
 
                 if (token.IsCancellationRequested)
                 {
-                    return default;
+                    return Option.None;
                 }
 
                 var obj = handle.asset;
@@ -75,7 +75,7 @@ namespace EncosyTower.ResourceKeys
                 // ignored
             }
 
-            return default;
+            return Option.None;
         }
     }
 }

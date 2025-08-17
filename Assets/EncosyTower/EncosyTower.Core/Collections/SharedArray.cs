@@ -459,7 +459,7 @@ namespace EncosyTower.Collections
                 _version = sharedArray.version;
                 _length = sharedArray.Length;
                 _index = -1;
-                _current = default;
+                _current = Option.None;
             }
 
             public readonly T Current
@@ -491,7 +491,7 @@ namespace EncosyTower.Collections
                 }
 
                 _index = _length + 1;
-                _current = default;
+                _current = Option.None;
                 return false;
             }
 
@@ -503,7 +503,7 @@ namespace EncosyTower.Collections
                 }
 
                 _index = 0;
-                _current = default;
+                _current = Option.None;
             }
 
             readonly object IEnumerator.Current

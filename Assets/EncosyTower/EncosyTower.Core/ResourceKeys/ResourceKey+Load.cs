@@ -13,7 +13,7 @@ namespace EncosyTower.ResourceKeys
 
         public readonly Option<T> TryLoad()
         {
-            if (IsValid == false) return default;
+            if (IsValid == false) return Option.None;
 
             try
             {
@@ -29,7 +29,7 @@ namespace EncosyTower.ResourceKeys
                 // ignored
             }
 
-            return default;
+            return Option.None;
         }
     }
 }

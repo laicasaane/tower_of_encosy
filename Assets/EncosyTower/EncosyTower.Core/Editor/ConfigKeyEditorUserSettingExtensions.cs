@@ -13,28 +13,28 @@ namespace EncosyTower.Editor.ConfigKeys
         public static Option<string> GetEditorUserSetting(this ConfigKey<string> self)
         {
             var str = EditorUserSettings.GetConfigValue(self.Value);
-            return string.IsNullOrEmpty(str) ? default(Option<string>) : str;
+            return string.IsNullOrEmpty(str) ? Option.None : str;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<bool> GetEditorUserSetting(this ConfigKey<bool> self)
         {
             var str = EditorUserSettings.GetConfigValue(self.Value);
-            return bool.TryParse(str, out var result) ? new Option<bool>(result) : default;
+            return bool.TryParse(str, out var result) ? new Option<bool>(result) : Option.None;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<int> GetEditorUserSetting(this ConfigKey<int> self)
         {
             var str = EditorUserSettings.GetConfigValue(self.Value);
-            return int.TryParse(str, out var result) ? result : default(Option<int>);
+            return int.TryParse(str, out var result) ? result : Option.None;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<float> GetEditorUserSetting(this ConfigKey<float> self)
         {
             var str = EditorUserSettings.GetConfigValue(self.Value);
-            return float.TryParse(str, out var result) ? result : default(Option<float>);
+            return float.TryParse(str, out var result) ? result : Option.None;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

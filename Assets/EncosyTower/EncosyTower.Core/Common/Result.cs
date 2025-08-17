@@ -42,13 +42,13 @@ namespace EncosyTower.Common
         public Result(TValue value)
         {
             _value = value;
-            _error = default;
+            _error = Error.None;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(Error error)
         {
-            _value = default;
+            _value = Option.None;
             _error = error;
         }
 

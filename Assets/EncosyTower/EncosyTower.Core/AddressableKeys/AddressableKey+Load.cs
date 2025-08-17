@@ -15,13 +15,13 @@ namespace EncosyTower.AddressableKeys
 
         public Option<T> TryLoad()
         {
-            if (IsValid == false) return default;
+            if (IsValid == false) return Option.None;
 
             var handle = Addressables.LoadAssetAsync<T>(Value.Value);
             var asset = handle.WaitForCompletion();
 
             return (asset is UnityEngine.Object obj && obj) || asset != null
-                ? asset : default(Option<T>);
+                ? asset : Option.None;
         }
     }
 }

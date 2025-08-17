@@ -49,7 +49,7 @@ namespace EncosyTower.ConfigKeys
         public static Option<string> GetPlayerPref(this ConfigKey<string> self)
         {
             string key = self.Value;
-            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : default(Option<string>);
+            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : Option.None;
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace EncosyTower.ConfigKeys
         public static Option<bool> GetPlayerPref(this ConfigKey<bool> self)
         {
             string key = self.Value;
-            return PlayerPrefs.HasKey(key) ? new Option<bool>(PlayerPrefs.GetInt(key) != 0) : default;
+            return PlayerPrefs.HasKey(key) ? new Option<bool>(PlayerPrefs.GetInt(key) != 0) : Option.None;
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace EncosyTower.ConfigKeys
         public static Option<int> GetPlayerPref(this ConfigKey<int> self)
         {
             string key = self.Value;
-            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetInt(key) : default(Option<int>);
+            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetInt(key) : Option.None;
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace EncosyTower.ConfigKeys
         public static Option<float> GetPlayerPref(this ConfigKey<float> self)
         {
             string key = self.Value;
-            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetFloat(key) : default(Option<float>);
+            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetFloat(key) : Option.None;
         }
 
         /// <summary>

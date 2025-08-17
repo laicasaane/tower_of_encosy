@@ -11,6 +11,8 @@ namespace EncosyTower.Common
 
     public readonly struct Error : IEquatable<Error>, IError
     {
+        public static readonly Error None = default;
+
         public static readonly Error Default = new(string.Empty);
 
         public readonly string Message;
@@ -98,8 +100,8 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Error([NotNull] Error innerError)
         {
+            Value = Option.None;
             InnerError = innerError;
-            Value = default;
         }
 
         public bool IsValid

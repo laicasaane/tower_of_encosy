@@ -111,7 +111,7 @@ namespace EncosyTower.ResourceKeys
                 }
             }
 
-            return default;
+            return Option.None;
         }
 
         private static async UnityTaskGameObjectOpt InstantiateAsyncInternal(
@@ -122,20 +122,20 @@ namespace EncosyTower.ResourceKeys
             , CancellationToken token
         )
         {
-            if (key.IsValid == false) return default;
+            if (key.IsValid == false) return Option.None;
 
             var goOpt = await key.TryLoadAsync(token);
 
             if (goOpt.HasValue == false || goOpt.TryGetValue(out var prefab) == false)
             {
-                return default;
+                return Option.None;
             }
 
             var go = UnityObject.Instantiate(prefab, parent.Transform, inWorldSpace);
 
             if (go.IsInvalid())
             {
-                return default;
+                return Option.None;
             }
 
             if (parent is { IsValid: true, IsScene: true })

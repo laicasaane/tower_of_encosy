@@ -80,7 +80,7 @@ namespace EncosyTower.Vaults
 
             if (token.IsCancellationRequested)
             {
-                return default;
+                return Option.None;
             }
 
             return TryCast<T>(id, _map[id], context);
@@ -97,7 +97,7 @@ namespace EncosyTower.Vaults
 
             if (token.IsCancellationRequested)
             {
-                return default;
+                return Option.None;
             }
 
             return TryCast(id, _map[id], context);

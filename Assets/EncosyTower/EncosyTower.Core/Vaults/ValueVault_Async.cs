@@ -97,7 +97,7 @@ namespace EncosyTower.Vaults
             await WaitUntilContains(id, token);
 
             return token.IsCancellationRequested
-                ? default(Option<TValue>)
+                ? Option.None
                 : _map.GetValueOrDefault(id);
         }
     }

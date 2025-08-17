@@ -35,10 +35,10 @@ namespace EncosyTower.AtlasedSprites
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<Sprite> TryGetSprite([NotNull] this SpriteAtlas atlas, string name)
         {
-            if (atlas == false) return default;
+            if (atlas == false) return Option.None;
 
             var sprite = atlas.GetSprite(name);
-            return sprite ? (Option<Sprite>)sprite : default;
+            return sprite ? (Option<Sprite>)sprite : Option.None;
         }
 
         #region SERIALIZABLE

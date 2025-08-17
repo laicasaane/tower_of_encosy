@@ -118,7 +118,7 @@ namespace EncosyTower.Vaults
             if (obj == null)
             {
                 ErrorIfRegisteredObjectIsNull(id, context);
-                return default;
+                return Option.None;
             }
 
             if (obj is not UnityObject unityObj)
@@ -143,7 +143,7 @@ namespace EncosyTower.Vaults
 
         FAILED:
             ErrorIfTypeMismatch<T>(id, obj, context);
-            return default;
+            return Option.None;
         }
 
         private static Option<object> TryCast(Id2 id, object obj, UnityObject context = null)
@@ -156,13 +156,13 @@ namespace EncosyTower.Vaults
                 }
 
                 ErrorIfRegisteredObjectIsNull(id, context);
-                return default;
+                return Option.None;
             }
 
             if (obj == null)
             {
                 ErrorIfRegisteredObjectIsNull(id, context);
-                return default;
+                return Option.None;
             }
 
             return new(obj);

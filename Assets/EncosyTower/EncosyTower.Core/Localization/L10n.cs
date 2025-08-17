@@ -9,6 +9,7 @@ using EncosyTower.Common;
 using EncosyTower.Ids;
 using EncosyTower.Logging;
 using EncosyTower.Types;
+using EncosyTower.UnityExtensions;
 using EncosyTower.Vaults;
 using Unity.Logging;
 using UnityEngine;
@@ -166,7 +167,8 @@ namespace EncosyTower.Localization
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Option<Locale> FindLocale(string localeCode)
-            => s_codeToLocaleMap.TryGetValue(localeCode, out var locale) && locale ? (Option<Locale>)locale : default;
+            => (s_codeToLocaleMap.TryGetValue(localeCode, out var locale) && locale.IsValid())
+                ? locale : Option.None;
 
         [HideInStackTrace, HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorNotReady()
