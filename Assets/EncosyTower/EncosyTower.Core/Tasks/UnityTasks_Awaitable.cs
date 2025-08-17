@@ -19,6 +19,10 @@ namespace EncosyTower.Tasks
             => Awaitables.GetCompleted<T>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Awaitable<T> GetCompleted<T>(T value)
+            => Awaitables.GetCompleted(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Awaitable NextFrameAsync(CancellationToken token)
             => Awaitable.NextFrameAsync(token);
 
@@ -36,6 +40,10 @@ namespace EncosyTower.Tasks
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Awaitable WhenAll(Awaitable[] tasks)
+            => Awaitables.WhenAll(tasks);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Awaitable<T[]> WhenAll<T>(Awaitable<T>[] tasks)
             => Awaitables.WhenAll(tasks);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

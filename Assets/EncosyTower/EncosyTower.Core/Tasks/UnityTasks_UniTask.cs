@@ -18,6 +18,10 @@ namespace EncosyTower.Tasks
             => UniTask.FromResult<T>(default);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UniTask<T> GetCompleted<T>(T value)
+            => UniTask.FromResult(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UniTask NextFrameAsync(CancellationToken token)
             => UniTask.NextFrame(token);
 
@@ -35,6 +39,10 @@ namespace EncosyTower.Tasks
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UniTask WhenAll(UniTask[] tasks)
+            => UniTask.WhenAll(tasks);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UniTask<T[]> WhenAll<T>(UniTask<T>[] tasks)
             => UniTask.WhenAll(tasks);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
