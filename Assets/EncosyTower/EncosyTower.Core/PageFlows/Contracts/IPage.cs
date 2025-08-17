@@ -1,40 +1,36 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 using System.Threading;
+using EncosyTower.PubSub;
 
 namespace EncosyTower.PageFlows
 {
 #if UNITASK
-    using UnityTask = Cysharp.Threading.Tasks.UniTask;
+    using UnityTaskBool = Cysharp.Threading.Tasks.UniTask<bool>;
 #else
-    using UnityTask = UnityEngine.Awaitable;
+    using UnityTaskBool = UnityEngine.Awaitable<bool>;
 #endif
 
     public interface IPage { }
 
-    public interface IPageCreateAsync : IPage
+    public interface IPageOnCreateAsync : IPage
     {
-        UnityTask OnCreateAsync(PageContext context, CancellationToken token);
+        UnityTaskBool OnCreateAsync(PageContext context, CancellationToken token);
     }
 
-    public interface IPageTearDown : IPage
+    public interface IPageOnReturnToPool : IPage
     {
-        void OnTearDown(PageContext context);
+        void OnReturnToPool(PageContext context);
     }
 
-    public interface IPageAttachToFlowAsync : IPage
+    public interface IPageOnAttachToFlowAsync : IPage
     {
-        UnityTask OnAttachToFlowAsync(IPageFlow flow, PageContext context, CancellationToken token);
+        UnityTaskBool OnAttachToFlowAsync(IPageFlow flow, PageContext context, CancellationToken token);
     }
 
-    public interface IPageDetachFromFlowAsync : IPage
+    public interface IPageOnDetachFromFlowAsync : IPage
     {
-        UnityTask OnDetachFromFlowAsync(IPageFlow flow, PageContext context, CancellationToken token);
-    }
-
-    public interface IPageHasFlowId : IPage
-    {
-        long FlowId { get; set; }
+        UnityTaskBool OnDetachFromFlowAsync(IPageFlow flow, PageContext context, CancellationToken token);
     }
 
     public interface IPageHasOptions : IPage
@@ -45,6 +41,21 @@ namespace EncosyTower.PageFlows
     public interface IPageHasTransition : IPage
     {
         IPageTransition PageTransition { get; }
+    }
+
+    public interface IPageNeedsFlowId : IPage
+    {
+        long FlowId { set; }
+    }
+
+    public interface IPageNeedsMessageSubscriber : IPage
+    {
+        MessageSubscriber.Subscriber<PageFlowScope> Subscriber { set; }
+    }
+
+    public interface IPageNeedsMessagePublisher : IPage
+    {
+        MessagePublisher.Publisher<PageFlowScope> Publisher { set; }
     }
 }
 

@@ -25,6 +25,7 @@ namespace EncosyTower.PageFlows
 
         public SinglePageStack([NotNull] IPageFlowContext context)
         {
+            var subscriber = context.Subscriber;
             var publisher = context.Publisher;
 
             Checks.IsTrue(publisher.IsValid, "Publisher must be created correctly.");
@@ -32,6 +33,7 @@ namespace EncosyTower.PageFlows
             _logger = context.Logger ?? DevLogger.Default;
             _flow = new PageFlow(
                   context.TaskArrayPool
+                , subscriber
                 , publisher
                 , context.SlimPublishingContext
                 , context.IgnoreEmptySubscriber

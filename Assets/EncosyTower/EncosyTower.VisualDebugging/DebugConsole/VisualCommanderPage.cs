@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 namespace EncosyTower.VisualDebugging.Commands
 {
     [RequireComponent(typeof(UIDocument))]
-    public partial class VisualCommanderPage : MonoPageBase, IPageAfterShow, IPageBeforeHide
+    public partial class VisualCommanderPage : MonoPageBase, IPageOnAfterShow, IPageOnBeforeHide
     {
         [SerializeField] private float _directoryListWidth = 200f;
         [SerializeField] private bool _showOnAwake;

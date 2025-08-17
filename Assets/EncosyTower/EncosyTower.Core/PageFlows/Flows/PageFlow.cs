@@ -22,10 +22,11 @@ namespace EncosyTower.PageFlows
     using UnityTask = UnityEngine.Awaitable;
 #endif
 
-    public readonly record struct PageFlow
+    public sealed class PageFlow
     {
         public PageFlow(
               [NotNull] ArrayPool<UnityTaskUntyped> taskArrayPool
+            , MessageSubscriber.Subscriber<PageFlowScope> subscriber
             , MessagePublisher.Publisher<PageFlowScope> publisher
             , bool slimPublisingContext
             , bool ignoreEmptySubscriber
@@ -35,6 +36,7 @@ namespace EncosyTower.PageFlows
             Checks.IsTrue(publisher.IsValid, "Publisher must be created correctly.");
 
             TaskArrayPool = taskArrayPool;
+            Subscriber = subscriber;
             Publisher = publisher;
             SlimPublishingContext = slimPublisingContext;
             IgnoreEmptySubscriber = ignoreEmptySubscriber;
@@ -43,92 +45,46 @@ namespace EncosyTower.PageFlows
 
         public static IPage DefaultPage => PageFlows.DefaultPage.Default;
 
-        public ArrayPool<UnityTaskUntyped> TaskArrayPool { get; private init; }
+        public ArrayPool<UnityTaskUntyped> TaskArrayPool { get; }
 
-        public MessagePublisher.Publisher<PageFlowScope> Publisher { get; private init; }
+        public MessageSubscriber.Subscriber<PageFlowScope> Subscriber { get; }
 
-        public bool SlimPublishingContext { get; private init; }
+        public MessagePublisher.Publisher<PageFlowScope> Publisher { get; }
 
-        public bool IgnoreEmptySubscriber { get; private init; }
+        public bool SlimPublishingContext { get; }
 
-        public ILogger Logger { get; private init; }
+        public bool IgnoreEmptySubscriber { get; }
 
-        [UnityEngine.HideInCallstack]
-        public void LogWarningNoActivePage()
-        {
-            Logger.LogWarning("The flow has no active page.");
-        }
-
-        [UnityEngine.HideInCallstack]
-        public void LogWarningNoPageToPop()
-        {
-            Logger.LogWarning("There is no page to pop.");
-        }
-
-        [UnityEngine.HideInCallstack]
-        public void LogWarningNoPageToRemove()
-        {
-            Logger.LogWarning("There is no page to remove.");
-        }
-
-        [UnityEngine.HideInCallstack]
-        public void LogWarningPageNotFound(IPage page)
-        {
-            Logger.LogWarning($"Cannot found this page '{page}' inside the flow.");
-        }
-
-        [UnityEngine.HideInCallstack]
-        public void LogWarningIndexOutOfRange(int index)
-        {
-            Logger.LogWarning($"Index '{index}' is out of range.");
-        }
-
-        [UnityEngine.HideInCallstack]
-        public void LogWarningCurrentPageIsIndex(int index)
-        {
-            Logger.LogWarning($"The page of index '{index}' is already showing.");
-        }
-
-        [UnityEngine.HideInCallstack]
-        public void LogWarningCannotHideDefaultIndexPage(int index)
-        {
-            Logger.LogWarning($"Cannot hide the page whose index '{index}' is also the default index.");
-        }
+        public ILogger Logger { get; }
 
         public async UnityTaskBool AttachAsync(IPageFlow flow, IPage page, PageContext context, CancellationToken token)
         {
-            if (page is IPageHasFlowId flowId)
-            {
-                flowId.FlowId = context.FlowId;
-            }
-
-            if (token.IsCancellationRequested == false)
-            {
-                var publishingContext = SlimPublishingContext
-                    ? PublishingContext.GetSlim(IgnoreEmptySubscriber, Logger)
-                    : PublishingContext.Get(IgnoreEmptySubscriber, Logger);
-
-                await Publisher.PublishAsync(
-                      new AttachPageMessage(flow, page ?? DefaultPage, token)
-                    , publishingContext
-                    , token
-                );
-            }
-            else
+            if (token.IsCancellationRequested)
             {
                 return false;
             }
 
-            if (token.IsCancellationRequested == false)
+            InitializeIPageNeedsInterfaces(page, this, context);
+
+            var publishingContext = SlimPublishingContext
+                ? PublishingContext.GetSlim(IgnoreEmptySubscriber, Logger)
+                : PublishingContext.Get(IgnoreEmptySubscriber, Logger);
+
+            await Publisher.PublishAsync(
+                  new AttachPageMessage(flow, page ?? DefaultPage, token)
+                , publishingContext
+                , token
+            );
+
+            if (token.IsCancellationRequested)
             {
-                if (page is IPageAttachToFlowAsync attach)
-                {
-                    await attach.OnAttachToFlowAsync(flow, context, token);
-                }
-            }
-            else
-            {
+                DeinitializeIPageNeedsInterfaces(page);
                 return false;
+            }
+
+            if (page is IPageOnAttachToFlowAsync onAttach)
+            {
+                return await onAttach.OnAttachToFlowAsync(flow, context, token);
             }
 
             return true;
@@ -136,34 +92,32 @@ namespace EncosyTower.PageFlows
 
         public async UnityTaskBool DetachAsync(IPageFlow flow, IPage page, PageContext context, CancellationToken token)
         {
-            if (token.IsCancellationRequested == false)
+            if (token.IsCancellationRequested)
             {
-                if (page is IPageDetachFromFlowAsync detach)
+                return false;
+            }
+
+            if (page is IPageOnDetachFromFlowAsync onDetach)
+            {
+                var detachResult = await onDetach.OnDetachFromFlowAsync(flow, context, token);
+
+                if (detachResult == false)
                 {
-                    await detach.OnDetachFromFlowAsync(flow, context, token);
+                    return false;
                 }
             }
-            else
-            {
-                return false;
-            }
 
-            if (token.IsCancellationRequested == false)
-            {
-                var publishingContext = SlimPublishingContext
-                    ? PublishingContext.GetSlim(IgnoreEmptySubscriber, Logger)
-                    : PublishingContext.Get(IgnoreEmptySubscriber, Logger);
+            var publishingContext = SlimPublishingContext
+                ? PublishingContext.GetSlim(IgnoreEmptySubscriber, Logger)
+                : PublishingContext.Get(IgnoreEmptySubscriber, Logger);
 
-                await Publisher.PublishAsync(
-                      new DetachPageMessage(flow, page ?? DefaultPage, token)
-                    , publishingContext
-                    , token
-                );
-            }
-            else
-            {
-                return false;
-            }
+            await Publisher.PublishAsync(
+                  new DetachPageMessage(flow, page ?? DefaultPage, token)
+                , publishingContext
+                , token
+            );
+
+            DeinitializeIPageNeedsInterfaces(page);
 
             return true;
         }
@@ -294,7 +248,7 @@ namespace EncosyTower.PageFlows
 
                 if (token.IsCancellationRequested == false)
                 {
-                    (pageToShow as IPageAfterShow)?.OnAfterShow(context);
+                    (pageToShow as IPageOnAfterShow)?.OnAfterShow(context);
 
                     pageToShowTransition?.OnAfterTransition(
                           PageTransition.Show
@@ -302,7 +256,7 @@ namespace EncosyTower.PageFlows
                         , context.HideOptions
                     );
 
-                    (pageToHide as IPageAfterHide)?.OnAfterHide(context);
+                    (pageToHide as IPageOnAfterHide)?.OnAfterHide(context);
 
                     pageToHideTransition?.OnAfterTransition(
                           PageTransition.Hide
@@ -336,6 +290,42 @@ namespace EncosyTower.PageFlows
             }
 
             return result;
+        }
+
+        private static void InitializeIPageNeedsInterfaces(IPage page, PageFlow flow, in PageContext context)
+        {
+            if (page is IPageNeedsFlowId flowId)
+            {
+                flowId.FlowId = context.FlowId;
+            }
+
+            if (page is IPageNeedsMessageSubscriber subscriber)
+            {
+                subscriber.Subscriber = flow.Subscriber;
+            }
+
+            if (page is IPageNeedsMessagePublisher publisher)
+            {
+                publisher.Publisher = flow.Publisher;
+            }
+        }
+
+        private static void DeinitializeIPageNeedsInterfaces(IPage page)
+        {
+            if (page is IPageNeedsFlowId flowId)
+            {
+                flowId.FlowId = default;
+            }
+
+            if (page is IPageNeedsMessageSubscriber subscriber)
+            {
+                subscriber.Subscriber = default;
+            }
+
+            if (page is IPageNeedsMessagePublisher publisher)
+            {
+                publisher.Publisher = default;
+            }
         }
 
         private static PageContext ProcessContext(
@@ -432,7 +422,7 @@ namespace EncosyTower.PageFlows
             PageTransitionOptions showOptions = context.ShowOptions;
             PageTransitionOptions hideOptions = context.HideOptions;
 
-            tasks[0] = (pageToShow as IPageBeforeShowAsync)
+            tasks[0] = (pageToShow as IPageOnBeforeShowAsync)
                 ?.OnBeforeShowAsync(context, token)
                 ?? UnityTasks.GetCompleted();
 
@@ -440,7 +430,7 @@ namespace EncosyTower.PageFlows
                 ?.OnBeforeTransitionAsync(PageTransition.Show, showOptions, hideOptions, token)
                 ?? UnityTasks.GetCompleted();
 
-            tasks[2] = (pageToHide as IPageBeforeHideAsync)
+            tasks[2] = (pageToHide as IPageOnBeforeHideAsync)
                 ?.OnBeforeHideAsync(context, token)
                 ?? UnityTasks.GetCompleted();
 
@@ -455,8 +445,8 @@ namespace EncosyTower.PageFlows
                 return;
             }
 
-            (pageToShow as IPageBeforeShow)?.OnBeforeShow(context);
-            (pageToHide as IPageBeforeHide)?.OnBeforeHide(context);
+            (pageToShow as IPageOnBeforeShow)?.OnBeforeShow(context);
+            (pageToHide as IPageOnBeforeHide)?.OnBeforeHide(context);
         }
 
         private static async UnityTask ParallelTransitionAsync(
@@ -475,7 +465,7 @@ namespace EncosyTower.PageFlows
             var withHide = hideOptions.Contains(PageTransitionOptions.NoTransition) == false;
 
             {
-                tasks[0] = withShow && pageToShow is IPageShowAsync pageShow
+                tasks[0] = withShow && pageToShow is IPageOnShowAsync pageShow
                     ? pageShow.OnShowAsync(context, token)
                     : UnityTasks.GetCompleted();
 
@@ -494,7 +484,7 @@ namespace EncosyTower.PageFlows
             }
 
             {
-                tasks[2] = withHide && pageToHide is IPageHideAsync pageHide
+                tasks[2] = withHide && pageToHide is IPageOnHideAsync pageHide
                     ? pageHide.OnHideAsync(context, token)
                     : UnityTasks.GetCompleted();
 
@@ -534,7 +524,7 @@ namespace EncosyTower.PageFlows
             var withHide = hideOptions.Contains(PageTransitionOptions.NoTransition) == false;
 
             {
-                tasks[0] = withShow && pageToShow is IPageShowAsync pageShow
+                tasks[0] = withShow && pageToShow is IPageOnShowAsync pageShow
                     ? pageShow.OnShowAsync(context, token)
                     : UnityTasks.GetCompleted();
 
@@ -555,7 +545,7 @@ namespace EncosyTower.PageFlows
             }
 
             {
-                tasks[0] = withHide && pageToHide is IPageHideAsync pageHide
+                tasks[0] = withHide && pageToHide is IPageOnHideAsync pageHide
                     ? pageHide.OnHideAsync(context, token)
                     : UnityTasks.GetCompleted();
 
@@ -574,6 +564,48 @@ namespace EncosyTower.PageFlows
 
                 await UnityTasks.WhenAll(tasks);
             }
+        }
+
+        [UnityEngine.HideInCallstack]
+        public void LogWarningNoActivePage()
+        {
+            Logger.LogWarning("The flow has no active page.");
+        }
+
+        [UnityEngine.HideInCallstack]
+        public void LogWarningNoPageToPop()
+        {
+            Logger.LogWarning("There is no page to pop.");
+        }
+
+        [UnityEngine.HideInCallstack]
+        public void LogWarningNoPageToRemove()
+        {
+            Logger.LogWarning("There is no page to remove.");
+        }
+
+        [UnityEngine.HideInCallstack]
+        public void LogWarningPageNotFound(IPage page)
+        {
+            Logger.LogWarning($"Cannot found this page '{page}' inside the flow.");
+        }
+
+        [UnityEngine.HideInCallstack]
+        public void LogWarningIndexOutOfRange(int index)
+        {
+            Logger.LogWarning($"Index '{index}' is out of range.");
+        }
+
+        [UnityEngine.HideInCallstack]
+        public void LogWarningCurrentPageIsIndex(int index)
+        {
+            Logger.LogWarning($"The page of index '{index}' is already showing.");
+        }
+
+        [UnityEngine.HideInCallstack]
+        public void LogWarningCannotHideDefaultIndexPage(int index)
+        {
+            Logger.LogWarning($"Cannot hide the page whose index '{index}' is also the default index.");
         }
     }
 }

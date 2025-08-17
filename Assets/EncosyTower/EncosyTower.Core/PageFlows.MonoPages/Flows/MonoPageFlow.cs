@@ -260,7 +260,7 @@ namespace EncosyTower.PageFlows.MonoPages
         {
             if (token.IsCancellationRequested)
             {
-                return default;
+                return Option.None;
             }
 
             var pool = GetPoolFor(pageKey);
@@ -271,7 +271,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
                 if (token.IsCancellationRequested)
                 {
-                    return default;
+                    return Option.None;
                 }
 
                 if (sourceOpt.TryGetValue(out var source) == false
@@ -279,22 +279,33 @@ namespace EncosyTower.PageFlows.MonoPages
                 )
                 {
                     ErrorIfCannotLoadAsset(pageKey, this);
-                    return default;
+                    return Option.None;
                 }
 
                 pool.Initialize(source);
             }
 
-            var identifierOpt = pool.Rent(pageKey.Id, pageKey.Value, this.GetLogger(Context.logEnvironment));
+            var identifierOpt = pool.Rent(
+                  pageKey.Id
+                , pageKey.Value
+                , this.GetLogger(Context.logEnvironment)
+            );
 
-            if (identifierOpt.TryGetValue(out var identifier) && identifier.Page is IPageCreateAsync create)
+            if (identifierOpt.TryGetValue(out var identifier)
+                && identifier.Page is IPageOnCreateAsync onCreate
+            )
             {
-                await create.OnCreateAsync(context, token);
+                var creationResult = await onCreate.OnCreateAsync(context, token);
 
-                if (token.IsCancellationRequested)
+                if (creationResult == false)
+                {
+                    WarningIfPageCreationFailed(pageKey, this);
+                }
+
+                if (creationResult == false || token.IsCancellationRequested)
                 {
                     ReturnPageToPool(identifier, context);
-                    return default;
+                    return Option.None;
                 }
             }
 
@@ -306,7 +317,7 @@ namespace EncosyTower.PageFlows.MonoPages
         {
             return (uint)index < (uint)_pageIds.Count
                 ? _pageIds[index]
-                : default(Option<MonoPageIdentifier>);
+                : Option.None;
         }
 
         protected bool ReturnPageToPool(IMonoPage page, PageContext context)
@@ -333,9 +344,9 @@ namespace EncosyTower.PageFlows.MonoPages
                 return false;
             }
 
-            if (identifier.Page is IPageTearDown teardown)
+            if (identifier.Page is IPageOnReturnToPool onReturn)
             {
-                teardown.OnTearDown(context);
+                onReturn.OnReturnToPool(context);
             }
 
             if (identifier.GameObjectId.IsValid == false || identifier.GameObject.IsInvalid())
@@ -481,6 +492,15 @@ namespace EncosyTower.PageFlows.MonoPages
         {
             context.GetLogger(context.Context.logEnvironment).LogError(
                 $"Cannot load asset by the key '{pageKey.Value}'"
+            );
+        }
+
+        [HideInCallstack]
+        private static void WarningIfPageCreationFailed(PageKey pageKey, MonoPageFlow context)
+        {
+            context.GetLogger(context.Context.logEnvironment).LogWarning(
+                $"The result of '{nameof(IPageOnCreateAsync)}.{nameof(IPageOnCreateAsync.OnCreateAsync)}' " +
+                $"for page loaded by the key '{pageKey.Value}' was a failure."
             );
         }
 

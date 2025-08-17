@@ -27,6 +27,7 @@ namespace EncosyTower.PageFlows
 
         public SinglePageList([NotNull] IPageFlowContext context)
         {
+            var subscriber = context.Subscriber;
             var publisher = context.Publisher;
 
             Checks.IsTrue(publisher.IsValid, "Publisher must be created correctly.");
@@ -34,6 +35,7 @@ namespace EncosyTower.PageFlows
             _logger = context.Logger ?? DevLogger.Default;
             _flow = new PageFlow(
                   context.TaskArrayPool
+                , subscriber
                 , publisher
                 , context.SlimPublishingContext
                 , context.IgnoreEmptySubscriber
@@ -165,7 +167,7 @@ namespace EncosyTower.PageFlows
                 {
                     var page = pages[index];
                     flowTasks[index] = flow.PublishDetachAsync(self, page, token);
-                    pageTasks[index] = (page as IPageDetachFromFlowAsync)
+                    pageTasks[index] = (page as IPageOnDetachFromFlowAsync)
                         ?.OnDetachFromFlowAsync(self, context, token)
                         ?? UnityTasks.GetCompleted();
 
@@ -200,7 +202,6 @@ namespace EncosyTower.PageFlows
 
             _pages.Clear();
             return true;
-
         }
 
         public async UnityTaskBool RemoveAsync([NotNull] TPage page, PageContext context, CancellationToken token)

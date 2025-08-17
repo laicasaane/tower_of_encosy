@@ -27,6 +27,7 @@ namespace EncosyTower.PageFlows
 
         public MultiPageStack([NotNull] IPageFlowContext context)
         {
+            var subscriber = context.Subscriber;
             var publisher = context.Publisher;
 
             Checks.IsTrue(publisher.IsValid, "Publisher must be created correctly.");
@@ -34,6 +35,7 @@ namespace EncosyTower.PageFlows
             _logger = context.Logger ?? DevLogger.Default;
             _flow = new PageFlow(
                   context.TaskArrayPool
+                , subscriber
                 , publisher
                 , context.SlimPublishingContext
                 , context.IgnoreEmptySubscriber
@@ -176,7 +178,7 @@ namespace EncosyTower.PageFlows
                 while (pages.TryPop(out var page))
                 {
                     flowTasks[index] = flow.PublishDetachAsync(self, page, token);
-                    pageTasks[index] = (page as IPageDetachFromFlowAsync)
+                    pageTasks[index] = (page as IPageOnDetachFromFlowAsync)
                         ?.OnDetachFromFlowAsync(self, context, token)
                         ?? UnityTasks.GetCompleted();
 

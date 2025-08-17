@@ -1,5 +1,6 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+using EncosyTower.PubSub;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
 
@@ -7,14 +8,14 @@ namespace EncosyTower.PageFlows.MonoPages
 {
     public abstract class MonoPageBase : MonoBehaviour
         , IMonoPage
-        , IPageHasFlowId
         , IPageHasOptions
         , IPageHasTransition
+        , IPageNeedsFlowId
+        , IPageNeedsMessageSubscriber
+        , IPageNeedsMessagePublisher
     {
         private MonoPageOptions _options;
         private MonoPageTransitionCollection _transition;
-
-        public long FlowId { get; set; }
 
         public PageOptions PageOptions
         {
@@ -41,6 +42,12 @@ namespace EncosyTower.PageFlows.MonoPages
                 return _transition;
             }
         }
+
+        public long FlowId { get; set; }
+
+        public MessageSubscriber.Subscriber<PageFlowScope> Subscriber { get; set; }
+
+        public MessagePublisher.Publisher<PageFlowScope> Publisher { get; set; }
     }
 }
 

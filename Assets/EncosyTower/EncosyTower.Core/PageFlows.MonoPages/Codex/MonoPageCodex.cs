@@ -26,19 +26,17 @@ namespace EncosyTower.PageFlows.MonoPages
         private readonly ArrayMap<string, FlowScopeRecord> _recordMap = new();
         private readonly FasterList<MonoPageFlow> _monoPageFlows = new();
 
-        public Func<MessagePublisher> GetPublisher { get; set; }
-
-        public Func<MessageSubscriber> GetSubscriber { get; set; }
-
-        public Func<Processor> GetProcessor { get; set; }
-
-        public Func<ArrayPool<UnityTask>> GetTaskArrayPool { get; set; }
-
         public MonoPageFlowContext FlowContext => _flowContext;
 
         public bool IsInitialized { get; private set; }
 
-        public void Initialize(MonoPageFlowContext flowContext = default)
+        public void Initialize(
+              MonoPageFlowContext flowContext = null
+            , Func<MessagePublisher> getPublisherFunc = null
+            , Func<MessageSubscriber> getSubscriberFunc = null
+            , Func<Processor> getProcessorFunc = null
+            , Func<ArrayPool<UnityTask>> getTaskArrayPoolFunc = null
+        )
         {
             flowContext ??= _flowContext;
             _flowContext = flowContext;
@@ -54,10 +52,10 @@ namespace EncosyTower.PageFlows.MonoPages
                     settings = MonoPageFlowSettings.Instance;
                 }
 
-                var subscriber = GetSubscriber?.Invoke();
-                var publisher = GetPublisher?.Invoke();
-                var processor = GetProcessor?.Invoke();
-                var taskArrayPool = GetTaskArrayPool?.Invoke();
+                var subscriber = getSubscriberFunc?.Invoke();
+                var publisher = getPublisherFunc?.Invoke();
+                var processor = getProcessorFunc?.Invoke();
+                var taskArrayPool = getTaskArrayPoolFunc?.Invoke();
 
                 flowContext.Initialize(subscriber, publisher, processor, settings, taskArrayPool);
             }
@@ -99,15 +97,15 @@ namespace EncosyTower.PageFlows.MonoPages
                     continue;
                 }
 
-                MonoPageFlow flow = definition.kind switch {
+                Option<MonoPageFlow> flowOpt = definition.kind switch {
                     MonoPageFlowKind.SinglePageStack => MonoPageFlow.Create<MonoSinglePageStack>(identifier, parent, context),
                     MonoPageFlowKind.MultiPageStack => MonoPageFlow.Create<MonoMultiPageStack>(identifier, parent, context),
                     MonoPageFlowKind.SinglePageList => MonoPageFlow.Create<MonoSinglePageList>(identifier, parent, context),
                     MonoPageFlowKind.MultiPageList => MonoPageFlow.Create<MonoMultiPageList>(identifier, parent, context),
-                    _ => default,
+                    _ => Option.None,
                 };
 
-                if (flow.IsInvalid())
+                if (flowOpt.TryGetValue(out var flow) == false)
                 {
                     ErrorIfUnexpectedErrorWhenCreate(i, this);
                     continue;
