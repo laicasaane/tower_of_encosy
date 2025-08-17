@@ -5,6 +5,7 @@ using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using EncosyTower.Common;
 using EncosyTower.Debugging;
 using EncosyTower.Logging;
 using EncosyTower.PubSub;
@@ -28,6 +29,7 @@ namespace EncosyTower.PageFlows
               [NotNull] ArrayPool<UnityTaskUntyped> taskArrayPool
             , MessageSubscriber.Subscriber<PageFlowScope> subscriber
             , MessagePublisher.Publisher<PageFlowScope> publisher
+            , Option<IPageFlowScopeCollectionApplier> flowScopeCollectionApplier
             , bool slimPublisingContext
             , bool ignoreEmptySubscriber
             , [NotNull] ILogger logger
@@ -38,6 +40,7 @@ namespace EncosyTower.PageFlows
             TaskArrayPool = taskArrayPool;
             Subscriber = subscriber;
             Publisher = publisher;
+            FlowScopeCollectionApplier = flowScopeCollectionApplier;
             SlimPublishingContext = slimPublisingContext;
             IgnoreEmptySubscriber = ignoreEmptySubscriber;
             Logger = logger;
@@ -50,6 +53,8 @@ namespace EncosyTower.PageFlows
         public MessageSubscriber.Subscriber<PageFlowScope> Subscriber { get; }
 
         public MessagePublisher.Publisher<PageFlowScope> Publisher { get; }
+
+        public Option<IPageFlowScopeCollectionApplier> FlowScopeCollectionApplier { get; }
 
         public bool SlimPublishingContext { get; }
 
@@ -292,11 +297,16 @@ namespace EncosyTower.PageFlows
             return result;
         }
 
-        private static void InitializeIPageNeedsInterfaces(IPage page, PageFlow flow, in PageContext context)
+        private void InitializeIPageNeedsInterfaces(IPage page, PageFlow flow, in PageContext context)
         {
             if (page is IPageNeedsFlowId flowId)
             {
                 flowId.FlowId = context.FlowId;
+            }
+
+            if (FlowScopeCollectionApplier.TryGetValue(out var applier))
+            {
+                applier.ApplyTo(page);
             }
 
             if (page is IPageNeedsMessageSubscriber subscriber)

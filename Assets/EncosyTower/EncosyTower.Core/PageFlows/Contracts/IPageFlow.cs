@@ -19,6 +19,10 @@ namespace EncosyTower.PageFlows
         bool IsInTransition { get; }
     }
 
+    public interface IPageFlowScopeCollection
+    {
+    }
+
     public interface ISinglePageStack<TPage> : IPageFlow, IPageStackStrategy<TPage>
         where TPage : class, IPage
     {

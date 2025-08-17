@@ -37,13 +37,14 @@ namespace EncosyTower.PageFlows
                   context.TaskArrayPool
                 , subscriber
                 , publisher
+                , context.FlowScopeCollectionApplier
                 , context.SlimPublishingContext
                 , context.IgnoreEmptySubscriber
                 , _logger
             );
         }
 
-        public Option<TPage> CurrentPage => _pages.TryPeek(out var page) ? page : default(Option<TPage>);
+        public Option<TPage> CurrentPage => _pages.TryPeek(out var page) ? page : Option.None;
 
         public IReadOnlyCollection<TPage> Pages => _pages;
 

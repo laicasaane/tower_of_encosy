@@ -2,6 +2,7 @@
 
 using System;
 using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Common;
@@ -64,6 +65,8 @@ namespace EncosyTower.PageFlows.MonoPages
                 ? new(new((Id<MonoPageFlow>)Type<MonoPageFlow>.Id, Owner.GetInstanceID()))
                 : new(new((Id<GameObject>)Type<GameObject>.Id, Owner.gameObject.GetInstanceID()));
         }
+
+        public Option<IPageFlowScopeCollectionApplier> FlowScopeCollectionApplier { get; set; }
 
         public MessageSubscriber.Subscriber<PageFlowScope> Subscriber
         {
@@ -143,6 +146,7 @@ namespace EncosyTower.PageFlows.MonoPages
                 _processor = _processor,
                 _taskArrayPool = _taskArrayPool,
                 IsInitialized = IsInitialized,
+                FlowScopeCollectionApplier = FlowScopeCollectionApplier,
             };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -153,17 +157,36 @@ namespace EncosyTower.PageFlows.MonoPages
         public string GetString(StringId id)
             => IdToString.GetManaged(id);
 
-        public async UnityTaskObject LoadAssetAsync(string assetKey, CancellationToken token)
+        public async UnityTaskObject LoadAssetAsync(
+              string assetKey
+            , CancellationToken token
+            , [NotNull] UnityEngine.Object logContext
+        )
         {
-#if UNITY_ADDRESSABLES
             if (loadStrategy == MonoPageLoaderStrategy.Addressables)
             {
+#if UNITY_ADDRESSABLES
                 return await new AddressableKey(assetKey).TryLoadAsync<GameObject>(token);
-            }
+#else
+                ErrorIfAddressablesNotInstalled(this, logContext);
 #endif
+            }
 
             return await new ResourceKey(assetKey).TryLoadAsync<GameObject>(token);
         }
+
+#if !UNITY_ADDRESSABLES
+        [HideInCallstack]
+        private static void ErrorIfAddressablesNotInstalled(
+              MonoPageFlowContext context
+            , UnityEngine.Object logContext
+        )
+        {
+            logContext.GetLogger(context.logEnvironment).LogError(
+                "Addressables is not installed. Mono Page Loader will use Resources instead."
+            );
+        }
+#endif
     }
 }
 

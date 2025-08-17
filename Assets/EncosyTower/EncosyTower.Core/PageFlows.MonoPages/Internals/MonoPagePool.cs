@@ -140,7 +140,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
             _pool.ReleaseInstances(0);
             _pool.Dispose();
-            _options = default;
+            _options = Option.None;
         }
 
         public void Destroy(int amountToDestroy)

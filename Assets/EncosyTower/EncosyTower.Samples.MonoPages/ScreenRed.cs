@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace EncosyTower.Samples.MonoPages
 {
-    public class ScreenRed : MonoPageBase
+    public class ScreenRed : MonoPageBase<GamePageFlowScopes>
     {
         [SerializeField] private Button _buttonOpenScreen;
         [SerializeField] private Button _buttonOpenPopup;
@@ -19,13 +19,23 @@ namespace EncosyTower.Samples.MonoPages
 
         private void OnOpenScreenClick()
         {
-            var publisher = GlobalMessenger.Publisher.Scope(GamePageCodex.ScreenScope);
+            if (FlowScopes.TryGetValue(out var scopes) == false)
+            {
+                return;
+            }
+
+            var publisher = GlobalMessenger.Publisher.Scope(scopes.Screen);
             publisher.Publish(new ShowPageAsyncMessage("prefab-screen-blue", default));
         }
 
         private void OnOpenPopupClick()
         {
-            var publisher = GlobalMessenger.Publisher.Scope(GamePageCodex.PopupScope);
+            if (FlowScopes.TryGetValue(out var scopes) == false)
+            {
+                return;
+            }
+
+            var publisher = GlobalMessenger.Publisher.Scope(scopes.Popup);
             publisher.Publish(new ShowPageAsyncMessage("prefab-popup-gray", new PageContext()));
         }
     }

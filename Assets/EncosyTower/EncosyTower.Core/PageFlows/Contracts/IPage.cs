@@ -1,6 +1,7 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 using System.Threading;
+using EncosyTower.Common;
 using EncosyTower.PubSub;
 
 namespace EncosyTower.PageFlows
@@ -56,6 +57,12 @@ namespace EncosyTower.PageFlows
     public interface IPageNeedsMessagePublisher : IPage
     {
         MessagePublisher.Publisher<PageFlowScope> Publisher { set; }
+    }
+
+    public interface IPageNeedsFlowScopes<TFlowScopes> : IPage
+        where TFlowScopes : struct, IPageFlowScopeCollection
+    {
+        Option<TFlowScopes> FlowScopes { set; }
     }
 }
 

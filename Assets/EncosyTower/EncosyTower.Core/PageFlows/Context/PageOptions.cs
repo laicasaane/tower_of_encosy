@@ -56,7 +56,7 @@ namespace EncosyTower.PageFlows
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly Option<PageTransitionOptions> GetTransitionOptions()
-                => forceUse ? transitionOptions : default(Option<PageTransitionOptions>);
+                => forceUse ? transitionOptions : Option.None;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void SetTransitionOptions(Option<PageTransitionOptions> value)

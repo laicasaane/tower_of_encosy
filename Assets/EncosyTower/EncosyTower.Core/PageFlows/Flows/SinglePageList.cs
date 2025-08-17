@@ -37,6 +37,7 @@ namespace EncosyTower.PageFlows
                   context.TaskArrayPool
                 , subscriber
                 , publisher
+                , context.FlowScopeCollectionApplier
                 , context.SlimPublishingContext
                 , context.IgnoreEmptySubscriber
                 , _logger

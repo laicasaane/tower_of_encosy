@@ -204,7 +204,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
             if (pool.IsInitialized == false)
             {
-                var sourceOpt = await Context.LoadAssetAsync(pageKey.Value, token);
+                var sourceOpt = await Context.LoadAssetAsync(pageKey.Value, token, this);
 
                 if (token.IsCancellationRequested)
                 {
@@ -267,7 +267,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
             if (pool.IsInitialized == false)
             {
-                var sourceOpt = await Context.LoadAssetAsync(pageKey.Value, token);
+                var sourceOpt = await Context.LoadAssetAsync(pageKey.Value, token, this);
 
                 if (token.IsCancellationRequested)
                 {

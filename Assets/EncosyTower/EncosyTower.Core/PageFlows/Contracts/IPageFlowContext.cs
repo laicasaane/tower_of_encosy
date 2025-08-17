@@ -1,6 +1,7 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 using System.Buffers;
+using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.PubSub;
 
@@ -19,6 +20,8 @@ namespace EncosyTower.PageFlows
         MessageSubscriber.Subscriber<PageFlowScope> Subscriber { get; }
 
         MessagePublisher.Publisher<PageFlowScope> Publisher { get; }
+
+        Option<IPageFlowScopeCollectionApplier> FlowScopeCollectionApplier { get; }
 
         bool SlimPublishingContext { get; }
 

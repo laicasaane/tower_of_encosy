@@ -1,55 +1,36 @@
-using System;
 using Cysharp.Threading.Tasks;
 using EncosyTower.PageFlows;
 using EncosyTower.PageFlows.MonoPages;
+using EncosyTower.PubSub;
 using UnityEngine;
 
 namespace EncosyTower.Samples.MonoPages
 {
-    [RequireComponent(typeof(MonoPageCodex))]
-    public class GamePageCodex : MonoBehaviour
+    public class GamePageCodex : MonoBehaviour, IMonoPageCodexOnInitialize
     {
-        private static MonoPageCodex.FlowScopeRecord s_screenRecord;
-        private static MonoPageCodex.FlowScopeRecord s_popupRecord;
-        private static MonoPageCodex.FlowScopeRecord s_freeTopRecord;
+        private readonly PageFlowScopeCollectionApplier<GamePageFlowScopes> _flowScopesApplier = new();
 
-        private MonoPageCodex _codex;
+        public IPageFlowScopeCollectionApplier PageFlowScopeCollectionApplier => _flowScopesApplier;
 
-        public static bool IsInitialized { get; private set; }
+        public GamePageFlowScopes FlowScopes { get;  set; }
 
-        public static PageFlowScope ScreenScope => s_screenRecord.Scope;
-
-        public static PageFlowScope PopupScope => s_popupRecord.Scope;
-
-        public static PageFlowScope FreeTopScope => s_freeTopRecord.Scope;
-
-#if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void InitWhenDomainReloadDisabled()
+        public UniTask OnInitializeAsync(MonoPageCodex codex)
         {
-            IsInitialized = false;
-            s_screenRecord = default;
-            s_popupRecord = default;
-            s_freeTopRecord = default;
-        }
-#endif
+            if (_flowScopesApplier.TryGetFlowScopeCollection(out var scopes))
+            {
+                ShowStartScreen(scopes);
+            }
 
-        private async void Awake()
-        {
-            _codex = GetComponent<MonoPageCodex>();
-
-            await UniTask.WaitUntil(this, static state => state._codex.IsInitialized);
-
-            s_screenRecord = GetFlowScopeRecord("Screen");
-            s_popupRecord = GetFlowScopeRecord("Popup");
-            s_freeTopRecord = GetFlowScopeRecord("FreeTop");
-
-            IsInitialized = true;
+            return UniTask.CompletedTask;
         }
 
-        private MonoPageCodex.FlowScopeRecord GetFlowScopeRecord(string identifier)
-            => _codex.TryGetFlowScopeRecord(identifier, out var result)
-            ? result
-            : throw new InvalidOperationException($"Cannot find PageFlowScope for identifier '{identifier}'");
+        private static void ShowStartScreen(GamePageFlowScopes scopes)
+        {
+            var publisher = GlobalMessenger.Publisher.Scope(scopes.Screen);
+
+            publisher.Publish(new ShowPageAsyncMessage("prefab-screen-red", new PageContext {
+                ShowOptions = PageTransitionOptions.NoTransition,
+            }));
+        }
     }
 }

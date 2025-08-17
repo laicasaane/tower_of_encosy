@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace EncosyTower.Samples.MonoPages
 {
-    public class PopupGreen : MonoPageBase
+    public class PopupGreen : MonoPageBase<GamePageFlowScopes>
     {
         [SerializeField] private Button _buttonOpen;
         [SerializeField] private Button _buttonClose;
@@ -24,7 +24,12 @@ namespace EncosyTower.Samples.MonoPages
 
         private void OnCloseClick()
         {
-            var publisher = GlobalMessenger.Publisher.Scope(GamePageCodex.PopupScope);
+            if (FlowScopes.TryGetValue(out var scopes) == false)
+            {
+                return;
+            }
+
+            var publisher = GlobalMessenger.Publisher.Scope(scopes.Popup);
             publisher.Publish(new HideActivePageAsyncMessage(new PageContext()));
         }
     }

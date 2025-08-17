@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace EncosyTower.Samples.MonoPages
 {
-    public class ScreenBlue : MonoPageBase
+    public class ScreenBlue : MonoPageBase<GamePageFlowScopes>
     {
         [SerializeField] private Button _buttonOpenScreen;
         [SerializeField] private Button _buttonOpenPopup;
@@ -21,13 +21,23 @@ namespace EncosyTower.Samples.MonoPages
 
         private void OnOpenSceneClick()
         {
-            var publisher = GlobalMessenger.Publisher.Scope(GamePageCodex.ScreenScope);
+            if (FlowScopes.TryGetValue(out var scopes) == false)
+            {
+                return;
+            }
+
+            var publisher = GlobalMessenger.Publisher.Scope(scopes.Screen);
             publisher.Publish(new ShowPageAsyncMessage("prefab-screen-red", default));
         }
 
         private void OnOpenPopupClick()
         {
-            var publisher = GlobalMessenger.Publisher.Scope(GamePageCodex.PopupScope);
+            if (FlowScopes.TryGetValue(out var scopes) == false)
+            {
+                return;
+            }
+
+            var publisher = GlobalMessenger.Publisher.Scope(scopes.Popup);
             publisher.Publish(new ShowPageAsyncMessage("prefab-popup-green", new PageContext {
                 ShowOptions = PageTransitionOptions.OnlyFirstPageHasDuration,
                 HideOptions = PageTransitionOptions.NoTransition,
@@ -36,7 +46,12 @@ namespace EncosyTower.Samples.MonoPages
 
         private void OnCloseScreenClick()
         {
-            var publisher = GlobalMessenger.Publisher.Scope(GamePageCodex.ScreenScope);
+            if (FlowScopes.TryGetValue(out var scopes) == false)
+            {
+                return;
+            }
+
+            var publisher = GlobalMessenger.Publisher.Scope(scopes.Screen);
             publisher.Publish(new HideActivePageAsyncMessage(default));
         }
     }

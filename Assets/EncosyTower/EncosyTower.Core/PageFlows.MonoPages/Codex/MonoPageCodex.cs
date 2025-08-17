@@ -2,11 +2,15 @@
 
 using System;
 using System.Buffers;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using EncosyTower.Collections;
 using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.Processing;
 using EncosyTower.PubSub;
+using EncosyTower.Tasks;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
 
@@ -18,17 +22,18 @@ namespace EncosyTower.PageFlows.MonoPages
     using UnityTask = UnityEngine.Awaitable;
 #endif
 
+    using UnityObject = UnityEngine.Object;
+
     public class MonoPageCodex : MonoBehaviour
     {
         [SerializeField] internal FlowDefinition[] _flows;
         [SerializeField] internal MonoPageFlowContext _flowContext = new();
 
-        private readonly ArrayMap<string, FlowScopeRecord> _recordMap = new();
+        private readonly ArrayMap<string, PageFlowScope> _flowScopeMap = new();
         private readonly FasterList<MonoPageFlow> _monoPageFlows = new();
+        private IPageFlowScopeCollectionApplier _flowScopeCollectionApplier;
 
         public MonoPageFlowContext FlowContext => _flowContext;
-
-        public bool IsInitialized { get; private set; }
 
         public void Initialize(
               MonoPageFlowContext flowContext = null
@@ -60,19 +65,132 @@ namespace EncosyTower.PageFlows.MonoPages
                 flowContext.Initialize(subscriber, publisher, processor, settings, taskArrayPool);
             }
 
-            var definitions = _flows.AsSpan();
-            var length = definitions.Length;
+            var initializer = GetComponent<IMonoPageCodexOnInitialize>();
 
-            if (length < 1)
+            if (initializer is not UnityObject initializerContext || initializerContext.IsInvalid())
+            {
+                ErrorIfCannotInitializeWithoutInitializer(this);
+                return;
+            }
+
+            var flowScopeCollectionApplier = initializer.PageFlowScopeCollectionApplier;
+
+            if (flowScopeCollectionApplier is null)
+            {
+                ErrorIfInitializerComponentReturnsNullApplier(this, initializerContext);
+                return;
+            }
+
+            var flowScopeCollectionType = flowScopeCollectionApplier.FlowScopeCollectionType;
+
+            if (flowScopeCollectionType == null)
+            {
+                ErrorIfApplierReturnsNullFlowScopeCollectionType(this, initializerContext);
+                return;
+            }
+
+            if (flowScopeCollectionType.IsValueType == false
+                || typeof(IPageFlowScopeCollection).IsAssignableFrom(flowScopeCollectionType) == false
+            )
+            {
+                ErrorIfFlowScopeCollectionTypeIsInvalid(flowScopeCollectionType, this, initializerContext);
+                return;
+            }
+
+            var properties = flowScopeCollectionType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(static x => x.CanWrite && x.PropertyType == typeof(PageFlowScope))
+                .ToArray();
+
+            if (properties.Length < 1)
+            {
+                ErrorIfFlowScopeCollectionTypeHasNoValidProperty(flowScopeCollectionType, this, initializerContext);
+                return;
+            }
+
+            var definitions = _flows.AsSpan();
+
+            if (ValidateFlowDefinitionList(flowScopeCollectionType, properties, definitions) == false)
             {
                 return;
             }
 
+            flowContext.FlowScopeCollectionApplier = new(flowScopeCollectionApplier);
+
+            CreatePageFlows(flowContext, definitions);
+
+            if (TryInitializeFlowScopeCollectionApplier(
+                  flowScopeCollectionApplier
+                , flowScopeCollectionType
+                , properties
+                , this
+            ) == false)
+            {
+                return;
+            }
+
+            _flowScopeCollectionApplier = flowScopeCollectionApplier;
+            initializer.OnInitializeAsync(this).Forget();
+        }
+
+        private bool ValidateFlowDefinitionList(
+              Type type
+            , ReadOnlySpan<PropertyInfo> properties
+            , ReadOnlySpan<FlowDefinition> flows
+        )
+        {
+            var flowIdentifierSet = new HashSet<string>(flows.Length);
+
+            for (var i = 0; i < flows.Length; i++)
+            {
+                var definition = flows[i];
+                var identifier = definition.identifier;
+
+                if (identifier.IsNotEmpty())
+                {
+                    flowIdentifierSet.Add(identifier);
+                    continue;
+                }
+
+                ErrorIfDefinitionIdentifierIsEmpty(i, this);
+                return false;
+            }
+
+            var propertySet = new HashSet<string>(properties.Length);
+
+            for (var i = 0; i < properties.Length; i++)
+            {
+                var property = properties[i];
+                var identifier = property.Name;
+                propertySet.Add(identifier);
+            }
+
+            if (propertySet.SetEquals(flowIdentifierSet) == false)
+            {
+                var missingIdentifiers = propertySet.Except(flowIdentifierSet);
+                var missingIdentifiersString = string.Join(", ", missingIdentifiers);
+                var missingProperties = flowIdentifierSet.Except(propertySet);
+                var missingPropertiesString = string.Join(", ", missingProperties);
+                ErrorIfFlowIdentifiersMismatch(type, missingIdentifiersString, missingPropertiesString, this);
+                return false;
+            }
+
+            return true;
+        }
+
+        private void CreatePageFlows(
+              MonoPageFlowContext originalContext
+            , ReadOnlySpan<FlowDefinition> definitions
+        )
+        {
             var parent = GetComponent<RectTransform>();
-            var recordMap = _recordMap;
-            recordMap.EnsureCapacity(length);
+            var length = definitions.Length;
+
+            var flowScopeMap = _flowScopeMap;
+            flowScopeMap.Clear();
+            flowScopeMap.EnsureCapacity(length);
 
             var monoPageFlows = _monoPageFlows;
+            monoPageFlows.Clear();
             monoPageFlows.IncreaseCapacityTo(length);
 
             var layer = gameObject.layer;
@@ -81,17 +199,10 @@ namespace EncosyTower.PageFlows.MonoPages
             {
                 var definition = definitions[i];
                 var identifier = definition.identifier;
-
-                var context = flowContext.CloneWithoutOwner();
+                var context = originalContext.CloneWithoutOwner();
                 context.autoInitializeOnAwake = false;
 
-                if (string.IsNullOrEmpty(identifier))
-                {
-                    ErrorIfDefinitionIdentifierIsEmpty(i, this);
-                    continue;
-                }
-
-                if (recordMap.ContainsKey(identifier))
+                if (flowScopeMap.ContainsKey(identifier))
                 {
                     ErrorIfDuplicateIdentifier(i, identifier, this);
                     continue;
@@ -112,9 +223,8 @@ namespace EncosyTower.PageFlows.MonoPages
                 }
 
                 var scope = flow.Context.FlowScope;
-                var index = monoPageFlows.Count;
 
-                if (recordMap.TryAdd(identifier, new(scope, index)) == false)
+                if (flowScopeMap.TryAdd(identifier, scope) == false)
                 {
                     ErrorIfUnexpectedErrorWhenRegister(i, identifier, this);
                     Destroy(flow.gameObject);
@@ -134,18 +244,16 @@ namespace EncosyTower.PageFlows.MonoPages
                 canvas.sortingLayerID = definition.sortingLayer;
                 canvas.sortingOrder = definition.sortingOrderInLayer;
             }
-
-            IsInitialized = true;
         }
 
-        public bool TryGetFlowScopeRecord(string identifier, out FlowScopeRecord result)
-            => _recordMap.TryGetValue(identifier, out result);
+        public bool TryGetFlowScope(string identifier, out PageFlowScope result)
+            => _flowScopeMap.TryGetValue(identifier, out result);
 
         public Option<MonoPageFlow> GetFlowAt(int index)
         {
             return (uint)index < (uint)_monoPageFlows.Count
                 ? _monoPageFlows[index]
-                : default(Option<MonoPageFlow>);
+                : Option.None;
         }
 
         private void Awake()
@@ -158,7 +266,58 @@ namespace EncosyTower.PageFlows.MonoPages
 
         private void OnDestroy()
         {
+            _flowScopeCollectionApplier = null;
+            _flowScopeMap.Clear();
             _monoPageFlows.Clear();
+        }
+
+        private static bool TryInitializeFlowScopeCollectionApplier(
+              IPageFlowScopeCollectionApplier flowScopeCollectionApplier
+            , Type flowScopeCollectionType
+            , ReadOnlySpan<PropertyInfo> properties
+            , MonoPageCodex codex
+        )
+        {
+            var map = codex._flowScopeMap;
+            var flowScopeCollection = Activator.CreateInstance(flowScopeCollectionType);
+
+            for (var i = 0; i < properties.Length; i++)
+            {
+                var property = properties[i];
+                var identifier = property.Name;
+
+                if (map.TryGetValue(identifier, out var flowScope) == false)
+                {
+                    ErrorIfCannotFindFlowScopeForProperty(flowScopeCollectionType, identifier, codex);
+                    goto FAILED;
+                }
+
+                try
+                {
+                    property.SetValue(flowScopeCollection, flowScope);
+                }
+                catch (Exception ex)
+                {
+                    codex.GetLogger(codex._flowContext.logEnvironment).LogException(ex);
+                    goto FAILED;
+                }
+            }
+
+            flowScopeCollectionApplier.SetFlowScopeCollection(flowScopeCollection);
+            return true;
+
+        FAILED:
+            return false;
+        }
+
+        [HideInCallstack]
+        private static void ErrorIfCannotInitializeWithoutInitializer(MonoPageCodex context)
+        {
+            context.GetLogger(context._flowContext.logEnvironment).LogError(
+                $"Cannot initialize {nameof(MonoPageCodex)} without an initializer. " +
+                $"Please add an {nameof(IMonoPageCodexOnInitialize)} component " +
+                $"to the GameObject of this {nameof(MonoPageCodex)}."
+            );
         }
 
         [HideInCallstack]
@@ -193,6 +352,84 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [HideInCallstack]
+        private static void ErrorIfInitializerComponentReturnsNullApplier(MonoPageCodex codex, UnityObject context)
+        {
+            context.GetLogger(codex._flowContext.logEnvironment).LogError(
+                $"The {nameof(IMonoPageCodexOnInitialize)} component " +
+                $"returned a null {nameof(IPageFlowScopeCollectionApplier)}. " +
+                $"Please ensure the interface {nameof(IMonoPageCodexOnInitialize)} is correctly implemented."
+            );
+        }
+
+        [HideInCallstack]
+        private static void ErrorIfApplierReturnsNullFlowScopeCollectionType(MonoPageCodex codex, UnityObject context)
+        {
+            context.GetLogger(codex._flowContext.logEnvironment).LogError(
+                $"The {nameof(IPageFlowScopeCollectionApplier)} returned a null " +
+                $"flow scope collection type. Please ensure the interface " +
+                $"{nameof(IPageFlowScopeCollectionApplier)} is correctly implemented."
+            );
+        }
+
+        [HideInCallstack]
+        private static void ErrorIfFlowScopeCollectionTypeIsInvalid(Type type, MonoPageCodex codex, UnityObject context)
+        {
+            context.GetLogger(codex._flowContext.logEnvironment).LogError(
+                $"The type '{type}' is an invalid Page Flow Scope Collection. " +
+                $"It must be a struct and implement {nameof(IPageFlowScopeCollection)}."
+            );
+        }
+
+        [HideInCallstack]
+        private static void ErrorIfFlowScopeCollectionTypeHasNoValidProperty(Type type, MonoPageCodex codex, UnityObject context)
+        {
+            context.GetLogger(codex._flowContext.logEnvironment).LogError(
+                $"The type '{type}' has no valid property to hold {nameof(PageFlowScope)} values. " +
+                $"Please ensure the type implements {nameof(IPageFlowScopeCollection)} " +
+                $"and has properties of type {nameof(PageFlowScope)}."
+            );
+        }
+
+        [HideInCallstack]
+        private static void ErrorIfFlowIdentifiersMismatch(
+              Type type
+            , string missingIdentifiers
+            , string missingProperties
+            , MonoPageCodex codex
+        )
+        {
+            if (missingIdentifiers.IsNotEmpty())
+            {
+                codex.GetLogger(codex._flowContext.logEnvironment).LogError(
+                    $"The flow definitions on this {nameof(MonoPageCodex)} " +
+                    $"do not match the properties of type '{type}'. " +
+                    $"The following identifiers are missing: {missingIdentifiers}. " +
+                    $"Please specify the flow definitions according to the properties of type '{type}'."
+                );
+            }
+
+            if (missingProperties.IsNotEmpty())
+            {
+                codex.GetLogger(codex._flowContext.logEnvironment).LogError(
+                    $"The properties of type '{type}' do not match the identifiers " +
+                    $"of the flow definitions on this {nameof(MonoPageCodex)}. " +
+                    $"The following properties are missing: {missingProperties}. " +
+                    $"Please ensure the properties of type '{type}' match the flow definitions."
+                );
+            }
+        }
+
+        [HideInCallstack]
+        private static void ErrorIfCannotFindFlowScopeForProperty(Type type, string identifier, MonoPageCodex codex)
+        {
+            codex.GetLogger(codex._flowContext.logEnvironment).LogError(
+                $"Cannot find a flow scope value for the property '{identifier}' of the type '{type}'. " +
+                $"Please add the flow definitions to this {nameof(MonoPageCodex)} " +
+                $"matching the properties of type '{type}'."
+            );
+        }
+
         [Serializable]
         internal struct FlowDefinition
         {
@@ -202,8 +439,6 @@ namespace EncosyTower.PageFlows.MonoPages
             public SortingLayerId sortingLayer;
             public int sortingOrderInLayer;
         }
-
-        public readonly record struct FlowScopeRecord(PageFlowScope Scope, int Index);
     }
 }
 
