@@ -70,10 +70,12 @@ namespace EncosyTower.Editor.ProjectSetup
 
         public void OnEnable()
         {
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 
             _initAfterRequest = false;
             s_listRequest = Client.List(true, true);
+            EditorApplication.update -= ListRequestProgress;
             EditorApplication.update += ListRequestProgress;
         }
 
@@ -651,6 +653,7 @@ namespace EncosyTower.Editor.ProjectSetup
             ApplyOpenUpm();
 
             s_addRequest = Client.AddAndRemove(packagesToAdd: s_unityIdentifiers.ToArray());
+            EditorApplication.update -= AddRequestProgress;
             EditorApplication.update += AddRequestProgress;
         }
 

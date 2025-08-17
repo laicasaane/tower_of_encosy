@@ -14,6 +14,7 @@ namespace EncosyTower.Editor
             // is required to let unity finish all its native menu population process,
             // else your new menu can get lost.
             // https://gist.github.com/JVinceW/1db8eaa93c7e8daf7bf21455a6d569af
+            EditorApplication.delayCall -= VerifyCreateMenu;
             EditorApplication.delayCall += VerifyCreateMenu;
         }
 
