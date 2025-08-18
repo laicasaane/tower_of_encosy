@@ -27,6 +27,10 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings
             return provider;
         }
 
+        [MenuItem("Encosy Tower/Project Settings/Mono Page Flow")]
+        private static void OpenSettings()
+            => MonoPageFlowSettings.Instance.OpenSettingsWindow();
+
         private static void Create(
               ScriptableObjectSettingsProvider provider
             , VisualElement root

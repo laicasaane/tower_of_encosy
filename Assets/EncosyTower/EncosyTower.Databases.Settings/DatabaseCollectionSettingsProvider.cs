@@ -26,6 +26,10 @@ namespace EncosyTower.Databases.Settings
             return provider;
         }
 
+        [MenuItem("Encosy Tower/Project Settings/Database Collection")]
+        private static void OpenSettings()
+            => DatabaseCollectionSettings.Instance.OpenSettingsWindow();
+
         private static void Create(
               ScriptableObjectSettingsProvider provider
             , VisualElement root
