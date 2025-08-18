@@ -2,7 +2,6 @@
 
 using System.Buffers;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 
 namespace EncosyTower.PubSub
 {
@@ -17,7 +16,7 @@ namespace EncosyTower.PubSub
         public static MessageSubscriber Subscriber => Instance.Subscriber;
 
 #if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        [UnityEditor.InitializeOnEnterPlayMode, UnityEngine.Scripting.Preserve]
         private static void InitWhenDomainReloadDisabled()
         {
             s_instance?.Dispose();

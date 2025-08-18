@@ -1,7 +1,5 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
-using UnityEngine;
-
 namespace EncosyTower.Processing
 {
     public static class GlobalProcessor
@@ -11,7 +9,7 @@ namespace EncosyTower.Processing
         public static Processor Instance => s_instance ??= new();
 
 #if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        [UnityEditor.InitializeOnEnterPlayMode, UnityEngine.Scripting.Preserve]
         private static void InitWhenDomainReloadDisabled()
         {
             s_instance?.Dispose();

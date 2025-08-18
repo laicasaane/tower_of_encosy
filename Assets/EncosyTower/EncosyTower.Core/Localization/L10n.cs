@@ -34,7 +34,7 @@ namespace EncosyTower.Localization
         public static IReadOnlyDictionary<string, Locale> LocaleMap => s_codeToLocaleMap;
 
 #if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        [UnityEditor.InitializeOnEnterPlayMode, UnityEngine.Scripting.Preserve]
         private static void InitWhenDomainReloadDisabled()
         {
             GlobalValueVault<bool>.TrySet(TypeId, false);

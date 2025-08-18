@@ -61,7 +61,7 @@ namespace EncosyTower.Vaults
     {
         private readonly static System.Collections.Generic.Dictionary<TypeId, IClearable> s_vaults = new();
 
-        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        [UnityEditor.InitializeOnEnterPlayMode, UnityEngine.Scripting.Preserve]
         private static void InitWhenDomainReloadDisabled()
         {
             var vaults = s_vaults;

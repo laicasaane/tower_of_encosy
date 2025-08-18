@@ -11,7 +11,7 @@ namespace EncosyTower.StringIds
         private readonly static StringVault s_vault = new(256);
 
 #if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        [UnityEditor.InitializeOnEnterPlayMode, UnityEngine.Scripting.Preserve]
         private static void InitWhenDomainReloadDisabled()
         {
             s_vault.Clear();

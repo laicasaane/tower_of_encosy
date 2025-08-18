@@ -11,7 +11,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Ids;
 using EncosyTower.Types.Internals;
-using UnityEngine;
 using UnityEngine.Scripting;
 
 namespace EncosyTower.Types
@@ -40,7 +39,7 @@ namespace EncosyTower.Types
         }
 
 #if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        [UnityEditor.InitializeOnEnterPlayMode, UnityEngine.Scripting.Preserve]
 #endif
         private static void InitTypeIdVault()
         {

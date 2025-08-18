@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using EncosyTower.Processing;
-using UnityEngine;
 
 namespace Module.GameCommon.Processing
 {
@@ -11,7 +10,7 @@ namespace Module.GameCommon.Processing
         public static Processor Instance => s_instance ??= new();
 
 #if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        [UnityEditor.InitializeOnEnterPlayMode, UnityEngine.Scripting.Preserve]
         private static void InitWhenDomainReloadDisabled()
         {
             s_instance?.Dispose();

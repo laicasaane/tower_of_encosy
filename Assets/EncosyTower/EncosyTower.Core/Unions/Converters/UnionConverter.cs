@@ -18,7 +18,7 @@ namespace EncosyTower.Unions.Converters
         }
 
 #if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        [UnityEditor.InitializeOnEnterPlayMode, UnityEngine.Scripting.Preserve]
 #endif
         private static void Init()
         {
