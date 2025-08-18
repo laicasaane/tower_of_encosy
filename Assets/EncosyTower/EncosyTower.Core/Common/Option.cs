@@ -18,6 +18,8 @@ namespace EncosyTower.Common
 
     public readonly struct Option<T> : IEquatable<Option<T>>
     {
+        private readonly static bool s_isValueType = typeof(T).IsValueType;
+
         public readonly static Option<T> None = default;
 
         private readonly T _value;
@@ -28,9 +30,16 @@ namespace EncosyTower.Common
         {
             _value = value;
 
-            HasValue = value is UnityEngine.Object obj
-                ? (ByteBool)(obj == true)
-                : value is not null;
+            if (s_isValueType)
+            {
+                HasValue = true;
+            }
+            else
+            {
+                HasValue = value is UnityEngine.Object obj
+                    ? (ByteBool)(obj == true)
+                    : value is not null;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
