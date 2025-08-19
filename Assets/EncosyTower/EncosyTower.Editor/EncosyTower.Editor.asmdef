@@ -9,6 +9,7 @@
         "Latios.Transforms",
         "UniTask",
         "UniTask.Addressables",
+        "Unity.2D.Sprite.Editor",
         "Unity.Addressables",
         "Unity.Addressables.Editor",
         "Unity.Burst",
@@ -34,6 +35,11 @@
         "UNITY_EDITOR"
     ],
     "versionDefines": [
+        {
+            "name": "com.unity.2d.sprite",
+            "expression": "",
+            "define": "UNITY_2D_SPRITE"
+        },
         {
             "name": "com.annulusgames.unity-codegen",
             "expression": "",

@@ -78,8 +78,6 @@ namespace EncosyTower.Editor.UIElements
         private Button _cancelButton;
         private VisualElement _buttonField;
 
-        private string _filter = string.Empty;
-
         public static void OpenWindow(
               string title
             , IReadOnlyList<IItemInfo> items
@@ -208,31 +206,7 @@ namespace EncosyTower.Editor.UIElements
 
         private void SearchField_OnValueChanged(ChangeEvent<string> evt)
         {
-            var filter = _filter = evt.newValue;
-            var hasFilter = string.IsNullOrWhiteSpace(filter) == false;
-
-            var itemInfoList = _itemInfoList;
-            itemInfoList.Clear();
-
-            foreach (var item in _items)
-            {
-                var name = item.Name ?? string.Empty;
-
-                if (item.IsHeader)
-                {
-                    itemInfoList.Add(item);
-                    continue;
-                }
-                else if (hasFilter
-                    && string.IsNullOrEmpty(name) == false
-                    && UnityEditor.Search.FuzzySearch.FuzzyMatch(filter, name) == false)
-                {
-                    continue;
-                }
-
-                itemInfoList.Add(item);
-            }
-
+            FuzzySearchAPI.Search(_items, evt.newValue, _itemInfoList, new SearchValidator());
             _listView?.Rebuild();
         }
 
@@ -300,6 +274,15 @@ namespace EncosyTower.Editor.UIElements
                 IsChecked = isChecked;
                 IsHeader = isHeader;
             }
+        }
+
+        private readonly struct SearchValidator : ISearchValidator<IItemInfo>
+        {
+            public bool IsSearchable(IItemInfo item)
+                => item.IsHeader;
+
+            public string GetSearchableString(IItemInfo item)
+                => item.Name;
         }
     }
 }

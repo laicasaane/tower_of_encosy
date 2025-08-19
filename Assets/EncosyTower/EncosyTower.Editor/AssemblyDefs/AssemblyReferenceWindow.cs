@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -303,31 +304,7 @@ namespace EncosyTower.Editor.AssemblyDefs
 
             private void SearchField_OnValueChanged(ChangeEvent<string> evt)
             {
-                var filter = evt.newValue;
-                var hasFilter = string.IsNullOrWhiteSpace(filter) == false;
-
-                var itemInfoList = _listViewItemSource;
-                itemInfoList.Clear();
-
-                foreach (var item in _references)
-                {
-                    var name = item.Name ?? string.Empty;
-
-                    if (item.IsHeader)
-                    {
-                        itemInfoList.Add(item);
-                        continue;
-                    }
-                    else if (hasFilter
-                        && string.IsNullOrEmpty(name) == false
-                        && UnityEditor.Search.FuzzySearch.FuzzyMatch(filter, name) == false)
-                    {
-                        continue;
-                    }
-
-                    itemInfoList.Add(item);
-                }
-
+                FuzzySearchAPI.Search(_references, evt.newValue, _listViewItemSource, new SearchValidator());
                 _listView?.Rebuild();
             }
 
@@ -392,6 +369,15 @@ namespace EncosyTower.Editor.AssemblyDefs
                 {
                     return StringComparer.OrdinalIgnoreCase.Compare(x.Name, y.Name);
                 }
+            }
+
+            private readonly struct SearchValidator : ISearchValidator<AssemblyReferenceData>
+            {
+                public string GetSearchableString(AssemblyReferenceData item)
+                    => item.Name;
+
+                public bool IsSearchable(AssemblyReferenceData item)
+                    => item.IsHeader == false;
             }
         }
     }

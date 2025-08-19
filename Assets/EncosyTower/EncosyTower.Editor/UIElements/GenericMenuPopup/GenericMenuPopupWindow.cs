@@ -226,7 +226,7 @@ namespace EncosyTower.Editor.UIElements
         {
             _scrollView.Clear();
 
-            var searchResult = FasterListPool<MenuItemNode>.Get();
+            using var _ = FasterListPool<MenuItemNode>.Get(out var searchResult);
 
             _popup.rootNode.Search(_search, searchResult);
 
@@ -291,8 +291,6 @@ namespace EncosyTower.Editor.UIElements
             {
                 _scrollView.Add(new Label("No result found for specified search."));
             }
-
-            FasterListPool<MenuItemNode>.Release(searchResult);
         }
 
         private void SearchField_OnValueChaned(ChangeEvent<string> evt)

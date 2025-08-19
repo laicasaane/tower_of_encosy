@@ -94,12 +94,11 @@ namespace EncosyTower.Editor
                     result.Add(node);
                 }
 
-                var searchResult = FasterListPool<MenuItemNode>.Get();
-
-                node.Search(search, searchResult);
-                result.AddRange(searchResult);
-
-                FasterListPool<MenuItemNode>.Release(searchResult);
+                using (FasterListPool<MenuItemNode>.Get(out var searchResult))
+                {
+                    node.Search(search, searchResult);
+                    result.AddRange(searchResult);
+                }
             }
         }
 
@@ -135,6 +134,15 @@ namespace EncosyTower.Editor
             {
                 func2?.Invoke(userData);
             }
+        }
+
+        private readonly struct SearchValidator : ISearchValidator<MenuItemNode>
+        {
+            public bool IsSearchable(MenuItemNode item)
+                => true;
+
+            public string GetSearchableString(MenuItemNode item)
+                => item.Name;
         }
     }
 }
