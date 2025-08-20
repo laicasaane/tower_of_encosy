@@ -5,6 +5,7 @@ namespace EncosyTower.Databases.Settings.Views
     using DatabaseSettings = DatabaseCollectionSettings.DatabaseSettings;
     using GoogleSheetSettings = DatabaseCollectionSettings.GoogleSheetSettings;
     using LocalFolderSettings = DatabaseCollectionSettings.LocalFolderSettings;
+    using LocalCsvFolderSettings = DatabaseCollectionSettings.LocalCsvFolderSettings;
 
     internal class DatabaseSettingsContext
     {
@@ -91,6 +92,9 @@ namespace EncosyTower.Databases.Settings.Views
 
         public SerializedProperty GetAlwaysDownloadAllProperty()
             => Property.FindPropertyRelative(nameof(GoogleSheetSettings.alwaysDownloadAll));
+
+        public SerializedProperty GetEmptyRowStreakThresholdProperty()
+            => Property.FindPropertyRelative(nameof(GoogleSheetSettings.emptyRowStreakThreshold));
     }
 
     internal readonly record struct LocalFolderContext(
@@ -109,5 +113,20 @@ namespace EncosyTower.Databases.Settings.Views
 
         public SerializedProperty GetLiveConversionProperty()
             => Property.FindPropertyRelative(nameof(LocalFolderSettings.liveConversion));
+
+        public SerializedProperty GetEmptyRowStreakThresholdProperty()
+            => Property.FindPropertyRelative(nameof(LocalFolderSettings.emptyRowStreakThreshold));
+
+        public SerializedProperty GetIncludeSubFoldersProperty()
+            => Property.FindPropertyRelative(nameof(LocalFolderSettings.includeSubFolders));
+
+        public SerializedProperty GetIncludeCommentedFilesProperty()
+            => Property.FindPropertyRelative(nameof(LocalFolderSettings.includeCommentedFiles));
+
+        public SerializedProperty GetSplitHeaderProperty()
+            => Property.FindPropertyRelative(nameof(LocalCsvFolderSettings.splitHeader));
+
+        public SerializedProperty GetExtensionProperty()
+            => Property.FindPropertyRelative(nameof(LocalCsvFolderSettings.extension));
     }
 }

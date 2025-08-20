@@ -1,4 +1,4 @@
-﻿// BakingSheet, Maxwell Keonwoo Kang <code.athei@gmail.com>, 2022
+// BakingSheet, Maxwell Keonwoo Kang <code.athei@gmail.com>, 2022
 
 using System;
 using System.Collections.Generic;
@@ -15,12 +15,6 @@ namespace EncosyTower.Databases.Authoring
     /// </summary>
     public abstract class DatabaseRawSheetConverter : DatabaseRawSheetImporter, ISheetConverter
     {
-        public bool SplitHeader { get; set; }
-
-        protected abstract Task<bool> SaveData();
-
-        protected abstract IRawSheetExporterPage CreatePage(string sheetName);
-
         protected DatabaseRawSheetConverter(
               TimeZoneInfo timeZoneInfo
             , IFormatProvider formatProvider
@@ -31,6 +25,8 @@ namespace EncosyTower.Databases.Authoring
         {
             SplitHeader = splitHeader;
         }
+
+        public bool SplitHeader { get; set; }
 
         public async Task<bool> Export(SheetConvertingContext context)
         {
@@ -68,6 +64,10 @@ namespace EncosyTower.Databases.Authoring
 
             return true;
         }
+
+        protected abstract Task<bool> SaveData();
+
+        protected abstract IRawSheetExporterPage CreatePage(string sheetName);
 
         private void ExportPage(IRawSheetExporterPage page, SheetConvertingContext context, ISheet sheet)
         {

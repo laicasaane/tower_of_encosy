@@ -45,7 +45,13 @@ namespace EncosyTower.Databases.Settings
                     , continueOnCapturedContext
                 ).ConfigureAwait(continueOnCapturedContext);
 
-                var fileConverter = new DatabaseGoogleSheetConverter(spreadsheetId, initializer, timeZone);
+                var fileConverter = new DatabaseGoogleSheetConverter(
+                      spreadsheetId
+                    , initializer
+                    , timeZone
+                    , formatProvider: null
+                    , emptyRowStreakThreshold
+                );
 
                 await fileContainer.Bake(fileConverter)
                     .ConfigureAwait(continueOnCapturedContext);
@@ -63,7 +69,13 @@ namespace EncosyTower.Databases.Settings
                             continue;
                         }
 
-                        converters.Add(new(row.FileId, initializer, timeZone));
+                        converters.Add(new DatabaseGoogleSheetConverter(
+                              row.FileId
+                            , initializer
+                            , timeZone
+                            , formatProvider: null
+                            , emptyRowStreakThreshold
+                        ));
                     }
                 }
                 else
@@ -124,7 +136,13 @@ namespace EncosyTower.Databases.Settings
                     , continueOnCapturedContext
                 ).ConfigureAwait(continueOnCapturedContext);
 
-                var fileConverter = new DatabaseGoogleSheetConverter(spreadsheetId, initializer, timeZone);
+                var fileConverter = new DatabaseGoogleSheetConverter(
+                      spreadsheetId
+                    , initializer
+                    , timeZone
+                    , formatProvider: null
+                    , emptyRowStreakThreshold
+                );
 
                 await fileContainer.Bake(fileConverter).ConfigureAwait(continueOnCapturedContext);
 
@@ -152,7 +170,7 @@ namespace EncosyTower.Databases.Settings
                             continue;
                         }
 
-                        exporters.TryAdd(id, new(row.FileId, initializer, fileSystem));
+                        exporters.TryAdd(id, new DatabaseGoogleSheetCsvExporter(row.FileId, initializer, fileSystem));
                         id += 1;
                     }
                 }

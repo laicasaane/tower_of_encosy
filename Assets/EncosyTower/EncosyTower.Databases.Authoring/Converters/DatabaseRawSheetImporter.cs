@@ -33,15 +33,15 @@ namespace EncosyTower.Databases.Authoring
             EmptyRowStreakThreshold = emptyRowStreakThreshold;
         }
 
-        protected abstract Task<bool> LoadData();
-
-        protected abstract IEnumerable<IRawSheetImporterPage> GetPages(string sheetName);
-
         public TimeZoneInfo TimeZoneInfo { get; }
 
         public IFormatProvider FormatProvider { get; }
 
         public int EmptyRowStreakThreshold { get; }
+
+        protected abstract Task<bool> LoadData();
+
+        protected abstract IEnumerable<IRawSheetImporterPage> GetPages(string sheetName);
 
         public virtual void Reset()
         {

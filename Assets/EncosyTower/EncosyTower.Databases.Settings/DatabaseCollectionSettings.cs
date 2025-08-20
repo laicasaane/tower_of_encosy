@@ -41,6 +41,7 @@ namespace EncosyTower.Databases.Settings
             public bool enabled = false;
             public bool cleanOutputFolder = true;
             public bool alwaysDownloadAll = false;
+            public int emptyRowStreakThreshold = 5;
         }
 
         [Serializable]
@@ -50,6 +51,9 @@ namespace EncosyTower.Databases.Settings
             public string outputRelativeFolderPath = string.Empty;
             public bool enabled = false;
             public bool liveConversion = true;
+            public int emptyRowStreakThreshold = 5;
+            public bool includeSubFolders = true;
+            public bool includeCommentedFiles = false;
 
             public static string GetProgressTitle(DataSourceFlags source)
             {
@@ -64,11 +68,14 @@ namespace EncosyTower.Databases.Settings
         [Serializable]
         internal sealed partial class LocalCsvFolderSettings : LocalFolderSettings
         {
+            public bool splitHeader = false;
+            public string extension = "csv";
         }
 
         [Serializable]
         internal sealed partial class LocalExcelFolderSettings : LocalFolderSettings
         {
+            public string extension = "xlsx";
         }
 
         internal enum AuthenticationType

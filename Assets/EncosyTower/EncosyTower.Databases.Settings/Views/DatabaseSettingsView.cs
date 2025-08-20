@@ -22,8 +22,8 @@ namespace EncosyTower.Databases.Settings.Views
         private readonly HelpBox _databaseHelp;
         private readonly VisualElement _container;
         private readonly GoogleSheetSettingsView _googleSheetView;
-        private readonly LocalFolderSettingsView _csvView;
-        private readonly LocalFolderSettingsView _excelView;
+        private readonly LocalCsvFolderSettingsView _csvView;
+        private readonly LocalExcelFolderSettingsView _excelView;
 
         // An optimization to limit the chance the
         // frequent of OtherValueUpdated being invoked.

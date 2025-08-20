@@ -30,13 +30,23 @@ MonoBehaviour:
       enabled: 1
       cleanOutputFolder: 1
       alwaysDownloadAll: 0
+      emptyRowStreakThreshold: 5
     csvSettings:
       inputRelativeFolderPath: Assets/EncosyTower/EncosyTower.Samples.Data/Authoring.Csv
       outputRelativeFolderPath: Assets/EncosyTower/EncosyTower.Samples.Data/RuntimeAsset.Tables
       enabled: 1
       liveConversion: 1
+      emptyRowStreakThreshold: 5
+      includeSubFolders: 1
+      includeCommentedFiles: 0
+      splitHeader: 0
+      extension: csv
     excelSettings:
       inputRelativeFolderPath: 
       outputRelativeFolderPath: 
       enabled: 0
       liveConversion: 1
+      emptyRowStreakThreshold: 5
+      includeSubFolders: 1
+      includeCommentedFiles: 0
+      extension: xlsx

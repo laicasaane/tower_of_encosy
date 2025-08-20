@@ -38,6 +38,7 @@ namespace EncosyTower.Databases.Settings.Views
         private readonly EnumField _outputFileTypeEnum;
         private readonly Toggle _cleanOutputFolderToggle;
         private readonly Toggle _alwaysDownloadAllToggle;
+        private readonly IntegerField _emptyRowStreakThresholdField;
         private readonly Button _downloadButton;
 
         private bool _credentialFileValid;
@@ -127,6 +128,11 @@ namespace EncosyTower.Databases.Settings.Views
             _alwaysDownloadAllToggle = new("Always Download All?");
             Add(_alwaysDownloadAllToggle.AddToAlignFieldClass());
 
+            _emptyRowStreakThresholdField = new("Empty Row Streak Threshold") {
+                tooltip = "The maximum number of continuous empty rows allowed before file is considered ended."
+            };
+            Add(_emptyRowStreakThresholdField.AddToAlignFieldClass());
+
             Add(new VisualSeparator());
 
             Add(_downloadButton = new(DownloadButton_OnClicked) {
@@ -192,6 +198,7 @@ namespace EncosyTower.Databases.Settings.Views
 
             _cleanOutputFolderToggle.BindProperty(context.GetCleanOutputFolderProperty());
             _alwaysDownloadAllToggle.BindProperty(context.GetAlwaysDownloadAllProperty());
+            _emptyRowStreakThresholdField.BindProperty(context.GetEmptyRowStreakThresholdProperty());
 
             {
                 var prop = context.GetOutputFileTypeProperty();
@@ -220,6 +227,7 @@ namespace EncosyTower.Databases.Settings.Views
             _outputFileTypeEnum.Unbind();
             _cleanOutputFolderToggle.Unbind();
             _alwaysDownloadAllToggle.Unbind();
+            _emptyRowStreakThresholdField.Unbind();
         }
 
         protected override void OnEnabled(bool value)
@@ -259,6 +267,7 @@ namespace EncosyTower.Databases.Settings.Views
             _outputFileTypeEnum.RegisterValueChangedCallback(OnValueChanged_ComparableUntyped);
             _cleanOutputFolderToggle.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
             _alwaysDownloadAllToggle.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
+            _emptyRowStreakThresholdField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
 
             _authenticationEnum.RegisterValueChangedCallback(AuthenticationType_OnChanged);
             _credentialFileText.TextField.RegisterValueChangedCallback(CredentialFile_OnChanged);

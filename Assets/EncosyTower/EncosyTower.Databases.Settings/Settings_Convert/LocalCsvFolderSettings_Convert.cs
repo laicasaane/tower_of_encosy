@@ -13,7 +13,19 @@ namespace EncosyTower.Databases.Settings
             public override string ProgressTitle => PROGRESS_TITLE;
 
             protected override ISheetImporter GetImporter(string inputFolderPath, TimeZoneInfo timeZone)
-                => new DatabaseCsvSheetConverter(inputFolderPath, timeZone);
+            {
+                return new DatabaseCsvSheetConverter(
+                      inputFolderPath
+                    , timeZone
+                    , extension
+                    , fileSystem: null
+                    , splitHeader
+                    , formatProvider: null
+                    , emptyRowStreakThreshold
+                    , includeSubFolders
+                    , includeCommentedFiles
+                );
+            }
         }
     }
 }

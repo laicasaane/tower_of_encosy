@@ -1,6 +1,8 @@
 namespace EncosyTower.Databases.Settings.Views
 {
     using LocalFolderSettings = DatabaseCollectionSettings.LocalFolderSettings;
+    using LocalCsvFolderSettings = DatabaseCollectionSettings.LocalCsvFolderSettings;
+    using LocalExcelFolderSettings = DatabaseCollectionSettings.LocalExcelFolderSettings;
 
     internal partial class DatabaseCollectionSettingsEditor
     {
@@ -83,6 +85,11 @@ namespace EncosyTower.Databases.Settings.Views
                     var prop = context.GetAlwaysDownloadAllProperty();
                     prop.boolValue = settings.alwaysDownloadAll;
                 }
+
+                {
+                    var prop = context.GetEmptyRowStreakThresholdProperty();
+                    prop.intValue = settings.emptyRowStreakThreshold;
+                }
             }
 
             Copy(destContext.Csv, database.csvSettings);
@@ -107,6 +114,45 @@ namespace EncosyTower.Databases.Settings.Views
                 {
                     var prop = context.GetLiveConversionProperty();
                     prop.boolValue = settings.liveConversion;
+                }
+                {
+                    var prop = context.GetEmptyRowStreakThresholdProperty();
+                    prop.intValue = settings.emptyRowStreakThreshold;
+                }
+                {
+                    var prop = context.GetIncludeSubFoldersProperty();
+                    prop.boolValue = settings.includeSubFolders;
+                }
+                {
+                    var prop = context.GetIncludeCommentedFilesProperty();
+                    prop.boolValue = settings.includeCommentedFiles;
+                }
+
+                switch (settings)
+                {
+                    case LocalCsvFolderSettings csvFolderSettings:
+                    {
+                        {
+                            var prop = context.GetSplitHeaderProperty();
+                            prop.boolValue = csvFolderSettings.splitHeader;
+                        }
+                        {
+                            var prop = context.GetExtensionProperty();
+                            prop.stringValue = csvFolderSettings.extension;
+                        }
+
+                        break;
+                    }
+
+                    case LocalExcelFolderSettings excelFolderSettings:
+                    {
+                        {
+                            var prop = context.GetExtensionProperty();
+                            prop.stringValue = excelFolderSettings.extension;
+                        }
+
+                        break;
+                    }
                 }
             }
         }

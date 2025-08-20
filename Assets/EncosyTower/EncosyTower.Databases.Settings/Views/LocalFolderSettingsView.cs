@@ -8,7 +8,7 @@ namespace EncosyTower.Databases.Settings.Views
 {
     using HelpType = HelpBoxMessageType;
 
-    internal sealed class LocalFolderSettingsView : SettingsView
+    internal abstract class LocalFolderSettingsView : SettingsView
     {
         private readonly DataSourceFlags _source;
         private readonly FolderTextField _inputFolderText;
@@ -16,13 +16,16 @@ namespace EncosyTower.Databases.Settings.Views
         private readonly FolderTextField _outputFolderText;
         private readonly HelpBox _outputFolderHelp;
         private readonly Toggle _liveConversionToggle;
+        private readonly IntegerField _emptyRowStreakThresholdField;
+        private readonly Toggle _includeSubFoldersToggle;
+        private readonly Toggle _includeCommentedFilesToggle;
         private readonly Button _convertButton;
 
         private LocalFolderContext _context;
         private bool _inputFolderValid;
         private bool _outputFolderValid;
 
-        public LocalFolderSettingsView(
+        protected LocalFolderSettingsView(
               string text
             , string ussClassName
             , ViewResources resources
@@ -56,6 +59,21 @@ namespace EncosyTower.Databases.Settings.Views
 
             _liveConversionToggle = new("Live Conversion?");
             Add(_liveConversionToggle.AddToAlignFieldClass());
+
+            _emptyRowStreakThresholdField = new("Empty Row Streak Threshold") {
+                tooltip = "The maximum number of continuous empty rows allowed before file is considered ended."
+            };
+            Add(_emptyRowStreakThresholdField.AddToAlignFieldClass());
+
+            Add(new VisualSeparator());
+
+            _includeSubFoldersToggle = new("Include Sub-Folders?");
+            Add(_includeSubFoldersToggle.AddToAlignFieldClass());
+
+            _includeCommentedFilesToggle = new("Include Commented Files?");
+            Add(_includeCommentedFilesToggle.AddToAlignFieldClass());
+
+            CreateAdditionalFields();
 
             Add(new VisualSeparator());
 
@@ -103,10 +121,15 @@ namespace EncosyTower.Databases.Settings.Views
                 TryDisplayOutputFolderHelp(prop.stringValue);
             }
 
+            _emptyRowStreakThresholdField.BindProperty(context.GetEmptyRowStreakThresholdProperty());
+            _includeSubFoldersToggle.BindProperty(context.GetIncludeSubFoldersProperty());
+            _includeCommentedFilesToggle.BindProperty(context.GetIncludeCommentedFilesProperty());
             _liveConversionToggle.BindProperty(context.GetLiveConversionProperty());
+
+            OnBind(context);
         }
 
-        public override void Unbind()
+        public sealed override void Unbind()
         {
             _context = default;
 
@@ -115,9 +138,20 @@ namespace EncosyTower.Databases.Settings.Views
             _inputFolderText.Unbind();
             _outputFolderText.Unbind();
             _liveConversionToggle.Unbind();
+            _emptyRowStreakThresholdField.Unbind();
+            _includeSubFoldersToggle.Unbind();
+            _includeCommentedFilesToggle.Unbind();
+
+            OnUnbind();
         }
 
-        protected override void OnEnabled(bool value)
+        protected abstract void CreateAdditionalFields();
+
+        protected abstract void OnBind(LocalFolderContext context);
+
+        protected abstract void OnUnbind();
+
+        protected sealed override void OnEnabled(bool value)
         {
 #if UNITY_6000_0_OR_NEWER
             _convertButton.enabledSelf = value;
@@ -131,6 +165,9 @@ namespace EncosyTower.Databases.Settings.Views
             _inputFolderText.TextField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
             _outputFolderText.TextField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
             _liveConversionToggle.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
+            _emptyRowStreakThresholdField.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
+            _includeSubFoldersToggle.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
+            _includeCommentedFilesToggle.RegisterValueChangedCallback(OnValueChanged_EquatableTyped);
 
             _inputFolderText.TextField.RegisterValueChangedCallback(InputFolder_OnChanged);
             _outputFolderText.TextField.RegisterValueChangedCallback(OutputFolder_OnChanged);

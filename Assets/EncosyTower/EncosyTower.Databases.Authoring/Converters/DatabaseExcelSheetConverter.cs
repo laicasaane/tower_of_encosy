@@ -1,4 +1,4 @@
-﻿// BakingSheet, Maxwell Keonwoo Kang <code.athei@gmail.com>, 2022
+// BakingSheet, Maxwell Keonwoo Kang <code.athei@gmail.com>, 2022
 
 using System;
 using System.Collections.Generic;
@@ -17,24 +17,27 @@ namespace EncosyTower.Databases.Authoring
         private readonly string _loadPath;
         private readonly string _extension;
         private readonly Dictionary<string, List<Page>> _pages;
-        private readonly IFileSystem _fileSystem;
+        private readonly IExtendedFileSystem _fileSystem;
+        private readonly bool _includeSubFolders;
         private readonly bool _includeCommentedFiles;
 
         public DatabaseExcelSheetConverter(
               string loadPath
             , TimeZoneInfo timeZoneInfo = null
             , string extension = "xlsx"
-            , IFileSystem fileSystem = null
+            , IExtendedFileSystem fileSystem = null
             , IFormatProvider formatProvider = null
             , int emptyRowStreakThreshold = 5
+            , bool includeSubFolders = true
             , bool includeCommentedFiles = false
         )
             : base(timeZoneInfo, formatProvider, emptyRowStreakThreshold)
         {
             _loadPath = loadPath;
             _extension = extension;
-            _fileSystem = fileSystem ?? new FileSystem();
+            _fileSystem = fileSystem ?? new DatabaseFileSystem();
             _pages = new Dictionary<string, List<Page>>();
+            _includeSubFolders = includeSubFolders;
             _includeCommentedFiles = includeCommentedFiles;
 
 #if NET5_0_OR_GREATER
@@ -51,7 +54,7 @@ namespace EncosyTower.Databases.Authoring
 
         protected override Task<bool> LoadData()
         {
-            var files = _fileSystem.GetFiles(_loadPath, _extension);
+            var files = _fileSystem.GetFiles(_loadPath, _extension, _includeSubFolders);
 
             _pages.Clear();
 
