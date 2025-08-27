@@ -11,7 +11,6 @@ using EncosyTower.Logging;
 using EncosyTower.Types;
 using EncosyTower.UnityExtensions;
 using EncosyTower.Vaults;
-using Unity.Logging;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
@@ -170,19 +169,19 @@ namespace EncosyTower.Localization
             => (s_codeToLocaleMap.TryGetValue(localeCode, out var locale) && locale.IsValid())
                 ? locale : Option.None;
 
-        [HideInStackTrace, HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorNotReady()
         {
             DevLoggerAPI.LogError("Must call \"L10n.Initialize()\" first.");
         }
 
-        [HideInStackTrace, HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorCannotFindLanguage(string value)
         {
             DevLoggerAPI.LogError($"Cannot find any language by locale code {value}");
         }
 
-        [HideInStackTrace, HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void InfoChangeLanguage(string value)
         {
             DevLoggerAPI.LogInfo($"Change language to {value}");
