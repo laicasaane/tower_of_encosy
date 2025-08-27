@@ -3,6 +3,6 @@
         <ItemGroup>
             <DataFiles Include="bin/**/*.dll" />
         </ItemGroup>
-        <Copy SourceFiles="@(DataFiles)" DestinationFolder="../../Assets/EncosyTower/Plugins/$(AssemblyName)/" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="@(DataFiles)" DestinationFolder="../../../Assets/EncosyTower/Plugins/$(AssemblyName)/" SkipUnchangedFiles="true" />
     </Target>
 </Project>
