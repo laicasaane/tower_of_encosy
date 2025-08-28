@@ -3,14 +3,14 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-## Foreword
+## Overview
 
 This is a playground for me to work on a 3D prototype. I aim to learn more about using ECS and 3D game.
 While I have some knowledge with the former, I nearly have zero experience with the latter,
 since I've been working mostly on 2D projects. Utility AI and 3D physics are also the topics
 I want to explore within this project.
 
-### A change of plan
+### What is my intention?
 
 The project was intended to be only a personal development sandbox. At some point I realized that
 it won't be helpful for neither me nor the community. Knowing various tools and techiques is one thing,
@@ -23,7 +23,14 @@ applied will be justified based on the document to give a real world example of 
 While the project remains an OSS, anything related to the game mechanics won't be available
 to public until the first playable version is published on some marketplaces.
 
-### A change of licenses
+> [!IMPORTANT]
+> Please keep in mind that this is a personal playground. That implies I may be building APIs, editor tools,
+> extensional functionality for my private projects, while the main features of this project are neglected.
+> 
+> I believe any feature shared within this project can be useful to the broader community,
+> not just the promised gameplay made in ECS.
+
+### Licenses
 
 - Most of the code inside `Assets/EncosyTower` folder is under the [MIT License][mit], unless stated otherwise.
 - The code inside `Assets/Game` folder is under the [Apache License 2.0][apache].
@@ -55,6 +62,14 @@ to public until the first playable version is published on some marketplaces.
 7. Basic Utility AI for the monsters
 8. Character attack systems
 
+## Project Status
+
+At this time, the first goals have yet reached.
+
+I'm currently working on features within the [EncosyTower module][encosy-module].
+
+[encosy-module]: https://github.com/laicasaane/tower_of_encosy/tree/main/Assets/EncosyTower
+
 ## Credits
 
 Thank you for your contributions to the community. Your works greatly ease my development process.
@@ -62,8 +77,11 @@ Thank you for your contributions to the community. Your works greatly ease my de
 <table>
   <tbody>
     <tr>
-      <td>Annulus Games</td>
+      <td rowspan=2>Annulus Games</td>
       <td><a href='https://github.com/AnnulusGames/UnityCodeGen'>Unity CodeGen</a></td>
+    </tr>
+    <tr>
+      <td><a href='https://github.com/AnnulusGames/NavStack'>NavStack</a></td>
     </tr>
     <tr>
       <td>baba-s</td>
@@ -154,6 +172,10 @@ Thank you for your contributions to the community. Your works greatly ease my de
     <tr>
       <td>Philippe St-Amand</td>
       <td><a href='https://github.com/PhilSA/Trove'>Trove</a></td>
+    </tr>
+    <tr>
+      <td>Raffinert</td>
+      <td><a href='https://github.com/Raffinert/FuzzySharp'>FuzzySharp</a></td>
     </tr>
     <tr>
       <td>Roy Theunissen</td>
