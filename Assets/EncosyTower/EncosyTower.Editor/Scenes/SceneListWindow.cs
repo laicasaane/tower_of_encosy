@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using EncosyTower.Common;
 using EncosyTower.Editor.UIElements;
+using EncosyTower.Search;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
+using UnityEditor.PackageManager;
 using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -23,11 +25,17 @@ namespace EncosyTower.Editor.Scenes
             window.ShowPopup();
         }
 
-        private static readonly string[] s_folders = new[] { "Assets" };
+        private static readonly string[] s_folders1 = new[] { "Assets" };
+        private static readonly string[] s_folders2 = new[] { "Assets", "Packages" };
 
         [SerializeField] private ThemeStyleSheet _themeStyleSheet;
 
+        private readonly List<ItemInfo> _items = new();
+
+        private ItemCollectionAsset _asset;
+        private SerializedObject _serializedObject;
         private SimpleTableView<ItemInfo> _table;
+        private Toggle _includePackagesToggle;
 
         private void CreateGUI()
         {
@@ -38,13 +46,56 @@ namespace EncosyTower.Editor.Scenes
                 name = "refresh-button",
             });
 
+            var searchField = new ToolbarSearchField {
+                name = "search-field"
+            };
+
+            searchField.RegisterValueChangedCallback(SearchField_OnValueChanged);
+
+            rootVisualElement.Add(searchField);
+
+            var toggleGroup = new VisualElement();
+            toggleGroup.AddToClassList("toggle-group");
+            rootVisualElement.Add(toggleGroup);
+
+            _includePackagesToggle = new Toggle {
+                text = "Include Packages",
+                tooltip = "Include all embedded packages",
+                name = "include-packages-toggle",
+                value = true,
+            };
+
+            _includePackagesToggle.RegisterValueChangedCallback(IncludePackagesToggle_OnValueChanged);
+
+            toggleGroup.Add(_includePackagesToggle);
+
             CreateTable();
             Refresh();
         }
 
         private void Refresh()
         {
-            FindItems(_table.Items);
+            FindItems(_items, _includePackagesToggle.value);
+
+            _asset.items.Clear();
+            _asset.items.AddRange(_items);
+        }
+
+        private void IncludePackagesToggle_OnValueChanged(ChangeEvent<bool> evt)
+        {
+            Refresh();
+        }
+
+        private void SearchField_OnValueChanged(ChangeEvent<string> evt)
+        {
+            _table.Unbind();
+
+            var dest = _asset.items;
+            dest.Clear();
+
+            FuzzySearchAPI.Search(_items, evt.newValue, dest, new SearchValidator());
+
+            _table.Bind(_serializedObject);
         }
 
         private void CreateTable()
@@ -79,11 +130,11 @@ namespace EncosyTower.Editor.Scenes
             column.resizable = true;
             column.sortable = true;
 
-            var asset = CreateInstance<ItemCollectionAsset>();
-            asset.items = _table.Items;
+            _asset = CreateInstance<ItemCollectionAsset>();
+            _asset.items = _table.Items;
 
-            var serializedObject = new SerializedObject(asset);
-            _table.Bind(serializedObject);
+            _serializedObject = new SerializedObject(_asset);
+            _table.Bind(_serializedObject);
         }
 
         private static Button TableColumn_MakeCell_Scene()
@@ -138,11 +189,12 @@ namespace EncosyTower.Editor.Scenes
             label.userData = item.asset;
         }
 
-        private static void FindItems(List<ItemInfo> result)
+        private static void FindItems(List<ItemInfo> result, bool includePackages)
         {
             result.Clear();
 
-            var guids = AssetDatabase.FindAssets("t:SceneAsset", s_folders).AsSpan();
+            var folders = includePackages ? s_folders2 : s_folders1;
+            var guids = AssetDatabase.FindAssets("t:SceneAsset", folders).AsSpan();
 
             if (guids.Length < 1)
             {
@@ -156,6 +208,13 @@ namespace EncosyTower.Editor.Scenes
             {
                 var guid = guids[i];
                 var path = AssetDatabase.GUIDToAssetPath(guid);
+                var package = UnityEditor.PackageManager.PackageInfo.FindForAssetPath(path);
+
+                if (package != null && package.source != PackageSource.Embedded)
+                {
+                    continue;
+                }
+
                 var asset = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
 
                 if (asset.IsInvalid())
@@ -195,6 +254,15 @@ namespace EncosyTower.Editor.Scenes
         private class ItemCollectionAsset : ScriptableObject
         {
             public List<ItemInfo> items;
+        }
+
+        private readonly struct SearchValidator : ISearchValidator<ItemInfo>
+        {
+            public bool IsSearchable(ItemInfo item)
+                => item.path.IsNotEmpty();
+
+            public string GetSearchableString(ItemInfo item)
+                => item.name;
         }
     }
 }

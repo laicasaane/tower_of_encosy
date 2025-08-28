@@ -3,6 +3,21 @@
     margin-top: 4px;
 }
 
+#search-field {
+    width: auto;
+    margin-top: 6px;
+}
+
+.toggle-group {
+    align-items: flex-end;
+    flex-direction: row-reverse;
+    margin-top: 6px;
+}
+
+.toggle-group .unity-toggle__text {
+    margin-left: 6px;
+}
+
 .unity-list-view__empty-label {
     -unity-text-align: middle-center;
     -unity-font-style: italic;
