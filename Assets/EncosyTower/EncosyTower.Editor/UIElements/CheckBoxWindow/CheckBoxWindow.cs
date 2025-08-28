@@ -71,13 +71,6 @@ namespace EncosyTower.Editor.UIElements
         private object _userData;
 
         private ListView _listView;
-        private Button _selectButton;
-        private Button _deselectButton;
-        private ToolbarSearchField _searchField;
-        private VisualElement _toolField;
-        private Button _acceptButton;
-        private Button _cancelButton;
-        private VisualElement _buttonField;
 
         public static void OpenWindow(
               string title
@@ -148,29 +141,29 @@ namespace EncosyTower.Editor.UIElements
                 return;
             }
 
-            _selectButton = new(SelectButton_OnClick) {
+            var selectButton = new Button(SelectButton_OnClick) {
                 text = "Select all",
             };
 
-            _selectButton.AddToClassList(SelectButtonUssClassName);
+            selectButton.AddToClassList(SelectButtonUssClassName);
 
-            _deselectButton = new(DeselectButton_OnClick) {
+            var deselectButton = new Button(DeselectButton_OnClick) {
                 text = "Deselect all"
             };
 
-            _deselectButton.AddToClassList(SelectButtonUssClassName);
+            deselectButton.AddToClassList(SelectButtonUssClassName);
 
-            _searchField = new();
-            _searchField.AddToClassList(SearchFieldUssClassName);
-            _searchField.RegisterValueChangedCallback(SearchField_OnValueChanged);
+            var searchField = new ToolbarSearchField();
+            searchField.AddToClassList(SearchFieldUssClassName);
+            searchField.RegisterValueChangedCallback(SearchField_OnValueChanged);
 
-            _toolField = new();
-            _toolField.AddToClassList(ToolFieldUssClassName);
-            _toolField.Add(_selectButton);
-            _toolField.Add(_deselectButton);
-            _toolField.Add(_searchField);
+            var toolField = new VisualElement();
+            toolField.AddToClassList(ToolFieldUssClassName);
+            toolField.Add(selectButton);
+            toolField.Add(deselectButton);
+            toolField.Add(searchField);
 
-            rootVisualElement.Add(_toolField);
+            rootVisualElement.Add(toolField);
 
             _listView = new() {
                 itemsSource = _itemInfoList,
@@ -183,24 +176,24 @@ namespace EncosyTower.Editor.UIElements
 
             rootVisualElement.Add(_listView);
 
-            _acceptButton = new(AcceptButton_OnClick) {
+            var acceptButton = new Button(AcceptButton_OnClick) {
                 text = "OK",
             };
 
-            _acceptButton.AddToClassList(AcceptButtonUssClassName);
+            acceptButton.AddToClassList(AcceptButtonUssClassName);
 
-            _cancelButton = new(CancelButton_OnClick) {
+            var cancelButton = new Button(CancelButton_OnClick) {
                 text = "Cancel"
             };
 
-            _cancelButton.AddToClassList(CancelButtonUssClassName);
+            cancelButton.AddToClassList(CancelButtonUssClassName);
 
-            _buttonField = new();
-            _buttonField.AddToClassList(ButtonFieldUssClassName);
-            _buttonField.Add(_acceptButton);
-            _buttonField.Add(_cancelButton);
+            var buttonField = new VisualElement();
+            buttonField.AddToClassList(ButtonFieldUssClassName);
+            buttonField.Add(acceptButton);
+            buttonField.Add(cancelButton);
 
-            rootVisualElement.Add(_buttonField);
+            rootVisualElement.Add(buttonField);
 
             onCreateWindow?.Invoke(this);
         }
