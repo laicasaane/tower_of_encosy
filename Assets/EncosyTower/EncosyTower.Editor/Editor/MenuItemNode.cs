@@ -31,6 +31,7 @@
 using System.Text;
 using EncosyTower.Collections;
 using EncosyTower.Pooling;
+using EncosyTower.Search;
 using UnityEditor;
 using UnityEngine;
 

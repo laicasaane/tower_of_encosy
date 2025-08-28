@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EncosyTower.Editor.UIElements;
+using EncosyTower.Search;
 using EncosyTower.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
