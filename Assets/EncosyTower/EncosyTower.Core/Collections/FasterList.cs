@@ -35,7 +35,7 @@ namespace EncosyTower.Collections
     public class FasterList<T> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , IAsMemory<T>, IAsReadOnlyMemory<T>
-        , IClearable
+        , IClearable, IHasCapacity
     {
         internal static readonly EqualityComparer<T> s_comp = EqualityComparer<T>.Default;
         internal static readonly bool s_shouldPerformMemClear = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
@@ -658,8 +658,8 @@ namespace EncosyTower.Collections
             => AsReadOnlySpan().GetEnumerator();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void IncreaseCapacityBy(int increment)
-            => IncreaseCapacityTo(_buffer.Length + increment);
+        public void IncreaseCapacityBy(int amount)
+            => IncreaseCapacityTo(_buffer.Length + amount);
 
         public void IncreaseCapacityTo(int newCapacity)
         {

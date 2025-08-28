@@ -58,7 +58,7 @@ namespace EncosyTower.Collections
     /// value with shared hash hence bucket list index.
     /// </remarks>
     [DebuggerTypeProxy(typeof(NativeArrayMapDebugProxy<,>))]
-    public struct NativeArrayMap<TKey, TValue> : IDisposable, IClearable
+    public struct NativeArrayMap<TKey, TValue> : IDisposable, IClearable, IHasCapacity
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -387,13 +387,12 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void IncreaseCapacityBy(int size)
-        {
-            var expandPrime = HashHelpers.ExpandPrime(_values.Capacity + size);
+        public void IncreaseCapacityBy(int amount)
+            => EnsureCapacity(_values.Capacity + amount);
 
-            _values.Resize(expandPrime, true, false);
-            _valuesInfo.Resize(expandPrime);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void IncreaseCapacityTo(int size)
+            => EnsureCapacity(size);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Remove(TKey key)

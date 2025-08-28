@@ -55,7 +55,7 @@ namespace EncosyTower.Collections
     public class SharedList<T, TNative> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , IAsMemory<T>, IAsReadOnlyMemory<T>
-        , IClearable, IDisposable
+        , IClearable, IDisposable, IHasCapacity
         where T : unmanaged
         where TNative : unmanaged
     {
@@ -335,8 +335,8 @@ namespace EncosyTower.Collections
             => AsReadOnlySpan().GetEnumerator();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void IncreaseCapacityBy(int increment)
-            => IncreaseCapacityTo(_buffer.Length + increment);
+        public void IncreaseCapacityBy(int amount)
+            => IncreaseCapacityTo(_buffer.Length + amount);
 
         public void IncreaseCapacityTo(int newCapacity)
         {

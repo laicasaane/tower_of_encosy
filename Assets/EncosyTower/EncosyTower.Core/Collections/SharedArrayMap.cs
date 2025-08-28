@@ -59,7 +59,7 @@ namespace EncosyTower.Collections
     public class SharedArrayMap<TKey, TValue, TValueNative> : IDisposable
         , ICollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>
         , IReadOnlyCollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>
-        , IClearable
+        , IClearable, IHasCapacity
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
         where TValueNative : unmanaged
@@ -353,13 +353,12 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void IncreaseCapacityBy(int size)
-        {
-            var expandPrime = HashHelpers.ExpandPrime(_values.Length + size);
+        public void IncreaseCapacityBy(int amount)
+            => EnsureCapacity(_values.Length + amount);
 
-            _values.Resize(expandPrime, true);
-            _valuesInfo.Resize(expandPrime);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void IncreaseCapacityTo(int size)
+            => EnsureCapacity(size);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Remove(TKey key)

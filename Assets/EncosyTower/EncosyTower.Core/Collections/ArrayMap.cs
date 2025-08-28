@@ -59,7 +59,7 @@ namespace EncosyTower.Collections
     public class ArrayMap<TKey, TValue> : IDisposable
         , ICollection<ArrayMapKeyValuePairFast<TKey, TValue>>
         , IReadOnlyCollection<ArrayMapKeyValuePairFast<TKey, TValue>>
-        , IClearable
+        , IClearable, IHasCapacity
     {
         internal readonly static EqualityComparer<TKey> s_comparer = EqualityComparer<TKey>.Default;
 
@@ -423,13 +423,12 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void IncreaseCapacityBy(int size)
-        {
-            var expandPrime = HashHelpers.ExpandPrime(_values.Capacity + size);
+        public void IncreaseCapacityBy(int amount)
+            => EnsureCapacity(_values.Capacity + amount);
 
-            _values.Resize(expandPrime, true, false);
-            _valuesInfo.Resize(expandPrime);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void IncreaseCapacityTo(int size)
+            => EnsureCapacity(size);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Remove(TKey key)

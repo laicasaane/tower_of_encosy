@@ -20,7 +20,7 @@ namespace EncosyTower.Collections
     public class StatelessList<TState, T> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , IAsMemory<T>, IAsReadOnlyMemory<T>
-        , IClearable
+        , IClearable, IHasCapacity
         where TState : IBufferProvider<T>
     {
         internal static readonly EqualityComparer<T> s_comp = EqualityComparer<T>.Default;
@@ -668,8 +668,8 @@ namespace EncosyTower.Collections
             => AsReadOnlySpan().GetEnumerator();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void IncreaseCapacityBy(int increment)
-            => IncreaseCapacityTo(_buffer.Length + increment);
+        public void IncreaseCapacityBy(int amount)
+            => IncreaseCapacityTo(_buffer.Length + amount);
 
         public void IncreaseCapacityTo(int newCapacity)
         {

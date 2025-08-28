@@ -18,6 +18,66 @@ namespace EncosyTower.Collections
         public static bool IsNullOrEmpty<T>(this ICollection<T> self)
             => self == null || self.Count < 1;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryIncreaseCapacityByFast<T>(this ICollection<T> self, int amount)
+        {
+            if (self is FasterList<T> fasterList)
+            {
+                fasterList.IncreaseCapacityBy(amount);
+                return true;
+            }
+
+            if (self is List<T> list)
+            {
+                list.IncreaseCapacityBy(amount);
+                return true;
+            }
+
+            if (self is HashSet<T> hashset)
+            {
+                hashset.EnsureCapacity(hashset.Count + amount);
+                return true;
+            }
+
+            if (self is IHasCapacity hasCapacity)
+            {
+                hasCapacity.IncreaseCapacityBy(amount);
+                return true;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryIncreaseCapacityToFast<T>(this ICollection<T> self, int newCapacity)
+        {
+            if (self is FasterList<T> fasterList)
+            {
+                fasterList.IncreaseCapacityTo(newCapacity);
+                return true;
+            }
+
+            if (self is List<T> list)
+            {
+                list.IncreaseCapacityTo(newCapacity);
+                return true;
+            }
+
+            if (self is HashSet<T> hashset)
+            {
+                hashset.EnsureCapacity(newCapacity);
+                return true;
+            }
+
+            if (self is IHasCapacity hasCapacity)
+            {
+                hasCapacity.IncreaseCapacityTo(newCapacity);
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Adds a range of items to a collection.
         /// </summary>
