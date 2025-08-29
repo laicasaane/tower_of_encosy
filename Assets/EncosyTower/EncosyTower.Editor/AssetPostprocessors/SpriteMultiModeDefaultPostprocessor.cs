@@ -41,6 +41,9 @@ namespace EncosyTower.Editor.AssetPostprocessors
         }
 
 #if UNITY_2D_SPRITE
+        /// <remarks>
+        /// This method must have a reference to the <c>Unity.2D.Sprite.Editor</c> assembly (asmdef).
+        /// </remarks>
         private void ProcessUsingNewerMethod(TextureImporter importer)
         {
             var factory = new UnityEditor.U2D.Sprites.SpriteDataProviderFactories();
@@ -76,6 +79,9 @@ namespace EncosyTower.Editor.AssetPostprocessors
         }
 #endif
 
+        /// <remarks>
+        /// This method uses the obsolete property <see cref="TextureImporter.spritesheet"/>.
+        /// </remarks>
         [System.Obsolete, System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051")]
         private void ProcessUsingObsoleteMethod(TextureImporter importer)
         {
