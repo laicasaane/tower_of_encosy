@@ -1,6 +1,5 @@
 using EncosyTower.PageFlows;
 using EncosyTower.PageFlows.MonoPages;
-using EncosyTower.PubSub;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -24,7 +23,7 @@ namespace EncosyTower.Samples.MonoPages
                 return;
             }
 
-            var publisher = GlobalMessenger.Publisher.Scope(scopes.Screen);
+            var publisher = Publisher.Scope(scopes.Screen);
             publisher.Publish(new ShowPageAsyncMessage("prefab-screen-blue", default));
         }
 
@@ -35,7 +34,7 @@ namespace EncosyTower.Samples.MonoPages
                 return;
             }
 
-            var publisher = GlobalMessenger.Publisher.Scope(scopes.Popup);
+            var publisher = Publisher.Scope(scopes.Popup);
             publisher.Publish(new ShowPageAsyncMessage("prefab-popup-gray", new PageContext()));
         }
     }

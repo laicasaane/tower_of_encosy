@@ -68,16 +68,16 @@ namespace EncosyTower.PageFlows.MonoPages
 
         public Option<IPageFlowScopeCollectionApplier> FlowScopeCollectionApplier { get; set; }
 
-        public MessageSubscriber.Subscriber<PageFlowScope> Subscriber
+        public MessageSubscriber Subscriber
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _subscriber.Scope(FlowScope);
+            get => _subscriber;
         }
 
-        public MessagePublisher.Publisher<PageFlowScope> Publisher
+        public MessagePublisher Publisher
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _publisher.Scope(FlowScope);
+            get => _publisher;
         }
 
         public ProcessHub<PageFlowScope> ProcessHub

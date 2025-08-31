@@ -17,9 +17,11 @@ namespace EncosyTower.PageFlows
     {
         ArrayPool<UnityTask> TaskArrayPool { get; }
 
-        MessageSubscriber.Subscriber<PageFlowScope> Subscriber { get; }
+        MessageSubscriber Subscriber { get; }
 
-        MessagePublisher.Publisher<PageFlowScope> Publisher { get; }
+        MessagePublisher Publisher { get; }
+
+        PageFlowScope FlowScope { get; }
 
         Option<IPageFlowScopeCollectionApplier> FlowScopeCollectionApplier { get; }
 

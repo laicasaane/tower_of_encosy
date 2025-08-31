@@ -110,7 +110,7 @@ namespace EncosyTower.PageFlows.MonoPages
             }
 
             var initContext = new InitializationContext(
-                  context.Subscriber
+                  context.Subscriber.Scope(context.FlowScope)
                 , context.ProcessHub
                 , _subscriptions
                 , _processRegistries

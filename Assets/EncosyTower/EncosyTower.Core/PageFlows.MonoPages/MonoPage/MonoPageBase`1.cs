@@ -1,5 +1,6 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 
 namespace EncosyTower.PageFlows.MonoPages
@@ -8,7 +9,19 @@ namespace EncosyTower.PageFlows.MonoPages
         , IPageNeedsFlowScopes<TFlowScopes>
         where TFlowScopes : struct, IPageFlowScopeCollection
     {
-        public Option<TFlowScopes> FlowScopes { get; set; }
+        private Option<TFlowScopes> _flowScopes;
+
+        public Option<TFlowScopes> FlowScopes
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _flowScopes;
+        }
+
+        Option<TFlowScopes> IPageNeedsFlowScopes<TFlowScopes>.FlowScopes
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => _flowScopes = value;
+        }
     }
 }
 

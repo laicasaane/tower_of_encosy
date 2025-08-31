@@ -6,7 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using EncosyTower.Collections;
 using EncosyTower.Common;
-using EncosyTower.Debugging;
 using EncosyTower.Logging;
 using EncosyTower.Tasks;
 
@@ -27,16 +26,12 @@ namespace EncosyTower.PageFlows
 
         public SinglePageList([NotNull] IPageFlowContext context)
         {
-            var subscriber = context.Subscriber;
-            var publisher = context.Publisher;
-
-            Checks.IsTrue(publisher.IsValid, "Publisher must be created correctly.");
-
             _logger = context.Logger ?? DevLogger.Default;
             _flow = new PageFlow(
                   context.TaskArrayPool
-                , subscriber
-                , publisher
+                , context.Subscriber
+                , context.Publisher
+                , context.FlowScope
                 , context.FlowScopeCollectionApplier
                 , context.SlimPublishingContext
                 , context.IgnoreEmptySubscriber

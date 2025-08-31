@@ -51,12 +51,12 @@ namespace EncosyTower.PageFlows
 
     public interface IPageNeedsMessageSubscriber : IPage
     {
-        MessageSubscriber.Subscriber<PageFlowScope> Subscriber { set; }
+        MessageSubscriber Subscriber { set; }
     }
 
     public interface IPageNeedsMessagePublisher : IPage
     {
-        MessagePublisher.Publisher<PageFlowScope> Publisher { set; }
+        MessagePublisher Publisher { set; }
     }
 
     public interface IPageNeedsFlowScopes<TFlowScopes> : IPage

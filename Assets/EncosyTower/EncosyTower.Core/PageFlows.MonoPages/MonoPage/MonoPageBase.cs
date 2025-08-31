@@ -1,5 +1,6 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+using System.Runtime.CompilerServices;
 using EncosyTower.PubSub;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
@@ -16,6 +17,9 @@ namespace EncosyTower.PageFlows.MonoPages
     {
         private MonoPageOptions _options;
         private MonoPageTransitionCollection _transition;
+        private MessageSubscriber _subscriber;
+        private MessagePublisher _publisher;
+        private long _flowId;
 
         public PageOptions PageOptions
         {
@@ -43,11 +47,41 @@ namespace EncosyTower.PageFlows.MonoPages
             }
         }
 
-        public long FlowId { get; set; }
+        public long FlowId
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _flowId;
+        }
 
-        public MessageSubscriber.Subscriber<PageFlowScope> Subscriber { get; set; }
+        public MessageSubscriber Subscriber
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _subscriber;
+        }
 
-        public MessagePublisher.Publisher<PageFlowScope> Publisher { get; set; }
+        public MessagePublisher Publisher
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _publisher;
+        }
+
+        long IPageNeedsFlowId.FlowId
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => _flowId = value;
+        }
+
+        MessageSubscriber IPageNeedsMessageSubscriber.Subscriber
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => _subscriber = value;
+        }
+
+        MessagePublisher IPageNeedsMessagePublisher.Publisher
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => _publisher = value;
+        }
     }
 }
 

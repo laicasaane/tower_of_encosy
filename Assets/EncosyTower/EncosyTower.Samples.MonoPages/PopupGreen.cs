@@ -1,6 +1,5 @@
 using EncosyTower.PageFlows;
 using EncosyTower.PageFlows.MonoPages;
-using EncosyTower.PubSub;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -29,7 +28,7 @@ namespace EncosyTower.Samples.MonoPages
                 return;
             }
 
-            var publisher = GlobalMessenger.Publisher.Scope(scopes.Popup);
+            var publisher = Publisher.Scope(scopes.Popup);
             publisher.Publish(new HideActivePageAsyncMessage(new PageContext()));
         }
     }
