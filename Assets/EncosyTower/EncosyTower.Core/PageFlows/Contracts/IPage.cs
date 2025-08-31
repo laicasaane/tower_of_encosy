@@ -44,9 +44,9 @@ namespace EncosyTower.PageFlows
         IPageTransition PageTransition { get; }
     }
 
-    public interface IPageNeedsFlowId : IPage
+    public interface IPageNeedsFlowScope : IPage
     {
-        long FlowId { set; }
+        PageFlowScope FlowScope { set; }
     }
 
     public interface IPageNeedsMessageSubscriber : IPage

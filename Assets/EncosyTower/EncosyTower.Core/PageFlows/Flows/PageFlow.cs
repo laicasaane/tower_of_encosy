@@ -297,9 +297,9 @@ namespace EncosyTower.PageFlows
 
         private void InitializeIPageNeedsInterfaces(IPage page, PageFlow flow, in PageContext context)
         {
-            if (page is IPageNeedsFlowId flowId)
+            if (page is IPageNeedsFlowScope flowScope)
             {
-                flowId.FlowId = context.FlowId;
+                flowScope.FlowScope = _flowScope;
             }
 
             if (_flowScopeCollectionApplier.TryGetValue(out var applier))
@@ -320,9 +320,9 @@ namespace EncosyTower.PageFlows
 
         private static void DeinitializeIPageNeedsInterfaces(IPage page)
         {
-            if (page is IPageNeedsFlowId flowId)
+            if (page is IPageNeedsFlowScope flowId)
             {
-                flowId.FlowId = default;
+                flowId.FlowScope = default;
             }
 
             if (page is IPageNeedsMessageSubscriber subscriber)

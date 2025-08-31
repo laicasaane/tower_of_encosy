@@ -11,7 +11,7 @@ namespace EncosyTower.PageFlows.MonoPages
         , IMonoPage
         , IPageHasOptions
         , IPageHasTransition
-        , IPageNeedsFlowId
+        , IPageNeedsFlowScope
         , IPageNeedsMessageSubscriber
         , IPageNeedsMessagePublisher
     {
@@ -19,7 +19,7 @@ namespace EncosyTower.PageFlows.MonoPages
         private MonoPageTransitionCollection _transition;
         private MessageSubscriber _subscriber;
         private MessagePublisher _publisher;
-        private long _flowId;
+        private PageFlowScope _flowScope;
 
         public PageOptions PageOptions
         {
@@ -47,10 +47,10 @@ namespace EncosyTower.PageFlows.MonoPages
             }
         }
 
-        public long FlowId
+        public PageFlowScope FlowScope
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _flowId;
+            get => _flowScope;
         }
 
         public MessageSubscriber Subscriber
@@ -65,10 +65,10 @@ namespace EncosyTower.PageFlows.MonoPages
             get => _publisher;
         }
 
-        long IPageNeedsFlowId.FlowId
+        PageFlowScope IPageNeedsFlowScope.FlowScope
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => _flowId = value;
+            set => _flowScope = value;
         }
 
         MessageSubscriber IPageNeedsMessageSubscriber.Subscriber
