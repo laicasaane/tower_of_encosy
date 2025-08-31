@@ -59,10 +59,10 @@ namespace EncosyTower.PageFlows
         MessagePublisher Publisher { set; }
     }
 
-    public interface IPageNeedsFlowScopes<TFlowScopes> : IPage
-        where TFlowScopes : struct, IPageFlowScopeCollection
+    public interface IPageNeedsFlowScopeCollection<TCollection> : IPage
+        where TCollection : struct, IPageFlowScopeCollection
     {
-        Option<TFlowScopes> FlowScopes { set; }
+        Option<TCollection> FlowScopeCollection { set; }
     }
 }
 

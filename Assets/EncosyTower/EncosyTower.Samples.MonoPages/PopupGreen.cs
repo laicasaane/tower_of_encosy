@@ -23,7 +23,7 @@ namespace EncosyTower.Samples.MonoPages
 
         private void OnCloseClick()
         {
-            if (FlowScopes.TryGetValue(out var scopes) == false)
+            if (FlowScopeCollection.TryGetValue(out var scopes) == false)
             {
                 return;
             }

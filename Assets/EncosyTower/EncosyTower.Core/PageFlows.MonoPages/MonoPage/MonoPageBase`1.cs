@@ -5,22 +5,22 @@ using EncosyTower.Common;
 
 namespace EncosyTower.PageFlows.MonoPages
 {
-    public abstract class MonoPageBase<TFlowScopes> : MonoPageBase
-        , IPageNeedsFlowScopes<TFlowScopes>
-        where TFlowScopes : struct, IPageFlowScopeCollection
+    public abstract class MonoPageBase<TFlowScopeCollection> : MonoPageBase
+        , IPageNeedsFlowScopeCollection<TFlowScopeCollection>
+        where TFlowScopeCollection : struct, IPageFlowScopeCollection
     {
-        private Option<TFlowScopes> _flowScopes;
+        private Option<TFlowScopeCollection> _flowScopeCollection;
 
-        public Option<TFlowScopes> FlowScopes
+        public Option<TFlowScopeCollection> FlowScopeCollection
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _flowScopes;
+            get => _flowScopeCollection;
         }
 
-        Option<TFlowScopes> IPageNeedsFlowScopes<TFlowScopes>.FlowScopes
+        Option<TFlowScopeCollection> IPageNeedsFlowScopeCollection<TFlowScopeCollection>.FlowScopeCollection
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => _flowScopes = value;
+            set => _flowScopeCollection = value;
         }
     }
 }

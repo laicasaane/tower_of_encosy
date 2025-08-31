@@ -20,7 +20,7 @@ namespace EncosyTower.Samples.MonoPages
 
         private void OnOpenSceneClick()
         {
-            if (FlowScopes.TryGetValue(out var scopes) == false)
+            if (FlowScopeCollection.TryGetValue(out var scopes) == false)
             {
                 return;
             }
@@ -31,7 +31,7 @@ namespace EncosyTower.Samples.MonoPages
 
         private void OnOpenPopupClick()
         {
-            if (FlowScopes.TryGetValue(out var scopes) == false)
+            if (FlowScopeCollection.TryGetValue(out var scopes) == false)
             {
                 return;
             }
@@ -45,7 +45,7 @@ namespace EncosyTower.Samples.MonoPages
 
         private void OnCloseScreenClick()
         {
-            if (FlowScopes.TryGetValue(out var scopes) == false)
+            if (FlowScopeCollection.TryGetValue(out var scopes) == false)
             {
                 return;
             }

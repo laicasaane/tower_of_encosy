@@ -34,9 +34,9 @@ namespace EncosyTower.PageFlows
 
         void IPageFlowScopeCollectionApplier.ApplyTo(IPage page)
         {
-            if (page is IPageNeedsFlowScopes<TFlowScopes> scopes)
+            if (page is IPageNeedsFlowScopeCollection<TFlowScopes> collection)
             {
-                scopes.FlowScopes = _value;
+                collection.FlowScopeCollection = _value;
             }
         }
 
