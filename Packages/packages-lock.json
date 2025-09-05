@@ -565,6 +565,13 @@
       "dependencies": {},
       "url": "https://package.openupm.com"
     },
+    "org.nuget.raffinert.fuzzysharp": {
+      "version": "3.0.4",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,

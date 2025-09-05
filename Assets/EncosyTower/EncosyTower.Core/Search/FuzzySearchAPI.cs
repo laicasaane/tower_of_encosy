@@ -1,11 +1,11 @@
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using EncosyTower.Collections;
-using EncosyTower.Common;
-using UnityEngine.Pool;
-
 namespace EncosyTower.Search
 {
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using EncosyTower.Collections;
+    using EncosyTower.Common;
+    using UnityEngine.Pool;
+
     public interface ISearchValidator<T>
     {
         bool IsSearchable(T item);
@@ -13,7 +13,7 @@ namespace EncosyTower.Search
         string GetSearchableString(T item);
     }
 
-    public static class FuzzySearchAPI
+    public static partial class FuzzySearchAPI
     {
         public static void Search(
               [NotNull] IEnumerable<string> source
@@ -23,6 +23,10 @@ namespace EncosyTower.Search
         {
             dest.Clear();
 
+#if !(ENCOSY_RAFFINERT_FUZZYSHARP || NUGET_RAFFINERT_FUZZYSHARP)
+            PluginValidator.LogErrorIfFuzzySharpIsNotInstalled();
+            dest.AddRange(source);
+#else
             if (string.IsNullOrWhiteSpace(searchString))
             {
                 dest.AddRange(source);
@@ -54,6 +58,7 @@ namespace EncosyTower.Search
             {
                 dest.Add(result.Value);
             }
+#endif
         }
 
         public static void Search<T, TValidator>(
@@ -66,6 +71,10 @@ namespace EncosyTower.Search
         {
             dest.Clear();
 
+#if !(ENCOSY_RAFFINERT_FUZZYSHARP || NUGET_RAFFINERT_FUZZYSHARP)
+            PluginValidator.LogErrorIfFuzzySharpIsNotInstalled();
+            dest.AddRange(source);
+#else
             if (string.IsNullOrWhiteSpace(searchString))
             {
                 dest.AddRange(source);
@@ -111,8 +120,43 @@ namespace EncosyTower.Search
                     dest.Add(item);
                 }
             }
+#endif
         }
 
         private readonly record struct Choice<T>(Option<T> Item, string SearchableString);
     }
 }
+
+#if !(ENCOSY_RAFFINERT_FUZZYSHARP || NUGET_RAFFINERT_FUZZYSHARP)
+
+namespace EncosyTower.Search
+{
+    using System.Diagnostics;
+    using EncosyTower.Logging;
+    using UnityEditor;
+    using UnityEngine;
+
+    partial class FuzzySearchAPI
+    {
+        private static class PluginValidator
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+#endif
+            [InitializeOnLoadMethod]
+            [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            public static void LogErrorIfFuzzySharpIsNotInstalled()
+            {
+                DevLoggerAPI.LogError(
+                    "Please install Raffinert.FuzzySharp plugin via one of these methods:\n" +
+                    "1. OpenUPM: `openupm add org.nuget.raffinert.fuzzysharp`. " +
+                    "Read <a href=\"https://openupm.com/nuget/#using-uplinked-unitynuget\">more</a> about this method.\n" +
+                    "2. Add this scripting symbol to the project: ENCOSY_RAFFINERT_FUZZYSHARP. " +
+                    "Read <a href=\"https://docs.unity3d.com/Manual/custom-scripting-symbols.html\">more</a> about this method."
+                );
+            }
+        }
+    }
+}
+
+#endif

@@ -46,6 +46,7 @@ MonoBehaviour:
     - com.xarbrough.renamer
     - com.xarbrough.scriptable-object-creator
     - jp.co.cyberagent.smartaddresser
+    - org.nuget.raffinert.fuzzysharp
     m_IsDefault: 0
     m_Capabilities: 0
     m_ConfigSource: 4
