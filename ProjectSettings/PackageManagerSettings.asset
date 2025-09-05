@@ -39,6 +39,7 @@ MonoBehaviour:
     - com.cathei.bakingsheet
     - com.cysharp.unitask
     - com.latios.latiosframework
+    - com.needle.compilation-visualizer
     - com.needle.console
     - com.quickeye.ui-toolkit-plus
     - com.roytheunissen.assetpalette
@@ -56,6 +57,6 @@ MonoBehaviour:
   m_RegistryInfoDraft:
     m_Modified: 0
     m_ErrorMessage: 
-    m_UserModificationsInstanceId: -880
-    m_OriginalInstanceId: -884
+    m_UserModificationsInstanceId: -868
+    m_OriginalInstanceId: -872
   m_LoadAssets: 50
