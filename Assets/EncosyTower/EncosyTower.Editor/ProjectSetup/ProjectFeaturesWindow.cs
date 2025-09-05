@@ -18,13 +18,13 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.Editor.ProjectSetup
 {
-    public sealed class ProjectSetupWindow : EditorWindow
+    public sealed class ProjectFeaturesWindow : EditorWindow
     {
-        [MenuItem("Encosy Tower/Project Setup")]
+        [MenuItem("Encosy Tower/Project/Features")]
         public static void OpenWindow()
         {
-            var window = GetWindow<ProjectSetupWindow>();
-            window.titleContent = new GUIContent("Project Setup");
+            var window = GetWindow<ProjectFeaturesWindow>();
+            window.titleContent = new GUIContent("Project Features");
             window.Show();
         }
 
@@ -303,6 +303,8 @@ namespace EncosyTower.Editor.ProjectSetup
                     {
                         _selectedPackages.AddRange(packages);
                     }
+
+                    _packageTable.Rebuild();
                 }
             };
 
@@ -650,14 +652,11 @@ namespace EncosyTower.Editor.ProjectSetup
                 }
             }
 
-            ApplyOpenUpm();
-
-            s_addRequest = Client.AddAndRemove(packagesToAdd: s_unityIdentifiers.ToArray());
-            EditorApplication.update -= AddRequestProgress;
-            EditorApplication.update += AddRequestProgress;
+            ApplyOpenUpmPackages();
+            ApplyUnityPackages();
         }
 
-        public static void ApplyOpenUpm()
+        public static void ApplyOpenUpmPackages()
         {
             if (s_openUpmSb.Length < 1)
             {
@@ -684,6 +683,19 @@ namespace EncosyTower.Editor.ProjectSetup
             {
                 EditorUtility.DisplayDialog(INSTALL_TITLE, ex.ToString(), "OK");
             }
+        }
+
+        public static void ApplyUnityPackages()
+        {
+            if (s_unityIdentifiers.Count < 1)
+            {
+                return;
+            }
+
+            s_addRequest = Client.AddAndRemove(packagesToAdd: s_unityIdentifiers.ToArray());
+
+            EditorApplication.update -= AddRequestProgress;
+            EditorApplication.update += AddRequestProgress;
         }
 
         private static void AddRequestProgress()

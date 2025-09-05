@@ -4,7 +4,7 @@ using EncosyTower.Editor.ProjectSetup;
 
 namespace EncosyTower.Editor.PageFlows
 {
-    [Feature("6. EncosyTower: Page Flows")]
+    [Feature("8. EncosyTower: Page Flows")]
 
 #if UNITY_6000_0_OR_NEWER
     [RequiresPackage(PackageRegistry.OpenUpm, "com.cysharp.unitask", isOptional: true)]
