@@ -88,6 +88,10 @@ Thank you for your contributions to the community. Your works greatly ease my de
       <td><a href='https://github.com/baba-s/Kogane.CheckBoxWindow'>Kogane Check Box Window</a></td>
     </tr>
     <tr>
+      <td>Benjamin Granzow</td>
+      <td><a href='https://github.com/Dysman/bgTools-playerPrefsEditor'>bgTools-playerPrefsEditor</a></td>
+    </tr>
+    <tr>
       <td>Chris Yarbrough</td>
       <td><a href='https://github.com/chrisyarbrough/Renamer'>Renamer</a></td>
     </tr>
