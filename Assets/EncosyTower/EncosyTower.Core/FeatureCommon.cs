@@ -17,6 +17,8 @@ namespace EncosyTower.Common
 #endif
 
     [RequiresPackage(PackageRegistry.OpenUpm, "com.annulusgames.unity-codegen")]
+    [RequiresPackage(PackageRegistry.OpenUpm, "com.bgtools.playerprefseditor", isOptional: true)]
+    [RequiresPackage(PackageRegistry.OpenUpm, "com.browar.editor-toolbox", isOptional: true)]
 
 #if UNITY_6000_0_OR_NEWER
     [RequiresPackage(PackageRegistry.OpenUpm, "com.cysharp.unitask", isOptional: true)]
@@ -25,7 +27,6 @@ namespace EncosyTower.Common
 #endif
 
     [RequiresPackage(PackageRegistry.OpenUpm, "com.needle.console", isOptional: true)]
-    [RequiresPackage(PackageRegistry.OpenUpm, "com.browar.editor-toolbox", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.xarbrough.renamer", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.yasirkula.inspectplus", isOptional: true)]
     internal readonly struct FeatureCommon { }
