@@ -32,7 +32,7 @@ to public until the first playable version is published on some marketplaces.
 
 ### Licenses
 
-- Most of the code inside `Assets/EncosyTower` folder is under the [MIT License][mit], unless stated otherwise.
+- Code under `Packages/com.laicasaane.encosy-tower` folder is under the [MIT License][mit], unless stated otherwise.
 - The code inside `Assets/Game` folder is under the [Apache License 2.0][apache].
 - The game design document is under the [CC BY-NC-SA 4.0 License][cc].
 
