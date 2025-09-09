@@ -3,11 +3,20 @@
 using System;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 {
+#if UNITY_6000_2_OR_NEWER
+    using TreeView = UnityEditor.IMGUI.Controls.TreeView<EntityId>;
+    using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<EntityId>;
+    using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<EntityId>;
+#else
+    using TreeView = UnityEditor.IMGUI.Controls.TreeView;
+    using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem;
+    using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState;
+#endif
+
     partial class MonoViewInspector
     {
         private sealed class TargetGameObjectTreeView : TreeView
@@ -32,7 +41,16 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 var icon = content.image as Texture2D;
                 var treeRoot = new TreeViewItem { id = 0, depth = -1, displayName = "Root" };
                 var allItems = new List<TreeViewItem>(childCount + 1) {
-                    new() { id = rootGo.GetInstanceID(), depth = 0, displayName = rootGo.name, icon = icon },
+                    new() {
+#if UNITY_6000_2_OR_NEWER
+                        id = rootGo.GetEntityId(),
+#else
+                        id = rootGo.GetInstanceID(),
+#endif
+                        depth = 0,
+                        displayName = rootGo.name,
+                        icon = icon
+                    },
                 };
 
                 if (childCount > 0)
@@ -47,7 +65,12 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 return treeRoot;
             }
 
-            private static void Build(Transform rootTransform, List<TreeViewItem> list, int depth, Texture2D icon)
+            private static void Build(
+                  Transform rootTransform
+                , List<TreeViewItem> list
+                , int depth
+                , Texture2D icon
+            )
             {
                 var rootChildCount = rootTransform.childCount;
 
@@ -55,7 +78,13 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 {
                     var child = rootTransform.GetChild(i);
                     var id = child.gameObject.GetInstanceID();
-                    list.Add(new TreeViewItem { id = id, depth = depth, displayName = child.name, icon = icon });
+
+                    list.Add(new TreeViewItem {
+                        id = id,
+                        depth = depth,
+                        displayName = child.name,
+                        icon = icon
+                    });
 
                     if (child.childCount > 0)
                     {
@@ -75,7 +104,11 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             private const string NAME_INDEX_FORMAT = "{0} ▶ {1}";
             private const string NAME_2_INDEX_FORMAT = "{0} ▶ {2} • {1}";
 
-            public TargetComponentTreeView(TreeViewState state, GameObject rootGo, Type componentType) : base(state)
+            public TargetComponentTreeView(
+                  TreeViewState state
+                , GameObject rootGo
+                , Type componentType
+            ) : base(state)
             {
                 _rootGo = rootGo;
                 _componentType = componentType;
@@ -116,7 +149,11 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                             : string.Format(nameFormat, rootGo.name, k);
 
                         allItems.Add(new TreeViewItem {
+#if UNITY_6000_2_OR_NEWER
+                            id = component.GetEntityId(),
+#else
                             id = component.GetInstanceID(),
+#endif
                             depth = 0,
                             displayName = name,
                             icon = icon,

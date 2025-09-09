@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+#if UNITY_EDITOR && UNITY_6000_2_OR_NEWER
 
 using System;
 using System.Collections.Generic;
@@ -9,20 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Editor
 {
-#if UNITY_6000_2_OR_NEWER
-    [Obsolete(
-        "TreeViewPopup is not deprecated. " +
-        "You can likely now use TreeViewPopup<int> instead and not think more about it."
-    )]
-#endif
-    public class TreeViewPopup : PopupWindowContent
+    public class TreeViewPopup<TIdentifier> : PopupWindowContent
+         where TIdentifier : unmanaged, IEquatable<TIdentifier>
     {
-        [SerializeField] private TreeViewState _treeViewState = new();
+        [SerializeField] private TreeViewState<TIdentifier> _treeViewState = new();
 
         public float width = 200f;
         public float height = 400f;
         public object data;
-        public Action<object, IList<int>> onApplySelectedIds;
+        public Action<object, IList<TIdentifier>> onApplySelectedIds;
 
         private readonly GUIContent _title;
         private readonly bool _showTitle;
@@ -60,9 +55,9 @@ namespace EncosyTower.Editor
 
         public GUIContent ResetLabel => _resetLabel ??= new GUIContent("Reset", "Reset Selection");
 
-        public TreeViewState TreeViewState => _treeViewState;
+        public TreeViewState<TIdentifier> TreeViewState => _treeViewState;
 
-        public TreeView Tree { get; set; }
+        public TreeView<TIdentifier> Tree { get; set; }
 
         public void Show(float x, float y)
             => Show(new Vector2(x, y));

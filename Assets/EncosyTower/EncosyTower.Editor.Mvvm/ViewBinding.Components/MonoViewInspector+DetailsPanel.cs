@@ -18,6 +18,14 @@ using UnityEngine;
 
 namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 {
+#if UNITY_6000_2_OR_NEWER
+    using TreeViewPopup = EncosyTower.Editor.TreeViewPopup<EntityId>;
+    using EntityId = UnityEngine.EntityId;
+#else
+    using TreeViewPopup = EncosyTower.Editor.TreeViewPopup;
+    using EntityId = System.Int32;
+#endif
+
     partial class MonoViewInspector
     {
         private enum DetailsToolbarButton
@@ -1000,7 +1008,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             menu.ShowAsContext();
         }
 
-        private static void TargetMenu_AddTargets(object data, IList<int> selectedIds)
+        private static void TargetMenu_AddTargets(object data, IList<EntityId> selectedIds)
         {
             if (data is not SerializedProperty binderProp)
             {
@@ -1028,7 +1036,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             var span = objects.Span;
             var length = span.Length;
             var componentType = typeof(Component);
-            var instanceIds = new List<int>(length);
+            var instanceIds = new List<EntityId>(length);
 
             if (targetType == typeof(GameObject))
             {
@@ -1078,7 +1086,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             TryAddTargets(binderProp, instanceIds);
         }
 
-        private static void TryAddTargets(SerializedProperty binderProp, IList<int> instanceIds)
+        private static void TryAddTargets(SerializedProperty binderProp, IList<EntityId> instanceIds)
         {
             if (instanceIds == null)
             {
