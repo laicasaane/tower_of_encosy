@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8a8fcaae57d2cb428bbd1a264416227, type: 3}
+  m_Name: VisualDebuggingSettings
+  m_EditorClassIdentifier: 
+  generalSettings:
+    activate: 1
+  commandSettings:
+    activate: 1
+    runtimeDirectoryPaneWidth: 200
+    editorDirectoryPaneWidth: 150
+  logSettings:
+    activate: 1
+    receiveInfoLogs: 1
+    receiveWarningLogs: 1
+    receiveErrorLogs: 1
+    receiveExceptionLogs: 1
+    receiveLogsWhileHidden: 1
+    captureLogTimestamps: 1
+    alwaysDisplayTimestamps: 0
+    maxLogCount: 2147483647
+    logsToRemoveAfterMaxLogCount: 16
+    queuedLogLimit: 256
+    receiveLogcatLogsInAndroid: 1
+    logcatArguments: 

@@ -1,0 +1,19 @@
+{
+    "name": "EncosyTower.Samples.VisualDebugging",
+    "rootNamespace": "EncosyTower.Samples.VisualDebugging",
+    "references": [
+        "EncosyTower.Core",
+        "EncosyTower.Core.Extended"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_EDITOR || INCLUDE_ENCOSY_SAMPLES_VISUAL_DEBUGGING"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

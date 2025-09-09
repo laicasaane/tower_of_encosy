@@ -69,6 +69,18 @@
       "source": "local-tarball",
       "dependencies": {}
     },
+    "com.laicasaane.encosy-tower": {
+      "version": "file:com.laicasaane.encosy-tower",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.burst": "1.8.21",
+        "com.unity.collections": "2.5.7",
+        "com.unity.mathematics": "1.3.2",
+        "com.unity.nuget.newtonsoft-json": "3.2.1",
+        "com.unity.serialization": "3.1.2"
+      }
+    },
     "com.latios.latiosframework": {
       "version": "0.13.5",
       "depth": 0,

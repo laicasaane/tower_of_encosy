@@ -68,7 +68,7 @@ At this time, the first goals have yet reached.
 
 I'm currently working on features within the [EncosyTower module][encosy-module].
 
-[encosy-module]: https://github.com/laicasaane/tower_of_encosy/tree/main/Assets/EncosyTower
+[encosy-module]: https://github.com/laicasaane/tower_of_encosy/tree/main/Packages/com.laicasaane.encosy-tower
 
 ## Credits
 
