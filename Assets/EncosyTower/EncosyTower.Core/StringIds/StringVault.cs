@@ -14,6 +14,7 @@ namespace EncosyTower.StringIds
         private readonly SharedList<UnmanagedString> _unmanagedStrings;
         private readonly FasterList<string> _managedStrings;
         private readonly SharedList<Option<StringHash>> _hashes;
+        private readonly object _lock = new();
         private int _count;
 
         public StringVault(int initialCapacity)
@@ -39,18 +40,21 @@ namespace EncosyTower.StringIds
 
         public void Clear()
         {
-            _map.Clear();
-            _unmanagedStrings.Clear();
-            _managedStrings.Clear();
-            _hashes.Clear();
+            lock (_lock)
+            {
+                _map.Clear();
+                _unmanagedStrings.Clear();
+                _managedStrings.Clear();
+                _hashes.Clear();
 
-            // The first item represent an invalid id
-            _map.Add(default, default);
-            _unmanagedStrings.Add(default);
-            _managedStrings.Add(string.Empty);
-            _hashes.Add(default);
+                // The first item represent an invalid id
+                _map.Add(default, default);
+                _unmanagedStrings.Add(default);
+                _managedStrings.Add(string.Empty);
+                _hashes.Add(default);
 
-            _count = 1;
+                _count = 1;
+            }
         }
 
         public Id MakeIdFromUnmanaged(in UnmanagedString str)
@@ -67,23 +71,11 @@ namespace EncosyTower.StringIds
                     return id;
                 }
 
-                var index = _count;
-                id = new Id(index);
-
-                _count += 1;
-                EnsureCapacity();
-
-                _unmanagedStrings[index] = str;
-                _managedStrings[index] = str.ToString();
-                _hashes[index] = new Option<StringHash>(hash);
-            }
-            else
-            {
-                var index = _count;
-                id = new Id(index);
-
-                if (_map.TryAdd(hash, id))
+                lock (_lock)
                 {
+                    var index = _count;
+                    id = new Id(index);
+
                     _count += 1;
                     EnsureCapacity();
 
@@ -91,9 +83,27 @@ namespace EncosyTower.StringIds
                     _managedStrings[index] = str.ToString();
                     _hashes[index] = new Option<StringHash>(hash);
                 }
-                else
+            }
+            else
+            {
+                var index = _count;
+                id = new Id(index);
+
+                lock (_lock)
                 {
-                    ThrowIfFailedRegistering(false, str, id);
+                    if (_map.TryAdd(hash, id))
+                    {
+                        _count += 1;
+                        EnsureCapacity();
+
+                        _unmanagedStrings[index] = str;
+                        _managedStrings[index] = str.ToString();
+                        _hashes[index] = new Option<StringHash>(hash);
+                    }
+                    else
+                    {
+                        ThrowIfFailedRegistering(false, str, id);
+                    }
                 }
             }
 
@@ -114,32 +124,38 @@ namespace EncosyTower.StringIds
                     return id;
                 }
 
-                var index = _count;
-                id = new Id(index);
+                lock (_lock)
+                {
+                    var index = _count;
+                    id = new Id(index);
 
-                _count += 1;
-                EnsureCapacity();
+                    _count += 1;
+                    EnsureCapacity();
 
-                _unmanagedStrings[index] = str;
-                _managedStrings[index] = str;
-                _hashes[index] = new Option<StringHash>(hash);
+                    _unmanagedStrings[index] = str;
+                    _managedStrings[index] = str;
+                    _hashes[index] = new Option<StringHash>(hash);
+                }
             }
             else
             {
                 var index = _count;
                 id = new Id(index);
 
-                if (_map.TryAdd(hash, id))
+                lock (_lock)
                 {
-                    _count += 1;
-                    EnsureCapacity();
-                    _unmanagedStrings[index] = str;
-                    _managedStrings[index] = str;
-                    _hashes[index] = new Option<StringHash>(hash);
-                }
-                else
-                {
-                    ThrowIfFailedRegistering(false, str, id);
+                    if (_map.TryAdd(hash, id))
+                    {
+                        _count += 1;
+                        EnsureCapacity();
+                        _unmanagedStrings[index] = str;
+                        _managedStrings[index] = str;
+                        _hashes[index] = new Option<StringHash>(hash);
+                    }
+                    else
+                    {
+                        ThrowIfFailedRegistering(false, str, id);
+                    }
                 }
             }
 
