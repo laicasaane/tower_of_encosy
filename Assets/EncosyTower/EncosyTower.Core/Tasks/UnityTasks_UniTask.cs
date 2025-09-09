@@ -52,6 +52,10 @@ namespace EncosyTower.Tasks
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Forget<T>(this UniTask<T> self)
             => UniTaskExtensions.Forget<T>(self);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static async UniTask AsUnityTask<T>(this UniTask<T> self)
+            => await self;
     }
 }
 

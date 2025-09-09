@@ -1,15 +1,20 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 using System.Buffers;
-using Cysharp.Threading.Tasks;
 
 namespace EncosyTower.PubSub
 {
+#if UNITASK
+    using UnityTask = Cysharp.Threading.Tasks.UniTask;
+#else
+    using UnityTask = UnityEngine.Awaitable;
+#endif
+
     public static class GlobalMessenger
     {
         private static Messenger s_instance;
 
-        private static Messenger Instance => s_instance ??= new(ArrayPool<UniTask>.Shared);
+        private static Messenger Instance => s_instance ??= new(ArrayPool<UnityTask>.Shared);
 
         public static MessagePublisher Publisher => Instance.Publisher;
 

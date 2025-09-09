@@ -1,8 +1,11 @@
 #if !UNITASK && UNITY_6000_0_OR_NEWER
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
 
@@ -53,6 +56,44 @@ namespace EncosyTower.Tasks
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Forget<T>(this Awaitable<T> self)
             => Awaitables.Forget<T>(self);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Run([NotNull] this Awaitable self)
+            => Awaitables.Run(self);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Run([NotNull] this IEnumerable<Awaitable> list)
+            => Awaitables.Run(list);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Awaitable WithContinuation([NotNull] this Awaitable self, [NotNull] Action continuation)
+            => Awaitables.WithContinuation(self, continuation);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ContinueWith([NotNull] this Awaitable self, [NotNull] Action continuation)
+            => Awaitables.ContinueWith(self, continuation);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static async Awaitable AsUnityTask<T>([NotNull] this Awaitable<T> self)
+            => await self;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Awaitable AsAwaitable(
+              [NotNull] this Task task
+            , bool useCurrentSynchronizationContext = true
+        )
+        {
+            return Awaitables.AsAwaitable(task, useCurrentSynchronizationContext);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Awaitable<T> AsAwaitable<T>(
+              [NotNull] this Task<T> task
+            , bool useCurrentSynchronizationContext = true
+        )
+        {
+            return Awaitables.AsAwaitable(task, useCurrentSynchronizationContext);
+        }
     }
 }
 

@@ -180,9 +180,9 @@ namespace EncosyTower.PageFlows
                 for (var index = 0; index < count; index++)
                 {
                     var page = pages[index];
-                    flowTasks[index] = flow.PublishDetachAsync(self, page, token);
+                    flowTasks[index] = flow.PublishDetachAsync(self, page, token).AsUnityTask();
                     pageTasks[index] = (page as IPageOnDetachFromFlowAsync)
-                        ?.OnDetachFromFlowAsync(self, context, token)
+                        ?.OnDetachFromFlowAsync(self, context, token).AsUnityTask()
                         ?? UnityTasks.GetCompleted();
 
                     index += 1;

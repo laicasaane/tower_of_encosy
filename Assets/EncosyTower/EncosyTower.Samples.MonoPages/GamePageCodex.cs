@@ -1,21 +1,29 @@
-using Cysharp.Threading.Tasks;
+#if UNITASK || UNITY_6000_0_OR_NEWER
+
 using EncosyTower.PageFlows;
 using EncosyTower.PageFlows.MonoPages;
+using EncosyTower.Tasks;
 using UnityEngine;
 
 namespace EncosyTower.Samples.MonoPages
 {
+#if UNITASK
+    using UnityTask = Cysharp.Threading.Tasks.UniTask;
+#else
+    using UnityTask = UnityEngine.Awaitable;
+#endif
+
     public class GamePageCodex : MonoBehaviour, IMonoPageCodexOnInitialize
     {
         private readonly PageFlowScopeCollectionApplier<GamePageFlowScopes> _flowScopesApplier = new();
 
         public IPageFlowScopeCollectionApplier PageFlowScopeCollectionApplier => _flowScopesApplier;
 
-        public GamePageFlowScopes FlowScopes { get;  set; }
+        public GamePageFlowScopes FlowScopes { get; set; }
 
         private MonoPageCodex _codex;
 
-        public UniTask OnInitializeAsync(MonoPageCodex codex)
+        public UnityTask OnInitializeAsync(MonoPageCodex codex)
         {
             _codex = codex;
 
@@ -24,7 +32,7 @@ namespace EncosyTower.Samples.MonoPages
                 ShowStartScreen(scopes);
             }
 
-            return UniTask.CompletedTask;
+            return UnityTasks.GetCompleted();
         }
 
         private void ShowStartScreen(GamePageFlowScopes scopes)
@@ -37,3 +45,5 @@ namespace EncosyTower.Samples.MonoPages
         }
     }
 }
+
+#endif

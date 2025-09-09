@@ -650,7 +650,7 @@ namespace EncosyTower.UnityExtensions
         /// <summary>
         /// Dismiss warning on fire-and-forget calls.
         /// </summary>
-        public static void Forget([NotNull] this Awaitable self)
+        public static void Forget([NotNull] Awaitable self)
         {
             var awaiter = self.GetAwaiter();
 
@@ -690,7 +690,7 @@ namespace EncosyTower.UnityExtensions
         /// <summary>
         /// Dismiss warning on fire-and-forget calls.
         /// </summary>
-        public static void Forget<T>([NotNull] this Awaitable<T> self)
+        public static void Forget<T>([NotNull] Awaitable<T> self)
         {
             var awaiter = self.GetAwaiter();
 
@@ -732,7 +732,7 @@ namespace EncosyTower.UnityExtensions
         /// On completion, rethrows any exception raised during execution.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Run([NotNull] this Awaitable self)
+        public static void Run([NotNull] Awaitable self)
         {
 #if !__ENCOSY_NO_VALIDATION__
             Checks.IsTrue(HasContinuation(self) == false, "Awaitable already have a continuation, is it already awaited?");
@@ -763,7 +763,7 @@ namespace EncosyTower.UnityExtensions
         /// then execute the continuation, once completed.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Awaitable WithContinuation([NotNull] this Awaitable self, [NotNull] Action continuation)
+        public static Awaitable WithContinuation([NotNull] Awaitable self, [NotNull] Action continuation)
         {
             if (self.IsCompleted == false)
             {
@@ -791,7 +791,7 @@ namespace EncosyTower.UnityExtensions
         /// This is an unusual method to use, be sure what you are doing.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ContinueWith([NotNull] this Awaitable self, [NotNull] Action continuation)
+        public static void ContinueWith([NotNull] Awaitable self, [NotNull] Action continuation)
         {
             if (self.IsCompleted == false)
             {
@@ -809,7 +809,7 @@ namespace EncosyTower.UnityExtensions
         }
 
         public static Awaitable AsAwaitable(
-              [NotNull] this Task task
+              [NotNull] Task task
             , bool useCurrentSynchronizationContext = true
         )
         {
@@ -850,7 +850,7 @@ namespace EncosyTower.UnityExtensions
         }
 
         public static Awaitable<T> AsAwaitable<T>(
-              [NotNull] this Task<T> task
+              [NotNull] Task<T> task
             , bool useCurrentSynchronizationContext = true
         )
         {
