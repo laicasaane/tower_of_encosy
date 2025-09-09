@@ -77,7 +77,12 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 for (var i = 0; i < rootChildCount; i++)
                 {
                     var child = rootTransform.GetChild(i);
+
+#if UNITY_6000_2_OR_NEWER
+                    var id = child.gameObject.GetEntityId();
+#else
                     var id = child.gameObject.GetInstanceID();
+#endif
 
                     list.Add(new TreeViewItem {
                         id = id,
@@ -203,7 +208,13 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                         {
                             var component = components[k];
                             var type = component.GetType();
+
+#if UNITY_6000_2_OR_NEWER
+                            var id = component.GetEntityId();
+#else
                             var id = component.GetInstanceID();
+#endif
+
                             var content = EditorGUIUtility.ObjectContent(component, type);
                             var icon = content.image as Texture2D;
                             var name = type != componentType

@@ -60,10 +60,17 @@ namespace EncosyTower.PageFlows.MonoPages
 
         public PageFlowScope FlowScope
         {
+#if UNITY_6000_2_OR_NEWER
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => messageScope == MonoMessageScope.Component
+                ? new(new((Id<MonoPageFlow>)Type<MonoPageFlow>.Id, (int)Owner.GetEntityId()))
+                : new(new((Id<GameObject>)Type<GameObject>.Id, (int)Owner.gameObject.GetEntityId()));
+#else
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => messageScope == MonoMessageScope.Component
                 ? new(new((Id<MonoPageFlow>)Type<MonoPageFlow>.Id, Owner.GetInstanceID()))
                 : new(new((Id<GameObject>)Type<GameObject>.Id, Owner.gameObject.GetInstanceID()));
+#endif
         }
 
         public Option<IPageFlowScopeCollectionApplier> FlowScopeCollectionApplier { get; set; }

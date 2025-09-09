@@ -1048,13 +1048,21 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                     {
                         case GameObject go:
                         {
+#if UNITY_6000_2_OR_NEWER
+                            instanceIds.Add(go.GetEntityId());
+#else
                             instanceIds.Add(go.GetInstanceID());
+#endif
                             continue;
                         }
 
                         case Component comp:
                         {
+#if UNITY_6000_2_OR_NEWER
+                            instanceIds.Add(comp.gameObject.GetEntityId());
+#else
                             instanceIds.Add(comp.gameObject.GetInstanceID());
+#endif
                             continue;
                         }
                     }
@@ -1070,13 +1078,21 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                     {
                         case Component comp when targetType == comp.GetType():
                         {
+#if UNITY_6000_2_OR_NEWER
+                            instanceIds.Add(obj.GetEntityId());
+#else
                             instanceIds.Add(obj.GetInstanceID());
+#endif
                             continue;
                         }
 
                         case GameObject go when go.TryGetComponent(targetType, out var firstComp):
                         {
+#if UNITY_6000_2_OR_NEWER
+                            instanceIds.Add(firstComp.GetEntityId());
+#else
                             instanceIds.Add(firstComp.GetInstanceID());
+#endif
                             continue;
                         }
                     }

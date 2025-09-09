@@ -21,9 +21,17 @@ namespace EncosyTower.PubSub
         public readonly partial struct UnitySubscriber<TScope>
             where TScope : UnityEngine.Object
         {
+#if UNITY_6000_2_OR_NEWER
+            internal readonly Subscriber<UnityEntityId<TScope>> _subscriber;
+#else
             internal readonly Subscriber<UnityInstanceId<TScope>> _subscriber;
+#endif
 
+#if UNITY_6000_2_OR_NEWER
+            public UnityEntityId<TScope> Scope => _subscriber.Scope;
+#else
             public UnityInstanceId<TScope> Scope => _subscriber.Scope;
+#endif
 
             public bool IsValid => _subscriber.IsValid;
 

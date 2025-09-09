@@ -19,11 +19,19 @@ namespace EncosyTower.PubSub
         public readonly partial struct UnityPublisher<TScope>
             where TScope : UnityEngine.Object
         {
+#if UNITY_6000_2_OR_NEWER
+            internal readonly Publisher<UnityEntityId<TScope>> _publisher;
+#else
             internal readonly Publisher<UnityInstanceId<TScope>> _publisher;
+#endif
 
             public bool IsValid => _publisher.IsValid;
 
+#if UNITY_6000_2_OR_NEWER
+            public UnityEntityId<TScope> Scope => _publisher.Scope;
+#else
             public UnityInstanceId<TScope> Scope => _publisher.Scope;
+#endif
 
             internal UnityPublisher([NotNull] MessagePublisher publisher, [NotNull] TScope scope)
             {

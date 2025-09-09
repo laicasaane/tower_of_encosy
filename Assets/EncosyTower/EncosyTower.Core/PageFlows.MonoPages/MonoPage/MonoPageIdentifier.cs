@@ -13,7 +13,11 @@ namespace EncosyTower.PageFlows.MonoPages
 
         public StringId KeyId { get; internal set; }
 
+#if UNITY_6000_2_OR_NEWER
+        public UnityEntityId<GameObject> GameObjectId { get; internal set; }
+#else
         public UnityInstanceId<GameObject> GameObjectId { get; internal set; }
+#endif
 
         [NotNull]
         public Transform Transform { get; internal set; }

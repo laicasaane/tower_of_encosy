@@ -8,14 +8,21 @@ using EncosyTower.Logging;
 using EncosyTower.Pooling;
 using EncosyTower.StringIds;
 using EncosyTower.UnityExtensions;
+using Unity.Collections;
 using UnityEngine;
 
 namespace EncosyTower.PageFlows.MonoPages
 {
+#if UNITY_6000_2_OR_NEWER
+    using GameObjectId = UnityEntityId<GameObject>;
+#else
+    using GameObjectId = UnityInstanceId<GameObject>;
+#endif
+
     internal class MonoPagePool : IDisposable
     {
         private readonly GameObjectPool _pool = new();
-        private readonly HashSet<UnityInstanceId<GameObject>> _instanceIds = new();
+        private readonly HashSet<GameObjectId> _gameObjectIds = new();
         private readonly FasterList<MonoPageIdentifier> _pageIds;
         private readonly Transform _poolParent;
         private readonly Transform _activeParent;
@@ -65,7 +72,7 @@ namespace EncosyTower.PageFlows.MonoPages
         {
             if (_pool.Prepool(amount, GetPooledStrategy()))
             {
-                _instanceIds.EnsureCapacity(amount);
+                _gameObjectIds.EnsureCapacity(amount);
                 _pageIds.IncreaseCapacityBy(amount);
             }
         }
@@ -109,7 +116,7 @@ namespace EncosyTower.PageFlows.MonoPages
             identifier.GameObjectId = gameObject;
             identifier.Page = page;
 
-            if (_instanceIds.Add(identifier.GameObjectId))
+            if (_gameObjectIds.Add(identifier.GameObjectId))
             {
                 _pageIds.Add(identifier);
             }
@@ -123,7 +130,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
         public void Return(MonoPageIdentifier identifier)
         {
-            if (_instanceIds.Remove(identifier.GameObjectId))
+            if (_gameObjectIds.Remove(identifier.GameObjectId))
             {
                 _pageIds.Remove(identifier);
             }
@@ -150,19 +157,20 @@ namespace EncosyTower.PageFlows.MonoPages
 
         private void ReturnActiveObjects()
         {
-            var length = _instanceIds.Count;
-            var array = NativeArray.CreateFast<int>(length, Unity.Collections.Allocator.Temp);
+            var gameObjectIds = _gameObjectIds;
+            var length = gameObjectIds.Count;
+            var array = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
             var index = 0;
 
-            foreach (var instanceId in _instanceIds)
+            foreach (var id in gameObjectIds)
             {
-                array[index] = (int)instanceId;
+                array[index] = id;
                 index++;
             }
 
-            _instanceIds.Clear();
+            gameObjectIds.Clear();
             _pageIds.Clear();
-            _pool.ReturnInstanceIds(array);
+            _pool.Return(array);
         }
 
         private PooledGameObjectStrategy GetPooledStrategy()
