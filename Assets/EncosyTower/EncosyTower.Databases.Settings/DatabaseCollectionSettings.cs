@@ -7,7 +7,7 @@ using UnityEngine;
 namespace EncosyTower.Databases.Settings
 {
     [Settings(SettingsUsage.EditorProject, "Encosy Tower/Database Collection")]
-    public partial class DatabaseCollectionSettings : Settings<DatabaseCollectionSettings>
+    public sealed partial class DatabaseCollectionSettings : Settings<DatabaseCollectionSettings>
     {
         public const DataSourceFlags ALL_SOURCES
                 = DataSourceFlags.GoogleSheet
