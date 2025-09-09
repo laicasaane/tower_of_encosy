@@ -43,13 +43,6 @@ namespace EncosyTower.Settings
         /// </summary>
         protected static T Initialize()
         {
-            // If the instance is already valid, return it. Needed if called from a
-            // derived class that wishes to ensure the settings are initialized.
-            if (s_instance.IsValid())
-            {
-                return s_instance;
-            }
-
             var type = typeof(T);
             var attribute = Attribute ?? throw new InvalidOperationException(
                 $"[Settings] attribute is missing for type: {type.Name}"
@@ -72,7 +65,7 @@ namespace EncosyTower.Settings
             // Return the instance if it was the load was successful.
             if (s_instance.IsValid())
             {
-                return s_instance;
+                goto RETURN_INSTANCE;
             }
 
             // Move settings if its path changed (type renamed or attribute changed)
@@ -101,7 +94,7 @@ namespace EncosyTower.Settings
             // Create the settings instance if it was not loaded or found.
             if (s_instance.IsValid())
             {
-                return s_instance;
+                goto RETURN_INSTANCE;
             }
 
             s_instance = CreateInstance<T>();
@@ -131,8 +124,13 @@ namespace EncosyTower.Settings
             AssetDatabase.CreateAsset(s_instance, path);
 #endif
 
+        RETURN_INSTANCE:
+            s_instance.OnInitialize();
+
             return s_instance;
         }
+
+        protected virtual void OnInitialize() { }
 
         /// <summary>
         /// Called to validate settings changes.
