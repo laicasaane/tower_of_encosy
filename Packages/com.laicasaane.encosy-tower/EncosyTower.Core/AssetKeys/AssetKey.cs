@@ -88,7 +88,7 @@ namespace EncosyTower.AssetKeys
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashCode.Combine(_value);
+            => _value?.GetHashCode() ?? 0;
 
         /// <summary>
         /// Returns a string representation of this <see cref="AssetKey"/>.

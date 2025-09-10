@@ -49,7 +49,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashCode.Combine(Message?.GetHashCode() ?? 0, Exception?.GetHashCode() ?? 0);
+            => HashCode.Combine(Message, Exception);
 
         public override string ToString()
         {

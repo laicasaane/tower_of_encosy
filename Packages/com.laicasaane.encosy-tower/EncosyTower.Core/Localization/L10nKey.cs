@@ -40,7 +40,7 @@ namespace EncosyTower.Localization
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashCode.Combine(Table.GetHashCode(), Entry.GetHashCode());
+            => HashCode.Combine(Table, Entry);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
