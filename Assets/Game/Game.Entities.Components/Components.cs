@@ -8,7 +8,7 @@ using Unity.Mathematics;
 
 namespace Module.EntityComponents
 {
-    public struct EntityId : IComponentData
+    public struct EntityResId : IComponentData
     {
         public ResId.Serializable value;
     }

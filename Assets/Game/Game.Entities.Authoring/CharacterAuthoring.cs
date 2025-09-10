@@ -32,7 +32,7 @@ namespace Module.EntityAuthoring
             public bool Bake(CharacterAuthoring authoring, IBaker baker)
             {
                 var entity = baker.GetEntity(TransformUsageFlags.Dynamic);
-                baker.AddComponent<EntityId>(entity);
+                baker.AddComponent<EntityResId>(entity);
 
                 var anims = authoring.anims.AsSpan();
                 var animsLength = anims.Length;
