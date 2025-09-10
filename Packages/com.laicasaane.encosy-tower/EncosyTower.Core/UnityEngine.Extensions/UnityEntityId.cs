@@ -15,61 +15,68 @@ using UnityEngine;
 
 namespace EncosyTower.UnityExtensions
 {
-    public readonly struct UnityEntityId<T> : IEquatable<UnityEntityId<T>>
+    [Serializable]
+    public struct UnityEntityId<T> : IEquatable<UnityEntityId<T>>
         where T : UnityEngine.Object
     {
-        private readonly EntityId _value;
-        private readonly ByteBool _isValid;
+        [SerializeField]
+        private EntityId _value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UnityEntityId(T obj)
         {
             ThrowIfInvalid(obj);
             _value = obj.GetEntityId();
-            _isValid = ByteBool.True;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private UnityEntityId(EntityId entityId)
+        public UnityEntityId(EntityId value)
         {
-            _value = entityId;
-            _isValid = ByteBool.True;
+            _value = value;
         }
 
-        public bool IsValid
+#pragma warning disable CS0618 // Type or member is obsolete
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public UnityEntityId(InstanceID value)
+        {
+            _value = (int)value;
+        }
+#pragma warning restore CS0618 // Type or member is obsolete
+
+        public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _isValid;
+            get => Resources.EntityIdIsValid(_value);
         }
 
-        public int Value
+        public readonly EntityId Value
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T ToObject()
+        public readonly Option<T> ToObject()
         {
             ThrowIfNotCreated(IsValid);
             return Resources.EntityIdToObject(_value) as T;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(UnityEntityId<T> other)
-            => _isValid == other._isValid && _value == other._value;
+        public readonly bool Equals(UnityEntityId<T> other)
+            => _value == other._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
-            => obj is UnityEntityId<T> other && _isValid == other._isValid && _value == other._value;
+        public override readonly bool Equals(object obj)
+            => obj is UnityEntityId<T> other && _value == other._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode()
-            => HashCode.Combine(_isValid, _value);
+        public readonly override int GetHashCode()
+            => _value.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString()
-            => _isValid ? ToObject().ToString() : _value.ToString();
+        public readonly override string ToString()
+            => _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator int(UnityEntityId<T> instanceId)
@@ -77,7 +84,7 @@ namespace EncosyTower.UnityExtensions
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator UnityEntityId<T>(int instanceId)
-            =>  new(instanceId);
+            =>  new((EntityId)instanceId);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator UnityEntityId<T>(EntityId entityId)
@@ -93,11 +100,21 @@ namespace EncosyTower.UnityExtensions
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(UnityEntityId<T> left, UnityEntityId<T> right)
-            => left._isValid == right._isValid && left._value == right._value;
+            => left._value == right._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(UnityEntityId<T> left, UnityEntityId<T> right)
-            => left._isValid != right._isValid || left._value != right._value;
+            => left._value != right._value;
+
+#pragma warning disable CS0618 // Type or member is obsolete
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator UnityEntityId<T>(InstanceID instanceId)
+            => new(instanceId);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator UnityEntityId<T>(UnityInstanceId<T> instanceId)
+            => new(instanceId.Value);
+#pragma warning restore CS0618 // Type or member is obsolete
 
         [Conditional("__ENCOSY_VALIDATION__")]
         private static void ThrowIfInvalid(T obj)
