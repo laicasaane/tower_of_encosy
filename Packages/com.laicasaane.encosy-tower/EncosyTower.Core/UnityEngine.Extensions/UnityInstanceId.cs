@@ -74,7 +74,7 @@ namespace EncosyTower.UnityExtensions
 #if UNITY_6000_2_OR_NEWER
         public readonly EntityId Value
 #else
-        public int Value
+        public readonly int Value
 #endif
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -113,11 +113,11 @@ namespace EncosyTower.UnityExtensions
         public static explicit operator int(UnityInstanceId<T> instanceId)
             => instanceId._value;
 
+#if UNITY_6000_2_OR_NEWER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator UnityInstanceId<T>(int instanceId)
             => new((EntityId)instanceId);
 
-#if UNITY_6000_2_OR_NEWER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator UnityInstanceId<T>(EntityId entityId)
             => new(entityId);
@@ -125,6 +125,10 @@ namespace EncosyTower.UnityExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator EntityId(UnityInstanceId<T> instanceId)
             => instanceId._value;
+#else
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator UnityInstanceId<T>(int instanceId)
+            => new(instanceId);
 #endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
