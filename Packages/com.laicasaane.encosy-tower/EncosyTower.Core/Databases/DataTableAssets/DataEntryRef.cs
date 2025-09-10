@@ -7,12 +7,35 @@ using UnityEngine;
 
 namespace EncosyTower.Databases
 {
+    public static class DataEntryRef
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DataEntryRef<T> GetEntryAt<T>(ReadOnlyMemory<T> entries, int index)
+        {
+#pragma warning disable CS0618 // Type or member is obsolete
+            return new(entries.Span.Slice(index, 1));
+#pragma warning restore CS0618 // Type or member is obsolete
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DataEntryRef<T> GetEntryAt<T>(ReadOnlySpan<T> entries, int index)
+        {
+#pragma warning disable CS0618 // Type or member is obsolete
+            return new(entries.Slice(index, 1));
+#pragma warning restore CS0618 // Type or member is obsolete
+        }
+    }
+
     public readonly ref struct DataEntryRef<T>
     {
         private readonly ReadOnlySpan<T> _value;
 
+        [Obsolete(
+            "This constructor is not intended to be used directly by user code. " +
+            "Please use DataEntryRef.GetEntryAt instead."
+        )]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public DataEntryRef(ReadOnlySpan<T> value)
+        internal DataEntryRef(ReadOnlySpan<T> value)
         {
             _value = value;
         }

@@ -7,12 +7,27 @@ using UnityEngine;
 
 namespace EncosyTower.Databases
 {
+    public static class DataEntry
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DataEntry<T> GetEntryAt<T>(ReadOnlyMemory<T> entries, int index)
+        {
+#pragma warning disable CS0618 // Type or member is obsolete
+            return new(entries.Slice(index, 1));
+#pragma warning restore CS0618 // Type or member is obsolete
+        }
+    }
+
     public readonly struct DataEntry<T> : IEquatable<DataEntry<T>>
     {
         private readonly ReadOnlyMemory<T> _value;
 
+        [Obsolete(
+            "This constructor is not intended to be used directly by user code. " +
+            "Please use DataEntry.GetEntryAt instead."
+        )]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public DataEntry(ReadOnlyMemory<T> value)
+        internal DataEntry(ReadOnlyMemory<T> value)
         {
             _value = value;
         }
@@ -67,7 +82,7 @@ namespace EncosyTower.Databases
         public override int GetHashCode()
         {
             return _value.IsEmpty == false
-                ? HashCode.Combine(RuntimeHelpers.GetHashCode(_value), 0, _value.Length)
+                ? HashCode.Combine(_value, 0, 1)
                 : 0;
         }
 

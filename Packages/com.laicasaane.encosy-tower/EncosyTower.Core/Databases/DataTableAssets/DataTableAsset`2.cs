@@ -47,7 +47,7 @@ namespace EncosyTower.Databases
         public virtual DataEntry<TData> GetEntry(TDataId id)
         {
             return IdToIndexMap.TryGetValue(id, out var index)
-                ? new(Entries.Slice(index, 1))
+                ? DataEntry.GetEntryAt(Entries, index)
                 : default;
         }
 
@@ -55,7 +55,7 @@ namespace EncosyTower.Databases
         public virtual DataEntryRef<TData> GetEntryByRef(TDataId id)
         {
             return IdToIndexMap.TryGetValue(id, out var index)
-                ? new(Entries.Span.Slice(index, 1))
+                ? DataEntryRef.GetEntryAt(Entries, index)
                 : default;
         }
 
