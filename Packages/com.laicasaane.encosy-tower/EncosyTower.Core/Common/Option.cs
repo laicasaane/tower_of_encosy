@@ -77,7 +77,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashCode.Combine(HasValue, _value);
+            => HashValue.Combine(HasValue, _value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()

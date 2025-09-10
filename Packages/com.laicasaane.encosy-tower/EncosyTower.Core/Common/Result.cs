@@ -240,7 +240,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashCode.Combine(_value, _error);
+            => HashValue.Combine(_value, _error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
