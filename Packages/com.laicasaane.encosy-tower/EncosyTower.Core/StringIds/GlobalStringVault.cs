@@ -14,7 +14,10 @@ namespace EncosyTower.StringIds
         [UnityEditor.InitializeOnEnterPlayMode, UnityEngine.Scripting.Preserve]
         private static void InitWhenDomainReloadDisabled()
         {
-            s_vault.Clear();
+            // DO NOT clear the `s_vault`!!!
+            // Allocated StringId value stored in static fields should persist upon entering play mode every time.
+            // Because when Domain Reload is disabled, the Unity Editor is always in a single session,
+            // string.GetHashCode will persist as well.
         }
 #endif
 
