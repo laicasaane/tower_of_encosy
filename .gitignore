@@ -83,6 +83,9 @@ crashlytics-build.properties
 [Aa]ssets/[Bb]uild[Rr]eports/
 [Aa]ssets/[Bb]uild[Rr]eports.meta
 
+[Aa]ssets/[Gg]enerated[Ll]ocal[Rr]epo/
+[Aa]ssets/[Gg]enerated[Ll]ocal[Rr]epo.meta
+
 [Aa]ssets/[Gg]lobal[Ee]ntities[Dd]ependencies/
 [Aa]ssets/[Gg]lobal[Ee]ntities[Dd]ependencies.meta
 [Aa]ssets/[Ss]cene[Dd]ependency[Cc]ache/
@@ -94,8 +97,8 @@ crashlytics-build.properties
 [Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ss]ettings.json
 [Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ss]ettings.json.meta
 
-[Aa]ssets/[Gg]enerated[Ll]ocal[Rr]epo/
-[Aa]ssets/[Gg]enerated[Ll]ocal[Rr]epo.meta
+[Aa]ssets/[Ss]amples/
+[Aa]ssets/[Ss]amples.meta
 
 [Aa]ssets/[Ss]ettings/[Ee]ditor/[Uu]ser/
 
