@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="EncosyTower.SourceGen.Tests/EncosyTower.SourceGen.Tests.csproj" />
+  <Project Path="EncosyTower.SourceGen/EncosyTower.SourceGen.csproj" />
+</Solution>
