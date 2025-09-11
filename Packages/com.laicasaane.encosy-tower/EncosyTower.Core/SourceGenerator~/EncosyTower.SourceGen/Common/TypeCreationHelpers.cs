@@ -85,7 +85,7 @@ namespace EncosyTower.SourceGen
             {
                 switch (childNode)
                 {
-                    case NamespaceDeclarationSyntax _:
+                    case BaseNamespaceDeclarationSyntax _:
                     case ClassDeclarationSyntax _:
                     case StructDeclarationSyntax _:
                     {
@@ -131,7 +131,7 @@ namespace EncosyTower.SourceGen
             // Either get the replaced node for this level - or create one - and add the replaced children
             // No node found, need to create a new one to represent this node in the hierarchy
             return currentNode switch {
-                NamespaceDeclarationSyntax namespaceNode =>
+                BaseNamespaceDeclarationSyntax namespaceNode =>
                     SyntaxFactory.NamespaceDeclaration(namespaceNode.Name)
                         .AddMembers(replacedChildren)
                         .WithModifiers(namespaceNode.Modifiers)
@@ -326,7 +326,7 @@ namespace EncosyTower.SourceGen
                         break;
                     }
 
-                    case NamespaceDeclarationSyntax namespaceSyntax:
+                    case BaseNamespaceDeclarationSyntax namespaceSyntax:
                     {
                         foreach (var usingDir in namespaceSyntax.Usings)
                         {
