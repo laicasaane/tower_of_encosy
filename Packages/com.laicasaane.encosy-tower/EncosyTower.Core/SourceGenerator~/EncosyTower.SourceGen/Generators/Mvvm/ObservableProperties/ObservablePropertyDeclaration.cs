@@ -124,7 +124,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             PropertyName = field.ToPropertyName(),
                             IsObservableObject = field.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE),
                             HasSerializeFieldAttribute = field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE),
-                            DontCreateProperty = field.HasAttribute(DONT_CREATE_PROPERTY_ATTRIBUTE),
                         };
 
                         if (fieldRef.IsObservableObject)
@@ -180,7 +179,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                               semanticModel
                             , token
                             , diagnosticBuilder
-                            , out ImmutableArray<(string, AttributeInfo)> propertyAttributes
+                            , out ImmutableArray<AttributeInfo> propertyAttributes
                             , DiagnosticDescriptors.InvalidPropertyTargetedAttributeOnObservableProperty
                         );
 
@@ -334,11 +333,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             public string PropertyName { get; set; }
 
-            public ImmutableArray<(string, AttributeInfo)> ForwardedPropertyAttributes { get; set; }
+            public ImmutableArray<AttributeInfo> ForwardedPropertyAttributes { get; set; }
 
             public bool HasSerializeFieldAttribute { get; set; }
-
-            public bool DontCreateProperty { get; set; }
 
             public override string GetPropertyName()
                 => PropertyName;

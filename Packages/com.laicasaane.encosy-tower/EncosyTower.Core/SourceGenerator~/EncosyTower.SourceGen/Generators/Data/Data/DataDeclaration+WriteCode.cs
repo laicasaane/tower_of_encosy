@@ -125,26 +125,12 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 p.PrintLine($"[{SERIALIZE_FIELD_ATTRIBUTE}]");
             }
 
-            if (hasGeneratePropertyBagAttribute)
+            if (hasGeneratePropertyBagAttribute
+                && prop.DoesCreateProperty
+                && withDontCreateProperty == false
+            )
             {
-                if (prop.DoesCreateProperty)
-                {
-                    if (withDontCreateProperty == false)
-                    {
-                        p.PrintLine($"[{DONT_CREATE_PROPERTY}]");
-                    }
-                }
-                else if (withDontCreateProperty == false)
-                {
-                    if (IsMutable)
-                    {
-                        p.PrintLine($"[{CREATE_PROPERTY}]");
-                    }
-                    else
-                    {
-                        p.PrintLine($"[{CREATE_PROPERTY}(ReadOnly = true)]");
-                    }
-                }
+                p.PrintLine($"[{DONT_CREATE_PROPERTY}]");
             }
 
             var fieldTypeName = GetFieldTypeName(prop.FieldType, prop.FieldCollection);
@@ -226,29 +212,13 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             p.PrintLine(string.Format(GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE, fieldName, field.FieldType.ToFullName()));
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
 
-            var hasGeneratePropertyBagAttribute = HasGeneratePropertyBagAttribute;
-            var withCreateProperty = false;
-
-            foreach (var (fullTypeName, attribute) in field.ForwardedPropertyAttributes)
+            foreach (var attribute in field.ForwardedPropertyAttributes)
             {
-                if (hasGeneratePropertyBagAttribute && fullTypeName == CREATE_PROPERTY_ATTRIBUTE)
-                {
-                    withCreateProperty = true;
-                }
-
                 p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
             }
 
             var mustCast = SymbolEqualityComparer.Default.Equals(field.FieldType, field.PropertyType) == false;
             var typeName = IsMutable ? mutableTypeName : immutableTypeName;
-
-            if (hasGeneratePropertyBagAttribute
-                && field.DontCreateProperty
-                && withCreateProperty == false
-            )
-            {
-                p.PrintLine($"[{CREATE_PROPERTY}]");
-            }
 
             p.PrintLine($"public {typeName} {field.PropertyName}");
             p.OpenScope();

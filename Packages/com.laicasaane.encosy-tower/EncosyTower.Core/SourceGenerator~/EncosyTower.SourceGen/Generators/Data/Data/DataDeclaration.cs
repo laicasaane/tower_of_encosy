@@ -205,7 +205,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                           semanticModel
                         , context.CancellationToken
                         , diagnosticBuilder
-                        , out ImmutableArray<(string, AttributeInfo)> propertyAttributes
+                        , out ImmutableArray<AttributeInfo> propertyAttributes
                         , DiagnosticDescriptors.InvalidPropertyTargetedAttribute
                     );
 
@@ -230,7 +230,6 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                         ForwardedPropertyAttributes = propertyAttributes,
                         FieldCollection = GetCollection(fieldType),
                         ImplicitlyConvertible = implicitlyConvertible,
-                        DontCreateProperty = field.HasAttribute(DONT_CREATE_PROPERTY_ATTRIBUTE),
                     };
 
                     var index = fieldArrayBuilder.Count;
@@ -623,9 +622,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
             public IPropertySymbol ImplementedProperty { get; set; }
 
-            public ImmutableArray<(string, AttributeInfo)> ForwardedPropertyAttributes { get; set; }
-
-            public bool DontCreateProperty { get; set; }
+            public ImmutableArray<AttributeInfo> ForwardedPropertyAttributes { get; set; }
         }
 
         public class PropertyRef : MemberRef
