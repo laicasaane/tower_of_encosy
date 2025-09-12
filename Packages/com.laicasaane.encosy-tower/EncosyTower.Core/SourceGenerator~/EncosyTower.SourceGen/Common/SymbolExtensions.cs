@@ -844,6 +844,99 @@ namespace EncosyTower.SourceGen
         }
 
         /// <summary>
+        /// Gathers all forwarded attributes for the generated property.
+        /// </summary>
+        /// <param name="fieldSymbol">The input <see cref="IFieldSymbol"/> instance to process.</param>
+        /// <param name="semanticModel">The <see cref="SemanticModel"/> instance for the current run.</param>
+        /// <param name="token">The cancellation token for the current operation.</param>
+        /// <param name="diagnostics">The current collection of gathered diagnostics.</param>
+        /// <param name="propertyAttributes">The resulting property attributes to forward.</param>
+        public static void GatherForwardedAttributes(
+              this IFieldSymbol fieldSymbol
+            , SemanticModel semanticModel
+            , CancellationToken token
+            , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
+            , out ImmutableArray<(string, AttributeInfo)> propertyAttributes
+            , DiagnosticDescriptor diagnostic
+        )
+        {
+            using var propertyAttributesInfo = ImmutableArrayBuilder<(string, AttributeInfo)>.Rent();
+
+            GatherForwardedAttributes(
+                  fieldSymbol
+                , semanticModel
+                , token
+                , in diagnostics
+                , in propertyAttributesInfo
+                , diagnostic
+            );
+
+            propertyAttributes = propertyAttributesInfo.ToImmutable();
+
+            static void GatherForwardedAttributes(
+                  IFieldSymbol symbol
+                , SemanticModel semanticModel
+                , CancellationToken token
+                , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
+                , in ImmutableArrayBuilder<(string, AttributeInfo)> propertyAttributesInfo
+                , DiagnosticDescriptor diagnostic
+            )
+            {
+                if (symbol.DeclaringSyntaxReferences.Length != 1
+                    || symbol.DeclaringSyntaxReferences[0] is not SyntaxReference syntaxReference
+                )
+                {
+                    return;
+                }
+
+                var syntax = syntaxReference.GetSyntax(token);
+
+                if (syntax.Parent?.Parent is not FieldDeclarationSyntax fieldDeclaration)
+                {
+                    return;
+                }
+
+                foreach (AttributeListSyntax attributeList in fieldDeclaration.AttributeLists)
+                {
+                    if (attributeList.Target == null
+                        || attributeList.Target.Identifier.Kind() is not SyntaxKind.PropertyKeyword
+                    )
+                    {
+                        continue;
+                    }
+
+                    foreach (AttributeSyntax attribute in attributeList.Attributes)
+                    {
+                        if (!semanticModel.GetSymbolInfo(attribute, token)
+                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol)
+                        )
+                        {
+                            diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);
+                            continue;
+                        }
+
+                        var attributeInfo = AttributeInfo.From(
+                              attributeTypeSymbol
+                            , semanticModel
+                            , attribute.ArgumentList?.Arguments ?? Enumerable.Empty<AttributeArgumentSyntax>()
+                            , token
+                        );
+
+                        // Add the new attribute info to the right builder
+                        if (attributeList.Target != null)
+                        {
+                            if (attributeList.Target.Identifier.IsKind(SyntaxKind.PropertyKeyword))
+                            {
+                                var typeName = attributeTypeSymbol.ToFullName();
+                                propertyAttributesInfo.Add((typeName, attributeInfo));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Gathers all forwarded attributes for the generated field.
         /// </summary>
         /// <param name="propertySymbol">The input <see cref="IPropertySymbol"/> instance to process.</param>

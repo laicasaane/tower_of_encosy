@@ -18,7 +18,11 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            p.PrintLine("[global::System.Serializable]");
+            if (HasSerializableAttribute == false)
+            {
+                p.PrintLine("[global::System.Serializable]");
+            }
+
             p.PrintBeginLine()
                 .Print($"partial {keyword} ").Print(TypeName)
                 .Print(" : ")
@@ -99,6 +103,8 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             p.PrintLine(GENERATED_CODE);
 
             var withSerializeField = false;
+            var hasGeneratePropertyBagAttribute = HasGeneratePropertyBagAttribute;
+            var withDontCreateProperty = false;
 
             foreach (var (fullTypeName, attribute) in prop.ForwardedFieldAttributes)
             {
@@ -106,13 +112,39 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 {
                     withSerializeField = true;
                 }
+                else if (hasGeneratePropertyBagAttribute && fullTypeName == DONT_CREATE_PROPERTY_ATTRIBUTE)
+                {
+                    withDontCreateProperty = true;
+                }
 
                 p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
             }
 
-            if (withSerializeField == false && ReferenceUnityEngine)
+            if (withSerializeField == false)
             {
                 p.PrintLine($"[{SERIALIZE_FIELD_ATTRIBUTE}]");
+            }
+
+            if (hasGeneratePropertyBagAttribute)
+            {
+                if (prop.DoesCreateProperty)
+                {
+                    if (withDontCreateProperty == false)
+                    {
+                        p.PrintLine($"[{DONT_CREATE_PROPERTY}]");
+                    }
+                }
+                else if (withDontCreateProperty == false)
+                {
+                    if (IsMutable)
+                    {
+                        p.PrintLine($"[{CREATE_PROPERTY}]");
+                    }
+                    else
+                    {
+                        p.PrintLine($"[{CREATE_PROPERTY}](ReadOnly = true)");
+                    }
+                }
             }
 
             var fieldTypeName = GetFieldTypeName(prop.FieldType, prop.FieldCollection);
@@ -194,13 +226,29 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             p.PrintLine(string.Format(GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE, fieldName, field.FieldType.ToFullName()));
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
 
-            foreach (var attribute in field.ForwardedPropertyAttributes)
+            var hasGeneratePropertyBagAttribute = HasGeneratePropertyBagAttribute;
+            var withCreateProperty = false;
+
+            foreach (var (fullTypeName, attribute) in field.ForwardedPropertyAttributes)
             {
+                if (hasGeneratePropertyBagAttribute && fullTypeName == CREATE_PROPERTY_ATTRIBUTE)
+                {
+                    withCreateProperty = true;
+                }
+
                 p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
             }
 
             var mustCast = SymbolEqualityComparer.Default.Equals(field.FieldType, field.PropertyType) == false;
             var typeName = IsMutable ? mutableTypeName : immutableTypeName;
+
+            if (hasGeneratePropertyBagAttribute
+                && field.DontCreateProperty
+                && withCreateProperty == false
+            )
+            {
+                p.PrintLine($"[{CREATE_PROPERTY}]");
+            }
 
             p.PrintLine($"public {typeName} {field.PropertyName}");
             p.OpenScope();

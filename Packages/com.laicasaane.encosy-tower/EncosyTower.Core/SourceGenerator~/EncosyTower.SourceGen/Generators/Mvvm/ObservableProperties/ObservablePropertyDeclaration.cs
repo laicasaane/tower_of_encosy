@@ -16,6 +16,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         public const string NOTIFY_CAN_EXECUTE_CHANGED_FOR_ATTRIBUTE = "global::EncosyTower.Mvvm.ComponentModel.NotifyCanExecuteChangedForAttribute";
         public const string RELAY_COMMAND_ATTRIBUTE = "global::EncosyTower.Mvvm.Input.RelayCommandAttribute";
 
+        public const string SERIALIZABLE_ATTRIBUTE = "global::System.SerializableAttribute";
+        public const string SERIALIZE_FIELD_ATTRIBUTE = "global::UnityEngine.SerializeField";
+
+        public const string GENERATE_PROPERTY_BAG_ATTRIBUTE = "global::Unity.Properties.GeneratePropertyBagAttribute";
+        public const string CREATE_PROPERTY_ATTRIBUTE = "global::Unity.Properties.CreatePropertyAttribute";
+        public const string CREATE_PROPERTY = "global::Unity.Properties.CreateProperty";
+        public const string DONT_CREATE_PROPERTY_ATTRIBUTE = "global::Unity.Properties.DontCreatePropertyAttribute";
+        public const string DONT_CREATE_PROPERTY = "global::Unity.Properties.DontCreateProperty";
+
         public ClassDeclarationSyntax Syntax { get; }
 
         public INamedTypeSymbol Symbol { get; }
@@ -31,6 +40,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         public ImmutableArray<PropertyRef> PropRefs { get; }
 
         public bool HasMemberObservableObject { get; }
+
+        public bool HasSerializableAttribute { get; }
+
+        public bool HasGeneratePropertyBagAttribute { get; }
 
         /// <summary>
         /// Key is <c>Field.Name</c>
@@ -54,6 +67,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             Syntax = candidate;
             Symbol = semanticModel.GetDeclaredSymbol(candidate, token);
+            HasSerializableAttribute = Symbol.HasAttribute(SERIALIZABLE_ATTRIBUTE);
+            HasGeneratePropertyBagAttribute = Symbol.HasAttribute(GENERATE_PROPERTY_BAG_ATTRIBUTE);
 
             var classNameSb = new StringBuilder(Syntax.Identifier.Text);
 
@@ -108,6 +123,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             Field = field,
                             PropertyName = field.ToPropertyName(),
                             IsObservableObject = field.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE),
+                            HasSerializeFieldAttribute = field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE),
+                            DontCreateProperty = field.HasAttribute(DONT_CREATE_PROPERTY_ATTRIBUTE),
                         };
 
                         if (fieldRef.IsObservableObject)
@@ -163,7 +180,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                               semanticModel
                             , token
                             , diagnosticBuilder
-                            , out var propertyAttributes
+                            , out ImmutableArray<(string, AttributeInfo)> propertyAttributes
                             , DiagnosticDescriptors.InvalidPropertyTargetedAttributeOnObservableProperty
                         );
 
@@ -188,6 +205,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             Property = property,
                             FieldName = fieldName,
                             IsObservableObject = property.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE),
+                            DoesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE),
                         };
 
                         if (propRef.IsObservableObject)
@@ -243,7 +261,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                               semanticModel
                             , token
                             , diagnosticBuilder
-                            , out ImmutableArray<AttributeInfo> fieldAttributes
+                            , out ImmutableArray<(string, AttributeInfo)> fieldAttributes
                             , DiagnosticDescriptors.InvalidFieldMethodTargetedAttributeOnObservableProperty
                         );
 
@@ -316,7 +334,11 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             public string PropertyName { get; set; }
 
-            public ImmutableArray<AttributeInfo> ForwardedPropertyAttributes { get; set; }
+            public ImmutableArray<(string, AttributeInfo)> ForwardedPropertyAttributes { get; set; }
+
+            public bool HasSerializeFieldAttribute { get; set; }
+
+            public bool DontCreateProperty { get; set; }
 
             public override string GetPropertyName()
                 => PropertyName;
@@ -328,7 +350,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             public string FieldName { get; set; }
 
-            public ImmutableArray<AttributeInfo> ForwardedFieldAttributes { get; set; }
+            public ImmutableArray<(string, AttributeInfo)> ForwardedFieldAttributes { get; set; }
+
+            public bool DoesCreateProperty { get; set; }
 
             public override string GetPropertyName()
                 => Property.Name;

@@ -96,10 +96,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
 
                     // For types in the same assembly
-                    if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE)
-                        || field.HasAttribute(JSON_INCLUDE_ATTRIBUTE)
-                        || field.HasAttribute(JSON_PROPERTY_ATTRIBUTE)
-                    )
+                    if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE))
                     {
                         properties.Add((field.ToPropertyName(), field.Name, field, field.Type));
                         continue;

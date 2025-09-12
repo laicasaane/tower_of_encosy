@@ -29,8 +29,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public const string DATA_CONVERTER_ATTRIBUTE = $"global::{DATA_NAMESPACE}.DataConverterAttribute";
 
         public const string SERIALIZE_FIELD_ATTRIBUTE = "global::UnityEngine.SerializeField";
-        public const string JSON_INCLUDE_ATTRIBUTE = "global::System.Text.Json.Serialization.JsonIncludeAttribute";
-        public const string JSON_PROPERTY_ATTRIBUTE = "global::Newtonsoft.Json.JsonPropertyAttribute";
 
         public const string LIST_TYPE_T = "global::System.Collections.Generic.List<";
         public const string DICTIONARY_TYPE_T = "global::System.Collections.Generic.Dictionary<";

@@ -110,18 +110,20 @@ namespace EncosyTower.Tests.Data.Heroes
     using System.Collections.Generic;
     using EncosyTower.Data;
     using EncosyTower.Databases;
+    using Unity.Properties;
     using UnityEngine;
 
+    [GeneratePropertyBag]
     [DataMutable(DataMutableOptions.WithoutPropertySetters | DataMutableOptions.WithReadOnlyView)]
     public partial class MutableData : IData
     {
-        [SerializeField]
+        [SerializeField, DontCreateProperty]
         private int _intValue;
 
         [SerializeField]
         private int[] _arrayValue;
 
-        [DataProperty]
+        [DataProperty, CreateProperty]
         public ReadOnlyMemory<float> Multipliers => Get_Multipliers();
     }
 

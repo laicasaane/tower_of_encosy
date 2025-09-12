@@ -78,7 +78,6 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
                 , propAttribListList
                 , fieldAttribCheck
                 , propAttribCheck
-                , cancellationToken
                 , ref fieldTypeSyntax
             );
 
@@ -147,7 +146,6 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
             , List<List<AttributeSyntax>> propAttribListList
             , HashSet<string> fieldAttribCheck
             , HashSet<string> propAttribCheck
-            , CancellationToken cancellationToken
             , ref TypeSyntax fieldTypeSyntax
         )
         {
@@ -255,57 +253,11 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
                 }
             }
 
-            if (fieldAttribCheck.Contains("SerializeField") == false
-                && fieldAttribCheck.Contains("JsonProperty") == false
-                && fieldAttribCheck.Contains("JsonInclude") == false
-            )
+            if (fieldAttribCheck.Contains("SerializeField") == false)
             {
-                var referenceUnityEngine = false;
-                var referenceNewtonsoft = false;
-                var referenceSystemTextJson = false;
-                var propertySymbol = semanticModel.GetDeclaredSymbol(propertyDecl, cancellationToken);
-
-                foreach (var assembly in propertySymbol.ContainingModule.ReferencedAssemblySymbols)
-                {
-                    var assemblyName = assembly.ToDisplayString();
-
-                    if (assemblyName.StartsWith("UnityEngine,"))
-                    {
-                        referenceUnityEngine = true;
-                        continue;
-                    }
-
-                    if (assemblyName.StartsWith("Newtonsoft.Json,"))
-                    {
-                        referenceNewtonsoft = true;
-                        continue;
-                    }
-
-                    if (assemblyName.StartsWith("System.Text.Json,"))
-                    {
-                        referenceSystemTextJson = true;
-                        continue;
-                    }
-                }
-
-                if (referenceUnityEngine)
-                {
-                    fieldAttribListList.Add(new List<AttributeSyntax> {
-                        SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("SerializeField"))
-                    });
-                }
-                else if (referenceNewtonsoft)
-                {
-                    fieldAttribListList.Add(new List<AttributeSyntax> {
-                        SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("JsonProperty"))
-                    });
-                }
-                else if (referenceSystemTextJson)
-                {
-                    fieldAttribListList.Add(new List<AttributeSyntax> {
-                        SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("JsonInclude"))
-                    });
-                }
+                fieldAttribListList.Add(new List<AttributeSyntax> {
+                    SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("SerializeField"))
+                });
             }
         }
 

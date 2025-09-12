@@ -10,14 +10,19 @@
         public const string DATA_TABLE_ASSET = $"global::{NAMESPACE}.DataTableAsset";
         public const string DATA_PROPERTY_ATTRIBUTE = $"global::{NAMESPACE}.DataPropertyAttribute";
         public const string DATA_CONVERTER_ATTRIBUTE = $"global::{NAMESPACE}.DataConverterAttribute";
+        public const string SERIALIZABLE_ATTRIBUTE = "global::System.SerializableAttribute";
         public const string SERIALIZE_FIELD_ATTRIBUTE = "global::UnityEngine.SerializeField";
-        public const string JSON_INCLUDE_ATTRIBUTE = "global::System.Text.Json.Serialization.JsonIncludeAttribute";
-        public const string JSON_PROPERTY_ATTRIBUTE = "global::Newtonsoft.Json.JsonPropertyAttribute";
         public const string DATA_MUTABLE_ATTRIBUTE = $"global::{NAMESPACE}.DataMutableAttribute";
         public const string DATA_FIELD_POLICY_ATTRIBUTE = $"global::{NAMESPACE}.DataFieldPolicyAttribute";
         public const string PROPERTY_TYPE_ATTRIBUTE = $"global::{NAMESPACE}.PropertyTypeAttribute";
         public const string DATA_WITHOUT_ID_ATTRIBUTE = $"global::{NAMESPACE}.DataWithoutIdAttribute";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
+
+        public const string GENERATE_PROPERTY_BAG_ATTRIBUTE = "global::Unity.Properties.GeneratePropertyBagAttribute";
+        public const string CREATE_PROPERTY_ATTRIBUTE = "global::Unity.Properties.CreatePropertyAttribute";
+        public const string CREATE_PROPERTY = "global::Unity.Properties.CreateProperty";
+        public const string DONT_CREATE_PROPERTY_ATTRIBUTE = "global::Unity.Properties.DontCreatePropertyAttribute";
+        public const string DONT_CREATE_PROPERTY = "global::Unity.Properties.DontCreateProperty";
 
         public const string UNION_ID_ATTRIBUTE = "global::EncosyTower.UnionIds.UnionIdAttribute";
 

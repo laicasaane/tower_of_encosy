@@ -27,8 +27,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
         public bool HasBaseBinder { get; }
 
-        public bool ReferenceUnityEngine { get; }
-
         public ImmutableArray<BindingPropertyRef> BindingPropertyRefs { get; }
 
         public ImmutableArray<BindingCommandRef> BindingCommandRefs { get; }
@@ -83,15 +81,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 if (Symbol.BaseType.ImplementsInterface(IBINDER_INTERFACE))
                 {
                     HasBaseBinder = true;
-                }
-            }
-
-            foreach (var assembly in Symbol.ContainingModule.ReferencedAssemblySymbols)
-            {
-                if (assembly.ToDisplayString().StartsWith("UnityEngine,"))
-                {
-                    ReferenceUnityEngine = true;
-                    break;
                 }
             }
 

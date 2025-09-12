@@ -49,10 +49,7 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
             if (context.Symbol is not IFieldSymbol fieldSymbol
                 || fieldSymbol.ContainingType is not INamedTypeSymbol typeSymbol
                 || typeSymbol.InheritsFromInterface(IDATA) == false
-                || (fieldSymbol.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE) == false
-                    && fieldSymbol.HasAttribute(JSON_INCLUDE_ATTRIBUTE) == false
-                    && fieldSymbol.HasAttribute(JSON_PROPERTY_ATTRIBUTE) == false
-                )
+                || fieldSymbol.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE) == false
             )
             {
                 return;

@@ -59,10 +59,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Suppressors
 
                 // Check if the field is using [SerializeField], in which case we should suppress the warning
                 if (declaredSymbol is IFieldSymbol fieldSymbol
-                    && (fieldSymbol.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE)
-                        || fieldSymbol.HasAttribute(JSON_INCLUDE_ATTRIBUTE)
-                        || fieldSymbol.HasAttribute(JSON_PROPERTY_ATTRIBUTE)
-                    )
+                    && fieldSymbol.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE)
                 )
                 {
                     context.ReportSuppression(Suppression.Create(PropertyAttributeListForDataField, diagnostic));

@@ -378,6 +378,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
         private void WriteObservableForProperties(ref Printer p)
         {
+            var hasSerializableAttribute = HasSerializableAttribute;
+            var canGeneratePropertyBagAttribute = HasSerializableAttribute && HasGeneratePropertyBagAttribute;
+
             foreach (var member in PropRefs)
             {
                 var fieldName = member.FieldName;
@@ -388,15 +391,46 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 var converterForFieldVariable = $"unionConverter{converterForField}";
                 var willNotifyPropertyChanged = NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties);
                 var constName = ConstName(member);
+                var withSerializeField = false;
+                var withDontCreateProperty = false;
 
-                foreach (var attribute in member.ForwardedFieldAttributes)
+                foreach (var (fullTypeName, attribute) in member.ForwardedFieldAttributes)
                 {
+                    if (hasSerializableAttribute && fullTypeName == SERIALIZE_FIELD_ATTRIBUTE)
+                    {
+                        withSerializeField = true;
+                    }
+                    else if (canGeneratePropertyBagAttribute && fullTypeName == DONT_CREATE_PROPERTY_ATTRIBUTE)
+                    {
+                        withDontCreateProperty = true;
+                    }
+
                     p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
                 }
 
                 if (member.IsObservableObject)
                 {
                     p.PrintLine(string.Format(IS_OBSERVABLE_OBJECT, typeName));
+                }
+
+                if (hasSerializableAttribute && withSerializeField == false)
+                {
+                    p.PrintLine($"[{SERIALIZE_FIELD_ATTRIBUTE}]");
+                }
+
+                if (canGeneratePropertyBagAttribute)
+                {
+                    if (member.DoesCreateProperty)
+                    {
+                        if (withDontCreateProperty == false)
+                        {
+                            p.PrintLine($"[{DONT_CREATE_PROPERTY}]");
+                        }
+                    }
+                    else if (withDontCreateProperty == false)
+                    {
+                        p.PrintLine($"[{CREATE_PROPERTY}]");
+                    }
                 }
 
                 p.PrintLine(GENERATED_CODE).PrintLine(EDITOR_BROWSABLE_NEVER);
@@ -485,6 +519,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
         private void WriteProperties(ref Printer p)
         {
+            var canGeneratePropertyBagAttribute = HasSerializableAttribute && HasGeneratePropertyBagAttribute;
+
             foreach (var member in FieldRefs)
             {
                 var fieldName = member.Field.Name;
@@ -495,17 +531,32 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 var converterForFieldVariable = $"unionConverter{converterForField}";
                 var willNotifyPropertyChanged = NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties);
                 var constName = ConstName(member);
+                var withCreateProperty = false;
 
                 p.PrintLine($"/// <inheritdoc cref=\"{fieldName}\"/>");
 
-                foreach (var attribute in member.ForwardedPropertyAttributes)
+                foreach (var (fullTypeName, attribute) in member.ForwardedPropertyAttributes)
                 {
+                    if (canGeneratePropertyBagAttribute && fullTypeName == CREATE_PROPERTY_ATTRIBUTE)
+                    {
+                        withCreateProperty = true;
+                    }
+
                     p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
                 }
 
                 if (member.IsObservableObject)
                 {
                     p.PrintLine(string.Format(IS_OBSERVABLE_OBJECT, typeName));
+                }
+
+                if (canGeneratePropertyBagAttribute
+                    && member.HasSerializeFieldAttribute
+                    && member.DontCreateProperty
+                    && withCreateProperty == false
+                )
+                {
+                    p.PrintLine($"[{CREATE_PROPERTY}]");
                 }
 
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(GENERATED_OBSERVABLE_PROPERTY);

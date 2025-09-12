@@ -31,8 +31,6 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
         public string BaseTypeName { get; }
 
-        public bool ReferenceUnityEngine { get; }
-
         public ImmutableArray<Order> Orders { get; }
 
         public ImmutableArray<FieldRef> FieldRefs { get; }
@@ -42,6 +40,10 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
         public ImmutableArray<string> OverrideEquals { get; }
 
         public ImmutableArray<DiagnosticInfo> Diagnostics { get; }
+
+        public bool HasSerializableAttribute { get; }
+
+        public bool HasGeneratePropertyBagAttribute { get; }
 
         public bool HasGetHashCodeMethod { get; }
 
@@ -65,6 +67,8 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             Syntax = syntax;
             Symbol = symbol;
             IsSealed = Symbol.IsSealed || Symbol.IsValueType;
+            HasSerializableAttribute = Symbol.HasAttribute(SERIALIZABLE_ATTRIBUTE);
+            HasGeneratePropertyBagAttribute = Symbol.HasAttribute(GENERATE_PROPERTY_BAG_ATTRIBUTE);
 
             var withoutId = WithoutId = Symbol.GetAttribute(DATA_WITHOUT_ID_ATTRIBUTE) != null;
             var mutableAttrib = Symbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE);
@@ -145,15 +149,6 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 TypeName = typeNameSb.ToString();
             }
 
-            foreach (var assembly in Symbol.ContainingModule.ReferencedAssemblySymbols)
-            {
-                if (assembly.ToDisplayString().StartsWith("UnityEngine,"))
-                {
-                    ReferenceUnityEngine = true;
-                    break;
-                }
-            }
-
             var existingFields = new HashSet<string>();
             var existingProperties = new Dictionary<string, IPropertySymbol>();
             var existingOverrideEquals = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
@@ -174,10 +169,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 {
                     existingFields.Add(field.Name);
 
-                    if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE) == false
-                        && field.HasAttribute(JSON_INCLUDE_ATTRIBUTE) == false
-                        && field.HasAttribute(JSON_PROPERTY_ATTRIBUTE) == false
-                    )
+                    if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE) == false)
                     {
                         continue;
                     }
@@ -213,7 +205,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                           semanticModel
                         , context.CancellationToken
                         , diagnosticBuilder
-                        , out var propertyAttributes
+                        , out ImmutableArray<(string, AttributeInfo)> propertyAttributes
                         , DiagnosticDescriptors.InvalidPropertyTargetedAttribute
                     );
 
@@ -238,6 +230,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                         ForwardedPropertyAttributes = propertyAttributes,
                         FieldCollection = GetCollection(fieldType),
                         ImplicitlyConvertible = implicitlyConvertible,
+                        DontCreateProperty = field.HasAttribute(DONT_CREATE_PROPERTY_ATTRIBUTE),
                     };
 
                     var index = fieldArrayBuilder.Count;
@@ -337,6 +330,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                         FieldCollection = GetCollection(fieldType),
                         PropertyCollection = GetCollection(property.Type),
                         ImplicitlyConvertible = implicitlyConvertible,
+                        DoesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE),
                     };
 
                     var index = propArrayBuilder.Count;
@@ -629,7 +623,9 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
             public IPropertySymbol ImplementedProperty { get; set; }
 
-            public ImmutableArray<AttributeInfo> ForwardedPropertyAttributes { get; set; }
+            public ImmutableArray<(string, AttributeInfo)> ForwardedPropertyAttributes { get; set; }
+
+            public bool DontCreateProperty { get; set; }
         }
 
         public class PropertyRef : MemberRef
@@ -641,6 +637,8 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             public bool FieldIsImplemented { get; set; }
 
             public ImmutableArray<(string, AttributeInfo)> ForwardedFieldAttributes { get; set; }
+
+            public bool DoesCreateProperty { get; set; }
         }
 
         public struct CollectionRef

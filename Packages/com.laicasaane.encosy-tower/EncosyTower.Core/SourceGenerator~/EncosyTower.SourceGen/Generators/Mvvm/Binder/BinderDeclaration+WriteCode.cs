@@ -11,7 +11,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         private const string NAMESPACE_BINDING = "EncosyTower.Mvvm.ViewBinding";
         private const string NAMESPACE_MODEL = "EncosyTower.Mvvm.ComponentModel";
         private const string NAMESPACE_INPUT = "EncosyTower.Mvvm.Input";
-        private const string OBSOLETE_METHOD = "[global::System.Obsolete(\"This method is not intended to be use directly by user code.\")]";
+        private const string OBSOLETE_METHOD = "[global::System.Obsolete(\"This method is not intended to be used directly by user code.\")]";
         private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
         private const string GENERATED_BINDING_PROPERTY = $"[global::{NAMESPACE_BINDING}.SourceGen.GeneratedBindingProperty({{0}}, typeof({{1}}))]";
         private const string GENERATED_BINDING_COMMAND = $"[global::{NAMESPACE_BINDING}.SourceGen.GeneratedBindingCommand(";
@@ -170,17 +170,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                     continue;
                 }
 
-                string readonlyKeyword;
-
-                if (ReferenceUnityEngine)
-                {
-                    readonlyKeyword = "";
-                }
-                else
-                {
-                    readonlyKeyword = "readonly ";
-                }
-
                 p.PrintLine($"/// <summary>The binding property for <see cref=\"{member.Symbol.Name}\"/></summary>");
                 p.PrintLine("[global::UnityEngine.SerializeField]");
 
@@ -195,7 +184,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 var paramType = param != null ? param.Type.ToFullName() : "void";
 
                 p.PrintLine(string.Format(GENERATED_BINDING_PROPERTY, ConstName(member), paramType));
-                p.PrintLine($"private {readonlyKeyword}global::{NAMESPACE_BINDING}.BindingProperty {BindingPropertyName(member)} =  new global::{NAMESPACE_BINDING}.BindingProperty();");
+                p.PrintLine($"private global::{NAMESPACE_BINDING}.BindingProperty {BindingPropertyName(member)} =  new global::{NAMESPACE_BINDING}.BindingProperty();");
                 p.PrintEndLine();
             }
 
@@ -216,17 +205,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                     continue;
                 }
 
-                string readonlyKeyword;
-
-                if (ReferenceUnityEngine)
-                {
-                    readonlyKeyword = "";
-                }
-                else
-                {
-                    readonlyKeyword = "readonly ";
-                }
-
                 var typeName = member.Parameter.Type.ToFullName();
 
                 p.PrintLine($"/// <summary>The converter for the parameter of <see cref=\"{member.Symbol.Name}\"/></summary>");
@@ -239,7 +217,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
                 p.PrintLine(GENERATED_CODE);
                 p.PrintLine(string.Format(GENERATED_CONVERTER, ConstName(member), typeName));
-                p.PrintLine($"private {readonlyKeyword}global::{NAMESPACE_BINDING}.Converter {ConverterName(member)} = new global::{NAMESPACE_BINDING}.Converter();");
+                p.PrintLine($"private global::{NAMESPACE_BINDING}.Converter {ConverterName(member)} = new global::{NAMESPACE_BINDING}.Converter();");
                 p.PrintEndLine();
             }
 
@@ -258,17 +236,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 if (member.SkipBindingCommand)
                 {
                     continue;
-                }
-
-                string readonlyKeyword;
-
-                if (ReferenceUnityEngine)
-                {
-                    readonlyKeyword = "";
-                }
-                else
-                {
-                    readonlyKeyword = "readonly ";
                 }
 
                 p.PrintLine($"/// <summary>The binding command for <see cref=\"{member.Symbol.Name}\"/></summary>");
@@ -295,7 +262,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
                 p.Print(")]").PrintEndLine();
 
-                p.PrintLine($"private {readonlyKeyword}global::{NAMESPACE_BINDING}.BindingCommand {BindingCommandName(member)} =  new global::{NAMESPACE_BINDING}.BindingCommand();");
+                p.PrintLine($"private global::{NAMESPACE_BINDING}.BindingCommand {BindingCommandName(member)} =  new global::{NAMESPACE_BINDING}.BindingCommand();");
                 p.PrintEndLine();
             }
 
@@ -759,7 +726,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 p.PrintLine($"/// from <see cref=\"global::EncosyTower.Unions.Union\"/>");
                 p.PrintLine($"/// to pass into <see cref=\"{originalMethodName}\"/>.");
                 p.PrintLine($"/// </summary>");
-                p.PrintLine($"/// <remarks>This method is not intended to be use directly by user code.</remarks>");
+                p.PrintLine($"/// <remarks>This method is not intended to be used directly by user code.</remarks>");
                 p.PrintLine(EDITOR_BROWSABLE_NEVER).PrintLine(OBSOLETE_METHOD).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"private void {methodName}(in global::EncosyTower.Unions.Union union)");
                 p.OpenScope();
