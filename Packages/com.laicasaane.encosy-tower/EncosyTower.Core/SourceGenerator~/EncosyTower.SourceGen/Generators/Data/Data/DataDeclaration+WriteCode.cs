@@ -142,7 +142,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                     }
                     else
                     {
-                        p.PrintLine($"[{CREATE_PROPERTY}](ReadOnly = true)");
+                        p.PrintLine($"[{CREATE_PROPERTY}(ReadOnly = true)]");
                     }
                 }
             }
