@@ -152,7 +152,7 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
                     text = "Open Mono Page Flow Settings Window",
                 };
 
-                button.AddToClassList("button-open-settings-windows");
+                button.AddToClassList("button-open-settings-window");
                 root.Add(button);
                 return root;
             }

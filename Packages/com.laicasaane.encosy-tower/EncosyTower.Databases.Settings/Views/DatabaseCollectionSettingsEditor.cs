@@ -381,7 +381,7 @@ namespace EncosyTower.Databases.Settings.Views
                     text = "Open Database Collection Settings Window",
                 };
 
-                button.AddToClassList("button-open-settings-windows");
+                button.AddToClassList("button-open-settings-window");
                 root.Add(button);
                 return root;
             }

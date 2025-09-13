@@ -10,6 +10,6 @@
     height: 19px;
 }
 
-.button-open-settings-windows {
+.button-open-settings-window {
     min-height: 30px;
 }
