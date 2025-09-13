@@ -2,7 +2,7 @@ namespace EncosyTower.Search
 {
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using EncosyTower.Collections;
+    using EncosyTower.Collections.Extensions;
     using EncosyTower.Common;
     using UnityEngine.Pool;
 

@@ -14,7 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using EncosyTower.Collections;
+using EncosyTower.Collections.Extensions;
 using EncosyTower.Common;
 using EncosyTower.Debugging;
 using EncosyTower.Logging;

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace EncosyTower.Collections
+namespace EncosyTower.Collections.Extensions
 {
     public static class FasterListExtensions
     {

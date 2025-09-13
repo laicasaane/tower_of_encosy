@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace EncosyTower.Collections
+namespace EncosyTower.Collections.Extensions
 {
     public static class EncosyICollectionExtensions
     {
