@@ -11,7 +11,8 @@ namespace EncosyTower.Editor.Variants
     {
         private const uint SIZE_OF_LONG = 8;
         private const uint MAX_LONG_COUNT = 512;
-        private const uint DEFAULT_BYTE_COUNT = SIZE_OF_LONG * 2;
+        private const uint DEFAULT_LONG_COUNT = 2;
+        private const uint DEFAULT_BYTE_COUNT = SIZE_OF_LONG * DEFAULT_LONG_COUNT;
         private const uint MAX_BYTE_COUNT = SIZE_OF_LONG * MAX_LONG_COUNT;
 
         public void Execute([NotNull] GeneratorContext context)
@@ -27,7 +28,7 @@ namespace EncosyTower.Editor.Variants
             p.PrintEndLine();
             p.PrintLine("#pragma warning disable");
             p.PrintEndLine();
-            p.Print($"// For practical reason, VariantData should be {DEFAULT_BYTE_COUNT} bytes by default.").PrintEndLine();
+            p.Print($"// For practical reasons, VariantData should be {DEFAULT_BYTE_COUNT} bytes by default.").PrintEndLine();
             p.Print($"#define VARIANT_{DEFAULT_BYTE_COUNT}_BYTES").PrintEndLine();
             p.Print($"#define VARIANT_{(DEFAULT_BYTE_COUNT / SIZE_OF_LONG) * 2}_INTS").PrintEndLine();
             p.Print($"#define VARIANT_{DEFAULT_BYTE_COUNT / SIZE_OF_LONG}_LONGS").PrintEndLine();
@@ -97,7 +98,13 @@ namespace EncosyTower.Editor.Variants
                     p.PrintLine($"internal const int MAX_BYTE_COUNT = MAX_LONG_COUNT * SIZE_OF_LONG;");
                     p.PrintEndLine();
 
-                    p.Print($"#if (VARIANT_{MAX_BYTE_COUNT}_BYTES || VARIANT_{MAX_LONG_COUNT}_LONGS || VARIANT_{MAX_LONG_COUNT * 2}_INTS)").PrintEndLine();
+                    p.PrintLine($"/// <summary>");
+                    p.PrintLine($"/// For practical reasons, VariantData should be {DEFAULT_BYTE_COUNT} bytes by default.");
+                    p.PrintLine($"/// </summary>");
+                    p.PrintLine($"internal const int DEFAULT_LONG_COUNT = {DEFAULT_LONG_COUNT};");
+                    p.PrintEndLine();
+
+                    p.Print($"#if (VARIANT_{MAX_BYTE_COUNT}_BYTES || VARIANT_{MAX_LONG_COUNT * 2}_INTS || VARIANT_{MAX_LONG_COUNT}_LONGS)").PrintEndLine();
 
                     for (var size = MAX_BYTE_COUNT; size >= SIZE_OF_LONG; size -= SIZE_OF_LONG)
                     {

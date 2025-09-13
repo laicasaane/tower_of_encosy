@@ -9,7 +9,7 @@
 
 #pragma warning disable
 
-// For practical reason, VariantData should be 16 bytes by default.
+// For practical reasons, VariantData should be 16 bytes by default.
 #define VARIANT_16_BYTES
 #define VARIANT_4_INTS
 #define VARIANT_2_LONGS
@@ -50,7 +50,12 @@ namespace EncosyTower.Variants
         internal const int MAX_INT_COUNT = MAX_LONG_COUNT * 2;
         internal const int MAX_BYTE_COUNT = MAX_LONG_COUNT * SIZE_OF_LONG;
 
-#if (VARIANT_4096_BYTES || VARIANT_512_LONGS || VARIANT_1024_INTS)
+        /// <summary>
+        /// For practical reasons, VariantData should be 16 bytes by default.
+        /// </summary>
+        internal const int DEFAULT_LONG_COUNT = 2;
+
+#if (VARIANT_4096_BYTES || VARIANT_1024_INTS || VARIANT_512_LONGS)
 
         /// <summary>
         /// Equals to 1024 × <see cref="int"/>, or 512 × <see cref="long"/>

@@ -134,11 +134,11 @@ namespace EncosyTower.Variants.Converters
                 if (size > VariantData.MAX_BYTE_COUNT)
                 {
                     return $"contact the author to increase the maximum size of Variant type to {nextSize} bytes " +
-                        $"(currently it is {VariantData.MAX_BYTE_COUNT} bytes).";
+                        $"(currently it is capped at {VariantData.MAX_BYTE_COUNT} bytes).";
                 }
                 else
                 {
-                    return $"define VARIANT_{nextSize}_BYTES, or VARIANT_{longCount * 2}_INTS, or VARIANT_{longCount}_LONGS.";
+                    return $"define VARIANT_{longCount}_LONGS, or use the menu 'Encosy Tower/Project Settings/Variant Type'.";
                 }
             }
         }

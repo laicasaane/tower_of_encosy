@@ -1,0 +1,23 @@
+.button-open-settings-window {
+    min-height: 30px;
+}
+
+.project-settings-container {
+    flex-grow: 1;
+}
+
+.size-container {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 4px;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.size-unit-label {
+    align-self: flex-end;
+}
+
+.apply-button {
+    min-height: 25px;
+}
