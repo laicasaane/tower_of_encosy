@@ -5,7 +5,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace EncosyTower.Collections.Unsafe
 {
-    public static class EncosyNativeArrayUnsafeExtensions
+    public static class EncosyNativeArrayExtensionsUnsafe
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T ElementAsUnsafeRefRW<T>(this NativeArray<T> array, int index)
