@@ -53,7 +53,7 @@ namespace EncosyTower.Editor.Variants.Settings
 
             var helpBox = new HelpBox {
                 messageType = HelpBoxMessageType.Info,
-                text = "The size of Variant type for this project is currently defined by one of these scripting symbol:\n" +
+                text = "The size of Variant type for this project is currently defined by one of these scripting symbols:\n" +
                 $"- {string.Format(VariantTypeSettings.LONG_SYMBOL_FORMAT, longCount)}\n" +
                 $"- {string.Format(VariantTypeSettings.INT_SYMBOL_FORMAT, intCount)}\n" +
                 $"- {string.Format(VariantTypeSettings.BYTE_SYMBOL_FORMAT, byteCount)}",
