@@ -1,6 +1,6 @@
 using System;
 using EncosyTower.Annotations;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
@@ -12,9 +12,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
         [SerializeField, HideInInspector]
         private ScriptableAdapterAsset _asset;
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            return _asset ? _asset.Convert(union) : union;
+            return _asset ? _asset.Convert(variant) : variant;
         }
     }
 }

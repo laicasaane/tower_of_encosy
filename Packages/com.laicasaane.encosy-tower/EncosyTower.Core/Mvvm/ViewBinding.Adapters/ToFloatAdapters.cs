@@ -1,6 +1,6 @@
 using System;
 using EncosyTower.Annotations;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters
 {
@@ -9,14 +9,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(bool), destType: typeof(float), order: 0)]
     public sealed class BoolToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out bool result))
+            if (variant.TryGetValue(out bool result))
             {
                 return result ? 1f : 0f;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -25,16 +25,16 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(string), destType: typeof(float), order: 0)]
     public sealed class StringToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out string result)
+            if (variant.TryGetValue(out string result)
                 && float.TryParse(result, out var value)
             )
             {
                 return value;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -43,16 +43,16 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(object), destType: typeof(float), order: 0)]
     public sealed class ObjectToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out object result)
+            if (variant.TryGetValue(out object result)
                 && result is float value
             )
             {
                 return value;
             }
 
-            return union;
+            return variant;
         }
     }
 }

@@ -15,8 +15,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         private const string GENERATED_PROPERTY_CHANGED_HANDLER = $"[global::{NAMESPACE}.SourceGen.GeneratedPropertyChangedEventHandler]";
         private const string GENERATED_PROPERTY_NAME_CONSTANT = $"[global::{NAMESPACE}.SourceGen.GeneratedPropertyNameConstant]";
         private const string IS_OBSERVABLE_OBJECT = $"[global::{NAMESPACE}.SourceGen.IsObservableObject(typeof({{0}}))]";
-        private const string UNION = "global::EncosyTower.Unions.Union";
-        private const string CACHED_UNION_CONVERTER = "global::EncosyTower.Unions.Converters.CachedUnionConverter";
+        private const string VARIANT = "global::EncosyTower.Variants.Variant";
+        private const string CACHED_VARIANT_CONVERTER = "global::EncosyTower.Variants.Converters.CachedVariantConverter";
         private const string INOTIFY_PROPERTY_CHANGING_INTERFACE = $"global::{NAMESPACE}.INotifyPropertyChanging";
         private const string INOTIFY_PROPERTY_CHANGED_INTERFACE = $"global::{NAMESPACE}.INotifyPropertyChanged";
         private const string PROPERTY_CHANGE_EVENT_LISTENER = $"global::{NAMESPACE}.PropertyChangeEventListener";
@@ -150,7 +150,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             {
                 WriteConstantFields(ref p);
                 WriteEvents(ref p);
-                WriteUnionConverters(ref p);
+                WriteVariantConverters(ref p);
                 WriteObservableForProperties(ref p);
                 WriteProperties(ref p);
                 WritePartialMethods(ref p);
@@ -313,7 +313,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             }
         }
 
-        private void WriteUnionConverters(ref Printer p)
+        private void WriteVariantConverters(ref Printer p)
         {
             var types = new Dictionary<string, ITypeSymbol>();
 
@@ -371,7 +371,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 var propertyName = type.ToValidIdentifier().AsSpan().ToTitleCase();
 
                 p.PrintLine(GENERATED_CODE).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private readonly {CACHED_UNION_CONVERTER}<{typeName}> _unionConverter{propertyName} = {CACHED_UNION_CONVERTER}<{typeName}>.Default;");
+                p.PrintLine($"private readonly {CACHED_VARIANT_CONVERTER}<{typeName}> _variantConverter{propertyName} = {CACHED_VARIANT_CONVERTER}<{typeName}>.Default;");
                 p.PrintEndLine();
             }
         }
@@ -388,7 +388,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 var typeName = member.Property.Type.ToFullName();
                 var argsName = OnChangedArgsName(member);
                 var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().ToTitleCase();
-                var converterForFieldVariable = $"unionConverter{converterForField}";
+                var converterForFieldVariable = $"variantConverter{converterForField}";
                 var willNotifyPropertyChanged = NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties);
                 var constName = ConstName(member);
                 var withSerializeField = false;
@@ -455,8 +455,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         p.PrintLine($"{OnChangingMethodName(member)}(oldValue, value);");
                         p.PrintEndLine();
 
-                        p.PrintLine($"var {converterForFieldVariable} = this._unionConverter{converterForField};");
-                        p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, {converterForFieldVariable}.ToUnion(oldValue), {converterForFieldVariable}.ToUnion(value));");
+                        p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
+                        p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, {converterForFieldVariable}.ToVariant(oldValue), {converterForFieldVariable}.ToVariant(value));");
                         p.PrintLine($"this.{OnChangingEventName(member)}?.Invoke({argsName});");
                         p.PrintEndLine();
 
@@ -486,8 +486,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                                 p.PrintLine($"{OnChangedMethodName(property)}({oldValueName}, this.{property.Name});");
                                 p.PrintEndLine();
 
-                                p.PrintLine($"var {converterForPropertyVariable} = this._unionConverter{converterForProperty};");
-                                p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(property)}, {converterForPropertyVariable}.ToUnion({oldValueName}), {converterForPropertyVariable}.ToUnion(this.{property.Name}));");
+                                p.PrintLine($"var {converterForPropertyVariable} = this._variantConverter{converterForProperty};");
+                                p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(property)}, {converterForPropertyVariable}.ToVariant({oldValueName}), {converterForPropertyVariable}.ToVariant(this.{property.Name}));");
                                 p.PrintLine($"this.{OnChangedEventName(property)}?.Invoke({otherArgsName});");
                             }
                             p.CloseScope();
@@ -519,7 +519,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 var typeName = member.Field.Type.ToFullName();
                 var argsName = OnChangedArgsName(member);
                 var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().ToTitleCase();
-                var converterForFieldVariable = $"unionConverter{converterForField}";
+                var converterForFieldVariable = $"variantConverter{converterForField}";
                 var willNotifyPropertyChanged = NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties);
                 var constName = ConstName(member);
 
@@ -556,8 +556,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             p.PrintLine($"{OnChangingMethodName(member)}(oldValue, value);");
                             p.PrintEndLine();
 
-                            p.PrintLine($"var {converterForFieldVariable} = this._unionConverter{converterForField};");
-                            p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, {converterForFieldVariable}.ToUnion(oldValue), {converterForFieldVariable}.ToUnion(value));");
+                            p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
+                            p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, {converterForFieldVariable}.ToVariant(oldValue), {converterForFieldVariable}.ToVariant(value));");
                             p.PrintLine($"this.{OnChangingEventName(member)}?.Invoke({argsName});");
                             p.PrintEndLine();
 
@@ -587,8 +587,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                                     p.PrintLine($"{OnChangedMethodName(property)}({oldValueName}, this.{property.Name});");
                                     p.PrintEndLine();
 
-                                    p.PrintLine($"var {converterForPropertyVariable} = this._unionConverter{converterForProperty};");
-                                    p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(property)}, {converterForPropertyVariable}.ToUnion({oldValueName}), {converterForPropertyVariable}.ToUnion(this.{property.Name}));");
+                                    p.PrintLine($"var {converterForPropertyVariable} = this._variantConverter{converterForProperty};");
+                                    p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(property)}, {converterForPropertyVariable}.ToVariant({oldValueName}), {converterForPropertyVariable}.ToVariant(this.{property.Name}));");
                                     p.PrintLine($"this.{OnChangedEventName(property)}?.Invoke({otherArgsName});");
                                 }
                                 p.CloseScope();
@@ -871,15 +871,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         var fieldName = member.Field.Name;
                         var argsName = OnChangedArgsName(member);
                         var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().ToTitleCase();
-                        var converterForFieldVariable = $"unionConverter{converterForField}";
+                        var converterForFieldVariable = $"variantConverter{converterForField}";
                         var constName = ConstName(member);
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
                         {
-                            p.PrintLine($"var {converterForFieldVariable} = this._unionConverter{converterForField};");
-                            p.PrintLine($"var union = {converterForFieldVariable}.ToUnion(this.{fieldName});");
-                            p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, union, union);");
+                            p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
+                            p.PrintLine($"var variant = {converterForFieldVariable}.ToVariant(this.{fieldName});");
+                            p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
                             p.PrintLine($"listener.OnEvent({argsName});");
                             p.PrintLine("return true;");
                         }
@@ -892,15 +892,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         var fieldName = member.FieldName;
                         var argsName = OnChangedArgsName(member);
                         var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().ToTitleCase();
-                        var converterForFieldVariable = $"unionConverter{converterForField}";
+                        var converterForFieldVariable = $"variantConverter{converterForField}";
                         var constName = ConstName(member);
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
                         {
-                            p.PrintLine($"var {converterForFieldVariable} = this._unionConverter{converterForField};");
-                            p.PrintLine($"var union = {converterForFieldVariable}.ToUnion(this.{fieldName});");
-                            p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, union, union);");
+                            p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
+                            p.PrintLine($"var variant = {converterForFieldVariable}.ToVariant(this.{fieldName});");
+                            p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
                             p.PrintLine($"listener.OnEvent({argsName});");
                             p.PrintLine("return true;");
                         }
@@ -931,9 +931,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
                         {
-                            p.PrintLine($"var {converterForPropertyVariable} = this._unionConverter{converterForProperty};");
-                            p.PrintLine($"var union = {converterForPropertyVariable}.ToUnion(this.{property.Name});");
-                            p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(property)}, union, union);");
+                            p.PrintLine($"var {converterForPropertyVariable} = this._variantConverter{converterForProperty};");
+                            p.PrintLine($"var variant = {converterForPropertyVariable}.ToVariant(this.{property.Name});");
+                            p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(property)}, variant, variant);");
                             p.PrintLine($"listener.OnEvent({otherArgsName});");
                             p.PrintLine("return true;");
                         }
@@ -974,15 +974,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         var fieldName = member.Field.Name;
                         var argsName = OnChangedArgsName(member);
                         var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().ToTitleCase();
-                        var converterForFieldVariable = $"unionConverter{converterForField}";
+                        var converterForFieldVariable = $"variantConverter{converterForField}";
                         var constName = ConstName(member);
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
                         {
-                            p.PrintLine($"var {converterForFieldVariable} = this._unionConverter{converterForField};");
-                            p.PrintLine($"var union = {converterForFieldVariable}.ToUnion(this.{fieldName});");
-                            p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, union, union);");
+                            p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
+                            p.PrintLine($"var variant = {converterForFieldVariable}.ToVariant(this.{fieldName});");
+                            p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
                             p.PrintLine($"this.{OnChangedEventName(member)}?.Invoke({argsName});");
                             p.PrintLine("return true;");
                         }
@@ -995,15 +995,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         var fieldName = member.FieldName;
                         var argsName = OnChangedArgsName(member);
                         var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().ToTitleCase();
-                        var converterForFieldVariable = $"unionConverter{converterForField}";
+                        var converterForFieldVariable = $"variantConverter{converterForField}";
                         var constName = ConstName(member);
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
                         {
-                            p.PrintLine($"var {converterForFieldVariable} = this._unionConverter{converterForField};");
-                            p.PrintLine($"var union = {converterForFieldVariable}.ToUnion(this.{fieldName});");
-                            p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, union, union);");
+                            p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
+                            p.PrintLine($"var variant = {converterForFieldVariable}.ToVariant(this.{fieldName});");
+                            p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
                             p.PrintLine($"this.{OnChangedEventName(member)}?.Invoke({argsName});");
                             p.PrintLine("return true;");
                         }
@@ -1034,9 +1034,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
                         {
-                            p.PrintLine($"var {converterForPropertyVariable} = this._unionConverter{converterForProperty};");
-                            p.PrintLine($"var union = {converterForPropertyVariable}.ToUnion(this.{property.Name});");
-                            p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(property)}, union, union);");
+                            p.PrintLine($"var {converterForPropertyVariable} = this._variantConverter{converterForProperty};");
+                            p.PrintLine($"var variant = {converterForPropertyVariable}.ToVariant(this.{property.Name});");
+                            p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(property)}, variant, variant);");
                             p.PrintLine($"this.{OnChangedEventName(property)}?.Invoke({otherArgsName});");
                             p.PrintLine("return true;");
                         }
@@ -1074,14 +1074,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     var fieldName = member.Field.Name;
                     var argsName = OnChangedArgsName(member);
                     var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().ToTitleCase();
-                    var converterForFieldVariable = $"unionConverter{converterForField}";
+                    var converterForFieldVariable = $"variantConverter{converterForField}";
                     var constName = ConstName(member);
 
                     p.OpenScope();
                     {
-                        p.PrintLine($"var {converterForFieldVariable} = this._unionConverter{converterForField};");
-                        p.PrintLine($"var union = {converterForFieldVariable}.ToUnion(this.{fieldName});");
-                        p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, union, union);");
+                        p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
+                        p.PrintLine($"var variant = {converterForFieldVariable}.ToVariant(this.{fieldName});");
+                        p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
                         p.PrintLine($"this.{OnChangedEventName(member)}?.Invoke({argsName});");
                     }
                     p.CloseScope();
@@ -1093,14 +1093,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     var fieldName = member.FieldName;
                     var argsName = OnChangedArgsName(member);
                     var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().ToTitleCase();
-                    var converterForFieldVariable = $"unionConverter{converterForField}";
+                    var converterForFieldVariable = $"variantConverter{converterForField}";
                     var constName = ConstName(member);
 
                     p.OpenScope();
                     {
-                        p.PrintLine($"var {converterForFieldVariable} = this._unionConverter{converterForField};");
-                        p.PrintLine($"var union = {converterForFieldVariable}.ToUnion(this.{fieldName});");
-                        p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, union, union);");
+                        p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
+                        p.PrintLine($"var variant = {converterForFieldVariable}.ToVariant(this.{fieldName});");
+                        p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
                         p.PrintLine($"this.{OnChangedEventName(member)}?.Invoke({argsName});");
                     }
                     p.CloseScope();
@@ -1129,9 +1129,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
                     p.OpenScope();
                     {
-                        p.PrintLine($"var {converterForPropertyVariable} = this._unionConverter{converterForProperty};");
-                        p.PrintLine($"var union = {converterForPropertyVariable}.ToUnion(this.{property.Name});");
-                        p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, union, union);");
+                        p.PrintLine($"var {converterForPropertyVariable} = this._variantConverter{converterForProperty};");
+                        p.PrintLine($"var variant = {converterForPropertyVariable}.ToVariant(this.{property.Name});");
+                        p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
                         p.PrintLine($"this.{OnChangedEventName(property)}?.Invoke({otherArgsName});");
                     }
                     p.CloseScope();

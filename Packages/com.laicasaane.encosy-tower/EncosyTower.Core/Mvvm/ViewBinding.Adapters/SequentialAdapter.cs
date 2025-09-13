@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.Annotations;
 using EncosyTower.Collections;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters
@@ -32,11 +32,11 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
         public void RemoveAt(int index)
             => _adapters.RemoveAt(index);
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
             var adapters = _adapters.AsSpan();
             var length = adapters.Length;
-            var result = union;
+            var result = variant;
 
             for (var i = 0; i < length; i++)
             {

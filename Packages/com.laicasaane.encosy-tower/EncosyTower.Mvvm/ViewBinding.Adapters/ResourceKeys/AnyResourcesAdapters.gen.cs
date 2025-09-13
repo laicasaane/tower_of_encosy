@@ -12,7 +12,7 @@
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.ResourceKeys;
-using EncosyTower.Unions.Converters;
+using EncosyTower.Variants.Converters;
 
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
@@ -25,7 +25,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.AnimationClip>), destType: typeof(UnityEngine.AnimationClip), order: 0)]
     public sealed class ResourceKeyToAnimationClipAdapter : ResourceKeyAdapter<UnityEngine.AnimationClip>
     {
-        public ResourceKeyToAnimationClipAdapter() : base(CachedUnionConverter<UnityEngine.AnimationClip>.Default) { }
+        public ResourceKeyToAnimationClipAdapter() : base(CachedVariantConverter<UnityEngine.AnimationClip>.Default) { }
     }
 
     [Serializable]
@@ -33,7 +33,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.AnimationClip), order: 2)]
     public sealed class ResourceStringToAnimationClipAdapter : ResourceStringAdapter<UnityEngine.AnimationClip>
     {
-        public ResourceStringToAnimationClipAdapter() : base(CachedUnionConverter<UnityEngine.AnimationClip>.Default) { }
+        public ResourceStringToAnimationClipAdapter() : base(CachedVariantConverter<UnityEngine.AnimationClip>.Default) { }
     }
 
     #region    UNITYENGINE.AUDIOCLIP
@@ -44,7 +44,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.AudioClip>), destType: typeof(UnityEngine.AudioClip), order: 0)]
     public sealed class ResourceKeyToAudioClipAdapter : ResourceKeyAdapter<UnityEngine.AudioClip>
     {
-        public ResourceKeyToAudioClipAdapter() : base(CachedUnionConverter<UnityEngine.AudioClip>.Default) { }
+        public ResourceKeyToAudioClipAdapter() : base(CachedVariantConverter<UnityEngine.AudioClip>.Default) { }
     }
 
     [Serializable]
@@ -52,7 +52,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.AudioClip), order: 2)]
     public sealed class ResourceStringToAudioClipAdapter : ResourceStringAdapter<UnityEngine.AudioClip>
     {
-        public ResourceStringToAudioClipAdapter() : base(CachedUnionConverter<UnityEngine.AudioClip>.Default) { }
+        public ResourceStringToAudioClipAdapter() : base(CachedVariantConverter<UnityEngine.AudioClip>.Default) { }
     }
 
     #region    UNITYENGINE.AUDIO.AUDIOMIXER
@@ -63,7 +63,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.Audio.AudioMixer>), destType: typeof(UnityEngine.Audio.AudioMixer), order: 0)]
     public sealed class ResourceKeyToAudioMixerAdapter : ResourceKeyAdapter<UnityEngine.Audio.AudioMixer>
     {
-        public ResourceKeyToAudioMixerAdapter() : base(CachedUnionConverter<UnityEngine.Audio.AudioMixer>.Default) { }
+        public ResourceKeyToAudioMixerAdapter() : base(CachedVariantConverter<UnityEngine.Audio.AudioMixer>.Default) { }
     }
 
     [Serializable]
@@ -71,7 +71,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Audio.AudioMixer), order: 2)]
     public sealed class ResourceStringToAudioMixerAdapter : ResourceStringAdapter<UnityEngine.Audio.AudioMixer>
     {
-        public ResourceStringToAudioMixerAdapter() : base(CachedUnionConverter<UnityEngine.Audio.AudioMixer>.Default) { }
+        public ResourceStringToAudioMixerAdapter() : base(CachedVariantConverter<UnityEngine.Audio.AudioMixer>.Default) { }
     }
 
     #region    UNITYENGINE.TEXTCORE.TEXT.FONTASSET
@@ -82,7 +82,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.TextCore.Text.FontAsset>), destType: typeof(UnityEngine.TextCore.Text.FontAsset), order: 0)]
     public sealed class ResourceKeyToFontAssetAdapter : ResourceKeyAdapter<UnityEngine.TextCore.Text.FontAsset>
     {
-        public ResourceKeyToFontAssetAdapter() : base(CachedUnionConverter<UnityEngine.TextCore.Text.FontAsset>.Default) { }
+        public ResourceKeyToFontAssetAdapter() : base(CachedVariantConverter<UnityEngine.TextCore.Text.FontAsset>.Default) { }
     }
 
     [Serializable]
@@ -90,7 +90,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.TextCore.Text.FontAsset), order: 2)]
     public sealed class ResourceStringToFontAssetAdapter : ResourceStringAdapter<UnityEngine.TextCore.Text.FontAsset>
     {
-        public ResourceStringToFontAssetAdapter() : base(CachedUnionConverter<UnityEngine.TextCore.Text.FontAsset>.Default) { }
+        public ResourceStringToFontAssetAdapter() : base(CachedVariantConverter<UnityEngine.TextCore.Text.FontAsset>.Default) { }
     }
 
     #region    UNITYENGINE.GAMEOBJECT
@@ -101,7 +101,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.GameObject>), destType: typeof(UnityEngine.GameObject), order: 0)]
     public sealed class ResourceKeyToGameObjectAdapter : ResourceKeyAdapter<UnityEngine.GameObject>
     {
-        public ResourceKeyToGameObjectAdapter() : base(CachedUnionConverter<UnityEngine.GameObject>.Default) { }
+        public ResourceKeyToGameObjectAdapter() : base(CachedVariantConverter<UnityEngine.GameObject>.Default) { }
     }
 
     [Serializable]
@@ -109,7 +109,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.GameObject), order: 2)]
     public sealed class ResourceStringToGameObjectAdapter : ResourceStringAdapter<UnityEngine.GameObject>
     {
-        public ResourceStringToGameObjectAdapter() : base(CachedUnionConverter<UnityEngine.GameObject>.Default) { }
+        public ResourceStringToGameObjectAdapter() : base(CachedVariantConverter<UnityEngine.GameObject>.Default) { }
     }
 
     #region    UNITYENGINE.MATERIAL
@@ -120,7 +120,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.Material>), destType: typeof(UnityEngine.Material), order: 0)]
     public sealed class ResourceKeyToMaterialAdapter : ResourceKeyAdapter<UnityEngine.Material>
     {
-        public ResourceKeyToMaterialAdapter() : base(CachedUnionConverter<UnityEngine.Material>.Default) { }
+        public ResourceKeyToMaterialAdapter() : base(CachedVariantConverter<UnityEngine.Material>.Default) { }
     }
 
     [Serializable]
@@ -128,7 +128,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Material), order: 2)]
     public sealed class ResourceStringToMaterialAdapter : ResourceStringAdapter<UnityEngine.Material>
     {
-        public ResourceStringToMaterialAdapter() : base(CachedUnionConverter<UnityEngine.Material>.Default) { }
+        public ResourceStringToMaterialAdapter() : base(CachedVariantConverter<UnityEngine.Material>.Default) { }
     }
 
     #region    UNITYENGINE.UIELEMENTS.PANELSETTINGS
@@ -139,7 +139,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.UIElements.PanelSettings>), destType: typeof(UnityEngine.UIElements.PanelSettings), order: 0)]
     public sealed class ResourceKeyToPanelSettingsAdapter : ResourceKeyAdapter<UnityEngine.UIElements.PanelSettings>
     {
-        public ResourceKeyToPanelSettingsAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.PanelSettings>.Default) { }
+        public ResourceKeyToPanelSettingsAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.PanelSettings>.Default) { }
     }
 
     [Serializable]
@@ -147,7 +147,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.PanelSettings), order: 2)]
     public sealed class ResourceStringToPanelSettingsAdapter : ResourceStringAdapter<UnityEngine.UIElements.PanelSettings>
     {
-        public ResourceStringToPanelSettingsAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.PanelSettings>.Default) { }
+        public ResourceStringToPanelSettingsAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.PanelSettings>.Default) { }
     }
 
     #region    UNITYENGINE.PLAYABLES.PLAYABLEASSET
@@ -158,7 +158,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.Playables.PlayableAsset>), destType: typeof(UnityEngine.Playables.PlayableAsset), order: 0)]
     public sealed class ResourceKeyToPlayableAssetAdapter : ResourceKeyAdapter<UnityEngine.Playables.PlayableAsset>
     {
-        public ResourceKeyToPlayableAssetAdapter() : base(CachedUnionConverter<UnityEngine.Playables.PlayableAsset>.Default) { }
+        public ResourceKeyToPlayableAssetAdapter() : base(CachedVariantConverter<UnityEngine.Playables.PlayableAsset>.Default) { }
     }
 
     [Serializable]
@@ -166,7 +166,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Playables.PlayableAsset), order: 2)]
     public sealed class ResourceStringToPlayableAssetAdapter : ResourceStringAdapter<UnityEngine.Playables.PlayableAsset>
     {
-        public ResourceStringToPlayableAssetAdapter() : base(CachedUnionConverter<UnityEngine.Playables.PlayableAsset>.Default) { }
+        public ResourceStringToPlayableAssetAdapter() : base(CachedVariantConverter<UnityEngine.Playables.PlayableAsset>.Default) { }
     }
 
     #region    UNITYENGINE.SCRIPTABLEOBJECT
@@ -177,7 +177,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.ScriptableObject>), destType: typeof(UnityEngine.ScriptableObject), order: 0)]
     public sealed class ResourceKeyToScriptableObjectAdapter : ResourceKeyAdapter<UnityEngine.ScriptableObject>
     {
-        public ResourceKeyToScriptableObjectAdapter() : base(CachedUnionConverter<UnityEngine.ScriptableObject>.Default) { }
+        public ResourceKeyToScriptableObjectAdapter() : base(CachedVariantConverter<UnityEngine.ScriptableObject>.Default) { }
     }
 
     [Serializable]
@@ -185,7 +185,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.ScriptableObject), order: 2)]
     public sealed class ResourceStringToScriptableObjectAdapter : ResourceStringAdapter<UnityEngine.ScriptableObject>
     {
-        public ResourceStringToScriptableObjectAdapter() : base(CachedUnionConverter<UnityEngine.ScriptableObject>.Default) { }
+        public ResourceStringToScriptableObjectAdapter() : base(CachedVariantConverter<UnityEngine.ScriptableObject>.Default) { }
     }
 
     #region    UNITYENGINE.SPRITE
@@ -196,7 +196,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.Sprite>), destType: typeof(UnityEngine.Sprite), order: 0)]
     public sealed class ResourceKeyToSpriteAdapter : ResourceKeyAdapter<UnityEngine.Sprite>
     {
-        public ResourceKeyToSpriteAdapter() : base(CachedUnionConverter<UnityEngine.Sprite>.Default) { }
+        public ResourceKeyToSpriteAdapter() : base(CachedVariantConverter<UnityEngine.Sprite>.Default) { }
     }
 
     [Serializable]
@@ -204,7 +204,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Sprite), order: 2)]
     public sealed class ResourceStringToSpriteAdapter : ResourceStringAdapter<UnityEngine.Sprite>
     {
-        public ResourceStringToSpriteAdapter() : base(CachedUnionConverter<UnityEngine.Sprite>.Default) { }
+        public ResourceStringToSpriteAdapter() : base(CachedVariantConverter<UnityEngine.Sprite>.Default) { }
     }
 
     #region    UNITYENGINE.U2D.SPRITEATLAS
@@ -215,7 +215,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.U2D.SpriteAtlas>), destType: typeof(UnityEngine.U2D.SpriteAtlas), order: 0)]
     public sealed class ResourceKeyToSpriteAtlasAdapter : ResourceKeyAdapter<UnityEngine.U2D.SpriteAtlas>
     {
-        public ResourceKeyToSpriteAtlasAdapter() : base(CachedUnionConverter<UnityEngine.U2D.SpriteAtlas>.Default) { }
+        public ResourceKeyToSpriteAtlasAdapter() : base(CachedVariantConverter<UnityEngine.U2D.SpriteAtlas>.Default) { }
     }
 
     [Serializable]
@@ -223,7 +223,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.U2D.SpriteAtlas), order: 2)]
     public sealed class ResourceStringToSpriteAtlasAdapter : ResourceStringAdapter<UnityEngine.U2D.SpriteAtlas>
     {
-        public ResourceStringToSpriteAtlasAdapter() : base(CachedUnionConverter<UnityEngine.U2D.SpriteAtlas>.Default) { }
+        public ResourceStringToSpriteAtlasAdapter() : base(CachedVariantConverter<UnityEngine.U2D.SpriteAtlas>.Default) { }
     }
 
     #region    UNITYENGINE.UIELEMENTS.STYLESHEET
@@ -234,7 +234,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.UIElements.StyleSheet>), destType: typeof(UnityEngine.UIElements.StyleSheet), order: 0)]
     public sealed class ResourceKeyToStyleSheetAdapter : ResourceKeyAdapter<UnityEngine.UIElements.StyleSheet>
     {
-        public ResourceKeyToStyleSheetAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.StyleSheet>.Default) { }
+        public ResourceKeyToStyleSheetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.StyleSheet>.Default) { }
     }
 
     [Serializable]
@@ -242,7 +242,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.StyleSheet), order: 2)]
     public sealed class ResourceStringToStyleSheetAdapter : ResourceStringAdapter<UnityEngine.UIElements.StyleSheet>
     {
-        public ResourceStringToStyleSheetAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.StyleSheet>.Default) { }
+        public ResourceStringToStyleSheetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.StyleSheet>.Default) { }
     }
 
     #region    UNITYENGINE.TEXTURE
@@ -253,7 +253,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.Texture>), destType: typeof(UnityEngine.Texture), order: 0)]
     public sealed class ResourceKeyToTextureAdapter : ResourceKeyAdapter<UnityEngine.Texture>
     {
-        public ResourceKeyToTextureAdapter() : base(CachedUnionConverter<UnityEngine.Texture>.Default) { }
+        public ResourceKeyToTextureAdapter() : base(CachedVariantConverter<UnityEngine.Texture>.Default) { }
     }
 
     [Serializable]
@@ -261,7 +261,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Texture), order: 2)]
     public sealed class ResourceStringToTextureAdapter : ResourceStringAdapter<UnityEngine.Texture>
     {
-        public ResourceStringToTextureAdapter() : base(CachedUnionConverter<UnityEngine.Texture>.Default) { }
+        public ResourceStringToTextureAdapter() : base(CachedVariantConverter<UnityEngine.Texture>.Default) { }
     }
 
     #region    UNITYENGINE.UIELEMENTS.THEMESTYLESHEET
@@ -272,7 +272,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.UIElements.ThemeStyleSheet>), destType: typeof(UnityEngine.UIElements.ThemeStyleSheet), order: 0)]
     public sealed class ResourceKeyToThemeStyleSheetAdapter : ResourceKeyAdapter<UnityEngine.UIElements.ThemeStyleSheet>
     {
-        public ResourceKeyToThemeStyleSheetAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.ThemeStyleSheet>.Default) { }
+        public ResourceKeyToThemeStyleSheetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.ThemeStyleSheet>.Default) { }
     }
 
     [Serializable]
@@ -280,7 +280,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.ThemeStyleSheet), order: 2)]
     public sealed class ResourceStringToThemeStyleSheetAdapter : ResourceStringAdapter<UnityEngine.UIElements.ThemeStyleSheet>
     {
-        public ResourceStringToThemeStyleSheetAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.ThemeStyleSheet>.Default) { }
+        public ResourceStringToThemeStyleSheetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.ThemeStyleSheet>.Default) { }
     }
 
     #region    TMPRO.TMP_FONTASSET
@@ -291,7 +291,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<TMPro.TMP_FontAsset>), destType: typeof(TMPro.TMP_FontAsset), order: 0)]
     public sealed class ResourceKeyToTMP_FontAssetAdapter : ResourceKeyAdapter<TMPro.TMP_FontAsset>
     {
-        public ResourceKeyToTMP_FontAssetAdapter() : base(CachedUnionConverter<TMPro.TMP_FontAsset>.Default) { }
+        public ResourceKeyToTMP_FontAssetAdapter() : base(CachedVariantConverter<TMPro.TMP_FontAsset>.Default) { }
     }
 
     [Serializable]
@@ -299,7 +299,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(TMPro.TMP_FontAsset), order: 2)]
     public sealed class ResourceStringToTMP_FontAssetAdapter : ResourceStringAdapter<TMPro.TMP_FontAsset>
     {
-        public ResourceStringToTMP_FontAssetAdapter() : base(CachedUnionConverter<TMPro.TMP_FontAsset>.Default) { }
+        public ResourceStringToTMP_FontAssetAdapter() : base(CachedVariantConverter<TMPro.TMP_FontAsset>.Default) { }
     }
 
     #region    UNITYENGINE.UIELEMENTS.VISUALTREEASSET
@@ -310,7 +310,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(ResourceKey<UnityEngine.UIElements.VisualTreeAsset>), destType: typeof(UnityEngine.UIElements.VisualTreeAsset), order: 0)]
     public sealed class ResourceKeyToVisualTreeAssetAdapter : ResourceKeyAdapter<UnityEngine.UIElements.VisualTreeAsset>
     {
-        public ResourceKeyToVisualTreeAssetAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.VisualTreeAsset>.Default) { }
+        public ResourceKeyToVisualTreeAssetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.VisualTreeAsset>.Default) { }
     }
 
     [Serializable]
@@ -318,7 +318,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.VisualTreeAsset), order: 2)]
     public sealed class ResourceStringToVisualTreeAssetAdapter : ResourceStringAdapter<UnityEngine.UIElements.VisualTreeAsset>
     {
-        public ResourceStringToVisualTreeAssetAdapter() : base(CachedUnionConverter<UnityEngine.UIElements.VisualTreeAsset>.Default) { }
+        public ResourceStringToVisualTreeAssetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.VisualTreeAsset>.Default) { }
     }
 
 }

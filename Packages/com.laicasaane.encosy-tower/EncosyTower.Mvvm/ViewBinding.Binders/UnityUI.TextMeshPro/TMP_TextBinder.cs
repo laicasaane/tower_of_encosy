@@ -6,7 +6,7 @@ using System;
 using System.Text;
 using EncosyTower.Annotations;
 using EncosyTower.Mvvm.ViewBinding.Components;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 using TMPro;
 using UnityEngine;
 
@@ -79,7 +79,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
         partial void OnBeforeConstructor()
         {
 #pragma warning disable CS0162 // Unreachable code detected
-            if (UnionData.BYTE_COUNT >= 64)
+            if (VariantData.BYTE_COUNT >= 64)
             {
                 return;
             }
@@ -104,7 +104,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
         private static void ThrowNotSupported()
         {
             Logging.RuntimeLoggerAPI.LogException(new NotSupportedException(
-                "TMP Text Color Gradient binding requires the symbol UNION_64_BYTES or higher to be defined"
+                "TMP Text Color Gradient binding requires the symbol VARIANT_64_BYTES or higher to be defined"
             ));
         }
     }

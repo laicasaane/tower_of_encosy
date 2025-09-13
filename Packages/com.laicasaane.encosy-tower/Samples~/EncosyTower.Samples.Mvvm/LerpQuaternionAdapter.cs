@@ -1,7 +1,7 @@
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.Mvvm.ViewBinding;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 using UnityEngine;
 
 namespace EncosyTower.Samples.Mvvm
@@ -15,18 +15,18 @@ namespace EncosyTower.Samples.Mvvm
         [SerializeField] private Vector3 _toEuler;
         [SerializeField] private bool _reversed;
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out float result) == false)
+            if (variant.TryGetValue(out float result) == false)
             {
-                return union;
+                return variant;
             }
 
             var quaternion = _reversed
                 ? Quaternion.Euler(Vector3.Lerp(_toEuler, _fromEuler, result))
                 : Quaternion.Euler(Vector3.Lerp(_fromEuler, _toEuler, result));
 
-            return new QuaternionUnion(quaternion);
+            return new QuaternionVariant(quaternion);
         }
     }
 }

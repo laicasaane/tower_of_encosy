@@ -5,7 +5,7 @@
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.Mvvm.ViewBinding.Components;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -78,7 +78,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         partial void OnBeforeConstructor()
         {
 #pragma warning disable CS0162 // Unreachable code detected
-            if (UnionData.BYTE_COUNT >= 64)
+            if (VariantData.BYTE_COUNT >= 64)
             {
                 return;
             }
@@ -103,7 +103,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         private static void ThrowNotSupported()
         {
             Logging.RuntimeLoggerAPI.LogException(new NotSupportedException(
-                "Tilemap Orientation Matrix binding property requires the symbol UNION_64_BYTES or higher to be defined"
+                "Tilemap Orientation Matrix binding property requires the symbol VARIANT_64_BYTES or higher to be defined"
             ));
         }
     }

@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.Mvvm.Event;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 
 namespace EncosyTower.Mvvm.Input
 {
@@ -60,7 +60,7 @@ namespace EncosyTower.Mvvm.Input
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void NotifyCanExecuteChanged()
-            => _canExecuteChanged?.Invoke(new MvvmEventArgs(this, Union.Undefined));
+            => _canExecuteChanged?.Invoke(new MvvmEventArgs(this, Variant.Undefined));
 
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,12 +74,12 @@ namespace EncosyTower.Mvvm.Input
 
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool CanExecute(in Union parameter)
+        public bool CanExecute(in Variant parameter)
             => _canExecute?.Invoke() != false;
 
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Execute(in Union parameter)
+        public void Execute(in Variant parameter)
             => _execute();
     }
 }

@@ -14,8 +14,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         private const string IADAPTER = "global::EncosyTower.Mvvm.ViewBinding.IAdapter";
         private const string ADAPTER_ATTRIBUTE = "[global::EncosyTower.Mvvm.ViewBinding.Adapter(sourceType: typeof({0}), destType: typeof(string), order: 1)]";
         private const string LABEL_ATTRIBUTE = "[global::EncosyTower.Annotations.Label(\"{0}\", \"{1}\")]";
-        private const string UNION = "global::EncosyTower.Unions.Union";
-        private const string CACHED_UNION_CONVERTER = "global::EncosyTower.Unions.Converters.CachedUnionConverter";
+        private const string VARIANT = "global::EncosyTower.Variants.Variant";
+        private const string CACHED_VARIANT_CONVERTER = "global::EncosyTower.Variants.Converters.CachedVariantConverter";
         private const string GENERATOR_NAME = nameof(InternalStringAdapterGenerator);
 
         public void GenerateAdapters(
@@ -77,14 +77,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                     p.OpenScope();
                     {
                         p.PrintLine(GENERATED_CODE);
-                        p.PrintLine($"private readonly {CACHED_UNION_CONVERTER}<{typeName}> _converter = {CACHED_UNION_CONVERTER}<{typeName}>.Default;");
+                        p.PrintLine($"private readonly {CACHED_VARIANT_CONVERTER}<{typeName}> _converter = {CACHED_VARIANT_CONVERTER}<{typeName}>.Default;");
                         p.PrintEndLine();
 
                         p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                        p.PrintLine($"public {UNION} Convert(in {UNION} union)");
+                        p.PrintLine($"public {VARIANT} Convert(in {VARIANT} variant)");
                         p.OpenScope();
                         {
-                            p.PrintLine("return this._converter.ToString(union);");
+                            p.PrintLine("return this._converter.ToString(variant);");
                         }
                         p.CloseScope();
                         p.PrintEndLine();

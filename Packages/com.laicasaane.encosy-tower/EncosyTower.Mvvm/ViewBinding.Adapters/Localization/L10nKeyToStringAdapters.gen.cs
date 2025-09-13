@@ -16,8 +16,8 @@
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.Localization;
-using EncosyTower.Unions;
-using EncosyTower.Unions.Converters;
+using EncosyTower.Variants;
+using EncosyTower.Variants.Converters;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
 {
@@ -26,16 +26,16 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
     [Adapter(sourceType: typeof(L10nKey), destType: typeof(string), order: 0)]
     public class L10nKeyToEntryKeyAdapter : IAdapter
     {
-        private readonly CachedUnionConverter<L10nKey> _converter = CachedUnionConverter<L10nKey>.Default;
+        private readonly CachedVariantConverter<L10nKey> _converter = CachedVariantConverter<L10nKey>.Default;
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (_converter.TryGetValue(union, out L10nKey key) && key.IsValid)
+            if (_converter.TryGetValue(variant, out L10nKey key) && key.IsValid)
             {
                 return key.Entry.Key;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -44,16 +44,16 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
     [Adapter(sourceType: typeof(L10nKey), destType: typeof(string), order: 1)]
     public class L10nKeyToTableCollectionNameAdapter : IAdapter
     {
-        private readonly CachedUnionConverter<L10nKey> _converter = CachedUnionConverter<L10nKey>.Default;
+        private readonly CachedVariantConverter<L10nKey> _converter = CachedVariantConverter<L10nKey>.Default;
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (_converter.TryGetValue(union, out L10nKey key) && key.IsValid)
+            if (_converter.TryGetValue(variant, out L10nKey key) && key.IsValid)
             {
                 return key.Table.TableCollectionName;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -62,16 +62,16 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
     [Adapter(sourceType: typeof(L10nKey), destType: typeof(string), order: 2)]
     public class L10nKeyToTableAndKeyFormatAdapter : IAdapter
     {
-        private readonly CachedUnionConverter<L10nKey> _converter = CachedUnionConverter<L10nKey>.Default;
+        private readonly CachedVariantConverter<L10nKey> _converter = CachedVariantConverter<L10nKey>.Default;
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (_converter.TryGetValue(union, out L10nKey key) && key.IsValid)
+            if (_converter.TryGetValue(variant, out L10nKey key) && key.IsValid)
             {
                 return key.ToString();
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -80,16 +80,16 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
     [Adapter(sourceType: typeof(L10nKey<string>), destType: typeof(string), order: 0)]
     public class L10nKeyStringToEntryKeyAdapter : IAdapter
     {
-        private readonly CachedUnionConverter<L10nKey<string>> _converter = CachedUnionConverter<L10nKey<string>>.Default;
+        private readonly CachedVariantConverter<L10nKey<string>> _converter = CachedVariantConverter<L10nKey<string>>.Default;
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (_converter.TryGetValue(union, out L10nKey<string> key) && key.IsValid)
+            if (_converter.TryGetValue(variant, out L10nKey<string> key) && key.IsValid)
             {
                 return key.Entry.Key;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -98,16 +98,16 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
     [Adapter(sourceType: typeof(L10nKey<string>), destType: typeof(string), order: 1)]
     public class L10nKeyStringToTableCollectionNameAdapter : IAdapter
     {
-        private readonly CachedUnionConverter<L10nKey<string>> _converter = CachedUnionConverter<L10nKey<string>>.Default;
+        private readonly CachedVariantConverter<L10nKey<string>> _converter = CachedVariantConverter<L10nKey<string>>.Default;
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (_converter.TryGetValue(union, out L10nKey<string> key) && key.IsValid)
+            if (_converter.TryGetValue(variant, out L10nKey<string> key) && key.IsValid)
             {
                 return key.Table.TableCollectionName;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -116,16 +116,16 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization
     [Adapter(sourceType: typeof(L10nKey<string>), destType: typeof(string), order: 2)]
     public class L10nKeyStringToTableAndKeyFormatAdapter : IAdapter
     {
-        private readonly CachedUnionConverter<L10nKey<string>> _converter = CachedUnionConverter<L10nKey<string>>.Default;
+        private readonly CachedVariantConverter<L10nKey<string>> _converter = CachedVariantConverter<L10nKey<string>>.Default;
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (_converter.TryGetValue(union, out L10nKey<string> key) && key.IsValid)
+            if (_converter.TryGetValue(variant, out L10nKey<string> key) && key.IsValid)
             {
                 return key.ToString();
             }
 
-            return union;
+            return variant;
         }
     }
 

@@ -1,7 +1,7 @@
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.Mvvm.ViewBinding;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 using UnityEngine;
 
 namespace EncosyTower.Samples.Mvvm
@@ -15,11 +15,11 @@ namespace EncosyTower.Samples.Mvvm
         [SerializeField] private Color _stop = Color.white;
         [SerializeField] private bool _invert = false;
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            return union.TryGetValue(out bool result)
-                ? ActualValue(result) ? new ColorUnion(_stop) : new ColorUnion(_start)
-                : union;
+            return variant.TryGetValue(out bool result)
+                ? ActualValue(result) ? new ColorVariant(_stop) : new ColorVariant(_start)
+                : variant;
         }
 
         private bool ActualValue(bool value) => _invert ? !value : value;

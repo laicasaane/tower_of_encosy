@@ -26,7 +26,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Adapters.Unity
 
 using System;
 using EncosyTower.Annotations;
-using EncosyTower.Unions.Converters;
+using EncosyTower.Variants.Converters;
 ");
 
             p.PrintEndLine();
@@ -49,7 +49,7 @@ using EncosyTower.Unions.Converters;
                     {
                         p.PrintBeginLine($"public ")
                             .Print(name)
-                            .Print("ResourcesAdapter() : base(CachedUnionConverter<")
+                            .Print("ResourcesAdapter() : base(CachedVariantConverter<")
                             .Print(typeName)
                             .PrintEndLine(">.Default) { }");
                     }

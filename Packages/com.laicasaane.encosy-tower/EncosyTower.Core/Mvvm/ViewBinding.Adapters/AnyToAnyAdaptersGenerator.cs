@@ -4,11 +4,11 @@ using System;
 using EncosyTower.CodeGen;
 using UnityCodeGen;
 
-namespace EncosyTower.Editor.Mvvm.Unions.Converters
+namespace EncosyTower.Editor.Mvvm.Variants.Converters
 {
     internal abstract class AnyToAnyAdaptersGenerator : ICodeGenerator
     {
-        private static readonly string[] s_unionTypes = new string[] {
+        private static readonly string[] s_variantTypes = new string[] {
             "byte",
             "sbyte",
             "char",
@@ -22,7 +22,7 @@ namespace EncosyTower.Editor.Mvvm.Unions.Converters
             "ushort",
         };
 
-        private static readonly string[] s_unionTypeNames = new string[] {
+        private static readonly string[] s_variantTypeNames = new string[] {
             "Byte",
             "SByte",
             "Char",
@@ -63,24 +63,24 @@ namespace EncosyTower.Editor.Mvvm.Unions.Converters
 
 using System;
 using EncosyTower.Annotations;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 ");
 
             p.PrintLine("namespace EncosyTower.Mvvm.ViewBinding.Adapters");
             p.OpenScope();
             {
-                var unionTypes = s_unionTypes.AsSpan();
-                var unionTypeNames = s_unionTypeNames.AsSpan();
+                var variantTypes = s_variantTypes.AsSpan();
+                var variantTypeNames = s_variantTypeNames.AsSpan();
                 var toType = ToType;
                 var toTypeName = ToTypeName;
                 var toTypeNameLabel = ToTypeNameLabel ?? toTypeName;
                 var order = Order.ToString();
                 var returnStatement = ReturnStatement;
 
-                for (var i = 0; i < unionTypes.Length; i++)
+                for (var i = 0; i < variantTypes.Length; i++)
                 {
-                    var type = unionTypes[i];
-                    var typeName = unionTypeNames[i];
+                    var type = variantTypes[i];
+                    var typeName = variantTypeNames[i];
 
                     p.PrintLine("[Serializable]");
                     p.PrintBeginLine("[Label(\"").Print(typeName).Print(" ⇒ ")
@@ -93,10 +93,10 @@ using EncosyTower.Unions;
                         .PrintEndLine("Adapter : IAdapter");
                     p.OpenScope();
                     {
-                        p.PrintLine("public Union Convert(in Union union)");
+                        p.PrintLine("public Variant Convert(in Variant variant)");
                         p.OpenScope();
                         {
-                            p.PrintBeginLine("if (union.TryGetValue(out ").Print(type).PrintEndLine(" result))");
+                            p.PrintBeginLine("if (variant.TryGetValue(out ").Print(type).PrintEndLine(" result))");
                             p.OpenScope();
                             {
                                 p.PrintBeginLine("return ").Print(returnStatement).PrintEndLine(";");
@@ -104,7 +104,7 @@ using EncosyTower.Unions;
                             p.CloseScope();
                             p.PrintEndLine();
 
-                            p.PrintLine("return union;");
+                            p.PrintLine("return variant;");
                         }
                         p.CloseScope();
                     }

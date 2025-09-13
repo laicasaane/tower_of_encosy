@@ -1,7 +1,7 @@
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.Mvvm.ViewBinding;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 using UnityEngine;
 
 namespace EncosyTower.Samples.Mvvm
@@ -15,15 +15,15 @@ namespace EncosyTower.Samples.Mvvm
         [SerializeField] private Vector3 _to;
         [SerializeField] private bool _reversed;
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out float result) == false)
+            if (variant.TryGetValue(out float result) == false)
             {
-                return union;
+                return variant;
             }
 
             var v3 = _reversed ? Vector3.Lerp(_to, _from, result) : Vector3.Lerp(_from, _to, result);
-            return new Vector3Union(v3);
+            return new Vector3Variant(v3);
         }
     }
 }

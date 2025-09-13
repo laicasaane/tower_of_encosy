@@ -41,8 +41,8 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Adapters.Localization
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.Localization;
-using EncosyTower.Unions;
-using EncosyTower.Unions.Converters;
+using EncosyTower.Variants;
+using EncosyTower.Variants.Converters;
 ");
 
             p.PrintLine("namespace EncosyTower.Mvvm.ViewBinding.Adapters.Localization");
@@ -63,13 +63,13 @@ using EncosyTower.Unions.Converters;
                         p.PrintLine($"public class {typeName}{expName}Adapter : IAdapter");
                         p.OpenScope();
                         {
-                            p.PrintLine($"private readonly CachedUnionConverter<{type}> _converter = CachedUnionConverter<{type}>.Default;");
+                            p.PrintLine($"private readonly CachedVariantConverter<{type}> _converter = CachedVariantConverter<{type}>.Default;");
                             p.PrintEndLine();
 
-                            p.PrintLine("public Union Convert(in Union union)");
+                            p.PrintLine("public Variant Convert(in Variant variant)");
                             p.OpenScope();
                             {
-                                p.PrintLine($"if (_converter.TryGetValue(union, out {type} key) && key.IsValid)");
+                                p.PrintLine($"if (_converter.TryGetValue(variant, out {type} key) && key.IsValid)");
                                 p.OpenScope();
                                 {
                                     p.PrintLine($"return {returnExp};");
@@ -77,7 +77,7 @@ using EncosyTower.Unions.Converters;
                                 p.CloseScope();
                                 p.PrintEndLine();
 
-                                p.PrintLine("return union;");
+                                p.PrintLine("return variant;");
                             }
                             p.CloseScope();
                         }

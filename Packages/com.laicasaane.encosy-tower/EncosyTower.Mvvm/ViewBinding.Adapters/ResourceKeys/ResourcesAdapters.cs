@@ -2,8 +2,8 @@ using System;
 using System.Diagnostics;
 using EncosyTower.Logging;
 using EncosyTower.ResourceKeys;
-using EncosyTower.Unions;
-using EncosyTower.Unions.Converters;
+using EncosyTower.Variants;
+using EncosyTower.Variants.Converters;
 using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
@@ -11,35 +11,35 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     public abstract class ResourcesAdapter<T> : IAdapter
        where T : UnityEngine.Object
     {
-        private readonly CachedUnionConverter<T> _converter;
+        private readonly CachedVariantConverter<T> _converter;
 
-        protected ResourcesAdapter(CachedUnionConverter<T> converter)
+        protected ResourcesAdapter(CachedVariantConverter<T> converter)
         {
             _converter = converter;
         }
 
-        protected virtual bool TryGetAddressPath(in Union union, out string result)
+        protected virtual bool TryGetAddressPath(in Variant variant, out string result)
         {
             result = string.Empty;
             return false;
         }
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (TryGetAddressPath(union, out var address))
+            if (TryGetAddressPath(variant, out var address))
             {
                 var key = new ResourceKey<T>(new(address));
                 var result = key.TryLoad();
 
                 if (result.TryGetValue(out var asset))
                 {
-                    return _converter.ToUnionT(asset);
+                    return _converter.ToVariantT(asset);
                 }
 
                 ErrorFoundNoAsset(typeof(T), address);
             }
 
-            return union;
+            return variant;
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
@@ -55,27 +55,27 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
     public abstract class ResourceStringAdapter<T> : ResourcesAdapter<T>
         where T : UnityEngine.Object
     {
-        protected ResourceStringAdapter(CachedUnionConverter<T> converter) : base(converter) { }
+        protected ResourceStringAdapter(CachedVariantConverter<T> converter) : base(converter) { }
 
-        protected sealed override bool TryGetAddressPath(in Union union, out string result)
+        protected sealed override bool TryGetAddressPath(in Variant variant, out string result)
         {
-            return union.TryGetValue(out result);
+            return variant.TryGetValue(out result);
         }
     }
 
     public abstract class ResourceKeyAdapter<T> : ResourcesAdapter<T>
         where T : UnityEngine.Object
     {
-        private readonly CachedUnionConverter<ResourceKey> _keyConverter;
+        private readonly CachedVariantConverter<ResourceKey> _keyConverter;
 
-        protected ResourceKeyAdapter(CachedUnionConverter<T> converter) : base(converter)
+        protected ResourceKeyAdapter(CachedVariantConverter<T> converter) : base(converter)
         {
-            _keyConverter = CachedUnionConverter<ResourceKey>.Default;
+            _keyConverter = CachedVariantConverter<ResourceKey>.Default;
         }
 
-        protected sealed override bool TryGetAddressPath(in Union union, out string result)
+        protected sealed override bool TryGetAddressPath(in Variant variant, out string result)
         {
-            if (_keyConverter.TryGetValue(union, out var key) && key.IsValid)
+            if (_keyConverter.TryGetValue(variant, out var key) && key.IsValid)
             {
                 result = (string)key.Value;
                 return true;

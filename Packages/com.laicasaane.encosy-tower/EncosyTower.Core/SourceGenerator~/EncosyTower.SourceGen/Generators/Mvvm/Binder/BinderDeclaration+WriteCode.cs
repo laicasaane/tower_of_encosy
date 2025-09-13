@@ -17,7 +17,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         private const string GENERATED_BINDING_COMMAND = $"[global::{NAMESPACE_BINDING}.SourceGen.GeneratedBindingCommand(";
         private const string GENERATED_CONVERTER = $"[global::{NAMESPACE_BINDING}.SourceGen.GeneratedConverter({{0}}, typeof({{1}}))]";
         private const string IADAPTER = $"global::{NAMESPACE_BINDING}.IAdapter";
-        private const string CACHED_UNION_CONVERTER = "global::EncosyTower.Unions.Converters.CachedUnionConverter";
+        private const string CACHED_VARIANT_CONVERTER = "global::EncosyTower.Variants.Converters.CachedVariantConverter";
 
         public string WriteCode()
         {
@@ -49,9 +49,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 WriteConverters(ref p);
                 WriteBindingCommands(ref p);
 
-                if (NonUnionTypes.Length > 0)
+                if (NonVariantTypes.Length > 0)
                 {
-                    WriteUnionConverters(ref p);
+                    WriteVariantConverters(ref p);
                 }
 
                 WriteListeners(ref p);
@@ -65,9 +65,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 WriteSetTargetPropertyNameMethod(ref p);
                 WriteSetAdapterMethod(ref p);
 
-                if (NonUnionTypes.Length > 0)
+                if (NonVariantTypes.Length > 0)
                 {
-                    WriteUnionOverloads(ref p);
+                    WriteVariantOverloads(ref p);
                 }
 
                 WritePartialBindingCommandMethods(ref p);
@@ -269,20 +269,20 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        private void WriteUnionConverters(ref Printer p)
+        private void WriteVariantConverters(ref Printer p)
         {
-            if (NonUnionTypes.Length < 1)
+            if (NonVariantTypes.Length < 1)
             {
                 return;
             }
 
-            foreach (var type in NonUnionTypes)
+            foreach (var type in NonVariantTypes)
             {
                 var typeName = type.ToFullName();
                 var propertyName = type.ToValidIdentifier().AsSpan().ToTitleCase();
 
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"private readonly {CACHED_UNION_CONVERTER}<{typeName}> _unionConverter{propertyName} = {CACHED_UNION_CONVERTER}<{typeName}>.Default;");
+                p.PrintLine($"private readonly {CACHED_VARIANT_CONVERTER}<{typeName}> _variantConverter{propertyName} = {CACHED_VARIANT_CONVERTER}<{typeName}>.Default;");
                 p.PrintEndLine();
             }
 
@@ -701,7 +701,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        private void WriteUnionOverloads(ref Printer p)
+        private void WriteVariantOverloads(ref Printer p)
         {
             if (BindingPropertyRefs.Length < 1)
             {
@@ -710,7 +710,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
             foreach (var member in BindingPropertyRefs)
             {
-                if (member.IsParameterTypeUnion || member.Parameter == null)
+                if (member.IsParameterTypeVariant || member.Parameter == null)
                 {
                     continue;
                 }
@@ -723,15 +723,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
                 p.PrintLine($"/// <summary>");
                 p.PrintLine($"/// This overload will try to get the value of type <see cref=\"{paramTypeName}\"/>");
-                p.PrintLine($"/// from <see cref=\"global::EncosyTower.Unions.Union\"/>");
+                p.PrintLine($"/// from <see cref=\"global::EncosyTower.Variants.Variant\"/>");
                 p.PrintLine($"/// to pass into <see cref=\"{originalMethodName}\"/>.");
                 p.PrintLine($"/// </summary>");
                 p.PrintLine($"/// <remarks>This method is not intended to be used directly by user code.</remarks>");
                 p.PrintLine(EDITOR_BROWSABLE_NEVER).PrintLine(OBSOLETE_METHOD).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintLine($"private void {methodName}(in global::EncosyTower.Unions.Union union)");
+                p.PrintLine($"private void {methodName}(in global::EncosyTower.Variants.Variant variant)");
                 p.OpenScope();
                 {
-                    p.PrintLine($"if (this._unionConverter{converter}.TryGetValue(union, out {paramTypeName} value))");
+                    p.PrintLine($"if (this._variantConverter{converter}.TryGetValue(variant, out {paramTypeName} value))");
                     p.OpenScope();
                     {
                         p.PrintBeginLine().Print($"{originalMethodName}(");
@@ -930,9 +930,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         {
             var name = member.Symbol.Name;
 
-            if (member.IsParameterTypeUnion == false)
+            if (member.IsParameterTypeVariant == false)
             {
-                return $"{name}__Union";
+                return $"{name}__Variant";
             }
 
             return name;

@@ -1,13 +1,13 @@
-﻿using EncosyTower.Unions;
+﻿using EncosyTower.Variants;
 
 namespace EncosyTower.Mvvm.Event
 {
     public readonly struct MvvmEventArgs
     {
         public readonly object Sender;
-        public readonly Union Value;
+        public readonly Variant Value;
 
-        public MvvmEventArgs(object sender, in Union value)
+        public MvvmEventArgs(object sender, in Variant value)
         {
             Sender = sender;
             Value = value;

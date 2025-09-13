@@ -29,7 +29,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Adapters.ResourceKeys
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.ResourceKeys;
-using EncosyTower.Unions.Converters;
+using EncosyTower.Variants.Converters;
 ");
 
             p.PrintEndLine();
@@ -62,7 +62,7 @@ using EncosyTower.Unions.Converters;
                         {
                             p.PrintBeginLine($"public ")
                                 .Print($"ResourceKey{affix}To{name}Adapter")
-                                .Print("() : base(CachedUnionConverter<")
+                                .Print("() : base(CachedVariantConverter<")
                                 .Print(typeName)
                                 .PrintEndLine(">.Default) { }");
                         }
@@ -78,7 +78,7 @@ using EncosyTower.Unions.Converters;
                     {
                         p.PrintBeginLine($"public ")
                             .Print($"ResourceStringTo{name}Adapter")
-                            .Print("() : base(CachedUnionConverter<")
+                            .Print("() : base(CachedVariantConverter<")
                             .Print(typeName)
                             .PrintEndLine(">.Default) { }");
                     }

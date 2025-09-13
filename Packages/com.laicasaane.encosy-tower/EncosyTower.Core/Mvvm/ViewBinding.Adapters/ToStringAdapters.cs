@@ -1,6 +1,6 @@
 using System;
 using EncosyTower.Annotations;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters
 {
@@ -9,14 +9,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(string), destType: typeof(string), order: 0)]
     public sealed class StringToStringAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out string result))
+            if (variant.TryGetValue(out string result))
             {
                 return result;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -25,14 +25,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(object), destType: typeof(string), order: 0)]
     public sealed class ObjectToStringAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out object result))
+            if (variant.TryGetValue(out object result))
             {
                 return result.ToString();
             }
 
-            return union;
+            return variant;
         }
     }
 }

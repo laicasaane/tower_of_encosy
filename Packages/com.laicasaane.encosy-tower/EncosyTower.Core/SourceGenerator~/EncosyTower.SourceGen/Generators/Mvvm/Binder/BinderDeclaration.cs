@@ -16,7 +16,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         public const string BINDING_PROPERTY = "global::EncosyTower.Mvvm.ViewBinding.BindingProperty";
         public const string BINDING_COMMAND = "global::EncosyTower.Mvvm.ViewBinding.BindingCommand";
         public const string CONVERTER = "global::EncosyTower.Mvvm.ViewBinding.Converter";
-        public const string UNION_TYPE = "global::EncosyTower.Unions.Union";
+        public const string VARIANT_TYPE = "global::EncosyTower.Variants.Variant";
         public const string MONO_BEHAVIOUR_TYPE = "global::UnityEngine.MonoBehaviour";
 
         public ClassDeclarationSyntax Syntax { get; }
@@ -31,7 +31,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
         public ImmutableArray<BindingCommandRef> BindingCommandRefs { get; }
 
-        public ImmutableArray<ITypeSymbol> NonUnionTypes { get; }
+        public ImmutableArray<ITypeSymbol> NonVariantTypes { get; }
 
         public bool HasOnBindPropertyFailedMethod { get; }
 
@@ -124,7 +124,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             }
 
             var members = Symbol.GetMembers();
-            var nonUnionTypeFilter = new Dictionary<string, ITypeSymbol>(members.Length);
+            var nonVariantTypeFilter = new Dictionary<string, ITypeSymbol>(members.Length);
 
             foreach (var member in members)
             {
@@ -137,7 +137,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                     {
                         IParameterSymbol parameter = null;
                         ITypeSymbol argumentType = null;
-                        var isUnion = true;
+                        var isVariant = true;
                         string argTypeName = null;
 
                         if (method.Parameters.Length == 1)
@@ -151,23 +151,23 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
                             argumentType = parameter.Type;
                             argTypeName = argumentType.ToFullName();
-                            isUnion = argTypeName == UNION_TYPE;
+                            isVariant = argTypeName == VARIANT_TYPE;
                         }
 
                         bindingPropertyRefs.Add(new BindingPropertyRef {
                             Symbol = method,
-                            IsParameterTypeUnion = isUnion,
+                            IsParameterTypeVariant = isVariant,
                             Parameter = parameter,
                         });
 
-                        if (isUnion || argumentType == null)
+                        if (isVariant || argumentType == null)
                         {
                             continue;
                         }
 
-                        if (nonUnionTypeFilter.ContainsKey(argTypeName) == false)
+                        if (nonVariantTypeFilter.ContainsKey(argTypeName) == false)
                         {
-                            nonUnionTypeFilter[argTypeName] = argumentType;
+                            nonVariantTypeFilter[argTypeName] = argumentType;
                         }
                     }
                     else if (bindingCommandAttribute != null
@@ -213,12 +213,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 }
             }
 
-            using var nonUnionTypes = ImmutableArrayBuilder<ITypeSymbol>.Rent();
-            nonUnionTypes.AddRange(nonUnionTypeFilter.Values);
+            using var nonVariantTypes = ImmutableArrayBuilder<ITypeSymbol>.Rent();
+            nonVariantTypes.AddRange(nonVariantTypeFilter.Values);
 
             BindingPropertyRefs = bindingPropertyRefs.ToImmutable();
             BindingCommandRefs = bindingCommandRefs.ToImmutable();
-            NonUnionTypes = nonUnionTypes.ToImmutable();
+            NonVariantTypes = nonVariantTypes.ToImmutable();
 
             foreach (var bindingPropertyRef in BindingPropertyRefs)
             {
@@ -265,7 +265,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
             public IParameterSymbol Parameter { get; set; }
 
-            public bool IsParameterTypeUnion { get; set; }
+            public bool IsParameterTypeVariant { get; set; }
 
             public bool SkipBindingProperty { get; set; }
 

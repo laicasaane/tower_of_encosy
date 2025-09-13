@@ -11,7 +11,7 @@
 
 using System;
 using EncosyTower.Annotations;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters
 {
@@ -20,14 +20,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(byte), destType: typeof(bool), order: 1)]
     public sealed class ByteToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out byte result))
+            if (variant.TryGetValue(out byte result))
             {
                 return result <= 0;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -36,14 +36,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(sbyte), destType: typeof(bool), order: 1)]
     public sealed class SByteToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out sbyte result))
+            if (variant.TryGetValue(out sbyte result))
             {
                 return result <= 0;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -52,14 +52,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(char), destType: typeof(bool), order: 1)]
     public sealed class CharToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out char result))
+            if (variant.TryGetValue(out char result))
             {
                 return result <= 0;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -68,14 +68,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(double), destType: typeof(bool), order: 1)]
     public sealed class DoubleToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out double result))
+            if (variant.TryGetValue(out double result))
             {
                 return result <= 0;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -84,14 +84,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(float), destType: typeof(bool), order: 1)]
     public sealed class FloatToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out float result))
+            if (variant.TryGetValue(out float result))
             {
                 return result <= 0;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -100,14 +100,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(int), destType: typeof(bool), order: 1)]
     public sealed class IntToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out int result))
+            if (variant.TryGetValue(out int result))
             {
                 return result <= 0;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -116,14 +116,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(uint), destType: typeof(bool), order: 1)]
     public sealed class UIntToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out uint result))
+            if (variant.TryGetValue(out uint result))
             {
                 return result <= 0;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -132,14 +132,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(long), destType: typeof(bool), order: 1)]
     public sealed class LongToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out long result))
+            if (variant.TryGetValue(out long result))
             {
                 return result <= 0;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -148,14 +148,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(ulong), destType: typeof(bool), order: 1)]
     public sealed class ULongToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out ulong result))
+            if (variant.TryGetValue(out ulong result))
             {
                 return result <= 0;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -164,14 +164,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(short), destType: typeof(bool), order: 1)]
     public sealed class ShortToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out short result))
+            if (variant.TryGetValue(out short result))
             {
                 return result <= 0;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -180,14 +180,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(ushort), destType: typeof(bool), order: 1)]
     public sealed class UShortToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out ushort result))
+            if (variant.TryGetValue(out ushort result))
             {
                 return result <= 0;
             }
 
-            return union;
+            return variant;
         }
     }
 

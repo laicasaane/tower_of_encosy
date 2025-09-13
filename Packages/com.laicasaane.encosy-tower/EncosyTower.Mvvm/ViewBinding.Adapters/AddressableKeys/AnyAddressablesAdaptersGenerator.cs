@@ -30,7 +30,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Adapters.AddressableKeys
 using System;
 using EncosyTower.AddressableKeys;
 using EncosyTower.Annotations;
-using EncosyTower.Unions.Converters;
+using EncosyTower.Variants.Converters;
 ");
 
             p.PrintEndLine();
@@ -63,7 +63,7 @@ using EncosyTower.Unions.Converters;
                         {
                             p.PrintBeginLine($"public ")
                                 .Print($"AddressableKey{affix}To{name}Adapter")
-                                .Print("() : base(CachedUnionConverter<")
+                                .Print("() : base(CachedVariantConverter<")
                                 .Print(typeName)
                                 .PrintEndLine(">.Default) { }");
                         }
@@ -79,7 +79,7 @@ using EncosyTower.Unions.Converters;
                     {
                         p.PrintBeginLine($"public ")
                             .Print($"AddressableStringTo{name}Adapter")
-                            .Print("() : base(CachedUnionConverter<")
+                            .Print("() : base(CachedVariantConverter<")
                             .Print(typeName)
                             .PrintEndLine(">.Default) { }");
                     }

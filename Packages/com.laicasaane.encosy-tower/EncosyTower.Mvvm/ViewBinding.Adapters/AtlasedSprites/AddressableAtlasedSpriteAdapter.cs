@@ -6,8 +6,8 @@ using EncosyTower.AddressableKeys;
 using EncosyTower.Annotations;
 using EncosyTower.AtlasedSprites;
 using EncosyTower.Logging;
-using EncosyTower.Unions;
-using EncosyTower.Unions.Converters;
+using EncosyTower.Variants;
+using EncosyTower.Variants.Converters;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -19,20 +19,20 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AtlasedSprites
     [Adapter(sourceType: typeof(AtlasedSpriteKey), destType: typeof(Sprite), order: 0)]
     public sealed class AddressableAtlasedSpriteAdapter : IAdapter
     {
-        private readonly CachedUnionConverter<AtlasedSpriteKey> _keyConverter;
-        private readonly CachedUnionConverter<AtlasedSpriteKey.Serializable> _keySerializableConverter;
-        private readonly CachedUnionConverter<Sprite> _assetConverter;
+        private readonly CachedVariantConverter<AtlasedSpriteKey> _keyConverter;
+        private readonly CachedVariantConverter<AtlasedSpriteKey.Serializable> _keySerializableConverter;
+        private readonly CachedVariantConverter<Sprite> _assetConverter;
 
         public AddressableAtlasedSpriteAdapter()
         {
-            _keyConverter = CachedUnionConverter<AtlasedSpriteKey>.Default;
-            _keySerializableConverter = CachedUnionConverter<AtlasedSpriteKey.Serializable>.Default;
-            _assetConverter = CachedUnionConverter<Sprite>.Default;
+            _keyConverter = CachedVariantConverter<AtlasedSpriteKey>.Default;
+            _keySerializableConverter = CachedVariantConverter<AtlasedSpriteKey.Serializable>.Default;
+            _assetConverter = CachedVariantConverter<Sprite>.Default;
         }
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (TryGetNames(union, out var atlasName, out var spriteName))
+            if (TryGetNames(variant, out var atlasName, out var spriteName))
             {
                 var key = new AddressableKey<SpriteAtlas>(atlasName);
                 var result = key.TryLoad();
@@ -43,7 +43,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AtlasedSprites
 
                     if (sprite)
                     {
-                        return _assetConverter.ToUnionT(sprite);
+                        return _assetConverter.ToVariantT(sprite);
                     }
 
                     ErrorFoundNoSprite(atlasName, spriteName, atlas);
@@ -54,19 +54,19 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AtlasedSprites
                 }
             }
 
-            return union;
+            return variant;
         }
 
-        private bool TryGetNames(in Union union, out string atlas, out string sprite)
+        private bool TryGetNames(in Variant variant, out string atlas, out string sprite)
         {
-            if (_keyConverter.TryGetValue(union, out var key) && key.IsValid)
+            if (_keyConverter.TryGetValue(variant, out var key) && key.IsValid)
             {
                 atlas = (string)key.Atlas;
                 sprite = (string)key.Sprite;
                 return true;
             }
 
-            if (_keySerializableConverter.TryGetValue(union, out var keySerializable) && key.IsValid)
+            if (_keySerializableConverter.TryGetValue(variant, out var keySerializable) && key.IsValid)
             {
                 atlas = (string)keySerializable.Atlas;
                 sprite = (string)keySerializable.Sprite;

@@ -1,7 +1,7 @@
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.Common;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters
 {
@@ -10,14 +10,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(bool), destType: typeof(bool), order: 0)]
     public sealed class BoolToBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out bool result))
+            if (variant.TryGetValue(out bool result))
             {
                 return result;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -26,9 +26,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(string), destType: typeof(bool), order: 0)]
     public sealed class StringToBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out string result))
+            if (variant.TryGetValue(out string result))
             {
                 if (bool.TryParse(result, out var value))
                 {
@@ -38,7 +38,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
                 return result.IsNotEmpty();
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -47,14 +47,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(object), destType: typeof(bool), order: 0)]
     public sealed class ObjectToBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out object result))
+            if (variant.TryGetValue(out object result))
             {
                 return result != null;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -63,14 +63,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(bool), destType: typeof(bool), order: 1)]
     public sealed class BoolToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out bool result))
+            if (variant.TryGetValue(out bool result))
             {
                 return !result;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -79,9 +79,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(string), destType: typeof(bool), order: 1)]
     public sealed class StringToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out string result))
+            if (variant.TryGetValue(out string result))
             {
                 if (bool.TryParse(result, out var value))
                 {
@@ -91,7 +91,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
                 return result.IsNotEmpty();
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -100,14 +100,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(object), destType: typeof(bool), order: 1)]
     public sealed class ObjectToNotBoolAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out object result))
+            if (variant.TryGetValue(out object result))
             {
                 return result == null;
             }
 
-            return union;
+            return variant;
         }
     }
 }

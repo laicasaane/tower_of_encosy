@@ -12,12 +12,12 @@ namespace EncosyTower.Mvvm.Input
         void NotifyCanExecuteChanged();
 
         /// <summary>
-        /// Provides a parameterless variant of <see cref="ICommand.CanExecute(in Unions.Union)"/>.
+        /// Provides a parameterless variant of <see cref="ICommand.CanExecute(in Variants.Variant)"/>.
         /// </summary>
         bool CanExecute();
 
         /// <summary>
-        /// Provides a parameterless variant of <see cref="ICommand.Execute(in Unions.Union)"/>.
+        /// Provides a parameterless variant of <see cref="ICommand.Execute(in Variants.Variant)"/>.
         /// </summary>
         void Execute();
     }
@@ -34,14 +34,14 @@ namespace EncosyTower.Mvvm.Input
         void NotifyCanExecuteChanged();
 
         /// <summary>
-        /// Provides a strongly-typed variant of <see cref="ICommand.CanExecute(in Unions.Union)"/>.
+        /// Provides a strongly-typed variant of <see cref="ICommand.CanExecute(in Variants.Variant)"/>.
         /// </summary>
         /// <param name="parameter">The input parameter.</param>
         /// <returns>Whether the current command can be executed.</returns>
         bool CanExecute(T parameter);
 
         /// <summary>
-        /// Provides a strongly-typed variant of <see cref="ICommand.Execute(in Unions.Union)"/>.
+        /// Provides a strongly-typed variant of <see cref="ICommand.Execute(in Variants.Variant)"/>.
         /// </summary>
         /// <param name="parameter">The input parameter.</param>
         void Execute(T parameter);

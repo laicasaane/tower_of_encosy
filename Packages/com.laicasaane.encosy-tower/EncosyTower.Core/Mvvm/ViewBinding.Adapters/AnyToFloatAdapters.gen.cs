@@ -11,7 +11,7 @@
 
 using System;
 using EncosyTower.Annotations;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters
 {
@@ -20,14 +20,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(byte), destType: typeof(float), order: 0)]
     public sealed class ByteToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out byte result))
+            if (variant.TryGetValue(out byte result))
             {
                 return (float)result;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -36,14 +36,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(sbyte), destType: typeof(float), order: 0)]
     public sealed class SByteToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out sbyte result))
+            if (variant.TryGetValue(out sbyte result))
             {
                 return (float)result;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -52,14 +52,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(char), destType: typeof(float), order: 0)]
     public sealed class CharToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out char result))
+            if (variant.TryGetValue(out char result))
             {
                 return (float)result;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -68,14 +68,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(double), destType: typeof(float), order: 0)]
     public sealed class DoubleToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out double result))
+            if (variant.TryGetValue(out double result))
             {
                 return (float)result;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -84,14 +84,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(float), destType: typeof(float), order: 0)]
     public sealed class FloatToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out float result))
+            if (variant.TryGetValue(out float result))
             {
                 return (float)result;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -100,14 +100,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(int), destType: typeof(float), order: 0)]
     public sealed class IntToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out int result))
+            if (variant.TryGetValue(out int result))
             {
                 return (float)result;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -116,14 +116,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(uint), destType: typeof(float), order: 0)]
     public sealed class UIntToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out uint result))
+            if (variant.TryGetValue(out uint result))
             {
                 return (float)result;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -132,14 +132,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(long), destType: typeof(float), order: 0)]
     public sealed class LongToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out long result))
+            if (variant.TryGetValue(out long result))
             {
                 return (float)result;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -148,14 +148,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(ulong), destType: typeof(float), order: 0)]
     public sealed class ULongToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out ulong result))
+            if (variant.TryGetValue(out ulong result))
             {
                 return (float)result;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -164,14 +164,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(short), destType: typeof(float), order: 0)]
     public sealed class ShortToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out short result))
+            if (variant.TryGetValue(out short result))
             {
                 return (float)result;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -180,14 +180,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(ushort), destType: typeof(float), order: 0)]
     public sealed class UShortToFloatAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out ushort result))
+            if (variant.TryGetValue(out ushort result))
             {
                 return (float)result;
             }
 
-            return union;
+            return variant;
         }
     }
 

@@ -3,8 +3,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Mvvm.Event;
-using EncosyTower.Unions;
-using EncosyTower.Unions.Converters;
+using EncosyTower.Variants;
+using EncosyTower.Variants.Converters;
 using UnityEngine;
 
 namespace EncosyTower.Mvvm.Input
@@ -30,7 +30,7 @@ namespace EncosyTower.Mvvm.Input
 
         private event MvvmEventHandler _canExecuteChanged;
 
-        private readonly CachedUnionConverter<T> _converter = CachedUnionConverter<T>.Default;
+        private readonly CachedVariantConverter<T> _converter = CachedVariantConverter<T>.Default;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RelayCommand{T}"/> class that can always execute.
@@ -73,7 +73,7 @@ namespace EncosyTower.Mvvm.Input
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void NotifyCanExecuteChanged()
-            => _canExecuteChanged?.Invoke(new MvvmEventArgs(this, Union.Undefined));
+            => _canExecuteChanged?.Invoke(new MvvmEventArgs(this, Variant.Undefined));
 
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -81,7 +81,7 @@ namespace EncosyTower.Mvvm.Input
             => _canExecute?.Invoke(parameter) != false;
 
         /// <inheritdoc/>
-        public bool CanExecute(in Union parameter)
+        public bool CanExecute(in Variant parameter)
         {
             if (_converter.TryGetValue(parameter, out T result) == false)
             {
@@ -96,7 +96,7 @@ namespace EncosyTower.Mvvm.Input
         public void Execute(T parameter) => _execute(parameter);
 
         /// <inheritdoc/>
-        public void Execute(in Union parameter)
+        public void Execute(in Variant parameter)
         {
             if (_converter.TryGetValue(parameter, out T result) == false)
             {

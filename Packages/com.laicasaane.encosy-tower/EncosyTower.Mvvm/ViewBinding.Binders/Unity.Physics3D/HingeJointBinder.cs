@@ -5,7 +5,7 @@
 using System;
 using EncosyTower.Annotations;
 using EncosyTower.Mvvm.ViewBinding.Components;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
@@ -41,7 +41,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         partial void OnBeforeConstructor()
         {
 #pragma warning disable CS0162 // Unreachable code detected
-            if (UnionData.BYTE_COUNT >= 32)
+            if (VariantData.BYTE_COUNT >= 32)
             {
                 return;
             }
@@ -66,7 +66,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         private static void ThrowNotSupported()
         {
             Logging.RuntimeLoggerAPI.LogException(new NotSupportedException(
-                "Hinge Joint Limits binding property requires the symbol UNION_32_BYTES or higher to be defined"
+                "Hinge Joint Limits binding property requires the symbol VARIANT_32_BYTES or higher to be defined"
             ));
         }
     }

@@ -1,6 +1,6 @@
 using System;
 using EncosyTower.Annotations;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters
 {
@@ -9,14 +9,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(bool), destType: typeof(int), order: 0)]
     public sealed class BoolToIntAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out bool result))
+            if (variant.TryGetValue(out bool result))
             {
                 return result ? 1 : 0;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -25,16 +25,16 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(string), destType: typeof(int), order: 0)]
     public sealed class StringToIntAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out string result)
+            if (variant.TryGetValue(out string result)
                 && int.TryParse(result, out var value)
             )
             {
                 return value;
             }
 
-            return union;
+            return variant;
         }
     }
 
@@ -43,16 +43,16 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     [Adapter(sourceType: typeof(object), destType: typeof(int), order: 0)]
     public sealed class ObjectToIntAdapter : IAdapter
     {
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out object result)
+            if (variant.TryGetValue(out object result)
                 && result is int value
             )
             {
                 return value;
             }
 
-            return union;
+            return variant;
         }
     }
 }

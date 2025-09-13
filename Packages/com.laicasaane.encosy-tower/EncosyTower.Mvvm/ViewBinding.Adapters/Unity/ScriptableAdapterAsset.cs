@@ -1,10 +1,10 @@
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
 {
     public abstract class ScriptableAdapterAsset : ScriptableObject, IAdapter
     {
-        public abstract Union Convert(in Union union);
+        public abstract Variant Convert(in Variant variant);
     }
 }

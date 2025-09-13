@@ -1,5 +1,5 @@
-using EncosyTower.Unions;
-using EncosyTower.Unions.Converters;
+using EncosyTower.Variants;
+using EncosyTower.Variants.Converters;
 using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
@@ -7,22 +7,22 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
     public abstract class ResourcesAdapter<T> : IAdapter
        where T : UnityEngine.Object
     {
-        private readonly CachedUnionConverter<T> _converter;
+        private readonly CachedVariantConverter<T> _converter;
 
-        protected ResourcesAdapter(CachedUnionConverter<T> converter)
+        protected ResourcesAdapter(CachedVariantConverter<T> converter)
         {
             _converter = converter;
         }
 
-        public Union Convert(in Union union)
+        public Variant Convert(in Variant variant)
         {
-            if (union.TryGetValue(out string assetPath) == false)
+            if (variant.TryGetValue(out string assetPath) == false)
             {
-                return union;
+                return variant;
             }
 
             var asset = Resources.Load<T>(assetPath);
-            return asset == false ? union : _converter.ToUnionT(asset);
+            return asset == false ? variant : _converter.ToVariantT(asset);
         }
     }
 }

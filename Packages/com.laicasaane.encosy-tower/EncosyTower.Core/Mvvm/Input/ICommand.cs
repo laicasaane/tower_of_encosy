@@ -1,5 +1,5 @@
 ﻿using EncosyTower.Mvvm.Event;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 
 namespace EncosyTower.Mvvm.Input
 {
@@ -15,12 +15,12 @@ namespace EncosyTower.Mvvm.Input
         /// </summary>
         /// <param name="parameter">Data used by the command. If the command does not require data to be passed, this object can be set to null.</param>
         /// <returns>true if this command can be executed; otherwise, false.</returns>
-        bool CanExecute(in Union parameter);
+        bool CanExecute(in Variant parameter);
 
         /// <summary>
         /// Defines the method to be called when the command is invoked.
         /// </summary>
         /// <param name="parameter">Data used by the command. If the command does not require data to be passed, this object can be set to null.</param>
-        void Execute(in Union parameter);
+        void Execute(in Variant parameter);
     }
 }

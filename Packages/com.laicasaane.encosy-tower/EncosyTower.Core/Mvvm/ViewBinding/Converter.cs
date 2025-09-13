@@ -1,5 +1,5 @@
 using System;
-using EncosyTower.Unions;
+using EncosyTower.Variants;
 using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding
@@ -10,7 +10,7 @@ namespace EncosyTower.Mvvm.ViewBinding
         [field: SerializeReference]
         public IAdapter Adapter { get; set; }
 
-        public Union Convert(in Union value)
+        public Variant Convert(in Variant value)
             => Adapter?.Convert(value) ?? value;
     }
 }
