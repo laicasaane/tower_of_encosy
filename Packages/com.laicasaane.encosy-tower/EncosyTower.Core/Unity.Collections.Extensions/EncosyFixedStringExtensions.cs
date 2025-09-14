@@ -107,45 +107,60 @@ namespace EncosyTower.Collections
             return fs;
         }
 
+        /// <summary>
+        /// Returns a span covering the entire internal buffer of the <see cref="FixedString32Bytes"/>.
+        /// </summary>
+        /// <remarks>
+        /// The internal buffer is 29 bytes long.
+        /// </remarks>
+        /// <seealso cref="FixedString32Bytes.UTF8MaxLengthInBytes"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Span<byte> AsSpan(this in FixedString32Bytes self)
-            => new(self.GetUnsafePtr(), self.Length);
+            => new(self.GetUnsafePtr(), FixedString32Bytes.UTF8MaxLengthInBytes);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString32Bytes self)
-            => new(self.GetUnsafePtr(), self.Length);
-
+        /// <summary>
+        /// Returns a span covering the entire internal buffer of the <see cref="FixedString64Bytes"/>.
+        /// </summary>
+        /// <remarks>
+        /// The internal buffer is 61 bytes long.
+        /// </remarks>
+        /// <seealso cref="FixedString64Bytes.UTF8MaxLengthInBytes"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Span<byte> AsSpan(this in FixedString64Bytes self)
-            => new(self.GetUnsafePtr(), self.Length);
+            => new(self.GetUnsafePtr(), FixedString64Bytes.UTF8MaxLengthInBytes);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString64Bytes self)
-            => new(self.GetUnsafePtr(), self.Length);
-
+        /// <summary>
+        /// Returns a span covering the entire internal buffer of the <see cref="FixedString128Bytes"/>.
+        /// </summary>
+        /// <remarks>
+        /// The internal buffer is 125 bytes long.
+        /// </remarks>
+        /// <seealso cref="FixedString128Bytes.UTF8MaxLengthInBytes"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Span<byte> AsSpan(this in FixedString128Bytes self)
-            => new(self.GetUnsafePtr(), self.Length);
+            => new(self.GetUnsafePtr(), FixedString128Bytes.UTF8MaxLengthInBytes);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString128Bytes self)
-            => new(self.GetUnsafePtr(), self.Length);
-
+        /// <summary>
+        /// Returns a span covering the entire internal buffer of the <see cref="FixedString512Bytes"/>.
+        /// </summary>
+        /// <remarks>
+        /// The internal buffer is 509 bytes long.
+        /// </remarks>
+        /// <seealso cref="FixedString512Bytes.UTF8MaxLengthInBytes"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Span<byte> AsSpan(this in FixedString512Bytes self)
-            => new(self.GetUnsafePtr(), self.Length);
+            => new(self.GetUnsafePtr(), FixedString512Bytes.UTF8MaxLengthInBytes);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString512Bytes self)
-            => new(self.GetUnsafePtr(), self.Length);
-
+        /// <summary>
+        /// Returns a span covering the entire internal buffer of the <see cref="FixedString4096Bytes"/>.
+        /// </summary>
+        /// <remarks>
+        /// The internal buffer is 4093 bytes long.
+        /// </remarks>
+        /// <seealso cref="FixedString4096Bytes.UTF8MaxLengthInBytes"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Span<byte> AsSpan(this in FixedString4096Bytes self)
-            => new(self.GetUnsafePtr(), self.Length);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString4096Bytes self)
-            => new(self.GetUnsafePtr(), self.Length);
+            => new(self.GetUnsafePtr(), FixedString4096Bytes.UTF8MaxLengthInBytes);
     }
 }
 
