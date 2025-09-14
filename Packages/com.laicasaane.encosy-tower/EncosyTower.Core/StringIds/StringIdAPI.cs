@@ -14,10 +14,12 @@ namespace EncosyTower.StringIds
         public static int Count()
             => GlobalStringVault.Count;
 
+#if UNITY_COLLECTIONS
         /// <inheritdoc cref="GlobalStringVault"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static StringId MakeFromUnmanaged(in UnmanagedString str)
             => GlobalStringVault.MakeIdFromUnmanaged(str);
+#endif
 
         /// <inheritdoc cref="GlobalStringVault"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -37,6 +39,7 @@ namespace EncosyTower.StringIds
         public static int Count()
             => GlobalStringVault.Count;
 
+#if UNITY_COLLECTIONS
         /// <inheritdoc cref="GlobalStringVault"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UnmanagedString GetUnmanaged(StringId id)
@@ -44,6 +47,7 @@ namespace EncosyTower.StringIds
             GlobalStringVault.ThrowIfNotDefined(GlobalStringVault.IsDefined(id), id);
             return GlobalStringVault.GetUnmanagedString(id);
         }
+#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetManaged(StringId id)

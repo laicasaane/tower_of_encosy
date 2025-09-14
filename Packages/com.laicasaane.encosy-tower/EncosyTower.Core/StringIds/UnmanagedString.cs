@@ -1,30 +1,33 @@
-#if UNITY_COLLECTIONS
-#define __ENCOSY_SHARED_STRING_VAULT__
-#endif
-
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace EncosyTower.StringIds
 {
-#if __ENCOSY_SHARED_STRING_VAULT__
+#if UNITY_COLLECTIONS
     using FixedString = Unity.Collections.FixedString128Bytes;
 #endif
 
+    /// <summary>
+    /// A struct that represents a string in an unmanaged way.
+    /// </summary>
+    /// <remarks>
+    /// If the package <c>com.unity.collections</c> is installed, this struct wraps a <see cref="FixedString"/>,
+    /// otherwise it wraps a hash code of the managed <see cref="string"/>.
+    /// </remarks>
     [StructLayout(LayoutKind.Sequential, Size = 128)]
     public readonly struct UnmanagedString
         : IEquatable<UnmanagedString>
         , IComparable<UnmanagedString>
     {
-#if __ENCOSY_SHARED_STRING_VAULT__
+#if UNITY_COLLECTIONS
         public readonly FixedString Value;
 #else
         public readonly int Value;
 #endif
 
         private UnmanagedString(
-#if __ENCOSY_SHARED_STRING_VAULT__
+#if UNITY_COLLECTIONS
             in FixedString value
 #else
             int value
@@ -36,7 +39,7 @@ namespace EncosyTower.StringIds
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-#if __ENCOSY_SHARED_STRING_VAULT__
+#if UNITY_COLLECTIONS
             => Value.GetHashCode();
 #else
             => Value;
@@ -66,7 +69,7 @@ namespace EncosyTower.StringIds
         public static bool operator !=(in UnmanagedString a, in UnmanagedString b)
             => !a.Equals(b);
 
-#if __ENCOSY_SHARED_STRING_VAULT__
+#if UNITY_COLLECTIONS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator UnmanagedString(in FixedString value)
             => new(value);
@@ -74,7 +77,7 @@ namespace EncosyTower.StringIds
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator UnmanagedString(string value)
-#if __ENCOSY_SHARED_STRING_VAULT__
+#if UNITY_COLLECTIONS
             => new(value);
 #else
             => new(value.GetHashCode());

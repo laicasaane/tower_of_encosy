@@ -38,22 +38,9 @@ namespace EncosyTower.StringIds
             => s_vault.ContainsId(key.Id);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static StringId MakeIdFromUnmanaged(in UnmanagedString str)
-        {
-            return new(s_vault.MakeIdFromUnmanaged(str));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static StringId MakeIdFromManaged([NotNull] string str)
         {
             return new(s_vault.MakeIdFromManaged(str));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UnmanagedString GetUnmanagedString(StringId key)
-        {
-            s_vault.TryGetUnmanagedString(key.Id, out var result);
-            return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -62,6 +49,21 @@ namespace EncosyTower.StringIds
             s_vault.TryGetManagedString(key.Id, out var result);
             return result;
         }
+
+#if UNITY_COLLECTIONS
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static StringId MakeIdFromUnmanaged(in UnmanagedString str)
+        {
+            return new(s_vault.MakeIdFromUnmanaged(str));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UnmanagedString GetUnmanagedString(StringId key)
+        {
+            s_vault.TryGetUnmanagedString(key.Id, out var result);
+            return result;
+        }
+#endif
 
         [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         internal static void ThrowIfNotDefined([DoesNotReturnIf(false)] bool isDefined, StringId key)
