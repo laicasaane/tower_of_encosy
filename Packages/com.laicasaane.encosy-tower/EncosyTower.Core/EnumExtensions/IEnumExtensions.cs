@@ -9,8 +9,8 @@ namespace EncosyTower.EnumExtensions
         : IHasLength
         , IToStringFast
         , IToDisplayStringFast
+        , ISpanFormattable
         , IToUnderlyingValue<TUnderlyingValue>
-        , ITryFormat
         , IIsDefined
         , IIsDefinedIn
         , IFindIndex

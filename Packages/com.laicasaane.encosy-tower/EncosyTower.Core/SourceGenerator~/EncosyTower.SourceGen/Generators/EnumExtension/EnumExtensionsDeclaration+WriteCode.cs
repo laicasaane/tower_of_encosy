@@ -188,6 +188,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintBeginLine("public string ToString(string format, global::System.IFormatProvider formatProvider) => ")
+                    .Print(ExtensionsName).PrintEndLine(".ToStringFast(this.Value);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public override int GetHashCode() => this.UnderlyingValue.GetHashCode();");
                 p.PrintEndLine();
 
