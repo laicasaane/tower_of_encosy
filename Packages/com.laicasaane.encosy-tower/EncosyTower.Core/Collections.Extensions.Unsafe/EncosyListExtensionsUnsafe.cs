@@ -23,5 +23,9 @@ namespace EncosyTower.Collections.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlyMemory<T> AsReadOnlyMemoryUnsafe<T>([NotNull] this List<T> list)
             => UnsafeUtility.As<List<T>, FasterList<T>>(ref list)._buffer.AsMemory(0, list.Count);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FasterList<T> AsFasterListUnsafe<T>([NotNull] this List<T> list)
+            => UnsafeUtility.As<List<T>, FasterList<T>>(ref list);
     }
 }
