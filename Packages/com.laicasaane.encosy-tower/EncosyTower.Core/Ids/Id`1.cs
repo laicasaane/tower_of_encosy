@@ -11,6 +11,7 @@ namespace EncosyTower.Ids
         , IComparable<Id<T>>
         , ITryParse<Id<T>>
         , ITryParseSpan<Id<T>>
+        , ISpanFormattable
     {
         private readonly uint _value;
 
@@ -45,6 +46,10 @@ namespace EncosyTower.Ids
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
             => _value.ToString();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ToString(string format, IFormatProvider formatProvider)
+            => _value.ToString(format, formatProvider);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryFormat(
@@ -149,6 +154,7 @@ namespace EncosyTower.Ids
         public partial struct Serializable<T> : ITryConvert<Id<T>>
             , IEquatable<Serializable<T>>
             , IComparable<Serializable<T>>
+            , ISpanFormattable
         {
             [SerializeField]
             private uint _value;
@@ -189,8 +195,23 @@ namespace EncosyTower.Ids
                 => _value.ToString();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly string ToString(string format, IFormatProvider formatProvider)
+                => _value.ToString(format, formatProvider);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly int CompareTo(Serializable<T> other)
                 => _value.CompareTo(other._value);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly bool TryFormat(
+                  Span<char> destination
+                , out int charsWritten
+                , ReadOnlySpan<char> format
+                , IFormatProvider provider
+            )
+            {
+                return _value.TryFormat(destination, out charsWritten, format, provider);
+            }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Serializable<T>(int value)
@@ -256,9 +277,10 @@ namespace EncosyTower.Ids
 namespace EncosyTower.Ids
 {
     using System.Runtime.CompilerServices;
+    using EncosyTower.Conversion;
     using Unity.Collections;
 
-    public readonly partial struct Id<T>
+    public readonly partial struct Id<T> : IToFixedString<FixedString32Bytes>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly FixedString32Bytes ToFixedString()
@@ -271,7 +293,7 @@ namespace EncosyTower.Ids
 
     partial struct Id
     {
-        public partial struct Serializable<T>
+        public partial struct Serializable<T> : IToFixedString<FixedString32Bytes>
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly FixedString32Bytes ToFixedString()

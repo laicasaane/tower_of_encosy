@@ -13,6 +13,7 @@ namespace EncosyTower.Common
     public readonly partial struct ByteBool : IEquatable<bool>, IEquatable<ByteBool>
         , IComparable, IComparable<bool>, IComparable<ByteBool>
         , ITryParse<ByteBool>, ITryParseSpan<ByteBool>
+        , ISpanFormattable
     {
         private const byte FALSE = byte.MinValue;
         private const byte TRUE = byte.MaxValue;
@@ -85,6 +86,10 @@ namespace EncosyTower.Common
             => this ? bool.TrueString : bool.FalseString;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ToString(string format, IFormatProvider formatProvider)
+            => ((bool)this).ToString(formatProvider);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CompareTo(bool other)
             => ((bool)this).CompareTo(other);
 
@@ -122,6 +127,17 @@ namespace EncosyTower.Common
             var parseResult = bool.TryParse(str, out var value);
             result = value;
             return parseResult;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool TryFormat(
+              Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format
+            , IFormatProvider provider
+        )
+        {
+            return ((bool)this).TryFormat(destination, out charsWritten);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -211,9 +227,10 @@ namespace EncosyTower.Common
 namespace EncosyTower.Common
 {
     using System.Runtime.CompilerServices;
+    using EncosyTower.Conversion;
     using Unity.Collections;
 
-    public readonly partial struct ByteBool
+    public readonly partial struct ByteBool : IToFixedString<FixedString32Bytes>
     {
         public static FixedString32Bytes FalseString
         {

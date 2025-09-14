@@ -3,8 +3,15 @@ namespace EncosyTower.Common
     using System;
     using System.Runtime.CompilerServices;
 
-    public readonly partial struct Bool<T> : IEquatable<bool>, IEquatable<ByteBool>, IEquatable<Bool<T>>
-        , IComparable, IComparable<bool>, IComparable<ByteBool>, IComparable<Bool<T>>
+    public readonly partial struct Bool<T>
+        : IEquatable<bool>
+        , IEquatable<ByteBool>
+        , IEquatable<Bool<T>>
+        , IComparable
+        , IComparable<bool>
+        , IComparable<ByteBool>
+        , IComparable<Bool<T>>
+        , ISpanFormattable
     {
         public static readonly Bool<T> True = new(true);
 
@@ -77,6 +84,10 @@ namespace EncosyTower.Common
             => _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ToString(string format, IFormatProvider formatProvider)
+            => ((bool)_value).ToString(formatProvider);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CompareTo(bool other)
             => _value.CompareTo(other);
 
@@ -106,6 +117,18 @@ namespace EncosyTower.Common
             }
 
             return _value.CompareTo(obj);
+        }
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryFormat(
+              Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format
+            , IFormatProvider provider
+        )
+        {
+            return ((bool)_value).TryFormat(destination, out charsWritten);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -255,9 +278,10 @@ namespace EncosyTower.Common
 namespace EncosyTower.Common
 {
     using System.Runtime.CompilerServices;
+    using EncosyTower.Conversion;
     using Unity.Collections;
 
-    public readonly partial struct Bool<T>
+    public readonly partial struct Bool<T> : IToFixedString<FixedString32Bytes>
     {
         public static FixedString32Bytes FalseString
         {

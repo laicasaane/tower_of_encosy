@@ -1,8 +1,8 @@
-using System;
-
 namespace EncosyTower.Logging
 {
-    public interface ILogger
+    using System;
+
+    public partial interface ILogger
     {
         void LogException(Exception value);
 
@@ -31,3 +31,45 @@ namespace EncosyTower.Logging
         void LogErrorFormatSlim(string format, params object[] args);
     }
 }
+
+#if UNITY_COLLECTIONS
+
+//namespace EncosyTower.Logging
+//{
+//    using Unity.Collections;
+
+//    partial interface ILogger
+//    {
+//        void LogInfo(in FixedString32Bytes message);
+
+//        void LogInfo(in FixedString64Bytes message);
+
+//        void LogInfo(in FixedString128Bytes message);
+
+//        void LogInfo(in FixedString512Bytes message);
+
+//        void LogInfo(in FixedString4096Bytes message);
+
+//        void LogWarning(in FixedString32Bytes message);
+
+//        void LogWarning(in FixedString64Bytes message);
+
+//        void LogWarning(in FixedString128Bytes message);
+
+//        void LogWarning(in FixedString512Bytes message);
+
+//        void LogWarning(in FixedString4096Bytes message);
+
+//        void LogError(in FixedString32Bytes message);
+
+//        void LogError(in FixedString64Bytes message);
+
+//        void LogError(in FixedString128Bytes message);
+
+//        void LogError(in FixedString512Bytes message);
+
+//        void LogError(in FixedString4096Bytes message);
+//    }
+//}
+
+#endif

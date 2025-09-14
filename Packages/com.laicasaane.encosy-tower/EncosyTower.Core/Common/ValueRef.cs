@@ -1,30 +1,48 @@
+using System;
 using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Common
 {
+    public static class ValueRef
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ValueRef<T> Create<T>() where T : struct
+            => new(Guid.NewGuid());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ValueRef<T> Create<T>(ref T value) where T : struct
+            => new(Guid.NewGuid(), ref value);
+    }
+
     public sealed class ValueRef<T> where T : struct
     {
-        public T Value { get; set; }
+        public readonly Guid Id;
 
-        public ValueRef()
+        private T _value;
+
+        internal ValueRef(in Guid id)
         {
+            Id = id;
             Value = default;
         }
 
-        public ValueRef(T value)
+        internal ValueRef(Guid id, ref T value) : this(id)
         {
             Value = value;
         }
 
+        public ref T Value
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref _value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
-            => Value.ToString();
+            => _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator T(ValueRef<T> refT)
-            => refT?.Value ?? default;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator ValueRef<T>(T value)
-            => new(value);
+            => refT?._value ?? default;
     }
 }

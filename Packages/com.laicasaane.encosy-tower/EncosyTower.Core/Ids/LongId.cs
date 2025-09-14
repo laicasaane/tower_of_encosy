@@ -14,6 +14,7 @@ namespace EncosyTower.Ids
         , IComparable<LongId>
         , ITryParse<LongId>
         , ITryParseSpan<LongId>
+        , ISpanFormattable
     {
         private readonly ulong _value;
 
@@ -42,6 +43,10 @@ namespace EncosyTower.Ids
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
             => _value.ToString();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ToString(string format, IFormatProvider formatProvider)
+            => _value.ToString(format, formatProvider);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryFormat(
@@ -131,6 +136,7 @@ namespace EncosyTower.Ids
         public partial struct Serializable : ITryConvert<LongId>
             , IEquatable<Serializable>
             , IComparable<Serializable>
+            , ISpanFormattable
         {
             [SerializeField]
             private ulong _value;
@@ -165,8 +171,23 @@ namespace EncosyTower.Ids
                 => _value.ToString();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public string ToString(string format, IFormatProvider formatProvider)
+                => _value.ToString(format, formatProvider);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly int CompareTo(Serializable other)
                 => _value.CompareTo(other._value);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly bool TryFormat(
+                  Span<char> destination
+                , out int charsWritten
+                , ReadOnlySpan<char> format
+                , IFormatProvider provider
+            )
+            {
+                return _value.TryFormat(destination, out charsWritten, format, provider);
+            }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator LongId(Serializable value)
@@ -208,9 +229,10 @@ namespace EncosyTower.Ids
 namespace EncosyTower.Ids
 {
     using System.Runtime.CompilerServices;
+    using EncosyTower.Conversion;
     using Unity.Collections;
 
-    public readonly partial struct LongId
+    public readonly partial struct LongId : IToFixedString<FixedString32Bytes>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly FixedString32Bytes ToFixedString()
@@ -220,7 +242,7 @@ namespace EncosyTower.Ids
             return fs;
         }
 
-        public partial struct Serializable
+        public partial struct Serializable : IToFixedString<FixedString32Bytes>
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly FixedString32Bytes ToFixedString()

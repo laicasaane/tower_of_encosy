@@ -16,6 +16,7 @@ namespace EncosyTower.Ids
         , IComparable<Id2>
         , ITryParse<Id2>
         , ITryParseSpan<Id2>
+        , ISpanFormattable
     {
         [FieldOffset(0)]
         private readonly ulong _value;
@@ -77,7 +78,6 @@ namespace EncosyTower.Ids
         public int CompareTo(Id2 other)
             => _value.CompareTo(other._value);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryFormat(
               Span<char> destination
             , out int charsWritten
@@ -136,6 +136,10 @@ namespace EncosyTower.Ids
             charsWritten = openQuoteChars + xChars + delimiterChars + yChars + closeQuoteChars;
             return true;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ToString(string format, IFormatProvider formatProvider)
+            => $"{_x.ToString(format, formatProvider)}-{_y.ToString(format, formatProvider)}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryParse(
@@ -243,6 +247,7 @@ namespace EncosyTower.Ids
         public partial struct Serializable : ITryConvert<Id2>
             , IEquatable<Serializable>
             , IComparable<Serializable>
+            , ISpanFormattable
         {
             [SerializeField]
             private Id.Serializable _x;
@@ -281,11 +286,20 @@ namespace EncosyTower.Ids
             public readonly override int GetHashCode()
                 => ((Id2)this).GetHashCode();
 
-#if !UNITY_COLLECTIONS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly override string ToString()
-                => $"({_x}, {_y})";
-#endif
+            public readonly string ToString(string format, IFormatProvider formatProvider)
+                => $"{_x.ToString(format, formatProvider)}-{_y.ToString(format, formatProvider)}";
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly bool TryFormat(
+                  Span<char> destination
+                , out int charsWritten
+                , ReadOnlySpan<char> format
+                , IFormatProvider provider
+            )
+            {
+                return ((Id2)this).TryFormat(destination, out charsWritten, format, provider);
+            }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly int CompareTo(Serializable other)
@@ -331,9 +345,10 @@ namespace EncosyTower.Ids
 namespace EncosyTower.Ids
 {
     using System.Runtime.CompilerServices;
+    using EncosyTower.Conversion;
     using Unity.Collections;
 
-    partial record struct Id2
+    partial record struct Id2 : IToFixedString<FixedString32Bytes>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override string ToString()
@@ -348,7 +363,7 @@ namespace EncosyTower.Ids
             return fs;
         }
 
-        public partial struct Serializable
+        public partial struct Serializable : IToFixedString<FixedString32Bytes>
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly override string ToString()
@@ -358,12 +373,9 @@ namespace EncosyTower.Ids
             public readonly FixedString32Bytes ToFixedString()
             {
                 var fs = new FixedString32Bytes();
-                fs.Append('(');
                 fs.Append(_x);
-                fs.Append(',');
-                fs.Append(' ');
+                fs.Append('-');
                 fs.Append(_y);
-                fs.Append(')');
                 return fs;
             }
         }
@@ -374,6 +386,7 @@ namespace EncosyTower.Ids
 
 namespace EncosyTower.Ids
 {
+    using System;
     using System.Runtime.CompilerServices;
 
     partial record struct Id2
@@ -381,6 +394,13 @@ namespace EncosyTower.Ids
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
             => $"{X}-{Y}";
+
+        partial struct Serializable
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly override string ToString()
+                => $"({_x}, {_y})";
+        }
     }
 }
 

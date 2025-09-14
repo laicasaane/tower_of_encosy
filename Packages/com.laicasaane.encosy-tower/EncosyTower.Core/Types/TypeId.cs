@@ -4,7 +4,11 @@ namespace EncosyTower.Types
     using System.Runtime.CompilerServices;
     using EncosyTower.Ids;
 
-    public readonly partial struct TypeId : IEquatable<TypeId>, IComparable<TypeId>
+    public readonly partial struct TypeId
+        : IEquatable<TypeId>
+        , IComparable<TypeId>
+        , IComparable
+        , ISpanFormattable
     {
         public static readonly TypeId Undefined = default;
 
@@ -33,8 +37,27 @@ namespace EncosyTower.Types
             => _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ToString(string format, IFormatProvider formatProvider)
+            => _value.ToString(format, formatProvider);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CompareTo(TypeId other)
             => _value.CompareTo(other._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int CompareTo(object obj)
+            => obj is TypeId other ? _value.CompareTo(other._value) : 1;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryFormat(
+              Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format
+            , IFormatProvider provider
+        )
+        {
+            return _value.TryFormat(destination, out charsWritten, format, provider);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Id(in TypeId id)

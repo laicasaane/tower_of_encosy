@@ -16,7 +16,7 @@ using UnityEngine;
 namespace EncosyTower.UnityExtensions
 {
     [Serializable]
-    public struct UnityEntityId<T> : IEquatable<UnityEntityId<T>>
+    public struct UnityEntityId<T> : IEquatable<UnityEntityId<T>>, ISpanFormattable
         where T : UnityEngine.Object
     {
         [SerializeField]
@@ -77,6 +77,21 @@ namespace EncosyTower.UnityExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override string ToString()
             => _value.ToString();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly string ToString(string format, IFormatProvider formatProvider)
+            => ((int)_value).ToString(format, formatProvider);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool TryFormat(
+              Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format
+            , IFormatProvider provider
+        )
+        {
+            return ((int)_value).TryFormat(destination, out charsWritten, format, provider);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator int(UnityEntityId<T> instanceId)

@@ -15,6 +15,7 @@ namespace EncosyTower.Common
         , IComparable<DateTimeId>
         , ITryParse<DateTimeId>
         , ITryParseSpan<DateTimeId>
+        , ISpanFormattable
     {
         public static readonly DateTimeId MaxValue = DateTime.MaxValue;
         public static readonly DateTimeId MinValue = DateTime.MinValue;
@@ -178,6 +179,10 @@ namespace EncosyTower.Common
             minute = _minute;
             second = _second;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ToString(string format, IFormatProvider provider)
+            => $"{_year.ToString(format, provider)}_{_month.ToString(format, provider)}_{_day.ToString(format, provider)}T{_hour.ToString(format, provider)}:{_minute.ToString(format, provider)}:{_second.ToString(format, provider)}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public DateTime ToDateTime()
@@ -369,6 +374,110 @@ namespace EncosyTower.Common
             return false;
         }
 
+        public bool TryFormat(
+              Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format = default
+            , IFormatProvider provider = null
+        )
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static bool False(out int value)
+            {
+                value = 0;
+                return false;
+            }
+
+            if (_year.TryFormat(destination, out var yearChars, format, provider) == false)
+            {
+                return False(out charsWritten);
+            }
+
+            destination = destination[yearChars..];
+
+            if (destination.Length < 1)
+            {
+                return False(out charsWritten);
+            }
+
+            destination[0] = '_';
+            destination = destination[1..];
+
+            if (_month.TryFormat(destination, out var monthChars, format, provider) == false)
+            {
+                return False(out charsWritten);
+            }
+
+            destination = destination[monthChars..];
+
+            if (destination.Length < 1)
+            {
+                return False(out charsWritten);
+            }
+
+            destination[0] = '_';
+            destination = destination[1..];
+
+            if (_day.TryFormat(destination, out var dayChars, format, provider) == false)
+            {
+                return False(out charsWritten);
+            }
+
+            destination = destination[dayChars..];
+
+            if (destination.Length < 1)
+            {
+                return False(out charsWritten);
+            }
+
+            destination[0] = 'T';
+            destination = destination[1..];
+
+            if (_hour.TryFormat(destination, out var hourChars, format, provider) == false)
+            {
+                return False(out charsWritten);
+            }
+
+            destination = destination[hourChars..];
+
+            if (destination.Length < 1)
+            {
+                return False(out charsWritten);
+            }
+
+            destination[0] = ':';
+            destination = destination[1..];
+
+            if (_minute.TryFormat(destination, out var minuteChars, format, provider) == false)
+            {
+                return False(out charsWritten);
+            }
+
+            destination = destination[minuteChars..];
+
+            if (destination.Length < 1)
+            {
+                return False(out charsWritten);
+            }
+
+            destination[0] = ':';
+            destination = destination[1..];
+
+            if (_second.TryFormat(destination, out var secondChars, format, provider) == false)
+            {
+                return False(out charsWritten);
+            }
+
+            charsWritten = yearChars
+                + 1 + monthChars
+                + 1 + dayChars
+                + 1 + hourChars
+                + 1 + minuteChars
+                + 1 + secondChars;
+
+            return true;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator ulong(in DateTimeId id)
             => id._raw;
@@ -423,9 +532,10 @@ namespace EncosyTower.Common
 namespace EncosyTower.Common
 {
     using System.Runtime.CompilerServices;
+    using EncosyTower.Conversion;
     using Unity.Collections;
 
-    partial record struct DateTimeId
+    partial record struct DateTimeId : IToFixedString<FixedString128Bytes>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
@@ -460,32 +570,12 @@ namespace EncosyTower.Common
 namespace EncosyTower.Common
 {
     using System.Runtime.CompilerServices;
-    using System.Text;
 
     partial record struct DateTimeId
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
-        {
-            var fs = new StringBuilder(32);
-            fs.Append(_year);
-            fs.Append('_');
-            if (_month < 10) fs.Append('0');
-            fs.Append(_month);
-            fs.Append('_');
-            if (_day < 10) fs.Append('0');
-            fs.Append(_day);
-            fs.Append('T');
-            if (_hour < 10) fs.Append('0');
-            fs.Append(_hour);
-            fs.Append(':');
-            if (_minute < 10) fs.Append('0');
-            fs.Append(_minute);
-            fs.Append(':');
-            if (_second < 10) fs.Append('0');
-            fs.Append(_second);
-            return fs.ToString();
-        }
+            => $"{_year:0000}_{_month:00}_{_day:00}T{_hour:00}:{_minute:00}:{_second:00}";
     }
 }
 

@@ -35,33 +35,33 @@ namespace EncosyTower.Common
 
     public readonly struct Result<TValue> : IEquatable<Result<TValue>>, IResult<TValue, Error>
     {
-        private readonly Option<TValue> _value;
-        private readonly Error _error;
+        public readonly Option<TValue> Value;
+        public readonly Error Error;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(TValue value)
         {
-            _value = value;
-            _error = Error.None;
+            Value = value;
+            Error = Error.None;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(Error error)
         {
-            _value = Option.None;
-            _error = error;
+            Value = Option.None;
+            Error = error;
         }
 
         public bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _value.HasValue || _error.IsValid;
+            get => Value.HasValue || Error.IsValid;
         }
 
         public bool IsSuccess
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _value.HasValue;
+            get => Value.HasValue;
         }
 
         public bool IsError
@@ -73,32 +73,32 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Deconstruct(out Option<TValue> value, out Error error)
         {
-            value = _value;
-            error = _error;
+            value = Value;
+            error = Error;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TValue GetValueOrThrow()
-            => _value.GetValueOrThrow();
+            => Value.GetValueOrThrow();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetValue(out TValue value)
-            => _value.TryGetValue(out value);
+            => Value.TryGetValue(out value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TValue GetValueOrDefault(TValue defaultValue = default)
-            => _value.GetValueOrDefault(defaultValue);
+            => Value.GetValueOrDefault(defaultValue);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Error GetErrorOrThrow()
-            => _error;
+            => Error;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetError(out Error error)
         {
-            if (_error.IsValid)
+            if (Error.IsValid)
             {
-                error = _error;
+                error = Error;
                 return true;
             }
             else
@@ -110,11 +110,11 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Error GetErrorOrDefault(Error defaultError = default)
-            => _error.IsValid ? _error : defaultError;
+            => Error.IsValid ? Error : defaultError;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Result<TValue> other)
-            => _value.Equals(other._value) && _error.Equals(other._error);
+            => Value.Equals(other.Value) && Error.Equals(other.Error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
@@ -122,7 +122,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashCode.Combine(_value, _error);
+            => HashCode.Combine(Value, Error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
@@ -164,33 +164,33 @@ namespace EncosyTower.Common
 
     public readonly struct Result<TValue, TError> : IEquatable<Result<TValue, TError>>, IResult<TValue, TError>
     {
-        private readonly Option<TValue> _value;
-        private readonly Option<TError> _error;
+        public readonly Option<TValue> Value;
+        public readonly Option<TError> Error;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(TValue value)
         {
-            _value = new Option<TValue>(value);
-            _error = default;
+            Value = new Option<TValue>(value);
+            Error = Option.None;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(TError error)
         {
-            _value = default;
-            _error = new Option<TError>(error);
+            Value = Option.None;
+            Error = new Option<TError>(error);
         }
 
         public bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _value.HasValue || _error.HasValue;
+            get => Value.HasValue || Error.HasValue;
         }
 
         public bool IsSuccess
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _value.HasValue;
+            get => Value.HasValue;
         }
 
         public bool IsError
@@ -202,37 +202,37 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Deconstruct(out Option<TValue> value, out Option<TError> error)
         {
-            value = _value;
-            error = _error;
+            value = Value;
+            error = Error;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TValue GetValueOrThrow()
-            => _value.GetValueOrThrow();
+            => Value.GetValueOrThrow();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetValue(out TValue value)
-            => _value.TryGetValue(out value);
+            => Value.TryGetValue(out value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TValue GetValueOrDefault(TValue defaultValue = default)
-            => _value.GetValueOrDefault(defaultValue);
+            => Value.GetValueOrDefault(defaultValue);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TError GetErrorOrThrow()
-            => _error.GetValueOrThrow();
+            => Error.GetValueOrThrow();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetError(out TError error)
-            => _error.TryGetValue(out error);
+            => Error.TryGetValue(out error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TError GetErrorOrDefault(TError defaultError = default)
-            => _error.GetValueOrDefault(defaultError);
+            => Error.GetValueOrDefault(defaultError);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Result<TValue, TError> other)
-            => _value.Equals(other._value) && _error.Equals(other._error);
+            => Value.Equals(other.Value) && Error.Equals(other.Error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
@@ -240,7 +240,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashValue.Combine(_value, _error);
+            => HashValue.Combine(Value, Error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()

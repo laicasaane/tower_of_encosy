@@ -1,9 +1,8 @@
-using System.Runtime.CompilerServices;
-using Unity.Collections;
-
 namespace EncosyTower.Logging
 {
-    public readonly struct CallerInfo
+    using System.Runtime.CompilerServices;
+
+    public readonly partial struct CallerInfo
     {
         public readonly string MemberName;
         public readonly string FilePath;
@@ -26,8 +25,31 @@ namespace EncosyTower.Logging
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
             => IsValid ? $"{LineNumber} :: {MemberName} :: {FilePath}" : string.Empty;
+    }
+
+    public static class CallerInfoExtensions
+    {
+        public static CallerInfo GetCallerInfo(
+              this object _
+            , [CallerLineNumber] int lineNumber = 0
+            , [CallerMemberName] string memberName = ""
+            , [CallerFilePath] string filePath = ""
+        )
+        {
+            return new CallerInfo(lineNumber, memberName, filePath);
+        }
+    }
+}
 
 #if UNITY_COLLECTIONS
+
+namespace EncosyTower.Logging
+{
+    using System.Runtime.CompilerServices;
+    using Unity.Collections;
+
+    partial struct CallerInfo
+    {
         public FixedString4096Bytes ToFixedString()
         {
             var fs = new FixedString4096Bytes();
@@ -52,19 +74,7 @@ namespace EncosyTower.Logging
                 fs.Append(' ');
             }
         }
-#endif
-    }
-
-    public static class CallerInfoExtensions
-    {
-        public static CallerInfo GetCallerInfo(
-              this object _
-            , [CallerLineNumber] int lineNumber = 0
-            , [CallerMemberName] string memberName = ""
-            , [CallerFilePath] string filePath = ""
-        )
-        {
-            return new CallerInfo(lineNumber, memberName, filePath);
-        }
     }
 }
+
+#endif

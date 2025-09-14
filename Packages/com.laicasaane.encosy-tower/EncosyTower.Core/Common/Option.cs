@@ -81,7 +81,9 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
-            => HasValue ? $"Option+Value({_value})" : "Option+None";
+            => HasValue
+            ? string.Format("{0}({1})", OptionExtensions.OPTION_VALUE_STRING, _value)
+            : OptionExtensions.OPTION_NONE_STRING;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Option<T>(T value)
@@ -106,6 +108,72 @@ namespace EncosyTower.Common
             {
                 throw new InvalidOperationException($"The instance of Option<{typeof(T)}> has no value");
             }
+        }
+    }
+
+    public static class OptionExtensions
+    {
+        internal const string OPTION_VALUE_STRING = "Option+Value";
+        internal const string OPTION_NONE_STRING = "Option+None";
+
+        public static bool TryFormat<T>(
+              in this Option<T> self
+            , Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format
+            , IFormatProvider provider
+        )
+            where T : ISpanFormattable
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static bool False(out int value)
+            {
+                value = 0;
+                return false;
+            }
+
+            if (self.TryGetValue(out var value) == false)
+            {
+                var optionNoneSpan = OPTION_NONE_STRING.AsSpan();
+
+                if (destination.Length < optionNoneSpan.Length)
+                {
+                    return False(out charsWritten);
+                }
+
+                OPTION_NONE_STRING.AsSpan().CopyTo(destination);
+                charsWritten = optionNoneSpan.Length;
+                return true;
+            }
+
+            var optionValueSpan = OPTION_VALUE_STRING.AsSpan();
+
+            if (destination.Length < optionValueSpan.Length + 1)
+            {
+                return False(out charsWritten);
+            }
+
+            OPTION_VALUE_STRING.AsSpan().CopyTo(destination);
+            destination[optionValueSpan.Length] = '(';
+
+            var prefixChars = optionValueSpan.Length + 1;
+            destination = destination[prefixChars..];
+
+            if (value.TryFormat(destination, out var valueCharsWritten, format, provider) == false)
+            {
+                return False(out charsWritten);
+            }
+
+            destination = destination[valueCharsWritten..];
+
+            if (destination.Length < 1)
+            {
+                return False(out charsWritten);
+            }
+
+            destination[0] = ')';
+            charsWritten = prefixChars + valueCharsWritten + 1;
+            return true;
         }
     }
 }

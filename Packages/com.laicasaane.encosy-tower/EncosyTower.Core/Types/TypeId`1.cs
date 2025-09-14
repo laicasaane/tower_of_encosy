@@ -4,8 +4,13 @@ namespace EncosyTower.Types
     using System.Runtime.CompilerServices;
     using EncosyTower.Ids;
 
-    public readonly partial struct TypeId<T> : IEquatable<TypeId<T>>, IEquatable<TypeId>
-        , IComparable<TypeId<T>>, IComparable<TypeId>
+    public readonly partial struct TypeId<T>
+        : IEquatable<TypeId<T>>
+        , IEquatable<TypeId>
+        , IComparable<TypeId<T>>
+        , IComparable<TypeId>
+        , IComparable
+        , ISpanFormattable
     {
         internal readonly uint _value;
 
@@ -42,12 +47,37 @@ namespace EncosyTower.Types
             => _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ToString(string format, IFormatProvider formatProvider)
+            => _value.ToString(format, formatProvider);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CompareTo(TypeId<T> other)
             => _value.CompareTo(other._value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CompareTo(TypeId other)
             => _value.CompareTo(other._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int CompareTo(object obj)
+        {
+            return obj switch {
+                TypeId<T> other => CompareTo(other),
+                TypeId other => CompareTo(other),
+                _ => 1,
+            };
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryFormat(
+              Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format
+            , IFormatProvider provider
+        )
+        {
+            return _value.TryFormat(destination, out charsWritten, format, provider);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Id<T>(in TypeId<T> id)

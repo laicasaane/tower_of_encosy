@@ -5,7 +5,11 @@ using UnityEngine;
 namespace EncosyTower.UnityExtensions
 {
     [Serializable]
-    public struct SortingLayerId : IEquatable<SortingLayerId>
+    public struct SortingLayerId
+        : IEquatable<SortingLayerId>
+        , IComparable<SortingLayerId>
+        , IComparable
+        , ISpanFormattable
     {
         public int value;
 
@@ -42,6 +46,29 @@ namespace EncosyTower.UnityExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override string ToString()
             => value.ToString();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ToString(string format, IFormatProvider formatProvider)
+            => value.ToString(format, formatProvider);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly int CompareTo(SortingLayerId other)
+            => value.CompareTo(other.value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly int CompareTo(object obj)
+            => obj is SortingLayerId other ? value.CompareTo(other.value) : 1;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool TryFormat(
+              Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format
+            , IFormatProvider provider
+        )
+        {
+            return value.TryFormat(destination, out charsWritten, format, provider);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator int(SortingLayerId value)

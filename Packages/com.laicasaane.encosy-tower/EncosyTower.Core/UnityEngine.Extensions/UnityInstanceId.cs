@@ -19,7 +19,7 @@ namespace EncosyTower.UnityExtensions
     )]
 #endif
     [Serializable]
-    public struct UnityInstanceId<T> : IEquatable<UnityInstanceId<T>>
+    public struct UnityInstanceId<T> : IEquatable<UnityInstanceId<T>>, ISpanFormattable
         where T : UnityEngine.Object
     {
         [SerializeField]
@@ -108,6 +108,21 @@ namespace EncosyTower.UnityExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override string ToString()
             => _value.ToString();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly string ToString(string format, IFormatProvider formatProvider)
+            => _value.ToString(format, formatProvider);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool TryFormat(
+              Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format
+            , IFormatProvider provider
+        )
+        {
+            return _value.TryFormat(destination, out charsWritten, format, provider);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator int(UnityInstanceId<T> instanceId)
