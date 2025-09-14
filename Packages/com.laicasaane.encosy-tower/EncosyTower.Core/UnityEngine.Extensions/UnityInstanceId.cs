@@ -109,6 +109,22 @@ namespace EncosyTower.UnityExtensions
         public readonly override string ToString()
             => _value.ToString();
 
+#if UNITY_6000_2_OR_NEWER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly string ToString(string format, IFormatProvider formatProvider)
+            => ((int)_value).ToString(format, formatProvider);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool TryFormat(
+              Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format
+            , IFormatProvider provider
+        )
+        {
+            return ((int)_value).TryFormat(destination, out charsWritten, format, provider);
+        }
+#else
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly string ToString(string format, IFormatProvider formatProvider)
             => _value.ToString(format, formatProvider);
@@ -123,6 +139,7 @@ namespace EncosyTower.UnityExtensions
         {
             return _value.TryFormat(destination, out charsWritten, format, provider);
         }
+#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator int(UnityInstanceId<T> instanceId)
