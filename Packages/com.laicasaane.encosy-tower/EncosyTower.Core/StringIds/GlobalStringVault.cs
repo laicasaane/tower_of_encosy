@@ -40,7 +40,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static StringId MakeIdFromManaged([NotNull] string str)
         {
-            return new(s_vault.MakeIdFromManaged(str));
+            return s_vault.MakeIdFromManaged(str);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -54,7 +54,7 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static StringId MakeIdFromUnmanaged(in UnmanagedString str)
         {
-            return new(s_vault.MakeIdFromUnmanaged(str));
+            return s_vault.MakeIdFromUnmanaged(str);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

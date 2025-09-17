@@ -57,7 +57,7 @@ namespace EncosyTower.StringIds
             }
         }
 
-        public Id MakeIdFromUnmanaged(in UnmanagedString str)
+        public StringId MakeIdFromUnmanaged(in UnmanagedString str)
         {
             var hash = str.GetHashCode();
             var registered = _map.TryGetValue(hash, out var id);
@@ -110,7 +110,7 @@ namespace EncosyTower.StringIds
             return id;
         }
 
-        public Id MakeIdFromManaged([NotNull] string str)
+        public StringId MakeIdFromManaged([NotNull] string str)
         {
             var hash = str.GetHashCode(StringComparison.Ordinal);
             var registered = _map.TryGetValue(hash, out var id);
@@ -139,11 +139,11 @@ namespace EncosyTower.StringIds
             }
             else
             {
-                var index = _count;
-                id = new Id(index);
-
                 lock (_lock)
                 {
+                    var index = _count;
+                    id = new Id(index);
+
                     if (_map.TryAdd(hash, id))
                     {
                         _count += 1;
