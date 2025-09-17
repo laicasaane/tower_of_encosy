@@ -3,6 +3,7 @@ namespace EncosyTower.Common
     using System;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
+    using EncosyTower.SystemExtensions;
     using UnityEngine;
 
     [Serializable, StructLayout(LayoutKind.Sequential)]
@@ -23,6 +24,14 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SerializedGuid NewGuid()
+            => Guid.NewGuid();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SerializedGuid CreateVersion7()
+            => GuidAPI.CreateVersion7();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Guid(in SerializedGuid guid)
             => guid.ToGuid();
 
@@ -37,6 +46,14 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in SerializedGuid lhs, in SerializedGuid rhs)
             => lhs.ToGuid() == rhs.ToGuid();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly Guid ToGuid()
+            => new Union(this).SystemGuid;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly SerializedGuid ToVersion7()
+            => ToGuid().ToVersion7();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(SerializedGuid other)
@@ -77,10 +94,6 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly string ToString(string format, IFormatProvider provider)
             => $"({_ac.ToString(format, provider)}, {_dk.ToString(format, provider)})";
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly Guid ToGuid()
-            => new Union(this).SystemGuid;
 
         public readonly bool TryFormat(
               Span<char> destination

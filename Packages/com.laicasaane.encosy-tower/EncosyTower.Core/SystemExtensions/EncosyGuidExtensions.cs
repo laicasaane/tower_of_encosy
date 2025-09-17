@@ -1,43 +1,107 @@
-#if UNITY_COLLECTIONS
-
 namespace EncosyTower.SystemExtensions
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
-    using EncosyTower.Collections;
     using EncosyTower.Debugging;
-    using Unity.Collections;
+    using Unity.Collections.LowLevel.Unsafe;
+
+    public static partial class GuidAPI
+    {
+        /// <summary>
+        /// Creates a new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// </summary>
+        /// <returns>
+        /// A new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// </returns>
+        /// <remarks>
+        ///     <para>This uses <see cref="DateTimeOffset.UtcNow" /> to determine the Unix Epoch timestamp source.</para>
+        ///     <para>This seeds the rand_a and rand_b sub-fields with random data.</para>
+        /// </remarks>
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Guid CreateVersion7()
+            => CreateVersion7(DateTimeOffset.UtcNow);
+
+        /// <summary>
+        /// Creates a new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// </summary>
+        /// <param name="timestamp">The date time offset used to determine the Unix Epoch timestamp.</param>
+        /// <returns>
+        /// A new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// </returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="timestamp" />
+        /// represents an offset prior to <see cref="DateTimeOffset.UnixEpoch" />.
+        /// </exception>
+        /// <remarks>
+        ///     <para>This seeds the rand_a and rand_b sub-fields with random data.</para>
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Guid CreateVersion7(DateTimeOffset timestamp)
+            => new Guid().ToVersion7(timestamp);
+
+        /// <summary>
+        /// Creates a new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// </summary>
+        /// <param name="unixTimeMilliseconds">The Unix Epoch timestamp in milliseconds.</param>
+        /// <returns>
+        /// A new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// </returns>
+        /// <remarks>
+        ///     <para>This seeds the rand_a and rand_b sub-fields with random data.</para>
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Guid CreateVersion7(ulong unixTimeMilliseconds)
+            => new Guid().ToVersion7(unixTimeMilliseconds);
+    }
 
     public static partial class EncosyGuidExtensions
     {
         /// <summary>
-        /// Converts a <see cref="Guid"/> to its equivalent <see cref="FixedString128Bytes"/> representation.
+        /// Creates a new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
         /// </summary>
+        /// <returns>
+        /// A new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// </returns>
+        /// <remarks>
+        ///     <para>This uses <see cref="DateTimeOffset.UtcNow" /> to determine the Unix Epoch timestamp source.</para>
+        ///     <para>This seeds the rand_a and rand_b sub-fields with random data.</para>
+        /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static FixedString128Bytes ToFixedString(in this Guid self)
-            => ToFixedString(self, stackalloc char[1] { 'D' });
+        public static Guid ToVersion7(in this Guid self)
+            => ToVersion7(self, DateTimeOffset.UtcNow);
 
         /// <summary>
-        /// Converts a <see cref="Guid"/> to its equivalent <see cref="FixedString128Bytes"/> representation.
+        /// Creates a new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
         /// </summary>
-        /// <param name="format">
-        /// A read-only span containing the character representing one of the following specifiers
-        /// that indicates the exact format to use when interpreting the current GUID instance:
-        /// "N", "D", "B", "P", or "X".
-        /// </param>
-        public static FixedString128Bytes ToFixedString(in this Guid self, ReadOnlySpan<char> format)
-        {
-            var fs = new FixedString128Bytes();
-            var guid = new Union(self).BurstableGuid;
+        /// <param name="timestamp">The date time offset used to determine the Unix Epoch timestamp.</param>
+        /// <returns>
+        /// A new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// </returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="timestamp" />
+        /// represents an offset prior to <see cref="DateTimeOffset.UnixEpoch" />.
+        /// </exception>
+        /// <remarks>
+        ///     <para>This seeds the rand_a and rand_b sub-fields with random data.</para>
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Guid ToVersion7(in this Guid self, DateTimeOffset timestamp)
+            => new Union(new Union(self).BurstableGuid.ToVersion7(timestamp)).SystemGuid;
 
-            Span<char> utf16Chars = stackalloc char[68];
-            guid.TryFormat(utf16Chars, out var utf16CharsWritten, format);
-            fs.AppendSpan(utf16Chars[..utf16CharsWritten]);
-
-            return fs;
-        }
+        /// <summary>
+        /// Creates a new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// </summary>
+        /// <param name="unixTimeMilliseconds">The Unix Epoch timestamp in milliseconds.</param>
+        /// <returns>
+        /// A new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// </returns>
+        /// <remarks>
+        ///     <para>This seeds the rand_a and rand_b sub-fields with random data.</para>
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Guid ToVersion7(in this Guid self, ulong unixTimeMilliseconds)
+            => new Union(new Union(self).BurstableGuid.ToVersion7(unixTimeMilliseconds)).SystemGuid;
 
         [StructLayout(LayoutKind.Explicit)]
         private readonly struct Union
@@ -50,12 +114,34 @@ namespace EncosyTower.SystemExtensions
             {
                 SystemGuid = guid;
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public Union(in  BurstableGuid guid) : this()
+            {
+                BurstableGuid = guid;
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]
         private readonly struct BurstableGuid
         {
             // https://github.com/dotnet/runtime/blob/release/8.0/src/libraries/System.Private.CoreLib/src/System/Guid.cs
+
+            // TryFormatCore accepts an `int flags` composed of:
+            // - Lowest byte: required length
+            // - Second byte: opening brace char, or 0 if no braces
+            // - Third byte: closing brace char, or 0 if no braces
+            // - Highest bit: 1 if use dashes, else 0
+            private const int TRY_FORMAT_FLAGS_USE_DASHES = unchecked((int)0x80000000);
+            private const int TRY_FORMAT_FLAGS_CURLY_BRACES = ('}' << 16) | ('{' << 8);
+            private const int TRY_FORMAT_FLAGS_PARENS = (')' << 16) | ('(' << 8);
+
+            private const byte VARIANT_10XX_MASK = 0xC0;
+            private const byte VARIANT_10XX_VALUE = 0x80;
+
+            private const ushort VERSION_MASK = 0xF000;
+            private const ushort VERSION4_VALUE = 0x4000;
+            private const ushort VERSION7_VALUE = 0x7000;
 
             private readonly int _a;
             private readonly short _b;
@@ -69,14 +155,39 @@ namespace EncosyTower.SystemExtensions
             private readonly byte _j;
             private readonly byte _k;
 
-            // TryFormatCore accepts an `int flags` composed of:
-            // - Lowest byte: required length
-            // - Second byte: opening brace char, or 0 if no braces
-            // - Third byte: closing brace char, or 0 if no braces
-            // - Highest bit: 1 if use dashes, else 0
-            internal const int TRY_FORMAT_FLAGS_USE_DASHES = unchecked((int)0x80000000);
-            internal const int TRY_FORMAT_FLAGS_CURLY_BRACES = ('}' << 16) | ('{' << 8);
-            internal const int TRY_FORMAT_FLAGS_PARENS = (')' << 16) | ('(' << 8);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public BurstableGuid ToVersion7(DateTimeOffset timestamp)
+            {
+                var unixTimeMilliseconds = timestamp.ToUnixTimeMilliseconds();
+
+                ThrowIfNegative(unixTimeMilliseconds, nameof(timestamp));
+
+                return ToVersion7Core((ulong)unixTimeMilliseconds);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public BurstableGuid ToVersion7(ulong unixTimeMilliseconds)
+            {
+                return ToVersion7Core(unixTimeMilliseconds);
+            }
+
+            private BurstableGuid ToVersion7Core(ulong unixTimeMilliseconds)
+            {
+                // 2^48 is roughly 8925.5 years, which from the Unix Epoch means we won't
+                // overflow until around July of 10,895. So there isn't any need to handle
+                // it given that DateTimeOffset.MaxValue is December 31, 9999. However, we
+                // can't represent timestamps prior to the Unix Epoch since UUIDv7 explicitly
+                // stores a 48-bit unsigned value, so we do need to throw if one is passed in.
+                BurstableGuid result = this;
+
+                UnsafeUtilityExtensions.AsRef(in result._a) = (int)(unixTimeMilliseconds >> 16);
+                UnsafeUtilityExtensions.AsRef(in result._b) = (short)(unixTimeMilliseconds);
+
+                UnsafeUtilityExtensions.AsRef(in result._c) = (short)((result._c & ~VERSION_MASK) | VERSION7_VALUE);
+                UnsafeUtilityExtensions.AsRef(in result._d) = (byte)((result._d & ~VARIANT_10XX_MASK) | VARIANT_10XX_VALUE);
+
+                return result;
+            }
 
             public unsafe bool TryFormat(
                   Span<char> destination
@@ -299,6 +410,62 @@ namespace EncosyTower.SystemExtensions
                 => throw new FormatException(
                     "Format string can be only \"D\", \"d\", \"N\", \"n\", \"P\", \"p\", \"B\", \"b\", \"X\" or \"x\"."
                 );
+
+            [DoesNotReturn]
+            private static void ThrowIfNegative(long value, string paramName)
+            {
+                if (value >= 0)
+                {
+                    return;
+                }
+
+                throw new ArgumentOutOfRangeException(
+                      paramName
+                    , value
+                    , $"{paramName} ('{value}') must be a non-negative value."
+                );
+            }
+        }
+    }
+}
+
+
+#if UNITY_COLLECTIONS
+
+namespace EncosyTower.SystemExtensions
+{
+    using System;
+    using System.Runtime.CompilerServices;
+    using EncosyTower.Collections;
+    using Unity.Collections;
+
+    partial class EncosyGuidExtensions
+    {
+        /// <summary>
+        /// Converts a <see cref="Guid"/> to its equivalent <see cref="FixedString128Bytes"/> representation.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FixedString128Bytes ToFixedString(in this Guid self)
+            => ToFixedString(self, stackalloc char[1] { 'D' });
+
+        /// <summary>
+        /// Converts a <see cref="Guid"/> to its equivalent <see cref="FixedString128Bytes"/> representation.
+        /// </summary>
+        /// <param name="format">
+        /// A read-only span containing the character representing one of the following specifiers
+        /// that indicates the exact format to use when interpreting the current GUID instance:
+        /// "N", "D", "B", "P", or "X".
+        /// </param>
+        public static FixedString128Bytes ToFixedString(in this Guid self, ReadOnlySpan<char> format)
+        {
+            var fs = new FixedString128Bytes();
+            var guid = new Union(self).BurstableGuid;
+
+            Span<char> utf16Chars = stackalloc char[68];
+            guid.TryFormat(utf16Chars, out var utf16CharsWritten, format);
+            fs.AppendSpan(utf16Chars[..utf16CharsWritten]);
+
+            return fs;
         }
     }
 }
