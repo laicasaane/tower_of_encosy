@@ -34,7 +34,7 @@ namespace EncosyTower.Samples.VisualDebugging
 
         public void Execute()
         {
-            RuntimeLoggerAPI.LogInfoSlim($"Resource: Type={Type} Amount={Amount}");
+            StaticLogger.LogInfoSlim($"Resource: Type={Type} Amount={Amount}");
         }
 
         [RelayCommand]
@@ -62,7 +62,7 @@ namespace EncosyTower.Samples.VisualDebugging
 
         public void Execute()
         {
-            RuntimeLoggerAPI.LogInfoSlim($"Gold: Amount={Amount}");
+            StaticLogger.LogInfoSlim($"Gold: Amount={Amount}");
         }
 
         [RelayCommand]
@@ -84,7 +84,7 @@ namespace EncosyTower.Samples.VisualDebugging
 
         public void Execute()
         {
-            RuntimeLoggerAPI.LogInfoSlim($"Crystal: Amount={Amount}");
+            StaticLogger.LogInfoSlim($"Crystal: Amount={Amount}");
         }
 
         [RelayCommand]
@@ -119,7 +119,7 @@ namespace EncosyTower.Samples.VisualDebugging
 
         public void Execute()
         {
-            RuntimeLoggerAPI.LogInfoSlim(
+            StaticLogger.LogInfoSlim(
                 $"Level: CurrentLevel={CurrentLevel} ReceivedStarterPack={ReceivedStarterPack}"
             );
         }
@@ -157,7 +157,7 @@ namespace EncosyTower.Samples.VisualDebugging
 
         public void Execute()
         {
-            RuntimeLoggerAPI.LogInfoSlim($"Player Name: {Name}");
+            StaticLogger.LogInfoSlim($"Player Name: {Name}");
         }
 
         [RelayCommand]
