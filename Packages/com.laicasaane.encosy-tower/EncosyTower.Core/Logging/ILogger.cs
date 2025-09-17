@@ -40,42 +40,21 @@ namespace EncosyTower.Logging
 
 #if UNITY_COLLECTIONS
 
-//namespace EncosyTower.Logging
-//{
-//    using Unity.Collections;
+namespace EncosyTower.Logging
+{
+    using Unity.Collections;
 
-//    partial interface ILogger
-//    {
-//        void LogInfo(in FixedString32Bytes message);
+    partial interface ILogger
+    {
+        void LogFixedInfo<TFixedString>(in TFixedString message)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes;
 
-//        void LogInfo(in FixedString64Bytes message);
+        void LogFixedWarning<TFixedString>(in TFixedString message)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes;
 
-//        void LogInfo(in FixedString128Bytes message);
-
-//        void LogInfo(in FixedString512Bytes message);
-
-//        void LogInfo(in FixedString4096Bytes message);
-
-//        void LogWarning(in FixedString32Bytes message);
-
-//        void LogWarning(in FixedString64Bytes message);
-
-//        void LogWarning(in FixedString128Bytes message);
-
-//        void LogWarning(in FixedString512Bytes message);
-
-//        void LogWarning(in FixedString4096Bytes message);
-
-//        void LogError(in FixedString32Bytes message);
-
-//        void LogError(in FixedString64Bytes message);
-
-//        void LogError(in FixedString128Bytes message);
-
-//        void LogError(in FixedString512Bytes message);
-
-//        void LogError(in FixedString4096Bytes message);
-//    }
-//}
+        void LogFixedError<TFixedString>(in TFixedString message)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes;
+    }
+}
 
 #endif

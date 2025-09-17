@@ -1,11 +1,11 @@
-using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.CompilerServices;
-using EncosyTower.Common;
-using UnityEngine;
-
 namespace EncosyTower.Logging
 {
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.Runtime.CompilerServices;
+    using EncosyTower.Common;
+    using UnityEngine;
+
     using UnityDebug = UnityEngine.Debug;
     using UnityObject = UnityEngine.Object;
 
@@ -25,7 +25,9 @@ namespace EncosyTower.Logging
             return new CallerInfo(lineNumber, memberName, filePath);
         }
 
-        // ReSharper disable Unity.PerformanceAnalysis
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogException(System.Exception value)
         {
@@ -44,7 +46,6 @@ namespace EncosyTower.Logging
             UnityDebug.LogFormat(format, args);
         }
 
-        // ReSharper disable Unity.PerformanceAnalysis
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogWarning(object message)
         {
@@ -58,19 +59,11 @@ namespace EncosyTower.Logging
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        public static void LogWarningFormat(UnityObject context, string format, params object[] args)
-        {
-            UnityDebug.LogWarningFormat(context, format, args);
-        }
-
-        // ReSharper disable Unity.PerformanceAnalysis
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogError(object message)
         {
             UnityDebug.LogError(message);
         }
 
-        // ReSharper disable Unity.PerformanceAnalysis
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogErrorFormat(string format, params object[] args)
         {
@@ -119,43 +112,72 @@ namespace EncosyTower.Logging
             DebugLogFormatSlim(LogType.Error, format, args);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogException(UnityObject context, System.Exception exception)
         {
             UnityDebug.LogException(exception, context);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogInfo(UnityObject context, object message)
         {
             UnityDebug.Log(message, context);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogInfoFormat(UnityObject context, string format, params object[] args)
         {
             UnityDebug.LogFormat(context, format, args);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogWarning(UnityObject context, object message)
         {
             UnityDebug.LogWarning(message, context);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        public static void LogWarningFormat(UnityObject context, string format, params object[] args)
+        {
+            UnityDebug.LogWarningFormat(context, format, args);
+        }
+
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogError(UnityObject context, object message)
         {
             UnityDebug.LogError(message, context);
         }
 
-        // ReSharper disable Unity.PerformanceAnalysis
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogErrorFormat(UnityObject context, string format, params object[] args)
         {
             UnityDebug.LogErrorFormat(context, format, args);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         /// <see cref="LogOption.NoStacktrace"/>
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogInfoSlim(UnityObject context, object message)
@@ -163,6 +185,9 @@ namespace EncosyTower.Logging
             DebugLogSlim(LogType.Log, context, message);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         /// <see cref="LogOption.NoStacktrace"/>
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogInfoFormatSlim(UnityObject context, string format, params object[] args)
@@ -170,6 +195,9 @@ namespace EncosyTower.Logging
             DebugLogFormatSlim(LogType.Log, context, format, args);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         /// <see cref="LogOption.NoStacktrace"/>
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogWarningSlim(UnityObject context, object message)
@@ -177,6 +205,9 @@ namespace EncosyTower.Logging
             DebugLogSlim(LogType.Warning, context, message);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         /// <see cref="LogOption.NoStacktrace"/>
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogWarningFormatSlim(UnityObject context, string format, params object[] args)
@@ -184,6 +215,9 @@ namespace EncosyTower.Logging
             DebugLogFormatSlim(LogType.Warning, context, format, args);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         /// <see cref="LogOption.NoStacktrace"/>
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogErrorSlim(UnityObject context, object message)
@@ -191,6 +225,9 @@ namespace EncosyTower.Logging
             DebugLogSlim(LogType.Error, context, message);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         /// <see cref="LogOption.NoStacktrace"/>
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void LogErrorFormatSlim(UnityObject context, string format, params object[] args)
@@ -198,6 +235,9 @@ namespace EncosyTower.Logging
             DebugLogFormatSlim(LogType.Error, context, format, args);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void DebugLogSlim(LogType type, object message)
@@ -206,6 +246,9 @@ namespace EncosyTower.Logging
             UnityDebug.LogFormat(type, LogOption.NoStacktrace, null, "{0}", msg);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void DebugLogSlim(LogType type, UnityObject context, object message)
@@ -221,6 +264,9 @@ namespace EncosyTower.Logging
             UnityDebug.LogFormat(type, LogOption.NoStacktrace, null, format, args);
         }
 
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void DebugLogFormatSlim(LogType type, UnityObject context, string format, params object[] args)
@@ -229,3 +275,40 @@ namespace EncosyTower.Logging
         }
     }
 }
+
+#if UNITY_COLLECTIONS
+
+namespace EncosyTower.Logging
+{
+    using System.Diagnostics;
+    using Unity.Collections;
+    using UnityEngine;
+
+    using UnityDebug = UnityEngine.Debug;
+
+    partial class StaticDevLogger
+    {
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        public static void LogFixedInfo<TFixedString>(in TFixedString message)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            UnityDebug.Log(message);
+        }
+
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        public static void LogFixedWarning<TFixedString>(in TFixedString message)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            UnityDebug.LogWarning(message);
+        }
+
+        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        public static void LogFixedError<TFixedString>(in TFixedString message)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            UnityDebug.LogError(message);
+        }
+    }
+}
+
+#endif

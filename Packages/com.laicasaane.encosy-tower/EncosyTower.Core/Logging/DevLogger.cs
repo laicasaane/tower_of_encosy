@@ -1,16 +1,16 @@
-using System;
-using System.Runtime.CompilerServices;
-using UnityEngine;
-
 namespace EncosyTower.Logging
 {
+    using System;
+    using System.Runtime.CompilerServices;
+    using UnityEngine;
+
     /// <summary>
     /// A logger for Editor and Development environments.
     /// </summary>
     /// <remarks>
     /// In a Release build, its methods will do nothing.
     /// </remarks>
-    public class DevLogger : ILogger
+    public partial class DevLogger : ILogger
     {
         public static readonly DevLogger Default = new();
 
@@ -109,3 +109,38 @@ namespace EncosyTower.Logging
         }
     }
 }
+
+#if UNITY_COLLECTIONS
+
+namespace EncosyTower.Logging
+{
+    using System.Runtime.CompilerServices;
+    using Unity.Collections;
+    using UnityEngine;
+
+    partial class DevLogger
+    {
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LogFixedInfo<TFixedString>(in TFixedString message)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            StaticDevLogger.LogInfo(message);
+        }
+
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LogFixedWarning<TFixedString>(in TFixedString message)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            StaticDevLogger.LogWarning(message);
+        }
+
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LogFixedError<TFixedString>(in TFixedString message)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            StaticDevLogger.LogError(message);
+        }
+    }
+}
+
+#endif

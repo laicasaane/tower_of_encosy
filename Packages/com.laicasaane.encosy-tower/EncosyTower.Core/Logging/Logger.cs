@@ -1,10 +1,10 @@
-using System;
-using System.Runtime.CompilerServices;
-using UnityEngine;
-
 namespace EncosyTower.Logging
 {
-    public class Logger : ILogger
+    using System;
+    using System.Runtime.CompilerServices;
+    using UnityEngine;
+
+    public partial class Logger : ILogger
     {
         public static readonly Logger Default = new();
 
@@ -103,3 +103,38 @@ namespace EncosyTower.Logging
         }
     }
 }
+
+#if UNITY_COLLECTIONS
+
+namespace EncosyTower.Logging
+{
+    using System.Runtime.CompilerServices;
+    using Unity.Collections;
+    using UnityEngine;
+
+    partial class Logger
+    {
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LogFixedInfo<TFixedString>(in TFixedString message)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            StaticLogger.LogInfo(message);
+        }
+
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LogFixedWarning<TFixedString>(in TFixedString message)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            StaticLogger.LogWarning(message);
+        }
+
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LogFixedError<TFixedString>(in TFixedString message)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            StaticLogger.LogError(message);
+        }
+    }
+}
+
+#endif
