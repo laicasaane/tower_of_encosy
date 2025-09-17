@@ -12,7 +12,7 @@ namespace EncosyTower.Collections
         public static FixedString32Bytes ToFixedString(this bool value)
         {
             var fs = new FixedString32Bytes();
-            fs.Append(value ? bool.TrueString : bool.FalseString);
+            fs.AppendSpan(value ? bool.TrueString : bool.FalseString);
             return fs;
         }
 
@@ -105,6 +105,41 @@ namespace EncosyTower.Collections
             fs.Append(value.End.ToFixedString());
             fs.Append(']');
             return fs;
+        }
+
+        /// <summary>
+        /// Appends a span of UTF16 chars to this string.
+        /// </summary>
+        /// <remarks>
+        /// When the method returns an error, the destination string is not modified.
+        /// </remarks>
+        /// <typeparam name="T">The type of the destination string.</typeparam>
+        /// <param name="fs">The destination string.</param>
+        /// <param name="utf16Chars">The span of UTF16 chars to append.</param>
+        /// <returns>
+        /// <see cref="FormatError.None"/> if successful.
+        /// Returns <see cref="FormatError.Overflow"/> if the capacity of the destination string is exceeded.
+        /// </returns>
+        public unsafe static FormatError AppendSpan<T>(this ref T fs, ReadOnlySpan<char> utf16Chars)
+            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            // we don't know how big the expansion from UTF16 to UTF8 will be, so we account for worst case.
+            int utf16Length = utf16Chars.Length;
+            int worstCaseCapacity = utf16Length * 4;
+            byte* utf8Bytes = stackalloc byte[worstCaseCapacity];
+            int utf8Len;
+
+            fixed (char* chars = utf16Chars)
+            {
+                var err = UTF8ArrayUnsafeUtility.Copy(utf8Bytes, out utf8Len, worstCaseCapacity, chars, utf16Length);
+
+                if (err != CopyError.None)
+                {
+                    return FormatError.Overflow;
+                }
+            }
+
+            return fs.Append(utf8Bytes, utf8Len);
         }
 
         /// <summary>
