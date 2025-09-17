@@ -3,10 +3,22 @@
 namespace EncosyTower.SystemExtensions
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
+    using EncosyTower.Collections;
+    using EncosyTower.Debugging;
     using Unity.Collections;
 
     public static partial class EncosyGuidExtensions
     {
+        /// <summary>
+        /// Converts a <see cref="Guid"/> to its equivalent <see cref="FixedString128Bytes"/> representation.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FixedString128Bytes ToFixedString(in this Guid self)
+            => ToFixedString(self, stackalloc char[1] { 'D' });
+
         /// <summary>
         /// Converts a <see cref="Guid"/> to its equivalent <see cref="FixedString128Bytes"/> representation.
         /// </summary>
@@ -18,27 +30,275 @@ namespace EncosyTower.SystemExtensions
         public static FixedString128Bytes ToFixedString(in this Guid self, ReadOnlySpan<char> format)
         {
             var fs = new FixedString128Bytes();
+            var guid = new Union(self).BurstableGuid;
 
-            unsafe
-            {
-                Span<char> utf16Chars = stackalloc char[68];
-
-                self.TryFormat(utf16Chars, out var utf16CharsWritten, format);
-                fs.TryResize(utf16CharsWritten, NativeArrayOptions.UninitializedMemory);
-
-                fixed (char* utf16Buffer = utf16Chars)
-                {
-                    Unicode.Utf16ToUtf8(
-                          utf16Buffer
-                        , utf16CharsWritten
-                        , fs.GetUnsafePtr()
-                        , out var utf8BytesWritten
-                        , FixedString128Bytes.UTF8MaxLengthInBytes
-                    );
-                }
-            }
+            Span<char> utf16Chars = stackalloc char[68];
+            guid.TryFormat(utf16Chars, out var utf16CharsWritten, format);
+            fs.AppendSpan(utf16Chars[..utf16CharsWritten]);
 
             return fs;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        private readonly struct Union
+        {
+            [FieldOffset(0)] public readonly Guid SystemGuid;
+            [FieldOffset(0)] public readonly BurstableGuid BurstableGuid;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public Union(in Guid guid) : this()
+            {
+                SystemGuid = guid;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private readonly struct BurstableGuid
+        {
+            // https://github.com/dotnet/runtime/blob/release/8.0/src/libraries/System.Private.CoreLib/src/System/Guid.cs
+
+            private readonly int _a;
+            private readonly short _b;
+            private readonly short _c;
+            private readonly byte _d;
+            private readonly byte _e;
+            private readonly byte _f;
+            private readonly byte _g;
+            private readonly byte _h;
+            private readonly byte _i;
+            private readonly byte _j;
+            private readonly byte _k;
+
+            // TryFormatCore accepts an `int flags` composed of:
+            // - Lowest byte: required length
+            // - Second byte: opening brace char, or 0 if no braces
+            // - Third byte: closing brace char, or 0 if no braces
+            // - Highest bit: 1 if use dashes, else 0
+            internal const int TRY_FORMAT_FLAGS_USE_DASHES = unchecked((int)0x80000000);
+            internal const int TRY_FORMAT_FLAGS_CURLY_BRACES = ('}' << 16) | ('{' << 8);
+            internal const int TRY_FORMAT_FLAGS_PARENS = (')' << 16) | ('(' << 8);
+
+            public unsafe bool TryFormat(
+                  Span<char> destination
+                , out int charsWritten
+                , ReadOnlySpan<char> format
+            )
+            {
+                int flags;
+
+                if (format.Length == 0)
+                {
+                    flags = 36 + TRY_FORMAT_FLAGS_USE_DASHES;
+                }
+                else
+                {
+                    if (format.Length != 1)
+                    {
+                        ThrowBadGuidFormatSpecification();
+                    }
+
+                    switch (format[0] | 0x20)
+                    {
+                        case 'd':
+                            flags = 36 + TRY_FORMAT_FLAGS_USE_DASHES;
+                            break;
+
+                        case 'p':
+                            flags = 38 + TRY_FORMAT_FLAGS_USE_DASHES + TRY_FORMAT_FLAGS_PARENS;
+                            break;
+
+                        case 'b':
+                            flags = 38 + TRY_FORMAT_FLAGS_USE_DASHES + TRY_FORMAT_FLAGS_CURLY_BRACES;
+                            break;
+
+                        case 'n':
+                            flags = 32;
+                            break;
+
+                        case 'x':
+                            return TryFormatX(destination, out charsWritten);
+
+                        default:
+                            flags = 0;
+                            ThrowBadGuidFormatSpecification();
+                            break;
+                    }
+                }
+
+                return TryFormatCore(destination, out charsWritten, flags);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] // only used from two callers
+            private unsafe bool TryFormatCore(
+                  Span<char> destination
+                , out int charsWritten
+                , int flags
+            )
+            {
+                // The low byte of flags contains the required length.
+                if ((byte)flags > destination.Length)
+                {
+                    charsWritten = 0;
+                    return false;
+                }
+
+                charsWritten = (byte)flags;
+                flags >>= 8;
+
+                fixed (char* guidChars = &MemoryMarshal.GetReference(destination))
+                {
+                    char* p = guidChars;
+
+                    // The low byte of flags now contains the opening brace char (if any)
+                    if ((byte)flags != 0)
+                    {
+                        *p++ = (char)(byte)flags;
+                    }
+
+                    flags >>= 8;
+
+                    // Non-vectorized fallback for D, N, P and B formats:
+                    // [{|(]dddddddd[-]dddd[-]dddd[-]dddd[-]dddddddddddd[}|)]
+                    p += HexsToChars(p, _a >> 24, _a >> 16);
+                    p += HexsToChars(p, _a >> 8, _a);
+
+                    if (flags < 0 /* dash */)
+                    {
+                        *p++ = '-';
+                    }
+
+                    p += HexsToChars(p, _b >> 8, _b);
+
+                    if (flags < 0 /* dash */)
+                    {
+                        *p++ = '-';
+                    }
+
+                    p += HexsToChars(p, _c >> 8, _c);
+
+                    if (flags < 0 /* dash */)
+                    {
+                        *p++ = '-';
+                    }
+
+                    p += HexsToChars(p, _d, _e);
+
+                    if (flags < 0 /* dash */)
+                    {
+                        *p++ = '-';
+                    }
+
+                    p += HexsToChars(p, _f, _g);
+                    p += HexsToChars(p, _h, _i);
+                    p += HexsToChars(p, _j, _k);
+
+                    // The low byte of flags now contains the closing brace char (if any)
+                    if ((byte)flags != 0)
+                    {
+                        *p = (char)(byte)flags;
+                    }
+
+                    Checks.IsTrue(p == guidChars + charsWritten - ((byte)flags != 0 ? 1 : 0));
+                }
+
+                return true;
+            }
+
+            private unsafe bool TryFormatX(Span<char> destination, out int charsWritten)
+            {
+                if (destination.Length < 68)
+                {
+                    charsWritten = 0;
+                    return false;
+                }
+
+                charsWritten = 68;
+
+                fixed (char* guidChars = &MemoryMarshal.GetReference(destination))
+                {
+                    char* p = guidChars;
+
+                    // {0xdddddddd,0xdddd,0xdddd,{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd}}
+                    *p++ = '{';
+                    *p++ = '0';
+                    *p++ = 'x';
+
+                    p += HexsToChars(p, _a >> 24, _a >> 16);
+                    p += HexsToChars(p, _a >> 8, _a);
+
+                    *p++ = ',';
+                    *p++ = '0';
+                    *p++ = 'x';
+
+                    p += HexsToChars(p, _b >> 8, _b);
+
+                    *p++ = ',';
+                    *p++ = '0';
+                    *p++ = 'x';
+
+                    p += HexsToChars(p, _c >> 8, _c);
+
+                    *p++ = ',';
+                    *p++ = '{';
+
+                    p += HexsToCharsHexOutput(p, _d, _e);
+
+                    *p++ = ',';
+
+                    p += HexsToCharsHexOutput(p, _f, _g);
+
+                    *p++ = ',';
+
+                    p += HexsToCharsHexOutput(p, _h, _i);
+
+                    *p++ = ',';
+
+                    p += HexsToCharsHexOutput(p, _j, _k);
+
+                    *p++ = '}';
+                    *p = '}';
+
+                    Checks.IsTrue(p == guidChars + charsWritten - 1);
+                }
+
+                return true;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static char HexToChar(int a)
+            {
+                a &= 0xF;
+                return (char)((a > 9) ? (a - 10 + 97) : (a + 48));
+            }
+
+            private unsafe static int HexsToChars(char* guidChars, int a, int b)
+            {
+                *guidChars = HexToChar(a >> 4);
+                guidChars[1] = HexToChar(a);
+                guidChars[2] = HexToChar(b >> 4);
+                guidChars[3] = HexToChar(b);
+                return 4;
+            }
+
+            private unsafe static int HexsToCharsHexOutput(char* guidChars, int a, int b)
+            {
+                *guidChars = '0';
+                guidChars[1] = 'x';
+                guidChars[2] = HexToChar(a >> 4);
+                guidChars[3] = HexToChar(a);
+                guidChars[4] = ',';
+                guidChars[5] = '0';
+                guidChars[6] = 'x';
+                guidChars[7] = HexToChar(b >> 4);
+                guidChars[8] = HexToChar(b);
+                return 9;
+            }
+
+            [DoesNotReturn]
+            private static void ThrowBadGuidFormatSpecification()
+                => throw new FormatException(
+                    "Format string can be only \"D\", \"d\", \"N\", \"n\", \"P\", \"p\", \"B\", \"b\", \"X\" or \"x\"."
+                );
         }
     }
 }
