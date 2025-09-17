@@ -604,7 +604,11 @@ namespace EncosyTower.Collections
 
             if (valueIndex == -1)
             {
-                ResizeIfNeeded();
+                if (ResizeIfNeeded())
+                {
+                    valuesInfo = _valuesInfo.AsSpan();
+                }
+
                 //create the info node at the last position and fill it with the relevant information
                 valuesInfo[freeValueCellIndex] = new ArrayMapNode<TKey>(key, hash);
             }
@@ -627,7 +631,10 @@ namespace EncosyTower.Collections
                     currentValueIndex = node._previous;
                 } while (currentValueIndex != -1); //-1 means no more values with key with the same hash
 
-                ResizeIfNeeded();
+                if (ResizeIfNeeded())
+                {
+                    valuesInfo = _valuesInfo.AsSpan();
+                }
 
                 //oops collision!
                 collisions++;
@@ -712,19 +719,21 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ResizeIfNeeded()
+        private bool ResizeIfNeeded()
         {
             var freeValueCellIndex = _freeValueCellIndex.AsReadOnlySpan()[0];
 
             if (freeValueCellIndex != _values.Length)
             {
-                return;
+                return false;
             }
 
             var expandPrime = HashHelpers.ExpandPrime(freeValueCellIndex);
 
             _values.Resize(expandPrime, true);
             _valuesInfo.Resize(expandPrime);
+
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
