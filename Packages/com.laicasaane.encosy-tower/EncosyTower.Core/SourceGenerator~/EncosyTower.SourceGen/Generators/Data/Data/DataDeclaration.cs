@@ -17,11 +17,17 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
         public string TypeName { get; }
 
+        public string ReadOnlyTypeName { get; }
+
+        public string TypeIdentifier { get; }
+
         public bool IsMutable { get; }
+
+        public bool IsValueType { get; }
 
         public bool WithoutPropertySetters { get; }
 
-        public bool WithReadOnlyStruct { get; }
+        public bool WithReadOnlyView { get; }
 
         public DataFieldPolicy FieldPolicy { get; }
 
@@ -66,26 +72,25 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
         {
             Syntax = syntax;
             Symbol = symbol;
+            TypeIdentifier = Syntax.Identifier.Text;
             IsSealed = Symbol.IsSealed || Symbol.IsValueType;
+            IsValueType = Symbol.IsValueType;
             HasSerializableAttribute = Symbol.HasAttribute(SERIALIZABLE_ATTRIBUTE);
             HasGeneratePropertyBagAttribute = Symbol.HasAttribute(GENERATE_PROPERTY_BAG_ATTRIBUTE);
+            WithoutId = Symbol.GetAttribute(DATA_WITHOUT_ID_ATTRIBUTE) != null;
 
-            var withoutId = WithoutId = Symbol.GetAttribute(DATA_WITHOUT_ID_ATTRIBUTE) != null;
-            var mutableAttrib = Symbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE);
+            var withId = WithoutId == false;
 
-            if (mutableAttrib != null)
-            {
-                IsMutable = true;
+            DetermineMutability(
+                  symbol
+                , out var isMutable
+                , out var withoutPropertySetters
+                , out var withReadOnlyView
+            );
 
-                var args = mutableAttrib.ConstructorArguments;
-
-                if (args.Length > 0 && args[0].Kind == TypedConstantKind.Enum)
-                {
-                    var options = (DataMutableOptions)args[0].Value;
-                    WithoutPropertySetters = options.HasFlag(DataMutableOptions.WithoutPropertySetters);
-                    WithReadOnlyStruct = options.HasFlag(DataMutableOptions.WithReadOnlyStruct);
-                }
-            }
+            IsMutable = isMutable;
+            WithoutPropertySetters = withoutPropertySetters;
+            WithReadOnlyView = withReadOnlyView;
 
             var fieldPolicyAttrib = Symbol.GetAttribute(DATA_FIELD_POLICY_ATTRIBUTE);
 
@@ -121,8 +126,10 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 BaseTypeName = string.Empty;
             }
 
+            var typeNameSb = new StringBuilder();
+
             {
-                var typeNameSb = new StringBuilder(Syntax.Identifier.Text);
+                typeNameSb.Append(TypeIdentifier);
 
                 if (syntax.TypeParameterList is TypeParameterListSyntax typeParamList
                     && typeParamList.Parameters.Count > 0
@@ -147,6 +154,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 }
 
                 TypeName = typeNameSb.ToString();
+                ReadOnlyTypeName = $"ReadOnly{TypeName}";
             }
 
             var existingFields = new HashSet<string>();
@@ -237,7 +245,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
                     fieldArrayBuilder.Add(fieldRef);
 
-                    if (withoutId == false && string.Equals(propertyName, "Id", StringComparison.Ordinal))
+                    if (withId && string.Equals(propertyName, "Id", StringComparison.Ordinal))
                     {
                         if (fieldRef.PropertyCollection.Kind != CollectionKind.NotCollection)
                         {
@@ -337,7 +345,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
                     propArrayBuilder.Add(propRef);
 
-                    if (withoutId == false && string.Equals(property.Name, "Id", StringComparison.Ordinal))
+                    if (withId && string.Equals(property.Name, "Id", StringComparison.Ordinal))
                     {
                         if (propRef.PropertyCollection.Kind != CollectionKind.NotCollection)
                         {
@@ -464,6 +472,144 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             }
 
             IsValid = true;
+        }
+
+        public static IDataType? GetIDataType(StringBuilder sb, ITypeSymbol type)
+        {
+            if (type.InheritsFromInterface(IDATA) == false)
+            {
+                return null;
+            }
+
+            DetermineMutability(
+                  type
+                , out var fieldTypeIsMutable
+                , out _
+                , out var fieldTypeWithReadOnlyView
+            );
+
+            GetTypeNames(
+                  sb
+                , type
+                , fieldTypeIsMutable
+                , fieldTypeWithReadOnlyView
+                , out var fieldTypeName
+                , out var fieldReadOnlyTypeName
+            );
+
+            return new IDataType(
+                  fieldTypeIsMutable
+                , fieldTypeWithReadOnlyView
+                , fieldTypeName
+                , fieldReadOnlyTypeName
+            );
+        }
+
+        private static void GetTypeNames(
+              StringBuilder sb
+            , ITypeSymbol type
+            , bool isMutable
+            , bool withReadOnlyView
+            , out string typeName
+            , out string readOnlyTypeName
+        )
+        {
+            sb.Clear();
+            sb.Append("global::")
+                .Append(type.ContainingNamespace.ToDisplayString())
+                .Append(".");
+
+            GetTypeName(type, sb, 0);
+            typeName = sb.ToString();
+
+            if (isMutable && withReadOnlyView)
+            {
+                sb.Clear();
+                sb.Append("global::")
+                    .Append(type.ContainingNamespace.ToDisplayString())
+                    .Append(".ReadOnly");
+
+                GetTypeName(type, sb, 0);
+                readOnlyTypeName = sb.ToString();
+            }
+            else
+            {
+                readOnlyTypeName = string.Empty;
+            }
+        }
+
+        private static void DetermineMutability(
+              ITypeSymbol symbol
+            , out bool isMutable
+            , out bool withoutPropertySetters
+            , out bool withReadOnlyView
+        )
+        {
+            isMutable = false;
+            withoutPropertySetters = false;
+            withReadOnlyView = false;
+
+            var attrib = symbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE);
+
+            if (attrib != null)
+            {
+                isMutable = true;
+
+                var args = attrib.ConstructorArguments;
+
+                if (args.Length > 0 && args[0].Kind == TypedConstantKind.Enum)
+                {
+                    var options = (DataMutableOptions)args[0].Value;
+                    withoutPropertySetters = options.HasFlag(DataMutableOptions.WithoutPropertySetters);
+                    withReadOnlyView = options.HasFlag(DataMutableOptions.WithReadOnlyStruct);
+                }
+            }
+        }
+
+        private static void GetTypeName(ITypeSymbol symbol, StringBuilder sb, int level)
+        {
+            if (symbol is not INamedTypeSymbol namedType)
+            {
+                sb.Append(symbol.ToSimpleName());
+                return;
+            }
+
+            if (level < 1)
+            {
+                sb.Append(symbol.Name);
+            }
+            else
+            {
+                sb.Append(symbol.ToFullName());
+            }
+
+            var typeArgs = namedType.TypeArguments;
+
+            if (typeArgs.Length > 0)
+            {
+                sb.Append('<');
+
+                for (int i = 0; i < typeArgs.Length; i++)
+                {
+                    if (i > 0)
+                    {
+                        sb.Append(", ");
+                    }
+
+                    var typeArg = typeArgs[i];
+
+                    if (typeArg is INamedTypeSymbol namedTypeArg)
+                    {
+                        GetTypeName(namedTypeArg, sb, level + 1);
+                    }
+                    else
+                    {
+                        sb.Append(typeArg.Name);
+                    }
+                }
+
+                sb.Append('>');
+            }
         }
 
         private static CollectionRef GetCollection(ITypeSymbol typeSymbol)
@@ -599,6 +745,13 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             return default;
         }
 
+        public record struct IDataType(
+              bool IsMutable
+            , bool WithReadOnlyView
+            , string TypeName
+            , string ReadOnlyTypeName
+        );
+
         public abstract class MemberRef
         {
             public ITypeSymbol FieldType { get; set; }
@@ -638,14 +791,11 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             public bool DoesCreateProperty { get; set; }
         }
 
-        public struct CollectionRef
-        {
-            public CollectionKind Kind { get; set; }
-
-            public ITypeSymbol KeyType { get; set; }
-
-            public ITypeSymbol ElementType { get; set; }
-        }
+        public record struct CollectionRef(
+              CollectionKind Kind
+            , ITypeSymbol KeyType
+            , ITypeSymbol ElementType
+        );
 
         public struct Order
         {

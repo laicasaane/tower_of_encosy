@@ -34,6 +34,8 @@ namespace EncosyTower.Databases
 
         public bool IsInitialized { get; protected set; }
 
+        public StringVault StringVault { get; set; }
+
         public virtual void Initialize()
         {
             if (IsInitialized)
@@ -68,7 +70,7 @@ namespace EncosyTower.Databases
 
                 var type = table.GetType();
                 var name = table.name;
-                var id = StringToId.MakeFromManaged(name);
+                var id = GetId(name);
 
                 idToAsset[id] = table;
 
@@ -118,7 +120,7 @@ namespace EncosyTower.Databases
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetDataTableAsset([NotNull] string name, out DataTableAssetBase tableAsset)
-            => TryGetDataTableAsset(StringToId.MakeFromManaged(name), out tableAsset);
+            => TryGetDataTableAsset(GetId(name), out tableAsset);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<DataTableAssetBase> GetDataTableAsset(StringId id)
@@ -208,7 +210,7 @@ namespace EncosyTower.Databases
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetDataTableAsset<T>([NotNull] string name, out T tableAsset)
             where T : DataTableAssetBase
-            => TryGetDataTableAsset<T>(StringToId.MakeFromManaged(name), out tableAsset);
+            => TryGetDataTableAsset<T>(GetId(name), out tableAsset);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<T> GetDataTableAsset<T>(StringId id)
@@ -239,6 +241,26 @@ namespace EncosyTower.Databases
 
             tableAsset = null;
             return false;
+        }
+
+        private string GetName(StringId id)
+        {
+            if (StringVault != null)
+            {
+                StringVault.TryGetManagedString(id, out var name);
+                return name;
+            }
+            else
+            {
+                return IdToString.GetManaged(id);
+            }
+        }
+
+        private StringId GetId(string name)
+        {
+            return StringVault != null
+                ? StringVault.MakeIdFromManaged(name)
+                : StringToId.MakeFromManaged(name);
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
@@ -281,7 +303,7 @@ namespace EncosyTower.Databases
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorCannotFindAsset(StringId id, DatabaseAsset context)
         {
-            var name = IdToString.GetManaged(id);
+            var name = context.GetName(id);
             var info = string.IsNullOrEmpty(name)
                 ? $"id '{id}'"
                 : $"name '{name}'";
@@ -313,9 +335,10 @@ namespace EncosyTower.Databases
                 return;
             }
 
-            var name = IdToString.GetManaged(ids[0]);
+            var id = ids[0];
+            var name = context.GetName(id);
             var info =  string.IsNullOrEmpty(name)
-                ? $"by id '{ids[0]}'"
+                ? $"by id '{id}'"
                 : $"named '{name}'";
 
             StaticDevLogger.LogWarning(

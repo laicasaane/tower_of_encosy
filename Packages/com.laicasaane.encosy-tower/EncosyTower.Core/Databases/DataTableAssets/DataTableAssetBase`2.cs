@@ -8,19 +8,13 @@ using UnityEngine;
 
 namespace EncosyTower.Databases
 {
-    public abstract class DataTableAssetBase<TDataId, TData> : DataTableAssetBase
+    public abstract class DataTableAssetBase<TDataId, TData> : DataTableAssetBase, IDataTableAsset<TData>
         where TData : IData, IDataWithId<TDataId>
     {
         [SerializeField]
         private TData[] _entries = new TData[0];
 
         public ReadOnlyMemory<TData> Entries
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _entries;
-        }
-
-        internal protected Memory<TData> EntriesInternal
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _entries;
@@ -34,6 +28,10 @@ namespace EncosyTower.Databases
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected virtual void Initialize(ref TData entry) { }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal protected ref TData[] GetEntries()
+            => ref _entries;
 
         internal sealed override void SetEntries(object obj)
         {

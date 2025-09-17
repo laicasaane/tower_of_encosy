@@ -24,8 +24,8 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
             p.PrintEndLine();
 
             p.PrintBeginLine()
-                .Print($"partial class ").Print(syntax.Identifier.Text)
-                .PrintEndLine();
+                .Print($"partial class ").Print(syntax.Identifier.Text);
+            p.PrintEndLine();
             p.OpenScope();
             {
                 p.PrintLine(GENERATED_CODE);

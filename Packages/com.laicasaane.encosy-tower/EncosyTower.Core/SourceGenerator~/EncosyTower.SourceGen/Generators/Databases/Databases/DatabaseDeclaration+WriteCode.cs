@@ -11,11 +11,15 @@ namespace EncosyTower.SourceGen.Generators.Databases
         private const string UNITY_IS_VALID = $"{UNITY_EXTENSIONS}.IsValid";
         private const string UNITY_IS_INVALID = $"{UNITY_EXTENSIONS}.IsInvalid";
         private const string DOES_NOT_RETURN_IF_FALSE = "[global::System.Diagnostics.CodeAnalysis.DoesNotReturnIf(false)]";
+        private const string STRING_VAULT = "global::EncosyTower.StringIds.StringVault";
         private const string STRING_ID = "global::EncosyTower.StringIds.StringId";
-        private const string MAKE_ID = "global::EncosyTower.StringIds.StringToId.MakeFromManaged";
+        private const string MAKE_ID = "Vault.Instance.MakeIdFromManaged";
+        private const string INITIALIZATION_BEHAVIOUR = "global::EncosyTower.Initialization.InitializationBehaviour";
+
         public const string NOT_NULL = "[global::System.Diagnostics.CodeAnalysis.NotNull]";
-        public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.AfterAssembliesLoaded)]";
+        public const string INITIALIZE_ON_LOAD_METHOD = "[global::UnityEditor.InitializeOnEnterPlayMode]";
         public const string ASSET_KEY = "global::EncosyTower.AssetKeys.AssetKey";
+
 
         public string WriteCode(ImmutableArray<TableRef> tables)
         {
@@ -49,6 +53,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 WriteKeys(ref p, tables);
                 WriteIds(ref p, tables);
                 WriteNestedInstanceType(ref p, DatabaseRef, tables);
+                WriteVault(ref p, tables);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -84,6 +89,49 @@ namespace EncosyTower.SourceGen.Generators.Databases
             {
                 p.PrintLine("ThrowIfInvalid(database);");
                 p.PrintLine("_database = database;");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintBeginLine("public ").Print(databaseTypeName)
+                .Print("(").Print(DATABASE_ASSET).Print(" database, ")
+                .Print(INITIALIZATION_BEHAVIOUR).Print(" initializationBehaviour)")
+                .PrintEndLineIf(isDatabaseStruct, " : this()", "");
+            p.OpenScope();
+            {
+                p.PrintLine("ThrowIfInvalid(database);");
+                p.PrintLine("_database = database;");
+                p.PrintEndLine();
+
+                p.PrintLine("switch (initializationBehaviour)");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("case ").Print(INITIALIZATION_BEHAVIOUR).PrintEndLine(".Respect:");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("if (IsInitialized == false)");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("Initialize();");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+
+                        p.PrintLine("break;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintBeginLine("case ").Print(INITIALIZATION_BEHAVIOUR).PrintEndLine(".Forced:");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("Deinitialize();");
+                        p.PrintLine("Initialize();");
+                        p.PrintLine("break;");
+                    }
+                    p.CloseScope();
+                }
+                p.CloseScope();
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -140,6 +188,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 p.PrintLine("Ids.Initialize();");
                 p.PrintEndLine();
 
+                p.PrintLine("_database.StringVault = Vault.Instance;");
                 p.PrintLine("_database.Initialize();");
             }
             p.CloseScope();
@@ -294,31 +343,45 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.PrintEndLine();
         }
 
+        private static void WriteVault(ref Printer p, ImmutableArray<TableRef> tables)
+        {
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine("private static partial class Vault");
+            p.OpenScope();
+            {
+                p.PrintLine(GENERATED_CODE);
+                p.PrintBeginLine("public static readonly ").Print(STRING_VAULT)
+                    .Print(" Instance = new(").Print($"{tables.Length + 1}").PrintEndLine(");");
+                p.PrintEndLine();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
         private static void WriteIds(ref Printer p, ImmutableArray<TableRef> tables)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public static partial class Ids");
             p.OpenScope();
             {
-                p.PrintLine(GENERATED_CODE);
-                p.PrintBeginLine("private static ").Print(STRING_ID).PrintEndLine(" s_database;");
-                p.PrintEndLine();
-
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public static ").Print(STRING_ID).PrintEndLine(" Database");
-                p.OpenScope();
-                {
-                    p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintLine("get => s_database;");
-                }
-                p.CloseScope();
+                p.PrintBeginLine("public static ").Print(STRING_ID).PrintEndLine(" Database { get; private set; }");
                 p.PrintEndLine();
 
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public static void Initialize()");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine("s_database = ").Print(MAKE_ID).PrintEndLine("(Names.DATABASE);");
+                    p.Print("#if UNITY_EDITOR").PrintEndLine();
+                    {
+                        p.PrintLine("Vault.Instance.Clear();");
+                    }
+                    p.Print("#endif").PrintEndLine();
+                    p.PrintEndLine();
+
+                    p.PrintBeginLine("Database = ").Print(MAKE_ID).PrintEndLine("(Names.DATABASE);");
+                    p.PrintEndLine();
+
                     p.PrintLine("Tables.Initialize();");
                 }
                 p.CloseScope();
@@ -330,21 +393,10 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     foreach (var table in tables)
                     {
                         var name = table.PropertyName;
-                        var nameLower = StringUtils.ToCamelCase(name);
-
-                        p.PrintLine(GENERATED_CODE);
-                        p.PrintBeginLine("private static ").Print(STRING_ID).Print(" s_")
-                            .Print(nameLower).PrintEndLine(";");
-                        p.PrintEndLine();
 
                         p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                        p.PrintBeginLine("public static ").Print(STRING_ID).Print(" ").PrintEndLine(name);
-                        p.OpenScope();
-                        {
-                            p.PrintLine(AGGRESSIVE_INLINING);
-                            p.PrintBeginLine("get => s_").Print(nameLower).Print(";");
-                        }
-                        p.CloseScope();
+                        p.PrintBeginLine("public static ").Print(STRING_ID).Print(" ").Print(name)
+                            .PrintEndLine(" { get; private set; }");
                         p.PrintEndLine();
                     }
 
@@ -355,10 +407,9 @@ namespace EncosyTower.SourceGen.Generators.Databases
                         foreach (var table in tables)
                         {
                             var name = table.PropertyName;
-                            var nameLower = StringUtils.ToCamelCase(name);
                             var nameUpper = StringUtils.ToSnakeCase(name).ToUpper();
 
-                            p.PrintBeginLine("s_").Print(nameLower).Print(" = ")
+                            p.PrintBeginLine(name).Print(" = ")
                                 .Print(MAKE_ID).Print("(Names.Tables.").Print(nameUpper).PrintEndLine(");");
                         }
                     }
@@ -452,7 +503,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 p.Print("#if UNITY_EDITOR").PrintEndLine();
                 {
                     p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintLine(RUNTIME_INITIALIZE_ON_LOAD_METHOD);
+                    p.PrintLine(INITIALIZE_ON_LOAD_METHOD);
                     p.PrintLine("private static void InitWhenDomainReloadDisabled()");
                     p.OpenScope();
                     {
@@ -491,6 +542,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 p.PrintEndLine();
             }
             p.CloseScope();
+            p.PrintEndLine();
         }
 
         public static string GetTableAssetName(TableRef table)

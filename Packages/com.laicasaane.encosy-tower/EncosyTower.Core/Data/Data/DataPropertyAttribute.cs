@@ -5,8 +5,6 @@ namespace EncosyTower.Data
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class DataPropertyAttribute : Attribute
     {
-        public Type FieldType { get; }
-
         public DataPropertyAttribute()
         {
         }
@@ -15,5 +13,7 @@ namespace EncosyTower.Data
         {
             FieldType = fieldType;
         }
+
+        public Type FieldType { get; }
     }
 }

@@ -74,6 +74,7 @@ namespace EncosyTower.Tests.Data
         [JsonProperty] private FloatWrapper _atk;
     }
 
+    [DataMutable(DataMutableOptions.WithReadOnlyView)]
     public partial class GenericData<T> : IData
     {
         [DataProperty]
@@ -87,14 +88,12 @@ namespace EncosyTower.Tests.Data
         }
     }
 
-    [StructLayout(LayoutKind.Auto)]
+    [DataMutable(DataMutableOptions.WithReadOnlyView)]
     public partial struct StatMultiplierData : IData
     {
         [SerializeField] private IntWrapper _level;
         [SerializeField] private FloatWrapper _hp;
-
-        [DataProperty]
-        public readonly float Atk => Get_Atk();
+        [SerializeField] private float _atk;
     }
 
     public enum StatKind
@@ -291,6 +290,7 @@ namespace EncosyTower.Tests.Data.ConvertibleIds
             => id.Value;
     }
 
+    [DataMutable(DataMutableOptions.WithReadOnlyView)]
     public partial struct ItemData : IData
     {
         [DataProperty] public readonly IdData Id => Get_Id();

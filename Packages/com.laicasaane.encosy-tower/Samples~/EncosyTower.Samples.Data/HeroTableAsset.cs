@@ -6,8 +6,10 @@ namespace EncosyTower.Samples.Data
 {
     public sealed partial class HeroTableAsset
         : DataTableAsset<EntityIdData, HeroData, EntityId>
-        , IDataTableAsset { }
+        , IDataTableAsset
+    { }
 
+    [DataMutable(DataMutableOptions.WithReadOnlyView)]
     public partial struct HeroData : IData
     {
         [DataProperty] public readonly EntityIdData Id => Get_Id();
@@ -17,5 +19,8 @@ namespace EncosyTower.Samples.Data
         [DataProperty] public readonly EntityStatData Stat => Get_Stat();
 
         [DataProperty] public readonly ReadOnlyMemory<EntityStatMultiplierData> Multipliers => Get_Multipliers();
+
+        public readonly override string ToString()
+            => $"{_id} :: {_name} :: {_stat}";
     }
 }

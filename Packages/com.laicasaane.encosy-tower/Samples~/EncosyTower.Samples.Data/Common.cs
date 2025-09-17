@@ -14,8 +14,8 @@ namespace EncosyTower.Samples.Data
     public readonly partial record struct EnemyId(short Value);
 
     [UnionId(KindSettings = UnionIdKindSettings.PreserveOrder | UnionIdKindSettings.RemoveSuffix)]
-    [UnionIdKind(typeof(HeroId), 0, signed: true)]
-    [UnionIdKind(typeof(EnemyId), 1, signed: true)]
+    [UnionIdKind(typeof(HeroId), 0, "Hero", signed: true)]
+    [UnionIdKind(typeof(EnemyId), 1, "Enemy", signed: true)]
     public readonly partial struct EntityId
     {
     }
@@ -58,11 +58,14 @@ namespace EncosyTower.Samples.Data
         [DataProperty] public readonly short SubId => Get_SubId();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override string ToString()
+            => $"{_kind}:{_subId}";
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator EntityId(EntityIdData data)
         {
             var @default = default(EntityId);
             var result = @default.TryParse(data._kind, data._subId, out var value, false, true);
-
             return result ? value : @default;
         }
     }
@@ -84,12 +87,19 @@ namespace EncosyTower.Samples.Data
         [DataProperty] public readonly float Hp => Get_Hp();
 
         [DataProperty] public readonly float Atk => Get_Atk();
+
+        public readonly override string ToString()
+            => $"HP:{_hp} | ATK:{_atk}";
     }
 
+    [DataMutable(DataMutableOptions.WithReadOnlyView)]
     public partial struct EntityStatMultiplierData : IData
     {
         [DataProperty] public readonly int Level => Get_Level();
 
-        [DataProperty] EntityStatData Multiplier => Get_Multiplier();
+        [DataProperty] public readonly EntityStatData Multiplier => Get_Multiplier();
+
+        public readonly override string ToString()
+            => $"[{_level}] = {_multiplier}";
     }
 }

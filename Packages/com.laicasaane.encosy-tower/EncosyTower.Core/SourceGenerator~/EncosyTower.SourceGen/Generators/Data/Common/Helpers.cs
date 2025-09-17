@@ -6,6 +6,7 @@
 
         public const string NAMESPACE = "EncosyTower.Data";
         public const string IDATA = $"global::{NAMESPACE}.IData";
+        public const string IREADONLY_DATA = $"global::{NAMESPACE}.IReadOnlyData";
         public const string IDATA_TABLE_ASSET = $"global::{NAMESPACE}.IDataTableAsset";
         public const string DATA_TABLE_ASSET = $"global::{NAMESPACE}.DataTableAsset";
         public const string DATA_PROPERTY_ATTRIBUTE = $"global::{NAMESPACE}.DataPropertyAttribute";
@@ -29,6 +30,7 @@
         public const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
         public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Data.DataGenerator\", \"{SourceGenVersion.VALUE}\")]";
         public const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
+
         public const string LIST_TYPE_T = "global::System.Collections.Generic.List<";
         public const string DICTIONARY_TYPE_T = "global::System.Collections.Generic.Dictionary<";
         public const string HASH_SET_TYPE_T = "global::System.Collections.Generic.HashSet<";

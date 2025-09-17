@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -16,7 +17,7 @@ namespace EncosyTower.Databases
         internal protected override void Initialize()
         {
             var map = IdToIndexMap;
-            var entries = EntriesInternal.Span;
+            var entries = GetEntries().AsSpan();
 
             map.Clear();
             map.EnsureCapacity(entries.Length);
@@ -72,7 +73,7 @@ namespace EncosyTower.Databases
         {
             StaticDevLogger.LogErrorFormat(
                   context
-                , "Id with value \"{0}\" is duplicated at row \"{1}\""
+                , "Id \"{0}\" is duplicated at row \"{1}\""
                 , context.ToString(id)
                 , index
             );

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -16,7 +17,7 @@ namespace EncosyTower.Databases
         internal protected override void Initialize()
         {
             var map = IdToIndexMap;
-            var entries = EntriesInternal.Span;
+            var entries = GetEntries().AsSpan();
 
             map.Clear();
             map.EnsureCapacity(entries.Length);
@@ -28,7 +29,7 @@ namespace EncosyTower.Databases
 
                 if (map.TryAdd(id, i) == false)
                 {
-                    ErrorDuplicateId(id, i, this);
+                    ErrorDuplicateId(id, entry.Id, i, this);
                     continue;
                 }
 
@@ -65,16 +66,22 @@ namespace EncosyTower.Databases
         protected virtual string ToString(TConvertedId value)
             => value.ToString();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected virtual string ToString(TDataId value)
+            => value.ToString();
+
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static void ErrorDuplicateId(
-              TConvertedId id
+              TConvertedId convertedId
+            , TDataId id
             , int index
             , [NotNull] DataTableAsset<TDataId, TData, TConvertedId> context
         )
         {
             StaticDevLogger.LogErrorFormat(
                   context
-                , "Id with value \"{0}\" is duplicated at row \"{1}\""
+                , "Id \"{0}\" (converted from \"{1}\") is duplicated at row \"{2}\""
+                , context.ToString(convertedId)
                 , context.ToString(id)
                 , index
             );
