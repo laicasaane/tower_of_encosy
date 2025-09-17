@@ -318,6 +318,10 @@ namespace EncosyTower.Common
         public override bool Equals(object obj)
             => obj is HashValue other && Equals(other);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ToHashCode()
+            => _value;
+
         /// <summary>
         /// Throws <see cref="NotSupportedException"/>.
         /// </summary>
@@ -327,7 +331,9 @@ namespace EncosyTower.Common
         /// </exception>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override int GetHashCode()
-            => throw new NotSupportedException("Implicitly convert this struct to an int to get the hash code.");
+            => throw new NotSupportedException(
+                "Implicitly convert this struct to an int to get the hash code or use ToHashCode method."
+            );
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int CombineHashes(int h1, int h2)
