@@ -673,7 +673,7 @@ namespace EncosyTower.UnityExtensions
 #if UNITY_EDITOR
                 catch (Exception ex)
                 {
-                    DevLoggerAPI.LogException(ex);
+                    StaticDevLogger.LogException(ex);
                 }
 #else
                 catch { }
@@ -681,7 +681,7 @@ namespace EncosyTower.UnityExtensions
 #else
                 catch (Exception ex)
                 {
-                    RuntimeLoggerAPI.LogException(ex);
+                    StaticLogger.LogException(ex);
                 }
 #endif
             }
@@ -713,7 +713,7 @@ namespace EncosyTower.UnityExtensions
 #if UNITY_EDITOR
                 catch (Exception ex)
                 {
-                    DevLoggerAPI.LogException(ex);
+                    StaticDevLogger.LogException(ex);
                 }
 #else
                 catch { }
@@ -721,7 +721,7 @@ namespace EncosyTower.UnityExtensions
 #else
                 catch (Exception ex)
                 {
-                    RuntimeLoggerAPI.LogException(ex);
+                    StaticLogger.LogException(ex);
                 }
 #endif
             }

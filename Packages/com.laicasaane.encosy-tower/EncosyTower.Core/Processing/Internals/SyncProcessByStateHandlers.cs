@@ -95,7 +95,7 @@ namespace EncosyTower.Processing.Internals.Sync
     {
         public static void ErrorIfStateIsDestroyed<TState>()
         {
-            Logging.RuntimeLoggerAPI.LogError($"The state instance of type {typeof(TState)} is not alive anymore.");
+            Logging.StaticLogger.LogError($"The state instance of type {typeof(TState)} is not alive anymore.");
         }
     }
 #endif

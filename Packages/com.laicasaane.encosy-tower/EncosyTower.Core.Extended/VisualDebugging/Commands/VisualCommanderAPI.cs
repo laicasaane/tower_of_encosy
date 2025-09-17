@@ -299,7 +299,7 @@ namespace EncosyTower.VisualDebugging.Commands
 
         private static void LogErrorNotApplicableCommandType(Type type)
         {
-            DevLoggerAPI.LogError(
+            StaticDevLogger.LogError(
                 $"Type '{type}' is not applicable as an {nameof(IVisualCommand)}. " +
                 $"It must be a sealed class that also implements {nameof(IObservableObject)} interface " +
                 "and has a default constructor."
@@ -308,7 +308,7 @@ namespace EncosyTower.VisualDebugging.Commands
 
         private static void LogWarningNotApplicablePropertyType(Type type, string propertyName)
         {
-            DevLoggerAPI.LogWarning(
+            StaticDevLogger.LogWarning(
                 $"Property '{propertyName}' of type '{type}' must only return one of the following types: " +
                 "bool, double, float, int, long, string, uint, ulong, " +
                 "Bounds, BoundsInt, DateTime, Rect, RectInt, Vector2, Vector2Int, Vector3, Vector3Int, Vector4, " +
@@ -318,7 +318,7 @@ namespace EncosyTower.VisualDebugging.Commands
 
         private static void LogWarningMissingRelayCommand(Type type, string propertyName, Type argType)
         {
-            DevLoggerAPI.LogWarning(
+            StaticDevLogger.LogWarning(
                 $"Property '{propertyName}' of type '{type}' must have a corresponding method " +
                 $"named 'Set{propertyName}'. The method must be annotated with [RelayCommand], " +
                 $"and has a single parameter of type '{argType}'."
@@ -327,7 +327,7 @@ namespace EncosyTower.VisualDebugging.Commands
 
         private static void LogWarningMissingSetOptionForCommand(Type type, string propertyName, Type argType)
         {
-            DevLoggerAPI.LogWarning(
+            StaticDevLogger.LogWarning(
                 $"Property '{propertyName}' of type '{type}' must have a corresponding method " +
                 $"named 'SetOptionFor{propertyName}'. The method must be annotated with [RelayCommand], " +
                 $"and has a single parameter of type '{argType}'."

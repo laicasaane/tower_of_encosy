@@ -54,7 +54,7 @@ namespace EncosyTower.Databases
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorCannotCast(object obj, UnityEngine.Object context)
         {
-            DevLoggerAPI.LogError(context,
+            StaticDevLogger.LogError(context,
                 obj == null
                     ? $"Cannot cast null into {typeof(TData[])}"
                     : $"Cannot cast {obj.GetType()} into {typeof(TData[])}"

@@ -80,7 +80,7 @@ namespace EncosyTower.Collections
 
                 if (method == null)
                 {
-                    DevLoggerAPI.LogWarning(
+                    StaticDevLogger.LogWarning(
                           type.Name
                         + " does not implement GetHashCode and will potentially cause unwanted allocations (boxing)"
                     );

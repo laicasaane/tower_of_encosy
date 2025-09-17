@@ -102,7 +102,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
 
         private static void ThrowNotSupported()
         {
-            Logging.RuntimeLoggerAPI.LogException(new NotSupportedException(
+            Logging.StaticLogger.LogException(new NotSupportedException(
                 "Tilemap Orientation Matrix binding property requires the symbol VARIANT_64_BYTES or higher to be defined"
             ));
         }

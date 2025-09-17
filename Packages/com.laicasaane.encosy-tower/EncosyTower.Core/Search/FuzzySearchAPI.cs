@@ -147,7 +147,7 @@ namespace EncosyTower.Search
             [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             public static void LogErrorIfFuzzySharpIsNotInstalled()
             {
-                DevLoggerAPI.LogError(
+                StaticDevLogger.LogError(
                     "Please install Raffinert.FuzzySharp plugin via one of these methods:\n" +
                     "1. OpenUPM: `openupm add org.nuget.raffinert.fuzzysharp`. " +
                     "Read <a href=\"https://openupm.com/nuget/#using-uplinked-unitynuget\">more</a> about this method.\n" +

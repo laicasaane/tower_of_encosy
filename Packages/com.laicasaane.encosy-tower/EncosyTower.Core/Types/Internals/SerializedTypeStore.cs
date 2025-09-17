@@ -102,7 +102,7 @@ namespace EncosyTower.Types.Internals
 
                 if (type == null)
                 {
-                    RuntimeLoggerAPI.LogError($"Failed to load type '{assemblyQualifiedName}'.");
+                    StaticLogger.LogError($"Failed to load type '{assemblyQualifiedName}'.");
                     continue;
                 }
 

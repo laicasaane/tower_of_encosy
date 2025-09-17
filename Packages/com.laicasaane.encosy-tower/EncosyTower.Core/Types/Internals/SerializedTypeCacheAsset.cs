@@ -45,7 +45,7 @@ namespace EncosyTower.Types.Internals
                 }
                 catch (Exception ex)
                 {
-                    RuntimeLoggerAPI.LogException(ex);
+                    StaticLogger.LogException(ex);
                 }
                 finally
                 {

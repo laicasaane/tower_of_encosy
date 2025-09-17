@@ -155,23 +155,23 @@ namespace EncosyTower.Databases.Settings
                 switch (validationResult)
                 {
                     case ValidationResult.UnknownAuthentication:
-                        DevLoggerAPI.LogError($"Unknown authentication type: '{authentication}'");
+                        StaticDevLogger.LogError($"Unknown authentication type: '{authentication}'");
                         break;
 
                     case ValidationResult.OAuth2CredentialFileDoesNotExist:
-                        DevLoggerAPI.LogError($"OAuth 2.0 credential file does not exist: '{credentialRelativeFilePath}'");
+                        StaticDevLogger.LogError($"OAuth 2.0 credential file does not exist: '{credentialRelativeFilePath}'");
                         break;
 
                     case ValidationResult.ApiKeyFileDoesNotExist:
-                        DevLoggerAPI.LogError($"API Key file does not exist: '{apiKeyRelativeFilePath}'");
+                        StaticDevLogger.LogError($"API Key file does not exist: '{apiKeyRelativeFilePath}'");
                         break;
 
                     case ValidationResult.SpreadSheetIdIsNullOrInvalid:
-                        DevLoggerAPI.LogError($"Spreadsheet ID is null or invalid: '{spreadsheetId}'");
+                        StaticDevLogger.LogError($"Spreadsheet ID is null or invalid: '{spreadsheetId}'");
                         break;
 
                     case ValidationResult.OutputFolderIsNullOrInvalid:
-                        DevLoggerAPI.LogError($"Output folder is null or invalid: '{outputRelativeFolderPath}'");
+                        StaticDevLogger.LogError($"Output folder is null or invalid: '{outputRelativeFolderPath}'");
                         break;
                 }
             }

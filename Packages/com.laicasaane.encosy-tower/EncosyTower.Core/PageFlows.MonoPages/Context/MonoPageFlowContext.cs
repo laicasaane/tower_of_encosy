@@ -108,7 +108,7 @@ namespace EncosyTower.PageFlows.MonoPages
         public Logging.ILogger Logger
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => logEnvironment == LogEnvironment.Runtime ? RuntimeLogger.Default : DevLogger.Default;
+            get => logEnvironment == LogEnvironment.Runtime ? Logging.Logger.Default : DevLogger.Default;
         }
 
         public void Initialize(

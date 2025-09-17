@@ -97,9 +97,9 @@ namespace EncosyTower.Types.Editor
         {
             CreateAssets(onlyDebug: true);
 
-            DevLoggerAPI.LogInfo($"<a href=\"{ASSET_FILE_PATH_DEBUG}\">{ASSET_FILE_NAME_DEBUG}.asset</a>");
-            DevLoggerAPI.LogInfo($"<a href=\"{ASSET_JSON_FILE_PATH_DEBUG}\">{ASSET_FILE_NAME_DEBUG}.json</a>");
-            DevLoggerAPI.LogInfo($"<a href=\"{LINK_XML_FILE_PATH_DEBUG}\">{ASSET_FILE_NAME_DEBUG}_link.xml</a>");
+            StaticDevLogger.LogInfo($"<a href=\"{ASSET_FILE_PATH_DEBUG}\">{ASSET_FILE_NAME_DEBUG}.asset</a>");
+            StaticDevLogger.LogInfo($"<a href=\"{ASSET_JSON_FILE_PATH_DEBUG}\">{ASSET_FILE_NAME_DEBUG}.json</a>");
+            StaticDevLogger.LogInfo($"<a href=\"{LINK_XML_FILE_PATH_DEBUG}\">{ASSET_FILE_NAME_DEBUG}_link.xml</a>");
         }
 
         [MenuItem("Encosy Tower/Runtime Type Cache/Create Runtime Assets")]
@@ -107,8 +107,8 @@ namespace EncosyTower.Types.Editor
         {
             CreateAssets(onlyDebug: false);
 
-            DevLoggerAPI.LogInfo($"<a href=\"{ASSET_FILE_PATH}\">{ASSET_FILE_NAME}.asset</a>");
-            DevLoggerAPI.LogInfo($"<a href=\"{LINK_XML_FILE_PATH}\">link.xml</a>");
+            StaticDevLogger.LogInfo($"<a href=\"{ASSET_FILE_PATH}\">{ASSET_FILE_NAME}.asset</a>");
+            StaticDevLogger.LogInfo($"<a href=\"{LINK_XML_FILE_PATH}\">link.xml</a>");
         }
 
         private static void CreateAssets(bool onlyDebug)

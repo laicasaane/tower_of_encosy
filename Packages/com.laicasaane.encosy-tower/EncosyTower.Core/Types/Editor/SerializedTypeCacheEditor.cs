@@ -50,7 +50,7 @@ namespace EncosyTower.Types.Editor
 
             foreach (var name in names)
             {
-                DevLoggerAPI.LogInfoSlim(name);
+                StaticDevLogger.LogInfoSlim(name);
             }
         }
 

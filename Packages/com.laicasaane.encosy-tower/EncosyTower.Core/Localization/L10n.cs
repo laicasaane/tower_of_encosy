@@ -172,19 +172,19 @@ namespace EncosyTower.Localization
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorNotReady()
         {
-            DevLoggerAPI.LogError("Must call \"L10n.Initialize()\" first.");
+            StaticDevLogger.LogError("Must call \"L10n.Initialize()\" first.");
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorCannotFindLanguage(string value)
         {
-            DevLoggerAPI.LogError($"Cannot find any language by locale code {value}");
+            StaticDevLogger.LogError($"Cannot find any language by locale code {value}");
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void InfoChangeLanguage(string value)
         {
-            DevLoggerAPI.LogInfo($"Change language to {value}");
+            StaticDevLogger.LogInfo($"Change language to {value}");
         }
 
         public readonly struct Localization { }

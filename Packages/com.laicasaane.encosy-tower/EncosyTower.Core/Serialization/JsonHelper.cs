@@ -70,7 +70,7 @@ namespace EncosyTower.Serialization
             }
             catch (Exception ex)
             {
-                DevLoggerAPI.LogException(ex);
+                StaticDevLogger.LogException(ex);
                 json = string.Empty;
             }
 
@@ -92,7 +92,7 @@ namespace EncosyTower.Serialization
             }
             catch (Exception ex)
             {
-                DevLoggerAPI.LogException(ex);
+                StaticDevLogger.LogException(ex);
                 data = default;
                 return false;
             }
@@ -101,7 +101,7 @@ namespace EncosyTower.Serialization
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfSerializeToNull()
         {
-            DevLoggerAPI.LogError("Serialize save data to `null`.");
+            StaticDevLogger.LogError("Serialize save data to `null`.");
         }
     }
 }

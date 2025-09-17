@@ -128,7 +128,7 @@ namespace EncosyTower.Processing
                 return true;
             }
 
-            Logging.RuntimeLoggerAPI.LogError(
+            Logging.StaticLogger.LogError(
                 $"{GetType().Name} must be retrieved via `{nameof(Processor)}.{Scope}` API"
             );
 

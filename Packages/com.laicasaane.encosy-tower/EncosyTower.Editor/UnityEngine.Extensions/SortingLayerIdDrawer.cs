@@ -88,7 +88,7 @@ namespace EncosyTower.Editor.UnityExtensions
         [HideInCallstack]
         private static void WarningIfValuePropertyNull()
         {
-            DevLoggerAPI.LogWarning("Could not find the layer index property, was it renamed or removed?");
+            StaticDevLogger.LogWarning("Could not find the layer index property, was it renamed or removed?");
         }
     }
 }

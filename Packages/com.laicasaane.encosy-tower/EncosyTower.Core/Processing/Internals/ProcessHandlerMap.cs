@@ -73,7 +73,7 @@ namespace EncosyTower.Processing.Internals
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private void LogIfExist(IProcessHandler handler)
         {
-            Logging.DevLoggerAPI.LogWarning(
+            Logging.StaticDevLogger.LogWarning(
                 $"A process handler of type {handler.Id.ToType()} has already been registered."
             );
         }

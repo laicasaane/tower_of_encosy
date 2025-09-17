@@ -45,7 +45,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.ResourceKeys
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorFoundNoAsset(Type type, string address)
         {
-            DevLoggerAPI.LogErrorFormat("Cannot find Resource Asset of type {0} by address {1}"
+            StaticDevLogger.LogErrorFormat("Cannot find Resource Asset of type {0} by address {1}"
                 , type.Name
                 , address
             );

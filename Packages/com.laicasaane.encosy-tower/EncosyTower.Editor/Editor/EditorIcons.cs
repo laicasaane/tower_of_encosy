@@ -276,7 +276,7 @@ namespace EncosyTower.Editor
         {
             if (EditorGUIUtility.IconContent(iconName).image is not Texture2D tex)
             {
-                DevLoggerAPI.LogError($"Cannot save the icon '{iconName}'");
+                StaticDevLogger.LogError($"Cannot save the icon '{iconName}'");
                 return;
             }
 
@@ -296,7 +296,7 @@ namespace EncosyTower.Editor
             }
             catch (Exception ex)
             {
-                DevLoggerAPI.LogException(ex);
+                StaticDevLogger.LogException(ex);
             }
         }
 
@@ -321,7 +321,7 @@ namespace EncosyTower.Editor
 
                     if (string.IsNullOrWhiteSpace(folderpath))
                     {
-                        DevLoggerAPI.LogError("Folder path invalid...");
+                        StaticDevLogger.LogError("Folder path invalid...");
                         break;
                     }
 
@@ -329,7 +329,7 @@ namespace EncosyTower.Editor
 
                     if (File.Exists(path))
                     {
-                        DevLoggerAPI.LogWarning($"File already exists at {path}");
+                        StaticDevLogger.LogWarning($"File already exists at {path}");
                     }
                     else
                     {
@@ -342,7 +342,7 @@ namespace EncosyTower.Editor
             }
             catch (Exception ex)
             {
-                DevLoggerAPI.LogException(ex);
+                StaticDevLogger.LogException(ex);
             }
         }
 

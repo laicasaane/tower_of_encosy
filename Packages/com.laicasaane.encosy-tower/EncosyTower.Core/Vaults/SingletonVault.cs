@@ -31,7 +31,7 @@ namespace EncosyTower.Vaults
             if (_singletons.ContainsKey(Type<T>.Hash))
             {
 #if __ENCOSY_VALIDATION__
-                DevLoggerAPI.LogError($"An instance of {Type<T>.Value.Name} has already been existing");
+                StaticDevLogger.LogError($"An instance of {Type<T>.Value.Name} has already been existing");
 #endif
 
                 return false;
@@ -56,7 +56,7 @@ namespace EncosyTower.Vaults
             if (_singletons.ContainsKey(Type<T>.Hash))
             {
 #if __ENCOSY_VALIDATION__
-                DevLoggerAPI.LogError($"An instance of {Type<T>.Value} has already been existing");
+                StaticDevLogger.LogError($"An instance of {Type<T>.Value} has already been existing");
 #endif
 
                 return false;

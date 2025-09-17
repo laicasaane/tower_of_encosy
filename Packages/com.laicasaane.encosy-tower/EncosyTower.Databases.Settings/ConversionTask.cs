@@ -54,7 +54,7 @@ namespace EncosyTower.Databases.Settings
 
             if (_task.IsFaulted)
             {
-                DevLoggerAPI.LogException(_task.Exception);
+                StaticDevLogger.LogException(_task.Exception);
             }
 
             Progress.Remove(_id);

@@ -49,7 +49,7 @@ namespace EncosyTower.Databases.Settings
                 catch (Exception ex)
                 {
                     credentialText = string.Empty;
-                    DevLoggerAPI.LogException(ex);
+                    StaticDevLogger.LogException(ex);
                 }
 
                 if (string.IsNullOrWhiteSpace(credentialText))
@@ -186,7 +186,7 @@ namespace EncosyTower.Databases.Settings
 
             private void Log(LogMessageType type)
             {
-                DevLoggerAPI.LogError(GetMessage(type));
+                StaticDevLogger.LogError(GetMessage(type));
             }
 
             private string GetMessage(ProgressMessageType type)

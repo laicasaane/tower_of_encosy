@@ -25,7 +25,7 @@ namespace EncosyTower.Databases.Settings.Views
                 return value;
             }
 
-            DevLoggerAPI.LogError($"Cannot find Label by name `{name}`");
+            StaticDevLogger.LogError($"Cannot find Label by name `{name}`");
             return string.Empty;
         }
 

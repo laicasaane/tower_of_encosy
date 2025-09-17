@@ -117,7 +117,7 @@ namespace EncosyTower.Naming
 
         private static void WarningNewtonsoftJson([CallerMemberName] string memberName = "")
         {
-            DevLoggerAPI.Warning(
+            StaticDevLogger.Warning(
                 "Newtonsoft.Json package is not installed. " +
                 $"'{memberName}' will return the input string as-is."
             );

@@ -222,7 +222,7 @@ namespace EncosyTower.Databases.Settings
                 catch (Exception ex)
                 {
                     instance = default;
-                    DevLoggerAPI.LogException(ex);
+                    StaticDevLogger.LogException(ex);
                     return ValidationResult.Success;
                 }
             }
@@ -232,34 +232,34 @@ namespace EncosyTower.Databases.Settings
                 switch (result)
                 {
                     case ValidationResult.DatabaseNameIsNullOrInvalid:
-                        DevLoggerAPI.LogError($"Database name is null or invalid: '{name}'");
+                        StaticDevLogger.LogError($"Database name is null or invalid: '{name}'");
                         break;
 
                     case ValidationResult.AuthorTypeIsNullOrInvalid:
-                        DevLoggerAPI.LogError($"Authoring type is null or invalid: '{authorType}'");
+                        StaticDevLogger.LogError($"Authoring type is null or invalid: '{authorType}'");
                         break;
 
                     case ValidationResult.DatabaseTypeIsNullOrInvalid:
-                        DevLoggerAPI.LogError($"Database type is null or invalid: '{databaseType}'");
+                        StaticDevLogger.LogError($"Database type is null or invalid: '{databaseType}'");
                         break;
 
                     case ValidationResult.AuthorTypeDoesNotExist:
-                        DevLoggerAPI.LogError($"Authoring type does not exist: '{authorType}'");
+                        StaticDevLogger.LogError($"Authoring type does not exist: '{authorType}'");
                         break;
 
                     case ValidationResult.DatabaseTypeDoesNotExist:
-                        DevLoggerAPI.LogError($"Database type does not exist: '{databaseType}'");
+                        StaticDevLogger.LogError($"Database type does not exist: '{databaseType}'");
                         break;
 
                     case ValidationResult.CannotFindSheetContainerTypeInsideType:
-                        DevLoggerAPI.LogError($"Cannot find the type 'SheetContainer' inside type '{authorType}'");
+                        StaticDevLogger.LogError($"Cannot find the type 'SheetContainer' inside type '{authorType}'");
                         break;
 
                     case ValidationResult.SheetContainerIsInvalid:
                     {
                         if (sheetContainerType != null)
                         {
-                            DevLoggerAPI.LogError(
+                            StaticDevLogger.LogError(
                                 $"'{sheetContainerType.FullName}' must be a non-abstract class derived from " +
                                 $"{typeof(DataSheetContainerBase)}."
                             );
@@ -272,7 +272,7 @@ namespace EncosyTower.Databases.Settings
                     {
                         if (sheetContainerType != null)
                         {
-                            DevLoggerAPI.LogError(
+                            StaticDevLogger.LogError(
                                 $"Cannot create an instance of '{sheetContainerType.FullName}'."
                             );
                         }

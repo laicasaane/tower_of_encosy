@@ -81,7 +81,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AtlasedSprites
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorFoundNoAtlas(string atlas)
         {
-            DevLoggerAPI.LogErrorFormat("Cannot find SpriteAtlas {0} in Addressables."
+            StaticDevLogger.LogErrorFormat("Cannot find SpriteAtlas {0} in Addressables."
                 , atlas
             );
         }
@@ -89,7 +89,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AtlasedSprites
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorFoundNoSprite(string atlas, string sprite, UnityEngine.Object context)
         {
-            DevLoggerAPI.LogErrorFormat(context
+            StaticDevLogger.LogErrorFormat(context
                 , "SpriteAtlas {0} does not contain sprite {1}"
                 , atlas
                 , sprite

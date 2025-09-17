@@ -201,11 +201,11 @@ namespace EncosyTower.Vaults
 
             if (context)
             {
-                DevLoggerAPI.LogErrorFormat(context, message, id, obj?.GetType(), typeof(T));
+                StaticDevLogger.LogErrorFormat(context, message, id, obj?.GetType(), typeof(T));
             }
             else
             {
-                DevLoggerAPI.LogErrorFormat(message, id, obj?.GetType(), typeof(T));
+                StaticDevLogger.LogErrorFormat(message, id, obj?.GetType(), typeof(T));
             }
         }
 
@@ -216,11 +216,11 @@ namespace EncosyTower.Vaults
 
             if (context)
             {
-                DevLoggerAPI.LogErrorFormat(context, message, id);
+                StaticDevLogger.LogErrorFormat(context, message, id);
             }
             else
             {
-                DevLoggerAPI.LogErrorFormat(message, id);
+                StaticDevLogger.LogErrorFormat(message, id);
             }
         }
     }

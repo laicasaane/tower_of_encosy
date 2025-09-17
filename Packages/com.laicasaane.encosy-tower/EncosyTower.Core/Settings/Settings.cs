@@ -82,7 +82,7 @@ namespace EncosyTower.Settings
                 }
                 else
                 {
-                    DevLoggerAPI.LogWarningFormat(
+                    StaticDevLogger.LogWarningFormat(
                         $"Failed to move previous settings asset '{oldPath}' to '{path}'. " +
                         $"A new settings asset will be created."
                         , s_instance

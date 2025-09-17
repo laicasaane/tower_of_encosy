@@ -244,7 +244,7 @@ namespace EncosyTower.Databases
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorAssetIsInvalid(int index, DatabaseAsset context)
         {
-            DevLoggerAPI.LogError(context, $"Table asset at index {index} is invalid.");
+            StaticDevLogger.LogError(context, $"Table asset at index {index} is invalid.");
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
@@ -256,7 +256,7 @@ namespace EncosyTower.Databases
             , DatabaseAsset context
         )
         {
-            DevLoggerAPI.LogWarning(
+            StaticDevLogger.LogWarning(
                   context
                 , $"DO NOT use the type '{type}' to get the asset named '{name}' (index {index}) " +
                   $"because that type has already been registered to the asset named '{otherName}'!\n" +
@@ -286,19 +286,19 @@ namespace EncosyTower.Databases
                 ? $"id '{id}'"
                 : $"name '{name}'";
 
-            DevLoggerAPI.LogError(context, $"Cannot find any table asset by {info}.");
+            StaticDevLogger.LogError(context, $"Cannot find any table asset by {info}.");
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorCannotFindAsset(Type type, DatabaseAsset context)
         {
-            DevLoggerAPI.LogError(context, $"Cannot find any table asset by the type '{type}'.");
+            StaticDevLogger.LogError(context, $"Cannot find any table asset by the type '{type}'.");
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorFoundAssetIsNotValidType<T>(DataTableAssetBase context)
         {
-            DevLoggerAPI.LogError(context, $"The table asset is not an instance of type '{typeof(T)}'");
+            StaticDevLogger.LogError(context, $"The table asset is not an instance of type '{typeof(T)}'");
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
@@ -318,7 +318,7 @@ namespace EncosyTower.Databases
                 ? $"by id '{ids[0]}'"
                 : $"named '{name}'";
 
-            DevLoggerAPI.LogWarning(
+            StaticDevLogger.LogWarning(
                   context
                 , $"It is unreliable to get a table asset by the type '{type}' " +
                   $"because it is the type of multiple assets of different names.\n" +

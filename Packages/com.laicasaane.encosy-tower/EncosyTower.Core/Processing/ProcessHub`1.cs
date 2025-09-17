@@ -148,7 +148,7 @@ namespace EncosyTower.Processing
             [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
-                DevLoggerAPI.LogError(
+                StaticDevLogger.LogError(
                     $"Cannot find any process handler for the request {typeof(TRequest)} " +
                     $"inside the scope {typeof(TScope)}({scope})"
                 );
@@ -195,7 +195,7 @@ namespace EncosyTower.Processing
             [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
-                DevLoggerAPI.LogError(
+                StaticDevLogger.LogError(
                     $"Cannot find any process handler for the request {typeof(TRequest)} " +
                     $"which returns a {typeof(TResult)} " +
                     $"inside the scope {typeof(TScope)}({scope})"
@@ -227,7 +227,7 @@ namespace EncosyTower.Processing
                 return true;
             }
 
-            RuntimeLoggerAPI.LogError(
+            StaticLogger.LogError(
                 $"{GetType().Name} must be retrieved via `{nameof(Processor)}.{nameof(Scope)}` API"
             );
 

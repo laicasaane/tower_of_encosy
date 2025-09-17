@@ -220,7 +220,7 @@ namespace EncosyTower.Editor.UnityObjects
                     continue;
                 }
 
-                DevLoggerAPI.LogInfoSlim(type);
+                StaticDevLogger.LogInfoSlim(type);
             }
 
             static bool IsIgnored(string name, bool config, string word)

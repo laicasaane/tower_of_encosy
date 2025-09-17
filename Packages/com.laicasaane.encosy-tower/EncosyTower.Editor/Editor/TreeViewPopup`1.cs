@@ -66,7 +66,7 @@ namespace EncosyTower.Editor
         {
             if (Tree == null)
             {
-                DevLoggerAPI.LogError("Cannot show an empty tree!");
+                StaticDevLogger.LogError("Cannot show an empty tree!");
                 return;
             }
 

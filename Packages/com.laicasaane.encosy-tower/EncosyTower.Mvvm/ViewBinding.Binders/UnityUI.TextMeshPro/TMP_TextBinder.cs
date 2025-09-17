@@ -103,7 +103,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 
         private static void ThrowNotSupported()
         {
-            Logging.RuntimeLoggerAPI.LogException(new NotSupportedException(
+            Logging.StaticLogger.LogException(new NotSupportedException(
                 "TMP Text Color Gradient binding requires the symbol VARIANT_64_BYTES or higher to be defined"
             ));
         }

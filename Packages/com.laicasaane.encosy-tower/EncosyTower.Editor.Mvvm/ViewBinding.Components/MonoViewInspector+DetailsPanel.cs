@@ -1811,7 +1811,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             }
             catch (Exception ex)
             {
-                DevLoggerAPI.LogException(target, ex);
+                StaticDevLogger.LogException(target, ex);
             }
         }
 
@@ -1850,7 +1850,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             }
             catch (Exception ex)
             {
-                DevLoggerAPI.LogException(target, ex);
+                StaticDevLogger.LogException(target, ex);
             }
         }
     }

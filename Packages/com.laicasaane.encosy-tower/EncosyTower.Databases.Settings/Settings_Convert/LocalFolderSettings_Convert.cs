@@ -51,7 +51,7 @@ namespace EncosyTower.Databases.Settings
                 }
                 catch (Exception ex)
                 {
-                    DevLoggerAPI.LogException(ex);
+                    StaticDevLogger.LogException(ex);
                     return false;
                 }
             }
@@ -111,7 +111,7 @@ namespace EncosyTower.Databases.Settings
                 }
                 catch (Exception ex)
                 {
-                    DevLoggerAPI.LogException(ex);
+                    StaticDevLogger.LogException(ex);
                     return false;
                 }
             }
@@ -141,15 +141,15 @@ namespace EncosyTower.Databases.Settings
                 switch (validationResult)
                 {
                     case ValidationResult.InputFolderIsNullOrInvalid:
-                        DevLoggerAPI.LogError($"Input folder is null or invalid: '{inputRelativeFolderPath}'");
+                        StaticDevLogger.LogError($"Input folder is null or invalid: '{inputRelativeFolderPath}'");
                         break;
 
                     case ValidationResult.InputFolderDoesNotExist:
-                        DevLoggerAPI.LogError($"Input folder does not exist: '{inputRelativeFolderPath}'");
+                        StaticDevLogger.LogError($"Input folder does not exist: '{inputRelativeFolderPath}'");
                         break;
 
                     case ValidationResult.OutputFolderIsNullOrInvalid:
-                        DevLoggerAPI.LogError($"Output folder is null or invalid: '{outputRelativeFolderPath}'");
+                        StaticDevLogger.LogError($"Output folder is null or invalid: '{outputRelativeFolderPath}'");
                         break;
                 }
             }

@@ -1,94 +1,111 @@
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace EncosyTower.Logging
 {
+    /// <summary>
+    /// A logger for Editor and Development environments.
+    /// </summary>
+    /// <remarks>
+    /// In a Release build, its methods will do nothing.
+    /// </remarks>
     public class DevLogger : ILogger
     {
         public static readonly DevLogger Default = new();
 
-        [HideInCallstack]
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public CallerInfo GetCallerInfo(
+              [CallerLineNumber] int lineNumber = 0
+            , [CallerMemberName] string memberName = ""
+            , [CallerFilePath] string filePath = ""
+        )
+        {
+            return StaticDevLogger.GetCallerInfo(lineNumber, memberName, filePath);
+        }
+
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogException(Exception value)
         {
-            DevLoggerAPI.LogException(value);
+            StaticDevLogger.LogException(value);
         }
 
-        [HideInCallstack]
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogInfo(object message)
         {
-            DevLoggerAPI.LogInfo(message);
+            StaticDevLogger.LogInfo(message);
         }
 
-        [HideInCallstack]
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogInfoFormat(string format, params object[] args)
         {
-            DevLoggerAPI.LogInfoFormat(format, args);
+            StaticDevLogger.LogInfoFormat(format, args);
         }
 
-        [HideInCallstack]
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogWarning(object message)
         {
-            DevLoggerAPI.LogWarning(message);
+            StaticDevLogger.LogWarning(message);
         }
 
-        [HideInCallstack]
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogWarningFormat(string format, params object[] args)
         {
-            DevLoggerAPI.LogWarningFormat(format, args);
+            StaticDevLogger.LogWarningFormat(format, args);
         }
 
-        [HideInCallstack]
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogError(object message)
         {
-            DevLoggerAPI.LogError(message);
+            StaticDevLogger.LogError(message);
         }
 
-        [HideInCallstack]
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogErrorFormat(string format, params object[] args)
         {
-            DevLoggerAPI.LogErrorFormat(format, args);
+            StaticDevLogger.LogErrorFormat(format, args);
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack]
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogInfoSlim(object message)
         {
-            DevLoggerAPI.LogInfoSlim(message);
+            StaticDevLogger.LogInfoSlim(message);
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack]
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogInfoFormatSlim(string format, params object[] args)
         {
-            DevLoggerAPI.LogInfoFormatSlim(format, args);
+            StaticDevLogger.LogInfoFormatSlim(format, args);
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack]
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogWarningSlim(object message)
         {
-            DevLoggerAPI.LogWarningSlim(message);
+            StaticDevLogger.LogWarningSlim(message);
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack]
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogWarningFormatSlim(string format, params object[] args)
         {
-            DevLoggerAPI.LogWarningFormatSlim(format, args);
+            StaticDevLogger.LogWarningFormatSlim(format, args);
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack]
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogErrorSlim(object message)
         {
-            DevLoggerAPI.LogErrorSlim(message);
+            StaticDevLogger.LogErrorSlim(message);
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack]
+        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogErrorFormatSlim(string format, params object[] args)
         {
-            DevLoggerAPI.LogErrorFormatSlim(format, args);
+            StaticDevLogger.LogErrorFormatSlim(format, args);
         }
     }
 }

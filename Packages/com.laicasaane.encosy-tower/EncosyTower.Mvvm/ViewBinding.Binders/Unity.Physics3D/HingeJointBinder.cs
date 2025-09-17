@@ -65,7 +65,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
 
         private static void ThrowNotSupported()
         {
-            Logging.RuntimeLoggerAPI.LogException(new NotSupportedException(
+            Logging.StaticLogger.LogException(new NotSupportedException(
                 "Hinge Joint Limits binding property requires the symbol VARIANT_32_BYTES or higher to be defined"
             ));
         }

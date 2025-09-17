@@ -150,7 +150,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfBindingMissing(UnityEngine.Object context, int index)
         {
-            DevLoggerAPI.LogError(
+            StaticDevLogger.LogError(
                   context
                 , $"Expected a MonoBinding<{typeof(T)}>, but received a null at index {index}"
             );
@@ -159,7 +159,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfTypeNotMatch(UnityEngine.Object context, int index, MonoBinding value)
         {
-            DevLoggerAPI.LogError(
+            StaticDevLogger.LogError(
                   context
                 , $"Expected a MonoBinding<{typeof(T)}>, but received a {value.GetType()} at index {index}"
             );
@@ -168,7 +168,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfContextMissing(UnityEngine.Object context, int index)
         {
-            DevLoggerAPI.LogError(
+            StaticDevLogger.LogError(
                   context
                 , $"The context of MonoBinding<{typeof(T)}> at index {index} is null"
             );

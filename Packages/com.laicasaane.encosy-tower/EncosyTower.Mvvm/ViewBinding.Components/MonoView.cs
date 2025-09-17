@@ -135,13 +135,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static void ErrorFoundNoContext(UnityEngine.Object context)
         {
-            DevLoggerAPI.LogError(context, $"MonoView has no context that implements IObservableObject");
+            StaticDevLogger.LogError(context, $"MonoView has no context that implements IObservableObject");
         }
 
         [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static void ErrorNotInitialized(UnityEngine.Object context)
         {
-            DevLoggerAPI.LogError(context, $"MonoView must be initialized");
+            StaticDevLogger.LogError(context, $"MonoView must be initialized");
         }
 
         protected sealed class BinderList : StatelessList<BinderBuffer, MonoBinder>

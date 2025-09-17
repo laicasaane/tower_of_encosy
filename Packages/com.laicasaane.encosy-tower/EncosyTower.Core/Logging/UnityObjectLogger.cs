@@ -10,63 +10,63 @@ namespace EncosyTower.Logging
         public void LogException(Exception value)
         {
             if (Environment == LogEnvironment.Runtime)
-                RuntimeLoggerAPI.LogException(Context, value);
+                StaticLogger.LogException(Context, value);
             else
-                DevLoggerAPI.LogException(Context, value);
+                StaticDevLogger.LogException(Context, value);
         }
 
         [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogInfo(object message)
         {
             if (Environment == LogEnvironment.Runtime)
-                RuntimeLoggerAPI.LogInfo(Context, message);
+                StaticLogger.LogInfo(Context, message);
             else
-                DevLoggerAPI.LogInfo(Context, message);
+                StaticDevLogger.LogInfo(Context, message);
         }
 
         [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogInfoFormat(string format, params object[] args)
         {
             if (Environment == LogEnvironment.Runtime)
-                RuntimeLoggerAPI.LogInfoFormat(Context, format, args);
+                StaticLogger.LogInfoFormat(Context, format, args);
             else
-                DevLoggerAPI.LogInfoFormat(Context, format, args);
+                StaticDevLogger.LogInfoFormat(Context, format, args);
         }
 
         [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogWarning(object message)
         {
             if (Environment == LogEnvironment.Runtime)
-                RuntimeLoggerAPI.LogWarning(Context, message);
+                StaticLogger.LogWarning(Context, message);
             else
-                DevLoggerAPI.LogWarning(Context, message);
+                StaticDevLogger.LogWarning(Context, message);
         }
 
         [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogWarningFormat(string format, params object[] args)
         {
             if (Environment == LogEnvironment.Runtime)
-                RuntimeLoggerAPI.LogWarningFormat(Context, format, args);
+                StaticLogger.LogWarningFormat(Context, format, args);
             else
-                DevLoggerAPI.LogWarningFormat(Context, format, args);
+                StaticDevLogger.LogWarningFormat(Context, format, args);
         }
 
         [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogError(object message)
         {
             if (Environment == LogEnvironment.Runtime)
-                RuntimeLoggerAPI.LogError(Context, message);
+                StaticLogger.LogError(Context, message);
             else
-                DevLoggerAPI.LogError(Context, message);
+                StaticDevLogger.LogError(Context, message);
         }
 
         [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogErrorFormat(string format, params object[] args)
         {
             if (Environment == LogEnvironment.Runtime)
-                RuntimeLoggerAPI.LogErrorFormat(Context, format, args);
+                StaticLogger.LogErrorFormat(Context, format, args);
             else
-                DevLoggerAPI.LogErrorFormat(Context, format, args);
+                StaticDevLogger.LogErrorFormat(Context, format, args);
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
@@ -74,9 +74,9 @@ namespace EncosyTower.Logging
         public void LogInfoSlim(object message)
         {
             if (Environment == LogEnvironment.Runtime)
-                RuntimeLoggerAPI.LogInfoSlim(Context, message);
+                StaticLogger.LogInfoSlim(Context, message);
             else
-                DevLoggerAPI.LogInfoSlim(Context, message);
+                StaticDevLogger.LogInfoSlim(Context, message);
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
@@ -84,9 +84,9 @@ namespace EncosyTower.Logging
         public void LogInfoFormatSlim(string format, params object[] args)
         {
             if (Environment == LogEnvironment.Runtime)
-                RuntimeLoggerAPI.LogInfoFormatSlim(Context, format, args);
+                StaticLogger.LogInfoFormatSlim(Context, format, args);
             else
-                DevLoggerAPI.LogInfoFormatSlim(Context, format, args);
+                StaticDevLogger.LogInfoFormatSlim(Context, format, args);
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
@@ -94,9 +94,9 @@ namespace EncosyTower.Logging
         public void LogWarningSlim(object message)
         {
             if (Environment == LogEnvironment.Runtime)
-                RuntimeLoggerAPI.LogWarningSlim(Context, message);
+                StaticLogger.LogWarningSlim(Context, message);
             else
-                DevLoggerAPI.LogWarningSlim(Context, message);
+                StaticDevLogger.LogWarningSlim(Context, message);
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
@@ -104,9 +104,9 @@ namespace EncosyTower.Logging
         public void LogWarningFormatSlim(string format, params object[] args)
         {
             if (Environment == LogEnvironment.Runtime)
-                RuntimeLoggerAPI.LogWarningFormatSlim(Context, format, args);
+                StaticLogger.LogWarningFormatSlim(Context, format, args);
             else
-                DevLoggerAPI.LogWarningFormatSlim(Context, format, args);
+                StaticDevLogger.LogWarningFormatSlim(Context, format, args);
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
@@ -114,9 +114,9 @@ namespace EncosyTower.Logging
         public void LogErrorSlim(object message)
         {
             if (Environment == LogEnvironment.Runtime)
-                RuntimeLoggerAPI.LogErrorSlim(Context, message);
+                StaticLogger.LogErrorSlim(Context, message);
             else
-                DevLoggerAPI.LogErrorSlim(Context, message);
+                StaticDevLogger.LogErrorSlim(Context, message);
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
@@ -124,9 +124,9 @@ namespace EncosyTower.Logging
         public void LogErrorFormatSlim(string format, params object[] args)
         {
             if (Environment == LogEnvironment.Runtime)
-                RuntimeLoggerAPI.LogErrorFormatSlim(Context, format, args);
+                StaticLogger.LogErrorFormatSlim(Context, format, args);
             else
-                DevLoggerAPI.LogErrorFormatSlim(Context, format, args);
+                StaticDevLogger.LogErrorFormatSlim(Context, format, args);
         }
     }
 

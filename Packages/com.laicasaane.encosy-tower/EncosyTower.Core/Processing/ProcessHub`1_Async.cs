@@ -191,7 +191,7 @@ namespace EncosyTower.Processing
             [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
-                DevLoggerAPI.LogError(
+                StaticDevLogger.LogError(
                     $"Cannot find any process handler for the request {typeof(TRequest)} " +
                     $"which returns a UniTask " +
                     $"inside the scope {typeof(TScope)}({scope})"
@@ -265,7 +265,7 @@ namespace EncosyTower.Processing
             [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
-                DevLoggerAPI.LogError(
+                StaticDevLogger.LogError(
                     $"Cannot find any process handler for the request {typeof(TRequest)} " +
                     $"which returns a UniTask<{typeof(TResult)}> " +
                     $"inside the scope {typeof(TScope)}({scope})"
@@ -314,7 +314,7 @@ namespace EncosyTower.Processing
             [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
-                DevLoggerAPI.LogError(
+                StaticDevLogger.LogError(
                     $"Cannot find any process handler for the request {typeof(TRequest)} " +
                     $"which returns a UniTask " +
                     $"inside the scope {typeof(TScope)}({scope})"
@@ -386,7 +386,7 @@ namespace EncosyTower.Processing
             [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
-                DevLoggerAPI.LogError(
+                StaticDevLogger.LogError(
                     $"Cannot find any process handler for the request {typeof(TRequest)} " +
                     $"which returns a UniTask<{typeof(TResult)}> " +
                     $"inside the scope {typeof(TScope)}({scope})"

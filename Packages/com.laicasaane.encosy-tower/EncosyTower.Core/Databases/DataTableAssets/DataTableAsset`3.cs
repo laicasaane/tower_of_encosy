@@ -72,7 +72,7 @@ namespace EncosyTower.Databases
             , [NotNull] DataTableAsset<TDataId, TData, TConvertedId> context
         )
         {
-            DevLoggerAPI.LogErrorFormat(
+            StaticDevLogger.LogErrorFormat(
                   context
                 , "Id with value \"{0}\" is duplicated at row \"{1}\""
                 , context.ToString(id)
