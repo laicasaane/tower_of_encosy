@@ -1,0 +1,14 @@
+{
+    "name": "Encosy.Core.LowLevel.ILSupport",
+    "rootNamespace": "Encosy.Core.LowLevel.ILSupport",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
