@@ -12,7 +12,7 @@ namespace EncosyTower.EnumExtensions
         , ISpanFormattable
         , IToUnderlyingValue<TUnderlyingValue>
         , IIsDefined
-        , IIsDefinedIn
+        , IIsNameDefined
         , IFindIndex
         where TEnum : struct, Enum
         where TUnderlyingValue : unmanaged
