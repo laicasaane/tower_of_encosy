@@ -71,7 +71,7 @@ namespace EncosyTower.Settings
             // Move settings if its path changed (type renamed or attribute changed)
             // while the editor was running. This must be done manually if the
             // change was made outside the editor.
-            if (Editor.AssetDatabaseAPI.FindFirstObjectByGlobalQualifiedType<T>(out var instance))
+            if (Editor.AssetDatabaseAPI.FindFirstObjectByGlobalQualifiedTypeName<T>(out var instance))
             {
                 var oldPath = AssetDatabase.GetAssetPath(instance);
                 var result = AssetDatabase.MoveAsset(oldPath, path);

@@ -91,7 +91,7 @@ namespace EncosyTower.Databases.Settings.Views
             var rootNode = _menu.rootNode;
             rootNode.Reset();
 
-            var presets = AssetDatabaseAPI.FindAllObjectsByGlobalQualifiedType<DatabaseSettingsPreset>();
+            var presets = AssetDatabaseAPI.FindAllObjectsByGlobalQualifiedTypeName<DatabaseSettingsPreset>();
             var count = presets.Count;
 
             GenericMenu.MenuFunction2 func2 = Menu_OnSelect;

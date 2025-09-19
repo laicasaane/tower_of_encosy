@@ -1,9 +1,11 @@
 #if UNITY_EDITOR
 
 using System;
-using System.Diagnostics.CodeAnalysis;
+using System.Collections.Generic;
 using System.IO;
 using EncosyTower.Collections;
+using EncosyTower.Collections.Extensions;
+using EncosyTower.IO;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEngine;
@@ -13,9 +15,86 @@ namespace EncosyTower.Editor
     public static class AssetDatabaseAPI
     {
         /// <summary>
+        /// Find all objects by a filter.
+        /// </summary>
+        public static FasterList<T> FindAllObjects<T>(string filter)
+            where T : UnityEngine.Object
+        {
+            var candidates = AssetDatabase.FindAssets(filter);
+            var result = new FasterList<T>(candidates.Length);
+
+            foreach (var candidate in candidates)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(candidate);
+                var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+
+                if (asset.IsInvalid())
+                {
+                    continue;
+                }
+
+                result.Add(asset);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Find all objects by a filter.
+        /// </summary>
+        public static void FindAllObjects<T>(string filter, ICollection<T> result)
+            where T : UnityEngine.Object
+        {
+            var candidates = AssetDatabase.FindAssets(filter);
+            result.TryIncreaseCapacityToFast(candidates.Length);
+
+            foreach (var candidate in candidates)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(candidate);
+                var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+
+                if (asset.IsInvalid())
+                {
+                    continue;
+                }
+
+                result.Add(asset);
+            }
+        }
+
+        /// <summary>
+        /// Find first object by a filter.
+        /// </summary>
+        public static bool FindFirstObject<T>(string filter, out T result)
+            where T : UnityEngine.Object
+        {
+            var candidates = AssetDatabase.FindAssets(filter);
+
+            if (candidates.Length > 0)
+            {
+                foreach (var candidate in candidates)
+                {
+                    var path = AssetDatabase.GUIDToAssetPath(candidate);
+                    var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+
+                    if (asset.IsInvalid())
+                    {
+                        continue;
+                    }
+
+                    result = asset;
+                    return true;
+                }
+            }
+
+            result = default;
+            return false;
+        }
+
+        /// <summary>
         /// Find first object by global qualified type name (i.e. with `global::` prefix).
         /// </summary>
-        public static bool FindFirstObjectByGlobalQualifiedType<T>(out T result)
+        public static bool FindFirstObjectByGlobalQualifiedTypeName<T>(out T result)
             where T : UnityEngine.Object
         {
             var candidates = AssetDatabase.FindAssets($"t:global::{typeof(T).FullName}");
@@ -44,7 +123,7 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find first object by name and global qualified type name (i.e. with `global::` prefix).
         /// </summary>
-        public static bool FindFirstObjectByNameAndGlobalQualifiedType<T>(
+        public static bool FindFirstObjectByNameAndGlobalQualifiedTypeName<T>(
               string name
             , out T result
             , out string resultPath
@@ -79,7 +158,7 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find all objects by global qualified type name (i.e. with `global::` prefix).
         /// </summary>
-        public static FasterList<T> FindAllObjectsByGlobalQualifiedType<T>()
+        public static FasterList<T> FindAllObjectsByGlobalQualifiedTypeName<T>()
             where T : UnityEngine.Object
         {
             var candidates = AssetDatabase.FindAssets($"t:global::{typeof(T).FullName}");
@@ -101,104 +180,203 @@ namespace EncosyTower.Editor
             return result;
         }
 
-        public static bool TryCreateScriptableObject<T>(out T result)
+        /// <summary>
+        /// Find all objects by global qualified type name (i.e. with `global::` prefix).
+        /// </summary>
+        public static void FindAllObjectsByGlobalQualifiedTypeName<T>(ICollection<T> result)
+            where T : UnityEngine.Object
+        {
+            var candidates = AssetDatabase.FindAssets($"t:global::{typeof(T).FullName}");
+            result.TryIncreaseCapacityToFast(candidates.Length);
+
+            foreach (var candidate in candidates)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(candidate);
+                var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+
+                if (asset.IsInvalid())
+                {
+                    continue;
+                }
+
+                result.Add(asset);
+            }
+        }
+
+        public static bool CreateThenSaveScriptableObjectToFile<T>(
+              string fileName
+            , string relativeFolderPath
+            , out T result
+            , bool overwriteIfExist = false
+            , bool displayErrorDialog = true
+            , bool refreshAssetDatabase = true
+            , Logging.ILogger logger = null
+        )
             where T : UnityEngine.ScriptableObject
         {
             var type = typeof(T);
-            var name = ObjectNames.NicifyVariableName(type.Name);
 
             if (type.IsAbstract)
             {
-                EditorUtility.DisplayDialog(
-                      $"Creating {name}"
-                    , $"Cannot create an instance of abstract type '{name}'"
-                    , "I understand"
-                );
+                logger?.LogError($"Cannot create an instance of the abstract type '{type}'");
 
+                if (displayErrorDialog)
+                {
+                    EditorUtility.DisplayDialog(
+                          $"Create Then Save ScriptableObject To File"
+                        , $"Cannot create an instance of the abstract type '{type}'"
+                        , "I understand"
+                    );
+                }
                 result = default;
                 return false;
             }
 
-            var choose = EditorUtility.DisplayDialog(
-                  $"Creating {name}"
-                , $"Cannot find any instance of '{name}' in this project"
-                , "Create"
-                , "I understand"
-            );
+            var filePath = Path.Combine(relativeFolderPath, $"{fileName}.asset");
 
-            if (choose == false)
+            RootPath rootPath = EditorAPI.ProjectPath;
+            var absoluteFilePath = rootPath.GetFileAbsolutePath(filePath);
+
+            if (File.Exists(absoluteFilePath))
             {
-                result = default;
-                return false;
+                if (overwriteIfExist == false)
+                {
+                    logger?.LogError(
+                        $"A file of the same name '{fileName}' already exists at '{relativeFolderPath}'.\n" +
+                        $"Please choose a new name."
+                    );
+
+                    if (displayErrorDialog)
+                    {
+                        EditorUtility.DisplayDialog(
+                              $"Create Then Save ScriptableObject To File"
+                            , $"A file of the same name '{fileName}' already exists at '{relativeFolderPath}'.\n" +
+                              $"Please choose a new name."
+                            , "I understand"
+                        );
+                    }
+
+                    result = null;
+                    return false;
+                }
+
+                File.Delete(absoluteFilePath);
             }
 
-            var path = EditorUtility.OpenFolderPanel(
-                  "Select a folder"
-                , "Assets"
-                , ""
-            );
-
-            if (string.IsNullOrWhiteSpace(path))
+            try
             {
-                result = default;
+                result = ScriptableObject.CreateInstance<T>();
+
+                AssetDatabase.CreateAsset(result, filePath);
+
+                if (refreshAssetDatabase)
+                {
+                    AssetDatabase.Refresh();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger?.LogException(ex);
+
+                if (displayErrorDialog)
+                {
+                    EditorUtility.DisplayDialog(
+                          $"Create Then Save ScriptableObject To File"
+                        , ex.ToString()
+                        , "I understand"
+                    );
+                }
+
+                result = null;
                 return false;
             }
-
-            var relativePath = Path.GetRelativePath(Application.dataPath, path);
-            relativePath = Path.Combine("Assets", relativePath, $"{type.Name}.asset");
-
-            result = ScriptableObject.CreateInstance<T>();
-            AssetDatabase.CreateAsset(result, relativePath);
-            return true;
         }
 
-        public static bool TryCreateScriptableObject([NotNull] Type type, out ScriptableObject result)
+        public static bool SaveScriptableObjectToFile<T>(
+              T asset
+            , string fileName
+            , string relativeFolderPath
+            , bool overwriteIfExist = false
+            , bool displayErrorDialog = true
+            , bool refreshAssetDatabase = true
+            , Logging.ILogger logger = null
+        )
+            where T : UnityEngine.ScriptableObject
         {
-            var name = ObjectNames.NicifyVariableName(type.Name);
-
-            if (type.IsAbstract)
+            if (asset.IsInvalid())
             {
-                EditorUtility.DisplayDialog(
-                      $"Creating {name}"
-                    , $"Cannot create an instance of abstract type '{name}'"
-                    , "I understand"
-                );
+                logger?.LogError("Asset must not be null.");
 
-                result = default;
+                if (displayErrorDialog)
+                {
+                    EditorUtility.DisplayDialog(
+                          $"Save ScriptableObject To File"
+                        , $"Asset must not be null."
+                        , "I understand"
+                    );
+                }
+
                 return false;
             }
 
-            var choose = EditorUtility.DisplayDialog(
-                  $"Creating {name}"
-                , $"Cannot find any instance of '{name}' in this project"
-                , "Create"
-                , "I understand"
-            );
+            var filePath = Path.Combine(relativeFolderPath, $"{fileName}.asset");
 
-            if (choose == false)
+            RootPath rootPath = EditorAPI.ProjectPath;
+            var absoluteFilePath = rootPath.GetFileAbsolutePath(filePath);
+
+            if (File.Exists(absoluteFilePath))
             {
-                result = default;
-                return false;
+                if (overwriteIfExist == false)
+                {
+                    logger?.LogError(
+                        $"A file of the same name '{fileName}' already exists at '{relativeFolderPath}'.\n" +
+                        $"Please choose a new name."
+                    );
+
+                    if (displayErrorDialog)
+                    {
+                        EditorUtility.DisplayDialog(
+                              $"Save ScriptableObject To File"
+                            , $"A file of the same name '{fileName}' already exists at '{relativeFolderPath}'.\n" +
+                              $"Please choose a new name."
+                            , "I understand"
+                        );
+                    }
+
+                    return false;
+                }
+
+                File.Delete(absoluteFilePath);
             }
 
-            var path = EditorUtility.OpenFolderPanel(
-                  "Select a folder"
-                , "Assets"
-                , ""
-            );
-
-            if (string.IsNullOrWhiteSpace(path))
+            try
             {
-                result = default;
+                AssetDatabase.CreateAsset(asset, filePath);
+
+                if (refreshAssetDatabase)
+                {
+                    AssetDatabase.Refresh();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger?.LogException(ex);
+
+                if (displayErrorDialog)
+                {
+                    EditorUtility.DisplayDialog(
+                          $"Save ScriptableObject To File"
+                        , ex.ToString()
+                        , "I understand"
+                    );
+                }
+
                 return false;
             }
-
-            var relativePath = Path.GetRelativePath(Application.dataPath, path);
-            relativePath = Path.Combine("Assets", relativePath, $"{type.Name}.asset");
-
-            result = ScriptableObject.CreateInstance(type);
-            AssetDatabase.CreateAsset(result, relativePath);
-            return true;
         }
     }
 }
