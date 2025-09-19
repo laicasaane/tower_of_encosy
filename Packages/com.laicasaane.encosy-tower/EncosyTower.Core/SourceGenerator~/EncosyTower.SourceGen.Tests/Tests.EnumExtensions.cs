@@ -1,4 +1,5 @@
-﻿using EncosyTower.EnumExtensions;
+﻿using System;
+using EncosyTower.EnumExtensions;
 
 namespace EncosyTower.Tests.EnumExtensions
 {
@@ -9,4 +10,15 @@ namespace EncosyTower.Tests.EnumExtensions
 
     [EnumExtensionsFor(typeof(System.DayOfWeek))]
     public static partial class DayOfWeekExtensions { }
+
+    [Flags, EnumExtensions]
+    public enum BitFlags
+    {
+        None = 0,
+        Bit1 = 1 << 0,
+        Bit2 = 2 << 0,
+        Bit3 = 3 << 0,
+    }
+
+    partial class BitFlagsExtensions { }
 }

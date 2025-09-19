@@ -263,6 +263,50 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     .Print(ExtensionsWrapperName).Print(" left, ")
                     .Print(ExtensionsWrapperName).PrintEndLine(" right) => left.UnderlyingValue > right.UnderlyingValue;");
                 p.PrintEndLine();
+
+                if (HasFlags)
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static ").Print(ExtensionsWrapperName).Print(" operator ~(")
+                        .Print(ExtensionsWrapperName).Print(" value) => new ")
+                        .Print(ExtensionsWrapperName).PrintEndLine("(~value.Value);");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static ").Print(ExtensionsWrapperName).Print(" operator <<(")
+                        .Print(ExtensionsWrapperName).Print(" value, int bits) => new ")
+                        .Print(ExtensionsWrapperName).Print("((").Print(FullyQualifiedName)
+                        .PrintEndLine(")(value.UnderlyingValue << bits));");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static ").Print(ExtensionsWrapperName).Print(" operator >>(")
+                        .Print(ExtensionsWrapperName).Print(" value, int bits) => new ")
+                        .Print(ExtensionsWrapperName).Print("((").Print(FullyQualifiedName)
+                        .PrintEndLine(")(value.UnderlyingValue >> bits));");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static ").Print(ExtensionsWrapperName).Print(" operator &(")
+                        .Print(ExtensionsWrapperName).Print(" left, ")
+                        .Print(ExtensionsWrapperName).Print(" right) => new ")
+                        .Print(ExtensionsWrapperName).PrintEndLine("(left.Value & right.Value);");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static ").Print(ExtensionsWrapperName).Print(" operator |(")
+                        .Print(ExtensionsWrapperName).Print(" left, ")
+                        .Print(ExtensionsWrapperName).Print(" right) => new ")
+                        .Print(ExtensionsWrapperName).PrintEndLine("(left.Value | right.Value);");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static ").Print(ExtensionsWrapperName).Print(" operator ^(")
+                        .Print(ExtensionsWrapperName).Print(" left, ")
+                        .Print(ExtensionsWrapperName).Print(" right) => new ")
+                        .Print(ExtensionsWrapperName).PrintEndLine("(left.Value ^ right.Value);");
+                    p.PrintEndLine();
+                }
             }
             p.CloseScope();
             p.PrintEndLine();
