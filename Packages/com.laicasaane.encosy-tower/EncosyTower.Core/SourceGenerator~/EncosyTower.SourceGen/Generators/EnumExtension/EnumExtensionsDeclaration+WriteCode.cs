@@ -58,6 +58,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     .Print(FullyQualifiedName).Print(", ").Print(UnderlyingTypeName)
                     .PrintEndLine(">");
 
+                if (HasFlags)
+                {
+                    p.PrintBeginLine(", global::EncosyTower.EnumExtensions.IEnumBitField<").Print(FullyQualifiedName).PrintEndLine(">");
+                }
+
                 if (ReferenceUnityCollections)
                 {
                     p.PrintBeginLine(", global::EncosyTower.Conversion.IToFixedString<").Print(FixedStringTypeFullyQualifiedName).PrintEndLine(">");
@@ -166,14 +171,14 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public bool IsDefinedIn(string name) => ")
-                    .Print(ExtensionsName).Print(".IsDefinedIn(name, default(")
+                p.PrintBeginLine("public bool IsNameDefined(string name) => ")
+                    .Print(ExtensionsName).Print(".IsNameDefined(name, default(")
                     .Print(FullyQualifiedName).PrintEndLine("));");
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public bool IsDefinedIn(string name, bool allowMatchingMetadataAttribute) => ")
-                    .Print(ExtensionsName).Print(".IsDefinedIn(name, default(")
+                p.PrintBeginLine("public bool IsNameDefined(string name, bool allowMatchingMetadataAttribute) => ")
+                    .Print(ExtensionsName).Print(".IsNameDefined(name, default(")
                     .Print(FullyQualifiedName).PrintEndLine("), allowMatchingMetadataAttribute);");
                 p.PrintEndLine();
 
@@ -181,6 +186,24 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintBeginLine("public int FindIndex() => ")
                     .Print(ExtensionsName).PrintEndLine(".FindIndex(this.Value);");
                 p.PrintEndLine();
+
+                if (HasFlags)
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public bool Contains(").Print(FullyQualifiedName).Print(" flag) => ")
+                        .Print(ExtensionsName).PrintEndLine(".Contains(this.Value, flag);");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public bool Any(").Print(FullyQualifiedName).Print(" flag) => ")
+                        .Print(ExtensionsName).PrintEndLine(".Any(this.Value, flag);");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public ").Print(FullyQualifiedName).Print(" Unset(").Print(FullyQualifiedName).Print(" flag) => ")
+                        .Print(ExtensionsName).PrintEndLine(".Unset(this.Value, flag);");
+                    p.PrintEndLine();
+                }
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public override string ToString() => ")
@@ -1110,9 +1133,9 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             }
 
             p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine($"public static bool IsDefinedIn({@this}string name, {FullyQualifiedName} _)");
+            p.PrintLine($"public static bool IsNameDefined({@this}string name, {FullyQualifiedName} _)");
             p = p.IncreasedIndent();
-            p.PrintLine($"=> IsDefinedIn(name, default({FullyQualifiedName}), allowMatchingMetadataAttribute: false);");
+            p.PrintLine($"=> IsNameDefined(name, default({FullyQualifiedName}), allowMatchingMetadataAttribute: false);");
             p = p.DecreasedIndent();
             p.PrintEndLine();
 
@@ -1130,7 +1153,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             }
 
             p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine($"public static bool IsDefinedIn({@this}string name, {FullyQualifiedName} _, bool allowMatchingMetadataAttribute)");
+            p.PrintLine($"public static bool IsNameDefined({@this}string name, {FullyQualifiedName} _, bool allowMatchingMetadataAttribute)");
             p.OpenScope();
             {
                 if (IsDisplayAttributeUsed)
