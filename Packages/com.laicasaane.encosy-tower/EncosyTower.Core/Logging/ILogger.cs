@@ -4,12 +4,6 @@ namespace EncosyTower.Logging
 
     public partial interface ILogger
     {
-        CallerInfo GetCallerInfo(
-              int lineNumber = 0
-            , string memberName = ""
-            , string filePath = ""
-        );
-
         void LogException(Exception value);
 
         void LogInfo(object message);

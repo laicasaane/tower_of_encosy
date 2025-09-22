@@ -13,16 +13,6 @@ namespace EncosyTower.Logging
     /// </summary>
     public static partial class StaticLogger
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static CallerInfo GetCallerInfo(
-              [CallerLineNumber] int lineNumber = 0
-            , [CallerMemberName] string memberName = ""
-            , [CallerFilePath] string filePath = ""
-        )
-        {
-            return new CallerInfo(lineNumber, memberName, filePath);
-        }
-
 #if UNITY_BURST
         [Unity.Burst.BurstDiscard]
 #endif

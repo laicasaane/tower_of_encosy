@@ -67,11 +67,11 @@ namespace EncosyTower.PageFlows
                 return false;
             }
 
-            InitializeIPageNeedsInterfaces(page, this, context);
+            InitializeIPageNeedsInterfaces(page, this);
 
             var publishingContext = _slimPublishingContext
-                ? PublishingContext.GetSlim(_ignoreEmptySubscriber, _logger)
-                : PublishingContext.Get(_ignoreEmptySubscriber, _logger);
+                ? PublishingContext.Get(_ignoreEmptySubscriber, _logger)
+                : PublishingContext.Get(_ignoreEmptySubscriber, _logger, CallerInfo.GetFull());
 
             await _publisher.Scope(_flowScope).PublishAsync(
                   new AttachPageMessage(flow, page ?? _defaultPage, token)
@@ -111,8 +111,8 @@ namespace EncosyTower.PageFlows
             }
 
             var publishingContext = _slimPublishingContext
-                ? PublishingContext.GetSlim(_ignoreEmptySubscriber, _logger)
-                : PublishingContext.Get(_ignoreEmptySubscriber, _logger);
+                ? PublishingContext.Get(_ignoreEmptySubscriber, _logger)
+                : PublishingContext.Get(_ignoreEmptySubscriber, _logger, CallerInfo.GetFull());
 
             await _publisher.Scope(_flowScope).PublishAsync(
                   new DetachPageMessage(flow, page ?? _defaultPage, token)
@@ -130,8 +130,8 @@ namespace EncosyTower.PageFlows
             if (token.IsCancellationRequested == false)
             {
                 var publishingContext = _slimPublishingContext
-                    ? PublishingContext.GetSlim(_ignoreEmptySubscriber, _logger)
-                    : PublishingContext.Get(_ignoreEmptySubscriber, _logger);
+                    ? PublishingContext.Get(_ignoreEmptySubscriber, _logger)
+                    : PublishingContext.Get(_ignoreEmptySubscriber, _logger, CallerInfo.GetFull());
 
                 await _publisher.Scope(_flowScope).PublishAsync(
                       new DetachPageMessage(flow, page ?? _defaultPage, token)
@@ -166,8 +166,8 @@ namespace EncosyTower.PageFlows
                 if (token.IsCancellationRequested == false)
                 {
                     var publishingContext = _slimPublishingContext
-                    ? PublishingContext.GetSlim(_ignoreEmptySubscriber, _logger)
-                    : PublishingContext.Get(_ignoreEmptySubscriber, _logger);
+                    ? PublishingContext.Get(_ignoreEmptySubscriber, _logger)
+                    : PublishingContext.Get(_ignoreEmptySubscriber, _logger, CallerInfo.GetFull());
 
                     await _publisher.Scope(_flowScope).PublishAsync(
                           new BeginTransitionMessage(pageToHide ?? defaultPage, pageToShow ?? defaultPage, token)
@@ -268,8 +268,8 @@ namespace EncosyTower.PageFlows
                     );
 
                     var publishingContext = _slimPublishingContext
-                        ? PublishingContext.GetSlim(_ignoreEmptySubscriber, _logger)
-                        : PublishingContext.Get(_ignoreEmptySubscriber, _logger);
+                        ? PublishingContext.Get(_ignoreEmptySubscriber, _logger)
+                        : PublishingContext.Get(_ignoreEmptySubscriber, _logger, CallerInfo.GetFull());
 
                     await _publisher.Scope(_flowScope).PublishAsync(
                           new EndTransitionMessage(pageToHide, pageToShow, token)
@@ -295,7 +295,7 @@ namespace EncosyTower.PageFlows
             return result;
         }
 
-        private void InitializeIPageNeedsInterfaces(IPage page, PageFlow flow, in PageContext context)
+        private void InitializeIPageNeedsInterfaces(IPage page, PageFlow flow)
         {
             if (page is IPageNeedsFlowScope flowScope)
             {

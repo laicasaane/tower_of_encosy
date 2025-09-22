@@ -15,16 +15,6 @@ namespace EncosyTower.Logging
         public static readonly DevLogger Default = new();
 
         [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public CallerInfo GetCallerInfo(
-              [CallerLineNumber] int lineNumber = 0
-            , [CallerMemberName] string memberName = ""
-            , [CallerFilePath] string filePath = ""
-        )
-        {
-            return StaticDevLogger.GetCallerInfo(lineNumber, memberName, filePath);
-        }
-
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogException(Exception value)
         {
             StaticDevLogger.LogException(value);

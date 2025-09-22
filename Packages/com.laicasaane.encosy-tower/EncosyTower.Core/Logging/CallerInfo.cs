@@ -7,7 +7,6 @@ namespace EncosyTower.Logging
         public readonly string MemberName;
         public readonly string FilePath;
         public readonly int LineNumber;
-        public readonly bool IsValid;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CallerInfo(
@@ -19,25 +18,36 @@ namespace EncosyTower.Logging
             MemberName = memberName;
             FilePath = filePath;
             LineNumber = lineNumber;
-            IsValid = true;
         }
 
+        /// <summary>
+        /// Returns an info with line number, member name, and file path.
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString()
-            => IsValid ? $"{LineNumber} :: {MemberName} :: {FilePath}" : string.Empty;
-    }
-
-    public static class CallerInfoExtensions
-    {
-        public static CallerInfo GetCallerInfo(
-              this object _
-            , [CallerLineNumber] int lineNumber = 0
+        public static CallerInfo GetFull(
+              [CallerLineNumber] int lineNumber = 0
             , [CallerMemberName] string memberName = ""
             , [CallerFilePath] string filePath = ""
         )
         {
             return new CallerInfo(lineNumber, memberName, filePath);
         }
+
+        /// <summary>
+        /// Returns an info with line number, and member name.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static CallerInfo GetSlim(
+              [CallerLineNumber] int lineNumber = 0
+            , [CallerMemberName] string memberName = ""
+        )
+        {
+            return new CallerInfo(lineNumber, memberName, string.Empty);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override string ToString()
+            => $"{LineNumber} :: {MemberName} :: {FilePath}";
     }
 }
 
@@ -54,14 +64,11 @@ namespace EncosyTower.Logging
         {
             var fs = new FixedString4096Bytes();
 
-            if (IsValid)
-            {
-                fs.Append(LineNumber);
-                AppendSeparator(ref fs);
-                fs.Append(MemberName);
-                AppendSeparator(ref fs);
-                fs.Append(FilePath);
-            }
+            fs.Append(LineNumber);
+            AppendSeparator(ref fs);
+            fs.Append(MemberName);
+            AppendSeparator(ref fs);
+            fs.Append(FilePath);
 
             return fs;
 
