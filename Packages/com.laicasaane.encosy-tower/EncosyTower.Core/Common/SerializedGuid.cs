@@ -30,6 +30,24 @@ namespace EncosyTower.Common
             _dk = dk;
         }
 
+        /// <summary>
+        /// An aggregation of <see cref="Guid"/> components: a, b, c.
+        /// </summary>
+        public readonly ulong Ac
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _ac;
+        }
+
+        /// <summary>
+        /// An aggregation of <see cref="Guid"/> components: d, e, f, g, h, k.
+        /// </summary>
+        public readonly ulong Dk
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _dk;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SerializedGuid NewGuid()
             => Guid.NewGuid();
@@ -53,6 +71,13 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in SerializedGuid lhs, in SerializedGuid rhs)
             => lhs.ToGuid() == rhs.ToGuid();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly void Deconstruct(out ulong ac, out ulong dk)
+        {
+            ac = _ac;
+            dk = _dk;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Guid ToGuid()
