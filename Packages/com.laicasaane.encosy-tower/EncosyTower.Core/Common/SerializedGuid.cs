@@ -24,6 +24,13 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public SerializedGuid(ulong ac, ulong dk)
+        {
+            _ac = ac;
+            _dk = dk;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SerializedGuid NewGuid()
             => Guid.NewGuid();
 
