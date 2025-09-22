@@ -225,6 +225,7 @@ namespace EncosyTower.Editor
               string fileName
             , string relativeFolderPath
             , out T result
+            , Action<T> onCreate = null
             , bool overwriteIfExist = false
             , bool displayErrorDialog = true
             , bool refreshAssetDatabase = true
@@ -284,6 +285,7 @@ namespace EncosyTower.Editor
             try
             {
                 result = ScriptableObject.CreateInstance<T>();
+                onCreate?.Invoke(result);
 
                 AssetDatabase.CreateAsset(result, filePath);
 
