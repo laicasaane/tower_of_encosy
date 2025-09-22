@@ -39,7 +39,7 @@ namespace EncosyTower.SystemExtensions
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Guid CreateVersion7(DateTimeOffset timestamp)
-            => new Guid().ToVersion7(timestamp);
+            => Guid.NewGuid().ToVersion7(timestamp);
 
         /// <summary>
         /// Creates a new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
@@ -53,7 +53,7 @@ namespace EncosyTower.SystemExtensions
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Guid CreateVersion7(ulong unixTimeMilliseconds)
-            => new Guid().ToVersion7(unixTimeMilliseconds);
+            => Guid.NewGuid().ToVersion7(unixTimeMilliseconds);
     }
 
     public static partial class EncosyGuidExtensions
@@ -155,11 +155,24 @@ namespace EncosyTower.SystemExtensions
             private readonly byte _j;
             private readonly byte _k;
 
+            /// <summary>
+            ///
+            /// </summary>
+            /// <param name="timestamp"></param>
+            /// <returns></returns>
+            /// <exception cref="ArgumentOutOfRangeException">
+            /// <paramref name="timestamp"/> represents an offset prior to <see cref="DateTime.UnixEpoch"/>.
+            /// </exception>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public BurstableGuid ToVersion7(DateTimeOffset timestamp)
             {
                 var unixTimeMilliseconds = timestamp.ToUnixTimeMilliseconds();
 
+                // 2^48 is roughly 8925.5 years, which from the Unix Epoch means we won't
+                // overflow until around July of 10,895. So there isn't any need to handle
+                // it given that DateTimeOffset.MaxValue is December 31, 9999. However, we
+                // can't represent timestamps prior to the Unix Epoch since UUIDv7 explicitly
+                // stores a 48-bit unsigned value, so we do need to throw if one is passed in.
                 ThrowIfNegative(unixTimeMilliseconds, nameof(timestamp));
 
                 return ToVersion7Core((ulong)unixTimeMilliseconds);
@@ -173,11 +186,6 @@ namespace EncosyTower.SystemExtensions
 
             private BurstableGuid ToVersion7Core(ulong unixTimeMilliseconds)
             {
-                // 2^48 is roughly 8925.5 years, which from the Unix Epoch means we won't
-                // overflow until around July of 10,895. So there isn't any need to handle
-                // it given that DateTimeOffset.MaxValue is December 31, 9999. However, we
-                // can't represent timestamps prior to the Unix Epoch since UUIDv7 explicitly
-                // stores a 48-bit unsigned value, so we do need to throw if one is passed in.
                 BurstableGuid result = this;
 
                 UnsafeUtilityExtensions.AsRef(in result._a) = (int)(unixTimeMilliseconds >> 16);
