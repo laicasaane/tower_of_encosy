@@ -3,8 +3,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Collections.Extensions;
+using EncosyTower.Common;
 using EncosyTower.IO;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
@@ -65,6 +67,14 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find first object by a filter.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Option<T> FindFirstObject<T>(string filter)
+            where T : UnityEngine.Object
+            => FindFirstObject<T>(filter, out var obj) ? obj : Option.None;
+
+        /// <summary>
+        /// Find first object by a filter.
+        /// </summary>
         public static bool FindFirstObject<T>(string filter, out T result)
             where T : UnityEngine.Object
         {
@@ -90,6 +100,14 @@ namespace EncosyTower.Editor
             result = default;
             return false;
         }
+
+        /// <summary>
+        /// Find first object by global qualified type name (i.e. with `global::` prefix).
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Option<T> FindFirstObjectByGlobalQualifiedTypeName<T>()
+            where T : UnityEngine.Object
+            => FindFirstObjectByGlobalQualifiedTypeName<T>(out var obj) ? obj : Option.None;
 
         /// <summary>
         /// Find first object by global qualified type name (i.e. with `global::` prefix).
