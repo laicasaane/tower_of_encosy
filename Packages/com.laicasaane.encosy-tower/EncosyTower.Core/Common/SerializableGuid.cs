@@ -8,52 +8,52 @@ namespace EncosyTower.Common
     using UnityEngine;
 
     [Serializable]
-    public unsafe partial struct SerializedGuid
-        : IEquatable<SerializedGuid>, IEquatable<Guid>
-        , IComparable<SerializedGuid>, IComparable<Guid>, IComparable
+    public unsafe partial struct SerializableGuid
+        : IEquatable<SerializableGuid>, IEquatable<Guid>
+        , IComparable<SerializableGuid>, IComparable<Guid>, IComparable
         , ISpanFormattable
         , IAsReadOnlySpan<byte>
     {
         private const int SIZE = 16;
 
-        public static readonly SerializedGuid Empty = new(Guid.Empty);
+        public static readonly SerializableGuid Empty = new(Guid.Empty);
 
         [SerializeField] private fixed byte _bytes[SIZE];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SerializedGuid(in Guid guid)
+        public SerializableGuid(in Guid guid)
         {
-            this = new Union(guid).SerializedGuid;
+            this = new Union(guid).SerializableGuid;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SerializedGuid(ReadOnlySpan<byte> bytes)
+        public SerializableGuid(ReadOnlySpan<byte> bytes)
         {
-            this = new Union(new Guid(bytes)).SerializedGuid;
+            this = new Union(new Guid(bytes)).SerializableGuid;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SerializedGuid NewGuid()
+        public static SerializableGuid NewGuid()
             => Guid.NewGuid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SerializedGuid CreateVersion7()
+        public static SerializableGuid CreateVersion7()
             => GuidAPI.CreateVersion7();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Guid(in SerializedGuid guid)
+        public static implicit operator Guid(in SerializableGuid guid)
             => guid.ToGuid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator SerializedGuid(in Guid guid)
-            => new Union(guid).SerializedGuid;
+        public static implicit operator SerializableGuid(in Guid guid)
+            => new Union(guid).SerializableGuid;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(in SerializedGuid lhs, in SerializedGuid rhs)
+        public static bool operator ==(in SerializableGuid lhs, in SerializableGuid rhs)
             => lhs.ToGuid() == rhs.ToGuid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(in SerializedGuid lhs, in SerializedGuid rhs)
+        public static bool operator !=(in SerializableGuid lhs, in SerializableGuid rhs)
             => lhs.ToGuid() == rhs.ToGuid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -61,11 +61,11 @@ namespace EncosyTower.Common
             => new Union(this).SystemGuid;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly SerializedGuid ToVersion7()
+        public readonly SerializableGuid ToVersion7()
             => ToGuid().ToVersion7();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool Equals(SerializedGuid other)
+        public readonly bool Equals(SerializableGuid other)
             => ToGuid() == other.ToGuid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,7 +73,7 @@ namespace EncosyTower.Common
             => ToGuid().Equals(other);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly int CompareTo(SerializedGuid other)
+        public readonly int CompareTo(SerializableGuid other)
             => ToGuid().CompareTo(other);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,7 +83,7 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override bool Equals(object obj)
             => obj switch {
-                SerializedGuid other => Equals(other),
+                SerializableGuid other => Equals(other),
                 Guid other => Equals(other),
                 _ => false,
             };
@@ -91,7 +91,7 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int CompareTo(object obj)
             => obj switch {
-                SerializedGuid other => CompareTo(other),
+                SerializableGuid other => CompareTo(other),
                 Guid other => CompareTo(other),
                 _ => 1,
             };
@@ -145,7 +145,7 @@ namespace EncosyTower.Common
         private readonly struct Union
         {
             [FieldOffset(0)] public readonly Guid SystemGuid;
-            [FieldOffset(0)] public readonly SerializedGuid SerializedGuid;
+            [FieldOffset(0)] public readonly SerializableGuid SerializableGuid;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Union(in Guid guid) : this()
@@ -154,9 +154,9 @@ namespace EncosyTower.Common
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Union(in SerializedGuid guid) : this()
+            public Union(in SerializableGuid guid) : this()
             {
-                SerializedGuid = guid;
+                SerializableGuid = guid;
             }
         }
     }
@@ -175,14 +175,14 @@ namespace EncosyTower.Common
     using Unity.Collections;
     using UnityEngine;
 
-    partial struct SerializedGuid : IToFixedString<FixedString128Bytes>
+    partial struct SerializableGuid : IToFixedString<FixedString128Bytes>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SerializedGuid(in FixedString128Bytes guidString)
+        public SerializableGuid(in FixedString128Bytes guidString)
         {
             if (GuidAPI.TryParse(guidString, out Guid result))
             {
-                this = new Union(result).SerializedGuid;
+                this = new Union(result).SerializableGuid;
             }
             else
             {
@@ -244,7 +244,7 @@ namespace EncosyTower.Common
         /// </returns>
         /// <example>
         /// <code>
-        /// SerializedGuid.ToFixedString(stackalloc char[1] { 'N' });
+        /// SerializableGuid.ToFixedString(stackalloc char[1] { 'N' });
         /// </code>
         /// </example>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -265,7 +265,7 @@ namespace EncosyTower.Common
 {
     using System.Runtime.CompilerServices;
 
-    partial struct SerializedGuid
+    partial struct SerializableGuid
     {
         /// <summary>
         /// Returns a string representation of the value of this instance in registry format.
