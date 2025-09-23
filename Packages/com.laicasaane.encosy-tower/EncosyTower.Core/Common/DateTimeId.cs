@@ -181,7 +181,7 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ToString(string format, IFormatProvider provider)
+        public string ToString(string format, IFormatProvider provider = null)
             => $"{_year.ToString(format, provider)}_{_month.ToString(format, provider)}_{_day.ToString(format, provider)}T{_hour.ToString(format, provider)}:{_minute.ToString(format, provider)}:{_second.ToString(format, provider)}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

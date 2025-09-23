@@ -114,8 +114,8 @@ namespace EncosyTower.Common
         /// The value of this Guid, represented as a series of lowercase hexadecimal digits in the specified format.
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly string ToString(string format, IFormatProvider provider)
-            => ToGuid().ToString(format, provider);
+        public readonly string ToString(string format, IFormatProvider provider = null)
+            => this.AsGuid().ToString(format, provider);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryFormat(
