@@ -1,68 +1,15 @@
 namespace EncosyTower.SystemExtensions
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-    using EncosyTower.Debugging;
-    using Unity.Collections.LowLevel.Unsafe;
-
-    public static partial class GuidAPI
-    {
-        /// <summary>
-        /// Creates a new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
-        /// </summary>
-        /// <returns>
-        /// A new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
-        /// </returns>
-        /// <remarks>
-        ///     <para>This uses <see cref="DateTimeOffset.UtcNow" /> to determine the Unix Epoch timestamp source.</para>
-        ///     <para>This seeds the rand_a and rand_b sub-fields with random data.</para>
-        /// </remarks>
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Guid CreateVersion7()
-            => CreateVersion7(DateTimeOffset.UtcNow);
-
-        /// <summary>
-        /// Creates a new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
-        /// </summary>
-        /// <param name="timestamp">The date time offset used to determine the Unix Epoch timestamp.</param>
-        /// <returns>
-        /// A new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
-        /// </returns>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="timestamp" />
-        /// represents an offset prior to <see cref="DateTimeOffset.UnixEpoch" />.
-        /// </exception>
-        /// <remarks>
-        ///     <para>This seeds the rand_a and rand_b sub-fields with random data.</para>
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Guid CreateVersion7(DateTimeOffset timestamp)
-            => Guid.NewGuid().ToVersion7(timestamp);
-
-        /// <summary>
-        /// Creates a new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
-        /// </summary>
-        /// <param name="unixTimeMilliseconds">The Unix Epoch timestamp in milliseconds.</param>
-        /// <returns>
-        /// A new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
-        /// </returns>
-        /// <remarks>
-        ///     <para>This seeds the rand_a and rand_b sub-fields with random data.</para>
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Guid CreateVersion7(ulong unixTimeMilliseconds)
-            => Guid.NewGuid().ToVersion7(unixTimeMilliseconds);
-    }
 
     public static partial class EncosyGuidExtensions
     {
         /// <summary>
-        /// Creates a new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// Creates a new <see cref="Guid"/> according to RFC 9562, following the Version 7 format.
         /// </summary>
         /// <returns>
-        /// A new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// A new <see cref="Guid"/> according to RFC 9562, following the Version 7 format.
         /// </returns>
         /// <remarks>
         ///     <para>This uses <see cref="DateTimeOffset.UtcNow" /> to determine the Unix Epoch timestamp source.</para>
@@ -73,11 +20,11 @@ namespace EncosyTower.SystemExtensions
             => ToVersion7(self, DateTimeOffset.UtcNow);
 
         /// <summary>
-        /// Creates a new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// Creates a new <see cref="Guid"/> according to RFC 9562, following the Version 7 format.
         /// </summary>
         /// <param name="timestamp">The date time offset used to determine the Unix Epoch timestamp.</param>
         /// <returns>
-        /// A new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// A new <see cref="Guid"/> according to RFC 9562, following the Version 7 format.
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="timestamp" />
         /// represents an offset prior to <see cref="DateTimeOffset.UnixEpoch" />.
@@ -90,11 +37,11 @@ namespace EncosyTower.SystemExtensions
             => new Union(new Union(self).BurstableGuid.ToVersion7(timestamp)).SystemGuid;
 
         /// <summary>
-        /// Creates a new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// Creates a new <see cref="Guid"/> according to RFC 9562, following the Version 7 format.
         /// </summary>
         /// <param name="unixTimeMilliseconds">The Unix Epoch timestamp in milliseconds.</param>
         /// <returns>
-        /// A new <see cref="Guid" /> according to RFC 9562, following the Version 7 format.
+        /// A new <see cref="Guid"/> according to RFC 9562, following the Version 7 format.
         /// </returns>
         /// <remarks>
         ///     <para>This seeds the rand_a and rand_b sub-fields with random data.</para>
@@ -102,7 +49,69 @@ namespace EncosyTower.SystemExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Guid ToVersion7(in this Guid self, ulong unixTimeMilliseconds)
             => new Union(new Union(self).BurstableGuid.ToVersion7(unixTimeMilliseconds)).SystemGuid;
+    }
+}
 
+#if UNITY_COLLECTIONS
+
+namespace EncosyTower.SystemExtensions
+{
+    using System;
+    using System.Runtime.CompilerServices;
+    using EncosyTower.Collections;
+    using Unity.Collections;
+
+    partial class EncosyGuidExtensions
+    {
+        /// <summary>
+        /// Converts a <see cref="Guid"/> to its equivalent <see cref="FixedString128Bytes"/> representation.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FixedString128Bytes ToFixedString(in this Guid self)
+            => ToFixedString(self, stackalloc char[1] { 'D' });
+
+        /// <summary>
+        /// Converts a <see cref="Guid"/> to its equivalent <see cref="FixedString128Bytes"/> representation.
+        /// </summary>
+        /// <param name="format">
+        /// A read-only span containing the character representing one of the following specifiers
+        /// that indicates the exact format to use when interpreting the current GUID instance:
+        /// "N", "D", "B", "P", or "X".
+        /// </param>
+        /// <example>
+        /// <code>
+        /// Guid.NewGuid().ToFixedString(stackalloc char[1] { 'D' });
+        /// </code>
+        /// </example>
+        public static FixedString128Bytes ToFixedString(in this Guid self, ReadOnlySpan<char> format)
+        {
+            var fs = new FixedString128Bytes();
+            var guid = new Union(self).BurstableGuid;
+
+            Span<char> utf16Chars = stackalloc char[68];
+            guid.TryFormat(utf16Chars, out var utf16CharsWritten, format);
+            fs.AppendSpan(utf16Chars[..utf16CharsWritten]);
+
+            return fs;
+        }
+    }
+}
+
+#endif
+
+namespace EncosyTower.SystemExtensions
+{
+    using System;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
+    using EncosyTower.Debugging;
+    using Unity.Collections.LowLevel.Unsafe;
+    using UnityEngine;
+
+    partial class EncosyGuidExtensions
+    {
         [StructLayout(LayoutKind.Explicit)]
         private readonly struct Union
         {
@@ -116,7 +125,7 @@ namespace EncosyTower.SystemExtensions
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Union(in  BurstableGuid guid) : this()
+            public Union(in BurstableGuid guid) : this()
             {
                 BurstableGuid = guid;
             }
@@ -413,13 +422,13 @@ namespace EncosyTower.SystemExtensions
                 return 9;
             }
 
-            [DoesNotReturn]
+            [HideInCallstack, StackTraceHidden, DoesNotReturn]
             private static void ThrowBadGuidFormatSpecification()
                 => throw new FormatException(
                     "Format string can be only \"D\", \"d\", \"N\", \"n\", \"P\", \"p\", \"B\", \"b\", \"X\" or \"x\"."
                 );
 
-            [DoesNotReturn]
+            [HideInCallstack, StackTraceHidden, DoesNotReturn]
             private static void ThrowIfNegative(long value, string paramName)
             {
                 if (value >= 0)
@@ -436,46 +445,3 @@ namespace EncosyTower.SystemExtensions
         }
     }
 }
-
-
-#if UNITY_COLLECTIONS
-
-namespace EncosyTower.SystemExtensions
-{
-    using System;
-    using System.Runtime.CompilerServices;
-    using EncosyTower.Collections;
-    using Unity.Collections;
-
-    partial class EncosyGuidExtensions
-    {
-        /// <summary>
-        /// Converts a <see cref="Guid"/> to its equivalent <see cref="FixedString128Bytes"/> representation.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static FixedString128Bytes ToFixedString(in this Guid self)
-            => ToFixedString(self, stackalloc char[1] { 'D' });
-
-        /// <summary>
-        /// Converts a <see cref="Guid"/> to its equivalent <see cref="FixedString128Bytes"/> representation.
-        /// </summary>
-        /// <param name="format">
-        /// A read-only span containing the character representing one of the following specifiers
-        /// that indicates the exact format to use when interpreting the current GUID instance:
-        /// "N", "D", "B", "P", or "X".
-        /// </param>
-        public static FixedString128Bytes ToFixedString(in this Guid self, ReadOnlySpan<char> format)
-        {
-            var fs = new FixedString128Bytes();
-            var guid = new Union(self).BurstableGuid;
-
-            Span<char> utf16Chars = stackalloc char[68];
-            guid.TryFormat(utf16Chars, out var utf16CharsWritten, format);
-            fs.AppendSpan(utf16Chars[..utf16CharsWritten]);
-
-            return fs;
-        }
-    }
-}
-
-#endif
