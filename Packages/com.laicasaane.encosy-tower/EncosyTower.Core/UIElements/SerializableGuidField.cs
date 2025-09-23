@@ -1,21 +1,21 @@
-using System;
-using System.Diagnostics;
-using EncosyTower.Common;
-using EncosyTower.SystemExtensions;
-using Unity.Properties;
-using UnityEngine;
-using UnityEngine.UIElements;
-
 namespace EncosyTower.UIElements
 {
-    public class SerializableGuidField : TextValueField<SerializableGuid>
+    using System;
+    using EncosyTower.Common;
+    using UnityEngine;
+    using UnityEngine.UIElements;
+
+    [UxmlElement]
+    public partial class SerializableGuidField : TextValueField<SerializableGuid>
     {
         public static readonly string UssClassName = "serializable-guid-field";
-        public static readonly string LabelUssClassName = $"{UssClassName}__label";
-        public static readonly string InputUssClassName = $"{UssClassName}__input";
+        public static readonly string NewButtonUssClassName = $"{UssClassName}__new-button";
+        public static readonly string Version7ButtonUssClassName = $"{UssClassName}__version-7-button";
 
-        internal static readonly BindingId s_version7Property = nameof(Version7);
         internal static readonly BindingId s_guidFormatProperty = nameof(GuidFormat);
+
+        private readonly Button _newButton;
+        private readonly Button _version7Button;
 
         /// <summary>
         /// Creates a new SerializableGuidField.
@@ -28,7 +28,7 @@ namespace EncosyTower.UIElements
         /// Creates a new SerializableGuidField.
         /// </summary>
         /// <param name="label"></param>
-        public SerializableGuidField(string label) : this(label, false, string.Empty)
+        public SerializableGuidField(string label) : this(label, string.Empty)
         {
         }
 
@@ -36,50 +36,28 @@ namespace EncosyTower.UIElements
         /// Creates a new SerializableGuidField.
         /// </summary>
         /// <param name="label"></param>
-        /// <param name="version7">Whether should use GUID version 7.</param>
         /// <param name="guidFormat">
         /// The value of format can be either null, an empty string (""), "N", "D", "B", "P", or "X".
         /// </param>
-        public SerializableGuidField(string label, bool version7, string guidFormat)
+        public SerializableGuidField(string label, string guidFormat)
             : base(label, 68, new SerializableGuidInput())
         {
             AddToClassList(UssClassName);
 
             pickingMode = PickingMode.Ignore;
-
-            SetValueWithoutNotify(version7 ? SerializableGuid.CreateVersion7() : SerializableGuid.NewGuid());
-
-            Version7 = version7;
             GuidFormat = guidFormat;
-        }
 
-        /// <summary>
-        /// Whether should use GUID version 7.
-        /// </summary>
-        [CreateProperty]
-        public bool Version7
-        {
-            get
-            {
-                return GuidInput.Version7;
-            }
+            Add(_newButton = new Button() { text = "New" }.WithClass(NewButtonUssClassName));
+            Add(_version7Button = new Button() { text = "Version 7" }.WithClass(Version7ButtonUssClassName));
 
-            set
-            {
-                var previous = GuidInput.Version7;
-                GuidInput.Version7 = value;
-
-                if (previous != value)
-                {
-                    NotifyPropertyChanged(s_version7Property);
-                }
-            }
+            _newButton.clicked += OnCreateNew;
+            _version7Button.clicked += OnCreateVersion7;
         }
 
         /// <summary>
         /// The value of format can be either null, an empty string (""), "N", "D", "B", "P", or "X".
         /// </summary>
-        [CreateProperty]
+        [UxmlAttribute("guid-format")]
         public string GuidFormat
         {
             get
@@ -99,6 +77,25 @@ namespace EncosyTower.UIElements
             }
         }
 
+#pragma warning disable IDE1006 // Naming Styles
+        [UxmlAttribute("readonly")]
+        public new bool isReadOnly
+        {
+            get
+            {
+                return base.isReadOnly;
+            }
+
+            set
+            {
+                _newButton.WithDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
+                _version7Button.WithDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
+
+                base.isReadOnly = value;
+            }
+        }
+#pragma warning restore IDE1006 // Naming Styles
+
         private SerializableGuidInput GuidInput => (SerializableGuidInput)textInputBase;
 
         public override void ApplyInputDeviceDelta(Vector3 delta, DeltaSpeed speed, SerializableGuid startValue)
@@ -115,80 +112,31 @@ namespace EncosyTower.UIElements
             return value.ToString(GuidFormat);
         }
 
-        [Serializable]
-        public new class UxmlSerializedData : TextInputBaseField<SerializableGuid>.UxmlSerializedData
+        private void OnCreateNew()
         {
-            [SerializeField] private bool _version7;
-
-            [UxmlIgnore, HideInInspector]
-            [SerializeField] private UxmlAttributeFlags _version7_UxmlAttributeFlags;
-
-            [SerializeField] private string _guidFormat;
-
-            [UxmlIgnore, HideInInspector]
-            [SerializeField] private UxmlAttributeFlags _guidFormat_UxmlAttributeFlags;
-
-            [Conditional("UNITY_EDITOR")]
-            public new static void Register()
+            if (isReadOnly)
             {
-                TextInputBaseField<SerializableGuid>.UxmlSerializedData.Register();
-
-                UxmlDescriptionCache.RegisterType(typeof(UxmlSerializedData), new UxmlAttributeNames[] {
-                    new(nameof(_version7), "version-7", null),
-                    new(nameof(_guidFormat), "guid-format", null),
-                });
+                return;
             }
 
-            public override object CreateInstance()
+            value = SerializableGuid.NewGuid();
+        }
+
+        private void OnCreateVersion7()
+        {
+            if (isReadOnly)
             {
-                return new SerializableGuidField();
+                return;
             }
 
-            public override void Deserialize(object obj)
-            {
-                base.Deserialize(obj);
-
-                var e = (SerializableGuidField)obj;
-
-                if (ShouldWriteAttributeValue(_version7_UxmlAttributeFlags))
-                {
-                    e.Version7 = _version7;
-                }
-
-                if (ShouldWriteAttributeValue(_guidFormat_UxmlAttributeFlags))
-                {
-                    e.GuidFormat = _guidFormat;
-                }
-            }
+            value = SerializableGuid.CreateVersion7();
         }
 
         private class SerializableGuidInput : TextValueInput
         {
-            private bool _version7;
-
             public SerializableGuidInput()
             {
                 formatString = string.Empty;
-            }
-
-            public bool Version7
-            {
-                get
-                {
-                    return _version7;
-                }
-
-                set
-                {
-                    if (_version7 = value)
-                    {
-                        text = new Guid(text).ToVersion7().ToString();
-                    }
-                    else
-                    {
-                        text = Guid.NewGuid().ToString();
-                    }
-                }
             }
 
             public string GuidFormat
@@ -202,11 +150,12 @@ namespace EncosyTower.UIElements
                 {
                     if ((formatString = value) is null or "" or "N" or "D" or "B" or "P" or "X")
                     {
-                        text = new Guid(text).ToString(value);
+                        text = new Guid(text).ToString(value.NotEmptyOr("D"));
+                        return;
                     }
 
                     throw new FormatException(
-                        "The value of format is not null, an empty string (\"\"), \"N\", \"D\", \"B\", \"P\", or \"X\""
+                        $"The value of format is not null, an empty string (\"\"), \"N\", \"D\", \"B\", \"P\", or \"X\""
                     );
                 }
             }
@@ -229,3 +178,57 @@ namespace EncosyTower.UIElements
         }
     }
 }
+
+#if UNITY_EDITOR
+
+namespace EncosyTower.Editor.Common
+{
+    using System;
+    using EncosyTower.Common;
+    using UnityEditor;
+
+    public static class SerializableGuidEditorAPI
+    {
+        public static bool TryGet(SerializedProperty property, out SerializableGuid result)
+        {
+            if (property is null
+                || property.isFixedBuffer == false
+                || property.fixedBufferSize != SerializableGuid.SIZE
+            )
+            {
+                result = default;
+                return false;
+            }
+
+            Span<byte> bytes = stackalloc byte[SerializableGuid.SIZE];
+
+            for (var i = 0; i < SerializableGuid.SIZE; i++)
+            {
+                bytes[i] = (byte)property.GetFixedBufferElementAtIndex(i).intValue;
+            }
+
+            result = new SerializableGuid(bytes);
+            return true;
+        }
+
+        public static void Set(SerializedProperty property, in SerializableGuid value)
+        {
+            if (property is null
+                || property.isFixedBuffer == false
+                || property.fixedBufferSize != SerializableGuid.SIZE
+            )
+            {
+                return;
+            }
+
+            var bytes = value.AsReadOnlySpan();
+
+            for (var i = 0; i < SerializableGuid.SIZE; i++)
+            {
+                property.GetFixedBufferElementAtIndex(i).intValue = bytes[i];
+            }
+        }
+    }
+}
+
+#endif

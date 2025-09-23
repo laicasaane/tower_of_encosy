@@ -2,8 +2,8 @@
 
 using System;
 using EncosyTower.Common;
+using EncosyTower.Editor.UIElements;
 using EncosyTower.UIElements;
-using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -24,7 +24,7 @@ namespace EncosyTower.Editor.Common
         {
             var bytesProperty = property.FindPropertyRelative("_bytes");
 
-            if (TryGet(bytesProperty, out var guid) == false)
+            if (SerializableGuidEditorAPI.TryGet(bytesProperty, out var guid) == false)
             {
                 EditorGUI.HelpBox(position, ERROR, MessageType.Error);
                 return;
@@ -76,7 +76,7 @@ namespace EncosyTower.Editor.Common
             if (newValue != guid)
             {
                 Undo.RecordObject(property.serializedObject.targetObject, $"Set {property.propertyPath}");
-                Set(bytesProperty, newValue);
+                SerializableGuidEditorAPI.Set(bytesProperty, newValue);
             }
 
             // Set indent back to what it was
@@ -87,61 +87,9 @@ namespace EncosyTower.Editor.Common
 
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            var container = new VisualElement().WithStyleSheet(_styleSheet);
-
-            // Create property fields.
-            var field = new SerializableGuidField(property.displayName);
-            var newBtn = new Button() { text = s_newLabel.text };
-            var v7Btn = new Button() { text = s_v7Label.text };
-
-            newBtn.clicked += () => field.value = SerializableGuid.NewGuid();
-            v7Btn.clicked += () => field.value = SerializableGuid.CreateVersion7();
-
-            container.Add(field);
-            container.Add(newBtn);
-            container.Add(v7Btn);
-
-            return container;
-        }
-
-        private static bool TryGet(SerializedProperty property, out SerializableGuid result)
-        {
-            if (property is null
-                || property.isFixedBuffer == false
-                || property.fixedBufferSize != SerializableGuid.SIZE
-            )
-            {
-                result = default;
-                return false;
-            }
-
-            Span<byte> bytes = stackalloc byte[SerializableGuid.SIZE];
-
-            for (var i = 0; i < SerializableGuid.SIZE; i++)
-            {
-                bytes[i] = (byte)property.GetFixedBufferElementAtIndex(i).intValue;
-            }
-
-            result = new SerializableGuid(bytes);
-            return true;
-        }
-
-        private static void Set(SerializedProperty property, in SerializableGuid value)
-        {
-            if (property is null
-                || property.isFixedBuffer == false
-                || property.fixedBufferSize != SerializableGuid.SIZE
-            )
-            {
-                return;
-            }
-
-            var bytes = value.AsReadOnlySpan();
-
-            for (var i = 0; i < SerializableGuid.SIZE; i++)
-            {
-                property.GetFixedBufferElementAtIndex(i).intValue = bytes[i];
-            }
+            return new SerializableGuidField(property.displayName)
+                .WithStyleSheet(_styleSheet)
+                .WithBindProperty(property);
         }
     }
 }
