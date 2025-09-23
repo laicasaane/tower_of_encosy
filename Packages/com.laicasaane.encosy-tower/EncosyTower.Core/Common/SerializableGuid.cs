@@ -2,7 +2,6 @@ namespace EncosyTower.Common
 {
     using System;
     using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
     using EncosyTower.Collections;
     using EncosyTower.SystemExtensions;
     using UnityEngine;
@@ -14,7 +13,10 @@ namespace EncosyTower.Common
         , ISpanFormattable
         , IAsReadOnlySpan<byte>
     {
-        private const int SIZE = 16;
+        /// <summary>
+        /// Size in bytes.
+        /// </summary>
+        public const int SIZE = 16;
 
         public static readonly SerializableGuid Empty = new(Guid.Empty);
 
@@ -23,13 +25,13 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SerializableGuid(in Guid guid)
         {
-            this = new Union(guid).SerializableGuid;
+            this = guid.AsSerializable();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SerializableGuid(ReadOnlySpan<byte> bytes)
         {
-            this = new Union(new Guid(bytes)).SerializableGuid;
+            this = new Guid(bytes).AsSerializable();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -42,43 +44,57 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Guid(in SerializableGuid guid)
-            => guid.ToGuid();
+            => guid.AsGuid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator SerializableGuid(in Guid guid)
-            => new Union(guid).SerializableGuid;
+            => guid.AsSerializable();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(in SerializableGuid lhs, in SerializableGuid rhs)
-            => lhs.ToGuid() == rhs.ToGuid();
+            => lhs.AsGuid() == rhs.AsGuid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in SerializableGuid lhs, in SerializableGuid rhs)
-            => lhs.ToGuid() == rhs.ToGuid();
+            => lhs.AsGuid() == rhs.AsGuid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly Guid ToGuid()
-            => new Union(this).SystemGuid;
+        public readonly void Deconstruct(
+              out int a
+            , out short b
+            , out short c
+            , out byte d
+            , out byte e
+            , out byte f
+            , out byte g
+            , out byte h
+            , out byte i
+            , out byte j
+            , out byte k
+        )
+        {
+            (a, b, c, d, e, f, g, h, i, j, k) = this.AsGuid();
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly SerializableGuid ToVersion7()
-            => ToGuid().ToVersion7();
+            => this.AsGuid().ToVersion7();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(SerializableGuid other)
-            => ToGuid() == other.ToGuid();
+            => this.AsGuid() == other.AsGuid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(Guid other)
-            => ToGuid().Equals(other);
+            => this.AsGuid().Equals(other);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int CompareTo(SerializableGuid other)
-            => ToGuid().CompareTo(other);
+            => this.AsGuid().CompareTo(other);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int CompareTo(Guid other)
-            => ToGuid().CompareTo(other);
+            => this.AsGuid().CompareTo(other);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override bool Equals(object obj)
@@ -98,7 +114,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override int GetHashCode()
-            => ToGuid().GetHashCode();
+            => this.AsGuid().GetHashCode();
 
         /// <summary>
         /// Returns a string representation of the value of this instance of the Guid class,
@@ -125,7 +141,7 @@ namespace EncosyTower.Common
             , IFormatProvider provider = null
         )
         {
-            return ToGuid().TryFormat(destination, out charsWritten, format);
+            return this.AsGuid().TryFormat(destination, out charsWritten, format);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -138,25 +154,6 @@ namespace EncosyTower.Common
             fixed (void* ptr = _bytes)
             {
                 return new ReadOnlySpan<byte>(ptr, SIZE);
-            }
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
-        private readonly struct Union
-        {
-            [FieldOffset(0)] public readonly Guid SystemGuid;
-            [FieldOffset(0)] public readonly SerializableGuid SerializableGuid;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Union(in Guid guid) : this()
-            {
-                SystemGuid = guid;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Union(in SerializableGuid guid) : this()
-            {
-                SerializableGuid = guid;
             }
         }
     }
@@ -182,7 +179,7 @@ namespace EncosyTower.Common
         {
             if (GuidAPI.TryParse(guidString, out Guid result))
             {
-                this = new Union(result).SerializableGuid;
+                this = result.AsSerializable();
             }
             else
             {
@@ -228,7 +225,7 @@ namespace EncosyTower.Common
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly FixedString128Bytes ToFixedString()
-            => ToGuid().ToFixedString();
+            => this.AsGuid().ToFixedString();
 
         /// <summary>
         /// Returns a  <see cref="FixedString128Bytes"/> representation of the value of this instance of the Guid class,
@@ -249,7 +246,7 @@ namespace EncosyTower.Common
         /// </example>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly FixedString128Bytes ToFixedString(ReadOnlySpan<char> format)
-            => ToGuid().ToFixedString(format);
+            => this.AsGuid().ToFixedString(format);
 
         [HideInCallstack, StackTraceHidden, DoesNotReturn]
         private static void ThrowIfCannotParse(in FixedString128Bytes guidString)

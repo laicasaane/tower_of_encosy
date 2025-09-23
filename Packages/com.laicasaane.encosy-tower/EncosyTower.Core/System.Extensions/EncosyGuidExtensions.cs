@@ -2,6 +2,7 @@ namespace EncosyTower.SystemExtensions
 {
     using System;
     using System.Runtime.CompilerServices;
+    using EncosyTower.Common;
 
     public static partial class EncosyGuidExtensions
     {
@@ -34,7 +35,7 @@ namespace EncosyTower.SystemExtensions
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Guid ToVersion7(in this Guid self, DateTimeOffset timestamp)
-            => new Union(new Union(self).BurstableGuid.ToVersion7(timestamp)).SystemGuid;
+            => ToSystem(ToBurstable(self).ToVersion7(timestamp));
 
         /// <summary>
         /// Creates a new <see cref="Guid"/> according to RFC 9562, following the Version 7 format.
@@ -48,7 +49,42 @@ namespace EncosyTower.SystemExtensions
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Guid ToVersion7(in this Guid self, ulong unixTimeMilliseconds)
-            => new Union(new Union(self).BurstableGuid.ToVersion7(unixTimeMilliseconds)).SystemGuid;
+            => ToSystem(ToBurstable(self).ToVersion7(unixTimeMilliseconds));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Guid AsGuid(in this SerializableGuid self)
+            => new Union(self).SystemGuid;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SerializableGuid AsSerializable(in this Guid self)
+            => new Union(self).SerializableGuid;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Deconstruct(
+              in this Guid self
+            , out int a
+            , out short b
+            , out short c
+            , out byte d
+            , out byte e
+            , out byte f
+            , out byte g
+            , out byte h
+            , out byte i
+            , out byte j
+            , out byte k
+        )
+        {
+            (a, b, c, d, e, f, g, h, i, j, k) = ToBurstable(self);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static BurstableGuid ToBurstable(in Guid guid)
+            => new Union(guid).BurstableGuid;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Guid ToSystem(in BurstableGuid guid)
+            => new Union(guid).SystemGuid;
     }
 }
 
@@ -106,6 +142,7 @@ namespace EncosyTower.SystemExtensions
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
+    using EncosyTower.Common;
     using EncosyTower.Debugging;
     using Unity.Collections.LowLevel.Unsafe;
     using UnityEngine;
@@ -117,6 +154,7 @@ namespace EncosyTower.SystemExtensions
         {
             [FieldOffset(0)] public readonly Guid SystemGuid;
             [FieldOffset(0)] public readonly BurstableGuid BurstableGuid;
+            [FieldOffset(0)] public readonly SerializableGuid SerializableGuid;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Union(in Guid guid) : this()
@@ -128,6 +166,12 @@ namespace EncosyTower.SystemExtensions
             public Union(in BurstableGuid guid) : this()
             {
                 BurstableGuid = guid;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public Union(in SerializableGuid guid) : this()
+            {
+                SerializableGuid = guid;
             }
         }
 
@@ -163,6 +207,34 @@ namespace EncosyTower.SystemExtensions
             private readonly byte _i;
             private readonly byte _j;
             private readonly byte _k;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Deconstruct(
+                  out int a
+                , out short b
+                , out short c
+                , out byte d
+                , out byte e
+                , out byte f
+                , out byte g
+                , out byte h
+                , out byte i
+                , out byte j
+                , out byte k
+            )
+            {
+                a = _a;
+                b = _b;
+                c = _c;
+                d = _d;
+                e = _e;
+                f = _f;
+                g = _g;
+                h = _h;
+                i = _i;
+                j = _j;
+                k = _k;
+            }
 
             /// <summary>
             ///
