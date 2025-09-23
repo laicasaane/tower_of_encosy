@@ -68,7 +68,7 @@ namespace EncosyTower.Databases.Settings.Views
         {
             {
                 var prop = context.Database.GetNameProperty();
-                _dbDropdown.BindProperty(prop);
+                _dbDropdown.WithBindProperty(prop);
 
                 var typeNameValid = string.Equals(prop.stringValue, Constants.UNDEFINED) == false;
                 ToggleDisplayContainer(typeNameValid);

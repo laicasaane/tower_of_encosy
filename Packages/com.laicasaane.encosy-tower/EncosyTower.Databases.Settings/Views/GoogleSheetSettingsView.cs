@@ -168,47 +168,47 @@ namespace EncosyTower.Databases.Settings.Views
 
             {
                 var prop = context.GetCredentialRelativeFilePathProperty();
-                _credentialFileText.Bind(prop);
+                _credentialFileText.WithBind(prop);
                 TryDisplayCredentialFileHelp(prop.stringValue);
             }
 
             {
                 var prop = context.GetApiKeyRelativeFilePathProperty();
-                _apiKeyFileText.Bind(prop);
+                _apiKeyFileText.WithBind(prop);
                 TryDisplayApiKeyFileHelp(prop.stringValue);
             }
 
             {
                 var prop = context.GetSpreadsheetIdProperty();
-                _spreadsheetIdText.Bind(prop);
+                _spreadsheetIdText.WithBind(prop);
                 TryDisplaySpreadSheetIdHelp(prop.stringValue);
             }
 
             {
                 var prop = context.GetCredentialTokenRelativeFolderPathProperty();
-                _tokenFolderText.Bind(prop);
+                _tokenFolderText.WithBind(prop);
                 TryDisplayTokenFolderHelp(prop.stringValue);
             }
 
             {
                 var prop = context.GetOutputRelativeFolderPathProperty();
-                _outputFolderText.Bind(prop);
+                _outputFolderText.WithBind(prop);
                 TryDisplayOutputFolderHelp(prop.stringValue);
             }
 
-            _cleanOutputFolderToggle.BindProperty(context.GetCleanOutputFolderProperty());
-            _alwaysDownloadAllToggle.BindProperty(context.GetAlwaysDownloadAllProperty());
-            _emptyRowStreakThresholdField.BindProperty(context.GetEmptyRowStreakThresholdProperty());
+            _cleanOutputFolderToggle.WithBindProperty(context.GetCleanOutputFolderProperty());
+            _alwaysDownloadAllToggle.WithBindProperty(context.GetAlwaysDownloadAllProperty());
+            _emptyRowStreakThresholdField.WithBindProperty(context.GetEmptyRowStreakThresholdProperty());
 
             {
                 var prop = context.GetOutputFileTypeProperty();
-                _outputFileTypeEnum.BindProperty(prop);
+                _outputFileTypeEnum.WithBindProperty(prop);
                 InitDownloadButton((OutputFileType)prop.enumValueIndex);
             }
 
             {
                 var prop = context.GetAuthenticationProperty();
-                _authenticationEnum.BindProperty(prop);
+                _authenticationEnum.WithBindProperty(prop);
             }
         }
 

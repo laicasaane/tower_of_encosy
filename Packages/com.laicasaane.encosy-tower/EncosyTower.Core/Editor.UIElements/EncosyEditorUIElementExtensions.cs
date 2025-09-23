@@ -12,11 +12,28 @@ namespace EncosyTower.Editor.UIElements
     public static class EncosyEditorUIElementExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Bind<TBindableElement>(this TBindableElement self, SerializedProperty property)
-            where TBindableElement : VisualElement, IHasBindingPath
+        public static T WithBind<T>([NotNull] this T self, [NotNull] SerializedProperty property)
+            where T : VisualElement, IHasBindingPath
         {
             self.BindingPath = property.propertyPath;
             self.Bind(property.serializedObject);
+            return self;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T WithBind<T>([NotNull] this T self, SerializedObject obj)
+            where T : VisualElement
+        {
+            self.Bind(obj);
+            return self;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T WithBindProperty<T>([NotNull] this T self, [NotNull] SerializedProperty property)
+            where T : IBindable
+        {
+            BindingExtensions.BindProperty(self, property);
+            return self;
         }
 
         public static T WithEditorBuiltInStyleSheet<T>([NotNull] this T self, [NotNull] string styleSheet)

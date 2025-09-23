@@ -51,7 +51,7 @@ namespace EncosyTower.Databases.Settings.Views
 
         public void BindFoldout(SerializedProperty property)
         {
-            _foldout.Bind(property);
+            _foldout.WithBind(property);
             _foldout.Expand = property.boolValue;
         }
 

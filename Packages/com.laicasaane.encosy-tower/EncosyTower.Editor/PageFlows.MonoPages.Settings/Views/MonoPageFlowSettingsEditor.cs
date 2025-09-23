@@ -74,14 +74,14 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
             messageScope.RegisterValueChangedCallback(OnValueChanged);
             logEnvironment.RegisterValueChangedCallback(OnValueChanged);
 
-            slimPublishingContext.BindProperty(context.GetSlimPublishingContext());
-            ignoreEmptySubscriber.BindProperty(context.GetIgnoreEmptySubscriber());
-            loaderStrategy.BindProperty(context.GetLoaderStrategyProperty());
-            pooledStrategy.BindProperty(context.GetPooledGameObjectStrategyProperty());
-            messageScope.BindProperty(context.GetMessageScopeProperty());
-            logEnvironment.BindProperty(context.GetLogEnvironmentProperty());
+            slimPublishingContext.WithBindProperty(context.GetSlimPublishingContext());
+            ignoreEmptySubscriber.WithBindProperty(context.GetIgnoreEmptySubscriber());
+            loaderStrategy.WithBindProperty(context.GetLoaderStrategyProperty());
+            pooledStrategy.WithBindProperty(context.GetPooledGameObjectStrategyProperty());
+            messageScope.WithBindProperty(context.GetMessageScopeProperty());
+            logEnvironment.WithBindProperty(context.GetLogEnvironmentProperty());
 
-            contentContainer.Bind(serializedSettings);
+            contentContainer.WithBind(serializedSettings);
         }
 
         public void Update()

@@ -111,20 +111,20 @@ namespace EncosyTower.Databases.Settings.Views
 
             {
                 var prop = context.GetInputRelativeFolderPathProperty();
-                _inputFolderText.Bind(prop);
+                _inputFolderText.WithBind(prop);
                 TryDisplayInputFolderHelp(prop.stringValue);
             }
 
             {
                 var prop = context.GetOutputRelativeFolderPathProperty();
-                _outputFolderText.Bind(prop);
+                _outputFolderText.WithBind(prop);
                 TryDisplayOutputFolderHelp(prop.stringValue);
             }
 
-            _emptyRowStreakThresholdField.BindProperty(context.GetEmptyRowStreakThresholdProperty());
-            _includeSubFoldersToggle.BindProperty(context.GetIncludeSubFoldersProperty());
-            _includeCommentedFilesToggle.BindProperty(context.GetIncludeCommentedFilesProperty());
-            _liveConversionToggle.BindProperty(context.GetLiveConversionProperty());
+            _emptyRowStreakThresholdField.WithBindProperty(context.GetEmptyRowStreakThresholdProperty());
+            _includeSubFoldersToggle.WithBindProperty(context.GetIncludeSubFoldersProperty());
+            _includeCommentedFilesToggle.WithBindProperty(context.GetIncludeCommentedFilesProperty());
+            _liveConversionToggle.WithBindProperty(context.GetLiveConversionProperty());
 
             OnBind(context);
         }
