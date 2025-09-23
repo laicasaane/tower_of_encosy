@@ -25,13 +25,13 @@ namespace EncosyTower.Databases.Settings.Views
                 tooltip = "If enabled, the header is a combination of multiple consecutive rows."
             };
 
-            contentContainer.Add(_splitHeaderToggle.AddToAlignFieldClass());
+            contentContainer.Add(_splitHeaderToggle.WithAlignFieldClass());
 
             _extensionText = new TextField("File Extension") {
                 tooltip = "The file extension for Excel files.",
             };
 
-            contentContainer.Add(_extensionText.AddToAlignFieldClass());
+            contentContainer.Add(_extensionText.WithAlignFieldClass());
         }
 
         protected override void OnBind(LocalFolderContext context)

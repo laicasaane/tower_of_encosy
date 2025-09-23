@@ -38,8 +38,8 @@ namespace EncosyTower.Editor.UIElements
 
         public SimpleSplitView(Direction splitDirection, float splitNormalizedPosition = 0.5f)
         {
-            this.ApplyEditorStyleSheet(THEME_STYLE_SHEET);
-            this.ApplyEditorStyleSheet(STYLE_SHEET_DARK, STYLE_SHEET_LIGHT);
+            this.WithEditorStyleSheet(THEME_STYLE_SHEET);
+            this.WithEditorStyleSheet(STYLE_SHEET_DARK, STYLE_SHEET_LIGHT);
 
             _direction = splitDirection;
             _splitNormalizedPosition = splitNormalizedPosition;

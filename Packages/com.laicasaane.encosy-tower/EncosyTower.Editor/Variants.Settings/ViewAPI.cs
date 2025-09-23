@@ -15,10 +15,10 @@ namespace EncosyTower.Editor.Variants.Settings
         {
             if (withBuiltInStyleSheet)
             {
-                root.ApplyEditorBuiltInStyleSheet(EditorStyleSheetPaths.PROJECT_SETTINGS_STYLE_SHEET);
+                root.WithEditorBuiltInStyleSheet(EditorStyleSheetPaths.PROJECT_SETTINGS_STYLE_SHEET);
             }
 
-            root.ApplyEditorStyleSheet(THEME_STYLE_SHEET);
+            root.WithEditorStyleSheet(THEME_STYLE_SHEET);
         }
     }
 }

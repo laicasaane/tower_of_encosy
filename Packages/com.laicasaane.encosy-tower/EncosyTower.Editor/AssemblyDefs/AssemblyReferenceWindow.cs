@@ -70,8 +70,8 @@ namespace EncosyTower.Editor.AssemblyDefs
                 return;
             }
 
-            rootVisualElement.styleSheets.Add(_themeStyleSheet);
-            rootVisualElement.ApplyEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
+            rootVisualElement.WithStyleSheet(_themeStyleSheet);
+            rootVisualElement.WithEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
 
             _tabAll = new AssemblyReferenceTab("All", Close);
             _tabFiltered = new AssemblyReferenceTab("Filtered", Close);
@@ -288,8 +288,8 @@ namespace EncosyTower.Editor.AssemblyDefs
                 _listView.Rebuild();
 
                 var hasItems = references.Count > 0;
-                _emptyLabel.SetDisplay(hasItems ? DisplayStyle.None : DisplayStyle.Flex);
-                _container.SetDisplay(hasItems ? DisplayStyle.Flex : DisplayStyle.None);
+                _emptyLabel.WithDisplay(hasItems ? DisplayStyle.None : DisplayStyle.Flex);
+                _container.WithDisplay(hasItems ? DisplayStyle.Flex : DisplayStyle.None);
             }
 
             private void ApplyButton_OnClick()

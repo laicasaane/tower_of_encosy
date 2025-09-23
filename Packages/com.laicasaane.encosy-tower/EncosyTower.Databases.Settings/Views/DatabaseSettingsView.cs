@@ -42,15 +42,15 @@ namespace EncosyTower.Databases.Settings.Views
             dbDropdown.AddToClassList(Constants.NAME_DROPDOWN);
             dbDropdown.RegisterCallback<PointerUpEvent>(NameDropdown_OnPointerUpEvent);
 
-            hierarchy.Add(dbDropdown.AddToAlignFieldClass());
+            hierarchy.Add(dbDropdown.WithAlignFieldClass());
             hierarchy.Add(new VisualSeparator("section"));
 
             _databaseHelp = new(resources.DatabaseInvalid, HelpBoxMessageType.Error);
-            hierarchy.Add(_databaseHelp.SetDisplay(DisplayStyle.None));
+            hierarchy.Add(_databaseHelp.WithDisplay(DisplayStyle.None));
 
             var container = _container = new();
             container.AddToClassList("settings-groups-list");
-            hierarchy.Add(container.SetDisplay(DisplayStyle.None));
+            hierarchy.Add(container.WithDisplay(DisplayStyle.None));
 
             var googleSheetView = _googleSheetView = new(resources);
             container.Add(googleSheetView);
@@ -115,8 +115,8 @@ namespace EncosyTower.Databases.Settings.Views
 
         public void ToggleDisplayContainer(bool value)
         {
-            _databaseHelp.SetDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
-            _container.SetDisplay(value ? DisplayStyle.Flex : DisplayStyle.None);
+            _databaseHelp.WithDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
+            _container.WithDisplay(value ? DisplayStyle.Flex : DisplayStyle.None);
         }
 
         private void RegisterValueChangedCallbacks()

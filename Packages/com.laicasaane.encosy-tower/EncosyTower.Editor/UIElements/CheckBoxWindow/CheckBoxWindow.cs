@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using EncosyTower.Search;
+using EncosyTower.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -127,8 +128,8 @@ namespace EncosyTower.Editor.UIElements
 
         private void OnCreateGUI(OnCreateWindow onCreateWindow)
         {
-            rootVisualElement.styleSheets.Add(_themeStyleSheet);
-            rootVisualElement.ApplyEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
+            rootVisualElement.WithStyleSheet(_themeStyleSheet);
+            rootVisualElement.WithEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
 
             _listView = null;
 

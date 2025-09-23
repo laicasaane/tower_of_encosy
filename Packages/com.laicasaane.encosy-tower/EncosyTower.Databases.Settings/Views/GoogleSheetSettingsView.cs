@@ -58,12 +58,12 @@ namespace EncosyTower.Databases.Settings.Views
             Add(new HelpBox(resources.GoogleSheet.Credential, HelpType.Info));
 
             _authenticationEnum = new("Authentication", default(AuthenticationType));
-            Add(_authenticationEnum.AddToAlignFieldClass());
+            Add(_authenticationEnum.WithAlignFieldClass());
 
             Add(new VisualSeparator());
 
             _credentialFileHelp = new(resources.GoogleSheet.CredentialMissing, HelpType.Error);
-            Add(_credentialFileHelp.SetDisplay(DisplayStyle.None));
+            Add(_credentialFileHelp.WithDisplay(DisplayStyle.None));
 
             _credentialFileText = CreatePathField(
                   "Credential File"
@@ -73,7 +73,7 @@ namespace EncosyTower.Databases.Settings.Views
             );
 
             _apiKeyFileHelp = new(resources.GoogleSheet.ApiKeyMissing, HelpType.Error);
-            Add(_apiKeyFileHelp.SetDisplay(DisplayStyle.None));
+            Add(_apiKeyFileHelp.WithDisplay(DisplayStyle.None));
 
             _apiKeyFileText = CreatePathField(
                   "API Key File"
@@ -85,7 +85,7 @@ namespace EncosyTower.Databases.Settings.Views
             Add(new VisualSeparator());
 
             Add(_tokenSeparator = new VisualSeparator());
-            Add((_tokenFolderHelp = new()).SetDisplay(DisplayStyle.None));
+            Add((_tokenFolderHelp = new()).WithDisplay(DisplayStyle.None));
 
             _tokenFolderText = CreatePathField(
                   "Auth Token Folder"
@@ -100,7 +100,7 @@ namespace EncosyTower.Databases.Settings.Views
             Add(new HelpBox(resources.GoogleSheet.SpreadSheetId, HelpType.Info));
 
             _spreadsheetIdHelp = new(resources.GoogleSheet.SpreadSheetIdInvalid, HelpType.Error);
-            Add(_spreadsheetIdHelp.SetDisplay(DisplayStyle.None));
+            Add(_spreadsheetIdHelp.WithDisplay(DisplayStyle.None));
 
             InitSpreadSheetIdField(
                   _spreadsheetIdText = new("Spread Sheet Id")
@@ -108,7 +108,7 @@ namespace EncosyTower.Databases.Settings.Views
             );
 
             Add(new VisualSeparator());
-            Add((_outputFolderHelp = new()).SetDisplay(DisplayStyle.None));
+            Add((_outputFolderHelp = new()).WithDisplay(DisplayStyle.None));
 
             _outputFolderText = CreatePathField(
                   "Output Folder"
@@ -120,18 +120,18 @@ namespace EncosyTower.Databases.Settings.Views
             Add(new VisualSeparator());
 
             _outputFileTypeEnum = new("Output File Type", default(OutputFileType));
-            Add(_outputFileTypeEnum.AddToAlignFieldClass());
+            Add(_outputFileTypeEnum.WithAlignFieldClass());
 
             _cleanOutputFolderToggle = new("Clean Output Folder?");
-            Add(_cleanOutputFolderToggle.AddToAlignFieldClass());
+            Add(_cleanOutputFolderToggle.WithAlignFieldClass());
 
             _alwaysDownloadAllToggle = new("Always Download All?");
-            Add(_alwaysDownloadAllToggle.AddToAlignFieldClass());
+            Add(_alwaysDownloadAllToggle.WithAlignFieldClass());
 
             _emptyRowStreakThresholdField = new("Empty Row Streak Threshold") {
                 tooltip = "The maximum number of continuous empty rows allowed before file is considered ended."
             };
-            Add(_emptyRowStreakThresholdField.AddToAlignFieldClass());
+            Add(_emptyRowStreakThresholdField.WithAlignFieldClass());
 
             Add(new VisualSeparator());
 
@@ -240,7 +240,7 @@ namespace EncosyTower.Databases.Settings.Views
             , Action<ButtonTextField> onClicked
         )
         {
-            Add(element.AddToAlignFieldClass());
+            Add(element.WithAlignFieldClass());
 
             var icon = EditorAPI.GetIcon("d_buildsettings.web.small", "buildsettings.web.small");
             var iconImage = Background.FromTexture2D(icon.image as Texture2D);
@@ -280,24 +280,24 @@ namespace EncosyTower.Databases.Settings.Views
 
         private void SetDisplayToTokenControls(DisplayStyle style)
         {
-            _tokenSeparator.SetDisplay(style);
-            _tokenFolderHelp.SetDisplay(style);
-            _tokenFolderText.SetDisplay(style);
-            _tokenSubInfo.SetDisplay(style);
+            _tokenSeparator.WithDisplay(style);
+            _tokenFolderHelp.WithDisplay(style);
+            _tokenFolderText.WithDisplay(style);
+            _tokenSubInfo.WithDisplay(style);
         }
 
         private void SetDisplayToCredentialControls(DisplayStyle style)
         {
-            _credentialFileText.SetDisplay(style);
-            _credentialFileHelp.SetDisplay(style);
-            _credentialFileSubInfo.SetDisplay(style);
+            _credentialFileText.WithDisplay(style);
+            _credentialFileHelp.WithDisplay(style);
+            _credentialFileSubInfo.WithDisplay(style);
         }
 
         private void SetDisplayToApiKeyControls(DisplayStyle style)
         {
-            _apiKeyFileText.SetDisplay(style);
-            _apiKeyFileHelp.SetDisplay(style);
-            _apiKeyFileSubInfo.SetDisplay(style);
+            _apiKeyFileText.WithDisplay(style);
+            _apiKeyFileHelp.WithDisplay(style);
+            _apiKeyFileSubInfo.WithDisplay(style);
         }
 
         private void InitDownloadButton(OutputFileType fileType)

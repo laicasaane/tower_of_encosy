@@ -31,7 +31,7 @@ namespace EncosyTower.Databases.Settings.Views
                 dropdown.AddToClassList(Constants.PRESET_DROPDOWN);
                 dropdown.RegisterCallback<PointerUpEvent>(PresetDropdown_OnPointerUpEvent);
 
-                hierarchy.Add(dropdown.AddToAlignFieldClass());
+                hierarchy.Add(dropdown.WithAlignFieldClass());
             }
 
             {

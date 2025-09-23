@@ -1,7 +1,8 @@
 #if UNITY_EDITOR
 
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using EncosyTower.UIElements;
-using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
@@ -10,6 +11,7 @@ namespace EncosyTower.Editor.UIElements
 {
     public static class EncosyEditorUIElementExtensions
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Bind<TBindableElement>(this TBindableElement self, SerializedProperty property)
             where TBindableElement : VisualElement, IHasBindingPath
         {
@@ -17,42 +19,54 @@ namespace EncosyTower.Editor.UIElements
             self.Bind(property.serializedObject);
         }
 
-        public static void ApplyEditorBuiltInStyleSheet(this VisualElement root, string styleSheet)
+        public static T WithEditorBuiltInStyleSheet<T>([NotNull] this T self, [NotNull] string styleSheet)
+            where T : VisualElement
         {
             if (string.IsNullOrWhiteSpace(styleSheet) == false
                 && EditorGUIUtility.Load(styleSheet) is StyleSheet uss
-                && uss.IsValid()
             )
             {
-                root.styleSheets.Add(uss);
+                self.WithStyleSheet(uss);
             }
+
+            return self;
         }
 
-        public static void ApplyEditorStyleSheet(this VisualElement root, string styleSheet)
+        public static T WithEditorStyleSheet<T>([NotNull] this T self, [NotNull] string styleSheet)
+            where T : VisualElement
         {
             if (string.IsNullOrWhiteSpace(styleSheet) == false
                 && AssetDatabase.LoadAssetAtPath<StyleSheet>(styleSheet) is StyleSheet uss
-                && uss.IsValid()
             )
             {
-                root.styleSheets.Add(uss);
+                self.WithStyleSheet(uss);
             }
+
+            return self;
         }
 
-        public static void ApplyEditorStyleSheet(this VisualElement root, string darkStyleSheet, string lightStyleSheet)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T WithEditorStyleSheet<T>(
+              [NotNull] this T self
+            , [NotNull] string darkStyleSheet
+            , [NotNull] string lightStyleSheet
+        )
+            where T : VisualElement
         {
             var styleSheet = EditorAPI.IsDark ? darkStyleSheet : lightStyleSheet;
-            ApplyEditorStyleSheet(root, styleSheet);
+            return self.WithEditorStyleSheet(styleSheet);
         }
 
-        public static void ApplyEditorStyleSheet(this VisualElement root, StyleSheet darkStyleSheet, StyleSheet lightStyleSheet)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T WithEditorStyleSheet<T>(
+              [NotNull] this T self
+            , StyleSheet darkStyleSheet
+            , StyleSheet lightStyleSheet
+        )
+            where T : VisualElement
         {
             var styleSheet = EditorAPI.IsDark ? darkStyleSheet : lightStyleSheet;
-
-            if (styleSheet.IsValid())
-            {
-                root.styleSheets.Add(styleSheet);
-            }
+            return self.WithStyleSheet(styleSheet);
         }
     }
 }

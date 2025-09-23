@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using EncosyTower.Common;
 using EncosyTower.Editor.UIElements;
 using EncosyTower.Search;
+using EncosyTower.UIElements;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -39,7 +40,7 @@ namespace EncosyTower.Editor.AssemblyDefs
 
         private void CreateGUI()
         {
-            rootVisualElement.styleSheets.Add(_themeStyleSheet);
+            rootVisualElement.WithStyleSheet(_themeStyleSheet);
 
             rootVisualElement.Add(new Button(Refresh) {
                 text = "Refresh",

@@ -24,7 +24,7 @@ namespace EncosyTower.Databases.Settings.Views
                 tooltip = "The file extension for Excel files.",
             };
 
-            contentContainer.Add(_extensionText.AddToAlignFieldClass());
+            contentContainer.Add(_extensionText.WithAlignFieldClass());
         }
 
         protected override void OnBind(LocalFolderContext context)

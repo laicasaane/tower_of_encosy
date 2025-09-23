@@ -157,7 +157,7 @@ namespace EncosyTower.Editor.ProjectSetup
 
         private void CreateGUI()
         {
-            rootVisualElement.styleSheets.Add(_themeStyleSheet);
+            rootVisualElement.WithStyleSheet(_themeStyleSheet);
 
             var requestInfoContainer = _requestInfoContainer = new VisualElement() {
                 name = "request-info-container",
@@ -182,7 +182,7 @@ namespace EncosyTower.Editor.ProjectSetup
 
             rootVisualElement.Add(featureContainer);
 
-            featureContainer.SetDisplay(DisplayStyle.None);
+            featureContainer.WithDisplay(DisplayStyle.None);
 
             var buttonGroup = new VisualElement() {
                 name = "button-group",
@@ -219,8 +219,8 @@ namespace EncosyTower.Editor.ProjectSetup
             )
             {
                 _initAfterRequest = true;
-                _requestInfoContainer.SetDisplay(DisplayStyle.None);
-                _featureContainer.SetDisplay(DisplayStyle.Flex);
+                _requestInfoContainer.WithDisplay(DisplayStyle.None);
+                _featureContainer.WithDisplay(DisplayStyle.Flex);
 
                 _featureCollectionAsset.features = _featureTable.Items = _features;
                 _packageCollectionAsset.packages = _packageTable.Items = _selectedPackages;
@@ -248,8 +248,8 @@ namespace EncosyTower.Editor.ProjectSetup
 
         private void Refresh()
         {
-            _requestInfoContainer.SetDisplay(DisplayStyle.Flex);
-            _featureContainer.SetDisplay(DisplayStyle.None);
+            _requestInfoContainer.WithDisplay(DisplayStyle.Flex);
+            _featureContainer.WithDisplay(DisplayStyle.None);
 
             _features.Clear();
             _featureMap.Clear();
@@ -792,17 +792,17 @@ namespace EncosyTower.Editor.ProjectSetup
 
                 Add(Toggle = new());
                 Toggle.AddToClassList(ToggleUssClassName);
-                Toggle.SetDisplay(DisplayStyle.Flex);
+                Toggle.WithDisplay(DisplayStyle.Flex);
 
                 Add(Image = new());
                 Image.AddToClassList(ImageUssClassName);
-                Image.SetDisplay(DisplayStyle.None);
+                Image.WithDisplay(DisplayStyle.None);
             }
 
             public void SetToggle(bool value)
             {
-                Toggle.SetDisplay(value ? DisplayStyle.Flex : DisplayStyle.None);
-                Image.SetDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
+                Toggle.WithDisplay(value ? DisplayStyle.Flex : DisplayStyle.None);
+                Image.WithDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
             }
         }
     }

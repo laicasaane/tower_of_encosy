@@ -36,7 +36,7 @@ namespace EncosyTower.Databases.Settings.Views
 
             AddToClassList(ussClassName);
             AddToClassList(Constants.SETTINGS_GROUP);
-            Add((_inputFolderHelp = new()).SetDisplay(DisplayStyle.None));
+            Add((_inputFolderHelp = new()).WithDisplay(DisplayStyle.None));
 
             _inputFolderText = CreatePathField(
                   "Input Folder"
@@ -46,7 +46,7 @@ namespace EncosyTower.Databases.Settings.Views
             );
 
             Add(new VisualSeparator());
-            Add((_outputFolderHelp = new()).SetDisplay(DisplayStyle.None));
+            Add((_outputFolderHelp = new()).WithDisplay(DisplayStyle.None));
 
             _outputFolderText = CreatePathField(
                   "Output Folder"
@@ -58,20 +58,20 @@ namespace EncosyTower.Databases.Settings.Views
             Add(new VisualSeparator());
 
             _liveConversionToggle = new("Live Conversion?");
-            Add(_liveConversionToggle.AddToAlignFieldClass());
+            Add(_liveConversionToggle.WithAlignFieldClass());
 
             _emptyRowStreakThresholdField = new("Empty Row Streak Threshold") {
                 tooltip = "The maximum number of continuous empty rows allowed before file is considered ended."
             };
-            Add(_emptyRowStreakThresholdField.AddToAlignFieldClass());
+            Add(_emptyRowStreakThresholdField.WithAlignFieldClass());
 
             Add(new VisualSeparator());
 
             _includeSubFoldersToggle = new("Include Sub-Folders?");
-            Add(_includeSubFoldersToggle.AddToAlignFieldClass());
+            Add(_includeSubFoldersToggle.WithAlignFieldClass());
 
             _includeCommentedFilesToggle = new("Include Commented Files?");
-            Add(_includeCommentedFilesToggle.AddToAlignFieldClass());
+            Add(_includeCommentedFilesToggle.WithAlignFieldClass());
 
             CreateAdditionalFields();
 

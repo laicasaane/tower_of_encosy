@@ -121,7 +121,7 @@ namespace EncosyTower.Databases.Settings.Views
             var element = new FolderTextField(textLabel, iconImage);
             element.TextField.tooltip = Resources.RelativePath;
 
-            Add(element.AddToAlignFieldClass());
+            Add(element.WithAlignFieldClass());
             Add(infoContainer);
 
 #if UNITY_6000_0_OR_NEWER
@@ -161,7 +161,7 @@ namespace EncosyTower.Databases.Settings.Views
             {
                 helpBox.text = paramsForEmpty.Text;
                 helpBox.messageType = paramsForEmpty.Type;
-                helpBox.SetDisplay(DisplayStyle.Flex);
+                helpBox.WithDisplay(DisplayStyle.Flex);
 
                 result = paramsForEmpty.Result;
             }
@@ -179,7 +179,7 @@ namespace EncosyTower.Databases.Settings.Views
         protected bool DisplayIfStringEmpty(HelpBox helpBox, string value)
         {
             var notEmpty = string.IsNullOrWhiteSpace(value) == false;
-            helpBox.SetDisplay(notEmpty ? DisplayStyle.None : DisplayStyle.Flex);
+            helpBox.WithDisplay(notEmpty ? DisplayStyle.None : DisplayStyle.Flex);
 
             return notEmpty;
         }
@@ -187,7 +187,7 @@ namespace EncosyTower.Databases.Settings.Views
         protected bool DisplayIfFileNotExist(HelpBox helpBox, string relativePath)
         {
             var exists = DirectoryAPI.ProjectPath.ExistsRelativeFile(relativePath);
-            helpBox.SetDisplay(exists ? DisplayStyle.None : DisplayStyle.Flex);
+            helpBox.WithDisplay(exists ? DisplayStyle.None : DisplayStyle.Flex);
 
             return exists;
         }
@@ -195,7 +195,7 @@ namespace EncosyTower.Databases.Settings.Views
         protected bool DisplayIfFolderNotExist(HelpBox helpBox, string relativePath)
         {
             var exists = DirectoryAPI.ProjectPath.ExistsRelativeFolder(relativePath);
-            helpBox.SetDisplay(exists ? DisplayStyle.None : DisplayStyle.Flex);
+            helpBox.WithDisplay(exists ? DisplayStyle.None : DisplayStyle.Flex);
 
             return exists;
         }

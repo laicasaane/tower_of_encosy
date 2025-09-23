@@ -36,8 +36,8 @@ namespace EncosyTower.Editor.UIElements
 
         public SimpleTableView()
         {
-            this.ApplyEditorStyleSheet(THEME_STYLE_SHEET);
-            this.ApplyEditorStyleSheet(STYLE_SHEET_DARK, STYLE_SHEET_LIGHT);
+            this.WithEditorStyleSheet(THEME_STYLE_SHEET);
+            this.WithEditorStyleSheet(STYLE_SHEET_DARK, STYLE_SHEET_LIGHT);
 
             showBoundCollectionSize = true;
             virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight;

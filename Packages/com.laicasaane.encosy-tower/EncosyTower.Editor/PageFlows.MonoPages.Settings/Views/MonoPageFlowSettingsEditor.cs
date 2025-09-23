@@ -32,8 +32,8 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
             , VisualElement root
         )
         {
-            root.ApplyEditorBuiltInStyleSheet(EditorStyleSheetPaths.PROJECT_SETTINGS_STYLE_SHEET);
-            root.ApplyEditorStyleSheet(Constants.THEME_STYLE_SHEET);
+            root.WithEditorBuiltInStyleSheet(EditorStyleSheetPaths.PROJECT_SETTINGS_STYLE_SHEET);
+            root.WithEditorStyleSheet(Constants.THEME_STYLE_SHEET);
 
             var context = _context = new SerializedContext(settings, serializedSettings);
             var titleBar = new VisualElement();
@@ -60,12 +60,12 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
             var messageScope = new EnumField("Message Scope", default(MonoMessageScope));
             var logEnvironment = new EnumField("Log Environment", default(LogEnvironment));
 
-            contentContainer.Add(slimPublishingContext.AddToAlignFieldClass());
-            contentContainer.Add(ignoreEmptySubscriber.AddToAlignFieldClass());
-            contentContainer.Add(loaderStrategy.AddToAlignFieldClass());
-            contentContainer.Add(pooledStrategy.AddToAlignFieldClass());
-            contentContainer.Add(messageScope.AddToAlignFieldClass());
-            contentContainer.Add(logEnvironment.AddToAlignFieldClass());
+            contentContainer.Add(slimPublishingContext.WithAlignFieldClass());
+            contentContainer.Add(ignoreEmptySubscriber.WithAlignFieldClass());
+            contentContainer.Add(loaderStrategy.WithAlignFieldClass());
+            contentContainer.Add(pooledStrategy.WithAlignFieldClass());
+            contentContainer.Add(messageScope.WithAlignFieldClass());
+            contentContainer.Add(logEnvironment.WithAlignFieldClass());
 
             slimPublishingContext.RegisterValueChangedCallback(OnValueChanged);
             ignoreEmptySubscriber.RegisterValueChangedCallback(OnValueChanged);
@@ -145,8 +145,8 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
             public override VisualElement CreateInspectorGUI()
             {
                 var root = new VisualElement();
-                root.ApplyEditorBuiltInStyleSheet(EditorStyleSheetPaths.PROJECT_SETTINGS_STYLE_SHEET);
-                root.ApplyEditorStyleSheet(Constants.THEME_STYLE_SHEET);
+                root.WithEditorBuiltInStyleSheet(EditorStyleSheetPaths.PROJECT_SETTINGS_STYLE_SHEET);
+                root.WithEditorStyleSheet(Constants.THEME_STYLE_SHEET);
 
                 var button = new Button(OpenSettingsWindow) {
                     text = "Open Mono Page Flow Settings Window",

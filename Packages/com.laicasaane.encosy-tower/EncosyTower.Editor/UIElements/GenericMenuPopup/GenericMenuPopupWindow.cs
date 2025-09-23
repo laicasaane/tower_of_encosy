@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using EncosyTower.Pooling;
+using EncosyTower.UIElements;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -50,8 +51,8 @@ namespace EncosyTower.Editor.UIElements
             var popup = _popup ??= s_defaultPopup;
             _currentNode = popup.rootNode;
 
-            rootVisualElement.styleSheets.Add(_themeStyleSheet);
-            rootVisualElement.ApplyEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
+            rootVisualElement.WithStyleSheet(_themeStyleSheet);
+            rootVisualElement.WithEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
             rootVisualElement.AddToClassList(MenuPopupUssClassName);
 
             rootVisualElement.Clear();

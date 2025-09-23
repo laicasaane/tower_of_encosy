@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using EncosyTower.Collections.Unsafe;
 using EncosyTower.Editor.UIElements;
+using EncosyTower.UIElements;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -30,7 +31,7 @@ namespace EncosyTower.Editor.ProjectSetup
 
         private void CreateGUI()
         {
-            rootVisualElement.styleSheets.Add(_themeStyleSheet);
+            rootVisualElement.WithStyleSheet(_themeStyleSheet);
 
             var buttonGroup = new VisualElement() {
                 name = "button-group",

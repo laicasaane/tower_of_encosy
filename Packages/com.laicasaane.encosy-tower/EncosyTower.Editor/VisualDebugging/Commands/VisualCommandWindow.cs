@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 
 using EncosyTower.Editor.UIElements;
+using EncosyTower.UIElements;
 using EncosyTower.VisualDebugging.Commands;
 using UnityEditor;
 using UnityEngine;
@@ -27,8 +28,8 @@ namespace EncosyTower.Editor.VisualDebugging.Commands
         private void CreateGUI()
         {
             var root = rootVisualElement;
-            root.styleSheets.Add(_themeStyleSheet);
-            root.ApplyEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
+            root.WithStyleSheet(_themeStyleSheet);
+            root.WithEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
 
             _view = VisualCommanderAPI.CreateView(root, 150f);
         }
