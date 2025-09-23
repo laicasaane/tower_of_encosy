@@ -100,7 +100,7 @@ namespace EncosyTower.Variants.Converters
                 : variant.TypeId.ToType().ToString();
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfNullOrSizeOfTIsBiggerThanVariantDataSize<T>(IVariantConverter<T> converter)
         {
             if (converter == null)

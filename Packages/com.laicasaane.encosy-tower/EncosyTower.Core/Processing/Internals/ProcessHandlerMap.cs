@@ -70,7 +70,7 @@ namespace EncosyTower.Processing.Internals
             return false;
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private void LogIfExist(IProcessHandler handler)
         {
             Logging.StaticDevLogger.LogWarning(

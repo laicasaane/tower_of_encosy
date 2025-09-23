@@ -42,7 +42,7 @@ namespace EncosyTower.Variants.Converters
         public string ToString(in Variant variant)
             => variant.Object?.ToString() ?? string.Empty;
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
             throw new InvalidCastException($"Cannot get value of {typeof(object)} from the input variant.");

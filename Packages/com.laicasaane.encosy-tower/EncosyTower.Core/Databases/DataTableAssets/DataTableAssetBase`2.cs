@@ -49,7 +49,7 @@ namespace EncosyTower.Databases
             ErrorCannotCast(obj, this);
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorCannotCast(object obj, UnityEngine.Object context)
         {
             StaticDevLogger.LogError(context,

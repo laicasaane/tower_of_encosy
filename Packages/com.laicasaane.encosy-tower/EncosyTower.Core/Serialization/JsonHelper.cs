@@ -98,7 +98,7 @@ namespace EncosyTower.Serialization
             }
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfSerializeToNull()
         {
             StaticDevLogger.LogError("Serialize save data to `null`.");

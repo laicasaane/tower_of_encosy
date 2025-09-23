@@ -131,7 +131,7 @@ namespace EncosyTower.UnityExtensions
             => new(instanceId.Value);
 #pragma warning restore CS0618 // Type or member is obsolete
 
-        [Conditional("__ENCOSY_VALIDATION__")]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("__ENCOSY_VALIDATION__")]
         private static void ThrowIfInvalid(T obj)
         {
             if (obj.IsInvalid())
@@ -140,7 +140,7 @@ namespace EncosyTower.UnityExtensions
             }
         }
 
-        [Conditional("__ENCOSY_VALIDATION__")]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("__ENCOSY_VALIDATION__")]
         private static void ThrowIfNotCreated([DoesNotReturnIf(false)] bool value)
         {
             if (value == false)

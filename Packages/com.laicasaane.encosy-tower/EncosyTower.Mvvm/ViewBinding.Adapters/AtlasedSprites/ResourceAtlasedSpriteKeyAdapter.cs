@@ -76,7 +76,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AtlasedSprites
             return false;
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorFoundNoAtlas(string atlas)
         {
             StaticDevLogger.LogErrorFormat("Cannot find SpriteAtlas {0} in Resources."
@@ -84,7 +84,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AtlasedSprites
             );
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorFoundNoSprite(string atlas, string sprite, UnityEngine.Object context)
         {
             StaticDevLogger.LogErrorFormat(context

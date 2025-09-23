@@ -371,7 +371,7 @@ namespace EncosyTower.Collections
             return native.Slice();
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static unsafe void ThrowIfTypesNotEqualSize()
         {
             if (sizeof(T) != sizeof(TNative))
@@ -383,7 +383,7 @@ namespace EncosyTower.Collections
             }
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static void ThrowIfSizeNegative(int size)
         {
             if (size < 0)
@@ -523,13 +523,13 @@ namespace EncosyTower.Collections
             {
             }
 
-            [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             private static void ThrowEnumFailedVersion()
             {
                 throw new InvalidOperationException("SharedArray was modified during enumeration.");
             }
 
-            [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             private static void ThrowEnumOpCantHappen()
             {
                 throw new InvalidOperationException("Invalid enumerator state: enumeration cannot proceed.");

@@ -65,7 +65,7 @@ namespace EncosyTower.StringIds
         }
 #endif
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         internal static void ThrowIfNotDefined([DoesNotReturnIf(false)] bool isDefined, StringId key)
         {
             if (isDefined == false)

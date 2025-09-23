@@ -44,7 +44,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
             return variant;
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorFoundNoAsset(Type type, string address)
         {
             StaticDevLogger.LogErrorFormat("Cannot find Addressable Asset of type {0} by address {1}"

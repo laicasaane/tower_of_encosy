@@ -110,7 +110,7 @@ namespace EncosyTower.Databases
         }
 #pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalid([DoesNotReturnIf(false)] bool isValid)
         {
             if (isValid == false)

@@ -132,13 +132,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
             }
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static void ErrorFoundNoContext(UnityEngine.Object context)
         {
             StaticDevLogger.LogError(context, $"MonoView has no context that implements IObservableObject");
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static void ErrorNotInitialized(UnityEngine.Object context)
         {
             StaticDevLogger.LogError(context, $"MonoView must be initialized");

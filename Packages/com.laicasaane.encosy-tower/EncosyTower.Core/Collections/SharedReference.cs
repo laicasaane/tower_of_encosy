@@ -253,7 +253,7 @@ namespace EncosyTower.Collections
             return native.Slice();
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static unsafe void ThrowIfTypesNotEqualSize()
         {
             if (sizeof(T) != sizeof(TNative))
@@ -265,7 +265,7 @@ namespace EncosyTower.Collections
             }
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static void ThrowIfSizeNegative(int size)
         {
             if (size < 0)

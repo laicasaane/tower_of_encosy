@@ -3,6 +3,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using EncosyTower.Collections;
@@ -310,7 +311,7 @@ namespace EncosyTower.PageFlows.MonoPages
             return false;
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfCannotInitializeWithoutInitializer(MonoPageCodex context)
         {
             context.GetLogger(context._flowContext.logEnvironment).LogError(
@@ -320,7 +321,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfDefinitionIdentifierIsEmpty(int index, MonoPageCodex context)
         {
             context.GetLogger(context._flowContext.logEnvironment).LogError(
@@ -328,7 +329,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfUnexpectedErrorWhenCreate(int index, MonoPageCodex context)
         {
             context.GetLogger(context._flowContext.logEnvironment).LogError(
@@ -336,7 +337,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfDuplicateIdentifier(int index, string identifier, MonoPageCodex context)
         {
             context.GetLogger(context._flowContext.logEnvironment).LogError(
@@ -344,7 +345,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfUnexpectedErrorWhenRegister(int index, string identifier, MonoPageCodex context)
         {
             context.GetLogger(context._flowContext.logEnvironment).LogError(
@@ -352,7 +353,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfInitializerComponentReturnsNullApplier(MonoPageCodex codex, UnityObject context)
         {
             context.GetLogger(codex._flowContext.logEnvironment).LogError(
@@ -362,7 +363,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfApplierReturnsNullFlowScopeCollectionType(MonoPageCodex codex, UnityObject context)
         {
             context.GetLogger(codex._flowContext.logEnvironment).LogError(
@@ -372,7 +373,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfFlowScopeCollectionTypeIsInvalid(Type type, MonoPageCodex codex, UnityObject context)
         {
             context.GetLogger(codex._flowContext.logEnvironment).LogError(
@@ -381,7 +382,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfFlowScopeCollectionTypeHasNoValidProperty(Type type, MonoPageCodex codex, UnityObject context)
         {
             context.GetLogger(codex._flowContext.logEnvironment).LogError(
@@ -391,7 +392,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfFlowIdentifiersMismatch(
               Type type
             , string missingIdentifiers
@@ -420,7 +421,7 @@ namespace EncosyTower.PageFlows.MonoPages
             }
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfCannotFindFlowScopeForProperty(Type type, string identifier, MonoPageCodex codex)
         {
             codex.GetLogger(codex._flowContext.logEnvironment).LogError(

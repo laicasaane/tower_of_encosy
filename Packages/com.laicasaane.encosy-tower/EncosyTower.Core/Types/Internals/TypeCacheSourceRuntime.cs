@@ -202,7 +202,7 @@ namespace EncosyTower.Types.Internals
             assemblyName = string.IsNullOrWhiteSpace(assemblyName) ? string.Empty : assemblyName;
         }
 
-        [HideInCallstack, Conditional("__ENCOSY_VALIDATION__")]
+        [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
         private static void ThrowIfNull(DeserializedTypeCache cache)
         {
             if (cache == null)

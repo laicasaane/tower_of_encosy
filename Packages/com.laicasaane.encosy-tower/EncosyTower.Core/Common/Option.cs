@@ -101,7 +101,7 @@ namespace EncosyTower.Common
         public static bool operator !=(Option<T> left, Option<T> right)
             => !left.Equals(right);
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfHasNoValue([DoesNotReturnIf(false)] bool check)
         {
             if (check == false)

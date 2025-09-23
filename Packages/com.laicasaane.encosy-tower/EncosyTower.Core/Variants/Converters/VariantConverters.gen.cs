@@ -67,7 +67,7 @@ namespace EncosyTower.Variants.Converters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ToString(in Variant variant) => variant.Bool.ToString();
 
-        [HideInCallstack, DoesNotReturn]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
@@ -107,7 +107,7 @@ namespace EncosyTower.Variants.Converters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ToString(in Variant variant) => variant.Byte.ToString();
 
-        [HideInCallstack, DoesNotReturn]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
@@ -147,7 +147,7 @@ namespace EncosyTower.Variants.Converters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ToString(in Variant variant) => variant.SByte.ToString();
 
-        [HideInCallstack, DoesNotReturn]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
@@ -187,7 +187,7 @@ namespace EncosyTower.Variants.Converters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ToString(in Variant variant) => variant.Char.ToString();
 
-        [HideInCallstack, DoesNotReturn]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
@@ -227,7 +227,7 @@ namespace EncosyTower.Variants.Converters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ToString(in Variant variant) => variant.Double.ToString();
 
-        [HideInCallstack, DoesNotReturn]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
@@ -267,7 +267,7 @@ namespace EncosyTower.Variants.Converters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ToString(in Variant variant) => variant.Float.ToString();
 
-        [HideInCallstack, DoesNotReturn]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
@@ -307,7 +307,7 @@ namespace EncosyTower.Variants.Converters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ToString(in Variant variant) => variant.Int.ToString();
 
-        [HideInCallstack, DoesNotReturn]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
@@ -347,7 +347,7 @@ namespace EncosyTower.Variants.Converters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ToString(in Variant variant) => variant.UInt.ToString();
 
-        [HideInCallstack, DoesNotReturn]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
@@ -387,7 +387,7 @@ namespace EncosyTower.Variants.Converters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ToString(in Variant variant) => variant.Long.ToString();
 
-        [HideInCallstack, DoesNotReturn]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
@@ -427,7 +427,7 @@ namespace EncosyTower.Variants.Converters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ToString(in Variant variant) => variant.ULong.ToString();
 
-        [HideInCallstack, DoesNotReturn]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
@@ -467,7 +467,7 @@ namespace EncosyTower.Variants.Converters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ToString(in Variant variant) => variant.Short.ToString();
 
-        [HideInCallstack, DoesNotReturn]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
@@ -507,7 +507,7 @@ namespace EncosyTower.Variants.Converters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ToString(in Variant variant) => variant.UShort.ToString();
 
-        [HideInCallstack, DoesNotReturn]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {

@@ -84,7 +84,7 @@ namespace EncosyTower.Collections
         public ObjectMemoryGetter MoveTo(int index)
             => new(_buffer, index);
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfIndexOutOfRange(int index, Memory<object> buffer)
         {
             if ((uint)index >= (uint)buffer.Length)

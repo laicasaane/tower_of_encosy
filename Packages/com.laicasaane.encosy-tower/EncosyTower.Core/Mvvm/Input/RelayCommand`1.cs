@@ -106,7 +106,7 @@ namespace EncosyTower.Mvvm.Input
             Execute(result);
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ThrowArgumentException()
             => throw new ArgumentException($"The command type requires an argument of type {typeof(T)}.");

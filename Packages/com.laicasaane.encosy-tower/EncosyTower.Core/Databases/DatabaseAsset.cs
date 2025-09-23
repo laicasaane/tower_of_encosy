@@ -263,13 +263,13 @@ namespace EncosyTower.Databases
                 : StringToId.MakeFromManaged(name);
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorAssetIsInvalid(int index, DatabaseAsset context)
         {
             StaticDevLogger.LogError(context, $"Table asset at index {index} is invalid.");
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogWarningAmbiguousTypeAtInitialization(
               int index
             , Type type
@@ -286,7 +286,7 @@ namespace EncosyTower.Databases
             );
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowsDatabaseIsNotInitialized(bool initialized)
         {
             if (initialized)
@@ -300,7 +300,7 @@ namespace EncosyTower.Databases
             );
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorCannotFindAsset(StringId id, DatabaseAsset context)
         {
             var name = context.GetName(id);
@@ -311,19 +311,19 @@ namespace EncosyTower.Databases
             StaticDevLogger.LogError(context, $"Cannot find any table asset by {info}.");
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorCannotFindAsset(Type type, DatabaseAsset context)
         {
             StaticDevLogger.LogError(context, $"Cannot find any table asset by the type '{type}'.");
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogErrorFoundAssetIsNotValidType<T>(DataTableAssetBase context)
         {
             StaticDevLogger.LogError(context, $"The table asset is not an instance of type '{typeof(T)}'");
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void LogWarningAmbiguousTypeAtGetDataTableAsset(
               Type type
             , Dictionary<Type, List<StringId>> typeToIds

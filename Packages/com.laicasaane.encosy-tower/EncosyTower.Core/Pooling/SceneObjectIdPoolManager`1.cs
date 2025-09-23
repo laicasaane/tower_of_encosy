@@ -351,7 +351,7 @@ namespace EncosyTower.Pooling
             );
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void AssertInitialization(SceneObjectIdManager<TKey> pooler)
         {
             Checks.IsTrue(pooler._transformArray.isCreated, "Pooler must be initialized first!");

@@ -3,6 +3,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -433,7 +434,7 @@ namespace EncosyTower.PageFlows.MonoPages
         private void Handle(TrimPoolMessage msg)
             => TrimPool(msg.AssetKey, msg.AmountToKeep);
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ThrowIfNotInitialized(MonoPageFlow context)
         {
             if (context.IsInitialized == false)
@@ -445,7 +446,7 @@ namespace EncosyTower.PageFlows.MonoPages
             }
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void WarningIfAmountLesserThanOne(MonoPageFlow context)
         {
             context.GetLogger(context.Context.logEnvironment).LogWarning(
@@ -453,7 +454,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfCannotReturnToPool(string key, MonoPageFlow context)
         {
             context.GetLogger(context.Context.logEnvironment).LogError(
@@ -462,7 +463,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfPageIsNotComponent(IMonoPage page, MonoPageFlow context)
         {
             context.GetLogger(context.Context.logEnvironment).LogError(
@@ -470,7 +471,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfPageMissingIdentifier(IMonoPage page, MonoPageFlow context)
         {
             context.GetLogger(context.Context.logEnvironment).LogError(
@@ -479,7 +480,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfPageIsDestroyedOrNotInited(IMonoPage page, MonoPageFlow context)
         {
             context.GetLogger(context.Context.logEnvironment).LogError(
@@ -488,7 +489,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfCannotLoadAsset(PageKey pageKey, MonoPageFlow context)
         {
             context.GetLogger(context.Context.logEnvironment).LogError(
@@ -496,7 +497,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void WarningIfPageCreationFailed(PageKey pageKey, MonoPageFlow context)
         {
             context.GetLogger(context.Context.logEnvironment).LogWarning(

@@ -2,6 +2,7 @@
 
 using System;
 using System.Buffers;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -574,43 +575,43 @@ namespace EncosyTower.PageFlows
             }
         }
 
-        [UnityEngine.HideInCallstack]
+        [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningNoActivePage()
         {
             _logger.LogWarning("The flow has no active page.");
         }
 
-        [UnityEngine.HideInCallstack]
+        [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningNoPageToPop()
         {
             _logger.LogWarning("There is no page to pop.");
         }
 
-        [UnityEngine.HideInCallstack]
+        [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningNoPageToRemove()
         {
             _logger.LogWarning("There is no page to remove.");
         }
 
-        [UnityEngine.HideInCallstack]
+        [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningPageNotFound(IPage page)
         {
             _logger.LogWarning($"Cannot found this page '{page}' inside the flow.");
         }
 
-        [UnityEngine.HideInCallstack]
+        [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningIndexOutOfRange(int index)
         {
             _logger.LogWarning($"Index '{index}' is out of range.");
         }
 
-        [UnityEngine.HideInCallstack]
+        [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningCurrentPageIsIndex(int index)
         {
             _logger.LogWarning($"The page of index '{index}' is already showing.");
         }
 
-        [UnityEngine.HideInCallstack]
+        [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningCannotHideDefaultIndexPage(int index)
         {
             _logger.LogWarning($"Cannot hide the page whose index '{index}' is also the default index.");

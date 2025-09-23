@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
@@ -221,7 +222,7 @@ namespace EncosyTower.StringIds
             return validIndex ? _hashes[index].HasValue : false;
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, in UnmanagedString str, Id id)
         {
             if (result == false)
@@ -232,7 +233,7 @@ namespace EncosyTower.StringIds
             }
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, string str, Id id)
         {
             if (result == false)

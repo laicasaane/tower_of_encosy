@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using EncosyTower.Collections;
 using EncosyTower.Common;
 using EncosyTower.Logging;
@@ -178,7 +179,7 @@ namespace EncosyTower.PageFlows.MonoPages
                 ? options.PooledStrategy
                 : PooledGameObjectStrategy.Default;
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfFoundNoPage(string key, UnityObjectLogger logger)
         {
             logger.LogError(
@@ -186,7 +187,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void ErrorIfPageIsNotComponent(IMonoPage page, string key, UnityObjectLogger logger)
         {
             logger.LogError(
@@ -194,7 +195,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
-        [HideInCallstack]
+        [HideInCallstack, StackTraceHidden]
         private static void WarningIfAlreadyInActive(IMonoPage page, string assetKey, UnityObjectLogger logger)
         {
             logger.LogWarning(

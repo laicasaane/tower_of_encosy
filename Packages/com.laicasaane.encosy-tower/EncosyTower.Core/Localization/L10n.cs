@@ -169,19 +169,19 @@ namespace EncosyTower.Localization
             => (s_codeToLocaleMap.TryGetValue(localeCode, out var locale) && locale.IsValid())
                 ? locale : Option.None;
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorNotReady()
         {
             StaticDevLogger.LogError("Must call \"L10n.Initialize()\" first.");
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorCannotFindLanguage(string value)
         {
             StaticDevLogger.LogError($"Cannot find any language by locale code {value}");
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void InfoChangeLanguage(string value)
         {
             StaticDevLogger.LogInfo($"Change language to {value}");

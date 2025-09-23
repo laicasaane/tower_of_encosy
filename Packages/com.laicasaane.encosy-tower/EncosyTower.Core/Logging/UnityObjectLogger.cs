@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ namespace EncosyTower.Logging
 {
     public readonly record struct UnityObjectLogger(UnityEngine.Object Context, LogEnvironment Environment)
     {
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogException(Exception value)
         {
             if (Environment == LogEnvironment.Runtime)
@@ -15,7 +16,7 @@ namespace EncosyTower.Logging
                 StaticDevLogger.LogException(Context, value);
         }
 
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogInfo(object message)
         {
             if (Environment == LogEnvironment.Runtime)
@@ -24,7 +25,7 @@ namespace EncosyTower.Logging
                 StaticDevLogger.LogInfo(Context, message);
         }
 
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogInfoFormat(string format, params object[] args)
         {
             if (Environment == LogEnvironment.Runtime)
@@ -33,7 +34,7 @@ namespace EncosyTower.Logging
                 StaticDevLogger.LogInfoFormat(Context, format, args);
         }
 
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogWarning(object message)
         {
             if (Environment == LogEnvironment.Runtime)
@@ -42,7 +43,7 @@ namespace EncosyTower.Logging
                 StaticDevLogger.LogWarning(Context, message);
         }
 
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogWarningFormat(string format, params object[] args)
         {
             if (Environment == LogEnvironment.Runtime)
@@ -51,7 +52,7 @@ namespace EncosyTower.Logging
                 StaticDevLogger.LogWarningFormat(Context, format, args);
         }
 
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogError(object message)
         {
             if (Environment == LogEnvironment.Runtime)
@@ -60,7 +61,7 @@ namespace EncosyTower.Logging
                 StaticDevLogger.LogError(Context, message);
         }
 
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogErrorFormat(string format, params object[] args)
         {
             if (Environment == LogEnvironment.Runtime)
@@ -70,7 +71,7 @@ namespace EncosyTower.Logging
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogInfoSlim(object message)
         {
             if (Environment == LogEnvironment.Runtime)
@@ -80,7 +81,7 @@ namespace EncosyTower.Logging
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogInfoFormatSlim(string format, params object[] args)
         {
             if (Environment == LogEnvironment.Runtime)
@@ -90,7 +91,7 @@ namespace EncosyTower.Logging
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogWarningSlim(object message)
         {
             if (Environment == LogEnvironment.Runtime)
@@ -100,7 +101,7 @@ namespace EncosyTower.Logging
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogWarningFormatSlim(string format, params object[] args)
         {
             if (Environment == LogEnvironment.Runtime)
@@ -110,7 +111,7 @@ namespace EncosyTower.Logging
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogErrorSlim(object message)
         {
             if (Environment == LogEnvironment.Runtime)
@@ -120,7 +121,7 @@ namespace EncosyTower.Logging
         }
 
         /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogErrorFormatSlim(string format, params object[] args)
         {
             if (Environment == LogEnvironment.Runtime)

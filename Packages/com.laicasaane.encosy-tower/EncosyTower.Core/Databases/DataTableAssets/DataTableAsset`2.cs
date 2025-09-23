@@ -64,7 +64,7 @@ namespace EncosyTower.Databases
         protected virtual string ToString(TDataId value)
             => value.ToString();
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         protected static void ErrorDuplicateId(
               TDataId id
             , int index

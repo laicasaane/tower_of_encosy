@@ -175,7 +175,7 @@ namespace EncosyTower.UnityExtensions
         public static bool operator !=(UnityInstanceId<T> left, UnityInstanceId<T> right)
             => left._value != right._value;
 
-        [Conditional("__ENCOSY_VALIDATION__")]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("__ENCOSY_VALIDATION__")]
         private static void ThrowIfInvalid(T obj)
         {
             if (obj.IsInvalid())
@@ -184,7 +184,7 @@ namespace EncosyTower.UnityExtensions
             }
         }
 
-        [Conditional("__ENCOSY_VALIDATION__")]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("__ENCOSY_VALIDATION__")]
         private static void ThrowIfNotCreated([DoesNotReturnIf(false)] bool value)
         {
             if (value == false)

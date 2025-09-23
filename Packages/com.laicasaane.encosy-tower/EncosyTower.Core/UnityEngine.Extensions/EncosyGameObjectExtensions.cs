@@ -78,7 +78,7 @@ namespace EncosyTower.UnityExtensions
             return self;
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfGameObjectInvalid(GameObject self)
         {
             if (self.IsInvalid())
@@ -87,7 +87,7 @@ namespace EncosyTower.UnityExtensions
             }
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfComponentTypeInvalid(Type type)
         {
             if (typeof(Component).IsAssignableFrom(type) == false)
@@ -96,7 +96,7 @@ namespace EncosyTower.UnityExtensions
             }
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfSceneInvalid(Scene scene)
         {
             if (scene.IsValid() == false)

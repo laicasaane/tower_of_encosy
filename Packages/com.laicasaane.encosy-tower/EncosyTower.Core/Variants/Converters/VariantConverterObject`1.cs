@@ -67,7 +67,7 @@ namespace EncosyTower.Variants.Converters
             return variant.TypeId.ToType().ToString() ?? string.Empty;
         }
 
-        [HideInCallstack, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalidCast()
         {
             throw new InvalidCastException($"Cannot get value of {typeof(T)} from the input variant.");

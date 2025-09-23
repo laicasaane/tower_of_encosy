@@ -188,7 +188,7 @@ namespace EncosyTower.Processing
 
             return false;
 
-            [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
                 StaticDevLogger.LogError(
@@ -262,7 +262,7 @@ namespace EncosyTower.Processing
 
             return Option.None;
 
-            [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
                 StaticDevLogger.LogError(
@@ -311,7 +311,7 @@ namespace EncosyTower.Processing
 
             return false;
 
-            [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+            [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             static void ErrorNotFound(TScope scope)
             {
                 StaticDevLogger.LogError(

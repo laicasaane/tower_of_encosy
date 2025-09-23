@@ -98,7 +98,7 @@ namespace EncosyTower.Databases
             return !(left == right);
         }
 
-        [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfInvalid([DoesNotReturnIf(false)] bool isValid)
         {
             if (isValid == false)
