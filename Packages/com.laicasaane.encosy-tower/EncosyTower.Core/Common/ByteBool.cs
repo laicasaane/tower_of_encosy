@@ -86,7 +86,7 @@ namespace EncosyTower.Common
             => this ? bool.TrueString : bool.FalseString;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string format, IFormatProvider formatProvider = null)
             => ((bool)this).ToString(formatProvider);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -133,8 +133,8 @@ namespace EncosyTower.Common
         public readonly bool TryFormat(
               Span<char> destination
             , out int charsWritten
-            , ReadOnlySpan<char> format
-            , IFormatProvider provider
+            , ReadOnlySpan<char> format = default
+            , IFormatProvider provider = null
         )
         {
             return ((bool)this).TryFormat(destination, out charsWritten);

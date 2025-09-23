@@ -111,30 +111,30 @@ namespace EncosyTower.UnityExtensions
 
 #if UNITY_6000_2_OR_NEWER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly string ToString(string format, IFormatProvider formatProvider)
+        public readonly string ToString(string format, IFormatProvider formatProvider = null)
             => ((int)_value).ToString(format, formatProvider);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryFormat(
               Span<char> destination
             , out int charsWritten
-            , ReadOnlySpan<char> format
-            , IFormatProvider provider
+            , ReadOnlySpan<char> format = default
+            , IFormatProvider provider = null
         )
         {
             return ((int)_value).TryFormat(destination, out charsWritten, format, provider);
         }
 #else
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly string ToString(string format, IFormatProvider formatProvider)
+        public readonly string ToString(string format, IFormatProvider formatProvider = null)
             => _value.ToString(format, formatProvider);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryFormat(
               Span<char> destination
             , out int charsWritten
-            , ReadOnlySpan<char> format
-            , IFormatProvider provider
+            , ReadOnlySpan<char> format = default
+            , IFormatProvider provider = null
         )
         {
             return _value.TryFormat(destination, out charsWritten, format, provider);

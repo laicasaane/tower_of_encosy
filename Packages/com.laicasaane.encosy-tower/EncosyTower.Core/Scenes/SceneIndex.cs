@@ -53,14 +53,14 @@ namespace EncosyTower.Scenes
             => Name ?? string.Empty;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string format, IFormatProvider formatProvider = null)
             => Name?.ToString(formatProvider) ?? string.Empty;
 
         public bool TryFormat(
               Span<char> destination
             , out int charsWritten
-            , ReadOnlySpan<char> format
-            , IFormatProvider provider
+            , ReadOnlySpan<char> format = default
+            , IFormatProvider provider = null
         )
         {
             var src = ToString().AsSpan();
@@ -154,15 +154,15 @@ namespace EncosyTower.Scenes
                 => _name ?? string.Empty;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly string ToString(string format, IFormatProvider formatProvider)
+            public readonly string ToString(string format, IFormatProvider formatProvider = null)
                 => ToString().ToString(formatProvider);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly bool TryFormat(
                   Span<char> destination
                 , out int charsWritten
-                , ReadOnlySpan<char> format
-                , IFormatProvider provider
+                , ReadOnlySpan<char> format = default
+                , IFormatProvider provider = null
             )
             {
                 return ((SceneIndex)this).TryFormat(destination, out charsWritten, format, provider);

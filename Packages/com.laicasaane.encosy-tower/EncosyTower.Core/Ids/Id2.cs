@@ -138,7 +138,7 @@ namespace EncosyTower.Ids
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string format, IFormatProvider formatProvider = null)
             => $"{_x.ToString(format, formatProvider)}-{_y.ToString(format, formatProvider)}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -287,15 +287,15 @@ namespace EncosyTower.Ids
                 => ((Id2)this).GetHashCode();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly string ToString(string format, IFormatProvider formatProvider)
+            public readonly string ToString(string format, IFormatProvider formatProvider = null)
                 => $"{_x.ToString(format, formatProvider)}-{_y.ToString(format, formatProvider)}";
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly bool TryFormat(
                   Span<char> destination
                 , out int charsWritten
-                , ReadOnlySpan<char> format
-                , IFormatProvider provider
+                , ReadOnlySpan<char> format = default
+                , IFormatProvider provider = null
             )
             {
                 return ((Id2)this).TryFormat(destination, out charsWritten, format, provider);

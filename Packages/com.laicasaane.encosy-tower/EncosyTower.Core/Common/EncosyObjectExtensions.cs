@@ -40,7 +40,7 @@ namespace EncosyTower.Common
         /// its <see cref="IFormattable.ToString(string, IFormatProvider)"/> method is called.
         /// Otherwise, its <see cref="object.ToString"/> method is called.
         /// </remarks>
-        public static string GetString(this object self, IFormatProvider formatProvider)
+        public static string GetString(this object self, IFormatProvider formatProvider = null)
         {
             if (self == null)
             {

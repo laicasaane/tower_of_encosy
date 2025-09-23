@@ -45,7 +45,7 @@ namespace EncosyTower.Ids
             => _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string format, IFormatProvider formatProvider = null)
             => _value.ToString(format, formatProvider);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -171,7 +171,7 @@ namespace EncosyTower.Ids
                 => _value.ToString();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public string ToString(string format, IFormatProvider formatProvider)
+            public string ToString(string format, IFormatProvider formatProvider = null)
                 => _value.ToString(format, formatProvider);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -182,8 +182,8 @@ namespace EncosyTower.Ids
             public readonly bool TryFormat(
                   Span<char> destination
                 , out int charsWritten
-                , ReadOnlySpan<char> format
-                , IFormatProvider provider
+                , ReadOnlySpan<char> format = default
+                , IFormatProvider provider = null
             )
             {
                 return _value.TryFormat(destination, out charsWritten, format, provider);

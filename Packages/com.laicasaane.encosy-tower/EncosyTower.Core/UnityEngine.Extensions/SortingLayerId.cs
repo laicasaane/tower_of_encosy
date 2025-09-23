@@ -48,7 +48,7 @@ namespace EncosyTower.UnityExtensions
             => value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string format, IFormatProvider formatProvider = null)
             => value.ToString(format, formatProvider);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -63,8 +63,8 @@ namespace EncosyTower.UnityExtensions
         public readonly bool TryFormat(
               Span<char> destination
             , out int charsWritten
-            , ReadOnlySpan<char> format
-            , IFormatProvider provider
+            , ReadOnlySpan<char> format = default
+            , IFormatProvider provider = null
         )
         {
             return value.TryFormat(destination, out charsWritten, format, provider);
