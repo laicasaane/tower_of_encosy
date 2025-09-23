@@ -1,7 +1,7 @@
 using EncosyTower.Collections;
 using NUnit.Framework;
 
-namespace EncosyTower.Tests.Collections
+namespace EncosyTower.Tests.EncosyTower.Collections
 {
     public class ArrayMapTests
     {

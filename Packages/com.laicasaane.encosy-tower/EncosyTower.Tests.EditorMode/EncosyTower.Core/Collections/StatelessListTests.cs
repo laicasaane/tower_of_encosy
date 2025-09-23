@@ -3,7 +3,7 @@ using EncosyTower.Buffers;
 using EncosyTower.Collections;
 using NUnit.Framework;
 
-namespace EncosyTower.Tests.Collections
+namespace EncosyTower.Tests.EncosyTower.Collections
 {
     public class BufferProvider<T> : IBufferProvider<T>
     {
