@@ -61,7 +61,7 @@ namespace EncosyTower.UIElements
 
         public override VisualElement contentContainer => Foldout.contentContainer;
 
-        public string BindingPath
+        public string bindingPath
         {
             get => EnableToggle.bindingPath;
             set => EnableToggle.bindingPath = value;

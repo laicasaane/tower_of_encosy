@@ -15,7 +15,7 @@ namespace EncosyTower.Editor.UIElements
         public static T WithBind<T>([NotNull] this T self, [NotNull] SerializedProperty property)
             where T : VisualElement, IHasBindingPath
         {
-            self.BindingPath = property.propertyPath;
+            self.bindingPath = property.propertyPath;
             self.Bind(property.serializedObject);
             return self;
         }

@@ -1,7 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace EncosyTower.UIElements
 {
     public interface IHasBindingPath
     {
-        string BindingPath { get; set; }
+        [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Conforms to Unity naming style.")]
+        string bindingPath { get; set; }
     }
 }

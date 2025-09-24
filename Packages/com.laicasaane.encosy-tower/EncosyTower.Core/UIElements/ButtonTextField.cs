@@ -41,7 +41,7 @@ namespace EncosyTower.UIElements
             hierarchy.Add(Button);
         }
 
-        public string BindingPath
+        public string bindingPath
         {
             get => TextField.bindingPath;
             set => TextField.bindingPath = value;
