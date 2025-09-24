@@ -5,6 +5,7 @@ using EncosyTower.Common;
 using EncosyTower.Editor.UIElements;
 using EncosyTower.UIElements;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -13,8 +14,6 @@ namespace EncosyTower.Editor.Common
     [CustomPropertyDrawer(typeof(SerializableGuid))]
     public class SerializableGuidPropertyDrawer : PropertyDrawer
     {
-        [SerializeField] private StyleSheet _styleSheet;
-
         private const string ERROR = $"Property is not a valid {nameof(SerializableGuid)} type";
 
         private static readonly GUIContent s_newLabel = new("New");
@@ -22,9 +21,9 @@ namespace EncosyTower.Editor.Common
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            var bytesProperty = property.FindPropertyRelative("_bytes");
+            SerializableGuid guid = default;
 
-            if (SerializableGuidEditorAPI.TryGet(bytesProperty, out var guid) == false)
+            if (guid.TryCopyFrom(property) == false)
             {
                 EditorGUI.HelpBox(position, ERROR, MessageType.Error);
                 return;
@@ -76,7 +75,7 @@ namespace EncosyTower.Editor.Common
             if (newValue != guid)
             {
                 Undo.RecordObject(property.serializedObject.targetObject, $"Set {property.propertyPath}");
-                SerializableGuidEditorAPI.Set(bytesProperty, newValue);
+                newValue.TryCopyTo(property);
             }
 
             // Set indent back to what it was
@@ -87,9 +86,36 @@ namespace EncosyTower.Editor.Common
 
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            return new SerializableGuidField(property.displayName)
-                .WithStyleSheet(_styleSheet)
-                .WithBindProperty(property);
+            var container = new PropertyContainer(property, false);
+            var field = new SerializableGuidField(property.displayName);
+            container.Add(field.WithAlignFieldClass());
+
+            SerializableGuid guid = default;
+            guid.TryCopyFrom(property);
+            field.value = guid;
+
+            field.RegisterValueChangedCallback(OnFieldValueChanged);
+            field.TrackPropertyValue(property, OnPropertyValueChanged);
+
+            return container;
+
+            void OnFieldValueChanged(ChangeEvent<SerializableGuid> evt)
+            {
+                evt.newValue.TryCopyTo(property);
+
+                property.serializedObject.ApplyModifiedProperties();
+                property.serializedObject.Update();
+            }
+
+            void OnPropertyValueChanged(SerializedProperty _)
+            {
+                var value = field.value;
+
+                if (value.TryCopyFrom(property))
+                {
+                    field.value = value;
+                }
+            }
         }
     }
 }

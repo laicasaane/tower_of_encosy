@@ -1,12 +1,12 @@
+using System;
+using EncosyTower.Common;
+using UnityEngine;
+using UnityEngine.UIElements;
+
 namespace EncosyTower.UIElements
 {
-    using System;
-    using EncosyTower.Common;
-    using UnityEngine;
-    using UnityEngine.UIElements;
-
     [UxmlElement]
-    public partial class SerializableGuidField : TextValueField<SerializableGuid>
+    public partial class SerializableGuidField : TextValueField<SerializableGuid>, IHasBindingPath
     {
         public static readonly string UssClassName = "serializable-guid-field";
         public static readonly string NewButtonUssClassName = $"{UssClassName}__new-button";
@@ -178,57 +178,3 @@ namespace EncosyTower.UIElements
         }
     }
 }
-
-#if UNITY_EDITOR
-
-namespace EncosyTower.Editor.Common
-{
-    using System;
-    using EncosyTower.Common;
-    using UnityEditor;
-
-    public static class SerializableGuidEditorAPI
-    {
-        public static bool TryGet(SerializedProperty property, out SerializableGuid result)
-        {
-            if (property is null
-                || property.isFixedBuffer == false
-                || property.fixedBufferSize != SerializableGuid.SIZE
-            )
-            {
-                result = default;
-                return false;
-            }
-
-            Span<byte> bytes = stackalloc byte[SerializableGuid.SIZE];
-
-            for (var i = 0; i < SerializableGuid.SIZE; i++)
-            {
-                bytes[i] = (byte)property.GetFixedBufferElementAtIndex(i).intValue;
-            }
-
-            result = new SerializableGuid(bytes);
-            return true;
-        }
-
-        public static void Set(SerializedProperty property, in SerializableGuid value)
-        {
-            if (property is null
-                || property.isFixedBuffer == false
-                || property.fixedBufferSize != SerializableGuid.SIZE
-            )
-            {
-                return;
-            }
-
-            var bytes = value.AsReadOnlySpan();
-
-            for (var i = 0; i < SerializableGuid.SIZE; i++)
-            {
-                property.GetFixedBufferElementAtIndex(i).intValue = bytes[i];
-            }
-        }
-    }
-}
-
-#endif

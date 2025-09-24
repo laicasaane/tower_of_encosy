@@ -60,6 +60,10 @@ namespace EncosyTower.SystemExtensions
             => new Union(self).SerializableGuid;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<byte> AsReadOnlySpan(in this Guid self)
+            => self.AsSerializable().AsReadOnlySpan();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(
               in this Guid self
             , out int a
