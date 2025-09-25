@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -9,6 +10,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
     public partial class TypeWrapDeclaration
     {
         public const string OBSOLETE_ATTRIBUTE = "global::System.ObsoleteAttribute";
+        public const string FIELD_NAME_FORMAT = "{0}Of{1}";
 
         public TypeDeclarationSyntax Syntax { get; }
 
@@ -38,7 +40,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         public bool EnableNullable { get; }
 
-        public InterfaceKind IgnoreInterfaces { get; }
+        public InterfaceKind IgnoreInterfaceMethods { get; }
 
         public OperatorKind IgnoreOperators { get; }
 
@@ -75,6 +77,11 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             , bool enableNullable
         )
         {
+            if (string.IsNullOrEmpty(fieldName))
+            {
+                fieldName = FIELD_NAME_FORMAT;
+            }
+
             Syntax = syntax;
             Symbol = symbol;
             TypeName = typeName;
@@ -85,12 +92,17 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             IsRefStruct = isRefStruct;
             IsRecord = isRecord;
             EnableNullable = enableNullable;
-            FieldTypeSymbol = fieldTypeSymbol;
-            FieldName = fieldName;
             ImplementInterfaces = GetBuiltInInterfaces(fieldTypeSymbol);
             ImplementOperators = GetBuiltInOperators(fieldTypeSymbol);
-            ImplementSpecialMethods |= SpecialMethodType.GetHashCode | SpecialMethodType.ToString;
+            ImplementSpecialMethods |= SpecialMethodType.CompareTo
+                | SpecialMethodType.Equals
+                | SpecialMethodType.GetHashCode
+                | SpecialMethodType.ToString;
 
+            var fieldTypeAsIdentifier = fieldTypeSymbol.ToSimpleNoSpecialTypeValidIdentifier();
+
+            FieldName = string.Format(fieldName, isStruct ? "value" : "instance", fieldTypeAsIdentifier);
+            FieldTypeSymbol = fieldTypeSymbol;
             FieldTypeName = fieldTypeSymbol.ToFullName();
             ExcludeConverter = excludeConverter;
 
@@ -98,7 +110,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             var definedMembers = new HashSet<string>(StringComparer.Ordinal);
             var globalFormat = SymbolExtensions.QualifiedMemberFormatWithGlobalPrefix;
             var implementSpecialMethods = ImplementSpecialMethods;
-            var ignoreInterfaces = IgnoreInterfaces;
+            var implementInterfaces = ImplementInterfaces;
+            var ignoreInterfaceMethods = IgnoreInterfaceMethods;
             var ignoredOperators = IgnoreOperators;
 
             foreach (var member in members)
@@ -158,22 +171,46 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                                     }
                                 }
                             }
-                            else if (method.Parameters.Length == 1
-                                && SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, symbol)
-                            )
+                            else if (method.Parameters.Length == 1)
                             {
-                                switch (method.Name)
-                                {
-                                    case "Equals":
-                                    {
-                                        ignoreInterfaces |= InterfaceKind.Equatable;
-                                        break;
-                                    }
+                                var paramType = method.Parameters[0].Type;
 
-                                    case "CompareTo":
+                                if (SymbolEqualityComparer.Default.Equals(paramType, symbol))
+                                {
+                                    switch (method.Name)
                                     {
-                                        ignoreInterfaces |= InterfaceKind.Comparable;
-                                        break;
+                                        case "Equals":
+                                        {
+                                            ignoreInterfaceMethods |= InterfaceKind.EquatableT;
+                                            implementInterfaces |= InterfaceKind.EquatableT;
+                                            break;
+                                        }
+
+                                        case "CompareTo":
+                                        {
+                                            ignoreInterfaceMethods |= InterfaceKind.ComparableT;
+                                            implementInterfaces |= InterfaceKind.ComparableT;
+                                            break;
+                                        }
+                                    }
+                                }
+                                else if (paramType.ToFullName() == "object")
+                                {
+                                    switch (method.Name)
+                                    {
+                                        case "Equals":
+                                        {
+                                            implementSpecialMethods &= ~SpecialMethodType.Equals;
+                                            break;
+                                        }
+
+                                        case "CompareTo":
+                                        {
+                                            implementSpecialMethods &= ~SpecialMethodType.CompareTo;
+                                            ignoreInterfaceMethods |= InterfaceKind.Comparable;
+                                            implementInterfaces |= InterfaceKind.Comparable;
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -211,7 +248,6 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             var format = SymbolExtensions.QualifiedMemberFormatWithType;
             var implementOperators = ImplementOperators;
             var hasBuiltInOperators = implementOperators != OperatorKind.None;
-            var implementInterfaces = ImplementInterfaces;
             var operatorReturnTypeMap = OperatorReturnTypeMap = new(OperatorKinds.All.Length);
             var operatorArgTypesMap = OperatorArgTypesMap = new(OperatorKinds.All.Length);
 
@@ -277,12 +313,17 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                             continue;
                         }
 
-                        if (definedMembers.Contains(method.ToDisplayString(globalFormat)))
+                        if (ValidateSpecial(
+                              fieldTypeSymbol
+                            , method
+                            , ref implementInterfaces
+                            , ref implementSpecialMethods
+                        ) == false)
                         {
                             continue;
                         }
 
-                        if (ValidateSpecial(fieldTypeSymbol, method, ref implementInterfaces) == false)
+                        if (definedMembers.Contains(method.ToDisplayString(globalFormat)))
                         {
                             continue;
                         }
@@ -334,7 +375,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
 
             ImplementSpecialMethods = implementSpecialMethods;
-            IgnoreInterfaces = ignoreInterfaces;
+            IgnoreInterfaceMethods = ignoreInterfaceMethods;
             IgnoreOperators = ignoredOperators;
             ImplementInterfaces = implementInterfaces;
             ImplementOperators = implementOperators;
@@ -342,34 +383,54 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             Properties = propertyArrayBuilder.ToImmutable();
             Events = eventArrayBuilder.ToImmutable();
             Methods = methodArrayBuilder.ToImmutable();
-            //Interfaces = interfaceArrayBuilder.ToImmutable();
         }
 
         private static bool ValidateSpecial(
               INamedTypeSymbol fieldTypeSymbol
             , IMethodSymbol method
             , ref InterfaceKind implementInterfaces
+            , ref SpecialMethodType implementSpecialMethods
         )
         {
             var result = true;
 
-            if (method.IsStatic == false
-                && method.Parameters.Length == 1
-                && SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, fieldTypeSymbol)
-            )
+            if (method.IsStatic == false && method.Parameters.Length == 1)
             {
-                switch (method.Name)
-                {
-                    case "Equals":
-                    {
-                        implementInterfaces |= InterfaceKind.Equatable;
-                        break;
-                    }
+                var paramType = method.Parameters[0].Type;
 
-                    case "CompareTo":
+                if (SymbolEqualityComparer.Default.Equals(paramType, fieldTypeSymbol))
+                {
+                    switch (method.Name)
                     {
-                        implementInterfaces |= InterfaceKind.Comparable;
-                        break;
+                        case "Equals":
+                        {
+                            implementInterfaces |= InterfaceKind.EquatableT;
+                            break;
+                        }
+
+                        case "CompareTo":
+                        {
+                            implementInterfaces |= InterfaceKind.ComparableT;
+                            break;
+                        }
+                    }
+                }
+                else if (paramType.ToFullName() == "object")
+                {
+                    switch (method.Name)
+                    {
+                        case "Equals":
+                        {
+                            implementSpecialMethods |= SpecialMethodType.Equals;
+                            break;
+                        }
+
+                        case "CompareTo":
+                        {
+                            implementSpecialMethods |= SpecialMethodType.CompareTo;
+                            implementInterfaces |= InterfaceKind.Comparable;
+                            break;
+                        }
                     }
                 }
             }
@@ -453,13 +514,14 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 case SpecialType.System_Boolean:
                 case SpecialType.System_String:
                 case SpecialType.System_Object:
-                    return InterfaceKind.Equatable
+                    return InterfaceKind.EquatableT
                         | InterfaceKind.Comparable
+                        | InterfaceKind.ComparableT
                         ;
 
                 case SpecialType.System_IntPtr:
                 case SpecialType.System_UIntPtr:
-                    return InterfaceKind.Equatable;
+                    return InterfaceKind.EquatableT;
             }
 
             return InterfaceKind.None;
@@ -732,8 +794,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 "op_LeftShift" => OperatorKind.LeftShift,
                 "op_RightShift" => OperatorKind.RightShift,
                 "op_UnsignedRightShift" => OperatorKind.UnsignedRightShift,
-                "op_Equality" => OperatorKind.Equal,
-                "op_Inequality" => OperatorKind.NotEqual,
+                "op_Equality" => DoesReturnBool(method) ? OperatorKind.Equal : OperatorKind.EqualCustom,
+                "op_Inequality" => DoesReturnBool(method) ? OperatorKind.NotEqual : OperatorKind.NotEqualCustom,
                 "op_GreaterThan" => OperatorKind.Greater,
                 "op_LessThan" => OperatorKind.Lesser,
                 "op_GreaterThanOrEqual" => OperatorKind.GreaterEqual,
@@ -742,6 +804,12 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             };
 
             return result != OperatorKind.None;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool DoesReturnBool(IMethodSymbol method)
+        {
+            return method.ReturnType.ToFullName() == "bool";
         }
     }
 }

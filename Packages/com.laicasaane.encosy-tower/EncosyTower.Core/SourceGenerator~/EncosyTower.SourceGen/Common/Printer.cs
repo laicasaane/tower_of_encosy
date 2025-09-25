@@ -303,6 +303,21 @@ namespace EncosyTower.SourceGen
             return this;
         }
 
+        public Printer PrintCallerDebug(
+#if DEBUG
+              [System.Runtime.CompilerServices.CallerLineNumber] int l = default
+            , [System.Runtime.CompilerServices.CallerMemberName] string m = default
+            , [System.Runtime.CompilerServices.CallerFilePath] string f = default
+#endif
+        )
+        {
+#if DEBUG
+            PrintLine($"// [{l}] :: {m} :: {f}");
+#endif
+
+            return this;
+        }
+
         #endregion
 
         #region List

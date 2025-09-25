@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+		<LangVersion>11.0</LangVersion>
         <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>disable</ImplicitUsings>
@@ -18,8 +19,8 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="Unity3D" Version="3.0.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+        <PackageReference Include="Unity3D" Version="3.0.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -29,6 +30,7 @@
         <Reference Include="$(UnityScriptAssembliesPath)/Unity.Collections.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/Unity.Entities.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/Unity.Entities.Hybrid.dll" Private="false" />
+        <Reference Include="$(UnityScriptAssembliesPath)/Unity.Mathematics.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/Latios.Core.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/Latios.Psyshock.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/Latios.Transforms.dll" Private="false" />

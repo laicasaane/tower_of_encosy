@@ -6,7 +6,9 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
     public enum SpecialMethodType
     {
         None        = 0,
-        GetHashCode = 1 << 0,
-        ToString    = 1 << 1,
+        CompareTo   = 1 << 0,
+        Equals      = 1 << 1,
+        GetHashCode = 1 << 2,
+        ToString    = 1 << 3,
     }
 }

@@ -28,12 +28,14 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         LeftShift          = 1 << 20,
         RightShift         = 1 << 21,
         UnsignedRightShift = 1 << 22,
-        Equal              = 1 << 23,
-        NotEqual           = 1 << 24,
-        Greater            = 1 << 25,
-        Lesser             = 1 << 26,
-        GreaterEqual       = 1 << 27,
-        LesserEqual        = 1 << 28,
+        Equal              = 1 << 23, // return bool
+        NotEqual           = 1 << 24, // return bool
+        EqualCustom        = 1 << 25, // return custom struct
+        NotEqualCustom     = 1 << 26, // return custom struct
+        Greater            = 1 << 27,
+        Lesser             = 1 << 28,
+        GreaterEqual       = 1 << 29,
+        LesserEqual        = 1 << 30,
     }
 
     public static class OperatorKinds

@@ -33,6 +33,14 @@ namespace EncosyTower.SourceGen
                 SymbolDisplayMiscellaneousOptions.UseSpecialTypes
             );
 
+        private static SymbolDisplayFormat SimpleNoSpecialTypeFormat { get; }
+            = new SymbolDisplayFormat(
+                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameOnly,
+                globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
+                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+                miscellaneousOptions: SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers
+            );
+
         public static SymbolDisplayFormat MemberNameFormat { get; }
             = new SymbolDisplayFormat(
                 typeQualificationStyle:
@@ -281,6 +289,9 @@ namespace EncosyTower.SourceGen
 
         public static string ToSimpleValidIdentifier(this ITypeSymbol symbol)
             => symbol.ToDisplayString(SimpleFormat).ToValidIdentifier();
+
+        public static string ToSimpleNoSpecialTypeValidIdentifier(this ITypeSymbol symbol)
+            => symbol.ToDisplayString(SimpleNoSpecialTypeFormat).ToValidIdentifier();
 
         public static bool ImplementsInterface(this ISymbol symbol, string interfaceName)
         {
