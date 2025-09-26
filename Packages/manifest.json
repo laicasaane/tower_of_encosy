@@ -37,7 +37,7 @@
     "com.unity.ugui": "2.0.0",
     "com.xarbrough.renamer": "1.0.1",
     "jp.co.cyberagent.smartaddresser": "1.1.0",
-    "org.nuget.raffinert.fuzzysharp": "3.0.4",
+    "org.nuget.raffinert.fuzzysharp": "3.0.6",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
@@ -81,7 +81,12 @@
         "com.xarbrough.renamer",
         "com.xarbrough.scriptable-object-creator",
         "jp.co.cyberagent.smartaddresser",
-        "org.nuget.raffinert.fuzzysharp"
+        "org.nuget.indexrange",
+        "org.nuget.raffinert.fuzzysharp",
+        "org.nuget.system.buffers",
+        "org.nuget.system.memory",
+        "org.nuget.system.numerics.vectors",
+        "org.nuget.system.runtime.compilerservices.unsafe"
       ]
     }
   ]
