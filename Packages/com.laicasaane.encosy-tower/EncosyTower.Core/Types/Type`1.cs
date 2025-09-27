@@ -9,14 +9,14 @@ namespace EncosyTower.Types
     /// <typeparam name="T"></typeparam>
     public static class Type<T>
     {
-        private readonly static Type s_type;
+        private readonly static Type s_cached;
         private readonly static TypeInfo<T> s_info;
 
         static Type()
         {
-            s_type = typeof(T);
+            s_cached = typeof(T);
 
-            var info = RuntimeTypeCache.Register<T>(s_type);
+            var info = RuntimeTypeCache.Register<T>(s_cached);
             s_info = new(info.Id, info.Hash, info.IsValueType, info.IsUnmanaged, info.IsBlittable);
         }
 
@@ -34,10 +34,10 @@ namespace EncosyTower.Types
         /// <summary>
         /// Gets the <see cref="Type"/> of <typeparamref name="T"/>.
         /// </summary>
-        public static Type Value
+        public static Type Cached
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => s_type;
+            get => s_cached;
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace EncosyTower.Types
         public static TypeHash Hash
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => s_type;
+            get => s_cached;
         }
 
         public static ref readonly TypeInfo<T> Info

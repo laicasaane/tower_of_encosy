@@ -31,7 +31,7 @@ namespace EncosyTower.Vaults
             if (_singletons.ContainsKey(Type<T>.Hash))
             {
 #if __ENCOSY_VALIDATION__
-                StaticDevLogger.LogError($"An instance of {Type<T>.Value.Name} has already been existing");
+                StaticDevLogger.LogError($"An instance of {typeof(T)} has already been existing");
 #endif
 
                 return false;
@@ -56,7 +56,7 @@ namespace EncosyTower.Vaults
             if (_singletons.ContainsKey(Type<T>.Hash))
             {
 #if __ENCOSY_VALIDATION__
-                StaticDevLogger.LogError($"An instance of {Type<T>.Value} has already been existing");
+                StaticDevLogger.LogError($"An instance of {typeof(T)} has already been existing");
 #endif
 
                 return false;
@@ -80,8 +80,8 @@ namespace EncosyTower.Vaults
                 else
                 {
                     throw new InvalidCastException(
-                        $"Cannot cast an instance of type {obj.GetType()} to {Type<T>.Value}" +
-                        $"even though it is registered for {Type<T>.Value}"
+                        $"Cannot cast an instance of type {obj.GetType()} to {typeof(T)}" +
+                        $"even though it is registered for {typeof(T)}"
                     );
                 }
 #endif
@@ -105,7 +105,7 @@ namespace EncosyTower.Vaults
                 else
                 {
                     throw new InvalidCastException(
-                        $"Cannot cast an instance of type {obj.GetType()} to {Type<T>.Value}"
+                        $"Cannot cast an instance of type {obj.GetType()} to {typeof(T)}"
                     );
                 }
 #endif

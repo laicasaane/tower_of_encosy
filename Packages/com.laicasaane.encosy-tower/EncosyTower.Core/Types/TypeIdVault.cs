@@ -3,9 +3,11 @@ using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.Scripting;
 
 namespace EncosyTower.Types
 {
+    [Preserve]
     internal static class TypeIdVault
     {
         #pragma warning disable IDE1006
@@ -20,6 +22,7 @@ namespace EncosyTower.Types
 
         public static readonly Type UndefinedType = typeof(__UndefinedType__);
 
+        [Preserve]
         private static uint Next
         {
             get
@@ -32,11 +35,13 @@ namespace EncosyTower.Types
             }
         }
 
+        [Preserve]
         internal static void Init()
         {
             _ = Type<__UndefinedType__>.Id;
         }
 
+        [Preserve]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static TypeId Register(Type type)
         {
@@ -46,10 +51,12 @@ namespace EncosyTower.Types
             return id;
         }
 
+        [Preserve]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool TryGetType(TypeId id, out Type type)
             => s_idToTypeVault.TryGetValue(id, out type);
 
+        [Preserve]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool TryGetId(Type type, out TypeId id)
             => s_typeToIdVault.TryGetValue(type, out id);

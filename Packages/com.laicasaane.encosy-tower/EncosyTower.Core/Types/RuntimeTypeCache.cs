@@ -2,12 +2,14 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
 namespace EncosyTower.Types
 {
     /// <summary>
     /// Provides methods for fast type extraction from assemblies loaded into the Unity Domain.
     /// </summary>
+    [Preserve]
     public static partial class RuntimeTypeCache
     {
         /// <summary>

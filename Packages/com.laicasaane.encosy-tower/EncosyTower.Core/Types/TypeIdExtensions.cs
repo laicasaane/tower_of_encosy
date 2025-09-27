@@ -20,11 +20,11 @@ namespace EncosyTower.Types
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Type ToType<T>(this TypeId<T> _)
-            => Type<T>.Value;
+            => Type<T>.Cached;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsType<T>(this TypeId self)
-            => TypeIdVault.TryGetType(self, out var type) && type == Type<T>.Value;
+            => TypeIdVault.TryGetType(self, out var type) && type == Type<T>.Cached;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<TypeId<T>> AsTyped<T>(this TypeId self)

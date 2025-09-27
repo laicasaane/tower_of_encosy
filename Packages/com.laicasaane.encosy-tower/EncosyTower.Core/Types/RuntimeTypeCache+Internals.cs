@@ -11,21 +11,36 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Ids;
 using EncosyTower.Types.Internals;
+using UnityEngine;
 using UnityEngine.Scripting;
 
 namespace EncosyTower.Types
 {
-    public static partial class RuntimeTypeCache
+    partial class RuntimeTypeCache
     {
         private static readonly ConcurrentDictionary<Type, TypeInfo> s_vault = new();
 
 #if __RUNTIME_TYPECACHE_AUTO__
-        private static readonly TypeCacheSourceEditor s_source = default;
+        private static TypeCacheSourceEditor s_source = default;
 #else
-        private static readonly TypeCacheSourceRuntime s_source;
+        private static TypeCacheSourceRuntime s_source;
 #endif
 
-        static RuntimeTypeCache()
+        [Preserve]
+        internal static TypeInfo<T> Register<T>([NotNull] Type type)
+        {
+            var id = TypeIdVault.Register(type);
+            var isUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
+            var isBlittable = isUnmanaged && type.IsAutoLayout == false && type != typeof(bool);
+            var info = new TypeInfo<T>((TypeId<T>)id, type, type.IsValueType, isUnmanaged, isBlittable);
+            s_vault.TryAdd(type, (TypeInfo)info);
+
+            return info;
+        }
+
+        [Preserve]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        private static void InitRuntimeTypeCache()
         {
             InitTypeIdVault();
 
@@ -38,8 +53,9 @@ namespace EncosyTower.Types
 #endif
         }
 
+        [Preserve]
 #if UNITY_EDITOR
-        [UnityEditor.InitializeOnEnterPlayMode, UnityEngine.Scripting.Preserve]
+        [UnityEditor.InitializeOnEnterPlayMode]
 #endif
         private static void InitTypeIdVault()
         {
@@ -92,16 +108,5 @@ namespace EncosyTower.Types
         }
 #pragma warning restore IDE0051 // Remove unused private members
 #endif
-
-        internal static TypeInfo<T> Register<T>([NotNull] Type type)
-        {
-            var id = TypeIdVault.Register(type);
-            var isUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
-            var isBlittable = isUnmanaged && type.IsAutoLayout == false && type != typeof(bool);
-            var info = new TypeInfo<T>((TypeId<T>)id, type, type.IsValueType, isUnmanaged, isBlittable);
-            s_vault.TryAdd(type, (TypeInfo)info);
-
-            return info;
-        }
     }
 }
