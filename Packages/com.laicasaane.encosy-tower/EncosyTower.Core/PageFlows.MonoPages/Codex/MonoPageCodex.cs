@@ -14,6 +14,7 @@ using EncosyTower.PubSub;
 using EncosyTower.Tasks;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
+using UnityEngine.Scripting;
 
 namespace EncosyTower.PageFlows.MonoPages
 {
@@ -68,7 +69,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
             var initializer = GetComponent<IMonoPageCodexOnInitialize>();
 
-            if (initializer is not UnityObject initializerContext || initializerContext.IsInvalid())
+            if (initializer is not Component initializerContext || initializerContext.IsInvalid())
             {
                 ErrorIfCannotInitializeWithoutInitializer(this);
                 return;
@@ -107,6 +108,8 @@ namespace EncosyTower.PageFlows.MonoPages
                 ErrorIfFlowScopeCollectionTypeHasNoValidProperty(flowScopeCollectionType, this, initializerContext);
                 return;
             }
+
+            WarningIfMissingPreserveAttribute(flowScopeCollectionType, properties, this);
 
             var definitions = _flows.AsSpan();
 
@@ -316,7 +319,7 @@ namespace EncosyTower.PageFlows.MonoPages
         {
             context.GetLogger(context._flowContext.logEnvironment).LogError(
                 $"Cannot initialize {nameof(MonoPageCodex)} without an initializer. " +
-                $"Please add an {nameof(IMonoPageCodexOnInitialize)} component " +
+                $"Please add another component implements {nameof(IMonoPageCodexOnInitialize)} " +
                 $"to the GameObject of this {nameof(MonoPageCodex)}."
             );
         }
@@ -386,10 +389,13 @@ namespace EncosyTower.PageFlows.MonoPages
         private static void ErrorIfFlowScopeCollectionTypeHasNoValidProperty(Type type, MonoPageCodex codex, UnityObject context)
         {
             context.GetLogger(codex._flowContext.logEnvironment).LogError(
-                $"The type '{type}' has no valid property to hold {nameof(PageFlowScope)} values. " +
-                $"Please ensure the type implements {nameof(IPageFlowScopeCollection)} " +
-                $"and has properties of type {nameof(PageFlowScope)}."
+                $"Cannot find any valid property to store {nameof(PageFlowScope)} values. " +
+                $"Please ensure the type '{type}' implements {nameof(IPageFlowScopeCollection)} " +
+                $"and has properties whose signature looks like this: " +
+                $"`public {nameof(PageFlowScope)} PropertyName {{ get; set; }}`."
             );
+
+            WarningAboutPreserveAttribute(type, codex);
         }
 
         [HideInCallstack, StackTraceHidden]
@@ -406,7 +412,7 @@ namespace EncosyTower.PageFlows.MonoPages
                     $"The flow definitions on this {nameof(MonoPageCodex)} " +
                     $"do not match the properties of type '{type}'. " +
                     $"The following identifiers are missing: {missingIdentifiers}. " +
-                    $"Please specify the flow definitions according to the properties of type '{type}'."
+                    $"Please specify all flow definitions according to the properties of type '{type}'."
                 );
             }
 
@@ -416,8 +422,10 @@ namespace EncosyTower.PageFlows.MonoPages
                     $"The properties of type '{type}' do not match the identifiers " +
                     $"of the flow definitions on this {nameof(MonoPageCodex)}. " +
                     $"The following properties are missing: {missingProperties}. " +
-                    $"Please ensure the properties of type '{type}' match the flow definitions."
+                    $"Please ensure the properties of type '{type}' match all flow definitions."
                 );
+
+                WarningAboutPreserveAttribute(type, codex);
             }
         }
 
@@ -429,6 +437,41 @@ namespace EncosyTower.PageFlows.MonoPages
                 $"Please add the flow definitions to this {nameof(MonoPageCodex)} " +
                 $"matching the properties of type '{type}'."
             );
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        private static void WarningAboutPreserveAttribute(Type type, MonoPageCodex codex)
+        {
+            codex.GetLogger(codex._flowContext.logEnvironment).LogWarning(
+                $"Missing attribute '[UnityEngine.Scripting.Preserve]'. " +
+                $"Because {nameof(MonoPageCodex)} uses reflection mechanism to retrieve " +
+                $"property information from type '{type}', the type and all of its properties " +
+                $"should be annotated with '[UnityEngine.Scripting.Preserve]' " +
+                $"so their code will not be stripped away at build time."
+            );
+        }
+
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void WarningIfMissingPreserveAttribute(
+              Type type
+            , ReadOnlySpan<PropertyInfo> properties
+            , MonoPageCodex codex
+        )
+        {
+            if (type.GetCustomAttribute<PreserveAttribute>() == null)
+            {
+                WarningAboutPreserveAttribute(type, codex);
+                return;
+            }
+
+            foreach (var property in properties)
+            {
+                if (property.GetCustomAttribute<PreserveAttribute>() == null)
+                {
+                    WarningAboutPreserveAttribute(type, codex);
+                    return;
+                }
+            }
         }
 
         [Serializable]
