@@ -19,6 +19,32 @@ namespace EncosyTower.PageFlows
         bool IsInTransition { get; }
     }
 
+    /// <summary>
+    /// The type implements this interface must also define writable properties
+    /// whose return type is <see cref="PageFlowScope"/>.
+    /// </summary>
+    /// <remarks>
+    /// Because the system uses reflection mechanism to retrieve property information from this type,
+    /// the type and all of its properties should be annotated with <c>[UnityEngine.Scripting.Preserve]</c>
+    /// so their code will not be stripped away at build time.
+    /// </remarks>
+    /// <seealso cref="UnityEngine.Scripting.PreserveAttribute"/>
+    /// <example>
+    /// <code>
+    /// [UnityEngine.Scripting.Preserve]
+    /// public struct GameFlowScopes : IPageFlowScopeCollection
+    /// {
+    ///     [UnityEngine.Scripting.Preserve]
+    ///     public PageFlowScope Screen { get; set; }
+    ///
+    ///     [UnityEngine.Scripting.Preserve]
+    ///     public PageFlowScope Popup { get; set; }
+    ///
+    ///     [UnityEngine.Scripting.Preserve]
+    ///     public PageFlowScope FreeTop { get; set; }
+    /// }
+    /// </code>
+    /// </example>
     public interface IPageFlowScopeCollection
     {
     }

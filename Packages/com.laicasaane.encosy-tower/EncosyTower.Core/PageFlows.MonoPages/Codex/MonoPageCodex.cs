@@ -83,7 +83,7 @@ namespace EncosyTower.PageFlows.MonoPages
                 return;
             }
 
-            var flowScopeCollectionType = flowScopeCollectionApplier.FlowScopeCollectionType;
+            var flowScopeCollectionType = flowScopeCollectionApplier.CollectionType;
 
             if (flowScopeCollectionType == null)
             {
@@ -276,14 +276,14 @@ namespace EncosyTower.PageFlows.MonoPages
         }
 
         private static bool TryInitializeFlowScopeCollectionApplier(
-              IPageFlowScopeCollectionApplier flowScopeCollectionApplier
-            , Type flowScopeCollectionType
+              IPageFlowScopeCollectionApplier collectionApplier
+            , Type collectionType
             , ReadOnlySpan<PropertyInfo> properties
             , MonoPageCodex codex
         )
         {
             var map = codex._flowScopeMap;
-            var flowScopeCollection = Activator.CreateInstance(flowScopeCollectionType);
+            var flowScopeCollection = Activator.CreateInstance(collectionType) as IPageFlowScopeCollection;
 
             for (var i = 0; i < properties.Length; i++)
             {
@@ -292,8 +292,8 @@ namespace EncosyTower.PageFlows.MonoPages
 
                 if (map.TryGetValue(identifier, out var flowScope) == false)
                 {
-                    ErrorIfCannotFindFlowScopeForProperty(flowScopeCollectionType, identifier, codex);
-                    goto FAILED;
+                    ErrorIfCannotFindFlowScopeForProperty(collectionType, identifier, codex);
+                    return false;
                 }
 
                 try
@@ -303,15 +303,17 @@ namespace EncosyTower.PageFlows.MonoPages
                 catch (Exception ex)
                 {
                     codex.GetLogger(codex._flowContext.logEnvironment).LogException(ex);
-                    goto FAILED;
+                    return false;
                 }
             }
 
-            flowScopeCollectionApplier.SetFlowScopeCollection(flowScopeCollection);
-            return true;
+            if (collectionApplier.TrySet(flowScopeCollection) == false)
+            {
+                ErrorIfCannotSetFlowScopeCollection(collectionType, collectionApplier.GetType(), codex);
+                return false;
+            }
 
-        FAILED:
-            return false;
+            return true;
         }
 
         [HideInCallstack, StackTraceHidden]
@@ -436,6 +438,15 @@ namespace EncosyTower.PageFlows.MonoPages
                 $"Cannot find a flow scope value for the property '{identifier}' of the type '{type}'. " +
                 $"Please add the flow definitions to this {nameof(MonoPageCodex)} " +
                 $"matching the properties of type '{type}'."
+            );
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        private static void ErrorIfCannotSetFlowScopeCollection(Type type, Type applierType, MonoPageCodex codex)
+        {
+            codex.GetLogger(codex._flowContext.logEnvironment).LogError(
+                $"Cannot set the value of '{type}' to '{applierType}'. " +
+                $"This should be an unexpected bug, please report to the author."
             );
         }
 

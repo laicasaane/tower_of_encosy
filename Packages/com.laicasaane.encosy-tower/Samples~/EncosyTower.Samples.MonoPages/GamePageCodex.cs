@@ -17,17 +17,15 @@ namespace EncosyTower.Samples.MonoPages
     {
         private readonly PageFlowScopeCollectionApplier<GamePageFlowScopes> _flowScopesApplier = new();
 
-        public IPageFlowScopeCollectionApplier PageFlowScopeCollectionApplier => _flowScopesApplier;
-
-        public GamePageFlowScopes FlowScopes { get; set; }
-
         private MonoPageCodex _codex;
+
+        public IPageFlowScopeCollectionApplier PageFlowScopeCollectionApplier => _flowScopesApplier;
 
         public UnityTask OnInitializeAsync(MonoPageCodex codex)
         {
             _codex = codex;
 
-            if (_flowScopesApplier.TryGetFlowScopeCollection(out var scopes))
+            if (_flowScopesApplier.TryGet(out var scopes))
             {
                 ShowStartScreen(scopes);
             }
