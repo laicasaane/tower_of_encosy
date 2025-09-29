@@ -9,13 +9,13 @@ namespace EncosyTower.UIElements
     public partial class SerializableGuidField : TextValueField<SerializableGuid>, IHasBindingPath
     {
         public static readonly string UssClassName = "serializable-guid-field";
-        public static readonly string NewButtonUssClassName = $"{UssClassName}__new-button";
-        public static readonly string Version7ButtonUssClassName = $"{UssClassName}__version-7-button";
+        public static readonly string NewButtonUssClassName = $"{UssClassName}__new-v4-button";
+        public static readonly string NewV7ButtonUssClassName = $"{UssClassName}__new-v7-button";
 
         internal static readonly BindingId s_guidFormatProperty = nameof(GuidFormat);
 
-        private readonly Button _newButton;
-        private readonly Button _version7Button;
+        private readonly Button _newV4Button;
+        private readonly Button _newV7Button;
 
         /// <summary>
         /// Creates a new SerializableGuidField.
@@ -47,11 +47,18 @@ namespace EncosyTower.UIElements
             pickingMode = PickingMode.Ignore;
             GuidFormat = guidFormat;
 
-            Add(_newButton = new Button() { text = "New" }.WithClass(NewButtonUssClassName));
-            Add(_version7Button = new Button() { text = "Version 7" }.WithClass(Version7ButtonUssClassName));
+            Add(_newV4Button = new Button() {
+                text = "New v4",
+                tooltip = "Creates a new Guid according to RFC 4122, following the Version 4 format.",
+            }.WithClass(NewButtonUssClassName));
 
-            _newButton.clicked += OnCreateNew;
-            _version7Button.clicked += OnCreateVersion7;
+            Add(_newV7Button = new Button() {
+                text = "New v7",
+                tooltip = "Creates a new Guid according to RFC 9562, following the Version 7 format."
+            }.WithClass(NewV7ButtonUssClassName));
+
+            _newV4Button.clicked += OnNewV4;
+            _newV7Button.clicked += OnNewV7;
         }
 
         /// <summary>
@@ -88,8 +95,8 @@ namespace EncosyTower.UIElements
 
             set
             {
-                _newButton.WithDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
-                _version7Button.WithDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
+                _newV4Button.WithDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
+                _newV7Button.WithDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
 
                 base.isReadOnly = value;
             }
@@ -104,7 +111,7 @@ namespace EncosyTower.UIElements
 
         protected override SerializableGuid StringToValue(string str)
         {
-            return new Guid(str);
+            return Guid.TryParse(str, out var result) ? result : Guid.Empty;
         }
 
         protected override string ValueToString(SerializableGuid value)
@@ -112,7 +119,7 @@ namespace EncosyTower.UIElements
             return value.ToString(GuidFormat);
         }
 
-        private void OnCreateNew()
+        private void OnNewV4()
         {
             if (isReadOnly)
             {
@@ -122,7 +129,7 @@ namespace EncosyTower.UIElements
             value = SerializableGuid.NewGuid();
         }
 
-        private void OnCreateVersion7()
+        private void OnNewV7()
         {
             if (isReadOnly)
             {
@@ -150,7 +157,12 @@ namespace EncosyTower.UIElements
                 {
                     if ((formatString = value) is null or "" or "N" or "D" or "B" or "P" or "X")
                     {
-                        text = new Guid(text).ToString(value.NotEmptyOr("D"));
+                        if (Guid.TryParse(text, out var result) == false)
+                        {
+                            result = Guid.Empty;
+                        }
+
+                        text = result.ToString(value.NotEmptyOr("D"));
                         return;
                     }
 
@@ -173,7 +185,7 @@ namespace EncosyTower.UIElements
 
             protected override SerializableGuid StringToValue(string str)
             {
-                return new Guid(str);
+                return Guid.TryParse(str, out var result) ? result : Guid.Empty;
             }
         }
     }
