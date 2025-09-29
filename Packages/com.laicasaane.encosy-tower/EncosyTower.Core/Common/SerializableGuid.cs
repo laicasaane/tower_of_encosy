@@ -20,7 +20,7 @@ namespace EncosyTower.Common
 
         public static readonly SerializableGuid Empty = new(Guid.Empty);
 
-        [SerializeField] private fixed byte _bytes[SIZE];
+        [SerializeField] internal fixed byte _bytes[SIZE];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SerializableGuid(in Guid guid)
@@ -56,7 +56,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in SerializableGuid lhs, in SerializableGuid rhs)
-            => lhs.AsGuid() == rhs.AsGuid();
+            => lhs.AsGuid() != rhs.AsGuid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void Deconstruct(

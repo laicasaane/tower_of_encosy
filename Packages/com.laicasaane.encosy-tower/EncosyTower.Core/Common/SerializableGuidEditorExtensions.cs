@@ -26,7 +26,7 @@ namespace EncosyTower.Editor.Common
 
         public static bool TryCopyFrom(ref this SerializableGuid self, SerializedProperty property)
         {
-            if (TryDetermineBytesProperty(ref property) == false)
+            if (TryGetBytesProperty(ref property) == false)
             {
                 self = default;
                 return false;
@@ -49,7 +49,7 @@ namespace EncosyTower.Editor.Common
 
         public static bool TryCopyTo(in this SerializableGuid self, SerializedProperty property)
         {
-            if (TryDetermineBytesProperty(ref property) == false)
+            if (TryGetBytesProperty(ref property) == false)
             {
                 return false;
             }
@@ -64,22 +64,12 @@ namespace EncosyTower.Editor.Common
             return true;
         }
 
-        private static bool TryDetermineBytesProperty(ref SerializedProperty property)
+        private static bool TryGetBytesProperty(ref SerializedProperty property)
         {
-            var parent = property;
-
-            while (property is not null)
+            if (property.type == nameof(SerializableGuid))
             {
-                if (property.isFixedBuffer == false
-                    || property.fixedBufferSize != SerializableGuid.SIZE
-                )
-                {
-                    parent = property;
-                    property = property.FindPropertyRelative("_bytes");
-                    continue;
-                }
-
-                return parent.type == nameof(SerializableGuid);
+                property = property.FindPropertyRelative(nameof(SerializableGuid._bytes));
+                return property != null;
             }
 
             return false;
