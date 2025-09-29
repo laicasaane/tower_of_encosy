@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <LangVersion>13</LangVersion>
+        <NoWarn>CS8618</NoWarn>
+        <TargetFrameworks>netstandard2.1</TargetFrameworks>
+        <RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion>
+
+        <!-- Disable default references -->
+        <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+        <NoStdLib>true</NoStdLib>
+        <NoConfig>true</NoConfig>
+
+        <!-- Match .NET Standard version -->
+        <Version Condition="'$(TargetFramework)' == 'netstandard2.1'">2.1.0.0</Version>
+
+        <!-- Sign assembly -->
+        <AssemblyOriginatorKeyFile>Open.snk</AssemblyOriginatorKeyFile>
+        <SignAssembly>true</SignAssembly>
+        <PublicSign>true</PublicSign>
+    </PropertyGroup>
+</Project>

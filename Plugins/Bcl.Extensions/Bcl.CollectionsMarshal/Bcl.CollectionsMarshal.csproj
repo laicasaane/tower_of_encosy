@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <LangVersion>13</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <NoWarn>CS8500</NoWarn>
+        <TargetFrameworks>netstandard2.1</TargetFrameworks>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <!-- Disable default references -->
+        <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+        <NoStdLib>true</NoStdLib>
+        <NoConfig>true</NoConfig>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../netstandard/netstandard.csproj" Private="false" PrivateAssets="all" />
+        <ProjectReference Include="../Bcl.Runtime/Bcl.Runtime.csproj" Private="false" PrivateAssets="all" />
+    </ItemGroup>
+</Project>
