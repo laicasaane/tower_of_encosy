@@ -16,8 +16,46 @@ namespace EncosyTower.Editor.Common
     {
         private const string ERROR = $"Property is not a valid {nameof(SerializableGuid)} type";
 
-        private static readonly GUIContent s_newLabel = new("New");
-        private static readonly GUIContent s_v7Label = new("Version 7");
+        private static readonly GUIContent s_emptyLabel = new(
+              "Empty"
+            , "Sets to all zeros."
+        );
+
+        private static readonly GUIContent s_newV4Label = new(
+              "New v4"
+            , "Creates a new Guid according to RFC 4122, following the Version 4 format."
+        );
+
+        private static readonly GUIContent s_newV7Label = new(
+              "New v7"
+            , "Creates a new Guid according to RFC 9562, following the Version 7 format."
+        );
+
+        [InitializeOnLoadMethod]
+        private static void RegisterContextualPropertyMenu()
+        {
+            EditorApplication.contextualPropertyMenu -= OnPropertyContextMenu;
+            EditorApplication.contextualPropertyMenu += OnPropertyContextMenu;
+
+            return;
+
+            static void OnPropertyContextMenu(GenericMenu menu, SerializedProperty property)
+            {
+                if (property.propertyType != SerializedPropertyType.Generic
+                    || property.type != typeof(SerializableGuid).Name
+                )
+                {
+                    return;
+                }
+
+                var propertyCopy = property.Copy();
+
+                menu.AddItem(s_emptyLabel, false, () => {
+                    SerializableGuid.Empty.TryCopyTo(propertyCopy);
+                    propertyCopy.serializedObject.ApplyModifiedProperties();
+                });
+            }
+        }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -42,40 +80,40 @@ namespace EncosyTower.Editor.Common
 
             var x = position.x;
             var m = 4f;
-            var w = position.width - m - 50f - 80f;
+            var w = position.width - m - 57f - 57f;
             var guidRect = new Rect(x, position.y, w, position.height);
 
             x += w + m;
-            w = 50f;
+            w = 57f;
 
-            var newBtnRect = new Rect(x, position.y, w, position.height);
+            var newV4BtnRect = new Rect(x, position.y, w, position.height);
 
             x += w;
-            w = 80f;
+            w = 57f;
 
-            var v7BtnRect = new Rect(x, position.y, w, position.height);
+            var newV7BtnRect = new Rect(x, position.y, w, position.height);
 
             var guidString = EditorGUI.TextField(guidRect, GUIContent.none, guid.ToString());
 
             Guid newValue;
 
-            if (GUI.Button(newBtnRect, s_newLabel))
+            if (GUI.Button(newV4BtnRect, s_newV4Label))
             {
                 newValue = SerializableGuid.NewGuid();
             }
-            else if (GUI.Button(v7BtnRect, s_v7Label))
+            else if (GUI.Button(newV7BtnRect, s_newV7Label))
             {
                 newValue = SerializableGuid.CreateVersion7();
             }
             else if (Guid.TryParse(guidString, out newValue) == false)
             {
-                newValue = guid;
+                newValue = SerializableGuid.Empty;
             }
 
             if (newValue != guid)
             {
-                Undo.RecordObject(property.serializedObject.targetObject, $"Set {property.propertyPath}");
                 newValue.TryCopyTo(property);
+                property.serializedObject.ApplyModifiedProperties();
             }
 
             // Set indent back to what it was
