@@ -2,14 +2,11 @@ namespace EncosyTower.Common
 {
     using System;
     using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
     using EncosyTower.Collections;
     using EncosyTower.SystemExtensions;
-    using Unity.Collections;
-    using Unity.Serialization;
     using UnityEngine;
 
-    [Serializable, StructLayout(LayoutKind.Explicit, Size = SIZE)]
+    [Serializable]
     public unsafe partial struct SerializableGuid
         : IEquatable<SerializableGuid>, IEquatable<Guid>
         , IComparable<SerializableGuid>, IComparable<Guid>, IComparable
@@ -23,20 +20,16 @@ namespace EncosyTower.Common
 
         public static readonly SerializableGuid Empty = new(Guid.Empty);
 
-        [FieldOffset(0), SerializeField]
-        internal FixedBytes16 _bytes;
-
-        [FieldOffset(0), DontSerialize, HideInInspector]
-        internal fixed byte _buffer[SIZE];
+        [SerializeField] private fixed byte _bytes[SIZE];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SerializableGuid(in Guid guid) : this()
+        public SerializableGuid(in Guid guid)
         {
             this = guid.AsSerializable();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SerializableGuid(ReadOnlySpan<byte> bytes) : this()
+        public SerializableGuid(ReadOnlySpan<byte> bytes)
         {
             this = new Guid(bytes).AsSerializable();
         }
@@ -158,7 +151,7 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ReadOnlySpan<byte> AsReadOnlySpan()
         {
-            fixed (void* ptr = _buffer)
+            fixed (void* ptr = _bytes)
             {
                 return new ReadOnlySpan<byte>(ptr, SIZE);
             }
@@ -182,7 +175,7 @@ namespace EncosyTower.Common
     partial struct SerializableGuid : IToFixedString<FixedString128Bytes>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SerializableGuid(in FixedString128Bytes guidString) : this()
+        public SerializableGuid(in FixedString128Bytes guidString)
         {
             if (GuidAPI.TryParse(guidString, out Guid result))
             {
