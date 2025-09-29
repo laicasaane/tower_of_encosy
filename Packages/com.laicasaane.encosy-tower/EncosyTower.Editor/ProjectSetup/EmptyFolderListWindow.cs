@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using EncosyTower.Collections.Unsafe;
+using EncosyTower.Collections.Extensions;
 using EncosyTower.Editor.UIElements;
 using EncosyTower.UIElements;
 using EncosyTower.UnityExtensions;
@@ -60,7 +60,7 @@ namespace EncosyTower.Editor.ProjectSetup
 
         private void Delete()
         {
-            var span = _table.Items.AsSpanUnsafe();
+            var span = _table.Items.AsSpan();
             var length = span.Length;
             var items = new List<ItemInfo>(length);
             var paths = new List<string>(length);

@@ -9,14 +9,14 @@ using EncosyTower.Debugging;
 
 namespace EncosyTower.Collections
 {
-    public struct FasterListEnumerator<T> : IEnumerator<T>, IEnumerator
+    public struct ListFastEnumerator<T> : IEnumerator<T>, IEnumerator
     {
-        private readonly FasterList<T> _list;
+        private readonly ListFast<T> _list;
         private int _index;
         private readonly int _version;
         private T _current;
 
-        internal FasterListEnumerator([NotNull] FasterList<T> list)
+        internal ListFastEnumerator([NotNull] ListFast<T> list)
         {
             _list = list;
             _index = 0;

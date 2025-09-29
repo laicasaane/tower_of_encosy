@@ -9,18 +9,20 @@ using EncosyTower.Debugging;
 
 namespace EncosyTower.Collections
 {
-    public struct FasterListEnumerator<T> : IEnumerator<T>, IEnumerator
+    public struct SharedListEnumerator<T, TNative> : IEnumerator<T>, IEnumerator
+        where T : unmanaged
+        where TNative : unmanaged
     {
-        private readonly FasterList<T> _list;
+        private readonly SharedList<T, TNative> _list;
         private int _index;
         private readonly int _version;
         private T _current;
 
-        internal FasterListEnumerator([NotNull] FasterList<T> list)
+        internal SharedListEnumerator([NotNull] SharedList<T, TNative> list)
         {
             _list = list;
             _index = 0;
-            _version = list._version;
+            _version = list._version.ValueRO;
             _current = default;
         }
 
@@ -32,23 +34,24 @@ namespace EncosyTower.Collections
         {
             var localList = _list;
 
-            if (_version == localList._version && ((uint)_index < (uint)localList._count))
+            if (_version == localList._version.ValueRO && ((uint)_index < (uint)localList._count.ValueRO))
             {
-                _current = localList._buffer[_index];
+                _current = localList._buffer.AsReadOnlySpan()[_index];
                 _index++;
                 return true;
             }
+
             return MoveNextRare();
         }
 
         private bool MoveNextRare()
         {
-            if (_version != _list._version)
+            if (_version != _list._version.ValueRO)
             {
                 ThrowHelper.ThrowInvalidOperationException_InvalidOperation_EnumFailedVersion();
             }
 
-            _index = _list._count + 1;
+            _index = _list._count.ValueRO + 1;
             _current = default;
             return false;
         }
@@ -61,7 +64,7 @@ namespace EncosyTower.Collections
 
         public void Reset()
         {
-            if (_version != _list._version)
+            if (_version != _list._version.ValueRO)
             {
                 ThrowHelper.ThrowInvalidOperationException_InvalidOperation_EnumFailedVersion();
             }
@@ -74,7 +77,7 @@ namespace EncosyTower.Collections
         {
             get
             {
-                if (_index == 0 || _index == _list._count + 1)
+                if (_index == 0 || _index == _list._count.ValueRO + 1)
                 {
                     ThrowHelper.ThrowInvalidOperationException_InvalidOperation_EnumOpCantHappen();
                 }

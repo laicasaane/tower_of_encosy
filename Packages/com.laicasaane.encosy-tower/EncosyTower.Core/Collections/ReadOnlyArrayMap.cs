@@ -20,6 +20,12 @@ namespace EncosyTower.Collections
             _map = map;
         }
 
+        public bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _map != null && _map.IsValid;
+        }
+
         public int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -30,12 +36,6 @@ namespace EncosyTower.Collections
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _map._freeValueCellIndex;
-        }
-
-        public bool IsValid
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _map != null && _map.IsValid;
         }
 
         public ArrayMap<TKey, TValue>.KeyEnumerable Keys

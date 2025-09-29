@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using EncosyTower.Debugging;
 using Unity.Collections;
 
-namespace EncosyTower.Collections
+namespace EncosyTower.Collections.Extensions
 {
     public static class SharedListExtensions
     {

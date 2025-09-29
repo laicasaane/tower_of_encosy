@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
-using EncosyTower.Collections.Unsafe;
+using EncosyTower.Collections.Extensions;
 using EncosyTower.UnityExtensions;
 using Unity.Collections;
 using UnityEngine;
@@ -283,7 +283,7 @@ namespace EncosyTower.Pooling
 
                         Resources.InstanceIDToObjectList(transformIds, list);
 
-                        var span = list.AsReadOnlySpanUnsafe();
+                        var span = list.AsReadOnlySpan();
                         var spanLength = span.Length;
                         var inWorldSpace = InstantiateInWorldSpace;
 

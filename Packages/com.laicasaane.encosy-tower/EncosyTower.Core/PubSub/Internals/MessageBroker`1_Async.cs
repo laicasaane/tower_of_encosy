@@ -10,7 +10,7 @@ using System;
 using System.Buffers;
 using System.Threading;
 using EncosyTower.Collections;
-using EncosyTower.Collections.Unsafe;
+using EncosyTower.Collections.Extensions.Unsafe;
 using EncosyTower.Tasks;
 
 namespace EncosyTower.PubSub.Internals

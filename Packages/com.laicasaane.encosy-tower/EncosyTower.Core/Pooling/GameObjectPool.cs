@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using EncosyTower.Collections;
-using EncosyTower.Collections.Unsafe;
+using EncosyTower.Collections.Extensions;
 using EncosyTower.Debugging;
 using EncosyTower.UnityExtensions;
 using Unity.Collections;
@@ -142,7 +142,7 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.IncreaseCapacityBy(amount);
             _unusedTransformIds.IncreaseCapacityBy(amount);
 
-            var objects = _objectList.AsReadOnlySpanUnsafe();
+            var objects = _objectList.AsReadOnlySpan();
             var objectsLength = objects.Length;
             var trimCloneSuffix = TrimCloneSuffix;
 
@@ -531,7 +531,7 @@ namespace EncosyTower.Pooling
             unusedGameObjectIds.IncreaseCapacityTo(capacity);
             unusedTransformIds.IncreaseCapacityTo(capacity);
 
-            var objects = _objectList.AsReadOnlySpanUnsafe();
+            var objects = _objectList.AsReadOnlySpan();
             var postIds = NativeArray.CreateFast<int>(length, Allocator.Temp);
             var postIdsLength = 0;
 
@@ -596,7 +596,7 @@ namespace EncosyTower.Pooling
             unusedGameObjectIds.IncreaseCapacityTo(capacity);
             unusedTransformIds.IncreaseCapacityTo(capacity);
 
-            var objects = _objectList.AsReadOnlySpanUnsafe();
+            var objects = _objectList.AsReadOnlySpan();
             var postIds = NativeArray.CreateFast<int>(length, Allocator.Temp);
             var postIdsLength = 0;
 

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Generic.Unsafe;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace EncosyTower.Collections.Extensions
 {
@@ -18,6 +20,22 @@ namespace EncosyTower.Collections.Extensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void IncreaseCapacityTo<T>([NotNull] this List<T> list, int capacity)
             => list.Capacity = Math.Max(list.Capacity, capacity);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> AsSpan<T>([NotNull] this List<T> list)
+            => CollectionsMarshal.AsSpan(list);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>([NotNull] this List<T> list)
+            => CollectionsMarshal.AsSpan(list);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Memory<T> AsMemory<T>([NotNull] this List<T> list)
+            => new ListExposed<T>(list).Item.AsMemory(0, list.Count);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlyMemory<T> AsReadOnlyMemory<T>([NotNull] this List<T> list)
+            => new ListExposed<T>(list).Item.AsMemory(0, list.Count);
 
         public static void AddRange<T>(
               [NotNull] this List<T> list

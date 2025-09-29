@@ -331,8 +331,8 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpan<T>.Enumerator GetEnumerator()
-            => AsReadOnlySpan().GetEnumerator();
+        public SharedListEnumerator<T, TNative> GetEnumerator()
+            => new(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void IncreaseCapacityBy(int amount)
@@ -573,11 +573,11 @@ namespace EncosyTower.Collections
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
-            => new Internals.FasterListEnumerator<T>(_buffer.AsManagedArray(), _count.ValueRO);
+            => new SharedListEnumerator<T, TNative>(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEnumerator IEnumerable.GetEnumerator()
-            => new Internals.FasterListEnumerator<T>(_buffer.AsManagedArray(), _count.ValueRO);
+            => new SharedListEnumerator<T, TNative>(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         int IList<T>.IndexOf(T item)

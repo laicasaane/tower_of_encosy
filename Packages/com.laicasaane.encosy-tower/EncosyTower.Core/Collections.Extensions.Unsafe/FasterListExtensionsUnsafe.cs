@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace EncosyTower.Collections.Unsafe
+namespace EncosyTower.Collections.Extensions.Unsafe
 {
     public static class FasterListExtensionsUnsafe
     {

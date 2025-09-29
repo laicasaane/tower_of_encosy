@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace EncosyTower.Collections
+namespace EncosyTower.Collections.Extensions
 {
     public static class ReadOnlyArrayMapExtensions
     {

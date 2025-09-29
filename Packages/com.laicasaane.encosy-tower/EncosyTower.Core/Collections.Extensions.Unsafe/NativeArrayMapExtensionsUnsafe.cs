@@ -4,7 +4,7 @@ using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.Buffers;
 
-namespace EncosyTower.Collections.Unsafe
+namespace EncosyTower.Collections.Extensions.Unsafe
 {
     public static class NativeArrayMapExtensionsUnsafe
     {

@@ -30,20 +30,26 @@ using EncosyTower.Common;
 
 namespace EncosyTower.Collections
 {
-    public readonly struct FasterReadOnlyList<T> : IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
+    public readonly struct ReadOnlyListFast<T> : IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
     {
-        internal readonly FasterList<T> _list;
+        internal readonly ListFast<T> _list;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FasterReadOnlyList([NotNull] FasterList<T> list)
+        public ReadOnlyListFast(ListFast<T> list)
         {
             _list = list;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlyListFast([NotNull] List<T> list)
+        {
+            _list = new(list);
         }
 
         public bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _list != null;
+            get => _list.IsValid;
         }
 
         public int Count
@@ -61,11 +67,11 @@ namespace EncosyTower.Collections
         public bool IsReadOnly => true;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator FasterReadOnlyList<T>(FasterList<T> list)
+        public static implicit operator ReadOnlyListFast<T>(ListFast<T> list)
             => new(list);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FasterListEnumerator<T> GetEnumerator()
+        public ListFastEnumerator<T> GetEnumerator()
             => _list.GetEnumerator();
 
         public T this[int index]
@@ -139,19 +145,19 @@ namespace EncosyTower.Collections
             => _list.Find(match);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FasterList<T> FindAll([NotNull] Predicate<T> match)
+        public ListFast<T> FindAll([NotNull] Predicate<T> match)
             => _list.FindAll(match);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FasterList<T> FindAll([NotNull] PredicateIn<T> match)
+        public ListFast<T> FindAll([NotNull] PredicateIn<T> match)
             => _list.FindAll(match);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void FindAll([NotNull] Predicate<T> match, [NotNull] FasterList<T> result)
+        public void FindAll([NotNull] Predicate<T> match, ListFast<T> result)
             => _list.FindAll(match, result);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void FindAll([NotNull] PredicateIn<T> match, [NotNull] FasterList<T> result)
+        public void FindAll([NotNull] PredicateIn<T> match, ListFast<T> result)
             => _list.FindAll(match, result);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -249,5 +255,9 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] ToArray()
             => _list.ToArray();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator ReadOnlyListFast<T>([NotNull] List<T> list)
+            => new(list);
     }
 }

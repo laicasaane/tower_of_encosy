@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using EncosyTower.Collections;
-using EncosyTower.Collections.Unsafe;
+using EncosyTower.Collections.Extensions;
 using EncosyTower.Debugging;
 using EncosyTower.UnityExtensions;
 using Unity.Collections;
@@ -149,7 +149,7 @@ namespace EncosyTower.Pooling
 
                 Resources.InstanceIDToObjectList(gameObjectIds, objectList);
 
-                var objects = objectList.AsReadOnlySpanUnsafe();
+                var objects = objectList.AsReadOnlySpan();
 
                 for (var i = objects.Length - 1; i >= 0; i--)
                 {
@@ -180,7 +180,7 @@ namespace EncosyTower.Pooling
 
             Resources.InstanceIDToObjectList(gameObjectIds, _objectList);
 
-            var objects = _objectList.AsReadOnlySpanUnsafe();
+            var objects = _objectList.AsReadOnlySpan();
 
             for (var i = objects.Length - 1; i >= 0; i--)
             {
@@ -341,7 +341,7 @@ namespace EncosyTower.Pooling
 
             Resources.InstanceIDToObjectList(transformIds, _objectList);
 
-            var objects = _objectList.AsReadOnlySpanUnsafe();
+            var objects = _objectList.AsReadOnlySpan();
             transforms.AddReplicateNoInit(amount);
             var transformSpan = transforms.AsSpan();
 
@@ -421,7 +421,7 @@ namespace EncosyTower.Pooling
             unusedGameObjectIds.IncreaseCapacityTo(capacity);
             unusedTransformIds.IncreaseCapacityTo(capacity);
 
-            var objects = _objectList.AsReadOnlySpanUnsafe();
+            var objects = _objectList.AsReadOnlySpan();
             var postIds = NativeArray.CreateFast<int>(length, Allocator.Temp);
             var postIdsLength = 0;
 
@@ -479,7 +479,7 @@ namespace EncosyTower.Pooling
             unusedGameObjectIds.IncreaseCapacityTo(capacity);
             unusedTransformIds.IncreaseCapacityTo(capacity);
 
-            var objects = _objectList.AsReadOnlySpanUnsafe();
+            var objects = _objectList.AsReadOnlySpan();
             var postIds = NativeArray.CreateFast<int>(length, Allocator.Temp);
             var postIdsLength = 0;
 

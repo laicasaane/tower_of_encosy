@@ -27,7 +27,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using EncosyTower.Collections;
-using EncosyTower.Collections.Unsafe;
+using EncosyTower.Collections.Extensions;
 
 namespace EncosyTower.Types.Internals
 {
@@ -52,7 +52,7 @@ namespace EncosyTower.Types.Internals
         )
         {
             var map = new AssemblyNameToMemberMapMap<Type>();
-            var items = serializedItems.AsSpanUnsafe();
+            var items = serializedItems.AsSpan();
             var itemsLength = items.Length;
             var typeStore = cache._typeStore;
 
@@ -82,7 +82,7 @@ namespace EncosyTower.Types.Internals
                     memberMap[baseType] = types;
                 }
 
-                Deserialize(typeStore, types, item._derivedTypes.AsSpanUnsafe());
+                Deserialize(typeStore, types, item._derivedTypes.AsSpan());
             }
 
             return map;
@@ -96,7 +96,7 @@ namespace EncosyTower.Types.Internals
             where T2 : MemberInfo
         {
             var map = new AssemblyNameToMemberMapMap<T2>();
-            var items = serializedItems.AsSpanUnsafe();
+            var items = serializedItems.AsSpan();
             var itemsLength = items.Length;
             var typeStore = cache._typeStore;
 
@@ -126,7 +126,7 @@ namespace EncosyTower.Types.Internals
                     memberMap[attributeType] = members;
                 }
 
-                Deserialize(typeStore, members, item._matches.AsSpanUnsafe());
+                Deserialize(typeStore, members, item._matches.AsSpan());
             }
 
             return map;

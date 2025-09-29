@@ -17,6 +17,12 @@ namespace EncosyTower.Collections
             _index = index;
         }
 
+        public int Length
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _buffer.Length;
+        }
+
         public ObjectSpanGetter TryGet<T>(out Option<T> result)
         {
             var buffer = _buffer;

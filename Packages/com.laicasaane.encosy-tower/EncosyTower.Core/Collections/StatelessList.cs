@@ -160,7 +160,7 @@ namespace EncosyTower.Collections
         public bool Exists([NotNull] PredicateIn<T> match)
             => FindIndex(match) != -1;
 
-        public T Find([NotNull] Predicate<T> match)
+        public Option<T> Find([NotNull] Predicate<T> match)
         {
             var items = AsReadOnlySpan();
             var length = items.Length;
@@ -173,10 +173,10 @@ namespace EncosyTower.Collections
                     return item;
             }
 
-            return default;
+            return Option.None;
         }
 
-        public T Find([NotNull] PredicateIn<T> match)
+        public Option<T> Find([NotNull] PredicateIn<T> match)
         {
             var items = AsReadOnlySpan();
             var length = items.Length;
@@ -189,14 +189,31 @@ namespace EncosyTower.Collections
                     return item;
             }
 
-            return default;
+            return Option.None;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public FasterList<T> FindAll([NotNull] Predicate<T> match)
+        {
+            var result = new FasterList<T>();
+            FindAll(match, result);
+
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public FasterList<T> FindAll([NotNull] PredicateIn<T> match)
+        {
+            var result = new FasterList<T>();
+            FindAll(match, result);
+
+            return result;
+        }
+
+        public void FindAll([NotNull] Predicate<T> match, [NotNull] FasterList<T> result)
         {
             var items = AsReadOnlySpan();
             var length = items.Length;
-            var result = new FasterList<T>();
 
             for (var i = 0; i < length; i++)
             {
@@ -207,15 +224,12 @@ namespace EncosyTower.Collections
                     result.Add(item);
                 }
             }
-
-            return result;
         }
 
-        public FasterList<T> FindAll([NotNull] PredicateIn<T> match)
+        public void FindAll([NotNull] PredicateIn<T> match, [NotNull] FasterList<T> result)
         {
             var items = AsReadOnlySpan();
             var length = items.Length;
-            var result = new FasterList<T>();
 
             for (var i = 0; i < length; i++)
             {
@@ -226,8 +240,50 @@ namespace EncosyTower.Collections
                     result.Add(in item);
                 }
             }
+        }
 
-            return result;
+        public void FindAll([NotNull] Predicate<T> match, [NotNull] ICollection<T> result)
+        {
+            if (result is FasterList<T> fasterResult)
+            {
+                FindAll(match, fasterResult);
+                return;
+            }
+
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(item))
+                {
+                    result.Add(item);
+                }
+            }
+        }
+
+        public void FindAll([NotNull] PredicateIn<T> match, [NotNull] ICollection<T> result)
+        {
+            if (result is FasterList<T> fasterResult)
+            {
+                FindAll(match, fasterResult);
+                return;
+            }
+
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(in item))
+                {
+                    result.Add(item);
+                }
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -664,8 +720,8 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpan<T>.Enumerator GetEnumerator()
-            => AsReadOnlySpan().GetEnumerator();
+        public BufferProviderEnumerator<T> GetEnumerator()
+            => new(State);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void IncreaseCapacityBy(int amount)
@@ -1026,10 +1082,10 @@ namespace EncosyTower.Collections
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
-            => new Internals.FasterListEnumerator<T>(_buffer, _count);
+            => new BufferProviderEnumerator<T>(State);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEnumerator IEnumerable.GetEnumerator()
-            => new Internals.FasterListEnumerator<T>(_buffer, _count);
+            => new BufferProviderEnumerator<T>(State);
     }
 }

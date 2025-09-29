@@ -1,4 +1,4 @@
-// https://github.com/sebas77/Svelto.Common/blob/master/DataStructures/Arrays/FasterList.cs
+// https://github.com/sebas77/Svelto.Common/blob/master/DataStructures/Arrays/ListFast.cs
 
 // MIT License
 //
@@ -25,6 +25,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Generic.Unsafe;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
@@ -32,7 +33,7 @@ using EncosyTower.Debugging;
 
 namespace EncosyTower.Collections
 {
-    public class FasterList<T> : IList<T>, IReadOnlyList<T>
+    public readonly struct ListFast<T> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , IAsMemory<T>, IAsReadOnlyMemory<T>
         , IClearable, IHasCapacity
@@ -40,82 +41,17 @@ namespace EncosyTower.Collections
         internal static readonly EqualityComparer<T> s_comp = EqualityComparer<T>.Default;
         internal static readonly bool s_shouldPerformMemClear = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 
-        internal T[] _buffer;
-        internal int _count;
-        internal int _version;
+        internal readonly ListExposed<T> _list;
 
-        public FasterList()
+        public ListFast([NotNull] List<T> list)
         {
-            _buffer = Array.Empty<T>();
-            _count = 0;
-            _version = 0;
+            _list = new(list);
         }
 
-        public FasterList(int capacity)
+        public bool IsValid
         {
-            _buffer = new T[capacity];
-            _count = 0;
-            _version = 0;
-        }
-
-        public FasterList([NotNull] params T[] source)
-        {
-            _buffer = new T[source.Length];
-
-            Array.Copy(source, _buffer, source.Length);
-
-            _count = source.Length;
-            _version = 0;
-        }
-
-        public FasterList(in ArraySegment<T> source)
-        {
-            _buffer = new T[source.Count];
-
-            source.CopyTo(_buffer, 0);
-
-            _count = source.Count;
-            _version = 0;
-        }
-
-        public FasterList(in ReadOnlySpan<T> source)
-        {
-            _buffer = new T[source.Length];
-
-            source.CopyTo(_buffer);
-
-            _count = source.Length;
-            _version = 0;
-        }
-
-        public FasterList([NotNull] ICollection<T> source)
-        {
-            _buffer = new T[source.Count];
-
-            source.CopyTo(_buffer, 0);
-
-            _count = source.Count;
-            _version = 0;
-        }
-
-        public FasterList([NotNull] ICollection<T> source, int extraSize)
-        {
-            _buffer = new T[source.Count + extraSize];
-
-            source.CopyTo(_buffer, 0);
-
-            _count = source.Count;
-            _version = 0;
-        }
-
-        public FasterList(in FasterReadOnlyList<T> source)
-        {
-            _buffer = new T[source.Count];
-
-            source.CopyTo(_buffer, 0);
-
-            _count = source.Count;
-            _version = 0;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _list.List != null;
         }
 
         public int Count
@@ -132,23 +68,49 @@ namespace EncosyTower.Collections
 
         public bool IsReadOnly => false;
 
+        public List<T> List
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _list.List;
+        }
+
         public T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                Checks.IsTrue((uint)index < (uint)_count, "index is outside the range of valid indexes for the FasterList<T>");
+                Checks.IsTrue((uint)index < (uint)_count, "index is outside the range of valid indexes for the ListFast<T>");
                 return _buffer[index];
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
-                Checks.IsTrue((uint)index < (uint)_count, "index is outside the range of valid indexes for the FasterList<T>");
+                Checks.IsTrue((uint)index < (uint)_count, "index is outside the range of valid indexes for the ListFast<T>");
                 _version++;
                 _buffer[index] = value;
             }
         }
+
+#pragma warning disable IDE1006 // Naming Styles
+        internal ref T[] _buffer
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref _list.Item;
+        }
+
+        internal ref int _count
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref _list.Size;
+        }
+
+        internal ref int _version
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref _list.Version;
+        }
+#pragma warning restore IDE1006 // Naming Styles
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Exists([NotNull] Predicate<T> match)
@@ -191,24 +153,24 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FasterList<T> FindAll([NotNull] Predicate<T> match)
+        public ListFast<T> FindAll([NotNull] Predicate<T> match)
         {
-            var result = new FasterList<T>();
+            var result = new ListFast<T>();
             FindAll(match, result);
 
             return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FasterList<T> FindAll([NotNull] PredicateIn<T> match)
+        public ListFast<T> FindAll([NotNull] PredicateIn<T> match)
         {
-            var result = new FasterList<T>();
+            var result = new ListFast<T>();
             FindAll(match, result);
 
             return result;
         }
 
-        public void FindAll([NotNull] Predicate<T> match, [NotNull] FasterList<T> result)
+        public void FindAll([NotNull] Predicate<T> match, [NotNull] ListFast<T> result)
         {
             var items = AsReadOnlySpan();
             var length = items.Length;
@@ -224,7 +186,7 @@ namespace EncosyTower.Collections
             }
         }
 
-        public void FindAll([NotNull] PredicateIn<T> match, [NotNull] FasterList<T> result)
+        public void FindAll([NotNull] PredicateIn<T> match, [NotNull] ListFast<T> result)
         {
             var items = AsReadOnlySpan();
             var length = items.Length;
@@ -242,7 +204,7 @@ namespace EncosyTower.Collections
 
         public void FindAll([NotNull] Predicate<T> match, [NotNull] ICollection<T> result)
         {
-            if (result is FasterList<T> fasterResult)
+            if (result is ListFast<T> fasterResult)
             {
                 FindAll(match, fasterResult);
                 return;
@@ -264,7 +226,7 @@ namespace EncosyTower.Collections
 
         public void FindAll([NotNull] PredicateIn<T> match, [NotNull] ICollection<T> result)
         {
-            if (result is FasterList<T> fasterResult)
+            if (result is ListFast<T> fasterResult)
             {
                 FindAll(match, fasterResult);
                 return;
@@ -294,9 +256,9 @@ namespace EncosyTower.Collections
 
         public int FindIndex(int startIndex, int count, [NotNull] Predicate<T> match)
         {
-            Checks.IsTrue((uint)startIndex < (uint)_count, "startIndex is outside the range of valid indexes for the FasterList<T>");
+            Checks.IsTrue((uint)startIndex < (uint)_count, "startIndex is outside the range of valid indexes for the ListFast<T>");
             Checks.IsTrue(count >= 0, "count is less than 0");
-            Checks.IsTrue(startIndex < _count - count, "startIndex and count do not specify a valid section in the FasterList<T>");
+            Checks.IsTrue(startIndex < _count - count, "startIndex and count do not specify a valid section in the ListFast<T>");
 
             var items = AsReadOnlySpan();
             var endIndex = startIndex + count;
@@ -322,9 +284,9 @@ namespace EncosyTower.Collections
 
         public int FindIndex(int startIndex, int count, [NotNull] PredicateIn<T> match)
         {
-            Checks.IsTrue((uint)startIndex < (uint)_count, "startIndex is outside the range of valid indexes for the FasterList<T>");
+            Checks.IsTrue((uint)startIndex < (uint)_count, "startIndex is outside the range of valid indexes for the ListFast<T>");
             Checks.IsTrue(count >= 0, "count is less than 0");
-            Checks.IsTrue(startIndex < _count - count, "startIndex and count do not specify a valid section in the FasterList<T>");
+            Checks.IsTrue(startIndex < _count - count, "startIndex and count do not specify a valid section in the ListFast<T>");
 
             var items = AsReadOnlySpan();
             var endIndex = startIndex + count;
@@ -352,15 +314,15 @@ namespace EncosyTower.Collections
         {
             if (_count == 0)
             {
-                Checks.IsTrue(startIndex == -1, "startIndex is outside the range of valid indexes for the FasterList<T>");
+                Checks.IsTrue(startIndex == -1, "startIndex is outside the range of valid indexes for the ListFast<T>");
             }
             else
             {
-                Checks.IsTrue((uint)startIndex < (uint)_count, "startIndex is outside the range of valid indexes for the FasterList<T>");
+                Checks.IsTrue((uint)startIndex < (uint)_count, "startIndex is outside the range of valid indexes for the ListFast<T>");
             }
 
             Checks.IsTrue(count >= 0, "count is less than 0");
-            Checks.IsTrue(startIndex - count + 1 >= 0, "startIndex and count do not specify a valid section in the FasterList<T>");
+            Checks.IsTrue(startIndex - count + 1 >= 0, "startIndex and count do not specify a valid section in the ListFast<T>");
 
             var items = AsReadOnlySpan();
             var endIndex = startIndex - count;
@@ -389,15 +351,15 @@ namespace EncosyTower.Collections
         {
             if (_count == 0)
             {
-                Checks.IsTrue(startIndex == -1, "startIndex is outside the range of valid indexes for the FasterList<T>");
+                Checks.IsTrue(startIndex == -1, "startIndex is outside the range of valid indexes for the ListFast<T>");
             }
             else
             {
-                Checks.IsTrue((uint)startIndex < (uint)_count, "startIndex is outside the range of valid indexes for the FasterList<T>");
+                Checks.IsTrue((uint)startIndex < (uint)_count, "startIndex is outside the range of valid indexes for the ListFast<T>");
             }
 
             Checks.IsTrue(count >= 0, "count is less than 0");
-            Checks.IsTrue(startIndex - count + 1 >= 0, "startIndex and count do not specify a valid section in the FasterList<T>");
+            Checks.IsTrue(startIndex - count + 1 >= 0, "startIndex and count do not specify a valid section in the ListFast<T>");
 
             var items = AsReadOnlySpan();
             var endIndex = startIndex - count;
@@ -427,7 +389,7 @@ namespace EncosyTower.Collections
         {
             Checks.IsTrue(index >= 0, "index is less than 0");
             Checks.IsTrue(count >= 0, "count is less than 0");
-            Checks.IsTrue(index + count <= _count, "index and count do not specify a valid section in the FasterList<T>");
+            Checks.IsTrue(index + count <= _count, "index and count do not specify a valid section in the ListFast<T>");
             return Array.IndexOf(_buffer, item, index, count);
         }
 
@@ -444,7 +406,7 @@ namespace EncosyTower.Collections
         {
             Checks.IsTrue(index >= 0, "index is less than 0");
             Checks.IsTrue(count >= 0, "count is less than 0");
-            Checks.IsTrue(index + count <= _count, "index and count do not specify a valid section in the FasterList<T>");
+            Checks.IsTrue(index + count <= _count, "index and count do not specify a valid section in the ListFast<T>");
             return Array.IndexOf(_buffer, item, index, count);
         }
 
@@ -473,7 +435,7 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Insert(int index, T item)
         {
-            Checks.IsTrue((uint)index < (uint)_count, "index is outside the range of valid indexes for the FasterList<T>");
+            Checks.IsTrue((uint)index < (uint)_count, "index is outside the range of valid indexes for the ListFast<T>");
 
             _version++;
 
@@ -489,7 +451,7 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Insert(int index, in T item)
         {
-            Checks.IsTrue((uint)index < (uint)_count, "index is outside the range of valid indexes for the FasterList<T>");
+            Checks.IsTrue((uint)index < (uint)_count, "index is outside the range of valid indexes for the ListFast<T>");
 
             _version++;
 
@@ -505,12 +467,12 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T ElementAt(int index)
         {
-            Checks.IsTrue((uint)index < (uint)_count, "index is outside the range of valid indexes for the FasterList<T>");
+            Checks.IsTrue((uint)index < (uint)_count, "index is outside the range of valid indexes for the ListFast<T>");
             return ref _buffer[index];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddRange(in FasterReadOnlyList<T> items)
+        public void AddRange(in ReadOnlyListFast<T> items)
         {
             _version++;
             AddRange(items._list._buffer, items.Count);
@@ -710,7 +672,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FasterListEnumerator<T> GetEnumerator()
+        public ListFastEnumerator<T> GetEnumerator()
             => new(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1035,37 +997,41 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static FasterList<T> Prefill<TDerived>(int amount)
+        public static ListFast<T> Prefill<TDerived>(int amount)
             where TDerived : T, new()
         {
-            var list = new FasterList<T>(amount);
+            var list = new ListFast<T>(new List<T>(amount));
             list.AddReplicate<TDerived>(amount);
             return list;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static FasterList<T> Prefill(int amount)
+        public static ListFast<T> Prefill(int amount)
         {
-            var list = new FasterList<T>(amount);
+            var list = new ListFast<T>(new List<T>(amount));
             list.AddReplicate(amount);
             return list;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static FasterList<T> Prefill(T value, int amount)
+        public static ListFast<T> Prefill(T value, int amount)
         {
-            var list = new FasterList<T>(amount);
+            var list = new ListFast<T>(new List<T>(amount));
             list.AddReplicate(value, amount);
             return list;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static FasterList<T> PrefillNoInit(int amount)
+        public static ListFast<T> PrefillNoInit(int amount)
         {
-            var list = new FasterList<T>(amount);
+            var list = new ListFast<T>(new List<T>(amount));
             list.AddReplicateNoInit(amount);
             return list;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator ListFast<T>([NotNull] List<T> list)
+            => new(list);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int CalcNewCapacity(int newSize)
@@ -1096,10 +1062,10 @@ namespace EncosyTower.Collections
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
-            => new FasterListEnumerator<T>(this);
+            => new ListFastEnumerator<T>(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEnumerator IEnumerable.GetEnumerator()
-            => new FasterListEnumerator<T>(this);
+            => new ListFastEnumerator<T>(this);
     }
 }

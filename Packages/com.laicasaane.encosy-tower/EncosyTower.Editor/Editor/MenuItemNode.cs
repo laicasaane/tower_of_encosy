@@ -83,7 +83,9 @@ namespace EncosyTower.Editor
         // TODO Optimize
         public MenuItemNode GetOrCreateNode(string name, string tooltip = "")
         {
-            return Nodes.Find(n => n.Name == name) ?? CreateNode(name, tooltip);
+            return Nodes.Find(n => n.Name == name).TryGetValue(out var node)
+                ? node
+                : CreateNode(name, tooltip);
         }
 
         public void Search(string search, FasterList<MenuItemNode> result)
