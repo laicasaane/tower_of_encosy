@@ -265,7 +265,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 Name = kindEnumName,
                 ExtensionsName = $"{kindEnumName}Extensions",
                 ExtensionsWrapperName = $"{kindEnumName}ExtensionsWrapper",
-                ParentIsNamespace = idCandidate.syntax.Parent is NamespaceDeclarationSyntax,
+                ParentIsNamespace = idCandidate.syntax.Parent is BaseNamespaceDeclarationSyntax,
                 FullyQualifiedName = $"{idSymbol.ToFullName()}.IdKind",
                 UnderlyingTypeName = KindRawTypeName,
                 Members = enumMembers,

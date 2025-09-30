@@ -29,7 +29,7 @@ namespace EncosyTower.SourceGen
             SyntaxNode current = syntaxNode;
 
             while (current.Parent != null && (
-                current.Parent is NamespaceDeclarationSyntax
+                current.Parent is BaseNamespaceDeclarationSyntax
                 || current.Parent is ClassDeclarationSyntax
                 || current.Parent is StructDeclarationSyntax
             ))
@@ -45,11 +45,11 @@ namespace EncosyTower.SourceGen
         public static bool IsReadOnly(this IParameterSymbol parameter)
             => parameter.RefKind == RefKind.In;
 
-        public static IEnumerable<NamespaceDeclarationSyntax> GetNamespacesFromMostToLeastNested(this SyntaxNode syntaxNode)
+        public static IEnumerable<BaseNamespaceDeclarationSyntax> GetNamespacesFromMostToLeastNested(this SyntaxNode syntaxNode)
         {
             SyntaxNode current = syntaxNode;
 
-            while (current.Parent != null && current.Parent is NamespaceDeclarationSyntax nds)
+            while (current.Parent != null && current.Parent is BaseNamespaceDeclarationSyntax nds)
             {
                 yield return nds;
                 current = current.Parent;

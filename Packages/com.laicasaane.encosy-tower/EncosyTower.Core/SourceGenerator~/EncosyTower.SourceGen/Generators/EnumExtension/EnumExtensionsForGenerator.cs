@@ -153,7 +153,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
                 var declaration = new EnumExtensionsDeclaration(
                       candidate.symbol
-                    , candidate.syntax.Parent is NamespaceDeclarationSyntax
+                    , candidate.syntax.Parent is BaseNamespaceDeclarationSyntax
                     , candidate.syntax.Identifier.Text
                     , candidate.accessibility
                     , compilationCandidate.references.unityCollections

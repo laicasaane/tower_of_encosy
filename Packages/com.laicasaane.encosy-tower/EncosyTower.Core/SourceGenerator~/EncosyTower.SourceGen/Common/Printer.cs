@@ -757,7 +757,7 @@ namespace EncosyTower.SourceGen
 
             switch (node)
             {
-                case NamespaceDeclarationSyntax namespaceSyntax:
+                case BaseNamespaceDeclarationSyntax namespaceSyntax:
                     printer.PrintBeginLine();
                     foreach (var m in namespaceSyntax.Modifiers)
                         printer.Print(m.ToString()).Print(" ");
@@ -811,7 +811,7 @@ namespace EncosyTower.SourceGen
             {
                 switch (parent)
                 {
-                    case NamespaceDeclarationSyntax _:
+                    case BaseNamespaceDeclarationSyntax _:
                     case InterfaceDeclarationSyntax _:
                     case ClassDeclarationSyntax _:
                     case StructDeclarationSyntax _:
