@@ -59,6 +59,8 @@ namespace EncosyTower.UIElements
 
             _newV4Button.clicked += OnNewV4;
             _newV7Button.clicked += OnNewV7;
+
+            onIsReadOnlyChanged += OnIsReadOnlyChanged;
         }
 
         /// <summary>
@@ -83,25 +85,6 @@ namespace EncosyTower.UIElements
                 }
             }
         }
-
-#pragma warning disable IDE1006 // Naming Styles
-        [UxmlAttribute("readonly")]
-        public new bool isReadOnly
-        {
-            get
-            {
-                return base.isReadOnly;
-            }
-
-            set
-            {
-                _newV4Button.WithDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
-                _newV7Button.WithDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
-
-                base.isReadOnly = value;
-            }
-        }
-#pragma warning restore IDE1006 // Naming Styles
 
         private SerializableGuidInput GuidInput => (SerializableGuidInput)textInputBase;
 
@@ -137,6 +120,12 @@ namespace EncosyTower.UIElements
             }
 
             value = SerializableGuid.CreateVersion7();
+        }
+
+        private void OnIsReadOnlyChanged(bool value)
+        {
+            _newV4Button.WithDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
+            _newV7Button.WithDisplay(value ? DisplayStyle.None : DisplayStyle.Flex);
         }
 
         private class SerializableGuidInput : TextValueInput
