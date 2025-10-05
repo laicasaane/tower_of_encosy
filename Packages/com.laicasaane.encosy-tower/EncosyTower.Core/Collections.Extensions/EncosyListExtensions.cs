@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Generic.Unsafe;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -30,12 +29,12 @@ namespace EncosyTower.Collections.Extensions
             => CollectionsMarshal.AsSpan(list);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Memory<T> AsMemory<T>([NotNull] this List<T> list)
-            => new ListExposed<T>(list).Item.AsMemory(0, list.Count);
+        public static ListFast<T> AsListFast<T>([NotNull] this List<T> list)
+            => list;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlyMemory<T> AsReadOnlyMemory<T>([NotNull] this List<T> list)
-            => new ListExposed<T>(list).Item.AsMemory(0, list.Count);
+        public static ReadOnlyListFast<T> AsReadOnlyListFast<T>([NotNull] this List<T> list)
+            => list;
 
         public static void AddRange<T>(
               [NotNull] this List<T> list

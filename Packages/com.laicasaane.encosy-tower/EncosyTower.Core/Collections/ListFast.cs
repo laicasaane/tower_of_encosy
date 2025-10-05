@@ -35,7 +35,6 @@ namespace EncosyTower.Collections
 {
     public readonly struct ListFast<T> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
-        , IAsMemory<T>, IAsReadOnlyMemory<T>
         , IClearable, IHasCapacity
     {
         internal static readonly EqualityComparer<T> s_comp = EqualityComparer<T>.Default;
@@ -851,17 +850,6 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<T> AsReadOnlySpan()
             => _buffer.AsSpan(0, _count);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Memory<T> AsMemory()
-        {
-            _version++;
-            return _buffer.AsMemory(0, _count);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlyMemory<T> AsReadOnlyMemory()
-            => _buffer.AsMemory(0, _count);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Trim()

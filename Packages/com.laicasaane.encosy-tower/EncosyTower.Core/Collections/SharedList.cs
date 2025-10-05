@@ -54,7 +54,6 @@ namespace EncosyTower.Collections
 
     public class SharedList<T, TNative> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
-        , IAsMemory<T>, IAsReadOnlyMemory<T>
         , IClearable, IDisposable, IHasCapacity
         where T : unmanaged
         where TNative : unmanaged
@@ -456,19 +455,6 @@ namespace EncosyTower.Collections
         public ReadOnlySpan<T> AsReadOnlySpan()
         {
             return _buffer.AsReadOnlySpan()[.._count.ValueRO];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Memory<T> AsMemory()
-        {
-            _version.ValueRW++;
-            return _buffer.AsMemory()[.._count.ValueRO];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlyMemory<T> AsReadOnlyMemory()
-        {
-            return _buffer.AsReadOnlyMemory()[.._count.ValueRO];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

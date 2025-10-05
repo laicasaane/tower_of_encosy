@@ -1,27 +1,27 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using EncosyTower.Annotations;
 using EncosyTower.Collections;
+using EncosyTower.Collections.Extensions;
 using EncosyTower.Variants;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters
 {
     [Serializable]
     [Label("Sequence of Adapters", "Default")]
-    public sealed class SequentialAdapter : IAdapter, ISerializationCallbackReceiver
+    public sealed class SequentialAdapter : IAdapter
     {
-        [SerializeField]
-        [SerializeReference]
-        [HideInInspector]
-        private IAdapter[] _presetAdapters = new IAdapter[0];
+        [SerializeField, SerializeReference, HideInInspector]
+        [FormerlySerializedAs("_presetAdapters")]
+        private List<IAdapter> _adapters = new();
 
-        private readonly FasterList<IAdapter> _adapters = new();
-
-        public ReadOnlyMemory<IAdapter> Adapters
+        public ReadOnlyListFast<IAdapter> Adapters
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _adapters.AsMemory();
+            get => _adapters;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -44,17 +44,6 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
             }
 
             return result;
-        }
-
-        void ISerializationCallbackReceiver.OnBeforeSerialize()
-        {
-            _presetAdapters = _adapters.ToArray();
-        }
-
-        void ISerializationCallbackReceiver.OnAfterDeserialize()
-        {
-            _adapters.Clear();
-            _adapters.AddRange(_presetAdapters.AsSpan());
         }
     }
 }

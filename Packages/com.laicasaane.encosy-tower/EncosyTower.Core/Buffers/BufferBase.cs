@@ -4,8 +4,7 @@ using EncosyTower.Collections;
 
 namespace EncosyTower.Buffers
 {
-    public abstract class BufferBase<T> : IBufferProvider<T>
-        , IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
+    public abstract class BufferBase<T> : IBufferProvider<T>, IAsSpan<T>, IAsReadOnlySpan<T>
     {
         private int _count;
         private int _version;
@@ -37,13 +36,5 @@ namespace EncosyTower.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<T> AsReadOnlySpan()
             => Buffer.AsSpan(0, Count);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Memory<T> AsMemory()
-            => Buffer.AsMemory(0, Count);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlyMemory<T> AsReadOnlyMemory()
-            => Buffer.AsMemory(0, Count);
     }
 }

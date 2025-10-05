@@ -30,7 +30,7 @@ using EncosyTower.Common;
 
 namespace EncosyTower.Collections
 {
-    public readonly struct FasterReadOnlyList<T> : IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
+    public readonly struct FasterReadOnlyList<T> : IAsSpan<T>, IAsReadOnlySpan<T>
     {
         internal readonly FasterList<T> _list;
 
@@ -81,14 +81,6 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<T> AsReadOnlySpan()
             => _list.AsReadOnlySpan();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Memory<T> AsMemory()
-            => _list.AsMemory();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlyMemory<T> AsReadOnlyMemory()
-            => _list.AsReadOnlyMemory();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains(in T item)
