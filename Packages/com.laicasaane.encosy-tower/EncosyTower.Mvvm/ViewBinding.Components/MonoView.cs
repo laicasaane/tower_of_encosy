@@ -1,12 +1,13 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using EncosyTower.Buffers;
 using EncosyTower.Collections;
 using EncosyTower.Logging;
 using EncosyTower.Mvvm.ComponentModel;
 using EncosyTower.Mvvm.ViewBinding.Contexts;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace EncosyTower.Mvvm.ViewBinding.Components
 {
@@ -32,17 +33,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         [HideInInspector]
         internal IBindingContext _context = new UnityObjectBindingContext();
 
-        [SerializeField]
-        [SerializeReference]
-        [HideInInspector]
-        internal MonoBinder[] _presetBinders = new MonoBinder[0];
+        [SerializeField, SerializeReference, HideInInspector]
+        [FormerlySerializedAs("_presetBinders")]
+        internal List<MonoBinder> _binders;
 
-        private BinderList _binders;
-
-        protected BinderList Binders
+        protected ReadOnlyList<MonoBinder> Binders
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _binders ??= new(this);
+            get => _binders ??= new();
         }
 
         public bool IsInitialized { get; private set; }
@@ -142,28 +140,6 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         protected static void ErrorNotInitialized(UnityEngine.Object context)
         {
             StaticDevLogger.LogError(context, $"MonoView must be initialized");
-        }
-
-        protected sealed class BinderList : StatelessList<BinderBuffer, MonoBinder>
-        {
-            public BinderList(MonoView view) : base(new(view)) { }
-        }
-
-        protected sealed class BinderBuffer : BufferBase<MonoBinder>
-        {
-            private readonly MonoView _view;
-
-            public BinderBuffer(MonoView view)
-            {
-                _view = view;
-                Count = Buffer.Length;
-            }
-
-            public override ref MonoBinder[] Buffer
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => ref _view._presetBinders;
-            }
         }
     }
 }

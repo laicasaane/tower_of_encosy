@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using EncosyTower.Buffers;
 using EncosyTower.Collections;
 using EncosyTower.Logging;
 using EncosyTower.Mvvm.ComponentModel;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace EncosyTower.Mvvm.ViewBinding.Components
 {
@@ -19,17 +20,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         [HideInInspector]
         internal string _subtitle;
 
-        [SerializeField]
-        [SerializeReference]
-        [HideInInspector]
-        internal MonoBinding[] _presetBindings;
+        [SerializeField, SerializeReference, HideInInspector]
+        [FormerlySerializedAs("_presetBindings")]
+        internal List<MonoBinding> _bindings = new();
 
-        private BindingList _bindings;
-
-        protected BindingList Bindings
+        protected ReadOnlyList<MonoBinding> Bindings
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _bindings ??= new(this);
+            get => _bindings ??= new();
         }
 
         public abstract void Initialize(
@@ -39,28 +37,6 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         );
 
         public abstract void StartListening(UnityEngine.Object loggingContext);
-
-        protected sealed class BindingList : StatelessList<BindingBuffer, MonoBinding>
-        {
-            public BindingList(MonoBinder binder) : base(new(binder)) { }
-        }
-
-        protected sealed class BindingBuffer : BufferBase<MonoBinding>
-        {
-            private readonly MonoBinder _binder;
-
-            public BindingBuffer(MonoBinder binder)
-            {
-                _binder = binder;
-                Count = Buffer.Length;
-            }
-
-            public override ref MonoBinding[] Buffer
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => ref _binder._presetBindings;
-            }
-        }
     }
 
     /// <summary>
@@ -71,16 +47,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
     public abstract partial class MonoBinder<T> : MonoBinder
         where T : UnityEngine.Object
     {
-        [SerializeField]
-        [HideInInspector]
-        internal T[] _presetTargets;
+        [SerializeField, HideInInspector]
+        [FormerlySerializedAs("_presetTargets")]
+        internal List<T> _targets;
 
-        private TargetList _targets;
-
-        protected TargetList Targets
+        protected ReadOnlyList<T> Targets
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _targets ??= new(this);
+            get => _targets ??= new();
         }
 
         public sealed override void Initialize(
@@ -172,28 +146,6 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
                   context
                 , $"The context of MonoBinding<{typeof(T)}> at index {index} is null"
             );
-        }
-
-        protected sealed class TargetList : StatelessList<TargetBuffer, T>
-        {
-            public TargetList(MonoBinder<T> binder) : base(new(binder)) { }
-        }
-
-        protected sealed class TargetBuffer : BufferBase<T>
-        {
-            private readonly MonoBinder<T> _binder;
-
-            public TargetBuffer(MonoBinder<T> binder)
-            {
-                _binder = binder;
-                Count = Buffer.Length;
-            }
-
-            public override ref T[] Buffer
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => ref _binder._presetTargets;
-            }
         }
     }
 }

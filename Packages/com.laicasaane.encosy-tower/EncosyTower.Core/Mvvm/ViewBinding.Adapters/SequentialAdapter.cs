@@ -16,12 +16,12 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     {
         [SerializeField, SerializeReference, HideInInspector]
         [FormerlySerializedAs("_presetAdapters")]
-        private List<IAdapter> _adapters = new();
+        private List<IAdapter> _adapters;
 
         public ReadOnlyList<IAdapter> Adapters
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _adapters;
+            get => _adapters ??= new();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
