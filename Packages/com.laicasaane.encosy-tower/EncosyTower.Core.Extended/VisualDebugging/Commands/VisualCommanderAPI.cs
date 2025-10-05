@@ -28,7 +28,7 @@ namespace EncosyTower.VisualDebugging.Commands
 
             var view = new VisualCommanderView(directoryListWidth);
             var controller = new VisualCommanderViewController(view);
-            controller.Initialize(s_directoryToCommands, s_directories.AsMemory());
+            controller.Initialize(s_directoryToCommands, s_directories);
 
             root.Add(view);
             return view;
