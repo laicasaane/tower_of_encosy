@@ -471,7 +471,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddRange(in ReadOnlyListFast<T> items)
+        public void AddRange(in ReadOnlyList<T> items)
         {
             _version++;
             AddRange(items._list._buffer, items.Count);

@@ -23,6 +23,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -30,21 +31,25 @@ using EncosyTower.Common;
 
 namespace EncosyTower.Collections
 {
-    public readonly struct ReadOnlyListFast<T> : IAsSpan<T>, IAsReadOnlySpan<T>
+    public readonly struct ReadOnlyList<T> : IAsSpan<T>, IAsReadOnlySpan<T>, IReadOnlyList<T>
     {
+        private static readonly ReadOnlyList<T> s_empty = new(new(0));
+
         internal readonly ListFast<T> _list;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlyListFast(ListFast<T> list)
+        public ReadOnlyList(ListFast<T> list)
         {
             _list = list;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlyListFast([NotNull] List<T> list)
+        public ReadOnlyList([NotNull] List<T> list)
         {
             _list = new(list);
         }
+
+        public static ReadOnlyList<T> Empty => s_empty;
 
         public bool IsValid
         {
@@ -67,7 +72,11 @@ namespace EncosyTower.Collections
         public bool IsReadOnly => true;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator ReadOnlyListFast<T>(ListFast<T> list)
+        public static implicit operator ReadOnlyList<T>(ListFast<T> list)
+            => new(list);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator ReadOnlyList<T>([NotNull] List<T> list)
             => new(list);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -249,7 +258,11 @@ namespace EncosyTower.Collections
             => _list.ToArray();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator ReadOnlyListFast<T>([NotNull] List<T> list)
-            => new(list);
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+            => GetEnumerator();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        IEnumerator IEnumerable.GetEnumerator()
+            => GetEnumerator();
     }
 }

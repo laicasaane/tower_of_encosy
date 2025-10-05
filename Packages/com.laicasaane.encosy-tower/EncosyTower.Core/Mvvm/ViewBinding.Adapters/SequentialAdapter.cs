@@ -18,7 +18,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
         [FormerlySerializedAs("_presetAdapters")]
         private List<IAdapter> _adapters = new();
 
-        public ReadOnlyListFast<IAdapter> Adapters
+        public ReadOnlyList<IAdapter> Adapters
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _adapters;
