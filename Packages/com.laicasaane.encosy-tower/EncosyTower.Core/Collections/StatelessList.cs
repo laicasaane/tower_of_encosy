@@ -49,42 +49,6 @@ namespace EncosyTower.Collections
             get => State != null;
         }
 
-        [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Ensures compatibility with StatelessList<TState, T>")]
-        internal ref T[] _buffer
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                Checks.IsTrue(State != null, "StatelessList<T> is not initialized");
-                // ReSharper disable once PossibleNullReferenceException
-                return ref State.Buffer;
-            }
-        }
-
-        [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Ensures compatibility with StatelessList<TState, T>")]
-        internal ref int _count
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                Checks.IsTrue(State != null, "StatelessList<T> is not initialized");
-                // ReSharper disable once PossibleNullReferenceException
-                return ref State.Count;
-            }
-        }
-
-        [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Ensures compatibility with StatelessList<TState, T>")]
-        internal ref int _version
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                Checks.IsTrue(State != null, "StatelessList<T> is not initialized");
-                // ReSharper disable once PossibleNullReferenceException
-                return ref State.Version;
-            }
-        }
-
         public int Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,6 +62,41 @@ namespace EncosyTower.Collections
         }
 
         public bool IsReadOnly => false;
+
+#pragma warning disable IDE1006 // Naming Styles
+        internal ref T[] _buffer
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                Checks.IsTrue(State != null, "StatelessList<T> is not initialized");
+                // ReSharper disable once PossibleNullReferenceException
+                return ref State.Buffer;
+            }
+        }
+
+        internal ref int _count
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                Checks.IsTrue(State != null, "StatelessList<T> is not initialized");
+                // ReSharper disable once PossibleNullReferenceException
+                return ref State.Count;
+            }
+        }
+
+        internal ref int _version
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                Checks.IsTrue(State != null, "StatelessList<T> is not initialized");
+                // ReSharper disable once PossibleNullReferenceException
+                return ref State.Version;
+            }
+        }
+#pragma warning restore IDE1006 // Naming Styles
 
         public T this[int index]
         {
