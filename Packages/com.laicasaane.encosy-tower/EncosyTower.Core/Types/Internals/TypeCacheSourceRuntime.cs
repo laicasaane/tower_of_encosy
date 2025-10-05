@@ -33,6 +33,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using EncosyTower.Collections.Extensions.Unsafe;
 using UnityEngine;
 
 namespace EncosyTower.Types.Internals
@@ -82,7 +83,8 @@ namespace EncosyTower.Types.Internals
                 && memberMap.TryGetValue(type, out var members)
             )
             {
-                return members.AsReadOnlyMemory();
+                members.GetBufferUnsafe(out var buffer, out var count);
+                return buffer.AsMemory(0, count);
             }
 
             return Array.Empty<Type>();
@@ -118,7 +120,8 @@ namespace EncosyTower.Types.Internals
                 && memberMap.TryGetValue(attrType, out var members)
             )
             {
-                return members.AsReadOnlyMemory();
+                members.GetBufferUnsafe(out var buffer, out var count);
+                return buffer.AsMemory(0, count);
             }
 
             return Array.Empty<Type>();
@@ -154,7 +157,8 @@ namespace EncosyTower.Types.Internals
                 && memberMap.TryGetValue(attrType, out var members)
             )
             {
-                return members.AsReadOnlyMemory();
+                members.GetBufferUnsafe(out var buffer, out var count);
+                return buffer.AsMemory(0, count);
             }
 
             return Array.Empty<FieldInfo>();
@@ -190,7 +194,8 @@ namespace EncosyTower.Types.Internals
                 && memberMap.TryGetValue(attrType, out var members)
             )
             {
-                return members.AsReadOnlyMemory();
+                members.GetBufferUnsafe(out var buffer, out var count);
+                return buffer.AsMemory(0, count);
             }
 
             return Array.Empty<MethodInfo>();
