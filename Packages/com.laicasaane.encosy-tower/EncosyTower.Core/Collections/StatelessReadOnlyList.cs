@@ -23,6 +23,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -31,7 +32,7 @@ using EncosyTower.Common;
 
 namespace EncosyTower.Collections
 {
-    public readonly struct StatelessReadOnlyList<TState, T> : IAsSpan<T>, IAsReadOnlySpan<T>
+    public readonly struct StatelessReadOnlyList<TState, T> : IAsSpan<T>, IAsReadOnlySpan<T>, IReadOnlyList<T>
         where TState : IBufferProvider<T>
     {
         internal readonly StatelessList<TState, T> _list;
@@ -45,7 +46,7 @@ namespace EncosyTower.Collections
         public bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _list != null;
+            get => _list.IsValid;
         }
 
         public int Count
@@ -240,5 +241,13 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] ToArray()
             => _list.ToArray();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+            => GetEnumerator();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        IEnumerator IEnumerable.GetEnumerator()
+            => GetEnumerator();
     }
 }
