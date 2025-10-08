@@ -11,10 +11,10 @@ using EncosyTower.Tasks;
 
 namespace EncosyTower.AddressableKeys
 {
-    partial record struct AddressableKey<T> : ILoadAsync<T>, ITryLoadAsync<T>
+    partial struct AddressableKey<T> : ILoadAsync<T>, ITryLoadAsync<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async
+        public readonly async
 #if UNITASK
             Cysharp.Threading.Tasks.UniTask<T>
 #else
@@ -26,7 +26,7 @@ namespace EncosyTower.AddressableKeys
             return result.GetValueOrDefault();
         }
 
-        public async
+        public readonly async
 #if UNITASK
             Cysharp.Threading.Tasks.UniTask<Option<T>>
 #else

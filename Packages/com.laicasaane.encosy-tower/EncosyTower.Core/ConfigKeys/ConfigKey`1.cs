@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.Conversion;
@@ -14,12 +15,14 @@ namespace EncosyTower.ConfigKeys
     /// Unlike <see cref="ConfigKey"/>, this struct provides additional type safety
     /// by enforcing the type of the configuration value.
     /// </remarks>
-    public readonly partial struct ConfigKey<T> : IEquatable<ConfigKey<T>>, IEquatable<ConfigKey>
+    [Serializable]
+    [TypeConverter(typeof(ConfigKey.TypeConverter))]
+    public partial struct ConfigKey<T> : IEquatable<ConfigKey<T>>, IEquatable<ConfigKey>, ITryParse<ConfigKey<T>>
     {
         /// <summary>
         /// The value of the key.
         /// </summary>
-        private readonly ConfigKey _value;
+        [SerializeField] private string _value;
 
         /// <summary>
         /// Constructs a new of <see cref="ConfigKey{T}"/>.
@@ -38,7 +41,7 @@ namespace EncosyTower.ConfigKeys
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ConfigKey(ConfigKey value)
         {
-            _value = value;
+            _value = value.Value;
         }
 
         /// <summary>
@@ -47,19 +50,19 @@ namespace EncosyTower.ConfigKeys
         /// <remarks>
         /// A key is considered valid if it is not null or empty.
         /// </remarks>
-        public bool IsValid
+        public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _value.IsValid;
+            get => _value.IsNotEmpty();
         }
 
         /// <summary>
         /// Gets the value of the key.
         /// </summary>
-        public string Value
+        public readonly string Value
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _value.Value;
+            get => _value;
         }
 
         /// <summary>
@@ -75,7 +78,7 @@ namespace EncosyTower.ConfigKeys
         /// Two keys are considered equal if their values are equal.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(ConfigKey<T> other)
+        public readonly bool Equals(ConfigKey<T> other)
             => _value.Equals(other._value);
 
         /// <summary>
@@ -91,7 +94,7 @@ namespace EncosyTower.ConfigKeys
         /// Two keys are considered equal if their values are equal.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(ConfigKey other)
+        public readonly bool Equals(ConfigKey other)
             => _value.Equals(other);
 
         /// <summary>
@@ -109,7 +112,7 @@ namespace EncosyTower.ConfigKeys
         /// and their values are equal.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
             => obj is ConfigKey<T> otherT
                 ? _value.Equals(otherT._value)
                 : obj is ConfigKey other && _value.Equals(other);
@@ -121,7 +124,7 @@ namespace EncosyTower.ConfigKeys
         /// The hash code is calculated based on the value of the key.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
             => _value.GetHashCode();
 
         /// <summary>
@@ -131,8 +134,26 @@ namespace EncosyTower.ConfigKeys
         /// The string representation is the value of the key.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString()
+        public override readonly string ToString()
             => _value.ToString();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool TryParse(
+              string str
+            , out ConfigKey<T> result
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
+        {
+            if (str.IsNotEmpty())
+            {
+                result = str;
+                return true;
+            }
+
+            result = string.Empty;
+            return false;
+        }
 
         /// <summary>
         /// Converts the current <see cref="ConfigKey{T}"/> to an instance of <see cref="ConfigKey"/>.
@@ -164,7 +185,7 @@ namespace EncosyTower.ConfigKeys
         /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ConfigKey<T>(ConfigKey value)
-            => new(value);
+            => new(value.Value);
 
         /// <summary>
         /// Determines whether two specified instances of <see cref="ConfigKey{T}"/> are equal.
@@ -189,193 +210,5 @@ namespace EncosyTower.ConfigKeys
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(ConfigKey<T> left, ConfigKey<T> right)
             => !left.Equals(right);
-    }
-
-    partial struct ConfigKey
-    {
-        /// <summary>
-        /// Represents a serializable version of <see cref="ConfigKey{T}"/>.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        [Serializable]
-        public partial struct Serializable<T> : ITryConvert<ConfigKey<T>>
-            , IEquatable<Serializable<T>>
-        {
-            /// <summary>
-            /// The value of the key.
-            /// </summary>
-            [SerializeField]
-            private string _value;
-
-            /// <summary>
-            /// Constructs a new of <see cref="Serializable{T}"/>.
-            /// </summary>
-            /// <param name="value"></param>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Serializable(string value)
-            {
-                _value = value;
-            }
-
-            /// <summary>
-            /// Gets a boolean value indicating whether the key is valid.
-            /// </summary>
-            public readonly bool IsValid
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _value.IsNotEmpty();
-            }
-
-            /// <summary>
-            /// Gets the value of the key.
-            /// </summary>
-            public readonly string Value
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _value;
-            }
-
-            /// <summary>
-            /// Attempts to convert the serializable key to an <see cref="ConfigKey{T}"/>.
-            /// </summary>
-            /// <param name="result">
-            /// When this method returns, contains the <see cref="ConfigKey{T}"/> equivalent of the serializable key.
-            /// </param>
-            /// <returns>
-            /// <c>true</c> if the conversion was successful; otherwise, <c>false</c>.
-            /// </returns>
-            /// <remarks>
-            /// The conversion is always successful.
-            /// </remarks>
-            public readonly bool TryConvert(out ConfigKey<T> result)
-            {
-                result = new(_value);
-                return true;
-            }
-
-            /// <summary>
-            /// Determines whether the specified <see cref="Serializable{T}"/> is equal to the current <see cref="Serializable{T}"/>.
-            /// </summary>
-            /// <param name="other">
-            /// The <see cref="Serializable{T}"/> to compare with the current <see cref="Serializable{T}"/>.
-            /// </param>
-            /// <returns>
-            /// <c>true</c> if the specified <see cref="Serializable{T}"/> is equal to the current <see cref="Serializable{T}"/>;
-            /// </returns>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly bool Equals(Serializable<T> other)
-                => string.Equals(_value, other._value, StringComparison.Ordinal);
-
-            /// <summary>
-            /// Determines whether the specified <see cref="object"/> is equal to the current <see cref="Serializable{T}"/>.
-            /// </summary>
-            /// <param name="obj">
-            /// The <see cref="object"/> to compare with the current <see cref="Serializable{T}"/>.
-            /// </param>
-            /// <returns>
-            /// <c>true</c> if the specified <see cref="object"/> is equal to the current <see cref="Serializable{T}"/>;
-            /// </returns>
-            /// <remarks>
-            /// <paramref name="obj"/> is considered equal to the current <see cref="Serializable{T}"/>
-            /// if it is a <see cref="Serializable{T}"/> and their values are equal.
-            /// </remarks>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly override bool Equals(object obj)
-                => obj is Serializable<T> other && Equals(other);
-
-            /// <summary>
-            /// Returns the hash code for this <see cref="Serializable{T}"/>.
-            /// </summary>
-            /// <returns>
-            /// The hash code for this <see cref="Serializable{T}"/>.
-            /// </returns>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly override int GetHashCode()
-                => _value.GetHashCode(StringComparison.Ordinal);
-
-            /// <summary>
-            /// Returns a string representation of this <see cref="Serializable{T}"/>.
-            /// </summary>
-            /// <returns>
-            /// The value of the key.
-            /// </returns>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly override string ToString()
-                => _value ?? string.Empty;
-
-            /// <summary>
-            /// Implicitly converts the specified <see cref="Serializable{T}"/> to a <see cref="string"/>.
-            /// </summary>
-            /// <param name="value">
-            /// The <see cref="Serializable{T}"/> to convert.
-            /// </param>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static explicit operator string(Serializable<T> value)
-                => value._value;
-
-            /// <summary>
-            /// Implicitly converts the specified <see cref="string"/> to a <see cref="Serializable{T}"/>.
-            /// </summary>
-            /// <param name="value">
-            /// The <see cref="string"/> to convert.
-            /// </param>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Serializable<T>(string value)
-                => new(value);
-
-            /// <summary>
-            /// Converts the specified <see cref="Serializable"/> to a <see cref="Serializable{T}"/>.
-            /// </summary>
-            /// <param name="value">
-            /// The <see cref="Serializable"/> to convert.
-            /// </param>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Serializable<T>(Serializable value)
-                => new(value.Value);
-
-            /// <summary>
-            /// Converts the specified <see cref="Serializable{T}"/> to an <see cref="ConfigKey{T}"/>.
-            /// </summary>
-            /// <param name="value">
-            /// The <see cref="Serializable{T}"/> to convert.
-            /// </param>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator ConfigKey<T>(Serializable<T> value)
-                => new(value._value);
-
-            /// <summary>
-            /// Converts the specified <see cref="ConfigKey{T}"/> to a <see cref="Serializable{T}"/>.
-            /// </summary>
-            /// <param name="value">
-            /// The <see cref="ConfigKey{T}"/> to convert.
-            /// </param>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Serializable<T>(ConfigKey<T> value)
-                => new((string)value);
-
-            /// <summary>
-            /// Determines whether two specified <see cref="Serializable{T}"/> objects have the same value.
-            /// </summary>
-            /// <param name="left">The first <see cref="ConfigKey{T}"/> to compare.</param>
-            /// <param name="right">The second <see cref="ConfigKey{T}"/> to compare.</param>
-            /// <returns>
-            /// <c>true</c> if the value of <paramref name="left"/> is the same as the value of <paramref name="right"/>;
-            /// </returns>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(Serializable<T> left, Serializable<T> right)
-                => left._value == right._value;
-
-            /// <summary>
-            /// Determines whether two specified <see cref="Serializable{T}"/> objects have different values.
-            /// </summary>
-            /// <param name="left">The first <see cref="ConfigKey{T}"/> to compare.</param>
-            /// <param name="right">The second <see cref="ConfigKey{T}"/> to compare.</param>
-            /// <returns>
-            /// <c>true</c> if the value of <paramref name="left"/> is different from the value of <paramref name="right"/>;
-            /// </returns>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(Serializable<T> left, Serializable<T> right)
-                => left._value != right._value;
-        }
     }
 }

@@ -491,7 +491,7 @@ namespace EncosyTower.PageFlows.MonoPages
             public string identifier;
             public MonoPageFlowKind kind;
             public bool overrideSortingLayer;
-            public SortingLayerId sortingLayer;
+            public SerializableSortingLayer sortingLayer;
             public int sortingOrderInLayer;
         }
     }

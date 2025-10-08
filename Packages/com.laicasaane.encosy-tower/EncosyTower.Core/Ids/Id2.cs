@@ -9,25 +9,25 @@ namespace EncosyTower.Ids
     using EncosyTower.Serialization;
     using UnityEngine;
 
+    [Serializable]
     [StructLayout(LayoutKind.Explicit)]
     [TypeConverter(typeof(TypeConverter))]
-    public readonly partial record struct Id2
+    public partial struct Id2
         : IEquatable<Id2>
         , IComparable<Id2>
         , ITryParse<Id2>
         , ITryParseSpan<Id2>
         , ISpanFormattable
     {
-        [FieldOffset(0)]
-        private readonly ulong _value;
+        [FieldOffset(0), SerializeField, HideInInspector]
+        private ulong _value;
 
-        [FieldOffset(0)]
+        [FieldOffset(0), NonSerialized]
         private readonly Id _y;
 
-        [FieldOffset(4)]
+        [FieldOffset(4), NonSerialized]
         private readonly Id _x;
 
-        // ReSharper disable once UnusedMember.Local
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Id2(ulong value) : this()
         {
@@ -41,44 +41,42 @@ namespace EncosyTower.Ids
             _x = x;
         }
 
-        public Id X
+        public readonly Id X
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _x;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            init => _x = value;
         }
 
-        public Id Y
+        public readonly Id Y
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _y;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            init => _y = value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deconstruct(out Id x, out Id y)
+        public readonly void Deconstruct(out Id x, out Id y)
         {
             x = _x;
             y = _y;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(Id2 other)
+        public readonly bool Equals(Id2 other)
             => _value == other._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode()
+        public readonly override bool Equals(object obj)
+            => obj is Id2 other && Equals(other);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override readonly int GetHashCode()
             => _value.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int CompareTo(Id2 other)
+        public readonly int CompareTo(Id2 other)
             => _value.CompareTo(other._value);
 
-        public bool TryFormat(
+        public readonly bool TryFormat(
               Span<char> destination
             , out int charsWritten
             , ReadOnlySpan<char> format = default
@@ -138,11 +136,11 @@ namespace EncosyTower.Ids
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ToString(string format, IFormatProvider formatProvider = null)
+        public readonly string ToString(string format, IFormatProvider formatProvider = null)
             => $"{_x.ToString(format, formatProvider)}-{_y.ToString(format, formatProvider)}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryParse(
+        public readonly bool TryParse(
               string str
             , out Id2 result
             , bool ignoreCase
@@ -152,7 +150,7 @@ namespace EncosyTower.Ids
             return TryParse(str.AsSpan(), out result, ignoreCase, allowMatchingMetadataAttribute);
         }
 
-        public bool TryParse(
+        public readonly bool TryParse(
               ReadOnlySpan<char> str
             , out Id2 result
             , bool ignoreCase
@@ -242,101 +240,6 @@ namespace EncosyTower.Ids
 
             public override bool AllowMatchingMetadataAttribute => false;
         }
-
-        [Serializable]
-        public partial struct Serializable : ITryConvert<Id2>
-            , IEquatable<Serializable>
-            , IComparable<Serializable>
-            , ISpanFormattable
-        {
-            [SerializeField]
-            private Id.Serializable _x;
-
-            [SerializeField]
-            private Id.Serializable _y;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Serializable(Id.Serializable x, Id.Serializable y)
-            {
-                _x = x;
-                _y = y;
-            }
-
-            public readonly bool TryConvert(out Id2 result)
-            {
-                if (_x.TryConvert(out var x) && _y.TryConvert(out var y))
-                {
-                    result = new(x, y);
-                    return true;
-                }
-
-                result = default;
-                return false;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly bool Equals(Serializable other)
-                => _x == other._x && _y == other._y;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly override bool Equals(object obj)
-                => obj is Serializable other && _x == other._x && _y == other._y;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly override int GetHashCode()
-                => ((Id2)this).GetHashCode();
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly string ToString(string format, IFormatProvider formatProvider = null)
-                => $"{_x.ToString(format, formatProvider)}-{_y.ToString(format, formatProvider)}";
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly bool TryFormat(
-                  Span<char> destination
-                , out int charsWritten
-                , ReadOnlySpan<char> format = default
-                , IFormatProvider provider = null
-            )
-            {
-                return ((Id2)this).TryFormat(destination, out charsWritten, format, provider);
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly int CompareTo(Serializable other)
-                => ((Id2)this).CompareTo(other);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Id2(Serializable value)
-                => new(value._x, value._y);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Serializable(Id2 value)
-                => new(value._x, value._y);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(Serializable left, Serializable right)
-                => left._x == right._x && left._y == right._y;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(Serializable left, Serializable right)
-                => left._x != right._x || left._y != right._y;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator >(in Serializable left, in Serializable right)
-                => (Id2)left > (Id2)right;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator >=(in Serializable left, in Serializable right)
-                => (Id2)left >= (Id2)right;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator <(in Serializable left, in Serializable right)
-                => (Id2)left < (Id2)right;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator <=(in Serializable left, in Serializable right)
-                => (Id2)left <= (Id2)right;
-        }
     }
 }
 
@@ -348,7 +251,7 @@ namespace EncosyTower.Ids
     using EncosyTower.Conversion;
     using Unity.Collections;
 
-    partial record struct Id2 : IToFixedString<FixedString32Bytes>
+    partial struct Id2 : IToFixedString<FixedString32Bytes>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override string ToString()
@@ -361,23 +264,6 @@ namespace EncosyTower.Ids
             fs.Append('-');
             fs.Append(_y);
             return fs;
-        }
-
-        public partial struct Serializable : IToFixedString<FixedString32Bytes>
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly override string ToString()
-                => ToFixedString().ToString();
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly FixedString32Bytes ToFixedString()
-            {
-                var fs = new FixedString32Bytes();
-                fs.Append(_x);
-                fs.Append('-');
-                fs.Append(_y);
-                return fs;
-            }
         }
     }
 }
@@ -394,13 +280,6 @@ namespace EncosyTower.Ids
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
             => $"{X}-{Y}";
-
-        partial struct Serializable
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly override string ToString()
-                => $"({_x}, {_y})";
-        }
     }
 }
 

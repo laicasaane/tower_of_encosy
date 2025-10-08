@@ -5,7 +5,6 @@ namespace EncosyTower.Localization
     using System.Runtime.CompilerServices;
     using UnityEngine.Localization.Settings;
 
-    // ReSharper disable once InconsistentNaming
     public static partial class L10nKeyExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -58,46 +57,6 @@ namespace EncosyTower.Localization
         public static TObject LocalizeAsset<TObject>(this L10nKey<TObject> key)
             where TObject : UnityEngine.Object
             => LocalizationSettings.AssetDatabase.GetLocalizedAsset<TObject>(key.Table, key.Entry);
-
-        #region SERIALIZABLE
-        #endregion =========
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static L10nKey.Serializable Format<T0>(this L10nKey.Serializable key, T0 arg0)
-            => new(key.Table.TableCollectionName, string.Format(key.Entry.Key, arg0));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static L10nKey.Serializable Format<T0, T1>(this L10nKey.Serializable key, T0 arg0, T1 arg1)
-            => new(key.Table.TableCollectionName, string.Format(key.Entry.Key, arg0, arg1));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static L10nKey.Serializable Format<T0, T1, T2>(this L10nKey.Serializable key, T0 arg0, T1 arg1, T2 arg2)
-            => new(key.Table.TableCollectionName, string.Format(key.Entry.Key, arg0, arg1, arg2));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static L10nKey.Serializable<T> Format<T, T0>(this L10nKey.Serializable<T> key, T0 arg0)
-            => new(key.Table.TableCollectionName, string.Format(key.Entry.Key, arg0));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static L10nKey.Serializable<T> Format<T, T0, T1>(this L10nKey.Serializable<T> key, T0 arg0, T1 arg1)
-            => new(key.Table.TableCollectionName, string.Format(key.Entry.Key, arg0, arg1));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static L10nKey.Serializable<T> Format<T, T0, T1, T2>(this L10nKey.Serializable<T> key, T0 arg0, T1 arg1, T2 arg2)
-            => new(key.Table.TableCollectionName, string.Format(key.Entry.Key, arg0, arg1, arg2));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string Localize(this L10nKey.Serializable<string> key)
-            => Localize((L10nKey<string>)key);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string Localize(this L10nKey.Serializable<string> key, params object[] arguments)
-            => Localize((L10nKey<string>)key, arguments);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TObject LocalizeAsset<TObject>(this L10nKey.Serializable<TObject> key)
-            where TObject : UnityEngine.Object
-            => LocalizeAsset((L10nKey<TObject>)key);
     }
 }
 

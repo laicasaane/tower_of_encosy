@@ -18,13 +18,11 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AtlasedSprites
     public sealed class ResourceAtlasedSpriteKeyAdapter : IAdapter
     {
         private readonly CachedVariantConverter<AtlasedSpriteKey> _keyConverter;
-        private readonly CachedVariantConverter<AtlasedSpriteKey.Serializable> _keySerializableConverter;
         private readonly CachedVariantConverter<Sprite> _assetConverter;
 
         public ResourceAtlasedSpriteKeyAdapter()
         {
             _keyConverter = CachedVariantConverter<AtlasedSpriteKey>.Default;
-            _keySerializableConverter = CachedVariantConverter<AtlasedSpriteKey.Serializable>.Default;
             _assetConverter = CachedVariantConverter<Sprite>.Default;
         }
 
@@ -61,13 +59,6 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AtlasedSprites
             {
                 atlas = (string)key.Atlas;
                 sprite = (string)key.Sprite;
-                return true;
-            }
-
-            if (_keySerializableConverter.TryGetValue(variant, out var keySerializable) && key.IsValid)
-            {
-                atlas = (string)keySerializable.Atlas;
-                sprite = (string)keySerializable.Sprite;
                 return true;
             }
 

@@ -17,22 +17,25 @@ namespace EncosyTower.AtlasedSprites
     using UnityTaskOpt = UnityEngine.Awaitable<Option<UnityEngine.Sprite>>;
 #endif
 
-    public readonly partial struct AtlasedSpriteKeyAddressables : ILoadAsync<Sprite>, ITryLoadAsync<Sprite>
+    partial struct AtlasedSpriteKeyAddressables : ILoadAsync<Sprite>, ITryLoadAsync<Sprite>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async UnityTask LoadAsync(CancellationToken token = default)
+        public readonly async UnityTask LoadAsync(CancellationToken token = default)
         {
             var result = await TryLoadAsync(token);
             return result.GetValueOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async UnityTaskOpt TryLoadAsync(CancellationToken token = default)
+        public readonly async UnityTaskOpt TryLoadAsync(CancellationToken token = default)
         {
-            if (string.IsNullOrEmpty(Sprite)) return Option.None;
+            if (_atlas.IsValid == false || _sprite.IsValid == false)
+            {
+                return Option.None;
+            }
 
             var result = await Atlas.TryLoadAsync(token);
-            return result.HasValue ? result.GetValueOrThrow().TryGetSprite(Sprite) : Option.None;
+            return result.HasValue ? result.GetValueOrThrow().TryGetSprite(_sprite) : Option.None;
         }
     }
 }

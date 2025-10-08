@@ -1,4 +1,6 @@
+using System;
 using System.Runtime.CompilerServices;
+using EncosyTower.AssetKeys;
 using EncosyTower.Common;
 using EncosyTower.Loaders;
 using EncosyTower.ResourceKeys;
@@ -7,16 +9,30 @@ using UnityEngine.U2D;
 
 namespace EncosyTower.AtlasedSprites
 {
-    public readonly partial struct AtlasedSpriteKeyResources : ILoad<Sprite>, ITryLoad<Sprite>
+    [Serializable]
+    public partial struct AtlasedSpriteKeyResources : ILoad<Sprite>, ITryLoad<Sprite>
+        , IEquatable<AtlasedSpriteKeyResources>
     {
-        public readonly ResourceKey<SpriteAtlas> Atlas;
-        public readonly string Sprite;
+        [SerializeField] private AssetKey<SpriteAtlas> _atlas;
+        [SerializeField] private AssetKey<Sprite> _sprite;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public AtlasedSpriteKeyResources(AtlasedSpriteKey value)
         {
-            Atlas = value.Atlas;
-            Sprite = (string)value.Sprite;
+            _atlas = value.Atlas;
+            _sprite = value.Sprite;
+        }
+
+        public readonly ResourceKey<SpriteAtlas> Atlas
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _atlas;
+        }
+
+        public readonly AssetKey<Sprite> Sprite
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _sprite;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -25,23 +41,42 @@ namespace EncosyTower.AtlasedSprites
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator AtlasedSpriteKey(AtlasedSpriteKeyResources value)
-            => new(value.Atlas.Value, value.Sprite);
+            => new(value._atlas.Value, value._sprite);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator AtlasedSpriteKeyResources(AtlasedSpriteKey.Serializable value)
-            => new(value);
+        public readonly bool Equals(AtlasedSpriteKeyResources other)
+            => Atlas.Equals(other._atlas) && Sprite.Equals(other._sprite);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator AtlasedSpriteKey.Serializable(AtlasedSpriteKeyResources value)
-            => new((string)value.Atlas.Value, value.Sprite);
+        public readonly override bool Equals(object obj)
+            => obj is AtlasedSpriteKeyResources other && Equals(other);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Sprite Load()
+        public readonly override int GetHashCode()
+            => HashCode.Combine(_atlas, _sprite);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override string ToString()
+            => $"{_atlas}[{_sprite}]";
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(AtlasedSpriteKeyResources left, AtlasedSpriteKeyResources right)
+            => left.Equals(right);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(AtlasedSpriteKeyResources left, AtlasedSpriteKeyResources right)
+            => !left.Equals(right);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly Sprite Load()
             => TryLoad().GetValueOrDefault();
 
-        public Option<Sprite> TryLoad()
+        public readonly Option<Sprite> TryLoad()
         {
-            if (string.IsNullOrEmpty(Sprite)) return Option.None;
+            if (_atlas.IsValid == false || _sprite.IsValid == false)
+            {
+                return Option.None;
+            }
 
             var atlasOpt = Atlas.TryLoad();
             return atlasOpt.HasValue ? atlasOpt.GetValueOrThrow().TryGetSprite(Sprite) : Option.None;
@@ -52,10 +87,6 @@ namespace EncosyTower.AtlasedSprites
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static AtlasedSpriteKeyResources ViaResources(this AtlasedSpriteKey value)
-            => value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static AtlasedSpriteKeyResources ViaResources(this AtlasedSpriteKey.Serializable value)
             => value;
     }
 }

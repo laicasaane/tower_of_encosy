@@ -1,14 +1,47 @@
 #if UNITY_ADDRESSABLES
 
+using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.AssetKeys;
-using EncosyTower.TypeWraps;
+using UnityEngine;
 
 namespace EncosyTower.AddressableKeys
 {
-    [WrapRecord]
-    public readonly partial record struct AddressableKey(AssetKey Value)
+    [Serializable]
+    public partial struct AddressableKey : IEquatable<AddressableKey>
     {
+        [SerializeField] internal AssetKey _value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public AddressableKey(AssetKey value)
+        {
+            _value = value;
+        }
+
+        public readonly bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _value.IsValid;
+        }
+
+        public readonly AssetKey Value
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Equals(AddressableKey other)
+            => _value.Equals(other._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override bool Equals(object obj)
+            => obj is AddressableKey other && Equals(other);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override int GetHashCode()
+            => _value.GetHashCode();
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator AddressableKey(string value)
             => new(value);
@@ -18,17 +51,55 @@ namespace EncosyTower.AddressableKeys
             => value.Value.Value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator AddressableKey(AssetKey.Serializable value)
-            => new(value);
+        public static bool operator ==(AddressableKey left, AddressableKey right)
+            => left.Equals(right);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator AssetKey.Serializable(AddressableKey value)
-            => value.Value;
+        public static bool operator !=(AddressableKey left, AddressableKey right)
+            => !left.Equals(right);
     }
 
-    [WrapRecord]
-    public readonly partial record struct AddressableKey<T>(AssetKey<T> Value)
+    [Serializable]
+    public partial struct AddressableKey<T> : IEquatable<AddressableKey<T>>, IEquatable<AddressableKey>
     {
+        [SerializeField] internal AssetKey<T> _value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public AddressableKey(AssetKey<T> value)
+        {
+            _value = value;
+        }
+
+        public readonly bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _value.IsValid;
+        }
+
+        public readonly AssetKey<T> Value
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Equals(AddressableKey<T> other)
+            => _value.Equals(other._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Equals(AddressableKey other)
+            => _value.Equals(other._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override bool Equals(object obj)
+            => obj is AddressableKey<T> otherT
+                ? _value.Equals(otherT._value)
+                : obj is AddressableKey other && _value.Equals(other._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override int GetHashCode()
+            => _value.GetHashCode();
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator AddressableKey<T>(string value)
             => new(value);
@@ -50,24 +121,20 @@ namespace EncosyTower.AddressableKeys
             => new(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator AddressableKey<T>(AssetKey<T> value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator AssetKey(AddressableKey<T> value)
             => (AssetKey)value.Value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator AddressableKey<T>(AssetKey.Serializable value)
-            => new(value.Value);
+        public static bool operator ==(AddressableKey<T> left, AddressableKey<T> right)
+            => left.Equals(right);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator AssetKey.Serializable(AddressableKey<T> value)
-            => (AssetKey)value.Value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator AddressableKey<T>(AssetKey.Serializable<T> value)
-            => new(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator AssetKey.Serializable<T>(AddressableKey<T> value)
-            => value.Value;
+        public static bool operator !=(AddressableKey<T> left, AddressableKey<T> right)
+            => !left.Equals(right);
     }
 }
 

@@ -5,11 +5,12 @@ using System.Threading;
 using EncosyTower.Common;
 using EncosyTower.Loaders;
 using EncosyTower.Tasks;
+using EncosyTower.UnityExtensions;
 using UnityEngine;
 
 namespace EncosyTower.ResourceKeys
 {
-    partial record struct ResourceKey<T> : ILoadAsync<T>, ITryLoadAsync<T>
+    partial struct ResourceKey<T> : ILoadAsync<T>, ITryLoadAsync<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly async
@@ -65,7 +66,7 @@ namespace EncosyTower.ResourceKeys
 
                 var obj = handle.asset;
 
-                if (obj is T asset && asset)
+                if (obj is T asset && asset.IsValid())
                 {
                     return asset;
                 }

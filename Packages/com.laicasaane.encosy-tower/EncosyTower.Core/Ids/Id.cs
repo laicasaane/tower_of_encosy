@@ -8,15 +8,16 @@ namespace EncosyTower.Ids
     using EncosyTower.Serialization;
     using UnityEngine;
 
+    [Serializable]
     [TypeConverter(typeof(TypeConverter))]
-    public readonly partial struct Id
+    public partial struct Id
         : IEquatable<Id>
         , IComparable<Id>
         , ITryParse<Id>
         , ITryParseSpan<Id>
         , ISpanFormattable
     {
-        private readonly uint _value;
+        [SerializeField] private uint _value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Id(int value)
@@ -31,31 +32,31 @@ namespace EncosyTower.Ids
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int CompareTo(Id other)
+        public readonly int CompareTo(Id other)
             => _value.CompareTo(other._value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(Id other)
+        public readonly bool Equals(Id other)
             => _value == other._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
             => obj is Id other && _value == other._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
             => _value.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString()
+        public override readonly string ToString()
             => _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ToString(string format, IFormatProvider formatProvider = null)
+        public readonly string ToString(string format, IFormatProvider formatProvider = null)
             => _value.ToString(format, formatProvider);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryFormat(
+        public readonly bool TryFormat(
               Span<char> destination
             , out int charsWritten
             , ReadOnlySpan<char> format = default
@@ -66,7 +67,7 @@ namespace EncosyTower.Ids
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryParse(
+        public readonly bool TryParse(
               string str
             , out Id result
             , bool ignoreCase
@@ -76,7 +77,7 @@ namespace EncosyTower.Ids
             return TryParse(str.AsSpan(), out result, ignoreCase, allowMatchingMetadataAttribute);
         }
 
-        public bool TryParse(
+        public readonly bool TryParse(
               ReadOnlySpan<char> str
             , out Id result
             , bool ignoreCase
@@ -142,114 +143,6 @@ namespace EncosyTower.Ids
             public override bool AllowMatchingMetadataAttribute => false;
         }
 
-        [Serializable]
-        public partial struct Serializable : ITryConvert<Id>
-            , IEquatable<Serializable>
-            , IComparable<Serializable>
-            , ISpanFormattable
-        {
-            [SerializeField]
-            private uint _value;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Serializable(int value)
-            {
-                _value = new Union(value).uintValue;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Serializable(uint value)
-            {
-                _value = value;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly bool TryConvert(out Id result)
-            {
-                result = new(_value);
-                return true;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly bool Equals(Serializable other)
-                => _value == other._value;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly override bool Equals(object obj)
-                => obj is Serializable other && _value == other._value;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly override int GetHashCode()
-                => _value.GetHashCode();
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly override string ToString()
-                => _value.ToString();
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly string ToString(string format, IFormatProvider formatProvider = null)
-                => _value.ToString(format, formatProvider);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly int CompareTo(Serializable other)
-                => _value.CompareTo(other._value);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly bool TryFormat(
-                  Span<char> destination
-                , out int charsWritten
-                , ReadOnlySpan<char> format = default
-                , IFormatProvider provider = null
-            )
-            {
-                return _value.TryFormat(destination, out charsWritten, format, provider);
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Serializable(int value)
-                => new(value);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Serializable(uint value)
-                => new(value);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Id(Serializable value)
-                => new(value._value);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Serializable(Id value)
-                => new(value._value);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator uint(Serializable value)
-                => value._value;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(Serializable left, Serializable right)
-                => left._value == right._value;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(Serializable left, Serializable right)
-                => left._value != right._value;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator <(Serializable left, Serializable right)
-                => left._value < right._value;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator <=(Serializable left, Serializable right)
-                => left._value <= right._value;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator >(Serializable left, Serializable right)
-                => left._value > right._value;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator >=(Serializable left, Serializable right)
-                => left._value >= right._value;
-        }
-
         [StructLayout(LayoutKind.Explicit)]
         internal struct Union
         {
@@ -276,7 +169,7 @@ namespace EncosyTower.Ids
     using EncosyTower.Conversion;
     using Unity.Collections;
 
-    public readonly partial struct Id : IToFixedString<FixedString32Bytes>
+    partial struct Id : IToFixedString<FixedString32Bytes>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly FixedString32Bytes ToFixedString()
@@ -284,17 +177,6 @@ namespace EncosyTower.Ids
             var fs = new FixedString32Bytes();
             fs.Append(_value);
             return fs;
-        }
-
-        public partial struct Serializable : IToFixedString<FixedString32Bytes>
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly FixedString32Bytes ToFixedString()
-            {
-                var fs = new FixedString32Bytes();
-                fs.Append(_value);
-                return fs;
-            }
         }
     }
 }

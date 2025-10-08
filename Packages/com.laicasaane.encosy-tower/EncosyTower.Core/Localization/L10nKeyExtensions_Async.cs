@@ -15,7 +15,6 @@ namespace EncosyTower.Localization
     using UnityTaskString = UnityEngine.Awaitable<string>;
 #endif
 
-    // ReSharper disable once InconsistentNaming
     public static partial class L10nKeyExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -116,32 +115,6 @@ namespace EncosyTower.Localization
 
             return handle.Result;
         }
-
-        #region SERIALIZABLE
-        #endregion =========
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UnityTaskString LocalizeAsync(this L10nKey.Serializable<string> key, CancellationToken token = default)
-            => LocalizeAsync((L10nKey<string>)key, token);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UnityTaskString LocalizeAsync(this L10nKey.Serializable<string> key, params object[] arguments)
-            => LocalizeAsync((L10nKey<string>)key, default, arguments);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UnityTaskString LocalizeAsync(this L10nKey.Serializable<string> key, CancellationToken token, params object[] arguments)
-            => LocalizeAsync((L10nKey<string>)key, token, arguments);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static
-#if UNITASK
-            Cysharp.Threading.Tasks.UniTask<TObject>
-#else
-            UnityEngine.Awaitable<TObject>
-#endif
-            LocalizeAssetAsync<TObject>(this L10nKey.Serializable<TObject> key, CancellationToken token = default)
-            where TObject : UnityEngine.Object
-            => LocalizeAssetAsync((L10nKey<TObject>)key, token);
     }
 }
 

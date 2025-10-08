@@ -7,13 +7,13 @@ using UnityEngine.AddressableAssets;
 
 namespace EncosyTower.AddressableKeys
 {
-    partial record struct AddressableKey<T> : ILoad<T>, ITryLoad<T>
+    partial struct AddressableKey<T> : ILoad<T>, ITryLoad<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Load()
+        public readonly T Load()
             => TryLoad().GetValueOrDefault();
 
-        public Option<T> TryLoad()
+        public readonly Option<T> TryLoad()
         {
             if (IsValid == false) return Option.None;
 
