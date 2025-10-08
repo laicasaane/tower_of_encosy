@@ -8,6 +8,7 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using EncosyTower.Common;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ namespace EncosyTower.UnityExtensions
         "UnityInstanceId<T> is deprecated. Use UnityEntityId<T> instead."
     )]
 #endif
-    [Serializable]
+    [Serializable, StructLayout(LayoutKind.Sequential, Size = 4)]
     public struct UnityInstanceId<T> : IEquatable<UnityInstanceId<T>>, ISpanFormattable
         where T : UnityEngine.Object
     {
@@ -147,11 +148,11 @@ namespace EncosyTower.UnityExtensions
 
 #if UNITY_6000_2_OR_NEWER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator UnityInstanceId<T>(int instanceId)
+        public static implicit operator UnityInstanceId<T>(int instanceId)
             => new((EntityId)instanceId);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator UnityInstanceId<T>(EntityId entityId)
+        public static implicit operator UnityInstanceId<T>(EntityId entityId)
             => new(entityId);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -159,7 +160,7 @@ namespace EncosyTower.UnityExtensions
             => instanceId._value;
 #else
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator UnityInstanceId<T>(int instanceId)
+        public static implicit operator UnityInstanceId<T>(int instanceId)
             => new(instanceId);
 #endif
 

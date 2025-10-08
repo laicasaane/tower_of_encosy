@@ -10,12 +10,13 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using EncosyTower.Common;
 using UnityEngine;
 
 namespace EncosyTower.UnityExtensions
 {
-    [Serializable]
+    [Serializable, StructLayout(LayoutKind.Sequential, Size = 4)]
     public struct UnityEntityId<T> : IEquatable<UnityEntityId<T>>, ISpanFormattable
         where T : UnityEngine.Object
     {
@@ -97,11 +98,11 @@ namespace EncosyTower.UnityExtensions
             => instanceId._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator UnityEntityId<T>(int instanceId)
+        public static implicit operator UnityEntityId<T>(int instanceId)
             =>  new((EntityId)instanceId);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator UnityEntityId<T>(EntityId entityId)
+        public static implicit operator UnityEntityId<T>(EntityId entityId)
             => new(entityId);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,7 +124,7 @@ namespace EncosyTower.UnityExtensions
 #pragma warning disable CS0618 // Type or member is obsolete
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [Obsolete("InstanceID is deprecated. Use EntityId instead.")]
-        public static explicit operator UnityEntityId<T>(InstanceID instanceId)
+        public static implicit operator UnityEntityId<T>(InstanceID instanceId)
             => new(instanceId);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
