@@ -5,22 +5,22 @@ using UnityEngine;
 namespace EncosyTower.UnityExtensions
 {
     [Serializable]
-    public struct SortingLayerId
-        : IEquatable<SortingLayerId>
-        , IComparable<SortingLayerId>
+    public struct SerializableSortingLayer
+        : IEquatable<SerializableSortingLayer>
+        , IComparable<SerializableSortingLayer>
         , IComparable
         , ISpanFormattable
     {
         public int value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SortingLayerId(int value)
+        public SerializableSortingLayer(int value)
         {
             this.value = value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SortingLayerId(string name)
+        public SerializableSortingLayer(string name)
         {
             value = SortingLayer.NameToID(name);
         }
@@ -37,10 +37,10 @@ namespace EncosyTower.UnityExtensions
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override bool Equals(object obj)
-            => obj is SortingLayerId other && value == other.value;
+            => obj is SerializableSortingLayer other && value == other.value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool Equals(SortingLayerId other)
+        public readonly bool Equals(SerializableSortingLayer other)
             => value == other.value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -48,16 +48,16 @@ namespace EncosyTower.UnityExtensions
             => value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ToString(string format, IFormatProvider formatProvider = null)
+        public readonly string ToString(string format, IFormatProvider formatProvider = null)
             => value.ToString(format, formatProvider);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly int CompareTo(SortingLayerId other)
+        public readonly int CompareTo(SerializableSortingLayer other)
             => value.CompareTo(other.value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int CompareTo(object obj)
-            => obj is SortingLayerId other ? value.CompareTo(other.value) : 1;
+            => obj is SerializableSortingLayer other ? value.CompareTo(other.value) : 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryFormat(
@@ -71,23 +71,23 @@ namespace EncosyTower.UnityExtensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator int(SortingLayerId value)
+        public static implicit operator int(SerializableSortingLayer value)
             => value.value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator SortingLayerId(int value)
+        public static implicit operator SerializableSortingLayer(int value)
             => new(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator SortingLayerId(string name)
+        public static implicit operator SerializableSortingLayer(string name)
             => new(name);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(SortingLayerId lhs, SortingLayerId rhs)
+        public static bool operator ==(SerializableSortingLayer lhs, SerializableSortingLayer rhs)
             => lhs.value == rhs.value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(SortingLayerId lhs, SortingLayerId rhs)
+        public static bool operator !=(SerializableSortingLayer lhs, SerializableSortingLayer rhs)
             => lhs.value != rhs.value;
     }
 }
