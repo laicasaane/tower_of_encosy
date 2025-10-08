@@ -11,7 +11,6 @@ namespace EncosyTower.Types
     internal static class TypeIdVault
     {
         #pragma warning disable IDE1006
-        // ReSharper disable once InconsistentNaming
         private readonly struct __UndefinedType__ { }
         #pragma warning restore IDE1006
 

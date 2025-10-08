@@ -82,7 +82,6 @@ namespace EncosyTower.Collections
         protected GCHandle gcHandle;
 
 #if UNITY_EDITOR && !DISABLE_SHAREDARRAY_SAFETY
-        // ReSharper disable once InconsistentNaming
         protected AtomicSafetyHandle m_SafetyHandle;
 #endif
 

@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -70,7 +68,6 @@ namespace EncosyTower.Collections
             get
             {
                 Checks.IsTrue(State != null, "StatelessList<T> is not initialized");
-                // ReSharper disable once PossibleNullReferenceException
                 return ref State.Buffer;
             }
         }
@@ -81,7 +78,6 @@ namespace EncosyTower.Collections
             get
             {
                 Checks.IsTrue(State != null, "StatelessList<T> is not initialized");
-                // ReSharper disable once PossibleNullReferenceException
                 return ref State.Count;
             }
         }
@@ -92,7 +88,6 @@ namespace EncosyTower.Collections
             get
             {
                 Checks.IsTrue(State != null, "StatelessList<T> is not initialized");
-                // ReSharper disable once PossibleNullReferenceException
                 return ref State.Version;
             }
         }

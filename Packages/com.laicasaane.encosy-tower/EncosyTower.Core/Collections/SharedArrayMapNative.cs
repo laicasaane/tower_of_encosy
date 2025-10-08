@@ -1,7 +1,5 @@
 // https://github.com/sebas77/Svelto.Common/blob/master/DataStructures/Dictionaries/SveltoDictionary.cs
 
-// ReSharper disable InconsistentNaming
-
 #if !(UNITY_EDITOR || DEBUG || ENABLE_UNITY_COLLECTIONS_CHECKS || UNITY_DOTS_DEBUG) || DISABLE_ENCOSY_CHECKS
 #define __ENCOSY_NO_VALIDATION__
 #else

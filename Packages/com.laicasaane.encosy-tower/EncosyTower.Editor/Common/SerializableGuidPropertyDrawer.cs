@@ -11,7 +11,7 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.Editor.Common
 {
-    [CustomPropertyDrawer(typeof(SerializableGuid))]
+    [CustomPropertyDrawer(typeof(SerializableGuid), true)]
     public class SerializableGuidPropertyDrawer : PropertyDrawer
     {
         private const string ERROR = $"Property is not a valid {nameof(SerializableGuid)} type";
@@ -57,41 +57,41 @@ namespace EncosyTower.Editor.Common
             }
         }
 
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
         {
             SerializableGuid guid = default;
 
             if (guid.TryCopyFrom(property) == false)
             {
-                EditorGUI.HelpBox(position, ERROR, MessageType.Error);
+                EditorGUI.HelpBox(rect, ERROR, MessageType.Error);
                 return;
             }
 
             // Using BeginProperty / EndProperty on the parent property means that
             // prefab override logic works on the entire property.
-            EditorGUI.BeginProperty(position, label, property);
+            EditorGUI.BeginProperty(rect, label, property);
 
             // Draw label
-            position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+            rect = EditorGUI.PrefixLabel(rect, GUIUtility.GetControlID(FocusType.Passive), label);
 
             // Don't make child fields be indented
             var indent = EditorGUI.indentLevel;
             EditorGUI.indentLevel = 0;
 
-            var x = position.x;
+            var x = rect.x;
             var m = 4f;
-            var w = position.width - m - 57f - 57f;
-            var guidRect = new Rect(x, position.y, w, position.height);
+            var w = rect.width - m - 57f - 57f;
+            var guidRect = new Rect(x, rect.y, w, rect.height);
 
             x += w + m;
             w = 57f;
 
-            var newV4BtnRect = new Rect(x, position.y, w, position.height);
+            var newV4BtnRect = new Rect(x, rect.y, w, rect.height);
 
             x += w;
             w = 57f;
 
-            var newV7BtnRect = new Rect(x, position.y, w, position.height);
+            var newV7BtnRect = new Rect(x, rect.y, w, rect.height);
 
             var guidString = EditorGUI.TextField(guidRect, GUIContent.none, guid.ToString());
 

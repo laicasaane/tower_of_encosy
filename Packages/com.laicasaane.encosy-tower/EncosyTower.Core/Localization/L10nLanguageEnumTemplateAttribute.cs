@@ -4,8 +4,6 @@ using System;
 
 namespace EncosyTower.Localization
 {
-    // ReSharper disable once InconsistentNaming
-
     /// <summary>
     /// Place on a struct whose name ends with either "_EnumTemplate" or "_Template"
     /// to indicate a template for generating an L10n Language enum.

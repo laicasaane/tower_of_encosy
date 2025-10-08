@@ -17,8 +17,6 @@ using UnityEngine.Localization.Settings;
 
 namespace EncosyTower.Localization
 {
-    // ReSharper disable once InconsistentNaming
-
     /// <summary>
     /// L10n = L(ocalizatio)n
     /// </summary>

@@ -9,8 +9,6 @@
 ///*****************************************************************///
 /// </auto-generated>
 
-// ReSharper disable InconsistentNaming
-
 #pragma warning disable
 
 using System;

@@ -18,14 +18,14 @@ namespace EncosyTower.UIElements
         private readonly Button _newV7Button;
 
         /// <summary>
-        /// Creates a new SerializableGuidField.
+        /// Construct a SerializableGuidField.
         /// </summary>
         public SerializableGuidField() : this(string.Empty)
         {
         }
 
         /// <summary>
-        /// Creates a new SerializableGuidField.
+        /// Construct a SerializableGuidField.
         /// </summary>
         /// <param name="label"></param>
         public SerializableGuidField(string label) : this(label, string.Empty)
@@ -33,7 +33,7 @@ namespace EncosyTower.UIElements
         }
 
         /// <summary>
-        /// Creates a new SerializableGuidField.
+        /// Construct a SerializableGuidField.
         /// </summary>
         /// <param name="label"></param>
         /// <param name="guidFormat">

@@ -1,7 +1,5 @@
 #if UNITY_COLLECTIONS
 
-// ReSharper disable UnassignedField.Global
-
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
