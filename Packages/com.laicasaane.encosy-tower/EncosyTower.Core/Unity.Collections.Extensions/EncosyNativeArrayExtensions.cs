@@ -12,16 +12,38 @@ namespace EncosyTower.Collections
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<T> CreateFast<T>(int length, Allocator allocator)
-            where T : unmanaged
+            where T : struct
         {
             return new NativeArray<T>(length, allocator, NativeArrayOptions.UninitializedMemory);
+        }
+
+        /// <summary>
+        /// Create a NativeArray from a <see cref="NativeSlice{T}"/>.
+        /// </summary>
+        public static NativeArray<T> CreateFrom<T>(NativeSlice<T> source, Allocator allocator)
+            where T : struct
+        {
+            var array = CreateFast<T>(source.Length, allocator);
+            source.CopyTo(array);
+            return array;
+        }
+
+        /// <summary>
+        /// Create a NativeArray from a <see cref="Span{T}"/>.
+        /// </summary>
+        public static NativeArray<T> CreateFrom<T>(Span<T> source, Allocator allocator)
+            where T : struct
+        {
+            var array = CreateFast<T>(source.Length, allocator);
+            source.CopyTo(array);
+            return array;
         }
 
         /// <summary>
         /// Create a NativeArray from a <see cref="ReadOnlySpan{T}"/>.
         /// </summary>
         public static NativeArray<T> CreateFrom<T>(ReadOnlySpan<T> source, Allocator allocator)
-            where T : unmanaged
+            where T : struct
         {
             var array = CreateFast<T>(source.Length, allocator);
             source.CopyTo(array);
@@ -49,6 +71,28 @@ namespace EncosyTower.Collections
             where T : unmanaged
         {
             return CollectionHelper.CreateNativeArray<T>(length, allocator, NativeArrayOptions.UninitializedMemory);
+        }
+
+        /// <summary>
+        /// Create a NativeArray from a <see cref="NativeSlice{T}"/>.
+        /// </summary>
+        public static NativeArray<T> CreateFrom<T>(NativeSlice<T> source, AllocatorManager.AllocatorHandle allocator)
+            where T : unmanaged
+        {
+            var array = CreateFast<T>(source.Length, allocator);
+            source.CopyTo(array);
+            return array;
+        }
+
+        /// <summary>
+        /// Create a NativeArray from a <see cref="Span{T}"/>.
+        /// </summary>
+        public static NativeArray<T> CreateFrom<T>(Span<T> source, AllocatorManager.AllocatorHandle allocator)
+            where T : unmanaged
+        {
+            var array = CreateFast<T>(source.Length, allocator);
+            source.CopyTo(array);
+            return array;
         }
 
         /// <summary>
