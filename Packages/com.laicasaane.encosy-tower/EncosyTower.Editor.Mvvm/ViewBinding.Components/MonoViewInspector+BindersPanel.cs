@@ -54,11 +54,11 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 }
 
                 var guiEnabled = GUI.enabled;
-                GUI.enabled = _presetBindersProp.ArraySize > 0;
+                GUI.enabled = _bindersProp.ArraySize > 0;
 
                 if (GUILayout.Button(s_removeSelectedLabel, s_toolbarMidButtonStyle, GUILayout.Height(20)))
                 {
-                    _presetBindersProp.DeleteSelected();
+                    _bindersProp.DeleteSelected();
                 }
 
                 GUI.enabled = guiEnabled;
@@ -69,18 +69,18 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 if (GUILayout.Button(s_menuIconLabel, s_toolbarMenuButtonStyle, GUILayout.Height(20), GUILayout.Width(20)))
                 {
                     var menu = new GenericMenu();
-                    menu.AddItem(s_copyAllLabel, false, Menu_OnCopyAll, _presetBindersProp);
+                    menu.AddItem(s_copyAllLabel, false, Menu_OnCopyAll, _bindersProp);
 
-                    if (_presetBindersProp.ValidatePasteAll())
+                    if (_bindersProp.ValidatePasteAll())
                     {
-                        menu.AddItem(s_pasteAllLabel, false, Menu_OnPasteAll, _presetBindersProp);
+                        menu.AddItem(s_pasteAllLabel, false, Menu_OnPasteAll, _bindersProp);
                     }
                     else
                     {
                         menu.AddDisabledItem(s_pasteAllLabel);
                     }
 
-                    menu.AddItem(s_clearAllLabel, false, Menu_OnClearAll, _presetBindersProp);
+                    menu.AddItem(s_clearAllLabel, false, Menu_OnClearAll, _bindersProp);
                     menu.ShowAsContext();
                 }
 
@@ -91,7 +91,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 
         private void ShowBinderDropdown()
         {
-            s_bindersPropRef.Prop = _presetBindersProp.Property;
+            s_bindersPropRef.Prop = _bindersProp.Property;
             s_bindersPropRef.Inspector = this;
 
             var menu = s_binderMenu;
@@ -125,12 +125,12 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             serializedObject.ApplyModifiedProperties();
             serializedObject.Update();
 
-            inspector._presetBindersProp.SetSelectedIndex(lastIndex);
+            inspector._bindersProp.SetSelectedIndex(lastIndex);
         }
 
         private void DrawBindersPanel_Content(in EventData eventData)
         {
-            var bindersLength = _presetBindersProp.ArraySize;
+            var bindersLength = _bindersProp.ArraySize;
             var guiWidth1 = GUILayout.MinWidth(206);
 
             var rect = EditorGUILayout.BeginVertical(guiWidth1);
@@ -154,9 +154,9 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                     {
                         var menu = new GenericMenu();
 
-                        if (_presetBindersProp.ValidatePasteSingle())
+                        if (_bindersProp.ValidatePasteSingle())
                         {
-                            menu.AddItem(s_pasteItemLabel, false, Menu_OnPasteSingle, _presetBindersProp);
+                            menu.AddItem(s_pasteItemLabel, false, Menu_OnPasteSingle, _bindersProp);
                         }
                         else
                         {
@@ -193,7 +193,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
         )
         {
             var subtitleIndex = eventData.Key == KeyCode.Escape ? null : _selectedSubtitleIndex;
-            var bindersProp = _presetBindersProp;
+            var bindersProp = _bindersProp;
             var bindersLength = bindersProp.ArraySize;
             var binderSelectedButtonStyle = s_binderSelectedButtonStyle;
             var binderButtonStyle = s_binderButtonStyle;
@@ -230,8 +230,8 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 var activeColor = buttonStyle.active.textColor;
                 var hoverColor = buttonStyle.hover.textColor;
                 var subtitleProp = binderProp.FindPropertyRelative(PROP_SUBTITLE);
-                var bindingsProp = binderProp.FindPropertyRelative(PROP_PRESET_BINDINGS);
-                var targetsProp = binderProp.FindPropertyRelative(PROP_PRESET_TARGETS);
+                var bindingsProp = binderProp.FindPropertyRelative(PROP_BINDINGS);
+                var targetsProp = binderProp.FindPropertyRelative(PROP_TARGETS);
                 var itemRect = origItemRect;
                 itemRect.y += offsetY;
                 offsetY += itemRect.height;

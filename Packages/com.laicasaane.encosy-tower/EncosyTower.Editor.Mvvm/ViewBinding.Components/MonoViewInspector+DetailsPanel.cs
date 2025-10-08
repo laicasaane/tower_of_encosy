@@ -67,7 +67,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 
             EditorGUILayout.BeginVertical();
             {
-                var bindersProp = _presetBindersProp;
+                var bindersProp = _bindersProp;
 
                 if (bindersProp.SelectedIndex.HasValue == false)
                 {
@@ -145,7 +145,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 
             EditorGUILayout.BeginVertical(s_rootTabViewStyle);
             {
-                var targetsProp = _presetTargetsProp.Property;
+                var targetsProp = _targetsProp.Property;
                 var layoutWidth = GUILayout.ExpandWidth(true);
 
                 var headerRect = EditorGUILayout.BeginHorizontal(layoutWidth, GUILayout.Height(30f));
@@ -158,7 +158,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 }
                 EditorGUILayout.EndHorizontal();
 
-                if (_presetTargetsProp == null || _presetTargetsProp.ArraySize < 1)
+                if (_targetsProp == null || _targetsProp.ArraySize < 1)
                 {
                     var iconRect = headerRect;
                     iconRect.x += headerRect.width - 22f;
@@ -173,7 +173,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 }
 
                 // Draw drop area for Targets
-                if (_presetTargetsProp != null)
+                if (_targetsProp != null)
                 {
                     DrawDragDropArea(headerRect, eventData, _onDropCreateTargets ??= OnDropCreateTargets);
                 }
@@ -200,7 +200,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             , Type targetType
         )
         {
-            var property = _presetTargetsProp;
+            var property = _targetsProp;
             var serializedObject = property.Property.serializedObject;
             var target = serializedObject.targetObject;
             var toolbarButton = DrawDetailsPanel_ToolbarButtons(property.ArraySize, true);
@@ -356,7 +356,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 }
                 EditorGUILayout.EndHorizontal();
 
-                if (_presetBindingsProp == null || _presetBindingsProp.ArraySize < 1)
+                if (_bindingsProp == null || _bindingsProp.ArraySize < 1)
                 {
                     var iconRect = headerRect;
                     iconRect.x += headerRect.width - 22f;
@@ -389,8 +389,8 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             , Type targetType
         )
         {
-            var presetBindingsProp = _presetBindingsProp;
-            var toolbarButton = DrawDetailsPanel_ToolbarButtons(presetBindingsProp.ArraySize, false);
+            var bindingsProp = _bindingsProp;
+            var toolbarButton = DrawDetailsPanel_ToolbarButtons(bindingsProp.ArraySize, false);
 
             switch (toolbarButton)
             {
@@ -402,18 +402,18 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 
                 case DetailsToolbarButton.Remove:
                 {
-                    presetBindingsProp.DeleteSelected();
+                    bindingsProp.DeleteSelected();
                     break;
                 }
 
                 case DetailsToolbarButton.Menu:
                 {
-                    ShowMenuContextMenu(presetBindingsProp);
+                    ShowMenuContextMenu(bindingsProp);
                     break;
                 }
             }
 
-            var length = presetBindingsProp.ArraySize;
+            var length = bindingsProp.ArraySize;
             var minWidth = GUILayout.MinWidth(0);
 
             if (length < 1)
@@ -429,7 +429,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                     && sectionRect.Contains(eventData.MousePos)
                 )
                 {
-                    ShowRightClickContextMenuEmpty(presetBindingsProp);
+                    ShowRightClickContextMenuEmpty(bindingsProp);
                 }
                 return EventResult.None;
             }
@@ -485,16 +485,16 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             var adapterMemberLabel = new GUIContent();
             var adapterMemberLabelWidth = GUILayout.Width(80f);
             var resetIconLabel = s_resetIconLabel;
-            var presetAdaptersProp = _presetAdaptersProp;
-            var hasSequentialAdapter = presetAdaptersProp.Property != null;
+            var adaptersProp = _adaptersProp;
+            var hasSequentialAdapter = adaptersProp.Property != null;
 
-            var presetBindingsProp = _presetBindingsProp;
-            var length = presetBindingsProp.ArraySize;
-            var selectedIndex = presetBindingsProp.SelectedIndex;
+            var bindingsProp = _bindingsProp;
+            var length = bindingsProp.ArraySize;
+            var selectedIndex = bindingsProp.SelectedIndex;
 
             for (var i = 0; i < length; i++)
             {
-                var bindingProp = presetBindingsProp.GetElementAt(i);
+                var bindingProp = bindingsProp.GetElementAt(i);
 
                 if (bindingProp.managedReferenceValue is not MonoBinding binding)
                 {
@@ -705,7 +705,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                                         , resetIconLabel
                                         , adapterMemberLabelWidth
                                         , bindingParamType
-                                        , presetAdaptersProp
+                                        , adaptersProp
                                         , adapterProp
                                         , targetMemberType
                                     );
@@ -721,7 +721,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                         && backRect.Contains(mousePos)
                     )
                     {
-                        presetBindingsProp.SetSelectedIndex(i);
+                        bindingsProp.SetSelectedIndex(i);
                         EditorGUILayout.EndVertical();
                         return EventResult.Consume;
                     }
@@ -732,7 +732,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 
             if (mouseDownIndex >= 0)
             {
-                ShowRightClickContextMenu(presetBindingsProp, mouseDownIndex);
+                ShowRightClickContextMenu(bindingsProp, mouseDownIndex);
             }
 
             return EventResult.None;
@@ -932,7 +932,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 
         private static void AddTargetToSelectedBinder(SerializedProperty binderProp)
         {
-            var targetsProp = binderProp.FindPropertyRelative(PROP_PRESET_TARGETS);
+            var targetsProp = binderProp.FindPropertyRelative(PROP_TARGETS);
             var serializedObject = targetsProp.serializedObject;
             var target = serializedObject.targetObject;
 
@@ -1021,7 +1021,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
         private void OnDropCreateTargets(Memory<UnityEngine.Object> objects)
         {
             var result = TryGetTargetType(
-                  _presetBindersProp
+                  _bindersProp
                 , out var binderProp
                 , out var binderType
                 , out var targetType
@@ -1116,7 +1116,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 return;
             }
 
-            var targetsProp = binderProp.FindPropertyRelative(PROP_PRESET_TARGETS);
+            var targetsProp = binderProp.FindPropertyRelative(PROP_TARGETS);
             var currentSize = targetsProp.arraySize;
             var checkIds = new HashSet<int>(currentSize + length);
 
@@ -1170,7 +1170,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 
             var (bindingType, _, binderPropRef) = menuItem;
             var binderProp = binderPropRef.Prop;
-            var bindingsProp = binderProp.FindPropertyRelative(PROP_PRESET_BINDINGS);
+            var bindingsProp = binderProp.FindPropertyRelative(PROP_BINDINGS);
             var serializedObject = bindingsProp.serializedObject;
             var target = serializedObject.targetObject;
             var lastIndex = bindingsProp.arraySize;

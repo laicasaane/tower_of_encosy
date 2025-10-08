@@ -56,10 +56,10 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
         private const string NO_TARGET = "Has no target!";
         private const string NO_BINDING_TARGET = "Has no binding and target!";
 
-        private const string PROP_PRESET_BINDERS = "_presetBinders";
-        private const string PROP_PRESET_BINDINGS = "_presetBindings";
-        private const string PROP_PRESET_TARGETS = "_presetTargets";
-        private const string PROP_PRESET_ADAPTERS = "_presetAdapters";
+        private const string PROP_BINDERS = nameof(MonoView._binders);
+        private const string PROP_BINDINGS = nameof(MonoBinder._bindings);
+        private const string PROP_TARGETS = nameof(MonoBinder<UnityEngine.Object>._targets);
+        private const string PROP_ADAPTERS = "_adapters";
         private const string PROP_SUBTITLE = "_subtitle";
 
         private MonoView _view;
@@ -70,10 +70,10 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
         private SerializedProperty _settingsProp;
         private SerializedProperty _contextProp;
         private Type _contextType;
-        private SerializedArrayProperty _presetBindersProp;
-        private SerializedArrayProperty _presetBindingsProp;
-        private SerializedArrayProperty _presetTargetsProp;
-        private SerializedArrayProperty _presetAdaptersProp;
+        private SerializedArrayProperty _bindersProp;
+        private SerializedArrayProperty _bindingsProp;
+        private SerializedArrayProperty _targetsProp;
+        private SerializedArrayProperty _adaptersProp;
         private BindingContextInspector _contextInspector;
 
         private readonly GUIContent _settingsLabel = new("Settings");
@@ -99,7 +99,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             _settingsProp = serializedObject.FindProperty("_settings");
             _contextProp = serializedObject.FindProperty("_context");
 
-            _presetBindersProp = new(
+            _bindersProp = new(
                   nameof(MonoBinder)
                 , CloneMonoBinder
                 , OnValidatePasteAllBinders
@@ -108,30 +108,30 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 , OnSetSelectedBinderIndex
             );
 
-            _presetBindingsProp = new(
+            _bindingsProp = new(
                   nameof(MonoBinding)
                 , CloneManagedReference
                 , OnValidatePasteAllBindings
                 , OnValidatePasteSingleBinding
             );
 
-            _presetTargetsProp = new(
+            _targetsProp = new(
                   "MonoBindingTarget"
                 , static (src, dest) => dest.objectReferenceValue = src.objectReferenceValue
                 , OnValidatePasteAllTargets
                 , OnValidatePasteSingleTarget
             );
 
-            _presetAdaptersProp = new(
+            _adaptersProp = new(
                   "SequentialAdapter"
                 , static (src, dest) => dest.objectReferenceValue = src.objectReferenceValue
                 , OnValidatePasteAllAdapters
                 , OnValidatePasteSingleAdapter
             );
 
-            _presetBindersProp.Initialize(serializedObject.FindProperty(PROP_PRESET_BINDERS));
-            _presetBindersProp.LoadSelectedIndex();
-            _presetBindersProp.SetSelectedIndex(_presetBindersProp.SelectedIndex);
+            _bindersProp.Initialize(serializedObject.FindProperty(PROP_BINDERS));
+            _bindersProp.LoadSelectedIndex();
+            _bindersProp.SetSelectedIndex(_bindersProp.SelectedIndex);
 
             InitInspector();
         }
@@ -149,8 +149,8 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
         {
             CloneManagedReference(src, dest);
 
-            var srcTargets = src.FindPropertyRelative(PROP_PRESET_TARGETS);
-            var destTargets = dest.FindPropertyRelative(PROP_PRESET_TARGETS);
+            var srcTargets = src.FindPropertyRelative(PROP_TARGETS);
+            var destTargets = dest.FindPropertyRelative(PROP_TARGETS);
             var targetsLength = srcTargets.arraySize;
 
             destTargets.arraySize = targetsLength;
@@ -193,7 +193,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
                 return;
             }
 
-            _presetBindersProp.RefreshSelectedIndex();
+            _bindersProp.RefreshSelectedIndex();
 
             EditorGUILayout.Space();
 
@@ -428,46 +428,46 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
         /// </remarks>
         private void PreventSerializedPropertyHasDisappearedError()
         {
-            if (_presetBindersProp.TryGetAtSelectedIndex(out var binderProperty))
+            if (_bindersProp.TryGetAtSelectedIndex(out var binderProperty))
             {
-                _presetBindingsProp.Initialize(binderProperty.FindPropertyRelative(PROP_PRESET_BINDINGS));
-                _presetTargetsProp.Initialize(binderProperty.FindPropertyRelative(PROP_PRESET_TARGETS));
+                _bindingsProp.Initialize(binderProperty.FindPropertyRelative(PROP_BINDINGS));
+                _targetsProp.Initialize(binderProperty.FindPropertyRelative(PROP_TARGETS));
             }
             else
             {
-                _presetBindingsProp.SetSelectedIndex(null);
-                _presetTargetsProp.SetSelectedIndex(null);
-                _presetBindingsProp.Initialize(null);
-                _presetTargetsProp.Initialize(null);
-                _presetAdaptersProp.Initialize(null);
+                _bindingsProp.SetSelectedIndex(null);
+                _targetsProp.SetSelectedIndex(null);
+                _bindingsProp.Initialize(null);
+                _targetsProp.Initialize(null);
+                _adaptersProp.Initialize(null);
             }
         }
 
         private void OnSetSelectedBinderIndex(SerializedArrayProperty property)
         {
-            _presetBindingsProp.SetSelectedIndex(null);
-            _presetTargetsProp.SetSelectedIndex(null);
-            _presetAdaptersProp.Initialize(null);
+            _bindingsProp.SetSelectedIndex(null);
+            _targetsProp.SetSelectedIndex(null);
+            _adaptersProp.Initialize(null);
 
             if (property.TryGetAtSelectedIndex(out var binderProperty))
             {
-                _presetBindingsProp.Initialize(binderProperty.FindPropertyRelative(PROP_PRESET_BINDINGS));
-                _presetTargetsProp.Initialize(binderProperty.FindPropertyRelative(PROP_PRESET_TARGETS));
+                _bindingsProp.Initialize(binderProperty.FindPropertyRelative(PROP_BINDINGS));
+                _targetsProp.Initialize(binderProperty.FindPropertyRelative(PROP_TARGETS));
             }
             else
             {
-                _presetBindingsProp.Initialize(null);
-                _presetTargetsProp.Initialize(null);
+                _bindingsProp.Initialize(null);
+                _targetsProp.Initialize(null);
             }
         }
 
         private void SetSelectedSubtitleIndex(int? value)
         {
-            if (_presetBindersProp.ValidateIndex(value))
+            if (_bindersProp.ValidateIndex(value))
             {
                 _selectedSubtitleIndex = value;
                 _subtitleControlName = $"sub_name_{value.Value}";
-                _selectedSubtitleProp = _presetBindersProp.GetElementAt(value.Value)
+                _selectedSubtitleProp = _bindersProp.GetElementAt(value.Value)
                     .FindPropertyRelative(PROP_SUBTITLE);
 
                 _binderSubtitle = _selectedSubtitleProp.stringValue;
@@ -482,7 +482,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
         }
 
         private bool ValidateSelectedSubtitleIndex()
-            => _presetBindersProp.ValidateIndex(_selectedSubtitleIndex);
+            => _bindersProp.ValidateIndex(_selectedSubtitleIndex);
 
         private void UpdateContextMaps()
         {
@@ -914,8 +914,8 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
         private static bool OnValidatePasteAllBinders(SerializedProperty src, SerializedArrayProperty dest)
         {
             return src.isArray
-                && src.propertyPath.EndsWith(PROP_PRESET_BINDERS, StringComparison.Ordinal)
-                && dest.Property.propertyPath.Equals(PROP_PRESET_BINDERS, StringComparison.Ordinal);
+                && src.propertyPath.EndsWith(PROP_BINDERS, StringComparison.Ordinal)
+                && dest.Property.propertyPath.Equals(PROP_BINDERS, StringComparison.Ordinal);
         }
 
         private static bool OnValidatePasteSingleBinder(SerializedProperty src, SerializedArrayProperty dest)
@@ -923,18 +923,18 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             return src.isArray == false
                 && src.propertyType == SerializedPropertyType.ManagedReference
                 && src.managedReferenceValue is MonoBinder
-                && dest.Property.propertyPath.Equals(PROP_PRESET_BINDERS, StringComparison.Ordinal);
+                && dest.Property.propertyPath.Equals(PROP_BINDERS, StringComparison.Ordinal);
         }
 
         private static bool OnValidatePasteAllBindings(SerializedProperty src, SerializedArrayProperty dest)
-            => ValidatePasteAll(src, dest, PROP_PRESET_BINDINGS);
+            => ValidatePasteAll(src, dest, PROP_BINDINGS);
 
         private static bool OnValidatePasteSingleBinding(SerializedProperty src, SerializedArrayProperty dest)
         {
             if (src.isArray
                 || src.propertyType != SerializedPropertyType.ManagedReference
                 || src.managedReferenceValue is not MonoBinding srcBinding
-                || dest.Property.propertyPath.EndsWith(PROP_PRESET_BINDINGS, StringComparison.Ordinal) == false
+                || dest.Property.propertyPath.EndsWith(PROP_BINDINGS, StringComparison.Ordinal) == false
             )
             {
                 return false;
@@ -952,13 +952,13 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
         }
 
         private static bool OnValidatePasteAllTargets(SerializedProperty src, SerializedArrayProperty dest)
-            => ValidatePasteAll(src, dest, PROP_PRESET_TARGETS);
+            => ValidatePasteAll(src, dest, PROP_TARGETS);
 
         private static bool OnValidatePasteSingleTarget(SerializedProperty src, SerializedArrayProperty dest)
         {
             if (src.isArray
                 || src.propertyType != SerializedPropertyType.ObjectReference
-                || dest.Property.propertyPath.EndsWith(PROP_PRESET_TARGETS, StringComparison.Ordinal) == false
+                || dest.Property.propertyPath.EndsWith(PROP_TARGETS, StringComparison.Ordinal) == false
             )
             {
                 return false;
@@ -979,8 +979,8 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
         private static bool OnValidatePasteAllAdapters(SerializedProperty src, SerializedArrayProperty dest)
         {
             return src.isArray
-                && src.propertyPath.EndsWith(PROP_PRESET_ADAPTERS, StringComparison.Ordinal)
-                && dest.Property.propertyPath.Equals(PROP_PRESET_ADAPTERS, StringComparison.Ordinal);
+                && src.propertyPath.EndsWith(PROP_ADAPTERS, StringComparison.Ordinal)
+                && dest.Property.propertyPath.Equals(PROP_ADAPTERS, StringComparison.Ordinal);
         }
 
         private static bool OnValidatePasteSingleAdapter(SerializedProperty src, SerializedArrayProperty dest)
@@ -988,7 +988,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             return src.isArray == false
                 && src.propertyType == SerializedPropertyType.ManagedReference
                 && src.managedReferenceValue is IAdapter
-                && dest.Property.propertyPath.Equals(PROP_PRESET_ADAPTERS, StringComparison.Ordinal);
+                && dest.Property.propertyPath.Equals(PROP_ADAPTERS, StringComparison.Ordinal);
         }
 
         private static bool ValidatePasteAll(

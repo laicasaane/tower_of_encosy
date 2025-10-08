@@ -22,7 +22,7 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
         {
             var eventResult = EventResult.None;
 
-            presetAdaptersProp.Initialize(parentAdapterProp.FindPropertyRelative(PROP_PRESET_ADAPTERS));
+            presetAdaptersProp.Initialize(parentAdapterProp.FindPropertyRelative(PROP_ADAPTERS));
 
             if (presetAdaptersProp.Property == null)
             {
