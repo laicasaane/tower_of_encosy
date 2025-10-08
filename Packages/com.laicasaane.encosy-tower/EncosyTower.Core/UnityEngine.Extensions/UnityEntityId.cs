@@ -35,13 +35,12 @@ namespace EncosyTower.UnityExtensions
             _value = value;
         }
 
-#pragma warning disable CS0618 // Type or member is obsolete
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("InstanceID is deprecated. Use EntityId instead.")]
         public UnityEntityId(InstanceID value)
         {
             _value = (int)value;
         }
-#pragma warning restore CS0618 // Type or member is obsolete
 
         public readonly bool IsValid
         {
@@ -123,10 +122,12 @@ namespace EncosyTower.UnityExtensions
 
 #pragma warning disable CS0618 // Type or member is obsolete
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("InstanceID is deprecated. Use EntityId instead.")]
         public static explicit operator UnityEntityId<T>(InstanceID instanceId)
             => new(instanceId);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("UnityInstanceId<T> is deprecated. Use UnityEntityId<T> instead.")]
         public static implicit operator UnityEntityId<T>(UnityInstanceId<T> instanceId)
             => new(instanceId.Value);
 #pragma warning restore CS0618 // Type or member is obsolete
