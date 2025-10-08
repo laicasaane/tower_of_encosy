@@ -179,7 +179,10 @@ namespace EncosyTower.Collections
 
             Checks.IsTrue(_buffer.Length - Count >= count, "the capacity of SharedListNative<T> is immutable and cannot change");
 
-            items.AsReadOnlySpan()[..count].CopyTo(_buffer.AsSpan().Slice(Count, count));
+            var span = _buffer.AsSpan().Slice(Count, count);
+            var buffer = NativeArrayUnsafe.ConvertFrom(span, Allocator.None);
+            items.Slice(0, count).CopyTo(buffer);
+
             CountRW += count;
         }
 
@@ -213,7 +216,7 @@ namespace EncosyTower.Collections
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(int index, NativeSlice<TNative> array, int length)
-            => AsReadOnlySpan().Slice(index, length).CopyTo(array.AsSpan()[..length]);
+            => array.Slice(0, length).CopyFrom(AsNativeSlice().Slice(index, length));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
