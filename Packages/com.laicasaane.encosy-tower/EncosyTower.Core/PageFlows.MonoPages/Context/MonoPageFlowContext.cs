@@ -21,6 +21,7 @@ namespace EncosyTower.PageFlows.MonoPages
 {
 #if UNITY_ADDRESSABLES
     using EncosyTower.AddressableKeys;
+    using UnityEngine.Serialization;
 #endif
 
 #if UNITASK
@@ -39,7 +40,12 @@ namespace EncosyTower.PageFlows.MonoPages
         public bool slimPublishingContext = true;
         public bool ignoreEmptySubscriber = true;
         public MonoPageLoaderStrategy loadStrategy;
-        public PooledGameObjectStrategy pooledGameObjectStrategy;
+
+        public RentingStrategy poolRentingStrategy;
+
+        [FormerlySerializedAs("pooledGameObjectStrategy")]
+        public ReturningStrategy poolReturningStrategy;
+
         public MonoMessageScope messageScope;
         public LogEnvironment logEnvironment;
 
@@ -126,7 +132,8 @@ namespace EncosyTower.PageFlows.MonoPages
                 slimPublishingContext = settings.slimPublishingContext;
                 ignoreEmptySubscriber = settings.ignoreEmptySubscriber;
                 loadStrategy = settings.loaderStrategy;
-                pooledGameObjectStrategy = settings.pooledGameObjectStrategy;
+                poolRentingStrategy = settings.poolRentingStrategy;
+                poolReturningStrategy = settings.poolReturningStrategy;
                 messageScope = settings.messageScope;
                 logEnvironment = settings.logEnvironment;
                 Logger.LogInfo($"Initialize {nameof(MonoPageFlowContext)} using Project Settings");
@@ -145,7 +152,8 @@ namespace EncosyTower.PageFlows.MonoPages
                 slimPublishingContext = slimPublishingContext,
                 ignoreEmptySubscriber = ignoreEmptySubscriber,
                 loadStrategy = loadStrategy,
-                pooledGameObjectStrategy = pooledGameObjectStrategy,
+                poolRentingStrategy = poolRentingStrategy,
+                poolReturningStrategy = poolReturningStrategy,
                 messageScope = messageScope,
                 logEnvironment = logEnvironment,
                 _subscriber = _subscriber,

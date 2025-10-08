@@ -3,11 +3,11 @@ namespace EncosyTower.Pooling
     /// <summary>
     /// Represents an operation after GameObjects are returned to the pool.
     /// </summary>
-    internal readonly record struct PooledGameObjectOperation
+    internal readonly record struct ReturnOperation
     {
-        public PooledGameObjectOperation(
-              PooledGameObjectStrategy defaultStrategy
-            , PooledGameObjectStrategy overriddenStrategy
+        public ReturnOperation(
+              ReturningStrategy defaultStrategy
+            , ReturningStrategy overriddenStrategy
         )
         {
             DefaultStrategy = defaultStrategy;
@@ -17,35 +17,35 @@ namespace EncosyTower.Pooling
         /// <summary>
         /// The default strategy defined by the pool.
         /// </summary>
-        public PooledGameObjectStrategy DefaultStrategy { get; init; }
+        public ReturningStrategy DefaultStrategy { get; init; }
 
         /// <summary>
         /// The strategy that overrides the default one for a specific return operation.
         /// </summary>
-        public PooledGameObjectStrategy OverriddenStrategy { get; init; }
+        public ReturningStrategy OverriddenStrategy { get; init; }
 
         /// <summary>
-        /// Determines if the pooled GameObjects should be deactivate.
+        /// Determines if the returned GameObjects should be deactivate.
         /// </summary>
         /// <returns>
         /// True if both <see cref="OverriddenStrategy"/> and <see cref="DefaultStrategy"/> are either
-        /// <see cref="PooledGameObjectStrategy.Deactivate"/> or <see cref="PooledGameObjectStrategy.Default"/>.
+        /// <see cref="ReturningStrategy.Deactivate"/> or <see cref="ReturningStrategy.Default"/>.
         /// <br/>
         /// Otherwise false.
         /// </returns>
         public bool ShouldDeactivate()
         {
-            if (OverriddenStrategy == PooledGameObjectStrategy.DoNothing)
+            if (OverriddenStrategy == ReturningStrategy.DoNothing)
             {
                 return false;
             }
 
-            if (OverriddenStrategy == PooledGameObjectStrategy.Deactivate)
+            if (OverriddenStrategy == ReturningStrategy.Deactivate)
             {
                 return true;
             }
 
-            if (DefaultStrategy == PooledGameObjectStrategy.DoNothing)
+            if (DefaultStrategy == ReturningStrategy.DoNothing)
             {
                 return false;
             }

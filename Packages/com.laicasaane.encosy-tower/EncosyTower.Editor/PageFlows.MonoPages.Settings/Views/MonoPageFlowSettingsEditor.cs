@@ -9,7 +9,6 @@ using EncosyTower.Pooling;
 using EncosyTower.UIElements;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -56,28 +55,35 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
             var slimPublishingContext = new Toggle("Slim Publishing Context");
             var ignoreEmptySubscriber = new Toggle("Ignore Empty Subscriber");
             var loaderStrategy = new EnumField("Loader Strategy", default(MonoPageLoaderStrategy));
-            var pooledStrategy = new EnumField("Pooled GameObject Strategy", default(PooledGameObjectStrategy));
             var messageScope = new EnumField("Message Scope", default(MonoMessageScope));
             var logEnvironment = new EnumField("Log Environment", default(LogEnvironment));
+            var poolFoldout = new Foldout { text = "GameObject Pooling Strategies" };
+            var poolRentingStrategy = new EnumField("Renting", default(RentingStrategy));
+            var poolReturningStrategy = new EnumField("Returning", default(ReturningStrategy));
 
             contentContainer.Add(slimPublishingContext.WithAlignFieldClass());
             contentContainer.Add(ignoreEmptySubscriber.WithAlignFieldClass());
             contentContainer.Add(loaderStrategy.WithAlignFieldClass());
-            contentContainer.Add(pooledStrategy.WithAlignFieldClass());
             contentContainer.Add(messageScope.WithAlignFieldClass());
             contentContainer.Add(logEnvironment.WithAlignFieldClass());
+
+            contentContainer.Add(poolFoldout);
+            poolFoldout.Add(poolRentingStrategy.WithAlignFieldClass());
+            poolFoldout.Add(poolReturningStrategy.WithAlignFieldClass());
 
             slimPublishingContext.RegisterValueChangedCallback(OnValueChanged);
             ignoreEmptySubscriber.RegisterValueChangedCallback(OnValueChanged);
             loaderStrategy.RegisterValueChangedCallback(OnValueChanged);
-            pooledStrategy.RegisterValueChangedCallback(OnValueChanged);
+            poolRentingStrategy.RegisterValueChangedCallback(OnValueChanged);
+            poolReturningStrategy.RegisterValueChangedCallback(OnValueChanged);
             messageScope.RegisterValueChangedCallback(OnValueChanged);
             logEnvironment.RegisterValueChangedCallback(OnValueChanged);
 
             slimPublishingContext.WithBindProperty(context.GetSlimPublishingContext());
             ignoreEmptySubscriber.WithBindProperty(context.GetIgnoreEmptySubscriber());
             loaderStrategy.WithBindProperty(context.GetLoaderStrategyProperty());
-            pooledStrategy.WithBindProperty(context.GetPooledGameObjectStrategyProperty());
+            poolRentingStrategy.WithBindProperty(context.GetPoolRentingStrategyProperty());
+            poolReturningStrategy.WithBindProperty(context.GetPoolReturningStrategyProperty());
             messageScope.WithBindProperty(context.GetMessageScopeProperty());
             logEnvironment.WithBindProperty(context.GetLogEnvironmentProperty());
 

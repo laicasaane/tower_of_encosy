@@ -1,6 +1,7 @@
 using EncosyTower.Logging;
 using EncosyTower.Pooling;
 using EncosyTower.Settings;
+using UnityEngine.Serialization;
 
 namespace EncosyTower.PageFlows.MonoPages
 {
@@ -10,7 +11,12 @@ namespace EncosyTower.PageFlows.MonoPages
         public bool slimPublishingContext = true;
         public bool ignoreEmptySubscriber = true;
         public MonoPageLoaderStrategy loaderStrategy;
-        public PooledGameObjectStrategy pooledGameObjectStrategy;
+
+        public RentingStrategy poolRentingStrategy;
+
+        [FormerlySerializedAs("pooledGameObjectStrategy")]
+        public ReturningStrategy poolReturningStrategy;
+
         public MonoMessageScope messageScope;
         public LogEnvironment logEnvironment;
     }

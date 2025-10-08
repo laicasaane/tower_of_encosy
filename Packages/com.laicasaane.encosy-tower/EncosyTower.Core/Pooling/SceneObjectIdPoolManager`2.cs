@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Debugging;
 using EncosyTower.Loaders;
@@ -122,11 +121,7 @@ namespace EncosyTower.Pooling
             _positions.Capacity = capacity;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Prepool(TId id, int amount)
-            => Prepool(id, amount, PooledGameObjectStrategy.Default);
-
-        public void Prepool(TId id, int amount, PooledGameObjectStrategy pooledStrategy)
+        public void Prepool(TId id, int amount, ReturningStrategy strategy)
         {
             AssertInitialization(this);
 
@@ -140,16 +135,12 @@ namespace EncosyTower.Pooling
                 return;
             }
 
-            pool.Prepool(amount, pooledStrategy);
+            pool.Prepool(amount, strategy);
 
             IncreaseCapacityBy(amount);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Prepool(ReadOnlySpan<TId> ids, int amount)
-            => Prepool(ids, amount, default);
-
-        public void Prepool(ReadOnlySpan<TId> ids, int amount, PooledGameObjectStrategy pooledStrategy)
+        public void Prepool(ReadOnlySpan<TId> ids, int amount, ReturningStrategy strategy)
         {
             AssertInitialization(this);
 
@@ -167,7 +158,7 @@ namespace EncosyTower.Pooling
                     continue;
                 }
 
-                pool.Prepool(amount, pooledStrategy);
+                pool.Prepool(amount, strategy);
                 count += 1;
             }
 
@@ -177,7 +168,7 @@ namespace EncosyTower.Pooling
             }
         }
 
-        public bool Rent(TId id, int amount, ref NativeList<GameObjectInfo> result)
+        public bool Rent(TId id, int amount, ref NativeList<GameObjectInfo> result, RentingStrategy strategy)
         {
             AssertInitialization(this);
 
@@ -194,7 +185,7 @@ namespace EncosyTower.Pooling
             var gameObjectIds = NativeArray.CreateFast<GameObjectId>(amount, Allocator.Temp);
             var transformIds = NativeArray.CreateFast<TransformId>(amount, Allocator.Temp);
 
-            pool.Rent(gameObjectIds, transformIds, true);
+            pool.Rent(gameObjectIds, transformIds, strategy);
 
             var transformArray = _transformArray;
             var goInfoMap = _goInfoMap;
@@ -246,15 +237,11 @@ namespace EncosyTower.Pooling
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(TId id, ReadOnlySpan<GameObjectId> gameObjectIds, ReadOnlySpan<TransformId> transformIds)
-            => Return(id, gameObjectIds, transformIds, PooledGameObjectStrategy.Default);
-
         public void Return(
               TId id
             , ReadOnlySpan<GameObjectId> gameObjectIds
             , ReadOnlySpan<TransformId> transformIds
-            , PooledGameObjectStrategy pooledStrategy
+            , ReturningStrategy strategy
         )
         {
             AssertInitialization(this);
@@ -264,24 +251,14 @@ namespace EncosyTower.Pooling
                 return;
             }
 
-            pool.Return(gameObjectIds, transformIds, pooledStrategy);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(
-              NativeHashMap<TId, Range> idToRangeMap
-            , ReadOnlySpan<GameObjectId> gameObjectIds
-            , ReadOnlySpan<TransformId> transformIds
-        )
-        {
-            Return(idToRangeMap, gameObjectIds, transformIds, PooledGameObjectStrategy.Default);
+            pool.Return(gameObjectIds, transformIds, strategy);
         }
 
         public void Return(
               NativeHashMap<TId, Range> idToRangeMap
             , ReadOnlySpan<GameObjectId> gameObjectIds
             , ReadOnlySpan<TransformId> transformIds
-            , PooledGameObjectStrategy pooledStrategy
+            , ReturningStrategy strategy
         )
         {
             AssertInitialization(this);
@@ -305,19 +282,15 @@ namespace EncosyTower.Pooling
                 pool.Return(
                       gameObjectIds.Slice(start, length)
                     , transformIds.Slice(start, length)
-                    , pooledStrategy
+                    , strategy
                 );
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(TId id, ReadOnlySpan<GameObjectId> gameObjectIds)
-            => Return(id, gameObjectIds, PooledGameObjectStrategy.Default);
-
         public void Return(
               TId id
             , ReadOnlySpan<GameObjectId> gameObjectIds
-            , PooledGameObjectStrategy pooledStrategy
+            , ReturningStrategy strategy
         )
         {
             AssertInitialization(this);
@@ -327,17 +300,13 @@ namespace EncosyTower.Pooling
                 return;
             }
 
-            pool.Return(gameObjectIds, pooledStrategy);
+            pool.Return(gameObjectIds, strategy);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(NativeHashMap<TId, Range> idToRangeMap, ReadOnlySpan<GameObjectId> gameObjectIds)
-            => Return(idToRangeMap, gameObjectIds, PooledGameObjectStrategy.Default);
 
         public void Return(
               NativeHashMap<TId, Range> idToRangeMap
             , ReadOnlySpan<GameObjectId> gameObjectIds
-            , PooledGameObjectStrategy pooledStrategy
+            , ReturningStrategy strategy
         )
         {
             AssertInitialization(this);
@@ -360,19 +329,15 @@ namespace EncosyTower.Pooling
 
                 pool.Return(
                       gameObjectIds.Slice(start, length)
-                    , pooledStrategy
+                    , strategy
                 );
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(TId id, ReadOnlySpan<TransformId> transformIds)
-            => Return(id, transformIds, PooledGameObjectStrategy.Default);
-
         public void Return(
               TId id
             , ReadOnlySpan<TransformId> transformIds
-            , PooledGameObjectStrategy pooledStrategy
+            , ReturningStrategy strategy
         )
         {
             AssertInitialization(this);
@@ -382,17 +347,13 @@ namespace EncosyTower.Pooling
                 return;
             }
 
-            pool.Return(transformIds, pooledStrategy);
+            pool.Return(transformIds, strategy);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(NativeHashMap<TId, Range> idToRangeMap, ReadOnlySpan<TransformId> transformIds)
-            => Return(idToRangeMap, transformIds, PooledGameObjectStrategy.Default);
 
         public void Return(
               NativeHashMap<TId, Range> idToRangeMap
             , ReadOnlySpan<TransformId> transformIds
-            , PooledGameObjectStrategy pooledStrategy
+            , ReturningStrategy strategy
         )
         {
             AssertInitialization(this);
@@ -415,7 +376,7 @@ namespace EncosyTower.Pooling
 
                 pool.Return(
                       transformIds.Slice(start, length)
-                    , pooledStrategy
+                    , strategy
                 );
             }
         }

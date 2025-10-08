@@ -36,7 +36,8 @@ namespace EncosyTower.PageFlows.MonoPages
               Transform poolParent
             , Transform activeParent
             , FasterList<MonoPageIdentifier> pageIds
-            , PooledGameObjectStrategy pooledStrategy
+            , RentingStrategy rentingStrategy
+            , ReturningStrategy returningStrategy
         )
         {
             _poolParent = poolParent;
@@ -44,7 +45,8 @@ namespace EncosyTower.PageFlows.MonoPages
             _pageIds = pageIds;
             _poolLayer = poolParent.gameObject.layer;
             _activeLayer = activeParent.gameObject.layer;
-            _pool.PooledStrategy = pooledStrategy;
+            _pool.RentingStrategy = rentingStrategy;
+            _pool.ReturningStrategy = returningStrategy;
         }
 
         public bool IsInitialized => _pool.Prefab != null;
@@ -71,7 +73,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
         public void Prepool(int amount)
         {
-            if (_pool.Prepool(amount, GetPooledStrategy()))
+            if (_pool.Prepool(amount, GetReturningStrategy()))
             {
                 _gameObjectIds.EnsureCapacity(amount);
                 _pageIds.IncreaseCapacityBy(amount);
@@ -84,7 +86,7 @@ namespace EncosyTower.PageFlows.MonoPages
             , UnityObjectLogger logger
         )
         {
-            var gameObject = _pool.RentGameObject(false);
+            var gameObject = _pool.RentGameObject(GetRentingStrategy());
             var findResult = gameObject.TryGetComponent<IMonoPage>(out var page);
 
             if (findResult == false)
@@ -139,7 +141,7 @@ namespace EncosyTower.PageFlows.MonoPages
             identifier.GameObject.layer = _poolLayer;
             identifier.Transform.SetParent(_poolParent, false);
 
-            _pool.Return(identifier.GameObject, GetPooledStrategy());
+            _pool.Return(identifier.GameObject, GetReturningStrategy());
         }
 
         public void Dispose()
@@ -171,13 +173,18 @@ namespace EncosyTower.PageFlows.MonoPages
 
             gameObjectIds.Clear();
             _pageIds.Clear();
-            _pool.Return(array);
+            _pool.Return(array, GetReturningStrategy());
         }
 
-        private PooledGameObjectStrategy GetPooledStrategy()
+        private RentingStrategy GetRentingStrategy()
             => _options.TryGetValue(out var options)
-                ? options.PooledStrategy
-                : PooledGameObjectStrategy.Default;
+                ? options.RentingStrategy
+                : RentingStrategy.Default;
+
+        private ReturningStrategy GetReturningStrategy()
+            => _options.TryGetValue(out var options)
+                ? options.ReturningStrategy
+                : ReturningStrategy.Default;
 
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfFoundNoPage(string key, UnityObjectLogger logger)

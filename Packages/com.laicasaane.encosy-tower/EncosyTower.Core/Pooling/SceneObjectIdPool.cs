@@ -39,7 +39,9 @@ namespace EncosyTower.Pooling
             _objectList = new(32);
         }
 
-        public PooledGameObjectStrategy PooledStrategy { get; set; }
+        public RentingStrategy RentingStrategy { get; set; }
+
+        public ReturningStrategy ReturningStrategy { get; set; }
 
         public int UnusedCount
         {
@@ -87,7 +89,7 @@ namespace EncosyTower.Pooling
         public bool Prepool(int amount)
             => Prepool(amount, default);
 
-        public bool Prepool(int amount, PooledGameObjectStrategy pooledStrategy)
+        public bool Prepool(int amount, ReturningStrategy strategy)
         {
             if (_scene.IsValid() == false)
             {
@@ -130,7 +132,7 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.AddRange(gameObjectIds.AsReadOnlySpan());
             _unusedTransformIds.AddRange(transformIds.AsReadOnlySpan());
 
-            if (new PooledGameObjectOperation(PooledStrategy, pooledStrategy).ShouldDeactivate())
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
             {
                 GameObject.SetGameObjectsActive(gameObjectIds, false);
             }
@@ -201,7 +203,7 @@ namespace EncosyTower.Pooling
             _unusedTransformIds.RemoveRange(keep, removeCount);
         }
 
-        public GameObjectId RentGameObjectId(bool activate = false)
+        public GameObjectId RentGameObjectId(RentingStrategy strategy)
         {
             if (UnusedCount < 1)
             {
@@ -214,7 +216,7 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.RemoveAt(last);
             _unusedTransformIds.RemoveAt(last);
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 var ids = NativeArray.CreateFast<int>(1, Allocator.Temp);
                 ids[0] = result;
@@ -225,7 +227,7 @@ namespace EncosyTower.Pooling
             return (GameObjectId)result;
         }
 
-        public TransformId RentTransformId(bool activate = false)
+        public TransformId RentTransformId(RentingStrategy strategy)
         {
             if (UnusedCount < 1)
             {
@@ -239,7 +241,7 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.RemoveAt(last);
             _unusedTransformIds.RemoveAt(last);
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 var ids = NativeArray.CreateFast<int>(1, Allocator.Temp);
                 ids[0] = id;
@@ -250,7 +252,7 @@ namespace EncosyTower.Pooling
             return (TransformId)result;
         }
 
-        public void Rent(Span<GameObjectId> gameObjectIds, Span<TransformId> transformIds, bool activate = false)
+        public void Rent(Span<GameObjectId> gameObjectIds, Span<TransformId> transformIds, RentingStrategy strategy)
         {
             var length = gameObjectIds.Length;
 
@@ -269,13 +271,13 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.RemoveRange(startIndex, length);
             _unusedTransformIds.RemoveRange(startIndex, length);
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 GameObject.SetGameObjectsActive(reGameObjectIds, true);
             }
         }
 
-        public void Rent(Span<GameObjectId> gameObjectIds, bool activate = false)
+        public void Rent(Span<GameObjectId> gameObjectIds, RentingStrategy strategy)
         {
             var length = gameObjectIds.Length;
 
@@ -290,13 +292,13 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.RemoveRange(startIndex, length);
             _unusedTransformIds.RemoveRange(startIndex, length);
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 GameObject.SetGameObjectsActive(reGameObjectIds, true);
             }
         }
 
-        public void Rent(Span<TransformId> transformIds, bool activate = false)
+        public void Rent(Span<TransformId> transformIds, RentingStrategy strategy)
         {
             var length = transformIds.Length;
 
@@ -314,13 +316,13 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.RemoveRange(startIndex, length);
             _unusedTransformIds.RemoveRange(startIndex, length);
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 GameObject.SetGameObjectsActive(gameObjectIds, true);
             }
         }
 
-        public void Rent(int amount, [NotNull] FasterList<Transform> transforms, bool activate = false)
+        public void Rent(int amount, [NotNull] FasterList<Transform> transforms, RentingStrategy strategy)
         {
             Checks.IsTrue(amount > 0, "\"amount\" must be greater than 0");
 
@@ -350,7 +352,7 @@ namespace EncosyTower.Pooling
                 transformSpan[i] = objects[i] as Transform;
             }
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 GameObject.SetGameObjectsActive(gameObjectIds, true);
             }
@@ -358,14 +360,10 @@ namespace EncosyTower.Pooling
             _objectList.Clear();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(ReadOnlySpan<GameObjectId> gameObjectIds, ReadOnlySpan<TransformId> transformIds)
-            => Return(gameObjectIds, transformIds, default);
-
         public void Return(
               ReadOnlySpan<GameObjectId> gameObjectIds
             , ReadOnlySpan<TransformId> transformIds
-            , PooledGameObjectStrategy pooledStrategy
+            , ReturningStrategy strategy
         )
         {
             var length = gameObjectIds.Length;
@@ -389,17 +387,13 @@ namespace EncosyTower.Pooling
             unusedGameObjectIds.AddRange(reGameObjectIds);
             unusedTransformIds.AddRange(reTransformIds);
 
-            if (new PooledGameObjectOperation(PooledStrategy, pooledStrategy).ShouldDeactivate())
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
             {
                 GameObject.SetGameObjectsActive(reGameObjectIds, false);
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(ReadOnlySpan<GameObjectId> gameObjectIds)
-            => Return(gameObjectIds, PooledGameObjectStrategy.Default);
-
-        public void Return(ReadOnlySpan<GameObjectId> gameObjectIds, PooledGameObjectStrategy pooledStrategy)
+        public void Return(ReadOnlySpan<GameObjectId> gameObjectIds, ReturningStrategy strategy)
         {
             var length = gameObjectIds.Length;
 
@@ -447,17 +441,13 @@ namespace EncosyTower.Pooling
 
             postIds = postIds.GetSubArray(0, postIdsLength);
 
-            if (new PooledGameObjectOperation(PooledStrategy, pooledStrategy).ShouldDeactivate())
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
             {
                 GameObject.SetGameObjectsActive(postIds, true);
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(ReadOnlySpan<TransformId> transformIds)
-            => Return(transformIds, PooledGameObjectStrategy.Default);
-
-        public void Return(ReadOnlySpan<TransformId> transformIds, PooledGameObjectStrategy pooledStrategy)
+        public void Return(ReadOnlySpan<TransformId> transformIds, ReturningStrategy strategy)
         {
             var length = transformIds.Length;
 
@@ -512,7 +502,7 @@ namespace EncosyTower.Pooling
 
             postIds = postIds.GetSubArray(0, postIdsLength);
 
-            if (new PooledGameObjectOperation(PooledStrategy, pooledStrategy).ShouldDeactivate())
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
             {
                 GameObject.SetGameObjectsActive(postIds, true);
             }

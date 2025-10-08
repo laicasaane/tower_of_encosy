@@ -2,7 +2,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Debugging;
 using EncosyTower.Loaders;
@@ -115,11 +114,7 @@ namespace EncosyTower.Pooling
             _positions.Capacity = capacity;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Prepool(int amount)
-            => Prepool(amount, PooledGameObjectStrategy.Default);
-
-        public void Prepool(int amount, PooledGameObjectStrategy pooledStrategy)
+        public void Prepool(int amount, ReturningStrategy strategy)
         {
             AssertInitialization(this);
 
@@ -133,12 +128,12 @@ namespace EncosyTower.Pooling
                 return;
             }
 
-            _pool.Prepool(amount, pooledStrategy);
+            _pool.Prepool(amount, strategy);
 
             IncreaseCapacityBy(amount);
         }
 
-        public bool Rent(int amount, ref NativeList<GameObjectInfo> result)
+        public bool Rent(int amount, ref NativeList<GameObjectInfo> result, RentingStrategy strategy)
         {
             AssertInitialization(this);
 
@@ -155,7 +150,7 @@ namespace EncosyTower.Pooling
             var gameObjectIds = NativeArray.CreateFast<GameObjectId>(amount, Allocator.Temp);
             var transformIds = NativeArray.CreateFast<TransformId>(amount, Allocator.Temp);
 
-            _pool.Rent(gameObjectIds, transformIds, true);
+            _pool.Rent(gameObjectIds, transformIds, strategy);
 
             var transformArray = _transformArray;
             var goInfoMap = _goInfoMap;
@@ -207,14 +202,10 @@ namespace EncosyTower.Pooling
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(ReadOnlySpan<GameObjectId> gameObjectIds, ReadOnlySpan<TransformId> transformIds)
-            => Return(gameObjectIds, transformIds, PooledGameObjectStrategy.Default);
-
         public void Return(
               ReadOnlySpan<GameObjectId> gameObjectIds
             , ReadOnlySpan<TransformId> transformIds
-            , PooledGameObjectStrategy pooledStrategy
+            , ReturningStrategy strategy
         )
         {
             AssertInitialization(this);
@@ -224,18 +215,14 @@ namespace EncosyTower.Pooling
                 return;
             }
 
-            _pool.Return(gameObjectIds, transformIds, pooledStrategy);
+            _pool.Return(gameObjectIds, transformIds, strategy);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(Range range, ReadOnlySpan<GameObjectId> gameObjectIds, ReadOnlySpan<TransformId> transformIds)
-            => Return(range, gameObjectIds, transformIds, default);
 
         public void Return(
               Range range
             , ReadOnlySpan<GameObjectId> gameObjectIds
             , ReadOnlySpan<TransformId> transformIds
-            , PooledGameObjectStrategy pooledStrategy
+            , ReturningStrategy strategy
         )
         {
             AssertInitialization(this);
@@ -255,15 +242,11 @@ namespace EncosyTower.Pooling
             _pool.Return(
                   gameObjectIds.Slice(start, length)
                 , transformIds.Slice(start, length)
-                , pooledStrategy
+                , strategy
             );
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(ReadOnlySpan<GameObjectId> gameObjectIds)
-            => Return(gameObjectIds, PooledGameObjectStrategy.Default);
-
-        public void Return(ReadOnlySpan<GameObjectId> gameObjectIds, PooledGameObjectStrategy pooledStrategy)
+        public void Return(ReadOnlySpan<GameObjectId> gameObjectIds, ReturningStrategy strategy)
         {
             AssertInitialization(this);
 
@@ -272,17 +255,13 @@ namespace EncosyTower.Pooling
                 return;
             }
 
-            _pool.Return(gameObjectIds, pooledStrategy);
+            _pool.Return(gameObjectIds, strategy);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(Range range, ReadOnlySpan<GameObjectId> gameObjectIds)
-            => Return(range, gameObjectIds, PooledGameObjectStrategy.Default);
 
         public void Return(
               Range range
             , ReadOnlySpan<GameObjectId> gameObjectIds
-            , PooledGameObjectStrategy pooledStrategy
+            , ReturningStrategy strategy
         )
         {
             AssertInitialization(this);
@@ -301,15 +280,11 @@ namespace EncosyTower.Pooling
 
             _pool.Return(
                   gameObjectIds.Slice(start, length)
-                , pooledStrategy
+                , strategy
             );
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(ReadOnlySpan<TransformId> transformIds)
-            => Return(transformIds, PooledGameObjectStrategy.Default);
-
-        public void Return(ReadOnlySpan<TransformId> transformIds, PooledGameObjectStrategy pooledStrategy)
+        public void Return(ReadOnlySpan<TransformId> transformIds, ReturningStrategy strategy)
         {
             AssertInitialization(this);
 
@@ -318,17 +293,13 @@ namespace EncosyTower.Pooling
                 return;
             }
 
-            _pool.Return(transformIds, pooledStrategy);
+            _pool.Return(transformIds, strategy);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(Range range, ReadOnlySpan<TransformId> transformIds)
-            => Return(range, transformIds, PooledGameObjectStrategy.Default);
 
         public void Return(
               Range range
             , ReadOnlySpan<TransformId> transformIds
-            , PooledGameObjectStrategy pooledStrategy
+            , ReturningStrategy strategy
         )
         {
             AssertInitialization(this);
@@ -347,7 +318,7 @@ namespace EncosyTower.Pooling
 
             _pool.Return(
                   transformIds.Slice(start, length)
-                , pooledStrategy
+                , strategy
             );
         }
 

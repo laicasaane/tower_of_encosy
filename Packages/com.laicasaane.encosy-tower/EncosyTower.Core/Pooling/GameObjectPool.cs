@@ -39,7 +39,9 @@ namespace EncosyTower.Pooling
             _objectList = new();
         }
 
-        public PooledGameObjectStrategy PooledStrategy { get; set; }
+        public RentingStrategy RentingStrategy { get; set; }
+
+        public ReturningStrategy ReturningStrategy { get; set; }
 
         public int UnusedCount
         {
@@ -62,7 +64,7 @@ namespace EncosyTower.Pooling
         public bool Prepool(int amount)
             => Prepool(amount, default);
 
-        public bool Prepool(int amount, PooledGameObjectStrategy pooledStrategy)
+        public bool Prepool(int amount, ReturningStrategy strategy)
         {
             if (_prefab == null)
             {
@@ -76,15 +78,15 @@ namespace EncosyTower.Pooling
 
             if (amount <= 1)
             {
-                return PrepoolOne(new(PooledStrategy, pooledStrategy));
+                return PrepoolOne(new(ReturningStrategy, strategy));
             }
             else
             {
-                return PrepoolMany(amount, new(PooledStrategy, pooledStrategy));
+                return PrepoolMany(amount, new(ReturningStrategy, strategy));
             }
         }
 
-        private bool PrepoolOne(PooledGameObjectOperation pooledOperation)
+        private bool PrepoolOne(ReturnOperation operation)
         {
             var go = _prefab.Instantiate(Location.Parent, Location.PoolScene, Location.Scene);
 
@@ -112,7 +114,7 @@ namespace EncosyTower.Pooling
             _unusedTransformIds.Add(go.transform.GetInstanceID());
 #endif
 
-            if (pooledOperation.ShouldDeactivate())
+            if (operation.ShouldDeactivate())
             {
                 go.SetActive(false);
             }
@@ -120,7 +122,7 @@ namespace EncosyTower.Pooling
             return true;
         }
 
-        private bool PrepoolMany(int amount, PooledGameObjectOperation pooledOperation)
+        private bool PrepoolMany(int amount, ReturnOperation operation)
         {
             if (_prefab.Instantiate(amount
                 , Allocator.Temp
@@ -168,7 +170,7 @@ namespace EncosyTower.Pooling
 
             _objectList.Clear();
 
-            if (pooledOperation.ShouldDeactivate())
+            if (operation.ShouldDeactivate())
             {
                 GameObject.SetGameObjectsActive(gameObjectIds, false);
             }
@@ -201,7 +203,7 @@ namespace EncosyTower.Pooling
             _unusedTransformIds.RemoveRange(keep, removeCount);
         }
 
-        public GameObject RentGameObject(bool activate = false)
+        public GameObject RentGameObject(RentingStrategy strategy)
         {
             if (UnusedCount < 1)
             {
@@ -217,7 +219,7 @@ namespace EncosyTower.Pooling
 
             Prefab.MoveToScene(result);
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 result.SetActive(true);
             }
@@ -225,7 +227,7 @@ namespace EncosyTower.Pooling
             return result;
         }
 
-        public GameObjectId RentGameObjectId(bool activate = false)
+        public GameObjectId RentGameObjectId(RentingStrategy strategy)
         {
             if (UnusedCount < 1)
             {
@@ -242,7 +244,7 @@ namespace EncosyTower.Pooling
 
             Prefab.MoveToScene(obj);
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 obj.SetActive(true);
             }
@@ -250,7 +252,7 @@ namespace EncosyTower.Pooling
             return (GameObjectId)result;
         }
 
-        public TransformId RentTransformId(bool activate = false)
+        public TransformId RentTransformId(RentingStrategy strategy)
         {
             if (UnusedCount < 1)
             {
@@ -267,7 +269,7 @@ namespace EncosyTower.Pooling
 
             Prefab.MoveToScene(obj);
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 obj.SetActive(true);
             }
@@ -275,7 +277,11 @@ namespace EncosyTower.Pooling
             return (TransformId)result;
         }
 
-        public void Rent(Span<GameObjectId> gameObjectIds, Span<TransformId> transformIds, bool activate = false)
+        public void Rent(
+              Span<GameObjectId> gameObjectIds
+            , Span<TransformId> transformIds
+            , RentingStrategy strategy
+        )
         {
             var length = gameObjectIds.Length;
 
@@ -297,7 +303,7 @@ namespace EncosyTower.Pooling
 
             Prefab.MoveToScene(reGameObjectIds);
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 GameObject.SetGameObjectsActive(reGameObjectIds, true);
             }
@@ -307,7 +313,7 @@ namespace EncosyTower.Pooling
               Span<GameObject> objects
             , Span<GameObjectId> gameObjectIds
             , Span<TransformId> transformIds
-            , bool activate = false
+            , RentingStrategy strategy
         )
         {
             var length = objects.Length;
@@ -331,13 +337,13 @@ namespace EncosyTower.Pooling
 
             Prefab.MoveToScene(reGameObjectIds);
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 GameObject.SetGameObjectsActive(reGameObjectIds, true);
             }
         }
 
-        public void Rent(Span<GameObject> objects, bool activate = false)
+        public void Rent(Span<GameObject> objects, RentingStrategy strategy)
         {
             var length = objects.Length;
 
@@ -357,13 +363,13 @@ namespace EncosyTower.Pooling
 
             Prefab.MoveToScene(gameObjectIds);
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 GameObject.SetGameObjectsActive(gameObjectIds, true);
             }
         }
 
-        public void Rent(Span<GameObjectId> gameObjectIds, bool activate = false)
+        public void Rent(Span<GameObjectId> gameObjectIds, RentingStrategy strategy)
         {
             var length = gameObjectIds.Length;
 
@@ -382,13 +388,13 @@ namespace EncosyTower.Pooling
 
             Prefab.MoveToScene(reGameObjectIds);
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 GameObject.SetGameObjectsActive(reGameObjectIds, true);
             }
         }
 
-        public void Rent(Span<TransformId> transformIds, bool activate = false)
+        public void Rent(Span<TransformId> transformIds, RentingStrategy strategy)
         {
             var length = transformIds.Length;
 
@@ -409,17 +415,13 @@ namespace EncosyTower.Pooling
 
             Prefab.MoveToScene(gameObjectIds);
 
-            if (activate)
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 GameObject.SetGameObjectsActive(gameObjectIds, true);
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(GameObject instance)
-            => Return(instance, PooledGameObjectStrategy.Default);
-
-        public void Return(GameObject instance, PooledGameObjectStrategy pooledStrategy)
+        public void Return(GameObject instance, ReturningStrategy strategy)
         {
             if (instance.IsInvalid())
             {
@@ -440,17 +442,13 @@ namespace EncosyTower.Pooling
             _unusedTransformIds.Add(instance.transform.GetInstanceID());
 #endif
 
-            if (new PooledGameObjectOperation(PooledStrategy, pooledStrategy).ShouldDeactivate())
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
             {
                 instance.SetActive(false);
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(ReadOnlySpan<GameObject> objects)
-            => Return(objects, PooledGameObjectStrategy.Default);
-
-        public void Return(ReadOnlySpan<GameObject> objects, PooledGameObjectStrategy pooledStrategy)
+        public void Return(ReadOnlySpan<GameObject> objects, ReturningStrategy strategy)
         {
             var length = objects.Length;
 
@@ -494,17 +492,13 @@ namespace EncosyTower.Pooling
             postIds = postIds.GetSubArray(0, postIdsLength);
             Prefab.MoveToScene(postIds, true);
 
-            if (new PooledGameObjectOperation(PooledStrategy, pooledStrategy).ShouldDeactivate())
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
             {
                 GameObject.SetGameObjectsActive(postIds, false);
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(ReadOnlySpan<GameObjectId> gameObjectIds)
-            => Return(gameObjectIds, PooledGameObjectStrategy.Default);
-
-        public void Return(ReadOnlySpan<GameObjectId> gameObjectIds, PooledGameObjectStrategy pooledStrategy)
+        public void Return(ReadOnlySpan<GameObjectId> gameObjectIds, ReturningStrategy strategy)
         {
             var length = gameObjectIds.Length;
 
@@ -559,17 +553,13 @@ namespace EncosyTower.Pooling
             postIds = postIds.GetSubArray(0, postIdsLength);
             Prefab.MoveToScene(postIds, true);
 
-            if (new PooledGameObjectOperation(PooledStrategy, pooledStrategy).ShouldDeactivate())
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
             {
                 GameObject.SetGameObjectsActive(postIds, false);
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(ReadOnlySpan<TransformId> transformIds)
-            => Return(transformIds, PooledGameObjectStrategy.Default);
-
-        public void Return(ReadOnlySpan<TransformId> transformIds, PooledGameObjectStrategy pooledStrategy)
+        public void Return(ReadOnlySpan<TransformId> transformIds, ReturningStrategy strategy)
         {
             var length = transformIds.Length;
 
@@ -632,7 +622,7 @@ namespace EncosyTower.Pooling
             postIds = postIds.GetSubArray(0, postIdsLength);
             Prefab.MoveToScene(postIds, true);
 
-            if (new PooledGameObjectOperation(PooledStrategy, pooledStrategy).ShouldDeactivate())
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
             {
                 GameObject.SetGameObjectsActive(postIds, false);
             }

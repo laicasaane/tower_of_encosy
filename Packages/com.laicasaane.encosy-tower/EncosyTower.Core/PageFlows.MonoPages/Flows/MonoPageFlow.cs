@@ -405,7 +405,8 @@ namespace EncosyTower.PageFlows.MonoPages
                       PoolTransform
                     , RectTransform
                     , _pageIds
-                    , _context.pooledGameObjectStrategy
+                    , _context.poolRentingStrategy
+                    , _context.poolReturningStrategy
                 );
             }
 

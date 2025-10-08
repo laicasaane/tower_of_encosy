@@ -8,24 +8,24 @@ namespace EncosyTower.Pooling
     /// <br/>
     /// However, each return operation should allow the caller to override this default behavior.
     /// </remarks>
-    public enum PooledGameObjectStrategy
+    public enum ReturningStrategy : byte
     {
         /// <summary>
-        /// This strategy will try to deactivate the pooled GameObjects if possible.
+        /// This strategy will try to deactivate the returned GameObjects if possible.
         /// </summary>
         /// <remarks>
-        /// Refers the implementation of <see cref="PooledGameObjectOperation.ShouldDeactivate"/>.
+        /// Refers the implementation of <see cref="ReturnOperation.ShouldDeactivate"/>.
         /// </remarks>
-        Default,
+        Default    = 0,
 
         /// <summary>
-        /// This strategy will always deactivate the pooled GameObjects.
+        /// This strategy will always deactivate the returned GameObjects.
         /// </summary>
-        Deactivate,
+        Deactivate = 1,
 
         /// <summary>
-        /// This strategy will do nothing to the pooled GameObjects.
+        /// This strategy will do nothing to the returned GameObjects.
         /// </summary>
-        DoNothing,
+        DoNothing  = 2,
     }
 }
