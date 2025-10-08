@@ -850,16 +850,6 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Resize(int newSize)
-        {
-            _version++;
-
-            if (newSize == _buffer.Length) return;
-
-            Array.Resize(ref _buffer, newSize);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] ToArray()
             => AsReadOnlySpan().ToArray();
 
@@ -877,8 +867,12 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Trim()
         {
+            _version++;
+
             if (_count < _buffer.Length)
-                Resize(_count);
+            {
+                Array.Resize(ref _buffer, _count);
+            }
         }
 
         public void AddReplicate<TDerived>(int amount)
