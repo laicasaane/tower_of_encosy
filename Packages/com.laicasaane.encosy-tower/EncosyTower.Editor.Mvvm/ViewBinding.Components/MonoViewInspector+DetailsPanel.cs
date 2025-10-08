@@ -16,14 +16,18 @@ using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEngine;
 
+#if UNITY_6000_2_OR_NEWER
+using EntityId = System.Int32;
+#else
+using EntityId = System.Int32;
+#endif
+
 namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 {
 #if UNITY_6000_2_OR_NEWER
     using TreeViewPopup = EncosyTower.Editor.TreeViewPopup<EntityId>;
-    using EntityId = UnityEngine.EntityId;
 #else
     using TreeViewPopup = EncosyTower.Editor.TreeViewPopup;
-    using EntityId = System.Int32;
 #endif
 
     partial class MonoViewInspector

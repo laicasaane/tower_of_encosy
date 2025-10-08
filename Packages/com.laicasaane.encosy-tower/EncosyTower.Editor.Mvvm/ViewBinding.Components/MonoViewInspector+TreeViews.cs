@@ -5,6 +5,12 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+#if UNITY_6000_2_OR_NEWER
+using EntityId = System.Int32;
+#else
+using EntityId = System.Int32;
+#endif
+
 namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 {
 #if UNITY_6000_2_OR_NEWER
