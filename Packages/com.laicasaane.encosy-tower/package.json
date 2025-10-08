@@ -33,6 +33,11 @@
       "path": "Samples~/EncosyTower.Samples.Mvvm"
     },
     {
+      "displayName": "EncosyTower.Samples.Pooling",
+      "description": "Contains sample setup for Encosy Pooling",
+      "path": "Samples~/EncosyTower.Samples.Pooling"
+    },
+    {
       "displayName": "EncosyTower.Samples.VisualDebugging",
       "description": "Contains sample setup for Encosy Visual Debugging",
       "path": "Samples~/EncosyTower.Samples.VisualDebugging"

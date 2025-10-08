@@ -1,0 +1,53 @@
+{
+    "name": "EncosyTower.Samples.Pooling",
+    "rootNamespace": "EncosyTower.Samples.Pooling",
+    "references": [
+        "EncosyTower.Core",
+        "Unity.Burst",
+        "Unity.Collections",
+        "Unity.Mathematics",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_EDITOR || INCLUDE_ENCOSY_SAMPLES_POOLING"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "UNITY_BURST"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "UNITY_COLLECTIONS"
+        },
+        {
+            "name": "com.unity.mathematics",
+            "expression": "",
+            "define": "UNITY_MATHEMATICS"
+        },
+        {
+            "name": "com.unity.textmeshpro",
+            "expression": "",
+            "define": "UNITY_TEXTMESHPRO"
+        },
+        {
+            "name": "com.unity.ugui",
+            "expression": "",
+            "define": "UNITY_UGUI"
+        },
+        {
+            "name": "com.unity.ugui",
+            "expression": "2.0.0",
+            "define": "UNITY_TEXTMESHPRO"
+        }
+    ],
+    "noEngineReferences": false
+}
