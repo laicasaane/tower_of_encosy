@@ -18,11 +18,9 @@ namespace EncosyTower.Common
 
     public readonly struct Option<T> : IEquatable<Option<T>>
     {
-        private readonly static bool s_isValueType = typeof(T).IsValueType;
-
         public readonly static Option<T> None = default;
 
-        private readonly T _value;
+        internal readonly T _value;
 
         public readonly ByteBool HasValue;
 
@@ -30,15 +28,19 @@ namespace EncosyTower.Common
         {
             _value = value;
 
-            if (s_isValueType)
+            var isValueType = true;
+            ValidateValueType(ref isValueType);
+
+            if (isValueType)
             {
                 HasValue = true;
             }
             else
             {
-                HasValue = value is UnityEngine.Object obj
-                    ? (ByteBool)(obj == true)
-                    : value is not null;
+                var result = true;
+                ValidateNotNull(value, ref result);
+
+                HasValue = result;
             }
         }
 
@@ -100,6 +102,26 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Option<T> left, Option<T> right)
             => !left.Equals(right);
+
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ValidateValueType(ref bool result)
+        {
+            result = typeof(T).IsValueType;
+        }
+
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ValidateNotNull(T value, ref bool result)
+        {
+            result = value is UnityEngine.Object unityObject
+                ? (ByteBool)(unityObject == true)
+                : value is not null;
+        }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfHasNoValue([DoesNotReturnIf(false)] bool check)
