@@ -1,3 +1,5 @@
+using System;
+using System.Runtime.InteropServices;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
 
@@ -11,10 +13,15 @@ namespace EncosyTower.Pooling
     using TransformId = UnityInstanceId<Transform>;
 #endif
 
+    [Serializable, StructLayout(LayoutKind.Explicit, Size = 4 + 4 + 4)]
     public struct GameObjectInfo
     {
-        public GameObjectId gameObjectId;
-        public TransformId transformId;
-        public int transformArrayIndex;
+        public const int OFFSET_GAMEOBJECT_ID = 0;
+        public const int OFFSET_TRANSFORM_ID = 0 + 4;
+        public const int OFFSET_TRANSFORM_ARRAY_INDEX = 0 + 4 + 4;
+
+        [FieldOffset(OFFSET_GAMEOBJECT_ID)]         public GameObjectId gameObjectId;
+        [FieldOffset(OFFSET_TRANSFORM_ID)]          public TransformId transformId;
+        [FieldOffset(OFFSET_TRANSFORM_ARRAY_INDEX)] public int transformArrayIndex;
     }
 }
