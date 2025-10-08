@@ -5,6 +5,18 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace EncosyTower.Collections.Unsafe
 {
+    public static class NativeArrayUnsafe
+    {
+        /// <summary>
+        /// Convert an existing <see cref="Span{T}"/> to a NativeArray.
+        /// </summary>
+        public static NativeArray<T> ConvertFrom<T>(Span<T> source, Allocator allocator)
+            where T : unmanaged
+        {
+            return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray(source, allocator);
+        }
+    }
+
     public static class EncosyNativeArrayExtensionsUnsafe
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
