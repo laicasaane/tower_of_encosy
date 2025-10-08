@@ -129,15 +129,15 @@ namespace EncosyTower.Common
         {
             if (TryGetValue(out var value))
             {
-                return $"Result+Value({value})";
+                return string.Format("{0}({1})", ResultExtensions.RESULT_VALUE_STRING, value);
             }
             else if (TryGetError(out var error))
             {
-                return $"Result+Error({error})";
+                return string.Format("{0}({1})", ResultExtensions.RESULT_ERROR_STRING, error);
             }
             else
             {
-                return "Result+Invalid";
+                return ResultExtensions.RESULT_INVALID_STRING;
             }
         }
 
@@ -247,15 +247,15 @@ namespace EncosyTower.Common
         {
             if (TryGetValue(out var value))
             {
-                return $"Result+Value({value})";
+                return string.Format("{0}({1})", ResultExtensions.RESULT_VALUE_STRING, value);
             }
             else if (TryGetError(out var error))
             {
-                return $"Result+Error({error})";
+                return string.Format("{0}({1})", ResultExtensions.RESULT_ERROR_STRING, error);
             }
             else
             {
-                return "Result+Invalid";
+                return ResultExtensions.RESULT_INVALID_STRING;
             }
         }
 
@@ -274,5 +274,171 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Result<TValue, TError> left, Result<TValue, TError> right)
             => !left.Equals(right);
+    }
+
+    public static class ResultExtensions
+    {
+        internal const string RESULT_VALUE_STRING = "Result+Value";
+        internal const string RESULT_ERROR_STRING = "Result+Error";
+        internal const string RESULT_INVALID_STRING = "Result+Invalid";
+
+        public static bool TryFormat<T>(
+              in this Result<T> self
+            , Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format = default
+            , IFormatProvider provider = null
+        )
+            where T : ISpanFormattable
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static bool False(out int value)
+            {
+                value = 0;
+                return false;
+            }
+
+            var resultValue = self.TryGetValue(out var value);
+            var resultError = self.TryGetError(out var error);
+
+            if (resultValue == false && resultError == false)
+            {
+                var resultInvalidSpan = RESULT_INVALID_STRING.AsSpan();
+
+                if (destination.Length < resultInvalidSpan.Length)
+                {
+                    return False(out charsWritten);
+                }
+
+                resultInvalidSpan.CopyTo(destination);
+                charsWritten = resultInvalidSpan.Length;
+                return true;
+            }
+
+            var resultStringSpan = resultValue ? RESULT_VALUE_STRING.AsSpan() : RESULT_ERROR_STRING.AsSpan();
+
+            if (destination.Length < resultStringSpan.Length + 1)
+            {
+                return False(out charsWritten);
+            }
+
+            resultStringSpan.CopyTo(destination);
+            destination[resultStringSpan.Length] = '(';
+
+            var prefixChars = resultStringSpan.Length + 1;
+            destination = destination[prefixChars..];
+
+            int resultCharsWritten;
+
+            if (resultValue)
+            {
+                if (value.TryFormat(destination, out var valueCharsWritten, format, provider) == false)
+                {
+                    return False(out charsWritten);
+                }
+
+                resultCharsWritten = valueCharsWritten;
+            }
+            else
+            {
+                var errorDestination = destination[..^1];
+
+                if (error.TryFormat(errorDestination, out var errorCharsWritten) == false)
+                {
+                    return False(out charsWritten);
+                }
+
+                resultCharsWritten = errorCharsWritten;
+            }
+
+            destination = destination[resultCharsWritten..];
+
+            if (destination.Length < 1)
+            {
+                return False(out charsWritten);
+            }
+
+            destination[0] = ')';
+            charsWritten = prefixChars + resultCharsWritten + 1;
+            return true;
+        }
+
+        public static bool TryFormat<TValue, TError>(
+              in this Result<TValue, TError> self
+            , Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format = default
+            , IFormatProvider provider = null
+        )
+            where TValue : ISpanFormattable
+            where TError : ISpanFormattable
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static bool False(out int value)
+            {
+                value = 0;
+                return false;
+            }
+
+            var resultValue = self.TryGetValue(out var value);
+            var resultError = self.TryGetError(out var error);
+
+            if (resultValue == false && resultError == false)
+            {
+                var resultInvalidSpan = RESULT_INVALID_STRING.AsSpan();
+
+                if (destination.Length < resultInvalidSpan.Length)
+                {
+                    return False(out charsWritten);
+                }
+
+                resultInvalidSpan.CopyTo(destination);
+                charsWritten = resultInvalidSpan.Length;
+                return true;
+            }
+
+            var resultStringSpan = resultValue ? RESULT_VALUE_STRING.AsSpan() : RESULT_ERROR_STRING.AsSpan();
+
+            if (destination.Length < resultStringSpan.Length + 1 + 1) // '(' and ')'
+            {
+                return False(out charsWritten);
+            }
+
+            resultStringSpan.CopyTo(destination);
+            destination[resultStringSpan.Length] = '(';
+
+            var prefixChars = resultStringSpan.Length + 1;
+            destination = destination[prefixChars..];
+
+            int resultCharsWritten;
+
+            if (resultValue)
+            {
+                var valueDestination = destination[..^1];
+
+                if (value.TryFormat(valueDestination, out var valueCharsWritten, format, provider) == false)
+                {
+                    return False(out charsWritten);
+                }
+
+                resultCharsWritten = valueCharsWritten;
+            }
+            else
+            {
+                var errorDestination = destination[..^1];
+
+                if (error.TryFormat(errorDestination, out var errorCharsWritten, format, provider) == false)
+                {
+                    return False(out charsWritten);
+                }
+
+                resultCharsWritten = errorCharsWritten;
+            }
+
+            destination = destination[resultCharsWritten..];
+            destination[0] = ')';
+            charsWritten = prefixChars + resultCharsWritten + 1;
+            return true;
+        }
     }
 }

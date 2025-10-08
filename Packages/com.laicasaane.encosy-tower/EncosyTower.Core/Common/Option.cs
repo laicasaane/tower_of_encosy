@@ -163,36 +163,32 @@ namespace EncosyTower.Common
                     return False(out charsWritten);
                 }
 
-                OPTION_NONE_STRING.AsSpan().CopyTo(destination);
+                optionNoneSpan.CopyTo(destination);
                 charsWritten = optionNoneSpan.Length;
                 return true;
             }
 
             var optionValueSpan = OPTION_VALUE_STRING.AsSpan();
 
-            if (destination.Length < optionValueSpan.Length + 1)
+            if (destination.Length < optionValueSpan.Length + 1 + 1) // '(' and ')'
             {
                 return False(out charsWritten);
             }
 
-            OPTION_VALUE_STRING.AsSpan().CopyTo(destination);
+            optionValueSpan.CopyTo(destination);
             destination[optionValueSpan.Length] = '(';
 
             var prefixChars = optionValueSpan.Length + 1;
             destination = destination[prefixChars..];
 
-            if (value.TryFormat(destination, out var valueCharsWritten, format, provider) == false)
+            var valueDestination = destination[..^1];
+
+            if (value.TryFormat(valueDestination, out var valueCharsWritten, format, provider) == false)
             {
                 return False(out charsWritten);
             }
 
             destination = destination[valueCharsWritten..];
-
-            if (destination.Length < 1)
-            {
-                return False(out charsWritten);
-            }
-
             destination[0] = ')';
             charsWritten = prefixChars + valueCharsWritten + 1;
             return true;

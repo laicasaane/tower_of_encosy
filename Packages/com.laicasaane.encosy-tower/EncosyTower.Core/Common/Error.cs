@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using UnityEngine;
 
 namespace EncosyTower.Common
 {
@@ -60,10 +61,34 @@ namespace EncosyTower.Common
 
             if (Exception is not null && Exception != UndefinedException.Default)
             {
-                return Exception.Message;
+                return Exception.ToString();
             }
 
-            return "Unknown error.";
+            return ErrorExtensions.UNKNOWN_ERROR_STRING;
+        }
+
+        public bool TryFormat(Span<char> destination, out int charsWritten)
+        {
+            ReadOnlySpan<char> source;
+
+            if (Message.IsNotEmpty())
+            {
+                source = Message.AsSpan();
+            }
+            else if (Exception is not null && Exception != UndefinedException.Default)
+            {
+                source = Exception.ToString().AsSpan();
+            }
+            else
+            {
+                source = Message.AsSpan();
+            }
+
+            var minLength = Mathf.Min(destination.Length, source.Length);
+            source[..minLength].CopyTo(destination);
+            charsWritten = minLength;
+
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -143,5 +168,24 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Error<TError> left, Error<TError> right)
             => !left.Equals(right);
+    }
+
+    public static class ErrorExtensions
+    {
+        public const string UNKNOWN_ERROR_STRING = "Unknown error";
+
+        public static bool TryFormat<TError>(
+              this Error<TError> error
+            , Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format = default
+            , IFormatProvider provider = null
+        )
+            where TError : ISpanFormattable
+        {
+            return error.Value.TryGetValue(out var value)
+                ? value.TryFormat(destination, out charsWritten, format, provider)
+                : error.InnerError.TryFormat(destination, out charsWritten);
+        }
     }
 }
