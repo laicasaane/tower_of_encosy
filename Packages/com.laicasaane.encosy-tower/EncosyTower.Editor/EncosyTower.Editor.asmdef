@@ -77,9 +77,9 @@
             "define": "UNITY_ENTITIES"
         },
         {
-            "name": "com.unity.mathematics",
-            "expression": "",
-            "define": "UNITY_MATHEMATICS"
+            "name": "com.unity.ide.visualstudio",
+            "expression": "2.0.24",
+            "define": "UNITY_SDK_STYLE_PROJECTS"
         },
         {
             "name": "com.unity.inputsystem",
@@ -90,6 +90,11 @@
             "name": "com.unity.localization",
             "expression": "",
             "define": "UNITY_LOCALIZATION"
+        },
+        {
+            "name": "com.unity.mathematics",
+            "expression": "",
+            "define": "UNITY_MATHEMATICS"
         },
         {
             "name": "com.unity.nuget.newtonsoft-json",
