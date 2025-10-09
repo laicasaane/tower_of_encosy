@@ -40,6 +40,8 @@
 *.unityproj
 *.sln
 *.sln.meta
+*.slnx
+*.slnx.meta
 *.suo
 *.tmp
 *.user
