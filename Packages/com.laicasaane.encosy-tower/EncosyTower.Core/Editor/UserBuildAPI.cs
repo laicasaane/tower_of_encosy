@@ -35,14 +35,12 @@ namespace EncosyTower.Editor
         {
             var symbolStr = string.Join(';', symbols);
             PlayerSettings.SetScriptingDefineSymbols(buildTarget, symbolStr);
-            AssetDatabase.SaveAssets();
         }
 
         public static void SetScriptingDefineSymbols(NamedBuildTarget buildTarget, IEnumerable<string> symbols)
         {
             var symbolStr = string.Join(';', symbols);
             PlayerSettings.SetScriptingDefineSymbols(buildTarget, symbolStr);
-            AssetDatabase.SaveAssets();
         }
 
         public static void AddScriptingDefineSymbols(NamedBuildTarget buildTarget, params string[] symbols)
