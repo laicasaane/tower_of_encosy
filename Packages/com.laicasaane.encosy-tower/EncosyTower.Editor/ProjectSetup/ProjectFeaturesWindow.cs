@@ -20,7 +20,7 @@ namespace EncosyTower.Editor.ProjectSetup
 {
     public sealed class ProjectFeaturesWindow : EditorWindow
     {
-        [MenuItem("Encosy Tower/Project/Features")]
+        [MenuItem("Encosy Tower/Project Settings/Features")]
         public static void OpenWindow()
         {
             var window = GetWindow<ProjectFeaturesWindow>();
