@@ -3,7 +3,6 @@
 using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
-using EncosyTower.Common;
 using EncosyTower.UnityExtensions;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -18,19 +17,14 @@ namespace EncosyTower.Pooling.Native
 #if UNITY_6000_2_OR_NEWER
     using GameObjectId = UnityEntityId<GameObject>;
     using TransformId = UnityEntityId<Transform>;
-    using EntityId = UnityEngine.EntityId;
 #else
     using GameObjectId = UnityInstanceId<GameObject>;
     using TransformId = UnityInstanceId<Transform>;
-    using EntityId = System.Int32;
 #endif
 
     public struct NativeGameObjectPool : IDisposable
     {
-        private readonly float3 _defaultPosition;
-        private readonly float3 _defaultScale;
-        private readonly quaternion _defaultRotation;
-        private readonly EntityId _prefabId;
+        private NativeReference<NativePrefabInfo> _prefabInfo;
 
         private TransformAccessArray _transformArray;
         private NativeList<float3> _positions;
@@ -41,40 +35,34 @@ namespace EncosyTower.Pooling.Native
         private NativeList<TransformId> _unusedTransformIds;
         private NativeList<int> _unusedTransformArrayIndices;
 
-        public NativeGameObjectPool(
-              EntityId prefabId
-            , int capacity
-            , in float3 defaultPosition
-            , in quaternion defaultRotation
-            , in float3 defaultScale
-            , Option<Scene> rentScene = default
-            , Option<Scene> returnScene = default
-        )
+        public NativeGameObjectPool(in NativePrefabInfo prefab, int initialCapacity)
         {
-            _prefabId = prefabId;
-            _defaultPosition = defaultPosition;
-            _defaultRotation = defaultRotation;
-            _defaultScale = defaultScale;
+            _prefabInfo = new(Allocator.Persistent, NativeArrayOptions.UninitializedMemory) {
+                Value = prefab
+            };
 
-            RentScene = rentScene;
-            ReturnScene = returnScene;
+            initialCapacity = math.max(initialCapacity, 4);
 
-            capacity = math.max(capacity, 4);
+            TransformAccessArray.Allocate(initialCapacity, -1, out _transformArray);
+            _positions = new(initialCapacity, Allocator.Persistent);
+            _rotations = new(initialCapacity, Allocator.Persistent);
+            _scales = new(initialCapacity, Allocator.Persistent);
 
-            TransformAccessArray.Allocate(capacity, -1, out _transformArray);
-            _positions = new(capacity, Allocator.Persistent);
-            _rotations = new(capacity, Allocator.Persistent);
-            _scales = new(capacity, Allocator.Persistent);
-
-            _unusedGameObjectIds = new(capacity, Allocator.Persistent);
-            _unusedTransformIds = new(capacity, Allocator.Persistent);
-            _unusedTransformArrayIndices = new(capacity, Allocator.Persistent);
+            _unusedGameObjectIds = new(initialCapacity, Allocator.Persistent);
+            _unusedTransformIds = new(initialCapacity, Allocator.Persistent);
+            _unusedTransformArrayIndices = new(initialCapacity, Allocator.Persistent);
         }
 
         public readonly bool IsCreated
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _transformArray.isCreated;
+            get => _prefabInfo.IsCreated;
+        }
+
+        public readonly NativePrefabInfo Prefab
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _prefabInfo.Value;
         }
 
         public readonly NativeArray<float3> Positions
@@ -101,12 +89,9 @@ namespace EncosyTower.Pooling.Native
             get => new(_transformArray);
         }
 
-        public Option<Scene> RentScene { get; set; }
-
-        public Option<Scene> ReturnScene { get; set; }
-
         public void Dispose()
         {
+            _prefabInfo.Dispose();
             _transformArray.Dispose();
             _positions.Dispose();
             _rotations.Dispose();
@@ -132,8 +117,9 @@ namespace EncosyTower.Pooling.Native
 
             var gameObjectIds = NativeArray.CreateFast<int>(amount, Allocator.Temp);
             var transformIds = NativeArray.CreateFast<int>(amount, Allocator.Temp);
+            var prefab = Prefab;
 
-            GameObject.InstantiateGameObjects(_prefabId, amount, gameObjectIds, transformIds);
+            GameObject.InstantiateGameObjects(prefab.EntityId, amount, gameObjectIds, transformIds);
 
             if (options.Contains(NativeReturningOptions.Deactivate))
             {
@@ -143,9 +129,9 @@ namespace EncosyTower.Pooling.Native
             _unusedGameObjectIds.AddRange(gameObjectIds.Reinterpret<GameObjectId>());
             _unusedTransformIds.AddRange(transformIds.Reinterpret<TransformId>());
 
-            _positions.AddReplicate(_defaultPosition, amount);
-            _rotations.AddReplicate(_defaultRotation, amount);
-            _scales.AddReplicate(_defaultScale, amount);
+            _positions.AddReplicate(prefab.Position, amount);
+            _rotations.AddReplicate(prefab.Rotation, amount);
+            _scales.AddReplicate(prefab.Scale, amount);
 
             var transformArray = _transformArray;
             var transformArrayIndices = _unusedTransformArrayIndices;
@@ -159,7 +145,9 @@ namespace EncosyTower.Pooling.Native
                 transformArrayIndices.Add(arrayIndex);
             }
 
-            if (options.Contains(NativeReturningOptions.MoveToScene) && ReturnScene.TryGetValue(out var scene))
+            if (options.Contains(NativeReturningOptions.MoveToScene)
+                && prefab.ReturnScene.TryGetValue(out var scene)
+            )
             {
                 SceneManager.MoveGameObjectsToScene(gameObjectIds, scene);
             }
@@ -486,7 +474,7 @@ namespace EncosyTower.Pooling.Native
             }
 
             if (options.Contains(NativeRentingOptions.MoveToScene) == false
-                || RentScene.TryGetValue(out var scene) == false
+                || Prefab.RentScene.TryGetValue(out var scene) == false
             )
             {
                 return;
@@ -531,7 +519,7 @@ namespace EncosyTower.Pooling.Native
             }
 
             if (options.Contains(NativeReturningOptions.MoveToScene) == false
-                || ReturnScene.TryGetValue(out var scene) == false
+                || Prefab.ReturnScene.TryGetValue(out var scene) == false
             )
             {
                 return;

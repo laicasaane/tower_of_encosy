@@ -68,15 +68,16 @@ namespace EncosyTower.Samples.Pooling
 
             _result = new NativeList<GameObjectInfo>(Allocator.Persistent);
 
-            _pool = new NativeGameObjectPool(
+            var prefab = new NativePrefabInfo(
                   _template.GetInstanceID()
-                , (int)_capacity
                 , float3.zero
                 , quaternion.identity
                 , new float3(1f)
                 , rentScene
                 , returnScene
             );
+
+            _pool = new NativeGameObjectPool(prefab, (int)_capacity);
         }
 
         partial void OnDispose()
