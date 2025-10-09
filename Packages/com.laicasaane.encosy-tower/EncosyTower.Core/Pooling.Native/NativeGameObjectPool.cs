@@ -18,9 +18,11 @@ namespace EncosyTower.Pooling.Native
 #if UNITY_6000_2_OR_NEWER
     using GameObjectId = UnityEntityId<GameObject>;
     using TransformId = UnityEntityId<Transform>;
+    using EntityId = UnityEngine.EntityId;
 #else
     using GameObjectId = UnityInstanceId<GameObject>;
     using TransformId = UnityInstanceId<Transform>;
+    using EntityId = System.Int32;
 #endif
 
     public struct NativeGameObjectPool : IDisposable
