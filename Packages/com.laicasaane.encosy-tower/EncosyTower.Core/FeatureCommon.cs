@@ -5,11 +5,11 @@ using EncosyTower.Editor.ProjectSetup;
 namespace EncosyTower.Common
 {
     [Feature("0. EncosyTower: Common")]
-    [RequiresPackage(PackageRegistry.Unity, "com.unity.burst", "1.8.23")]
+    [RequiresPackage(PackageRegistry.Unity, "com.unity.burst", "1.8.25")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.collections", "2.5.7")]
-    [RequiresPackage(PackageRegistry.Unity, "com.unity.mathematics", "1.3.2")]
+    [RequiresPackage(PackageRegistry.Unity, "com.unity.mathematics", "1.3.3")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.nuget.newtonsoft-json", "3.2.1")]
-    [RequiresPackage(PackageRegistry.Unity, "com.unity.serialization", "3.1.2")]
+    [RequiresPackage(PackageRegistry.Unity, "com.unity.serialization", "3.1.3")]
 
 #if UNITY_2023_1_OR_NEWER
 #else
