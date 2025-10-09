@@ -1,5 +1,6 @@
 using EncosyTower.Settings;
 using EncosyTower.Variants;
+using UnityEditor;
 using UnityEngine;
 
 namespace EncosyTower.Editor.Variants.Settings
@@ -43,6 +44,9 @@ namespace EncosyTower.Editor.Variants.Settings
                     , nextLongSymbol
                 );
             }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
     }
 }
