@@ -21,8 +21,13 @@ MonoBehaviour:
   m_OverrideGlobalSceneList: 1
   m_Scenes:
   - m_enabled: 1
-    m_path: Assets/Samples/Encosy Tower/0.1.0-preview.16/EncosyTower.Samples.MonoPages/encosy-scene-sample-monopages.unity
-  m_ScriptingDefines: []
+    m_path: Assets/Samples/Encosy Tower/0.1.0-preview.39/EncosyTower.Samples.MonoPages/encosy-scene-sample-monopages.unity
+  m_ScriptingDefines:
+  - DISABLE_DEBUG_ASSERT
+  - REMOVE_DISPOSE_SENTINEL
+  - ENTITY_STORE_V1
+  - UNITY_BURST_EXPERIMENTAL_ATOMIC_INTRINSICS
+  - INCLUDE_ENCOSY_SAMPLES_MONO_PAGES
   m_PlayerSettingsYaml:
     m_Settings:
     - line: '| PlayerSettings:'
@@ -850,7 +855,7 @@ MonoBehaviour:
     - line: '|   webGLCloseOnQuit: 0'
     - line: '|   webWasm2023: 0'
     - line: '|   scriptingDefineSymbols:'
-    - line: '|     Standalone: DISABLE_DEBUG_ASSERT;REMOVE_DISPOSE_SENTINEL;ENTITY_STORE_V1;UNITY_BURST_EXPERIMENTAL_ATOMIC_INTRINSICS;INCLUDE_ENCOSY_SAMPLES_MONO_PAGES'
+    - line: '|     Standalone: DISABLE_DEBUG_ASSERT;REMOVE_DISPOSE_SENTINEL;ENTITY_STORE_V1;UNITY_BURST_EXPERIMENTAL_ATOMIC_INTRINSICS;INCLUDE_ENCOSY_SAMPLES_MONO_PAGES;ENABLE_SDK_STYLE_PROJECTS'
     - line: '|   additionalCompilerArguments:'
     - line: '|     Standalone: []'
     - line: '|   platformArchitecture: {}'
