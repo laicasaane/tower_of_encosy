@@ -258,7 +258,7 @@ namespace EncosyTower.SourceGen
 
                 default:
                 {
-                    if (symbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.EnumUnderlyingType != null)
+                    if (symbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.IsEnumType())
                     {
                         GetUnmanagedSize(namedTypeSymbol.EnumUnderlyingType, ref size);
                     }
@@ -1086,10 +1086,7 @@ namespace EncosyTower.SourceGen
 
         public static MemberExistence FindTryParseSpan(this ITypeSymbol symbol)
         {
-            if (symbol.IsUnmanagedType
-                && symbol is INamedTypeSymbol namedType
-                && namedType.EnumUnderlyingType is not null
-            )
+            if (symbol.IsEnumType())
             {
                 return new(true, true, false);
             }
@@ -1168,10 +1165,7 @@ namespace EncosyTower.SourceGen
 
         public static MemberExistence FindEquals(this ITypeSymbol symbol)
         {
-            if (symbol.IsUnmanagedType
-                && symbol is INamedTypeSymbol namedType
-                && namedType.EnumUnderlyingType is not null
-            )
+            if (symbol.IsEnumType())
             {
                 return new(true, true, false);
             }
@@ -1237,10 +1231,7 @@ namespace EncosyTower.SourceGen
 
         public static MemberExistence FindOpEquality(this ITypeSymbol symbol)
         {
-            if (symbol.IsUnmanagedType
-                && symbol is INamedTypeSymbol namedType
-                && namedType.EnumUnderlyingType is not null
-            )
+            if (symbol.IsEnumType())
             {
                 return new(true, true, false);
             }
@@ -1359,6 +1350,18 @@ namespace EncosyTower.SourceGen
             }
 
             return false;
+        }
+
+        public static bool IsEnumType(this ITypeSymbol symbol)
+        {
+            if (symbol.SpecialType == SpecialType.System_Enum)
+            {
+                return true;
+            }
+
+            return symbol.IsUnmanagedType
+                && symbol is INamedTypeSymbol namedType
+                && namedType.EnumUnderlyingType is not null;
         }
     }
 }

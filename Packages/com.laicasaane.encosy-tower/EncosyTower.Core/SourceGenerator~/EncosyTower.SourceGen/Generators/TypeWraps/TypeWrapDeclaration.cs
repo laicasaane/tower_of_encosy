@@ -32,7 +32,11 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         public string FieldTypeName { get; }
 
+        public string FieldEnumUnderlyingTypeName { get; }
+
         public bool IsFieldDeclared { get; }
+
+        public bool IsFieldEnum { get; }
 
         public bool IsReadOnly { get; }
 
@@ -105,6 +109,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             FieldTypeSymbol = fieldTypeSymbol;
             FieldTypeName = fieldTypeSymbol.ToFullName();
             ExcludeConverter = excludeConverter;
+            IsFieldEnum = fieldTypeSymbol.IsEnumType();
+            FieldEnumUnderlyingTypeName = IsFieldEnum ? fieldTypeSymbol.EnumUnderlyingType.ToFullName() : string.Empty;
 
             var members = symbol.GetMembers();
             var definedMembers = new HashSet<string>(StringComparer.Ordinal);
@@ -497,7 +503,9 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private static InterfaceKind GetBuiltInInterfaces(INamedTypeSymbol type)
         {
-            switch (type.SpecialType)
+            var specialType = type.IsEnumType() ? SpecialType.System_Enum : type.SpecialType;
+
+            switch (specialType)
             {
                 case SpecialType.System_Enum:
                 case SpecialType.System_Char:
@@ -529,7 +537,9 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private static OperatorKind GetBuiltInOperators(INamedTypeSymbol type)
         {
-            switch (type.SpecialType)
+            var specialType = type.IsEnumType() ? SpecialType.System_Enum : type.SpecialType;
+
+            switch (specialType)
             {
                 case SpecialType.System_Enum:
                     return OperatorKind.OnesComplement
@@ -540,8 +550,6 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         | OperatorKind.BitwiseAnd
                         | OperatorKind.BitwiseOr
                         | OperatorKind.BitwiseXor
-                        | OperatorKind.LeftShift
-                        | OperatorKind.RightShift
                         | OperatorKind.Equal
                         | OperatorKind.NotEqual
                         | OperatorKind.Greater

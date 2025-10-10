@@ -145,4 +145,7 @@ namespace EncosyTower.Tests.TypeWraps
 
     [WrapRecord]
     public readonly partial record struct Position(float3 _);
+
+    [WrapRecord]
+    public readonly partial record struct EnumWrapper(AttributeTargets _);
 }

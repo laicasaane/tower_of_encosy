@@ -22,6 +22,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
+            p.PrintBeginLine("// ").PrintEndLine(FieldTypeSymbol.SpecialType.ToString());
+
             p = p.IncreasedIndent();
             {
                 if (ExcludeConverter == false && IsRefStruct == false)
@@ -814,15 +816,42 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             if (hasCompareToT)
             {
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
-                    .Print("int CompareTo(").Print(FullTypeName).PrintEndLine(" other)");
-                p = p.IncreasedIndent();
+                if (IsFieldEnum)
                 {
-                    p.PrintBeginLine("=> this.").Print(FieldName).Print(".CompareTo(other.").Print(FieldName).PrintEndLine(");");
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
+                        .Print("int CompareTo(").Print(FieldTypeName).PrintEndLine(" other)");
+                    p = p.IncreasedIndent();
+                    {
+                        p.PrintBeginLine("=> ((").Print(FieldEnumUnderlyingTypeName)
+                            .Print(")this.").Print(FieldName).Print(").CompareTo((")
+                            .Print(FieldEnumUnderlyingTypeName).PrintEndLine(")other);");
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
+                        .Print("int CompareTo(").Print(FullTypeName).PrintEndLine(" other)");
+                    p = p.IncreasedIndent();
+                    {
+                        p.PrintBeginLine("=> this.CompareTo(other.").Print(FieldName).PrintEndLine(");");
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintEndLine();
                 }
-                p = p.DecreasedIndent();
-                p.PrintEndLine();
+                else
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
+                        .Print("int CompareTo(").Print(FullTypeName).PrintEndLine(" other)");
+                    p = p.IncreasedIndent();
+                    {
+                        p.PrintBeginLine("=> this.").Print(FieldName).Print(".CompareTo(other.").Print(FieldName).PrintEndLine(");");
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintEndLine();
+                }
             }
 
             var hasCompareTo = IgnoreInterfaceMethods.HasFlag(InterfaceKind.Comparable) == false
@@ -858,22 +887,47 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 || ImplementInterfaces.HasFlag(InterfaceKind.EquatableT)
             ))
             {
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
-                    .Print("bool Equals(").Print(FullTypeName).PrintEndLine(" other)");
-                p = p.IncreasedIndent();
+                if (IsFieldEnum)
                 {
-                    if (ImplementOperators.HasFlag(OperatorKind.Equal))
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
+                        .Print("bool Equals(").Print(FieldTypeName).PrintEndLine(" other)");
+                    p = p.IncreasedIndent();
+                    {
+                        p.PrintBeginLine("=> this.").Print(FieldName).Print(" == other").PrintEndLine(";");
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
+                        .Print("bool Equals(").Print(FullTypeName).PrintEndLine(" other)");
+                    p = p.IncreasedIndent();
                     {
                         p.PrintBeginLine("=> this.").Print(FieldName).Print(" == other.").Print(FieldName).PrintEndLine(";");
                     }
-                    else
-                    {
-                        p.PrintBeginLine("=> this.").Print(FieldName).Print(".Equals(other.").Print(FieldName).PrintEndLine(");");
-                    }
+                    p = p.DecreasedIndent();
+                    p.PrintEndLine();
                 }
-                p = p.DecreasedIndent();
-                p.PrintEndLine();
+                else
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
+                        .Print("bool Equals(").Print(FullTypeName).PrintEndLine(" other)");
+                    p = p.IncreasedIndent();
+                    {
+                        if (ImplementOperators.HasFlag(OperatorKind.Equal))
+                        {
+                            p.PrintBeginLine("=> this.").Print(FieldName).Print(" == other.").Print(FieldName).PrintEndLine(";");
+                        }
+                        else
+                        {
+                            p.PrintBeginLine("=> this.").Print(FieldName).Print(".Equals(other.").Print(FieldName).PrintEndLine(");");
+                        }
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintEndLine();
+                }
             }
 
             var hasEquals = IgnoreInterfaceMethods.HasFlag(InterfaceKind.EquatableT)
