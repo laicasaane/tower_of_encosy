@@ -13,7 +13,34 @@ namespace EncosyTower.Collections.Unsafe
         public static NativeArray<T> ConvertFrom<T>(Span<T> source, Allocator allocator)
             where T : unmanaged
         {
+#if UNITY_6000_0_OR_NEWER
             return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray(source, allocator);
+#else
+            return ConvertExistingDataToNativeArray(source, allocator);
+
+            unsafe static NativeArray<T> ConvertExistingDataToNativeArray(Span<T> data, Allocator allocator)
+            {
+                CheckConvertArguments(data.Length);
+
+                fixed (T* buffer = data)
+                {
+                    return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+                          buffer
+                        , data.Length
+                        , allocator
+                    );
+                }
+            }
+
+            [System.Diagnostics.Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+            static void CheckConvertArguments(int length)
+            {
+                if (length < 0)
+                {
+                    throw new ArgumentOutOfRangeException("length", "Length must be >= 0");
+                }
+            }
+#endif
         }
     }
 
