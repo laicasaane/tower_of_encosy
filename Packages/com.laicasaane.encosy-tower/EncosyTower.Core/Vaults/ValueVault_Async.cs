@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Common;
-using EncosyTower.Ids;
 using EncosyTower.Tasks;
 
 namespace EncosyTower.Vaults
@@ -15,34 +14,10 @@ namespace EncosyTower.Vaults
     using UnityTask = UnityEngine.Awaitable;
 #endif
 
-    public sealed partial class ValueVault<TValue>
+    partial class ValueVault<TId, TValue>
     {
-        #region    ID<T>
-        #endregion =====
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UnityTask WaitUntilContains<T>(Id<T> id, CancellationToken token = default)
-            => WaitUntilContains(ToId2(id), token);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UnityTask WaitUntil<T>(Id<T> id, TValue value, CancellationToken token = default)
-            => WaitUntil(ToId2(id), value, token);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public
-#if UNITASK
-            Cysharp.Threading.Tasks.UniTask<Option<TValue>>
-#else
-            UnityEngine.Awaitable<Option<TValue>>
-#endif
-            TryGetAsync<T>(Id<T> id, CancellationToken token = default)
-            => TryGetAsync(ToId2(id), token);
-
-        #region    ID2
-        #endregion ===
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async UnityTask WaitUntilContains(Id2 id, CancellationToken token = default)
+        public async UnityTask WaitUntilContains(TId id, CancellationToken token = default)
         {
             var map = _map;
 
@@ -63,7 +38,7 @@ namespace EncosyTower.Vaults
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async UnityTask WaitUntil(Id2 id, TValue other, CancellationToken token = default)
+        public async UnityTask WaitUntil(TId id, TValue other, CancellationToken token = default)
         {
             var map = _map;
 
@@ -92,7 +67,7 @@ namespace EncosyTower.Vaults
 #else
             UnityEngine.Awaitable<Option<TValue>>
 #endif
-            TryGetAsync(Id2 id, CancellationToken token = default)
+            TryGetAsync(TId id, CancellationToken token = default)
         {
             await WaitUntilContains(id, token);
 

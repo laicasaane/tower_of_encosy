@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
-using EncosyTower.Ids;
 using EncosyTower.Logging;
-using EncosyTower.Types;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
 
@@ -14,9 +12,10 @@ namespace EncosyTower.Vaults
 {
     using UnityObject = UnityEngine.Object;
 
-    public sealed partial class ObjectVault : IDisposable
+    public sealed partial class ObjectVault<TId> : IDisposable
+        where TId : unmanaged, IEquatable<TId>
     {
-        private readonly Dictionary<Id2, object> _map = new();
+        private readonly ConcurrentDictionary<TId, object> _map = new();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose()
@@ -24,34 +23,12 @@ namespace EncosyTower.Vaults
             _map.Clear();
         }
 
-        #region    ID<T>
-        #endregion =====
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Contains<T>(Id<T> id)
-            => Contains(ToId2(id));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryAdd<T>(Id<T> id, [NotNull] T obj)
-            => TryAdd(ToId2(id), obj);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryRemove<T>(Id<T> id, out T obj)
-            => TryRemove(ToId2(id), out obj);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGet<T>(Id<T> id, out T obj)
-            => TryGet<T>(ToId2(id), out obj);
-
-        #region    ID2
-        #endregion ===
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Contains(Id2 id)
+        public bool Contains(TId id)
             => _map.ContainsKey(id);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryAdd<T>(Id2 id, [NotNull] T obj)
+        public bool TryAdd<T>(TId id, [NotNull] T obj)
         {
             ThrowIfNotReferenceType<T>();
             ThrowIfUnityObjectIsDestroyed(obj);
@@ -68,52 +45,47 @@ namespace EncosyTower.Vaults
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryRemove<T>(Id2 id, out T obj)
+        public bool TryRemove<T>(TId id, out Option<T> obj)
         {
-            if (TryGet(id, out obj))
+            if (_map.TryRemove(id, out var weakRef))
             {
-                _map.Remove(id);
+                obj = TryCast<T>(id, weakRef);
                 return true;
             }
 
+            obj = Option.None;
             return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGet<T>(Id2 id, out T obj)
+        public bool TryGet<T>(TId id, out Option<T> obj)
         {
             ThrowIfNotReferenceType<T>();
 
             if (_map.TryGetValue(id, out var weakRef))
             {
-                var result = TryCast<T>(id, weakRef);
-                obj = result.GetValueOrDefault();
-                return result.HasValue;
+                obj = TryCast<T>(id, weakRef);
+                return true;
             }
 
-            obj = default;
+            obj = Option.None;
             return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGet(Id2 id, out object obj)
+        public bool TryGet(TId id, out Option<object> obj)
         {
             if (_map.TryGetValue(id, out var weakRef))
             {
-                var result = TryCast(id, weakRef);
-                obj = result.GetValueOrDefault();
-                return result.HasValue;
+                obj = TryCast(id, weakRef);
+                return true;
             }
 
             obj = default;
             return false;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Id2 ToId2<T>(Id<T> id)
-            => Type<T>.Id.ToId2(id);
-
-        private static Option<T> TryCast<T>(Id2 id, object obj, UnityObject context = null)
+        private static Option<T> TryCast<T>(TId id, object obj, UnityObject context = null)
         {
             if (obj == null)
             {
@@ -146,7 +118,7 @@ namespace EncosyTower.Vaults
             return Option.None;
         }
 
-        private static Option<object> TryCast(Id2 id, object obj, UnityObject context = null)
+        private static Option<object> TryCast(TId id, object obj, UnityObject context = null)
         {
             if (obj is UnityObject unityObj)
             {
@@ -193,7 +165,7 @@ namespace EncosyTower.Vaults
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ErrorIfTypeMismatch<T>(Id2 id, object obj, UnityObject context)
+        private static void ErrorIfTypeMismatch<T>(TId id, object obj, UnityObject context)
         {
             var message = "Id \"{0}\" is mapped to an object of type \"{1}\". " +
                   "However an object of type \"{2}\" is being requested from it. " +
@@ -210,7 +182,7 @@ namespace EncosyTower.Vaults
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ErrorIfRegisteredObjectIsNull(Id2 id, UnityObject context)
+        private static void ErrorIfRegisteredObjectIsNull(TId id, UnityObject context)
         {
             var message = "The object registered with id \"{0}\" is null.";
 

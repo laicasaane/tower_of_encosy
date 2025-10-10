@@ -3,7 +3,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Common;
-using EncosyTower.Ids;
 using EncosyTower.Tasks;
 
 namespace EncosyTower.Vaults
@@ -18,30 +17,10 @@ namespace EncosyTower.Vaults
 
     using UnityObject = UnityEngine.Object;
 
-    public sealed partial class ObjectVault
+    partial class ObjectVault<TId>
     {
-        #region    ID<T>
-        #endregion =====
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UnityTask WaitUntilContains<T>(Id<T> id, CancellationToken token = default)
-            => WaitUntilContains(ToId2(id), token);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public
-#if UNITASK
-            Cysharp.Threading.Tasks.UniTask<Option<T>>
-#else
-            UnityEngine.Awaitable<Option<T>>
-#endif
-            TryGetAsync<T>(Id<T> id, UnityObject context = null, CancellationToken token = default)
-            => TryGetAsync<T>(ToId2(id), context, token);
-
-        #region    ID2
-        #endregion ===
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async UnityTask WaitUntilContains(Id2 id, CancellationToken token = default)
+        public async UnityTask WaitUntilContains(TId id, CancellationToken token = default)
         {
             var map = _map;
 
@@ -69,7 +48,7 @@ namespace EncosyTower.Vaults
             UnityEngine.Awaitable<Option<T>>
 #endif
             TryGetAsync<T>(
-              Id2 id
+              TId id
             , UnityObject context
             , CancellationToken token
         )
@@ -88,7 +67,7 @@ namespace EncosyTower.Vaults
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async UnityTaskObject TryGetAsync(
-              Id2 id
+              TId id
             , UnityObject context
             , CancellationToken token
         )
