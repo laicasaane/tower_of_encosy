@@ -90,15 +90,6 @@ namespace EncosyTower.Ids
                 return false;
             }
 
-            if (destination.Length < 1)
-            {
-                return False(out charsWritten);
-            }
-
-            var openQuoteChars = 0;
-            destination[openQuoteChars++] = '(';
-            destination = destination[openQuoteChars..];
-
             if (_x.TryFormat(destination, out var xChars, format, provider) == false)
             {
                 return False(out charsWritten);
@@ -112,8 +103,7 @@ namespace EncosyTower.Ids
             }
 
             var delimiterChars = 0;
-            destination[delimiterChars++] = ',';
-            destination[delimiterChars++] = ' ';
+            destination[delimiterChars++] = '-';
             destination = destination[delimiterChars..];
 
             if (_y.TryFormat(destination, out var yChars, format, provider) == false)
@@ -121,17 +111,7 @@ namespace EncosyTower.Ids
                 return False(out charsWritten);
             }
 
-            destination = destination[yChars..];
-
-            if (destination.Length < 1)
-            {
-                return False(out charsWritten);
-            }
-
-            var closeQuoteChars = 0;
-            destination[closeQuoteChars++] = ')';
-
-            charsWritten = openQuoteChars + xChars + delimiterChars + yChars + closeQuoteChars;
+            charsWritten = xChars + delimiterChars + yChars;
             return true;
         }
 
@@ -275,11 +255,11 @@ namespace EncosyTower.Ids
     using System;
     using System.Runtime.CompilerServices;
 
-    partial record struct Id2
+    partial struct Id2
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString()
-            => $"{X}-{Y}";
+        public readonly override string ToString()
+            => $"{_x}-{_y}";
     }
 }
 
