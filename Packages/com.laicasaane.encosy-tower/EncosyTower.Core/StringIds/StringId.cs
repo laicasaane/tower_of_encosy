@@ -33,7 +33,7 @@ namespace EncosyTower.StringIds
     /// guarantee the uniqueness of a string or its (assumingly) associative ID.
     /// </remarks>
     [WrapRecord]
-    public readonly partial record struct StringId<T>(Id Id)
+    public readonly partial record struct StringId<T>(Id<T> Id)
     {
         public bool IsValid
         {
@@ -43,11 +43,11 @@ namespace EncosyTower.StringIds
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator StringId<T>(StringId id)
-            => new(id);
+            => new(id.Id);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator StringId(StringId<T> id)
-            => new(id);
+            => new(id.Id);
     }
 
     /// <summary>
