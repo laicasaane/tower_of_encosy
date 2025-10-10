@@ -5,16 +5,21 @@
 #endif
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using EncosyTower.Logging;
 using EncosyTower.Types;
 
 namespace EncosyTower.Vaults
 {
     public class SingletonVault<TBase> : IDisposable
-        where TBase : class
     {
-        private readonly Dictionary<TypeHash, TBase> _singletons = new();
+        private readonly ConcurrentDictionary<TypeHash, TBase> _singletons = new();
+
+        static SingletonVault()
+        {
+            ThrowIfNotReferenceType();
+        }
 
         public bool Contains<T>()
             where T : TBase
@@ -37,8 +42,7 @@ namespace EncosyTower.Vaults
                 return false;
             }
 
-            _singletons.Add(Type<T>.Hash, new T());
-            return true;
+            return _singletons.TryAdd(Type<T>.Hash, new T());
         }
 
         public bool TryAdd<T>(T instance)
@@ -62,8 +66,7 @@ namespace EncosyTower.Vaults
                 return false;
             }
 
-            _singletons.Add(Type<T>.Hash, instance);
-            return true;
+            return _singletons.TryAdd(Type<T>.Hash, instance);
         }
 
         public bool TryGetOrAdd<T>(out T instance)
@@ -76,15 +79,10 @@ namespace EncosyTower.Vaults
                     instance = inst;
                     return true;
                 }
-#if __ENCOSY_VALIDATION__
                 else
                 {
-                    throw new InvalidCastException(
-                        $"Cannot cast an instance of type {obj.GetType()} to {typeof(T)}" +
-                        $"even though it is registered for {typeof(T)}"
-                    );
+                    ThrowCannotCastEvenRegistered<T>(obj);
                 }
-#endif
             }
 
             _singletons[Type<T>.Hash] = instance = new();
@@ -101,14 +99,10 @@ namespace EncosyTower.Vaults
                     instance = inst;
                     return true;
                 }
-#if __ENCOSY_VALIDATION__
                 else
                 {
-                    throw new InvalidCastException(
-                        $"Cannot cast an instance of type {obj.GetType()} to {typeof(T)}"
-                    );
+                    ThrowCannotCast<T>(obj);
                 }
-#endif
             }
 
             instance = default;
@@ -128,6 +122,35 @@ namespace EncosyTower.Vaults
             }
 
             singletons.Clear();
+        }
+
+        [Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowIfNotReferenceType()
+        {
+            if (typeof(TBase).IsValueType)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(SingletonVault<TBase>)} does not accept type '{typeof(TBase)}' " +
+                    $"because it is not a reference type."
+                );
+            }
+        }
+
+        [Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowCannotCastEvenRegistered<T>(TBase obj)
+        {
+            throw new InvalidCastException(
+                $"Cannot cast an instance of type {obj.GetType()} to {typeof(T)}" +
+                $"even though it is registered for {typeof(T)}"
+            );
+        }
+
+        [Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowCannotCast<T>(TBase obj)
+        {
+            throw new InvalidCastException(
+                $"Cannot cast an instance of type {obj.GetType()} to {typeof(T)}"
+            );
         }
     }
 }
