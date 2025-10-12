@@ -962,14 +962,29 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 && IsRefStruct == false
             )
             {
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ").PrintEndLine("override int GetHashCode()");
-                p = p.IncreasedIndent();
+                if (IsFieldEnum)
                 {
-                    p.PrintBeginLine("=> this.").Print(FieldName).PrintEndLine(".GetHashCode();");
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ").PrintEndLine("override int GetHashCode()");
+                    p = p.IncreasedIndent();
+                    {
+                        p.PrintBeginLine("=> ((").Print(FieldEnumUnderlyingTypeName).Print(")this.")
+                            .Print(FieldName).PrintEndLine(").GetHashCode();");
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintEndLine();
                 }
-                p = p.DecreasedIndent();
-                p.PrintEndLine();
+                else
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ").PrintEndLine("override int GetHashCode()");
+                    p = p.IncreasedIndent();
+                    {
+                        p.PrintBeginLine("=> this.").Print(FieldName).PrintEndLine(".GetHashCode();");
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintEndLine();
+                }
             }
 
             if (_writenSpecialMethods.HasFlag(SpecialMethodType.ToString) == false
