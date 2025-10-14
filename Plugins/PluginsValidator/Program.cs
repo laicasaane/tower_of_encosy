@@ -207,7 +207,7 @@ foreach (var (gitUrl, folderName) in processingGitFolders)
     Console.WriteLine($"Clone '{gitUrl}' into '{srcRepoPath}'");
 
     using var gitProcess = new Process {
-        StartInfo = new ProcessStartInfo{
+        StartInfo = new ProcessStartInfo {
             FileName = "git",
             Arguments = $"clone \"{gitUrl}\" \"{srcRepoPath}\"",
             RedirectStandardOutput = true,

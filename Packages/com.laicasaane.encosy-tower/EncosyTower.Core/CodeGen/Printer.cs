@@ -39,6 +39,8 @@ namespace EncosyTower.CodeGen
 
         public static Printer DefaultLarge => new(0, 1024 * 16);
 
+        public readonly bool IsCreated => _builder != null;
+
         public readonly int IndentDepth => _currentIndentIndex;
 
         /// <summary>
@@ -361,6 +363,75 @@ namespace EncosyTower.CodeGen
         }
 
         /// <summary>
+        /// Create a list printer from this printer
+        /// </summary>
+        /// <param name="separator"></param>
+        /// <returns></returns>
+        public readonly ListPrinter AsListPrinter(string separator) => new(this, separator);
+
+        /// <summary>
+        /// Print the scope open string and return a new printer with deeper indent.
+        /// The returned printer must be terminated with CloseScope.
+        /// </summary>
+        /// <param name="scopeOpen"></param>
+        /// <returns>a copy of this printer with a deeper indent</returns>
+        public readonly Printer ScopePrinter(string scopeOpen = "{")
+        {
+            PrintEndLine(scopeOpen);
+            return WithIncreasedIndent();
+        }
+
+        /// <summary>
+        /// Close a scope printer and print a string.
+        /// </summary>
+        /// <param name="scopedPrinter">the scope printer to close</param>
+        /// <param name="scopeClose"></param>
+        /// <returns>a copy of the closed scope printer with a shallower indent</returns>
+        public readonly Printer CloseScope(Printer scopedPrinter, string scopeClose = "{")
+        {
+            PrintBeginLine(scopeClose);
+            return scopedPrinter.WithDecreasedIndent();
+        }
+
+        /// <summary>
+        /// Print the scope open string and increase indent.
+        /// </summary>
+        /// <param name="scopeOpen"></param>
+        /// <returns>this</returns>
+        public Printer OpenScope(string scopeOpen = "{")
+        {
+            PrintLine(scopeOpen);
+            IncreasedIndent();
+            return this;
+        }
+
+        /// <summary>
+        /// Decrease indent and print the scope close string.
+        /// </summary>
+        /// <param name="scopeClose"></param>
+        /// <returns>this</returns>
+        public Printer CloseScope(string scopeClose = "}")
+        {
+            DecreasedIndent();
+            PrintLine(scopeClose);
+            return this;
+        }
+
+        /// <summary>
+        /// Print a IPrintable to a string
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="printable"></param>
+        /// <returns></returns>
+        public static string PrintToString<T>(T printable)
+            where T : struct, IPrintable
+        {
+            var printer = Printer.Default;
+            printable.Print(printer);
+            return printer._builder.ToString();
+        }
+
+        /// <summary>
         /// Print item in a list with a separator
         /// </summary>
         public struct ListPrinter
@@ -460,76 +531,6 @@ namespace EncosyTower.CodeGen
 
                 return listPrinter._printer;
             }
-        }
-
-        /// <summary>
-        /// Create a list printer from this printer
-        /// </summary>
-        /// <param name="separator"></param>
-        /// <returns></returns>
-        public readonly ListPrinter AsListPrinter(string separator) => new(this, separator);
-
-        /// <summary>
-        /// print the scope open string and return a new printer with deeper indent
-        /// The returned printer must be terminated with CloseScope.
-        /// </summary>
-        /// <param name="scopeOpen"></param>
-        /// <returns>a copy of this printer with a deeper indent</returns>
-        public readonly Printer ScopePrinter(string scopeOpen = "{")
-        {
-            PrintEndLine(scopeOpen);
-            return WithIncreasedIndent();
-        }
-
-        /// <summary>
-        /// Close a scope printer and print a string.
-        /// </summary>
-        /// <param name="scopedPrinter">the scope printer to close</param>
-        /// <param name="scopeClose"></param>
-        /// <returns>a copy of the closed scope printer with a shallower indent</returns>
-        public readonly Printer CloseScope(Printer scopedPrinter, string scopeClose = "{")
-        {
-            PrintBeginLine(scopeClose);
-            return scopedPrinter.WithDecreasedIndent();
-        }
-
-        /// <summary>
-        /// print the scope open string and increase indent
-        /// </summary>
-        /// <param name="scopeOpen"></param>
-        /// <returns>this</returns>
-        public Printer OpenScope(string scopeOpen = "{")
-        {
-            //PrintEndLine();
-            PrintLine(scopeOpen);
-            IncreasedIndent();
-            return this;
-        }
-
-        /// <summary>
-        /// Decrease indent and print the scope close string.
-        /// </summary>
-        /// <param name="scopeClose"></param>
-        /// <returns>this</returns>
-        public Printer CloseScope(string scopeClose = "}")
-        {
-            DecreasedIndent();
-            PrintLine(scopeClose);
-            return this;
-        }
-
-        /// <summary>
-        /// Print a IPrintable to a string
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="printable"></param>
-        /// <returns></returns>
-        public static string PrintToString<T>(T printable)
-            where T : struct, IPrintable
-        {
-            var printer = Printer.Default;
-            printable.Print(printer);
-            return printer._builder.ToString();
         }
     }
 }
