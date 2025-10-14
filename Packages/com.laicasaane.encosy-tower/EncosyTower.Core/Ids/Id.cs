@@ -13,6 +13,7 @@ namespace EncosyTower.Ids
     public partial struct Id
         : IEquatable<Id>
         , IComparable<Id>
+        , IComparable
         , ITryParse<Id>
         , ITryParseSpan<Id>
         , ISpanFormattable
@@ -34,6 +35,10 @@ namespace EncosyTower.Ids
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int CompareTo(Id other)
             => _value.CompareTo(other._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly int CompareTo(object obj)
+            => obj is Id other ? CompareTo(other) : 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(Id other)

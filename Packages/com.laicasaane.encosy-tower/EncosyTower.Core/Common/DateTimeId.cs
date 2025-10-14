@@ -13,6 +13,7 @@ namespace EncosyTower.Common
     public readonly partial record struct DateTimeId
         : IEquatable<DateTimeId>
         , IComparable<DateTimeId>
+        , IComparable
         , ITryParse<DateTimeId>
         , ITryParseSpan<DateTimeId>
         , ISpanFormattable
@@ -199,6 +200,10 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CompareTo(DateTimeId other)
             => _raw.CompareTo(other._raw);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly int CompareTo(object obj)
+            => obj is DateTimeId other ? CompareTo(other) : 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public DateTimeId AddDays(double value)

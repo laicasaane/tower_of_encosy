@@ -19,6 +19,7 @@ namespace EncosyTower.StringIds
     public readonly partial struct MetaStringId
         : IEquatable<MetaStringId>
         , IComparable<MetaStringId>
+        , IComparable
         , ISpanFormattable
     {
         [FieldOffset(0), SerializeField, HideInInspector]
@@ -77,6 +78,10 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int CompareTo(MetaStringId other)
             => _value.CompareTo(other._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly int CompareTo(object obj)
+            => obj is MetaStringId other ? CompareTo(other) : 1;
 
         public readonly bool TryFormat(
               Span<char> destination

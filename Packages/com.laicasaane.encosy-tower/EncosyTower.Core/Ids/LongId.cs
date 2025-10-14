@@ -13,6 +13,7 @@ namespace EncosyTower.Ids
     public partial struct LongId
         : IEquatable<LongId>
         , IComparable<LongId>
+        , IComparable
         , ITryParse<LongId>
         , ITryParseSpan<LongId>
         , ISpanFormattable
@@ -28,6 +29,10 @@ namespace EncosyTower.Ids
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int CompareTo(LongId other)
             => _value.CompareTo(other._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly int CompareTo(object obj)
+            => obj is LongId other ? CompareTo(other) : 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(LongId other)
