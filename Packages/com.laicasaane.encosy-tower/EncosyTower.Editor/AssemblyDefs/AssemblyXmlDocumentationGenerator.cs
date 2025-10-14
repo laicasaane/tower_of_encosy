@@ -39,11 +39,57 @@ namespace EncosyTower.Editor.AssemblyDefs
             }
         }
 
+        private const string MENU_ROOT = "Encosy Tower/XML Documentation";
+
         private const string GENERATED_FILE = ".XMLDOC_CSC_RSP_GENERATED";
         private const string XML_DOCUMENTATION_FOLDER = "Library/XmlDocumentationGenerated";
         private const string SCRIPT_ASSEMBLIES_FOLDER = "Library/ScriptAssemblies";
+        private const string MENU_AUTO_GENERATE = $"{MENU_ROOT}/Auto Generate";
+        private const string MENU_AUTO_LOG = $"{MENU_ROOT}/Auto Log";
+        private const string AUTO_GENERATE_KEY = "XML_DOCUMENTATION_AUTO_GENERATE";
+        private const string AUTO_LOG_KEY = "XML_DOCUMENTATION_AUTO_LOG";
 
-        [MenuItem("Encosy Tower/XML Documentation/Generate", priority = 88_00_00_00)]
+        [MenuItem(MENU_AUTO_GENERATE, priority = 88_00_00_00)]
+        private static void ToggleAutoGenerate()
+        {
+            if (TryGetConfigAutoGenerate(out var value) == false)
+            {
+                value = false;
+            }
+            else
+            {
+                value = !value;
+            }
+
+            EditorUserSettings.SetConfigValue(AUTO_GENERATE_KEY, value.ToString());
+            Menu.SetChecked(MENU_AUTO_GENERATE, value);
+            StaticDevLogger.LogInfo($"{AUTO_GENERATE_KEY} = {value}");
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
+        [MenuItem(MENU_AUTO_LOG, priority = 88_00_00_01)]
+        private static void ToggleAutoLog()
+        {
+            if (TryGetConfigAutoLog(out var value) == false)
+            {
+                value = false;
+            }
+            else
+            {
+                value = !value;
+            }
+
+            EditorUserSettings.SetConfigValue(AUTO_LOG_KEY, value.ToString());
+            Menu.SetChecked(MENU_AUTO_LOG, value);
+            StaticDevLogger.LogInfo($"{AUTO_LOG_KEY} = {value}");
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
+        [MenuItem($"{MENU_ROOT}/Generate", priority = 88_00_00_02)]
         private static void GenerateXmlDocumentation()
         {
             const string TITLE = "Generate XML Documentation";
@@ -115,7 +161,7 @@ namespace EncosyTower.Editor.AssemblyDefs
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("Encosy Tower/XML Documentation/Delete", priority = 88_00_00_01)]
+        [MenuItem($"{MENU_ROOT}/Delete", priority = 88_00_00_03)]
         private static void DeleteXmlDocumentation()
         {
             const string TITLE = "Delete XML Documentation";
@@ -238,6 +284,45 @@ namespace EncosyTower.Editor.AssemblyDefs
         }
 
         [InitializeOnLoadMethod]
+        private static void SetMenuCheckState()
+        {
+            if (TryGetConfigAutoGenerate(out var autoGenerate) == false)
+            {
+                autoGenerate = false;
+            }
+
+            Menu.SetChecked(MENU_AUTO_GENERATE, autoGenerate);
+
+            if (TryGetConfigAutoLog(out var autoLog) == false)
+            {
+                autoLog = false;
+            }
+
+            Menu.SetChecked(MENU_AUTO_LOG, autoLog);
+        }
+
+        [InitializeOnLoadMethod]
+        private static void AutoGenerateXmlDocumentation()
+        {
+            if (TryGetConfigAutoGenerate(out var autoGenerate) == false || autoGenerate == false)
+            {
+                return;
+            }
+
+            if (TryGetConfigAutoLog(out var autoLog) && autoLog)
+            {
+                var projectRoot = GetProjectRootPath();
+                var xmlDocumentationFolderPath = projectRoot.GetFolderAbsolutePath(XML_DOCUMENTATION_FOLDER);
+                StaticDevLogger.LogInfo(
+                    $"XML documentation for UPM packages has been generated into " +
+                    $"<a href=\"file:///{xmlDocumentationFolderPath}\">{XML_DOCUMENTATION_FOLDER}</a>"
+                );
+            }
+
+            GenerateXmlDocumentation();
+        }
+
+        [InitializeOnLoadMethod]
         private static void CopyXmlDocToScriptAssembliesFolder()
         {
             var projectRoot = GetProjectRootPath();
@@ -275,6 +360,18 @@ namespace EncosyTower.Editor.AssemblyDefs
 
         private static RootPath GetProjectRootPath()
             => EditorAPI.ProjectPath;
+
+        private static bool TryGetConfigAutoGenerate(out bool value)
+        {
+            var configValue = EditorUserSettings.GetConfigValue(AUTO_GENERATE_KEY) ?? bool.FalseString;
+            return bool.TryParse(configValue, out value);
+        }
+
+        private static bool TryGetConfigAutoLog(out bool value)
+        {
+            var configValue = EditorUserSettings.GetConfigValue(AUTO_LOG_KEY) ?? bool.FalseString;
+            return bool.TryParse(configValue, out value);
+        }
 
         private static string GetCscRspContent(ref Printer p, string xmlFilePath)
         {
