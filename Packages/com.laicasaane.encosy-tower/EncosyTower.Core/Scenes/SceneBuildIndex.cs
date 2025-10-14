@@ -103,6 +103,14 @@ namespace EncosyTower.Scenes
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator >(SceneBuildIndex left, SceneBuildIndex right)
             => left.CompareTo(right) > 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <=(SceneBuildIndex left, SceneBuildIndex right)
+            => left.CompareTo(right) <= 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >=(SceneBuildIndex left, SceneBuildIndex right)
+            => left.CompareTo(right) >= 0;
     }
 }
 
