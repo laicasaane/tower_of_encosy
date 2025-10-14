@@ -45,6 +45,15 @@ namespace EncosyTower.Logging
             return new CallerInfo(lineNumber, memberName, string.Empty);
         }
 
+        /// <summary>
+        /// Returns an info with only line number.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static CallerInfo GetLine([CallerLineNumber] int lineNumber = 0)
+        {
+            return new CallerInfo(lineNumber, string.Empty, string.Empty);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
             => $"{LineNumber} :: {MemberName} :: {FilePath}";
