@@ -14,7 +14,7 @@ using UnityEditorInternal;
 
 namespace EncosyTower.Editor.AssemblyDefs
 {
-    internal static class AssemblyDocGenerator
+    internal static class AssemblyXmlDocumentationGenerator
     {
         private readonly struct AsmdefXmlDoc
         {
