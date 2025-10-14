@@ -1,10 +1,13 @@
 #if UNITY_ADDRESSABLES
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Common;
+using EncosyTower.Logging;
 using EncosyTower.Tasks;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace EncosyTower.Scenes
@@ -17,11 +20,11 @@ namespace EncosyTower.Scenes
     using UnityTaskOpt = UnityEngine.Awaitable<Option<Scene>>;
 #endif
 
-    public static partial class SceneIndexExtensions
+    public static partial class SceneBuildIndexAsyncExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static async UnityTask LoadAsync(
-              this SceneIndex index
+              this SceneBuildIndex index
             , LoadSceneMode mode = LoadSceneMode.Single
             , CancellationToken token = default
         )
@@ -32,7 +35,7 @@ namespace EncosyTower.Scenes
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UnityTaskOpt TryLoadAsync(
-              this SceneIndex index
+              this SceneBuildIndex index
             , LoadSceneMode mode = LoadSceneMode.Single
             , CancellationToken token = default
         )
@@ -41,12 +44,20 @@ namespace EncosyTower.Scenes
         }
 
         private static async UnityTaskOpt TryLoadAsyncInternal(
-              SceneIndex index
+              SceneBuildIndex index
             , LoadSceneMode mode
             , CancellationToken token
         )
         {
+#if UNITY_EDITOR
+            if (Editor.Scenes.SceneBuildIndexEditorAPI.Validate(index) == false)
+            {
+                LogErrorIfInvalidInEditor(index);
+                return Option.None;
+            }
+#else
             if (index.IsValid == false) return Option.None;
+#endif
 
             var handle =  SceneManager.LoadSceneAsync(index.Index, mode);
 
@@ -75,27 +86,13 @@ namespace EncosyTower.Scenes
                 : SceneManager.GetSceneByBuildIndex(index.Index);
         }
 
-        #region SERIALIZABLE
-        #endregion =========
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UnityTask LoadAsync(
-              this SceneIndex.Serializable key
-            , LoadSceneMode mode = LoadSceneMode.Single
-            , CancellationToken token = default
-        )
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void LogErrorIfInvalidInEditor(SceneBuildIndex index)
         {
-            return LoadAsync((SceneIndex)key, mode, token);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UnityTaskOpt TryLoadAsync(
-              this SceneIndex.Serializable key
-            , LoadSceneMode mode = LoadSceneMode.Single
-            , CancellationToken token = default
-        )
-        {
-            return TryLoadAsync((SceneIndex)key, mode, token);
+            StaticDevLogger.LogError(
+                $"Cannot find scene with build index {index.Index} and name '{index.Name}' " +
+                $"in the current EditorBuildSettings."
+            );
         }
     }
 }
