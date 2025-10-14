@@ -11,16 +11,18 @@ namespace EncosyTower.Editor.UnityObjects
     {
         private const string GROUP = nameof(UnityObjectTypes);
 
-        private const string CONTAINS_UNITY = "Encosy Tower/Unity Objects/Type Config/Contains 'Unity'";
-        private const string CONTAINS_EDITOR = "Encosy Tower/Unity Objects/Type Config/Contains 'Editor'";
-        private const string CONTAINS_AUTHORING = "Encosy Tower/Unity Objects/Type Config/Contains 'Authoring'";
-        private const string CONTAINS_WINDOW = "Encosy Tower/Unity Objects/Type Config/Contains 'Window'";
-        private const string CONTAINS_DRAWER = "Encosy Tower/Unity Objects/Type Config/Contains 'Drawer'";
-        private const string CONTAINS_IMPORTER = "Encosy Tower/Unity Objects/Type Config/Contains 'Importer'";
-        private const string IS_ABSTRACT = "Encosy Tower/Unity Objects/Type Config/Is Abstract?";
-        private const string IS_UNBOUND_GENERIC = "Encosy Tower/Unity Objects/Type Config/Is Unbound Generic?";
-        private const string IS_COMPONENT = "Encosy Tower/Unity Objects/Type Config/Is Component?";
-        private const string IS_SCRIPTABLE_OBJECT = "Encosy Tower/Unity Objects/Type Config/Is ScriptableObject?";
+        private const string MENU_PATH = "Encosy Tower/Utilities/Unity Objects";
+        private const string TYPE_CONFIG_MENU_PATH = $"{MENU_PATH}/Type Config";
+        private const string CONTAINS_UNITY = $"{TYPE_CONFIG_MENU_PATH}/Contains 'Unity'";
+        private const string CONTAINS_EDITOR = $"{TYPE_CONFIG_MENU_PATH}/Contains 'Editor'";
+        private const string CONTAINS_AUTHORING = $"{TYPE_CONFIG_MENU_PATH}/Contains 'Authoring'";
+        private const string CONTAINS_WINDOW = $"{TYPE_CONFIG_MENU_PATH}/Contains 'Window'";
+        private const string CONTAINS_DRAWER = $"{TYPE_CONFIG_MENU_PATH}/Contains 'Drawer'";
+        private const string CONTAINS_IMPORTER = $"{TYPE_CONFIG_MENU_PATH}/Contains 'Importer'";
+        private const string IS_ABSTRACT = $"{TYPE_CONFIG_MENU_PATH}/Is Abstract?";
+        private const string IS_UNBOUND_GENERIC = $"{TYPE_CONFIG_MENU_PATH}/Is Unbound Generic?";
+        private const string IS_COMPONENT = $"{TYPE_CONFIG_MENU_PATH}/Is Component?";
+        private const string IS_SCRIPTABLE_OBJECT = $"{TYPE_CONFIG_MENU_PATH}/Is ScriptableObject?";
 
         private static readonly ConfigKey<bool> s_containsUnity = $"{GROUP}-{nameof(ContainsUnity)}";
         private static readonly ConfigKey<bool> s_containsEditor = $"{GROUP}-{nameof(ContainsEditor)}";
@@ -108,77 +110,77 @@ namespace EncosyTower.Editor.UnityObjects
             Menu.SetChecked(IS_SCRIPTABLE_OBJECT, IsScriptableObject);
         }
 
-        [MenuItem(CONTAINS_UNITY)]
+        [MenuItem(CONTAINS_UNITY, priority = 85_85_78_00)]
         private static void ToggleContainsUnity()
         {
             var value = ContainsUnity = !ContainsUnity;
             Menu.SetChecked(CONTAINS_UNITY, value);
         }
 
-        [MenuItem(CONTAINS_EDITOR)]
+        [MenuItem(CONTAINS_EDITOR, priority = 85_85_78_00)]
         private static void ToggleContainsEditor()
         {
             var value = ContainsEditor = !ContainsEditor;
             Menu.SetChecked(CONTAINS_EDITOR, value);
         }
 
-        [MenuItem(CONTAINS_AUTHORING)]
+        [MenuItem(CONTAINS_AUTHORING, priority = 85_85_78_00)]
         private static void ToggleContainsAuthoring()
         {
             var value = ContainsAuthoring = !ContainsAuthoring;
             Menu.SetChecked(CONTAINS_AUTHORING, value);
         }
 
-        [MenuItem(CONTAINS_WINDOW)]
+        [MenuItem(CONTAINS_WINDOW, priority = 85_85_78_00)]
         private static void ToggleContainsWindow()
         {
             var value = ContainsWindow = !ContainsWindow;
             Menu.SetChecked(CONTAINS_WINDOW, value);
         }
 
-        [MenuItem(CONTAINS_DRAWER)]
+        [MenuItem(CONTAINS_DRAWER, priority = 85_85_78_00)]
         private static void ToggleContainsDrawer()
         {
             var value = ContainsDrawer = !ContainsDrawer;
             Menu.SetChecked(CONTAINS_DRAWER, value);
         }
 
-        [MenuItem(CONTAINS_IMPORTER)]
+        [MenuItem(CONTAINS_IMPORTER, priority = 85_85_78_00)]
         private static void ToggleContainsImporter()
         {
             var value = ContainsImporter = !ContainsImporter;
             Menu.SetChecked(CONTAINS_IMPORTER, value);
         }
 
-        [MenuItem(IS_ABSTRACT)]
+        [MenuItem(IS_ABSTRACT, priority = 85_85_78_00)]
         private static void ToggleAbstract()
         {
             var value = IsAbstract = !IsAbstract;
             Menu.SetChecked(IS_ABSTRACT, value);
         }
 
-        [MenuItem(IS_UNBOUND_GENERIC)]
+        [MenuItem(IS_UNBOUND_GENERIC, priority = 85_85_78_00)]
         private static void ToggleUnboundGeneric()
         {
             var value = IsUnboundGeneric = !IsUnboundGeneric;
             Menu.SetChecked(IS_UNBOUND_GENERIC, value);
         }
 
-        [MenuItem(IS_COMPONENT)]
+        [MenuItem(IS_COMPONENT, priority = 85_85_78_00)]
         private static void ToggleComponent()
         {
             var value = IsComponent = !IsComponent;
             Menu.SetChecked(IS_UNBOUND_GENERIC, value);
         }
 
-        [MenuItem(IS_SCRIPTABLE_OBJECT)]
+        [MenuItem(IS_SCRIPTABLE_OBJECT, priority = 85_85_78_00)]
         private static void ToggleScriptableObject()
         {
             var value = IsScriptableObject = !IsScriptableObject;
             Menu.SetChecked(IS_UNBOUND_GENERIC, value);
         }
 
-        [MenuItem("Encosy Tower/Unity Objects/Print Types")]
+        [MenuItem($"{MENU_PATH}/Print Types", priority = 85_85_78_00)]
         private static void PrintTypes()
         {
             var types = TypeCache.GetTypesDerivedFrom<UnityEngine.Object>();

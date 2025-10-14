@@ -18,7 +18,7 @@ namespace EncosyTower.Editor.AssemblyDefs
 {
     internal class AssemblyDefinitionListWindow : EditorWindow
     {
-        [MenuItem("Encosy Tower/Assembly Definitions")]
+        [MenuItem("Encosy Tower/Assembly Definitions", priority = 65_83_00_00)]
         public static void OpenWindow()
         {
             var window = GetWindow<AssemblyDefinitionListWindow>();

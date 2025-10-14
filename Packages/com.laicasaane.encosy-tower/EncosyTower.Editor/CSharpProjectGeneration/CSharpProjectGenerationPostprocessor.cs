@@ -18,7 +18,7 @@ namespace EncosyTower.Editor.CSharpProjectGeneration
 
     internal static class CSharpProjectGenerationMenu
     {
-        [MenuItem("Encosy Tower/Project Settings/CSharp/Switch to Legacy")]
+        [MenuItem("Encosy Tower/Project Settings/CSharp/Switch to Legacy", priority = 80_67_00_01)]
         private static void SwitchToLegacy()
         {
             UserBuildAPI.RemoveScriptingDefineSymbols(
@@ -30,7 +30,7 @@ namespace EncosyTower.Editor.CSharpProjectGeneration
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("Encosy Tower/Project Settings/CSharp/Switch to SDK-style")]
+        [MenuItem("Encosy Tower/Project Settings/CSharp/Switch to SDK-style", priority = 80_67_00_00)]
         private static void SwitchToSdkStyle()
         {
             UserBuildAPI.RemoveScriptingDefineSymbols(

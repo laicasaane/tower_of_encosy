@@ -27,7 +27,7 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings
             return provider;
         }
 
-        [MenuItem("Encosy Tower/Project Settings/Mono Page Flow")]
+        [MenuItem("Encosy Tower/Project Settings/Mono Page Flow", priority = 80_77_00_00)]
         private static void OpenSettings()
             => MonoPageFlowSettings.Instance.OpenSettingsWindow();
 

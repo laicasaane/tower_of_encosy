@@ -92,7 +92,7 @@ namespace EncosyTower.Types.Editor
         /// </summary>
         private const string LINK_XML_FILE_PATH_DEBUG = $"Temp/{ASSET_FILE_NAME_DEBUG}_link.xml";
 
-        [MenuItem("Encosy Tower/Runtime Type Cache/Create Debug Assets")]
+        [MenuItem("Encosy Tower/Runtime Type Cache/Create Debug Assets", priority = 82_67_00_01)]
         private static void Menu_CreateDebugAssets()
         {
             CreateAssets(onlyDebug: true);
@@ -102,7 +102,7 @@ namespace EncosyTower.Types.Editor
             StaticDevLogger.LogInfo($"<a href=\"{LINK_XML_FILE_PATH_DEBUG}\">{ASSET_FILE_NAME_DEBUG}_link.xml</a>");
         }
 
-        [MenuItem("Encosy Tower/Runtime Type Cache/Create Runtime Assets")]
+        [MenuItem("Encosy Tower/Runtime Type Cache/Create Runtime Assets", priority = 82_67_00_02)]
         private static void Menu_CreateRuntimeAssets()
         {
             CreateAssets(onlyDebug: false);

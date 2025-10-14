@@ -43,7 +43,7 @@ namespace EncosyTower.Editor.AssemblyDefs
         private const string XML_DOCUMENTATION_FOLDER = "Library/XmlDocumentationGenerated";
         private const string SCRIPT_ASSEMBLIES_FOLDER = "Library/ScriptAssemblies";
 
-        [MenuItem("Tools/XML Documentation/Generate", priority = 0)]
+        [MenuItem("Encosy Tower/XML Documentation/Generate", priority = 88_00_00_00)]
         private static void GenerateXmlDocumentation()
         {
             const string TITLE = "Generate XML Documentation";
@@ -115,7 +115,7 @@ namespace EncosyTower.Editor.AssemblyDefs
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("Tools/XML Documentation/Delete", priority = 1)]
+        [MenuItem("Encosy Tower/XML Documentation/Delete", priority = 88_00_00_01)]
         private static void DeleteXmlDocumentation()
         {
             const string TITLE = "Delete XML Documentation";

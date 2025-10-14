@@ -15,7 +15,7 @@ namespace EncosyTower.Editor
 {
     public class EditorIcons : EditorWindow
     {
-        [MenuItem("Encosy Tower/Editor Icons")]
+        [MenuItem("Encosy Tower/Utilities/Editor Icons", priority = 85_69_68_00)]
         public static void EditorIconsOpen()
         {
             var w = CreateWindow<EditorIcons>("Editor Icons");

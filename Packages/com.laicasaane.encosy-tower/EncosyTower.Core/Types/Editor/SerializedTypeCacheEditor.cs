@@ -43,7 +43,7 @@ namespace EncosyTower.Types.Editor
 
     internal static class SerializedTypeCacheEditor
     {
-        [MenuItem("Encosy Tower/Runtime Type Cache/Print Player Assemblies")]
+        [MenuItem("Encosy Tower/Runtime Type Cache/Print Player Assemblies", priority = 82_80_00_00)]
         public static void PrintAssemblies()
         {
             var names = GetPlayerAssemblyNames();

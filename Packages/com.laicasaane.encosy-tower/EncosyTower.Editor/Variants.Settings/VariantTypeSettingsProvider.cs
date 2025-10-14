@@ -23,7 +23,7 @@ namespace EncosyTower.Editor.Variants.Settings
             return provider;
         }
 
-        [MenuItem("Encosy Tower/Project Settings/Variant Type")]
+        [MenuItem("Encosy Tower/Project Settings/Variant Type", priority = 80_86_00_00)]
         private static void OpenSettings()
             => VariantTypeSettings.Instance.OpenSettingsWindow();
 

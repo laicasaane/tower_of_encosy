@@ -17,7 +17,7 @@ namespace EncosyTower.Editor.VisualDebugging.Commands
 
         private VisualCommanderView _view;
 
-        [MenuItem("Encosy Tower/Visual Commands")]
+        [MenuItem("Encosy Tower/Visual Commands", priority = 86_73_00_00)]
         public static void OpenVisualCommandWindow()
         {
             var window = GetWindow<VisualCommandWindow>();

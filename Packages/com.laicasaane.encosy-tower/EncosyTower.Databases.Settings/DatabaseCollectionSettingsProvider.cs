@@ -26,7 +26,7 @@ namespace EncosyTower.Databases.Settings
             return provider;
         }
 
-        [MenuItem("Encosy Tower/Project Settings/Database Collection")]
+        [MenuItem("Encosy Tower/Project Settings/Database Collection", priority = 80_68_00_00)]
         private static void OpenSettings()
             => DatabaseCollectionSettings.Instance.OpenSettingsWindow();
 

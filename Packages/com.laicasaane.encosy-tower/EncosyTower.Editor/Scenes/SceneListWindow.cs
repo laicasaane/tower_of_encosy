@@ -18,7 +18,7 @@ namespace EncosyTower.Editor.Scenes
 {
     internal sealed class SceneListWindow : EditorWindow
     {
-        [MenuItem("Encosy Tower/Scenes")]
+        [MenuItem("Encosy Tower/Scenes", priority = 83_67_00_00)]
         public static void OpenWindow()
         {
             var window = GetWindow<SceneListWindow>();

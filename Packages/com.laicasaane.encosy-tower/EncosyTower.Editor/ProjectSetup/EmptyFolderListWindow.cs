@@ -17,7 +17,7 @@ namespace EncosyTower.Editor.ProjectSetup
 {
     public sealed class EmptyFolderListWindow : EditorWindow
     {
-        [MenuItem("Encosy Tower/Empty Folders")]
+        [MenuItem("Encosy Tower/Empty Folders", priority = 69_77_00_00)]
         public static void OpenWindow()
         {
             var window = GetWindow<EmptyFolderListWindow>();
