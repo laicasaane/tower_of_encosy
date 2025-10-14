@@ -38,6 +38,25 @@ namespace EncosyTower.IO
         }
 
         /// <summary>
+        /// Returns the root to a folder (absolute path) after combining <paramref name="relativePath"/>
+        /// with <see cref="Root"/>.
+        /// </summary>
+        /// <param name="relativePath">The path that is relative to <see cref="Root"/>.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// If <paramref name="relativePath"/> points to a file, the returned value will be the absolute path of its
+        /// containing folder.
+        /// </remarks>
+        public RootPath GetFolderRoot(string relativePath)
+        {
+            var fullPath = GetFileAbsolutePath(relativePath);
+
+            return File.Exists(fullPath)
+                ? ToUnixPath(Path.GetDirectoryName(fullPath))
+                : fullPath;
+        }
+
+        /// <summary>
         /// Returns the absolute path to a folder after combining <paramref name="relativePath"/>
         /// with <see cref="Root"/>.
         /// </summary>
