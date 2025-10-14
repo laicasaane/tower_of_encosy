@@ -19,6 +19,12 @@ namespace EncosyTower.IO
                 => path?.Replace('\\', '/');
 
         /// <summary>
+        /// Returns the absolute path to the <see cref="Root"/>.
+        /// </summary>
+        public string GetAbsolutePath()
+            => GetFolderAbsolutePath(string.Empty);
+
+        /// <summary>
         /// Returns the absolute path to a file after combining <paramref name="relativePath"/>
         /// with <see cref="Root"/>.
         /// </summary>
