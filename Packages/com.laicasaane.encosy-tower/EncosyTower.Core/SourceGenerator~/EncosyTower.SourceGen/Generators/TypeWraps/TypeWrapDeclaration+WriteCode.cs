@@ -22,8 +22,6 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            p.PrintBeginLine("// ").PrintEndLine(FieldTypeSymbol.SpecialType.ToString());
-
             p = p.IncreasedIndent();
             {
                 if (ExcludeConverter == false && IsRefStruct == false)
