@@ -15,7 +15,7 @@ namespace EncosyTower.Collections
     /// Effectively, anything implementing <see cref="IBufferProvider{T}"/> can be used
     /// as the external state for this list.
     /// </summary>
-    public readonly struct StatelessList<TState, T> : IList<T>, IReadOnlyList<T>
+    public readonly partial struct StatelessList<TState, T> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , IAddRangeSpan<T>
         , IClearable, IHasCapacity
