@@ -126,7 +126,7 @@ namespace EncosyTower.Collections
 #if __ENCOSY_VALIDATION__
             if (itemAdded == false)
             {
-                throw new InvalidOperationException("Key already present");
+                ThrowHelper.ThrowInvalidOperationException_KeyPresent();
             }
             else
 #else
@@ -167,7 +167,7 @@ namespace EncosyTower.Collections
 #if __ENCOSY_VALIDATION__
             if (itemAdded)
             {
-                throw new InvalidOperationException("Trying to set a value on a not existing key");
+                ThrowHelper.ThrowInvalidOperationException_TrySetValueOnNotExistingKey();
             }
             else
 #else
@@ -246,17 +246,17 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValueNative GetValueByRef(TKey key)
         {
-#if __ENCOSY_VALIDATION__
-            if (TryFindIndex(key, out var findIndex))
-                return ref _values.AsSpan()[findIndex];
+            var found = TryFindIndex(key, out var findIndex);
 
-            throw new KeyNotFoundException("Key not found");
-#else
             // Burst is not able to vectorise code if throw is found, regardless if it's actually ever thrown
-            TryFindIndex(key, out var findIndex);
+#if __ENCOSY_VALIDATION__
+            if (found == false)
+            {
+                ThrowHelper.ThrowKeyNotFoundException_KeyNotFound();
+            }
+#endif
 
             return ref _values.AsSpan()[findIndex];
-#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -417,17 +417,17 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetIndex(TKey key)
         {
-#if __ENCOSY_VALIDATION__
-            if (TryFindIndex(key, out var findIndex))
-                return findIndex;
+            var found = TryFindIndex(key, out var findIndex);
 
-            throw new KeyNotFoundException("Key not found");
-#else
             //Burst is not able to vectorise code if throw is found, regardless if it's actually ever thrown
-            TryFindIndex(key, out var findIndex);
+#if __ENCOSY_VALIDATION__
+            if (found == false)
+            {
+                ThrowHelper.ThrowKeyNotFoundException_KeyNotFound();
+            }
+#endif
 
             return findIndex;
-#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -655,8 +655,11 @@ namespace EncosyTower.Collections
             {
 #if __ENCOSY_VALIDATION__
                 if (_count != _map.Count)
-                    throw new InvalidOperationException("Cannot modify a map while it is being iterated");
+                {
+                    ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
+                }
 #endif
+
                 if (_index < _count - 1)
                 {
                     ++_index;
@@ -705,7 +708,9 @@ namespace EncosyTower.Collections
         {
 #if __ENCOSY_VALIDATION__
             if (_count != _startCount)
-                throw new InvalidOperationException("Cannot modify a map while it is being iterated");
+            {
+                ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
+            }
 #endif
 
             if (_index >= _count - 1)
@@ -737,7 +742,9 @@ namespace EncosyTower.Collections
 
 #if __ENCOSY_VALIDATION__
             if (_count > _startCount)
-                throw new InvalidOperationException("Cannot set a count greater than the starting one");
+            {
+                ThrowHelper.ThrowInvalidOperationException_SetCountGreaterThanStartingOne();
+            }
 
             _startCount = (int)count;
 #endif
@@ -753,6 +760,7 @@ namespace EncosyTower.Collections
 #endif
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void Dispose() { }
     }
 

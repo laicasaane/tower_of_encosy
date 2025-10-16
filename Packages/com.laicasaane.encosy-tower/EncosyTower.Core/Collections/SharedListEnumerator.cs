@@ -48,7 +48,7 @@ namespace EncosyTower.Collections
         {
             if (_version != _list._version.ValueRO)
             {
-                ThrowHelper.ThrowInvalidOperationException_InvalidOperation_EnumFailedVersion();
+                ThrowHelper.ThrowInvalidOperationException_EnumFailedVersion();
             }
 
             _index = _list._count.ValueRO + 1;
@@ -66,7 +66,7 @@ namespace EncosyTower.Collections
         {
             if (_version != _list._version.ValueRO)
             {
-                ThrowHelper.ThrowInvalidOperationException_InvalidOperation_EnumFailedVersion();
+                ThrowHelper.ThrowInvalidOperationException_EnumFailedVersion();
             }
 
             _index = 0;
@@ -79,7 +79,7 @@ namespace EncosyTower.Collections
             {
                 if (_index == 0 || _index == _list._count.ValueRO + 1)
                 {
-                    ThrowHelper.ThrowInvalidOperationException_InvalidOperation_EnumOpCantHappen();
+                    ThrowHelper.ThrowInvalidOperationException_EnumOpCantHappen();
                 }
 
                 return Current;

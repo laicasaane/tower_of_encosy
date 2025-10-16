@@ -211,7 +211,7 @@ namespace EncosyTower.Collections
 #if __ENCOSY_VALIDATION__
             if (itemAdded == false)
             {
-                throw new InvalidOperationException("Key already present");
+                ThrowHelper.ThrowInvalidOperationException_KeyPresent();
             }
             else
 #else
@@ -241,7 +241,7 @@ namespace EncosyTower.Collections
 #if __ENCOSY_VALIDATION__
             if (itemAdded)
             {
-                throw new InvalidOperationException("Trying to set a value on a not existing key");
+                ThrowHelper.ThrowInvalidOperationException_TrySetValueOnNotExistingKey();
             }
             else
 #else
@@ -359,17 +359,17 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ref TValue GetValueByRef(TKey key)
         {
-#if __ENCOSY_VALIDATION__
-            if (TryFindIndex(key, out var findIndex))
-                return ref _values[findIndex];
+            var found = TryFindIndex(key, out var findIndex);
 
-            throw new KeyNotFoundException("Key not found");
-#else
             // Burst is not able to vectorise code if throw is found, regardless if it's actually ever thrown
-            TryFindIndex(key, out var findIndex);
+#if __ENCOSY_VALIDATION__
+            if (found == false)
+            {
+                ThrowHelper.ThrowKeyNotFoundException_KeyNotFound();
+            }
+#endif
 
             return ref _values[(int)findIndex];
-#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -547,17 +547,17 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int GetIndex(TKey key)
         {
-#if __ENCOSY_VALIDATION__
-            if (TryFindIndex(key, out var findIndex))
-                return findIndex;
+            var found = TryFindIndex(key, out var findIndex);
 
-            throw new KeyNotFoundException("Key not found");
-#else
             //Burst is not able to vectorise code if throw is found, regardless if it's actually ever thrown
-            TryFindIndex(key, out var findIndex);
+#if __ENCOSY_VALIDATION__
+            if (found == false)
+            {
+                ThrowHelper.ThrowKeyNotFoundException_KeyNotFound();
+            }
+#endif
 
             return findIndex;
-#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -797,8 +797,11 @@ namespace EncosyTower.Collections
             {
 #if __ENCOSY_VALIDATION__
                 if (_count != _map.Count)
-                    throw new InvalidOperationException("Cannot modify a map while it is being iterated");
+                {
+                    ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
+                }
 #endif
+
                 if (_index < _count - 1)
                 {
                     ++_index;
@@ -815,14 +818,13 @@ namespace EncosyTower.Collections
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly void Dispose()
-            { }
+            public readonly void Dispose() { }
 
             readonly object IEnumerator.Current => Current;
         }
     }
 
-    public struct NativeArrayMapKeyValueEnumerator<TKey, TValue>
+    public struct NativeArrayMapKeyValueEnumerator<TKey, TValue> : IEnumerator<NativeArrayMapKeyValuePairFast<TKey, TValue>>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -857,7 +859,9 @@ namespace EncosyTower.Collections
         {
 #if __ENCOSY_VALIDATION__
             if (_count != _startCount)
-                throw new InvalidOperationException("Cannot modify a map while it is being iterated");
+            {
+                ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
+            }
 #endif
 
             if (_index < _count - 1)
@@ -869,10 +873,16 @@ namespace EncosyTower.Collections
             return false;
         }
 
-        public NativeArrayMapKeyValuePairFast<TKey, TValue> Current
+        public readonly NativeArrayMapKeyValuePairFast<TKey, TValue> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(_map._valuesInfo[_index].key, _map._values, _index);
+        }
+
+        readonly object IEnumerator.Current
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Current;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -883,11 +893,26 @@ namespace EncosyTower.Collections
 
 #if __ENCOSY_VALIDATION__
             if (_count > _startCount)
-                throw new InvalidOperationException("Cannot set a count greater than the starting one");
+            {
+                ThrowHelper.ThrowInvalidOperationException_SetCountGreaterThanStartingOne();
+            }
 
             _startCount = (int)count;
 #endif
         }
+
+        public void Reset()
+        {
+            _index = -1;
+            _count = _map.Count;
+
+#if __ENCOSY_VALIDATION__
+            _startCount = _map.Count;
+#endif
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly void Dispose() { }
     }
 
     [DebuggerDisplay("[{Key}] = {Value}")]
