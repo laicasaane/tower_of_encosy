@@ -8,7 +8,7 @@ using Unity.Collections;
 
 namespace EncosyTower.Collections
 {
-    public class SharedList<T> : SharedList<T, T>
+    public partial class SharedList<T> : SharedList<T, T>
         where T : unmanaged
     {
         public SharedList() : base()
@@ -52,7 +52,7 @@ namespace EncosyTower.Collections
         }
     }
 
-    public class SharedList<T, TNative> : IList<T>, IReadOnlyList<T>
+    public partial class SharedList<T, TNative> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , IAddRangeSpan<T>
         , IClearable, IDisposable, IHasCapacity
@@ -331,8 +331,8 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SharedListEnumerator<T, TNative> GetEnumerator()
-            => new(this);
+        public Enumerator GetEnumerator()
+            => new(AsReadOnly());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void IncreaseCapacityBy(int amount)
@@ -551,11 +551,11 @@ namespace EncosyTower.Collections
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
-            => new SharedListEnumerator<T, TNative>(this);
+            => GetEnumerator();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEnumerator IEnumerable.GetEnumerator()
-            => new SharedListEnumerator<T, TNative>(this);
+            => GetEnumerator();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         int IList<T>.IndexOf(T item)
