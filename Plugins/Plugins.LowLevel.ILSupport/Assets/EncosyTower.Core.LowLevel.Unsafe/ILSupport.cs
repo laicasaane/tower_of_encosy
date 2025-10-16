@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("EncosyTower.Core")]
 
-namespace Encosy.Core.LowLevel.Unsafe
+namespace EncosyTower.LowLevel.Unsafe
 {
     internal unsafe static class ILSupport
     {

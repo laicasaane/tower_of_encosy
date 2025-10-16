@@ -1,6 +1,6 @@
 {
-    "name": "Encosy.Core.LowLevel.ILSupport",
-    "rootNamespace": "Encosy.Core.LowLevel.ILSupport",
+    "name": "EncosyTower.Core.LowLevel.Unsafe",
+    "rootNamespace": "EncosyTower.Core.LowLevel.Unsafe",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

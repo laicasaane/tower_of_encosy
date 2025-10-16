@@ -19,7 +19,7 @@ namespace Unity.Collections.LowLevel.ILSupport.CodeGen
 
         public override bool WillProcess(ICompiledAssembly compiledAssembly)
         {
-            if (compiledAssembly.Name == "Encosy.Core.LowLevel.ILSupport")
+            if (compiledAssembly.Name == "EncosyTower.Core.LowLevel.Unsafe")
                 return true;
             return false;
         }
@@ -34,7 +34,7 @@ namespace Unity.Collections.LowLevel.ILSupport.CodeGen
             TypeDefinition ilSupportType = null;
             foreach (var t in assemblyDefinition.MainModule.Types)
             {
-                if (t.FullName == "Encosy.Core.LowLevel.Unsafe.ILSupport")
+                if (t.FullName == "EncosyTower.LowLevel.Unsafe.ILSupport")
                 {
                     ilSupportType = t;
                     break;

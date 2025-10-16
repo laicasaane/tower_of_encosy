@@ -3,7 +3,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Encosy.Core.LowLevel.Unsafe;
+using EncosyTower.LowLevel.Unsafe;
 using Unity.Mathematics;
 
 namespace Unity.Collections.LowLevel.Unsafe
@@ -20,7 +20,7 @@ namespace Unity.Collections.LowLevel.Unsafe
         /// <param name="ptr">A buffer.</param>
         /// <param name="otherPtr">Another buffer.</param>
         /// <param name="size">The number of bytes to swap.</param>
-        /// <exception cref="System.InvalidOperationException">Thrown if the two ranges of bytes to swap overlap in memory.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the two ranges of bytes to swap overlap in memory.</exception>
         internal static void MemSwap(void* ptr, void* otherPtr, long size)
         {
             byte* dst = (byte*) ptr;
