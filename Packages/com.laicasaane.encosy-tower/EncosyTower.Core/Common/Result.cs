@@ -170,7 +170,7 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(TValue value)
         {
-            Value = new Option<TValue>(value);
+            Value = Option.Some(value);
             Error = Option.None;
         }
 
@@ -178,7 +178,7 @@ namespace EncosyTower.Common
         public Result(TError error)
         {
             Value = Option.None;
-            Error = new Option<TError>(error);
+            Error = Option.Some(error);
         }
 
         public bool IsValid

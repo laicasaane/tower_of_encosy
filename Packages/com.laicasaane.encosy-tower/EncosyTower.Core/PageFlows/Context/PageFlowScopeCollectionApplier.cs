@@ -75,7 +75,7 @@ namespace EncosyTower.PageFlows
         {
             if (value is TCollection flowScopes)
             {
-                _value = new(flowScopes);
+                _value = Option.Some(flowScopes);
                 return true;
             }
             else

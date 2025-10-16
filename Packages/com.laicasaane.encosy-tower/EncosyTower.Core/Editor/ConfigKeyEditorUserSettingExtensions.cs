@@ -20,7 +20,7 @@ namespace EncosyTower.Editor.ConfigKeys
         public static Option<bool> GetEditorUserSetting(this ConfigKey<bool> self)
         {
             var str = EditorUserSettings.GetConfigValue(self.Value);
-            return bool.TryParse(str, out var result) ? new Option<bool>(result) : Option.None;
+            return bool.TryParse(str, out var result) ? Option.Some(result) : Option.None;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

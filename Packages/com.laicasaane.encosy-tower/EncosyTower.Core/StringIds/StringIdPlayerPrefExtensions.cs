@@ -77,7 +77,7 @@ namespace EncosyTower.StringIds
         public static Option<bool> GetPlayerPref(this StringId<bool> self)
         {
             var key = IdToString.GetManaged(self);
-            return PlayerPrefs.HasKey(key) ? new Option<bool>(PlayerPrefs.GetInt(key) != 0) : Option.None;
+            return PlayerPrefs.HasKey(key) ? Option.Some(PlayerPrefs.GetInt(key) != 0) : Option.None;
         }
 
         /// <summary>

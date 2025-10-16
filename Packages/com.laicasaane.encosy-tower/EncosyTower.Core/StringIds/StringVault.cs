@@ -58,7 +58,7 @@ namespace EncosyTower.StringIds
             }
         }
 
-        public StringId MakeIdFromUnmanaged(in UnmanagedString str)
+        public Id MakeIdFromUnmanaged(in UnmanagedString str)
         {
             var hash = str.GetHashCode();
             var registered = _map.TryGetValue(hash, out var id);
@@ -82,7 +82,7 @@ namespace EncosyTower.StringIds
 
                     _unmanagedStrings[index] = str;
                     _managedStrings[index] = str.ToString();
-                    _hashes[index] = new Option<StringHash>(hash);
+                    _hashes[index] = Option.Some<StringHash>(hash);
                 }
             }
             else
@@ -99,7 +99,7 @@ namespace EncosyTower.StringIds
 
                         _unmanagedStrings[index] = str;
                         _managedStrings[index] = str.ToString();
-                        _hashes[index] = new Option<StringHash>(hash);
+                        _hashes[index] = Option.Some<StringHash>(hash);
                     }
                     else
                     {
@@ -135,7 +135,7 @@ namespace EncosyTower.StringIds
 
                     _unmanagedStrings[index] = str;
                     _managedStrings[index] = str;
-                    _hashes[index] = new Option<StringHash>(hash);
+                    _hashes[index] = Option.Some<StringHash>(hash);
                 }
             }
             else
@@ -151,7 +151,7 @@ namespace EncosyTower.StringIds
                         EnsureCapacity();
                         _unmanagedStrings[index] = str;
                         _managedStrings[index] = str;
-                        _hashes[index] = new Option<StringHash>(hash);
+                        _hashes[index] = Option.Some<StringHash>(hash);
                     }
                     else
                     {
@@ -161,6 +161,37 @@ namespace EncosyTower.StringIds
             }
 
             return id;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryGetUnmanagedString(Id id, out UnmanagedString result)
+        {
+            var indexUnsigned = (uint)id;
+            var index = (int)indexUnsigned;
+            var validIndex = indexUnsigned < (uint)_hashes.Count;
+
+            result = validIndex ? _unmanagedStrings[index] : default;
+            return validIndex ? _hashes[index].HasValue : false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryGetManagedString(Id id, out string result)
+        {
+            var indexUnsigned = (uint)id;
+            var index = (int)indexUnsigned;
+            var validIndex = indexUnsigned < (uint)_hashes.Count;
+
+            result = validIndex ? _managedStrings[index] : string.Empty;
+            return validIndex ? _hashes[index].HasValue : false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool ContainsId(Id id)
+        {
+            var indexUnsigned = (uint)id;
+            var index = (int)indexUnsigned;
+            var validIndex = indexUnsigned < (uint)_hashes.Count;
+            return validIndex ? _hashes[index].HasValue : false;
         }
 
         private void EnsureCapacity()
@@ -189,37 +220,6 @@ namespace EncosyTower.StringIds
             {
                 _managedStrings.AddReplicateNoInit(Math.Max(newCapacity - _managedStrings.Count, 0));
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetUnmanagedString(Id id, out UnmanagedString str)
-        {
-            var indexUnsigned = (uint)id;
-            var index = (int)indexUnsigned;
-            var validIndex = indexUnsigned < (uint)_hashes.Count;
-
-            str = validIndex ? _unmanagedStrings[index] : default;
-            return validIndex ? _hashes[index].HasValue : false;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetManagedString(Id id, out string str)
-        {
-            var indexUnsigned = (uint)id;
-            var index = (int)indexUnsigned;
-            var validIndex = indexUnsigned < (uint)_hashes.Count;
-
-            str = validIndex ? _managedStrings[index] : string.Empty;
-            return validIndex ? _hashes[index].HasValue : false;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ContainsId(Id id)
-        {
-            var indexUnsigned = (uint)id;
-            var index = (int)indexUnsigned;
-            var validIndex = indexUnsigned < (uint)_hashes.Count;
-            return validIndex ? _hashes[index].HasValue : false;
         }
 
         [HideInCallstack, StackTraceHidden]

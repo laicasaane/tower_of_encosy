@@ -118,7 +118,7 @@ namespace EncosyTower.PageFlows.MonoPages
                 return;
             }
 
-            flowContext.FlowScopeCollectionApplier = new(flowScopeCollectionApplier);
+            flowContext.FlowScopeCollectionApplier = Option.Some(flowScopeCollectionApplier);
 
             CreatePageFlows(flowContext, definitions);
 

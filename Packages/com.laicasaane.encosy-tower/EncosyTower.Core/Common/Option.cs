@@ -24,7 +24,7 @@ namespace EncosyTower.Common
 
         public readonly ByteBool HasValue;
 
-        public Option(T value)
+        internal Option(T value)
         {
             _value = value;
 

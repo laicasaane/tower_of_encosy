@@ -59,7 +59,7 @@ namespace EncosyTower.ConfigKeys
         public static Option<bool> GetPlayerPref(this ConfigKey<bool> self)
         {
             string key = self.Value;
-            return PlayerPrefs.HasKey(key) ? new Option<bool>(PlayerPrefs.GetInt(key) != 0) : Option.None;
+            return PlayerPrefs.HasKey(key) ? Option.Some(PlayerPrefs.GetInt(key) != 0) : Option.None;
         }
 
         /// <summary>

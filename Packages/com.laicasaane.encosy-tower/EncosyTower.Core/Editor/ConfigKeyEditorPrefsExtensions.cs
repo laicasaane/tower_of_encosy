@@ -44,7 +44,7 @@ namespace EncosyTower.Editor.ConfigKeys
         public static Option<bool> GetEditorPref(this ConfigKey<bool> self)
         {
             string key = self.Value;
-            return EditorPrefs.HasKey(key) ? new Option<bool>(EditorPrefs.GetInt(key) != 0) : Option.None;
+            return EditorPrefs.HasKey(key) ? Option.Some(EditorPrefs.GetInt(key) != 0) : Option.None;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

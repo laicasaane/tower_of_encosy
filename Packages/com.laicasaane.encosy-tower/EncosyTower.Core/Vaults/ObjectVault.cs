@@ -97,7 +97,7 @@ namespace EncosyTower.Vaults
             {
                 if (obj is T objT)
                 {
-                    return new(objT);
+                    return Option.Some(objT);
                 }
 
                 goto FAILED;
@@ -105,7 +105,7 @@ namespace EncosyTower.Vaults
 
             if (unityObj && obj is T unityObjT)
             {
-                return new(unityObjT);
+                return Option.Some(unityObjT);
             }
 
             if (unityObj == false)
@@ -124,7 +124,7 @@ namespace EncosyTower.Vaults
             {
                 if (unityObj.IsValid())
                 {
-                    return new(unityObj);
+                    return Option.Some(unityObj);
                 }
 
                 ErrorIfRegisteredObjectIsNull(id, context);
@@ -137,7 +137,7 @@ namespace EncosyTower.Vaults
                 return Option.None;
             }
 
-            return new(obj);
+            return Option.Some(obj);
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
