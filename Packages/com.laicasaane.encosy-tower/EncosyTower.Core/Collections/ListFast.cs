@@ -95,7 +95,7 @@ namespace EncosyTower.Collections
         internal ref T[] _buffer
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref _list.Item;
+            get => ref _list.Items;
         }
 
         internal ref int _count
