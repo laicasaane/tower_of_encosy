@@ -30,7 +30,7 @@ namespace EncosyTower.Collections
     /// value with shared hash hence bucket list index.
     /// </remarks>
     [DebuggerTypeProxy(typeof(SharedArrayMapDebugProxy<,>))]
-    public class SharedArrayMap<TKey, TValue> : SharedArrayMap<TKey, TValue, TValue>
+    public partial class SharedArrayMap<TKey, TValue> : SharedArrayMap<TKey, TValue, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -54,7 +54,7 @@ namespace EncosyTower.Collections
     /// value with shared hash hence bucket list index.
     /// </remarks>
     [DebuggerTypeProxy(typeof(SharedArrayMapDebugProxy<,,>))]
-    public class SharedArrayMap<TKey, TValue, TValueNative> : IDisposable
+    public partial class SharedArrayMap<TKey, TValue, TValueNative> : IDisposable
         , ICollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>
         , IReadOnlyCollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>
         , IClearable, IHasCapacity
@@ -781,7 +781,7 @@ namespace EncosyTower.Collections
 
         public readonly struct KeyEnumerable : IEnumerable<TKey>
         {
-            private readonly SharedArrayMap< TKey, TValue, TValueNative > _map;
+            private readonly SharedArrayMap<TKey, TValue, TValueNative> _map;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public KeyEnumerable([NotNull] SharedArrayMap<TKey, TValue, TValueNative> map)
@@ -810,7 +810,7 @@ namespace EncosyTower.Collections
 
         public struct KeyEnumerator : IEnumerator<TKey>
         {
-            private readonly SharedArrayMap< TKey, TValue, TValueNative > _map;
+            private readonly SharedArrayMap<TKey, TValue, TValueNative> _map;
             private readonly int _count;
 
             private int _index;
