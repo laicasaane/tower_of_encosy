@@ -24,7 +24,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         [FormerlySerializedAs("_presetBindings")]
         internal List<MonoBinding> _bindings = new();
 
-        protected ReadOnlyList<MonoBinding> Bindings
+        protected ListFast<MonoBinding>.ReadOnly Bindings
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _bindings ??= new();
@@ -51,7 +51,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         [FormerlySerializedAs("_presetTargets")]
         internal List<T> _targets;
 
-        protected ReadOnlyList<T> Targets
+        protected ListFast<T>.ReadOnly Targets
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _targets ??= new();

@@ -37,7 +37,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         [FormerlySerializedAs("_presetBinders")]
         internal List<MonoBinder> _binders;
 
-        protected ReadOnlyList<MonoBinder> Binders
+        protected ListFast<MonoBinder>.ReadOnly Binders
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _binders ??= new();

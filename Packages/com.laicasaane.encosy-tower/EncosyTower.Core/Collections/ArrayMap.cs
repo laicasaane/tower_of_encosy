@@ -54,7 +54,7 @@ namespace EncosyTower.Collections
     /// value with shared hash hence bucket list index.
     /// </remarks>
     [DebuggerTypeProxy(typeof(ArrayMapDebugProxy<,>))]
-    public class ArrayMap<TKey, TValue> : IDisposable
+    public partial class ArrayMap<TKey, TValue> : IDisposable
         , ICollection<ArrayMapKeyValuePairFast<TKey, TValue>>
         , IReadOnlyCollection<ArrayMapKeyValuePairFast<TKey, TValue>>
         , IClearable, IHasCapacity
@@ -106,7 +106,7 @@ namespace EncosyTower.Collections
             _fastModBucketsMultiplier = source._fastModBucketsMultiplier;
         }
 
-        public ArrayMap(ReadOnlyArrayMap<TKey, TValue> source) : this(source._map)
+        public ArrayMap(ReadOnly source) : this(source._map)
         { }
 
         public int Capacity
@@ -625,18 +625,6 @@ namespace EncosyTower.Collections
             {
                 this[other.Key] = other.Value;
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlyArrayMap<TKey, TValue> AsReadOnly()
-        {
-            return new ReadOnlyArrayMap<TKey, TValue>(this);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator ReadOnlyArrayMap<TKey, TValue>(ArrayMap<TKey, TValue> map)
-        {
-            return map.AsReadOnly();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -103,7 +103,7 @@ namespace EncosyTower.VisualDebugging.Commands
         private readonly FasterList<VisualDirectoryView> _directoryViews;
         private readonly FasterList<VisualCommandView> _commandViews;
 
-        private ReadOnlyArrayMap<StringId, FasterList<VisualCommandData>> _directoryToCommands;
+        private ArrayMap<StringId, FasterList<VisualCommandData>>.ReadOnly _directoryToCommands;
         private FasterList<VisualDirectoryData>.ReadOnly _directories;
 
         // Detect redundant Dispose() calls.
@@ -144,7 +144,7 @@ namespace EncosyTower.VisualDebugging.Commands
         }
 
         public void Initialize(
-              [NotNull] ReadOnlyArrayMap<StringId, FasterList<VisualCommandData>> directoryToCommands
+              [NotNull] ArrayMap<StringId, FasterList<VisualCommandData>>.ReadOnly directoryToCommands
             , [NotNull] FasterList<VisualDirectoryData>.ReadOnly directories
         )
         {

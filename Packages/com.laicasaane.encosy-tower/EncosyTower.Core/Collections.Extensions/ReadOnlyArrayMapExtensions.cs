@@ -7,7 +7,7 @@ namespace EncosyTower.Collections.Extensions
     public static class ReadOnlyArrayMapExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<TValue> GetValues<TKey, TValue>([NotNull] this ReadOnlyArrayMap<TKey, TValue> self)
+        public static Span<TValue> GetValues<TKey, TValue>([NotNull] this ArrayMap<TKey, TValue>.ReadOnly self)
         {
             return self._map.GetValues();
         }

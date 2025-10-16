@@ -9,7 +9,7 @@ using EncosyTower.Debugging;
 
 namespace EncosyTower.Collections
 {
-    public readonly struct ListFast<T> : IList<T>, IReadOnlyList<T>
+    public readonly partial struct ListFast<T> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , IAddRangeSpan<T>
         , IClearable, IHasCapacity

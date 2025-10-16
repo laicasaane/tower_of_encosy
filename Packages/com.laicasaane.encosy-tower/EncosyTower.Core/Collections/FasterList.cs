@@ -918,10 +918,6 @@ namespace EncosyTower.Collections
             => _buffer.AsSpan(0, _count);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnly AsReadOnly()
-            => new(this);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Trim()
         {
             _version++;

@@ -194,10 +194,6 @@ namespace EncosyTower.StringIds
             return validIndex ? _hashes[index].HasValue : false;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnly AsReadOnly()
-            => new(this);
-
         private void EnsureCapacity()
         {
             var oldCapacity = Math.Min(_hashes.Capacity, _unmanagedStrings.Capacity);
@@ -251,6 +247,10 @@ namespace EncosyTower.StringIds
 
     partial class StringVault
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnly AsReadOnly()
+            => new(this);
+
         public readonly partial struct ReadOnly
         {
             private readonly SharedArrayMapNative<StringHash, Id, Id> _map;
