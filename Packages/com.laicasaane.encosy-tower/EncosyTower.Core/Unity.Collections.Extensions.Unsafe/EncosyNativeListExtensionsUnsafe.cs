@@ -9,14 +9,14 @@ namespace EncosyTower.Collections.Unsafe
     public static class EncosyNativeListExtensionsUnsafe
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref T ElementAsUnsafeRefRW<T>(ref this NativeList<T> list, int index)
+        public static unsafe ref T ElementAsUnsafeRefRW<T>(this NativeList<T> list, int index)
             where T : unmanaged
         {
             return ref UnsafeUtility.ArrayElementAsRef<T>(list.GetUnsafePtr(), index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref readonly T ElementAsUnsafeRefRO<T>(ref this NativeList<T> list, int index)
+        public static unsafe ref readonly T ElementAsUnsafeRefRO<T>(this NativeList<T> list, int index)
             where T : unmanaged
         {
             return ref UnsafeUtility.ArrayElementAsRef<T>(list.GetUnsafeReadOnlyPtr(), index);

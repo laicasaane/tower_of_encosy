@@ -25,7 +25,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T ElementAtOrDefault<T>(ref this NativeList<T> list, int index)
+        public static T ElementAtOrDefault<T>(this NativeList<T> list, int index)
             where T : unmanaged
         {
             return (uint)index < (uint)list.Length ? list[index] : default;
