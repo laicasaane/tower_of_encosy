@@ -137,6 +137,10 @@ namespace EncosyTower.Buffers
             => _realBuffer.Clear();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal readonly NativeArray<T> ToNativeArray()
+            => _realBuffer.ToNativeArray();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly NB<T> ToRealBuffer()
             => _realBuffer;
 

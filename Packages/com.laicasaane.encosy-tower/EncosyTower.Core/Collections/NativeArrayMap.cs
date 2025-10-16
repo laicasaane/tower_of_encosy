@@ -56,7 +56,7 @@ namespace EncosyTower.Collections
     /// value with shared hash hence bucket list index.
     /// </remarks>
     [DebuggerTypeProxy(typeof(NativeArrayMapDebugProxy<,>))]
-    public struct NativeArrayMap<TKey, TValue> : IDisposable, IClearable, IHasCapacity
+    public partial struct NativeArrayMap<TKey, TValue> : IDisposable, IClearable, IHasCapacity
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -157,13 +157,15 @@ namespace EncosyTower.Collections
         public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _buckets.IsValid;
+            get => _valuesInfo.IsValid && _values.IsValid && _buckets.IsValid
+                && _freeValueCellIndex.IsCreated && _collisions.IsCreated
+                && _fastModBucketsMultiplier.IsCreated;
         }
 
         public readonly KeyEnumerable Keys
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => new(this);
+            get => new(AsReadOnly());
         }
 
         public readonly NativeSlice<TValue> Values
@@ -738,10 +740,10 @@ namespace EncosyTower.Collections
 
         public readonly struct KeyEnumerable : IEnumerable<TKey>
         {
-            private readonly NativeArrayMap<TKey, TValue> _map;
+            private readonly ReadOnly _map;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public KeyEnumerable(in NativeArrayMap<TKey, TValue> map)
+            public KeyEnumerable(in ReadOnly map)
             {
                 _map = map;
             }
@@ -767,13 +769,13 @@ namespace EncosyTower.Collections
 
         public struct KeyEnumerator : IEnumerator<TKey>
         {
-            private readonly NativeArrayMap<TKey, TValue> _map;
+            private readonly ReadOnly _map;
             private readonly int _count;
 
             private int _index;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public KeyEnumerator(in NativeArrayMap<TKey, TValue> map) : this()
+            public KeyEnumerator(in ReadOnly map) : this()
             {
                 _map = map;
                 _index = -1;
