@@ -100,7 +100,7 @@ namespace EncosyTower.Editor
                 using (FasterListPool<MenuItemNode>.Get(out var searchResult))
                 {
                     node.Search(search, searchResult);
-                    result.AddRange(searchResult);
+                    result.AddRange(searchResult.AsReadOnlySpan());
                 }
             }
         }

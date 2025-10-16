@@ -28,7 +28,7 @@ using Unity.Collections;
 
 namespace EncosyTower.Buffers
 {
-    public interface IBufferStrategy<T> : IAsSpan<T>, IAsReadOnlySpan<T>, IClearable, IDisposable
+    public interface IBufferStrategy<T> : IAsSpan<T>, IAsReadOnlySpan<T>, IResizable, IClearable, IDisposable
     {
         int Capacity { get; }
 
@@ -38,7 +38,7 @@ namespace EncosyTower.Buffers
 
         void Alloc(int size, Allocator allocator, bool memClear = true);
 
-        void Resize(int newCapacity, bool copyContent = true, bool memClear = true);
+        void Resize(int newCapacity, bool copyContent, bool memClear);
 
         void FastClear();
     }

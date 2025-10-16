@@ -100,7 +100,15 @@ namespace EncosyTower.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Resize(int newSize, bool copyContent = true, bool memClear = true)
+        public void Resize(int newSize)
+            => Resize(newSize, true, true);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Resize(int newSize, bool copyContent)
+            => Resize(newSize, copyContent, true);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Resize(int newSize, bool copyContent, bool memClear)
         {
 #if __ENCOSY_VALIDATION__
             if (_nativeAllocator.IsCreated == false || _realBuffer.ToNativeArray().IsCreated == false)
@@ -150,8 +158,10 @@ namespace EncosyTower.Buffers
 
             if (array.IsCreated)
                 array.Dispose();
+#if __ENCOSY_VALIDATION__
             else
                 throw new InvalidOperationException("Trying to dispose a disposed buffer");
+#endif
 
             _realBuffer = default;
         }

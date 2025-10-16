@@ -72,26 +72,24 @@ namespace EncosyTower.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if (NEW_C_SHARP && !UNITY_5_3_OR_NEWER) //this is still not supported by Unity
-        [SkipLocalsInit]
-#endif
         public void Alloc(int size, Allocator allocator, bool memClear = true)
         {
             var b =  default(MBInternal<T>);
             var array = new T[size];
-#if (NEW_C_SHARP && !UNITY_5_3_OR_NEWER)
-            if (memClear)
-                Array.Clear(array, 0, array.Length);
-#endif
             b.Set(array);
             _realBuffer = b;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if (NEW_C_SHARP && !UNITY_5_3_OR_NEWER) //this is still not supported by Unity
-        [SkipLocalsInit]
-#endif
-        public void Resize(int newSize, bool copyContent = true, bool memClear = true)
+        public void Resize(int newSize)
+            => Resize(newSize, true, true);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Resize(int newSize, bool copyContent)
+            => Resize(newSize, copyContent, true);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Resize(int newSize, bool copyContent, bool memClear)
         {
             if (newSize == Capacity)
             {
@@ -104,11 +102,6 @@ namespace EncosyTower.Buffers
                 Array.Resize(ref realBuffer, newSize);
             else
                 realBuffer = new T[newSize];
-
-#if (NEW_C_SHARP && !UNITY_5_3_OR_NEWER) //this is still not supported by Unity
-            if (memClear)
-                Array.Clear(realBuffer, 0, realBuffer.Length);
-#endif
 
             var b = default(MBInternal<T>);
             b.Set(realBuffer);

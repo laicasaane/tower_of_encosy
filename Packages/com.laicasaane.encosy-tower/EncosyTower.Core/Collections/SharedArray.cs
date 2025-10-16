@@ -1,4 +1,3 @@
-#pragma warning disable IDE1006 // Naming Styles
 
 // https://github.com/stella3d/SharedArray
 
@@ -40,7 +39,7 @@ namespace EncosyTower.Collections
     /// An array usable as both a NativeArray and managed array
     /// </summary>
     /// <typeparam name="T">The type of the array element</typeparam>
-    public sealed class SharedArray<T> : SharedArray<T, T>
+    public class SharedArray<T> : SharedArray<T, T>
         where T : unmanaged
     {
         public SharedArray(int size) : base(size)
@@ -73,21 +72,23 @@ namespace EncosyTower.Collections
     /// </summary>
     /// <typeparam name="T">The element type in the managed representation.</typeparam>
     /// <typeparam name="TNative">The element type in the NativeArray representation. Must be the same size as <typeparamref name="T"/>.</typeparam>
-    public class SharedArray<T, TNative> : IDisposable, IClearable, IEnumerable<T>
+    public class SharedArray<T, TNative> : IDisposable, IClearable, IResizable, IEnumerable<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
         , IAsNativeArray<TNative>, IAsNativeSlice<TNative>
         where T : unmanaged
         where TNative : unmanaged
     {
-        protected GCHandle gcHandle;
+#pragma warning disable IDE1006 // Naming Styles
+        private GCHandle _gcHandle;
 
 #if UNITY_EDITOR && !DISABLE_SHAREDARRAY_SAFETY
-        protected AtomicSafetyHandle m_SafetyHandle;
+        private AtomicSafetyHandle m_SafetyHandle;
 #endif
 
-        protected T[] managed;
-        protected NativeArray<TNative> native;
-        protected int version;
+        internal T[] _managed;
+        internal NativeArray<TNative> _native;
+        internal int _version;
+#pragma warning restore IDE1006 // Naming Styles
 
         protected SharedArray()
         {
@@ -162,7 +163,7 @@ namespace EncosyTower.Collections
         public int Length
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => managed.Length;
+            get => _managed.Length;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -219,23 +220,30 @@ namespace EncosyTower.Collections
         /// <returns></returns>
         public ref T GetPinnableReference()
         {
-            version++;
+            _version++;
 
-            if (managed.Length > 0)
+            if (_managed.Length > 0)
             {
-                return ref managed[0];
+                return ref _managed[0];
             }
 
             return ref NullRef();
         }
 
-        public void Resize(int newSize, bool copyContent = true)
+        /// <summary>
+        /// Resize and keep the content.
+        /// </summary>
+        /// <param name="newSize"></param>
+        public void Resize(int newSize)
+            => Resize(newSize, true);
+
+        public void Resize(int newSize, bool copyContent)
         {
-            version++;
+            _version++;
 
             ThrowIfSizeNegative(newSize);
 
-            if (newSize == managed.Length)
+            if (newSize == _managed.Length)
             {
                 return;
             }
@@ -245,18 +253,18 @@ namespace EncosyTower.Collections
             AtomicSafetyHandle.Release(m_SafetyHandle);
 #endif
 
-            if (gcHandle.IsAllocated)
+            if (_gcHandle.IsAllocated)
             {
-                gcHandle.Free();
+                _gcHandle.Free();
             }
 
             if (copyContent)
             {
-                Array.Resize(ref managed, newSize);
+                Array.Resize(ref _managed, newSize);
             }
             else
             {
-                managed = new T[newSize];
+                _managed = new T[newSize];
             }
 
             Initialize();
@@ -268,7 +276,7 @@ namespace EncosyTower.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
 
-            Array.Clear(managed, 0, managed.Length);
+            Array.Clear(_managed, 0, _managed.Length);
         }
 
         public Enumerator GetEnumerator()
@@ -278,24 +286,24 @@ namespace EncosyTower.Collections
 
         public void Dispose()
         {
-            if (managed == null)
+            if (_managed == null)
             {
                 return;
             }
 
-            version++;
+            _version++;
 
 #if UNITY_EDITOR && !DISABLE_SHAREDARRAY_SAFETY
             AtomicSafetyHandle.CheckDeallocateAndThrow(m_SafetyHandle);
             AtomicSafetyHandle.Release(m_SafetyHandle);
 #endif
 
-            if (gcHandle.IsAllocated)
+            if (_gcHandle.IsAllocated)
             {
-                gcHandle.Free();
+                _gcHandle.Free();
             }
 
-            managed = null;
+            _managed = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -305,7 +313,7 @@ namespace EncosyTower.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
 
-            return managed;
+            return _managed;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -315,7 +323,7 @@ namespace EncosyTower.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
 
-            return managed;
+            return _managed;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -325,7 +333,7 @@ namespace EncosyTower.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
 
-            return managed.AsSpan();
+            return _managed.AsSpan();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -335,7 +343,7 @@ namespace EncosyTower.Collections
             AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
 
-            return managed.AsSpan();
+            return _managed.AsSpan();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -345,7 +353,7 @@ namespace EncosyTower.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
 
-            return managed.AsMemory();
+            return _managed.AsMemory();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -355,19 +363,19 @@ namespace EncosyTower.Collections
             AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
 
-            return managed.AsMemory();
+            return _managed.AsMemory();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeArray<TNative> AsNativeArray()
         {
-            return native;
+            return _native;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeSlice<TNative> AsNativeSlice()
         {
-            return native.Slice();
+            return _native.Slice();
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
@@ -397,11 +405,10 @@ namespace EncosyTower.Collections
             return ref *(T*)null;
         }
 
-        private void Initialize(T[] managed)
+        internal void Initialize(T[] managed)
         {
-            version++;
-
-            this.managed = managed;
+            _version++;
+            _managed = managed;
             Initialize();
         }
 
@@ -409,22 +416,22 @@ namespace EncosyTower.Collections
         {
             // Unity's default garbage collector doesn't move objects around, so pinning the array in memory
             // should not even be necessary. Better to be safe, though
-            gcHandle = GCHandle.Alloc(managed, GCHandleType.Pinned);
+            _gcHandle = GCHandle.Alloc(_managed, GCHandleType.Pinned);
             CreateNativeAlias();
 
             unsafe void CreateNativeAlias()
             {
                 // this is the trick to making a NativeArray view of a managed array (or any pointer)
-                fixed (void* ptr = managed)
+                fixed (void* ptr = _managed)
                 {
-                    native = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TNative>(
-                        ptr, managed.Length, Allocator.None
+                    _native = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TNative>(
+                        ptr, _managed.Length, Allocator.None
                     );
                 }
 
 #if UNITY_EDITOR && !DISABLE_SHAREDARRAY_SAFETY
                 m_SafetyHandle = AtomicSafetyHandle.Create();
-                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref native, m_SafetyHandle);
+                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref _native, m_SafetyHandle);
 #endif
             }
         }
@@ -455,7 +462,7 @@ namespace EncosyTower.Collections
 #endif
 
                 _sharedArray = sharedArray;
-                _version = sharedArray.version;
+                _version = sharedArray._version;
                 _length = sharedArray.Length;
                 _index = -1;
                 _current = Option.None;
@@ -470,9 +477,9 @@ namespace EncosyTower.Collections
             public bool MoveNext()
             {
                 var sharedArray = _sharedArray;
-                var array = sharedArray.managed;
+                var array = sharedArray._managed;
 
-                if (_version == sharedArray.version && ((uint)_index < (uint)_length))
+                if (_version == sharedArray._version && ((uint)_index < (uint)_length))
                 {
                     _current = array[_index];
                     _index++;
@@ -484,7 +491,7 @@ namespace EncosyTower.Collections
 
             private bool MoveNextRare()
             {
-                if (_version != _sharedArray.version)
+                if (_version != _sharedArray._version)
                 {
                     ThrowEnumFailedVersion();
                 }
@@ -496,7 +503,7 @@ namespace EncosyTower.Collections
 
             void IEnumerator.Reset()
             {
-                if (_version != _sharedArray.version)
+                if (_version != _sharedArray._version)
                 {
                     ThrowEnumFailedVersion();
                 }

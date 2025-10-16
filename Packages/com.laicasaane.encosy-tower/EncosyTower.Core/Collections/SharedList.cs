@@ -54,6 +54,7 @@ namespace EncosyTower.Collections
 
     public class SharedList<T, TNative> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
+        , IAddRangeSpan<T>
         , IClearable, IDisposable, IHasCapacity
         where T : unmanaged
         where TNative : unmanaged
@@ -560,10 +561,12 @@ namespace EncosyTower.Collections
         int IList<T>.IndexOf(T item)
             => Array.IndexOf(_buffer.AsManagedArray(), item, 0, _count.ValueRO);
 
+        [Obsolete("Use SharedListExtensions.Remove instead.")]
         bool ICollection<T>.Remove(T item)
-            => throw new NotImplementedException("Use SharedListExtensions.Remove instead.");
+            => Extensions.SharedListExtensions.Remove(this, item, Comparer<T>.Default);
 
+        [Obsolete("Use SharedListExtensions.Contains instead.")]
         bool ICollection<T>.Contains(T item)
-            => throw new NotImplementedException("Use SharedListExtensions.Contains instead.");
+            => Extensions.SharedListExtensions.Contains(this, item, EqualityComparer<T>.Default);
     }
 }

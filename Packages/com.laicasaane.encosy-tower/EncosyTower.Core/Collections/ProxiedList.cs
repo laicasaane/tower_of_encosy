@@ -9,7 +9,13 @@ using EncosyTower.Debugging;
 
 namespace EncosyTower.Collections
 {
-    public readonly struct ListFast<T> : IList<T>, IReadOnlyList<T>
+    /// <summary>
+    /// A structure that wraps a <see cref="List{T}"/> via a proxy implementing <see cref="IListProxy{T}"/>.
+    /// </summary>
+    /// <remarks>
+    /// Upon creation, a <see cref="List{T}"/> will also be allocated.
+    /// </remarks>
+    public readonly struct ProxiedList<T> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , IAddRangeSpan<T>
         , IClearable, IHasCapacity
@@ -18,16 +24,29 @@ namespace EncosyTower.Collections
         internal static readonly bool s_shouldPerformMemClear = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 
         internal readonly ListExposed<T> _list;
+        internal readonly IListProxy<T> _proxy;
 
-        public ListFast([NotNull] List<T> list)
+        /// <summary>
+        /// Creates a new <see cref="ProxiedList{T}"/> instance that wraps the given <see cref="IListProxy{T}"/>.
+        /// </summary>
+        /// <remarks>
+        /// A <see cref="List{T}"/> will also be allocated.
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ProxiedList([NotNull] IListProxy<T> proxy)
         {
-            _list = new(list);
+            _proxy = proxy;
+            _list = new(new()) {
+                Items = proxy.Items,
+                Size = proxy.Size,
+                Version = proxy.Version
+            };
         }
 
         public bool IsCreated
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _list.List != null;
+            get => _proxy != null && _list.List != null;
         }
 
         public int Count
@@ -43,12 +62,6 @@ namespace EncosyTower.Collections
         }
 
         public bool IsReadOnly => false;
-
-        public List<T> List
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _list.List;
-        }
 
         public T this[int index]
         {
@@ -69,22 +82,28 @@ namespace EncosyTower.Collections
         }
 
 #pragma warning disable IDE1006 // Naming Styles
-        internal ref T[] _buffer
+        internal T[] _buffer
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref _list.Items;
+            get => _list.Items;
         }
 
-        internal ref int _count
+        internal int _count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref _list.Size;
+            get => _list.Size;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => _list.Size = _proxy.Size = value;
         }
 
-        internal ref int _version
+        internal int _version
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref _list.Version;
+            get => _list.Version;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => _list.Version = _proxy.Version = value;
         }
 #pragma warning restore IDE1006 // Naming Styles
 
@@ -146,6 +165,38 @@ namespace EncosyTower.Collections
             return result;
         }
 
+        public void FindAll([NotNull] Predicate<T> match, [NotNull] FasterList<T> result)
+        {
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(item))
+                {
+                    result.Add(item);
+                }
+            }
+        }
+
+        public void FindAll([NotNull] PredicateIn<T> match, [NotNull] FasterList<T> result)
+        {
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(in item))
+                {
+                    result.Add(in item);
+                }
+            }
+        }
+
         public void FindAll([NotNull] Predicate<T> match, [NotNull] ListFast<T> result)
         {
             var items = AsReadOnlySpan();
@@ -180,6 +231,12 @@ namespace EncosyTower.Collections
 
         public void FindAll([NotNull] Predicate<T> match, [NotNull] ICollection<T> result)
         {
+            if (result is FasterList<T> fasterResult)
+            {
+                FindAll(match, fasterResult);
+                return;
+            }
+
             if (result is List<T> listResult)
             {
                 FindAll(match, listResult);
@@ -202,6 +259,12 @@ namespace EncosyTower.Collections
 
         public void FindAll([NotNull] PredicateIn<T> match, [NotNull] ICollection<T> result)
         {
+            if (result is FasterList<T> fasterResult)
+            {
+                FindAll(match, fasterResult);
+                return;
+            }
+
             if (result is List<T> listResult)
             {
                 FindAll(match, listResult);
@@ -657,9 +720,8 @@ namespace EncosyTower.Collections
                 return;
             }
 
-            var newList = new T[newCapacity];
-            if (_count > 0) Array.Copy(_buffer, newList, _count);
-            _buffer = newList;
+            _proxy.Resize(newCapacity, true);
+            _list.Items = _proxy.Items;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -818,7 +880,8 @@ namespace EncosyTower.Collections
 
             if (_count < _buffer.Length)
             {
-                Array.Resize(ref _buffer, _count);
+                _proxy.Resize(_count);
+                _list.Items = _proxy.Items;
             }
         }
 
@@ -948,6 +1011,31 @@ namespace EncosyTower.Collections
             _version++;
         }
 
+        /// <summary>
+        /// Synchronizes the states of <see cref="IListProxy{T}"/> with <see cref="List{T}"/>.
+        /// </summary>
+        /// <remarks>
+        /// This method should be called whenever there are changes from either
+        /// <see cref="IListProxy{T}"/> or <see cref="List{T}"/> that bypass the safety mechanism of this struct.
+        /// <br/>
+        /// This method use the internal versions from both side to determine if a synchronization is necessary.
+        /// </remarks>
+        public void Synchronize()
+        {
+            if (_proxy.Version > _list.Version)
+            {
+                _list.Items = _proxy.Items;
+                _list.Size = _proxy.Size;
+                _list.Version = _proxy.Version;
+            }
+            else if (_list.Version > _proxy.Version)
+            {
+                _proxy.Items = _list.Items;
+                _proxy.Size = _list.Size;
+                _proxy.Version = _list.Version;
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ListFast<T> Prefill<TDerived>(int amount)
             where TDerived : T, new()
@@ -982,10 +1070,6 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator ListFast<T>([NotNull] List<T> list)
-            => new(list);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int CalcNewCapacity(int newSize)
         {
             newSize = Math.Max(4, newSize);
@@ -996,9 +1080,8 @@ namespace EncosyTower.Collections
         internal void AllocateMore()
         {
             var newCapacity = CalcNewCapacity(_buffer.Length + 1);
-            var newList = new T[newCapacity];
-            if (_count > 0) Array.Copy(_buffer, newList, _count);
-            _buffer = newList;
+            _proxy.Resize(newCapacity, true);
+            _list.Items = _proxy.Items;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1007,9 +1090,8 @@ namespace EncosyTower.Collections
             Checks.IsTrue(newSize > _buffer.Length, "newSize is not greater than the current capacity");
 
             var newCapacity = CalcNewCapacity(newSize);
-            var newList = new T[newCapacity];
-            if (_count > 0) Array.Copy(_buffer, newList, _count);
-            _buffer = newList;
+            _proxy.Resize(newCapacity, true);
+            _list.Items = _proxy.Items;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

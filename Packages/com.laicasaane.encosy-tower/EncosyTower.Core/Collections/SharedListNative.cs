@@ -9,6 +9,7 @@ namespace EncosyTower.Collections
 {
     public readonly struct SharedListNative<T, TNative>
         : IAsSpan<TNative>, IAsReadOnlySpan<TNative>, IAsNativeSlice<TNative>
+        , IAddRangeSpan<TNative>
         , IClearable
         where T : unmanaged
         where TNative : unmanaged

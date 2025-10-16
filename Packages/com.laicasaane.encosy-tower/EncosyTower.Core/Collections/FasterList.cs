@@ -34,6 +34,7 @@ namespace EncosyTower.Collections
 {
     public class FasterList<T> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
+        , IAddRangeSpan<T>
         , IClearable, IHasCapacity
     {
         internal static readonly EqualityComparer<T> s_comp = EqualityComparer<T>.Default;
@@ -239,11 +240,49 @@ namespace EncosyTower.Collections
             }
         }
 
+        public void FindAll([NotNull] Predicate<T> match, [NotNull] ListFast<T> result)
+        {
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(item))
+                {
+                    result.Add(item);
+                }
+            }
+        }
+
+        public void FindAll([NotNull] PredicateIn<T> match, [NotNull] ListFast<T> result)
+        {
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(in item))
+                {
+                    result.Add(in item);
+                }
+            }
+        }
+
         public void FindAll([NotNull] Predicate<T> match, [NotNull] ICollection<T> result)
         {
             if (result is FasterList<T> fasterResult)
             {
                 FindAll(match, fasterResult);
+                return;
+            }
+
+            if (result is List<T> listResult)
+            {
+                FindAll(match, listResult);
                 return;
             }
 
@@ -266,6 +305,12 @@ namespace EncosyTower.Collections
             if (result is FasterList<T> fasterResult)
             {
                 FindAll(match, fasterResult);
+                return;
+            }
+
+            if (result is List<T> listResult)
+            {
+                FindAll(match, listResult);
                 return;
             }
 
@@ -506,13 +551,6 @@ namespace EncosyTower.Collections
         {
             Checks.IsTrue((uint)index < (uint)_count, "index is outside the range of valid indexes for the FasterList<T>");
             return ref _buffer[index];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddRange(in FasterReadOnlyList<T> items)
-        {
-            _version++;
-            AddRange(items._list._buffer, items.Count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

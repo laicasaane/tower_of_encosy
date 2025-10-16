@@ -11,7 +11,7 @@ namespace EncosyTower.Tests.EncosyTower.Collections
         {
             var list = new ListFast<int>(new List<int>(4));
 
-            Assert.AreEqual(true, list.IsValid);
+            Assert.AreEqual(true, list.IsCreated);
             Assert.AreEqual(4, list.Capacity);
             Assert.AreEqual(0, list.Count);
 

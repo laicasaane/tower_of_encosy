@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Generic.Unsafe;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Debugging;
@@ -11,16 +12,16 @@ namespace EncosyTower.Collections
 {
     public struct ListFastEnumerator<T> : IEnumerator<T>, IEnumerator
     {
-        private readonly ListFast<T> _list;
+        private readonly ListExposed<T> _list;
         private int _index;
         private readonly int _version;
         private T _current;
 
-        internal ListFastEnumerator([NotNull] ListFast<T> list)
+        internal ListFastEnumerator([NotNull] ListExposed<T> list)
         {
             _list = list;
             _index = 0;
-            _version = list._version;
+            _version = list.Version;
             _current = default;
         }
 
@@ -32,9 +33,9 @@ namespace EncosyTower.Collections
         {
             var localList = _list;
 
-            if (_version == localList._version && ((uint)_index < (uint)localList._count))
+            if (_version == localList.Version && ((uint)_index < (uint)localList.Size))
             {
-                _current = localList._buffer[_index];
+                _current = localList.Items[_index];
                 _index++;
                 return true;
             }
@@ -43,12 +44,12 @@ namespace EncosyTower.Collections
 
         private bool MoveNextRare()
         {
-            if (_version != _list._version)
+            if (_version != _list.Version)
             {
                 ThrowHelper.ThrowInvalidOperationException_EnumFailedVersion();
             }
 
-            _index = _list._count + 1;
+            _index = _list.Size + 1;
             _current = default;
             return false;
         }
@@ -61,7 +62,7 @@ namespace EncosyTower.Collections
 
         public void Reset()
         {
-            if (_version != _list._version)
+            if (_version != _list.Version)
             {
                 ThrowHelper.ThrowInvalidOperationException_EnumFailedVersion();
             }
@@ -74,7 +75,7 @@ namespace EncosyTower.Collections
         {
             get
             {
-                if (_index == 0 || _index == _list._count + 1)
+                if (_index == 0 || _index == _list.Size + 1)
                 {
                     ThrowHelper.ThrowInvalidOperationException_EnumOpCantHappen();
                 }
