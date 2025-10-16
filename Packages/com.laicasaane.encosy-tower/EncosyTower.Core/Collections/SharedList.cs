@@ -507,6 +507,10 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public SharedListNative<T, TNative> AsNative()
+            => new(this);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SharedList<T, TNative> Prefill(int amount)
         {
             var list = new SharedList<T, TNative>(amount);
@@ -521,10 +525,6 @@ namespace EncosyTower.Collections
             list.AddReplicate(value, amount);
             return list;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator SharedListNative<T, TNative>(SharedList<T, TNative> list)
-            => new(list);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int CalcNewCapacity(int newSize)

@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections.Unsafe;
@@ -7,8 +9,9 @@ using Unity.Collections;
 
 namespace EncosyTower.Collections
 {
-    public readonly struct SharedListNative<T, TNative>
-        : IAsSpan<TNative>, IAsReadOnlySpan<TNative>, IAsNativeSlice<TNative>
+    public readonly partial struct SharedListNative<T, TNative>
+        : IReadOnlyList<TNative>
+        , IAsSpan<TNative>, IAsReadOnlySpan<TNative>, IAsNativeSlice<TNative>
         , IAddRangeSpan<TNative>
         , IClearable
         where T : unmanaged
@@ -28,7 +31,7 @@ namespace EncosyTower.Collections
         public readonly bool IsCreated
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _buffer.IsCreated;
+            get => _buffer.IsCreated && _count.IsCreated && _version.IsCreated;
         }
 
         public readonly int Capacity
@@ -72,6 +75,10 @@ namespace EncosyTower.Collections
                 _buffer.AsSpan()[index] = value;
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator SharedListNative<T, TNative>(SharedList<T, TNative> list)
+            => new(list);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(TNative item)
@@ -227,8 +234,8 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpan<TNative>.Enumerator GetEnumerator()
-            => AsReadOnlySpan().GetEnumerator();
+        public Enumerator GetEnumerator()
+            => new(AsReadOnly());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref readonly TNative Peek()
@@ -383,5 +390,13 @@ namespace EncosyTower.Collections
             list.AddReplicate(value, amount);
             return list;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        IEnumerator<TNative> IEnumerable<TNative>.GetEnumerator()
+            => GetEnumerator();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        IEnumerator IEnumerable.GetEnumerator()
+            => GetEnumerator();
     }
 }
