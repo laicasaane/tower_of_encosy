@@ -507,7 +507,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SharedListNative<T, TNative> AsNative()
+        public SharedListNative<T, TNative> AsListNative()
             => new(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
