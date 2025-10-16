@@ -188,7 +188,7 @@ namespace EncosyTower.VisualDebugging.Commands
         )
         {
             var directoryContainer = _view.DirectoryContainer;
-            var directories = _directories.AsSpan();
+            var directories = _directories.AsReadOnlySpan();
             var directoryViewPool = _directoryViewPool;
             var directoryViews = _directoryViews;
 

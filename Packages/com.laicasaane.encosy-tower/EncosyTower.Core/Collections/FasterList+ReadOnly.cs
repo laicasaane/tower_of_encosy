@@ -23,6 +23,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -36,7 +37,7 @@ namespace EncosyTower.Collections
         public ReadOnly AsReadOnly()
             => new(this);
 
-        public readonly struct ReadOnly : IAsSpan<T>, IAsReadOnlySpan<T>
+        public readonly struct ReadOnly : IAsReadOnlySpan<T>, IReadOnlyList<T>
         {
             internal readonly FasterList<T> _list;
 
@@ -79,10 +80,6 @@ namespace EncosyTower.Collections
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _list[index];
             }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Span<T> AsSpan()
-                => _list.AsSpan();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ReadOnlySpan<T> AsReadOnlySpan()
@@ -247,6 +244,14 @@ namespace EncosyTower.Collections
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public T[] ToArray()
                 => _list.ToArray();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            IEnumerator<T> IEnumerable<T>.GetEnumerator()
+                => GetEnumerator();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            IEnumerator IEnumerable.GetEnumerator()
+                => GetEnumerator();
         }
     }
 }

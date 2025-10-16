@@ -13,10 +13,8 @@ namespace EncosyTower.Collections
         public ReadOnly AsReadOnly()
             => new(this);
 
-        public readonly struct ReadOnly : IAsSpan<T>, IAsReadOnlySpan<T>, IReadOnlyList<T>
+        public readonly struct ReadOnly : IAsReadOnlySpan<T>, IReadOnlyList<T>
         {
-            private static readonly ReadOnly s_empty = new(new(0));
-
             internal readonly ListFast<T> _list;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -30,8 +28,6 @@ namespace EncosyTower.Collections
             {
                 _list = new(list);
             }
-
-            public static ReadOnly Empty => s_empty;
 
             public bool IsValid
             {
@@ -70,10 +66,6 @@ namespace EncosyTower.Collections
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _list[index];
             }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Span<T> AsSpan()
-                => _list.AsSpan();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ReadOnlySpan<T> AsReadOnlySpan()
