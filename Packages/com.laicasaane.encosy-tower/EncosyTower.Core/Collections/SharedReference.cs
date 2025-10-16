@@ -1,6 +1,4 @@
-#pragma warning disable IDE1006 // Naming Styles
-
-// https://github.com/stella3d/SharedReference
+// https://github.com/stella3d/SharedArray
 
 using System;
 using System.Diagnostics;
@@ -41,15 +39,17 @@ namespace EncosyTower.Collections
         where T : unmanaged
         where TNative : unmanaged
     {
-        protected GCHandle gcHandle;
+#pragma warning disable IDE1006 // Naming Styles
+        internal GCHandle _gcHandle;
 
 #if UNITY_EDITOR && !DISABLE_SHAREDARRAY_SAFETY
-        protected AtomicSafetyHandle m_SafetyHandle;
+        private AtomicSafetyHandle m_SafetyHandle;
 #endif
 
-        protected T[] managed;
-        protected NativeArray<TNative> native;
-        protected int version;
+        internal T[] _managed;
+        internal NativeArray<TNative> _native;
+        internal int _version;
+#pragma warning restore IDE1006 // Naming Styles
 
         protected SharedReference()
         {
@@ -65,14 +65,14 @@ namespace EncosyTower.Collections
 
         ~SharedReference()
         {
-            version++;
+            _version++;
             Dispose();
         }
 
         public int Length
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => managed.Length;
+            get => _managed.Length;
         }
 
         public ref T ValueRW
@@ -84,8 +84,8 @@ namespace EncosyTower.Collections
                 AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
 
-                version++;
-                return ref managed[0];
+                _version++;
+                return ref _managed[0];
             }
         }
 
@@ -98,7 +98,7 @@ namespace EncosyTower.Collections
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
 
-                return ref managed[0];
+                return ref _managed[0];
             }
         }
 
@@ -158,24 +158,24 @@ namespace EncosyTower.Collections
 
         public void Dispose()
         {
-            if (managed == null)
+            if (_managed == null)
             {
                 return;
             }
 
-            version++;
+            _version++;
 
 #if UNITY_EDITOR && !DISABLE_SHAREDARRAY_SAFETY
             AtomicSafetyHandle.CheckDeallocateAndThrow(m_SafetyHandle);
             AtomicSafetyHandle.Release(m_SafetyHandle);
 #endif
 
-            if (gcHandle.IsAllocated)
+            if (_gcHandle.IsAllocated)
             {
-                gcHandle.Free();
+                _gcHandle.Free();
             }
 
-            managed = null;
+            _managed = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -185,7 +185,7 @@ namespace EncosyTower.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
 
-            return managed;
+            return _managed;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -195,7 +195,7 @@ namespace EncosyTower.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
 
-            return managed.AsSpan();
+            return _managed.AsSpan();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -205,7 +205,7 @@ namespace EncosyTower.Collections
             AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
 
-            return managed.AsSpan();
+            return _managed.AsSpan();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -215,7 +215,7 @@ namespace EncosyTower.Collections
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
 
-            return managed.AsMemory();
+            return _managed.AsMemory();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -225,31 +225,31 @@ namespace EncosyTower.Collections
             AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
 
-            return managed.AsMemory();
+            return _managed.AsMemory();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span<TNative> AsSpanNative()
         {
-            return native.AsSpan();
+            return _native.AsSpan();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<TNative> AsReadOnlySpanNative()
         {
-            return native.AsReadOnlySpan();
+            return _native.AsReadOnlySpan();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeArray<TNative> AsNativeArray()
         {
-            return native;
+            return _native;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeSlice<TNative> AsNativeSlice()
         {
-            return native.Slice();
+            return _native.Slice();
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
@@ -275,28 +275,28 @@ namespace EncosyTower.Collections
 
         private void Initialize(T value)
         {
-            version++;
+            _version++;
 
-            this.managed = new T[] { value };
+            this._managed = new T[] { value };
 
             // Unity's default garbage collector doesn't move objects around, so pinning the array in memory
             // should not even be necessary. Better to be safe, though
-            gcHandle = GCHandle.Alloc(managed, GCHandleType.Pinned);
+            _gcHandle = GCHandle.Alloc(_managed, GCHandleType.Pinned);
             CreateNativeAlias();
 
             unsafe void CreateNativeAlias()
             {
                 // this is the trick to making a NativeArray view of a managed array (or any pointer)
-                fixed (void* ptr = managed)
+                fixed (void* ptr = _managed)
                 {
-                    native = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TNative>(
-                        ptr, managed.Length, Allocator.None
+                    _native = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TNative>(
+                        ptr, _managed.Length, Allocator.None
                     );
                 }
 
 #if UNITY_EDITOR && !DISABLE_SHAREDARRAY_SAFETY
                 m_SafetyHandle = AtomicSafetyHandle.Create();
-                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref native, m_SafetyHandle);
+                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref _native, m_SafetyHandle);
 #endif
             }
         }

@@ -1,4 +1,3 @@
-
 // https://github.com/stella3d/SharedArray
 
 // MIT License
