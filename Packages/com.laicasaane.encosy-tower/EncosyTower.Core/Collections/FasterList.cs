@@ -32,7 +32,7 @@ using EncosyTower.Debugging;
 
 namespace EncosyTower.Collections
 {
-    public class FasterList<T> : IList<T>, IReadOnlyList<T>
+    public partial class FasterList<T> : IList<T>, IReadOnlyList<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , IAddRangeSpan<T>
         , IClearable, IHasCapacity
@@ -108,7 +108,7 @@ namespace EncosyTower.Collections
             _version = 0;
         }
 
-        public FasterList(in FasterReadOnlyList<T> source)
+        public FasterList(in ReadOnly source)
         {
             _buffer = new T[source.Count];
 
@@ -916,6 +916,10 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<T> AsReadOnlySpan()
             => _buffer.AsSpan(0, _count);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnly AsReadOnly()
+            => new(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Trim()
