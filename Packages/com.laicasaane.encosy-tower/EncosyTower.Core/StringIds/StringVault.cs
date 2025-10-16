@@ -303,6 +303,10 @@ namespace EncosyTower.StringIds
                 var validIndex = indexUnsigned < (uint)_hashes.Count;
                 return validIndex ? _hashes[index].HasValue : false;
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator ReadOnly(StringVault vault)
+                => new(vault);
         }
     }
 }

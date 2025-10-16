@@ -170,7 +170,7 @@ namespace EncosyTower.StringIds
             internal readonly int _count;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ReadOnly(NativeStringVault vault)
+            public ReadOnly(in NativeStringVault vault)
             {
                 _map = vault._map.AsReadOnly();
                 _strings = vault._strings.AsReadOnly();
@@ -222,6 +222,10 @@ namespace EncosyTower.StringIds
                 var validIndex = indexUnsigned < (uint)_hashes.Length;
                 return validIndex ? _hashes[index].HasValue : false;
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator ReadOnly(in NativeStringVault vault)
+                => new(vault);
         }
     }
 }
