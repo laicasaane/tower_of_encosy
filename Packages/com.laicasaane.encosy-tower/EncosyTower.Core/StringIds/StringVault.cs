@@ -11,12 +11,12 @@ namespace EncosyTower.StringIds
 {
     public partial class StringVault
     {
-        private readonly SharedArrayMap<StringHash, Id> _map;
-        private readonly SharedList<UnmanagedString> _unmanagedStrings;
-        private readonly FasterList<string> _managedStrings;
-        private readonly SharedList<Option<StringHash>> _hashes;
-        private readonly object _lock = new();
-        private int _count;
+        internal readonly SharedArrayMap<StringHash, Id> _map;
+        internal readonly SharedList<UnmanagedString> _unmanagedStrings;
+        internal readonly FasterList<string> _managedStrings;
+        internal readonly SharedList<Option<StringHash>> _hashes;
+        internal readonly object _lock = new();
+        internal int _count;
 
         public StringVault(int initialCapacity)
         {
@@ -194,6 +194,10 @@ namespace EncosyTower.StringIds
             return validIndex ? _hashes[index].HasValue : false;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnly AsReadOnly()
+            => new(this);
+
         private void EnsureCapacity()
         {
             var oldCapacity = Math.Min(_hashes.Capacity, _unmanagedStrings.Capacity);
@@ -241,6 +245,63 @@ namespace EncosyTower.StringIds
                 throw new InvalidOperationException(
                     $"Cannot register a StringId by the same value \"{str}\" with different id \"{id}\"."
                 );
+            }
+        }
+    }
+
+    partial class StringVault
+    {
+        public readonly partial struct ReadOnly
+        {
+            private readonly SharedArrayMapNative<StringHash, Id, Id> _map;
+            private readonly SharedListNative<UnmanagedString, UnmanagedString> _unmanagedStrings;
+            private readonly SharedListNative<Option<StringHash>, Option<StringHash>> _hashes;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public ReadOnly(StringVault vault)
+            {
+                _map = vault._map;
+                _unmanagedStrings = vault._unmanagedStrings;
+                _hashes = vault._hashes;
+            }
+
+            public bool IsCreated
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _map.IsCreated;
+            }
+
+            public bool TryGetId(in UnmanagedString str, out Id result)
+            {
+                var hash = str.GetHashCode();
+                var registered = _map.TryGetValue(hash, out var id);
+
+                if (registered && TryGetString(id, out var registeredString) && str == registeredString)
+                {
+                    result = id;
+                    return true;
+                }
+
+                result = default;
+                return false;
+            }
+
+            public bool TryGetString(Id id, out UnmanagedString result)
+            {
+                var indexUnsigned = (uint)id;
+                var index = (int)indexUnsigned;
+                var validIndex = indexUnsigned < (uint)_hashes.Count;
+
+                result = validIndex ? _unmanagedStrings[index] : default;
+                return validIndex ? _hashes[index].HasValue : false;
+            }
+
+            public bool ContainsId(Id id)
+            {
+                var indexUnsigned = (uint)id;
+                var index = (int)indexUnsigned;
+                var validIndex = indexUnsigned < (uint)_hashes.Count;
+                return validIndex ? _hashes[index].HasValue : false;
             }
         }
     }
