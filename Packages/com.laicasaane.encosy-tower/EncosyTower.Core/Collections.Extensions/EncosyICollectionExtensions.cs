@@ -85,7 +85,7 @@ namespace EncosyTower.Collections.Extensions
         /// <param name="self"></param>
         /// <param name="items"></param>
         /// <remarks>
-        /// If <paramref name="items"/> can be cast to a specific collection type,
+        /// If <paramref name="self"/> can be cast to a specific collection type,
         /// it uses the most efficient method available for that type.
         /// <br/>
         /// <list type="bullet">
