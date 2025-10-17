@@ -122,7 +122,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         private void WritePrimaryConstructor(ref Printer p)
         {
             p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine($"public {TypeName}({FieldTypeName} value)");
+            p.PrintBeginLine($"public {TypeName}({FieldTypeName} value)");
+            p.PrintEndLineIf(IsStruct, " : this()", "");
             p.OpenScope();
             {
                 p.PrintLine($"this.{FieldName} = value;");

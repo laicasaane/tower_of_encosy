@@ -143,6 +143,12 @@ namespace EncosyTower.Tests.TypeWraps
         }
     }
 
+    [WrapType(typeof(int), nameof(Raw))]
+    public readonly partial struct F
+    {
+        public readonly int Raw;
+    }
+
     [WrapRecord]
     public readonly partial record struct Position(float3 _);
 

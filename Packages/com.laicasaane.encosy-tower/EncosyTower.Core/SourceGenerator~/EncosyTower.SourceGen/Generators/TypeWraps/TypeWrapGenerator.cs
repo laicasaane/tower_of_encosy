@@ -232,6 +232,27 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                                         result.fieldName = literal.Token.ValueText;
                                         break;
                                     }
+
+                                    case InvocationExpressionSyntax invocation:
+                                    {
+                                        if (invocation.Expression is IdentifierNameSyntax identifierName
+                                            && identifierName.Identifier.ValueText == "nameof"
+                                            && invocation.ArgumentList.Arguments.Count == 1
+                                        )
+                                        {
+                                            var nameofArg = invocation.ArgumentList.Arguments[0];
+
+                                            if (nameofArg.Expression is IdentifierNameSyntax idName)
+                                            {
+                                                result.fieldName = idName.Identifier.ValueText;
+                                            }
+                                            else if (nameofArg.Expression is MemberAccessExpressionSyntax memberAccess)
+                                            {
+                                                result.fieldName = memberAccess.Name.Identifier.ValueText;
+                                            }
+                                        }
+                                        break;
+                                    }
                                 }
                             }
                         }
