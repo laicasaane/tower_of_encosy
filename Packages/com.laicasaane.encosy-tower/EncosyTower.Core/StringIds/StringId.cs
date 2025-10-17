@@ -49,22 +49,4 @@ namespace EncosyTower.StringIds
         public static implicit operator StringId(StringId<T> id)
             => new(id.Id);
     }
-
-    /// <summary>
-    /// Represents the hash value of a string.
-    /// </summary>
-    internal readonly partial record struct StringHash(int Value)
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode()
-            => Value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator StringHash(int value)
-            => new(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator int(StringHash hash)
-            => hash.Value;
-    }
 }

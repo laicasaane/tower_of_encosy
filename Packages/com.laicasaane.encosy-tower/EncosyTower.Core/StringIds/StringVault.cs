@@ -27,6 +27,22 @@ namespace EncosyTower.StringIds
             Clear();
         }
 
+        public StringVault(ReadOnlySpan<string> managedStrings) : this(managedStrings.Length)
+        {
+            foreach (var str in managedStrings)
+            {
+                MakeIdFromManaged(str);
+            }
+        }
+
+        public StringVault(ReadOnlySpan<UnmanagedString> unmanagedStrings) : this(unmanagedStrings.Length)
+        {
+            foreach (var str in unmanagedStrings)
+            {
+                MakeIdFromUnmanaged(str);
+            }
+        }
+
         public int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -37,6 +53,18 @@ namespace EncosyTower.StringIds
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _count;
+        }
+
+        public SharedList<UnmanagedString>.ReadOnly UnmanagedStrings
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _unmanagedStrings.AsReadOnly();
+        }
+
+        public FasterList<string>.ReadOnly ManagedStrings
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _managedStrings.AsReadOnly();
         }
 
         public void Clear()
@@ -58,9 +86,17 @@ namespace EncosyTower.StringIds
             }
         }
 
+        /// <summary>
+        /// Creates or retrieves a <see cref="StringId"/> from a managed <see cref="string"/>.
+        /// </summary>
+        /// <param name="str">
+        /// The managed string to create or retrieve the <see cref="StringId"/> for.
+        /// Should have a maximum length of 125 UTF8 characters.
+        /// </param>
+        /// <returns></returns>
         public Id MakeIdFromUnmanaged(in UnmanagedString str)
         {
-            var hash = str.GetHashCode();
+            var hash = str.ToHashCode();
             var registered = _map.TryGetValue(hash, out var id);
 
             if (registered)
@@ -111,9 +147,17 @@ namespace EncosyTower.StringIds
             return id;
         }
 
+        /// <summary>
+        /// Creates or retrieves a <see cref="StringId"/> from a managed <see cref="string"/>.
+        /// </summary>
+        /// <param name="str">
+        /// The managed string to create or retrieve the <see cref="StringId"/> for.
+        /// Should have a maximum length of 125 UTF8 characters.
+        /// </param>
+        /// <returns></returns>
         public StringId MakeIdFromManaged([NotNull] string str)
         {
-            var hash = str.GetHashCode(StringComparison.Ordinal);
+            var hash = HashValue64.FNV1a(str);
             var registered = _map.TryGetValue(hash, out var id);
 
             if (registered)
@@ -273,7 +317,7 @@ namespace EncosyTower.StringIds
 
             public bool TryGetId(in UnmanagedString str, out Id result)
             {
-                var hash = str.GetHashCode();
+                var hash = str.ToHashCode();
                 var registered = _map.TryGetValue(hash, out var id);
 
                 if (registered && TryGetString(id, out var registeredString) && str == registeredString)

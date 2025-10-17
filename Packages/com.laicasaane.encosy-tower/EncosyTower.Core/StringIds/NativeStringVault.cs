@@ -26,6 +26,16 @@ namespace EncosyTower.StringIds
             _strings = new(initialCapacity, allocator);
             _hashes = new(initialCapacity, allocator);
             _count = new(allocator);
+            Clear();
+        }
+
+        public NativeStringVault(ReadOnlySpan<UnmanagedString> strings, AllocatorManager.AllocatorHandle allocator)
+            : this(strings.Length, allocator)
+        {
+            foreach (var str in strings)
+            {
+                MakeIdFrom(str);
+            }
         }
 
         public int Capacity
@@ -38,6 +48,12 @@ namespace EncosyTower.StringIds
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _count.Value;
+        }
+
+        public NativeArray<UnmanagedString>.ReadOnly Strings
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _strings.AsReadOnly();
         }
 
         public void Clear()
@@ -53,9 +69,17 @@ namespace EncosyTower.StringIds
             _count.ValueAsUnsafeRefRW() = 1;
         }
 
+        /// <summary>
+        /// Creates or retrieves a <see cref="StringId"/> from a managed <see cref="string"/>.
+        /// </summary>
+        /// <param name="str">
+        /// The managed string to create or retrieve the <see cref="StringId"/> for.
+        /// Should have a maximum length of 125 UTF8 characters.
+        /// </param>
+        /// <returns></returns>
         public Id MakeIdFrom(in UnmanagedString str)
         {
-            var hash = str.GetHashCode();
+            var hash = str.ToHashCode();
             var registered = _map.TryGetValue(hash, out var id);
 
             if (registered)
@@ -192,7 +216,7 @@ namespace EncosyTower.StringIds
 
             public bool TryGetId(in UnmanagedString str, out Id result)
             {
-                var hash = str.GetHashCode();
+                var hash = str.ToHashCode();
                 var registered = _map.TryGetValue(hash, out var id);
 
                 if (registered && TryGetString(id, out var registeredString) && str == registeredString)

@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using EncosyTower.Common;
 
 namespace EncosyTower.StringIds
 {
@@ -13,8 +14,10 @@ namespace EncosyTower.StringIds
     /// </summary>
     /// <remarks>
     /// If the package <c>com.unity.collections</c> is installed, this struct wraps a <see cref="FixedString"/>,
-    /// otherwise it wraps a hash code of the managed <see cref="string"/>.
+    /// otherwise it wraps a <see cref="HashValue64"/> of the managed <see cref="string"/>.
     /// </remarks>
+    /// <seealso cref="FixedString"/>
+    /// <seealso cref="HashValue64"/>
     [StructLayout(LayoutKind.Sequential, Size = 128)]
     public readonly struct UnmanagedString
         : IEquatable<UnmanagedString>
@@ -23,27 +26,30 @@ namespace EncosyTower.StringIds
 #if UNITY_COLLECTIONS
         public readonly FixedString Value;
 #else
-        public readonly int Value;
+        public readonly ulong Value;
 #endif
 
         private UnmanagedString(
 #if UNITY_COLLECTIONS
             in FixedString value
 #else
-            int value
+            ulong value
 #endif
         )
         {
             Value = value;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode()
+        public ulong ToHashCode()
 #if UNITY_COLLECTIONS
-            => Value.GetHashCode();
+            => HashValue64.FNV1a(Value);
 #else
             => Value;
 #endif
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode()
+            => Value.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
@@ -80,7 +86,7 @@ namespace EncosyTower.StringIds
 #if UNITY_COLLECTIONS
             => new(value);
 #else
-            => new(value.GetHashCode());
+            => new(HashValue64.FNV1a(value));
 #endif
     }
 }
