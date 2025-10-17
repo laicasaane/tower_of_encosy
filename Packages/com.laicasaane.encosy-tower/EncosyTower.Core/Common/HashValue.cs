@@ -5,13 +5,13 @@
 // FNV Hash Reference
 // https://gist.github.com/StephenCleary/4f6568e5ab5bee7845943fdaef8426d2
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-
 namespace EncosyTower.Common
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Runtime.CompilerServices;
+
     /// <summary>
     /// Combines the hash code for multiple values into a single hash code
     /// to help with implementing <see cref="object.GetHashCode()"/>.
@@ -25,35 +25,32 @@ namespace EncosyTower.Common
     /// </remarks>
     /// <seealso href="https://discussions.unity.com/t/hashcode-combine/1682736/10"/>
     /// <seealso href="https://docs.unity3d.com/Packages/com.unity.burst@1.8/manual/csharp-system-support.html#systemhashcode"/>
-    public readonly struct HashValue : IEquatable<HashValue>
+    public readonly partial struct HashValue : IEquatable<HashValue>
     {
         /// <summary>
-        /// The prime number used to compute the FNV hash.
+        /// The prime number used to compute the FNV hash 32 bits.
         /// </summary>
-        public const int PRIME = 16777619;
+        public const uint PRIME = 16777619;
+
+        /// <summary>
+        /// The starting point of the FNV hash 32 bits.
+        /// </summary>
+        public const int BASIS = unchecked((int)2166136261);
 
         /// <summary>
         /// The prime number used in case the collection is null or empty.
         /// </summary>
-        public const int EMPTY_COLLECTION_PRIME = 19;
+        public const int EMPTY_COLLECTION_BASIS = 1111111231;
 
-        /// <summary>
-        /// The starting point of the FNV hash.
-        /// </summary>
-        public const int VALUE = unchecked((int)2166136261);
-
-        private readonly int _prime = PRIME;
-        private readonly int _value = VALUE;
+        private readonly int  _value = BASIS;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HashValue"/> struct.
         /// </summary>
-        /// <param name="prime">The prime number used to compute the FNV hash.</param>
         /// <param name="value">The starting point of the FNV hash.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private HashValue(int prime, int value)
+        private HashValue(int value)
         {
-            _prime = prime;
             _value = value;
         }
 
@@ -70,6 +67,47 @@ namespace EncosyTower.Common
             => !(left == right);
 
         /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int FNV1a(int value)
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+                ulong val = (ulong)value;
+
+                result = (((val & 0x000000FF) >> 00) ^ result) * PRIME;
+                result = (((val & 0x0000FF00) >> 08) ^ result) * PRIME;
+                result = (((val & 0x00FF0000) >> 16) ^ result) * PRIME;
+                result = (((val & 0xFF000000) >> 24) ^ result) * PRIME;
+
+                return (int)result;
+            }
+        }
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        /// <param name="text">Text to hash.</param>
+        /// <returns>Hash of input string.</returns>
+        public static int FNV1a(string text)
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+
+                foreach (var c in text)
+                {
+                    result = PRIME * (result ^ (byte)(c & 255));
+                    result = PRIME * (result ^ (byte)(c >> 8));
+                }
+
+                return (int)result;
+            }
+        }
+
+        /// <summary>
         /// Returns the hash code of a specific item.
         /// </summary>
         /// <typeparam name="T1">The type of the item to add the hash code.</typeparam>
@@ -77,7 +115,7 @@ namespace EncosyTower.Common
         /// <returns>The hash code that represents the single value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static HashValue Combine<T1>(T1 item1)
-            => new(PRIME, GetHashCode(item1));
+            => new(GetHashCode(item1));
 
         /// <summary>
         /// Combines two items into a hash code.
@@ -206,150 +244,6 @@ namespace EncosyTower.Common
             => Combine(item1, item2, item3, item4, item5, item6, item7).Add(item8);
 
         /// <summary>
-        /// Returns the hash code of a specific item.
-        /// </summary>
-        /// <typeparam name="T1">The type of the item to add the hash code.</typeparam>
-        /// <param name="prime">The prime number used to compute the FNV hash.</param>
-        /// <param name="item1">The item to add to the hash code.</param>
-        /// <returns>The hash code that represents the single value.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static HashValue Combine<T1>(int prime, T1 item1)
-            => new(prime, GetHashCode(item1));
-
-        /// <summary>
-        /// Combines two items into a hash code.
-        /// </summary>
-        /// <typeparam name="T1">The first type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T2">The second type of the item to add the hash code.</typeparam>
-        /// <param name="prime">The prime number used to compute the FNV hash.</param>
-        /// <param name="item1">The first item to add to the hash code.</param>
-        /// <param name="item2">The second item to add to the hash code.</param>
-        /// <returns>The hash code that represents the two values.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static HashValue Combine<T1, T2>(int prime, T1 item1, T2 item2)
-            => Combine(prime, item1).Add(item2);
-
-        /// <summary>
-        /// Combines three items into a hash code.
-        /// </summary>
-        /// <typeparam name="T1">The first type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T2">The second type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T3">The third type of the item to add the hash code.</typeparam>
-        /// <param name="prime">The prime number used to compute the FNV hash.</param>
-        /// <param name="item1">The first item to add to the hash code.</param>
-        /// <param name="item2">The second item to add to the hash code.</param>
-        /// <param name="item3">The third item to add to the hash code.</param>
-        /// <returns>The hash code that represents the three values.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static HashValue Combine<T1, T2, T3>(int prime, T1 item1, T2 item2, T3 item3)
-            => Combine(prime, item1, item2).Add(item3);
-
-        /// <summary>
-        /// Combines four items into a hash code.
-        /// </summary>
-        /// <typeparam name="T1">The first type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T2">The second type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T3">The third type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T4">The fourth type of the item to add the hash code.</typeparam>
-        /// <param name="prime">The prime number used to compute the FNV hash.</param>
-        /// <param name="item1">The first item to add to the hash code.</param>
-        /// <param name="item2">The second item to add to the hash code.</param>
-        /// <param name="item3">The third item to add to the hash code.</param>
-        /// <param name="item4">The fourth item to add to the hash code.</param>
-        /// <returns>The hash code that represents the four values.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static HashValue Combine<T1, T2, T3, T4>(int prime, T1 item1, T2 item2, T3 item3, T4 item4)
-            => Combine(prime, item1, item2, item3).Add(item4);
-
-        /// <summary>
-        /// Combines five items into a hash code.
-        /// </summary>
-        /// <typeparam name="T1">The first type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T2">The second type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T3">The third type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T4">The fourth type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T5">The fifth type of the item to add the hash code.</typeparam>
-        /// <param name="prime">The prime number used to compute the FNV hash.</param>
-        /// <param name="item1">The first item to add to the hash code.</param>
-        /// <param name="item2">The second item to add to the hash code.</param>
-        /// <param name="item3">The third item to add to the hash code.</param>
-        /// <param name="item4">The fourth item to add to the hash code.</param>
-        /// <param name="item5">The fifth item to add to the hash code.</param>
-        /// <returns>The hash code that represents the five values.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static HashValue Combine<T1, T2, T3, T4, T5>(int prime, T1 item1, T2 item2, T3 item3, T4 item4, T5 item5)
-            => Combine(prime, item1, item2, item3, item4).Add(item5);
-
-        /// <summary>
-        /// Combines six items into a hash code.
-        /// </summary>
-        /// <typeparam name="T1">The first type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T2">The second type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T3">The third type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T4">The fourth type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T5">The fifth type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T6">The sixth type of the item to add the hash code.</typeparam>
-        /// <param name="prime">The prime number used to compute the FNV hash.</param>
-        /// <param name="item1">The first item to add to the hash code.</param>
-        /// <param name="item2">The second item to add to the hash code.</param>
-        /// <param name="item3">The third item to add to the hash code.</param>
-        /// <param name="item4">The fourth item to add to the hash code.</param>
-        /// <param name="item5">The fifth item to add to the hash code.</param>
-        /// <param name="item6">The sixth item to add to the hash code.</param>
-        /// <returns>The hash code that represents the six values.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static HashValue Combine<T1, T2, T3, T4, T5, T6>(int prime, T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6)
-            => Combine(prime, item1, item2, item3, item4, item5).Add(item6);
-
-        /// <summary>
-        /// Combines seven items into a hash code.
-        /// </summary>
-        /// <typeparam name="T1">The first type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T2">The second type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T3">The third type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T4">The fourth type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T5">The fifth type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T6">The sixth type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T7">The seventh type of the item to add the hash code.</typeparam>
-        /// <param name="prime">The prime number used to compute the FNV hash.</param>
-        /// <param name="item1">The first item to add to the hash code.</param>
-        /// <param name="item2">The second item to add to the hash code.</param>
-        /// <param name="item3">The third item to add to the hash code.</param>
-        /// <param name="item4">The fourth item to add to the hash code.</param>
-        /// <param name="item5">The fifth item to add to the hash code.</param>
-        /// <param name="item6">The sixth item to add to the hash code.</param>
-        /// <param name="item7">The seventh item to add to the hash code.</param>
-        /// <returns>The hash code that represents the seven values.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static HashValue Combine<T1, T2, T3, T4, T5, T6, T7>(int prime, T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7)
-            => Combine(prime, item1, item2, item3, item4, item5, item6).Add(item7);
-
-        /// <summary>
-        /// Combines eight items into a hash code.
-        /// </summary>
-        /// <typeparam name="T1">The first type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T2">The second type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T3">The third type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T4">The fourth type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T5">The fifth type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T6">The sixth type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T7">The seventh type of the item to add the hash code.</typeparam>
-        /// <typeparam name="T8">The eighth type of the item to add the hash code.</typeparam>
-        /// <param name="prime">The prime number used to compute the FNV hash.</param>
-        /// <param name="item1">The first item to add to the hash code.</param>
-        /// <param name="item2">The second item to add to the hash code.</param>
-        /// <param name="item3">The third item to add to the hash code.</param>
-        /// <param name="item4">The fourth item to add to the hash code.</param>
-        /// <param name="item5">The fifth item to add to the hash code.</param>
-        /// <param name="item6">The sixth item to add to the hash code.</param>
-        /// <param name="item7">The seventh item to add to the hash code.</param>
-        /// <param name="item8">The eighth item to add to the hash code.</param>
-        /// <returns>The hash code that represents the eight values.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static HashValue Combine<T1, T2, T3, T4, T5, T6, T7, T8>(int prime, T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8)
-            => Combine(prime, item1, item2, item3, item4, item5, item6, item7).Add(item8);
-
-        /// <summary>
         /// Takes the hash code of the specified items.
         /// </summary>
         /// <typeparam name="T">The type of the items.</typeparam>
@@ -357,7 +251,9 @@ namespace EncosyTower.Common
         /// <returns>The new hash code.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static HashValue CombineEach<T>(IEnumerable<T> items)
-            => CombineEach(PRIME, items);
+            => items == null
+            ? new(BASIS)
+            : new(GetHashCodeEach(BASIS, items, null));
 
         /// <summary>
         /// Takes the hash code of the specified items.
@@ -368,34 +264,9 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static HashValue CombineEach<T, TEnumerator>(TEnumerator enumerator)
             where TEnumerator : IEnumerator<T>
-            => CombineEach<T, TEnumerator>(PRIME, enumerator);
-
-        /// <summary>
-        /// Takes the hash code of the specified items.
-        /// </summary>
-        /// <typeparam name="T">The type of the items.</typeparam>
-        /// <param name="prime">The prime number used to compute the FNV hash.</param>
-        /// <param name="items">The collection.</param>
-        /// <returns>The new hash code.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static HashValue CombineEach<T>(int prime, IEnumerable<T> items)
-            => items == null
-            ? new(prime, VALUE)
-            : new(prime, GetHashCodeEach(prime, VALUE, items, null));
-
-        /// <summary>
-        /// Takes the hash code of the specified items.
-        /// </summary>
-        /// <typeparam name="T">The type of the items.</typeparam>
-        /// <param name="prime">The prime number used to compute the FNV hash.</param>
-        /// <param name="enumerator">The enumerator of a collection.</param>
-        /// <returns>The new hash code.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static HashValue CombineEach<T, TEnumerator>(int prime, TEnumerator enumerator)
-            where TEnumerator : IEnumerator<T>
             => enumerator == null
-            ? new(prime, VALUE)
-            : new(prime, GetHashCodeEach<T, TEnumerator>(prime, VALUE, enumerator));
+            ? new(BASIS)
+            : new(GetHashCodeEach<T, TEnumerator>(BASIS, enumerator));
 
         /// <summary>
         /// Adds a single item to the hash code.
@@ -404,7 +275,7 @@ namespace EncosyTower.Common
         /// <param name="item">The item to add to the hash code.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public HashValue Add<T>(T item)
-            => new(_prime, CombineHashes(_prime, _value, GetHashCode(item)));
+            => new(CombineFNV1a(_value, GetHashCode(item)));
 
         /// <summary>
         /// Adds a single item to the hash code, specifying the type that provides the hash code function.
@@ -418,7 +289,7 @@ namespace EncosyTower.Common
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public HashValue Add<T>(T item, IEqualityComparer<T> comparer)
-            => new(_prime, CombineHashes(_prime, _value, (comparer ?? EqualityComparer<T>.Default).GetHashCode(item)));
+            => new(CombineFNV1a(_value, (comparer ?? EqualityComparer<T>.Default).GetHashCode(item)));
 
         /// <summary>
         /// Adds a single item to the hash code, specifying the type that provides the hash code function.
@@ -435,8 +306,8 @@ namespace EncosyTower.Common
         public HashValue Add<T, TEqualityComparer>(T item, TEqualityComparer comparer)
             where TEqualityComparer : IEqualityComparer<T>
             => comparer == null
-            ? new(_prime, CombineHashes(_prime, _value, GetHashCode(item)))
-            : new(_prime, CombineHashes(_prime, _value, comparer.GetHashCode(item)));
+            ? new(CombineFNV1a(_value, GetHashCode(item)))
+            : new(CombineFNV1a(_value, comparer.GetHashCode(item)));
 
         /// <summary>
         /// Adds a collection of items to the hash code.
@@ -446,8 +317,8 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public HashValue AddEach<T>(IEnumerable<T> items)
             => items == null
-            ? new(_prime, _value)
-            : new(_prime, GetHashCodeEach(_prime, _value, items, null));
+            ? new(_value)
+            : new(GetHashCodeEach(_value, items, null));
 
         /// <summary>
         /// Adds a collection of items to the hash code, specifying the type that provides the hash code function.
@@ -462,8 +333,8 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public HashValue AddEach<T>(IEnumerable<T> items, IEqualityComparer<T> comparer)
             => items == null
-            ? new(_prime, _value)
-            : new(_prime, GetHashCodeEach(_prime, _value, items, comparer ?? EqualityComparer<T>.Default));
+            ? new(_value)
+            : new(GetHashCodeEach(_value, items, comparer ?? EqualityComparer<T>.Default));
 
         /// <summary>
         /// Adds a collection of items to the hash code.
@@ -475,8 +346,8 @@ namespace EncosyTower.Common
         public HashValue AddEach<T, TEnumerator>(TEnumerator enumerator)
             where TEnumerator : IEnumerator<T>
             => enumerator == null
-            ? new(_prime, _value)
-            : new(_prime, GetHashCodeEach<T, TEnumerator>(_prime, _value, enumerator));
+            ? new(_value)
+            : new(GetHashCodeEach<T, TEnumerator>(_value, enumerator));
 
         /// <summary>
         /// Adds a collection of items to the hash code, specifying the type that provides the hash code function.
@@ -495,8 +366,8 @@ namespace EncosyTower.Common
             where TEnumerator : IEnumerator<T>
             where TEqualityComparer : IEqualityComparer<T>
             => enumerator == null
-            ? new(_prime, _value)
-            : new(_prime, GetHashCodeEach<T, TEnumerator, TEqualityComparer>(_prime, _value, enumerator, comparer));
+            ? new(_value)
+            : new(GetHashCodeEach<T, TEnumerator, TEqualityComparer>(_value, enumerator, comparer));
 
         /// <inheritdoc />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -525,14 +396,16 @@ namespace EncosyTower.Common
                 "Implicitly convert this struct to an int to get the hash code or use ToHashCode method."
             );
 
+        /// <summary>
+        /// Combines a FNV1a hash with a value.
+        /// </summary>
+        /// <param name="hash">Input Hash.</param>
+        /// <param name="value">Value to add to the hash.</param>
+        /// <returns>A combined FNV1a hash.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int CombineHashes(int prime, int h1, int h2)
+        private static int CombineFNV1a(int hash, int value)
         {
-            unchecked
-            {
-                // Fowler/Noll/Vo algorithm (FNV-1a)
-                return (h1 ^ h2) * prime;
-            }
+            return (int)((hash ^ value) * PRIME);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -540,8 +413,7 @@ namespace EncosyTower.Common
             => item?.GetHashCode() ?? 0;
 
         private static int GetHashCodeEach<T>(
-              int prime
-            , int startHashCode
+              int startHashCode
             , IEnumerable<T> items
             , IEqualityComparer<T> comparer
         )
@@ -551,22 +423,21 @@ namespace EncosyTower.Common
 
             if (enumerator.MoveNext() == false)
             {
-                return CombineHashes(prime, result, EMPTY_COLLECTION_PRIME);
+                return CombineFNV1a(result, EMPTY_COLLECTION_BASIS);
             }
 
-            result = CombineHashes(prime, result, comparer.GetHashCode(enumerator.Current));
+            result = CombineFNV1a(result, comparer.GetHashCode(enumerator.Current));
 
             while (enumerator.MoveNext())
             {
-                result = CombineHashes(prime, result, comparer.GetHashCode(enumerator.Current));
+                result = CombineFNV1a(result, comparer.GetHashCode(enumerator.Current));
             }
 
             return result;
         }
 
         private static int GetHashCodeEach<T, TEnumerator>(
-              int prime
-            , int startHashCode
+              int startHashCode
             , TEnumerator enumerator
         )
             where TEnumerator : IEnumerator<T>
@@ -575,22 +446,21 @@ namespace EncosyTower.Common
 
             if (enumerator.MoveNext() == false)
             {
-                return CombineHashes(prime, result, EMPTY_COLLECTION_PRIME);
+                return CombineFNV1a(result, EMPTY_COLLECTION_BASIS);
             }
 
-            result = CombineHashes(prime, result, GetHashCode(enumerator.Current));
+            result = CombineFNV1a(result, GetHashCode(enumerator.Current));
 
             while (enumerator.MoveNext())
             {
-                result = CombineHashes(prime, result, GetHashCode(enumerator.Current));
+                result = CombineFNV1a(result, GetHashCode(enumerator.Current));
             }
 
             return result;
         }
 
         private static int GetHashCodeEach<T, TEnumerator, TEqualityComparer>(
-              int prime
-            , int startHashCode
+              int startHashCode
             , TEnumerator enumerator
             , TEqualityComparer comparer
         )
@@ -601,25 +471,25 @@ namespace EncosyTower.Common
 
             if (enumerator.MoveNext() == false)
             {
-                return CombineHashes(prime, result, EMPTY_COLLECTION_PRIME);
+                return CombineFNV1a(result, EMPTY_COLLECTION_BASIS);
             }
 
             if (comparer != null)
             {
-                result = CombineHashes(prime, result, comparer.GetHashCode(enumerator.Current));
+                result = CombineFNV1a(result, comparer.GetHashCode(enumerator.Current));
 
                 while (enumerator.MoveNext())
                 {
-                    result = CombineHashes(prime, result, comparer.GetHashCode(enumerator.Current));
+                    result = CombineFNV1a(result, comparer.GetHashCode(enumerator.Current));
                 }
             }
             else
             {
-                result = CombineHashes(prime, result, GetHashCode(enumerator.Current));
+                result = CombineFNV1a(result, GetHashCode(enumerator.Current));
 
                 while (enumerator.MoveNext())
                 {
-                    result = CombineHashes(prime, result, GetHashCode(enumerator.Current));
+                    result = CombineFNV1a(result, GetHashCode(enumerator.Current));
                 }
             }
 
@@ -627,3 +497,39 @@ namespace EncosyTower.Common
         }
     }
 }
+
+#if UNITY_COLLECTIONS
+
+namespace EncosyTower.Common
+{
+    using Unity.Collections;
+
+    partial struct HashValue
+    {
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        /// <param name="text">Text to hash.</param>
+        /// <typeparam name="T">Unmanaged IUTF8 type.</typeparam>
+        /// <returns>Hash of input string.</returns>
+        public static int FNV1a<T>(T text)
+            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+
+                for (int i = 0; i < text.Length; ++i)
+                {
+                    var c = text[i];
+                    result = PRIME * (result ^ (byte)(c & 255));
+                    result = PRIME * (result ^ (byte)(c >> 8));
+                }
+
+                return (int)result;
+            }
+        }
+    }
+}
+
+#endif
