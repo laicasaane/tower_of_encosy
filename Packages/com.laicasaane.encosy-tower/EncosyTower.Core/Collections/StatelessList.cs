@@ -26,15 +26,19 @@ namespace EncosyTower.Collections
 
         public readonly TState State;
 
+        private readonly bool _isCreated;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public StatelessList([NotNull] TState state)
         {
             this.State = state;
+            _isCreated = true;
         }
 
         public StatelessList([NotNull] TState state, int capacity)
         {
             this.State = state;
+            _isCreated = true;
 
             if (capacity > this.State.Buffer.Length)
             {
@@ -42,10 +46,10 @@ namespace EncosyTower.Collections
             }
         }
 
-        public bool IsValid
+        public bool IsCreated
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => State != null;
+            get => _isCreated;
         }
 
         public int Count

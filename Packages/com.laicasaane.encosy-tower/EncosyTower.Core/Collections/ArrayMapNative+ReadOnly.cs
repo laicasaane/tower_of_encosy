@@ -14,7 +14,7 @@ using Unity.Collections;
 
 namespace EncosyTower.Collections
 {
-    partial struct NativeArrayMap<TKey, TValue>
+    partial struct ArrayMapNative<TKey, TValue>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ReadOnly AsReadOnly()
@@ -30,7 +30,7 @@ namespace EncosyTower.Collections
             internal readonly NativeReference<uint>.ReadOnly _collisions;
             internal readonly NativeReference<ulong>.ReadOnly _fastModBucketsMultiplier;
 
-            public ReadOnly(NativeArrayMap<TKey, TValue> map)
+            public ReadOnly(ArrayMapNative<TKey, TValue> map)
             {
                 _valuesInfo = map._valuesInfo.ToNativeArray().AsReadOnly();
                 _values = map._values.ToNativeArray().AsReadOnly();
@@ -40,7 +40,7 @@ namespace EncosyTower.Collections
                 _fastModBucketsMultiplier = map._fastModBucketsMultiplier.AsReadOnly();
             }
 
-            public readonly bool IsValid
+            public readonly bool IsCreated
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _valuesInfo.IsCreated && _values.IsCreated && _buckets.IsCreated;
@@ -77,7 +77,7 @@ namespace EncosyTower.Collections
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly NativeArrayMapReadOnlyKeyValueEnumerator<TKey, TValue> GetEnumerator()
+            public readonly ArrayMapNativeReadOnlyKeyValueEnumerator<TKey, TValue> GetEnumerator()
                 => new(this);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -153,11 +153,11 @@ namespace EncosyTower.Collections
         }
     }
 
-    public struct NativeArrayMapReadOnlyKeyValueEnumerator<TKey, TValue> : IEnumerator<NativeArrayMapReadOnlyKeyValuePairFast<TKey, TValue>>
+    public struct ArrayMapNativeReadOnlyKeyValueEnumerator<TKey, TValue> : IEnumerator<ArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue>>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
-        private readonly NativeArrayMap<TKey, TValue>.ReadOnly _map;
+        private readonly ArrayMapNative<TKey, TValue>.ReadOnly _map;
 
 #if __ENCOSY_VALIDATION__
         internal int _startCount;
@@ -166,7 +166,7 @@ namespace EncosyTower.Collections
         private int _count;
         private int _index;
 
-        public NativeArrayMapReadOnlyKeyValueEnumerator(in NativeArrayMap<TKey, TValue>.ReadOnly map) : this()
+        public ArrayMapNativeReadOnlyKeyValueEnumerator(in ArrayMapNative<TKey, TValue>.ReadOnly map) : this()
         {
             _map = map;
             _index = -1;
@@ -180,13 +180,18 @@ namespace EncosyTower.Collections
         public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _map.IsValid;
+            get => _map.IsCreated;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MoveNext()
         {
 #if __ENCOSY_VALIDATION__
+            if (IsValid == false)
+            {
+                ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+            }
+
             if (_count != _startCount)
             {
                 ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
@@ -202,7 +207,7 @@ namespace EncosyTower.Collections
             return false;
         }
 
-        public readonly NativeArrayMapReadOnlyKeyValuePairFast<TKey, TValue> Current
+        public readonly ArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(_map._valuesInfo[_index].key, _map._values, _index);
@@ -244,7 +249,7 @@ namespace EncosyTower.Collections
         public readonly void Dispose() { }
     }
 
-    public readonly struct NativeArrayMapReadOnlyKeyValuePairFast<TKey, TValue>
+    public readonly struct ArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -253,7 +258,7 @@ namespace EncosyTower.Collections
         private readonly int _index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public NativeArrayMapReadOnlyKeyValuePairFast(in TKey key, in NativeArray<TValue>.ReadOnly mapValues, int index)
+        public ArrayMapNativeReadOnlyKeyValuePairFast(in TKey key, in NativeArray<TValue>.ReadOnly mapValues, int index)
         {
             _mapValues = mapValues;
             _index = index;

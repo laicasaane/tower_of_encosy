@@ -22,6 +22,12 @@ namespace EncosyTower.Debugging
         }
 
         [DoesNotReturn]
+        public static void ThrowInvalidOperationException_EnumeratorNotValid()
+        {
+            throw new InvalidOperationException("Enumerator is not retrieved via a valid method.");
+        }
+
+        [DoesNotReturn]
         public static void ThrowInvalidOperationException_KeyPresent()
         {
             throw new InvalidOperationException("Key already present");

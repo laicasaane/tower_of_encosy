@@ -55,12 +55,12 @@ namespace EncosyTower.Collections
     /// ArrayMap is not thread safe. A thread safe version should take care of possible setting of
     /// value with shared hash hence bucket list index.
     /// </remarks>
-    [DebuggerTypeProxy(typeof(NativeArrayMapDebugProxy<,>))]
-    public partial struct NativeArrayMap<TKey, TValue> : IDisposable, IClearable, IHasCapacity
+    [DebuggerTypeProxy(typeof(ArrayMapNativeDebugProxy<,>))]
+    public partial struct ArrayMapNative<TKey, TValue> : IDisposable, IClearable, IHasCapacity
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
-        static NativeArrayMap()
+        static ArrayMapNative()
         {
             NoBurstCheck();
         }
@@ -96,9 +96,9 @@ namespace EncosyTower.Collections
         internal NativeReference<uint> _collisions;
         internal NativeReference<ulong> _fastModBucketsMultiplier;
 
-        public NativeArrayMap(int capacity, Allocator allocator)
+        public ArrayMapNative(int capacity, AllocatorManager.AllocatorHandle allocator)
         {
-            // AllocationStrategy must be passed external for TValue because NativeArrayMap doesn't have struct
+            // AllocationStrategy must be passed external for TValue because ArrayMapNative doesn't have struct
             // constraint needed for the NativeVersion
             _valuesInfo = default;
             _valuesInfo.Alloc(capacity, allocator);
@@ -114,9 +114,9 @@ namespace EncosyTower.Collections
                 _fastModBucketsMultiplier.Value = HashHelpers.GetFastModMultiplier((uint)capacity);
         }
 
-        public NativeArrayMap(NativeArrayMap<TKey, TValue> source, Allocator allocator)
+        public ArrayMapNative(ArrayMapNative<TKey, TValue> source, AllocatorManager.AllocatorHandle allocator)
         {
-            if (source.IsValid == false)
+            if (source.IsCreated == false)
             {
                 throw new InvalidOperationException("Source map is not valid");
             }
@@ -154,10 +154,10 @@ namespace EncosyTower.Collections
             get => _freeValueCellIndex.Value;
         }
 
-        public readonly bool IsValid
+        public readonly bool IsCreated
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _valuesInfo.IsValid && _values.IsValid && _buckets.IsValid
+            get => _valuesInfo.IsCreated && _values.IsCreated && _buckets.IsCreated
                 && _freeValueCellIndex.IsCreated && _collisions.IsCreated
                 && _fastModBucketsMultiplier.IsCreated;
         }
@@ -202,7 +202,7 @@ namespace EncosyTower.Collections
         /// This returns readonly because the enumerator cannot be, but at the same time, it cannot be modified
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly NativeArrayMapKeyValueEnumerator<TKey, TValue> GetEnumerator()
+        public readonly ArrayMapNativeKeyValueEnumerator<TKey, TValue> GetEnumerator()
             => new(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -563,7 +563,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Intersect<UValue>(in NativeArrayMap<TKey, UValue> otherMapKeys)
+        public void Intersect<UValue>(in ArrayMapNative<TKey, UValue> otherMapKeys)
             where UValue : unmanaged
         {
             var keys = _valuesInfo.AsSpan();
@@ -576,7 +576,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Exclude<UValue>(in NativeArrayMap<TKey, UValue> otherMapKeys)
+        public void Exclude<UValue>(in ArrayMapNative<TKey, UValue> otherMapKeys)
             where UValue : unmanaged
         {
             var keys = _valuesInfo.AsSpan();
@@ -589,7 +589,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Union(in NativeArrayMap<TKey, TValue> otherMapKeys)
+        public void Union(in ArrayMapNative<TKey, TValue> otherMapKeys)
         {
             foreach (var other in otherMapKeys)
             {
@@ -751,7 +751,7 @@ namespace EncosyTower.Collections
             public bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _map.IsValid;
+                get => _map.IsCreated;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -785,7 +785,7 @@ namespace EncosyTower.Collections
             public readonly bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _map.IsValid;
+                get => _map.IsCreated;
             }
 
             public readonly TKey Current
@@ -826,11 +826,11 @@ namespace EncosyTower.Collections
         }
     }
 
-    public struct NativeArrayMapKeyValueEnumerator<TKey, TValue> : IEnumerator<NativeArrayMapKeyValuePairFast<TKey, TValue>>
+    public struct ArrayMapNativeKeyValueEnumerator<TKey, TValue> : IEnumerator<ArrayMapNativeKeyValuePairFast<TKey, TValue>>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
-        private NativeArrayMap<TKey, TValue> _map;
+        private ArrayMapNative<TKey, TValue> _map;
 
 #if __ENCOSY_VALIDATION__
         internal int _startCount;
@@ -839,7 +839,7 @@ namespace EncosyTower.Collections
         private int _count;
         private int _index;
 
-        public NativeArrayMapKeyValueEnumerator(in NativeArrayMap<TKey, TValue> map) : this()
+        public ArrayMapNativeKeyValueEnumerator(in ArrayMapNative<TKey, TValue> map) : this()
         {
             _map = map;
             _index = -1;
@@ -853,13 +853,18 @@ namespace EncosyTower.Collections
         public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _map.IsValid;
+            get => _map.IsCreated;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MoveNext()
         {
 #if __ENCOSY_VALIDATION__
+            if (IsValid == false)
+            {
+                ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+            }
+
             if (_count != _startCount)
             {
                 ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
@@ -875,7 +880,7 @@ namespace EncosyTower.Collections
             return false;
         }
 
-        public readonly NativeArrayMapKeyValuePairFast<TKey, TValue> Current
+        public readonly ArrayMapNativeKeyValuePairFast<TKey, TValue> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(_map._valuesInfo[_index].key, _map._values, _index);
@@ -894,6 +899,11 @@ namespace EncosyTower.Collections
             _count = (int)count;
 
 #if __ENCOSY_VALIDATION__
+            if (IsValid == false)
+            {
+                ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+            }
+
             if (_count > _startCount)
             {
                 ThrowHelper.ThrowInvalidOperationException_SetCountGreaterThanStartingOne();
@@ -918,8 +928,8 @@ namespace EncosyTower.Collections
     }
 
     [DebuggerDisplay("[{Key}] = {Value}")]
-    [DebuggerTypeProxy(typeof(NativeArrayMapKeyValuePairFastDebugProxy<,>))]
-    public readonly struct NativeArrayMapKeyValuePairFast<TKey, TValue>
+    [DebuggerTypeProxy(typeof(ArrayMapNativeKeyValuePairFastDebugProxy<,>))]
+    public readonly struct ArrayMapNativeKeyValuePairFast<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -928,7 +938,7 @@ namespace EncosyTower.Collections
         private readonly int _index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public NativeArrayMapKeyValuePairFast(in TKey key, in NativeStrategy<TValue> mapValues, int index)
+        public ArrayMapNativeKeyValuePairFast(in TKey key, in NativeStrategy<TValue> mapValues, int index)
         {
             _mapValues = mapValues;
             _index = index;
@@ -938,7 +948,7 @@ namespace EncosyTower.Collections
         public bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _mapValues.IsValid;
+            get => _mapValues.IsCreated;
         }
 
         public TKey Key
@@ -961,14 +971,14 @@ namespace EncosyTower.Collections
         }
     }
 
-    internal sealed class NativeArrayMapKeyValuePairFastDebugProxy<TKey, TValue>
+    internal sealed class ArrayMapNativeKeyValuePairFastDebugProxy<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
 
-        private readonly NativeArrayMapKeyValuePairFast<TKey, TValue> _keyValue;
+        private readonly ArrayMapNativeKeyValuePairFast<TKey, TValue> _keyValue;
 
-        public NativeArrayMapKeyValuePairFastDebugProxy(in NativeArrayMapKeyValuePairFast<TKey, TValue> keyValue)
+        public ArrayMapNativeKeyValuePairFastDebugProxy(in ArrayMapNativeKeyValuePairFast<TKey, TValue> keyValue)
         {
             _keyValue = keyValue;
         }
@@ -986,14 +996,14 @@ namespace EncosyTower.Collections
         }
     }
 
-    internal sealed class NativeArrayMapDebugProxy<TKey, TValue>
+    internal sealed class ArrayMapNativeDebugProxy<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
 
-        private readonly NativeArrayMap<TKey, TValue> _map;
+        private readonly ArrayMapNative<TKey, TValue> _map;
 
-        public NativeArrayMapDebugProxy(in NativeArrayMap<TKey, TValue> map)
+        public ArrayMapNativeDebugProxy(in ArrayMapNative<TKey, TValue> map)
         {
             _map = map;
         }
@@ -1005,12 +1015,12 @@ namespace EncosyTower.Collections
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public NativeArrayMapKeyValuePairFast<TKey, TValue>[] KeyValues
+        public ArrayMapNativeKeyValuePairFast<TKey, TValue>[] KeyValues
         {
             get
             {
                 var map = _map;
-                var array = new NativeArrayMapKeyValuePairFast<TKey, TValue>[map.Count];
+                var array = new ArrayMapNativeKeyValuePairFast<TKey, TValue>[map.Count];
                 var i = 0;
 
                 foreach (var keyValue in map)

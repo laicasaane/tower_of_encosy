@@ -19,6 +19,11 @@ namespace EncosyTower.Collections
 
         internal readonly ListExposed<T> _list;
 
+        public ListFast()
+        {
+            _list = new(new List<T>());
+        }
+
         public ListFast([NotNull] List<T> list)
         {
             _list = new(list);
@@ -87,6 +92,14 @@ namespace EncosyTower.Collections
             get => ref _list.Version;
         }
 #pragma warning restore IDE1006 // Naming Styles
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode()
+            => List.GetHashCode();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Equals(object obj)
+            => obj is ListFast<T> other && ReferenceEquals(List, other.List);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Exists([NotNull] Predicate<T> match)
@@ -949,6 +962,22 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator List<T>(ListFast<T> list)
+            => list.List;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator ListFast<T>([NotNull] List<T> list)
+            => new(list);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(ListFast<T> lhs, ListFast<T> rhs)
+            => ReferenceEquals(lhs.List, rhs.List);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(ListFast<T> lhs, ListFast<T> rhs)
+            => ReferenceEquals(lhs.List, rhs.List) == false;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ListFast<T> Prefill<TDerived>(int amount)
             where TDerived : T, new()
         {
@@ -980,10 +1009,6 @@ namespace EncosyTower.Collections
             list.AddReplicateNoInit(amount);
             return list;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator ListFast<T>([NotNull] List<T> list)
-            => new(list);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int CalcNewCapacity(int newSize)

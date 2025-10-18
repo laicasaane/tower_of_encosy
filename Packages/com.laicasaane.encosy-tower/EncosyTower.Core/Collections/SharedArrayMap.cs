@@ -839,6 +839,11 @@ namespace EncosyTower.Collections
             public bool MoveNext()
             {
 #if __ENCOSY_VALIDATION__
+                if (IsValid == false)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+                }
+
                 if (_count != _map.Count)
                 {
                     ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
@@ -904,6 +909,11 @@ namespace EncosyTower.Collections
         public bool MoveNext()
         {
 #if __ENCOSY_VALIDATION__
+            if (IsValid == false)
+            {
+                ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+            }
+
             if (_count != _startCount)
             {
                 ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
@@ -938,6 +948,11 @@ namespace EncosyTower.Collections
             _count = (int)count;
 
 #if __ENCOSY_VALIDATION__
+            if (IsValid == false)
+            {
+                ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+            }
+
             if (_count > _startCount)
             {
                 ThrowHelper.ThrowInvalidOperationException_SetCountGreaterThanStartingOne();

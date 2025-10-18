@@ -15,7 +15,15 @@ namespace EncosyTower.Collections
 
         public readonly struct ReadOnly : IAsReadOnlySpan<T>, IReadOnlyList<T>
         {
+            private static readonly ReadOnly s_empty = new(new());
+
             internal readonly ListFast<T> _list;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public ReadOnly()
+            {
+                _list = s_empty._list;
+            }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ReadOnly(ListFast<T> list)
@@ -23,13 +31,13 @@ namespace EncosyTower.Collections
                 _list = list;
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ReadOnly([NotNull] List<T> list)
+            public static ReadOnly Empty
             {
-                _list = new(list);
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => s_empty;
             }
 
-            public bool IsValid
+            public bool IsCreated
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _list.IsCreated;

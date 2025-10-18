@@ -47,10 +47,10 @@ namespace EncosyTower.Collections
                 _list = list;
             }
 
-            public bool IsValid
+            public bool IsCreated
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _list.IsValid;
+                get => _list.IsCreated;
             }
 
             public int Count

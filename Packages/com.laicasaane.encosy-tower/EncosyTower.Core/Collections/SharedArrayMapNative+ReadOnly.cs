@@ -39,7 +39,7 @@ namespace EncosyTower.Collections
                 _fastModBucketsMultiplier = map._fastModBucketsMultiplier.AsReadOnly();
             }
 
-            public readonly bool IsValid
+            public readonly bool IsCreated
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _valuesInfo.IsCreated && _values.IsCreated && _buckets.IsCreated;
@@ -163,7 +163,7 @@ namespace EncosyTower.Collections
                 public bool IsValid
                 {
                     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                    get => _map.IsValid;
+                    get => _map.IsCreated;
                 }
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -197,7 +197,7 @@ namespace EncosyTower.Collections
                 public readonly bool IsValid
                 {
                     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                    get => _map.IsValid;
+                    get => _map.IsCreated;
                 }
 
                 public readonly TKey Current
@@ -210,6 +210,11 @@ namespace EncosyTower.Collections
                 public bool MoveNext()
                 {
 #if __ENCOSY_VALIDATION__
+                    if (IsValid == false)
+                    {
+                        ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+                    }
+
                     if (_count != _map.Count)
                     {
                         ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
@@ -269,13 +274,18 @@ namespace EncosyTower.Collections
         public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _map.IsValid;
+            get => _map.IsCreated;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MoveNext()
         {
 #if __ENCOSY_VALIDATION__
+            if (IsValid == false)
+            {
+                ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+            }
+
             if (_count != _startCount)
             {
                 ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
@@ -310,6 +320,11 @@ namespace EncosyTower.Collections
             _count = (int)count;
 
 #if __ENCOSY_VALIDATION__
+            if (IsValid == false)
+            {
+                ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+            }
+
             if (_count > _startCount)
             {
                 ThrowHelper.ThrowInvalidOperationException_SetCountGreaterThanStartingOne();

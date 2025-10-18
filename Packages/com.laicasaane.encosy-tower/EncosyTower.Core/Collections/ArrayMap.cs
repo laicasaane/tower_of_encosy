@@ -76,11 +76,11 @@ namespace EncosyTower.Collections
             // AllocationStrategy must be passed external for TValue because ArrayMap doesn't have struct
             // constraint needed for the NativeVersion
             _valuesInfo = default;
-            _valuesInfo.Alloc(capacity, default);
+            _valuesInfo.Alloc(capacity);
             _values = default;
-            _values.Alloc(capacity, default);
+            _values.Alloc(capacity);
             _buckets = default;
-            _buckets.Alloc(HashHelpers.GetPrime(capacity), default);
+            _buckets.Alloc(HashHelpers.GetPrime(capacity));
 
             if (capacity > 0)
                 _fastModBucketsMultiplier = HashHelpers.GetFastModMultiplier((uint)capacity);
@@ -91,11 +91,11 @@ namespace EncosyTower.Collections
             var capacity = source.Capacity;
 
             _valuesInfo = default;
-            _valuesInfo.Alloc(capacity, default);
+            _valuesInfo.Alloc(capacity);
             _values = default;
-            _values.Alloc(capacity, default);
+            _values.Alloc(capacity);
             _buckets = default;
-            _buckets.Alloc(HashHelpers.GetPrime(capacity), default);
+            _buckets.Alloc(HashHelpers.GetPrime(capacity));
 
             source._valuesInfo.AsSpan().CopyTo(_valuesInfo.AsSpan());
             source._values.AsSpan().CopyTo(_values.AsSpan());
@@ -119,12 +119,6 @@ namespace EncosyTower.Collections
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _freeValueCellIndex;
-        }
-
-        public bool IsValid
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _buckets.IsValid;
         }
 
         public KeyEnumerable Keys
@@ -806,7 +800,7 @@ namespace EncosyTower.Collections
             public bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _map?.IsValid ?? false;
+                get => _map != null;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -840,7 +834,7 @@ namespace EncosyTower.Collections
             public readonly bool IsValid
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _map?.IsValid ?? false;
+                get => _map != null;
             }
 
             public readonly TKey Current
@@ -853,6 +847,11 @@ namespace EncosyTower.Collections
             public bool MoveNext()
             {
 #if __ENCOSY_VALIDATION__
+                if (IsValid == false)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+                }
+
                 if (_count != _map.Count)
                 {
                     ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
@@ -907,13 +906,18 @@ namespace EncosyTower.Collections
         public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _map?.IsValid ?? false;
+            get => _map != null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MoveNext()
         {
 #if __ENCOSY_VALIDATION__
+            if (IsValid == false)
+            {
+                ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+            }
+
             if (_count != _startCount)
             {
                 ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
@@ -948,6 +952,11 @@ namespace EncosyTower.Collections
             _count = (int)count;
 
 #if __ENCOSY_VALIDATION__
+            if (IsValid == false)
+            {
+                ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+            }
+
             if (_count > _startCount)
             {
                 ThrowHelper.ThrowInvalidOperationException_SetCountGreaterThanStartingOne();
@@ -990,7 +999,7 @@ namespace EncosyTower.Collections
         public bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _mapValues.IsValid;
+            get => _mapValues.IsCreated;
         }
 
         public TKey Key

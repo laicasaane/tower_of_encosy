@@ -35,7 +35,7 @@ namespace EncosyTower.Collections
                 _version = version;
             }
 
-            public bool IsValid
+            public bool IsCreated
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _buffer.IsCreated && _count.IsCreated && _version.IsCreated;

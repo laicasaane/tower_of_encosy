@@ -28,10 +28,10 @@ namespace EncosyTower.Collections
                 _map = map;
             }
 
-            public bool IsValid
+            public bool IsCreated
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _map != null && _map.IsValid;
+                get => _map != null;
             }
 
             public int Capacity
