@@ -159,6 +159,14 @@ namespace EncosyTower.Editor.AssemblyDefs
             EditorUtility.ClearProgressBar();
 
             AssetDatabase.Refresh();
+
+            if (TryGetConfigAutoLog(out var autoLog) && autoLog)
+            {
+                StaticDevLogger.LogInfo(
+                    $"XML documentation for UPM packages has been generated into " +
+                    $"<a href=\"file:///{xmlDocumentationFolderPath}\">{XML_DOCUMENTATION_FOLDER}</a>"
+                );
+            }
         }
 
         [MenuItem($"{MENU_ROOT}/Delete", priority = 88_00_00_03)]
@@ -284,6 +292,13 @@ namespace EncosyTower.Editor.AssemblyDefs
         }
 
         [InitializeOnLoadMethod]
+        private static void InitializeOnLoad()
+        {
+            SetMenuCheckState();
+            AutoGenerateXmlDocumentation();
+            CopyXmlDocToScriptAssembliesFolder();
+        }
+
         private static void SetMenuCheckState()
         {
             if (TryGetConfigAutoGenerate(out var autoGenerate) == false)
@@ -301,7 +316,6 @@ namespace EncosyTower.Editor.AssemblyDefs
             Menu.SetChecked(MENU_AUTO_LOG, autoLog);
         }
 
-        [InitializeOnLoadMethod]
         private static void AutoGenerateXmlDocumentation()
         {
             if (TryGetConfigAutoGenerate(out var autoGenerate) == false || autoGenerate == false)
@@ -309,20 +323,9 @@ namespace EncosyTower.Editor.AssemblyDefs
                 return;
             }
 
-            if (TryGetConfigAutoLog(out var autoLog) && autoLog)
-            {
-                var projectRoot = GetProjectRootPath();
-                var xmlDocumentationFolderPath = projectRoot.GetFolderAbsolutePath(XML_DOCUMENTATION_FOLDER);
-                StaticDevLogger.LogInfo(
-                    $"XML documentation for UPM packages has been generated into " +
-                    $"<a href=\"file:///{xmlDocumentationFolderPath}\">{XML_DOCUMENTATION_FOLDER}</a>"
-                );
-            }
-
             GenerateXmlDocumentation();
         }
 
-        [InitializeOnLoadMethod]
         private static void CopyXmlDocToScriptAssembliesFolder()
         {
             var projectRoot = GetProjectRootPath();
@@ -355,6 +358,14 @@ namespace EncosyTower.Editor.AssemblyDefs
                 {
                     StaticDevLogger.LogError($"Failed to copy '{xmlFile}' to '{destFilePath}': {ex.Message}");
                 }
+            }
+
+            if (TryGetConfigAutoLog(out var autoLog) && autoLog)
+            {
+                StaticDevLogger.LogInfo(
+                    $"XML documentation files has been copied to " +
+                    $"<a href=\"file:///{scriptAssembliesFolderPath}\">{SCRIPT_ASSEMBLIES_FOLDER}</a>"
+                );
             }
         }
 
