@@ -18,7 +18,7 @@ namespace EncosyTower.PubSub
         {
             internal readonly MessagePublisher _publisher;
 
-            public bool IsValid => _publisher != null;
+            public bool IsCreated => _publisher != null;
 
             public TScope Scope { get; }
 

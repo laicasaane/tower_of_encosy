@@ -32,7 +32,7 @@ namespace EncosyTower.Processing
 
         public TScope Scope => _hub.Scope;
 
-        public bool IsValid => _hub.IsValid;
+        public bool IsCreated => _hub.IsCreated;
 
         public TState State { get; }
 
@@ -123,7 +123,7 @@ namespace EncosyTower.Processing
 #if __ENCOSY_PROCESSING_VALIDATION__
         private bool Validate()
         {
-            if (IsValid)
+            if (IsCreated)
             {
                 return true;
             }

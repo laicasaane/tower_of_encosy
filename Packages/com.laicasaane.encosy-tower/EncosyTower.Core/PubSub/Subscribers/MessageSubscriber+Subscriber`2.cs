@@ -35,7 +35,7 @@ namespace EncosyTower.PubSub
         {
             internal readonly Subscriber<TScope> _subscriber;
 
-            public bool IsValid => _subscriber.IsValid;
+            public bool IsCreated => _subscriber.IsCreated;
 
             public TScope Scope => _subscriber.Scope;
 
@@ -240,7 +240,7 @@ namespace EncosyTower.PubSub
 #if __ENCOSY_VALIDATION__
             private bool Validate(ILogger logger)
             {
-                if (IsValid)
+                if (IsCreated)
                 {
                     return true;
                 }

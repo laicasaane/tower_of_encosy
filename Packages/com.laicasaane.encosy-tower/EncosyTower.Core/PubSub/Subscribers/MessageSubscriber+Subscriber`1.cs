@@ -23,7 +23,7 @@ namespace EncosyTower.PubSub
 
             public TScope Scope { get; }
 
-            public bool IsValid => _subscriber != null;
+            public bool IsCreated => _subscriber != null;
 
             internal Subscriber([NotNull] MessageSubscriber subscriber, [NotNull] TScope scope)
             {

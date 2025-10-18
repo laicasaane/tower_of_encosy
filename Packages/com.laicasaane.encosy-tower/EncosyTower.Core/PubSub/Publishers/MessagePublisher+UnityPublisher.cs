@@ -25,7 +25,7 @@ namespace EncosyTower.PubSub
             internal readonly Publisher<UnityInstanceId<TScope>> _publisher;
 #endif
 
-            public bool IsValid => _publisher.IsValid;
+            public bool IsCreated => _publisher.IsCreated;
 
 #if UNITY_6000_2_OR_NEWER
             public UnityEntityId<TScope> Scope => _publisher.Scope;
@@ -106,7 +106,7 @@ namespace EncosyTower.PubSub
 #if __ENCOSY_VALIDATION__
             private bool Validate(ILogger logger)
             {
-                if (IsValid)
+                if (IsCreated)
                 {
                     return true;
                 }

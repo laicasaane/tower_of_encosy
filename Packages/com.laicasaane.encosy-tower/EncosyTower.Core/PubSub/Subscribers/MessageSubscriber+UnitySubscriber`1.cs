@@ -33,7 +33,7 @@ namespace EncosyTower.PubSub
             public UnityInstanceId<TScope> Scope => _subscriber.Scope;
 #endif
 
-            public bool IsValid => _subscriber.IsValid;
+            public bool IsCreated => _subscriber.IsCreated;
 
             internal UnitySubscriber([NotNull] MessageSubscriber subscriber, [NotNull] TScope scope)
             {
@@ -244,7 +244,7 @@ namespace EncosyTower.PubSub
 #if __ENCOSY_VALIDATION__
             private bool Validate(ILogger logger)
             {
-                if (IsValid)
+                if (IsCreated)
                 {
                     return true;
                 }

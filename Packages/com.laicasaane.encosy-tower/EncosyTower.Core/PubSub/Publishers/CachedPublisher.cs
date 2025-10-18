@@ -28,7 +28,7 @@ namespace EncosyTower.PubSub
             _broker = broker ?? throw new ArgumentNullException(nameof(broker));
         }
 
-        public readonly bool IsValid => _broker != null;
+        public readonly bool IsCreated => _broker != null;
 
         public void Dispose()
         {
