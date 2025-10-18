@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace EncosyTower.StringIds
 {
-    public readonly partial struct NativeStringVault
+    public readonly partial struct NativeStringVault : IDisposable
     {
         internal readonly NativeHashMap<StringHash, Id> _map;
         internal readonly NativeList<UnmanagedString> _strings;
@@ -38,6 +38,13 @@ namespace EncosyTower.StringIds
             }
         }
 
+        public bool IsCreated
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _map.IsCreated && _strings.IsCreated
+                && _hashes.IsCreated && _count.IsCreated;
+        }
+
         public int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -54,6 +61,14 @@ namespace EncosyTower.StringIds
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _strings.AsReadOnly();
+        }
+
+        public void Dispose()
+        {
+            _map.Dispose();
+            _strings.Dispose();
+            _hashes.Dispose();
+            _count.Dispose();
         }
 
         public void Clear()
@@ -191,7 +206,7 @@ namespace EncosyTower.StringIds
             internal readonly NativeHashMap<StringHash, Id>.ReadOnly _map;
             internal readonly NativeArray<UnmanagedString>.ReadOnly _strings;
             internal readonly NativeArray<Option<StringHash>>.ReadOnly _hashes;
-            internal readonly int _count;
+            internal readonly NativeReference<int>.ReadOnly _count;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ReadOnly(in NativeStringVault vault)
@@ -199,7 +214,14 @@ namespace EncosyTower.StringIds
                 _map = vault._map.AsReadOnly();
                 _strings = vault._strings.AsReadOnly();
                 _hashes = vault._hashes.AsReadOnly();
-                _count = vault._count.Value;
+                _count = vault._count.AsReadOnly();
+            }
+
+            public bool IsCreated
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _map.IsCreated && _strings.IsCreated
+                    && _hashes.IsCreated;
             }
 
             public int Capacity
@@ -211,7 +233,7 @@ namespace EncosyTower.StringIds
             public int Count
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _count;
+                get => _count.Value;
             }
 
             public bool TryGetId(in UnmanagedString str, out Id result)

@@ -5,18 +5,19 @@ using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Common;
 using EncosyTower.Ids;
+using Unity.Collections;
 using UnityEngine;
 
 namespace EncosyTower.StringIds
 {
-    public partial class StringVault
+    public sealed partial class StringVault : IDisposable
     {
         internal readonly SharedArrayMap<StringHash, Id> _map;
         internal readonly SharedList<UnmanagedString> _unmanagedStrings;
         internal readonly FasterList<string> _managedStrings;
         internal readonly SharedList<Option<StringHash>> _hashes;
+        internal readonly SharedReference<int> _count;
         internal readonly object _lock = new();
-        internal int _count;
 
         public StringVault(int initialCapacity)
         {
@@ -24,6 +25,7 @@ namespace EncosyTower.StringIds
             _unmanagedStrings = new(initialCapacity);
             _managedStrings = new(initialCapacity);
             _hashes = new(initialCapacity);
+            _count = new();
             Clear();
         }
 
@@ -52,7 +54,7 @@ namespace EncosyTower.StringIds
         public int Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _count;
+            get => _count.ValueRO;
         }
 
         public SharedList<UnmanagedString>.ReadOnly UnmanagedStrings
@@ -65,6 +67,14 @@ namespace EncosyTower.StringIds
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _managedStrings.AsReadOnly();
+        }
+
+        public void Dispose()
+        {
+            _map.Dispose();
+            _unmanagedStrings.Dispose();
+            _hashes.Dispose();
+            _count.Dispose();
         }
 
         public void Clear()
@@ -82,7 +92,7 @@ namespace EncosyTower.StringIds
                 _managedStrings.Add(string.Empty);
                 _hashes.Add(default);
 
-                _count = 1;
+                _count.ValueRW = 1;
             }
         }
 
@@ -110,10 +120,12 @@ namespace EncosyTower.StringIds
 
                 lock (_lock)
                 {
-                    var index = _count;
+                    ref var count = ref _count.ValueRW;
+                    var index = count;
+
                     id = new Id(index);
 
-                    _count += 1;
+                    count += 1;
                     EnsureCapacity();
 
                     _unmanagedStrings[index] = str;
@@ -123,14 +135,16 @@ namespace EncosyTower.StringIds
             }
             else
             {
-                var index = _count;
+                ref var count = ref _count.ValueRW;
+                var index = count;
+
                 id = new Id(index);
 
                 lock (_lock)
                 {
                     if (_map.TryAdd(hash, id))
                     {
-                        _count += 1;
+                        count += 1;
                         EnsureCapacity();
 
                         _unmanagedStrings[index] = str;
@@ -171,10 +185,12 @@ namespace EncosyTower.StringIds
 
                 lock (_lock)
                 {
-                    var index = _count;
+                    ref var count = ref _count.ValueRW;
+                    var index = count;
+
                     id = new Id(index);
 
-                    _count += 1;
+                    count += 1;
                     EnsureCapacity();
 
                     _unmanagedStrings[index] = str;
@@ -186,12 +202,14 @@ namespace EncosyTower.StringIds
             {
                 lock (_lock)
                 {
-                    var index = _count;
+                    ref var count = ref _count.ValueRW;
+                    var index = count;
+
                     id = new Id(index);
 
                     if (_map.TryAdd(hash, id))
                     {
-                        _count += 1;
+                        count += 1;
                         EnsureCapacity();
                         _unmanagedStrings[index] = str;
                         _managedStrings[index] = str;
@@ -241,7 +259,7 @@ namespace EncosyTower.StringIds
         private void EnsureCapacity()
         {
             var oldCapacity = Math.Min(_hashes.Capacity, _unmanagedStrings.Capacity);
-            var newCapacity = Math.Max(_map.Capacity, _count);
+            var newCapacity = Math.Max(_map.Capacity, _count.ValueRO);
 
             if (newCapacity > 0 && newCapacity > oldCapacity)
             {
@@ -297,22 +315,37 @@ namespace EncosyTower.StringIds
 
         public readonly partial struct ReadOnly
         {
-            private readonly SharedArrayMapNative<StringHash, Id, Id> _map;
-            private readonly SharedListNative<UnmanagedString, UnmanagedString> _unmanagedStrings;
-            private readonly SharedListNative<Option<StringHash>, Option<StringHash>> _hashes;
+            private readonly SharedArrayMapNative<StringHash, Id, Id>.ReadOnly _map;
+            private readonly SharedListNative<UnmanagedString, UnmanagedString>.ReadOnly _unmanagedStrings;
+            private readonly SharedListNative<Option<StringHash>, Option<StringHash>>.ReadOnly _hashes;
+            private readonly NativeArray<int>.ReadOnly _count;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ReadOnly(StringVault vault)
             {
-                _map = vault._map;
-                _unmanagedStrings = vault._unmanagedStrings;
-                _hashes = vault._hashes;
+                _map = vault._map.AsNative();
+                _unmanagedStrings = vault._unmanagedStrings.AsNative();
+                _hashes = vault._hashes.AsNative();
+                _count = vault._count.AsNativeArray().AsReadOnly();
             }
 
             public bool IsCreated
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _map.IsCreated;
+                get => _map.IsCreated && _unmanagedStrings.IsCreated
+                    && _hashes.IsCreated && _count.IsCreated;
+            }
+
+            public int Capacity
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _hashes.Count;
+            }
+
+            public int Count
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _count[0];
             }
 
             public bool TryGetId(in UnmanagedString str, out Id result)
