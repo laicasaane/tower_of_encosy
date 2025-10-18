@@ -30,8 +30,12 @@
 #endif
 
 using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.Collections;
 using Unity.Collections;
+using Unity.Mathematics;
 
 namespace EncosyTower.Buffers
 {
@@ -40,7 +44,7 @@ namespace EncosyTower.Buffers
     /// Through the IBufferStrategy interface, with these, datastructure can use interchangeably
     /// native and managed memory and other strategies.
     /// </summary>
-    public struct NativeStrategy<T> : IBufferStrategy<T> where T : struct
+    public struct NativeStrategy<T> : IBufferStrategy<T> where T : unmanaged
     {
         internal static readonly bool s_isTUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
 
@@ -52,13 +56,14 @@ namespace EncosyTower.Buffers
         }
 #endif
 
-        internal NativeReference<Allocator> _nativeAllocator;
+        internal NativeReference<AllocatorStrategy> _nativeAllocator;
         internal NBInternal<T> _realBuffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public NativeStrategy(int size, Allocator allocator, bool clear = true) : this()
+        public NativeStrategy(int size, AllocatorStrategy allocatorStrategy, bool clear = true) : this()
         {
-            Alloc(size, allocator, clear);
+            ThrowIfInvalidAllocatorStrategy(allocatorStrategy);
+            Alloc(size, allocatorStrategy, clear);
         }
 
         public readonly int Capacity
@@ -67,10 +72,10 @@ namespace EncosyTower.Buffers
             get => _realBuffer.Capacity;
         }
 
-        public readonly bool IsValid
+        public readonly bool IsCreated
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _realBuffer.IsValid;
+            get => _realBuffer.IsCreated;
         }
 
         public ref T this[int index]
@@ -80,22 +85,38 @@ namespace EncosyTower.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Alloc(int newCapacity, Allocator allocator, bool memClear = true)
+        public void Alloc(int newCapacity, AllocatorStrategy allocatorStrategy, bool memClear = true)
         {
 #if __ENCOSY_VALIDATION__
             if (_realBuffer.ToNativeArray().IsCreated)
                 throw new InvalidOperationException("Cannot allocate an already allocated buffer");
-
-            if (allocator != Allocator.Persistent && allocator != Allocator.Temp && allocator != Allocator.TempJob)
-                throw new Exception("Invalid allocator used for native strategy");
 #endif
 
+            if (allocatorStrategy.TryGetAllocatorHandle(out var handle))
+            {
+                Alloc(newCapacity, handle, memClear);
+                return;
+            }
+
+            if (allocatorStrategy.TryGetAllocator(out var allocator))
+            {
+                Alloc(newCapacity, allocator, memClear);
+                return;
+            }
+
+            ThrowIfInvalidAllocatorStrategy(allocatorStrategy);
+        }
+
+        private void Alloc(int newCapacity, AllocatorManager.AllocatorHandle allocator, bool memClear = true)
+        {
             _nativeAllocator = new(allocator, NativeArrayOptions.UninitializedMemory) {
                 Value = allocator
             };
 
-            var memType = memClear ? NativeArrayOptions.ClearMemory : NativeArrayOptions.UninitializedMemory;
-            var array = new NativeArray<T>(newCapacity, allocator, memType);
+            var array = memClear
+                ? NativeArray.Create<T>(newCapacity, allocator)
+                : NativeArray.CreateFast<T>(newCapacity, allocator);
+
             _realBuffer = new NBInternal<T>(array);
         }
 
@@ -117,16 +138,43 @@ namespace EncosyTower.Buffers
 
             var capacity = Capacity;
 
-            if (newSize != capacity)
+            if (newSize == capacity)
             {
-                var realBuffer = _realBuffer.ToNativeArray();
-                var memType = memClear ? NativeArrayOptions.ClearMemory : NativeArrayOptions.UninitializedMemory;
-                var newBuffer = new NativeArray<T>(newSize, _nativeAllocator.Value, memType);
-                var copyLength = Math.Min(capacity, newSize);
-                realBuffer.AsReadOnlySpan().CopyTo(newBuffer.AsSpan()[..copyLength]);
-                realBuffer.Dispose();
-                _realBuffer = new NBInternal<T>(newBuffer);
+                return;
             }
+
+            var allocatorStrategy = _nativeAllocator.Value;
+
+            if (allocatorStrategy.TryGetAllocatorHandle(out var handle))
+            {
+                Resize(newSize, copyContent, memClear, handle);
+                return;
+            }
+
+            if (allocatorStrategy.TryGetAllocator(out var allocator))
+            {
+                Resize(newSize, copyContent, memClear, allocator);
+                return;
+            }
+
+            ThrowIfInvalidAllocatorStrategy(allocatorStrategy);
+        }
+
+        private void Resize(int newSize, bool copyContent, bool memClear, AllocatorManager.AllocatorHandle allocator)
+        {
+            var realBuffer = _realBuffer.ToNativeArray();
+            var newBuffer = memClear
+                ? NativeArray.Create<T>(newSize, allocator)
+                : NativeArray.CreateFast<T>(newSize, allocator);
+
+            if (copyContent)
+            {
+                var copyLength = math.min(Capacity, newSize);
+                realBuffer.AsReadOnlySpan().CopyTo(newBuffer.AsSpan()[..copyLength]);
+            }
+
+            realBuffer.Dispose();
+            _realBuffer = new NBInternal<T>(newBuffer);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -168,6 +216,20 @@ namespace EncosyTower.Buffers
 #endif
 
             _realBuffer = default;
+        }
+
+        [DoesNotReturn, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowIfInvalidAllocatorStrategy(AllocatorStrategy strategy)
+        {
+            if (strategy.IsValid)
+            {
+                return;
+            }
+
+            throw new InvalidOperationException(
+                "Allocator strategy must be either Unity.Collections.Allocator " +
+                "or Unity.Collections.AllocatorManager.AllocatorHandle"
+            );
         }
     }
 }

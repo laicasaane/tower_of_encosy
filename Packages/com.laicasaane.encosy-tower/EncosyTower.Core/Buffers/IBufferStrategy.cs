@@ -24,19 +24,18 @@
 
 using System;
 using EncosyTower.Collections;
-using Unity.Collections;
 
 namespace EncosyTower.Buffers
 {
-    public interface IBufferStrategy<T> : IAsSpan<T>, IAsReadOnlySpan<T>, IResizable, IClearable, IDisposable
+    public interface IBufferStrategy<T> : IAlloc
+        , IAsSpan<T>, IAsReadOnlySpan<T>
+        , IResizable, IClearable, IDisposable
     {
         int Capacity { get; }
 
-        bool IsValid { get; }
+        bool IsCreated { get; }
 
         ref T this[int index] { get; }
-
-        void Alloc(int size, Allocator allocator, bool memClear = true);
 
         void Resize(int newCapacity, bool copyContent, bool memClear);
 

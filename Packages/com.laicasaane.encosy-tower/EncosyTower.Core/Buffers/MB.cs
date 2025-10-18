@@ -59,10 +59,10 @@ namespace EncosyTower.Buffers
             get => _bufferImplementation.Capacity;
         }
 
-        public readonly bool IsValid
+        public readonly bool IsCreated
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _bufferImplementation.IsValid;
+            get => _bufferImplementation.IsCreated;
         }
 
         public ref T this[int index]
@@ -143,7 +143,7 @@ namespace EncosyTower.Buffers
             get => _buffer.Length;
         }
 
-        public readonly bool IsValid
+        public readonly bool IsCreated
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _buffer != null;

@@ -30,7 +30,7 @@ namespace EncosyTower.Buffers
     {
         int Capacity { get; }
 
-        bool IsValid { get; }
+        bool IsCreated { get; }
 
         void CopyTo(uint sourceStartIndex, T[] destination, uint destinationStartIndex, uint count);
     }

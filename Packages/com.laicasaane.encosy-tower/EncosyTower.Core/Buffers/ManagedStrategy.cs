@@ -24,7 +24,6 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using Unity.Collections;
 
 namespace EncosyTower.Buffers
 {
@@ -51,10 +50,10 @@ namespace EncosyTower.Buffers
             get => _realBuffer.Capacity;
         }
 
-        public readonly bool IsValid
+        public readonly bool IsCreated
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _realBuffer.IsValid;
+            get => _realBuffer.IsCreated;
         }
 
         public ref T this[int index]
@@ -64,7 +63,7 @@ namespace EncosyTower.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Alloc(int size)
+        public void Alloc(int size)
         {
             var b =  default(MBInternal<T>);
             b.Set(new T[size]);
@@ -72,7 +71,7 @@ namespace EncosyTower.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Alloc(int size, Allocator allocator, bool memClear = true)
+        public void Alloc(int size, AllocatorStrategy allocator, bool memClear = true)
         {
             var b =  default(MBInternal<T>);
             var array = new T[size];
