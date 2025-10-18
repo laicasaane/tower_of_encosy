@@ -1,7 +1,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.CodeGen;
 using EncosyTower.Common;
+using EncosyTower.Pooling;
 
 namespace EncosyTower.Types
 {
@@ -76,7 +78,9 @@ namespace EncosyTower.Types
                 return VOID_TYPE_NAME;
             }
 
-            var friendlyName = fullName ? type.GetFullName() : type.GetName();
+            using var _ = StringBuilderPool.Rent(out var stringBuilder);
+            var printer = new Printer(stringBuilder);
+            var friendlyName = (fullName ? type.GetFullName() : type.GetName()).AsSpan();
 
             if (type.IsGenericType)
             {
@@ -84,23 +88,31 @@ namespace EncosyTower.Types
 
                 if (iBacktick > 0)
                 {
-                    friendlyName = friendlyName.Remove(iBacktick);
+                    printer.Print(friendlyName[..iBacktick]);
+                }
+                else
+                {
+                    printer.Print(friendlyName);
                 }
 
-                friendlyName += "<";
+                printer.Print('<');
 
                 var typeParameters = type.GetGenericArguments();
 
                 for (var i = 0; i < typeParameters.Length; ++i)
                 {
-                    var typeParamName = GetFriendlyName(typeParameters[i]);
-                    friendlyName += (i == 0 ? typeParamName : "," + typeParamName);
+                    var typeParamName = GetFriendlyName(typeParameters[i], fullName);
+                    printer.Print(',', i > 0).Print(typeParamName);
                 }
 
-                friendlyName += ">";
+                printer.Print('>');
+            }
+            else
+            {
+                printer.Print(friendlyName);
             }
 
-            return friendlyName;
+            return printer.Result;
         }
 
         public static bool IsReferenceOrContainsReferences([NotNull] this Type type)

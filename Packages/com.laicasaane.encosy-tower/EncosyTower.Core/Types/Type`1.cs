@@ -11,6 +11,7 @@ namespace EncosyTower.Types
     {
         private readonly static Type s_cached;
         private readonly static TypeInfo<T> s_info;
+        private static string s_friendlyName;
 
         static Type()
         {
@@ -38,6 +39,24 @@ namespace EncosyTower.Types
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => s_cached;
+        }
+
+        /// <summary>
+        /// Gets the name of <typeparamref name="T"/>.
+        /// </summary>
+        public static string Name
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => s_cached.Name;
+        }
+
+        /// <summary>
+        /// Gets the friendly name of <typeparamref name="T"/> which properly includes generic parameters.
+        /// </summary>
+        public static string FriendlyName
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => s_friendlyName ??= s_cached.GetFriendlyName();
         }
 
         /// <summary>
