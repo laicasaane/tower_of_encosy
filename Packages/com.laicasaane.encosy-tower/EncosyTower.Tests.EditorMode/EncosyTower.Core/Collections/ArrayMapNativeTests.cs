@@ -4,12 +4,12 @@ using Unity.Collections;
 
 namespace EncosyTower.Tests.EncosyTower.Collections
 {
-    public class NativeArrayMapTests
+    public class ArrayMapNativeTests
     {
         [Test]
-        public void NativeArrayMap_Tests()
+        public void ArrayMapNative_Tests()
         {
-            var map = new NativeArrayMap<int, float>(12, Allocator.Temp);
+            var map = new ArrayMapNative<int, float>(12, Allocator.Temp);
 
             map.Add(1, 5f);
             map.Add(2, 6f);

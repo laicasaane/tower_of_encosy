@@ -44,7 +44,7 @@ namespace EncosyTower.Tests.EncosyTower.Collections
             var buffer = new BufferProvider<int>();
             var list = new StatelessList<BufferProvider<int>, int>(buffer);
 
-            Assert.AreEqual(true, list.IsValid);
+            Assert.AreEqual(true, list.IsCreated);
             Assert.AreEqual(4, list.Capacity);
             Assert.AreEqual(0, list.Count);
 

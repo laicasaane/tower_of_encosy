@@ -7,11 +7,33 @@ namespace EncosyTower.Tests.EncosyTower.Collections
     public class ListFastTests
     {
         [Test]
+        public void ListFast_Default_Tests()
+        {
+            ListFast<int> list = default;
+            Assert.AreEqual(false, list != null);
+            Assert.AreEqual(false, list.List != null);
+
+            ListFast<int>.ReadOnly readList = default;
+            Assert.AreEqual(false, readList.IsCreated);
+        }
+
+        [Test]
+        public void ListFast_Default_Constructor_Tests()
+        {
+            var list = new ListFast<int>();
+            Assert.AreEqual(true, list != null);
+            Assert.AreEqual(true, list.List != null);
+
+            var readList = new ListFast<int>.ReadOnly();
+            Assert.AreEqual(true, readList.IsCreated);
+        }
+
+        [Test]
         public void ListFast_Tests()
         {
             var list = new ListFast<int>(new List<int>(4));
 
-            Assert.AreEqual(true, list.IsCreated);
+            Assert.AreEqual(true, list.List != null);
             Assert.AreEqual(4, list.Capacity);
             Assert.AreEqual(0, list.Count);
 
