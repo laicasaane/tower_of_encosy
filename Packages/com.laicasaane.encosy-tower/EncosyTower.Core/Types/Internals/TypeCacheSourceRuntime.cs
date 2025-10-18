@@ -48,7 +48,7 @@ namespace EncosyTower.Types.Internals
             _cache = cache;
         }
 
-        public bool IsValid
+        public bool IsCreated
         {
             get => _cache != null;
         }
