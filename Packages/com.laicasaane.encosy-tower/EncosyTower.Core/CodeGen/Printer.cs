@@ -4,29 +4,37 @@ using System.Text;
 
 namespace EncosyTower.CodeGen
 {
-    public interface IPrintable
-    {
-        void Print(Printer printer);
-    }
-
     public struct Printer
     {
-        public const string NEWLINE = "\n";
+        public const char NEWLINE = '\n';
         public const string INDENT = "    ";
 
         private readonly StringBuilder _builder;
 
         private int _currentIndentIndex;
 
+        public Printer()
+        {
+            _builder = new StringBuilder();
+            _currentIndentIndex = 0;
+        }
+
         public Printer(int indentCount)
         {
             _builder = new StringBuilder();
             _currentIndentIndex = indentCount;
         }
+
         public Printer(int indentCount, int capacity)
         {
             _builder = new StringBuilder(capacity);
             _currentIndentIndex = indentCount;
+        }
+
+        public Printer(StringBuilder builder)
+        {
+            _builder = builder;
+            _currentIndentIndex = 0;
         }
 
         public Printer(StringBuilder builder, int indentCount)
@@ -42,13 +50,6 @@ namespace EncosyTower.CodeGen
         public readonly bool IsCreated => _builder != null;
 
         public readonly int IndentDepth => _currentIndentIndex;
-
-        /// <summary>
-        /// Get a copy of this printer with the same setting but new output.
-        /// </summary>
-        /// <param name="printer"></param>
-        /// <returns></returns>
-        public static Printer NewCopy(Printer printer) => new(printer._currentIndentIndex);
 
         /// <summary>
         /// Allows to continue inline printing using a different printer
@@ -107,7 +108,7 @@ namespace EncosyTower.CodeGen
         /// The current output of the printer.
         /// </summary>
         public readonly string Result
-            => _builder.Replace("\r\n", $"{NEWLINE}").ToString();
+            => _builder.Replace('\r', NEWLINE).ToString();
 
         /// <summary>
         /// Clear the output of the printer and reset indent
@@ -133,16 +134,32 @@ namespace EncosyTower.CodeGen
         }
 
         /// <summary>
+        /// Print a character
+        /// </summary>
+        /// <param name="character"></param>
+        /// <returns></returns>
+        public readonly Printer Print(char character)
+        {
+            _builder.Append(character);
+            return this;
+        }
+
+        /// <summary>
         /// Print a string
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public readonly Printer Print(string text)
+        public readonly Printer Print(ReadOnlySpan<char> text)
         {
             _builder.Append(text);
             return this;
         }
 
+        /// <summary>
+        /// Print a string from another printer
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public readonly Printer Print(Printer text)
         {
             _builder.Append(text._builder);
@@ -162,12 +179,26 @@ namespace EncosyTower.CodeGen
         }
 
         /// <summary>
+        /// Print a character if condition is true
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="character"></param>
+        /// <returns></returns>
+        public readonly Printer Print(char character, bool condition)
+        {
+            if (condition)
+                Print(character);
+
+            return this;
+        }
+
+        /// <summary>
         /// Print a string if condition is true
         /// </summary>
         /// <param name="condition"></param>
         /// <param name="text"></param>
         /// <returns></returns>
-        public readonly Printer Print(string text, bool condition)
+        public readonly Printer Print(ReadOnlySpan<char> text, bool condition)
         {
             if (condition)
                 Print(text);
@@ -175,7 +206,27 @@ namespace EncosyTower.CodeGen
             return this;
         }
 
-        public readonly Printer PrintSelect(string trueText, string falseText, bool condition)
+        /// <summary>
+        /// Print a character
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="trueCharacter"></param>
+        /// <param name="falseCharacter"></param>
+        /// <returns></returns>
+        public readonly Printer PrintSelect(char trueCharacter, char falseCharacter, bool condition)
+        {
+            Print(condition ? trueCharacter : falseCharacter);
+            return this;
+        }
+
+        /// <summary>
+        /// Print a string
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="trueText"></param>
+        /// <param name="falseText"></param>
+        /// <returns></returns>
+        public readonly Printer PrintSelect(ReadOnlySpan<char> trueText, ReadOnlySpan<char> falseText, bool condition)
         {
             Print(condition ? trueText : falseText);
             return this;
@@ -213,14 +264,28 @@ namespace EncosyTower.CodeGen
         }
 
         /// <summary>
+        /// Print indent and a character
+        /// </summary>
+        /// <param name="character"></param>
+        /// <returns></returns>
+        public readonly Printer PrintBeginLine(char character)
+            => PrintBeginLine().Print(character);
+
+        /// <summary>
         /// Print indent and a string
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public readonly Printer PrintBeginLine(string text)
+        public readonly Printer PrintBeginLine(ReadOnlySpan<char> text)
             => PrintBeginLine().Print(text);
 
-        public readonly Printer PrintBeginLine(string text, bool condition)
+        /// <summary>
+        /// Print indent and a string if condition is true
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        public readonly Printer PrintBeginLine(ReadOnlySpan<char> text, bool condition)
         {
             if (condition)
                 PrintBeginLine(text);
@@ -228,7 +293,14 @@ namespace EncosyTower.CodeGen
             return this;
         }
 
-        public readonly Printer PrintBeginLineSelect(string trueText, string falseText, bool condition)
+        /// <summary>
+        /// Print indent and a string
+        /// </summary>
+        /// <param name="trueText"></param>
+        /// <param name="falseText"></param>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        public readonly Printer PrintBeginLineSelect(ReadOnlySpan<char> trueText, ReadOnlySpan<char> falseText, bool condition)
         {
             PrintBeginLine(condition ? trueText : falseText);
             return this;
@@ -243,11 +315,17 @@ namespace EncosyTower.CodeGen
         public readonly Printer PrintBeginLine(char character, int repeatCount)
             => PrintBeginLine().Print(character, repeatCount);
 
+        /// <summary>
+        /// Print indent and a string from another printer
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public readonly Printer PrintBeginLine(Printer text)
         {
             PrintBeginLine().Print(text);
             return this;
         }
+
         /// <summary>
         /// Print end-line
         /// </summary>
@@ -263,7 +341,7 @@ namespace EncosyTower.CodeGen
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public readonly Printer PrintEndLine(string text)
+        public readonly Printer PrintEndLine(ReadOnlySpan<char> text)
         {
             _builder.Append(text).Append(NEWLINE);
             return this;
@@ -281,6 +359,11 @@ namespace EncosyTower.CodeGen
             return this;
         }
 
+        /// <summary>
+        /// Print a string from another printer, and an end-line
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public readonly Printer PrintEndLine(Printer text)
         {
             _builder.Append(text._builder).Append(NEWLINE);
@@ -292,7 +375,7 @@ namespace EncosyTower.CodeGen
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public readonly Printer PrintLine(string text)
+        public readonly Printer PrintLine(ReadOnlySpan<char> text)
             => PrintBeginLine().PrintEndLine(text);
 
         /// <summary>
@@ -310,7 +393,7 @@ namespace EncosyTower.CodeGen
         /// <param name="condition"></param>
         /// <param name="text"></param>
         /// <returns></returns>
-        public readonly Printer PrintLine(string text, bool condition)
+        public readonly Printer PrintLine(ReadOnlySpan<char> text, bool condition)
         {
             if (condition)
                 PrintLine(text);
@@ -318,10 +401,22 @@ namespace EncosyTower.CodeGen
             return this;
         }
 
+        /// <summary>
+        /// Print indent, a string from another printer, and an end-line
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public readonly Printer PrintLine(Printer text)
             => PrintBeginLine().PrintEndLine(text);
 
-        public readonly Printer PrintLineSelect(string trueText, string falseText, bool condition)
+        /// <summary>
+        /// Print indent, a string, and an end-line
+        /// </summary>
+        /// <param name="trueText"></param>
+        /// <param name="falseText"></param>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        public readonly Printer PrintLineSelect(ReadOnlySpan<char> trueText, ReadOnlySpan<char> falseText, bool condition)
         {
             PrintLine(condition ? trueText : falseText);
             return this;
@@ -343,12 +438,12 @@ namespace EncosyTower.CodeGen
         }
 
         /// <summary>
-        /// Print a string and an end-line
+        /// Print a string and an end-line if the condition is true
         /// </summary>
         /// <param name="text"></param>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public readonly Printer PrintEndLine(string text, bool condition)
+        public readonly Printer PrintEndLine(ReadOnlySpan<char> text, bool condition)
         {
             if (condition)
                 PrintEndLine(text);
@@ -356,7 +451,14 @@ namespace EncosyTower.CodeGen
             return this;
         }
 
-        public readonly Printer PrintEndLineSelect(string trueText, string falseText, bool condition)
+        /// <summary>
+        /// Print a string, and an end-line
+        /// </summary>
+        /// <param name="trueText"></param>
+        /// <param name="falseText"></param>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        public readonly Printer PrintEndLineSelect(ReadOnlySpan<char> trueText, ReadOnlySpan<char> falseText, bool condition)
         {
             PrintEndLine(condition ? trueText : falseText);
             return this;
@@ -367,7 +469,8 @@ namespace EncosyTower.CodeGen
         /// </summary>
         /// <param name="separator"></param>
         /// <returns></returns>
-        public readonly ListPrinter AsListPrinter(string separator) => new(this, separator);
+        public readonly ListPrinter AsListPrinter(string separator)
+            => new(this, separator);
 
         /// <summary>
         /// Print the scope open string and return a new printer with deeper indent.
@@ -415,20 +518,6 @@ namespace EncosyTower.CodeGen
             DecreasedIndent();
             PrintLine(scopeClose);
             return this;
-        }
-
-        /// <summary>
-        /// Print a IPrintable to a string
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="printable"></param>
-        /// <returns></returns>
-        public static string PrintToString<T>(T printable)
-            where T : struct, IPrintable
-        {
-            var printer = Printer.Default;
-            printable.Print(printer);
-            return printer._builder.ToString();
         }
 
         /// <summary>
