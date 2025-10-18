@@ -16,7 +16,7 @@ namespace EncosyTower.Common
     [RequiresPackage(PackageRegistry.Unity, "com.unity.textmeshpro", "3.2.0-pre.10")]
 #endif
 
-    [RequiresPackage(PackageRegistry.OpenUpm, "com.annulusgames.unity-codegen")]
+    [RequiresPackage(PackageRegistry.OpenUpm, "com.annulusgames.unity-codegen", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.bgtools.playerprefseditor", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.browar.editor-toolbox", isOptional: true)]
 
