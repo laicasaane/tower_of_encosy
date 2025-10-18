@@ -17,6 +17,13 @@ using Unity.Collections;
 
 namespace EncosyTower.Collections
 {
+    partial class SharedArrayMap<TKey, TValue, TValueNative>
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public SharedArrayMapNative<TKey, TValue, TValueNative> AsNative()
+            => new(this);
+    }
+
     /// <summary>
     /// This map has been created for just one reason: I needed a map that would have let me iterate
     /// over the values as an array, directly, without generating one or using an iterator.

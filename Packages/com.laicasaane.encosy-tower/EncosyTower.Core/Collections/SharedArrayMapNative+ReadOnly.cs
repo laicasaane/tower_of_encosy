@@ -76,6 +76,10 @@ namespace EncosyTower.Collections
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator ReadOnly(SharedArrayMapNative<TKey, TValue, TValueNative> map)
+                => map.AsReadOnly();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly SharedArrayMapNativeReadOnlyKeyValueEnumerator<TKey, TValue, TValueNative> GetEnumerator()
                 => new(this);
 

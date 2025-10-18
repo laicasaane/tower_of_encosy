@@ -9,6 +9,13 @@ using Unity.Collections;
 
 namespace EncosyTower.Collections
 {
+    partial class SharedList<T, TNative>
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public SharedListNative<T, TNative> AsNative()
+            => new(this);
+    }
+
     public readonly partial struct SharedListNative<T, TNative>
         : IReadOnlyList<TNative>
         , IAsSpan<TNative>, IAsReadOnlySpan<TNative>, IAsNativeSlice<TNative>
