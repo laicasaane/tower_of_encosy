@@ -98,17 +98,19 @@ namespace EncosyTower.Editor.AssemblyDefs
             EditorUtility.DisplayProgressBar(TITLE, INFO, 0f);
 
             var packages = GetPackageDefs(false);
+            var projectRoot = GetProjectRootPath();
+            var xmlDocumentationFolderPath = projectRoot.GetFolderAbsolutePath(XML_DOCUMENTATION_FOLDER);
 
             if (packages.Length < 1)
             {
                 EditorUtility.ClearProgressBar();
+                EditorUtility.RequestScriptReload();
+
+                Log(xmlDocumentationFolderPath);
                 return;
             }
 
             EditorUtility.DisplayProgressBar(TITLE, INFO, 20f);
-
-            var projectRoot = GetProjectRootPath();
-            var xmlDocumentationFolderPath = projectRoot.GetFolderAbsolutePath(XML_DOCUMENTATION_FOLDER);
 
             if (Directory.Exists(xmlDocumentationFolderPath) == false)
             {
@@ -160,12 +162,17 @@ namespace EncosyTower.Editor.AssemblyDefs
 
             AssetDatabase.Refresh();
 
-            if (TryGetConfigAutoLog(out var autoLog) && autoLog)
+            Log(xmlDocumentationFolderPath);
+
+            static void Log(string xmlDocumentationFolderPath)
             {
-                StaticDevLogger.LogInfo(
-                    $"XML documentation for UPM packages has been generated into " +
-                    $"<a href=\"file:///{xmlDocumentationFolderPath}\">{XML_DOCUMENTATION_FOLDER}</a>"
-                );
+                if (TryGetConfigAutoLog(out var autoLog) && autoLog)
+                {
+                    StaticDevLogger.LogInfo(
+                        $"XML documentation for UPM packages has been generated into " +
+                        $"<a href=\"file:///{xmlDocumentationFolderPath}\">{XML_DOCUMENTATION_FOLDER}</a>"
+                    );
+                }
             }
         }
 
