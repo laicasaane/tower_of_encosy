@@ -2,12 +2,31 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using EncosyTower.Debugging;
 using Unity.Collections;
 
 namespace EncosyTower.Collections
 {
     public static class EncosyNativeHashMapExtensions
     {
+        public static void IncreaseCapacityBy<TKey, TValue>(this NativeHashMap<TKey, TValue> map, int amount)
+            where TKey : unmanaged, IEquatable<TKey>
+            where TValue : unmanaged
+        {
+            Checks.IsTrue(amount > 0, "amount must be greater than 0");
+            IncreaseCapacityTo(map, map.Capacity + amount);
+        }
+
+        public static void IncreaseCapacityTo<TKey, TValue>(this NativeHashMap<TKey, TValue> map, int newCapacity)
+            where TKey : unmanaged, IEquatable<TKey>
+            where TValue : unmanaged
+        {
+            if (newCapacity > map.Capacity)
+            {
+                map.Capacity = newCapacity;
+            }
+        }
+
         public static ref NativeHashMap<TKey, TValue> NewOrClear<TKey, TValue>(
               ref this NativeHashMap<TKey, TValue> map
             , int capacity

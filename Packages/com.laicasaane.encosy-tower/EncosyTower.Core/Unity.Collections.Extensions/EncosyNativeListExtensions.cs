@@ -1,12 +1,29 @@
 #if UNITY_COLLECTIONS
 
 using System.Runtime.CompilerServices;
+using EncosyTower.Debugging;
 using Unity.Collections;
 
 namespace EncosyTower.Collections
 {
     public static class EncosyNativeListExtensions
     {
+        public static void IncreaseCapacityBy<T>(this NativeList<T> list, int amount)
+            where T : unmanaged
+        {
+            Checks.IsTrue(amount > 0, "amount must be greater than 0");
+            IncreaseCapacityTo(list, list.Capacity + amount);
+        }
+
+        public static void IncreaseCapacityTo<T>(this NativeList<T> list, int newCapacity)
+            where T : unmanaged
+        {
+            if (newCapacity > list.Capacity)
+            {
+                list.SetCapacity(newCapacity);
+            }
+        }
+
         public static void NewOrClear<T>(
               ref this NativeList<T> list
             , int capacity
