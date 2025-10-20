@@ -59,9 +59,9 @@ namespace EncosyTower.Collections
         where T : unmanaged
         where TNative : unmanaged
     {
-        internal readonly SharedArray<T, TNative> _buffer;
-        internal readonly SharedReference<int> _count;
-        internal readonly SharedReference<int> _version;
+        internal SharedArray<T, TNative> _buffer;
+        internal SharedReference<int> _count;
+        internal SharedReference<int> _version;
 
         public SharedList()
         {
@@ -126,6 +126,11 @@ namespace EncosyTower.Collections
             _version = new(0);
         }
 
+        ~SharedList()
+        {
+            Dispose();
+        }
+
         public int Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -160,9 +165,18 @@ namespace EncosyTower.Collections
 
         public void Dispose()
         {
+            if (_buffer == null)
+            {
+                return;
+            }
+
             _buffer.Dispose();
             _count.Dispose();
             _version.Dispose();
+
+            _buffer = null;
+            _count = null;
+            _version = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

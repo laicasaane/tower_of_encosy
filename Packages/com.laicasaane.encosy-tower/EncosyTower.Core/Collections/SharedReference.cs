@@ -65,7 +65,6 @@ namespace EncosyTower.Collections
 
         ~SharedReference()
         {
-            _version++;
             Dispose();
         }
 

@@ -62,13 +62,13 @@ namespace EncosyTower.Collections
         where TValue : unmanaged
         where TValueNative : unmanaged
     {
-        internal readonly SharedArray<ArrayMapNode<TKey>> _valuesInfo;
-        internal readonly SharedArray<TValue, TValueNative> _values;
-        internal readonly SharedArray<int> _buckets;
+        internal SharedArray<ArrayMapNode<TKey>> _valuesInfo;
+        internal SharedArray<TValue, TValueNative> _values;
+        internal SharedArray<int> _buckets;
 
-        internal readonly SharedReference<int> _freeValueCellIndex;
-        internal readonly SharedReference<uint> _collisions;
-        internal readonly SharedReference<ulong> _fastModBucketsMultiplier;
+        internal SharedReference<int> _freeValueCellIndex;
+        internal SharedReference<uint> _collisions;
+        internal SharedReference<ulong> _fastModBucketsMultiplier;
 
         public SharedArrayMap() : this(0) { }
 
@@ -134,6 +134,11 @@ namespace EncosyTower.Collections
             _fastModBucketsMultiplier.ValueRW = source._fastModBucketsMultiplier[0];
         }
 
+        ~SharedArrayMap()
+        {
+            Dispose();
+        }
+
         public int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -183,12 +188,26 @@ namespace EncosyTower.Collections
 
         public void Dispose()
         {
+            if (_valuesInfo == null)
+            {
+                return;
+            }
+
             _valuesInfo.Dispose();
             _values.Dispose();
             _buckets.Dispose();
+
             _freeValueCellIndex.Dispose();
             _collisions.Dispose();
             _fastModBucketsMultiplier.Dispose();
+
+            _valuesInfo = null;
+            _values = null;
+            _buckets = null;
+
+            _freeValueCellIndex = null;
+            _collisions = null;
+            _fastModBucketsMultiplier = null;
         }
 
         /// <remarks>

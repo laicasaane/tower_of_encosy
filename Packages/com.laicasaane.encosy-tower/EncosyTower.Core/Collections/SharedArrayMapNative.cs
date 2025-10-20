@@ -36,8 +36,7 @@ namespace EncosyTower.Collections
     /// SharedArrayMapNative is not thread safe. A thread safe version should take care of possible setting of
     /// value with shared hash hence bucket list index.
     /// </remarks>
-    public readonly partial struct SharedArrayMapNative<TKey, TValue, TValueNative>
-        : IDisposable , IClearable
+    public readonly partial struct SharedArrayMapNative<TKey, TValue, TValueNative> : IClearable
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
         where TValueNative : unmanaged
@@ -106,16 +105,6 @@ namespace EncosyTower.Collections
 
                 _values.AsSpan()[index] = value;
             }
-        }
-
-        public void Dispose()
-        {
-            _valuesInfo.Dispose();
-            _values.Dispose();
-            _buckets.Dispose();
-            _freeValueCellIndex.Dispose();
-            _collisions.Dispose();
-            _fastModBucketsMultiplier.Dispose();
         }
 
         /// <remarks>

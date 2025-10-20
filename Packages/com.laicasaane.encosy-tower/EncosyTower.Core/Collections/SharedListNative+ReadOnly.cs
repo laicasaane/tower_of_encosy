@@ -11,11 +11,7 @@ namespace EncosyTower.Collections
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnly AsReadOnly()
-            => new(
-                  _buffer.AsReadOnly()
-                , _count.AsReadOnly()
-                , _version.AsReadOnly()
-            );
+            => new(this);
 
         public readonly struct ReadOnly : IAsReadOnlySpan<TNative>, IReadOnlyList<TNative>
         {
@@ -24,15 +20,11 @@ namespace EncosyTower.Collections
             internal readonly NativeArray<int>.ReadOnly _version;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ReadOnly(
-                  NativeArray<TNative>.ReadOnly buffer
-                , NativeArray<int>.ReadOnly count
-                , NativeArray<int>.ReadOnly version
-            )
+            public ReadOnly(SharedListNative<T, TNative> list)
             {
-                _buffer = buffer;
-                _count = count;
-                _version = version;
+                _buffer = list._buffer.AsReadOnly();
+                _count = list._count.AsReadOnly();
+                _version = list._version.AsReadOnly();
             }
 
             public bool IsCreated
