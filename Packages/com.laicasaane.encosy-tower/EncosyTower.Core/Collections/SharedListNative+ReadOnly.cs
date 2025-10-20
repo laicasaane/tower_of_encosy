@@ -7,20 +7,20 @@ using Unity.Collections;
 
 namespace EncosyTower.Collections
 {
-    partial struct SharedListNative<T, TNative>
+    partial struct SharedListNative<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnly AsReadOnly()
             => new(this);
 
-        public readonly struct ReadOnly : IAsReadOnlySpan<TNative>, IReadOnlyList<TNative>
+        public readonly struct ReadOnly : IAsReadOnlySpan<T>, IReadOnlyList<T>
         {
-            internal readonly NativeArray<TNative>.ReadOnly _buffer;
+            internal readonly NativeArray<T>.ReadOnly _buffer;
             internal readonly NativeArray<int>.ReadOnly _count;
             internal readonly NativeArray<int>.ReadOnly _version;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ReadOnly(SharedListNative<T, TNative> list)
+            public ReadOnly(SharedListNative<T> list)
             {
                 _buffer = list._buffer.AsReadOnly();
                 _count = list._count.AsReadOnly();
@@ -57,7 +57,7 @@ namespace EncosyTower.Collections
             public Enumerator GetEnumerator()
                 => new(this);
 
-            public TNative this[int index]
+            public T this[int index]
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get
@@ -68,42 +68,42 @@ namespace EncosyTower.Collections
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator ReadOnly(in SharedListNative<T, TNative> list)
+            public static implicit operator ReadOnly(in SharedListNative<T> list)
                 => list.AsReadOnly();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ReadOnlySpan<TNative> AsReadOnlySpan()
+            public ReadOnlySpan<T> AsReadOnlySpan()
                 => _buffer.AsReadOnlySpan()[..Count];
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(TNative[] array)
+            public void CopyTo(T[] array)
                 => CopyTo(array, 0);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(TNative[] array, int arrayIndex)
+            public void CopyTo(T[] array, int arrayIndex)
                 => CopyTo(0, array, arrayIndex, Count);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(int index, TNative[] array, int arrayIndex, int length)
+            public void CopyTo(int index, T[] array, int arrayIndex, int length)
                 => AsReadOnlySpan().Slice(index, length).CopyTo(array.AsSpan(arrayIndex, length));
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(Span<TNative> array)
+            public void CopyTo(Span<T> array)
                 => CopyTo(0, array);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(int index, Span<TNative> array)
+            public void CopyTo(int index, Span<T> array)
                 => CopyTo(index, array, array.Length);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(int index, Span<TNative> array, int length)
+            public void CopyTo(int index, Span<T> array, int length)
                 => AsReadOnlySpan().Slice(index, length).CopyTo(array[..length]);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public TNative[] ToArray()
+            public T[] ToArray()
                 => AsReadOnlySpan().ToArray();
 
-            IEnumerator<TNative> IEnumerable<TNative>.GetEnumerator()
+            IEnumerator<T> IEnumerable<T>.GetEnumerator()
                 => GetEnumerator();
 
             IEnumerator IEnumerable.GetEnumerator()

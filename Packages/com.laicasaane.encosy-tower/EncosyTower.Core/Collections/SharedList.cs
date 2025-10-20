@@ -163,6 +163,10 @@ namespace EncosyTower.Collections
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator SharedListNative<TNative>(SharedList<T, TNative> list)
+            => list.AsNative();
+
         public void Dispose()
         {
             if (_buffer == null)
@@ -519,10 +523,6 @@ namespace EncosyTower.Collections
 
             _count.ValueRW = newCount;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SharedListNative<T, TNative> AsListNative()
-            => new(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SharedList<T, TNative> Prefill(int amount)

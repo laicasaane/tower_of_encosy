@@ -346,9 +346,9 @@ namespace EncosyTower.StringIds
 
         public readonly partial struct ReadOnly
         {
-            private readonly SharedArrayMapNative<StringHash, Id, Id>.ReadOnly _map;
-            private readonly SharedListNative<UnmanagedString, UnmanagedString>.ReadOnly _unmanagedStrings;
-            private readonly SharedListNative<Option<StringHash>, Option<StringHash>>.ReadOnly _hashes;
+            private readonly SharedArrayMapNative<StringHash, Id>.ReadOnly _map;
+            private readonly SharedListNative<UnmanagedString>.ReadOnly _unmanagedStrings;
+            private readonly SharedListNative<Option<StringHash>>.ReadOnly _hashes;
             private readonly NativeArray<int>.ReadOnly _count;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

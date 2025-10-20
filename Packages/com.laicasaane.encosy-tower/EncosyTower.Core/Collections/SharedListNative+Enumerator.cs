@@ -5,14 +5,14 @@ using EncosyTower.Debugging;
 
 namespace EncosyTower.Collections
 {
-    partial struct SharedListNative<T, TNative>
+    partial struct SharedListNative<T>
     {
-        public struct Enumerator : IEnumerator<TNative>, IEnumerator
+        public struct Enumerator : IEnumerator<T>, IEnumerator
         {
             private readonly ReadOnly _list;
             private int _index;
             private readonly int _version;
-            private TNative _current;
+            private T _current;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Enumerator(ReadOnly list)
@@ -49,7 +49,7 @@ namespace EncosyTower.Collections
                 return false;
             }
 
-            public readonly TNative Current
+            public readonly T Current
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _current;

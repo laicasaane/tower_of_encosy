@@ -10,9 +10,8 @@ namespace EncosyTower.Collections.Extensions
 {
     public static class SharedListNativeExtensions
     {
-        public static bool Contains<T, TNative>([NotNull] this in SharedListNative<T, TNative> self, TNative item)
-            where T : unmanaged
-            where TNative : unmanaged, IEquatable<TNative>
+        public static bool Contains<T>([NotNull] this in SharedListNative<T> self, T item)
+            where T : unmanaged, IEquatable<T>
         {
             var items = self.AsReadOnlySpan();
             var length = items.Length;
@@ -28,9 +27,8 @@ namespace EncosyTower.Collections.Extensions
             return false;
         }
 
-        public static bool Contains<T, TNative>([NotNull] this in SharedListNative<T, TNative> self, in TNative item)
-            where T : unmanaged
-            where TNative : unmanaged, IEquatable<TNative>
+        public static bool Contains<T>([NotNull] this in SharedListNative<T> self, in T item)
+            where T : unmanaged, IEquatable<T>
         {
             var items = self.AsReadOnlySpan();
             var length = items.Length;
@@ -46,9 +44,8 @@ namespace EncosyTower.Collections.Extensions
             return false;
         }
 
-        public static bool Remove<T, TNative>([NotNull] this in SharedListNative<T, TNative> self, TNative item)
-            where T : unmanaged
-            where TNative : unmanaged, IEquatable<TNative>
+        public static bool Remove<T>([NotNull] this in SharedListNative<T> self, T item)
+            where T : unmanaged, IEquatable<T>
         {
             self.VersionRW++;
 
@@ -65,9 +62,8 @@ namespace EncosyTower.Collections.Extensions
             return true;
         }
 
-        public static bool Remove<T, TNative>([NotNull] this in SharedListNative<T, TNative> self, in TNative item)
-            where T : unmanaged
-            where TNative : unmanaged, IEquatable<TNative>
+        public static bool Remove<T>([NotNull] this in SharedListNative<T> self, in T item)
+            where T : unmanaged, IEquatable<T>
         {
             self.VersionRW++;
 
@@ -85,16 +81,14 @@ namespace EncosyTower.Collections.Extensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int BinarySearch<T, TNative, TComparer>([NotNull] this in SharedListNative<T, TNative> self, TNative item, TComparer comparer)
+        public static int BinarySearch<T, TComparer>([NotNull] this in SharedListNative<T> self, T item, TComparer comparer)
             where T : unmanaged
-            where TNative : unmanaged
-            where TComparer : unmanaged, IComparer<TNative>
+            where TComparer : unmanaged, IComparer<T>
             => BinarySearch(self, 0, self.Count, item, comparer);
 
-        public static int BinarySearch<T, TNative, TComparer>([NotNull] this in SharedListNative<T, TNative> self, int index, int count, TNative item, TComparer comparer)
+        public static int BinarySearch<T, TComparer>([NotNull] this in SharedListNative<T> self, int index, int count, T item, TComparer comparer)
             where T : unmanaged
-            where TNative : unmanaged
-            where TComparer : unmanaged, IComparer<TNative>
+            where TComparer : unmanaged, IComparer<T>
         {
             Checks.IsTrue(index >= 0, "index is less than 0");
             Checks.IsTrue(count >= 0, "count is less than 0");
@@ -104,16 +98,14 @@ namespace EncosyTower.Collections.Extensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int BinarySearch<T, TNative, TComparer>([NotNull] this in SharedListNative<T, TNative> self, in TNative item, TComparer comparer)
+        public static int BinarySearch<T, TComparer>([NotNull] this in SharedListNative<T> self, in T item, TComparer comparer)
             where T : unmanaged
-            where TNative : unmanaged
-            where TComparer : unmanaged, IComparer<TNative>
+            where TComparer : unmanaged, IComparer<T>
             => BinarySearch(self, 0, self.Count, in item, comparer);
 
-        public static int BinarySearch<T, TNative, TComparer>([NotNull] this in SharedListNative<T, TNative> self, int index, int count, in TNative item, TComparer comparer)
+        public static int BinarySearch<T, TComparer>([NotNull] this in SharedListNative<T> self, int index, int count, in T item, TComparer comparer)
             where T : unmanaged
-            where TNative : unmanaged
-            where TComparer : unmanaged, IComparer<TNative>
+            where TComparer : unmanaged, IComparer<T>
         {
             Checks.IsTrue(index >= 0, "index is less than 0");
             Checks.IsTrue(count >= 0, "count is less than 0");
@@ -123,21 +115,18 @@ namespace EncosyTower.Collections.Extensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T, TNative>([NotNull] this in SharedListNative<T, TNative> self, TNative item)
-            where T : unmanaged
-            where TNative : unmanaged, IEquatable<TNative>
+        public static int IndexOf<T>([NotNull] this in SharedListNative<T> self, T item)
+            where T : unmanaged, IEquatable<T>
             => IndexOf(self, item, 0);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T, TNative>([NotNull] this in SharedListNative<T, TNative> self, TNative item, int index)
-            where T : unmanaged
-            where TNative : unmanaged, IEquatable<TNative>
+        public static int IndexOf<T>([NotNull] this in SharedListNative<T> self, T item, int index)
+            where T : unmanaged, IEquatable<T>
             => IndexOf(self, item, index, self.Count);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T, TNative>([NotNull] this in SharedListNative<T, TNative> self, TNative item, int index, int count)
-            where T : unmanaged
-            where TNative : unmanaged, IEquatable<TNative>
+        public static int IndexOf<T>([NotNull] this in SharedListNative<T> self, T item, int index, int count)
+            where T : unmanaged, IEquatable<T>
         {
             Checks.IsTrue(index >= 0, "index is less than 0");
             Checks.IsTrue(count >= 0, "count is less than 0");
@@ -148,21 +137,18 @@ namespace EncosyTower.Collections.Extensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T, TNative>([NotNull] this in SharedListNative<T, TNative> self, in TNative item)
-            where T : unmanaged
-            where TNative : unmanaged, IEquatable<TNative>
+        public static int IndexOf<T>([NotNull] this in SharedListNative<T> self, in T item)
+            where T : unmanaged, IEquatable<T>
             => IndexOf(self, in item, 0);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T, TNative>([NotNull] this in SharedListNative<T, TNative> self, in TNative item, int index)
-            where T : unmanaged
-            where TNative : unmanaged, IEquatable<TNative>
+        public static int IndexOf<T>([NotNull] this in SharedListNative<T> self, in T item, int index)
+            where T : unmanaged, IEquatable<T>
             => IndexOf(self, in item, index, self.Count);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T, TNative>([NotNull] this in SharedListNative<T, TNative> self, in TNative item, int index, int count)
-            where T : unmanaged
-            where TNative : unmanaged, IEquatable<TNative>
+        public static int IndexOf<T>([NotNull] this in SharedListNative<T> self, in T item, int index, int count)
+            where T : unmanaged, IEquatable<T>
         {
             Checks.IsTrue(index >= 0, "index is less than 0");
             Checks.IsTrue(count >= 0, "count is less than 0");
@@ -173,31 +159,27 @@ namespace EncosyTower.Collections.Extensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T, TNative, TComparer>([NotNull] this in SharedListNative<T, TNative> self, TNative item, TComparer comparer)
+        public static int IndexOf<T, TComparer>([NotNull] this in SharedListNative<T> self, T item, TComparer comparer)
             where T : unmanaged
-            where TNative : unmanaged
-            where TComparer : unmanaged, IComparer<TNative>
+            where TComparer : unmanaged, IComparer<T>
             => MemoryExtensions.BinarySearch(self.AsReadOnlySpan(), item, comparer);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T, TNative, TComparer>([NotNull] this in SharedListNative<T, TNative> self, in TNative item, TComparer comparer)
+        public static int IndexOf<T, TComparer>([NotNull] this in SharedListNative<T> self, in T item, TComparer comparer)
             where T : unmanaged
-            where TNative : unmanaged
-            where TComparer : unmanaged, IComparer<TNative>
+            where TComparer : unmanaged, IComparer<T>
             => MemoryExtensions.BinarySearch(self.AsReadOnlySpan(), item, comparer);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort<T, TNative, TComparer>([NotNull] this in SharedListNative<T, TNative> self, TComparer comparer)
+        public static void Sort<T, TComparer>([NotNull] this in SharedListNative<T> self, TComparer comparer)
             where T : unmanaged
-            where TNative : unmanaged
-            where TComparer : unmanaged, IComparer<TNative>
+            where TComparer : unmanaged, IComparer<T>
             => Sort(self, 0, self.Count, comparer);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort<T, TNative, TComparer>([NotNull] this in SharedListNative<T, TNative> self, int index, int count, TComparer comparer)
+        public static void Sort<T, TComparer>([NotNull] this in SharedListNative<T> self, int index, int count, TComparer comparer)
             where T : unmanaged
-            where TNative : unmanaged
-            where TComparer : unmanaged, IComparer<TNative>
+            where TComparer : unmanaged, IComparer<T>
         {
             Checks.IsTrue(index >= 0, "'index' must be non-negative number");
             Checks.IsTrue(count >= 0, "'count' must be non-negative number");

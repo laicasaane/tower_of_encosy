@@ -13,7 +13,7 @@ using Unity.Collections;
 
 namespace EncosyTower.Collections
 {
-    partial struct SharedArrayMapNative<TKey, TValue, TValueNative>
+    partial struct SharedArrayMapNative<TKey, TValue>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnly AsReadOnly()
@@ -22,14 +22,14 @@ namespace EncosyTower.Collections
         public readonly struct ReadOnly
         {
             internal readonly NativeArray<ArrayMapNode<TKey>>.ReadOnly _valuesInfo;
-            internal readonly NativeArray<TValueNative>.ReadOnly _values;
+            internal readonly NativeArray<TValue>.ReadOnly _values;
             internal readonly NativeArray<int>.ReadOnly _buckets;
 
             internal readonly NativeArray<int>.ReadOnly _freeValueCellIndex;
             internal readonly NativeArray<uint>.ReadOnly _collisions;
             internal readonly NativeArray<ulong>.ReadOnly _fastModBucketsMultiplier;
 
-            public ReadOnly(in SharedArrayMapNative<TKey, TValue, TValueNative> map)
+            public ReadOnly(in SharedArrayMapNative<TKey, TValue> map)
             {
                 _valuesInfo = map._valuesInfo.AsReadOnly();
                 _values = map._values.AsReadOnly();
@@ -63,24 +63,24 @@ namespace EncosyTower.Collections
                 get => new(this);
             }
 
-            public readonly ReadOnlySpan<TValueNative> Values
+            public readonly ReadOnlySpan<TValue> Values
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _values.AsReadOnlySpan()[.._freeValueCellIndex[0]];
             }
 
-            public TValueNative this[TKey key]
+            public TValue this[TKey key]
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _values[GetIndex(key)];
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator ReadOnly(SharedArrayMapNative<TKey, TValue, TValueNative> map)
+            public static implicit operator ReadOnly(SharedArrayMapNative<TKey, TValue> map)
                 => map.AsReadOnly();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly SharedArrayMapNativeReadOnlyKeyValueEnumerator<TKey, TValue, TValueNative> GetEnumerator()
+            public readonly SharedArrayMapNativeReadOnlyKeyValueEnumerator<TKey, TValue> GetEnumerator()
                 => new(this);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -90,7 +90,7 @@ namespace EncosyTower.Collections
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly bool TryGetValue(TKey key, out TValueNative result)
+            public readonly bool TryGetValue(TKey key, out TValue result)
             {
                 if (TryFindIndex(key, out var findIndex))
                 {
@@ -249,13 +249,12 @@ namespace EncosyTower.Collections
         }
     }
 
-    public struct SharedArrayMapNativeReadOnlyKeyValueEnumerator<TKey, TValue, TValueNative>
-        : IEnumerator<SharedArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue, TValueNative>>
+    public struct SharedArrayMapNativeReadOnlyKeyValueEnumerator<TKey, TValue>
+        : IEnumerator<SharedArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue>>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
-        where TValueNative : unmanaged
     {
-        private readonly SharedArrayMapNative<TKey, TValue, TValueNative>.ReadOnly _map;
+        private readonly SharedArrayMapNative<TKey, TValue>.ReadOnly _map;
 
 #if __ENCOSY_VALIDATION__
         internal int _startCount;
@@ -264,7 +263,7 @@ namespace EncosyTower.Collections
         private int _count;
         private int _index;
 
-        public SharedArrayMapNativeReadOnlyKeyValueEnumerator(in SharedArrayMapNative<TKey, TValue, TValueNative>.ReadOnly map) : this()
+        public SharedArrayMapNativeReadOnlyKeyValueEnumerator(in SharedArrayMapNative<TKey, TValue>.ReadOnly map) : this()
         {
             _map = map;
             _index = -1;
@@ -305,7 +304,7 @@ namespace EncosyTower.Collections
             return true;
         }
 
-        public readonly SharedArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue, TValueNative> Current
+        public readonly SharedArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(_map._valuesInfo.AsReadOnlySpan()[_index].key, _map._values, _index);
@@ -352,17 +351,16 @@ namespace EncosyTower.Collections
         public readonly void Dispose() { }
     }
 
-    public readonly struct SharedArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue, TValueNative>
+    public readonly struct SharedArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
-        where TValueNative : unmanaged
     {
-        private readonly NativeArray<TValueNative>.ReadOnly _mapValues;
+        private readonly NativeArray<TValue>.ReadOnly _mapValues;
         private readonly TKey _key;
         private readonly int _index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SharedArrayMapNativeReadOnlyKeyValuePairFast(in TKey key, NativeArray<TValueNative>.ReadOnly mapValues, int index)
+        public SharedArrayMapNativeReadOnlyKeyValuePairFast(in TKey key, NativeArray<TValue>.ReadOnly mapValues, int index)
         {
             _mapValues = mapValues;
             _index = index;
@@ -381,14 +379,14 @@ namespace EncosyTower.Collections
             get => _key;
         }
 
-        public readonly ref readonly TValueNative Value
+        public readonly ref readonly TValue Value
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => ref _mapValues.AsReadOnlySpan()[_index];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deconstruct(out TKey key, out TValueNative value)
+        public void Deconstruct(out TKey key, out TValue value)
         {
             key = Key;
             value = Value;

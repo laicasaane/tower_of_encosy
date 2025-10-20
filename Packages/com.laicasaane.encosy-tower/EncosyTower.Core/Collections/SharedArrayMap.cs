@@ -53,6 +53,12 @@ namespace EncosyTower.Collections
     /// SharedArrayMap is not thread safe. A thread safe version should take care of possible setting of
     /// value with shared hash hence bucket list index.
     /// </remarks>
+    /// <typeparam name="TValue">
+    /// The element type in the managed representation.
+    /// </typeparam>
+    /// <typeparam name="TValueNative">
+    /// The element type in the SharedArrayMapNative representation. Must be the same size as <typeparamref name="TValue"/>.
+    /// </typeparam>
     [DebuggerTypeProxy(typeof(SharedArrayMapDebugProxy<,,>))]
     public partial class SharedArrayMap<TKey, TValue, TValueNative> : IDisposable
         , ICollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>
@@ -109,7 +115,7 @@ namespace EncosyTower.Collections
             _fastModBucketsMultiplier.ValueRW = source._fastModBucketsMultiplier.ValueRO;
         }
 
-        public SharedArrayMap(SharedArrayMapNative<TKey, TValue, TValueNative> source)
+        public SharedArrayMap(in SharedArrayMapNative<TKey, TValueNative> source)
         {
             if (source.IsCreated == false)
             {
@@ -185,6 +191,10 @@ namespace EncosyTower.Collections
                 _values.AsSpan()[index] = value;
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator SharedArrayMapNative<TKey, TValueNative>([NotNull] SharedArrayMap<TKey, TValue, TValueNative> map)
+            => map.AsNative();
 
         public void Dispose()
         {
@@ -601,10 +611,6 @@ namespace EncosyTower.Collections
                 this[other.Key] = other.Value;
             }
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator SharedArrayMapNative<TKey, TValue, TValueNative>([NotNull] SharedArrayMap<TKey, TValue, TValueNative> map)
-            => new(map);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool AddValue(TKey key, out int indexSet)

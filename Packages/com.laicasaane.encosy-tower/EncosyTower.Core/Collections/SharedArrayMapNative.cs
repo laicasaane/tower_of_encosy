@@ -9,7 +9,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.Debugging;
@@ -20,8 +19,15 @@ namespace EncosyTower.Collections
     partial class SharedArrayMap<TKey, TValue, TValueNative>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SharedArrayMapNative<TKey, TValue, TValueNative> AsNative()
-            => new(this);
+        public SharedArrayMapNative<TKey, TValueNative> AsNative()
+            => new(
+                  _valuesInfo.AsNativeArray()
+                , _values.AsNativeArray()
+                , _buckets.AsNativeArray()
+                , _freeValueCellIndex.AsNativeArray()
+                , _collisions.AsNativeArray()
+                , _fastModBucketsMultiplier.AsNativeArray()
+            );
     }
 
     /// <summary>
@@ -36,28 +42,33 @@ namespace EncosyTower.Collections
     /// SharedArrayMapNative is not thread safe. A thread safe version should take care of possible setting of
     /// value with shared hash hence bucket list index.
     /// </remarks>
-    public readonly partial struct SharedArrayMapNative<TKey, TValue, TValueNative> : IClearable
+    public readonly partial struct SharedArrayMapNative<TKey, TValue> : IClearable
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
-        where TValueNative : unmanaged
     {
         internal readonly NativeArray<ArrayMapNode<TKey>> _valuesInfo;
-        internal readonly NativeArray<TValueNative> _values;
+        internal readonly NativeArray<TValue> _values;
         internal readonly NativeArray<int> _buckets;
 
         internal readonly NativeArray<int> _freeValueCellIndex;
         internal readonly NativeArray<uint> _collisions;
         internal readonly NativeArray<ulong> _fastModBucketsMultiplier;
 
-        public SharedArrayMapNative([NotNull] SharedArrayMap<TKey, TValue, TValueNative> map)
+        internal SharedArrayMapNative(
+              NativeArray<ArrayMapNode<TKey>> valuesInfo
+            , NativeArray<TValue> values
+            , NativeArray<int> buckets
+            , NativeArray<int> freeValueCellIndex
+            , NativeArray<uint> collisions
+            , NativeArray<ulong> fastModBucketsMultiplier
+        )
         {
-            _valuesInfo = map._valuesInfo.AsNativeArray();
-            _values = map._values.AsNativeArray();
-            _buckets = map._buckets.AsNativeArray();
-
-            _freeValueCellIndex = map._freeValueCellIndex.AsNativeArray();
-            _collisions = map._collisions.AsNativeArray();
-            _fastModBucketsMultiplier = map._fastModBucketsMultiplier.AsNativeArray();
+            _valuesInfo = valuesInfo;
+            _values = values;
+            _buckets = buckets;
+            _freeValueCellIndex = freeValueCellIndex;
+            _collisions = collisions;
+            _fastModBucketsMultiplier = fastModBucketsMultiplier;
         }
 
         public readonly bool IsCreated
@@ -84,13 +95,13 @@ namespace EncosyTower.Collections
             get => new(this);
         }
 
-        public NativeSlice<TValueNative> Values
+        public NativeSlice<TValue> Values
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _values.Slice(0, _freeValueCellIndex.AsSpan()[0]);
         }
 
-        public TValueNative this[TKey key]
+        public TValue this[TKey key]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
@@ -111,11 +122,11 @@ namespace EncosyTower.Collections
         /// This returns readonly because the enumerator cannot be, but at the same time, it cannot be modified
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SharedArrayMapNativeKeyValueEnumerator<TKey, TValue, TValueNative> GetEnumerator()
+        public SharedArrayMapNativeKeyValueEnumerator<TKey, TValue> GetEnumerator()
             => new(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add(TKey key, in TValueNative value)
+        public void Add(TKey key, in TValue value)
         {
             var itemAdded = AddValue(key, out var index);
 
@@ -134,7 +145,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryAdd(TKey key, in TValueNative value)
+        public bool TryAdd(TKey key, in TValue value)
         {
             var itemAdded = AddValue(key, out var index);
 
@@ -145,7 +156,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryAdd(TKey key, in TValueNative value, out int index)
+        public bool TryAdd(TKey key, in TValue value, out int index)
         {
             var itemAdded = AddValue(key, out index);
 
@@ -156,7 +167,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(TKey key, in TValueNative value)
+        public void Set(TKey key, in TValue value)
         {
             var itemAdded = AddValue(key, out var index);
 
@@ -195,7 +206,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetValue(TKey key, out TValueNative result)
+        public bool TryGetValue(TKey key, out TValue result)
         {
             if (TryFindIndex(key, out var findIndex))
             {
@@ -208,7 +219,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValueNative GetOrAdd(TKey key)
+        public ref TValue GetOrAdd(TKey key)
         {
             var values = _values.AsSpan();
 
@@ -225,7 +236,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValueNative GetOrAdd(TKey key, out int index)
+        public ref TValue GetOrAdd(TKey key, out int index)
         {
             var values = _values.AsSpan();
 
@@ -240,7 +251,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValueNative GetValueByRef(TKey key)
+        public ref TValue GetValueByRef(TKey key)
         {
             var found = TryFindIndex(key, out var findIndex);
 
@@ -262,7 +273,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Remove(TKey key, out int index, out TValueNative value)
+        public bool Remove(TKey key, out int index, out TValue value)
         {
             var buckets = _buckets.AsSpan();
             var valuesInfo = _valuesInfo.AsSpan();
@@ -427,9 +438,8 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Intersect<UValue, UValueNative>(in SharedArrayMapNative<TKey, UValue, UValueNative> otherMapKeys)
+        public void Intersect<UValue>(in SharedArrayMapNative<TKey, UValue> otherMapKeys)
             where UValue : unmanaged
-            where UValueNative : unmanaged
         {
             var keys = _valuesInfo.AsSpan();
 
@@ -445,9 +455,8 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Exclude<UValue, UValueNative>(in SharedArrayMapNative<TKey, UValue, UValueNative> otherMapKeys)
+        public void Exclude<UValue, UValueNative>(in SharedArrayMapNative<TKey, UValue> otherMapKeys)
             where UValue : unmanaged
-            where UValueNative : unmanaged
         {
             var keys = _valuesInfo.AsSpan();
 
@@ -463,7 +472,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Union(in SharedArrayMapNative<TKey, TValue, TValueNative> otherMapKeys)
+        public void Union(in SharedArrayMapNative<TKey, TValue> otherMapKeys)
         {
             foreach (var other in otherMapKeys)
             {
@@ -618,10 +627,10 @@ namespace EncosyTower.Collections
 
         public readonly struct KeyEnumerable
         {
-            private readonly SharedArrayMapNative< TKey, TValue, TValueNative > _map;
+            private readonly SharedArrayMapNative< TKey, TValue > _map;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public KeyEnumerable(in SharedArrayMapNative<TKey, TValue, TValueNative> map)
+            public KeyEnumerable(in SharedArrayMapNative<TKey, TValue> map)
             {
                 _map = map;
             }
@@ -633,13 +642,13 @@ namespace EncosyTower.Collections
 
         public struct KeyEnumerator
         {
-            private readonly SharedArrayMapNative< TKey, TValue, TValueNative > _map;
+            private readonly SharedArrayMapNative< TKey, TValue > _map;
             private readonly int _count;
 
             private int _index;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public KeyEnumerator(in SharedArrayMapNative<TKey, TValue, TValueNative> map) : this()
+            public KeyEnumerator(in SharedArrayMapNative<TKey, TValue> map) : this()
             {
                 _map = map;
                 _index = -1;
@@ -673,13 +682,12 @@ namespace EncosyTower.Collections
         }
     }
 
-    public struct SharedArrayMapNativeKeyValueEnumerator<TKey, TValue, TValueNative>
-        : IEnumerator<SharedArrayMapNativeKeyValuePairFast<TKey, TValue, TValueNative>>
+    public struct SharedArrayMapNativeKeyValueEnumerator<TKey, TValue>
+        : IEnumerator<SharedArrayMapNativeKeyValuePairFast<TKey, TValue>>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
-        where TValueNative : unmanaged
     {
-        private readonly SharedArrayMapNative<TKey, TValue, TValueNative> _map;
+        private readonly SharedArrayMapNative<TKey, TValue> _map;
 
 #if __ENCOSY_VALIDATION__
         internal int _startCount;
@@ -688,7 +696,7 @@ namespace EncosyTower.Collections
         private int _count;
         private int _index;
 
-        public SharedArrayMapNativeKeyValueEnumerator(SharedArrayMapNative<TKey, TValue, TValueNative> map) : this()
+        public SharedArrayMapNativeKeyValueEnumerator(SharedArrayMapNative<TKey, TValue> map) : this()
         {
             _map = map;
             _index = -1;
@@ -718,7 +726,7 @@ namespace EncosyTower.Collections
             return true;
         }
 
-        public readonly SharedArrayMapNativeKeyValuePairFast<TKey, TValue, TValueNative> Current
+        public readonly SharedArrayMapNativeKeyValuePairFast<TKey, TValue> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(_map._valuesInfo.AsReadOnlySpan()[_index].key, _map._values, _index);
@@ -760,17 +768,16 @@ namespace EncosyTower.Collections
         public readonly void Dispose() { }
     }
 
-    public readonly struct SharedArrayMapNativeKeyValuePairFast<TKey, TValue, TValueNative>
+    public readonly struct SharedArrayMapNativeKeyValuePairFast<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
-        where TValueNative : unmanaged
     {
-        private readonly NativeArray<TValueNative> _mapValues;
+        private readonly NativeArray<TValue> _mapValues;
         private readonly TKey _key;
         private readonly int _index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SharedArrayMapNativeKeyValuePairFast(in TKey key, NativeArray<TValueNative> mapValues, int index)
+        public SharedArrayMapNativeKeyValuePairFast(in TKey key, NativeArray<TValue> mapValues, int index)
         {
             _mapValues = mapValues;
             _index = index;
@@ -783,14 +790,14 @@ namespace EncosyTower.Collections
             get => _key;
         }
 
-        public readonly ref readonly TValueNative Value
+        public readonly ref readonly TValue Value
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => ref _mapValues.AsReadOnlySpan()[_index];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deconstruct(out TKey key, out TValueNative value)
+        public void Deconstruct(out TKey key, out TValue value)
         {
             key = Key;
             value = Value;

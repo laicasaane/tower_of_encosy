@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections.Unsafe;
 using EncosyTower.Debugging;
@@ -12,27 +11,34 @@ namespace EncosyTower.Collections
     partial class SharedList<T, TNative>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SharedListNative<T, TNative> AsNative()
-            => new(this);
+        public SharedListNative<TNative> AsNative()
+            => new(
+                  _buffer.AsNativeArray()
+                , _count.AsNativeArray()
+                , _version.AsNativeArray()
+            );
     }
 
-    public readonly partial struct SharedListNative<T, TNative>
-        : IReadOnlyList<TNative>
-        , IAsSpan<TNative>, IAsReadOnlySpan<TNative>, IAsNativeSlice<TNative>
-        , IAddRangeSpan<TNative>
+    public readonly partial struct SharedListNative<T>
+        : IReadOnlyList<T>
+        , IAsSpan<T>, IAsReadOnlySpan<T>, IAsNativeSlice<T>
+        , IAddRangeSpan<T>
         , IClearable
         where T : unmanaged
-        where TNative : unmanaged
     {
-        internal readonly NativeArray<TNative> _buffer;
+        internal readonly NativeArray<T> _buffer;
         internal readonly NativeArray<int> _count;
         internal readonly NativeArray<int> _version;
 
-        public SharedListNative([NotNull] SharedList<T, TNative> list)
+        internal SharedListNative(
+              NativeArray<T> buffer
+            , NativeArray<int> count
+            , NativeArray<int> version
+        )
         {
-            _buffer = list._buffer.AsNativeArray();
-            _count = list._count.AsNativeArray();
-            _version = list._version.AsNativeArray();
+            _buffer = buffer;
+            _count = count;
+            _version = version;
         }
 
         public readonly bool IsCreated
@@ -65,7 +71,7 @@ namespace EncosyTower.Collections
             get => ref _version.AsSpan()[0];
         }
 
-        public TNative this[int index]
+        public T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
@@ -84,11 +90,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator SharedListNative<T, TNative>(SharedList<T, TNative> list)
-            => new(list);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add(TNative item)
+        public void Add(T item)
         {
             VersionRW++;
 
@@ -100,7 +102,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add(in TNative item)
+        public void Add(in T item)
         {
             VersionRW++;
 
@@ -112,7 +114,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Insert(int index, TNative item)
+        public void Insert(int index, T item)
         {
             VersionRW++;
 
@@ -128,7 +130,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Insert(int index, in TNative item)
+        public void Insert(int index, in T item)
         {
             VersionRW++;
 
@@ -144,17 +146,17 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TNative ElementAt(int index)
+        public ref T ElementAt(int index)
         {
             Checks.IsTrue((uint)index < (uint)Count, "index is outside the range of valid indexes for the SharedListNative<T>");
             return ref _buffer.AsSpan()[index];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddRange(ReadOnlySpan<TNative> items)
+        public void AddRange(ReadOnlySpan<T> items)
             => AddRange(items, items.Length);
 
-        public void AddRange(ReadOnlySpan<TNative> items, int count)
+        public void AddRange(ReadOnlySpan<T> items, int count)
         {
             VersionRW++;
 
@@ -167,10 +169,10 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddRange(NativeArray<TNative> items)
+        public void AddRange(NativeArray<T> items)
             => AddRange(items, items.Length);
 
-        public void AddRange(NativeArray<TNative> items, int count)
+        public void AddRange(NativeArray<T> items, int count)
         {
             VersionRW++;
 
@@ -183,10 +185,10 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddRange(NativeSlice<TNative> items)
+        public void AddRange(NativeSlice<T> items)
             => AddRange(items, items.Length);
 
-        public void AddRange(NativeSlice<TNative> items, int count)
+        public void AddRange(NativeSlice<T> items, int count)
         {
             VersionRW++;
 
@@ -202,35 +204,35 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(Span<TNative> array)
+        public void CopyTo(Span<T> array)
             => CopyTo(0, array);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(int index, Span<TNative> array)
+        public void CopyTo(int index, Span<T> array)
             => CopyTo(index, array, array.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(int index, Span<TNative> array, int length)
+        public void CopyTo(int index, Span<T> array, int length)
             => AsReadOnlySpan().Slice(index, length).CopyTo(array[..length]);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(NativeArray<TNative> array)
+        public void CopyTo(NativeArray<T> array)
             => CopyTo(0, array);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(int index, NativeArray<TNative> array)
+        public void CopyTo(int index, NativeArray<T> array)
             => CopyTo(index, array, array.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(int index, NativeArray<TNative> array, int length)
+        public void CopyTo(int index, NativeArray<T> array, int length)
             => AsReadOnlySpan().Slice(index, length).CopyTo(array.AsSpan()[..length]);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(int index, NativeSlice<TNative> array)
+        public void CopyTo(int index, NativeSlice<T> array)
             => CopyTo(index, array, array.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(int index, NativeSlice<TNative> array, int length)
+        public void CopyTo(int index, NativeSlice<T> array, int length)
             => array.Slice(0, length).CopyFrom(AsNativeSlice().Slice(index, length));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -245,11 +247,11 @@ namespace EncosyTower.Collections
             => new(AsReadOnly());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref readonly TNative Peek()
+        public ref readonly T Peek()
             => ref _buffer.AsReadOnlySpan()[Count - 1];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref readonly TNative Pop()
+        public ref readonly T Pop()
         {
             VersionRW++;
             --CountRW;
@@ -257,14 +259,14 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Push(TNative item)
+        public int Push(T item)
         {
             Insert(Count, item);
             return Count - 1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Push(in TNative item)
+        public int Push(in T item)
         {
             Insert(Count, item);
             return Count - 1;
@@ -317,26 +319,26 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TNative[] ToArray()
+        public T[] ToArray()
         {
             return AsReadOnlySpan().ToArray();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span<TNative> AsSpan()
+        public Span<T> AsSpan()
         {
             VersionRW++;
             return _buffer.AsSpan()[..Count];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpan<TNative> AsReadOnlySpan()
+        public ReadOnlySpan<T> AsReadOnlySpan()
         {
             return _buffer.AsReadOnlySpan()[..Count];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public NativeSlice<TNative> AsNativeSlice()
+        public NativeSlice<T> AsNativeSlice()
         {
             return _buffer.Slice(0, Count);
         }
@@ -355,7 +357,7 @@ namespace EncosyTower.Collections
             CountRW = newCount;
         }
 
-        public void AddReplicate(TNative value, int amount)
+        public void AddReplicate(T value, int amount)
         {
             VersionRW++;
 
@@ -383,23 +385,23 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SharedListNative<T, TNative> Prefill(int amount)
+        public static SharedListNative<T> Prefill(int amount)
         {
-            SharedListNative<T, TNative> list = new SharedList<T, TNative>(amount);
+            SharedListNative<T> list = new SharedList<T, T>(amount);
             list.AddReplicate(amount);
             return list;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SharedListNative<T, TNative> Prefill(TNative value, int amount)
+        public static SharedListNative<T> Prefill(T value, int amount)
         {
-            SharedListNative<T, TNative> list = new SharedList<T, TNative>(amount);
+            SharedListNative<T> list = new SharedList<T, T>(amount);
             list.AddReplicate(value, amount);
             return list;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        IEnumerator<TNative> IEnumerable<TNative>.GetEnumerator()
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
             => GetEnumerator();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
