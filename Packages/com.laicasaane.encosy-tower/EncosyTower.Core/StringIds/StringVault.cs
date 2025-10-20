@@ -4,13 +4,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Common;
+using EncosyTower.Debugging;
 using EncosyTower.Ids;
 using Unity.Collections;
 using UnityEngine;
 
 namespace EncosyTower.StringIds
 {
-    public sealed partial class StringVault : IDisposable
+    public sealed partial class StringVault : IDisposable, IHasCapacity, IClearable
     {
         internal readonly SharedArrayMap<StringHash, Id> _map;
         internal readonly SharedList<UnmanagedString> _unmanagedStrings;
@@ -273,6 +274,18 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(Span<UnmanagedString> destination, int length)
             => GetUnanagedStringsAsSpan()[..length].CopyTo(destination[..length]);
+
+        public void IncreaseCapacityBy(int amount)
+        {
+            Checks.IsTrue(amount > 0, "amount must be greater than 0");
+            IncreaseCapacityTo(Capacity + amount);
+        }
+
+        public void IncreaseCapacityTo(int newCapacity)
+        {
+            _map.IncreaseCapacityTo(newCapacity);
+            EnsureCapacity();
+        }
 
         private void EnsureCapacity()
         {

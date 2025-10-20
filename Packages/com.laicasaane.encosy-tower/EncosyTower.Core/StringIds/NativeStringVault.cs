@@ -4,8 +4,10 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.Collections;
 using EncosyTower.Collections.Unsafe;
 using EncosyTower.Common;
+using EncosyTower.Debugging;
 using EncosyTower.Ids;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -13,7 +15,7 @@ using UnityEngine;
 
 namespace EncosyTower.StringIds
 {
-    public readonly partial struct NativeStringVault : IDisposable
+    public readonly partial struct NativeStringVault : IDisposable, IHasCapacity, IClearable
     {
         internal readonly NativeHashMap<StringHash, Id> _map;
         internal readonly NativeList<UnmanagedString> _strings;
@@ -170,6 +172,18 @@ namespace EncosyTower.StringIds
         public void CopyTo(Span<UnmanagedString> destination, int length)
             => GetStringsAsSpan()[..length].CopyTo(destination[..length]);
 
+        public void IncreaseCapacityBy(int amount)
+        {
+            Checks.IsTrue(amount > 0, "amount must be greater than 0");
+            IncreaseCapacityTo(Capacity + amount);
+        }
+
+        public void IncreaseCapacityTo(int newCapacity)
+        {
+            _map.IncreaseCapacityTo(newCapacity);
+            EnsureCapacity();
+        }
+
         private void EnsureCapacity()
         {
             var oldCapacity = math.min(_hashes.Capacity, _strings.Capacity);
@@ -177,8 +191,8 @@ namespace EncosyTower.StringIds
 
             if (newCapacity > 0 && newCapacity > oldCapacity)
             {
-                _hashes.SetCapacity(newCapacity);
-                _strings.SetCapacity(newCapacity);
+                _hashes.IncreaseCapacityTo(newCapacity);
+                _strings.IncreaseCapacityTo(newCapacity);
             }
 
             if (_hashes.Length < newCapacity)
