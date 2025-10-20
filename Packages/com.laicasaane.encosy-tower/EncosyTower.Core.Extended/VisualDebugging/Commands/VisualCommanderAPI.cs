@@ -221,7 +221,7 @@ namespace EncosyTower.VisualDebugging.Commands
 
             static VisualDirectoryData CreateDirectoryData(string label)
             {
-                var id = StringToId.MakeFromManaged(label);
+                var id = StringToId.Get(label);
                 var name = label.Replace(' ', '_').Replace('/', '-').ToKebabCase();
                 return new VisualDirectoryData(name, label, id);
             }

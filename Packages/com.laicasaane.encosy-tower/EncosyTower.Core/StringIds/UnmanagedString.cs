@@ -47,6 +47,8 @@ namespace EncosyTower.StringIds
             => Value;
 #endif
 
+        public static int UTF8MaxLengthInBytes => 125;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
             => Value.GetHashCode();

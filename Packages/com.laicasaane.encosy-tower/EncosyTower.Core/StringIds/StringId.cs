@@ -5,17 +5,23 @@ using EncosyTower.TypeWraps;
 namespace EncosyTower.StringIds
 {
     /// <summary>
-    /// Represents a lightweight handle for a string.
+    /// Represents a lightweight handle for a string. <see cref="StringId"/> must be retrieved from either:
+    /// <list type="bullet">
+    /// <item>The global API <see cref="StringToId"/></item>
+    /// <item>A local <see cref="StringVault"/></item>
+    /// <item>A local <see cref="NativeStringVault"/></item>
+    /// </list>
     /// </summary>
     /// <remarks>
-    /// An instance of <see cref="StringId"/> must be retrieved from <see cref="StringToId"/>.
-    /// <br/>
-    /// <see cref="StringId"/> constructors should not be used because they cannot
-    /// guarantee the uniqueness of a string or its (assumingly) associative ID.
+    /// <see cref="StringId"/> constructor should not be directly used by user code
+    /// because it does not guarantee the uniqueness of a string or the associative <see cref="Id"/>.
     /// </remarks>
     [WrapRecord]
     public readonly partial record struct StringId(Id Id)
     {
+        /// <summary>
+        /// A <see cref="StringId"/> is invalid when it is registered within a string vault.
+        /// </summary>
         public bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -24,13 +30,16 @@ namespace EncosyTower.StringIds
     }
 
     /// <summary>
-    /// Represents a lightweight typed handle for a string.
+    /// Represents a lightweight handle for a string. <see cref="StringId{T}"/> must be retrieved from either:
+    /// <list type="bullet">
+    /// <item>The global API <see cref="StringToId"/></item>
+    /// <item>A local <see cref="StringVault"/></item>
+    /// <item>A local <see cref="NativeStringVault"/></item>
+    /// </list>
     /// </summary>
     /// <remarks>
-    /// An instance of <see cref="StringId"/> must be retrieved from <see cref="StringToId"/>.
-    /// <br/>
-    /// <see cref="StringId"/> constructors should not be used because they cannot
-    /// guarantee the uniqueness of a string or its (assumingly) associative ID.
+    /// <see cref="StringId{T}"/> constructor should not be directly used by user code
+    /// because it does not guarantee the uniqueness of a string or the associative <see cref="Id"/>.
     /// </remarks>
     [WrapRecord]
     public readonly partial record struct StringId<T>(Id<T> Id)

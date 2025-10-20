@@ -33,7 +33,7 @@ namespace EncosyTower.StringIds
         {
             foreach (var str in managedStrings)
             {
-                MakeIdFromManaged(str);
+                GetOrMakeId(str);
             }
         }
 
@@ -41,7 +41,7 @@ namespace EncosyTower.StringIds
         {
             foreach (var str in unmanagedStrings)
             {
-                MakeIdFromUnmanaged(str);
+                GetOrMakeId(str);
             }
         }
 
@@ -55,18 +55,6 @@ namespace EncosyTower.StringIds
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _count.ValueRO;
-        }
-
-        public SharedList<UnmanagedString>.ReadOnly UnmanagedStrings
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _unmanagedStrings.AsReadOnly();
-        }
-
-        public FasterList<string>.ReadOnly ManagedStrings
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _managedStrings.AsReadOnly();
         }
 
         public void Dispose()
@@ -97,14 +85,17 @@ namespace EncosyTower.StringIds
         }
 
         /// <summary>
-        /// Creates or retrieves a <see cref="StringId"/> from a managed <see cref="string"/>.
+        /// Creates or retrieves a <see cref="StringId"/> from an <see cref="UnmanagedString"/>.
         /// </summary>
         /// <param name="str">
         /// The managed string to create or retrieve the <see cref="StringId"/> for.
-        /// Should have a maximum length of 125 UTF8 characters.
+        /// It should have a maximum length of 125 UTF8 characters.
         /// </param>
         /// <returns></returns>
-        public Id MakeIdFromUnmanaged(in UnmanagedString str)
+        /// <remarks>
+        /// The unmanaged string will be synchronized with its managed representation.
+        /// </remarks>
+        public Id GetOrMakeId(in UnmanagedString str)
         {
             var hash = str.ToHashCode();
             var registered = _map.TryGetValue(hash, out var id);
@@ -166,10 +157,13 @@ namespace EncosyTower.StringIds
         /// </summary>
         /// <param name="str">
         /// The managed string to create or retrieve the <see cref="StringId"/> for.
-        /// Should have a maximum length of 125 UTF8 characters.
+        /// It should have a maximum length of 125 UTF8 characters.
         /// </param>
         /// <returns></returns>
-        public StringId MakeIdFromManaged([NotNull] string str)
+        /// <remarks>
+        /// The managed string will be synchronized with its unmanaged representation.
+        /// </remarks>
+        public StringId GetOrMakeId([NotNull] string str)
         {
             var hash = HashValue64.FNV1a(str);
             var registered = _map.TryGetValue(hash, out var id);
@@ -255,6 +249,30 @@ namespace EncosyTower.StringIds
             var validIndex = indexUnsigned < (uint)_hashes.Count;
             return validIndex ? _hashes[index].HasValue : false;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlySpan<string> GetManagedStringsAsSpan()
+            => _managedStrings.AsReadOnlySpan()[..Count];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlySpan<UnmanagedString> GetUnanagedStringsAsSpan()
+            => _unmanagedStrings.AsReadOnlySpan()[..Count];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(Span<string> destination)
+            => CopyTo(destination, Count);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(Span<string> destination, int length)
+            => GetManagedStringsAsSpan()[..length].CopyTo(destination[..length]);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(Span<UnmanagedString> destination)
+            => CopyTo(destination, Count);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(Span<UnmanagedString> destination, int length)
+            => GetUnanagedStringsAsSpan()[..length].CopyTo(destination[..length]);
 
         private void EnsureCapacity()
         {
@@ -380,6 +398,18 @@ namespace EncosyTower.StringIds
                 var validIndex = indexUnsigned < (uint)_hashes.Count;
                 return validIndex ? _hashes[index].HasValue : false;
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public ReadOnlySpan<UnmanagedString> GetUnanagedStringsAsSpan()
+                => _unmanagedStrings.AsReadOnlySpan()[..Count];
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void CopyTo(Span<UnmanagedString> destination)
+                => CopyTo(destination, Count);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void CopyTo(Span<UnmanagedString> destination, int length)
+                => GetUnanagedStringsAsSpan()[..length].CopyTo(destination[..length]);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator ReadOnly(StringVault vault)

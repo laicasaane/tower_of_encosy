@@ -38,9 +38,9 @@ namespace EncosyTower.StringIds
             => s_vault.ContainsId(key.Id);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static StringId MakeIdFromManaged([NotNull] string str)
+        public static StringId GetOrMakeId([NotNull] string str)
         {
-            return s_vault.MakeIdFromManaged(str);
+            return s_vault.GetOrMakeId(str);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -52,9 +52,9 @@ namespace EncosyTower.StringIds
 
 #if UNITY_COLLECTIONS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static StringId MakeIdFromUnmanaged(in UnmanagedString str)
+        public static StringId GetOrMakeId(in UnmanagedString str)
         {
-            return s_vault.MakeIdFromUnmanaged(str);
+            return s_vault.GetOrMakeId(str);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

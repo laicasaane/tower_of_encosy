@@ -34,7 +34,7 @@ namespace EncosyTower.StringIds
         {
             foreach (var str in strings)
             {
-                MakeIdFrom(str);
+                GetOrMakeId(str);
             }
         }
 
@@ -55,12 +55,6 @@ namespace EncosyTower.StringIds
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _count.Value;
-        }
-
-        public NativeArray<UnmanagedString>.ReadOnly Strings
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _strings.AsReadOnly();
         }
 
         public void Dispose()
@@ -85,14 +79,17 @@ namespace EncosyTower.StringIds
         }
 
         /// <summary>
-        /// Creates or retrieves a <see cref="StringId"/> from a managed <see cref="string"/>.
+        /// Creates or retrieves a <see cref="StringId"/> from an <see cref="UnmanagedString"/>.
         /// </summary>
         /// <param name="str">
         /// The managed string to create or retrieve the <see cref="StringId"/> for.
-        /// Should have a maximum length of 125 UTF8 characters.
+        /// It should have a maximum length of 125 UTF8 characters.
         /// </param>
         /// <returns></returns>
-        public Id MakeIdFrom(in UnmanagedString str)
+        /// <remarks>
+        /// The unmanaged string will be synchronized with its managed representation.
+        /// </remarks>
+        public Id GetOrMakeId(in UnmanagedString str)
         {
             var hash = str.ToHashCode();
             var registered = _map.TryGetValue(hash, out var id);
@@ -160,6 +157,18 @@ namespace EncosyTower.StringIds
             var validIndex = indexUnsigned < (uint)_hashes.Length;
             return validIndex ? _hashes[index].HasValue : false;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlySpan<UnmanagedString> GetStringsAsSpan()
+            => _strings.AsArray().AsReadOnlySpan()[..Count];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(Span<UnmanagedString> destination)
+            => CopyTo(destination, Count);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(Span<UnmanagedString> destination, int length)
+            => GetStringsAsSpan()[..length].CopyTo(destination[..length]);
 
         private void EnsureCapacity()
         {
@@ -268,6 +277,18 @@ namespace EncosyTower.StringIds
                 var validIndex = indexUnsigned < (uint)_hashes.Length;
                 return validIndex ? _hashes[index].HasValue : false;
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public ReadOnlySpan<UnmanagedString> GetStringsAsSpan()
+                => _strings.AsReadOnlySpan()[..Count];
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void CopyTo(Span<UnmanagedString> destination)
+                => CopyTo(destination, Count);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void CopyTo(Span<UnmanagedString> destination, int length)
+                => GetStringsAsSpan()[..length].CopyTo(destination[..length]);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator ReadOnly(in NativeStringVault vault)

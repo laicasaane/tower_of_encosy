@@ -14,7 +14,7 @@
         public const string WHEN_ALL_TASKS = "global::EncosyTower.Tasks.UnityTasks.WhenAll(tasks)";
         public const string NOT_NULL = "[global::System.Diagnostics.CodeAnalysis.NotNull]";
         public const string STRING_ID = "global::EncosyTower.StringIds.StringId<string>";
-        public const string STRING_ID_MAKE = "global::EncosyTower.StringIds.StringToId.MakeFromManaged";
+        public const string STRING_ID_GET = "global::EncosyTower.StringIds.StringToId.Get";
         public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.UserDataVaults.UserDataVaultGenerator\", \"{SourceGenVersion.VALUE}\")]";
         public const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
         public const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";

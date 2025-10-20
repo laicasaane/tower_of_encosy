@@ -17,14 +17,14 @@ namespace EncosyTower.StringIds
 #if UNITY_COLLECTIONS
         /// <inheritdoc cref="GlobalStringVault"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static StringId MakeFromUnmanaged(in UnmanagedString str)
-            => GlobalStringVault.MakeIdFromUnmanaged(str);
+        public static StringId Get(in UnmanagedString str)
+            => GlobalStringVault.GetOrMakeId(str);
 #endif
 
         /// <inheritdoc cref="GlobalStringVault"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static StringId MakeFromManaged(in string str)
-            => GlobalStringVault.MakeIdFromManaged(str);
+        public static StringId Get(in string str)
+            => GlobalStringVault.GetOrMakeId(str);
     }
 
     /// <inheritdoc cref="GlobalStringVault"/>

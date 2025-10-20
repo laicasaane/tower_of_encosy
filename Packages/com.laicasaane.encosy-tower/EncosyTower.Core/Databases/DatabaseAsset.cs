@@ -259,8 +259,8 @@ namespace EncosyTower.Databases
         private StringId GetId(string name)
         {
             return StringVault != null
-                ? StringVault.MakeIdFromManaged(name)
-                : StringToId.MakeFromManaged(name);
+                ? StringVault.GetOrMakeId(name)
+                : StringToId.Get(name);
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]

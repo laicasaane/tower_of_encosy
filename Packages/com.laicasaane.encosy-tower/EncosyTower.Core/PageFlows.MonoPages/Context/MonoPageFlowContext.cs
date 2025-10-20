@@ -166,7 +166,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public StringId MakeStringId(string str)
-            => StringToId.MakeFromManaged(str);
+            => StringToId.Get(str);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetString(StringId id)

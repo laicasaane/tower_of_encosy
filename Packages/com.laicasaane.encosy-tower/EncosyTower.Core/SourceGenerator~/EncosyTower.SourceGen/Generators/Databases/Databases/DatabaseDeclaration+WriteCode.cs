@@ -13,7 +13,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
         private const string DOES_NOT_RETURN_IF_FALSE = "[global::System.Diagnostics.CodeAnalysis.DoesNotReturnIf(false)]";
         private const string STRING_VAULT = "global::EncosyTower.StringIds.StringVault";
         private const string STRING_ID = "global::EncosyTower.StringIds.StringId";
-        private const string MAKE_ID = "Vault.Instance.MakeIdFromManaged";
+        private const string MAKE_ID = "Vault.Instance.GetOrMakeId";
         private const string INITIALIZATION_BEHAVIOUR = "global::EncosyTower.Initialization.InitializationBehaviour";
 
         public const string NOT_NULL = "[global::System.Diagnostics.CodeAnalysis.NotNull]";

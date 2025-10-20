@@ -703,7 +703,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         var nameUpper = name.ToUpperInvariant();
 
                         p.PrintBeginLine("s_").Print(name).Print(" = ")
-                            .Print(STRING_ID_MAKE).Print("(nameof(").Print(nameUpper).PrintEndLine("));");
+                            .Print(STRING_ID_GET).Print("(nameof(").Print(nameUpper).PrintEndLine("));");
                     }
                 }
                 p.CloseScope();
