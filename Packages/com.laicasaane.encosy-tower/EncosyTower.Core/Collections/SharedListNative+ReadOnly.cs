@@ -7,11 +7,25 @@ using Unity.Collections;
 
 namespace EncosyTower.Collections
 {
+    partial class SharedList<T, TNative>
+    {
+        partial struct ReadOnly
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public SharedListNative<TNative>.ReadOnly AsNative()
+                => new(_buffer.Reinterpret<TNative>(), _count, _version);
+        }
+    }
+
     partial struct SharedListNative<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnly AsReadOnly()
-            => new(this);
+            => new(
+                  _buffer.AsReadOnly()
+                , _count.AsReadOnly()
+                , _version.AsReadOnly()
+            );
 
         public readonly struct ReadOnly : IAsReadOnlySpan<T>, IReadOnlyList<T>
         {
@@ -20,11 +34,15 @@ namespace EncosyTower.Collections
             internal readonly NativeArray<int>.ReadOnly _version;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ReadOnly(SharedListNative<T> list)
+            internal ReadOnly(
+                  NativeArray<T>.ReadOnly buffer
+                , NativeArray<int>.ReadOnly count
+                , NativeArray<int>.ReadOnly version
+            )
             {
-                _buffer = list._buffer.AsReadOnly();
-                _count = list._count.AsReadOnly();
-                _version = list._version.AsReadOnly();
+                _buffer = buffer;
+                _count = count;
+                _version = version;
             }
 
             public bool IsCreated

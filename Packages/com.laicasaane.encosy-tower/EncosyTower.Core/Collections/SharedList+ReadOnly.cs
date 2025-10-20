@@ -13,7 +13,7 @@ namespace EncosyTower.Collections
         public ReadOnly AsReadOnly()
             => new(this);
 
-        public readonly struct ReadOnly : IAsReadOnlySpan<T>, IReadOnlyList<T>
+        public readonly partial struct ReadOnly : IAsReadOnlySpan<T>, IReadOnlyList<T>
         {
             internal readonly NativeArray<T>.ReadOnly _buffer;
             internal readonly NativeArray<int>.ReadOnly _count;

@@ -13,11 +13,36 @@ using Unity.Collections;
 
 namespace EncosyTower.Collections
 {
+    partial class SharedArrayMap<TKey, TValue, TValueNative>
+    {
+        partial struct ReadOnly
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public SharedArrayMapNative<TKey, TValueNative>.ReadOnly AsNative()
+                => new(
+                      _valuesInfo
+                    , _values.Reinterpret<TValueNative>()
+                    , _buckets
+                    , _freeValueCellIndex
+                    , _collisions
+                    , _fastModBucketsMultiplier
+                );
+
+        }
+    }
+
     partial struct SharedArrayMapNative<TKey, TValue>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnly AsReadOnly()
-            => new(this);
+            => new(
+                  _valuesInfo.AsReadOnly()
+                , _values.AsReadOnly()
+                , _buckets.AsReadOnly()
+                , _freeValueCellIndex.AsReadOnly()
+                , _collisions.AsReadOnly()
+                , _fastModBucketsMultiplier.AsReadOnly()
+            );
 
         public readonly struct ReadOnly
         {
@@ -29,14 +54,21 @@ namespace EncosyTower.Collections
             internal readonly NativeArray<uint>.ReadOnly _collisions;
             internal readonly NativeArray<ulong>.ReadOnly _fastModBucketsMultiplier;
 
-            public ReadOnly(in SharedArrayMapNative<TKey, TValue> map)
+            internal ReadOnly(
+                  NativeArray<ArrayMapNode<TKey>>.ReadOnly valuesInfo
+                , NativeArray<TValue>.ReadOnly values
+                , NativeArray<int>.ReadOnly buckets
+                , NativeArray<int>.ReadOnly freeValueCellIndex
+                , NativeArray<uint>.ReadOnly collisions
+                , NativeArray<ulong>.ReadOnly fastModBucketsMultiplier
+            )
             {
-                _valuesInfo = map._valuesInfo.AsReadOnly();
-                _values = map._values.AsReadOnly();
-                _buckets = map._buckets.AsReadOnly();
-                _freeValueCellIndex = map._freeValueCellIndex.AsReadOnly();
-                _collisions = map._collisions.AsReadOnly();
-                _fastModBucketsMultiplier = map._fastModBucketsMultiplier.AsReadOnly();
+                _valuesInfo = valuesInfo;
+                _values = values;
+                _buckets = buckets;
+                _freeValueCellIndex = freeValueCellIndex;
+                _collisions = collisions;
+                _fastModBucketsMultiplier = fastModBucketsMultiplier;
             }
 
             public readonly bool IsCreated
