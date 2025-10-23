@@ -130,7 +130,7 @@ namespace EncosyTower.SystemExtensions
 
             Span<char> utf16Chars = stackalloc char[68];
             guid.TryFormat(utf16Chars, out var utf16CharsWritten, format);
-            fs.AppendSpan(utf16Chars[..utf16CharsWritten]);
+            fs.Append(utf16Chars[..utf16CharsWritten]);
 
             return fs;
         }

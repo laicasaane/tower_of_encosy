@@ -12,7 +12,7 @@ namespace EncosyTower.Collections
         public static FixedString32Bytes ToFixedString(this bool value)
         {
             var fs = new FixedString32Bytes();
-            fs.AppendSpan(value ? bool.TrueString : bool.FalseString);
+            fs.Append(value ? bool.TrueString : bool.FalseString);
             return fs;
         }
 
@@ -120,7 +120,7 @@ namespace EncosyTower.Collections
         /// <see cref="FormatError.None"/> if successful.
         /// Returns <see cref="FormatError.Overflow"/> if the capacity of the destination string is exceeded.
         /// </returns>
-        public unsafe static FormatError AppendSpan<T>(this ref T fs, ReadOnlySpan<char> utf16Chars)
+        public unsafe static FormatError Append<T>(this ref T fs, ReadOnlySpan<char> utf16Chars)
             where T : unmanaged, INativeList<byte>, IUTF8Bytes
         {
             // we don't know how big the expansion from UTF16 to UTF8 will be, so we account for worst case.
