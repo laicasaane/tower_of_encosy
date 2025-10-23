@@ -108,6 +108,64 @@ namespace EncosyTower.Collections
         }
 
         /// <summary>
+        /// Copies a span of UTF16 chars to this string (making the two strings equal).
+        /// Replaces any existing content of the FixedString.
+        /// </summary>
+        /// <remarks>
+        /// When the method returns an error, the destination string is not modified.
+        /// </remarks>
+        /// <typeparam name="T">The type of the destination string.</typeparam>
+        /// <param name="fs">The destination string.</param>
+        /// <param name="utf16Chars">The span of UTF16 chars to be copied.</param>
+        /// <returns>
+        /// CopyError.None if successful.
+        /// Returns CopyError.Truncation if the source string is too large to fit in the destination.
+        /// </returns>
+        [ExcludeFromBurstCompatTesting("Takes managed string")]
+        public static CopyError CopyFrom<T>(this ref T fs, ReadOnlySpan<char> utf16Chars)
+            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            fs.Length = 0;
+
+            if (Append(ref fs, utf16Chars) != 0)
+            {
+                return CopyError.Truncation;
+            }
+
+            return CopyError.None;
+        }
+
+        /// <summary>
+        /// Copies a span of UTF16 chars to this string.
+        /// If the string exceeds the capacity it will be truncated.
+        /// Replaces any existing content of the FixedString.
+        /// </summary>
+        /// <typeparam name="T">The type of the destination string.</typeparam>
+        /// <param name="fs">The destination string.</param>
+        /// <param name="utf16Chars">The span of UTF16 chars to be copied.</param>
+        /// <returns>
+        ///  CopyError.None if successful.
+        ///  Returns CopyError.Truncation if the source span is too large to fit in the destination.
+        /// </returns>
+        public unsafe static CopyError CopyFromTruncated<T>(this ref T fs, ReadOnlySpan<char> utf16Chars)
+            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            fixed (char* chars = utf16Chars)
+            {
+                CopyError result = UTF8ArrayUnsafeUtility.Copy(
+                      fs.GetUnsafePtr()
+                    , out var destLength
+                    , fs.Capacity
+                    , chars
+                    , utf16Chars.Length
+                );
+
+                fs.Length = destLength;
+                return result;
+            }
+        }
+
+        /// <summary>
         /// Appends a span of UTF16 chars to this string.
         /// </summary>
         /// <remarks>
