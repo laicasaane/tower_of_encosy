@@ -195,7 +195,7 @@ namespace EncosyTower.StringIds
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override string ToString()
-            => $"{_id}-{_meta}";
+            => $"{_id.Id}-{_meta}";
     }
 }
 
