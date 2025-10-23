@@ -1,10 +1,10 @@
-using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using EncosyTower.Common;
-
 namespace EncosyTower.StringIds
 {
+    using System;
+    using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
+    using EncosyTower.Common;
+
 #if UNITY_COLLECTIONS
     using FixedString = Unity.Collections.FixedString128Bytes;
 #endif
@@ -19,7 +19,7 @@ namespace EncosyTower.StringIds
     /// <seealso cref="FixedString"/>
     /// <seealso cref="HashValue64"/>
     [StructLayout(LayoutKind.Sequential, Size = 128)]
-    public readonly struct UnmanagedString
+    public readonly partial struct UnmanagedString
         : IEquatable<UnmanagedString>
         , IComparable<UnmanagedString>
     {
@@ -77,12 +77,6 @@ namespace EncosyTower.StringIds
         public static bool operator !=(in UnmanagedString a, in UnmanagedString b)
             => !a.Equals(b);
 
-#if UNITY_COLLECTIONS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator UnmanagedString(in FixedString value)
-            => new(value);
-#endif
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator UnmanagedString(string value)
 #if UNITY_COLLECTIONS
@@ -92,3 +86,28 @@ namespace EncosyTower.StringIds
 #endif
     }
 }
+
+#if UNITY_COLLECTIONS
+
+namespace EncosyTower.StringIds
+{
+    using System.Runtime.CompilerServices;
+    using Unity.Collections;
+
+    partial struct UnmanagedString
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator UnmanagedString(in FixedString32Bytes value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator UnmanagedString(in FixedString64Bytes value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator UnmanagedString(in FixedString128Bytes value)
+            => new(value);
+    }
+}
+
+#endif
