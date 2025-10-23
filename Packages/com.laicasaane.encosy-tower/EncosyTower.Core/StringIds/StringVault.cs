@@ -13,7 +13,7 @@ namespace EncosyTower.StringIds
 {
     public sealed partial class StringVault : IDisposable, IHasCapacity, IClearable
     {
-        internal readonly SharedArrayMap<StringHash, Id> _map;
+        internal readonly SharedArrayMap<StringHash, StringId> _map;
         internal readonly SharedList<UnmanagedString> _unmanagedStrings;
         internal readonly FasterList<string> _managedStrings;
         internal readonly SharedList<Option<StringHash>> _hashes;
@@ -96,7 +96,7 @@ namespace EncosyTower.StringIds
         /// <remarks>
         /// The unmanaged string will be synchronized with its managed representation.
         /// </remarks>
-        public Id GetOrMakeId(in UnmanagedString str)
+        public StringId GetOrMakeId(in UnmanagedString str)
         {
             var hash = str.ToHashCode();
             var registered = _map.TryGetValue(hash, out var id);
@@ -221,9 +221,9 @@ namespace EncosyTower.StringIds
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetUnmanagedString(Id id, out UnmanagedString result)
+        public bool TryGetUnmanagedString(StringId id, out UnmanagedString result)
         {
-            var indexUnsigned = (uint)id;
+            var indexUnsigned = (uint)id.Id;
             var index = (int)indexUnsigned;
             var validIndex = indexUnsigned < (uint)_hashes.Count;
 
@@ -232,9 +232,9 @@ namespace EncosyTower.StringIds
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetManagedString(Id id, out string result)
+        public bool TryGetManagedString(StringId id, out string result)
         {
-            var indexUnsigned = (uint)id;
+            var indexUnsigned = (uint)id.Id;
             var index = (int)indexUnsigned;
             var validIndex = indexUnsigned < (uint)_hashes.Count;
 
@@ -243,9 +243,9 @@ namespace EncosyTower.StringIds
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ContainsId(Id id)
+        public bool ContainsId(StringId id)
         {
-            var indexUnsigned = (uint)id;
+            var indexUnsigned = (uint)id.Id;
             var index = (int)indexUnsigned;
             var validIndex = indexUnsigned < (uint)_hashes.Count;
             return validIndex ? _hashes[index].HasValue : false;
@@ -316,7 +316,7 @@ namespace EncosyTower.StringIds
         }
 
         [HideInCallstack, StackTraceHidden]
-        private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, in UnmanagedString str, Id id)
+        private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, in UnmanagedString str, StringId id)
         {
             if (result == false)
             {
@@ -327,7 +327,7 @@ namespace EncosyTower.StringIds
         }
 
         [HideInCallstack, StackTraceHidden]
-        private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, string str, Id id)
+        private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, string str, StringId id)
         {
             if (result == false)
             {
@@ -346,7 +346,7 @@ namespace EncosyTower.StringIds
 
         public readonly partial struct ReadOnly
         {
-            private readonly SharedArrayMapNative<StringHash, Id>.ReadOnly _map;
+            private readonly SharedArrayMapNative<StringHash, StringId>.ReadOnly _map;
             private readonly SharedListNative<UnmanagedString>.ReadOnly _unmanagedStrings;
             private readonly SharedListNative<Option<StringHash>>.ReadOnly _hashes;
             private readonly NativeArray<int>.ReadOnly _count;
@@ -379,7 +379,7 @@ namespace EncosyTower.StringIds
                 get => _count[0];
             }
 
-            public bool TryGetId(in UnmanagedString str, out Id result)
+            public bool TryGetId(in UnmanagedString str, out StringId result)
             {
                 var hash = str.ToHashCode();
                 var registered = _map.TryGetValue(hash, out var id);
@@ -394,9 +394,9 @@ namespace EncosyTower.StringIds
                 return false;
             }
 
-            public bool TryGetString(Id id, out UnmanagedString result)
+            public bool TryGetString(StringId id, out UnmanagedString result)
             {
-                var indexUnsigned = (uint)id;
+                var indexUnsigned = (uint)id.Id;
                 var index = (int)indexUnsigned;
                 var validIndex = indexUnsigned < (uint)_hashes.Count;
 
@@ -404,9 +404,9 @@ namespace EncosyTower.StringIds
                 return validIndex ? _hashes[index].HasValue : false;
             }
 
-            public bool ContainsId(Id id)
+            public bool ContainsId(StringId id)
             {
-                var indexUnsigned = (uint)id;
+                var indexUnsigned = (uint)id.Id;
                 var index = (int)indexUnsigned;
                 var validIndex = indexUnsigned < (uint)_hashes.Count;
                 return validIndex ? _hashes[index].HasValue : false;
