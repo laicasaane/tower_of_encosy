@@ -100,6 +100,9 @@ crashlytics-build.properties
 [Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ss]ettings.json
 [Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ss]ettings.json.meta
 
+[Aa]ssets/[Rr]untime[Tt]ype[Cc]ache/
+[Aa]ssets/[Rr]untime[Tt]ype[Cc]ache.meta
+
 [Aa]ssets/[Ss]amples/
 [Aa]ssets/[Ss]amples.meta
 
