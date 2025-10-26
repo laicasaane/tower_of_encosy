@@ -21,7 +21,7 @@ MonoBehaviour:
   m_OverrideGlobalSceneList: 1
   m_Scenes:
   - m_enabled: 1
-    m_path: Assets/Samples/Encosy Tower/0.1.0-preview.39/EncosyTower.Samples.MonoPages/encosy-scene-sample-monopages.unity
+    m_path: Assets/Samples/Encosy Tower/0.1.0-preview.48/EncosyTower.Samples.MonoPages/encosy-scene-sample-monopages.unity
   m_ScriptingDefines:
   - DISABLE_DEBUG_ASSERT
   - REMOVE_DISPOSE_SENTINEL
@@ -163,6 +163,7 @@ MonoBehaviour:
     - line: '|   switchNVNMaxPublicSamplerIDCount: 0'
     - line: '|   switchMaxWorkerMultiple: 8'
     - line: '|   switchNVNGraphicsFirmwareMemory: 32'
+    - line: '|   switchGraphicsJobsSyncAfterKick: 1'
     - line: '|   vulkanNumSwapchainBuffers: 3'
     - line: '|   vulkanEnableSetSRGBWrite: 0'
     - line: '|   vulkanEnablePreTransform: 1'
@@ -172,7 +173,13 @@ MonoBehaviour:
     - line: '|   visionOSBundleVersion: 1.0'
     - line: '|   tvOSBundleVersion: 1.0'
     - line: '|   bundleVersion: 0.1.0'
-    - line: '|   preloadedAssets: []'
+    - line: '|   preloadedAssets:'
+    - line: '|   - {fileID: 11400000, guid: a1a43384e5ff3e14db233a70b1817714, type:
+        2}'
+    - line: '|   - {fileID: -944628639613478452, guid: d79d94034bd10f64689b5913bf9089bf,
+        type: 3}'
+    - line: '|   - {fileID: 11400000, guid: 76868f32d89e44946ae346fdfc288838, type:
+        2}'
     - line: '|   metroInputSource: 0'
     - line: '|   wsaTransparentSwapchain: 0'
     - line: '|   m_HolographicPauseOnTrackingLoss: 1'
@@ -550,7 +557,10 @@ MonoBehaviour:
     - line: '|       m_Height: 720'
     - line: '|       m_Kind: 1'
     - line: '|       m_SubKind: '
-    - line: '|   m_BuildTargetBatching: []'
+    - line: '|   m_BuildTargetBatching:'
+    - line: '|   - m_BuildTarget: Standalone'
+    - line: '|     m_StaticBatching: 1'
+    - line: '|     m_DynamicBatching: 0'
     - line: '|   m_BuildTargetShaderSettings: []'
     - line: '|   m_BuildTargetGraphicsJobs: []'
     - line: '|   m_BuildTargetGraphicsJobMode: []'
@@ -848,12 +858,12 @@ MonoBehaviour:
     - line: '|   webGLMemoryLinearGrowthStep: 16'
     - line: '|   webGLMemoryGeometricGrowthStep: 0.2'
     - line: '|   webGLMemoryGeometricGrowthCap: 96'
-    - line: '|   webGLEnableWebGPU: 0'
     - line: '|   webGLPowerPreference: 2'
     - line: '|   webGLWebAssemblyTable: 0'
     - line: '|   webGLWebAssemblyBigInt: 0'
     - line: '|   webGLCloseOnQuit: 0'
     - line: '|   webWasm2023: 0'
+    - line: '|   webEnableSubmoduleStrippingCompatibility: 0'
     - line: '|   scriptingDefineSymbols:'
     - line: '|     Standalone: DISABLE_DEBUG_ASSERT;REMOVE_DISPOSE_SENTINEL;ENTITY_STORE_V1;UNITY_BURST_EXPERIMENTAL_ATOMIC_INTRINSICS;INCLUDE_ENCOSY_SAMPLES_MONO_PAGES;ENABLE_SDK_STYLE_PROJECTS'
     - line: '|   additionalCompilerArguments:'
@@ -862,7 +872,7 @@ MonoBehaviour:
     - line: '|   scriptingBackend:'
     - line: '|     Android: 1'
     - line: '|     Server: 1'
-    - line: '|     Standalone: 1'
+    - line: '|     Standalone: 0'
     - line: '|   il2cppCompilerConfiguration: {}'
     - line: '|   il2cppCodeGeneration:'
     - line: '|     Android: 1'
@@ -992,6 +1002,8 @@ MonoBehaviour:
     - line: '|   insecureHttpOption: 0'
     - line: '|   androidVulkanDenyFilterList: []'
     - line: '|   androidVulkanAllowFilterList: []'
+    - line: '|   androidVulkanDeviceFilterListAsset: {instanceID: 0}'
+    - line: '|   d3d12DeviceFilterListAsset: {instanceID: 0}'
     - line: '| '
   references:
     version: 2
@@ -999,10 +1011,10 @@ MonoBehaviour:
     - rid: 7382983703316660225
       type: {class: WindowsPlatformSettings, ns: UnityEditor.WindowsStandalone, asm: UnityEditor.WindowsStandalone.Extensions}
       data:
-        m_Development: 1
-        m_ConnectProfiler: 1
+        m_Development: 0
+        m_ConnectProfiler: 0
         m_BuildWithDeepProfilingSupport: 0
-        m_AllowDebugging: 1
+        m_AllowDebugging: 0
         m_WaitForManagedDebugger: 0
         m_ManagedDebuggerFixedPort: 0
         m_ExplicitNullChecks: 0
@@ -1010,9 +1022,11 @@ MonoBehaviour:
         m_ExplicitArrayBoundsChecks: 0
         m_CompressionType: 0
         m_InstallInBuildFolder: 0
+        m_InsightsSettingsContainer:
+          m_BuildProfileEngineDiagnosticsState: 2
         m_WindowsBuildAndRunDeployTarget: 0
         m_Architecture: 0
         m_CreateSolution: 0
-        m_CopyPDBFiles: 1
+        m_CopyPDBFiles: 0
         m_WindowsDevicePortalAddress: 
         m_WindowsDevicePortalUsername: 
