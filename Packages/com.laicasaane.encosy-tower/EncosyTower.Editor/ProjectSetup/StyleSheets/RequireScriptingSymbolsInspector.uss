@@ -1,0 +1,14 @@
+.symbol {
+    flex-direction: row;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.symbol__label {
+    width: 30px;
+    -unity-text-align: middle-left;
+}
+
+.symbol__text {
+    flex-grow: 1;
+}
