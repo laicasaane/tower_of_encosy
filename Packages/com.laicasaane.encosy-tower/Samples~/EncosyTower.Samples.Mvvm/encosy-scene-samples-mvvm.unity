@@ -350,7 +350,6 @@ MonoBehaviour:
   m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
-  m_Version: 2
   m_TaaSettings:
     m_Quality: 3
     m_FrameInfluence: 0.1
@@ -358,6 +357,7 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!1 &209879521
 GameObject:
   m_ObjectHideFlags: 0
@@ -685,7 +685,7 @@ MonoBehaviour:
     startAfterInitialization: 1
   _context:
     rid: 8109321786255212778
-  _presetBinders:
+  _binders:
   - rid: 8109321786255212780
   - rid: 8109321786255212786
   references:
@@ -701,9 +701,9 @@ MonoBehaviour:
         asm: EncosyTower.Mvvm}
       data:
         _subtitle: 
-        _presetBindings:
+        _bindings:
         - rid: 8109321786255212784
-        _presetTargets:
+        _targets:
         - {fileID: 343873117}
     - rid: 8109321786255212784
       type: {class: TransformBindingLocalRotation, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
@@ -725,9 +725,9 @@ MonoBehaviour:
         asm: EncosyTower.Mvvm}
       data:
         _subtitle: 
-        _presetBindings:
+        _bindings:
         - rid: 8109321786255212787
-        _presetTargets:
+        _targets:
         - {fileID: 402938463}
     - rid: 8109321786255212787
       type: {class: TransformBindingLocalScale, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
@@ -797,6 +797,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -818,6 +820,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -1169,7 +1172,7 @@ MonoBehaviour:
     startAfterInitialization: 1
   _context:
     rid: 7562154210548776971
-  _presetBinders:
+  _binders:
   - rid: 7562154620754329610
   - rid: 7562154620754329616
   - rid: 7562154631834632210
@@ -1188,9 +1191,9 @@ MonoBehaviour:
         asm: EncosyTower.Mvvm}
       data:
         _subtitle: 
-        _presetBindings:
+        _bindings:
         - rid: 7562154620754329612
-        _presetTargets:
+        _targets:
         - {fileID: 1529285863}
     - rid: 7562154620754329612
       type: {class: ScrollRectBindingVerticalNormalizedPosition, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
@@ -1210,9 +1213,9 @@ MonoBehaviour:
         asm: EncosyTower.Mvvm}
       data:
         _subtitle: scroll position
-        _presetBindings:
+        _bindings:
         - rid: 7562154620754329617
-        _presetTargets:
+        _targets:
         - {fileID: 555238475}
     - rid: 7562154620754329617
       type: {class: TMP_TextBindingText, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
@@ -1231,9 +1234,9 @@ MonoBehaviour:
         asm: EncosyTower.Mvvm}
       data:
         _subtitle: 
-        _presetBindings:
+        _bindings:
         - rid: 7562154620754329621
-        _presetTargets:
+        _targets:
         - {fileID: 860427089}
     - rid: 7562154620754329621
       type: {class: ImageBindingColor, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
@@ -1249,9 +1252,9 @@ MonoBehaviour:
         asm: EncosyTower.Mvvm}
       data:
         _subtitle: 
-        _presetBindings:
+        _bindings:
         - rid: 7562154631834632209
-        _presetTargets:
+        _targets:
         - {fileID: 1289389104}
     - rid: 7562154631834632209
       type: {class: ButtonBindingOnClick, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
@@ -1264,9 +1267,9 @@ MonoBehaviour:
         asm: EncosyTower.Mvvm}
       data:
         _subtitle: status
-        _presetBindings:
+        _bindings:
         - rid: 7562154631834632211
-        _presetTargets:
+        _targets:
         - {fileID: 743286631}
     - rid: 7562154631834632211
       type: {class: TMP_TextBindingText, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
@@ -1534,17 +1537,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Version: 3
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
-  m_LightLayerMask: 1
-  m_RenderingLayers: 1
   m_CustomShadowLayers: 0
-  m_ShadowLayerMask: 1
-  m_ShadowRenderingLayers: 1
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!114 &752059395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1563,7 +1572,7 @@ MonoBehaviour:
     startAfterInitialization: 1
   _context:
     rid: 1154242496108167262
-  _presetBinders:
+  _binders:
   - rid: 8109321786255212790
   references:
     version: 2
@@ -1578,9 +1587,9 @@ MonoBehaviour:
         asm: EncosyTower.Mvvm}
       data:
         _subtitle: 
-        _presetBindings:
+        _bindings:
         - rid: 8109321786255212791
-        _presetTargets:
+        _targets:
         - {fileID: 752059393}
     - rid: 8109321786255212791
       type: {class: TransformBindingLocalEulerAngles, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
@@ -2145,6 +2154,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 964636075}
   m_CullTransparentMesh: 1
+--- !u!1 &974754424
+GameObject:
+  m_ObjectHideFlags: 16
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 974754426}
+  - component: {fileID: 974754425}
+  m_Layer: 0
+  m_Name: RequireScriptingSymbols
+  m_TagString: EditorOnly
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &974754425
+MonoBehaviour:
+  m_ObjectHideFlags: 16
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 974754424}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b45873de8360fc747a5a30ec08f3405c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: EncosyTower.Editor::EncosyTower.Editor.ProjectSetup.RequireScriptingSymbols
+  _symbols:
+  - INCLUDE_ENCOSY_SAMPLES_MVVM
+--- !u!4 &974754426
+Transform:
+  m_ObjectHideFlags: 16
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 974754424}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1002819355
 GameObject:
   m_ObjectHideFlags: 0
@@ -2413,7 +2468,7 @@ MonoBehaviour:
     startAfterInitialization: 1
   _context:
     rid: 7562154620754329622
-  _presetBinders:
+  _binders:
   - rid: 7562154620754329623
   - rid: 7562154620754329625
   - rid: 7562154620754329653
@@ -2431,9 +2486,9 @@ MonoBehaviour:
         asm: EncosyTower.Mvvm}
       data:
         _subtitle: 
-        _presetBindings:
+        _bindings:
         - rid: 7562154620754329624
-        _presetTargets:
+        _targets:
         - {fileID: 1289389104}
     - rid: 7562154620754329624
       type: {class: ButtonBindingOnClick, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
@@ -2446,9 +2501,9 @@ MonoBehaviour:
         asm: EncosyTower.Mvvm}
       data:
         _subtitle: Stopped
-        _presetBindings:
+        _bindings:
         - rid: 7562154620754329626
-        _presetTargets:
+        _targets:
         - {fileID: 296471785}
     - rid: 7562154620754329626
       type: {class: GameObjectBindingActiveSelf, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
@@ -2464,9 +2519,9 @@ MonoBehaviour:
         asm: EncosyTower.Mvvm}
       data:
         _subtitle: Started
-        _presetBindings:
+        _bindings:
         - rid: 7562154620754329654
-        _presetTargets:
+        _targets:
         - {fileID: 964636075}
     - rid: 7562154620754329654
       type: {class: GameObjectBindingActiveSelf, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
@@ -2482,9 +2537,9 @@ MonoBehaviour:
         asm: EncosyTower.Mvvm}
       data:
         _subtitle: 
-        _presetBindings:
+        _bindings:
         - rid: 7562154620754329657
-        _presetTargets:
+        _targets:
         - {fileID: 1289389105}
     - rid: 7562154620754329657
       type: {class: ImageBindingColor, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
@@ -3432,6 +3487,7 @@ MonoBehaviour:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 974754426}
   - {fileID: 169186883}
   - {fileID: 752059393}
   - {fileID: 1603940290}
