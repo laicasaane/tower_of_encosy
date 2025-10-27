@@ -8,7 +8,7 @@ using Unity.Jobs;
 namespace EncosyTower.Jobs
 {
     [BurstCompile]
-    public partial struct TrySetCapacityHashMapJob<TKey, TValue> : IJob
+    public partial struct TrySetCapacityNativeHashMapJob<TKey, TValue> : IJob
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -26,7 +26,7 @@ namespace EncosyTower.Jobs
     }
 
     [BurstCompile]
-    public partial struct TrySetCapacityParallelHashMapJob<TKey, TValue> : IJob
+    public partial struct TrySetCapacityNativeParallelHashMapJob<TKey, TValue> : IJob
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -44,7 +44,7 @@ namespace EncosyTower.Jobs
     }
 
     [BurstCompile]
-    public partial struct TrySetCapacityParallelMultiHashMapJob<TKey, TValue> : IJob
+    public partial struct TrySetCapacityNativeParallelMultiHashMapJob<TKey, TValue> : IJob
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -62,7 +62,7 @@ namespace EncosyTower.Jobs
     }
 
     [BurstCompile]
-    public partial struct ClearHashMapJob<TKey, TValue> : IJob
+    public partial struct ClearNativeHashMapJob<TKey, TValue> : IJob
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -76,7 +76,7 @@ namespace EncosyTower.Jobs
     }
 
     [BurstCompile]
-    public partial struct ClearParallelHashMapJob<TKey, TValue> : IJob
+    public partial struct ClearNativeParallelHashMapJob<TKey, TValue> : IJob
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -90,7 +90,7 @@ namespace EncosyTower.Jobs
     }
 
     [BurstCompile]
-    public partial struct ClearParallelMultiHashMapJob<TKey, TValue> : IJob
+    public partial struct ClearNativeParallelMultiHashMapJob<TKey, TValue> : IJob
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {

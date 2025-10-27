@@ -7,7 +7,7 @@ using Unity.Jobs;
 namespace EncosyTower.Jobs
 {
     [BurstCompile]
-    public partial struct ClearQueueJob<TData> : IJob
+    public partial struct ClearNativeQueueJob<TData> : IJob
         where TData : unmanaged
     {
         [WriteOnly] public NativeQueue<TData> queue;

@@ -10,45 +10,45 @@ namespace EncosyTower.Jobs
 {
 #if LATIOS_FRAMEWORK
 
-    partial struct ClearListJob<TData>
+    partial struct ClearNativeQueueJob<TData>
     {
-        public static ClearListJob<TData> FromCollectionComponent<TCollectionComponent>(
+        public static ClearNativeQueueJob<TData> FromCollectionComponent<TCollectionComponent>(
             BlackboardEntity blackboard
         )
             where TCollectionComponent : unmanaged
                 , ICollectionComponent
                 , Latios.InternalSourceGen.StaticAPI.ICollectionComponentSourceGenerated
-                , ITryGet<NativeList<TData>>
+                , ITryGet<NativeQueue<TData>>
         {
             if (blackboard.HasCollectionComponent<TCollectionComponent>() == false)
             {
                 return default;
             }
 
-            if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var list) == false)
+            if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var queue) == false)
             {
                 return default;
             }
 
-            if (list.Length < 1)
+            if (queue.Count < 1)
             {
                 return default;
             }
 
-            return new ClearListJob<TData> {
-                list = list,
+            return new ClearNativeQueueJob<TData> {
+                queue = queue,
             };
         }
     }
 
 #endif
 
-    public static class ClearListJobExtensions
+    public static class ClearQueueJobExtensions
     {
-        public static void ScheduleIfCreated<TData>(this ref ClearListJob<TData> job, ref SystemState state)
+        public static void ScheduleIfCreated<TData>(this ref ClearNativeQueueJob<TData> job, ref SystemState state)
             where TData : unmanaged
         {
-            if (job.list.IsCreated)
+            if (job.queue.IsCreated)
             {
                 state.Dependency = job.ScheduleByRef(state.Dependency);
             }

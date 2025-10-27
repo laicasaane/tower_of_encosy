@@ -1,5 +1,6 @@
 #if UNITY_COLLECTIONS
 
+using EncosyTower.Collections;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -7,27 +8,40 @@ using Unity.Jobs;
 namespace EncosyTower.Jobs
 {
     [BurstCompile]
-    public partial struct TrySetCapacityListJob<TData> : IJob
+    public partial struct TrySetCapacityNativeListJob<TData> : IJob
         where TData : unmanaged
     {
         public int capacity;
-        public NativeList<TData> set;
+        public NativeList<TData> list;
 
         [BurstCompile]
         public void Execute()
         {
-            if (capacity > set.Capacity)
+            if (capacity > list.Capacity)
             {
-                set.Capacity = capacity;
+                list.Capacity = capacity;
             }
         }
     }
 
     [BurstCompile]
-    public partial struct ClearListJob<TData> : IJob
+    public partial struct ClearNativeListJob<TData> : IJob
         where TData : unmanaged
     {
         [WriteOnly] public NativeList<TData> list;
+
+        [BurstCompile]
+        public void Execute()
+        {
+            list.Clear();
+        }
+    }
+
+    [BurstCompile]
+    public partial struct ClearSharedListNativeJob<TData> : IJob
+        where TData : unmanaged
+    {
+        [WriteOnly] public SharedListNative<TData> list;
 
         [BurstCompile]
         public void Execute()

@@ -8,7 +8,7 @@ using Unity.Jobs;
 namespace EncosyTower.Jobs
 {
     [BurstCompile]
-    public partial struct TrySetCapacityHashSetJob<TData> : IJob
+    public partial struct TrySetCapacityNativeHashSetJob<TData> : IJob
         where TData : unmanaged, IEquatable<TData>
     {
         public int capacity;
@@ -25,7 +25,7 @@ namespace EncosyTower.Jobs
     }
 
     [BurstCompile]
-    public partial struct TrySetCapacityParallelHashSetJob<TData> : IJob
+    public partial struct TrySetCapacityNativeParallelHashSetJob<TData> : IJob
         where TData : unmanaged, IEquatable<TData>
     {
         public int capacity;
@@ -42,7 +42,7 @@ namespace EncosyTower.Jobs
     }
 
     [BurstCompile]
-    public partial struct ClearHashSetJob<TData> : IJob
+    public partial struct ClearNativeHashSetJob<TData> : IJob
         where TData : unmanaged, IEquatable<TData>
     {
         [WriteOnly] public NativeHashSet<TData> set;
@@ -55,7 +55,7 @@ namespace EncosyTower.Jobs
     }
 
     [BurstCompile]
-    public partial struct ClearParallelHashSetJob<TData> : IJob
+    public partial struct ClearNativeParallelHashSetJob<TData> : IJob
         where TData : unmanaged, IEquatable<TData>
     {
         [WriteOnly] public NativeParallelHashSet<TData> set;

@@ -11,9 +11,9 @@ namespace EncosyTower.Jobs
 {
 #if LATIOS_FRAMEWORK
 
-    partial struct ClearHashMapJob<TKey, TValue>
+    partial struct ClearNativeHashMapJob<TKey, TValue>
     {
-        public static ClearHashMapJob<TKey, TValue> FromCollectionComponent<TCollectionComponent>(
+        public static ClearNativeHashMapJob<TKey, TValue> FromCollectionComponent<TCollectionComponent>(
             BlackboardEntity blackboard
         )
             where TCollectionComponent : unmanaged
@@ -36,15 +36,15 @@ namespace EncosyTower.Jobs
                 return default;
             }
 
-            return new ClearHashMapJob<TKey, TValue> {
+            return new ClearNativeHashMapJob<TKey, TValue> {
                 map = map,
             };
         }
     }
 
-    partial struct ClearParallelHashMapJob<TKey, TValue>
+    partial struct ClearNativeParallelHashMapJob<TKey, TValue>
     {
-        public static ClearParallelHashMapJob<TKey, TValue> FromCollectionComponent<TCollectionComponent>(
+        public static ClearNativeParallelHashMapJob<TKey, TValue> FromCollectionComponent<TCollectionComponent>(
             BlackboardEntity blackboard
         )
             where TCollectionComponent : unmanaged
@@ -62,15 +62,15 @@ namespace EncosyTower.Jobs
                 return default;
             }
 
-            return new ClearParallelHashMapJob<TKey, TValue> {
+            return new ClearNativeParallelHashMapJob<TKey, TValue> {
                 map = map,
             };
         }
     }
 
-    partial struct ClearParallelMultiHashMapJob<TKey, TValue>
+    partial struct ClearNativeParallelMultiHashMapJob<TKey, TValue>
     {
-        public static ClearParallelMultiHashMapJob<TKey, TValue> FromCollectionComponent<TCollectionComponent>(
+        public static ClearNativeParallelMultiHashMapJob<TKey, TValue> FromCollectionComponent<TCollectionComponent>(
             BlackboardEntity blackboard
         )
             where TCollectionComponent : unmanaged
@@ -88,7 +88,7 @@ namespace EncosyTower.Jobs
                 return default;
             }
 
-            return new ClearParallelMultiHashMapJob<TKey, TValue> {
+            return new ClearNativeParallelMultiHashMapJob<TKey, TValue> {
                 map = map,
             };
         }
@@ -99,7 +99,7 @@ namespace EncosyTower.Jobs
     public static class ClearHashMapJobExtensions
     {
         public static void ScheduleIfCreated<TKey, TValue>(
-              this ref ClearHashMapJob<TKey, TValue> job
+              this ref ClearNativeHashMapJob<TKey, TValue> job
             , ref SystemState state
         )
             where TKey : unmanaged, IEquatable<TKey>
@@ -115,7 +115,7 @@ namespace EncosyTower.Jobs
     public static class ClearParallelHashMapJobExtensions
     {
         public static void ScheduleIfCreated<TKey, TValue>(
-              this ref ClearParallelHashMapJob<TKey, TValue> job
+              this ref ClearNativeParallelHashMapJob<TKey, TValue> job
             , ref SystemState state
         )
             where TKey : unmanaged, IEquatable<TKey>
@@ -131,7 +131,7 @@ namespace EncosyTower.Jobs
     public static class ClearParallelMultiHashMapJobExtensions
     {
         public static void ScheduleIfCreated<TKey, TValue>(
-              this ref ClearParallelMultiHashMapJob<TKey, TValue> job
+              this ref ClearNativeParallelMultiHashMapJob<TKey, TValue> job
             , ref SystemState state
         )
             where TKey : unmanaged, IEquatable<TKey>

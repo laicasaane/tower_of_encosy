@@ -1,6 +1,5 @@
 #if UNITY_ENTITIES
 
-using System;
 using EncosyTower.Collections;
 using Latios;
 using Unity.Collections;
@@ -11,89 +10,91 @@ namespace EncosyTower.Jobs
 {
 #if LATIOS_FRAMEWORK
 
-    partial struct ClearHashSetJob<TData>
+    partial struct ClearNativeListJob<TData>
     {
-        public static ClearHashSetJob<TData> FromCollectionComponent<TCollectionComponent>(
+        public static ClearNativeListJob<TData> FromCollectionComponent<TCollectionComponent>(
             BlackboardEntity blackboard
         )
             where TCollectionComponent : unmanaged
                 , ICollectionComponent
                 , Latios.InternalSourceGen.StaticAPI.ICollectionComponentSourceGenerated
-                , ITryGet<NativeHashSet<TData>>
+                , ITryGet<NativeList<TData>>
         {
             if (blackboard.HasCollectionComponent<TCollectionComponent>() == false)
             {
                 return default;
             }
 
-            if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var set) == false)
+            if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var list) == false)
             {
                 return default;
             }
 
-            if (set.Count < 1)
+            if (list.Length < 1)
             {
                 return default;
             }
 
-            return new ClearHashSetJob<TData> {
-                set = set,
+            return new ClearNativeListJob<TData> {
+                list = list,
             };
         }
     }
 
-    partial struct ClearParallelHashSetJob<TData>
+    partial struct ClearSharedListNativeJob<TData>
     {
-        public static ClearParallelHashSetJob<TData> FromCollectionComponent<TCollectionComponent>(
+        public static ClearSharedListNativeJob<TData> FromCollectionComponent<TCollectionComponent>(
             BlackboardEntity blackboard
         )
             where TCollectionComponent : unmanaged
                 , ICollectionComponent
                 , Latios.InternalSourceGen.StaticAPI.ICollectionComponentSourceGenerated
-                , ITryGet<NativeParallelHashSet<TData>>
+                , ITryGet<SharedListNative<TData>>
         {
             if (blackboard.HasCollectionComponent<TCollectionComponent>() == false)
             {
                 return default;
             }
 
-            if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var set) == false)
+            if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var list) == false)
             {
                 return default;
             }
 
-            return new ClearParallelHashSetJob<TData> {
-                set = set,
+            if (list.Count < 1)
+            {
+                return default;
+            }
+
+            return new ClearSharedListNativeJob<TData> {
+                list = list,
             };
         }
     }
 
 #endif
 
-    public static class ClearHashSetJobExtensions
+    public static class ClearListJobExtensions
     {
         public static void ScheduleIfCreated<TData>(
-              this ref ClearHashSetJob<TData> job
+              this ref ClearNativeListJob<TData> job
             , ref SystemState state
         )
-            where TData : unmanaged, IEquatable<TData>
+            where TData : unmanaged
         {
-            if (job.set.IsCreated)
+            if (job.list.IsCreated)
             {
                 state.Dependency = job.ScheduleByRef(state.Dependency);
             }
         }
-    }
 
-    public static class ClearParallelHashSetJobExtensions
-    {
         public static void ScheduleIfCreated<TData>(
-              this ref ClearParallelHashSetJob<TData> job
+              this ref ClearSharedListNativeJob<TData> job
             , ref SystemState state
         )
-            where TData : unmanaged, IEquatable<TData>
+            where TData : unmanaged
         {
-            if (job.set.IsCreated)
+            if (job.list.IsCreated)
             {
                 state.Dependency = job.ScheduleByRef(state.Dependency);
             }
