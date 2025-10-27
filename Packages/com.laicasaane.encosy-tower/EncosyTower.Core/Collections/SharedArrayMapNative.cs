@@ -39,8 +39,9 @@ namespace EncosyTower.Collections
     /// one.
     /// </summary>
     /// <remarks>
-    /// SharedArrayMapNative is not thread safe. A thread safe version should take care of possible setting of
-    /// value with shared hash hence bucket list index.
+    /// <para>SharedArrayMapNative is not thread safe. A thread safe version should take care of possible setting of
+    /// value with shared hash hence bucket list index.</para>
+    /// <para>The capacity of SharedArrayMapNative is immutable, cannot change.</para>
     /// </remarks>
     public readonly partial struct SharedArrayMapNative<TKey, TValue> : IClearable
         where TKey : unmanaged, IEquatable<TKey>

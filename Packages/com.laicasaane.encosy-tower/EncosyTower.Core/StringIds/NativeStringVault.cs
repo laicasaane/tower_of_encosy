@@ -1,6 +1,8 @@
 #if UNITY_COLLECTIONS && UNITY_MATHEMATICS
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -16,6 +18,8 @@ using UnityEngine;
 namespace EncosyTower.StringIds
 {
     public readonly partial struct NativeStringVault : IDisposable, IHasCapacity, IClearable
+        , IReadOnlyList<UnmanagedString>
+        , ICopyToSpan<UnmanagedString>, ITryCopyToSpan<UnmanagedString>
     {
         internal readonly NativeHashMap<StringHash, StringId> _map;
         internal readonly NativeList<UnmanagedString> _strings;
@@ -57,6 +61,12 @@ namespace EncosyTower.StringIds
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _count.Value;
+        }
+
+        public UnmanagedString this[int index]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _strings[index];
         }
 
         public void Dispose()
@@ -170,19 +180,57 @@ namespace EncosyTower.StringIds
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(Span<UnmanagedString> destination, int length)
-            => GetStringsAsSpan()[..length].CopyTo(destination[..length]);
+            => CopyTo(0, destination, length);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(int sourceStartIndex, Span<UnmanagedString> destination)
+            => CopyTo(sourceStartIndex, destination, Count);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(int sourceStartIndex, Span<UnmanagedString> destination, int length)
+            => GetStringsAsSpan().Slice(sourceStartIndex, length).CopyTo(destination[..length]);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryCopyTo(Span<UnmanagedString> destination)
+            => TryCopyTo(destination, Count);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryCopyTo(Span<UnmanagedString> destination, int length)
+            => TryCopyTo(0, destination, length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryCopyTo(int sourceStartIndex, Span<UnmanagedString> destination)
+            => TryCopyTo(sourceStartIndex, destination, Count);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryCopyTo(int sourceStartIndex, Span<UnmanagedString> destination, int length)
+            => GetStringsAsSpan().Slice(sourceStartIndex, length).TryCopyTo(destination[..length]);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void IncreaseCapacityBy(int amount)
         {
             Checks.IsTrue(amount > 0, "amount must be greater than 0");
             IncreaseCapacityTo(Capacity + amount);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void IncreaseCapacityTo(int newCapacity)
         {
             _map.IncreaseCapacityTo(newCapacity);
             EnsureCapacity();
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public NativeArray<UnmanagedString>.Enumerator GetEnumerator()
+            => _strings.GetEnumerator();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        IEnumerator<UnmanagedString> IEnumerable<UnmanagedString>.GetEnumerator()
+            => GetEnumerator();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        IEnumerator IEnumerable.GetEnumerator()
+            => GetEnumerator();
 
         private void EnsureCapacity()
         {
@@ -224,7 +272,8 @@ namespace EncosyTower.StringIds
         public ReadOnly AsReadOnly()
             => new(this);
 
-        public readonly struct ReadOnly
+        public readonly struct ReadOnly : IReadOnlyList<UnmanagedString>
+            , ICopyToSpan<UnmanagedString>, ITryCopyToSpan<UnmanagedString>
         {
             internal readonly NativeHashMap<StringHash, StringId>.ReadOnly _map;
             internal readonly NativeArray<UnmanagedString>.ReadOnly _strings;
@@ -235,8 +284,8 @@ namespace EncosyTower.StringIds
             public ReadOnly(in NativeStringVault vault)
             {
                 _map = vault._map.AsReadOnly();
-                _strings = vault._strings.AsReadOnly();
-                _hashes = vault._hashes.AsReadOnly();
+                _strings = vault._strings.AsArray().AsReadOnly();
+                _hashes = vault._hashes.AsArray().AsReadOnly();
                 _count = vault._count.AsReadOnly();
             }
 
@@ -257,6 +306,12 @@ namespace EncosyTower.StringIds
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _count.Value;
+            }
+
+            public UnmanagedString this[int index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _strings[index];
             }
 
             public bool TryGetId(in UnmanagedString str, out StringId result)
@@ -302,7 +357,43 @@ namespace EncosyTower.StringIds
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void CopyTo(Span<UnmanagedString> destination, int length)
-                => GetStringsAsSpan()[..length].CopyTo(destination[..length]);
+                => CopyTo(0, destination, length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void CopyTo(int sourceStartIndex, Span<UnmanagedString> destination)
+                => CopyTo(sourceStartIndex, destination, Count);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void CopyTo(int sourceStartIndex, Span<UnmanagedString> destination, int length)
+                => GetStringsAsSpan().Slice(sourceStartIndex, length).CopyTo(destination[..length]);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool TryCopyTo(Span<UnmanagedString> destination)
+                => TryCopyTo(destination, Count);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool TryCopyTo(Span<UnmanagedString> destination, int length)
+                => TryCopyTo(0, destination, length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool TryCopyTo(int sourceStartIndex, Span<UnmanagedString> destination)
+                => TryCopyTo(sourceStartIndex, destination, Count);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool TryCopyTo(int sourceStartIndex, Span<UnmanagedString> destination, int length)
+                => GetStringsAsSpan().Slice(sourceStartIndex, length).TryCopyTo(destination[..length]);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public NativeArray<UnmanagedString>.ReadOnly.Enumerator GetEnumerator()
+                => _strings.GetEnumerator();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            IEnumerator<UnmanagedString> IEnumerable<UnmanagedString>.GetEnumerator()
+                => GetEnumerator();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            IEnumerator IEnumerable.GetEnumerator()
+                => GetEnumerator();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator ReadOnly(in NativeStringVault vault)

@@ -26,12 +26,12 @@ using EncosyTower.Collections;
 
 namespace EncosyTower.Buffers
 {
-    public interface IBuffer<T> : IAsSpan<T>, IAsReadOnlySpan<T>, IClearable
+    public interface IBuffer<T> : IClearable, IAsSpan<T>, IAsReadOnlySpan<T>
+        , ICopyFromSpan<T>, ITryCopyFromSpan<T>
+        , ICopyToSpan<T>, ITryCopyToSpan<T>
     {
         int Capacity { get; }
 
         bool IsCreated { get; }
-
-        void CopyTo(uint sourceStartIndex, T[] destination, uint destinationStartIndex, uint count);
     }
 }

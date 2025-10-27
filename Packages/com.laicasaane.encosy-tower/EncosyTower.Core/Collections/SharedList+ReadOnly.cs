@@ -13,7 +13,8 @@ namespace EncosyTower.Collections
         public ReadOnly AsReadOnly()
             => new(this);
 
-        public readonly partial struct ReadOnly : IAsReadOnlySpan<T>, IReadOnlyList<T>
+        public readonly partial struct ReadOnly : IReadOnlyList<T>, IAsReadOnlySpan<T>
+            , ICopyToSpan<T>, ITryCopyToSpan<T>
         {
             internal readonly NativeArray<T>.ReadOnly _buffer;
             internal readonly NativeArray<int>.ReadOnly _count;
@@ -76,28 +77,40 @@ namespace EncosyTower.Collections
                 => _buffer.AsReadOnlySpan()[..Count];
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(T[] array)
-                => CopyTo(array, 0);
+            public void CopyTo(T[] destination, int destinationIndex)
+                => CopyTo(destination.AsSpan().Slice(destinationIndex, Count));
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(T[] array, int arrayIndex)
-                => CopyTo(0, array, arrayIndex, Count);
+            public void CopyTo(Span<T> destination)
+                => CopyTo(0, destination);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(int index, T[] array, int arrayIndex, int length)
-                => AsReadOnlySpan().Slice(index, length).CopyTo(array.AsSpan(arrayIndex, length));
+            public void CopyTo(Span<T> destination, int length)
+                => CopyTo(0, destination, length);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(Span<T> array)
-                => CopyTo(0, array);
+            public void CopyTo(int sourceStartIndex, Span<T> destination)
+                => CopyTo(sourceStartIndex, destination, destination.Length);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(int index, Span<T> array)
-                => CopyTo(index, array, array.Length);
+            public void CopyTo(int sourceStartIndex, Span<T> destination, int length)
+                => AsReadOnlySpan().Slice(sourceStartIndex, length).CopyTo(destination[..length]);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(int index, Span<T> array, int length)
-                => AsReadOnlySpan().Slice(index, length).CopyTo(array[..length]);
+            public bool TryCopyTo(Span<T> destination)
+                => TryCopyTo(0, destination);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool TryCopyTo(Span<T> destination, int length)
+                => TryCopyTo(0, destination, length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool TryCopyTo(int sourceStartIndex, Span<T> destination)
+                => TryCopyTo(sourceStartIndex, destination, destination.Length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool TryCopyTo(int sourceStartIndex, Span<T> destination, int length)
+                => AsReadOnlySpan().Slice(sourceStartIndex, length).TryCopyTo(destination[..length]);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public T[] ToArray()
