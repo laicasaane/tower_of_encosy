@@ -106,6 +106,60 @@ namespace EncosyTower.Collections
             return array;
         }
 
+        /// <summary>
+        /// Create a NativeArray with cleared memory but lower performance.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NativeArray<T> Create<T>(int length, RewindableAllocator allocator)
+            where T : unmanaged
+        {
+            return CollectionHelper.CreateNativeArray<T>(length, allocator.Handle);
+        }
+
+        /// <summary>
+        /// Create a NativeArray with memory that is not cleared and may contain garbage values.
+        /// However, this method has higher performance.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NativeArray<T> CreateFast<T>(int length, RewindableAllocator allocator)
+            where T : unmanaged
+        {
+            return CollectionHelper.CreateNativeArray<T>(length, allocator.Handle, NativeArrayOptions.UninitializedMemory);
+        }
+
+        /// <summary>
+        /// Create a NativeArray from a <see cref="NativeSlice{T}"/>.
+        /// </summary>
+        public static NativeArray<T> CreateFrom<T>(NativeSlice<T> source, RewindableAllocator allocator)
+            where T : unmanaged
+        {
+            var array = CreateFast<T>(source.Length, allocator);
+            source.CopyTo(array);
+            return array;
+        }
+
+        /// <summary>
+        /// Create a NativeArray from a <see cref="Span{T}"/>.
+        /// </summary>
+        public static NativeArray<T> CreateFrom<T>(Span<T> source, RewindableAllocator allocator)
+            where T : unmanaged
+        {
+            var array = CreateFast<T>(source.Length, allocator);
+            source.CopyTo(array);
+            return array;
+        }
+
+        /// <summary>
+        /// Create a NativeArray from a <see cref="ReadOnlySpan{T}"/>.
+        /// </summary>
+        public static NativeArray<T> CreateFrom<T>(ReadOnlySpan<T> source, RewindableAllocator allocator)
+            where T : unmanaged
+        {
+            var array = CreateFast<T>(source.Length, allocator);
+            source.CopyTo(array);
+            return array;
+        }
+
 #endif
     }
 
