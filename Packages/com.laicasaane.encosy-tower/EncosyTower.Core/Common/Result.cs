@@ -1,5 +1,8 @@
 using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using UnityEngine;
 
 namespace EncosyTower.Common
 {
@@ -35,39 +38,49 @@ namespace EncosyTower.Common
 
     public readonly struct Result<TValue> : IEquatable<Result<TValue>>, IResult<TValue, Error>
     {
-        public readonly Option<TValue> Value;
         public readonly Error Error;
+
+        private readonly TValue _value;
+        private readonly ByteBool _hasValue;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(TValue value)
         {
-            Value = value;
             Error = Error.None;
+            _value = value;
+            _hasValue = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(Error error)
         {
-            Value = Option.None;
             Error = error;
+            _value = default;
+            _hasValue = false;
         }
 
         public bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Value.HasValue || Error.IsValid;
+            get => _hasValue || Error.IsValid;
         }
 
         public bool IsSuccess
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Value.HasValue;
+            get => IsValid && _hasValue;
         }
 
         public bool IsError
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => !IsSuccess;
+            get => IsValid && Error.IsValid;
+        }
+
+        public Option<TValue> Value
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _hasValue ? Option.Some(_value) : Option.None;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -114,7 +127,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Result<TValue> other)
-            => Value.Equals(other.Value) && Error.Equals(other.Error);
+            => _value.Equals(other._value) && Error.Equals(other.Error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
@@ -122,7 +135,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashCode.Combine(Value, Error);
+            => HashCode.Combine(_value, Error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
@@ -164,39 +177,62 @@ namespace EncosyTower.Common
 
     public readonly struct Result<TValue, TError> : IEquatable<Result<TValue, TError>>, IResult<TValue, TError>
     {
-        public readonly Option<TValue> Value;
-        public readonly Option<TError> Error;
+        private readonly TValue _value;
+        private readonly TError _error;
+        private readonly ByteBool _hasValue;
+        private readonly ByteBool _hasError;
+
+        static Result()
+        {
+            ThrowIfSameType();
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(TValue value)
         {
-            Value = Option.Some(value);
-            Error = Option.None;
+            _value = value;
+            _error = default;
+            _hasValue = true;
+            _hasError = false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(TError error)
         {
-            Value = Option.None;
-            Error = Option.Some(error);
+            _value = default;
+            _error = error;
+            _hasValue = false;
+            _hasError = true;
         }
 
         public bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Value.HasValue || Error.HasValue;
+            get => _hasValue || _hasError;
         }
 
         public bool IsSuccess
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Value.HasValue;
+            get => IsValid && _hasValue;
         }
 
         public bool IsError
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => !IsSuccess;
+            get => IsValid && _hasError;
+        }
+
+        public Option<TValue> Value
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _hasValue ? Option.Some(_value) : Option.None;
+        }
+
+        public Option<TError> Error
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _hasError ? Option.Some(_error) : Option.None;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -274,6 +310,17 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Result<TValue, TError> left, Result<TValue, TError> right)
             => !left.Equals(right);
+
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
+        private static void ThrowIfSameType()
+        {
+            if (typeof(TValue) == typeof(TError))
+            {
+                throw new InvalidOperationException(
+                    $"{typeof(Result<TValue, TError>)} is not allowed. Value type and error type must be different."
+                );
+            }
+        }
     }
 
     public static class ResultExtensions
@@ -317,7 +364,7 @@ namespace EncosyTower.Common
 
             var resultStringSpan = resultValue ? RESULT_VALUE_STRING.AsSpan() : RESULT_ERROR_STRING.AsSpan();
 
-            if (destination.Length < resultStringSpan.Length + 1)
+            if (destination.Length < resultStringSpan.Length + 1 + 1) // '(' and ')'
             {
                 return False(out charsWritten);
             }
@@ -332,7 +379,9 @@ namespace EncosyTower.Common
 
             if (resultValue)
             {
-                if (value.TryFormat(destination, out var valueCharsWritten, format, provider) == false)
+                var valueDestination = destination[..^1];
+
+                if (value.TryFormat(valueDestination, out var valueCharsWritten, format, provider) == false)
                 {
                     return False(out charsWritten);
                 }
@@ -352,12 +401,6 @@ namespace EncosyTower.Common
             }
 
             destination = destination[resultCharsWritten..];
-
-            if (destination.Length < 1)
-            {
-                return False(out charsWritten);
-            }
-
             destination[0] = ')';
             charsWritten = prefixChars + resultCharsWritten + 1;
             return true;
