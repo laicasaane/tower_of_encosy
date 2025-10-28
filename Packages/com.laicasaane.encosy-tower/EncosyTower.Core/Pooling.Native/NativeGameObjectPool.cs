@@ -24,7 +24,9 @@ namespace EncosyTower.Pooling.Native
 
     public struct NativeGameObjectPool : IDisposable
     {
-        private NativeReference<NativePrefabInfo> _prefabInfo;
+        public static readonly Allocator Allocator = Allocator.Persistent;
+
+        private NativeReference<NativePrefabInfo> _prefab;
 
         private TransformAccessArray _transformArray;
         private NativeList<float3> _positions;
@@ -33,36 +35,37 @@ namespace EncosyTower.Pooling.Native
 
         private NativeList<GameObjectId> _unusedGameObjectIds;
         private NativeList<TransformId> _unusedTransformIds;
-        private NativeList<int> _unusedTransformArrayIndices;
+        private NativeList<int> _unusedTransformIndices;
 
-        public NativeGameObjectPool(in NativePrefabInfo prefab, int initialCapacity)
+        public NativeGameObjectPool(in NativePrefabInfo prefab, int initialCapacity = 4, int desiredJobCount = -1)
         {
-            _prefabInfo = new(Allocator.Persistent, NativeArrayOptions.UninitializedMemory) {
+            initialCapacity = math.max(initialCapacity, 4);
+            desiredJobCount = math.select(-1, desiredJobCount, desiredJobCount >= 0);
+
+            _prefab = new(Allocator, NativeArrayOptions.UninitializedMemory) {
                 Value = prefab
             };
 
-            initialCapacity = math.max(initialCapacity, 4);
+            TransformAccessArray.Allocate(initialCapacity, desiredJobCount, out _transformArray);
+            _positions = new(initialCapacity, Allocator);
+            _rotations = new(initialCapacity, Allocator);
+            _scales = new(initialCapacity, Allocator);
 
-            TransformAccessArray.Allocate(initialCapacity, -1, out _transformArray);
-            _positions = new(initialCapacity, Allocator.Persistent);
-            _rotations = new(initialCapacity, Allocator.Persistent);
-            _scales = new(initialCapacity, Allocator.Persistent);
-
-            _unusedGameObjectIds = new(initialCapacity, Allocator.Persistent);
-            _unusedTransformIds = new(initialCapacity, Allocator.Persistent);
-            _unusedTransformArrayIndices = new(initialCapacity, Allocator.Persistent);
+            _unusedGameObjectIds = new(initialCapacity, Allocator);
+            _unusedTransformIds = new(initialCapacity, Allocator);
+            _unusedTransformIndices = new(initialCapacity, Allocator);
         }
 
         public readonly bool IsCreated
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _prefabInfo.IsCreated;
+            get => _prefab.IsCreated;
         }
 
         public readonly NativePrefabInfo Prefab
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _prefabInfo.Value;
+            get => _prefab.Value;
         }
 
         public readonly NativeArray<float3> Positions
@@ -91,7 +94,7 @@ namespace EncosyTower.Pooling.Native
 
         public void Dispose()
         {
-            _prefabInfo.Dispose();
+            _prefab.Dispose();
             _transformArray.Dispose();
             _positions.Dispose();
             _rotations.Dispose();
@@ -99,18 +102,23 @@ namespace EncosyTower.Pooling.Native
 
             _unusedGameObjectIds.Dispose();
             _unusedTransformIds.Dispose();
-            _unusedTransformArrayIndices.Dispose();
+            _unusedTransformIndices.Dispose();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Prepool(int amount)
-            => Prepool(amount, NativeReturningOptions.Everything);
+        public bool Prepool(int amount)
+            => Prepool(amount, NativeReturningOptions.Everything, out _);
 
-        public void Prepool(int amount, NativeReturningOptions options)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Prepool(int amount, out NativeRentingError error)
+            => Prepool(amount, NativeReturningOptions.Everything, out error);
+
+        public bool Prepool(int amount, NativeReturningOptions options, out NativeRentingError error)
         {
             if (amount < 1)
             {
-                return;
+                error = NativeRentingError.AmountMustBeGreaterThanZero;
+                return false;
             }
 
             IncreaseCapacityBy(amount);
@@ -134,7 +142,7 @@ namespace EncosyTower.Pooling.Native
             _scales.AddReplicate(prefab.Scale, amount);
 
             var transformArray = _transformArray;
-            var transformArrayIndices = _unusedTransformArrayIndices;
+            var transformArrayIndices = _unusedTransformIndices;
 
             for (var i = 0; i < amount; i++)
             {
@@ -151,44 +159,70 @@ namespace EncosyTower.Pooling.Native
             {
                 SceneManager.MoveGameObjectsToScene(gameObjectIds, scene);
             }
+
+            error = NativeRentingError.None;
+            return true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Rent(int amount, NativeList<GameObjectInfo> result, NativeRentingOptions options)
+            => Rent(amount, result, options, out _);
+
+        public bool Rent(
+              int amount
+            , NativeList<GameObjectInfo> result
+            , NativeRentingOptions options
+            , out NativeRentingError error
+        )
         {
             if (BurstHint.Unlikely(amount < 1))
             {
+                error = NativeRentingError.AmountMustBeGreaterThanZero;
                 return false;
             }
 
             if (BurstHint.Unlikely(result.IsCreated == false))
             {
+                error = NativeRentingError.ResultListMustBeCreatedInAdvance;
                 return false;
             }
 
             result.ResizeUninitialized(amount);
             RentInternal(result.AsArray().Slice(), options);
 
+            error = NativeRentingError.None;
             return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Rent(NativeArray<GameObjectInfo> result, NativeRentingOptions options)
-            => Rent(result.Slice(), options);
+        public bool Rent(in NativeArray<GameObjectInfo> result, NativeRentingOptions options)
+            => Rent(result, options, out _);
 
-        public bool Rent(NativeSlice<GameObjectInfo> result, NativeRentingOptions options)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Rent(in NativeArray<GameObjectInfo> result, NativeRentingOptions options, out NativeRentingError error)
+            => Rent(result.Slice(), options, out error);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Rent(in NativeSlice<GameObjectInfo> result, NativeRentingOptions options)
+            => Rent(result, options, out _);
+
+        public bool Rent(in NativeSlice<GameObjectInfo> result, NativeRentingOptions options, out NativeRentingError error)
         {
             var amount = result.Length;
 
             if (BurstHint.Unlikely(amount < 1))
             {
+                error = NativeRentingError.AmountMustBeGreaterThanZero;
                 return false;
             }
 
             RentInternal(result, options);
 
+            error = NativeRentingError.None;
             return true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Rent(
               NativeArray<GameObjectId> gameObjectIds
             , NativeArray<TransformId> transformIds
@@ -196,10 +230,22 @@ namespace EncosyTower.Pooling.Native
             , NativeRentingOptions options
         )
         {
+            return Rent(gameObjectIds, transformIds, arrayIndices, options, out _);
+        }
+
+        public bool Rent(
+              NativeArray<GameObjectId> gameObjectIds
+            , NativeArray<TransformId> transformIds
+            , NativeArray<int> arrayIndices
+            , NativeRentingOptions options
+            , out NativeRentingError error
+        )
+        {
             if (BurstHint.Unlikely(
                 gameObjectIds.Length != transformIds.Length || transformIds.Length != arrayIndices.Length
             ))
             {
+                error = NativeRentingError.ArraysMustHaveSameLength;
                 return false;
             }
 
@@ -207,6 +253,7 @@ namespace EncosyTower.Pooling.Native
 
             if (BurstHint.Unlikely(amount < 1))
             {
+                error = NativeRentingError.AmountMustBeGreaterThanZero;
                 return false;
             }
 
@@ -218,9 +265,11 @@ namespace EncosyTower.Pooling.Native
                 , gameObjectIds.Reinterpret<int>()
             );
 
+            error = NativeRentingError.None;
             return true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Rent(
               Span<GameObjectId> gameObjectIds
             , Span<TransformId> transformIds
@@ -228,10 +277,22 @@ namespace EncosyTower.Pooling.Native
             , NativeRentingOptions options
         )
         {
+            return Rent(gameObjectIds, transformIds, arrayIndices, options, out _);
+        }
+
+        public bool Rent(
+              Span<GameObjectId> gameObjectIds
+            , Span<TransformId> transformIds
+            , Span<int> arrayIndices
+            , NativeRentingOptions options
+            , out NativeRentingError error
+        )
+        {
             if (BurstHint.Unlikely(
                 gameObjectIds.Length != transformIds.Length || transformIds.Length != arrayIndices.Length
             ))
             {
+                error = NativeRentingError.ArraysMustHaveSameLength;
                 return false;
             }
 
@@ -239,6 +300,7 @@ namespace EncosyTower.Pooling.Native
 
             if (BurstHint.Unlikely(amount < 1))
             {
+                error = NativeRentingError.AmountMustBeGreaterThanZero;
                 return false;
             }
 
@@ -250,27 +312,49 @@ namespace EncosyTower.Pooling.Native
                 , default
             );
 
+            error = NativeRentingError.None;
             return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Return(NativeList<GameObjectInfo> items, NativeReturningOptions options)
-            => Return(items.AsArray().Slice(), options);
+            => Return(items, options, out _);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Return(NativeList<GameObjectInfo> items, NativeReturningOptions options, out NativeReturningError error)
+            => Return(items.AsArray().Slice(), options, out error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Return(NativeArray<GameObjectInfo> items, NativeReturningOptions options)
-            => Return(items.Slice(), options);
+            => Return(items, options, out _);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Return(NativeArray<GameObjectInfo> items, NativeReturningOptions options, out NativeReturningError error)
+            => Return(items.Slice(), options, out error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Return(ReadOnlySpan<GameObjectInfo> items, NativeReturningOptions options)
-            => Return(NativeArray.CreateFrom(items, Allocator.Temp).Slice(), options);
+            => Return(items, options, out _);
 
-        public bool Return(NativeSlice<GameObjectInfo> items, NativeReturningOptions options)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Return(ReadOnlySpan<GameObjectInfo> items, NativeReturningOptions options, out NativeReturningError error)
+            => Return(NativeArray.CreateFrom(items, Allocator.Temp).Slice(), options, out error);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Return(in NativeSlice<GameObjectInfo> items, NativeReturningOptions options)
+            => Return(items, options, out _);
+
+        public bool Return(
+              in NativeSlice<GameObjectInfo> items
+            , NativeReturningOptions options
+            , out NativeReturningError error
+        )
         {
             var amount = items.Length;
 
             if (BurstHint.Unlikely(amount < 1))
             {
+                error = NativeReturningError.ArraysMustContainAnyElement;
                 return false;
             }
 
@@ -284,9 +368,11 @@ namespace EncosyTower.Pooling.Native
                 , transformIds
                 , arrayIndices
                 , options
+                , out error
             );
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Return(
               NativeArray<GameObjectId> gameObjectIds
             , NativeArray<TransformId> transformIds
@@ -294,15 +380,28 @@ namespace EncosyTower.Pooling.Native
             , NativeReturningOptions options
         )
         {
+            return Return(gameObjectIds, transformIds, arrayIndices, options, out _);
+        }
+
+        public bool Return(
+              NativeArray<GameObjectId> gameObjectIds
+            , NativeArray<TransformId> transformIds
+            , NativeArray<int> arrayIndices
+            , NativeReturningOptions options
+            , out NativeReturningError error
+        )
+        {
             if (BurstHint.Unlikely(
                 gameObjectIds.Length != transformIds.Length || transformIds.Length != arrayIndices.Length
             ))
             {
+                error = NativeReturningError.ArraysMustHaveSameLength;
                 return false;
             }
 
             if (BurstHint.Unlikely(gameObjectIds.Length < 1))
             {
+                error = NativeReturningError.ArraysMustContainAnyElement;
                 return false;
             }
 
@@ -314,9 +413,11 @@ namespace EncosyTower.Pooling.Native
                 , gameObjectIds.Reinterpret<int>()
             );
 
+            error = NativeReturningError.None;
             return true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Return(
               ReadOnlySpan<GameObjectId> gameObjectIds
             , ReadOnlySpan<TransformId> transformIds
@@ -324,10 +425,22 @@ namespace EncosyTower.Pooling.Native
             , NativeReturningOptions options
         )
         {
+            return Return(gameObjectIds, transformIds, arrayIndices, options, out _);
+        }
+
+        public bool Return(
+              ReadOnlySpan<GameObjectId> gameObjectIds
+            , ReadOnlySpan<TransformId> transformIds
+            , ReadOnlySpan<int> arrayIndices
+            , NativeReturningOptions options
+            , out NativeReturningError error
+        )
+        {
             if (BurstHint.Unlikely(
                 gameObjectIds.Length != transformIds.Length || transformIds.Length != arrayIndices.Length
             ))
             {
+                error = NativeReturningError.ArraysMustHaveSameLength;
                 return false;
             }
 
@@ -335,6 +448,7 @@ namespace EncosyTower.Pooling.Native
 
             if (BurstHint.Unlikely(amount < 1))
             {
+                error = NativeReturningError.ArraysMustContainAnyElement;
                 return false;
             }
 
@@ -354,25 +468,40 @@ namespace EncosyTower.Pooling.Native
                 , returnedGameObjectIds.Reinterpret<int>()
             );
 
+            error = NativeReturningError.None;
             return true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Return(
-              NativeSlice<GameObjectId> gameObjectIds
-            , NativeSlice<TransformId> transformIds
-            , NativeSlice<int> arrayIndices
+              in NativeSlice<GameObjectId> gameObjectIds
+            , in NativeSlice<TransformId> transformIds
+            , in NativeSlice<int> arrayIndices
             , NativeReturningOptions options
+        )
+        {
+            return Return(gameObjectIds, transformIds, arrayIndices, options, out _);
+        }
+
+        public bool Return(
+              in NativeSlice<GameObjectId> gameObjectIds
+            , in NativeSlice<TransformId> transformIds
+            , in NativeSlice<int> arrayIndices
+            , NativeReturningOptions options
+            , out NativeReturningError error
         )
         {
             if (BurstHint.Unlikely(
                 gameObjectIds.Length != transformIds.Length || transformIds.Length != arrayIndices.Length
             ))
             {
+                error = NativeReturningError.ArraysMustHaveSameLength;
                 return false;
             }
 
             if (BurstHint.Unlikely(gameObjectIds.Length < 1))
             {
+                error = NativeReturningError.ArraysMustContainAnyElement;
                 return false;
             }
 
@@ -384,6 +513,7 @@ namespace EncosyTower.Pooling.Native
                 , default
             );
 
+            error = NativeReturningError.None;
             return true;
         }
 
@@ -406,9 +536,9 @@ namespace EncosyTower.Pooling.Native
                 _unusedTransformIds.Capacity = capacity;
             }
 
-            if (_unusedTransformArrayIndices.Capacity < capacity)
+            if (_unusedTransformIndices.Capacity < capacity)
             {
-                _unusedTransformArrayIndices.Capacity = capacity;
+                _unusedTransformIndices.Capacity = capacity;
             }
 
             if (_positions.Capacity < capacity)
@@ -427,7 +557,7 @@ namespace EncosyTower.Pooling.Native
             }
         }
 
-        private void RentInternal(NativeSlice<GameObjectInfo> result, NativeRentingOptions options)
+        private void RentInternal(in NativeSlice<GameObjectInfo> result, NativeRentingOptions options)
         {
             var slice = result.Slice();
             var gameObjectIds = slice.SliceWithStride<GameObjectId>(GameObjectInfo.OFFSET_GAMEOBJECT_ID);
@@ -438,9 +568,9 @@ namespace EncosyTower.Pooling.Native
         }
 
         private void RentInternal(
-              NativeSlice<GameObjectId> gameObjectIds
-            , NativeSlice<TransformId> transformIds
-            , NativeSlice<int> arrayIndices
+              in NativeSlice<GameObjectId> gameObjectIds
+            , in NativeSlice<TransformId> transformIds
+            , in NativeSlice<int> arrayIndices
             , NativeRentingOptions options
             , NativeArray<int> gameObjectIdsToMove
         )
@@ -452,7 +582,7 @@ namespace EncosyTower.Pooling.Native
             var startIndex = _unusedGameObjectIds.Length - amount;
             var unusedGameObjectIds = _unusedGameObjectIds.AsArray();
             var unusedTransformIds = _unusedTransformIds.AsArray();
-            var unusedArrayIndices = _unusedTransformArrayIndices.AsArray();
+            var unusedArrayIndices = _unusedTransformIndices.AsArray();
 
             gameObjectIds.CopyFrom(unusedGameObjectIds.Slice(startIndex, amount));
             transformIds.CopyFrom(unusedTransformIds.Slice(startIndex, amount));
@@ -466,7 +596,7 @@ namespace EncosyTower.Pooling.Native
 
             _unusedGameObjectIds.RemoveRange(startIndex, amount);
             _unusedTransformIds.RemoveRange(startIndex, amount);
-            _unusedTransformArrayIndices.RemoveRange(startIndex, amount);
+            _unusedTransformIndices.RemoveRange(startIndex, amount);
 
             if (options.Contains(NativeRentingOptions.Activate))
             {
@@ -484,9 +614,9 @@ namespace EncosyTower.Pooling.Native
         }
 
         private void ReturnInternal(
-              NativeSlice<GameObjectId> gameObjectIds
-            , NativeSlice<TransformId> transformIds
-            , NativeSlice<int> arrayIndices
+              in NativeSlice<GameObjectId> gameObjectIds
+            , in NativeSlice<TransformId> transformIds
+            , in NativeSlice<int> arrayIndices
             , NativeReturningOptions options
             , NativeArray<int> gameObjectIdsToMove
         )
@@ -497,11 +627,11 @@ namespace EncosyTower.Pooling.Native
 
             _unusedGameObjectIds.ResizeUninitialized(newLength);
             _unusedTransformIds.ResizeUninitialized(newLength);
-            _unusedTransformArrayIndices.ResizeUninitialized(newLength);
+            _unusedTransformIndices.ResizeUninitialized(newLength);
 
             var unusedGameObjectIds = _unusedGameObjectIds.AsArray();
             var unusedTransformIds = _unusedTransformIds.AsArray();
-            var unusedArrayIndices = _unusedTransformArrayIndices.AsArray();
+            var unusedArrayIndices = _unusedTransformIndices.AsArray();
 
             unusedGameObjectIds.Slice(startIndex, amount).CopyFrom(gameObjectIds);
             unusedTransformIds.Slice(startIndex, amount).CopyFrom(transformIds);
