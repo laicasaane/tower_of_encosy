@@ -94,15 +94,28 @@ namespace EncosyTower.Pooling.Native
 
         public void Dispose()
         {
-            _prefab.Dispose();
-            _transformArray.Dispose();
-            _positions.Dispose();
-            _rotations.Dispose();
-            _scales.Dispose();
+            if (IsCreated)
+            {
+                _prefab.Dispose();
+                _transformArray.Dispose();
+                _positions.Dispose();
+                _rotations.Dispose();
+                _scales.Dispose();
 
-            _unusedGameObjectIds.Dispose();
-            _unusedTransformIds.Dispose();
-            _unusedTransformIndices.Dispose();
+                _unusedGameObjectIds.Dispose();
+                _unusedTransformIds.Dispose();
+                _unusedTransformIndices.Dispose();
+            }
+
+            _prefab = default;
+            _transformArray = default;
+            _positions = default;
+            _rotations = default;
+            _scales = default;
+
+            _unusedGameObjectIds = default;
+            _unusedTransformIds = default;
+            _unusedTransformIndices = default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -142,7 +155,7 @@ namespace EncosyTower.Pooling.Native
             _scales.AddReplicate(prefab.Scale, amount);
 
             var transformArray = _transformArray;
-            var transformArrayIndices = _unusedTransformIndices;
+            var unusedTransformIndices = _unusedTransformIndices;
 
             for (var i = 0; i < amount; i++)
             {
@@ -150,7 +163,7 @@ namespace EncosyTower.Pooling.Native
                 var arrayIndex = transformArray.length;
 
                 transformArray.Add(transformId);
-                transformArrayIndices.Add(arrayIndex);
+                unusedTransformIndices.Add(arrayIndex);
             }
 
             if (options.Contains(NativeReturningOptions.MoveToScene)
