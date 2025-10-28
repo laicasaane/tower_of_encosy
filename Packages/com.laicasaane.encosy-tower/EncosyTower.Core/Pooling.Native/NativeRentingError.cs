@@ -9,5 +9,6 @@ namespace EncosyTower.Pooling.Native
         ArraysMustHaveSameLength,
         AmountMustBeGreaterThanZero,
         ResultListMustBeCreatedInAdvance,
+        NoPrefabAssociatedWithProvidedKey,
     }
 }

@@ -8,5 +8,6 @@ namespace EncosyTower.Pooling.Native
         None = 0,
         ArraysMustHaveSameLength,
         ArraysMustContainAnyElement,
+        NoPrefabAssociatedWithProvidedKey,
     }
 }
