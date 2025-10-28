@@ -191,10 +191,10 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddRange(NativeSlice<T> items)
+        public void AddRange(in NativeSlice<T> items)
             => AddRange(items, items.Length);
 
-        public void AddRange(NativeSlice<T> items, int count)
+        public void AddRange(in NativeSlice<T> items, int count)
         {
             VersionRW++;
 
@@ -290,11 +290,11 @@ namespace EncosyTower.Collections
             => AsReadOnlySpan().Slice(index, length).CopyTo(array.AsSpan()[..length]);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(int index, NativeSlice<T> array)
+        public void CopyTo(int index, in NativeSlice<T> array)
             => CopyTo(index, array, array.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(int index, NativeSlice<T> array, int length)
+        public void CopyTo(int index, in NativeSlice<T> array, int length)
             => array.Slice(0, length).CopyFrom(AsNativeSlice().Slice(index, length));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

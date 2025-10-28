@@ -20,7 +20,7 @@ namespace EncosyTower.Collections
         /// <summary>
         /// Create a NativeArray from a <see cref="NativeSlice{T}"/>.
         /// </summary>
-        public static NativeArray<T> CreateFrom<T>(NativeSlice<T> source, Allocator allocator)
+        public static NativeArray<T> CreateFrom<T>(in NativeSlice<T> source, Allocator allocator)
             where T : struct
         {
             var array = CreateFast<T>(source.Length, allocator);
@@ -76,7 +76,7 @@ namespace EncosyTower.Collections
         /// <summary>
         /// Create a NativeArray from a <see cref="NativeSlice{T}"/>.
         /// </summary>
-        public static NativeArray<T> CreateFrom<T>(NativeSlice<T> source, AllocatorManager.AllocatorHandle allocator)
+        public static NativeArray<T> CreateFrom<T>(in NativeSlice<T> source, AllocatorManager.AllocatorHandle allocator)
             where T : unmanaged
         {
             var array = CreateFast<T>(source.Length, allocator);
@@ -130,7 +130,7 @@ namespace EncosyTower.Collections
         /// <summary>
         /// Create a NativeArray from a <see cref="NativeSlice{T}"/>.
         /// </summary>
-        public static NativeArray<T> CreateFrom<T>(NativeSlice<T> source, RewindableAllocator allocator)
+        public static NativeArray<T> CreateFrom<T>(in NativeSlice<T> source, RewindableAllocator allocator)
             where T : unmanaged
         {
             var array = CreateFast<T>(source.Length, allocator);
