@@ -221,7 +221,7 @@ namespace EncosyTower.Collections
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
 
-        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [HideInCallstack, StackTraceHidden, DoesNotReturn]
         private static void ThrowIfInvalidSize()
         {
             if (UnsafeUtility.SizeOf<TBuffer>() < UnsafeUtility.SizeOf<T>())
