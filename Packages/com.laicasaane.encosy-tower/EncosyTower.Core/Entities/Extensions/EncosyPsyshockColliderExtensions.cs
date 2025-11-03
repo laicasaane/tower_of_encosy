@@ -1,7 +1,10 @@
 #if UNITY_ENTITIES && LATIOS_FRAMEWORK
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using EncosyTower.UnityExtensions;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace EncosyTower.Entities
 {
@@ -13,23 +16,25 @@ namespace EncosyTower.Entities
     {
         public static PsyshockCollider ToPsyshockCollider([NotNull] this UnityCollider collider)
         {
-            if (collider == false)
+            if (collider.IsValid() == false)
             {
+                ThrowColliderNullReference();
                 return default;
             }
 
             return collider switch {
-                UnityEngine.SphereCollider sphere => ToPsyshockCollider(sphere),
-                UnityEngine.CapsuleCollider capsule => ToPsyshockCollider(capsule),
-                UnityEngine.BoxCollider box => ToPsyshockCollider(box),
+                SphereCollider sphere => ToPsyshockCollider(sphere),
+                CapsuleCollider capsule => ToPsyshockCollider(capsule),
+                BoxCollider box => ToPsyshockCollider(box),
                 _ => default,
             };
         }
 
-        public static Psyshock.SphereCollider ToPsyshockCollider([NotNull] this UnityEngine.SphereCollider collider)
+        public static Psyshock.SphereCollider ToPsyshockCollider([NotNull] this SphereCollider collider)
         {
-            if (collider == false)
+            if (collider.IsValid() == false)
             {
+                ThrowColliderNullReference();
                 return default;
             }
 
@@ -40,10 +45,11 @@ namespace EncosyTower.Entities
             };
         }
 
-        public static Psyshock.CapsuleCollider ToPsyshockCollider([NotNull] this UnityEngine.CapsuleCollider collider)
+        public static Psyshock.CapsuleCollider ToPsyshockCollider([NotNull] this CapsuleCollider collider)
         {
-            if (collider == false)
+            if (collider.IsValid() == false)
             {
+                ThrowColliderNullReference();
                 return default;
             }
 
@@ -70,10 +76,11 @@ namespace EncosyTower.Entities
             };
         }
 
-        public static Psyshock.BoxCollider ToPsyshockCollider([NotNull] this UnityEngine.BoxCollider collider)
+        public static Psyshock.BoxCollider ToPsyshockCollider([NotNull] this BoxCollider collider)
         {
-            if (collider == false)
+            if (collider.IsValid() == false)
             {
+                ThrowColliderNullReference();
                 return default;
             }
 
@@ -81,6 +88,12 @@ namespace EncosyTower.Entities
                 center = collider.center,
                 halfSize = collider.size / 2f
             };
+        }
+
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void ThrowColliderNullReference()
+        {
+            throw new System.ArgumentNullException("collider");
         }
     }
 }
