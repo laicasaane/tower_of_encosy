@@ -60,10 +60,24 @@ namespace EncosyTower.SourceGen.Generators.Entities
 
         private static void WriteConcreteMethods(ref Printer p, LookupDeclaration declaration)
         {
+            var writeLookupCommon = false;
+
             foreach (var typeRef in declaration.TypeRefs)
             {
                 var typeName = typeRef.Symbol.ToFullName();
                 var lookupField = GetLookupFieldName(typeRef);
+
+                if (writeLookupCommon == false)
+                {
+                    writeLookupCommon = true;
+
+                    WriteAttributes(ref p);
+                    p.PrintBeginLine("public bool EntityExists(")
+                        .Print(ENTITY).Print(" entity)")
+                        .Print(" => ").Print(lookupField)
+                        .PrintEndLine(".EntityExists(entity);");
+                    p.PrintEndLine();
+                }
 
                 WriteBeginRegion(ref p, typeRef.Symbol.Name);
 
@@ -74,6 +88,15 @@ namespace EncosyTower.SourceGen.Generators.Entities
                     .Print(" => result = (").Print(BOOL).Print(typeName)
                     .Print(">)").Print(lookupField)
                     .PrintEndLine(".HasBuffer(entity);");
+                p.PrintEndLine();
+
+                WriteAttributes(ref p);
+                p.PrintBeginLine("public void HasBuffer(")
+                    .Print(ENTITY).Print(" entity, out ").Print(BOOL)
+                    .Print(typeName).Print("> result, out bool entityExists)")
+                    .Print(" => result = (").Print(BOOL).Print(typeName)
+                    .Print(">)").Print(lookupField)
+                    .PrintEndLine(".HasBuffer(entity, out entityExists);");
                 p.PrintEndLine();
 
                 WriteAttributes(ref p);
@@ -94,6 +117,14 @@ namespace EncosyTower.SourceGen.Generators.Entities
                 p.PrintEndLine();
 
                 WriteAttributes(ref p);
+                p.PrintBeginLine("public bool TryGetBuffer(")
+                    .Print(ENTITY).Print(" entity, out ").Print(BUFFER)
+                    .Print(typeName).Print("> bufferData, out bool entityExists)")
+                    .Print(" => ").Print(lookupField)
+                    .PrintEndLine(".TryGetBuffer(entity, out bufferData, out entityExists);");
+                p.PrintEndLine();
+
+                WriteAttributes(ref p);
                 p.PrintBeginLine("public ").Print(BUFFER)
                     .Print(typeName).Print("> GetBuffer(")
                     .Print(ENTITY).Print(" entity, ")
@@ -111,26 +142,6 @@ namespace EncosyTower.SourceGen.Generators.Entities
                 p.PrintEndLine();
 
                 WriteAttributes(ref p);
-                p.PrintBeginLine("public void IsBufferEnabled(")
-                    .Print(ENTITY).Print(" entity, out ").Print(BOOL)
-                    .Print(typeName).Print("> result)")
-                    .Print(" => result = (").Print(BOOL).Print(typeName)
-                    .Print(">)").Print(lookupField)
-                    .PrintEndLine(".IsBufferEnabled(entity);");
-                p.PrintEndLine();
-
-                if (typeRef.IsReadOnly == false)
-                {
-                    WriteAttributes(ref p);
-                    p.PrintBeginLine("public void SetBufferEnabled(")
-                        .Print(ENTITY).Print(" entity, ").Print(BOOL)
-                        .Print(typeName).Print("> value)")
-                        .Print(" => ").Print(lookupField)
-                        .PrintEndLine(".SetBufferEnabled(entity, value);");
-                    p.PrintEndLine();
-                }
-
-                WriteAttributes(ref p);
                 p.PrintBeginLine("public static implicit operator ").Print(LOOKUP)
                     .Print(typeName).Print(">(in ").Print(declaration.Syntax.Identifier.Text).Print(" value)")
                     .Print(" => value.").Print(lookupField).PrintEndLine(";");
@@ -141,6 +152,7 @@ namespace EncosyTower.SourceGen.Generators.Entities
 
             static void WriteAttributes(ref Printer p)
             {
+                p.PrintLine("/// <inheritdoc/>");
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             }
         }

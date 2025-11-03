@@ -11,17 +11,25 @@ namespace EncosyTower.Tests.Lookups
 
     public struct BufferB : IBufferElementData { }
 
+    public struct EnableableBufferA : IBufferElementData, IEnableableComponent { }
+
+    public struct EnableableBufferB : IBufferElementData, IEnableableComponent { }
+
     public struct EnableableComponentA : IComponentData, IEnableableComponent { }
 
     public struct EnableableComponentB : IComponentData, IEnableableComponent { }
 
-    [Lookup(typeof(ComponentA), true)]
-    [Lookup(typeof(ComponentB), false)]
-    public partial struct ComponentLookups : IComponentLookups { }
-
     [Lookup(typeof(BufferA), true)]
     [Lookup(typeof(BufferB), false)]
     public partial struct BufferLookups : IBufferLookups { }
+
+    [Lookup(typeof(EnableableBufferA), true)]
+    [Lookup(typeof(EnableableBufferB), false)]
+    public partial struct EnableableBufferLookups : IEnableableBufferLookups { }
+
+    [Lookup(typeof(ComponentA), true)]
+    [Lookup(typeof(ComponentB), false)]
+    public partial struct ComponentLookups : IComponentLookups { }
 
     [Lookup(typeof(EnableableComponentA), true)]
     [Lookup(typeof(EnableableComponentB), false)]

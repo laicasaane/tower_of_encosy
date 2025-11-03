@@ -138,7 +138,7 @@ namespace EncosyTower.SourceGen.Generators.Entities
                         .PrintEndLine(".GetRW(entity);");
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    WriteAttributesNoInline(ref p);
                     p.PrintBeginLine("public void GetRefRWOptional(")
                         .Print(SAFE_ENTITY).Print(" entity, out ").Print(REFRW)
                         .Print(typeName).PrintEndLine("> result)");
@@ -163,7 +163,7 @@ namespace EncosyTower.SourceGen.Generators.Entities
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    WriteAttributesNoInline(ref p);
                     p.PrintBeginLine("public void GetRefRWOptional(")
                         .Print(SAFE_ENTITY).Print(" entity, ").Print(typeName)
                         .Print(" _, out ").Print(REFRW).Print(typeName).PrintEndLine("> result)");
@@ -218,7 +218,7 @@ namespace EncosyTower.SourceGen.Generators.Entities
                         .PrintEndLine(".SetEnabled(entity, value);");
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    WriteAttributesNoInline(ref p);
                     p.PrintBeginLine("public void SetComponentEnabledOptional(")
                         .Print(SAFE_ENTITY).Print(" entity, ").Print(BOOL)
                         .Print(typeName).PrintEndLine("> value)");
@@ -243,7 +243,14 @@ namespace EncosyTower.SourceGen.Generators.Entities
 
             static void WriteAttributes(ref Printer p)
             {
+                p.PrintLine("/// <inheritdoc/>");
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            }
+
+            static void WriteAttributesNoInline(ref Printer p)
+            {
+                p.PrintLine("/// <inheritdoc/>");
+                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             }
         }
     }
