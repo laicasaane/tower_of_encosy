@@ -201,59 +201,135 @@ namespace EncosyTower.Collections
         }
 
         /// <summary>
-        /// Returns a span covering the entire internal buffer of the <see cref="FixedString32Bytes"/>.
+        /// Copies a span of UTF8 chars to this string (making the two strings equal).
+        /// Replaces any existing content of the FixedString.
         /// </summary>
         /// <remarks>
-        /// The internal buffer is 29 bytes long.
+        /// When the method returns an error, the destination string is not modified.
         /// </remarks>
-        /// <seealso cref="FixedString32Bytes.UTF8MaxLengthInBytes"/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> AsSpan(this in FixedString32Bytes self)
-            => new(self.GetUnsafePtr(), FixedString32Bytes.UTF8MaxLengthInBytes);
+        /// <typeparam name="T">The type of the destination string.</typeparam>
+        /// <param name="fs">The destination string.</param>
+        /// <param name="utf8Chars">The span of UTF8 chars to be copied.</param>
+        /// <returns>
+        /// CopyError.None if successful.
+        /// Returns CopyError.Truncation if the source string is too large to fit in the destination.
+        /// </returns>
+        [ExcludeFromBurstCompatTesting("Takes managed string")]
+        public static CopyError CopyFrom<T>(this ref T fs, ReadOnlySpan<byte> utf8Chars)
+            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            fs.Length = 0;
+
+            if (Append(ref fs, utf8Chars) != 0)
+            {
+                return CopyError.Truncation;
+            }
+
+            return CopyError.None;
+        }
 
         /// <summary>
-        /// Returns a span covering the entire internal buffer of the <see cref="FixedString64Bytes"/>.
+        /// Copies a span of UTF8 chars to this string.
+        /// If the string exceeds the capacity it will be truncated.
+        /// Replaces any existing content of the FixedString.
         /// </summary>
-        /// <remarks>
-        /// The internal buffer is 61 bytes long.
-        /// </remarks>
-        /// <seealso cref="FixedString64Bytes.UTF8MaxLengthInBytes"/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> AsSpan(this in FixedString64Bytes self)
-            => new(self.GetUnsafePtr(), FixedString64Bytes.UTF8MaxLengthInBytes);
+        /// <typeparam name="T">The type of the destination string.</typeparam>
+        /// <param name="fs">The destination string.</param>
+        /// <param name="utf8Chars">The span of UTF8 chars to be copied.</param>
+        /// <returns>
+        ///  CopyError.None if successful.
+        ///  Returns CopyError.Truncation if the source span is too large to fit in the destination.
+        /// </returns>
+        public unsafe static CopyError CopyFromTruncated<T>(this ref T fs, ReadOnlySpan<byte> utf8Chars)
+            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            fixed (byte* chars = utf8Chars)
+            {
+                CopyError result = UTF8ArrayUnsafeUtility.Copy(
+                      fs.GetUnsafePtr()
+                    , out var destLength
+                    , fs.Capacity
+                    , chars
+                    , utf8Chars.Length
+                );
+
+                fs.Length = destLength;
+                return result;
+            }
+        }
 
         /// <summary>
-        /// Returns a span covering the entire internal buffer of the <see cref="FixedString128Bytes"/>.
+        /// Appends a span of UTF8 chars to this string.
         /// </summary>
         /// <remarks>
-        /// The internal buffer is 125 bytes long.
+        /// When the method returns an error, the destination string is not modified.
         /// </remarks>
-        /// <seealso cref="FixedString128Bytes.UTF8MaxLengthInBytes"/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> AsSpan(this in FixedString128Bytes self)
-            => new(self.GetUnsafePtr(), FixedString128Bytes.UTF8MaxLengthInBytes);
+        /// <typeparam name="T">The type of the destination string.</typeparam>
+        /// <param name="fs">The destination string.</param>
+        /// <param name="utf8Chars">The span of UTF8 chars to append.</param>
+        /// <returns>
+        /// <see cref="FormatError.None"/> if successful.
+        /// Returns <see cref="FormatError.Overflow"/> if the capacity of the destination string is exceeded.
+        /// </returns>
+        public unsafe static FormatError Append<T>(this ref T fs, ReadOnlySpan<byte> utf8Chars)
+            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            fixed (byte* chars = utf8Chars)
+            {
+                return fs.Append(chars, utf8Chars.Length);
+            }
+        }
 
         /// <summary>
-        /// Returns a span covering the entire internal buffer of the <see cref="FixedString512Bytes"/>.
+        /// Returns a span covering the entire length of <paramref name="self"/>.
         /// </summary>
-        /// <remarks>
-        /// The internal buffer is 509 bytes long.
-        /// </remarks>
-        /// <seealso cref="FixedString512Bytes.UTF8MaxLengthInBytes"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> AsSpan(this in FixedString512Bytes self)
-            => new(self.GetUnsafePtr(), FixedString512Bytes.UTF8MaxLengthInBytes);
+        public static unsafe Span<byte> AsSpan<T>(this ref T self)
+            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+            => new(self.GetUnsafePtr(), self.Length);
 
         /// <summary>
-        /// Returns a span covering the entire internal buffer of the <see cref="FixedString4096Bytes"/>.
+        /// Returns a readonly span covering the entire length of <paramref name="self"/>.
         /// </summary>
-        /// <remarks>
-        /// The internal buffer is 4093 bytes long.
-        /// </remarks>
-        /// <seealso cref="FixedString4096Bytes.UTF8MaxLengthInBytes"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> AsSpan(this in FixedString4096Bytes self)
-            => new(self.GetUnsafePtr(), FixedString4096Bytes.UTF8MaxLengthInBytes);
+        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan<T>(this T self)
+            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+            => new(self.GetUnsafePtr(), self.Length);
+
+        /// <summary>
+        /// Returns a readonly span covering the entire length of <paramref name="self"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString32Bytes self)
+            => new(self.GetUnsafePtr(), self.Length);
+
+        /// <summary>
+        /// Returns a readonly span covering the entire length of <paramref name="self"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString64Bytes self)
+            => new(self.GetUnsafePtr(), self.Length);
+
+        /// <summary>
+        /// Returns a readonly span covering the entire length of <paramref name="self"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString128Bytes self)
+            => new(self.GetUnsafePtr(), self.Length);
+
+        /// <summary>
+        /// Returns a readonly span covering the entire length of <paramref name="self"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString512Bytes self)
+            => new(self.GetUnsafePtr(), self.Length);
+
+        /// <summary>
+        /// Returns a readonly span covering the entire length of <paramref name="self"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString4096Bytes self)
+            => new(self.GetUnsafePtr(), self.Length);
     }
 }
 
