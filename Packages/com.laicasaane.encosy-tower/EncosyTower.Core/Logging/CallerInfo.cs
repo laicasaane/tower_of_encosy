@@ -1,23 +1,35 @@
+using System.Runtime.CompilerServices;
+using EncosyTower.Common;
+
 namespace EncosyTower.Logging
 {
-    using System.Runtime.CompilerServices;
-
     public readonly partial struct CallerInfo
     {
-        public readonly string MemberName;
+        /// <summary>
+        /// The value retrieved from <see cref="CallerFilePathAttribute"/>.
+        /// </summary>
         public readonly string FilePath;
+
+        /// <summary>
+        /// The value retrieved from <see cref="CallerMemberNameAttribute"/>.
+        /// </summary>
+        public readonly string MemberName;
+
+        /// <summary>
+        /// The value retrieved from <see cref="CallerLineNumberAttribute"/>.
+        /// </summary>
         public readonly int LineNumber;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public CallerInfo(
+        private CallerInfo(
               int lineNumber
             , string memberName
             , string filePath
         )
         {
+            LineNumber = lineNumber;
             MemberName = memberName;
             FilePath = filePath;
-            LineNumber = lineNumber;
         }
 
         /// <summary>
@@ -56,41 +68,23 @@ namespace EncosyTower.Logging
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
-            => $"{LineNumber} :: {MemberName} :: {FilePath}";
-    }
-}
-
-#if UNITY_COLLECTIONS
-
-namespace EncosyTower.Logging
-{
-    using System.Runtime.CompilerServices;
-    using Unity.Collections;
-
-    partial struct CallerInfo
-    {
-        public FixedString4096Bytes ToFixedString()
         {
-            var fs = new FixedString4096Bytes();
-
-            fs.Append(LineNumber);
-            AppendSeparator(ref fs);
-            fs.Append(MemberName);
-            AppendSeparator(ref fs);
-            fs.Append(FilePath);
-
-            return fs;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static void AppendSeparator(ref FixedString4096Bytes fs)
+            if (MemberName.IsNotEmpty() && FilePath.IsNotEmpty())
             {
-                fs.Append(' ');
-                fs.Append(':');
-                fs.Append(':');
-                fs.Append(' ');
+                return $"{LineNumber} :: {MemberName} :: {FilePath}";
             }
+
+            if (MemberName.IsNotEmpty())
+            {
+                return $"{LineNumber} :: {MemberName}";
+            }
+
+            if (FilePath.IsNotEmpty())
+            {
+                return $"{LineNumber} :: {FilePath}";
+            }
+
+            return LineNumber.ToString();
         }
     }
 }
-
-#endif
