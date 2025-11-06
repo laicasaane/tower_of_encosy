@@ -36,6 +36,24 @@ namespace EncosyTower.Common
     {
     }
 
+    public readonly struct Result
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Equals<TValue>(in Result<TValue> a, in Result<TValue> b)
+            where TValue : IEquatable<TValue>
+        {
+            return Option.Equals(a.Value, b.Value) || a.Error == b.Error;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Equals<TValue, TError>(in Result<TValue, TError> a, in Result<TValue, TError> b)
+            where TValue : IEquatable<TValue>
+            where TError : IEquatable<TError>
+        {
+            return Option.Equals(a.Value, b.Value) || Option.Equals(a.Error, b.Error);
+        }
+    }
+
     public readonly struct Result<TValue> : IResult<TValue, Error>
     {
         public readonly Error Error;
