@@ -7,6 +7,7 @@
 #endif
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -19,12 +20,25 @@ namespace EncosyTower.PubSub
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static MessageSubscriber.Subscriber<TScope, TState> WithState<TScope, TState>(
-              this MessageSubscriber.Subscriber<TScope> subscriber
+              this in MessageSubscriber.Subscriber<TScope> subscriber
             , [NotNull] TState state
         )
             where TState : class
         {
             return new MessageSubscriber.Subscriber<TScope, TState>(subscriber, state);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static MessageSubscriber.Subscriber<TScope, TState> WithSubscriptions<TScope, TState>(
+              this in MessageSubscriber.Subscriber<TScope, TState> subscriber
+            , ICollection<ISubscription> subscriptions
+        )
+            where TState : class
+        {
+            return new MessageSubscriber.Subscriber<TScope, TState>(
+                  subscriber._subscriber.WithSubscriptions(subscriptions)
+                , subscriber.State
+            );
         }
     }
 
@@ -35,17 +49,20 @@ namespace EncosyTower.PubSub
         {
             internal readonly Subscriber<TScope> _subscriber;
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal Subscriber(in Subscriber<TScope> subscriber, [NotNull] TState state)
+            {
+                _subscriber = subscriber;
+                State = state;
+            }
+
             public bool IsCreated => _subscriber.IsCreated;
 
             public TScope Scope => _subscriber.Scope;
 
             public TState State { get; }
 
-            internal Subscriber(Subscriber<TScope> subscriber, [NotNull] TState state)
-            {
-                _subscriber = subscriber;
-                State = state;
-            }
+            public ICollection<ISubscription> Subscriptions => _subscriber.Subscriptions;
 
             /// <summary>
             /// Remove empty handler groups to optimize performance.

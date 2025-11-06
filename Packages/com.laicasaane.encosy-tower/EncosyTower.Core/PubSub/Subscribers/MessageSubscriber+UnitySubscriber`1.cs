@@ -7,6 +7,7 @@
 #endif
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -16,6 +17,21 @@ using EncosyTower.UnityExtensions;
 
 namespace EncosyTower.PubSub
 {
+    public static partial class MessageSubscriberExtensions
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static MessageSubscriber.UnitySubscriber<TScope> WithSubscriptions<TScope>(
+              this in MessageSubscriber.UnitySubscriber<TScope> subscriber
+            , ICollection<ISubscription> subscriptions
+        )
+            where TScope : UnityEngine.Object
+        {
+            return new MessageSubscriber.UnitySubscriber<TScope>(
+                subscriber._subscriber.WithSubscriptions(subscriptions)
+            );
+        }
+    }
+
     partial class MessageSubscriber
     {
         public readonly partial struct UnitySubscriber<TScope>
@@ -27,18 +43,27 @@ namespace EncosyTower.PubSub
             internal readonly Subscriber<UnityInstanceId<TScope>> _subscriber;
 #endif
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal UnitySubscriber([NotNull] MessageSubscriber subscriber, [NotNull] TScope scope)
+            {
+                _subscriber = new(subscriber, scope);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal UnitySubscriber(in Subscriber<UnityEntityId<TScope>> subscriber)
+            {
+                _subscriber = subscriber;
+            }
+
+            public bool IsCreated => _subscriber.IsCreated;
+
 #if UNITY_6000_2_OR_NEWER
             public UnityEntityId<TScope> Scope => _subscriber.Scope;
 #else
             public UnityInstanceId<TScope> Scope => _subscriber.Scope;
 #endif
 
-            public bool IsCreated => _subscriber.IsCreated;
-
-            internal UnitySubscriber([NotNull] MessageSubscriber subscriber, [NotNull] TScope scope)
-            {
-                _subscriber = new(subscriber, scope);
-            }
+            public ICollection<ISubscription> Subscriptions => _subscriber.Subscriptions;
 
             /// <summary>
             /// Remove empty handler groups to optimize performance.

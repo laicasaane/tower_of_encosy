@@ -7,6 +7,7 @@
 #endif
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -15,21 +16,54 @@ using EncosyTower.PubSub.Internals;
 
 namespace EncosyTower.PubSub
 {
+    public static partial class MessageSubscriberExtensions
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static MessageSubscriber.Subscriber<TScope> WithSubscriptions<TScope>(
+              this in MessageSubscriber.Subscriber<TScope> subscriber
+            , ICollection<ISubscription> subscriptions
+        )
+        {
+            return new MessageSubscriber.Subscriber<TScope>(
+                  subscriber._subscriber
+                , subscriber.Scope
+                , subscriptions ?? EmptySubscriptions.Default
+            );
+        }
+    }
+
     partial class MessageSubscriber
     {
         public readonly partial struct Subscriber<TScope>
         {
             internal readonly MessageSubscriber _subscriber;
+            internal readonly ICollection<ISubscription> _subscriptions;
 
-            public TScope Scope { get; }
-
-            public bool IsCreated => _subscriber != null;
-
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal Subscriber([NotNull] MessageSubscriber subscriber, [NotNull] TScope scope)
             {
                 _subscriber = subscriber;
+                _subscriptions = EmptySubscriptions.Default;
                 Scope = scope;
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal Subscriber(
+                  [NotNull] MessageSubscriber subscriber
+                , [NotNull] TScope scope
+                , [NotNull] ICollection<ISubscription> subscriptions
+            )
+            {
+                _subscriber = subscriber;
+                _subscriptions = subscriptions;
+                Scope = scope;
+            }
+
+            public bool IsCreated => _subscriber != null;
+
+            public TScope Scope { get; }
+
+            public ICollection<ISubscription> Subscriptions => _subscriptions ?? EmptySubscriptions.Default;
 
             /// <summary>
             /// Remove empty handler groups to optimize performance.
@@ -228,8 +262,10 @@ namespace EncosyTower.PubSub
                     }
 
                     subscription = broker.Subscribe(Scope, handler, order, taskArrayPool, logger);
-                    return true;
                 }
+
+                Subscriptions.Add(subscription);
+                return true;
             }
 
 #if __ENCOSY_VALIDATION__

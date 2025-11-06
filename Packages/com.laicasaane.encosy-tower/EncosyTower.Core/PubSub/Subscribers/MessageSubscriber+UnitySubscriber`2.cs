@@ -7,6 +7,7 @@
 #endif
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -20,13 +21,27 @@ namespace EncosyTower.PubSub
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static MessageSubscriber.UnitySubscriber<TScope, TState> WithState<TScope, TState>(
-              this MessageSubscriber.UnitySubscriber<TScope> subscriber
+              this in MessageSubscriber.UnitySubscriber<TScope> subscriber
             , [NotNull] TState state
         )
             where TScope : UnityEngine.Object
             where TState : class
         {
             return new MessageSubscriber.UnitySubscriber<TScope, TState>(subscriber, state);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static MessageSubscriber.UnitySubscriber<TScope, TState> WithSubscriptions<TScope, TState>(
+              this in MessageSubscriber.UnitySubscriber<TScope, TState> subscriber
+            , ICollection<ISubscription> subscriptions
+        )
+            where TScope : UnityEngine.Object
+            where TState : class
+        {
+            return new MessageSubscriber.UnitySubscriber<TScope, TState>(
+                  subscriber._subscriber.WithSubscriptions(subscriptions)
+                , subscriber.State
+            );
         }
     }
 
@@ -42,6 +57,20 @@ namespace EncosyTower.PubSub
             internal readonly Subscriber<UnityInstanceId<TScope>> _subscriber;
 #endif
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal UnitySubscriber(in UnitySubscriber<TScope> subscriber, [NotNull] TState state)
+            {
+                _subscriber = subscriber._subscriber;
+                State = state;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal UnitySubscriber(in Subscriber<UnityEntityId<TScope>> subscriber, [NotNull] TState state)
+            {
+                _subscriber = subscriber;
+                State = state;
+            }
+
             public bool IsCreated => _subscriber.IsCreated;
 
 #if UNITY_6000_2_OR_NEWER
@@ -52,11 +81,7 @@ namespace EncosyTower.PubSub
 
             public TState State { get; }
 
-            internal UnitySubscriber(UnitySubscriber<TScope> subscriber, [NotNull] TState state)
-            {
-                _subscriber = subscriber._subscriber;
-                State = state;
-            }
+            public ICollection<ISubscription> Subscriptions => _subscriber.Subscriptions;
 
             /// <summary>
             /// Remove empty handler groups to optimize performance.
