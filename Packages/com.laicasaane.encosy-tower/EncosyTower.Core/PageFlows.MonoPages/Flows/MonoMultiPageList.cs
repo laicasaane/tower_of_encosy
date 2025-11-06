@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using EncosyTower.Collections.Extensions;
 using EncosyTower.Processing;
 using EncosyTower.PubSub;
 using UnityEngine;
@@ -91,43 +90,20 @@ namespace EncosyTower.PageFlows.MonoPages
             }
         }
 
-        protected override void OnInitialize(InitializationContext context)
+        protected override void OnInitialize(in InitializationContext context)
         {
             _flow = new(Context);
 
             var subscriber = context.Subscriber.WithState(this);
-            var subscriptions = context.Subscriptions;
-
-            subscriber
-                .Subscribe<AddPageAsyncMessage>(static (state, msg, _, tkn) => state.HandleAsync(msg, tkn))
-                .AddTo(subscriptions);
-
-            subscriber
-                .Subscribe<ShowPageAtIndexAsyncMessage>(static (state, msg, _, tkn) => state.HandleAsync(msg, tkn))
-                .AddTo(subscriptions);
-
-            subscriber
-                .Subscribe<HidePageAtIndexAsyncMessage>(static (state, msg, _, tkn) => state.HandleAsync(msg, tkn))
-                .AddTo(subscriptions);
+            subscriber.Subscribe<AddPageAsyncMessage>(HandleAsync);
+            subscriber.Subscribe<ShowPageAtIndexAsyncMessage>(HandleAsync);
+            subscriber.Subscribe<HidePageAtIndexAsyncMessage>(HandleAsync);
 
             var processHub = context.ProcessHub.WithState(this);
-            var processRegistries = context.ProcessRegistries;
-
-            processHub
-                .Register<IsInTransitionRequest, bool>(static (state, proc) => state.Process(proc))
-                .AddTo(processRegistries);
-
-            processHub
-                .Register<GetPageIndexRequest, int>(static (state, proc) => state.Process(proc))
-                .AddTo(processRegistries);
-
-            processHub
-                .Register<GetPageListRequest, IReadOnlyList<IMonoPage>>(static (state, proc) => state.Process(proc))
-                .AddTo(processRegistries);
-
-            processHub
-                .Register<GetPageCollectionRequest, IReadOnlyCollection<IMonoPage>>(static (state, proc) => state.Process(proc))
-                .AddTo(processRegistries);
+            processHub.Register<IsInTransitionRequest, bool>(Process);
+            processHub.Register<GetPageIndexRequest, int>(Process);
+            processHub.Register<GetPageListRequest, IReadOnlyList<IMonoPage>>(Process);
+            processHub.Register<GetPageCollectionRequest, IReadOnlyCollection<IMonoPage>>(Process);
         }
 
         protected override void OnDispose()
@@ -136,32 +112,50 @@ namespace EncosyTower.PageFlows.MonoPages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private UnityTask HandleAsync(AddPageAsyncMessage msg, CancellationToken token)
-            => AddPageAsync(msg.AssetKey, msg.Context, token);
+        private static UnityTask HandleAsync(
+              MonoMultiPageList list
+            , AddPageAsyncMessage msg
+            , CancellationToken token
+        )
+        {
+            return list.AddPageAsync(msg.AssetKey, msg.Context, token);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private UnityTask HandleAsync(ShowPageAtIndexAsyncMessage msg, CancellationToken token)
-            => ShowPageAtIndexAsync(msg.Index, msg.Context, token);
+        private static UnityTask HandleAsync(
+              MonoMultiPageList list
+            , ShowPageAtIndexAsyncMessage msg
+            , CancellationToken token
+        )
+        {
+            return list.ShowPageAtIndexAsync(msg.Index, msg.Context, token);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private UnityTask HandleAsync(HidePageAtIndexAsyncMessage msg, CancellationToken token)
-            => HidePageAtIndexAsync(msg.Index, msg.Context, token);
+        private static UnityTask HandleAsync(
+              MonoMultiPageList list
+            , HidePageAtIndexAsyncMessage msg
+            , CancellationToken token
+        )
+        {
+            return list.HidePageAtIndexAsync(msg.Index, msg.Context, token);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool Process(IsInTransitionRequest _)
-            => _flow.IsInTransition;
+        private static bool Process(MonoMultiPageList list, IsInTransitionRequest _)
+            => list._flow.IsInTransition;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int Process(GetPageIndexRequest req)
-            => _flow.IndexOf(req.Page);
+        private static int Process(MonoMultiPageList list, GetPageIndexRequest req)
+            => list._flow.IndexOf(req.Page);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private IReadOnlyList<IMonoPage> Process(GetPageListRequest _)
-            => _flow.Pages;
+        private static IReadOnlyList<IMonoPage> Process(MonoMultiPageList list, GetPageListRequest _)
+            => list._flow.Pages;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private IReadOnlyCollection<IMonoPage> Process(GetPageCollectionRequest _)
-            => _flow.Pages;
+        private static IReadOnlyCollection<IMonoPage> Process(MonoMultiPageList list, GetPageCollectionRequest _)
+            => list._flow.Pages;
     }
 }
 

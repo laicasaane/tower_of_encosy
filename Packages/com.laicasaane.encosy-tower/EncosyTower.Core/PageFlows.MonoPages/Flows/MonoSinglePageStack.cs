@@ -2,7 +2,6 @@
 
 using System.Runtime.CompilerServices;
 using System.Threading;
-using EncosyTower.Collections.Extensions;
 using EncosyTower.Common;
 using EncosyTower.Processing;
 using EncosyTower.PubSub;
@@ -79,31 +78,17 @@ namespace EncosyTower.PageFlows.MonoPages
             }
         }
 
-        protected override void OnInitialize(InitializationContext context)
+        protected override void OnInitialize(in InitializationContext context)
         {
             _flow = new(Context);
 
             var subscriber = context.Subscriber.WithState(this);
-            var subscriptions = context.Subscriptions;
-
-            subscriber
-                .Subscribe<ShowPageAsyncMessage>(static (state, msg, _, tkn) => state.HandleAsync(msg, tkn))
-                .AddTo(subscriptions);
-
-            subscriber
-                .Subscribe<HideActivePageAsyncMessage>(static (state, msg, _, tkn) => state.HandleAsync(msg, tkn))
-                .AddTo(subscriptions);
+            subscriber.Subscribe<ShowPageAsyncMessage>(HandleAsync);
+            subscriber.Subscribe<HideActivePageAsyncMessage>(HandleAsync);
 
             var processHub = context.ProcessHub.WithState(this);
-            var processRegistries = context.ProcessRegistries;
-
-            processHub
-                .Register<IsInTransitionRequest, bool>(static (state, proc) => state.Process(proc))
-                .AddTo(processRegistries);
-
-            processHub
-                .Register<GetCurrentPageRequest, Option<IMonoPage>>(static (state, proc) => state.Process(proc))
-                .AddTo(processRegistries);
+            processHub.Register<IsInTransitionRequest, bool>(Process);
+            processHub.Register<GetCurrentPageRequest, Option<IMonoPage>>(Process);
         }
 
         protected override void OnDispose()
@@ -112,20 +97,32 @@ namespace EncosyTower.PageFlows.MonoPages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private UnityTask HandleAsync(ShowPageAsyncMessage msg, CancellationToken token)
-            => ShowPageAsync(msg.AssetKey, msg.Context, token);
+        private static UnityTask HandleAsync(
+              MonoSinglePageStack stack
+            , ShowPageAsyncMessage msg
+            , CancellationToken token
+        )
+        {
+            return stack.ShowPageAsync(msg.AssetKey, msg.Context, token);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private UnityTask HandleAsync(HideActivePageAsyncMessage msg, CancellationToken token)
-            => HideActivePageAsync(msg.Context, token);
+        private static UnityTask HandleAsync(
+              MonoSinglePageStack stack
+            , HideActivePageAsyncMessage msg
+            , CancellationToken token
+        )
+        {
+            return stack.HideActivePageAsync(msg.Context, token);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool Process(IsInTransitionRequest _)
-            => _flow.IsInTransition;
+        private static bool Process(MonoSinglePageStack stack, IsInTransitionRequest _)
+            => stack._flow.IsInTransition;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Option<IMonoPage> Process(GetCurrentPageRequest _)
-            => _flow.CurrentPage;
+        private static Option<IMonoPage> Process(MonoSinglePageStack stack, GetCurrentPageRequest _)
+            => stack._flow.CurrentPage;
     }
 }
 

@@ -8,7 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Collections;
-using EncosyTower.Collections.Extensions;
 using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.Processing;
@@ -30,7 +29,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
     [RequireComponent(typeof(RectTransform))]
     [RequireComponent(typeof(CanvasGroup))]
-    public class MonoPageFlow : MonoBehaviour
+    public abstract class MonoPageFlow : MonoBehaviour
     {
         [SerializeField] internal MonoPageFlowContext _context = new();
 
@@ -112,10 +111,8 @@ namespace EncosyTower.PageFlows.MonoPages
             }
 
             var initContext = new InitializationContext(
-                  context.Subscriber.Scope(context.FlowScope)
-                , context.ProcessHub
-                , _subscriptions
-                , _processRegistries
+                  context.Subscriber.Scope(context.FlowScope).WithSubscriptions(_subscriptions)
+                , context.ProcessHub.WithRegistries(_processRegistries)
             );
 
             SubscribeMessages(initContext);
@@ -124,7 +121,7 @@ namespace EncosyTower.PageFlows.MonoPages
             IsInitialized = true;
         }
 
-        protected virtual void OnInitialize(InitializationContext context) { }
+        protected abstract void OnInitialize(in InitializationContext context);
 
         protected void Awake()
         {
@@ -151,7 +148,7 @@ namespace EncosyTower.PageFlows.MonoPages
             _pageIdToPool.Clear();
         }
 
-        protected virtual void OnDispose() { }
+        protected abstract void OnDispose();
 
         /// <summary>
         /// Preload an amount of view instances and keep them in the pool.
@@ -413,27 +410,20 @@ namespace EncosyTower.PageFlows.MonoPages
             return pool;
         }
 
-        private void SubscribeMessages(InitializationContext context)
+        private void SubscribeMessages(in InitializationContext context)
         {
             var subscriber = context.Subscriber.WithState(this);
-            var subscriptions = context.Subscriptions;
-
-            subscriber
-                .Subscribe<PrepoolPageAsyncMessage>(static (state, msg, _, tkn) => state.HandleAsync(msg, tkn))
-                .AddTo(subscriptions);
-
-            subscriber
-                .Subscribe<TrimPoolMessage>(static (state, msg) => state.Handle(msg))
-                .AddTo(subscriptions);
+            subscriber.Subscribe<PrepoolPageAsyncMessage>(HandleAsync);
+            subscriber.Subscribe<TrimPoolMessage>(Handle);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private UnityTask HandleAsync(PrepoolPageAsyncMessage msg, CancellationToken token)
-            => PrepoolPageAsync(msg.AssetKey, msg.Amount, token);
+        private static UnityTask HandleAsync(MonoPageFlow flow, PrepoolPageAsyncMessage msg, CancellationToken token)
+            => flow.PrepoolPageAsync(msg.AssetKey, msg.Amount, token);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Handle(TrimPoolMessage msg)
-            => TrimPool(msg.AssetKey, msg.AmountToKeep);
+        private static void Handle(MonoPageFlow flow, TrimPoolMessage msg)
+            => flow.TrimPool(msg.AssetKey, msg.AmountToKeep);
 
         [HideInCallstack, StackTraceHidden]
         private static void ThrowIfNotInitialized(MonoPageFlow context)
@@ -510,8 +500,6 @@ namespace EncosyTower.PageFlows.MonoPages
         protected readonly record struct InitializationContext(
               MessageSubscriber.Subscriber<PageFlowScope> Subscriber
             , ProcessHub<PageFlowScope> ProcessHub
-            , FasterList<ISubscription> Subscriptions
-            , FasterList<ProcessRegistry> ProcessRegistries
         );
 
         protected readonly record struct PageKey(string Value, StringId Id);
