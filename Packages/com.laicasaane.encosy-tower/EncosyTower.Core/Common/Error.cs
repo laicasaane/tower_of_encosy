@@ -64,7 +64,7 @@ namespace EncosyTower.Common
                 return Exception.ToString();
             }
 
-            return ErrorExtensions.UNKNOWN_ERROR_STRING;
+            return "Unknown error";
         }
 
         public bool TryFormat(Span<char> destination, out int charsWritten)
@@ -106,66 +106,5 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Error left, Error right)
             => !left.Equals(right);
-    }
-
-    public readonly struct Error<TError> : IError
-    {
-        public static readonly Error<TError> Default = new(Error.Default);
-
-        public readonly Option<TError> Value;
-        public readonly Error InnerError;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Error([NotNull] TError value)
-        {
-            Value = value;
-            InnerError = UndefinedException.Default;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Error([NotNull] Error innerError)
-        {
-            Value = Option.None;
-            InnerError = innerError;
-        }
-
-        public bool IsValid
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Value.HasValue || InnerError.IsValid;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString()
-            => Value.TryGetValue(out var value)
-                ? value.ToString()
-                : InnerError.ToString();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Error<TError>(TError value)
-            => new(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Error<TError>(Error error)
-            => new(error);
-    }
-
-    public static class ErrorExtensions
-    {
-        public const string UNKNOWN_ERROR_STRING = "Unknown error";
-
-        public static bool TryFormat<TError>(
-              this Error<TError> error
-            , Span<char> destination
-            , out int charsWritten
-            , ReadOnlySpan<char> format = default
-            , IFormatProvider provider = null
-        )
-            where TError : ISpanFormattable
-        {
-            return error.Value.TryGetValue(out var value)
-                ? value.TryFormat(destination, out charsWritten, format, provider)
-                : error.InnerError.TryFormat(destination, out charsWritten);
-        }
     }
 }

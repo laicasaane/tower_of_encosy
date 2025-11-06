@@ -19,7 +19,7 @@ namespace EncosyTower.Common
     {
         public readonly static Option<T> None = default;
 
-        internal readonly T _value;
+        private readonly T _value;
 
         public readonly ByteBool HasValue;
 
