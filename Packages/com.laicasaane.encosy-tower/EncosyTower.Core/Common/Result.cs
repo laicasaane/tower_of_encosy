@@ -36,7 +36,7 @@ namespace EncosyTower.Common
     {
     }
 
-    public readonly struct Result<TValue> : IEquatable<Result<TValue>>, IResult<TValue, Error>
+    public readonly struct Result<TValue> : IResult<TValue, Error>
     {
         public readonly Error Error;
 
@@ -126,18 +126,6 @@ namespace EncosyTower.Common
             => Error.IsValid ? Error : defaultError;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(Result<TValue> other)
-            => _value.Equals(other._value) && Error.Equals(other.Error);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
-            => obj is Result<TValue, Error> other && Equals(other);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode()
-            => HashCode.Combine(_value, Error);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
             if (TryGetValue(out var value))
@@ -165,17 +153,9 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Result<TValue>(Exception error)
             => new(new Error(error));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Result<TValue> left, Result<TValue> right)
-            => left.Equals(right);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Result<TValue> left, Result<TValue> right)
-            => !left.Equals(right);
     }
 
-    public readonly struct Result<TValue, TError> : IEquatable<Result<TValue, TError>>, IResult<TValue, TError>
+    public readonly struct Result<TValue, TError> : IResult<TValue, TError>
     {
         private readonly TValue _value;
         private readonly TError _error;
@@ -267,18 +247,6 @@ namespace EncosyTower.Common
             => Error.GetValueOrDefault(defaultError);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(Result<TValue, TError> other)
-            => Value.Equals(other.Value) && Error.Equals(other.Error);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
-            => obj is Result<TValue, TError> other && Equals(other);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode()
-            => HashValue.Combine(Value, Error);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
             if (TryGetValue(out var value))
@@ -302,14 +270,6 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Result<TValue, TError>(TError error)
             => new(error);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Result<TValue, TError> left, Result<TValue, TError> right)
-            => left.Equals(right);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Result<TValue, TError> left, Result<TValue, TError> right)
-            => !left.Equals(right);
 
         [HideInCallstack, StackTraceHidden, DoesNotReturn]
         private static void ThrowIfSameType()

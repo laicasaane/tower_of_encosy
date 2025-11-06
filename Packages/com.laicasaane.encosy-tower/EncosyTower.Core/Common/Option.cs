@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -16,7 +15,7 @@ namespace EncosyTower.Common
             => new(value);
     }
 
-    public readonly struct Option<T> : IEquatable<Option<T>>
+    public readonly struct Option<T>
     {
         public readonly static Option<T> None = default;
 
@@ -70,18 +69,6 @@ namespace EncosyTower.Common
             => HasValue ? _value : defaultValue;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(Option<T> other)
-            => HasValue == other.HasValue && EqualityComparer<T>.Default.Equals(_value, other._value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
-            => obj is Option<T> other && Equals(other);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode()
-            => HashValue.Combine(HasValue, _value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
             => HasValue
             ? string.Format("{0}({1})", OptionExtensions.OPTION_VALUE_STRING, _value)
@@ -94,14 +81,6 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Option<T>(Option _)
             => default;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Option<T> left, Option<T> right)
-            => left.Equals(right);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Option<T> left, Option<T> right)
-            => !left.Equals(right);
 
 #if UNITY_BURST
         [Unity.Burst.BurstDiscard]

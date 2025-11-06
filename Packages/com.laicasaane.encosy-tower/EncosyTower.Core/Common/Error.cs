@@ -42,7 +42,7 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Error other)
             => string.Equals(Message, other.Message, StringComparison.Ordinal)
-                && Exception?.Equals(other.Exception) == true;
+                || Exception?.Equals(other.Exception) == true;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
@@ -108,7 +108,7 @@ namespace EncosyTower.Common
             => !left.Equals(right);
     }
 
-    public readonly struct Error<TError> : IEquatable<Error<TError>>, IError
+    public readonly struct Error<TError> : IError
     {
         public static readonly Error<TError> Default = new(Error.Default);
 
@@ -136,18 +136,6 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(Error<TError> other)
-            => Value.Equals(other.Value) && InnerError.Equals(other.InnerError);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
-            => obj is Error<TError> other && Equals(other);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode()
-            => HashCode.Combine(Value, InnerError);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
             => Value.TryGetValue(out var value)
                 ? value.ToString()
@@ -160,14 +148,6 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Error<TError>(Error error)
             => new(error);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Error<TError> left, Error<TError> right)
-            => left.Equals(right);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Error<TError> left, Error<TError> right)
-            => !left.Equals(right);
     }
 
     public static class ErrorExtensions
