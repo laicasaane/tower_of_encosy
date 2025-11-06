@@ -13,13 +13,20 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<T> Some<T>(T value)
             => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Equals<T>(in Option<T> a, in Option<T> b)
+            where T : IEquatable<T>
+        {
+            return a.HasValue == b.HasValue && a._value.Equals(b._value);
+        }
     }
 
     public readonly struct Option<T>
     {
         public readonly static Option<T> None = default;
 
-        private readonly T _value;
+        internal readonly T _value;
 
         public readonly ByteBool HasValue;
 
