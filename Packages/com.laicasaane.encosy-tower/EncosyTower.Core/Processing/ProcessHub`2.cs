@@ -6,6 +6,7 @@
 #endif
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Types;
@@ -16,31 +17,44 @@ namespace EncosyTower.Processing
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ProcessHub<TScope, TState> WithState<TScope, TState>(
-              this ProcessHub<TScope> hub
+              this in ProcessHub<TScope> hub
             , [NotNull] TState state
         )
             where TState : class
         {
             return new ProcessHub<TScope, TState>(hub, state);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ProcessHub<TScope, TState> WithRegistries<TScope, TState>(
+              this in ProcessHub<TScope, TState> hub
+            , ICollection<ProcessRegistry> registries
+        )
+            where TState : class
+        {
+            return new ProcessHub<TScope, TState>(hub._hub.WithRegistries(registries), hub.State);
+        }
     }
 
     public readonly partial struct ProcessHub<TScope, TState>
         where TState : class
     {
-        private readonly ProcessHub<TScope> _hub;
+        internal readonly ProcessHub<TScope> _hub;
 
-        public TScope Scope => _hub.Scope;
-
-        public bool IsCreated => _hub.IsCreated;
-
-        public TState State { get; }
-
-        internal ProcessHub(ProcessHub<TScope> hub, [NotNull] TState state)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal ProcessHub(in ProcessHub<TScope> hub, [NotNull] TState state)
         {
             _hub = hub;
             State = state;
         }
+
+        public bool IsCreated => _hub.IsCreated;
+
+        public TScope Scope => _hub.Scope;
+
+        public TState State { get; }
+
+        public ICollection<ProcessRegistry> Registries => _hub.Registries;
 
         #region    REGISTER - SYNC
         #endregion ===============

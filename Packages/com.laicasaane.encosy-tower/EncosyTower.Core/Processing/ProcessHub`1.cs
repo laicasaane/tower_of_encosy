@@ -6,6 +6,7 @@
 #endif
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -17,11 +18,42 @@ using UnityEngine;
 
 namespace EncosyTower.Processing
 {
+    public static partial class ProcessHubExtensions
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ProcessHub<TScope> WithRegistries<TScope>(
+              this in ProcessHub<TScope> hub
+            , ICollection<ProcessRegistry> registries
+        )
+        {
+            return new ProcessHub<TScope>(hub.Scope, hub._map, registries ?? EmptyRegistries.Default);
+        }
+    }
+
     public readonly partial struct ProcessHub<TScope>
     {
-        private readonly ProcessHandlerMap _map;
+        internal readonly ProcessHandlerMap _map;
+        internal readonly ICollection<ProcessRegistry> _registries;
 
-        public readonly TScope Scope;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal ProcessHub(TScope scope, [NotNull] ProcessHandlerMap map)
+        {
+            _map = map;
+            _registries = EmptyRegistries.Default;
+            Scope = scope;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal ProcessHub(
+              TScope scope
+            , [NotNull] ProcessHandlerMap map
+            , [NotNull] ICollection<ProcessRegistry> registries
+        )
+        {
+            _map = map;
+            _registries = registries;
+            Scope = scope;
+        }
 
         public bool IsCreated
         {
@@ -29,11 +61,9 @@ namespace EncosyTower.Processing
             get => _map != null;
         }
 
-        internal ProcessHub(TScope scope, ProcessHandlerMap map)
-        {
-            _map = map;
-            Scope = scope;
-        }
+        public TScope Scope { get; }
+
+        public ICollection<ProcessRegistry> Registries => _registries ?? EmptyRegistries.Default;
 
         #region    REGISTER - SYNC
         #endregion ===============
@@ -68,7 +98,10 @@ namespace EncosyTower.Processing
             }
 #endif
 
-            return _map.Register(handler);
+            var registry = _map.Register(handler);
+            Registries.Add(registry);
+
+            return registry;
         }
 
         #region    UNREGISTER - SYNC
