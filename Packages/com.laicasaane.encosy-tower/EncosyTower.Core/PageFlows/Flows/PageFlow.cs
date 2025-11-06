@@ -347,7 +347,7 @@ namespace EncosyTower.PageFlows
                 ShowOptions = TrySetZeroDuration(
                       context.ShowOptions
                     , PageTransitionOptions.OnlyFirstPageHasDuration
-                    , (pageToHide is null && pageToShow is not null) == false
+                    , pageToHide is not null || pageToShow is null
                 )
             };
 
@@ -355,7 +355,7 @@ namespace EncosyTower.PageFlows
                 ShowOptions = TrySetZeroDuration(
                       context.ShowOptions
                     , PageTransitionOptions.OnlyLastPageHasDuration
-                    , (pageToHide is not null && pageToShow is not null) == false
+                    , pageToHide is null || pageToShow is null
                 )
             };
 
@@ -363,7 +363,7 @@ namespace EncosyTower.PageFlows
                 HideOptions = TrySetZeroDuration(
                       context.HideOptions
                     , PageTransitionOptions.OnlyFirstPageHasDuration
-                    , (pageToShow is null && pageToHide is not null) == false
+                    , pageToShow is not null || pageToHide is null
                 )
             };
 
@@ -371,7 +371,7 @@ namespace EncosyTower.PageFlows
                 HideOptions = TrySetZeroDuration(
                       context.HideOptions
                     , PageTransitionOptions.OnlyLastPageHasDuration
-                    , (pageToShow is not null && pageToHide is not null) == false
+                    , pageToShow is null || pageToHide is null
                 )
             };
 

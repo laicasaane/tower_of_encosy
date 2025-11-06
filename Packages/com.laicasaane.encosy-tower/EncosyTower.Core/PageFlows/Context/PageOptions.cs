@@ -12,7 +12,7 @@ namespace EncosyTower.PageFlows
         public ShowOperationOptions showOptions;
         public HideOperationOptions hideOptions;
 
-        public static PageOptions.Options SelectHideOptions(
+        public static Options SelectHideOptions(
               PageTransition transition
             , in PageOptions pageToHideOptions
             , in PageOptions pageToShowOptions
@@ -23,7 +23,7 @@ namespace EncosyTower.PageFlows
                 : pageToShowOptions.showOptions.hideOtherPage;
         }
 
-        public static PageOptions.Options SelectShowOptions(
+        public static Options SelectShowOptions(
               PageTransition transition
             , in PageOptions pageToHideOptions
             , in PageOptions pageToShowOptions
