@@ -65,7 +65,14 @@ namespace EncosyTower.PubSub
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal UnitySubscriber(in Subscriber<UnityEntityId<TScope>> subscriber, [NotNull] TState state)
+            internal UnitySubscriber(
+#if UNITY_6000_2_OR_NEWER
+                  in Subscriber<UnityEntityId<TScope>> subscriber
+#else
+                  in Subscriber<UnityInstanceId<TScope>> subscriber
+#endif
+                , [NotNull] TState state
+            )
             {
                 _subscriber = subscriber;
                 State = state;
