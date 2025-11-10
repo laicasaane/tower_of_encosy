@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace EncosyTower.Editor
 {
     public static class EditorAPI
     {
-        public static string ProjectPath => Application.dataPath.Replace("/Assets", string.Empty);
+        public static string ProjectPath => Path.Combine(Application.dataPath, "..");
 
         public static bool IsDark => EditorGUIUtility.isProSkin;
 
