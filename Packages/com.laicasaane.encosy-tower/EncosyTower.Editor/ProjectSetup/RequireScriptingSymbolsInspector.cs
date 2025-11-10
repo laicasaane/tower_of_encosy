@@ -3,7 +3,6 @@
 using EncosyTower.Editor.UIElements;
 using EncosyTower.UIElements;
 using UnityEditor;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace EncosyTower.Editor.ProjectSetup
@@ -11,13 +10,17 @@ namespace EncosyTower.Editor.ProjectSetup
     [CustomEditor(typeof(RequiredScriptingSymbols), true)]
     internal sealed class RequireScriptingSymbolsInspector : UnityEditor.Editor
     {
+        private const string MODULE_ROOT = $"{EditorStyleSheetPaths.ROOT}/EncosyTower.Editor/ProjectSetup";
+        private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
+        private const string FILE_NAME = nameof(RequireScriptingSymbolsInspector);
+
+        public const string STYLE_SHEET = $"{STYLE_SHEETS_PATH}/{FILE_NAME}.uss";
+
         public static readonly string UssClassName = "require-scripting-symbols-inspector";
         public static readonly string SymbolsClassName = "symbols";
         public static readonly string SymbolClassName = "symbol";
         public static readonly string SymbolLabelClassName = "symbol__label";
         public static readonly string SymbolTextClassName = "symbol__text";
-
-        [SerializeField] private StyleSheet _styleSheet;
 
         private SerializedProperty _symbolsProp;
 
@@ -29,7 +32,7 @@ namespace EncosyTower.Editor.ProjectSetup
         public override VisualElement CreateInspectorGUI()
         {
             var root = new VisualElement();
-            root.WithStyleSheet(_styleSheet);
+            root.WithEditorStyleSheet(STYLE_SHEET);
             root.AddToClassList(UssClassName);
 
             var list = new ListView {

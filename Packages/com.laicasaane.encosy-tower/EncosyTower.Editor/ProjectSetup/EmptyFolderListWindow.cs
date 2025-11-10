@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using EncosyTower.Collections.Extensions;
 using EncosyTower.Editor.UIElements;
+using EncosyTower.IO;
 using EncosyTower.UIElements;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
@@ -17,6 +18,14 @@ namespace EncosyTower.Editor.ProjectSetup
 {
     public sealed class EmptyFolderListWindow : EditorWindow
     {
+        private const string MODULE_ROOT = $"{EditorStyleSheetPaths.ROOT}/EncosyTower.Editor/ProjectSetup";
+        private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
+        private const string FILE_NAME = nameof(EmptyFolderListWindow);
+
+        public const string THEME_STYLE_SHEET = $"{STYLE_SHEETS_PATH}/{FILE_NAME}.uss";
+
+        private SimpleTableView<ItemInfo> _table;
+
         [MenuItem("Encosy Tower/Empty Folders", priority = 69_77_00_00)]
         public static void OpenWindow()
         {
@@ -25,26 +34,21 @@ namespace EncosyTower.Editor.ProjectSetup
             window.ShowPopup();
         }
 
-        [SerializeField] private ThemeStyleSheet _themeStyleSheet;
-
-        private SimpleTableView<ItemInfo> _table;
-
         private void CreateGUI()
         {
-            rootVisualElement.WithStyleSheet(_themeStyleSheet);
+            rootVisualElement.WithEditorStyleSheet(THEME_STYLE_SHEET);
 
-            var buttonGroup = new VisualElement() {
-                name = "button-group",
-            };
+            var toolbar = new Toolbar();
+            rootVisualElement.Add(toolbar);
 
-            rootVisualElement.Add(buttonGroup);
-
-            buttonGroup.Add(new Button(Refresh) {
+            toolbar.Add(new ToolbarButton(Refresh) {
                 text = "Refresh",
                 name = "refresh-button",
             });
 
-            buttonGroup.Add(new Button(Delete) {
+            toolbar.Add(new ToolbarSpacer());
+
+            toolbar.Add(new ToolbarButton(Delete) {
                 text = "Delete",
                 name = "delete-button",
             });
@@ -93,10 +97,10 @@ namespace EncosyTower.Editor.ProjectSetup
 
         private void CreateTable()
         {
-            var table = _table = new() {
+            var table = _table = new SimpleTableView<ItemInfo>() {
                 bindingPath = nameof(ItemCollectionAsset.items),
                 showBoundCollectionSize = false,
-            };
+            }.WithEditorStyleSheets();
 
             rootVisualElement.Add(table);
 
@@ -207,45 +211,13 @@ namespace EncosyTower.Editor.ProjectSetup
         {
             result.Clear();
 
-            var directoryInfo = new DirectoryInfo(Application.dataPath);
-            var rootPath = Path.Combine(Application.dataPath, "..");
+            var projectPath = new RootPath(EditorAPI.ProjectPath);
+            var assetsDirectory = new DirectoryInfo(projectPath.GetFolderAbsolutePath("Assets"));
+            var packagesDirectory = new DirectoryInfo(projectPath.GetFolderAbsolutePath("Packages"));
             var items = new List<ItemInfo>();
 
-            foreach (var subDirectory in directoryInfo.GetDirectories("*.*", SearchOption.AllDirectories))
-            {
-                if (subDirectory.Exists == false)
-                {
-                    continue;
-                }
-
-                var files = subDirectory.GetFiles("*.*", SearchOption.AllDirectories);
-
-                if (files.Length > 0 && files.Any(IsNotMeta))
-                {
-                    continue;
-                }
-
-                var path = Path.GetRelativePath(rootPath, subDirectory.FullName);
-                var guid = AssetDatabase.AssetPathToGUID(path);
-
-                if (string.IsNullOrWhiteSpace(guid))
-                {
-                    continue;
-                }
-
-                var asset = AssetDatabase.LoadAssetAtPath<DefaultAsset>(path);
-
-                if (asset.IsInvalid())
-                {
-                    continue;
-                }
-
-                items.Add(new ItemInfo {
-                    asset = asset,
-                    path = path,
-                    selected = true,
-                });
-            }
+            FindEmptyFolders(projectPath, assetsDirectory, items);
+            FindEmptyFolders(projectPath, packagesDirectory, items);
 
             if (items.Count < 1)
             {
@@ -259,6 +231,45 @@ namespace EncosyTower.Editor.ProjectSetup
             static bool IsNotMeta(FileInfo file)
             {
                 return file.FullName.EndsWith(".meta", StringComparison.Ordinal) == false;
+            }
+
+            static void FindEmptyFolders(RootPath rootPath, DirectoryInfo directory, List<ItemInfo> result)
+            {
+                foreach (var subDirectory in directory.GetDirectories("*.*", SearchOption.AllDirectories))
+                {
+                    if (subDirectory.Exists == false)
+                    {
+                        continue;
+                    }
+
+                    var files = subDirectory.GetFiles("*.*", SearchOption.AllDirectories);
+
+                    if (files.Length > 0 && files.Any(IsNotMeta))
+                    {
+                        continue;
+                    }
+
+                    var path = rootPath.GetRelativePath(subDirectory.FullName);
+                    var guid = AssetDatabase.AssetPathToGUID(path);
+
+                    if (string.IsNullOrWhiteSpace(guid))
+                    {
+                        continue;
+                    }
+
+                    var asset = AssetDatabase.LoadAssetAtPath<DefaultAsset>(path);
+
+                    if (asset.IsInvalid())
+                    {
+                        continue;
+                    }
+
+                    result.Add(new ItemInfo {
+                        asset = asset,
+                        path = path,
+                        selected = true,
+                    });
+                }
             }
         }
 

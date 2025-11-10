@@ -11,16 +11,19 @@ using EncosyTower.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEditorInternal;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace EncosyTower.Editor.AssemblyDefs
 {
     internal class AssemblyReferenceWindow : EditorWindow
     {
-        [SerializeField] private ThemeStyleSheet _themeStyleSheet;
-        [SerializeField] private StyleSheet _darkThemeStyleSheet;
-        [SerializeField] private StyleSheet _lightThemeStyleSheet;
+        private const string MODULE_ROOT = $"{EditorStyleSheetPaths.ROOT}/EncosyTower.Editor/AssemblyDefs";
+        private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
+        private const string FILE_NAME = nameof(AssemblyReferenceWindow);
+
+        public const string THEME_STYLE_SHEET = $"{STYLE_SHEETS_PATH}/{FILE_NAME}.tss";
+        public const string STYLE_SHEET_DARK = $"{STYLE_SHEETS_PATH}/{FILE_NAME}_Dark.uss";
+        public const string STYLE_SHEET_LIGHT = $"{STYLE_SHEETS_PATH}/{FILE_NAME}_Light.uss";
 
         private TabView _tabView;
         private AssemblyReferenceTab _tabAll;
@@ -70,8 +73,8 @@ namespace EncosyTower.Editor.AssemblyDefs
                 return;
             }
 
-            rootVisualElement.WithStyleSheet(_themeStyleSheet);
-            rootVisualElement.WithEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
+            rootVisualElement.WithEditorStyleSheet(THEME_STYLE_SHEET);
+            rootVisualElement.WithEditorStyleSheet(STYLE_SHEET_DARK, STYLE_SHEET_LIGHT);
 
             _tabAll = new AssemblyReferenceTab("All", Close);
             _tabFiltered = new AssemblyReferenceTab("Filtered", Close);

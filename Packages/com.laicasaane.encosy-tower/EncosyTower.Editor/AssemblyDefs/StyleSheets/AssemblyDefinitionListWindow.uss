@@ -1,21 +1,9 @@
+.unity-toolbar .unity-toolbar-spacer {
+    flex-grow: 1;
+}
+
 #refresh-button {
-    height: 28px;
-    margin-top: 4px;
-}
-
-#search-field {
-    width: auto;
-    margin-top: 6px;
-}
-
-.toggle-group {
-    align-items: flex-end;
-    flex-direction: row-reverse;
-    margin-top: 6px;
-}
-
-.toggle-group .unity-toggle__text {
-    margin-left: 6px;
+    margin-left: 9px;
 }
 
 .unity-list-view__empty-label {

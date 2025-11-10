@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using EncosyTower.Pooling;
-using EncosyTower.UIElements;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -15,6 +14,14 @@ namespace EncosyTower.Editor.UIElements
 {
     internal partial class GenericMenuPopupWindow : EditorWindow
     {
+        private const string MODULE_ROOT = $"{EditorStyleSheetPaths.ROOT}/EncosyTower.Editor/UIElements/GenericMenuPopup";
+        private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
+        private const string FILE_NAME = nameof(GenericMenuPopup);
+
+        public const string THEME_STYLE_SHEET = $"{STYLE_SHEETS_PATH}/{FILE_NAME}.tss";
+        public const string STYLE_SHEET_DARK = $"{STYLE_SHEETS_PATH}/{FILE_NAME}_Dark.uss";
+        public const string STYLE_SHEET_LIGHT = $"{STYLE_SHEETS_PATH}/{FILE_NAME}_Light.uss";
+
         public static readonly string MenuPopupUssClassName = "menu-popup";
         public static readonly string MenuTitleUssClassName = "menu-title";
         public static readonly string MenuTooltipUssClassName = "menu-tooltip";
@@ -24,10 +31,6 @@ namespace EncosyTower.Editor.UIElements
         public static readonly string SearchLabelUssClassName = "search-label";
 
         private static readonly GenericMenuPopup s_defaultPopup = new(new MenuItemNode(), "");
-
-        [SerializeField] private ThemeStyleSheet _themeStyleSheet;
-        [SerializeField] private StyleSheet _darkThemeStyleSheet;
-        [SerializeField] private StyleSheet _lightThemeStyleSheet;
 
         private GenericMenuPopup _popup = s_defaultPopup;
         private MenuItemNode _currentNode;
@@ -51,8 +54,8 @@ namespace EncosyTower.Editor.UIElements
             var popup = _popup ??= s_defaultPopup;
             _currentNode = popup.rootNode;
 
-            rootVisualElement.WithStyleSheet(_themeStyleSheet);
-            rootVisualElement.WithEditorStyleSheet(_darkThemeStyleSheet, _lightThemeStyleSheet);
+            rootVisualElement.WithEditorStyleSheet(THEME_STYLE_SHEET);
+            rootVisualElement.WithEditorStyleSheet(STYLE_SHEET_DARK, STYLE_SHEET_LIGHT);
             rootVisualElement.AddToClassList(MenuPopupUssClassName);
 
             rootVisualElement.Clear();

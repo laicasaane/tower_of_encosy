@@ -1,12 +1,9 @@
-#button-group {
-    margin-top: 4px;
-    flex-direction: row;
+.unity-toolbar .unity-toolbar-spacer {
+    flex-grow: 1;
 }
 
-#button-group * {
-    height: 28px;
-    flex-direction: row;
-    flex-grow: 1;
+.refresh-button {
+    margin-left: 9px;
 }
 
 #request-info-label,
@@ -16,11 +13,6 @@
 
 #request-info-container {
     flex-grow: 1;
-}
-
-.refresh-button {
-    height: 28px;
-    flex-grow: 0;
 }
 
 #request-info-label {

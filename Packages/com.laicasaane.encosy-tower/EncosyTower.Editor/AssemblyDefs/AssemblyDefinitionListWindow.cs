@@ -18,18 +18,14 @@ namespace EncosyTower.Editor.AssemblyDefs
 {
     internal class AssemblyDefinitionListWindow : EditorWindow
     {
-        [MenuItem("Encosy Tower/Assembly Definitions", priority = 65_83_00_00)]
-        public static void OpenWindow()
-        {
-            var window = GetWindow<AssemblyDefinitionListWindow>();
-            window.titleContent = new GUIContent("Assembly Definitions");
-            window.ShowPopup();
-        }
+        private const string MODULE_ROOT = $"{EditorStyleSheetPaths.ROOT}/EncosyTower.Editor/AssemblyDefs";
+        private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
+        private const string FILE_NAME = nameof(AssemblyDefinitionListWindow);
+
+        public const string THEME_STYLE_SHEET = $"{STYLE_SHEETS_PATH}/{FILE_NAME}.tss";
 
         private static readonly string[] s_folders1 = new[] { "Assets" };
         private static readonly string[] s_folders2 = new[] { "Assets", "Packages" };
-
-        [SerializeField] private ThemeStyleSheet _themeStyleSheet;
 
         private readonly List<ItemInfo> _items = new();
 
@@ -38,14 +34,36 @@ namespace EncosyTower.Editor.AssemblyDefs
         private SimpleTableView<ItemInfo> _table;
         private Toggle _includePackagesToggle;
 
+        [MenuItem("Encosy Tower/Assembly Definitions", priority = 65_83_00_00)]
+        public static void OpenWindow()
+        {
+            var window = GetWindow<AssemblyDefinitionListWindow>();
+            window.titleContent = new GUIContent("Assembly Definitions");
+            window.ShowPopup();
+        }
+
         private void CreateGUI()
         {
-            rootVisualElement.WithStyleSheet(_themeStyleSheet);
+            rootVisualElement.WithEditorStyleSheet(THEME_STYLE_SHEET);
 
-            rootVisualElement.Add(new Button(Refresh) {
+            var toolbar = new Toolbar();
+            rootVisualElement.Add(toolbar);
+
+            toolbar.Add(new ToolbarButton(Refresh) {
                 text = "Refresh",
                 name = "refresh-button",
             });
+
+            toolbar.Add(new ToolbarSpacer());
+
+            toolbar.Add(_includePackagesToggle = new ToolbarToggle {
+                text = "Include Packages",
+                tooltip = "Include all embedded packages",
+                name = "include-packages-toggle",
+                value = true,
+            });
+
+            _includePackagesToggle.RegisterValueChangedCallback(IncludePackagesToggle_OnValueChanged);
 
             var searchField = new ToolbarSearchField {
                 name = "search-field"
@@ -53,22 +71,7 @@ namespace EncosyTower.Editor.AssemblyDefs
 
             searchField.RegisterValueChangedCallback(SearchField_OnValueChanged);
 
-            rootVisualElement.Add(searchField);
-
-            var toggleGroup = new VisualElement();
-            toggleGroup.AddToClassList("toggle-group");
-            rootVisualElement.Add(toggleGroup);
-
-            _includePackagesToggle = new Toggle {
-                text = "Include Packages",
-                tooltip = "Include all embedded packages",
-                name = "include-packages-toggle",
-                value = true,
-            };
-
-            _includePackagesToggle.RegisterValueChangedCallback(IncludePackagesToggle_OnValueChanged);
-
-            toggleGroup.Add(_includePackagesToggle);
+            toolbar.Add(searchField);
 
             CreateTable();
             Refresh();
@@ -101,10 +104,10 @@ namespace EncosyTower.Editor.AssemblyDefs
 
         private void CreateTable()
         {
-            var table = _table = new() {
+            var table = _table = new SimpleTableView<ItemInfo>() {
                 bindingPath = nameof(ItemCollectionAsset.items),
                 showBoundCollectionSize = false,
-            };
+            }.WithEditorStyleSheets();
 
             rootVisualElement.Add(table);
 

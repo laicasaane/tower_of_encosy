@@ -20,13 +20,11 @@ namespace EncosyTower.Editor.ProjectSetup
 {
     public sealed class ProjectFeaturesWindow : EditorWindow
     {
-        [MenuItem("Encosy Tower/Project Settings/Features", priority = 80_70_00_00)]
-        public static void OpenWindow()
-        {
-            var window = GetWindow<ProjectFeaturesWindow>();
-            window.titleContent = new GUIContent("Project Features");
-            window.Show();
-        }
+        private const string MODULE_ROOT = $"{EditorStyleSheetPaths.ROOT}/EncosyTower.Editor/ProjectSetup";
+        private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
+        private const string FILE_NAME = nameof(ProjectFeaturesWindow);
+
+        public const string THEME_STYLE_SHEET = $"{STYLE_SHEETS_PATH}/{FILE_NAME}.uss";
 
         private const string LIST_TITLE = "Package Information";
         private const string LIST_MSG = "Retrieving installed packages...";
@@ -48,8 +46,6 @@ namespace EncosyTower.Editor.ProjectSetup
         private static StringBuilder s_openUpmSb;
         private static List<string> s_unityIdentifiers;
 
-        [SerializeField] private ThemeStyleSheet _themeStyleSheet;
-
         [SerializeField, HideInInspector]
         private FeatureCollectionAsset _featureCollectionAsset;
 
@@ -66,7 +62,15 @@ namespace EncosyTower.Editor.ProjectSetup
 
         private VisualElement _requestInfoContainer;
         private VisualElement _featureContainer;
-        private Button _installButton;
+        private ToolbarButton _installButton;
+
+        [MenuItem("Encosy Tower/Project Settings/Features", priority = 80_70_00_00)]
+        public static void OpenWindow()
+        {
+            var window = GetWindow<ProjectFeaturesWindow>();
+            window.titleContent = new GUIContent("Project Features");
+            window.Show();
+        }
 
         public void OnEnable()
         {
@@ -157,7 +161,7 @@ namespace EncosyTower.Editor.ProjectSetup
 
         private void CreateGUI()
         {
-            rootVisualElement.WithStyleSheet(_themeStyleSheet);
+            rootVisualElement.WithEditorStyleSheet(THEME_STYLE_SHEET);
 
             var requestInfoContainer = _requestInfoContainer = new VisualElement() {
                 name = "request-info-container",
@@ -165,12 +169,12 @@ namespace EncosyTower.Editor.ProjectSetup
 
             rootVisualElement.Add(requestInfoContainer);
 
-            var refreshButton = new Button(Refresh) {
-                text = "Refresh"
-            };
-            refreshButton.AddToClassList("refresh-button");
+            var requestInfoToolbar = new Toolbar();
+            requestInfoContainer.Add(requestInfoToolbar);
 
-            requestInfoContainer.Add(refreshButton);
+            requestInfoToolbar.Add(new ToolbarButton(Refresh) {
+                text = "Refresh"
+            }.WithClass("refresh-button"));
 
             requestInfoContainer.Add(new Label(LIST_MSG) {
                 name = "request-info-label",
@@ -178,25 +182,20 @@ namespace EncosyTower.Editor.ProjectSetup
 
             var featureContainer = _featureContainer = new VisualElement() {
                 name = "feature-container",
-            };
+            }.WithDisplay(DisplayStyle.None);
 
             rootVisualElement.Add(featureContainer);
 
-            featureContainer.WithDisplay(DisplayStyle.None);
+            var featureToolbar = new Toolbar();
+            featureContainer.Add(featureToolbar);
 
-            var buttonGroup = new VisualElement() {
-                name = "button-group",
-            };
-
-            featureContainer.Add(buttonGroup);
-
-            buttonGroup.Add(refreshButton = new Button(Refresh) {
+            featureToolbar.Add(new ToolbarButton(Refresh) {
                 text = "Refresh",
-            });
+            }.WithClass("refresh-button"));
 
-            refreshButton.AddToClassList("refresh-button");
+            featureToolbar.Add(new ToolbarSpacer());
 
-            buttonGroup.Add(_installButton = new Button(Install) {
+            featureToolbar.Add(_installButton = new ToolbarButton(Install) {
                 text = "Install",
                 name = "install-button",
                 enabledSelf = false,
@@ -265,12 +264,12 @@ namespace EncosyTower.Editor.ProjectSetup
 
         private void CreateFeatureTable(VisualElement container)
         {
-            var table = _featureTable = new() {
+            var table = _featureTable = new SimpleTableView<string>() {
                 name = "feature-table",
                 alternateRows = false,
                 bindingPath = nameof(FeatureCollectionAsset.features),
                 showBoundCollectionSize = false,
-            };
+            }.WithEditorStyleSheets();
 
             container.Add(table);
 
@@ -324,11 +323,11 @@ namespace EncosyTower.Editor.ProjectSetup
 
         private void CreatePackageTable(VisualElement container)
         {
-            var table = _packageTable = new() {
+            var table = _packageTable = new SimpleTableView<PackageInfo>() {
                 name = "package-table",
                 bindingPath = nameof(PackageCollectionAsset.packages),
                 showBoundCollectionSize = false,
-            };
+            }.WithEditorStyleSheets();
 
             container.Add(table);
 
