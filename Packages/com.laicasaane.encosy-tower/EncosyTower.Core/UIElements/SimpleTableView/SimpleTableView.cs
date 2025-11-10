@@ -1,22 +1,12 @@
-#if UNITY_EDITOR
-
 using System;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
 
-namespace EncosyTower.Editor.UIElements
+namespace EncosyTower.UIElements
 {
     public class SimpleTableView<TItem> : MultiColumnListView
     {
         public const float DEFAULT_ROW_HEIGHT = 20;
-
-        private const string MODULE_ROOT = $"{EditorStyleSheetPaths.ROOT}/EncosyTower.Editor/UIElements/SimpleTableView";
-        private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
-        private const string FILE_NAME = nameof(SimpleTableView<TItem>);
-
-        private const string THEME_STYLE_SHEET = $"{STYLE_SHEETS_PATH}/{FILE_NAME}.tss";
-        private const string STYLE_SHEET_DARK = $"{STYLE_SHEETS_PATH}/{FILE_NAME}_Dark.uss";
-        private const string STYLE_SHEET_LIGHT = $"{STYLE_SHEETS_PATH}/{FILE_NAME}_Light.uss";
 
         public static readonly string TableViewUssClassName = "table-view";
         public static readonly string TableHeaderUssClassName = "table-header";
@@ -36,9 +26,6 @@ namespace EncosyTower.Editor.UIElements
 
         public SimpleTableView()
         {
-            this.WithEditorStyleSheet(THEME_STYLE_SHEET);
-            this.WithEditorStyleSheet(STYLE_SHEET_DARK, STYLE_SHEET_LIGHT);
-
             showBoundCollectionSize = true;
             virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight;
 
@@ -205,5 +192,3 @@ namespace EncosyTower.Editor.UIElements
         );
     }
 }
-
-#endif
