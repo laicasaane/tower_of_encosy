@@ -11,9 +11,7 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static FixedString32Bytes ToFixedString(this bool value)
         {
-            var fs = new FixedString32Bytes();
-            fs.Append(value ? bool.TrueString : bool.FalseString);
-            return fs;
+            return (FixedString32Bytes)(value ? bool.TrueString : bool.FalseString);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,14 +86,14 @@ namespace EncosyTower.Collections
             return fs;
         }
 
-        public static FixedString32Bytes ToFixedString(this System.Index value)
+        public static FixedString32Bytes ToFixedString(this Index value)
         {
             var fs = new FixedString32Bytes();
             fs.Append(value.Value);
             return fs;
         }
 
-        public static FixedString32Bytes ToFixedString(this System.Range value)
+        public static FixedString32Bytes ToFixedString(this Range value)
         {
             var fs = new FixedString32Bytes();
             fs.Append('[');
