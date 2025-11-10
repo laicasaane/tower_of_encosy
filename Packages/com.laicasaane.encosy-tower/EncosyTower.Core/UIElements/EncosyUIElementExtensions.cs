@@ -29,6 +29,18 @@ namespace EncosyTower.UIElements
         }
 
         /// <summary>
+        /// Set <paramref name="name"/> to <paramref name="self"/>
+        /// then returns <paramref name="self"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T WithName<T>([NotNull] this T self, [NotNull] string name)
+            where T : VisualElement
+        {
+            self.name = name;
+            return self;
+        }
+
+        /// <summary>
         /// Adds a cloned tree of <paramref name="asset"/> into <paramref name="self"/>
         /// then returns <paramref name="self"/>.
         /// </summary>
