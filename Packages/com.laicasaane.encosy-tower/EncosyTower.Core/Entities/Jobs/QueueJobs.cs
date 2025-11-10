@@ -1,7 +1,7 @@
 #if UNITY_ENTITIES
 
+using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
-using Latios;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -9,6 +9,8 @@ using Unity.Jobs;
 namespace EncosyTower.Jobs
 {
 #if LATIOS_FRAMEWORK
+
+    using Latios;
 
     partial struct ClearNativeQueueJob<TData>
     {
@@ -43,14 +45,18 @@ namespace EncosyTower.Jobs
 
 #endif
 
-    public static class ClearQueueJobExtensions
+    public static class EntitiesQueueJobExtensions
     {
-        public static void ScheduleIfCreated<TData>(this ref ClearNativeQueueJob<TData> job, ref SystemState state)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ScheduleIfCreated<TData>(
+              this ClearNativeQueueJob<TData> job
+            , ref SystemState state
+        )
             where TData : unmanaged
         {
             if (job.queue.IsCreated)
             {
-                state.Dependency = job.ScheduleByRef(state.Dependency);
+                state.Dependency = job.Schedule(state.Dependency);
             }
         }
     }
