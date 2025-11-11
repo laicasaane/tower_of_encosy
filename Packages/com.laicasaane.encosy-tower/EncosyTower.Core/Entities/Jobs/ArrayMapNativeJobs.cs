@@ -32,7 +32,7 @@ namespace EncosyTower.Jobs
                 return default;
             }
 
-            if (map.Count < 1)
+            if (map.IsCreated == false || map.Count < 1)
             {
                 return default;
             }
@@ -63,7 +63,7 @@ namespace EncosyTower.Jobs
                 return default;
             }
 
-            if (map.Count < 1)
+            if (map.IsCreated == false || map.Count < 1)
             {
                 return default;
             }
@@ -94,7 +94,7 @@ namespace EncosyTower.Jobs
                 return default;
             }
 
-            if (map.Count < 1)
+            if (map.IsCreated == false || map.Count < 1)
             {
                 return default;
             }

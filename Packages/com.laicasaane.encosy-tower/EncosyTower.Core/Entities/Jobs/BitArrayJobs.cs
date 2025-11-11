@@ -12,15 +12,15 @@ namespace EncosyTower.Jobs
 
     using Latios;
 
-    partial struct TrySetCapacityNativeListJob<TData>
+    partial struct TrySetCapacityNativeBitArrayJob
     {
-        public static TrySetCapacityNativeListJob<TData> FromCollectionComponent<TCollectionComponent>(
+        public static TrySetCapacityNativeBitArrayJob FromCollectionComponent<TCollectionComponent>(
             BlackboardEntity blackboard
         )
             where TCollectionComponent : unmanaged
                 , ICollectionComponent
                 , Latios.InternalSourceGen.StaticAPI.ICollectionComponentSourceGenerated
-                , ITryGet<NativeList<TData>>
+                , ITryGet<NativeBitArray>
         {
             if (blackboard.HasCollectionComponent<TCollectionComponent>() == false)
             {
@@ -37,21 +37,21 @@ namespace EncosyTower.Jobs
                 return default;
             }
 
-            return new TrySetCapacityNativeListJob<TData> {
+            return new TrySetCapacityNativeBitArrayJob {
                 list = list,
             };
         }
     }
 
-    partial struct ClearNativeListJob<TData>
+    partial struct ClearNativeBitArrayJob
     {
-        public static ClearNativeListJob<TData> FromCollectionComponent<TCollectionComponent>(
+        public static ClearNativeBitArrayJob FromCollectionComponent<TCollectionComponent>(
             BlackboardEntity blackboard
         )
             where TCollectionComponent : unmanaged
                 , ICollectionComponent
                 , Latios.InternalSourceGen.StaticAPI.ICollectionComponentSourceGenerated
-                , ITryGet<NativeList<TData>>
+                , ITryGet<NativeBitArray>
         {
             if (blackboard.HasCollectionComponent<TCollectionComponent>() == false)
             {
@@ -68,38 +68,7 @@ namespace EncosyTower.Jobs
                 return default;
             }
 
-            return new ClearNativeListJob<TData> {
-                list = list,
-            };
-        }
-    }
-
-    partial struct ClearSharedListNativeJob<TData>
-    {
-        public static ClearSharedListNativeJob<TData> FromCollectionComponent<TCollectionComponent>(
-            BlackboardEntity blackboard
-        )
-            where TCollectionComponent : unmanaged
-                , ICollectionComponent
-                , Latios.InternalSourceGen.StaticAPI.ICollectionComponentSourceGenerated
-                , ITryGet<SharedListNative<TData>>
-        {
-            if (blackboard.HasCollectionComponent<TCollectionComponent>() == false)
-            {
-                return default;
-            }
-
-            if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var list) == false)
-            {
-                return default;
-            }
-
-            if (list.IsCreated == false || list.Count < 1)
-            {
-                return default;
-            }
-
-            return new ClearSharedListNativeJob<TData> {
+            return new ClearNativeBitArrayJob {
                 list = list,
             };
         }
@@ -107,14 +76,13 @@ namespace EncosyTower.Jobs
 
 #endif
 
-    public static class EntitiesListJobExtensions
+    public static class EntitiesBitArrayJobExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ScheduleIfCreated<TData>(
-              this TrySetCapacityNativeListJob<TData> job
+        public static void ScheduleIfCreated(
+              this TrySetCapacityNativeBitArrayJob job
             , ref SystemState state
         )
-            where TData : unmanaged
         {
             if (job.list.IsCreated)
             {
@@ -123,24 +91,10 @@ namespace EncosyTower.Jobs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ScheduleIfCreated<TData>(
-              this ClearNativeListJob<TData> job
+        public static void ScheduleIfCreated(
+              this ClearNativeBitArrayJob job
             , ref SystemState state
         )
-            where TData : unmanaged
-        {
-            if (job.list.IsCreated)
-            {
-                state.Dependency = job.Schedule(state.Dependency);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ScheduleIfCreated<TData>(
-              this ClearSharedListNativeJob<TData> job
-            , ref SystemState state
-        )
-            where TData : unmanaged
         {
             if (job.list.IsCreated)
             {

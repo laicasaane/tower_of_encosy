@@ -5,7 +5,7 @@ using UnityEngine.Jobs;
 
 namespace EncosyTower.Jobs
 {
-    public static class IJobParallelForTransformExtensions
+    public static class EncosyIJobParallelForTransformExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static JobHandle Schedule<T>(
@@ -15,7 +15,7 @@ namespace EncosyTower.Jobs
         )
             where T : struct, IJobParallelForTransform
         {
-            return UnityEngine.Jobs.IJobParallelForTransformExtensions.Schedule(
+            return IJobParallelForTransformExtensions.Schedule(
                   jobData
                 , transforms._array
                 , dependsOn
@@ -31,7 +31,7 @@ namespace EncosyTower.Jobs
         )
             where T : struct, IJobParallelForTransform
         {
-            return UnityEngine.Jobs.IJobParallelForTransformExtensions.ScheduleReadOnly(
+            return IJobParallelForTransformExtensions.ScheduleReadOnly(
                   jobData
                 , transforms._array
                 , batchSize
@@ -46,7 +46,7 @@ namespace EncosyTower.Jobs
         )
             where T : struct, IJobParallelForTransform
         {
-            UnityEngine.Jobs.IJobParallelForTransformExtensions.RunReadOnly(
+            IJobParallelForTransformExtensions.RunReadOnly(
                   jobData
                 , transforms._array
             );
@@ -60,7 +60,7 @@ namespace EncosyTower.Jobs
         )
             where T : struct, IJobParallelForTransform
         {
-            return UnityEngine.Jobs.IJobParallelForTransformExtensions.ScheduleByRef(
+            return IJobParallelForTransformExtensions.ScheduleByRef(
                   ref jobData
                 , transforms._array
                 , dependsOn
@@ -76,7 +76,7 @@ namespace EncosyTower.Jobs
         )
             where T : struct, IJobParallelForTransform
         {
-            return UnityEngine.Jobs.IJobParallelForTransformExtensions.ScheduleReadOnlyByRef(
+            return IJobParallelForTransformExtensions.ScheduleReadOnlyByRef(
                   ref jobData
                 , transforms._array
                 , batchSize
@@ -88,7 +88,7 @@ namespace EncosyTower.Jobs
         public unsafe static void RunReadOnlyByRef<T>(this ref T jobData, ScheduleOnlyTransformArray transforms)
             where T : struct, IJobParallelForTransform
         {
-            UnityEngine.Jobs.IJobParallelForTransformExtensions.RunReadOnlyByRef(
+            IJobParallelForTransformExtensions.RunReadOnlyByRef(
                   ref jobData
                 , transforms._array
             );

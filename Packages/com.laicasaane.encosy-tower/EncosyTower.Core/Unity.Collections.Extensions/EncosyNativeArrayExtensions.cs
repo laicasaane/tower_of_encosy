@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
+using Unity.Jobs;
 
 namespace EncosyTower.Collections
 {
@@ -20,6 +21,7 @@ namespace EncosyTower.Collections
         /// <summary>
         /// Create a NativeArray from a <see cref="NativeSlice{T}"/>.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<T> CreateFrom<T>(in NativeSlice<T> source, Allocator allocator)
             where T : struct
         {
@@ -31,6 +33,7 @@ namespace EncosyTower.Collections
         /// <summary>
         /// Create a NativeArray from a <see cref="Span{T}"/>.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<T> CreateFrom<T>(Span<T> source, Allocator allocator)
             where T : struct
         {
@@ -42,6 +45,7 @@ namespace EncosyTower.Collections
         /// <summary>
         /// Create a NativeArray from a <see cref="ReadOnlySpan{T}"/>.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<T> CreateFrom<T>(ReadOnlySpan<T> source, Allocator allocator)
             where T : struct
         {
@@ -76,6 +80,7 @@ namespace EncosyTower.Collections
         /// <summary>
         /// Create a NativeArray from a <see cref="NativeSlice{T}"/>.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<T> CreateFrom<T>(in NativeSlice<T> source, AllocatorManager.AllocatorHandle allocator)
             where T : unmanaged
         {
@@ -87,6 +92,7 @@ namespace EncosyTower.Collections
         /// <summary>
         /// Create a NativeArray from a <see cref="Span{T}"/>.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<T> CreateFrom<T>(Span<T> source, AllocatorManager.AllocatorHandle allocator)
             where T : unmanaged
         {
@@ -98,6 +104,7 @@ namespace EncosyTower.Collections
         /// <summary>
         /// Create a NativeArray from a <see cref="ReadOnlySpan{T}"/>.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<T> CreateFrom<T>(ReadOnlySpan<T> source, AllocatorManager.AllocatorHandle allocator)
             where T : unmanaged
         {
@@ -130,6 +137,7 @@ namespace EncosyTower.Collections
         /// <summary>
         /// Create a NativeArray from a <see cref="NativeSlice{T}"/>.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<T> CreateFrom<T>(in NativeSlice<T> source, RewindableAllocator allocator)
             where T : unmanaged
         {
@@ -141,6 +149,7 @@ namespace EncosyTower.Collections
         /// <summary>
         /// Create a NativeArray from a <see cref="Span{T}"/>.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<T> CreateFrom<T>(Span<T> source, RewindableAllocator allocator)
             where T : unmanaged
         {
@@ -152,6 +161,7 @@ namespace EncosyTower.Collections
         /// <summary>
         /// Create a NativeArray from a <see cref="ReadOnlySpan{T}"/>.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<T> CreateFrom<T>(ReadOnlySpan<T> source, RewindableAllocator allocator)
             where T : unmanaged
         {
@@ -247,15 +257,38 @@ namespace EncosyTower.Collections
             return (uint)index < (uint)array.Length ? array[index] : default;
         }
 
-        public static void DisposeUnset<T>(this NativeArray<T> array)
+        /// <summary>
+        /// Dispose the collection then set it to default.
+        /// </summary>
+        /// <param name="array">The collection to dispose and unset</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DisposeUnset<T>(ref this NativeArray<T> array)
+            where T : struct
+        {
+            array.DisposeIfCreated();
+            array = default;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DisposeIfCreated<T>(this NativeArray<T> array)
             where T : struct
         {
             if (array.IsCreated)
             {
                 array.Dispose();
             }
+        }
 
-            array = default;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static JobHandle DisposeIfCreated<T>(this NativeArray<T> array, JobHandle inputDeps)
+            where T : struct
+        {
+            if (array.IsCreated)
+            {
+                return array.Dispose(inputDeps);
+            }
+
+            return inputDeps;
         }
     }
 }

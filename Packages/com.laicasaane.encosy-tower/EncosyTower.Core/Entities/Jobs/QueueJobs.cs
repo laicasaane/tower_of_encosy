@@ -32,7 +32,7 @@ namespace EncosyTower.Jobs
                 return default;
             }
 
-            if (queue.Count < 1)
+            if (queue.IsCreated == false || queue.Count < 1)
             {
                 return default;
             }

@@ -33,7 +33,7 @@ namespace EncosyTower.Jobs
                 return default;
             }
 
-            if (set.Count < 1)
+            if (set.IsCreated == false || set.Count < 1)
             {
                 return default;
             }
@@ -64,7 +64,7 @@ namespace EncosyTower.Jobs
                 return default;
             }
 
-            if (set.Count() < 1)
+            if (set.IsCreated == false || set.Count() < 1)
             {
                 return default;
             }
@@ -95,7 +95,7 @@ namespace EncosyTower.Jobs
                 return default;
             }
 
-            if (set.Count < 1)
+            if (set.IsCreated == false || set.Count < 1)
             {
                 return default;
             }
@@ -122,6 +122,11 @@ namespace EncosyTower.Jobs
             }
 
             if (blackboard.GetCollectionComponent<TCollectionComponent>().TryGet(out var set) == false)
+            {
+                return default;
+            }
+
+            if (set.IsCreated == false || set.Count() < 1)
             {
                 return default;
             }
