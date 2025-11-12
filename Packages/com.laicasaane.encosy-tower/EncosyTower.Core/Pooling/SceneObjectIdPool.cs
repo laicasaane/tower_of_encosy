@@ -344,8 +344,7 @@ namespace EncosyTower.Pooling
             Resources.InstanceIDToObjectList(transformIds, _objectList);
 
             var objects = _objectList.AsReadOnlySpan();
-            transforms.AddReplicateNoInit(amount);
-            var transformSpan = transforms.AsSpan();
+            var transformSpan = transforms.AddReplicateNoInit(amount);
 
             for (var i = 0; i < amount; i++)
             {

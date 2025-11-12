@@ -171,8 +171,8 @@ namespace EncosyTower.PubSub.Internals
 
                         var handlerArray = handlerMap.GetValues();
                         var handlerList = GetHandlerList();
-                        handlerList.AddReplicateNoInit(handlerArray.Length);
-                        handlerArray.CopyTo(handlerList.AsSpan());
+                        var handlerSpan = handlerList.AddReplicateNoInit(handlerArray.Length);
+                        handlerArray.CopyTo(handlerSpan);
                         handlerListList.Add(handlerList);
                     }
                 }
