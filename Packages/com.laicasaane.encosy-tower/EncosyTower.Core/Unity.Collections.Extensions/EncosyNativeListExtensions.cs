@@ -1,8 +1,10 @@
 #if UNITY_COLLECTIONS
 
+using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.Debugging;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 
 namespace EncosyTower.Collections
@@ -84,6 +86,20 @@ namespace EncosyTower.Collections
             }
 
             return inputDeps;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe static Span<T> AsSpan<T>(this NativeList<T> list)
+            where T : unmanaged
+        {
+            return new Span<T>(list.GetUnsafePtr(), list.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe static ReadOnlySpan<T> AsReadOnlySpan<T>(this NativeList<T> list)
+            where T : unmanaged
+        {
+            return new ReadOnlySpan<T>(list.GetUnsafeReadOnlyPtr(), list.Length);
         }
     }
 }
