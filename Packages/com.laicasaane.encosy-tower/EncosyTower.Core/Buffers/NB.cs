@@ -30,6 +30,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using EncosyTower.Collections;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -255,7 +256,7 @@ namespace EncosyTower.Buffers
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void CopyFrom(int destinationStartIndex, ReadOnlySpan<T> source, int length)
-            => source[..length].CopyTo(AsSpan().Slice(destinationStartIndex, length));
+            => new CopyFromSpan<T>(AsSpan()).CopyFrom(destinationStartIndex, source, length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryCopyFrom(ReadOnlySpan<T> source)
@@ -271,7 +272,7 @@ namespace EncosyTower.Buffers
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryCopyFrom(int destinationStartIndex, ReadOnlySpan<T> source, int length)
-            => source[..length].TryCopyTo(AsSpan().Slice(destinationStartIndex, length));
+            => new CopyFromSpan<T>(AsSpan()).TryCopyFrom(destinationStartIndex, source, length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void CopyTo(Span<T> destination)
@@ -287,7 +288,7 @@ namespace EncosyTower.Buffers
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void CopyTo(int sourceStartIndex, Span<T> destination, int length)
-            => AsReadOnlySpan().Slice(sourceStartIndex, length).CopyTo(destination[..length]);
+            => new CopyToSpan<T>(AsReadOnlySpan()).CopyTo(sourceStartIndex, destination, length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryCopyTo(Span<T> destination)
@@ -303,7 +304,7 @@ namespace EncosyTower.Buffers
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryCopyTo(int sourceStartIndex, Span<T> destination, int length)
-            => AsReadOnlySpan().Slice(sourceStartIndex, length).TryCopyTo(destination[..length]);
+            => new CopyToSpan<T>(AsReadOnlySpan()).TryCopyTo(sourceStartIndex, destination, length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal NativeArray<T> ToNativeArray()
