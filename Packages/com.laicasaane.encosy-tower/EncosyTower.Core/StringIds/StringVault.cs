@@ -10,7 +10,6 @@ using EncosyTower.Collections;
 using EncosyTower.Common;
 using EncosyTower.Debugging;
 using EncosyTower.Ids;
-using Unity.Collections;
 using UnityEngine;
 
 namespace EncosyTower.StringIds
@@ -21,7 +20,8 @@ namespace EncosyTower.StringIds
         , ICopyToSpan<UnmanagedString>, ITryCopyToSpan<UnmanagedString>
     {
         internal readonly SharedArrayMap<StringHash, StringId> _map;
-        internal readonly SharedList<UnmanagedString> _unmanagedStrings;
+        internal readonly SharedList<Range> _unmanagedStringRanges;
+        internal readonly SharedList<byte> _unmanagedStringBuffer;
         internal readonly FasterList<string> _managedStrings;
         internal readonly SharedList<Option<StringHash>> _hashes;
         internal readonly SharedReference<int> _count;
@@ -30,7 +30,8 @@ namespace EncosyTower.StringIds
         public StringVault(int initialCapacity)
         {
             _map = new(initialCapacity);
-            _unmanagedStrings = new(initialCapacity);
+            _unmanagedStringRanges = new(initialCapacity);
+            _unmanagedStringBuffer = new(initialCapacity);
             _managedStrings = new(initialCapacity);
             _hashes = new(initialCapacity);
             _count = new();
@@ -74,7 +75,8 @@ namespace EncosyTower.StringIds
         public void Dispose()
         {
             _map.Dispose();
-            _unmanagedStrings.Dispose();
+            _unmanagedStringRanges.Dispose();
+            _unmanagedStringBuffer.Dispose();
             _hashes.Dispose();
             _count.Dispose();
         }
@@ -84,13 +86,14 @@ namespace EncosyTower.StringIds
             lock (_lock)
             {
                 _map.Clear();
-                _unmanagedStrings.Clear();
+                _unmanagedStringRanges.Clear();
+                _unmanagedStringBuffer.Clear();
                 _managedStrings.Clear();
                 _hashes.Clear();
 
                 // The first item represent an invalid id
                 _map.Add(default, default);
-                _unmanagedStrings.Add(default);
+                _unmanagedStringRanges.Add(default);
                 _managedStrings.Add(string.Empty);
                 _hashes.Add(default);
 
@@ -133,7 +136,7 @@ namespace EncosyTower.StringIds
                     count += 1;
                     EnsureCapacity();
 
-                    _unmanagedStrings[index] = str;
+                    _unmanagedStringRanges[index] = WriteToBuffer(str);
                     _managedStrings[index] = str.ToString();
                     _hashes[index] = Option.Some<StringHash>(hash);
                 }
@@ -152,7 +155,7 @@ namespace EncosyTower.StringIds
                         count += 1;
                         EnsureCapacity();
 
-                        _unmanagedStrings[index] = str;
+                        _unmanagedStringRanges[index] = WriteToBuffer(str);
                         _managedStrings[index] = str.ToString();
                         _hashes[index] = Option.Some<StringHash>(hash);
                     }
@@ -201,7 +204,7 @@ namespace EncosyTower.StringIds
                     count += 1;
                     EnsureCapacity();
 
-                    _unmanagedStrings[index] = str;
+                    _unmanagedStringRanges[index] = WriteToBuffer(str);
                     _managedStrings[index] = str;
                     _hashes[index] = Option.Some<StringHash>(hash);
                 }
@@ -219,7 +222,7 @@ namespace EncosyTower.StringIds
                     {
                         count += 1;
                         EnsureCapacity();
-                        _unmanagedStrings[index] = str;
+                        _unmanagedStringRanges[index] = WriteToBuffer(str);
                         _managedStrings[index] = str;
                         _hashes[index] = Option.Some<StringHash>(hash);
                     }
@@ -240,8 +243,12 @@ namespace EncosyTower.StringIds
             var index = (int)indexUnsigned;
             var validIndex = indexUnsigned < (uint)_hashes.Count;
 
-            result = validIndex ? _unmanagedStrings[index] : default;
-            return validIndex ? _hashes[index].HasValue : false;
+            var resultOpt = validIndex
+                ? UnmanagedString.FromBufferAt(_unmanagedStringRanges.AsReadOnly()[index], _unmanagedStringBuffer.AsReadOnlySpan())
+                : Option.None;
+
+            result = resultOpt.GetValueOrDefault();
+            return resultOpt.HasValue;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -265,12 +272,12 @@ namespace EncosyTower.StringIds
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpan<string> GetManagedStringsAsSpan()
+        public ReadOnlySpan<string> GetManagedStringSpan()
             => _managedStrings.AsReadOnlySpan()[..Count];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpan<UnmanagedString> GetUnmanagedStringsAsSpan()
-            => _unmanagedStrings.AsReadOnlySpan()[..Count];
+        public UnmanagedStringSpan GetUnmanagedStringSpan()
+            => new(_unmanagedStringRanges.AsReadOnlySpan()[1..Count], _unmanagedStringBuffer.AsReadOnlySpan());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(Span<string> destination)
@@ -286,7 +293,7 @@ namespace EncosyTower.StringIds
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(int sourceStartIndex, Span<string> destination, int length)
-            => GetManagedStringsAsSpan().Slice(sourceStartIndex, length).CopyTo(destination[..length]);
+            => GetManagedStringSpan().Slice(sourceStartIndex, length).CopyTo(destination[..length]);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryCopyTo(Span<string> destination)
@@ -302,7 +309,7 @@ namespace EncosyTower.StringIds
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryCopyTo(int sourceStartIndex, Span<string> destination, int length)
-            => GetManagedStringsAsSpan().Slice(sourceStartIndex, length).TryCopyTo(destination[..length]);
+            => GetManagedStringSpan().Slice(sourceStartIndex, length).TryCopyTo(destination[..length]);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(Span<UnmanagedString> destination)
@@ -318,7 +325,7 @@ namespace EncosyTower.StringIds
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(int sourceStartIndex, Span<UnmanagedString> destination, int length)
-            => GetUnmanagedStringsAsSpan().Slice(sourceStartIndex, length).CopyTo(destination[..length]);
+            => GetUnmanagedStringSpan().CopyTo(sourceStartIndex, destination, length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryCopyTo(Span<UnmanagedString> destination)
@@ -334,7 +341,7 @@ namespace EncosyTower.StringIds
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryCopyTo(int sourceStartIndex, Span<UnmanagedString> destination, int length)
-            => GetUnmanagedStringsAsSpan().Slice(sourceStartIndex, length).TryCopyTo(destination[..length]);
+            => GetUnmanagedStringSpan().TryCopyTo(sourceStartIndex, destination, length);
 
         public void IncreaseCapacityBy(int amount)
         {
@@ -362,13 +369,13 @@ namespace EncosyTower.StringIds
 
         private void EnsureCapacity()
         {
-            var oldCapacity = Math.Min(_hashes.Capacity, _unmanagedStrings.Capacity);
+            var oldCapacity = Math.Min(_hashes.Capacity, _unmanagedStringRanges.Capacity);
             var newCapacity = Math.Max(_map.Capacity, _count.ValueRO);
 
             if (newCapacity > 0 && newCapacity > oldCapacity)
             {
                 _hashes.IncreaseCapacityTo(newCapacity);
-                _unmanagedStrings.IncreaseCapacityTo(newCapacity);
+                _unmanagedStringRanges.IncreaseCapacityTo(newCapacity);
                 _managedStrings.IncreaseCapacityTo(newCapacity);
             }
 
@@ -377,15 +384,26 @@ namespace EncosyTower.StringIds
                 _hashes.AddReplicateNoInit(Math.Max(newCapacity - _hashes.Count, 0));
             }
 
-            if (_unmanagedStrings.Count < newCapacity)
+            if (_unmanagedStringRanges.Count < newCapacity)
             {
-                _unmanagedStrings.AddReplicateNoInit(Math.Max(newCapacity - _unmanagedStrings.Count, 0));
+                _unmanagedStringRanges.AddReplicateNoInit(Math.Max(newCapacity - _unmanagedStringRanges.Count, 0));
             }
 
             if (_managedStrings.Count < newCapacity)
             {
                 _managedStrings.AddReplicateNoInit(Math.Max(newCapacity - _managedStrings.Count, 0));
             }
+        }
+
+        private Range WriteToBuffer(in UnmanagedString str)
+        {
+            var buffer = _unmanagedStringBuffer;
+            var startIndex = buffer.Count;
+            var amount = str.Length;
+            var strSpan = buffer.AddReplicateNoInit(amount);
+            str.AsReadOnlySpan().CopyTo(strSpan);
+
+            return new(startIndex, startIndex + amount);
         }
 
         [HideInCallstack, StackTraceHidden]
@@ -408,141 +426,6 @@ namespace EncosyTower.StringIds
                     $"Cannot register a StringId by the same value \"{str}\" with different id \"{id}\"."
                 );
             }
-        }
-    }
-
-    partial class StringVault
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnly AsReadOnly()
-            => new(this);
-
-        public readonly partial struct ReadOnly : IReadOnlyList<UnmanagedString>
-            , ICopyToSpan<UnmanagedString>, ITryCopyToSpan<UnmanagedString>
-        {
-            private readonly SharedArrayMapNative<StringHash, StringId>.ReadOnly _map;
-            private readonly SharedListNative<UnmanagedString>.ReadOnly _unmanagedStrings;
-            private readonly SharedListNative<Option<StringHash>>.ReadOnly _hashes;
-            private readonly NativeArray<int>.ReadOnly _count;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ReadOnly(StringVault vault)
-            {
-                _map = vault._map.AsNative();
-                _unmanagedStrings = vault._unmanagedStrings.AsNative();
-                _hashes = vault._hashes.AsNative();
-                _count = vault._count.AsNativeArray().AsReadOnly();
-            }
-
-            public bool IsCreated
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _map.IsCreated && _unmanagedStrings.IsCreated
-                    && _hashes.IsCreated && _count.IsCreated;
-            }
-
-            public int Capacity
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _hashes.Count;
-            }
-
-            public int Count
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _count[0];
-            }
-
-            public UnmanagedString this[int index]
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _unmanagedStrings[index];
-            }
-
-            public bool TryGetId(in UnmanagedString str, out StringId result)
-            {
-                var hash = str.GetHashCode64();
-                var registered = _map.TryGetValue(hash, out var id);
-
-                if (registered && TryGetString(id, out var registeredString) && str == registeredString)
-                {
-                    result = id;
-                    return true;
-                }
-
-                result = default;
-                return false;
-            }
-
-            public bool TryGetString(StringId id, out UnmanagedString result)
-            {
-                var indexUnsigned = (uint)id.Id;
-                var index = (int)indexUnsigned;
-                var validIndex = indexUnsigned < (uint)_hashes.Count;
-
-                result = validIndex ? _unmanagedStrings[index] : default;
-                return validIndex ? _hashes[index].HasValue : false;
-            }
-
-            public bool ContainsId(StringId id)
-            {
-                var indexUnsigned = (uint)id.Id;
-                var index = (int)indexUnsigned;
-                var validIndex = indexUnsigned < (uint)_hashes.Count;
-                return validIndex ? _hashes[index].HasValue : false;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ReadOnlySpan<UnmanagedString> GetUnmanagedStringsAsSpan()
-                => _unmanagedStrings.AsReadOnlySpan()[..Count];
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(Span<UnmanagedString> destination)
-                => CopyTo(destination, Count);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(Span<UnmanagedString> destination, int length)
-                => CopyTo(0, destination, length);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(int sourceStartIndex, Span<UnmanagedString> destination)
-                => CopyTo(sourceStartIndex, destination, Count);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(int sourceStartIndex, Span<UnmanagedString> destination, int length)
-                => GetUnmanagedStringsAsSpan().Slice(sourceStartIndex, length).CopyTo(destination[..length]);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool TryCopyTo(Span<UnmanagedString> destination)
-                => TryCopyTo(destination, Count);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool TryCopyTo(Span<UnmanagedString> destination, int length)
-                => TryCopyTo(0, destination, length);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool TryCopyTo(int sourceStartIndex, Span<UnmanagedString> destination)
-                => TryCopyTo(sourceStartIndex, destination, Count);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool TryCopyTo(int sourceStartIndex, Span<UnmanagedString> destination, int length)
-                => GetUnmanagedStringsAsSpan().Slice(sourceStartIndex, length).TryCopyTo(destination[..length]);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public SharedListNative<UnmanagedString>.Enumerator GetEnumerator()
-                => _unmanagedStrings.GetEnumerator();
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            IEnumerator<UnmanagedString> IEnumerable<UnmanagedString>.GetEnumerator()
-                => GetEnumerator();
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            IEnumerator IEnumerable.GetEnumerator()
-                => GetEnumerator();
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator ReadOnly(StringVault vault)
-                => new(vault);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using EncosyTower.Collections;
 using EncosyTower.Common;
+using EncosyTower.SystemExtensions;
 using Unity.Collections;
 
 namespace EncosyTower.StringIds
@@ -57,6 +58,48 @@ namespace EncosyTower.StringIds
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator UnmanagedString(string value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator UnmanagedString(in FixedString32Bytes value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator UnmanagedString(in FixedString64Bytes value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator UnmanagedString(in FixedString128Bytes value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator UnmanagedString(in FixedString512Bytes value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(in UnmanagedString a, in UnmanagedString b)
+            => a.Equals(b);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(in UnmanagedString a, in UnmanagedString b)
+            => !a.Equals(b);
+
+        internal static Option<UnmanagedString> FromBufferAt(Range range, ReadOnlySpan<byte> buffer)
+        {
+            if (range.TryGetOffsetAndLength(buffer.Length).TryGetValue(out var offsetLength) == false)
+            {
+                return Option.None;
+            }
+
+            var slice = buffer.Slice(offsetLength.Offset, offsetLength.Length);
+            var result = new UnmanagedString();
+            result._value.CopyFromTruncated(slice);
+
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ulong GetHashCode64()
             => HashValue64.FixedStringFNV1a(_value);
 
@@ -91,34 +134,6 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ReadOnlySpan<byte> AsReadOnlySpan()
             => _value.AsReadOnlySpan();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(in UnmanagedString a, in UnmanagedString b)
-            => a.Equals(b);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(in UnmanagedString a, in UnmanagedString b)
-            => !a.Equals(b);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator UnmanagedString(string value)
-            => new(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator UnmanagedString(in FixedString32Bytes value)
-            => new(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator UnmanagedString(in FixedString64Bytes value)
-            => new(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator UnmanagedString(in FixedString128Bytes value)
-            => new(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator UnmanagedString(in FixedString512Bytes value)
-            => new(value);
     }
 }
 
