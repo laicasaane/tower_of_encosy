@@ -90,6 +90,10 @@ namespace EncosyTower.Collections
                 => list.AsReadOnly();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator ReadOnlySpan<T>(in ReadOnly list)
+                => list.AsReadOnlySpan();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ReadOnlySpan<T> AsReadOnlySpan()
                 => _buffer.AsReadOnlySpan()[..Count];
 

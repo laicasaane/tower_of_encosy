@@ -73,6 +73,10 @@ namespace EncosyTower.Collections
                 => new(list);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator ReadOnlySpan<T>(in ReadOnly list)
+                => list.AsReadOnlySpan();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public FasterListEnumerator<T> GetEnumerator()
                 => _list.GetEnumerator();
 
