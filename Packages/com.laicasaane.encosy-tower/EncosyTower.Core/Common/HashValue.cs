@@ -5,14 +5,14 @@
 // FNV Hash Reference
 // https://gist.github.com/StephenCleary/4f6568e5ab5bee7845943fdaef8426d2
 
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+
 namespace EncosyTower.Common
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Runtime.CompilerServices;
-
     /// <summary>
     /// Combines the hash code for multiple values into a single hash code
     /// to help with implementing <see cref="object.GetHashCode()"/>.
@@ -403,10 +403,11 @@ namespace EncosyTower.Common
             unchecked
             {
                 ulong result = (ulong)BASIS;
+                int length = span.Length;
 
-                foreach (var item in span)
+                for (var i = 0; i < length; i++)
                 {
-                    result = PRIME * (result ^ item);
+                    result = PRIME * (result ^ span[i]);
                 }
 
                 return (int)result;
@@ -972,39 +973,3 @@ namespace EncosyTower.Common
         }
     }
 }
-
-#if UNITY_COLLECTIONS
-
-namespace EncosyTower.Common
-{
-    using Unity.Collections;
-
-    partial struct HashValue
-    {
-        /// <summary>
-        /// Generates a FNV1a hash.
-        /// </summary>
-        /// <param name="text">Text to hash.</param>
-        /// <typeparam name="T">Unmanaged IUTF8 type.</typeparam>
-        /// <returns>Hash of input string.</returns>
-        public static int FixedStringFNV1a<T>(T text)
-            where T : unmanaged, INativeList<byte>, IUTF8Bytes
-        {
-            unchecked
-            {
-                ulong result = (ulong)BASIS;
-
-                for (int i = 0; i < text.Length; ++i)
-                {
-                    var c = text[i];
-                    result = PRIME * (result ^ (byte)(c & 255));
-                    result = PRIME * (result ^ (byte)(c >> 8));
-                }
-
-                return (int)result;
-            }
-        }
-    }
-}
-
-#endif

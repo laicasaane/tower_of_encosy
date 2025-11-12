@@ -1,5 +1,3 @@
-#if UNITY_COLLECTIONS
-
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using UnityEngine;
@@ -346,5 +344,3 @@ namespace EncosyTower.StringIds
         }
     }
 }
-
-#endif

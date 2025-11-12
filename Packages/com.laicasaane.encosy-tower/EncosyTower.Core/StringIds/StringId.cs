@@ -1,5 +1,3 @@
-#if UNITY_COLLECTIONS
-
 using System.Runtime.CompilerServices;
 using EncosyTower.Ids;
 using EncosyTower.TypeWraps;
@@ -61,5 +59,3 @@ namespace EncosyTower.StringIds
             => new(id.Id);
     }
 }
-
-#endif

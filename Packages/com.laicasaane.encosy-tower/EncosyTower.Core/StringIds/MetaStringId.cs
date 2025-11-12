@@ -1,5 +1,3 @@
-#if UNITY_COLLECTIONS
-
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -133,6 +131,7 @@ namespace EncosyTower.StringIds
         public readonly override string ToString()
             => ToFixedString().ToString();
 
+#if UNITY_COLLECTIONS
         public readonly FixedString32Bytes ToFixedString()
         {
             var fs = new FixedString32Bytes();
@@ -141,6 +140,7 @@ namespace EncosyTower.StringIds
             fs.Append(_meta);
             return fs;
         }
+#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator ulong(in MetaStringId id)
@@ -175,5 +175,3 @@ namespace EncosyTower.StringIds
             => left._value <= right._value;
     }
 }
-
-#endif

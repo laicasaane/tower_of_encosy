@@ -1,5 +1,3 @@
-#if UNITY_COLLECTIONS
-
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -78,5 +76,3 @@ namespace EncosyTower.StringIds
         }
     }
 }
-
-#endif

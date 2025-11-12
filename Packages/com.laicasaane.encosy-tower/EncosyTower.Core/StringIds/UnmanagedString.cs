@@ -1,5 +1,3 @@
-#if UNITY_COLLECTIONS
-
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -62,18 +60,6 @@ namespace EncosyTower.StringIds
             => new(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator UnmanagedString(in FixedString32Bytes value)
-            => new(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator UnmanagedString(in FixedString64Bytes value)
-            => new(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator UnmanagedString(in FixedString128Bytes value)
-            => new(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator UnmanagedString(in FixedString512Bytes value)
             => new(value);
 
@@ -95,20 +81,19 @@ namespace EncosyTower.StringIds
             var slice = buffer.Slice(offsetLength.Offset, offsetLength.Length);
             var result = new UnmanagedString();
             result._value.CopyFromTruncated(slice);
-
             return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ulong GetHashCode64()
-            => HashValue64.FixedStringFNV1a(_value);
+            => HashValue64.FNV1a(_value.AsReadOnlySpan());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
             => _value.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString()
+        public readonly override string ToString()
             => _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -124,7 +109,7 @@ namespace EncosyTower.StringIds
             => obj is UnmanagedString other && Equals(other);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int CompareTo(UnmanagedString other)
+        public readonly int CompareTo(UnmanagedString other)
             => _value.CompareTo(other._value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -136,5 +121,3 @@ namespace EncosyTower.StringIds
             => _value.AsReadOnlySpan();
     }
 }
-
-#endif

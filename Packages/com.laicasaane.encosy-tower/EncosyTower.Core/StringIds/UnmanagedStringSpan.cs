@@ -1,5 +1,3 @@
-#if UNITY_COLLECTIONS
-
 using System;
 using System.Runtime.CompilerServices;
 
@@ -134,5 +132,3 @@ namespace EncosyTower.StringIds
         }
     }
 }
-
-#endif

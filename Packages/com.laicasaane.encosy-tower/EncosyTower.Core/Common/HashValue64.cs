@@ -5,14 +5,14 @@
 // FNV Hash Reference
 // https://gist.github.com/StephenCleary/4f6568e5ab5bee7845943fdaef8426d2
 
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+
 namespace EncosyTower.Common
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Runtime.CompilerServices;
-
     /// <inheritdoc cref="HashValue"/>
     /// <remarks>
     /// 64 bits version of <see cref="HashValue"/>.
@@ -359,10 +359,11 @@ namespace EncosyTower.Common
         public static ulong FNV1a(ReadOnlySpan<byte> span)
         {
             ulong result = BASIS;
+            int length = span.Length;
 
-            foreach (var item in span)
+            for (int i = 0; i < length; ++i)
             {
-                result = PRIME * (result ^ item);
+                result = PRIME * (result ^ span[i]);
             }
 
             return result;
@@ -927,36 +928,3 @@ namespace EncosyTower.Common
         }
     }
 }
-
-#if UNITY_COLLECTIONS
-
-namespace EncosyTower.Common
-{
-    using Unity.Collections;
-
-    partial struct HashValue64
-    {
-        /// <summary>
-        /// Generates a FNV1a hash.
-        /// </summary>
-        /// <param name="text">Text to hash.</param>
-        /// <typeparam name="T">Unmanaged IUTF8 type.</typeparam>
-        /// <returns>Hash of input string.</returns>
-        public static ulong FixedStringFNV1a<T>(T text)
-            where T : unmanaged, INativeList<byte>, IUTF8Bytes
-        {
-            ulong result = BASIS;
-
-            for (int i = 0; i < text.Length; ++i)
-            {
-                var c = text[i];
-                result = PRIME * (result ^ (byte)(c & 255));
-                result = PRIME * (result ^ (byte)(c >> 8));
-            }
-
-            return result;
-        }
-    }
-}
-
-#endif
