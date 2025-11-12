@@ -1,73 +1,96 @@
+#if UNITY_COLLECTIONS
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using EncosyTower.Collections;
+using EncosyTower.Common;
+using Unity.Collections;
+
 namespace EncosyTower.StringIds
 {
-    using System;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-    using EncosyTower.Common;
-
-#if UNITY_COLLECTIONS
-    using FixedString = Unity.Collections.FixedString128Bytes;
-#endif
-
     /// <summary>
     /// A struct that represents a string in an unmanaged way.
     /// </summary>
     /// <remarks>
-    /// If the package <c>com.unity.collections</c> is installed, this struct wraps a <see cref="FixedString"/>,
-    /// otherwise it wraps a <see cref="HashValue64"/> of the managed <see cref="string"/>.
+    /// This struct wraps a <see cref="FixedString512Bytes"/>.
     /// </remarks>
-    /// <seealso cref="FixedString"/>
-    /// <seealso cref="HashValue64"/>
-    [StructLayout(LayoutKind.Sequential, Size = 128)]
-    public readonly partial struct UnmanagedString
+    /// <seealso cref="FixedString512Bytes"/>
+    [StructLayout(LayoutKind.Sequential, Size = 512)]
+    public partial struct UnmanagedString
         : IEquatable<UnmanagedString>
         , IComparable<UnmanagedString>
+        , IGetHashCode64
+        , IAsSpan<byte>
+        , IAsReadOnlySpan<byte>
     {
-#if UNITY_COLLECTIONS
-        public readonly FixedString Value;
-#else
-        public readonly ulong Value;
-#endif
+        private FixedString512Bytes _value;
 
-        private UnmanagedString(
-#if UNITY_COLLECTIONS
-            in FixedString value
-#else
-            ulong value
-#endif
-        )
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private UnmanagedString(in FixedString512Bytes value)
         {
-            Value = value;
+            _value = value;
         }
 
-        public ulong ToHashCode()
-#if UNITY_COLLECTIONS
-            => HashValue64.FNV1a(Value);
-#else
-            => Value;
-#endif
+        public static int UTF8MaxLengthInBytes
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => FixedString512Bytes.UTF8MaxLengthInBytes;
+        }
 
-        public static int UTF8MaxLengthInBytes => 125;
+        public readonly bool IsEmpty
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _value.IsEmpty;
+        }
+
+        public readonly int Capacity
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _value.Capacity;
+        }
+
+        public readonly int Length
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _value.Length;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ulong GetHashCode64()
+            => HashValue64.FixedStringFNV1a(_value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => Value.GetHashCode();
+            => _value.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
-            => Value.ToString();
+            => _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(UnmanagedString other)
-            => Value == other.Value;
+        public readonly FixedString512Bytes ToFixedString()
+            => _value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
+        public readonly bool Equals(UnmanagedString other)
+            => _value == other._value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override readonly bool Equals(object obj)
             => obj is UnmanagedString other && Equals(other);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CompareTo(UnmanagedString other)
-            => Value.CompareTo(other.Value);
+            => _value.CompareTo(other._value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Span<byte> AsSpan()
+            => _value.AsSpan();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ReadOnlySpan<byte> AsReadOnlySpan()
+            => _value.AsReadOnlySpan();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(in UnmanagedString a, in UnmanagedString b)
@@ -79,23 +102,8 @@ namespace EncosyTower.StringIds
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator UnmanagedString(string value)
-#if UNITY_COLLECTIONS
             => new(value);
-#else
-            => new(HashValue64.FNV1a(value));
-#endif
-    }
-}
 
-#if UNITY_COLLECTIONS
-
-namespace EncosyTower.StringIds
-{
-    using System.Runtime.CompilerServices;
-    using Unity.Collections;
-
-    partial struct UnmanagedString
-    {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator UnmanagedString(in FixedString32Bytes value)
             => new(value);
@@ -106,6 +114,10 @@ namespace EncosyTower.StringIds
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator UnmanagedString(in FixedString128Bytes value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator UnmanagedString(in FixedString512Bytes value)
             => new(value);
     }
 }

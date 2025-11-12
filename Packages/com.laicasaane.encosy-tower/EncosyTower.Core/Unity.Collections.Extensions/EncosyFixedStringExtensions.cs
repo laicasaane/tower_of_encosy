@@ -86,6 +86,7 @@ namespace EncosyTower.Collections
             return fs;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static FixedString32Bytes ToFixedString(this Index value)
         {
             var fs = new FixedString32Bytes();
@@ -106,7 +107,7 @@ namespace EncosyTower.Collections
         }
 
         /// <summary>
-        /// Copies a span of UTF16 chars to this string (making the two strings equal).
+        /// Copies a span of UTF-16 chars to this string (making the two strings equal).
         /// Replaces any existing content of the FixedString.
         /// </summary>
         /// <remarks>
@@ -114,18 +115,18 @@ namespace EncosyTower.Collections
         /// </remarks>
         /// <typeparam name="T">The type of the destination string.</typeparam>
         /// <param name="fs">The destination string.</param>
-        /// <param name="utf16Chars">The span of UTF16 chars to be copied.</param>
+        /// <param name="utf16Chars">The span of UTF-16 chars to be copied.</param>
         /// <returns>
         /// CopyError.None if successful.
         /// Returns CopyError.Truncation if the source string is too large to fit in the destination.
         /// </returns>
-        [ExcludeFromBurstCompatTesting("Takes managed string")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static CopyError CopyFrom<T>(this ref T fs, ReadOnlySpan<char> utf16Chars)
             where T : unmanaged, INativeList<byte>, IUTF8Bytes
         {
             fs.Length = 0;
 
-            if (Append(ref fs, utf16Chars) != 0)
+            if (Append(ref fs, utf16Chars) != FormatError.None)
             {
                 return CopyError.Truncation;
             }
@@ -134,17 +135,18 @@ namespace EncosyTower.Collections
         }
 
         /// <summary>
-        /// Copies a span of UTF16 chars to this string.
+        /// Copies a span of UTF-16 chars to this string.
         /// If the string exceeds the capacity it will be truncated.
         /// Replaces any existing content of the FixedString.
         /// </summary>
         /// <typeparam name="T">The type of the destination string.</typeparam>
         /// <param name="fs">The destination string.</param>
-        /// <param name="utf16Chars">The span of UTF16 chars to be copied.</param>
+        /// <param name="utf16Chars">The span of UTF-16 chars to be copied.</param>
         /// <returns>
         ///  CopyError.None if successful.
         ///  Returns CopyError.Truncation if the source span is too large to fit in the destination.
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static CopyError CopyFromTruncated<T>(this ref T fs, ReadOnlySpan<char> utf16Chars)
             where T : unmanaged, INativeList<byte>, IUTF8Bytes
         {
@@ -164,14 +166,14 @@ namespace EncosyTower.Collections
         }
 
         /// <summary>
-        /// Appends a span of UTF16 chars to this string.
+        /// Appends a span of UTF-16 chars to this string.
         /// </summary>
         /// <remarks>
         /// When the method returns an error, the destination string is not modified.
         /// </remarks>
         /// <typeparam name="T">The type of the destination string.</typeparam>
         /// <param name="fs">The destination string.</param>
-        /// <param name="utf16Chars">The span of UTF16 chars to append.</param>
+        /// <param name="utf16Chars">The span of UTF-16 chars to append.</param>
         /// <returns>
         /// <see cref="FormatError.None"/> if successful.
         /// Returns <see cref="FormatError.Overflow"/> if the capacity of the destination string is exceeded.
@@ -179,7 +181,7 @@ namespace EncosyTower.Collections
         public unsafe static FormatError Append<T>(this ref T fs, ReadOnlySpan<char> utf16Chars)
             where T : unmanaged, INativeList<byte>, IUTF8Bytes
         {
-            // we don't know how big the expansion from UTF16 to UTF8 will be, so we account for worst case.
+            // we don't know how big the expansion from UTF-16 to UTF8 will be, so we account for worst case.
             int utf16Length = utf16Chars.Length;
             int worstCaseCapacity = utf16Length * 4;
             byte* utf8Bytes = stackalloc byte[worstCaseCapacity];
@@ -212,13 +214,13 @@ namespace EncosyTower.Collections
         /// CopyError.None if successful.
         /// Returns CopyError.Truncation if the source string is too large to fit in the destination.
         /// </returns>
-        [ExcludeFromBurstCompatTesting("Takes managed string")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static CopyError CopyFrom<T>(this ref T fs, ReadOnlySpan<byte> utf8Chars)
             where T : unmanaged, INativeList<byte>, IUTF8Bytes
         {
             fs.Length = 0;
 
-            if (Append(ref fs, utf8Chars) != 0)
+            if (Append(ref fs, utf8Chars) != FormatError.None)
             {
                 return CopyError.Truncation;
             }
@@ -238,6 +240,7 @@ namespace EncosyTower.Collections
         ///  CopyError.None if successful.
         ///  Returns CopyError.Truncation if the source span is too large to fit in the destination.
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static CopyError CopyFromTruncated<T>(this ref T fs, ReadOnlySpan<byte> utf8Chars)
             where T : unmanaged, INativeList<byte>, IUTF8Bytes
         {
@@ -257,6 +260,29 @@ namespace EncosyTower.Collections
         }
 
         /// <summary>
+        /// Copies a FixedString to a span of characters.
+        /// If the string exceeds the capacity it will be truncated.
+        /// </summary>
+        /// <typeparam name="TFixedString">A string type.</typeparam>
+        /// <param name="fs">A string to copy.</param>
+        /// <param name="dest">The destination string.</param>
+        /// <param name="destLength">Outputs the number of chars written to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe static CopyError CopyTo<TFixedString>(this TFixedString fs, Span<char> dest, out int destLength)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            fixed (char* chars = dest)
+            {
+                if (Unicode.Utf8ToUtf16(fs.GetUnsafePtr(), fs.Length, chars, out destLength, dest.Length) == ConversionError.None)
+                {
+                    return CopyError.None;
+                }
+
+                return CopyError.Truncation;
+            }
+        }
+
+        /// <summary>
         /// Appends a span of UTF8 chars to this string.
         /// </summary>
         /// <remarks>
@@ -269,6 +295,7 @@ namespace EncosyTower.Collections
         /// <see cref="FormatError.None"/> if successful.
         /// Returns <see cref="FormatError.Overflow"/> if the capacity of the destination string is exceeded.
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static FormatError Append<T>(this ref T fs, ReadOnlySpan<byte> utf8Chars)
             where T : unmanaged, INativeList<byte>, IUTF8Bytes
         {
@@ -328,6 +355,26 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this in FixedString4096Bytes self)
             => new(self.GetUnsafePtr(), self.Length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NativeText ToNativeText<T>(this T text, Allocator allocator)
+            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            var result = new NativeText(text.Length, allocator);
+            result.CopyFromTruncated(text.AsReadOnlySpan());
+
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NativeText ToNativeText<T>(this T text, AllocatorManager.AllocatorHandle allocator)
+            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            var result = new NativeText(text.Length, allocator);
+            result.CopyFromTruncated(text.AsReadOnlySpan());
+
+            return result;
+        }
     }
 }
 

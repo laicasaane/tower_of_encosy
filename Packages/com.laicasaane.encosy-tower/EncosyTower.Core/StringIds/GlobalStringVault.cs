@@ -1,3 +1,5 @@
+#if UNITY_COLLECTIONS
+
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -50,7 +52,6 @@ namespace EncosyTower.StringIds
             return result;
         }
 
-#if UNITY_COLLECTIONS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static StringId GetOrMakeId(in UnmanagedString str)
         {
@@ -63,7 +64,6 @@ namespace EncosyTower.StringIds
             s_vault.TryGetUnmanagedString(key.Id, out var result);
             return result;
         }
-#endif
 
         [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         internal static void ThrowIfNotDefined([DoesNotReturnIf(false)] bool isDefined, StringId key)
@@ -78,3 +78,5 @@ namespace EncosyTower.StringIds
         }
     }
 }
+
+#endif

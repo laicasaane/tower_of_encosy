@@ -1,11 +1,14 @@
+#if UNITY_COLLECTIONS
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using EncosyTower.Ids;
+using Unity.Collections;
+using UnityEngine;
+
 namespace EncosyTower.StringIds
 {
-    using System;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-    using EncosyTower.Ids;
-    using UnityEngine;
-
     /// <summary>
     /// Represents a lightweight handle for a string with an additional metadata.
     /// </summary>
@@ -127,6 +130,19 @@ namespace EncosyTower.StringIds
             => $"{_id.ToString(format, formatProvider)}-{_meta.ToString(format, formatProvider)}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override string ToString()
+            => ToFixedString().ToString();
+
+        public readonly FixedString32Bytes ToFixedString()
+        {
+            var fs = new FixedString32Bytes();
+            fs.Append(_id.Id);
+            fs.Append('-');
+            fs.Append(_meta);
+            return fs;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator ulong(in MetaStringId id)
             => id._value;
 
@@ -157,45 +173,6 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator <=(in MetaStringId left, in MetaStringId right)
             => left._value <= right._value;
-    }
-}
-
-#if UNITY_COLLECTIONS
-
-namespace EncosyTower.StringIds
-{
-    using System.Runtime.CompilerServices;
-    using EncosyTower.Conversion;
-    using Unity.Collections;
-
-    partial struct MetaStringId : IToFixedString<FixedString32Bytes>
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly override string ToString()
-            => ToFixedString().ToString();
-
-        public readonly FixedString32Bytes ToFixedString()
-        {
-            var fs = new FixedString32Bytes();
-            fs.Append(_id.Id);
-            fs.Append('-');
-            fs.Append(_meta);
-            return fs;
-        }
-    }
-}
-
-#else
-
-namespace EncosyTower.StringIds
-{
-    using System.Runtime.CompilerServices;
-
-    partial struct MetaStringId
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly override string ToString()
-            => $"{_id.Id}-{_meta}";
     }
 }
 

@@ -10,6 +10,7 @@ namespace EncosyTower.Common
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
 
     /// <summary>
@@ -70,12 +71,60 @@ namespace EncosyTower.Common
         /// Generates a FNV1a hash.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int FNV1a(int value)
+        public static int FNV1a(long value)
+            => FNV1a((ulong)value);
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int FNV1a(double value)
+            => FNV1a((ulong)value);
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int FNV1a(ulong value)
         {
             unchecked
             {
                 ulong result = (ulong)BASIS;
-                ulong val = (ulong)value;
+
+                result = (((value & 0x00000000000000FF) >> 00) ^ result) * PRIME;
+                result = (((value & 0x000000000000FF00) >> 08) ^ result) * PRIME;
+                result = (((value & 0x0000000000FF0000) >> 16) ^ result) * PRIME;
+                result = (((value & 0x00000000FF000000) >> 24) ^ result) * PRIME;
+                result = (((value & 0x000000FF00000000) >> 32) ^ result) * PRIME;
+                result = (((value & 0x0000FF0000000000) >> 40) ^ result) * PRIME;
+                result = (((value & 0x00FF000000000000) >> 48) ^ result) * PRIME;
+                result = (((value & 0xFF00000000000000) >> 56) ^ result) * PRIME;
+
+                return (int)result;
+            }
+        }
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        public static int FNV1a(float value)
+            => FNV1a((uint)value);
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        public static int FNV1a(int value)
+            => FNV1a((uint)value);
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        public static int FNV1a(uint value)
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+                ulong val = value;
 
                 result = (((val & 0x000000FF) >> 00) ^ result) * PRIME;
                 result = (((val & 0x0000FF00) >> 08) ^ result) * PRIME;
@@ -89,9 +138,225 @@ namespace EncosyTower.Common
         /// <summary>
         /// Generates a FNV1a hash.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int FNV1a(short value)
+            => FNV1a((ushort)value);
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int FNV1a(ushort value)
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+                ulong val = value;
+
+                result = ((val & 255) ^ result) * PRIME;
+                result = ((val >> 08) ^ result) * PRIME;
+
+                return (int)result;
+            }
+        }
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int FNV1a(sbyte value)
+            => FNV1a((byte)value);
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int FNV1a(byte value)
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+                ulong val = value;
+
+                result = (val ^ result) * PRIME;
+
+                return (int)result;
+            }
+        }
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
         /// <param name="text">Text to hash.</param>
         /// <returns>Hash of input string.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int FNV1a(string text)
+        {
+            return FNV1a(text.AsSpan());
+        }
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        /// <param name="span">Span to hash.</param>
+        /// <returns>Hash of input span.</returns>
+        public static int FNV1a(ReadOnlySpan<long> span)
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+
+                foreach (var item in span)
+                {
+                    ulong val = (ulong)item;
+
+                    result = (((val & 0x00000000000000FF) >> 00) ^ result) * PRIME;
+                    result = (((val & 0x000000000000FF00) >> 08) ^ result) * PRIME;
+                    result = (((val & 0x0000000000FF0000) >> 16) ^ result) * PRIME;
+                    result = (((val & 0x00000000FF000000) >> 24) ^ result) * PRIME;
+                    result = (((val & 0x000000FF00000000) >> 32) ^ result) * PRIME;
+                    result = (((val & 0x0000FF0000000000) >> 40) ^ result) * PRIME;
+                    result = (((val & 0x00FF000000000000) >> 48) ^ result) * PRIME;
+                    result = (((val & 0xFF00000000000000) >> 56) ^ result) * PRIME;
+                }
+
+                return (int)result;
+            }
+        }
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        /// <param name="span">Span to hash.</param>
+        /// <returns>Hash of input span.</returns>
+        public static int FNV1a(ReadOnlySpan<ulong> span)
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+
+                foreach (var item in span)
+                {
+                    result = (((item & 0x00000000000000FF) >> 00) ^ result) * PRIME;
+                    result = (((item & 0x000000000000FF00) >> 08) ^ result) * PRIME;
+                    result = (((item & 0x0000000000FF0000) >> 16) ^ result) * PRIME;
+                    result = (((item & 0x00000000FF000000) >> 24) ^ result) * PRIME;
+                    result = (((item & 0x000000FF00000000) >> 32) ^ result) * PRIME;
+                    result = (((item & 0x0000FF0000000000) >> 40) ^ result) * PRIME;
+                    result = (((item & 0x00FF000000000000) >> 48) ^ result) * PRIME;
+                    result = (((item & 0xFF00000000000000) >> 56) ^ result) * PRIME;
+                }
+
+                return (int)result;
+            }
+        }
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        /// <param name="span">Span to hash.</param>
+        /// <returns>Hash of input span.</returns>
+        public static int FNV1a(ReadOnlySpan<double> span)
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+
+                foreach (var item in span)
+                {
+                    ulong val = (ulong)item;
+
+                    result = (((val & 0x00000000000000FF) >> 00) ^ result) * PRIME;
+                    result = (((val & 0x000000000000FF00) >> 08) ^ result) * PRIME;
+                    result = (((val & 0x0000000000FF0000) >> 16) ^ result) * PRIME;
+                    result = (((val & 0x00000000FF000000) >> 24) ^ result) * PRIME;
+                    result = (((val & 0x000000FF00000000) >> 32) ^ result) * PRIME;
+                    result = (((val & 0x0000FF0000000000) >> 40) ^ result) * PRIME;
+                    result = (((val & 0x00FF000000000000) >> 48) ^ result) * PRIME;
+                    result = (((val & 0xFF00000000000000) >> 56) ^ result) * PRIME;
+                }
+
+                return (int)result;
+            }
+        }
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        /// <param name="span">Span to hash.</param>
+        /// <returns>Hash of input span.</returns>
+        public static int FNV1a(ReadOnlySpan<int> span)
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+
+                foreach (var item in span)
+                {
+                    ulong val = (ulong)item;
+
+                    result = (((val & 0x000000FF) >> 00) ^ result) * PRIME;
+                    result = (((val & 0x0000FF00) >> 08) ^ result) * PRIME;
+                    result = (((val & 0x00FF0000) >> 16) ^ result) * PRIME;
+                    result = (((val & 0xFF000000) >> 24) ^ result) * PRIME;
+                }
+
+                return (int)result;
+            }
+        }
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        /// <param name="span">Span to hash.</param>
+        /// <returns>Hash of input span.</returns>
+        public static int FNV1a(ReadOnlySpan<float> span)
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+
+                foreach (var item in span)
+                {
+                    ulong val = (ulong)item;
+
+                    result = (((val & 0x000000FF) >> 00) ^ result) * PRIME;
+                    result = (((val & 0x0000FF00) >> 08) ^ result) * PRIME;
+                    result = (((val & 0x00FF0000) >> 16) ^ result) * PRIME;
+                    result = (((val & 0xFF000000) >> 24) ^ result) * PRIME;
+                }
+
+                return (int)result;
+            }
+        }
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        /// <param name="span">Text to hash.</param>
+        /// <returns>Hash of input string.</returns>
+        public static int FNV1a(ReadOnlySpan<char> span)
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+
+                foreach (var item in span)
+                {
+                    result = PRIME * (result ^ (byte)(item & 255));
+                    result = PRIME * (result ^ (byte)(item >> 8));
+                }
+
+                return (int)result;
+            }
+        }
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        /// <param name="text">Text to hash.</param>
+        /// <returns>Hash of input string.</returns>
+        public static int FNV1a(ReadOnlySpan<short> text)
         {
             unchecked
             {
@@ -101,6 +366,47 @@ namespace EncosyTower.Common
                 {
                     result = PRIME * (result ^ (byte)(c & 255));
                     result = PRIME * (result ^ (byte)(c >> 8));
+                }
+
+                return (int)result;
+            }
+        }
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        /// <param name="text">Text to hash.</param>
+        /// <returns>Hash of input string.</returns>
+        public static int FNV1a(ReadOnlySpan<ushort> text)
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+
+                foreach (var c in text)
+                {
+                    result = PRIME * (result ^ (byte)(c & 255));
+                    result = PRIME * (result ^ (byte)(c >> 8));
+                }
+
+                return (int)result;
+            }
+        }
+
+        /// <summary>
+        /// Generates a FNV1a hash.
+        /// </summary>
+        /// <param name="span">Span to hash.</param>
+        /// <returns>Hash of input span.</returns>
+        public static int FNV1a(ReadOnlySpan<byte> span)
+        {
+            unchecked
+            {
+                ulong result = (ulong)BASIS;
+
+                foreach (var item in span)
+                {
+                    result = PRIME * (result ^ item);
                 }
 
                 return (int)result;
@@ -250,10 +556,58 @@ namespace EncosyTower.Common
         /// <param name="items">The collection.</param>
         /// <returns>The new hash code.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static HashValue CombineEach<T>(ReadOnlySpan<T> items)
+            => items == null
+            ? new(BASIS)
+            : new(GetHashCodeEach(BASIS, items));
+
+        /// <summary>
+        /// Takes the hash code of the specified items.
+        /// </summary>
+        /// <typeparam name="T">The type of the items.</typeparam>
+        /// <typeparam name="TComparer">The type implements <see cref="IEqualityComparer{T}"/>.</typeparam>
+        /// <param name="items">The collection.</param>
+        /// <param name="comparer">
+        /// The <typeparamref name="TComparer"/> to use to calculate the hash code.
+        /// This value can be a null reference, in which case
+        /// the internal <see cref="GetHashCode{T}(T)"/> will be used instead.
+        /// </param>
+        /// <returns>The new hash code.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static HashValue CombineEach<T, TComparer>(ReadOnlySpan<T> items, [NotNull] TComparer comparer)
+            where TComparer : IEqualityComparer<T>
+            => items == null
+            ? new(BASIS)
+            : new(GetHashCodeEach(BASIS, items, comparer));
+
+        /// <summary>
+        /// Takes the hash code of the specified items.
+        /// </summary>
+        /// <typeparam name="T">The type of the items.</typeparam>
+        /// <param name="items">The collection.</param>
+        /// <returns>The new hash code.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static HashValue CombineEach<T>(IEnumerable<T> items)
             => items == null
             ? new(BASIS)
-            : new(GetHashCodeEach(BASIS, items, null));
+            : new(GetHashCodeEach(BASIS, items));
+
+        /// <summary>
+        /// Takes the hash code of the specified items.
+        /// </summary>
+        /// <typeparam name="T">The type of the items.</typeparam>
+        /// <param name="items">The collection.</param>
+        /// <param name="comparer">
+        /// The <see cref="IEqualityComparer{T}"/> to use to calculate the hash code.
+        /// This value can be a null reference, which will use
+        /// the default equality comparer for <typeparamref name="T"/>.
+        /// </param>
+        /// <returns>The new hash code.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static HashValue CombineEach<T>(IEnumerable<T> items, IEqualityComparer<T> comparer)
+            => items == null
+            ? new(BASIS)
+            : new(GetHashCodeEach(BASIS, items, comparer ?? EqualityComparer<T>.Default));
 
         /// <summary>
         /// Takes the hash code of the specified items.
@@ -267,6 +621,27 @@ namespace EncosyTower.Common
             => enumerator == null
             ? new(BASIS)
             : new(GetHashCodeEach<T, TEnumerator>(BASIS, enumerator));
+
+        /// <summary>
+        /// Takes the hash code of the specified items.
+        /// </summary>
+        /// <typeparam name="T">The type of the items.</typeparam>
+        /// <typeparam name="TEnumerator">The type of the enumerator of the collection.</typeparam>
+        /// <typeparam name="TComparer">The type implements <see cref="IEqualityComparer{T}"/>.</typeparam>
+        /// <param name="enumerator">The enumerator of a collection.</param>
+        /// <returns>The new hash code.</returns>
+        /// <param name="comparer">
+        /// The <typeparamref name="TComparer"/> to use to calculate the hash code.
+        /// This value can be a null reference, in which case
+        /// the internal <see cref="GetHashCode{T}(T)"/> will be used instead.
+        /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static HashValue CombineEach<T, TEnumerator, TComparer>(TEnumerator enumerator, [NotNull] TComparer comparer)
+            where TEnumerator : IEnumerator<T>
+            where TComparer : IEqualityComparer<T>
+            => enumerator == null
+            ? new(BASIS)
+            : new(GetHashCodeEach<T, TEnumerator, TComparer>(BASIS, enumerator, comparer));
 
         /// <summary>
         /// Adds a single item to the hash code.
@@ -295,16 +670,16 @@ namespace EncosyTower.Common
         /// Adds a single item to the hash code, specifying the type that provides the hash code function.
         /// </summary>
         /// <typeparam name="T">The type of the item to add to the hash code.</typeparam>
-        /// <typeparam name="TEqualityComparer">The type implements <see cref="IEqualityComparer{T}"/>.</typeparam>
+        /// <typeparam name="TComparer">The type implements <see cref="IEqualityComparer{T}"/>.</typeparam>
         /// <param name="item">The item to add to the hash code.</param>
         /// <param name="comparer">
-        /// The <typeparamref name="TEqualityComparer"/> to use to calculate the hash code.
+        /// The <typeparamref name="TComparer"/> to use to calculate the hash code.
         /// This value can be a null reference, in which case
         /// the internal <see cref="GetHashCode{T}(T)"/> will be used instead.
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public HashValue Add<T, TEqualityComparer>(T item, TEqualityComparer comparer)
-            where TEqualityComparer : IEqualityComparer<T>
+        public HashValue Add<T, TComparer>(T item, [NotNull] TComparer comparer)
+            where TComparer : IEqualityComparer<T>
             => comparer == null
             ? new(CombineFNV1a(_value, GetHashCode(item)))
             : new(CombineFNV1a(_value, comparer.GetHashCode(item)));
@@ -315,10 +690,39 @@ namespace EncosyTower.Common
         /// <typeparam name="T">The type of the item to add to the hash code.</typeparam>
         /// <param name="items">The collection of items to add to the hash code.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public HashValue AddEach<T>(ReadOnlySpan<T> items)
+            => items == null
+            ? new(_value)
+            : new(GetHashCodeEach(_value, items));
+
+        /// <summary>
+        /// Adds a collection of items to the hash code, specifying the type that provides the hash code function.
+        /// </summary>
+        /// <typeparam name="T">The type of the item to add to the hash code.</typeparam>
+        /// <param name="items">The collection of items to add to the hash code.</param>
+        /// <typeparam name="TComparer">The type implements <see cref="IEqualityComparer{T}"/>.</typeparam>
+        /// <param name="comparer">
+        /// The <typeparamref name="TComparer"/> to use to calculate the hash code.
+        /// This value can be a null reference, in which case
+        /// the internal <see cref="GetHashCode{T}(T)"/> will be used instead.
+        /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public HashValue AddEach<T, TComparer>(ReadOnlySpan<T> items, [NotNull] TComparer comparer)
+            where TComparer : IEqualityComparer<T>
+            => items == null
+            ? new(_value)
+            : new(GetHashCodeEach(_value, items, comparer));
+
+        /// <summary>
+        /// Adds a collection of items to the hash code.
+        /// </summary>
+        /// <typeparam name="T">The type of the item to add to the hash code.</typeparam>
+        /// <param name="items">The collection of items to add to the hash code.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public HashValue AddEach<T>(IEnumerable<T> items)
             => items == null
             ? new(_value)
-            : new(GetHashCodeEach(_value, items, null));
+            : new(GetHashCodeEach(_value, items));
 
         /// <summary>
         /// Adds a collection of items to the hash code, specifying the type that provides the hash code function.
@@ -354,20 +758,20 @@ namespace EncosyTower.Common
         /// </summary>
         /// <typeparam name="T">The type of the item to add to the hash code.</typeparam>
         /// <typeparam name="TEnumerator">The type of the enumerator of the collection.</typeparam>
-        /// <typeparam name="TEqualityComparer">The type implements <see cref="IEqualityComparer{T}"/>.</typeparam>
+        /// <typeparam name="TComparer">The type implements <see cref="IEqualityComparer{T}"/>.</typeparam>
         /// <param name="enumerator">The enumerator of the collection.</param>
         /// <param name="comparer">
-        /// The <typeparamref name="TEqualityComparer"/> to use to calculate the hash code.
+        /// The <typeparamref name="TComparer"/> to use to calculate the hash code.
         /// This value can be a null reference, in which case
         /// the internal <see cref="GetHashCode{T}(T)"/> will be used instead.
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public HashValue AddEach<T, TEnumerator, TEqualityComparer>(TEnumerator enumerator, TEqualityComparer comparer)
+        public HashValue AddEach<T, TEnumerator, TComparer>(TEnumerator enumerator, [NotNull] TComparer comparer)
             where TEnumerator : IEnumerator<T>
-            where TEqualityComparer : IEqualityComparer<T>
+            where TComparer : IEqualityComparer<T>
             => enumerator == null
             ? new(_value)
-            : new(GetHashCodeEach<T, TEnumerator, TEqualityComparer>(_value, enumerator, comparer));
+            : new(GetHashCodeEach<T, TEnumerator, TComparer>(_value, enumerator, comparer));
 
         /// <inheritdoc />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -411,6 +815,77 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int GetHashCode<T>(T item)
             => item?.GetHashCode() ?? 0;
+
+        private static int GetHashCodeEach<T>(
+              int startHashCode
+            , ReadOnlySpan<T> items
+        )
+        {
+            var result = startHashCode;
+            var enumerator = items.GetEnumerator();
+
+            if (enumerator.MoveNext() == false)
+            {
+                return CombineFNV1a(result, EMPTY_COLLECTION_BASIS);
+            }
+
+            result = CombineFNV1a(result, GetHashCode(enumerator.Current));
+
+            while (enumerator.MoveNext())
+            {
+                result = CombineFNV1a(result, GetHashCode(enumerator.Current));
+            }
+
+            return result;
+        }
+
+        private static int GetHashCodeEach<T, TComparer>(
+              int startHashCode
+            , ReadOnlySpan<T> items
+            , TComparer comparer
+        )
+            where TComparer : IEqualityComparer<T>
+        {
+            var result = startHashCode;
+            var enumerator = items.GetEnumerator();
+
+            if (enumerator.MoveNext() == false)
+            {
+                return CombineFNV1a(result, EMPTY_COLLECTION_BASIS);
+            }
+
+            result = CombineFNV1a(result, comparer.GetHashCode(enumerator.Current));
+
+            while (enumerator.MoveNext())
+            {
+                result = CombineFNV1a(result, comparer.GetHashCode(enumerator.Current));
+            }
+
+            return result;
+        }
+
+        private static int GetHashCodeEach<T>(
+              int startHashCode
+            , IEnumerable<T> items
+        )
+        {
+            var result = startHashCode;
+            var enumerator = items.GetEnumerator();
+
+            if (enumerator.MoveNext() == false)
+            {
+                return CombineFNV1a(result, EMPTY_COLLECTION_BASIS);
+            }
+
+            result = CombineFNV1a(result, GetHashCode(enumerator.Current));
+
+            while (enumerator.MoveNext())
+            {
+                result = CombineFNV1a(result, GetHashCode(enumerator.Current));
+            }
+
+            return result;
+        }
 
         private static int GetHashCodeEach<T>(
               int startHashCode
@@ -459,13 +934,13 @@ namespace EncosyTower.Common
             return result;
         }
 
-        private static int GetHashCodeEach<T, TEnumerator, TEqualityComparer>(
+        private static int GetHashCodeEach<T, TEnumerator, TComparer>(
               int startHashCode
             , TEnumerator enumerator
-            , TEqualityComparer comparer
+            , TComparer comparer
         )
             where TEnumerator : IEnumerator<T>
-            where TEqualityComparer : IEqualityComparer<T>
+            where TComparer : IEqualityComparer<T>
         {
             var result = startHashCode;
 
@@ -512,7 +987,7 @@ namespace EncosyTower.Common
         /// <param name="text">Text to hash.</param>
         /// <typeparam name="T">Unmanaged IUTF8 type.</typeparam>
         /// <returns>Hash of input string.</returns>
-        public static int FNV1a<T>(T text)
+        public static int FixedStringFNV1a<T>(T text)
             where T : unmanaged, INativeList<byte>, IUTF8Bytes
         {
             unchecked

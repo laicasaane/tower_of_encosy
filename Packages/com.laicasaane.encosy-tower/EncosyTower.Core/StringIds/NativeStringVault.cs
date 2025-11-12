@@ -103,7 +103,7 @@ namespace EncosyTower.StringIds
         /// </remarks>
         public StringId GetOrMakeId(in UnmanagedString str)
         {
-            var hash = str.ToHashCode();
+            var hash = str.GetHashCode64();
             var registered = _map.TryGetValue(hash, out var id);
 
             if (registered)
@@ -316,7 +316,7 @@ namespace EncosyTower.StringIds
 
             public bool TryGetId(in UnmanagedString str, out StringId result)
             {
-                var hash = str.ToHashCode();
+                var hash = str.GetHashCode64();
                 var registered = _map.TryGetValue(hash, out var id);
 
                 if (registered && TryGetString(id, out var registeredString) && str == registeredString)
