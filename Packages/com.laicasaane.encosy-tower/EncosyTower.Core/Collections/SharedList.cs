@@ -520,7 +520,7 @@ namespace EncosyTower.Collections
             }
         }
 
-        public void AddReplicate(int amount)
+        public Span<T> AddReplicate(int amount)
         {
             _version.ValueRW++;
 
@@ -533,11 +533,14 @@ namespace EncosyTower.Collections
                 AllocateMore(newCount);
             }
 
-            _buffer.AsSpan().Slice(oldCount, amount).Fill(default);
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
+            buffer.Fill(default);
             _count.ValueRW = newCount;
+
+            return buffer;
         }
 
-        public void AddReplicate(T value, int amount)
+        public Span<T> AddReplicate(T value, int amount)
         {
             _version.ValueRW++;
 
@@ -550,11 +553,14 @@ namespace EncosyTower.Collections
                 AllocateMore(newCount);
             }
 
-            _buffer.AsSpan().Slice(oldCount, amount).Fill(value);
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
+            buffer.Fill(value);
             _count.ValueRW = newCount;
+
+            return buffer;
         }
 
-        public void AddReplicateNoInit(int amount)
+        public Span<T> AddReplicateNoInit(int amount)
         {
             _version.ValueRW++;
 
@@ -567,7 +573,10 @@ namespace EncosyTower.Collections
                 AllocateMore(newCount);
             }
 
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
             _count.ValueRW = newCount;
+
+            return buffer;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

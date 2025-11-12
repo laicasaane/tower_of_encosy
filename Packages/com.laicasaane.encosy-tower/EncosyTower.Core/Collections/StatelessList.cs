@@ -958,8 +958,7 @@ namespace EncosyTower.Collections
             }
         }
 
-        public void AddReplicate<TDerived>(int amount)
-            where TDerived : T, new()
+        public Span<T> AddReplicate(int amount, [NotNull] Func<T> createFunc)
         {
             _version++;
 
@@ -972,20 +971,18 @@ namespace EncosyTower.Collections
                 AllocateMore(newCount);
             }
 
-            if (default(TDerived) == null)
-            {
-                var buffer = _buffer.AsSpan().Slice(oldCount, amount);
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
+            _count = newCount;
 
-                for (var i = 0; i < amount; i++)
-                {
-                    buffer[i] = new TDerived();
-                }
+            for (var i = 0; i < amount; i++)
+            {
+                buffer[i] = createFunc();
             }
 
-            _count = newCount;
+            return buffer;
         }
 
-        public void AddReplicate(int amount)
+        public Span<T> AddReplicate(int amount)
         {
             _version++;
 
@@ -998,11 +995,14 @@ namespace EncosyTower.Collections
                 AllocateMore(newCount);
             }
 
-            _buffer.AsSpan().Slice(oldCount, amount).Fill(default);
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
+            buffer.Fill(default);
             _count = newCount;
+
+            return buffer;
         }
 
-        public void AddReplicate(T value, int amount)
+        public Span<T> AddReplicate(T value, int amount)
         {
             _version++;
 
@@ -1015,11 +1015,14 @@ namespace EncosyTower.Collections
                 AllocateMore(newCount);
             }
 
-            _buffer.AsSpan().Slice(oldCount, amount).Fill(value);
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
+            buffer.Fill(value);
             _count = newCount;
+
+            return buffer;
         }
 
-        public void AddReplicateNoInit(int amount)
+        public Span<T> AddReplicateNoInit(int amount)
         {
             _version++;
 
@@ -1032,7 +1035,10 @@ namespace EncosyTower.Collections
                 AllocateMore(newCount);
             }
 
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
             _count = newCount;
+
+            return buffer;
         }
 
         /// <summary>
@@ -1085,11 +1091,10 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static StatelessList<TState, T> Prefill<TDerived>([NotNull] TState state, int amount)
-            where TDerived : T, new()
+        public static StatelessList<TState, T> Prefill([NotNull] TState state, int amount, [NotNull] Func<T> createFunc)
         {
             var list = new StatelessList<TState, T>(state, amount);
-            list.AddReplicate<TDerived>(amount);
+            list.AddReplicate(amount, createFunc);
             return list;
         }
 

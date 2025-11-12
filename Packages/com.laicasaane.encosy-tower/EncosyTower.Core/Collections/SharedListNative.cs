@@ -405,7 +405,7 @@ namespace EncosyTower.Collections
             return _buffer.Slice(0, Count);
         }
 
-        public void AddReplicate(int amount)
+        public Span<T> AddReplicate(int amount)
         {
             VersionRW++;
 
@@ -415,11 +415,14 @@ namespace EncosyTower.Collections
 
             Checks.IsTrue(offset < 1, "the capacity of SharedListNative<T> is immutable and cannot change");
 
-            _buffer.AsSpan().Slice(oldCount, amount).Fill(default);
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
+            buffer.Fill(default);
             CountRW = newCount;
+
+            return buffer;
         }
 
-        public void AddReplicate(T value, int amount)
+        public Span<T> AddReplicate(T value, int amount)
         {
             VersionRW++;
 
@@ -429,11 +432,14 @@ namespace EncosyTower.Collections
 
             Checks.IsTrue(offset < 1, "the capacity of SharedListNative<T> is immutable and cannot change");
 
-            _buffer.AsSpan().Slice(oldCount, amount).Fill(value);
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
+            buffer.Fill(value);
             CountRW = newCount;
+
+            return buffer;
         }
 
-        public void AddReplicateNoInit(int amount)
+        public Span<T> AddReplicateNoInit(int amount)
         {
             VersionRW++;
 
@@ -443,7 +449,10 @@ namespace EncosyTower.Collections
 
             Checks.IsTrue(offset < 1, "the capacity of SharedListNative<T> is immutable and cannot change");
 
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
             CountRW = newCount;
+
+            return buffer;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
