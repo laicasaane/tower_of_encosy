@@ -6,10 +6,10 @@ namespace EncosyTower.Common
 {
     [Feature("0. EncosyTower: Common")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.burst", "1.8.25")]
-    [RequiresPackage(PackageRegistry.Unity, "com.unity.collections", "2.5.7")]
+    [RequiresPackage(PackageRegistry.Unity, "com.unity.collections", "2.6.3")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.mathematics", "1.3.3")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.nuget.newtonsoft-json", "3.2.1")]
-    [RequiresPackage(PackageRegistry.Unity, "com.unity.serialization", "3.1.3")]
+    [RequiresPackage(PackageRegistry.Unity, "com.unity.serialization", "3.1.5")]
 
 #if UNITY_2023_1_OR_NEWER
 #else
