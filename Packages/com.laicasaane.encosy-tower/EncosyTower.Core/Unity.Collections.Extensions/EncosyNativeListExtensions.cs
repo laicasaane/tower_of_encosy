@@ -89,17 +89,23 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static Span<T> AsSpan<T>(this NativeList<T> list)
+        public static Span<T> AsSpan<T>(this NativeList<T> list)
             where T : unmanaged
         {
-            return new Span<T>(list.GetUnsafePtr(), list.Length);
+            unsafe
+            {
+                return new Span<T>(list.GetUnsafePtr(), list.Length);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static ReadOnlySpan<T> AsReadOnlySpan<T>(this NativeList<T> list)
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this NativeList<T> list)
             where T : unmanaged
         {
-            return new ReadOnlySpan<T>(list.GetUnsafeReadOnlyPtr(), list.Length);
+            unsafe
+            {
+                return new ReadOnlySpan<T>(list.GetUnsafeReadOnlyPtr(), list.Length);
+            }
         }
     }
 }

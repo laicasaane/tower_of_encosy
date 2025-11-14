@@ -125,14 +125,17 @@ namespace EncosyTower.SystemExtensions
         /// </example>
         public static FixedString128Bytes ToFixedString(in this Guid self, ReadOnlySpan<char> format)
         {
-            var fs = new FixedString128Bytes();
-            var guid = new Union(self).BurstableGuid;
+            unsafe
+            {
+                var fs = new FixedString128Bytes();
+                var guid = new Union(self).BurstableGuid;
 
-            Span<char> utf16Chars = stackalloc char[68];
-            guid.TryFormat(utf16Chars, out var utf16CharsWritten, format);
-            fs.Append(utf16Chars[..utf16CharsWritten]);
+                Span<char> utf16Chars = stackalloc char[68];
+                guid.TryFormat(utf16Chars, out var utf16CharsWritten, format);
+                fs.Append(utf16Chars[..utf16CharsWritten]);
 
-            return fs;
+                return fs;
+            }
         }
     }
 }

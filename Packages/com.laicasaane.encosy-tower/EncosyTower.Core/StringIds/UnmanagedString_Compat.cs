@@ -20,7 +20,10 @@ namespace EncosyTower.StringIds
 
             public FixedString512Bytes(string other) : this()
             {
-                Initialize(ref this, other.AsSpan());
+                unsafe
+                {
+                    Initialize(ref this, other.AsSpan());
+                }
             }
 
             public static int UTF8MaxLengthInBytes => 509;
@@ -95,9 +98,12 @@ namespace EncosyTower.StringIds
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly unsafe ReadOnlySpan<byte> AsReadOnlySpan()
+            public readonly ReadOnlySpan<byte> AsReadOnlySpan()
             {
-                return new(GetUnsafePtr(), Length);
+                unsafe
+                {
+                    return new(GetUnsafePtr(), Length);
+                }
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -209,11 +215,17 @@ namespace EncosyTower.StringIds
 
     internal static class UnmanagedStringFixedStringExtensions
     {
-        public static unsafe void CopyFromTruncated(this ref UnmanagedString.FixedString512Bytes fs, ReadOnlySpan<byte> utf8Chars)
+        public static void CopyFromTruncated(
+              this ref UnmanagedString.FixedString512Bytes fs
+            , ReadOnlySpan<byte> utf8Chars
+        )
         {
-            var length = Mathf.Min(utf8Chars.Length, fs.Capacity);
-            fs.Length = length;
-            utf8Chars[..length].CopyTo(fs.AsSpan());
+            unsafe
+            {
+                var length = Mathf.Min(utf8Chars.Length, fs.Capacity);
+                fs.Length = length;
+                utf8Chars[..length].CopyTo(fs.AsSpan());
+            }
         }
     }
 }
