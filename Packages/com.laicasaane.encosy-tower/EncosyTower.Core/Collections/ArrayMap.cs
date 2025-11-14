@@ -59,8 +59,6 @@ namespace EncosyTower.Collections
         , IReadOnlyCollection<ArrayMapKeyValuePairFast<TKey, TValue>>
         , IClearable, IHasCapacity
     {
-        internal readonly static EqualityComparer<TKey> s_comparer = EqualityComparer<TKey>.Default;
-
         internal ManagedStrategy<ArrayMapNode<TKey>> _valuesInfo;
         internal ManagedStrategy<TValue> _values;
         internal ManagedStrategy<int> _buckets;
@@ -437,7 +435,7 @@ namespace EncosyTower.Collections
             //find the bucket
             var indexToValueToRemove = _buckets[bucketIndex] - 1;
             var itemAfterCurrentOne = -1;
-            var comparer = s_comparer;
+            var comparer = EqualityComparer<TKey>.Default;
 
             //Part one: look for the actual key in the bucket list if found I update the bucket list so that it doesn't
             //point anymore to the cell to remove
@@ -553,7 +551,7 @@ namespace EncosyTower.Collections
             var hash = key.GetHashCode();
             var bucketIndex = (int)Reduce((uint)hash, (uint)_buckets.Capacity, _fastModBucketsMultiplier);
             var valueIndex = _buckets[bucketIndex] - 1;
-            var comparer = s_comparer;
+            var comparer = EqualityComparer<TKey>.Default;
 
             //even if we found an existing value we need to be sure it's the one we requested
             while (valueIndex != -1)
@@ -639,7 +637,7 @@ namespace EncosyTower.Collections
             else //collision or already exists
             {
                 var currentValueIndex = valueIndex;
-                var comparer = s_comparer;
+                var comparer = EqualityComparer<TKey>.Default;
 
                 do
                 {

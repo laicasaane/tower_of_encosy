@@ -142,6 +142,23 @@ namespace EncosyTower.Collections
             _freeValueCellIndex.Value = source._freeValueCellIndex.Value;
         }
 
+        private ArrayMapNative(
+              NativeStrategy<ArrayMapNode<TKey>> valuesInfo
+            , NativeStrategy<TValue> values
+            , NativeStrategy<int> buckets
+            , NativeReference<int> freeValueCellIndex
+            , NativeReference<uint> collisions
+            , NativeReference<ulong> fastModBucketsMultiplier
+        )
+        {
+            _valuesInfo = valuesInfo;
+            _values = values;
+            _buckets = buckets;
+            _freeValueCellIndex = freeValueCellIndex;
+            _collisions = collisions;
+            _fastModBucketsMultiplier = fastModBucketsMultiplier;
+        }
+
         public readonly int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -204,6 +221,20 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ArrayMapNativeKeyValueEnumerator<TKey, TValue> GetEnumerator()
             => new(this);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ArrayMapNative<TKey, UValue> Reinterpret<UValue>()
+            where UValue : unmanaged
+        {
+            return new ArrayMapNative<TKey, UValue>(
+                  _valuesInfo
+                , _values.Reinterpret<UValue>()
+                , _buckets
+                , _freeValueCellIndex
+                , _collisions
+                , _fastModBucketsMultiplier
+            );
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(TKey key, in TValue value)

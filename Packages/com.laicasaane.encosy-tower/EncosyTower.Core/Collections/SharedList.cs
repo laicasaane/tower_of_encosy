@@ -186,6 +186,40 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int IndexOf(T item)
+            => IndexOf(item, 0);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int IndexOf(T item, int index)
+            => IndexOf(item, index, _count.ValueRO);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int IndexOf(T item, int index, int count)
+        {
+            Checks.IsTrue(index >= 0, "index is less than 0");
+            Checks.IsTrue(count >= 0, "count is less than 0");
+            Checks.IsTrue(index + count <= _count.ValueRO, "index and count do not specify a valid section in the SharedList<T>");
+            return Array.IndexOf(_buffer, item, index, count);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int IndexOf(in T item)
+            => IndexOf(in item, 0);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int IndexOf(in T item, int index)
+            => IndexOf(in item, index, _count.ValueRO);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int IndexOf(in T item, int index, int count)
+        {
+            Checks.IsTrue(index >= 0, "index is less than 0");
+            Checks.IsTrue(count >= 0, "count is less than 0");
+            Checks.IsTrue(index + count <= _count.ValueRO, "index and count do not specify a valid section in the SharedList<T>");
+            return Array.IndexOf(_buffer, item, index, count);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(T item)
         {
             _version.ValueRW++;
@@ -320,6 +354,13 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Contains(T item)
+        {
+            var count = _count.ValueRO;
+            return count > 0 && Array.IndexOf(_buffer, item, 0, count) >= 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
             _version.ValueRW++;
@@ -440,6 +481,50 @@ namespace EncosyTower.Collections
             return _count.ValueRO - 1;
         }
 
+        public bool Remove(T item)
+        {
+            _version.ValueRW++;
+
+            var index = IndexOf(item);
+
+            if ((uint)index >= (uint)_count.ValueRO)
+                return false;
+
+            if (index < --_count.ValueRW)
+            {
+                Array.Copy(_buffer, index + 1, _buffer, index, _count.ValueRO - index);
+            }
+
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                _buffer.AsSpan()[_count.ValueRO] = default;
+            }
+
+            return true;
+        }
+
+        public bool Remove(in T item)
+        {
+            _version.ValueRW++;
+
+            var index = IndexOf(item);
+
+            if ((uint)index >= (uint)_count.ValueRO)
+                return false;
+
+            if (index < --_count.ValueRW)
+            {
+                Array.Copy(_buffer, index + 1, _buffer, index, _count.ValueRO - index);
+            }
+
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                _buffer.AsSpan()[_count.ValueRO] = default;
+            }
+
+            return true;
+        }
+
         public void RemoveAt(int index)
         {
             _version.ValueRW++;
@@ -485,7 +570,7 @@ namespace EncosyTower.Collections
 
             if (index < --_count.ValueRW)
             {
-                var buffer = _buffer.AsManagedArray();
+                var buffer = _buffer.AsSpan();
                 buffer[index] = buffer[_count.ValueRO];
             }
         }
@@ -625,17 +710,5 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        int IList<T>.IndexOf(T item)
-            => Array.IndexOf(_buffer.AsManagedArray(), item, 0, _count.ValueRO);
-
-        [Obsolete("Use SharedListExtensions.Remove instead.")]
-        bool ICollection<T>.Remove(T item)
-            => Extensions.SharedListExtensions.Remove(this, item, Comparer<T>.Default);
-
-        [Obsolete("Use SharedListExtensions.Contains instead.")]
-        bool ICollection<T>.Contains(T item)
-            => Extensions.SharedListExtensions.Contains(this, item, EqualityComparer<T>.Default);
     }
 }

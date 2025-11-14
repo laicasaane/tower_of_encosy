@@ -10,8 +10,8 @@ namespace EncosyTower.Collections.Extensions
     public static class SharedListExtensions
     {
         /// <remarks>
-        /// This method allocates a <see cref="IListProxy{T}"/> for <paramref name="self"/>
-        /// and an accompanied <see cref="List{T}"/>.
+        /// This method allocates an internal <see cref="SharedListProxy{T, TNative, SharedList{T}}"/>
+        /// which implements <see cref="IListProxy{T}"/> for <paramref name="self"/>.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ProxiedList<T> ToProxiedList<T>([NotNull] this SharedList<T> self)
@@ -19,8 +19,8 @@ namespace EncosyTower.Collections.Extensions
             => new(new SharedListProxy<T, T, SharedList<T>>(self));
 
         /// <remarks>
-        /// This method allocates a <see cref="IListProxy{T}"/> for <paramref name="self"/>
-        /// and an accompanied <see cref="List{T}"/>.
+        /// This method allocates an internal <see cref="SharedListProxy{T, TNative, SharedList{T, TNative}}"/>
+        /// which implements <see cref="IListProxy{T}"/> for <paramref name="self"/>.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ProxiedList<T> ToProxiedList<T, TNative>([NotNull] this SharedList<T, TNative> self)
@@ -29,8 +29,8 @@ namespace EncosyTower.Collections.Extensions
             => new(new SharedListProxy<T, TNative, SharedList<T, TNative>>(self));
 
         /// <remarks>
-        /// This method allocates a <see cref="IListProxy{T}"/> for <paramref name="self"/>
-        /// and an accompanied <see cref="List{T}"/>.
+        /// This method allocates an internal <see cref="SharedListProxy{T, TNative, TSharedList}"/>
+        /// which implements <see cref="IListProxy{T}"/> for <paramref name="self"/>.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ProxiedList<T> ToProxiedList<T, TNative, TSharedList>([NotNull] this TSharedList self)
@@ -39,43 +39,11 @@ namespace EncosyTower.Collections.Extensions
             where TSharedList : SharedList<T, TNative>
             => new(new SharedListProxy<T, TNative, TSharedList>(self));
 
-        public static bool Contains<T, TNative>([NotNull] this SharedList<T, TNative> self, T item)
-            where T : unmanaged, IEquatable<T>
-            where TNative : unmanaged
-        {
-            var items = self.AsReadOnlySpan();
-            var length = items.Length;
-
-            for (var index = 0; index < length; index++)
-            {
-                ref readonly var item2 = ref items[index];
-
-                if (item.Equals(item2))
-                    return true;
-            }
-
-            return false;
-        }
-
-        public static bool Contains<T, TNative>([NotNull] this SharedList<T, TNative> self, in T item)
-            where T : unmanaged, IEquatable<T>
-            where TNative : unmanaged
-        {
-            var items = self.AsReadOnlySpan();
-            var length = items.Length;
-
-            for (var index = 0; index < length; index++)
-            {
-                ref readonly var item2 = ref items[index];
-
-                if (item.Equals(item2))
-                    return true;
-            }
-
-            return false;
-        }
-
-        public static bool Contains<T, TNative, TComparer>([NotNull] this SharedList<T, TNative> self, in T item, TComparer comparer)
+        public static bool Contains<T, TNative, TComparer>(
+              [NotNull] this SharedList<T, TNative> self
+            , T item
+            , TComparer comparer
+        )
             where T : unmanaged
             where TNative : unmanaged
             where TComparer : IEqualityComparer<T>
@@ -94,33 +62,41 @@ namespace EncosyTower.Collections.Extensions
             return false;
         }
 
-        public static bool Remove<T, TNative>([NotNull] this SharedList<T, TNative> self, T item)
-            where T : unmanaged, IEquatable<T>
+        public static bool Contains<T, TNative, TComparer>(
+              [NotNull] this SharedList<T, TNative> self
+            , in T item
+            , TComparer comparer
+        )
+            where T : unmanaged
             where TNative : unmanaged
+            where TComparer : IEqualityComparer<T>
         {
-            self._version.ValueRW++;
+            var items = self.AsReadOnlySpan();
+            var length = items.Length;
 
-            var index = IndexOf(self, item);
-
-            if (index < 0)
-                return false;
-
-            if (index < --self._count.ValueRW)
+            for (var index = 0; index < length; index++)
             {
-                var buffer = self._buffer.AsManagedArray();
-                Array.Copy(buffer, index + 1, buffer, index, self._count.ValueRO - index);
+                ref readonly var item2 = ref items[index];
+
+                if (comparer.Equals(item, item2))
+                    return true;
             }
 
-            return true;
+            return false;
         }
 
-        public static bool Remove<T, TNative>([NotNull] this SharedList<T, TNative> self, in T item)
-            where T : unmanaged, IEquatable<T>
+        public static bool Remove<T, TNative, TComparer>(
+              [NotNull] this SharedList<T, TNative> self
+            , T item
+            , TComparer comparer
+        )
+            where T : unmanaged
             where TNative : unmanaged
+            where TComparer : IComparer<T>
         {
             self._version.ValueRW++;
 
-            var index = self.AsSpan().BinarySearch(item, Comparer<T>.Default);
+            var index = self.AsSpan().BinarySearch(item, comparer);
 
             if ((uint)index >= (uint)self._count.ValueRO)
                 return false;
@@ -134,7 +110,11 @@ namespace EncosyTower.Collections.Extensions
             return true;
         }
 
-        public static bool Remove<T, TNative, TComparer>([NotNull] this SharedList<T, TNative> self, in T item, TComparer comparer)
+        public static bool Remove<T, TNative, TComparer>(
+              [NotNull] this SharedList<T, TNative> self
+            , in T item
+            , TComparer comparer
+        )
             where T : unmanaged
             where TNative : unmanaged
             where TComparer : IComparer<T>
@@ -156,39 +136,71 @@ namespace EncosyTower.Collections.Extensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int BinarySearch<T, TNative, TComparer>([NotNull] this SharedList<T, TNative> self, T item, TComparer comparer)
+        public static int BinarySearch<T, TNative, TComparer>(
+              [NotNull] this SharedList<T, TNative> self
+            , T item
+            , TComparer comparer
+        )
             where T : unmanaged
             where TNative : unmanaged
             where TComparer : IComparer<T>
-            => BinarySearch(self, 0, self._count.ValueRO, item, comparer);
+        {
+            return BinarySearch(self, 0, self._count.ValueRO, item, comparer);
+        }
 
-        public static int BinarySearch<T, TNative, TComparer>([NotNull] this SharedList<T, TNative> self, int index, int count, T item, TComparer comparer)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int BinarySearch<T, TNative, TComparer>(
+              [NotNull] this SharedList<T, TNative> self
+            , int index
+            , int count
+            , T item
+            , TComparer comparer
+        )
             where T : unmanaged
             where TNative : unmanaged
             where TComparer : IComparer<T>
         {
             Checks.IsTrue(index >= 0, "index is less than 0");
             Checks.IsTrue(count >= 0, "count is less than 0");
-            Checks.IsTrue(self._count.ValueRO - index >= count, "index and count do not denote a valid range in the SharedList<T, TNative>");
+            Checks.IsTrue(
+                  self._count.ValueRO - index >= count
+                , "index and count do not denote a valid range in the SharedList<T, TNative>"
+            );
 
             return self.AsReadOnlySpan().BinarySearch(item, comparer);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int BinarySearch<T, TNative, TComparer>([NotNull] this SharedList<T, TNative> self, in T item, TComparer comparer)
+        public static int BinarySearch<T, TNative, TComparer>(
+              [NotNull] this SharedList<T, TNative> self
+            , in T item
+            , TComparer comparer
+        )
             where T : unmanaged
             where TNative : unmanaged
             where TComparer : IComparer<T>
-            => BinarySearch(self, 0, self._count.ValueRO, in item, comparer);
+        {
+            return BinarySearch(self, 0, self._count.ValueRO, in item, comparer);
+        }
 
-        public static int BinarySearch<T, TNative, TComparer>([NotNull] this SharedList<T, TNative> self, int index, int count, in T item, TComparer comparer)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int BinarySearch<T, TNative, TComparer>(
+              [NotNull] this SharedList<T, TNative> self
+            , int index
+            , int count
+            , in T item
+            , TComparer comparer
+        )
             where T : unmanaged
             where TNative : unmanaged
             where TComparer : IComparer<T>
         {
             Checks.IsTrue(index >= 0, "index is less than 0");
             Checks.IsTrue(count >= 0, "count is less than 0");
-            Checks.IsTrue(self._count.ValueRO - index >= count, "index and count do not denote a valid range in the SharedList<T, TNative>");
+            Checks.IsTrue(
+                  self._count.ValueRO - index >= count
+                , "index and count do not denote a valid range in the SharedList<T, TNative>"
+            );
 
             return self.AsReadOnlySpan().BinarySearch(item, comparer);
         }
@@ -212,32 +224,10 @@ namespace EncosyTower.Collections.Extensions
         {
             Checks.IsTrue(index >= 0, "index is less than 0");
             Checks.IsTrue(count >= 0, "count is less than 0");
-            Checks.IsTrue(index + count <= self._count.ValueRO, "index and count do not specify a valid section in the SharedList<T, TNative>");
-
-            var result = MemoryExtensions.IndexOf(self.AsReadOnlySpan().Slice(index, count), item);
-            return result < 0 ? result : result + index;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T, TNative>([NotNull] this SharedList<T, TNative> self, in T item)
-            where T : unmanaged, IEquatable<T>
-            where TNative : unmanaged
-            => IndexOf(self, in item, 0);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T, TNative>([NotNull] this SharedList<T, TNative> self, in T item, int index)
-            where T : unmanaged, IEquatable<T>
-            where TNative : unmanaged
-            => IndexOf(self, in item, index, self._count.ValueRO);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T, TNative>([NotNull] this SharedList<T, TNative> self, in T item, int index, int count)
-            where T : unmanaged, IEquatable<T>
-            where TNative : unmanaged
-        {
-            Checks.IsTrue(index >= 0, "index is less than 0");
-            Checks.IsTrue(count >= 0, "count is less than 0");
-            Checks.IsTrue(index + count <= self._count.ValueRO, "index and count do not specify a valid section in the SharedList<T, TNative>");
+            Checks.IsTrue(
+                  index + count <= self._count.ValueRO
+                , "index and count do not specify a valid section in the SharedList<T, TNative>"
+            );
 
             var result = MemoryExtensions.IndexOf(self.AsReadOnlySpan().Slice(index, count), item);
             return result < 0 ? result : result + index;
@@ -265,7 +255,12 @@ namespace EncosyTower.Collections.Extensions
             => Sort(self, 0, self._count.ValueRO, comparer);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort<T, TNative, TComparer>([NotNull] this SharedList<T, TNative> self, int index, int count, TComparer comparer)
+        public static void Sort<T, TNative, TComparer>(
+              [NotNull] this SharedList<T, TNative> self
+            , int index
+            , int count
+            , TComparer comparer
+        )
             where T : unmanaged
             where TNative : unmanaged
             where TComparer : IComparer<T>

@@ -180,16 +180,21 @@ namespace EncosyTower.Buffers
         {
             return _bufferImplementation.AsSpan();
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public NB<U> Reinterpret<U>()
+            where U : unmanaged
+        {
+            return new NB<U>(_bufferImplementation.Reinterpret<U>());
+        }
     }
 
     internal readonly struct NBInternal<T> : IBuffer<T> where T : struct
     {
-        internal static readonly bool s_isTUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
-
         static NBInternal()
         {
 #if __ENCOSY_VALIDATION__
-            if (s_isTUnmanaged == false)
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 throw new InvalidOperationException("NativeBuffer (NB) supports only unmanaged types");
 #endif
         }
@@ -328,6 +333,13 @@ namespace EncosyTower.Buffers
         public ReadOnlySpan<T> AsReadOnlySpan()
         {
             return _buffer.AsSpan();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public NBInternal<U> Reinterpret<U>()
+            where U : unmanaged
+        {
+            return new NBInternal<U>(_buffer.Reinterpret<U>());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

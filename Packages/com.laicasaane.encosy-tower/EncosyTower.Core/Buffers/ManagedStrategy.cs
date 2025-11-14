@@ -34,8 +34,6 @@ namespace EncosyTower.Buffers
     /// <typeparam name="T"></typeparam>
     public struct ManagedStrategy<T> : IBufferStrategy<T>
     {
-        internal static readonly bool s_isTUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
-
         internal MBInternal<T> _realBuffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -110,7 +108,7 @@ namespace EncosyTower.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void FastClear()
         {
-            if (s_isTUnmanaged == false)
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 _realBuffer.Clear();
         }
 

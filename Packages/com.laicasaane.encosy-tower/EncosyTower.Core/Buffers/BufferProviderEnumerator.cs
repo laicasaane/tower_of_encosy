@@ -5,10 +5,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using EncosyTower.Buffers;
 using EncosyTower.Debugging;
 
-namespace EncosyTower.Collections
+namespace EncosyTower.Buffers
 {
     public struct BufferProviderEnumerator<T> : IEnumerator<T>, IEnumerator
     {

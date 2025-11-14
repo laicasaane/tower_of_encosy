@@ -456,6 +456,17 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public SharedListNative<U> Reinterpret<U>()
+            where U : unmanaged
+        {
+            return new SharedListNative<U>(
+                  _buffer.Reinterpret<U>()
+                , _count
+                , _version
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SharedListNative<T> Prefill(int amount)
         {
             SharedListNative<T> list = new SharedList<T, T>(amount);

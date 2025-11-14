@@ -28,6 +28,17 @@ namespace EncosyTower.Collections
                 _version = list._version.AsNativeArray().AsReadOnly();
             }
 
+            private ReadOnly(
+                  NativeArray<T>.ReadOnly buffer
+                , NativeArray<int>.ReadOnly count
+                , NativeArray<int>.ReadOnly version
+            )
+            {
+                _buffer = buffer;
+                _count = count;
+                _version = version;
+            }
+
             public bool IsCreated
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -119,6 +130,17 @@ namespace EncosyTower.Collections
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public T[] ToArray()
                 => AsReadOnlySpan().ToArray();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public SharedList<U, TNative>.ReadOnly Reinterpret<U>()
+                where U : unmanaged
+            {
+                return new SharedList<U, TNative>.ReadOnly(
+                      _buffer.Reinterpret<U>()
+                    , _count
+                    , _version
+                );
+            }
 
             IEnumerator<T> IEnumerable<T>.GetEnumerator()
                 => GetEnumerator();

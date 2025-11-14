@@ -8,8 +8,8 @@ namespace EncosyTower.Collections.Extensions
     public static class FasterListExtensions
     {
         /// <remarks>
-        /// This method allocates a <see cref="IListProxy{T}"/> for <paramref name="self"/>
-        /// and an accompanied <see cref="List{T}"/>.
+        /// This method allocates an internal <see cref="FasterListProxy{T}"/>
+        /// which implements <see cref="IListProxy{T}"/> for <paramref name="self"/>.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ProxiedList<T> ToProxiedList<T>([NotNull] this FasterList<T> self)

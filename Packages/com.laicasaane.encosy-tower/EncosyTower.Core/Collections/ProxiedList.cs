@@ -22,9 +22,6 @@ namespace EncosyTower.Collections
         , IAddRangeSpan<T>
         , IClearable, IHasCapacity
     {
-        internal static readonly EqualityComparer<T> s_comp = EqualityComparer<T>.Default;
-        internal static readonly bool s_shouldPerformMemClear = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
-
         internal readonly ListExposed<T> _list;
         internal readonly IListProxy<T> _proxy;
 
@@ -575,38 +572,16 @@ namespace EncosyTower.Collections
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains(T item)
         {
-            var items = AsReadOnlySpan();
-            var length = items.Length;
-            var comp = s_comp;
-
-            for (var index = 0; index < length; index++)
-            {
-                ref readonly var item2 = ref items[index];
-
-                if (comp.Equals(item2, item))
-                    return true;
-            }
-
-            return false;
+            return _count > 0 && Array.IndexOf(_buffer, item, 0, _count) >= 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains(in T item)
         {
-            var items = AsReadOnlySpan();
-            var length = items.Length;
-            var comp = s_comp;
-
-            for (var index = 0; index < length; index++)
-            {
-                ref readonly var item2 = ref items[index];
-
-                if (comp.Equals(item2, item))
-                    return true;
-            }
-
-            return false;
+            return _count > 0 && Array.IndexOf(_buffer, item, 0, _count) >= 0;
         }
 
         public void ForEach([NotNull] Action<T> action)
@@ -673,7 +648,7 @@ namespace EncosyTower.Collections
         {
             _version++;
 
-            if (s_shouldPerformMemClear)
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 Array.Clear(_buffer, 0, _buffer.Length);
             }
@@ -810,7 +785,7 @@ namespace EncosyTower.Collections
                 Array.Copy(_buffer, index + 1, _buffer, index, _count - index);
             }
 
-            if (s_shouldPerformMemClear)
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 _buffer[_count] = default;
             }
@@ -832,7 +807,7 @@ namespace EncosyTower.Collections
                 Array.Copy(_buffer, index + 1, _buffer, index, _count - index);
             }
 
-            if (s_shouldPerformMemClear)
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 _buffer[_count] = default;
             }
@@ -851,7 +826,7 @@ namespace EncosyTower.Collections
                 Array.Copy(_buffer, index + 1, _buffer, index, _count - index);
             }
 
-            if (s_shouldPerformMemClear)
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 _buffer[_count] = default;
             }
@@ -881,7 +856,7 @@ namespace EncosyTower.Collections
                 Array.Copy(_buffer, startIndex + length, _buffer, startIndex, count - startIndex);
             }
 
-            if (s_shouldPerformMemClear)
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 Array.Clear(_buffer, count, length);
             }
@@ -898,7 +873,7 @@ namespace EncosyTower.Collections
                 _buffer[index] = _buffer[_count];
             }
 
-            if (s_shouldPerformMemClear)
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 _buffer[_count] = default;
             }

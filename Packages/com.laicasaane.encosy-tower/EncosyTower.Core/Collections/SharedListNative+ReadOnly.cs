@@ -80,7 +80,11 @@ namespace EncosyTower.Collections
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    Checks.IsTrue((uint)index < (uint)Count, "index is outside the range of valid indices for the SharedList<T>.ReadOnly");
+                    Checks.IsTrue(
+                          (uint)index < (uint)Count
+                        , "index is outside the range of valid indices for the SharedList<T>.ReadOnly"
+                    );
+
                     return _buffer.AsReadOnlySpan()[index];
                 }
             }
@@ -136,6 +140,17 @@ namespace EncosyTower.Collections
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public T[] ToArray()
                 => AsReadOnlySpan().ToArray();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public SharedListNative<U>.ReadOnly Reinterpret<U>()
+                where U : unmanaged
+            {
+                return new SharedListNative<U>.ReadOnly(
+                      _buffer.Reinterpret<U>()
+                    , _count
+                    , _version
+                );
+            }
 
             IEnumerator<T> IEnumerable<T>.GetEnumerator()
                 => GetEnumerator();

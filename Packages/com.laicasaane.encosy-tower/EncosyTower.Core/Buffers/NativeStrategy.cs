@@ -46,12 +46,10 @@ namespace EncosyTower.Buffers
     /// </summary>
     public struct NativeStrategy<T> : IBufferStrategy<T> where T : unmanaged
     {
-        internal static readonly bool s_isTUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
-
 #if DEBUG && !PROFILE_SVELTO
         static NativeStrategy()
         {
-            if (s_isTUnmanaged == false)
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 throw new InvalidOperationException("Only unmanaged data can be stored natively");
         }
 #endif
@@ -64,6 +62,13 @@ namespace EncosyTower.Buffers
         {
             ThrowIfInvalidAllocatorStrategy(allocatorStrategy);
             Alloc(size, allocatorStrategy, clear);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private NativeStrategy(NativeReference<AllocatorStrategy> nativeAllocator, NBInternal<T> realBuffer)
+        {
+            _nativeAllocator = nativeAllocator;
+            _realBuffer = realBuffer;
         }
 
         public readonly int Capacity
@@ -203,6 +208,13 @@ namespace EncosyTower.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ReadOnlySpan<T> AsReadOnlySpan()
             => _realBuffer.AsSpan();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly NativeStrategy<U> Reinterpret<U>()
+            where U : unmanaged
+        {
+            return new NativeStrategy<U>(_nativeAllocator, _realBuffer.Reinterpret<U>());
+        }
 
         public void Dispose()
         {
