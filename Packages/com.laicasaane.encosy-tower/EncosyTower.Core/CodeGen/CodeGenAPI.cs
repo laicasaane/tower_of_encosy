@@ -3,7 +3,9 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using EncosyTower.Annotations;
+using EncosyTower.Common;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,6 +13,15 @@ namespace EncosyTower.CodeGen
 {
     public static class CodeGenAPI
     {
+        public static string GetOutputFolderPathFromCaller(
+              [CallerFilePath] string filePath = ""
+            , string pathCombine = ""
+        )
+        {
+            var directoryPath = Path.GetDirectoryName(filePath);
+            return pathCombine.IsNotEmpty() ? Path.Combine(directoryPath, pathCombine) : directoryPath;
+        }
+
         public static bool TryGetOutputFolderPath(
               string fileName
             , out string path

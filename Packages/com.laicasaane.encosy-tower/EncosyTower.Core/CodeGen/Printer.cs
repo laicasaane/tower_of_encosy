@@ -134,13 +134,123 @@ namespace EncosyTower.CodeGen
         }
 
         /// <summary>
+        /// Print a number
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public readonly Printer Print(sbyte value)
+        {
+            _builder.Append(value);
+            return this;
+        }
+
+        /// <summary>
+        /// Print a number
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public readonly Printer Print(byte value)
+        {
+            _builder.Append(value);
+            return this;
+        }
+
+        /// <summary>
+        /// Print a number
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public readonly Printer Print(ushort value)
+        {
+            _builder.Append(value);
+            return this;
+        }
+
+        /// <summary>
+        /// Print a number
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public readonly Printer Print(short value)
+        {
+            _builder.Append(value);
+            return this;
+        }
+
+        /// <summary>
+        /// Print a number
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public readonly Printer Print(int value)
+        {
+            _builder.Append(value);
+            return this;
+        }
+
+        /// <summary>
+        /// Print a number
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public readonly Printer Print(uint value)
+        {
+            _builder.Append(value);
+            return this;
+        }
+
+        /// <summary>
+        /// Print a number
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public readonly Printer Print(float value)
+        {
+            _builder.Append(value);
+            return this;
+        }
+
+        /// <summary>
+        /// Print a number
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public readonly Printer Print(double value)
+        {
+            _builder.Append(value);
+            return this;
+        }
+
+        /// <summary>
+        /// Print a number
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public readonly Printer Print(long value)
+        {
+            _builder.Append(value);
+            return this;
+        }
+
+        /// <summary>
+        /// Print a number
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public readonly Printer Print(ulong value)
+        {
+            _builder.Append(value);
+            return this;
+        }
+
+        /// <summary>
         /// Print a character
         /// </summary>
-        /// <param name="character"></param>
+        /// <param name="value"></param>
         /// <returns></returns>
-        public readonly Printer Print(char character)
+        public readonly Printer Print(char value)
         {
-            _builder.Append(character);
+            _builder.Append(value);
             return this;
         }
 
