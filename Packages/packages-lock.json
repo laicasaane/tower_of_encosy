@@ -82,7 +82,7 @@
       }
     },
     "com.latios.latiosframework": {
-      "version": "0.14.2",
+      "version": "0.14.3",
       "depth": 0,
       "source": "registry",
       "dependencies": {
