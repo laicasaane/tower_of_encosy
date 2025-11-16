@@ -35,7 +35,7 @@
         <ItemGroup>
             <DataFiles Include="$(ProjectDir)$(OutDir)*.dll" />
         </ItemGroup>
-        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(ProjectDir)../../SourceGenerators/" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(ProjectDir)../../../Packages/com.laicasaane.encosy-tower/EncosyTower.Core/SourceGenerators/" SkipUnchangedFiles="true" />
     </Target>
 
 </Project>

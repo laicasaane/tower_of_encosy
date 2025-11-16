@@ -215,7 +215,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 GeneratedCode = GENERATED_CODE,
                 Name = EnumName,
                 ExtensionsName = $"{EnumName}Extensions",
-                ExtensionsWrapperName = $"{EnumName}ExtensionsWrapper",
+                StructName = $"{EnumName}ExtensionsWrapper",
                 ParentIsNamespace = templateCandidate.syntax.Parent is BaseNamespaceDeclarationSyntax,
                 FullyQualifiedName = fullyQualifiedEnumName,
                 UnderlyingTypeName = UnderlyingTypeName,

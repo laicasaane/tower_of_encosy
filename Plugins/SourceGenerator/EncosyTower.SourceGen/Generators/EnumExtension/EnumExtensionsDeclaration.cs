@@ -12,7 +12,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         public string ExtensionsName { get; set; }
 
-        public string ExtensionsWrapperName { get; set; }
+        public string StructName { get; set; }
 
         public bool ParentIsNamespace { get; set; }
 
@@ -53,7 +53,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         )
         {
             ExtensionsName = extensionsName;
-            ExtensionsWrapperName = $"{extensionsName}Wrapper";
+            StructName = $"{symbol.Name}Extended";
             ParentIsNamespace = parentIsNamespace;
             Name = symbol.Name;
             FullyQualifiedName = symbol.ToFullName();

@@ -92,7 +92,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             var memberRefs = MemberRefs;
             var map = MemberIndexMap;
 
-            p.PrintBeginLine("partial struct ").PrintEndLine(ExtensionsRef.ExtensionsWrapperName);
+            p.PrintBeginLine("partial struct ").PrintEndLine(ExtensionsRef.StructName);
             p = p.IncreasedIndent();
             {
                 var isFirst = true;
@@ -118,7 +118,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 foreach (var kvp in map)
                 {
                     var typeSymbol = kvp.Key;
-                    var thisName = ExtensionsRef.ExtensionsWrapperName;
+                    var thisName = ExtensionsRef.StructName;
                     var otherName = typeSymbol.ToFullName();
                     var extensionsName = ExtensionsRef.ExtensionsName;
                     var indexOrIndices = kvp.Value;

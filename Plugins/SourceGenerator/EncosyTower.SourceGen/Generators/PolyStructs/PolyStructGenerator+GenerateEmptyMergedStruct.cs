@@ -38,7 +38,7 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
                         GeneratedCode = GENERATED_CODE,
                         Name = "TypeId",
                         ExtensionsName = $"{interfaceRef.StructName}_TypeIdExtensions",
-                        ExtensionsWrapperName = $"{interfaceRef.StructName}_TypeIdExtensionsWrapper",
+                        StructName = $"{interfaceRef.StructName}_TypeIdExtensionsWrapper",
                         ParentIsNamespace = interfaceRef.Syntax.Parent is BaseNamespaceDeclarationSyntax,
                         FullyQualifiedName = $"{mergedStructName}.TypeId",
                         UnderlyingTypeName = enumUnderlyingTypeName,
