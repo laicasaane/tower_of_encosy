@@ -6,6 +6,8 @@ namespace EncosyTower.Tests.EnumTemplates
     [EnumTemplateMemberFromTypeName(typeof(CustomFruit<int>), 500)]
     public readonly partial struct ResourceType_EnumTemplate { }
 
+    partial class ResourceTypeExtensions { }
+
     [EnumMembersForTemplate(typeof(ResourceType_EnumTemplate), 000)]
     public enum ResourceNone : byte { None }
 

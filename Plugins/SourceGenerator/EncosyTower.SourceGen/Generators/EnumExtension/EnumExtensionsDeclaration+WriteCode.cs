@@ -339,7 +339,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 if (OnlyNames == false)
                 {
                     p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintLine($"public static {StructName} AsExtensionsWrapper({@this}{FullyQualifiedName} value)");
+                    p.PrintLine($"public static {StructName} AsExtended({@this}{FullyQualifiedName} value)");
                     p = p.IncreasedIndent();
                     p.PrintLine($"=> new {StructName}(value);");
                     p = p.DecreasedIndent();

@@ -33,6 +33,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
         public string KindRawTypeName { get; }
 
+        public int TypeSize { get; }
+
         public int KindFieldOffset { get; }
 
         public List<KindRef> KindRefs { get; }
@@ -142,7 +144,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     var extensions = new EnumExtensionsDeclaration(
                           kindSymbol
                         , parentIsNamespace: false
-                        , extensionsName: $"{kindName}Extensions"
+                        , extensionsName: EnumExtensionsDeclaration.GetNameExtensionsClass(kindName)
                         , accessibility: Accessibility.Private
                         , references.unityCollections
                     ) {
@@ -228,7 +230,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
             if (KindEnumIsEmpty)
             {
-                var typeSize = ToSize(Size, idSize);
+                var typeSize = TypeSize = ToSize(Size, idSize);
                 RawTypeName = ToUnsignedTypeName(typeSize);
                 IdRawUnsignedTypeName = kindRefs.Count > 0 ? kindRefs[0].fullName : ToUnsignedTypeName(idSize);
                 IdRawSignedTypeName = kindRefs.Count > 0 ? kindRefs[0].fullName : ToSignedTypeName(idSize);
@@ -238,7 +240,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             else
             {
                 var kindSizeCandidate = ItemCountToSize(Math.Max((ulong)kindRefs.Count, maxKeyOrder));
-                var typeSize = Math.Max(GetTypeSize(idSize + kindSizeCandidate, Size), 2);
+                var typeSize = TypeSize = Math.Max(GetTypeSize(idSize + kindSizeCandidate, Size), 2);
                 var kindSizeCapacity = typeSize - idSize;
                 var kindSize = kindSizeCandidate <= kindSizeCapacity
                     ? kindSizeCandidate
@@ -263,8 +265,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             KindExtensionsRef = new EnumExtensionsDeclaration(references.unityCollections, kindFixedStringBytes) {
                 GeneratedCode = GENERATED_CODE,
                 Name = kindEnumName,
-                ExtensionsName = $"{kindEnumName}Extensions",
-                StructName = $"{kindEnumName}ExtensionsWrapper",
+                ExtensionsName = EnumExtensionsDeclaration.GetNameExtensionsClass(kindEnumName),
+                StructName = EnumExtensionsDeclaration.GetNameExtendedStruct(kindEnumName),
                 ParentIsNamespace = idCandidate.syntax.Parent is BaseNamespaceDeclarationSyntax,
                 FullyQualifiedName = $"{idSymbol.ToFullName()}.IdKind",
                 UnderlyingTypeName = KindRawTypeName,

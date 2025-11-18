@@ -107,7 +107,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 var declaration = new EnumExtensionsDeclaration(
                       candidate.symbol
                     , candidate.syntax.Parent is BaseNamespaceDeclarationSyntax
-                    , $"{candidate.symbol.Name}Extensions"
+                    , EnumExtensionsDeclaration.GetNameExtensionsClass(candidate.symbol.Name)
                     , candidate.symbol.DeclaredAccessibility
                     , compilationCandidate.references.unityCollections
                 );

@@ -214,8 +214,8 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             ExtensionsRef = new EnumExtensionsDeclaration(references.unityCollections, maxByteCount) {
                 GeneratedCode = GENERATED_CODE,
                 Name = EnumName,
-                ExtensionsName = $"{EnumName}Extensions",
-                StructName = $"{EnumName}ExtensionsWrapper",
+                ExtensionsName = EnumExtensionsDeclaration.GetNameExtensionsClass(EnumName),
+                StructName = EnumExtensionsDeclaration.GetNameExtendedStruct(EnumName),
                 ParentIsNamespace = templateCandidate.syntax.Parent is BaseNamespaceDeclarationSyntax,
                 FullyQualifiedName = fullyQualifiedEnumName,
                 UnderlyingTypeName = UnderlyingTypeName,
@@ -493,7 +493,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         public static readonly DiagnosticDescriptor SameMemberIsIgnored = new(
               id: "ENUM_TEMPLATE_0006"
             , title: "A member of the same name will be ignored"
-            , messageFormat: "Member \"{0}\" has already been defined in another enum \"{1}\""
+            , messageFormat: "Member \"{0}\" is ignored because it exists in another enum \"{1}\""
             , category: "EnumTemplateGenerator"
             , defaultSeverity: DiagnosticSeverity.Warning
             , isEnabledByDefault: true

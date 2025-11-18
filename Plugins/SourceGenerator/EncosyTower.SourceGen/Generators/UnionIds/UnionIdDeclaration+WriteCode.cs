@@ -5,6 +5,7 @@
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
         private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.UnionIds.UnionIdGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
+        private const string STRUCT_LAYOUT_SIZE = "[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = {0})]";
         private const string STRUCT_LAYOUT = "[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit)]";
         private const string FIELD_OFFSET = "[global::System.Runtime.InteropServices.FieldOffset({0})]";
         private const string ODIN_PROPERTY_ORDER = "[global::Sirenix.OdinInspector.PropertyOrder({0})]";
@@ -33,7 +34,7 @@
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            p.PrintLine(STRUCT_LAYOUT);
+            p.PrintLine(string.Format(STRUCT_LAYOUT_SIZE, TypeSize));
             p.PrintLine("[global::System.ComponentModel.TypeConverter(typeof(TypeConverter))]");
             p.PrintBeginLine("partial struct ").Print(typeName).Print(" ")
                 .Print(": global::System.IEquatable<").Print(typeName).Print(">")

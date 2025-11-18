@@ -115,17 +115,18 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             p = p.DecreasedIndent();
             p.OpenScope();
             {
+                var thisName = ExtensionsRef.StructName;
+                var extensionsName = ExtensionsRef.ExtensionsName;
+
                 foreach (var kvp in map)
                 {
                     var typeSymbol = kvp.Key;
-                    var thisName = ExtensionsRef.StructName;
                     var otherName = typeSymbol.ToFullName();
-                    var extensionsName = ExtensionsRef.ExtensionsName;
                     var indexOrIndices = kvp.Value;
 
                     if (indexOrIndices.Indices is { } indices)
                     {
-                        WriteXXXMethods(
+                        WriteAdditionalWrapperMethods(
                               ref p
                             , memberRefs
                             , thisName
@@ -135,12 +136,21 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                         );
                     }
                 }
+
+                if (memberRefs.Count > 0)
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public readonly bool TryConvert(out ulong order, out ulong value)")
+                        .Print(" => ").Print(extensionsName)
+                        .PrintEndLine(".TryConvert(Value, out order, out value);");
+                    p.PrintEndLine();
+                }
             }
             p.CloseScope();
             p.PrintEndLine();
         }
 
-        private static void WriteXXXMethods(
+        private static void WriteAdditionalWrapperMethods(
               ref Printer p
             , List<EnumMemberRef> memberRefs
             , string thisName
@@ -181,6 +191,18 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     p.PrintEndLine();
                 }
 
+                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintBeginLine("public readonly void Convert(out ").Print(otherName).Print(" result)")
+                    .Print(" => ").Print(extensionsName)
+                    .PrintEndLine(".Convert(Value, out result);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintBeginLine("public readonly bool TryConvert(out ").Print(otherName).Print(" result)")
+                    .Print(" => ").Print(extensionsName)
+                    .PrintEndLine(".TryConvert(Value, out result);");
+                p.PrintEndLine();
+
                 break;
             }
         }
@@ -204,27 +226,27 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
                     if (indexOrIndices.Indices is { } indices)
                     {
-                        WriteXXXExtensions(ref p, memberRefs, @this, thisName, otherName, indices, underTypeName);
-                        WriteTryConvertXXXExtensions(ref p, memberRefs, @this, thisName, otherName, indices);
+                        WriteAdditionalExtensionsCommonMethods(ref p, memberRefs, @this, thisName, otherName, indices, underTypeName);
+                        WriteAdditionalExtensionsTryConvertMethod(ref p, memberRefs, @this, thisName, otherName, indices);
                     }
                     else if (indexOrIndices.Index.HasValue)
                     {
                         var index = indexOrIndices.Index.Value;
 
-                        WriteToXXXMethod(ref p, memberRefs, @this, thisName, otherName, index);
+                        WriteAdditionalToEnumMethod(ref p, memberRefs, @this, thisName, otherName, index);
                     }
                 }
 
                 if (memberRefs.Count > 0)
                 {
-                    WriteTryConvertExtension(ref p, memberRefs, @this, thisName);
+                    WriteAdditionalExtensionsTryConvertMethod(ref p, memberRefs, @this, thisName);
                 }
             }
             p.CloseScope();
             p.PrintEndLine();
         }
 
-        private static void WriteToXXXMethod(
+        private static void WriteAdditionalToEnumMethod(
               ref Printer p
             , List<EnumMemberRef> memberRefs
             , string @this
@@ -247,7 +269,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             p.PrintEndLine();
         }
 
-        private static void WriteXXXExtensions(
+        private static void WriteAdditionalExtensionsCommonMethods(
               ref Printer p
             , List<EnumMemberRef> memberRefs
             , string @this
@@ -307,7 +329,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             }
         }
 
-        private static void WriteTryConvertXXXExtensions(
+        private static void WriteAdditionalExtensionsTryConvertMethod(
               ref Printer p
             , List<EnumMemberRef> memberRefs
             , string @this
@@ -355,7 +377,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             p.PrintEndLine();
         }
 
-        private static void WriteTryConvertExtension(
+        private static void WriteAdditionalExtensionsTryConvertMethod(
               ref Printer p
             , List<EnumMemberRef> memberRefs
             , string @this

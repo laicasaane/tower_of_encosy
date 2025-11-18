@@ -33,12 +33,12 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
                     var assemblyName = compilation.Assembly.Name;
                     var mergedStructName = $"{interfaceRef.FullContainingNameWithDot}{interfaceRef.StructName}";
                     var enumUnderlyingTypeName = GetEnumUnderlyingTypeName(0);
-
+                    var typeIdEnumName = $"{interfaceRef.StructName}_TypeId";
                     var enumExtensions = new EnumExtensionsDeclaration(refUnityCollections, 32) {
                         GeneratedCode = GENERATED_CODE,
                         Name = "TypeId",
-                        ExtensionsName = $"{interfaceRef.StructName}_TypeIdExtensions",
-                        StructName = $"{interfaceRef.StructName}_TypeIdExtensionsWrapper",
+                        ExtensionsName = EnumExtensionsDeclaration.GetNameExtensionsClass(typeIdEnumName),
+                        StructName = EnumExtensionsDeclaration.GetNameExtendedStruct(typeIdEnumName),
                         ParentIsNamespace = interfaceRef.Syntax.Parent is BaseNamespaceDeclarationSyntax,
                         FullyQualifiedName = $"{mergedStructName}.TypeId",
                         UnderlyingTypeName = enumUnderlyingTypeName,

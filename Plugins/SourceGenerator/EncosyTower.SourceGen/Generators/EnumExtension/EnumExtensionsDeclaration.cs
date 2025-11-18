@@ -53,7 +53,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         )
         {
             ExtensionsName = extensionsName;
-            StructName = $"{symbol.Name}Extended";
+            StructName = GetNameExtendedStruct(symbol.Name);
             ParentIsNamespace = parentIsNamespace;
             Name = symbol.Name;
             FullyQualifiedName = symbol.ToFullName();
@@ -173,6 +173,16 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 FixedStringTypeName = GeneratorHelpers.GetFixedStringTypeName(fixedStringBytes);
                 FixedStringTypeFullyQualifiedName = $"global::Unity.Collections.{FixedStringTypeName}";
             }
+        }
+
+        public static string GetNameExtensionsClass(string enumName)
+        {
+            return $"{enumName}Extensions";
+        }
+
+        public static string GetNameExtendedStruct(string enumName)
+        {
+            return $"{enumName}Extended";
         }
     }
 }
