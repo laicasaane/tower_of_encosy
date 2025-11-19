@@ -82,7 +82,7 @@
       }
     },
     "com.latios.latiosframework": {
-      "version": "0.14.3",
+      "version": "0.14.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -103,7 +103,7 @@
       "hash": "de773d83add4627d07bb295f78b72372c78449b4"
     },
     "com.needle.compilation-visualizer": {
-      "version": "1.8.7",
+      "version": "1.8.8",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -373,7 +373,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.localization": {
-      "version": "1.5.8",
+      "version": "1.5.9",
       "depth": 0,
       "source": "registry",
       "dependencies": {
