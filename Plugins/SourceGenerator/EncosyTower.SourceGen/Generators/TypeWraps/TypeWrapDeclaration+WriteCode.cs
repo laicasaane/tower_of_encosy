@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.TypeWraps
 {
-    partial class TypeWrapDeclaration
+    partial struct TypeWrapDeclaration
     {
         private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
         private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.TypeWraps.TypeWrapGenerator\", \"{SourceGenVersion.VALUE}\")]";
@@ -11,9 +10,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         private const string OBSOLETE_REF_STRUCT = "[global::System.Obsolete(\"Not supported for ref struct\")]";
         private const string IWRAP = "global::EncosyTower.TypeWraps.IWrap<";
 
-        private SpecialMethodType _writenSpecialMethods;
-
-        public string WriteCode()
+        public readonly string WriteCode()
         {
             var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, Syntax.Parent);
             var p = scopePrinter.printer;
@@ -74,7 +71,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             return p.Result;
         }
 
-        private void WriteInterfaces(ref Printer p)
+        private readonly void WriteInterfaces(ref Printer p)
         {
             p = p.IncreasedIndent();
 
@@ -102,7 +99,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p = p.DecreasedIndent();
         }
 
-        private void WriteBackingField(ref Printer p)
+        private readonly void WriteBackingField(ref Printer p)
         {
             if (IsFieldDeclared)
             {
@@ -119,7 +116,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p.PrintEndLine();
         }
 
-        private void WritePrimaryConstructor(ref Printer p)
+        private readonly void WritePrimaryConstructor(ref Printer p)
         {
             p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine($"public {TypeName}({FieldTypeName} value)");
@@ -132,7 +129,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p.PrintEndLine();
         }
 
-        private void WriteFields(ref Printer p)
+        private readonly void WriteFields(ref Printer p)
         {
             foreach (var field in Fields)
             {
@@ -140,13 +137,13 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
         }
 
-        void WriteField(ref Printer p, IFieldSymbol field)
+        readonly void WriteField(ref Printer p, in FieldDeclaration field)
         {
-            var returnTypeName = field.Type.ToFullName();
-            var sameType = SymbolEqualityComparer.Default.Equals(field.Type, FieldTypeSymbol);
-            var name = field.Name;
+            var returnTypeName = field.typeName;
+            var sameType = field.sameType;
+            var name = field.name;
 
-            if (field.IsConst)
+            if (field.isConst)
             {
                 if (sameType)
                 {
@@ -159,14 +156,14 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     p.PrintLine($"public const {returnTypeName} {name} = {FieldTypeName}.{name};");
                 }
             }
-            else if (field.IsStatic)
+            else if (field.isStatic)
             {
-                if (field.IsReadOnly && sameType)
+                if (field.isReadOnly && sameType)
                 {
                     p.PrintLine(GENERATED_CODE);
                     p.PrintLine($"public static readonly {FullTypeName} {name} = new {FullTypeName}({FieldTypeName}.{name});");
                 }
-                else if (field.IsReadOnly)
+                else if (field.isReadOnly)
                 {
                     p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintLine($"public static {returnTypeName} {name}");
@@ -210,7 +207,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
             else
             {
-                var isReadOnly = IsReadOnly || field.IsReadOnly;
+                var isReadOnly = IsReadOnly || field.isReadOnly;
 
                 if (isReadOnly && sameType)
                 {
@@ -263,11 +260,11 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p.PrintEndLine();
         }
 
-        private void WriteProperties(ref Printer p)
+        private readonly void WriteProperties(ref Printer p)
         {
             foreach (var property in Properties)
             {
-                if (property.ExplicitInterfaceImplementations.Length > 0)
+                if (property.explicitInterfaceImplementationsLength > 0)
                 {
                     continue;
                 }
@@ -276,88 +273,54 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
         }
 
-        private void WriteProperty(ref Printer p, IPropertySymbol property)
+        private readonly void WriteProperty(ref Printer p, in PropertyDeclaration property)
         {
-            var name = property.ToDisplayString(SymbolExtensions.QualifiedMemberNameWithGlobalPrefix);
-            var returnTypeName = property.Type.ToFullName();
-            var sameType = SymbolEqualityComparer.Default.Equals(property.Type, FieldTypeSymbol);
-            var hasParams = property.IsIndexer || property.Parameters.Length > 0;
-            var isPublic = property.DeclaredAccessibility == Accessibility.Public;
+            var name = property.name;
+            var returnTypeName = property.typeName;
+            var sameType = property.sameType;
+            var hasParams = string.IsNullOrEmpty(property.parameters) == false;
+            var isStatic = property.isStatic;
+            var isReadOnly = property.isReadOnly;
+            var refKind = property.refKind;
             var wrapperIsStruct = IsStruct;
-            var wrapperIsReadOnly = IsReadOnly;
-            var fieldTypeIsReadOnly = FieldTypeSymbol.IsReadOnly;
+            var withoutSetter = property.withoutSetter;
+            var getterSetterCanBeReadOnly = property.getterSetterCanBeReadOnly;
+            var getterCanBeReadOnly = property.getterCanBeReadOnly;
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLineIf(isPublic, "public ", "");
-            p.PrintIf(property.IsStatic, "static ");
+            p.PrintBeginLineIf(property.isPublic, "public ", "");
+            p.PrintIf(property.isUnsafe, "unsafe ");
+            p.PrintIf(isStatic, "static ");
 
-            var withoutSetter = property.SetMethod is not IMethodSymbol setter
-                || setter.IsInitOnly
-                || (fieldTypeIsReadOnly == false && wrapperIsStruct && wrapperIsReadOnly)
-                ;
-
-            var getterSetterCanBeReadOnly = IsStruct && withoutSetter == false && property.IsStatic;
-
-            if (property.RefKind == RefKind.RefReadOnly)
+            if (refKind == RefKind.RefReadOnly)
             {
                 getterSetterCanBeReadOnly = false;
                 p.Print("ref readonly ");
             }
-            else if (property.RefKind == RefKind.Ref)
+            else if (refKind == RefKind.Ref)
             {
                 p.Print("ref ");
             }
-            else if (IsStruct && property.IsStatic == false)
+            else if (IsStruct && isStatic == false)
             {
-                if (property.IsReadOnly
-                    || (withoutSetter && property.GetMethod is IMethodSymbol getter && getter.IsReadOnly)
-                )
+                if (isReadOnly || getterCanBeReadOnly)
                 {
                     getterSetterCanBeReadOnly = false;
                     p.Print("readonly ");
                 }
             }
 
-            var isRef = property.RefKind is RefKind.Ref or RefKind.RefReadOnly;
+            var isRef = refKind is RefKind.Ref or RefKind.RefReadOnly;
             var canConvertType = wrapperIsStruct && sameType && isRef == false;
 
             p.PrintIf(canConvertType, FullTypeName, returnTypeName);
             p.Print(" ");
 
-            string explicitTypeName;
-            bool isIndexer;
-
-            if (property.ExplicitInterfaceImplementations.Length > 0)
-            {
-                var explicitImpl = property.ExplicitInterfaceImplementations[0];
-                explicitTypeName = explicitImpl.ContainingType.ToFullName();
-                isIndexer = explicitImpl.IsIndexer;
-
-                p.Print(explicitTypeName).Print(".");
-            }
-            else
-            {
-                explicitTypeName = string.Empty;
-                isIndexer = property.IsIndexer;
-            }
+            var explicitTypeName = string.Empty;
 
             if (hasParams)
             {
-                p.PrintIf(isIndexer, "this", name)
-                    .Print("[");
-
-                var propParams = property.Parameters;
-                var last = propParams.Length - 1;
-
-                for (var i = 0; i <= last; i++)
-                {
-                    var param = propParams[i];
-
-                    p.Print($"{param.Type.ToFullName()} {param.Name}");
-                    p.PrintIf(i < last, ", ");
-                }
-
-                p.Print("]");
+                p.Print(property.parameters);
             }
             else
             {
@@ -372,7 +335,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     ? $"this.{FieldName}"
                     : $"(({explicitTypeName})this.{FieldName})";
 
-                var accessor = property.IsStatic ? FieldTypeName : fieldName;
+                var accessor = isStatic ? FieldTypeName : fieldName;
 
                 if (hasParams)
                 {
@@ -403,30 +366,27 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             static void WriteIndexerBody(
                   ref Printer p
-                , IPropertySymbol property
+                , in PropertyDeclaration property
                 , string accessor
                 , bool isRef
                 , bool getterSetterCanBeReadOnly
                 , bool withoutSetter
             )
             {
-                if (property.GetMethod != null)
+                if (property.hasGetter)
                 {
-                    var isGetterRef = property.RefKind != RefKind.Ref && property.GetMethod.RefKind == RefKind.Ref;
-                    var isGetterRefRO = property.RefKind != RefKind.RefReadOnly && property.GetMethod.RefKind == RefKind.RefReadOnly;
-
                     p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine();
 
-                    if (getterSetterCanBeReadOnly && isGetterRefRO)
+                    if (getterSetterCanBeReadOnly && property.isGetterRefRO)
                     {
                         p.Print("ref readonly ");
                     }
-                    else if (isGetterRef)
+                    else if (property.isGetterRef)
                     {
                         p.Print("ref ");
                     }
-                    else if (getterSetterCanBeReadOnly && property.GetMethod.IsReadOnly)
+                    else if (getterSetterCanBeReadOnly && property.isGetterRO)
                     {
                         p.Print("readonly ");
                     }
@@ -434,7 +394,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     p.Print("get => ");
                     p.PrintIf(isRef, "ref ");
                     p.Print(accessor).Print("[");
-                    WriteIndexerParams(ref p, property);
+                    p.Print(property.arguments);
                     p.Print("];");
                     p.PrintEndLine();
                     p.PrintEndLine();
@@ -447,15 +407,13 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine();
-                p.PrintIf(getterSetterCanBeReadOnly && property.SetMethod.IsReadOnly, "readonly ");
-                p.Print("set => ").Print(accessor).Print("[");
-                WriteIndexerParams(ref p, property);
-                p.PrintEndLine("] = value;");
+                p.PrintIf(getterSetterCanBeReadOnly && property.isSetterRO, "readonly ");
+                p.Print("set => ").Print(accessor).Print("[").Print(property.arguments).PrintEndLine("] = value;");
             }
 
             static void WritePropertyBody(
                   ref Printer p
-                , IPropertySymbol property
+                , in PropertyDeclaration property
                 , string accessor
                 , string propName
                 , bool isRef
@@ -463,10 +421,10 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 , bool withoutSetter
             )
             {
-                if (property.GetMethod != null)
+                if (property.hasGetter)
                 {
-                    var isGetterRef = property.RefKind != RefKind.Ref && property.GetMethod.RefKind == RefKind.Ref;
-                    var isGetterRefRO = property.RefKind != RefKind.RefReadOnly && property.GetMethod.RefKind == RefKind.RefReadOnly;
+                    var isGetterRef = property.isGetterRef;
+                    var isGetterRefRO = property.isGetterRefRO;
 
                     p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine();
@@ -479,7 +437,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     {
                         p.Print("ref ");
                     }
-                    else if (getterSetterCanBeReadOnly && property.GetMethod.IsReadOnly)
+                    else if (getterSetterCanBeReadOnly && property.isGetterRO)
                     {
                         p.Print("readonly ");
                     }
@@ -498,30 +456,16 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine();
-                p.PrintIf(getterSetterCanBeReadOnly && property.SetMethod.IsReadOnly, "readonly ");
+                p.PrintIf(getterSetterCanBeReadOnly && property.isSetterRO, "readonly ");
                 p.PrintEndLine($"set => {accessor}.{propName} = value;");
-            }
-
-            static void WriteIndexerParams(ref Printer p, IPropertySymbol property)
-            {
-                var propParams = property.Parameters;
-                var last = propParams.Length - 1;
-
-                for (var i = 0; i <= last; i++)
-                {
-                    var param = propParams[i];
-
-                    p.Print(param.Name);
-                    p.PrintIf(i < last, ", ");
-                }
             }
         }
 
-        private void WriteEvents(ref Printer p)
+        private readonly void WriteEvents(ref Printer p)
         {
             foreach (var evt in Events)
             {
-                if (evt.ExplicitInterfaceImplementations.Length > 0)
+                if (evt.explicitInterfaceImplementationsLength > 0)
                 {
                     continue;
                 }
@@ -530,33 +474,21 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
         }
 
-        private void WriteEvent(ref Printer p, IEventSymbol evt)
+        private readonly void WriteEvent(ref Printer p, in EventDeclaration evt)
         {
-            var name = evt.ToDisplayString(SymbolExtensions.QualifiedMemberNameWithGlobalPrefix);
-            var returnTypeName = evt.Type.ToFullName();
-            var isPublic = evt.DeclaredAccessibility == Accessibility.Public;
+            var name = evt.name;
+            var returnTypeName = evt.typeName;
+            var isPublic = evt.isPublic;
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLineIf(isPublic, "public ", "");
-            p.PrintIf(evt.IsStatic, "static ");
+            p.PrintIf(evt.isStatic, "static ");
             p.Print("event ");
 
             p.Print(returnTypeName);
             p.Print(" ");
 
-            string explicitTypeName;
-
-            if (evt.ExplicitInterfaceImplementations.Length > 0)
-            {
-                var explicitImpl = evt.ExplicitInterfaceImplementations[0];
-                explicitTypeName = explicitImpl.ContainingType.ToFullName();
-
-                p.Print(explicitTypeName).Print(".");
-            }
-            else
-            {
-                explicitTypeName = string.Empty;
-            }
+            var explicitTypeName = string.Empty;
 
             p.PrintEndLine(name);
             p.OpenScope();
@@ -565,7 +497,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     ? $"this.{FieldName}"
                     : $"(({explicitTypeName})this.{FieldName})";
 
-                var accessor = evt.IsStatic ? returnTypeName : fieldName;
+                var accessor = evt.isStatic ? returnTypeName : fieldName;
 
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("add => ").Print(accessor).Print(".").Print(name).PrintEndLine(" += value;");
@@ -578,89 +510,75 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p.PrintEndLine();
         }
 
-        private void WriteMethods(ref Printer p)
+        private readonly void WriteMethods(ref Printer p)
         {
+            SpecialMethodType writtenSpecialMethods = default;
+
             foreach (var method in Methods)
             {
-                if (method.ExplicitInterfaceImplementations.Length > 0)
+                if (method.explicitInterfaceImplementationsLength > 0)
                 {
                     continue;
                 }
 
-                WriteMethod(ref p, method);
+                WriteMethod(ref p, method, ref writtenSpecialMethods);
             }
 
-            WriteAdditionalMethods(ref p);
+            WriteAdditionalMethods(ref p, writtenSpecialMethods);
         }
 
-        private void WriteMethod(ref Printer p, IMethodSymbol method)
+        private readonly void WriteMethod(
+              ref Printer p
+            , in MethodDeclaration method
+            , ref SpecialMethodType writtenSpecialMethods
+        )
         {
-            var methodName = method.ToDisplayString(SymbolExtensions.MemberNameFormat);
-            var returnTypeName = method.ReturnType.ToFullName();
-            var hasParams = method.Parameters.Length > 0;
-            var isPublic = method.DeclaredAccessibility == Accessibility.Public;
-            var enableNullable = EnableNullable;
+            var methodName = method.name;
+            var returnTypeName = method.returnTypeName;
+            var hasParams = string.IsNullOrEmpty(method.parameters) == false;
 
             p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLineIf(isPublic, "public ", "");
-            p.PrintIf(method.IsStatic, "static ");
-            p.PrintIf(IsStruct == false && method.IsOverride, "override ");
-            p.PrintIf(method.IsReadOnly, "readonly ");
-            p.PrintIf(method.RefKind == RefKind.Ref, "ref ");
-            p.PrintIf(method.RefKind == RefKind.RefReadOnly, "ref readonly ");
-            p.PrintIf(method.ReturnsVoid, "void", returnTypeName);
+            p.PrintBeginLineIf(method.isPublic, "public ", "");
+            p.PrintIf(method.isUnsafe, "unsafe ");
+            p.PrintIf(method.isStatic, "static ");
+            p.PrintIf(IsStruct == false && method.isOverride, "override ");
+            p.PrintIf(method.isReadOnly, "readonly ");
+            p.PrintIf(method.refKind == RefKind.Ref, "ref ");
+            p.PrintIf(method.refKind == RefKind.RefReadOnly, "ref readonly ");
+            p.PrintIf(method.returnsVoid, "void", returnTypeName);
 
             p.Print(" ");
 
-            p.Print(methodName);
-            WriteTypeParams(ref p, method);
-            p.Print("(");
+            p.Print(methodName).Print(method.typeParameters).Print("(");
 
             if (hasParams)
             {
-                var propParams = method.Parameters;
-                var last = propParams.Length - 1;
-
-                for (var i = 0; i <= last; i++)
-                {
-                    var param = propParams[i];
-                    var paramTypeName = param.Type.ToFullName();
-                    var isNullable = param.NullableAnnotation == NullableAnnotation.Annotated && enableNullable;
-
-                    WriteInlineAttributes(ref p, param);
-                    p.PrintIf(param.RefKind == RefKind.Ref, "ref ");
-                    p.PrintIf(param.RefKind == RefKind.Out, "out ");
-                    p.PrintIf(param.RefKind == RefKind.In, "in ");
-                    p.Print(paramTypeName);
-                    p.PrintIf(isNullable, "? ", " ");
-                    p.Print(param.Name);
-                    p.PrintIf(i < last, ", ");
-                }
+                p.Print(method.parameters);
             }
             else
             {
                 switch (methodName)
                 {
                     case "GetHashCode":
-                        _writenSpecialMethods |= SpecialMethodType.GetHashCode;
+                        writtenSpecialMethods |= SpecialMethodType.GetHashCode;
                         break;
 
                     case "ToString":
-                        _writenSpecialMethods |= SpecialMethodType.ToString;
+                        writtenSpecialMethods |= SpecialMethodType.ToString;
                         break;
                 }
             }
 
             p.PrintEndLine(")");
-            WriteTypeParamConstraints(ref p, method);
+            p.PrintLine(method.typeParameterConstraints);
             p = p.IncreasedIndent();
             {
                 p.PrintBeginLine("=> ");
 
-                p.PrintIf(method.RefKind == RefKind.Ref, "ref ");
-                p.PrintIf(method.RefKind == RefKind.RefReadOnly, "ref readonly ");
+                p.PrintIf(method.refKind == RefKind.Ref, "ref ");
+                p.PrintIf(method.refKind == RefKind.RefReadOnly, "ref readonly ");
 
-                if (method.IsStatic)
+                if (method.isStatic)
                 {
                     p.Print(FieldTypeName);
                 }
@@ -669,146 +587,20 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     p.Print($"this.{FieldName}");
                 }
 
-                p.Print(".").Print(method.Name);
-
-                WriteTypeParams(ref p, method);
-
-                p.Print("(");
+                p.Print(".").Print(method.name).Print(method.typeParameters).Print("(");
 
                 if (hasParams)
                 {
-                    var propParams = method.Parameters;
-                    var last = propParams.Length - 1;
-
-                    for (var i = 0; i <= last; i++)
-                    {
-                        var param = propParams[i];
-
-                        p.PrintIf(param.RefKind == RefKind.Ref, "ref ");
-                        p.PrintIf(param.RefKind == RefKind.Out, "out ");
-                        p.PrintIf(param.RefKind == RefKind.In, "in ");
-                        p.Print(param.Name);
-                        p.PrintIf(i < last, ", ");
-                    }
+                    p.Print(method.arguments);
                 }
 
                 p.PrintEndLine(");");
             }
             p = p.DecreasedIndent();
             p.PrintEndLine();
-
-            static void WriteTypeParams(ref Printer p, IMethodSymbol method)
-            {
-                var typeParams = method.TypeParameters;
-
-                if (typeParams.Length < 1)
-                {
-                    return;
-                }
-
-                p.Print("<");
-
-                var last = typeParams.Length - 1;
-
-                for (var i = 0; i <= last; i++)
-                {
-                    var param = typeParams[i];
-
-                    p.Print(param.Name);
-                    p.PrintIf(i < last, ", ");
-                }
-
-                p.Print(">");
-            }
-
-            static void WriteTypeParamConstraints(ref Printer p, IMethodSymbol method)
-            {
-                var typeParams = method.TypeParameters;
-
-                if (typeParams.Length < 1)
-                {
-                    return;
-                }
-
-                var last = typeParams.Length - 1;
-                var constraints = new List<string>(10);
-
-                for (var i = 0; i <= last; i++)
-                {
-                    constraints.Clear();
-
-                    var param = typeParams[i];
-
-                    if (param.HasReferenceTypeConstraint)
-                    {
-                        if (param.ReferenceTypeConstraintNullableAnnotation == NullableAnnotation.Annotated)
-                        {
-                            constraints.Add("class?");
-                        }
-                        else
-                        {
-                            constraints.Add("class");
-                        }
-                    }
-
-                    if (param.HasValueTypeConstraint)
-                    {
-                        constraints.Add("struct");
-                    }
-
-                    if (param.HasUnmanagedTypeConstraint)
-                    {
-                        constraints.Add("unmanaged");
-                    }
-
-                    if (param.HasNotNullConstraint)
-                    {
-                        constraints.Add("notnull");
-                    }
-
-                    var constraintTypes = param.ConstraintTypes;
-                    var constraintNullable = param.ConstraintNullableAnnotations;
-
-                    for (var k = 0; k < constraintTypes.Length; k++)
-                    {
-                        var constraintType = constraintTypes[k];
-
-                        if (constraintNullable[k] == NullableAnnotation.Annotated)
-                        {
-                            constraints.Add($"{constraintType.ToFullName()}?");
-                        }
-                        else
-                        {
-                            constraints.Add(constraintType.ToFullName());
-                        }
-                    }
-
-                    if (param.HasConstructorConstraint)
-                    {
-                        constraints.Add("new()");
-                    }
-
-                    if (constraints.Count > 0)
-                    {
-                        p = p.IncreasedIndent();
-                        p.PrintBeginLine("where ").Print(param.Name).Print(" : ");
-
-                        var lastConstraint = constraints.Count - 1;
-
-                        for (var k = 0; k <= lastConstraint; k++)
-                        {
-                            p.Print(constraints[k]);
-                            p.PrintIf(k < lastConstraint, ", ");
-                        }
-
-                        p.PrintEndLine();
-                        p = p.DecreasedIndent();
-                    }
-                }
-            }
         }
 
-        private void WriteAdditionalMethods(ref Printer p)
+        private readonly void WriteAdditionalMethods(ref Printer p, SpecialMethodType writtenSpecialMethods)
         {
             var hasCompareToT = IgnoreInterfaceMethods.HasFlag(InterfaceKind.ComparableT) == false
                 && ImplementInterfaces.HasFlag(InterfaceKind.ComparableT);
@@ -956,7 +748,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 p.PrintEndLine();
             }
 
-            if (_writenSpecialMethods.HasFlag(SpecialMethodType.GetHashCode) == false
+            if (writtenSpecialMethods.HasFlag(SpecialMethodType.GetHashCode) == false
                 && ImplementSpecialMethods.HasFlag(SpecialMethodType.GetHashCode)
                 && IsRefStruct == false
             )
@@ -986,7 +778,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 }
             }
 
-            if (_writenSpecialMethods.HasFlag(SpecialMethodType.ToString) == false
+            if (writtenSpecialMethods.HasFlag(SpecialMethodType.ToString) == false
                 && ImplementSpecialMethods.HasFlag(SpecialMethodType.ToString)
                 && IsRefStruct == false
             )
@@ -1013,128 +805,9 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
         }
 
-        private void WriteInlineAttributes(ref Printer p, ISymbol symbol)
+        private readonly void WriteConversionOperators(ref Printer p)
         {
-            var attribs = symbol.GetAttributes();
-            var attribsLength = attribs.Length;
-            var attribLast = attribsLength - 1;
-
-            for (var i = 0; i < attribsLength; i++)
-            {
-                var attrib = attribs[i];
-
-                if (attrib.AttributeClass is not ITypeSymbol type)
-                {
-                    continue;
-                }
-
-                var attribName = type.ToFullName();
-
-                if (attribName == "global::System.Runtime.CompilerServices.NullableAttribute")
-                {
-                    continue;
-                }
-
-                p.Print("[").Print(attribName).Print("(");
-
-                var constructorArgs = attrib.ConstructorArguments;
-                var length = constructorArgs.Length;
-                var last = length - 1;
-
-                for (var k = 0; k < length; k++)
-                {
-                    var arg = constructorArgs[k];
-
-                    if (IsValid(arg) == false) continue;
-
-                    WriteArgValue(ref p, arg);
-                    p.PrintIf(k < last, ", ");
-                }
-
-                var namedArgs = attrib.NamedArguments;
-
-                foreach (var item in namedArgs)
-                {
-                    var arg = item.Value;
-
-                    if (IsValid(arg) == false) continue;
-
-                    p.Print(", ").Print(item.Key).Print(": ");
-                    WriteArgValue(ref p, arg);
-                }
-
-                p.Print(")]").PrintIf(i == last, " ");
-            }
-
-            static bool IsValid(TypedConstant arg)
-            {
-                return arg.Kind != TypedConstantKind.Error
-                    && arg.Type != null;
-            }
-
-            static void WriteArgValue(ref Printer p, TypedConstant arg)
-            {
-                if (arg.IsNull)
-                {
-                    p.Print("null");
-                    return;
-                }
-
-                switch (arg.Kind)
-                {
-                    case TypedConstantKind.Primitive:
-                    {
-                        if (arg.Value is bool valBool)
-                        {
-                            p.Print(valBool ? "true" : "false");
-                        }
-                        else if (arg.Value is string valStr)
-                        {
-                            p.Print("\"").Print(valStr).Print("\"");
-                        }
-                        else
-                        {
-                            p.Print(arg.Value.ToString());
-                        }
-                        break;
-                    }
-
-                    case TypedConstantKind.Enum:
-                    {
-                        p.Print("(").Print(arg.Type.ToFullName()).Print(")").Print(arg.Value.ToString());
-                        break;
-                    }
-
-                    case TypedConstantKind.Type:
-                    {
-                        p.Print("typeof(").Print(((ITypeSymbol)arg.Value).ToFullName()).Print(")");
-                        break;
-                    }
-
-                    case TypedConstantKind.Array:
-                    {
-                        p.Print("new ").Print(arg.Type.ToFullName()).Print(" { ");
-
-                        var values = arg.Values;
-                        var length = values.Length;
-                        var last = length - 1;
-
-                        for (var i = 0; i < length; i++)
-                        {
-                            WriteArgValue(ref p, values[i]);
-                            p.PrintIf(i < last, ", ");
-                        }
-
-                        p.Print(" }");
-                        break;
-                    }
-                }
-            }
-        }
-
-        private void WriteConversionOperators(ref Printer p)
-        {
-            if (FieldTypeSymbol.TypeKind == TypeKind.Interface)
+            if (FieldTypeIsInterface)
             {
                 return;
             }
@@ -1161,25 +834,17 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p.PrintEndLine();
         }
 
-        private void WriteOperators(ref Printer p)
+        private readonly void WriteOperators(ref Printer p)
         {
             var operatorKinds = OperatorKinds.All;
             var ignoreOperators = IgnoreOperators;
             var implementOperators = ImplementOperators;
-            var operatorReturnTypeMap = OperatorReturnTypeMap;
-            var operatorArgTypesMap = OperatorArgTypesMap;
+            var operatorMap = OperatorMap;
             var fullTypeName = FullTypeName;
-            var fieldTypeSymbol = FieldTypeSymbol;
             var fieldTypeName = FieldTypeName;
-            var fieldSpecialType = fieldTypeSymbol.SpecialType;
-            var fieldUnderlyingSpecialType = SpecialType.None;
+            var fieldSpecialType = FieldSpecialType;
+            var fieldUnderlyingSpecialType = FieldUnderlyingSpecialType;
             var fieldName = FieldName;
-
-            if (fieldTypeSymbol.EnumUnderlyingType is INamedTypeSymbol underlyingTypeSymbol)
-            {
-                fieldSpecialType = SpecialType.System_Enum;
-                fieldUnderlyingSpecialType = underlyingTypeSymbol.SpecialType;
-            }
 
             foreach (var operatorKind in operatorKinds)
             {
@@ -1190,26 +855,38 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     continue;
                 }
 
-                if (operatorReturnTypeMap.TryGetValue(operatorKind, out var opReturnType) == false)
+                if (operatorMap.TryGetValue(operatorKind, out var operators))
                 {
-                    opReturnType = new OpType(DetermineReturnType(operatorKind, fullTypeName), true);
+                    foreach (var (returnType, argTypes) in operators)
+                    {
+                        WriteOperator(
+                              ref p
+                            , operatorKind
+                            , fullTypeName
+                            , fieldTypeName
+                            , fieldName
+                            , returnType
+                            , argTypes
+                            , fieldSpecialType
+                        );
+                    }
                 }
-
-                if (operatorArgTypesMap.TryGetValue(operatorKind, out var opArgTypes) == false)
+                else
                 {
-                    opArgTypes = DetermineArgTypes(operatorKind, fullTypeName, fieldSpecialType, fieldUnderlyingSpecialType);
-                }
+                    var returnType = new OpType(DetermineReturnType(operatorKind, fullTypeName), true);
+                    var argTypes = DetermineArgTypes(operatorKind, fullTypeName, fieldSpecialType, fieldUnderlyingSpecialType);
 
-                WriteOperator(
-                      ref p
-                    , operatorKind
-                    , fullTypeName
-                    , fieldTypeName
-                    , fieldName
-                    , opReturnType
-                    , opArgTypes
-                    , fieldSpecialType
-                );
+                    WriteOperator(
+                          ref p
+                        , operatorKind
+                        , fullTypeName
+                        , fieldTypeName
+                        , fieldName
+                        , returnType
+                        , argTypes
+                        , fieldSpecialType
+                    );
+                }
             }
 
             if (fieldSpecialType == SpecialType.System_Enum)
@@ -1449,24 +1126,42 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
         }
 
-        private void WriteEnumOperators(
+        private readonly void WriteEnumOperators(
               ref Printer p
             , string fullTypeName
             , SpecialType fieldUnderlyingSpecialType
             , string fieldName
         )
         {
-            var map = OperatorReturnTypeMap;
+            var map = OperatorMap;
 
             {
                 var kind = OperatorKind.Substraction;
                 var op = GetOp(kind);
 
-                if (map.TryGetValue(kind, out var opReturnType) == false)
+                if (map.TryGetValue(kind, out var operators))
                 {
-                    opReturnType = new OpType(DetermineReturnType(kind, fullTypeName), true);
+                    foreach (var (returnType, _) in operators)
+                    {
+                        Write(ref p, fullTypeName, fieldUnderlyingSpecialType, fieldName, op, returnType);
+                    }
                 }
+                else
+                {
+                    var returnType = new OpType(DetermineReturnType(kind, fullTypeName), true);
+                    Write(ref p, fullTypeName, fieldUnderlyingSpecialType, fieldName, op, returnType);
+                }
+            }
 
+            static void Write(
+                  ref Printer p
+                , string fullTypeName
+                , SpecialType fieldUnderlyingSpecialType
+                , string fieldName
+                , string op
+                , OpType opReturnType
+            )
+            {
                 var args = fieldUnderlyingSpecialType switch {
                     SpecialType.System_SByte => $"{fullTypeName} left, sbyte right",
                     SpecialType.System_Byte => $"{fullTypeName} left, byte right",
@@ -1545,7 +1240,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             };
         }
 
-        private void WriteTypeConverter(ref Printer p)
+        private readonly void WriteTypeConverter(ref Printer p)
         {
             if (ExcludeConverter || IsRefStruct)
             {

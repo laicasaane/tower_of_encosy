@@ -1,6 +1,8 @@
-﻿namespace EncosyTower.SourceGen.Generators.TypeWraps
+﻿using System;
+
+namespace EncosyTower.SourceGen.Generators.TypeWraps
 {
-    public readonly struct OpArgTypes
+    public readonly struct OpArgTypes : IEquatable<OpArgTypes>
     {
         public readonly OpType First;
         public readonly OpType Second;
@@ -68,5 +70,14 @@
                 }
             }
         }
+
+        public bool Equals(OpArgTypes other)
+            => First.Equals(other.First) && Second.Equals(other.Second);
+
+        public override bool Equals(object obj)
+            => obj is OpArgTypes other && Equals(other);
+
+        public override int GetHashCode()
+            => HashValue.Combine(First, Second);
     }
 }

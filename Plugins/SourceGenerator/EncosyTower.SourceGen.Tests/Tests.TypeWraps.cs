@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using EncosyTower.TypeWraps;
+using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -154,4 +155,9 @@ namespace EncosyTower.Tests.TypeWraps
 
     [WrapRecord]
     public readonly partial record struct EnumWrapper(AttributeTargets _);
+
+    [WrapRecord]
+    public unsafe readonly partial record struct WrappedNativeList<T>(NativeList<T> _)
+        where T : unmanaged
+    { }
 }

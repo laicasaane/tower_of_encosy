@@ -24,17 +24,17 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(CompilationCandidate.GetCompilation);
+                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
                 predicate: IsValidTypeSyntax,
                 transform: GetSemanticSymbolMatch
-            ).Where(static t => t is { syntax: { }, symbol: { }, fieldTypeSymbol: { } });
+            ).Where(static t => t.IsValid);
 
             var combined = candidateProvider
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.isValid);
 
             context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
                 GenerateOutput(
@@ -76,7 +76,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             return false;
         }
 
-        public static Candidate GetSemanticSymbolMatch(
+        public static TypeWrapDeclaration GetSemanticSymbolMatch(
               GeneratorSyntaxContext context
             , CancellationToken token
         )
@@ -84,6 +84,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             token.ThrowIfCancellationRequested();
 
             var semanticModel = context.SemanticModel;
+            var enableNullable = semanticModel.Compilation.Options.NullableContextOptions != NullableContextOptions.Disable;
 
             switch (context.Node)
             {
@@ -99,11 +100,23 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                             || InheritBaseClass(semanticModel, symbol, token) == false
                         )
                         {
-                            GetTypeName(recordSyntax, candidate);
-                            SetOtherFields(candidate, recordSyntax, symbol, semanticModel, token);
+                            GetTypeName(recordSyntax, ref candidate);
+                            SetOtherFields(ref candidate, recordSyntax, symbol, semanticModel, token);
                             candidate.isStruct = recordSyntax.ClassOrStructKeyword.IsKind(SyntaxKind.StructKeyword);
                             candidate.isRecord = true;
-                            return candidate;
+
+                            return new TypeWrapDeclaration(
+                                  candidate.syntax
+                                , candidate.symbol
+                                , candidate.typeName
+                                , candidate.isStruct
+                                , candidate.isRefStruct
+                                , candidate.isRecord
+                                , candidate.fieldTypeSymbol
+                                , candidate.fieldName
+                                , candidate.excludeConverter || candidate.isGeneric
+                                , enableNullable
+                            );
                         }
                     }
 
@@ -117,11 +130,23 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         && symbol.HasAttribute(WRAP_TYPE_ATTRIBUTE)
                     )
                     {
-                        GetTypeName(structSyntax, candidate);
-                        SetOtherFields(candidate, structSyntax, symbol, semanticModel, token);
+                        GetTypeName(structSyntax, ref candidate);
+                        SetOtherFields(ref candidate, structSyntax, symbol, semanticModel, token);
                         candidate.isStruct = true;
                         candidate.isRefStruct = structSyntax.Modifiers.Any(SyntaxKind.RefKeyword);
-                        return candidate;
+
+                        return new TypeWrapDeclaration(
+                              candidate.syntax
+                            , candidate.symbol
+                            , candidate.typeName
+                            , candidate.isStruct
+                            , candidate.isRefStruct
+                            , candidate.isRecord
+                            , candidate.fieldTypeSymbol
+                            , candidate.fieldName
+                            , candidate.excludeConverter || candidate.isGeneric
+                            , enableNullable
+                        );
                     }
 
                     break;
@@ -136,9 +161,21 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     {
                         if (InheritBaseClass(semanticModel, symbol, token) == false)
                         {
-                            GetTypeName(classSyntax, candidate);
-                            SetOtherFields(candidate, classSyntax, symbol, semanticModel, token);
-                            return candidate;
+                            GetTypeName(classSyntax, ref candidate);
+                            SetOtherFields(ref candidate, classSyntax, symbol, semanticModel, token);
+
+                            return new TypeWrapDeclaration(
+                                  candidate.syntax
+                                , candidate.symbol
+                                , candidate.typeName
+                                , candidate.isStruct
+                                , candidate.isRefStruct
+                                , candidate.isRecord
+                                , candidate.fieldTypeSymbol
+                                , candidate.fieldName
+                                , candidate.excludeConverter || candidate.isGeneric
+                                , enableNullable
+                            );
                         }
                     }
 
@@ -146,7 +183,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 }
             }
 
-            return null;
+            return default;
 
             static bool InheritBaseClass(
                   SemanticModel semanticModel
@@ -342,7 +379,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 return result.fieldTypeSyntax != null;
             }
 
-            static void GetTypeName(TypeDeclarationSyntax syntax, Candidate candidate)
+            static void GetTypeName(TypeDeclarationSyntax syntax, ref Candidate candidate)
             {
                 var typeNameSb = new StringBuilder(syntax.Identifier.ValueText);
 
@@ -374,7 +411,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
 
             static void SetOtherFields(
-                  Candidate candidate
+                  ref Candidate candidate
                 , TypeDeclarationSyntax syntax
                 , INamedTypeSymbol symbol
                 , SemanticModel semanticModel
@@ -389,18 +426,13 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidate compilationCandidate
-            , Candidate candidate
+            , CompilationCandidateSlim compilation
+            , TypeWrapDeclaration declaration
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
-            if (candidate == null
-                || candidate.syntax == null
-                || candidate.symbol == null
-                || candidate.fieldTypeSymbol == null
-                || candidate.fieldTypeSymbol.TypeKind == TypeKind.Dynamic
-            )
+            if (declaration.IsValid == false)
             {
                 return;
             }
@@ -411,37 +443,22 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             {
                 SourceGenHelpers.ProjectPath = projectPath;
 
-                var syntaxTree = candidate.syntax.SyntaxTree;
-                var compilation = compilationCandidate.compilation;
-                var semanticModel = compilation.GetSemanticModel(syntaxTree);
-                var declaration = new TypeWrapDeclaration(
-                      candidate.syntax
-                    , candidate.symbol
-                    , candidate.typeName
-                    , candidate.isStruct
-                    , candidate.isRefStruct
-                    , candidate.isRecord
-                    , candidate.fieldTypeSymbol
-                    , candidate.fieldName
-                    , candidate.excludeConverter || candidate.isGeneric
-                    , compilationCandidate.enableNullable
-                );
-
+                var syntaxTree = declaration.Syntax.SyntaxTree;
                 var source = declaration.WriteCode();
                 var hintName = syntaxTree.GetGeneratedSourceFileName(
                       GENERATOR_NAME
                     , declaration.Syntax
-                    , declaration.Symbol.ToValidIdentifier()
+                    , declaration.TypeNameIndentifier
                 );
 
                 var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                      compilation.Assembly.Name
+                      compilation.assemblyName
                     , GENERATOR_NAME
                 );
 
                 context.OutputSource(
                       outputSourceGenFiles
-                    , candidate.syntax
+                    , declaration.Syntax
                     , source
                     , hintName
                     , sourceFilePath
@@ -456,7 +473,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
-                    , candidate.syntax.GetLocation()
+                    , declaration.Syntax.GetLocation()
                     , e.ToUnityPrintableString()
                 ));
             }
@@ -472,7 +489,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 , description: ""
             );
 
-        public class Candidate
+        public partial struct Candidate : IEquatable<Candidate>
         {
             public TypeDeclarationSyntax syntax;
             public INamedTypeSymbol symbol;
@@ -485,6 +502,26 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             public INamedTypeSymbol fieldTypeSymbol;
             public string fieldName;
             public bool excludeConverter;
+
+            public readonly bool IsValid
+                => syntax is { }
+                && symbol is { }
+                && fieldTypeSyntax is { }
+                && fieldTypeSymbol is { }
+                && string.IsNullOrEmpty(typeName)
+                && fieldTypeSymbol.TypeKind != TypeKind.Dynamic;
+
+            public readonly override bool Equals(object obj)
+                => obj is Candidate other && Equals(other);
+
+            public readonly bool Equals(Candidate other)
+                => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
+                && string.Equals(fieldTypeSymbol?.ToFullName() ?? string.Empty, other.fieldTypeSymbol?.ToFullName() ?? string.Empty)
+                && fieldTypeSymbol?.TypeKind == other.fieldTypeSymbol?.TypeKind
+                ;
+
+            public readonly override int GetHashCode()
+                => HashValue.Combine(typeName, fieldTypeSymbol?.ToFullName() ?? string.Empty, fieldTypeSymbol?.TypeKind);
         }
     }
 }

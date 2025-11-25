@@ -3,20 +3,17 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.TypeWraps
 {
-    public partial class TypeWrapDeclaration
+    public partial struct TypeWrapDeclaration : IEquatable<TypeWrapDeclaration>
     {
         public const string OBSOLETE_ATTRIBUTE = "global::System.ObsoleteAttribute";
         public const string FIELD_NAME_FORMAT = "{0}Of{1}";
 
         public TypeDeclarationSyntax Syntax { get; }
-
-        public INamedTypeSymbol Symbol { get; }
-
-        public INamedTypeSymbol FieldTypeSymbol { get; }
 
         public bool IsRecord { get; }
 
@@ -24,9 +21,13 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         public bool IsRefStruct { get; }
 
+        public bool FieldTypeIsInterface { get; }
+
         public bool ExcludeConverter { get; }
 
         public string TypeName { get; }
+
+        public string TypeNameIndentifier { get; }
 
         public string FullTypeName { get; }
 
@@ -39,6 +40,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         public bool IsFieldEnum { get; }
 
         public bool IsReadOnly { get; }
+
+        public bool FieldTypeIsReadOnly { get; }
 
         public bool IsSealed { get; }
 
@@ -54,19 +57,26 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         public SpecialMethodType ImplementSpecialMethods { get; }
 
+        public SpecialType FieldSpecialType { get; }
+
+        public SpecialType FieldUnderlyingSpecialType { get; }
+
         public string FieldName { get; }
 
-        public ImmutableArray<IFieldSymbol> Fields { get; }
+        public ImmutableArray<FieldDeclaration> Fields { get; }
 
-        public ImmutableArray<IPropertySymbol> Properties { get; }
+        public ImmutableArray<PropertyDeclaration> Properties { get; }
 
-        public ImmutableArray<IEventSymbol> Events { get; }
+        public ImmutableArray<EventDeclaration> Events { get; }
 
-        public ImmutableArray<IMethodSymbol> Methods { get; }
+        public ImmutableArray<MethodDeclaration> Methods { get; }
 
-        public Dictionary<OperatorKind, OpType> OperatorReturnTypeMap { get; }
+        public Dictionary<OperatorKind, HashSet<Operator>> OperatorMap { get; }
 
-        public Dictionary<OperatorKind, OpArgTypes> OperatorArgTypesMap { get; }
+        public readonly bool IsValid
+            => string.IsNullOrEmpty(FullTypeName) == false
+            && string.IsNullOrEmpty(FieldTypeName) == false
+            && string.IsNullOrEmpty(FieldName) == false;
 
         public TypeWrapDeclaration(
               TypeDeclarationSyntax syntax
@@ -87,8 +97,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
 
             Syntax = syntax;
-            Symbol = symbol;
             TypeName = typeName;
+            TypeNameIndentifier = symbol.ToValidIdentifier();
             FullTypeName = symbol.ToFullName();
             IsReadOnly = symbol.IsReadOnly;
             IsSealed = symbol.IsSealed;
@@ -96,17 +106,29 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             IsRefStruct = isRefStruct;
             IsRecord = isRecord;
             EnableNullable = enableNullable;
+            FieldTypeIsReadOnly = fieldTypeSymbol.IsReadOnly;
+            FieldSpecialType = fieldTypeSymbol.SpecialType;
+            FieldTypeIsInterface = fieldTypeSymbol.TypeKind == TypeKind.Interface;
             ImplementInterfaces = GetBuiltInInterfaces(fieldTypeSymbol);
             ImplementOperators = GetBuiltInOperators(fieldTypeSymbol);
-            ImplementSpecialMethods |= SpecialMethodType.CompareTo
+            ImplementSpecialMethods = SpecialMethodType.CompareTo
                 | SpecialMethodType.Equals
                 | SpecialMethodType.GetHashCode
                 | SpecialMethodType.ToString;
 
+            if (fieldTypeSymbol.EnumUnderlyingType is INamedTypeSymbol underlyingTypeSymbol)
+            {
+                FieldSpecialType = SpecialType.System_Enum;
+                FieldUnderlyingSpecialType = underlyingTypeSymbol.SpecialType;
+            }
+            else
+            {
+                FieldUnderlyingSpecialType = SpecialType.None;
+            }
+
             var fieldTypeAsIdentifier = fieldTypeSymbol.ToSimpleNoSpecialTypeValidIdentifier();
 
             FieldName = string.Format(fieldName, isStruct ? "value" : "instance", fieldTypeAsIdentifier);
-            FieldTypeSymbol = fieldTypeSymbol;
             FieldTypeName = fieldTypeSymbol.ToFullName();
             ExcludeConverter = excludeConverter;
             IsFieldEnum = fieldTypeSymbol.IsEnumType();
@@ -117,8 +139,10 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             var globalFormat = SymbolExtensions.QualifiedMemberFormatWithGlobalPrefix;
             var implementSpecialMethods = ImplementSpecialMethods;
             var implementInterfaces = ImplementInterfaces;
-            var ignoreInterfaceMethods = IgnoreInterfaceMethods;
-            var ignoredOperators = IgnoreOperators;
+            var ignoreInterfaceMethods = IgnoreInterfaceMethods = default;
+            var ignoredOperators = IgnoreOperators = default;
+
+            IsFieldDeclared = false;
 
             foreach (var member in members)
             {
@@ -240,11 +264,10 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             definedMembers.Add("GetHashCode()");
             definedMembers.Add("ToString()");
 
-            //using var interfaceArrayBuilder = ImmutableArrayBuilder<INamedTypeSymbol>.Rent();
-            using var fieldArrayBuilder = ImmutableArrayBuilder<IFieldSymbol>.Rent();
-            using var propertyArrayBuilder = ImmutableArrayBuilder<IPropertySymbol>.Rent();
-            using var eventArrayBuilder = ImmutableArrayBuilder<IEventSymbol>.Rent();
-            using var methodArrayBuilder = ImmutableArrayBuilder<IMethodSymbol>.Rent();
+            using var fieldArrayBuilder = ImmutableArrayBuilder<FieldDeclaration>.Rent();
+            using var propertyArrayBuilder = ImmutableArrayBuilder<PropertyDeclaration>.Rent();
+            using var eventArrayBuilder = ImmutableArrayBuilder<EventDeclaration>.Rent();
+            using var methodArrayBuilder = ImmutableArrayBuilder<MethodDeclaration>.Rent();
 
             var fullTypeName = FullTypeName;
             var fieldTypeMembers = fieldTypeSymbol.GetMembers();
@@ -254,8 +277,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             var format = SymbolExtensions.QualifiedMemberFormatWithType;
             var implementOperators = ImplementOperators;
             var hasBuiltInOperators = implementOperators != OperatorKind.None;
-            var operatorReturnTypeMap = OperatorReturnTypeMap = new(OperatorKinds.All.Length);
-            var operatorArgTypesMap = OperatorArgTypesMap = new(OperatorKinds.All.Length);
+            var operatorMap = OperatorMap = new(OperatorKinds.All.Length);
 
             foreach (var member in fieldTypeMembers)
             {
@@ -272,7 +294,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                             && definedMembers.Contains(field.ToDisplayString(globalFormat)) == false
                         )
                         {
-                            fieldArrayBuilder.Add(field);
+                            fieldArrayBuilder.Add(FieldDeclaration.Create(field, fieldTypeSymbol));
                         }
                         break;
                     }
@@ -285,7 +307,12 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         {
                             if (definedMembers.Contains(property.ToDisplayString(globalFormat)) == false)
                             {
-                                propertyArrayBuilder.Add(property);
+                                propertyArrayBuilder.Add(PropertyDeclaration.Create(
+                                      property
+                                    , fieldTypeSymbol
+                                    , IsStruct
+                                    , IsReadOnly
+                                ));
                             }
                         }
                         break;
@@ -299,7 +326,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         {
                             if (definedMembers.Contains(@event.ToDisplayString(globalFormat)) == false)
                             {
-                                eventArrayBuilder.Add(@event);
+                                eventArrayBuilder.Add(EventDeclaration.Create(@event, fieldTypeSymbol));
                             }
                         }
                         break;
@@ -345,7 +372,12 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                         if (foundOp != OperatorKind.None)
                         {
-                            operatorReturnTypeMap[foundOp] = GetOpType(
+                            if (operatorMap.TryGetValue(foundOp, out var operators) == false)
+                            {
+                                operatorMap[foundOp] = operators = new HashSet<Operator>();
+                            }
+
+                            var returnType = GetOpType(
                                 method.ReturnType, fieldTypeSymbol, fullTypeName, RetainReturnType(foundOp)
                             );
 
@@ -354,16 +386,28 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                             if (methodParamsLength > 1)
                             {
-                                operatorArgTypesMap[foundOp] = new OpArgTypes(
-                                      GetOpType(methodParams[0].Type, fieldTypeSymbol, fullTypeName, false)
-                                    , GetOpType(methodParams[1].Type, fieldTypeSymbol, fullTypeName, false)
-                                );
+                                var first = GetOpType(methodParams[0].Type, fieldTypeSymbol, fullTypeName, false);
+                                var second = GetOpType(methodParams[1].Type, fieldTypeSymbol, fullTypeName, false);
+
+                                if (isRecord && foundOp is OperatorKind.EqualCustom or OperatorKind.NotEqualCustom
+                                    && first.IsWrapper && second.IsWrapper
+                                )
+                                {
+                                    var second2 = new OpType(FieldTypeName);
+                                    operators.Add(new Operator(returnType, new OpArgTypes(first, second2)));
+
+                                    var first2 = new OpType(FieldTypeName);
+                                    operators.Add(new Operator(returnType, new OpArgTypes(first2, second)));
+                                }
+                                else
+                                {
+                                    operators.Add(new Operator(returnType, new OpArgTypes(first, second)));
+                                }
                             }
                             else if (methodParamsLength > 0)
                             {
-                                operatorArgTypesMap[foundOp] = new OpArgTypes(
-                                    GetOpType(methodParams[0].Type, fieldTypeSymbol, fullTypeName, false)
-                                );
+                                var first = GetOpType(methodParams[0].Type, fieldTypeSymbol, fullTypeName, false);
+                                operators.Add(new Operator(returnType, new OpArgTypes(first)));
                             }
 
                             continue;
@@ -374,7 +418,11 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                             continue;
                         }
 
-                        methodArrayBuilder.Add(method);
+                        methodArrayBuilder.Add(MethodDeclaration.Create(
+                              method
+                            , fieldTypeSymbol
+                            , enableNullable
+                        ));
                         break;
                     }
                 }
@@ -772,6 +820,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     return default;
             }
         }
+
         private static bool FindOperator(IMethodSymbol method, out OperatorKind result)
         {
             if (method.IsStatic == false)
@@ -818,6 +867,45 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         private static bool DoesReturnBool(IMethodSymbol method)
         {
             return method.ReturnType.ToFullName() == "bool";
+        }
+
+        public readonly override bool Equals(object obj)
+            => obj is TypeWrapDeclaration other && Equals(other);
+
+        public readonly bool Equals(TypeWrapDeclaration other)
+            => string.Equals(FullTypeName, other.FullTypeName, StringComparison.Ordinal)
+            && string.Equals(FieldTypeName, other.FieldTypeName, StringComparison.Ordinal)
+            && string.Equals(FieldName, other.FieldName, StringComparison.Ordinal)
+            ;
+
+        public readonly override int GetHashCode()
+            => HashValue.Combine(FullTypeName, FieldTypeName, FieldName);
+
+        public readonly struct Operator : IEquatable<Operator>
+        {
+            public readonly OpType ReturnType;
+            public readonly OpArgTypes ArgTypes;
+
+            public Operator(OpType returnType, OpArgTypes argTypes)
+            {
+                ReturnType = returnType;
+                ArgTypes = argTypes;
+            }
+
+            public void Deconstruct(out OpType returnType, out OpArgTypes argTypes)
+            {
+                returnType = ReturnType;
+                argTypes = ArgTypes;
+            }
+
+            public bool Equals(Operator other)
+                => ReturnType.Equals(other.ReturnType) && ArgTypes.Equals(other.ArgTypes);
+
+            public override bool Equals(object obj)
+                => obj is Operator other && Equals(other);
+
+            public override int GetHashCode()
+                => HashValue.Combine(ReturnType, ArgTypes);
         }
     }
 }
