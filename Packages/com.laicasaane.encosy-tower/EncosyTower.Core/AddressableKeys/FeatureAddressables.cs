@@ -7,7 +7,7 @@ namespace EncosyTower.Editor.AddressableKeys
     [Feature("1. EncosyTower: Addressables")]
 
 #if UNITY_6000_0_OR_NEWER
-    [RequiresPackage(PackageRegistry.Unity, "com.unity.addressables", "2.7.4")]
+    [RequiresPackage(PackageRegistry.Unity, "com.unity.addressables", "2.7.6")]
 #else
     [RequiresPackage(PackageRegistry.Unity, "com.unity.addressables", "1.22.3")]
 #endif

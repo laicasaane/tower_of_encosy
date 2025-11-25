@@ -7,7 +7,7 @@ namespace EncosyTower.Editor.AtlasedSprites
     [Feature("3. EncosyTower: SpriteAtlas")]
 
 #if UNITY_6000_0_OR_NEWER
-    [RequiresPackage(PackageRegistry.Unity, "com.unity.addressables", "2.7.4", isOptional: true)]
+    [RequiresPackage(PackageRegistry.Unity, "com.unity.addressables", "2.7.6", isOptional: true)]
 #else
     [RequiresPackage(PackageRegistry.Unity, "com.unity.addressables", "1.22.3", isOptional: true)]
 #endif
