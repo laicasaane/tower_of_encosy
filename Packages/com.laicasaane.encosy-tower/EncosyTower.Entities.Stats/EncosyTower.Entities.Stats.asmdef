@@ -1,0 +1,62 @@
+{
+    "name": "EncosyTower.Entities.Stats",
+    "rootNamespace": "EncosyTower.Entities.Stats",
+    "references": [
+        "AnnulusGames.UnityCodeGen.Editor",
+        "Latios.Core",
+        "EncosyTower.Core",
+        "Unity.Burst",
+        "Unity.Collections",
+        "Unity.Entities",
+        "Unity.Entities.Hybrid",
+        "Unity.Mathematics",
+        "Unity.Serialization"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_ENTITIES"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.annulusgames.unity-codegen",
+            "expression": "",
+            "define": "ANNULUS_CODEGEN"
+        },
+        {
+            "name": "com.latios.latiosframework",
+            "expression": "",
+            "define": "LATIOS_FRAMEWORK"
+        },
+        {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "UNITY_BURST"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "UNITY_COLLECTIONS"
+        },
+        {
+            "name": "com.unity.entities",
+            "expression": "",
+            "define": "UNITY_ENTITIES"
+        },
+        {
+            "name": "com.unity.mathematics",
+            "expression": "",
+            "define": "UNITY_MATHEMATICS"
+        },
+        {
+            "name": "com.unity.serialization",
+            "expression": "",
+            "define": "UNITY_SERIALIZATION"
+        }
+    ],
+    "noEngineReferences": false
+}

@@ -3,10 +3,11 @@
     <PropertyGroup>
 		<LangVersion>11.0</LangVersion>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>netstandard2.1</TargetFramework>
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>disable</Nullable>
         <RootNamespace>EncosyTower.SourceGen.Tests</RootNamespace>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -37,6 +38,7 @@
         <Reference Include="$(UnityScriptAssembliesPath)/UniTask.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/EncosyTower.Core.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/EncosyTower.Databases.Authoring.dll" Private="false" />
+        <Reference Include="$(UnityScriptAssembliesPath)/EncosyTower.Entities.Stats.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/BakingSheet.dll" Private="false" />
         <ProjectReference Include="../EncosyTower.SourceGen/EncosyTower.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
