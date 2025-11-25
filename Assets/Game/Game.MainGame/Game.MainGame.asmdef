@@ -4,6 +4,7 @@
     "references": [
         "DebugUI",
         "EncosyTower.Core",
+        "EncosyTower.Entities.Stats",
         "Game.Common",
         "Game.Inputs",
         "UniTask",
@@ -11,6 +12,8 @@
         "Unity.Addressables",
         "Unity.Burst",
         "Unity.Collections",
+        "Unity.Entities",
+        "Unity.Entities.Hybrid",
         "Unity.InputSystem",
         "Unity.Mathematics",
         "Unity.ResourceManager",

@@ -38,6 +38,11 @@
       "path": "Samples~/EncosyTower.Samples.Pooling"
     },
     {
+      "displayName": "EncosyTower.Samples.Stats",
+      "description": "Contains sample setup for Encosy Entities Stats",
+      "path": "Samples~/EncosyTower.Samples.Stats"
+    },
+    {
       "displayName": "EncosyTower.Samples.VisualDebugging",
       "description": "Contains sample setup for Encosy Visual Debugging",
       "path": "Samples~/EncosyTower.Samples.VisualDebugging"
