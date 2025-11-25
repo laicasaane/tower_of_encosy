@@ -187,7 +187,7 @@ namespace EncosyTower.SourceGen
             return argumentList?.DescendantNodes().OfType<ConditionalExpressionSyntax>().FirstOrDefault() != null;
         }
 
-        public static bool HasModifier(this ClassDeclarationSyntax cls, SyntaxKind modifier)
+        public static bool HasModifier(this MemberDeclarationSyntax cls, SyntaxKind modifier)
             => cls.Modifiers.Any(m => m.IsKind(modifier));
 
         public static T AncestorOfKind<T>(this SyntaxNode node)

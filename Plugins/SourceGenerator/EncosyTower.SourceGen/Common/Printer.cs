@@ -155,6 +155,21 @@ namespace EncosyTower.SourceGen
         }
 
         /// <summary>
+        /// Print a string
+        /// </summary>
+        /// <param name="ch"></param>
+        /// <returns></returns>
+        public Printer PrintRepeat(char ch, int repeatCount)
+        {
+            if (repeatCount > 0)
+            {
+                _builder.Append(ch, repeatCount);
+            }
+
+            return this;
+        }
+
+        /// <summary>
         /// Print indent
         /// </summary>
         /// <returns></returns>

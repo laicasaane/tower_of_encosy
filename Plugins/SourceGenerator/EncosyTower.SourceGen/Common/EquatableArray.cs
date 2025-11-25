@@ -92,7 +92,7 @@ namespace EncosyTower.SourceGen
                 return 0;
             }
 
-            HashCode hashCode = default;
+            HashValue hashCode = default;
 
             foreach (T item in array)
             {
