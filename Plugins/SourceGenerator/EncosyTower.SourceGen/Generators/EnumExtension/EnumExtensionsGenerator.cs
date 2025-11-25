@@ -20,7 +20,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(CompilationCandidate.GetCompilation);
+                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
                 predicate: IsValidEnumSyntax,
@@ -30,7 +30,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             var combined = candidateProvider
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.isValid);
 
             context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
                 GenerateOutput(
@@ -81,7 +81,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidate compilationCandidate
+            , CompilationCandidateSlim compilation
             , MatchedSemantic candidate
             , string projectPath
             , bool outputSourceGenFiles
@@ -101,15 +101,13 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 var syntax = candidate.syntax;
                 var symbol = candidate.symbol;
                 var syntaxTree = syntax.SyntaxTree;
-                var compilation = compilationCandidate.compilation;
-                var assemblyName = compilation.Assembly.Name;
 
                 var declaration = new EnumExtensionsDeclaration(
                       candidate.symbol
                     , candidate.syntax.Parent is BaseNamespaceDeclarationSyntax
                     , EnumExtensionsDeclaration.GetNameExtensionsClass(candidate.symbol.Name)
                     , candidate.symbol.DeclaredAccessibility
-                    , compilationCandidate.references.unityCollections
+                    , compilation.references.unityCollections
                 );
 
                 context.OutputSource(
@@ -117,7 +115,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     , syntax
                     , declaration.WriteCode()
                     , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, symbol.ToValidIdentifier())
-                    , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME)
+                    , syntaxTree.GetGeneratedSourceFilePath(compilation.assemblyName, GENERATOR_NAME)
                 );
             }
             catch (Exception e)
