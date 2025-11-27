@@ -31,7 +31,7 @@ namespace EncosyTower.Editor.Variants.Settings
             var nextLongSymbol = string.Format(LONG_SYMBOL_FORMAT, nextLongCount);
 
             UserBuildAPI.RemoveScriptingDefineSymbols(
-                  UserBuildAPI.CurrentBuildTarget
+                  UserBuildAPI.ActiveNamedBuildTarget
                 , currLongSymbol
                 , currIntSymbol
                 , currByteSymbol
@@ -40,7 +40,7 @@ namespace EncosyTower.Editor.Variants.Settings
             if (nextLongCount > minLongCount)
             {
                 UserBuildAPI.AddScriptingDefineSymbols(
-                      UserBuildAPI.CurrentBuildTarget
+                      UserBuildAPI.ActiveNamedBuildTarget
                     , nextLongSymbol
                 );
             }

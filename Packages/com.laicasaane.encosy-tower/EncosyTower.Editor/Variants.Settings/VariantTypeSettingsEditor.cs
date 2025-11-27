@@ -83,7 +83,7 @@ namespace EncosyTower.Editor.Variants.Settings
             sizeUnitLabel.AddToClassList("size-unit-label");
 
             var button = new Button {
-                text = $"Apply to {UserBuildAPI.CurrentBuildTarget.TargetName} build group",
+                text = $"Apply to {UserBuildAPI.ActiveNamedBuildTarget.TargetName} build group",
             };
 
             button.AddToClassList("apply-button");

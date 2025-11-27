@@ -9,7 +9,7 @@ namespace EncosyTower.Editor
 {
     public static class UserBuildAPI
     {
-        public static NamedBuildTarget CurrentBuildTarget
+        public static NamedBuildTarget ActiveNamedBuildTarget
         {
             get
             {

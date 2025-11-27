@@ -22,7 +22,7 @@ namespace EncosyTower.Editor.CSharpProjectGeneration
         private static void SwitchToLegacy()
         {
             UserBuildAPI.RemoveScriptingDefineSymbols(
-                  UserBuildAPI.CurrentBuildTarget
+                  UserBuildAPI.ActiveNamedBuildTarget
                 , "ENABLE_SDK_STYLE_PROJECTS"
             );
 
@@ -34,12 +34,12 @@ namespace EncosyTower.Editor.CSharpProjectGeneration
         private static void SwitchToSdkStyle()
         {
             UserBuildAPI.RemoveScriptingDefineSymbols(
-                  UserBuildAPI.CurrentBuildTarget
+                  UserBuildAPI.ActiveNamedBuildTarget
                 , "ENABLE_SDK_STYLE_PROJECTS"
             );
 
             UserBuildAPI.AddScriptingDefineSymbols(
-                  UserBuildAPI.CurrentBuildTarget
+                  UserBuildAPI.ActiveNamedBuildTarget
                 , "ENABLE_SDK_STYLE_PROJECTS"
             );
 
