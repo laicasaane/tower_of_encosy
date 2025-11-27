@@ -9,7 +9,7 @@
     <ItemGroup>
         <DataFiles Include="$(ProjectDir)$(OutDir)*.dll" />
     </ItemGroup>
-    <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(ProjectDir)../../SourceGenerators/" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(ProjectDir)../../../Packages/com.laicasaane.encosy-tower/EncosyTower.Core/SourceGenerators/" SkipUnchangedFiles="true" />
 </Target>
 ```
 
@@ -99,7 +99,7 @@ the target project on which source generators will run.
 #### Declares the Unity Project Path
 
 ```xml
-<UnityProjectPath>$(MSBuildProjectDirectory)/../../../../../</UnityProjectPath>
+<UnityProjectPath>$(MSBuildProjectDirectory)/../../../</UnityProjectPath>
 ```
 
 - This is the path to the root folder of this Tower of Encosy project.
