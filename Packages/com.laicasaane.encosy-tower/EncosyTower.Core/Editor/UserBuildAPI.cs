@@ -16,12 +16,22 @@ namespace EncosyTower.Editor
 #if UNITY_SERVER
                 return NamedBuildTarget.Server;
 #else
-                var buildTarget = EditorUserBuildSettings.activeBuildTarget;
-                var targetGroup = BuildPipeline.GetBuildTargetGroup(buildTarget);
-                var namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(targetGroup);
-                return namedBuildTarget;
+                return GetNamedBuildTarget(EditorUserBuildSettings.activeBuildTarget);
 #endif
             }
+        }
+
+        public static NamedBuildTarget GetNamedBuildTarget(BuildTarget buildTarget)
+        {
+            var targetGroup = BuildPipeline.GetBuildTargetGroup(buildTarget);
+            var namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(targetGroup);
+            return namedBuildTarget;
+        }
+
+        public static NamedBuildTarget GetNamedBuildTarget(BuildTargetGroup targetGroup)
+        {
+            var namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(targetGroup);
+            return namedBuildTarget;
         }
 
         public static HashSet<string> GetScriptingDefineSymbols(NamedBuildTarget buildTarget)
