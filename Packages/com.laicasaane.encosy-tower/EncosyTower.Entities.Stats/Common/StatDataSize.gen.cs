@@ -101,19 +101,9 @@ namespace EncosyTower.Entities.Stats
     public enum StatDataSize : byte
     {
         /// <summary>
-        /// 1 byte.
-        /// </summary>
-        Size1 = 1,
-
-        /// <summary>
         /// 2 bytes.
         /// </summary>
         Size2 = 2,
-
-        /// <summary>
-        /// 3 bytes.
-        /// </summary>
-        Size3 = 3,
 
         /// <summary>
         /// 4 bytes.
@@ -129,11 +119,6 @@ namespace EncosyTower.Entities.Stats
         /// 8 bytes.
         /// </summary>
         Size8 = 8,
-
-        /// <summary>
-        /// 9 bytes.
-        /// </summary>
-        Size9 = 9,
 
         /// <summary>
         /// 12 bytes.

@@ -41,6 +41,11 @@ using EncosyTower.EnumExtensions;
                     {
                         var size = sizes[i];
 
+                        if (size % 2 != 0)
+                        {
+                            continue;
+                        }
+
                         p.PrintLine("/// <summary>");
                         p.PrintBeginLine("/// ").Print(size).PrintEndLineSelect(" bytes.", " byte.", size > 1);
                         p.PrintLine("/// </summary>");
