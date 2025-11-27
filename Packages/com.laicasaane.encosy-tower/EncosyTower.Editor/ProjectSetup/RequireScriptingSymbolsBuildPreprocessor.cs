@@ -26,9 +26,20 @@ namespace EncosyTower.Editor.ProjectSetup
 
         public void OnPreprocessBuild(BuildReport report)
         {
-            var buildProfile = BuildProfile.GetActiveBuildProfile();
-            var buildScenes = buildProfile.GetScenesForBuild();
-            var buildSymbols = buildProfile.scriptingDefines.ToHashSet();
+            EditorBuildSettingsScene[] buildScenes;
+            HashSet<string> buildSymbols;
+
+            if (BuildProfile.GetActiveBuildProfile() is BuildProfile buildProfile)
+            {
+                buildScenes = buildProfile.GetScenesForBuild();
+                buildSymbols = buildProfile.scriptingDefines.ToHashSet();
+            }
+            else
+            {
+                buildScenes = EditorBuildSettings.scenes;
+                buildSymbols = UserBuildAPI.GetScriptingDefineSymbols(UserBuildAPI.ActiveNamedBuildTarget);
+            }
+
             var result = new List<SceneMissingSymbols>();
             var gameObjects = new List<GameObject>();
 
