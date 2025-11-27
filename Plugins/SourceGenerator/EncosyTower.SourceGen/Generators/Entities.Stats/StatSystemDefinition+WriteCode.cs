@@ -121,13 +121,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintBeginLine("partial ").Print(keyword).Print(" ").PrintEndLine(statSystemName);
                 p.OpenScope();
                 {
-                    WriteIsCompatibleMethod(ref p, typeName, singleTypes, pairTypes);
                     WriteStat(ref p);
                     WriteStatObserver(ref p);
                     WriteStatModifier(ref p);
                     WriteWrappers(ref p);
                     WriteJobs(ref p, references);
                     WriteValuePair(ref p);
+                    WriteIsCompatibleMethod(ref p, typeName, singleTypes, pairTypes);
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -146,13 +146,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     p.PrintBeginLine("private const string GENERATOR = ").Print(GENERATOR).PrintEndLine(";");
                     p.PrintEndLine();
 
-                    WriteStatWithStatDataImp(ref p);
+                    WriteStatImpl(ref p);
                     WriteAPIImpl(ref p);
                     WriteReaderImpl(ref p);
                     WriteAccessorImpl(ref p);
                     WriteBakerImpl(ref p);
                     WriteWorldDataImpl(ref p);
-                    WriteValuePairImpl(ref p, singleTypes, pairTypes);
+                    WriteStatDataStore(ref p, singleTypes, pairTypes);
+                    WritePairTypes(ref p, pairTypes);
                     WriteThrowMethods(ref p, typeName);
                 }
                 p.CloseScope();
@@ -199,7 +200,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
         private static void WriteStat(ref Printer p)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public partial struct Stat<TStatData> { }");
+            p.PrintEndLine();
+
             p.PrintBeginLine("public partial struct Stat ")
                 .Print(": ").Print(IBUFFER_ELEMENT_DATA).Print(", ").Print(ISTAT)
                 .PrintEndLine();
@@ -217,12 +220,20 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintBeginLine("private ").Print(OBSERVER_RANGE).PrintEndLine(" _observerRange;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
-                p.PrintBeginLine("private ").Print(BYTE_BOOL).PrintEndLine(" _produceChangeEvents;");
+                p.PrintLine(SERIALIZED_FIELD).PrintLine(GENERATED_CODE);
+                p.PrintLine("private StatDataStore _valueData;");
                 p.PrintEndLine();
 
                 p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
-                p.PrintLine("private ValuePair _valuePair;");
+                p.PrintBeginLine("private ").Print(STAT_VARIANT_TYPE).PrintEndLine(" _valueType;");
+                p.PrintEndLine();
+
+                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintBeginLine("private ").Print(BYTE_BOOL).PrintEndLine(" _valueIsPair;");
+                p.PrintEndLine();
+
+                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintBeginLine("private ").Print(BYTE_BOOL).PrintEndLine(" _produceChangeEvents;");
                 p.PrintEndLine();
 
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
@@ -286,11 +297,11 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.OpenScope();
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintLine("readonly get => _valuePair;");
+                    p.PrintLine("readonly get => StatValueUnion.Convert(_valueData, _valueIsPair, _valueType);");
                     p.PrintEndLine();
 
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintLine("set => _valuePair = value;");
+                    p.PrintLine("set => StatValueUnion.Convert(value, ref _valueData, ref _valueIsPair, ref _valueType);");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -360,8 +371,70 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.PrintEndLine();
         }
 
-        private static void WriteStatWithStatDataImp(ref Printer p)
+        private static void WriteStatImpl(ref Printer p)
         {
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine("partial struct Stat");
+            p.OpenScope();
+            {
+                p.PrintLine(STRUCT_LAYOUT_EXPLICIT).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine("struct StatValueUnion");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine(FIELD_OFFSET_0).PrintEndLine(GENERATED_CODE);
+                    p.PrintLine("private ValuePair _valuePair;");
+                    p.PrintEndLine();
+                    
+                    p.PrintBeginLine(FIELD_OFFSET_0).PrintEndLine(GENERATED_CODE);
+                    p.PrintLine("private StatDataStore _data;");
+                    p.PrintEndLine();
+
+                    p.PrintBeginLine(FIELD_OFFSET_0).PrintEndLine(GENERATED_CODE);
+                    p.PrintBeginLine("private ").Print(STAT_VARIANT_TYPE).PrintEndLine(" _type;");
+                    p.PrintEndLine();
+
+                    p.PrintBeginLine(FIELD_OFFSET_0).PrintEndLine(GENERATED_CODE);
+                    p.PrintBeginLine("private ").Print(BYTE_BOOL).PrintEndLine(" _isPair;");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static ValuePair Convert(StatDataStore data, ")
+                        .Print(BYTE_BOOL).Print(" isPair, ")
+                        .Print(STAT_VARIANT_TYPE).PrintEndLine(" type)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("return new StatValueUnion");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("_data = data,");
+                            p.PrintLine("_isPair = isPair,");
+                            p.PrintLine("_type = type,");
+                        }
+                        p.CloseScope("}._valuePair;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public static void Convert(ValuePair valuePair, ")
+                        .Print("ref StatDataStore data, ref ")
+                        .Print(BYTE_BOOL).Print(" isPair, ref ")
+                        .Print(STAT_VARIANT_TYPE).PrintEndLine(" type)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("var union = new StatValueUnion { _valuePair = valuePair };");
+                        p.PrintLine("data = union._data;");
+                        p.PrintLine("isPair = union._isPair;");
+                        p.PrintLine("type = union._type;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
+                p.CloseScope();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("partial struct Stat<TStatData>");
             p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA);
@@ -724,9 +797,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
         private static void WriteWrappers(ref Printer p)
         {
-            p.PrintLine("public partial struct Stat<TStatData> { }");
-            p.PrintEndLine();
-
             WriteModifierAndHandleRecord(ref p, "ModifierTriggerEvent");
             WriteModifierAndHandleRecord(ref p, "StatModifierRecord");
 
@@ -913,16 +983,16 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 .PrintEndLine();
             p.OpenScope();
             {
-                p.PrintLine(SERIALIZED_FIELD).PrintLine(GENERATED_CODE);
-                p.PrintBeginLine("private ").Print(STAT_VARIANT_TYPE).PrintEndLine(" _type;");
-                p.PrintEndLine();
-                
-                p.PrintLine(SERIALIZED_FIELD).PrintLine(GENERATED_CODE);
-                p.PrintBeginLine("private ").Print(BYTE_BOOL).PrintEndLine(" _isPair;");
+                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintLine("internal StatDataStore _data;");
                 p.PrintEndLine();
 
-                p.PrintLine(SERIALIZED_FIELD).PrintLine(GENERATED_CODE);
-                p.PrintLine("private DataStorage _storage;");
+                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintBeginLine("internal ").Print(STAT_VARIANT_TYPE).PrintEndLine(" _type;");
+                p.PrintEndLine();
+
+                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintBeginLine("internal ").Print(BYTE_BOOL).PrintEndLine(" _isPair;");
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
@@ -930,7 +1000,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
                 p.OpenScope();
                 {
-                    p.PrintLine("_storage = DataStorage.Store(isPair, baseValue, currentValue);");
+                    p.PrintLine("_data = StatDataStore.Store(isPair, baseValue, currentValue);");
                     p.PrintLine("_type = baseValue.Type;");
                     p.PrintLine("_isPair = isPair;");
                 }
@@ -964,45 +1034,45 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public readonly bool Equals(ValuePair other)");
-                p.WithIncreasedIndent().PrintLine("=> DataStorage.Equals(this, other);");
+                p.WithIncreasedIndent().PrintLine("=> StatDataStore.Equals(this, other);");
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public readonly override int GetHashCode()");
-                p.WithIncreasedIndent().PrintLine("=> DataStorage.GetHashCode(this);");
+                p.WithIncreasedIndent().PrintLine("=> StatDataStore.GetHashCode(this);");
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public readonly ").Print(STAT_VARIANT).Print(" GetBaseValueOrDefault(in ")
                     .Print(STAT_VARIANT).PrintEndLine(" defaultValue = default)");
                 p.WithIncreasedIndent()
-                    .PrintLine("=> DataStorage.TryGetBaseValue(this, out var baseValue) ? baseValue : defaultValue;");
+                    .PrintLine("=> StatDataStore.TryGetBaseValue(this, out var baseValue) ? baseValue : defaultValue;");
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public readonly ").Print(STAT_VARIANT).Print(" GetCurrentValueOrDefault(in ")
                     .Print(STAT_VARIANT).PrintEndLine(" defaultValue = default)");
                 p.WithIncreasedIndent()
-                    .PrintLine("=> DataStorage.TryGetCurrentValue(this, out var baseValue) ? baseValue : defaultValue;");
+                    .PrintLine("=> StatDataStore.TryGetCurrentValue(this, out var baseValue) ? baseValue : defaultValue;");
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public bool TrySetBaseValue(in ").Print(STAT_VARIANT).PrintEndLine(" value)");
                 p.WithIncreasedIndent()
-                    .PrintLine("=> DataStorage.TrySetBaseValue(ref this, value);");
+                    .PrintLine("=> StatDataStore.TrySetBaseValue(ref this, value);");
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public bool TrySetCurrentValue(in ").Print(STAT_VARIANT).PrintEndLine(" value)");
                 p.WithIncreasedIndent()
-                    .PrintLine("=> DataStorage.TrySetCurrentValue(ref this, value);");
+                    .PrintLine("=> StatDataStore.TrySetCurrentValue(ref this, value);");
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public bool TrySetValues(in ").Print(STAT_VARIANT).Print(" baseValue, in ")
                     .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
                 p.WithIncreasedIndent()
-                    .PrintLine("=> DataStorage.TrySetValues(ref this, baseValue, currentValue);");
+                    .PrintLine("=> StatDataStore.TrySetValues(ref this, baseValue, currentValue);");
                 p.PrintEndLine();
 
                 WriteComposer(ref p);
@@ -1965,39 +2035,27 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.PrintEndLine();
         }
 
-        private static void WriteValuePairImpl(ref Printer p, List<TypeRecord> types, List<TypeRecord> pairTypes)
-        {
-            p.PrintLine("partial struct ValuePair");
-            p.OpenScope();
-            {
-                WriteDataStorage(ref p, types, pairTypes);
-                WritePairTypes(ref p, pairTypes);
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-        }
-
-        private static void WriteDataStorage(ref Printer p, List<TypeRecord> singleTypes, List<TypeRecord> pairTypes)
+        private static void WriteStatDataStore(ref Printer p, List<TypeRecord> singleTypes, List<TypeRecord> pairTypes)
         {
             p.PrintLine(SERIALIZABLE).PrintLine(STRUCT_LAYOUT_EXPLICIT);
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine("private struct DataStorage");
+            p.PrintLine("internal partial struct StatDataStore");
             p.OpenScope();
             {
                 for (var i = 0; i < singleTypes.Count; i++)
                 {
                     var (ns, type, typeName, _, customNs) = singleTypes[i];
 
-                    p.PrintBeginLine(FIELD_OFFSET_0).PrintEndLine(GENERATED_CODE);
-                    p.PrintBeginLine("public ")
+                    p.PrintBeginLine(SERIALIZED_FIELD).Print(FIELD_OFFSET_0).PrintEndLine(GENERATED_CODE);
+                    p.PrintBeginLine("private ")
                         .PrintIf(customNs, ns)
                         .PrintIf(customNs, ".")
-                        .Print(type).Print(" ").Print(typeName).PrintEndLine(";");
+                        .Print(type).Print(" _").Print(typeName).PrintEndLine(";");
                     p.PrintEndLine();
                 }
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public static DataStorage Store(bool isPair, in ")
+                p.PrintBeginLine("public static StatDataStore Store(bool isPair, in ")
                     .Print(STAT_VARIANT).Print(" baseValue, in ")
                     .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
                 p.OpenScope();
@@ -2011,7 +2069,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         .Print(" : StoreSingle(baseValue, currentValue)").PrintEndLine(";");
                     p.PrintEndLine();
 
-                    p.PrintBeginLine("static DataStorage StoreSingle(in ")
+                    p.PrintBeginLine("static StatDataStore StoreSingle(in ")
                         .Print(STAT_VARIANT).Print(" baseValue, in ")
                         .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
                     p.OpenScope();
@@ -2024,7 +2082,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 var (_, _, typeName, _, _) = singleTypes[i];
 
                                 p.PrintBeginLine(STAT_VARIANT_TYPE).Print(".").Print(typeName)
-                                    .Print(" => new DataStorage { ")
+                                    .Print(" => new StatDataStore { _")
                                     .Print(typeName).Print(" = currentValue.")
                                     .Print(typeName).PrintEndLine(" },");
                             }
@@ -2036,7 +2094,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintBeginLine("static DataStorage StorePair(in ")
+                    p.PrintBeginLine("static StatDataStore StorePair(in ")
                         .Print(STAT_VARIANT).Print(" baseValue, in ")
                         .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
                     p.OpenScope();
@@ -2050,7 +2108,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                                 p.PrintBeginLine(STAT_VARIANT_TYPE).Print(".").Print(typeName)
                                     .Print(" => new Pair").Print(typeName).Print("(baseValue.").Print(typeName)
-                                    .Print(", currentValue.").Print(typeName).PrintEndLine(").storage,");
+                                    .Print(", currentValue.").Print(typeName).PrintEndLine(").data,");
                             }
 
                             p.PrintLine("_ => default,");
@@ -2084,7 +2142,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
                                 {
-                                    p.PrintBeginLine("result = pair._storage.").Print(typeName)
+                                    p.PrintBeginLine("result = pair._data._").Print(typeName)
                                         .PrintEndLine(";");
                                     p.PrintLine("return true;");
                                 }
@@ -2120,7 +2178,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 p.OpenScope();
                                 {
                                     p.PrintBeginLine("result = new Pair").Print(typeName)
-                                        .PrintEndLine("(pair._storage).baseValue;");
+                                        .PrintEndLine("(pair._data).baseValue;");
                                     p.PrintLine("return true;");
                                 }
                                 p.CloseScope();
@@ -2164,7 +2222,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
                                 {
-                                    p.PrintBeginLine("result = pair._storage.").Print(typeName).PrintEndLine(";");
+                                    p.PrintBeginLine("result = pair._data._").Print(typeName).PrintEndLine(";");
                                     p.PrintLine("return true;");
                                 }
                                 p.CloseScope();
@@ -2199,7 +2257,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 p.OpenScope();
                                 {
                                     p.PrintBeginLine("result = new Pair").Print(typeName)
-                                        .PrintEndLine("(pair._storage).currentValue;");
+                                        .PrintEndLine("(pair._data).currentValue;");
                                     p.PrintLine("return true;");
                                 }
                                 p.CloseScope();
@@ -2247,7 +2305,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
                                 {
-                                    p.PrintBeginLine("pair._storage.").Print(typeName)
+                                    p.PrintBeginLine("pair._data._").Print(typeName)
                                         .Print(" = value.").Print(typeName)
                                         .PrintEndLine(";");
                                     p.PrintLine("return true;");
@@ -2282,9 +2340,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
                                 {
-                                    p.PrintBeginLine("pair._storage = new Pair").Print(typeName)
-                                        .Print("(pair._storage) { baseValue = value.").Print(typeName)
-                                        .PrintEndLine(" }.storage;");
+                                    p.PrintBeginLine("pair._data = new Pair").Print(typeName)
+                                        .Print("(pair._data) { baseValue = value.").Print(typeName)
+                                        .PrintEndLine(" }.data;");
                                     p.PrintLine("return true;");
                                 }
                                 p.CloseScope();
@@ -2332,7 +2390,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
                                 {
-                                    p.PrintBeginLine("pair._storage.").Print(typeName)
+                                    p.PrintBeginLine("pair._data._").Print(typeName)
                                         .Print(" = value.").Print(typeName)
                                         .PrintEndLine(";");
                                     p.PrintLine("return true;");
@@ -2367,9 +2425,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
                                 {
-                                    p.PrintBeginLine("pair._storage = new Pair").Print(typeName)
-                                        .Print("(pair._storage) { currentValue = value.").Print(typeName)
-                                        .PrintEndLine(" }.storage;");
+                                    p.PrintBeginLine("pair._data = new Pair").Print(typeName)
+                                        .Print("(pair._data) { currentValue = value.").Print(typeName)
+                                        .PrintEndLine(" }.data;");
                                     p.PrintLine("return true;");
                                 }
                                 p.CloseScope();
@@ -2422,7 +2480,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
                                 {
-                                    p.PrintBeginLine("pair._storage.").Print(typeName)
+                                    p.PrintBeginLine("pair._data._").Print(typeName)
                                         .Print(" = currentValue.").Print(typeName)
                                         .PrintEndLine(";");
                                     p.PrintLine("return true;");
@@ -2458,10 +2516,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
                                 {
-                                    p.PrintBeginLine("pair._storage = new Pair").Print(typeName)
-                                        .Print("(pair._storage) { baseValue = baseValue.").Print(typeName)
+                                    p.PrintBeginLine("pair._data = new Pair").Print(typeName)
+                                        .Print("(pair._data) { baseValue = baseValue.").Print(typeName)
                                         .Print(", currentValue = currentValue.").Print(typeName)
-                                        .PrintEndLine(" }.storage;");
+                                        .PrintEndLine(" }.data;");
                                     p.PrintLine("return true;");
                                 }
                                 p.CloseScope();
@@ -2501,8 +2559,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 var (_, _, typeName, _, _) = singleTypes[i];
 
                                 p.PrintBeginLine(STAT_VARIANT_TYPE).Print(".").Print(typeName)
-                                    .Print(" => ").Print(HASH_VALUE).Print(".Combine(pair._type, pair._storage.")
-                                    .Print(typeName).PrintEndLine("),");
+                                    .Print(" => ").Print(HASH_VALUE)
+                                    .Print(".Combine(pair._type, pair._data._").Print(typeName)
+                                    .PrintEndLine("),");
                             }
 
                             p.PrintLine("_ => 0,");
@@ -2524,7 +2583,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                                 p.PrintBeginLine(STAT_VARIANT_TYPE).Print(".").Print(typeName)
                                     .Print(" => ").Print(HASH_VALUE).Print(".Combine(pair._type, new Pair")
-                                    .Print(typeName).PrintEndLine("(pair._storage)),");
+                                    .Print(typeName).PrintEndLine("(pair._data)),");
                             }
 
                             p.PrintLine("_ => 0,");
@@ -2557,8 +2616,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 var (_, _, typeName, _, _) = singleTypes[i];
 
                                 p.PrintBeginLine(STAT_VARIANT_TYPE).Print(".").Print(typeName)
-                                    .Print(" => pairA._storage.").Print(typeName).Print(".Equals(pairB._storage.")
-                                    .Print(typeName).PrintEndLine("),");
+                                    .Print(" => pairA._data._").Print(typeName)
+                                    .Print(".Equals(pairB._data._").Print(typeName)
+                                    .PrintEndLine("),");
                             }
 
                             p.PrintLine("_ => false,");
@@ -2579,8 +2639,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                                 var (_, _, typeName, _, _) = pairTypes[i];
 
                                 p.PrintBeginLine(STAT_VARIANT_TYPE).Print(".").Print(typeName)
-                                    .Print(" => new Pair").Print(typeName).Print("(pairA._storage).Equals(new Pair")
-                                    .Print(typeName).PrintEndLine("(pairB._storage)),");
+                                    .Print(" => new Pair").Print(typeName).Print("(pairA._data).Equals(new Pair")
+                                    .Print(typeName).PrintEndLine("(pairB._data)),");
                             }
 
                             p.PrintLine("_ => false,");
@@ -2603,12 +2663,12 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             {
                 p.PrintLine(STRUCT_LAYOUT_EXPLICIT);
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("private struct Pair").Print(typeName)
+                p.PrintBeginLine("struct Pair").Print(typeName)
                     .Print(" : ").Print(IEQUATABLE).Print("<Pair").Print(typeName).PrintEndLine(">");
                 p.OpenScope();
                 {
                     p.PrintBeginLine(FIELD_OFFSET_0).PrintEndLine(GENERATED_CODE);
-                    p.PrintLine("public DataStorage storage;");
+                    p.PrintLine("public StatDataStore data;");
                     p.PrintEndLine();
 
                     p.PrintBeginLine(FIELD_OFFSET_0).PrintEndLine(GENERATED_CODE);
@@ -2626,10 +2686,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     p.PrintEndLine();
 
                     p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintBeginLine("public Pair").Print(typeName).PrintEndLine("(in DataStorage storage) : this()");
+                    p.PrintBeginLine("public Pair").Print(typeName).PrintEndLine("(in StatDataStore data) : this()");
                     p.OpenScope();
                     {
-                        p.PrintLine("this.storage = storage;");
+                        p.PrintLine("this.data = data;");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
