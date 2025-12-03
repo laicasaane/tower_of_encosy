@@ -88,6 +88,52 @@ namespace EncosyTower.Collections
             return inputDeps;
         }
 
+        /// <inheritdoc cref="NativeList{T}.AddRange(NativeArray{T})"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddRange<T>(this NativeList<T> list, ReadOnlySpan<T> items)
+            where T : unmanaged
+        {
+            unsafe
+            {
+                fixed (T* ptr = items)
+                {
+                    list.AddRange(ptr, items.Length);
+                }
+            }
+        }
+
+        /// <inheritdoc cref="NativeList{T}.InsertRange(int, int)"/>
+        /// <returns>
+        /// A <see cref="Span{T}"/> of the inserted range.
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> InsertRangeSpan<T>(this NativeList<T> list, int index, int count)
+            where T : unmanaged
+        {
+            list.InsertRange(index, count);
+            return list.AsSpan().Slice(index, count);
+        }
+
+        /// <inheritdoc cref="NativeList{T}.InsertRangeWithBeginEnd(int, int)"/>
+        /// <returns>
+        /// A <see cref="Span{T}"/> of the inserted range.
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> InsertRangeWithBeginEndSpan<T>(this NativeList<T> list, int begin, int end)
+            where T : unmanaged
+        {
+            list.InsertRangeWithBeginEnd(begin, end);
+
+            var count = end - begin;
+
+            if (count > 0)
+            {
+                return list.AsSpan().Slice(begin, end);
+            }
+
+            return default;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this NativeList<T> list)
             where T : unmanaged
