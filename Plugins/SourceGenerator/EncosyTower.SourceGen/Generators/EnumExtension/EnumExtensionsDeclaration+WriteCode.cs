@@ -203,6 +203,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintBeginLine("public ").Print(FullyQualifiedName).Print(" Unset(").Print(FullyQualifiedName).Print(" flag) => ")
                         .Print(ExtensionsName).PrintEndLine(".Unset(this.Value, flag);");
                     p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public ").Print(FullyQualifiedName).Print(" Set(").Print(FullyQualifiedName).Print(" flag) => ")
+                        .Print(ExtensionsName).PrintEndLine(".Set(this.Value, flag);");
+                    p.PrintEndLine();
                 }
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
@@ -1133,6 +1138,21 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             p.PrintLine($"public static {FullyQualifiedName} Unset({@this}{FullyQualifiedName} value, {FullyQualifiedName} flag)");
             p = p.IncreasedIndent();
             p.PrintLine($"=> value & (~flag);");
+            p = p.DecreasedIndent();
+            p.PrintEndLine();
+
+            if (NoDocumentation == false)
+            {
+                p.PrintLine("/// <summary>");
+                p.PrintLine("/// Sets one or more bit fields on the current instance.");
+                p.PrintLine("/// </summary>");
+                p.PrintLine("/// <returns>A new instance with bit fields that are set in <c>flags</c>.</returns>");
+            }
+
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine($"public static {FullyQualifiedName} Set({@this}{FullyQualifiedName} value, {FullyQualifiedName} flag)");
+            p = p.IncreasedIndent();
+            p.PrintLine($"=> value | flag;");
             p = p.DecreasedIndent();
             p.PrintEndLine();
         }
