@@ -25,7 +25,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 {
                     p.PrintBeginLine("[global::System.ComponentModel.TypeConverter(typeof(")
                         .Print(FullTypeName).Print(".")
-                        .Print(TypeName).PrintEndLine("TypeConverter))]");
+                        .Print(TypeNameWithTypeParams).PrintEndLine("TypeConverter))]");
                 }
 
                 p.PrintBeginLine()
@@ -33,7 +33,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     .Print("partial ")
                     .PrintIf(IsRecord, "record ")
                     .PrintIf(IsStruct, "struct ", "class ")
-                    .Print(TypeName);
+                    .Print(TypeNameWithTypeParams);
 
                 if (IsRefStruct)
                 {
@@ -569,8 +569,10 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 }
             }
 
+            var hasTypeConstraints = string.IsNullOrEmpty(method.typeParameterConstraints) == false;
+
             p.PrintEndLine(")");
-            p.PrintLine(method.typeParameterConstraints);
+            p.PrintLineIf(hasTypeConstraints, method.typeParameterConstraints);
             p = p.IncreasedIndent();
             {
                 p.PrintBeginLine("=> ");
@@ -658,7 +660,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     p.PrintLine("=> obj switch");
                     p.OpenScope();
                     {
-                        p.PrintBeginLine(TypeName).PrintEndLine(" other => CompareTo(other),");
+                        p.PrintBeginLine(TypeNameWithTypeParams).PrintEndLine(" other => CompareTo(other),");
                         p.PrintBeginLine(FieldTypeName).Print(" other => this.").Print(FieldName).PrintEndLine(".CompareTo(other),");
                         p.PrintLine("_ => 1,");
                     }
@@ -738,7 +740,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     p.PrintLine("=> obj switch");
                     p.OpenScope();
                     {
-                        p.PrintBeginLine(TypeName).PrintEndLine(" other => Equals(other),");
+                        p.PrintBeginLine(TypeNameWithTypeParams).PrintEndLine(" other => Equals(other),");
                         p.PrintBeginLine(FieldTypeName).Print(" other => this.").Print(FieldName).PrintEndLine(".Equals(other),");
                         p.PrintLine("_ => false,");
                     }
@@ -1248,7 +1250,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine($"private sealed class {TypeName}TypeConverter : global::System.ComponentModel.TypeConverter");
+            p.PrintLine($"private sealed class {TypeNameWithTypeParams}TypeConverter : global::System.ComponentModel.TypeConverter");
             p.OpenScope();
             {
                 p.PrintLine($"private static readonly global::System.Type s_wrapperType = typeof({FullTypeName});");

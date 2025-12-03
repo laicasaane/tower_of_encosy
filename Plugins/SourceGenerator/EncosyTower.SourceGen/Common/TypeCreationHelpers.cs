@@ -173,10 +173,10 @@ namespace EncosyTower.SourceGen
         public static SourceText GenerateSourceTextForRootNodes(
               string generatedSourceFilePath
             , SyntaxNode containingSyntax
-            , SyntaxNode originalSyntax
-            , string generatedSyntax
+            , string bodySource
             , CancellationToken cancellationToken
             , Printer? overridePrinter = default
+            , PrinterAction printAdditionalUsings = default
         )
         {
             // DO NOT worry about #if directives
@@ -189,11 +189,11 @@ namespace EncosyTower.SourceGen
             var result = WriteOpeningSyntax_AndReturnClosingSyntax(
                   ref printer
                 , containingSyntax
-                , originalSyntax
                 , cancellationToken
+                , printAdditionalUsings
             );
 
-            printer.PrintLine(generatedSyntax);
+            printer.PrintLine(bodySource);
 
             var numClosingBraces = result.NumClosingBraces;
 
@@ -215,11 +215,75 @@ namespace EncosyTower.SourceGen
                 ;
         }
 
+        public static SourceText GenerateSourceText(
+              string generatedSourceFilePath
+            , string openingSource
+            , string bodySource
+            , string closingSource
+            , Printer? overridePrinter = default
+        )
+        {
+            // DO NOT worry about #if directives
+            // Because source generators run after preprocessors,
+            // every disabled code will be removed from the compilation context.
+            // So there might be no generated code to worry about.
+
+            var printer = overridePrinter ?? Printer.DefaultLarge;
+
+            printer.PrintLine(openingSource);
+            printer.PrintLine(bodySource);
+            printer.PrintLine(closingSource);
+
+            // Output as source
+            return SourceText.From(printer.Result, Encoding.UTF8)
+                .WithIgnoreUnassignedVariableWarning()
+                .WithInitialLineDirectiveToGeneratedSource(generatedSourceFilePath)
+                ;
+        }
+
+        public static void GenerateOpeningAndClosingSource(
+              SyntaxNode containingSyntax
+            , CancellationToken cancellationToken
+            , out string openingSource
+            , out string closingSource
+            , Printer? overridePrinter = default
+            , PrinterAction printAdditionalUsings = default
+        )
+        {
+            var printer = overridePrinter ?? Printer.DefaultLarge;
+
+            var result = WriteOpeningSyntax_AndReturnClosingSyntax(
+                  ref printer
+                , containingSyntax
+                , cancellationToken
+                , printAdditionalUsings
+            );
+
+            openingSource = printer.Result;
+
+            printer.ClearAndIndent(printer.IndentDepth);
+
+            var numClosingBraces = result.NumClosingBraces;
+
+            if (numClosingBraces > 0)
+            {
+                printer.PrintEndLine();
+            }
+
+            for (int i = 0; i < numClosingBraces; i++)
+            {
+                printer = printer.DecreasedIndent();
+                printer.PrintLine("}");
+            }
+
+            closingSource = printer.Result;
+        }
+
         private static ClosingSyntax WriteOpeningSyntax_AndReturnClosingSyntax(
               ref Printer printer
             , SyntaxNode containingTypeSyntax
-            , SyntaxNode originalSyntax
             , CancellationToken cancellationToken
+            , PrinterAction printAdditionUsings
         )
         {
             var (openingSyntaxes, numClosingBraces) = GetOpeningSyntaxes(containingTypeSyntax);
@@ -235,6 +299,8 @@ namespace EncosyTower.SourceGen
             {
                 printer.PrintLine(@using.ToString());
             }
+
+            printAdditionUsings?.Invoke(ref printer);
 
             if (usings.Count > 0)
             {

@@ -17,7 +17,6 @@ namespace EncosyTower.SourceGen.Generators
             var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
                   sourceFilePath
                 , syntax
-                , syntax
                 , source
                 , context.CancellationToken
                 , overridePrinter
@@ -30,6 +29,39 @@ namespace EncosyTower.SourceGen.Generators
                 SourceGenHelpers.OutputSourceToFile(
                       context
                     , syntax.GetLocation()
+                    , sourceFilePath
+                    , outputSource
+                );
+            }
+        }
+        
+        public static void OutputSource(
+              this ref SourceProductionContext context
+            , bool outputSourceGenFiles
+            , string openingSource
+            , string bodySource
+            , string closingSource
+            , string hintName
+            , string sourceFilePath
+            , Location location
+            , Printer? overridePrinter = default
+        )
+        {
+            var outputSource = TypeCreationHelpers.GenerateSourceText(
+                  sourceFilePath
+                , openingSource
+                , bodySource
+                , closingSource
+                , overridePrinter
+            );
+
+            context.AddSource(hintName, outputSource);
+
+            if (outputSourceGenFiles)
+            {
+                SourceGenHelpers.OutputSourceToFile(
+                      context
+                    , location
                     , sourceFilePath
                     , outputSource
                 );
@@ -50,7 +82,6 @@ namespace EncosyTower.SourceGen.Generators
             var outputSource = TypeCreationHelpers.GenerateSourceTextForRootNodes(
                   sourceFilePath
                 , containingSyntax
-                , originalSyntax
                 , source
                 , context.CancellationToken
                 , overridePrinter

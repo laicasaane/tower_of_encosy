@@ -25,7 +25,9 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         public bool ExcludeConverter { get; }
 
-        public string TypeName { get; }
+        public string TypeName  { get; }
+
+        public string TypeNameWithTypeParams { get; }
 
         public string TypeNameIndentifier { get; }
 
@@ -82,6 +84,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
               TypeDeclarationSyntax syntax
             , INamedTypeSymbol symbol
             , string typeName
+            , string typeNameWithTypeParams
             , bool isStruct
             , bool isRefStruct
             , bool isRecord
@@ -98,6 +101,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             Syntax = syntax;
             TypeName = typeName;
+            TypeNameWithTypeParams = typeNameWithTypeParams;
             TypeNameIndentifier = symbol.ToValidIdentifier();
             FullTypeName = symbol.ToFullName();
             IsReadOnly = symbol.IsReadOnly;
