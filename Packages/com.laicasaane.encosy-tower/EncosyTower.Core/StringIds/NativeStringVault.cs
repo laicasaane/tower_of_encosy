@@ -31,7 +31,7 @@ namespace EncosyTower.StringIds
         {
             _map = new(initialCapacity, allocator);
             _stringRanges = new(initialCapacity, allocator);
-            _stringBuffer = new(initialCapacity, allocator);
+            _stringBuffer = new(initialCapacity * 512, allocator);
             _hashes = new(initialCapacity, allocator);
             _count = new(allocator);
             Clear();
@@ -252,12 +252,19 @@ namespace EncosyTower.StringIds
 
             if (_hashes.Length < newCapacity)
             {
-                _hashes.ResizeUninitialized(math.max(newCapacity - _hashes.Length, 0));
+                _hashes.ResizeUninitialized(newCapacity);
             }
 
             if (_stringRanges.Length < newCapacity)
             {
-                _stringRanges.ResizeUninitialized(math.max(newCapacity - _stringRanges.Length, 0));
+                _stringRanges.ResizeUninitialized(newCapacity);
+            }
+
+            var newBufferCapacity = newCapacity * 512;
+
+            if (_stringBuffer.Capacity < newBufferCapacity)
+            {
+                _stringBuffer.IncreaseCapacityTo(newBufferCapacity);
             }
         }
 
@@ -266,9 +273,8 @@ namespace EncosyTower.StringIds
             var buffer = _stringBuffer;
             var startIndex = buffer.Length;
             var amount = str.Length;
-            buffer.InsertRange(startIndex, amount);
+            var strSpan = buffer.InsertRangeSpan(startIndex, amount);
 
-            var strSpan = buffer.AsSpan().Slice(startIndex, amount);
             str.AsReadOnlySpan().CopyTo(strSpan);
 
             return new(startIndex, startIndex + amount);

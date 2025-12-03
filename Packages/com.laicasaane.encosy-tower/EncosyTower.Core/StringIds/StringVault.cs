@@ -29,7 +29,7 @@ namespace EncosyTower.StringIds
         {
             _map = new(initialCapacity);
             _unmanagedStringRanges = new(initialCapacity);
-            _unmanagedStringBuffer = new(initialCapacity);
+            _unmanagedStringBuffer = new(initialCapacity * 512);
             _managedStrings = new(initialCapacity);
             _hashes = new(initialCapacity);
             _count = new();
@@ -390,6 +390,13 @@ namespace EncosyTower.StringIds
             if (_managedStrings.Count < newCapacity)
             {
                 _managedStrings.AddReplicateNoInit(Math.Max(newCapacity - _managedStrings.Count, 0));
+            }
+
+            var newBufferCapacity = newCapacity * 512;
+
+            if (_unmanagedStringBuffer.Capacity < newBufferCapacity)
+            {
+                _unmanagedStringBuffer.IncreaseCapacityTo(newBufferCapacity);
             }
         }
 
