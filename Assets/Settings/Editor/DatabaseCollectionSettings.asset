@@ -24,7 +24,7 @@ MonoBehaviour:
       apiKeyRelativeFilePath: GoogleServices/api-key.txt
       credentialTokenRelativeFolderPath: GoogleServices
       spreadsheetId: 1MCEi9N9EVYHvbIPr8Vlf9g39aGOmAayaxDH99-wnyi8
-      outputRelativeFolderPath: Assets/EncosyTower/EncosyTower.Samples.Data/Authoring.Csv
+      outputRelativeFolderPath: Assets/Samples/Encosy Tower/0.1.0-preview.75/EncosyTower.Samples.Data/Authoring.Csv
       authentication: 1
       outputFileType: 1
       enabled: 1
@@ -32,8 +32,8 @@ MonoBehaviour:
       alwaysDownloadAll: 0
       emptyRowStreakThreshold: 5
     csvSettings:
-      inputRelativeFolderPath: Assets/EncosyTower/EncosyTower.Samples.Data/Authoring.Csv
-      outputRelativeFolderPath: Assets/EncosyTower/EncosyTower.Samples.Data/RuntimeAsset.Tables
+      inputRelativeFolderPath: Assets/Samples/Encosy Tower/0.1.0-preview.75/EncosyTower.Samples.Data/Authoring.Csv
+      outputRelativeFolderPath: Assets/Samples/Encosy Tower/0.1.0-preview.75/EncosyTower.Samples.Data/RuntimeAsset.Tables
       enabled: 1
       liveConversion: 1
       emptyRowStreakThreshold: 5

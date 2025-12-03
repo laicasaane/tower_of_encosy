@@ -37,7 +37,7 @@ namespace EncosyTower.Databases.Settings
                 , owner
                 , (title, msg) => Progress.Report(id, 0f, msg)
                 , default
-                , false
+                , true
             ));
 
             EditorApplication.update += task.Update;

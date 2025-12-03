@@ -20,20 +20,33 @@ MonoBehaviour:
       Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     assetName: 
     googleSheetSettings:
-      serviceAccountRelativeFilePath: GoogleServices/tower-of-encosy-service-account-google-sheets.json
+      credentialRelativeFilePath: 
+      apiKeyRelativeFilePath: 
+      credentialTokenRelativeFolderPath: 
       spreadsheetId: 1MCEi9N9EVYHvbIPr8Vlf9g39aGOmAayaxDH99-wnyi8
-      outputRelativeFolderPath: Assets/Samples/Encosy Tower/0.1.0/EncosyTower.Samples.Data/Authoring.Csv
+      outputRelativeFolderPath: Assets/Samples/Encosy Tower/0.1.0-preview.75/EncosyTower.Samples.Data/Authoring.Csv
+      authentication: 0
       outputFileType: 1
       enabled: 1
       cleanOutputFolder: 1
       alwaysDownloadAll: 0
+      emptyRowStreakThreshold: 5
     csvSettings:
-      inputRelativeFolderPath: Assets/Samples/Encosy Tower/0.1.0/EncosyTower.Samples.Data/Authoring.Csv
-      outputRelativeFolderPath: Assets/Samples/Encosy Tower/0.1.0/EncosyTower.Samples.Data/RuntimeAsset.Tables
+      inputRelativeFolderPath: Assets/Samples/Encosy Tower/0.1.0-preview.75/EncosyTower.Samples.Data/Authoring.Csv
+      outputRelativeFolderPath: Assets/Samples/Encosy Tower/0.1.0-preview.75/EncosyTower.Samples.Data/RuntimeAsset.Tables
       enabled: 1
       liveConversion: 1
+      emptyRowStreakThreshold: 5
+      includeSubFolders: 1
+      includeCommentedFiles: 0
+      splitHeader: 0
+      extension: csv
     excelSettings:
       inputRelativeFolderPath: 
       outputRelativeFolderPath: 
       enabled: 0
       liveConversion: 1
+      emptyRowStreakThreshold: 5
+      includeSubFolders: 1
+      includeCommentedFiles: 0
+      extension: xlsx

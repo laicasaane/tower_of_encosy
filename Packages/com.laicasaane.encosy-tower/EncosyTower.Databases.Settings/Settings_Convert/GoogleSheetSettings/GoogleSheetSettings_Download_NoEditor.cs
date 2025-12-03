@@ -58,7 +58,7 @@ namespace EncosyTower.Databases.Settings
 
                 var converters = new List<DatabaseGoogleSheetConverter>();
 
-                if (fileContainer.FileTableAsset_FileDataSheets[0] is { } fileSheet)
+                if (fileContainer.FileTableAsset_FileDataSheets[0] is { } fileSheet && fileSheet.Count > 0)
                 {
                     foreach (var row in fileSheet)
                     {
@@ -159,7 +159,7 @@ namespace EncosyTower.Databases.Settings
                     { 0, fileSheetExporter}
                 };
 
-                if (fileContainer.FileTableAsset_FileDataSheets[0] is { } fileSheet)
+                if (fileContainer.FileTableAsset_FileDataSheets[0] is { } fileSheet && fileSheet.Count > 0)
                 {
                     var id = 1;
 
