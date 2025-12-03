@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Entities.Stats
 {
@@ -31,5 +32,13 @@ namespace EncosyTower.Entities.Stats
         public StatHandle statHandle;
         public TValuePair prevValue;
         public TValuePair newValue;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly void Deconstruct(out StatHandle statHandle, out TValuePair prevValue, out TValuePair newValue)
+        {
+            statHandle = this.statHandle;
+            prevValue = this.prevValue;
+            newValue = this.newValue;
+        }
     }
 }

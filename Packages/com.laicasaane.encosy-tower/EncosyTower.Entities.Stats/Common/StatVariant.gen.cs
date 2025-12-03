@@ -21,6 +21,7 @@ namespace EncosyTower.Entities.Stats
     partial struct StatVariant : IEquatable<StatVariant>
     {
         [FieldOffset(0)] public StatVariantType Type;
+        [FieldOffset(1)] public None None;
         [FieldOffset(1)] public bool Bool;
         [FieldOffset(1)] public bool2 Bool2;
         [FieldOffset(1)] public bool2x2 Bool2x2;
@@ -101,6 +102,13 @@ namespace EncosyTower.Entities.Stats
         public StatVariant(StatVariantType type) : this()
         {
             Type = type;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public StatVariant(None value) : this()
+        {
+            Type = StatVariantType.None;
+            None = value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -646,6 +654,7 @@ namespace EncosyTower.Entities.Stats
 
             return Type switch
             {
+                StatVariantType.None => None.Equals(other.None),
                 StatVariantType.Bool => Bool == other.Bool,
                 StatVariantType.Bool2 => Bool2.Equals(other.Bool2),
                 StatVariantType.Bool2x2 => Bool2x2.Equals(other.Bool2x2),
@@ -735,6 +744,7 @@ namespace EncosyTower.Entities.Stats
         {
             return Type switch
             {
+                StatVariantType.None => HashValue.Combine(Type, None),
                 StatVariantType.Bool => HashValue.Combine(Type, Bool),
                 StatVariantType.Bool2 => HashValue.Combine(Type, Bool2),
                 StatVariantType.Bool2x2 => HashValue.Combine(Type, Bool2x2),
@@ -823,6 +833,7 @@ namespace EncosyTower.Entities.Stats
 
             Option<StatVariant> valueOpt = Type switch
             {
+                StatVariantType.None => Option.Some<StatVariant>(None),
                 StatVariantType.Bool => Option.Some<StatVariant>(Bool),
                 StatVariantType.Bool2 => Option.Some<StatVariant>(Bool2),
                 StatVariantType.Bool2x2 => Option.Some<StatVariant>(Bool2x2),
@@ -912,6 +923,7 @@ namespace EncosyTower.Entities.Stats
 
             Option<StatVariant> valueOpt = Type switch
             {
+                StatVariantType.None => Option.Some<StatVariant>(None),
                 StatVariantType.Bool => Option.Some<StatVariant>(Bool),
                 StatVariantType.Bool2 => Option.Some<StatVariant>(Bool2),
                 StatVariantType.Bool2x2 => Option.Some<StatVariant>(Bool2x2),
@@ -991,6 +1003,18 @@ namespace EncosyTower.Entities.Stats
             };
 
             destination = valueOpt.GetValueOrDefault();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool TrySetValueTo(ref None destination)
+        {
+            if (Type == StatVariantType.None)
+            {
+                destination = None;
+                return true;
+            }
+
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1894,6 +1918,15 @@ namespace EncosyTower.Entities.Stats
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly void SetValueTo(ref None destination)
+        {
+            ThrowHelper.ThrowIfDestinationTypeMismatch(Type, StatVariantType.None);
+            ThrowHelper.ThrowIfUnsupportedType(Type);
+
+            destination = None;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void SetValueTo(ref bool destination)
         {
             ThrowHelper.ThrowIfDestinationTypeMismatch(Type, StatVariantType.Bool);
@@ -2569,6 +2602,10 @@ namespace EncosyTower.Entities.Stats
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator StatVariant(None value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator StatVariant(bool value)
             => new(value);
 
@@ -2867,6 +2904,15 @@ namespace EncosyTower.Entities.Stats
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator StatVariant(ushort value)
             => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator None(in StatVariant value)
+        {
+            ThrowHelper.ThrowIfExplicitlyConvertToWrongType(value.Type, StatVariantType.None);
+            ThrowHelper.ThrowIfUnsupportedType(value.Type);
+
+            return value.None;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator bool(in StatVariant value)

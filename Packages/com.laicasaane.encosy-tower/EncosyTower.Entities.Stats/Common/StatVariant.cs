@@ -134,7 +134,7 @@ namespace EncosyTower.Entities.Stats
 
         public static StatVariant operator +(in StatVariant lhs, in StatVariant rhs)
         {
-            ThrowHelper.ThrowIfMismatchedTypes(lhs.Type, rhs.Type);
+            ThrowHelper.ThrowIfMismatchedOperatorTypes(lhs.Type, rhs.Type, "+");
             ThrowHelper.ThrowIfUnsupportedType(lhs.Type);
 
             return lhs.Type switch {
@@ -206,7 +206,7 @@ namespace EncosyTower.Entities.Stats
 
         public static StatVariant operator -(in StatVariant lhs, in StatVariant rhs)
         {
-            ThrowHelper.ThrowIfMismatchedTypes(lhs.Type, rhs.Type);
+            ThrowHelper.ThrowIfMismatchedOperatorTypes(lhs.Type, rhs.Type, "-");
             ThrowHelper.ThrowIfUnsupportedType(lhs.Type);
 
             return lhs.Type switch {
@@ -278,7 +278,7 @@ namespace EncosyTower.Entities.Stats
 
         public static StatVariant operator *(in StatVariant lhs, in StatVariant rhs)
         {
-            ThrowHelper.ThrowIfMismatchedTypes(lhs.Type, rhs.Type);
+            ThrowHelper.ThrowIfMismatchedOperatorTypes(lhs.Type, rhs.Type, "*");
             ThrowHelper.ThrowIfUnsupportedType(lhs.Type);
 
             return lhs.Type switch {
@@ -350,7 +350,7 @@ namespace EncosyTower.Entities.Stats
 
         public static StatVariant operator /(in StatVariant lhs, in StatVariant rhs)
         {
-            ThrowHelper.ThrowIfMismatchedTypes(lhs.Type, rhs.Type);
+            ThrowHelper.ThrowIfMismatchedOperatorTypes(lhs.Type, rhs.Type, "/");
             ThrowHelper.ThrowIfUnsupportedType(lhs.Type);
 
             return lhs.Type switch {
@@ -567,7 +567,7 @@ namespace EncosyTower.Entities.Stats
 
         public static StatVariant operator &(in StatVariant lhs, in StatVariant rhs)
         {
-            ThrowHelper.ThrowIfMismatchedTypes(lhs.Type, rhs.Type);
+            ThrowHelper.ThrowIfMismatchedOperatorTypes(lhs.Type, rhs.Type, "&");
             ThrowHelper.ThrowIfUnsupportedType(lhs.Type);
 
             return lhs.Type switch {
@@ -622,7 +622,7 @@ namespace EncosyTower.Entities.Stats
 
         public static StatVariant operator |(in StatVariant lhs, in StatVariant rhs)
         {
-            ThrowHelper.ThrowIfMismatchedTypes(lhs.Type, rhs.Type);
+            ThrowHelper.ThrowIfMismatchedOperatorTypes(lhs.Type, rhs.Type, "|");
             ThrowHelper.ThrowIfUnsupportedType(lhs.Type);
 
             return lhs.Type switch {
@@ -677,7 +677,7 @@ namespace EncosyTower.Entities.Stats
 
         public static StatVariant operator ^(in StatVariant lhs, in StatVariant rhs)
         {
-            ThrowHelper.ThrowIfMismatchedTypes(lhs.Type, rhs.Type);
+            ThrowHelper.ThrowIfMismatchedOperatorTypes(lhs.Type, rhs.Type, "^");
             ThrowHelper.ThrowIfUnsupportedType(lhs.Type);
 
             return lhs.Type switch {
@@ -732,7 +732,7 @@ namespace EncosyTower.Entities.Stats
 
         public static StatVariant Min(in StatVariant a, in StatVariant b)
         {
-            ThrowHelper.ThrowIfMismatchedTypes(a.Type, b.Type);
+            ThrowHelper.ThrowIfMismatchedFunctionTypes(a.Type, b.Type, "Min");
             ThrowHelper.ThrowIfUnsupportedType(a.Type);
 
             return a.Type switch {
@@ -768,7 +768,7 @@ namespace EncosyTower.Entities.Stats
 
         public static StatVariant Max(in StatVariant a, in StatVariant b)
         {
-            ThrowHelper.ThrowIfMismatchedTypes(a.Type, b.Type);
+            ThrowHelper.ThrowIfMismatchedFunctionTypes(a.Type, b.Type, "Max");
             ThrowHelper.ThrowIfUnsupportedType(a.Type);
 
             return a.Type switch {
@@ -808,8 +808,7 @@ namespace EncosyTower.Entities.Stats
             , in StatVariant upperBound
         )
         {
-            ThrowHelper.ThrowIfMismatchedTypes(lowerBound.Type, upperBound.Type);
-            ThrowHelper.ThrowIfMismatchedTypes(valueToClamp.Type, lowerBound.Type);
+            ThrowHelper.ThrowIfMismatchedClampTypes(valueToClamp.Type, lowerBound.Type, upperBound.Type);
             ThrowHelper.ThrowIfUnsupportedType(valueToClamp.Type);
 
             return valueToClamp.Type switch {

@@ -1,17 +1,17 @@
 // MIT License
-// 
+//
 // Copyright (c) 2023 Philippe St-Amand
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -37,40 +37,124 @@ namespace EncosyTower.Entities.Stats
     {
         internal IBaker _baker;
         internal Entity _entity;
+        internal TValuePairComposer _valuePairComposer;
 
         internal StatOwner _statOwner;
         internal DynamicBuffer<TStat> _statBuffer;
         internal DynamicBuffer<TStatModifier> _modifierBuffer;
         internal DynamicBuffer<TStatObserver> _observerBuffer;
 
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public ref TStatData CreateStat<TStatData>(
+        //      ref TStatData statDataWithIndex
+        //    , bool produceChangeEvents
+        //)
+        //    where TStatData : unmanaged, IStatDataWithIndex
+        //{
+        //    statDataWithIndex = StatAPI.CreateStat<TValuePair, TStat, TStatData, TValuePairComposer>(
+        //          _entity
+        //        , ref statDataWithIndex
+        //        , produceChangeEvents
+        //        , ref _statBuffer
+        //        , _valuePairComposer
+        //    );
+
+        //    return ref statDataWithIndex;
+        //}
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public TStatData CreateStat<TStatData>(
+        //      TStatData statDataWithIndex
+        //    , bool produceChangeEvents
+        //)
+        //    where TStatData : unmanaged, IStatDataWithIndex
+        //{
+        //    return StatAPI.CreateStat<TValuePair, TStat, TStatData, TValuePairComposer>(
+        //          _entity
+        //        , ref statDataWithIndex
+        //        , produceChangeEvents
+        //        , ref _statBuffer
+        //        , _valuePairComposer
+        //    );
+        //}
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public TStatData CreateStat<TStatData>(
+        //      TValuePair valuePair
+        //    , bool produceChangeEvents
+        //)
+        //    where TStatData : unmanaged, IStatDataWithIndex
+        //{
+        //    return StatAPI.CreateStat<TValuePair, TStat, TStatData, TValuePairComposer>(
+        //          _entity
+        //        , valuePair
+        //        , produceChangeEvents
+        //        , ref _statBuffer
+        //        , _valuePairComposer
+        //    );
+        //}
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public StatHandle CreateStat<TStatData>(
+        public StatHandle<TStatData> CreateStatHandle<TStatData>(
               TStatData statData
             , bool produceChangeEvents
-            , TValuePairComposer valuePairComposer = default
         )
             where TStatData : unmanaged, IStatData
         {
-            return StatAPI.CreateStat<TValuePair, TStat, TStatData, TValuePairComposer>(
+            return StatAPI.CreateStatHandle<TValuePair, TStat, TStatData, TValuePairComposer>(
                   _entity
                 , statData
                 , produceChangeEvents
                 , ref _statBuffer
-                , valuePairComposer
+                , _valuePairComposer
             );
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public StatHandle CreateStat(TValuePair valuePair, bool produceChangeEvents)
+        public StatHandle<TStatData> CreateStatHandle<TStatData>(
+              TValuePair valuePair
+            , bool produceChangeEvents
+        )
+            where TStatData : unmanaged, IStatData
         {
-            return StatAPI.CreateStat(_entity, valuePair, produceChangeEvents, ref _statBuffer);
+            return StatAPI.CreateStatHandle<TValuePair, TStat, TStatData, TValuePairComposer>(
+                  _entity
+                , valuePair
+                , produceChangeEvents
+                , ref _statBuffer
+                , out _
+                , _valuePairComposer
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public StatHandle<TStatData> CreateStatHandle<TStatData>(
+              TValuePair valuePair
+            , bool produceChangeEvents
+            , out TStatData statData
+        )
+            where TStatData : unmanaged, IStatData
+        {
+            return StatAPI.CreateStatHandle<TValuePair, TStat, TStatData, TValuePairComposer>(
+                  _entity
+                , valuePair
+                , produceChangeEvents
+                , ref _statBuffer
+                , out statData
+                , _valuePairComposer
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public StatHandle CreateStatHandle(TValuePair valuePair, bool produceChangeEvents)
+        {
+            return StatAPI.CreateStatHandle(_entity, valuePair, produceChangeEvents, ref _statBuffer);
         }
 
         public bool TryAddStatModifier(
               StatHandle affectedStatHandle
             , TStatModifier modifier
             , out StatModifierHandle statModifierHandle
-            , TValuePairComposer valuePairComposer = default
         )
         {
             var entity = _entity;
@@ -96,7 +180,7 @@ namespace EncosyTower.Entities.Stats
             }
 
             this.GetStatWorldData(Allocator.Temp, out var worldData);
-            this.GetStatAccessor(out var accessor, valuePairComposer);
+            this.GetStatAccessor(out var accessor, _valuePairComposer);
 
             var success = accessor.TryAddStatModifierSingleEntity(
                   affectedStatHandle

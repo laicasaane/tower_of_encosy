@@ -1,4 +1,4 @@
-#if UNITY_EDITOR && ANNULUS_CODEGEN && ENCOSY_STAT_VALUE_TYPES_GENERATOR
+#if UNITY_EDITOR && ANNULUS_CODEGEN && !ENCOSY_STAT_VALUE_TYPES_GENERATOR
 
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -14,6 +14,7 @@ namespace EncosyTower.Entities.Stats.Generators
         public const string COMMON_FOLDER = "../Common";
 
         public static readonly string[] Types = new string[] {
+            nameof(None),
             "bool",
             nameof(bool2),
             nameof(bool2x2),
@@ -92,6 +93,7 @@ namespace EncosyTower.Entities.Stats.Generators
         };
 
         public static readonly bool[] EqualOperators = new bool[] {
+            false, /// <see cref="None"/>
             true,  /// <see cref="bool"/>
             false, /// <see cref="bool2"/>
             false, /// <see cref="bool2x2"/>
@@ -170,6 +172,7 @@ namespace EncosyTower.Entities.Stats.Generators
         };
 
         public static readonly string[] TypeNames = new string[] {
+            "None",
             "Bool",
             "Bool2",
             "Bool2x2",
@@ -248,6 +251,7 @@ namespace EncosyTower.Entities.Stats.Generators
         };
 
         public static readonly string[] OneConstructors = new string[] {
+            "new None()",
             "true",
             "new bool2(true)",
             "new bool2x2(true)",
@@ -326,6 +330,7 @@ namespace EncosyTower.Entities.Stats.Generators
         };
 
         public static readonly int[] Sizes = new int[] {
+            UnsafeUtility.SizeOf<None>(),
             UnsafeUtility.SizeOf<bool>(),
             UnsafeUtility.SizeOf<bool2>(),
             UnsafeUtility.SizeOf<bool2x2>(),

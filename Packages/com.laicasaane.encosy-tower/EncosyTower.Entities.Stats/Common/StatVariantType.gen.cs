@@ -21,379 +21,384 @@ namespace EncosyTower.Entities.Stats
     public enum StatVariantType : byte
     {
         /// <summary>
+        /// <see cref="Stats.None"/> | 1 byte.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
         /// <see cref="bool"/> | 1 byte.
         /// </summary>
-        Bool = 0,
+        Bool = 1,
 
         /// <summary>
         /// <see cref="bool2"/> | 2 bytes.
         /// </summary>
-        Bool2 = 1,
+        Bool2 = 2,
 
         /// <summary>
         /// <see cref="bool2x2"/> | 4 bytes.
         /// </summary>
-        Bool2x2 = 2,
+        Bool2x2 = 3,
 
         /// <summary>
         /// <see cref="bool2x3"/> | 6 bytes.
         /// </summary>
-        Bool2x3 = 3,
+        Bool2x3 = 4,
 
         /// <summary>
         /// <see cref="bool2x4"/> | 8 bytes.
         /// </summary>
-        Bool2x4 = 4,
+        Bool2x4 = 5,
 
         /// <summary>
         /// <see cref="bool3"/> | 3 bytes.
         /// </summary>
-        Bool3 = 5,
+        Bool3 = 6,
 
         /// <summary>
         /// <see cref="bool3x2"/> | 6 bytes.
         /// </summary>
-        Bool3x2 = 6,
+        Bool3x2 = 7,
 
         /// <summary>
         /// <see cref="bool3x3"/> | 9 bytes.
         /// </summary>
-        Bool3x3 = 7,
+        Bool3x3 = 8,
 
         /// <summary>
         /// <see cref="bool3x4"/> | 12 bytes.
         /// </summary>
-        Bool3x4 = 8,
+        Bool3x4 = 9,
 
         /// <summary>
         /// <see cref="bool4"/> | 4 bytes.
         /// </summary>
-        Bool4 = 9,
+        Bool4 = 10,
 
         /// <summary>
         /// <see cref="bool4x2"/> | 8 bytes.
         /// </summary>
-        Bool4x2 = 10,
+        Bool4x2 = 11,
 
         /// <summary>
         /// <see cref="bool4x3"/> | 12 bytes.
         /// </summary>
-        Bool4x3 = 11,
+        Bool4x3 = 12,
 
         /// <summary>
         /// <see cref="bool4x4"/> | 16 bytes.
         /// </summary>
-        Bool4x4 = 12,
+        Bool4x4 = 13,
 
         /// <summary>
         /// <see cref="byte"/> | 1 byte.
         /// </summary>
-        Byte = 13,
+        Byte = 14,
 
         /// <summary>
         /// <see cref="double"/> | 8 bytes.
         /// </summary>
-        Double = 14,
+        Double = 15,
 
         /// <summary>
         /// <see cref="double2"/> | 16 bytes.
         /// </summary>
-        Double2 = 15,
+        Double2 = 16,
 
         /// <summary>
         /// <see cref="double2x2"/> | 32 bytes.
         /// </summary>
-        Double2x2 = 16,
+        Double2x2 = 17,
 
         /// <summary>
         /// <see cref="double2x3"/> | 48 bytes.
         /// </summary>
-        Double2x3 = 17,
+        Double2x3 = 18,
 
         /// <summary>
         /// <see cref="double2x4"/> | 64 bytes.
         /// </summary>
-        Double2x4 = 18,
+        Double2x4 = 19,
 
         /// <summary>
         /// <see cref="double3"/> | 24 bytes.
         /// </summary>
-        Double3 = 19,
+        Double3 = 20,
 
         /// <summary>
         /// <see cref="double3x2"/> | 48 bytes.
         /// </summary>
-        Double3x2 = 20,
+        Double3x2 = 21,
 
         /// <summary>
         /// <see cref="double3x3"/> | 72 bytes.
         /// </summary>
-        Double3x3 = 21,
+        Double3x3 = 22,
 
         /// <summary>
         /// <see cref="double3x4"/> | 96 bytes.
         /// </summary>
-        Double3x4 = 22,
+        Double3x4 = 23,
 
         /// <summary>
         /// <see cref="double4"/> | 32 bytes.
         /// </summary>
-        Double4 = 23,
+        Double4 = 24,
 
         /// <summary>
         /// <see cref="double4x2"/> | 64 bytes.
         /// </summary>
-        Double4x2 = 24,
+        Double4x2 = 25,
 
         /// <summary>
         /// <see cref="double4x3"/> | 96 bytes.
         /// </summary>
-        Double4x3 = 25,
+        Double4x3 = 26,
 
         /// <summary>
         /// <see cref="double4x4"/> | 128 bytes.
         /// </summary>
-        Double4x4 = 26,
+        Double4x4 = 27,
 
         /// <summary>
         /// <see cref="float"/> | 4 bytes.
         /// </summary>
-        Float = 27,
+        Float = 28,
 
         /// <summary>
         /// <see cref="float2"/> | 8 bytes.
         /// </summary>
-        Float2 = 28,
+        Float2 = 29,
 
         /// <summary>
         /// <see cref="float2x2"/> | 16 bytes.
         /// </summary>
-        Float2x2 = 29,
+        Float2x2 = 30,
 
         /// <summary>
         /// <see cref="float2x3"/> | 24 bytes.
         /// </summary>
-        Float2x3 = 30,
+        Float2x3 = 31,
 
         /// <summary>
         /// <see cref="float2x4"/> | 32 bytes.
         /// </summary>
-        Float2x4 = 31,
+        Float2x4 = 32,
 
         /// <summary>
         /// <see cref="float3"/> | 12 bytes.
         /// </summary>
-        Float3 = 32,
+        Float3 = 33,
 
         /// <summary>
         /// <see cref="float3x2"/> | 24 bytes.
         /// </summary>
-        Float3x2 = 33,
+        Float3x2 = 34,
 
         /// <summary>
         /// <see cref="float3x3"/> | 36 bytes.
         /// </summary>
-        Float3x3 = 34,
+        Float3x3 = 35,
 
         /// <summary>
         /// <see cref="float3x4"/> | 48 bytes.
         /// </summary>
-        Float3x4 = 35,
+        Float3x4 = 36,
 
         /// <summary>
         /// <see cref="float4"/> | 16 bytes.
         /// </summary>
-        Float4 = 36,
+        Float4 = 37,
 
         /// <summary>
         /// <see cref="float4x2"/> | 32 bytes.
         /// </summary>
-        Float4x2 = 37,
+        Float4x2 = 38,
 
         /// <summary>
         /// <see cref="float4x3"/> | 48 bytes.
         /// </summary>
-        Float4x3 = 38,
+        Float4x3 = 39,
 
         /// <summary>
         /// <see cref="float4x4"/> | 64 bytes.
         /// </summary>
-        Float4x4 = 39,
+        Float4x4 = 40,
 
         /// <summary>
         /// <see cref="half"/> | 2 bytes.
         /// </summary>
-        Half = 40,
+        Half = 41,
 
         /// <summary>
         /// <see cref="half2"/> | 4 bytes.
         /// </summary>
-        Half2 = 41,
+        Half2 = 42,
 
         /// <summary>
         /// <see cref="half3"/> | 6 bytes.
         /// </summary>
-        Half3 = 42,
+        Half3 = 43,
 
         /// <summary>
         /// <see cref="half4"/> | 8 bytes.
         /// </summary>
-        Half4 = 43,
+        Half4 = 44,
 
         /// <summary>
         /// <see cref="int"/> | 4 bytes.
         /// </summary>
-        Int = 44,
+        Int = 45,
 
         /// <summary>
         /// <see cref="int2"/> | 8 bytes.
         /// </summary>
-        Int2 = 45,
+        Int2 = 46,
 
         /// <summary>
         /// <see cref="int2x2"/> | 16 bytes.
         /// </summary>
-        Int2x2 = 46,
+        Int2x2 = 47,
 
         /// <summary>
         /// <see cref="int2x3"/> | 24 bytes.
         /// </summary>
-        Int2x3 = 47,
+        Int2x3 = 48,
 
         /// <summary>
         /// <see cref="int2x4"/> | 32 bytes.
         /// </summary>
-        Int2x4 = 48,
+        Int2x4 = 49,
 
         /// <summary>
         /// <see cref="int3"/> | 12 bytes.
         /// </summary>
-        Int3 = 49,
+        Int3 = 50,
 
         /// <summary>
         /// <see cref="int3x2"/> | 24 bytes.
         /// </summary>
-        Int3x2 = 50,
+        Int3x2 = 51,
 
         /// <summary>
         /// <see cref="int3x3"/> | 36 bytes.
         /// </summary>
-        Int3x3 = 51,
+        Int3x3 = 52,
 
         /// <summary>
         /// <see cref="int3x4"/> | 48 bytes.
         /// </summary>
-        Int3x4 = 52,
+        Int3x4 = 53,
 
         /// <summary>
         /// <see cref="int4"/> | 16 bytes.
         /// </summary>
-        Int4 = 53,
+        Int4 = 54,
 
         /// <summary>
         /// <see cref="int4x2"/> | 32 bytes.
         /// </summary>
-        Int4x2 = 54,
+        Int4x2 = 55,
 
         /// <summary>
         /// <see cref="int4x3"/> | 48 bytes.
         /// </summary>
-        Int4x3 = 55,
+        Int4x3 = 56,
 
         /// <summary>
         /// <see cref="int4x4"/> | 64 bytes.
         /// </summary>
-        Int4x4 = 56,
+        Int4x4 = 57,
 
         /// <summary>
         /// <see cref="long"/> | 8 bytes.
         /// </summary>
-        Long = 57,
+        Long = 58,
 
         /// <summary>
         /// <see cref="sbyte"/> | 1 byte.
         /// </summary>
-        SByte = 58,
+        SByte = 59,
 
         /// <summary>
         /// <see cref="short"/> | 2 bytes.
         /// </summary>
-        Short = 59,
+        Short = 60,
 
         /// <summary>
         /// <see cref="uint"/> | 4 bytes.
         /// </summary>
-        UInt = 60,
+        UInt = 61,
 
         /// <summary>
         /// <see cref="uint2"/> | 8 bytes.
         /// </summary>
-        UInt2 = 61,
+        UInt2 = 62,
 
         /// <summary>
         /// <see cref="uint2x2"/> | 16 bytes.
         /// </summary>
-        UInt2x2 = 62,
+        UInt2x2 = 63,
 
         /// <summary>
         /// <see cref="uint2x3"/> | 24 bytes.
         /// </summary>
-        UInt2x3 = 63,
+        UInt2x3 = 64,
 
         /// <summary>
         /// <see cref="uint2x4"/> | 32 bytes.
         /// </summary>
-        UInt2x4 = 64,
+        UInt2x4 = 65,
 
         /// <summary>
         /// <see cref="uint3"/> | 12 bytes.
         /// </summary>
-        UInt3 = 65,
+        UInt3 = 66,
 
         /// <summary>
         /// <see cref="uint3x2"/> | 24 bytes.
         /// </summary>
-        UInt3x2 = 66,
+        UInt3x2 = 67,
 
         /// <summary>
         /// <see cref="uint3x3"/> | 36 bytes.
         /// </summary>
-        UInt3x3 = 67,
+        UInt3x3 = 68,
 
         /// <summary>
         /// <see cref="uint3x4"/> | 48 bytes.
         /// </summary>
-        UInt3x4 = 68,
+        UInt3x4 = 69,
 
         /// <summary>
         /// <see cref="uint4"/> | 16 bytes.
         /// </summary>
-        UInt4 = 69,
+        UInt4 = 70,
 
         /// <summary>
         /// <see cref="uint4x2"/> | 32 bytes.
         /// </summary>
-        UInt4x2 = 70,
+        UInt4x2 = 71,
 
         /// <summary>
         /// <see cref="uint4x3"/> | 48 bytes.
         /// </summary>
-        UInt4x3 = 71,
+        UInt4x3 = 72,
 
         /// <summary>
         /// <see cref="uint4x4"/> | 64 bytes.
         /// </summary>
-        UInt4x4 = 72,
+        UInt4x4 = 73,
 
         /// <summary>
         /// <see cref="ulong"/> | 8 bytes.
         /// </summary>
-        ULong = 73,
+        ULong = 74,
 
         /// <summary>
         /// <see cref="ushort"/> | 2 bytes.
         /// </summary>
-        UShort = 74,
+        UShort = 75,
 
     }
 

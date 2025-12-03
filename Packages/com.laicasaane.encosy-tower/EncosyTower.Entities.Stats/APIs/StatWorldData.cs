@@ -1,17 +1,17 @@
 // MIT License
-// 
+//
 // Copyright (c) 2023 Philippe St-Amand
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -59,13 +59,27 @@ namespace EncosyTower.Entities.Stats
             _modifierStackRef = new(allocator);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public StatWorldData(int initialCapacity, AllocatorManager.AllocatorHandle allocator)
+        {
+            _statChangeEvents = new(initialCapacity, allocator);
+            _modifierTriggerEvents = new(initialCapacity, allocator);
+
+            _tmpModifierObservedStats = new(initialCapacity, allocator);
+            _tmpStatObservers = new(initialCapacity, allocator);
+            _tmpGlobalUpdatedStats = new(initialCapacity, allocator);
+            _tmpSameEntityUpdatedStats = new(initialCapacity, allocator);
+
+            _modifierStackRef = new(allocator);
+        }
+
         public readonly bool IsCreated
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _statChangeEvents.IsCreated;
         }
 
-        public void SetStatModifiersStack(in TStatModifierStack stack)
+        public void SetStatModifierStack(in TStatModifierStack stack)
         {
             _modifierStackRef.Value = stack;
         }
@@ -85,9 +99,7 @@ namespace EncosyTower.Entities.Stats
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly void GetStatChangeEvents(
-            NativeList<StatChangeEvent<TValuePair>> result
-        )
+        public readonly void GetStatChangeEvents(NativeList<StatChangeEvent<TValuePair>> result)
         {
             result.AddRange(_statChangeEvents.AsArray());
         }
@@ -127,9 +139,33 @@ namespace EncosyTower.Entities.Stats
             _modifierTriggerEvents.Add(evt);
         }
 
+        public void Clear()
+        {
+            ClearStatChangeEvents();
+            ClearModifierTriggerEvents();
+
+            _tmpModifierObservedStats.Clear();
+            _tmpStatObservers.Clear();
+            _tmpGlobalUpdatedStats.Clear();
+            _tmpSameEntityUpdatedStats.Clear();
+
+            _modifierStackRef.Value = default;
+        }
+
         public void Dispose()
         {
-            Dispose(default);
+            if (IsCreated == false)
+            {
+                return;
+            }
+
+            _statChangeEvents.Dispose();
+            _modifierTriggerEvents.Dispose();
+            _tmpModifierObservedStats.Dispose();
+            _tmpStatObservers.Dispose();
+            _tmpGlobalUpdatedStats.Dispose();
+            _tmpSameEntityUpdatedStats.Dispose();
+            _modifierStackRef.Dispose();
         }
 
         public JobHandle Dispose(JobHandle inputDeps)

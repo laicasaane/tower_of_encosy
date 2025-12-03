@@ -1,17 +1,17 @@
 // MIT License
-// 
+//
 // Copyright (c) 2023 Philippe St-Amand
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,14 +30,31 @@ namespace EncosyTower.Entities.Stats
     [Serializable]
     public struct StatHandle : IEquatable<StatHandle>
     {
+        public static readonly StatHandle Null = default;
+
         public Entity entity;
-        public int index;
+
+        /// <summary>
+        /// The index associated with a specific DynamicBuffer&lt;Stat&gt;.
+        /// </summary>
+        /// <remarks>
+        /// A valid index should be greater than 0.
+        /// Index 0 equals to the first element in DynamicBuffer&lt;Stat&gt;
+        /// whose type is <see cref="StatVariantType.None"/>.
+        /// </remarks>
+        public StatIndex index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public StatHandle(Entity entity, int index)
+        public StatHandle(Entity entity, StatIndex index)
         {
             this.entity = entity;
             this.index = index;
+        }
+
+        public readonly bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Equals(Null) == false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -50,6 +67,13 @@ namespace EncosyTower.Entities.Stats
         public static bool operator !=(StatHandle left, StatHandle right)
         {
             return !left.Equals(right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly void Deconstruct(out Entity entity, out StatIndex index)
+        {
+            entity = this.entity;
+            index = this.index;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,20 +99,30 @@ namespace EncosyTower.Entities.Stats
     public struct StatHandle<TStatData> : IEquatable<StatHandle<TStatData>>
         where TStatData : unmanaged, IStatData
     {
+        public static readonly StatHandle<TStatData> Null = default;
+
         public Entity entity;
-        public int index;
+
+        /// <inheritdoc cref="StatHandle.index"/>
+        public StatIndex<TStatData> index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public StatHandle(Entity entity, int index)
+        public StatHandle(Entity entity, StatIndex<TStatData> index)
         {
             this.entity = entity;
             this.index = index;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator StatHandle<TStatData>(StatHandle value)
+        public readonly bool IsValid
         {
-            return new(value.entity, value.index);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Equals(Null) == false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator StatHandle<TStatData>(StatHandle value)
+        {
+            return new(value.entity, (StatIndex<TStatData>)value.index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -107,6 +141,13 @@ namespace EncosyTower.Entities.Stats
         public static bool operator !=(StatHandle<TStatData> left, StatHandle<TStatData> right)
         {
             return !left.Equals(right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly void Deconstruct(out Entity entity, out StatIndex<TStatData> index)
+        {
+            entity = this.entity;
+            index = this.index;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

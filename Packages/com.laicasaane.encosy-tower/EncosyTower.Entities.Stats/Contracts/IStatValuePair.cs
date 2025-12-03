@@ -13,6 +13,8 @@ namespace EncosyTower.Entities.Stats
         bool TrySetBaseValue(in StatVariant value);
 
         bool TrySetCurrentValue(in StatVariant value);
+
+        bool TrySetValues(in StatVariant baseValue, in StatVariant currentValue);
     }
 
     public interface IStatValuePairComposer<TValuePair>

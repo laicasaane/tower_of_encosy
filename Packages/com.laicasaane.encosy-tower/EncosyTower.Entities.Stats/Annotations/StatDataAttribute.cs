@@ -11,22 +11,23 @@ namespace EncosyTower.Entities.Stats
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
     public sealed class StatDataAttribute : Attribute
     {
-        public StatDataAttribute(StatVariantType valueType, bool singleValue = false)
+        public StatDataAttribute(StatVariantType valueType)
         {
             ValueType = valueType;
-            SingleValue = singleValue;
         }
-        
-        public StatDataAttribute(Type enumType, bool singleValue = false)
+
+        public StatDataAttribute(Type enumType)
         {
             EnumType = enumType;
-            SingleValue = singleValue;
         }
 
         public StatVariantType ValueType { get; }
 
         public Type EnumType { get; }
 
-        public bool SingleValue { get; }
+        public bool SingleValue { get; set; }
+
+        [Obsolete("This usecase has yet fully explored.")]
+        private bool WithIndex { get; set; }
     }
 }

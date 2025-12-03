@@ -86,13 +86,57 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 return default;
             }
 
+            var assemblyName = semanticModel.Compilation.AssemblyName;
+            var syntaxTree = syntax.SyntaxTree;
+            var typeIdentifier = symbol.ToValidIdentifier();
+            var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, typeIdentifier);
+            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME);
+
+            TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                  syntax
+                , token
+                , out var openingSource
+                , out var closingSource
+                , printAdditionalUsings: PrintAdditionalUsings
+            );
+
             return new StatSystemDefinition {
                 typeName = symbol.Name,
                 typeNamespace = symbol.ContainingNamespace.ToDisplayString(),
-                syntax = syntax,
-                typeIdentifier = symbol.ToValidIdentifier(),
+                syntaxKeyword = syntax.Keyword.ValueText,
+                typeIdentifier = typeIdentifier,
+                hintName = hintName,
+                sourceFilePath = sourceFilePath,
+                openingSource = openingSource,
+                closingSource = closingSource,
                 maxDataSize = maxDataSize,
+                isStatic = symbol.IsStatic,
+                location = syntax.GetLocation()
             };
+
+            static void PrintAdditionalUsings(ref Printer p)
+            {
+                p.PrintEndLine();
+                p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+                p.PrintEndLine();
+                p.PrintLine("using System;");
+                p.PrintLine("using System.CodeDom.Compiler;");
+                p.PrintLine("using System.Diagnostics;");
+                p.PrintLine("using System.Diagnostics.CodeAnalysis;");
+                p.PrintLine("using System.Runtime.CompilerServices;");
+                p.PrintLine("using System.Runtime.InteropServices;");
+                p.PrintLine("using EncosyTower.Common;");
+                p.PrintLine("using UnityEngine;");
+                p.PrintLine("using Unity.Burst;");
+                p.PrintLine("using Unity.Collections;");
+                p.PrintLine("using Unity.Collections.LowLevel.Unsafe;");
+                p.PrintLine("using Unity.Entities;");
+                p.PrintLine("using Unity.Mathematics;");
+                p.PrintLine("using Unity.Jobs;");
+                p.PrintLine($"using {StatGeneratorAPI.NAMESPACE};");
+                p.PrintEndLine();
+                p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            }
         }
 
         private static void GenerateOutput(
@@ -114,15 +158,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             {
                 SourceGenHelpers.ProjectPath = projectPath;
 
-                var syntax = candidate.syntax;
-                var syntaxTree = syntax.SyntaxTree;
-
                 context.OutputSource(
                       outputSourceGenFiles
-                    , syntax
+                    , candidate.openingSource
                     , candidate.WriteCode(compilation.references)
-                    , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, candidate.typeIdentifier)
-                    , syntaxTree.GetGeneratedSourceFilePath(compilation.assemblyName, GENERATOR_NAME)
+                    , candidate.closingSource
+                    , candidate.hintName
+                    , candidate.sourceFilePath
+                    , candidate.location
                 );
             }
             catch (Exception e)
@@ -134,7 +177,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
-                    , candidate.syntax.GetLocation()
+                    , candidate.location
                     , e.ToUnityPrintableString()
                 ));
             }

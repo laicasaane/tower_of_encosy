@@ -1,6 +1,6 @@
 {
-    "name": "EncosyTower.Samples.Stats",
-    "rootNamespace": "EncosyTower.Samples.Stats",
+    "name": "EncosyTower.Samples.Stats.Definitions",
+    "rootNamespace": "EncosyTower.Samples.Stats.Definitions",
     "references": [
         "EncosyTower.Core",
         "EncosyTower.Entities.Stats",

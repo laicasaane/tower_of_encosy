@@ -3,7 +3,7 @@
 namespace EncosyTower.Tests.Entities.Stats
 {
     [StatSystem(StatDataSize.Size8)]
-    public partial struct StatSystem
+    public static partial class StatSystem
     {
         public static void Test()
         {
@@ -15,7 +15,7 @@ namespace EncosyTower.Tests.Entities.Stats
     {
     }
 
-    [StatData(typeof(DirectionType), true)]
+    [StatData(typeof(DirectionType), SingleValue = true)]
     public partial struct Direction
     {
     }

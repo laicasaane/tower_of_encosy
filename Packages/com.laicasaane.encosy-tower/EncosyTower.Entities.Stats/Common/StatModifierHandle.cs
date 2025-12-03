@@ -39,6 +39,13 @@ namespace EncosyTower.Entities.Stats
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly void Deconstruct(out StatHandle affectedStatHandle, out uint modifierId)
+        {
+            affectedStatHandle = this.affectedStatHandle;
+            modifierId = this.modifierId;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(StatModifierHandle other)
         {
             return affectedStatHandle == other.affectedStatHandle && modifierId == other.modifierId;

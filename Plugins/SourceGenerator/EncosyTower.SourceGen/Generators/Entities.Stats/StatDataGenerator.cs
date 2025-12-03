@@ -12,9 +12,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         private const string NAMESPACE = StatGeneratorAPI.NAMESPACE;
         private const string SKIP_ATTRIBUTE = StatGeneratorAPI.SKIP_ATTRIBUTE;
         private const string STAT_DATA_ATTRIBUTE = $"global::{NAMESPACE}.StatDataAttribute";
-        private const string STAT_VALUE_TYPE_ATTRIBUTE = $"global::{NAMESPACE}.StatVariantTypeAttribute";
-        private const string ISTAT_VALUE_ATTRIBUTE = $"global::{NAMESPACE}.IStatVariant";
-        private const string ISTAT_VALUE_PAIR_ATTRIBUTE = $"global::{NAMESPACE}.IStatVariantPair";
         private const string GENERATOR_NAME = nameof(StatDataGenerator);
 
         private static readonly Dictionary<string, string> s_enumTypeMap = new(StringComparer.Ordinal) {
@@ -97,12 +94,30 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 return default;
             }
 
+            var assemblyName = semanticModel.Compilation.AssemblyName;
+            var syntaxTree = syntax.SyntaxTree;
+            var typeIdentifier = symbol.ToValidIdentifier();
+            var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, typeIdentifier);
+            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME);
+
+            TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                  syntax
+                , token
+                , out var openingSource
+                , out var closingSource
+                , printAdditionalUsings: PrintAdditionalUsings
+            );
+
             var args = argumentList.Arguments;
             var result = new StatDataDefinition {
-                syntax = syntax,
                 typeName = symbol.Name,
                 typeNamespace = symbol.ContainingNamespace.ToDisplayString(),
-                typeIdentifier = symbol.ToValidIdentifier(),
+                typeIdentifier = typeIdentifier,
+                hintName = hintName,
+                sourceFilePath = sourceFilePath,
+                openingSource = openingSource,
+                closingSource = closingSource,
+                location = syntax.GetLocation(),
                 singleValue = false,
             };
 
@@ -126,15 +141,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 }
 
                 var typeNames = StatGeneratorAPI.TypeNames.AsSpan();
-                var namespaces = StatGeneratorAPI.Namespaces.AsSpan();
+                var sizes = StatGeneratorAPI.Sizes.AsSpan();
 
                 var type = types[index];
                 var typeName = typeNames[index];
-                var ns = namespaces[index];
-                var hasNs = string.IsNullOrEmpty(ns) == false;
 
+                result.size = sizes[index];
                 result.valueTypeName = typeName;
-                result.valueFullTypeName = hasNs ? $"{ns}.{type}" : type;
+                result.valueFullTypeName = type;
             }
             else if (args[0].Expression is TypeOfExpressionSyntax typeOfExpr)
             {
@@ -156,19 +170,65 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 result.valueTypeName = valueTypeName;
                 result.valueFullTypeName = candidate.ToFullName();
                 result.underlyingTypeName = underlyingType;
+
+                candidate.EnumUnderlyingType.GetUnmanagedSize(ref result.size);
+            }
+            else
+            {
+                return default;
             }
 
-            if (args.Count > 1 && args[1].Expression is LiteralExpressionSyntax literalExpr2)
+            for (var i = 1; i < args.Count; i++)
             {
-                result.singleValue = (bool)literalExpr2.Token.Value;
+                var arg = args[i];
+
+                if (arg.NameEquals is not NameEqualsSyntax nameEquals
+                    || arg.Expression is not LiteralExpressionSyntax literalExpr2
+                )
+                {
+                    continue;
+                }
+
+                switch (nameEquals.Name.Identifier.ValueText)
+                {
+                    case "SingleValue":
+                    {
+                        result.singleValue = (bool)literalExpr2.Token.Value;
+                        break;
+                    }
+
+                    case "WithIndex":
+                    {
+                        result.withIndex = (bool)literalExpr2.Token.Value;
+                        break;
+                    }
+                }
             }
 
             return result;
+
+            static void PrintAdditionalUsings(ref Printer p)
+            {
+                p.PrintEndLine();
+                p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+                p.PrintEndLine();
+                p.PrintLine("using System;");
+                p.PrintLine("using System.CodeDom.Compiler;");
+                p.PrintLine("using System.Diagnostics.CodeAnalysis;");
+                p.PrintLine("using System.Runtime.CompilerServices;");
+                p.PrintLine("using System.Runtime.InteropServices;");
+                p.PrintLine("using EncosyTower.Logging;");
+                p.PrintLine("using Unity.Entities;");
+                p.PrintLine("using Unity.Mathematics;");
+                p.PrintLine($"using {StatGeneratorAPI.NAMESPACE};");
+                p.PrintEndLine();
+                p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            }
         }
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidateSlim compilation
+            , CompilationCandidateSlim _
             , StatDataDefinition candidate
             , string projectPath
             , bool outputSourceGenFiles
@@ -185,15 +245,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             {
                 SourceGenHelpers.ProjectPath = projectPath;
 
-                var syntax = candidate.syntax;
-                var syntaxTree = syntax.SyntaxTree;
-
                 context.OutputSource(
                       outputSourceGenFiles
-                    , syntax
+                    , candidate.openingSource
                     , candidate.WriteCode()
-                    , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, candidate.typeIdentifier)
-                    , syntaxTree.GetGeneratedSourceFilePath(compilation.assemblyName, GENERATOR_NAME)
+                    , candidate.closingSource
+                    , candidate.hintName
+                    , candidate.sourceFilePath
+                    , candidate.location
                 );
             }
             catch (Exception e)
@@ -205,7 +264,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
-                    , candidate.syntax.GetLocation()
+                    , candidate.location
                     , e.ToUnityPrintableString()
                 ));
             }

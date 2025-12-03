@@ -21,13 +21,27 @@
 // SOFTWARE.
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace EncosyTower.Entities.Stats
 {
     [Serializable]
     public struct ModifierRange
     {
-        public ushort startIndex;
-        public ushort count;
+        public int startIndex;
+        public int count;
+
+        public readonly int ExclusiveEnd
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => startIndex + count;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly void Deconstruct(out int startIndex, out int count)
+        {
+            startIndex = this.startIndex;
+            count = this.count;
+        }
     }
 }

@@ -11,6 +11,7 @@
 /// LIST OF SUPPORTED TYPES AND THEIR SIZE
 /// TYPE      | SIZE (bytes)
 /// --------- | ------------
+/// None      | 1
 /// Bool      | 1
 /// Bool2     | 2
 /// Bool2x2   | 4

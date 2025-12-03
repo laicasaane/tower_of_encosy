@@ -5,8 +5,6 @@ namespace EncosyTower.Entities.Stats
     public interface IStat<TValuePair> : IBufferElementData
         where TValuePair : unmanaged, IStatValuePair
     {
-        StatHandle Handle { get; set; }
-
         ModifierRange ModifierRange { get; set; }
 
         ObserverRange ObserverRange { get; set; }

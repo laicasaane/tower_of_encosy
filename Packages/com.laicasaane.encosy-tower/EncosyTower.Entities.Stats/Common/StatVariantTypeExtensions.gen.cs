@@ -29,6 +29,7 @@ namespace EncosyTower.Entities.Stats
         {
             return type switch
             {
+                StatVariantType.None => new StatVariant(new None()),
                 StatVariantType.Bool => new StatVariant(true),
                 StatVariantType.Bool2 => new StatVariant(new bool2(true)),
                 StatVariantType.Bool2x2 => new StatVariant(new bool2x2(true)),
