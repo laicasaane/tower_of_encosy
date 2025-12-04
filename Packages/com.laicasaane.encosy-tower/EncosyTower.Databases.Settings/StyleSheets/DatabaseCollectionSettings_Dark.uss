@@ -2,7 +2,7 @@
     --database-border-color: #1A1A1A;
     --sub-text-active: #EEEEEE;
     --sub-text-active-background: #007600;
-    --sub-text-inactive: ##EEEEEE;
+    --sub-text-inactive: #EEEEEE;
     --sub-text-inactive-background: #8A0000;
     --button-highlight-enabled-text: #EEEEEE;
     --button-highlight-enabled-background: #007600;
