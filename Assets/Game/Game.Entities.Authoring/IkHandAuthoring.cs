@@ -2,6 +2,7 @@ using System;
 using EncosyTower.Entities;
 using Latios;
 using Module.EntityComponents;
+using SaintsField;
 using Unity.Entities;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ namespace Module.EntityAuthoring
 {
     internal sealed partial class IkHandAuthoring : MonoBehaviour
     {
-        [ReorderableList(Foldable = true)] public HandEntry[] hands;
+        [Table] public HandEntry[] hands;
 
         [Serializable]
         public struct HandEntry

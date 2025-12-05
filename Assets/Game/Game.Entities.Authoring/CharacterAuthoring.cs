@@ -5,6 +5,7 @@ using Latios.Kinemation;
 using Latios.Kinemation.Authoring;
 using Module.EntityComponents;
 using Module.GameCommon;
+using SaintsField;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -13,7 +14,7 @@ namespace Module.EntityAuthoring
 {
     internal sealed partial class CharacterAuthoring : MonoBehaviour
     {
-        [ReorderableList(Foldable = true)] public AnimEntry[] anims;
+        [Table] public AnimEntry[] anims;
 
         private sealed class Baker : SmartBaker<CharacterAuthoring, SmartBakeItem> { }
 

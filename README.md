@@ -158,10 +158,6 @@ Thank you for your contributions to the community. Your works greatly ease my de
       <td><a href='https://github.com/thebeardphantom/Runtime-TypeCache'>Runtime TypeCache</a></td>
     </tr>
     <tr>
-      <td>Miłosz Matkowski</td>
-      <td><a href='https://github.com/arimger/Unity-Editor-Toolbox'>Unity Editor Toolbox</a></td>
-    </tr>
-    <tr>
       <td>Natsuneko Laboratory</td>
       <td><a href='https://github.com/natsuneko-laboratory/power-rename'>Power Rename</a></td>
     </tr>
@@ -196,6 +192,10 @@ Thank you for your contributions to the community. Your works greatly ease my de
     <tr>
       <td>Stella Cannefax</td>
       <td><a href='https://github.com/stella3d/SharedArray'>SharedArray</a></td>
+    </tr>
+    <tr>
+      <td>Tyler Temp</td>
+      <td><a href='https://github.com/TylerTemp/SaintsField'>SaintsField</a></td>
     </tr>
     <tr>
       <td>WMJordan</td>
