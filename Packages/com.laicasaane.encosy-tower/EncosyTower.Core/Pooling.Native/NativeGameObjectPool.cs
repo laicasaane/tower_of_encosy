@@ -173,7 +173,7 @@ namespace EncosyTower.Pooling.Native
                 var transformId = transformIds[i];
                 var arrayIndex = transformArray.length;
 
-                transformArray.Add(transformId);
+                transformArray.Add((EntityId)transformId);
                 unusedTransformIndices.Add(arrayIndex);
             }
 

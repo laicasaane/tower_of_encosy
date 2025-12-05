@@ -233,12 +233,12 @@ namespace EncosyTower.Pooling
             if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 var ids = NativeArray.CreateFast<EntityId>(1, Allocator.Temp);
-                ids[0] = result;
+                ids[0] = (EntityId)result;
 
                 GameObject.SetGameObjectsActive(ids, true);
             }
 
-            return (GameObjectId)result;
+            return result;
         }
 
         public TransformId RentTransformId(RentingStrategy strategy)
@@ -258,12 +258,12 @@ namespace EncosyTower.Pooling
             if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
             {
                 var ids = NativeArray.CreateFast<EntityId>(1, Allocator.Temp);
-                ids[0] = id;
+                ids[0] = (EntityId)id;
 
                 GameObject.SetGameObjectsActive(ids, true);
             }
 
-            return (TransformId)result;
+            return result;
         }
 
         public void Rent(Span<GameObjectId> gameObjectIds, Span<TransformId> transformIds, RentingStrategy strategy)
