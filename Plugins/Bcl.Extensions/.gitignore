@@ -4,3 +4,6 @@
 !**/*.csproj
 !**/*.sln
 !**/*.slnx
+
+# All .DS_Store files for macOS
+*.DS_Store
