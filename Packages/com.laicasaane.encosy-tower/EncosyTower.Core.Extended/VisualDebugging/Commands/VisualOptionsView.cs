@@ -37,7 +37,12 @@ namespace EncosyTower.VisualDebugging.Commands
         private void OnClicked()
         {
             var menu = _menu.Rebuild();
+
+#if UNITY_6000_3_OR_NEWER
+            menu.DropDown(worldBound, this, DropdownMenuSizeMode.Auto);
+#else
             menu.DropDown(worldBound, this, false);
+#endif
         }
     }
 

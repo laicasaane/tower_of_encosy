@@ -11,6 +11,20 @@ using UnityEngine.SceneManagement;
 
 namespace EncosyTower.Pooling
 {
+#if UNITY_6000_2_OR_NEWER
+    using GameObjectId = UnityEntityId<GameObject>;
+    using TransformId = UnityEntityId<Transform>;
+#else
+    using GameObjectId = UnityInstanceId<GameObject>;
+    using TransformId = UnityInstanceId<Transform>;
+#endif
+
+#if UNITY_6000_3_OR_NEWER
+    using EntityId = UnityEngine.EntityId;
+#else
+    using EntityId = System.Int32;
+#endif
+
     public sealed partial class GameObjectPrefab
     {
         public GameObject Source { get; init; }
@@ -75,13 +89,11 @@ namespace EncosyTower.Pooling
             return Instantiate(Location.Parent);
         }
 
-
-#if UNITY_6000_2_OR_NEWER
         public bool Instantiate(
               int count
             , Allocator allocator
-            , out NativeArray<EntityId> gameObjectIds
-            , out NativeArray<EntityId> transformIds
+            , out NativeArray<GameObjectId> gameObjectIds
+            , out NativeArray<TransformId> transformIds
             , Location tryLocation1
             , Location tryLocation2
             , Location tryLocation3
@@ -101,60 +113,8 @@ namespace EncosyTower.Pooling
                 throw new NullReferenceException(nameof(Source));
             }
 
-            gameObjectIds = NativeArray.CreateFast<EntityId>(count, allocator);
-            transformIds = NativeArray.CreateFast<EntityId>(count, allocator);
-
-            var reGameObjectIds = gameObjectIds.Reinterpret<int>();
-            var reTransformIds = transformIds.Reinterpret<int>();
-
-            if (Validate(tryLocation1))
-            {
-                Instantiate(source, count, reGameObjectIds, reTransformIds, tryLocation1);
-                return true;
-            }
-
-            if (Validate(tryLocation2))
-            {
-                Instantiate(source, count, reGameObjectIds, reTransformIds, tryLocation2);
-                return true;
-            }
-
-            if (Validate(tryLocation3))
-            {
-                Instantiate(source, count, reGameObjectIds, reTransformIds, tryLocation3);
-                return true;
-            }
-
-            return false;
-        }
-#endif
-
-        public bool Instantiate(
-              int count
-            , Allocator allocator
-            , out NativeArray<int> gameObjectIds
-            , out NativeArray<int> transformIds
-            , Location tryLocation1
-            , Location tryLocation2
-            , Location tryLocation3
-        )
-        {
-            if (count <= 0)
-            {
-                gameObjectIds = default;
-                transformIds = default;
-                return false;
-            }
-
-            var source = Source;
-
-            if (source.IsInvalid())
-            {
-                throw new NullReferenceException(nameof(Source));
-            }
-
-            gameObjectIds = NativeArray.CreateFast<int>(count, allocator);
-            transformIds = NativeArray.CreateFast<int>(count, allocator);
+            gameObjectIds = NativeArray.CreateFast<GameObjectId>(count, allocator);
+            transformIds = NativeArray.CreateFast<TransformId>(count, allocator);
 
             if (Validate(tryLocation1))
             {
@@ -194,17 +154,17 @@ namespace EncosyTower.Pooling
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void MoveToScene(Span<int> gameObjectIds, bool moveToPoolScene = false)
+        public void MoveToScene(Span<GameObjectId> gameObjectIds, bool moveToPoolScene = false)
         {
             var scene = moveToPoolScene ? this.PoolScene : this.Scene;
             var length = gameObjectIds.Length;
 
             if (scene.IsValid() && length > 0)
             {
-                var instanceIds = NativeArray.CreateFast<int>(length, Allocator.Temp);
+                var instanceIds = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
                 gameObjectIds.CopyTo(instanceIds);
 
-                SceneManager.MoveGameObjectsToScene(instanceIds, scene);
+                SceneManager.MoveGameObjectsToScene(instanceIds.Reinterpret<EntityId>(), scene);
             }
         }
 
@@ -221,8 +181,8 @@ namespace EncosyTower.Pooling
         private void Instantiate(
               GameObject source
             , int count
-            , NativeArray<int> gameObjectIds
-            , NativeArray<int> transformIds
+            , NativeArray<GameObjectId> gameObjectIds
+            , NativeArray<TransformId> transformIds
             , Location location
         )
         {
@@ -237,8 +197,8 @@ namespace EncosyTower.Pooling
                           source.GetInstanceID()
 #endif
                         , count
-                        , gameObjectIds
-                        , transformIds
+                        , gameObjectIds.Reinterpret<EntityId>()
+                        , transformIds.Reinterpret<EntityId>()
                         , PoolScene
                     );
 
@@ -254,8 +214,8 @@ namespace EncosyTower.Pooling
                           source.GetInstanceID()
 #endif
                         , count
-                        , gameObjectIds
-                        , transformIds
+                        , gameObjectIds.Reinterpret<EntityId>()
+                        , transformIds.Reinterpret<EntityId>()
                         , Scene
                     );
 
@@ -271,8 +231,8 @@ namespace EncosyTower.Pooling
                           source.GetInstanceID()
 #endif
                         , count
-                        , gameObjectIds
-                        , transformIds
+                        , gameObjectIds.Reinterpret<EntityId>()
+                        , transformIds.Reinterpret<EntityId>()
                     );
 
                     var parent = this.Parent;
@@ -281,7 +241,11 @@ namespace EncosyTower.Pooling
                     {
                         var list = new List<UnityEngine.Object>(transformIds.Length);
 
-                        Resources.InstanceIDToObjectList(transformIds, list);
+#if UNITY_6000_3_OR_NEWER
+                        Resources.EntityIdsToObjectList(transformIds.Reinterpret<EntityId>(), list);
+#else
+                        Resources.InstanceIDToObjectList(transformIds.Reinterpret<EntityId>(), list);
+#endif
 
                         var span = list.AsReadOnlySpan();
                         var spanLength = span.Length;

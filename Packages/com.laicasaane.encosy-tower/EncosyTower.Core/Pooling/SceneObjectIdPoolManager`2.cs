@@ -23,6 +23,12 @@ namespace EncosyTower.Pooling
     using TransformId = UnityInstanceId<Transform>;
 #endif
 
+#if UNITY_6000_3_OR_NEWER
+    using EntityId = UnityEngine.EntityId;
+#else
+    using EntityId = System.Int32;
+#endif
+
     public abstract partial class SceneObjectIdManager<TKey, TId> : MonoBehaviour
         where TKey : ITryLoadAsync<GameObject>
         where TId : unmanaged, IEquatable<TId>
@@ -61,7 +67,7 @@ namespace EncosyTower.Pooling
 
             SceneManager.MoveGameObjectToScene(defaultGo, scene);
 
-            _transformArray.Add((int)transformId);
+            _transformArray.Add((EntityId)transformId);
             _positions.Add(default);
             _goInfoMap.Add(transformId, new GameObjectInfo {
                 gameObjectId = gameObjectId,
@@ -222,7 +228,7 @@ namespace EncosyTower.Pooling
                 var transformId = transform.transformId;
                 var index = transform.transformArrayIndex = transformArray.length;
 
-                transformArray.Add((int)transformId);
+                transformArray.Add((EntityId)transformId);
                 transformArray[index].SetPositionAndRotation(defaultPosition, defaultRotation);
 
                 goInfoMap.Add(transformId, transform);

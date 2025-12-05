@@ -22,6 +22,12 @@ namespace EncosyTower.Pooling.Native
     using TransformId = UnityInstanceId<Transform>;
 #endif
 
+#if UNITY_6000_3_OR_NEWER
+    using EntityId = UnityEngine.EntityId;
+#else
+    using EntityId = System.Int32;
+#endif
+
     public struct NativeGameObjectPool : IDisposable
     {
         public static readonly Allocator Allocator = Allocator.Persistent;
@@ -136,15 +142,20 @@ namespace EncosyTower.Pooling.Native
 
             IncreaseCapacityBy(amount);
 
-            var gameObjectIds = NativeArray.CreateFast<int>(amount, Allocator.Temp);
-            var transformIds = NativeArray.CreateFast<int>(amount, Allocator.Temp);
+            var gameObjectIds = NativeArray.CreateFast<GameObjectId>(amount, Allocator.Temp);
+            var transformIds = NativeArray.CreateFast<TransformId>(amount, Allocator.Temp);
             var prefab = Prefab;
 
-            GameObject.InstantiateGameObjects(prefab.EntityId, amount, gameObjectIds, transformIds);
+            GameObject.InstantiateGameObjects(
+                  prefab.EntityId
+                , amount
+                , gameObjectIds.Reinterpret<EntityId>()
+                , transformIds.Reinterpret<EntityId>()
+            );
 
             if (options.Contains(NativeReturningOptions.Deactivate))
             {
-                GameObject.SetGameObjectsActive(gameObjectIds, false);
+                GameObject.SetGameObjectsActive(gameObjectIds.Reinterpret<EntityId>(), false);
             }
 
             _unusedGameObjectIds.AddRange(gameObjectIds.Reinterpret<GameObjectId>());
@@ -170,7 +181,7 @@ namespace EncosyTower.Pooling.Native
                 && prefab.ReturnScene.TryGetValue(out var scene)
             )
             {
-                SceneManager.MoveGameObjectsToScene(gameObjectIds, scene);
+                SceneManager.MoveGameObjectsToScene(gameObjectIds.Reinterpret<EntityId>(), scene);
             }
 
             error = NativeRentingError.None;
@@ -275,7 +286,7 @@ namespace EncosyTower.Pooling.Native
                 , transformIds
                 , arrayIndices
                 , options
-                , gameObjectIds.Reinterpret<int>()
+                , gameObjectIds
             );
 
             error = NativeRentingError.None;
@@ -423,7 +434,7 @@ namespace EncosyTower.Pooling.Native
                 , transformIds
                 , arrayIndices
                 , options
-                , gameObjectIds.Reinterpret<int>()
+                , gameObjectIds
             );
 
             error = NativeReturningError.None;
@@ -478,7 +489,7 @@ namespace EncosyTower.Pooling.Native
                 , returnedTransformIds
                 , returnedArrayIndices
                 , options
-                , returnedGameObjectIds.Reinterpret<int>()
+                , returnedGameObjectIds
             );
 
             error = NativeReturningError.None;
@@ -585,7 +596,7 @@ namespace EncosyTower.Pooling.Native
             , in NativeSlice<TransformId> transformIds
             , in NativeSlice<int> arrayIndices
             , NativeRentingOptions options
-            , NativeArray<int> gameObjectIdsToMove
+            , NativeArray<GameObjectId> gameObjectIdsToMove
         )
         {
             var amount = gameObjectIds.Length;
@@ -603,7 +614,7 @@ namespace EncosyTower.Pooling.Native
 
             if (gameObjectIdsToMove.IsCreated == false)
             {
-                var ids = unusedGameObjectIds.Reinterpret<int>().Slice(startIndex, amount);
+                var ids = unusedGameObjectIds.Slice(startIndex, amount);
                 gameObjectIdsToMove = NativeArray.CreateFrom(ids, Allocator.Temp);
             }
 
@@ -613,7 +624,7 @@ namespace EncosyTower.Pooling.Native
 
             if (options.Contains(NativeRentingOptions.Activate))
             {
-                GameObject.SetGameObjectsActive(gameObjectIdsToMove, true);
+                GameObject.SetGameObjectsActive(gameObjectIdsToMove.Reinterpret<EntityId>(), true);
             }
 
             if (options.Contains(NativeRentingOptions.MoveToScene) == false
@@ -623,7 +634,7 @@ namespace EncosyTower.Pooling.Native
                 return;
             }
 
-            SceneManager.MoveGameObjectsToScene(gameObjectIdsToMove, scene);
+            SceneManager.MoveGameObjectsToScene(gameObjectIdsToMove.Reinterpret<EntityId>(), scene);
         }
 
         private void ReturnInternal(
@@ -631,7 +642,7 @@ namespace EncosyTower.Pooling.Native
             , in NativeSlice<TransformId> transformIds
             , in NativeSlice<int> arrayIndices
             , NativeReturningOptions options
-            , NativeArray<int> gameObjectIdsToMove
+            , NativeArray<GameObjectId> gameObjectIdsToMove
         )
         {
             var amount = gameObjectIds.Length;
@@ -652,13 +663,13 @@ namespace EncosyTower.Pooling.Native
 
             if (gameObjectIdsToMove.IsCreated == false)
             {
-                var ids = unusedGameObjectIds.Reinterpret<int>().AsSpan().Slice(startIndex, amount);
+                var ids = unusedGameObjectIds.AsSpan().Slice(startIndex, amount);
                 gameObjectIdsToMove = NativeArray.CreateFrom(ids, Allocator.Temp);
             }
 
             if (options.Contains(NativeReturningOptions.Deactivate))
             {
-                GameObject.SetGameObjectsActive(gameObjectIdsToMove, false);
+                GameObject.SetGameObjectsActive(gameObjectIdsToMove.Reinterpret<EntityId>(), false);
             }
 
             if (options.Contains(NativeReturningOptions.MoveToScene) == false
@@ -668,7 +679,7 @@ namespace EncosyTower.Pooling.Native
                 return;
             }
 
-            SceneManager.MoveGameObjectsToScene(gameObjectIdsToMove, scene);
+            SceneManager.MoveGameObjectsToScene(gameObjectIdsToMove.Reinterpret<EntityId>(), scene);
         }
     }
 }
