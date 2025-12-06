@@ -274,35 +274,45 @@ namespace EncosyTower.SourceGen.Generators
 
             if (nameSpan.StartsWith(prefix))
             {
-                return ToTitleCase(nameSpan.Slice(1));
+                return MakeFirstCharUpperCase(nameSpan.Slice(1));
             }
 
             prefix = FIELD_PREFIX_M_UNDERSCORE.AsSpan();
 
             if (nameSpan.StartsWith(prefix))
             {
-                return ToTitleCase(nameSpan.Slice(2));
+                return MakeFirstCharUpperCase(nameSpan.Slice(2));
             }
 
-            return ToTitleCase(nameSpan);
+            return MakeFirstCharUpperCase(nameSpan);
         }
 
-        public static string ToFieldName(this IPropertySymbol property)
+        public static string ToPublicFieldName(this IPropertySymbol property)
         {
-            return $"{FIELD_PREFIX_UNDERSCORE}{ToLowerCase(property.Name.AsSpan())}";
+            return MakeFirstCharLowerCase(property.Name.AsSpan());
         }
 
-        public static string ToFieldName(this string propertyName)
+        public static string ToPublicFieldName(this string propertyName)
         {
-            return $"{FIELD_PREFIX_UNDERSCORE}{ToLowerCase(propertyName.AsSpan())}";
+            return MakeFirstCharLowerCase(propertyName.AsSpan());
         }
 
-        public static string ToTitleCase(this ReadOnlySpan<char> value)
+        public static string ToPrivateFieldName(this IPropertySymbol property)
+        {
+            return $"{FIELD_PREFIX_UNDERSCORE}{MakeFirstCharLowerCase(property.Name.AsSpan())}";
+        }
+
+        public static string ToPrivateFieldName(this string propertyName)
+        {
+            return $"{FIELD_PREFIX_UNDERSCORE}{MakeFirstCharLowerCase(propertyName.AsSpan())}";
+        }
+
+        public static string MakeFirstCharUpperCase(this ReadOnlySpan<char> value)
         {
             return $"{char.ToUpper(value[0])}{value.Slice(1).ToString()}";
         }
 
-        public static string ToLowerCase(this ReadOnlySpan<char> value)
+        public static string MakeFirstCharLowerCase(this ReadOnlySpan<char> value)
         {
             return $"{char.ToLower(value[0])}{value.Slice(1).ToString()}";
         }

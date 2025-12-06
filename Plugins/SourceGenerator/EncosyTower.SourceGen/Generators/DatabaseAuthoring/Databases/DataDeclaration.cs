@@ -71,7 +71,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                             }
 
                             // Generated fields
-                            fields.Add((property.Name, property.ToFieldName(), property, fieldType));
+                            fields.Add((property.Name, property.ToPrivateFieldName(), property, fieldType));
                             continue;
                         }
                     }

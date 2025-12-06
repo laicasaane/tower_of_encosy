@@ -314,7 +314,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                         , DiagnosticDescriptors.InvalidFieldTargetedAttribute
                     );
 
-                    var fieldName = property.ToFieldName();
+                    var fieldName = property.ToPrivateFieldName();
                     var fieldEquality = fieldType.DetermineEquality();
 
                     if (fieldType.InheritsFromInterface(IDATA))

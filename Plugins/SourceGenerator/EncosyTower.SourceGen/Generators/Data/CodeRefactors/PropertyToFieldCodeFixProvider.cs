@@ -83,7 +83,7 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
 
             AddPropertyTypeAttribute(propertyDecl, fieldAttribListList, fieldAttribCheck, fieldTypeSyntax);
 
-            var fieldName = propertyDecl.Identifier.Text.ToFieldName();
+            var fieldName = propertyDecl.Identifier.Text.ToPrivateFieldName();
             var varDecl = SyntaxFactory.VariableDeclaration(fieldTypeSyntax ?? propertyDecl.Type);
             varDecl = varDecl.WithVariables(
                 SyntaxFactory.SingletonSeparatedList(SyntaxFactory.VariableDeclarator(fieldName))

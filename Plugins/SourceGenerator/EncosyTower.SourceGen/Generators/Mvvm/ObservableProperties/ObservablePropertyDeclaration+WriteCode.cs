@@ -226,7 +226,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             foreach (var member in PropRefs)
             {
-                var fieldName = member.Property.ToFieldName();
+                var fieldName = member.Property.ToPrivateFieldName();
                 var typeName = member.Property.Type.ToFullName();
                 var name = member.Property.Name;
 
@@ -343,7 +343,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             foreach (var member in PropRefs)
             {
-                var fieldName = member.Property.ToFieldName();
+                var fieldName = member.Property.ToPrivateFieldName();
                 var typeName = member.Property.Type.ToFullName();
 
                 if (types.ContainsKey(typeName) == false)
@@ -368,7 +368,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             foreach (var type in types.Values)
             {
                 var typeName = type.ToFullName();
-                var propertyName = type.ToValidIdentifier().AsSpan().ToTitleCase();
+                var propertyName = type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
 
                 p.PrintLine(GENERATED_CODE).PrintLine(EDITOR_BROWSABLE_NEVER);
                 p.PrintLine($"private readonly {CACHED_VARIANT_CONVERTER}<{typeName}> _variantConverter{propertyName} = {CACHED_VARIANT_CONVERTER}<{typeName}>.Default;");
@@ -387,7 +387,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 var propertyName = member.Property.Name;
                 var typeName = member.Property.Type.ToFullName();
                 var argsName = OnChangedArgsName(member);
-                var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
                 var converterForFieldVariable = $"variantConverter{converterForField}";
                 var willNotifyPropertyChanged = NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties);
                 var constName = ConstName(member);
@@ -475,7 +475,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         {
                             var oldValueName = "oldValueProperty";
                             var otherArgsName = OnChangedArgsName(property);
-                            var converterForProperty = property.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                            var converterForProperty = property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
                             var converterForPropertyVariable = $"converter{converterForProperty}";
 
                             p.OpenScope();
@@ -518,7 +518,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 var propertyName = member.PropertyName;
                 var typeName = member.Field.Type.ToFullName();
                 var argsName = OnChangedArgsName(member);
-                var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
                 var converterForFieldVariable = $"variantConverter{converterForField}";
                 var willNotifyPropertyChanged = NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties);
                 var constName = ConstName(member);
@@ -576,7 +576,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             {
                                 var oldValueName = "oldValueProperty";
                                 var otherArgsName = OnChangedArgsName(property);
-                                var converterForProperty = property.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                                var converterForProperty = property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
                                 var converterForPropertyVariable = $"converter{converterForProperty}";
 
                                 p.OpenScope();
@@ -870,7 +870,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     {
                         var fieldName = member.Field.Name;
                         var argsName = OnChangedArgsName(member);
-                        var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                        var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
                         var converterForFieldVariable = $"variantConverter{converterForField}";
                         var constName = ConstName(member);
 
@@ -891,7 +891,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     {
                         var fieldName = member.FieldName;
                         var argsName = OnChangedArgsName(member);
-                        var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                        var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
                         var converterForFieldVariable = $"variantConverter{converterForField}";
                         var constName = ConstName(member);
 
@@ -925,7 +925,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     {
                         var constName = ConstName(property);
                         var otherArgsName = OnChangedArgsName(property);
-                        var converterForProperty = property.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                        var converterForProperty = property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
                         var converterForPropertyVariable = $"converter{converterForProperty}";
 
                         p.PrintLine($"case {constName}:");
@@ -973,7 +973,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     {
                         var fieldName = member.Field.Name;
                         var argsName = OnChangedArgsName(member);
-                        var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                        var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
                         var converterForFieldVariable = $"variantConverter{converterForField}";
                         var constName = ConstName(member);
 
@@ -994,7 +994,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     {
                         var fieldName = member.FieldName;
                         var argsName = OnChangedArgsName(member);
-                        var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                        var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
                         var converterForFieldVariable = $"variantConverter{converterForField}";
                         var constName = ConstName(member);
 
@@ -1028,7 +1028,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     {
                         var constName = ConstName(property);
                         var otherArgsName = OnChangedArgsName(property);
-                        var converterForProperty = property.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                        var converterForProperty = property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
                         var converterForPropertyVariable = $"converter{converterForProperty}";
 
                         p.PrintLine($"case {constName}:");
@@ -1073,7 +1073,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 {
                     var fieldName = member.Field.Name;
                     var argsName = OnChangedArgsName(member);
-                    var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                    var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
                     var converterForFieldVariable = $"variantConverter{converterForField}";
                     var constName = ConstName(member);
 
@@ -1092,7 +1092,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 {
                     var fieldName = member.FieldName;
                     var argsName = OnChangedArgsName(member);
-                    var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                    var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
                     var converterForFieldVariable = $"variantConverter{converterForField}";
                     var constName = ConstName(member);
 
@@ -1124,7 +1124,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 {
                     var constName = ConstName(property);
                     var otherArgsName = OnChangedArgsName(property);
-                    var converterForProperty = property.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                    var converterForProperty = property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
                     var converterForPropertyVariable = $"converter{converterForProperty}";
 
                     p.OpenScope();
@@ -1191,7 +1191,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             foreach (var member in PropRefs)
             {
-                var fieldName = member.Property.ToFieldName();
+                var fieldName = member.Property.ToPrivateFieldName();
                 var propName = member.GetPropertyName();
                 var typeName = member.Property.Type.ToFullName();
 

@@ -199,7 +199,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     }
                     else
                     {
-                        var fieldName = property.ToFieldName();
+                        var fieldName = property.ToPrivateFieldName();
                         var propRef = new PropertyRef {
                             Property = property,
                             FieldName = fieldName,

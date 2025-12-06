@@ -139,7 +139,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.CodeRefactors
                 }
             }
 
-            var fieldName = propertyDecl.Identifier.Text.ToFieldName();
+            var fieldName = propertyDecl.Identifier.Text.ToPrivateFieldName();
             var varDecl = SyntaxFactory.VariableDeclaration(propertyDecl.Type);
             varDecl = varDecl.WithVariables(SyntaxFactory.SingletonSeparatedList(SyntaxFactory.VariableDeclarator(fieldName)));
 

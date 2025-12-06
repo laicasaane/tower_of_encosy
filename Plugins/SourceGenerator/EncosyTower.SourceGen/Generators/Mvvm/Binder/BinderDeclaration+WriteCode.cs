@@ -279,7 +279,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             foreach (var type in NonVariantTypes)
             {
                 var typeName = type.ToFullName();
-                var propertyName = type.ToValidIdentifier().AsSpan().ToTitleCase();
+                var propertyName = type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
 
                 p.PrintLine(GENERATED_CODE);
                 p.PrintLine($"private readonly {CACHED_VARIANT_CONVERTER}<{typeName}> _variantConverter{propertyName} = {CACHED_VARIANT_CONVERTER}<{typeName}>.Default;");
@@ -719,7 +719,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 var param = member.Parameter;
                 var paramTypeName = param.Type.ToFullName();
                 var methodName = MethodName(member);
-                var converter = param.Type.ToValidIdentifier().AsSpan().ToTitleCase();
+                var converter = param.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
 
                 p.PrintLine($"/// <summary>");
                 p.PrintLine($"/// This overload will try to get the value of type <see cref=\"{paramTypeName}\"/>");
