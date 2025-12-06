@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,19 +10,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
     {
         private const string NAMESPACE = StatGeneratorAPI.NAMESPACE;
         private const string SKIP_ATTRIBUTE = StatGeneratorAPI.SKIP_ATTRIBUTE;
+        private const string STAT_DATA = "StatData";
         private const string STAT_DATA_ATTRIBUTE = $"global::{NAMESPACE}.StatDataAttribute";
         private const string GENERATOR_NAME = nameof(StatDataGenerator);
-
-        private static readonly Dictionary<string, string> s_enumTypeMap = new(StringComparer.Ordinal) {
-            { "sbyte", "SByte" },
-            { "byte", "Byte" },
-            { "short", "Short" },
-            { "ushort", "UShort" },
-            { "int", "Int" },
-            { "uint", "UInt" },
-            { "long", "Long" },
-            { "ulong", "ULong" },
-        };
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -58,8 +47,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             token.ThrowIfCancellationRequested();
 
             return node is StructDeclarationSyntax syntax
+                && syntax.TypeParameterList is null
                 && syntax.AttributeLists.Count > 0
-                && syntax.HasAttributeCandidate(NAMESPACE, "StatData")
+                && syntax.HasAttributeCandidate(NAMESPACE, STAT_DATA)
                 ;
         }
 
@@ -71,7 +61,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             token.ThrowIfCancellationRequested();
 
             if (context.Node is not StructDeclarationSyntax syntax
-                || syntax.GetAttribute(NAMESPACE, "StatData") is not AttributeSyntax attributeSyntax
+                || syntax.TypeParameterList is not null
+                || syntax.GetAttribute(NAMESPACE, STAT_DATA) is not AttributeSyntax attributeSyntax
                 || attributeSyntax.ArgumentList is not AttributeArgumentListSyntax argumentList
                 || argumentList.Arguments.Count < 1
             )
@@ -161,7 +152,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 var underlyingType = candidate.EnumUnderlyingType.ToSimpleName();
 
-                if (s_enumTypeMap.TryGetValue(underlyingType, out var valueTypeName) == false)
+                if (StatGeneratorAPI.EnumTypeMap.TryGetValue(underlyingType, out var valueTypeName) == false)
                 {
                     return default;
                 }
@@ -196,12 +187,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         result.singleValue = (bool)literalExpr2.Token.Value;
                         break;
                     }
-
-                    case "WithIndex":
-                    {
-                        result.withIndex = (bool)literalExpr2.Token.Value;
-                        break;
-                    }
                 }
             }
 
@@ -218,7 +203,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine("using System.Runtime.CompilerServices;");
                 p.PrintLine("using System.Runtime.InteropServices;");
                 p.PrintLine("using EncosyTower.Logging;");
-                p.PrintLine("using Unity.Entities;");
                 p.PrintLine("using Unity.Mathematics;");
                 p.PrintLine($"using {StatGeneratorAPI.NAMESPACE};");
                 p.PrintEndLine();
@@ -271,10 +255,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_ENTITIES_STATS_01"
+            = new("SG_ENTITIES_STAT_DATA_01"
                 , "Stat Data Generator Error"
                 , "This error indicates a bug in the Stat Data source generators. Error message: '{0}'."
-                , $"{NAMESPACE}.StatDataAttribute"
+                , STAT_DATA_ATTRIBUTE
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""

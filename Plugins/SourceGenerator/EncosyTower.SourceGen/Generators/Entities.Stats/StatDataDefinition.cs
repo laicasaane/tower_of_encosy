@@ -19,7 +19,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public int size;
         public bool singleValue;
         public bool isEnum;
-        public bool withIndex;
 
         public readonly bool IsValid
             => size > 0
@@ -46,22 +45,18 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             && size == other.size
             && singleValue == other.singleValue
             && isEnum == other.isEnum
-            && withIndex == other.withIndex
             ;
 
         public readonly override int GetHashCode()
             => HashValue.Combine(
-                HashValue.Combine(
-                      typeName
-                    , typeNamespace
-                    , valueTypeName
-                    , valueFullTypeName
-                    , underlyingTypeName
-                    , size
-                    , singleValue
-                    , isEnum
-                )
-                , withIndex
+                  typeName
+                , typeNamespace
+                , valueTypeName
+                , valueFullTypeName
+                , underlyingTypeName
+                , size
+                , singleValue
+                , isEnum
             );
     }
 }

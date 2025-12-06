@@ -11,17 +11,23 @@ namespace EncosyTower.Tests.Entities.Stats
     }
 
     [StatData(StatVariantType.Float)]
-    public partial struct Hp
-    {
-    }
+    public partial struct Hp { }
 
     [StatData(typeof(DirectionType), SingleValue = true)]
-    public partial struct Direction
-    {
-    }
+    public partial struct Direction { }
 
     public enum DirectionType : byte
     {
         Forward, Backward, Up, Down, Left,
+    }
+
+    [StatCollection]
+    public partial struct Stats
+    {
+        [StatData(StatVariantType.Float)]
+        public partial struct Hp { }
+
+        [StatData(typeof(DirectionType), SingleValue = true)]
+        public partial struct Direction { }
     }
 }

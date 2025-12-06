@@ -3,11 +3,17 @@ using System;
 namespace EncosyTower.Entities.Stats
 {
     /// <summary>
-    /// Annotates any struct with to generate stat-related functionality.
+    /// Annotates any struct to generate functionality related to stat data.
     /// </summary>
     /// <remarks>
     /// The struct will automatically implement <see cref="IStatData"/>.
     /// </remarks>
+    /// <example>
+    /// <code>
+    /// [StatData(StatVariantType.Float)]
+    /// public partial struct Hp { }
+    /// </code>
+    /// </example>
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
     public sealed class StatDataAttribute : Attribute
     {
@@ -26,8 +32,5 @@ namespace EncosyTower.Entities.Stats
         public Type EnumType { get; }
 
         public bool SingleValue { get; set; }
-
-        [Obsolete("This usecase has yet fully explored.")]
-        private bool WithIndex { get; set; }
     }
 }

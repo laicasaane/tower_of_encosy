@@ -1,5 +1,3 @@
-using System;
-
 namespace EncosyTower.Entities.Stats
 {
     public interface IStatData
@@ -11,11 +9,5 @@ namespace EncosyTower.Entities.Stats
         StatVariant BaseValue { get; set; }
 
         StatVariant CurrentValue { get; set; }
-    }
-
-    [Obsolete("This usecase has yet fully explored.")]
-    internal interface IStatDataWithIndex : IStatData
-    {
-        StatIndex StatIndex { get; set; }
     }
 }

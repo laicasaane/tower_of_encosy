@@ -3,15 +3,12 @@
     partial struct StatDataDefinition
     {
         private const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.EnumExtensions.EnumExtensionsGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.Entities.Stats.StatDataGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
 
         private const string ISTAT_DATA = $"IStatData";
-        private const string ISTAT_DATA_INDEX = $"IStatDataWithIndex";
         private const string STAT_VARIANT = $"StatVariant";
         private const string STAT_VARIANT_TYPE = $"StatVariantType";
-
-        private const string ENTITY = $"Entity";
 
         private const string LOG_ERROR = "StaticDevLogger.LogError";
         private const string IF_DEBUG = "#if UNITY_EDITOR || DEVELOPMENT_BUILD";
@@ -27,15 +24,12 @@
 
             p = p.IncreasedIndent();
             {
-                p.PrintBeginLine("partial struct ").Print(typeName).Print(" : ")
-                    .PrintEndLineIf(withIndex, ISTAT_DATA_INDEX, ISTAT_DATA);
+                p.PrintBeginLine("partial struct ").Print(typeName).Print(" : ").PrintEndLine(ISTAT_DATA);
                 p.OpenScope();
                 {
                     WriteFields(ref p);
                     WriteConstructors(ref p);
-                    WriteIndexProperty(ref p);
                     WriteIStatData(ref p);
-                    WriteMakeStatHandleFor(ref p);
 
                 }
                 p.CloseScope();
@@ -47,14 +41,6 @@
 
         private readonly void WriteFields(ref Printer p)
         {
-            if (withIndex)
-            {
-                WriteStatIndexXmlDoc(ref p, typeName);
-                p.PrintLine(GENERATED_CODE);
-                p.PrintBeginLine("public StatIndex<").Print(typeName).PrintEndLine("> statIndex;");
-                p.PrintEndLine();
-            }
-
             if (singleValue)
             {
                 p.PrintLine(GENERATED_CODE);
@@ -91,26 +77,6 @@
             p.CloseScope();
             p.PrintEndLine();
 
-            if (withIndex)
-            {
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public ").Print(typeName).Print("(")
-                    .Print(@in).Print(valueFullTypeName)
-                    .Print(" value, StatIndex<").Print(typeName).PrintEndLine("> statIndex)");
-                p.OpenScope();
-                {
-                    p.PrintLineIf(
-                          singleValue
-                        , "this.value = value;"
-                        , "this.baseValue = this.currentValue = value;"
-                    );
-
-                    p.PrintLine("this.statIndex = statIndex;");
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-            }
-
             if (singleValue)
             {
                 return;
@@ -127,23 +93,6 @@
             }
             p.CloseScope();
             p.PrintEndLine();
-
-            if (withIndex)
-            {
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public ").Print(typeName).Print("(")
-                    .Print(@in).Print(valueFullTypeName).Print(" baseValue, ")
-                    .Print(@in).Print(valueFullTypeName)
-                    .Print(" currentValue, StatIndex<").Print(typeName).PrintEndLine("> statIndex)");
-                p.OpenScope();
-                {
-                    p.PrintLine("this.baseValue = baseValue;");
-                    p.PrintLine("this.currentValue = currentValue;");
-                    p.PrintLine("this.statIndex = statIndex;");
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-            }
         }
 
         private readonly void WriteIStatData(ref Printer p)
@@ -271,44 +220,6 @@
                 p.PrintEndLine();
             }
             p.CloseScope();
-            p.PrintEndLine();
-        }
-
-        private readonly void WriteIndexProperty(ref Printer p)
-        {
-            if (withIndex == false)
-            {
-                return;
-            }
-
-            WriteStatIndexXmlDoc(ref p, typeName);
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("public StatIndex StatIndex");
-            p.OpenScope();
-            {
-                p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintLine("readonly get => statIndex;");
-                p.PrintEndLine();
-
-                p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintLine("set => statIndex = value.value;");
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-        }
-
-        private readonly void WriteMakeStatHandleFor(ref Printer p)
-        {
-            if (withIndex == false)
-            {
-                return;
-            }
-
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public readonly StatHandle")
-                .Print("<").Print(typeName).Print("> MakeStatHandleFor(")
-                .Print(ENTITY).PrintEndLine(" entity)");
-            p.WithIncreasedIndent().PrintLine("=> new(entity, statIndex.value);");
             p.PrintEndLine();
         }
 

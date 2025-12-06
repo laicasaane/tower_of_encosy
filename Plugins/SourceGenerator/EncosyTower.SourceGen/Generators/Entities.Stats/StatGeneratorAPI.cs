@@ -1,9 +1,23 @@
-﻿namespace EncosyTower.SourceGen.Generators.Entities.Stats
+﻿using System;
+using System.Collections.Generic;
+
+namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
     public static class StatGeneratorAPI
     {
         public const string NAMESPACE = "EncosyTower.Entities.Stats";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
+
+        public static readonly Dictionary<string, string> EnumTypeMap = new(StringComparer.Ordinal) {
+            { "sbyte", "SByte" },
+            { "byte", "Byte" },
+            { "short", "Short" },
+            { "ushort", "UShort" },
+            { "int", "Int" },
+            { "uint", "UInt" },
+            { "long", "Long" },
+            { "ulong", "ULong" },
+        };
 
         public static readonly string[] Types = new string[] {
             "None",
