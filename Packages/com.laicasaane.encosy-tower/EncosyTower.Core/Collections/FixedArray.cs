@@ -29,6 +29,7 @@ namespace EncosyTower.Collections
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , ICopyToSpan<T>, ITryCopyToSpan<T>
         , ICopyFromSpan<T>, ITryCopyFromSpan<T>
+        , IHasLength
         where T : unmanaged
         where TBuffer : unmanaged
     {

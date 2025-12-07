@@ -18,7 +18,8 @@ namespace EncosyTower.Collections
         /// <inheritdoc cref="ArrayMap{TKey, TValue}"/>
         [DebuggerTypeProxy(typeof(ArrayMapDebugProxy<,>))]
         public readonly struct ReadOnly : IDisposable
-            , IReadOnlyCollection<ArrayMapKeyValuePairFast<TKey, TValue>>
+            , IReadOnlyCollection<ArrayMapKeyValuePairFast<TKey, TValue>>, IHasCount
+            , ITryGetValue<TKey, TValue>
         {
             internal readonly ArrayMap<TKey, TValue> _map;
 

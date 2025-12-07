@@ -4,9 +4,4 @@ namespace EncosyTower.Collections
     {
         bool TryGet(out T result);
     }
-
-    public interface ITryGet<in TArg, TResult>
-    {
-        bool TryGet(TArg arg, out TResult result);
-    }
 }

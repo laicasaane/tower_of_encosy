@@ -56,8 +56,9 @@ namespace EncosyTower.Collections
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , ICopyFromSpan<T>, ITryCopyFromSpan<T>
         , ICopyToSpan<T>, ITryCopyToSpan<T>
-        , IAddRangeSpan<T>
-        , IClearable, IDisposable, IHasCapacity
+        , IAddRangeSpan<T>, IContains<T>
+        , IClearable, IDisposable
+        , IIncreaseCapacity, IHasCount
         where T : unmanaged
         where TNative : unmanaged
     {

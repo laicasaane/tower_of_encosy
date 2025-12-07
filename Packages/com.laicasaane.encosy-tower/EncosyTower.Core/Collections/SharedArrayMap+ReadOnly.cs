@@ -19,7 +19,7 @@ namespace EncosyTower.Collections
         public ReadOnly AsReadOnly()
             => new(this);
 
-        public readonly partial struct ReadOnly
+        public readonly partial struct ReadOnly : IHasCapacity, IHasCount, ITryGetValue<TKey, TValue>
         {
             internal readonly NativeArray<ArrayMapNode<TKey>>.ReadOnly _valuesInfo;
             internal readonly NativeArray<TValue>.ReadOnly _values;

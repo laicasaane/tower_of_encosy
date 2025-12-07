@@ -4,4 +4,9 @@ namespace EncosyTower.Collections
     {
         int Length { get; }
     }
+
+    public interface IHasCount
+    {
+        int Count { get; }
+    }
 }

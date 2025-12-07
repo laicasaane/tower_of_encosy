@@ -19,8 +19,8 @@ namespace EncosyTower.Collections
         , IAsSpan<T>, IAsReadOnlySpan<T>
         , ICopyFromSpan<T>, ITryCopyFromSpan<T>
         , ICopyToSpan<T>, ITryCopyToSpan<T>
-        , IAddRangeSpan<T>
-        , IClearable, IHasCapacity
+        , IAddRangeSpan<T>, IContains<T>
+        , IClearable, IIncreaseCapacity, IHasCount
         where TState : IBufferProvider<T>
     {
         public readonly TState State;

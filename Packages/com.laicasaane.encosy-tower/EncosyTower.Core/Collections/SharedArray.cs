@@ -73,7 +73,7 @@ namespace EncosyTower.Collections
     /// <typeparam name="TNative">The element type in the NativeArray representation. Must be the same size as <typeparamref name="T"/>.</typeparam>
     public class SharedArray<T, TNative> : IDisposable, IClearable, IResizable, IEnumerable<T>
         , IAsSpan<T>, IAsReadOnlySpan<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
-        , IAsNativeArray<TNative>, IAsNativeSlice<TNative>
+        , IAsNativeArray<TNative>, IAsNativeSlice<TNative>, IHasLength
         where T : unmanaged
         where TNative : unmanaged
     {

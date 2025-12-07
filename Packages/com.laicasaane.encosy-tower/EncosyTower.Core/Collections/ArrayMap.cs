@@ -57,7 +57,7 @@ namespace EncosyTower.Collections
     public partial class ArrayMap<TKey, TValue> : IDisposable
         , ICollection<ArrayMapKeyValuePairFast<TKey, TValue>>
         , IReadOnlyCollection<ArrayMapKeyValuePairFast<TKey, TValue>>
-        , IClearable, IHasCapacity
+        , IClearable, IIncreaseCapacity, IHasCount, ITryGetValue<TKey, TValue>
     {
         internal ManagedStrategy<ArrayMapNode<TKey>> _valuesInfo;
         internal ManagedStrategy<TValue> _values;

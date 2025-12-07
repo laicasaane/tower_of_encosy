@@ -63,7 +63,7 @@ namespace EncosyTower.Collections
     public partial class SharedArrayMap<TKey, TValue, TValueNative> : IDisposable
         , ICollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>
         , IReadOnlyCollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>
-        , IClearable, IHasCapacity
+        , IClearable, IIncreaseCapacity, IHasCount, ITryGetValue<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
         where TValueNative : unmanaged

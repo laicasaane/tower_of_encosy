@@ -28,7 +28,7 @@ namespace EncosyTower.Collections
         , IAsSpan<T>, IAsReadOnlySpan<T>, IAsNativeSlice<T>
         , ICopyFromSpan<T>, ITryCopyFromSpan<T>
         , ICopyToSpan<T>, ITryCopyToSpan<T>
-        , IAddRangeSpan<T>
+        , IAddRangeSpan<T>, IHasCapacity, IHasCount
         , IClearable
         where T : unmanaged
     {

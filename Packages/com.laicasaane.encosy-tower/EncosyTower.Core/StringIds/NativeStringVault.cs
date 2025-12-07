@@ -17,7 +17,7 @@ using UnityEngine;
 
 namespace EncosyTower.StringIds
 {
-    public readonly partial struct NativeStringVault : IDisposable, IHasCapacity, IClearable
+    public readonly partial struct NativeStringVault : IDisposable, IClearable, IIncreaseCapacity
         , IReadOnlyList<UnmanagedString>
         , ICopyToSpan<UnmanagedString>, ITryCopyToSpan<UnmanagedString>
     {

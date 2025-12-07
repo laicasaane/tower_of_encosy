@@ -38,7 +38,7 @@ namespace EncosyTower.Collections
             => new(this);
 
         public readonly struct ReadOnly : IReadOnlyList<T>, IAsReadOnlySpan<T>
-            , ICopyToSpan<T>, ITryCopyToSpan<T>
+            , ICopyToSpan<T>, ITryCopyToSpan<T>, IContains<T>, IHasCapacity, IHasCount
         {
             internal readonly FasterList<T> _list;
 

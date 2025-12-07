@@ -44,7 +44,7 @@ namespace EncosyTower.Collections
                 , _fastModBucketsMultiplier.AsReadOnly()
             );
 
-        public readonly struct ReadOnly
+        public readonly struct ReadOnly : IHasCapacity, IHasCount, ITryGetValue<TKey, TValue>
         {
             internal readonly NativeArray<ArrayMapNode<TKey>>.ReadOnly _valuesInfo;
             internal readonly NativeArray<TValue>.ReadOnly _values;

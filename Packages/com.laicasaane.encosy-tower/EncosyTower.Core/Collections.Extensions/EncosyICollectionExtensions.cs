@@ -39,7 +39,7 @@ namespace EncosyTower.Collections.Extensions
                 return true;
             }
 
-            if (self is IHasCapacity hasCapacity)
+            if (self is IIncreaseCapacity hasCapacity)
             {
                 hasCapacity.IncreaseCapacityBy(amount);
                 return true;
@@ -69,7 +69,7 @@ namespace EncosyTower.Collections.Extensions
                 return true;
             }
 
-            if (self is IHasCapacity hasCapacity)
+            if (self is IIncreaseCapacity hasCapacity)
             {
                 hasCapacity.IncreaseCapacityTo(newCapacity);
                 return true;

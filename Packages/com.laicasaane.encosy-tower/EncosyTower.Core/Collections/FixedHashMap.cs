@@ -12,7 +12,8 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace EncosyTower.Collections
 {
-    public unsafe struct FixedHashMap<TKey, TValue, TCapacity>
+    public unsafe struct FixedHashMap<TKey, TValue, TCapacity> : IHasCapacity, IHasCount
+        , ITryGetValue<TKey, TValue>, ITryAddKeyValue<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
         where TCapacity : unmanaged

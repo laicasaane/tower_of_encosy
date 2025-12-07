@@ -14,7 +14,7 @@ namespace EncosyTower.Collections
             => new(this);
 
         public readonly partial struct ReadOnly : IReadOnlyList<T>, IAsReadOnlySpan<T>
-            , ICopyToSpan<T>, ITryCopyToSpan<T>
+            , ICopyToSpan<T>, ITryCopyToSpan<T>, IHasCapacity, IHasCount
         {
             internal readonly NativeArray<T>.ReadOnly _buffer;
             internal readonly NativeArray<int>.ReadOnly _count;

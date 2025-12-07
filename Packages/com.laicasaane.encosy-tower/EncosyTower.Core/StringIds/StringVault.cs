@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace EncosyTower.StringIds
 {
-    public sealed partial class StringVault : IDisposable, IHasCapacity, IClearable
+    public sealed partial class StringVault : IDisposable, IClearable, IIncreaseCapacity
         , IReadOnlyList<string>
         , ICopyToSpan<string>, ITryCopyToSpan<string>
         , ICopyToSpan<UnmanagedString>, ITryCopyToSpan<UnmanagedString>
