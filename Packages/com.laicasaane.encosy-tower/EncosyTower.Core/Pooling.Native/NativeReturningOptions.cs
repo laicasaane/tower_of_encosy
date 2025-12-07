@@ -11,4 +11,6 @@ namespace EncosyTower.Pooling.Native
         MoveToScene = 1 << 1,
         Everything  = Deactivate | MoveToScene,
     }
+
+    static partial class NativeReturningOptionsExtensions { }
 }

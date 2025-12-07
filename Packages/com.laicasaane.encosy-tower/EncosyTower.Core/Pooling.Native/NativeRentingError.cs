@@ -11,4 +11,6 @@ namespace EncosyTower.Pooling.Native
         ResultListMustBeCreatedInAdvance,
         NoPrefabAssociatedWithProvidedKey,
     }
+
+    static partial class NativeRentingErrorExtensions { }
 }

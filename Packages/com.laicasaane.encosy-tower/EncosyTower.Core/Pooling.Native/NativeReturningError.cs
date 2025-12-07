@@ -10,4 +10,6 @@ namespace EncosyTower.Pooling.Native
         ArraysMustContainAnyElement,
         NoPrefabAssociatedWithProvidedKey,
     }
+
+    static partial class NativeReturningErrorExtensions { }
 }

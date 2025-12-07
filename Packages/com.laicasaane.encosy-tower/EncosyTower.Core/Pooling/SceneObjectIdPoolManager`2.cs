@@ -198,7 +198,7 @@ namespace EncosyTower.Pooling
             var positions = _positions;
             var defaultPosition = _defaultPosition;
             var defaultRotation = quaternion.identity;
-            var newTransforms = new NativeList<GameObjectInfo>(amount, Allocator.Temp);
+            var newInfoList = new NativeList<GameObjectInfo>(amount, Allocator.Temp);
 
             for (var i = 0; i < amount; i++)
             {
@@ -213,31 +213,102 @@ namespace EncosyTower.Pooling
                 }
                 else
                 {
-                    newTransforms.Add(new GameObjectInfo {
+                    newInfoList.Add(new GameObjectInfo {
                         gameObjectId = gameObjectIds[i],
                         transformId = transformId,
                     });
                 }
             }
 
-            var newTransformsLength = newTransforms.Length;
+            var newInfoLength = newInfoList.Length;
 
-            for (var i = 0; i < newTransformsLength; i++)
+            for (var i = 0; i < newInfoLength; i++)
             {
-                var transform = newTransforms[i];
-                var transformId = transform.transformId;
-                var index = transform.transformArrayIndex = transformArray.length;
+                var goInfo = newInfoList[i];
+                var transformId = goInfo.transformId;
+                var transformArrayIndex = goInfo.transformArrayIndex = transformArray.length;
 
                 transformArray.Add((EntityId)transformId);
-                transformArray[index].SetPositionAndRotation(defaultPosition, defaultRotation);
+                transformArray[transformArrayIndex].SetPositionAndRotation(defaultPosition, defaultRotation);
 
-                goInfoMap.Add(transformId, transform);
-                result.Add(transform);
+                goInfoMap.Add(transformId, goInfo);
+                result.Add(goInfo);
             }
 
-            if (newTransformsLength > 0)
+            if (newInfoLength > 0)
             {
-                _positions.AddReplicate(defaultPosition, newTransformsLength);
+                _positions.AddReplicate(defaultPosition, newInfoLength);
+            }
+
+            return true;
+        }
+
+        public bool Rent(TId id, Span<GameObjectInfo> result, RentingStrategy strategy)
+        {
+            AssertInitialization(this);
+
+            var amount = result.Length;
+
+            if (amount < 1)
+            {
+                return false;
+            }
+
+            if (_poolMap.TryGetValue(id, out var pool) == false)
+            {
+                return false;
+            }
+
+            var gameObjectIds = NativeArray.CreateFast<GameObjectId>(amount, Allocator.Temp);
+            var transformIds = NativeArray.CreateFast<TransformId>(amount, Allocator.Temp);
+
+            pool.Rent(gameObjectIds, transformIds, strategy);
+
+            var transformArray = _transformArray;
+            var goInfoMap = _goInfoMap;
+            var positions = _positions;
+            var defaultPosition = _defaultPosition;
+            var defaultRotation = quaternion.identity;
+            var newInfoList = new NativeList<(int resultIndex, GameObjectInfo)>(amount, Allocator.Temp);
+
+            for (var i = 0; i < amount; i++)
+            {
+                var transformId = transformIds[i];
+
+                if (goInfoMap.TryGetValue(transformId, out var goInfo))
+                {
+                    var transformArrayIndex = goInfo.transformArrayIndex;
+                    result[i] = goInfo;
+                    positions[transformArrayIndex] = defaultPosition;
+                    transformArray[transformArrayIndex].SetPositionAndRotation(defaultPosition, defaultRotation);
+                }
+                else
+                {
+                    newInfoList.Add((i, new GameObjectInfo {
+                        gameObjectId = gameObjectIds[i],
+                        transformId = transformId,
+                    }));
+                }
+            }
+
+            var newInfoLength = newInfoList.Length;
+
+            for (var i = 0; i < newInfoLength; i++)
+            {
+                var (resultIndex, goInfo) = newInfoList[i];
+                var transformId = goInfo.transformId;
+                var transformArrayIndex = goInfo.transformArrayIndex = transformArray.length;
+
+                transformArray.Add((EntityId)transformId);
+                transformArray[transformArrayIndex].SetPositionAndRotation(defaultPosition, defaultRotation);
+
+                goInfoMap.Add(transformId, goInfo);
+                result[resultIndex] = goInfo;
+            }
+
+            if (newInfoLength > 0)
+            {
+                _positions.AddReplicate(defaultPosition, newInfoLength);
             }
 
             return true;

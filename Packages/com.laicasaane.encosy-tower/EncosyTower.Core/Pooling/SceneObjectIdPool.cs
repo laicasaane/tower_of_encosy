@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using EncosyTower.Collections;
@@ -153,7 +152,7 @@ namespace EncosyTower.Pooling
                 }
 
                 objectList.Clear();
-                objectList.Capacity = Mathf.Max(objectList.Capacity, gameObjectIds.Length);
+                objectList.IncreaseCapacityTo(gameObjectIds.Length);
 
 #if UNITY_6000_3_OR_NEWER
                 Resources.EntityIdsToObjectList(gameObjectIds.Reinterpret<EntityId>(), objectList);
@@ -165,8 +164,8 @@ namespace EncosyTower.Pooling
 
                 for (var i = objects.Length - 1; i >= 0; i--)
                 {
-                    var go = objects[i] as GameObject;
-                    go.TrimCloneSuffix();
+                    var gameObject = (objects[i] as GameObject).AssumeValid();
+                    gameObject.TrimCloneSuffix();
                 }
             }
         }
@@ -188,7 +187,7 @@ namespace EncosyTower.Pooling
             unusedGameObjectIds.CopyTo(gameObjectIds);
 
             _objectList.Clear();
-            _objectList.Capacity = Mathf.Max(_objectList.Capacity, length);
+            _objectList.IncreaseCapacityTo(length);
 
 #if UNITY_6000_3_OR_NEWER
             Resources.EntityIdsToObjectList(gameObjectIds.Reinterpret<EntityId>(), _objectList);
@@ -200,21 +199,64 @@ namespace EncosyTower.Pooling
 
             for (var i = objects.Length - 1; i >= 0; i--)
             {
-                var go = objects[i] as GameObject;
+                var gameObject = (objects[i] as GameObject).AssumeValid();
 
-                if (go.IsInvalid())
-                {
-                    continue;
-                }
-
-                onReleased?.Invoke(go);
-                UnityObject.Destroy(go);
+                onReleased?.Invoke(gameObject);
+                UnityObject.Destroy(gameObject);
             }
 
             _objectList.Clear();
 
             _unusedGameObjectIds.RemoveRange(keep, removeCount);
             _unusedTransformIds.RemoveRange(keep, removeCount);
+        }
+
+        public GameObject RentGameObject(RentingStrategy strategy)
+        {
+            if (UnusedCount < 1)
+            {
+                Prepool(1);
+            }
+
+            var last = UnusedCount - 1;
+            var result = _unusedGameObjectIds[last];
+
+            _unusedGameObjectIds.RemoveAt(last);
+            _unusedTransformIds.RemoveAt(last);
+
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
+            {
+                var ids = NativeArray.CreateFast<EntityId>(1, Allocator.Temp);
+                ids[0] = (EntityId)result;
+
+                GameObject.SetGameObjectsActive(ids, true);
+            }
+
+            return result.ToObject().GetValueOrThrow();
+        }
+
+        public Transform RentTransform(RentingStrategy strategy)
+        {
+            if (UnusedCount < 1)
+            {
+                Prepool(1);
+            }
+
+            var last = UnusedCount - 1;
+            var result = _unusedTransformIds[last];
+
+            _unusedGameObjectIds.RemoveAt(last);
+            _unusedTransformIds.RemoveAt(last);
+
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
+            {
+                var ids = NativeArray.CreateFast<EntityId>(1, Allocator.Temp);
+                ids[0] = (EntityId)result;
+
+                GameObject.SetGameObjectsActive(ids, true);
+            }
+
+            return result.ToObject().GetValueOrThrow();
         }
 
         public GameObjectId RentGameObjectId(RentingStrategy strategy)
@@ -264,6 +306,251 @@ namespace EncosyTower.Pooling
             }
 
             return result;
+        }
+
+        public void Rent(
+              Span<GameObject> gameObjects
+            , Span<Transform> transforms
+            , Span<GameObjectId> gameObjectIds
+            , Span<TransformId> transformIds
+            , RentingStrategy strategy
+        )
+        {
+            var length = gameObjects.Length;
+
+            Checks.IsTrue(
+                  length == transforms.Length && length == gameObjectIds.Length && length == transformIds.Length
+                , "arrays do not have the same size"
+            );
+
+            Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
+
+            Prepool(length - UnusedCount);
+
+            var startIndex = UnusedCount - length;
+
+            _unusedGameObjectIds.CopyTo(startIndex, gameObjectIds);
+            _unusedTransformIds.CopyTo(startIndex, transformIds);
+
+            _unusedGameObjectIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
+
+            UnityObjectAPI.ConvertIdsToObjects(gameObjectIds, gameObjects, _objectList);
+            UnityObjectAPI.ConvertIdsToObjects(transformIds, transforms, _objectList);
+
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
+            {
+                GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
+            }
+        }
+
+        public void Rent(
+              Span<GameObject> gameObjects
+            , Span<GameObjectId> gameObjectIds
+            , Span<TransformId> transformIds
+            , RentingStrategy strategy
+        )
+        {
+            var length = gameObjects.Length;
+
+            Checks.IsTrue(length == gameObjectIds.Length && length == transformIds.Length, "arrays do not have the same size");
+            Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
+
+            Prepool(length - UnusedCount);
+
+            var startIndex = UnusedCount - length;
+
+            _unusedGameObjectIds.CopyTo(startIndex, gameObjectIds);
+            _unusedTransformIds.CopyTo(startIndex, transformIds);
+
+            _unusedGameObjectIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
+
+            UnityObjectAPI.ConvertIdsToObjects(gameObjectIds, gameObjects, _objectList);
+
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
+            {
+                GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
+            }
+        }
+
+        public void Rent(
+              Span<Transform> transforms
+            , Span<GameObjectId> gameObjectIds
+            , Span<TransformId> transformIds
+            , RentingStrategy strategy
+        )
+        {
+            var length = transformIds.Length;
+
+            Checks.IsTrue(length == gameObjectIds.Length && length == transformIds.Length, "arrays do not have the same size");
+            Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
+
+            Prepool(length - UnusedCount);
+
+            var startIndex = UnusedCount - length;
+
+            _unusedGameObjectIds.CopyTo(startIndex, gameObjectIds);
+            _unusedTransformIds.CopyTo(startIndex, transformIds);
+
+            _unusedGameObjectIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
+
+            UnityObjectAPI.ConvertIdsToObjects(transformIds, transforms, _objectList);
+
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
+            {
+                GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
+            }
+        }
+
+        public void Rent(
+              Span<GameObject> gameObjects
+            , Span<Transform> transforms
+            , Span<GameObjectId> gameObjectIds
+            , RentingStrategy strategy
+        )
+        {
+            var length = gameObjects.Length;
+
+            Checks.IsTrue(
+                length == transforms.Length
+                && length == gameObjectIds.Length
+                , "arrays do not have the same size"
+            );
+
+            Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
+
+            Prepool(length - UnusedCount);
+
+            var startIndex = UnusedCount - length;
+            var transformIds = NativeArray.CreateFast<TransformId>(length, Allocator.Temp);
+
+            _unusedGameObjectIds.CopyTo(startIndex, gameObjectIds);
+            _unusedTransformIds.CopyTo(startIndex, transformIds);
+
+            _unusedGameObjectIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
+
+            UnityObjectAPI.ConvertIdsToObjects(gameObjectIds, gameObjects, _objectList);
+            UnityObjectAPI.ConvertIdsToObjects(transformIds, transforms, _objectList);
+
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
+            {
+                GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
+            }
+        }
+
+        public void Rent(
+              Span<GameObject> gameObjects
+            , Span<Transform> transforms
+            , Span<TransformId> transformIds
+            , RentingStrategy strategy
+        )
+        {
+            var length = gameObjects.Length;
+
+            Checks.IsTrue(length == transforms.Length && length == transformIds.Length, "arrays do not have the same size");
+            Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
+
+            Prepool(length - UnusedCount);
+
+            var startIndex = UnusedCount - length;
+            var gameObjectIds = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
+
+            _unusedGameObjectIds.CopyTo(startIndex, gameObjectIds);
+            _unusedTransformIds.CopyTo(startIndex, transformIds);
+
+            _unusedGameObjectIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
+
+            UnityObjectAPI.ConvertIdsToObjects(gameObjectIds, gameObjects, _objectList);
+            UnityObjectAPI.ConvertIdsToObjects(transformIds, transforms, _objectList);
+
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
+            {
+                GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
+            }
+        }
+
+        public void Rent(Span<GameObject> gameObjects, Span<Transform> transforms, RentingStrategy strategy)
+        {
+            var length = gameObjects.Length;
+
+            Checks.IsTrue(length == transforms.Length, "arrays do not have the same size");
+            Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
+
+            Prepool(length - UnusedCount);
+
+            var startIndex = UnusedCount - length;
+            var gameObjectIds = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
+            var transformIds = NativeArray.CreateFast<TransformId>(length, Allocator.Temp);
+
+            _unusedTransformIds.CopyTo(startIndex, transformIds);
+            _unusedGameObjectIds.CopyTo(startIndex, gameObjectIds);
+
+            _unusedGameObjectIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
+
+            UnityObjectAPI.ConvertIdsToObjects(gameObjectIds, gameObjects, _objectList);
+            UnityObjectAPI.ConvertIdsToObjects(transformIds, transforms, _objectList);
+
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
+            {
+                GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
+            }
+        }
+
+        public void Rent(Span<GameObject> gameObjects, RentingStrategy strategy)
+        {
+            var length = gameObjects.Length;
+
+            Checks.IsTrue(length > 0, "array does not have enough space to contain the items");
+
+            Prepool(length - UnusedCount);
+
+            var startIndex = UnusedCount - length;
+            var gameObjectIds = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
+            var transformIds = NativeArray.CreateFast<TransformId>(length, Allocator.Temp);
+
+            _unusedTransformIds.CopyTo(startIndex, transformIds);
+            _unusedGameObjectIds.CopyTo(startIndex, gameObjectIds);
+
+            _unusedGameObjectIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
+
+            UnityObjectAPI.ConvertIdsToObjects(gameObjectIds, gameObjects, _objectList);
+
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
+            {
+                GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
+            }
+        }
+
+        public void Rent(Span<Transform> transforms, RentingStrategy strategy)
+        {
+            var length = transforms.Length;
+
+            Checks.IsTrue(length > 0, "array does not have enough space to contain the items");
+
+            Prepool(length - UnusedCount);
+
+            var startIndex = UnusedCount - length;
+            var gameObjectIds = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
+            var transformIds = NativeArray.CreateFast<TransformId>(length, Allocator.Temp);
+
+            _unusedTransformIds.CopyTo(startIndex, transformIds);
+            _unusedGameObjectIds.CopyTo(startIndex, gameObjectIds);
+
+            _unusedGameObjectIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
+
+            UnityObjectAPI.ConvertIdsToObjects(transformIds, transforms, _objectList);
+
+            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
+            {
+                GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
+            }
         }
 
         public void Rent(Span<GameObjectId> gameObjectIds, Span<TransformId> transformIds, RentingStrategy strategy)
@@ -332,45 +619,212 @@ namespace EncosyTower.Pooling
             }
         }
 
-        public void Rent(int amount, [NotNull] FasterList<Transform> transforms, RentingStrategy strategy)
+        public void Return(GameObject gameObject, ReturningStrategy strategy)
         {
-            Checks.IsTrue(amount > 0, "\"amount\" must be greater than 0");
+            if (gameObject.IsInvalid())
+            {
+                return;
+            }
 
-            Prepool(amount - UnusedCount);
+            gameObject = gameObject.AssumeValid();
+            var transform = gameObject.transform.AssumeValid();
 
-            var startIndex = UnusedCount - amount;
-            var gameObjectIds = NativeArray.CreateFast<GameObjectId>(amount, Allocator.Temp);
-            var transformIds = NativeArray.CreateFast<TransformId>(amount, Allocator.Temp);
-
-            _unusedTransformIds.CopyTo(startIndex, transformIds);
-            _unusedGameObjectIds.CopyTo(startIndex, gameObjectIds);
-
-            _unusedGameObjectIds.RemoveRange(startIndex, amount);
-            _unusedTransformIds.RemoveRange(startIndex, amount);
-
-            _objectList.Clear();
-            _objectList.Capacity = Mathf.Max(_objectList.Capacity, amount);
-
-#if UNITY_6000_3_OR_NEWER
-            Resources.EntityIdsToObjectList(transformIds.Reinterpret<EntityId>(), _objectList);
+#if UNITY_6000_2_OR_NEWER
+            _unusedGameObjectIds.Add(gameObject.GetEntityId());
+            _unusedTransformIds.Add(transform.GetEntityId());
 #else
-            Resources.InstanceIDToObjectList(transformIds.Reinterpret<EntityId>(), _objectList);
+            _unusedGameObjectIds.Add(gameObject.GetInstanceID());
+            _unusedTransformIds.Add(transform.GetInstanceID());
 #endif
 
-            var objects = _objectList.AsReadOnlySpan();
-            var transformSpan = transforms.AddReplicateNoInit(amount);
-
-            for (var i = 0; i < amount; i++)
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
             {
-                transformSpan[i] = objects[i] as Transform;
+                gameObject.SetActive(false);
+            }
+        }
+
+        public void Return(Transform transform, ReturningStrategy strategy)
+        {
+            if (transform.IsInvalid())
+            {
+                return;
             }
 
-            if (new RentOperation(RentingStrategy, strategy).ShouldActivate())
+            transform = transform.AssumeValid();
+            var gameObject = transform.gameObject.AssumeValid();
+
+#if UNITY_6000_2_OR_NEWER
+            _unusedGameObjectIds.Add(gameObject.GetEntityId());
+            _unusedTransformIds.Add(transform.GetEntityId());
+#else
+            _unusedGameObjectIds.Add(gameObject.GetInstanceID());
+            _unusedTransformIds.Add(transform.GetInstanceID());
+#endif
+
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
             {
-                GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
+                gameObject.SetActive(false);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Return(GameObjectId gameObjectId, ReturningStrategy strategy)
+        {
+            if (gameObjectId.IsValid == false)
+            {
+                return;
             }
 
-            _objectList.Clear();
+            Return(gameObjectId.ToObject().GetValueOrThrow(), strategy);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Return(TransformId transformId, ReturningStrategy strategy)
+        {
+            if (transformId.IsValid == false)
+            {
+                return;
+            }
+
+            Return(transformId.ToObject().GetValueOrThrow(), strategy);
+        }
+
+        public void Return(
+              ReadOnlySpan<GameObject> gameObjects
+            , ReadOnlySpan<Transform> transforms
+            , ReturningStrategy strategy
+        )
+        {
+            var length = gameObjects.Length;
+
+            Checks.IsTrue(length == transforms.Length, "arrays do not have the same size");
+
+            if (length < 1)
+            {
+                return;
+            }
+
+            var unusedGameObjectIds = _unusedGameObjectIds;
+            var unusedTransformIds = _unusedTransformIds;
+            var capacity = unusedGameObjectIds.Count + length;
+
+            unusedGameObjectIds.IncreaseCapacityTo(capacity);
+            unusedTransformIds.IncreaseCapacityTo(capacity);
+
+            var gameObjectIdBuffer = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
+            var gameObjectIdCount = 0;
+
+            for (var i = 0; i < length; i++)
+            {
+                var gameObject = gameObjects[i].AssumeValid();
+                var transform = transforms[i].AssumeValid();
+
+#if UNITY_6000_2_OR_NEWER
+                var gameObjectId = gameObject.GetEntityId();
+                var transformId = transform.GetEntityId();
+#else
+                var gameObjectId = gameObject.GetInstanceID();
+                var transformId = transform.GetInstanceID();
+#endif
+
+                unusedGameObjectIds.Add(gameObjectIdBuffer[gameObjectIdCount++] = gameObjectId);
+                unusedTransformIds.Add(transformId);
+            }
+
+            var returnedGameObjectIds = gameObjectIdBuffer.GetSubArray(0, gameObjectIdCount);
+
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
+            {
+                GameObject.SetGameObjectsActive(returnedGameObjectIds.Reinterpret<EntityId>(), false);
+            }
+        }
+
+        public void Return(ReadOnlySpan<GameObject> gameObjects, ReturningStrategy strategy)
+        {
+            var length = gameObjects.Length;
+
+            if (length < 1)
+            {
+                return;
+            }
+
+            var unusedGameObjectIds = _unusedGameObjectIds;
+            var unusedTransformIds = _unusedTransformIds;
+            var capacity = unusedGameObjectIds.Count + length;
+
+            unusedGameObjectIds.IncreaseCapacityTo(capacity);
+            unusedTransformIds.IncreaseCapacityTo(capacity);
+
+            var gameObjectIdBuffer = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
+            var gameObjectIdCount = 0;
+
+            for (var i = 0; i < length; i++)
+            {
+                var gameObject = gameObjects[i].AssumeValid();
+                var transform = gameObject.transform.AssumeValid();
+
+#if UNITY_6000_2_OR_NEWER
+                var gameObjectId = gameObject.GetEntityId();
+                var transformId = transform.GetEntityId();
+#else
+                var gameObjectId = gameObject.GetInstanceID();
+                var transformId = transform.GetInstanceID();
+#endif
+
+                unusedGameObjectIds.Add(gameObjectIdBuffer[gameObjectIdCount++] = gameObjectId);
+                unusedTransformIds.Add(transformId);
+            }
+
+            var returnedGameObjectIds = gameObjectIdBuffer.GetSubArray(0, gameObjectIdCount);
+
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
+            {
+                GameObject.SetGameObjectsActive(returnedGameObjectIds.Reinterpret<EntityId>(), false);
+            }
+        }
+
+        public void Return(ReadOnlySpan<Transform> transforms, ReturningStrategy strategy)
+        {
+            var length = transforms.Length;
+
+            if (length < 1)
+            {
+                return;
+            }
+
+            var unusedGameObjectIds = _unusedGameObjectIds;
+            var unusedTransformIds = _unusedTransformIds;
+            var capacity = unusedGameObjectIds.Count + length;
+
+            unusedGameObjectIds.IncreaseCapacityTo(capacity);
+            unusedTransformIds.IncreaseCapacityTo(capacity);
+
+            var gameObjectIdBuffer = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
+            var gameObjectIdCount = 0;
+
+            for (var i = 0; i < length; i++)
+            {
+                var transform = transforms[i].AssumeValid();
+                var gameObject = transform.gameObject.AssumeValid();
+
+#if UNITY_6000_2_OR_NEWER
+                var gameObjectId = gameObject.GetEntityId();
+                var transformId = transform.GetEntityId();
+#else
+                var gameObjectId = gameObject.GetInstanceID();
+                var transformId = transform.GetInstanceID();
+#endif
+
+                unusedGameObjectIds.Add(gameObjectIdBuffer[gameObjectIdCount++] = gameObjectId);
+                unusedTransformIds.Add(transformId);
+            }
+
+            var returnedGameObjectIds = gameObjectIdBuffer.GetSubArray(0, gameObjectIdCount);
+
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
+            {
+                GameObject.SetGameObjectsActive(returnedGameObjectIds.Reinterpret<EntityId>(), false);
+            }
         }
 
         public void Return(
@@ -414,7 +868,7 @@ namespace EncosyTower.Pooling
             }
 
             _objectList.Clear();
-            _objectList.Capacity = Mathf.Max(_objectList.Capacity, length);
+            _objectList.IncreaseCapacityTo(length);
 
             var reGameObjectIds = MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds);
             var gameObjectIdArray = NativeArray.CreateFast<EntityId>(length, Allocator.Temp);
@@ -439,19 +893,14 @@ namespace EncosyTower.Pooling
 
             for (var i = 0; i < length; i++)
             {
-                var go = objects[i] as GameObject;
-
-                if (go.IsInvalid())
-                {
-                    continue;
-                }
+                var gameObject = (objects[i] as GameObject).AssumeValid();
 
                 unusedGameObjectIds.Add(gameObjectIdBuffer[gameObjectIdCount++] = reGameObjectIds[i]);
 
 #if UNITY_6000_2_OR_NEWER
-                unusedTransformIds.Add(go.transform.GetEntityId());
+                unusedTransformIds.Add(gameObject.transform.GetEntityId());
 #else
-                unusedTransformIds.Add(go.transform.GetInstanceID());
+                unusedTransformIds.Add(gameObject.transform.GetInstanceID());
 #endif
             }
 
@@ -475,7 +924,7 @@ namespace EncosyTower.Pooling
             }
 
             _objectList.Clear();
-            _objectList.Capacity = Mathf.Max(_objectList.Capacity, length);
+            _objectList.IncreaseCapacityTo(length);
 
             var reTransformIds = MemoryMarshal.Cast<TransformId, EntityId>(transformIds);
             var transformIdArray = NativeArray.CreateFast<EntityId>(length, Allocator.Temp);
@@ -500,25 +949,13 @@ namespace EncosyTower.Pooling
 
             for (var i = 0; i < length; i++)
             {
-                var transform = objects[i] as Transform;
-
-                if (transform.IsInvalid())
-                {
-                    continue;
-                }
-
-                var obj = transform.gameObject;
-
-                if (obj.IsInvalid())
-                {
-                    continue;
-                }
-
+                var transform = (objects[i] as Transform).AssumeValid();
+                var gameObject = (transform.gameObject).AssumeValid();
 
 #if UNITY_6000_2_OR_NEWER
-                var gameObjectId = obj.GetEntityId();
+                var gameObjectId = gameObject.GetEntityId();
 #else
-                var gameObjectId = obj.GetInstanceID();
+                var gameObjectId = gameObject.GetInstanceID();
 #endif
 
                 unusedGameObjectIds.Add(gameObjectIdBuffer[gameObjectIdCount++] = gameObjectId);
