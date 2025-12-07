@@ -9,13 +9,19 @@ namespace EncosyTower.EnumExtensions
         : IHasLength
         , IToStringFast
         , IToDisplayStringFast
+        , IToIndex
         , ISpanFormattable
         , IToUnderlyingValue<TUnderlyingValue>
         , IIsDefined
         , IIsNameDefined
-        , IFindIndex
         where TEnum : struct, Enum
         where TUnderlyingValue : unmanaged
-    { }
+    {
+    }
+
+    public interface IToIndex
+    {
+        int ToIndex();
+    }
 }
 
