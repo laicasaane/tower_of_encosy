@@ -207,7 +207,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 tempMemberRefs.Clear();
             }
 
-            UnderlyingTypeName = ToUnderlyingTypeName(ItemCountToSize(currentBaseOrder));
+            UnderlyingTypeName = GeneratorHelpers.GetEnumUnderlyingTypeFromMemberCount(currentBaseOrder);
 
             TryGetEnumName(TemplateFullName, out var fullyQualifiedEnumName);
 
@@ -329,22 +329,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             enumName = templateName;
             return false;
         }
-
-        private static string ToUnderlyingTypeName(int value)
-            => value switch {
-                <= 1 => "byte",
-                <= 2 => "ushort",
-                <= 4 => "uint",
-                _ => "ulong",
-            };
-
-        private static int ItemCountToSize(ulong itemCount)
-            => itemCount switch {
-                <= byte.MaxValue => 1,
-                <= ushort.MaxValue => 2,
-                <= uint.MaxValue => 4,
-                _ => 8,
-            };
 
         private static int Compare(KindCandidate a, KindCandidate b)
         {

@@ -383,19 +383,20 @@ namespace EncosyTower.SourceGen.Generators.PolyStructs
             list.Clear();
         }
 
+        // Specialized code for PolyStruct that use `MaxValue + 1` instead of just `MaxValue`.
         private static string GetEnumUnderlyingTypeName(ulong structRefCount)
         {
             string underlyingType;
 
-            if (structRefCount <= 256)
+            if (structRefCount <= byte.MaxValue + 1)
             {
                 underlyingType = "byte";
             }
-            else if (structRefCount <= 65536)
+            else if (structRefCount <= ushort.MaxValue + 1)
             {
                 underlyingType = "ushort";
             }
-            else if (structRefCount <= 4294967296)
+            else if (structRefCount <= (long)uint.MaxValue + 1)
             {
                 underlyingType = "uint";
             }

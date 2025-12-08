@@ -370,5 +370,35 @@ namespace EncosyTower.SourceGen.Generators
             p.PrintLine("public sealed class PreserveAttribute : global::System.Attribute { }");
             return p;
         }
+
+        public static string GetEnumUnderlyingTypeFromMemberCount(long memberCount)
+            => GetEnumUnderlyingTypeFromSize(DetermineEnumSizeFromMemberCount(memberCount));
+
+        public static string GetEnumUnderlyingTypeFromMemberCount(ulong memberCount)
+            => GetEnumUnderlyingTypeFromSize(DetermineEnumSizeFromMemberCount(memberCount));
+
+        public static string GetEnumUnderlyingTypeFromSize(int size)
+            => size switch {
+                <= 1 => "byte",
+                <= 2 => "ushort",
+                <= 4 => "uint",
+                _ => "ulong",
+            };
+
+        public static int DetermineEnumSizeFromMemberCount(long memberCount)
+            => memberCount switch {
+                <= byte.MaxValue => 1,
+                <= ushort.MaxValue => 2,
+                <= uint.MaxValue => 4,
+                _ => 8,
+            };
+
+        public static int DetermineEnumSizeFromMemberCount(ulong memberCount)
+            => memberCount switch {
+                <= byte.MaxValue => 1,
+                <= ushort.MaxValue => 2,
+                <= uint.MaxValue => 4,
+                _ => 8,
+            };
     }
 }
