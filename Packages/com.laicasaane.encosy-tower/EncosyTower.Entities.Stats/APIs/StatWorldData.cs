@@ -27,8 +27,7 @@ using Unity.Jobs;
 
 namespace EncosyTower.Entities.Stats
 {
-    public struct StatWorldData<TValuePair, TStat, TStatModifier, TStatModifierStack, TStatObserver>
-        : IDisposable, INativeDisposable
+    public struct StatWorldData<TValuePair, TStat, TStatModifier, TStatModifierStack, TStatObserver> : IDisposable, INativeDisposable
         where TValuePair : unmanaged, IStatValuePair
         where TStat : unmanaged, IStat<TValuePair>
         where TStatModifier : unmanaged, IStatModifier<TValuePair, TStat, TStatModifierStack>

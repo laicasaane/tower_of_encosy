@@ -74,38 +74,6 @@ namespace EncosyTower.Entities.Stats
                 return StatAPI.TryGetStatData<TValuePair, TStat, TStatData>(statHandle, statBuffer, out statData);
             }
 
-            //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-            //public readonly bool TryGetStatDataWithIndex<TStatData>(
-            //      StatHandle<TStatData> statHandle
-            //    , out TStatData statData
-            //)
-            //    where TStatData : unmanaged, IStatDataWithIndex
-            //{
-            //    return StatAPI.TryGetStatDataWithIndex<TValuePair, TStat, TStatData>(
-            //          statHandle
-            //        , _lookupStats
-            //        , out statData
-            //    );
-            //}
-
-            ///// <summary>
-            ///// Note: Assumes the "statBuffer" is on the entity of the statHandle
-            ///// </summary>
-            //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-            //public readonly bool TryGetStatDataWithIndex<TStatData>(
-            //      StatHandle<TStatData> statHandle
-            //    , ReadOnlySpan<TStat> statBuffer
-            //    , out TStatData statData
-            //)
-            //    where TStatData : unmanaged, IStatDataWithIndex
-            //{
-            //    return StatAPI.TryGetStatDataWithIndex<TValuePair, TStat, TStatData>(
-            //          statHandle
-            //        , statBuffer
-            //        , out statData
-            //    );
-            //}
-
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly bool TryGetStat(StatHandle statHandle, out TStat stat)
             {

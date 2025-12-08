@@ -41,6 +41,12 @@ namespace EncosyTower.Entities.Stats
         /// </remarks>
         public int value;
 
+        public readonly bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Equals(Null) == false;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator uint(StatIndex value)
             => (uint)value.value;
@@ -54,6 +60,12 @@ namespace EncosyTower.Entities.Stats
 
         /// <inheritdoc cref="StatIndex.value"/>
         public int value;
+
+        public readonly bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Equals(Null) == false;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator StatIndex<TStatData>(StatIndex value)

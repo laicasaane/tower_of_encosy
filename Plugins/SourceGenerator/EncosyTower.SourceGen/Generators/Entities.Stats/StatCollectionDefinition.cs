@@ -8,6 +8,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public string typeName;
         public string typeNamespace;
         public string typeIdentifier;
+        public string statSystemFullTypeName;
         public string hintName;
         public string sourceFilePath;
         public string openingSource;
@@ -18,6 +19,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public readonly bool IsValid
             => string.IsNullOrEmpty(typeName) == false
             && string.IsNullOrEmpty(typeNamespace) == false
+            && string.IsNullOrEmpty(statSystemFullTypeName) == false
             && string.IsNullOrEmpty(hintName) == false
             && string.IsNullOrEmpty(sourceFilePath) == false
             && string.IsNullOrEmpty(openingSource) == false
@@ -29,6 +31,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public readonly bool Equals(StatCollectionDefinition other)
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(typeNamespace, other.typeNamespace, StringComparison.Ordinal)
+            && string.Equals(statSystemFullTypeName, other.statSystemFullTypeName, StringComparison.Ordinal)
             && statDataCollection.Equals(other.statDataCollection)
             ;
 
@@ -36,7 +39,12 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             => obj is StatCollectionDefinition other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(typeName, typeNamespace, statDataCollection);
+            => HashValue.Combine(
+                  typeName
+                , typeNamespace
+                , statSystemFullTypeName
+                , statDataCollection
+            );
 
         internal partial struct StatDataDefinition : IEquatable<StatDataDefinition>
         {

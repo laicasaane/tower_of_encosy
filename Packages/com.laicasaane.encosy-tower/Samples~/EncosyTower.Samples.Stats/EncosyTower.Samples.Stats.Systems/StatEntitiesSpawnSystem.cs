@@ -75,7 +75,7 @@ namespace EncosyTower.Samples.Stats
 
             state.Dependency = new InitializeAffectorStatsJob {
                 accessor = _accessor,
-                lookupIndices = _lookups,
+                lookupStats = _lookups,
                 lookupLifetime = _lookups,
                 entities = affectorEntities.AsReadOnly(),
                 random = new Random(random.NextUInt() + 1),
@@ -91,8 +91,8 @@ namespace EncosyTower.Samples.Stats
             }.Schedule(state.Dependency);
         }
 
-        [Lookup(typeof(PrimaryStatIndices), true)]
-        [Lookup(typeof(AffectorStatIndices), true)]
+        [Lookup(typeof(PrimaryStats), true)]
+        [Lookup(typeof(AffectorStats), true)]
         [Lookup(typeof(Lifetime))]
         private partial struct Lookups : IComponentLookups { }
 
@@ -103,7 +103,7 @@ namespace EncosyTower.Samples.Stats
             public StatSystem.Accessor accessor;
 
             [NativeDisableParallelForRestriction, ReadOnly]
-            public ComponentLookup<AffectorStatIndices> lookupIndices;
+            public ComponentLookup<AffectorStats> lookupStats;
 
             [NativeDisableParallelForRestriction]
             public ComponentLookup<Lifetime> lookupLifetime;
@@ -114,7 +114,7 @@ namespace EncosyTower.Samples.Stats
             public void Execute(int startIndex, int count)
             {
                 var end = startIndex + count;
-                var lookupIndices = this.lookupIndices;
+                var lookupStats = this.lookupStats;
                 var lookupLifetime = this.lookupLifetime;
                 var accessor = this.accessor;
                 var entities = this.entities;
@@ -124,10 +124,10 @@ namespace EncosyTower.Samples.Stats
                 for (var i = startIndex; i < end; i++)
                 {
                     var entity = entities[i];
-                    var statIndices = lookupIndices[entity].value;
+                    var statHandles = lookupStats[entity].value.MakeHandlesFor(entity);
 
-                    accessor.TrySetStatBaseValue(new(entity, statIndices.hp), 200f, ref worldData);
-                    accessor.TrySetStatBaseValue(new(entity, statIndices.moveSpeed), 100f, ref worldData);
+                    accessor.TrySetStatBaseValue(statHandles.hp, 200f, ref worldData);
+                    accessor.TrySetStatBaseValue(statHandles.moveSpeed, 100f, ref worldData);
 
                     var lifeTimeRef = lookupLifetime.GetRefRW(entity);
                     lifeTimeRef.ValueRW.value = random.NextFloat(1f, 6f);
@@ -176,11 +176,15 @@ namespace EncosyTower.Samples.Stats
                 statOps[1] = StatOp.AddMultiplier;
                 statOps[2] = StatOp.MultiplyMultiplier;
 
+                var statTypes = NativeArray.CreateFast<Stats.Type>(2, Allocator.Temp);
+                statTypes[0] = Stats.Type.Hp;
+                statTypes[1] = Stats.Type.MoveSpeed;
+
                 var worldData = new StatSystem.WorldData(primaryEntities.Length, Allocator.Temp);
                 var statEntities = new NativeList<Entity>(primaryEntities.Length, Allocator.Temp);
                 statEntities.AddRange(primaryEntities);
 
-                var modifierHandles = new NativeList<ModifierHandle>((int)StatIndices.COUNT, Allocator.Temp);
+                var modifierHandles = new NativeList<ModifierHandle>(Stats.Indices.LENGTH, Allocator.Temp);
 
                 for (var i = 0; i < affectorEntities.Length; i++)
                 {
@@ -193,27 +197,31 @@ namespace EncosyTower.Samples.Stats
                     // In this context we don't need the list to stay ordered, but to be randomized as much as possible.
                     statEntities.RemoveAtSwapBack(statEntityIndex);
 
-                    lookups.GetComponentData(statEntity, out PrimaryStatIndices primaryIndices);
-                    lookups.GetComponentData(affectorEntity, out AffectorStatIndices affectorIndices);
+                    lookups.GetComponentData(statEntity, out PrimaryStats primaryStats);
+                    lookups.GetComponentData(affectorEntity, out AffectorStats affectorStats);
+
+                    var primaryIndices = primaryStats.value.indices;
+                    var affectorIndices = affectorStats.value.indices;
 
                     modifierHandles.Clear();
 
-                    var linkCount = (int)random.NextUInt(StatIndices.COUNT) + 1;
+                    var linkCount = random.NextInt(1, Stats.Indices.LENGTH + 1);
 
                     for (var k = 0; k < linkCount; k++)
                     {
-                        var handleIndex = (int)random.NextUInt(StatIndices.LAST_STAT_OF_TYPE_HALF + 1);
+                        var statTypeIndex = random.NextInt(0, statTypes.Length);
+                        var statType = statTypes[statTypeIndex];
+                        var primaryIndex = primaryIndices[statType];
+                        var affectorIndex = affectorIndices[statType];
 
-                        if (primaryIndices.value.TryGetHandle(handleIndex, out var primaryIndex) == false
-                            || affectorIndices.value.TryGetHandle(handleIndex, out var affectorIndex) == false
-                        )
+                        if (primaryIndex.IsValid == false || affectorIndex.IsValid == false)
                         {
                             continue;
                         }
 
                         var primaryHandle = new StatHandle(statEntity, primaryIndex);
                         var affectorHandle = new StatHandle(affectorEntity, affectorIndex);
-                        var statOpIndex = (int)random.NextUInt((uint)statOps.Length);
+                        var statOpIndex = random.NextInt(0, statOps.Length);
                         var statOp = statOps[statOpIndex];
 
                         if (accessor.TryAddStatModifier(

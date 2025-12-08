@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.CodeAnalysis;
-
-namespace EncosyTower.SourceGen.Generators.Entities.Stats
+﻿namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
     partial struct StatCollectionDefinition
     {
@@ -13,16 +10,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         private const string GENERATED_CODE = $"[GeneratedCode(GENERATOR, \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
 
-        private const string ISTAT_DATA = $"IStatData";
-        private const string STAT_VARIANT = $"StatVariant";
-        private const string STAT_VARIANT_TYPE = $"StatVariantType";
-
-        private const string LOG_ERROR = "StaticDevLogger.LogError";
-        private const string IF_DEBUG = "#if UNITY_EDITOR || DEVELOPMENT_BUILD";
-        private const string ENDIF_DEBUG = "#endif";
-
         public readonly string WriteCode()
         {
+            var count = statDataCollection.Count;
             var p = Printer.DefaultLarge;
 
             p.PrintEndLine();
@@ -34,13 +24,20 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintBeginLine("partial struct ").PrintEndLine(typeName);
                 p.OpenScope();
                 {
-                    p.PrintLine(GENERATED_CODE);
                     p.PrintLine("public Indices indices;");
                     p.PrintEndLine();
 
+                    WriteMethods(ref p);
+                    WriteTypeEnum(ref p);
                     WriteIndicesStruct(ref p);
+                    WriteHandlesStruct(ref p);
+                    WriteStatDataCollection(ref p);
 
+                    p.Print("#region BAKING").PrintEndLine();
+                    p.Print("#endregion ===").PrintEndLine();
+                    p.PrintEndLine();
 
+                    WriteBakingStruct(ref p);
                 }
                 p.CloseScope();
 
@@ -48,6 +45,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.Print("#endregion ======").PrintEndLine();
                 p.PrintEndLine();
 
+                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("partial struct ").PrintEndLine(typeName);
                 p.OpenScope();
                 {
@@ -65,14 +63,42 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             return p.Result;
         }
 
+        private readonly void WriteMethods(ref Printer p)
+        {
+            p.PrintLine(AGGRESSIVE_INLINING);
+            p.PrintLine("public readonly Handles MakeHandlesFor(Entity entity)");
+            p.WithIncreasedIndent().PrintLine("=> indices.ToHandles(entity);");
+            p.PrintEndLine();
+        }
+
+        private readonly void WriteTypeEnum(ref Printer p)
+        {
+            var count = statDataCollection.Count;
+            var underlyingType = GeneratorHelpers.GetEnumUnderlyingTypeFromMemberCount(count);
+
+            p.PrintLine(GENERATED_CODE);
+            p.PrintBeginLine("public enum Type : ").PrintEndLine(underlyingType);
+            p.OpenScope();
+            {
+                for (var i = 0; i < count; i++)
+                {
+                    var statData = statDataCollection[i];
+
+                    p.PrintBeginLine(statData.typeName).Print(" = ").Print(i).PrintEndLine(",");
+                }
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
         private readonly void WriteIndicesStruct(ref Printer p)
         {
             var count = statDataCollection.Count;
 
-            p.PrintLine("public partial struct Indices");
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public partial struct Indices : IHasLength, IAsSpan<StatIndex>, IAsReadOnlySpan<StatIndex>");
             p.OpenScope();
             {
-                p.PrintLine(GENERATED_CODE);
                 p.PrintLine($"public const int LENGTH = {count};");
                 p.PrintEndLine();
 
@@ -80,13 +106,21 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 {
                     var statData = statDataCollection[i];
 
-                    p.PrintLine(GENERATED_CODE);
                     p.PrintBeginLine("public StatIndex<").Print(statData.typeName).Print("> ")
                         .Print(statData.fieldName).PrintEndLine(";");
-                    p.PrintEndLine();
                 }
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public Indices(ReadOnlySpan<StatIndex> values) : this()");
+                p.OpenScope();
+                {
+                    p.PrintLine("values.CopyTo(AsSpan());");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
                 p.PrintLine("public ref StatIndex this[int index]");
                 p.OpenScope();
                 {
@@ -96,7 +130,15 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine("public ref StatIndex this[Type type]");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => ref AsSpan()[(int)type];");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
                 p.PrintLine("public readonly int Length");
                 p.OpenScope();
                 {
@@ -106,7 +148,16 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public static explicit operator Indices(Span<StatIndex> values)");
+                p.WithIncreasedIndent().PrintLine("=> new(values);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public static explicit operator Indices(ReadOnlySpan<StatIndex> values)");
+                p.WithIncreasedIndent().PrintLine("=> new(values);");
+                p.PrintEndLine();
+
                 p.PrintLine("public readonly Span<StatIndex> AsSpan()");
                 p.OpenScope();
                 {
@@ -127,13 +178,337 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public readonly ReadOnlySpan<StatIndex> AsReadOnlySpan()");
                 p.WithIncreasedIndent().PrintLine("=> AsSpan();");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly ReadOnlySpan<StatIndex>.Enumerator GetEnumerator()");
+                p.WithIncreasedIndent().PrintLine("=> AsReadOnlySpan().GetEnumerator();");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly Handles ToHandles(Entity entity)");
+                p.OpenScope();
+                {
+                    p.PrintLine("return new()");
+                    p.OpenScope();
+                    {
+                        for (var i = 0; i < count; i++)
+                        {
+                            var fieldName = statDataCollection[i].fieldName;
+
+                            p.PrintBeginLine(fieldName).Print(" = new(entity, ")
+                                .Print(fieldName).PrintEndLine("),");
+                        }
+                    }
+                    p.CloseScope("};");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly StatIndex<TStatData> GetIndexFor<TStatData>()");
+                p.WithIncreasedIndent().PrintLine("where TStatData : unmanaged, IStatData");
+                p.OpenScope();
+                {
+                    for (var i = 0; i < count; i++)
+                    {
+                        var statData = statDataCollection[i];
+
+                        p.PrintBeginLine("if (typeof(TStatData) == typeof(").Print(statData.typeName).PrintEndLine("))");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine("return (StatIndex<TStatData>)((StatIndex)")
+                                .Print(statData.fieldName).PrintEndLine(");");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+
+                    p.PrintLine("return default;");
+                }
+                p.CloseScope();
                 p.PrintEndLine();
             }
             p.CloseScope();
             p.PrintEndLine();
+        }
+
+        private readonly void WriteHandlesStruct(ref Printer p)
+        {
+            var count = statDataCollection.Count;
+
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public partial struct Handles : IHasLength, IAsSpan<StatHandle>, IAsReadOnlySpan<StatHandle>");
+            p.OpenScope();
+            {
+                p.PrintLine($"public const int LENGTH = {count};");
+                p.PrintEndLine();
+
+                for (var i = 0; i < count; i++)
+                {
+                    var statData = statDataCollection[i];
+
+                    p.PrintBeginLine("public StatHandle<").Print(statData.typeName).Print("> ")
+                        .Print(statData.fieldName).PrintEndLine(";");
+                }
+
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public Handles(ReadOnlySpan<StatHandle> values) : this()");
+                p.OpenScope();
+                {
+                    p.PrintLine("values.CopyTo(AsSpan());");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public ref StatHandle this[int index]");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => ref AsSpan()[index];");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public ref StatHandle this[Type type]");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => ref AsSpan()[(int)type];");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public readonly int Length");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => LENGTH;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public static explicit operator Handles(Span<StatHandle> values)");
+                p.WithIncreasedIndent().PrintLine("=> new(values);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public static explicit operator Handles(ReadOnlySpan<StatHandle> values)");
+                p.WithIncreasedIndent().PrintLine("=> new(values);");
+                p.PrintEndLine();
+
+                p.PrintLine("public readonly Span<StatHandle> AsSpan()");
+                p.OpenScope();
+                {
+                    p.PrintLine("unsafe");
+                    p.OpenScope();
+                    {
+                        var firstFieldName = statDataCollection[0].fieldName;
+
+                        p.PrintBeginLine("fixed (void* ptr = &").Print(firstFieldName).PrintEndLine(")");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("return new Span<StatHandle>(ptr, LENGTH);");
+                        }
+                        p.CloseScope();
+                    }
+                    p.CloseScope();
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly ReadOnlySpan<StatHandle> AsReadOnlySpan()");
+                p.WithIncreasedIndent().PrintLine("=> AsSpan();");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly ReadOnlySpan<StatHandle>.Enumerator GetEnumerator()");
+                p.WithIncreasedIndent().PrintLine("=> AsReadOnlySpan().GetEnumerator();");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly Indices ToIndices()");
+                p.OpenScope();
+                {
+                    p.PrintLine("return new()");
+                    p.OpenScope();
+                    {
+                        for (var i = 0; i < count; i++)
+                        {
+                            var fieldName = statDataCollection[i].fieldName;
+
+                            p.PrintBeginLine(fieldName).Print(" = ")
+                                .Print(fieldName).PrintEndLine(".index,");
+                        }
+                    }
+                    p.CloseScope("};");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly StatHandle<TStatData> GetHandleFor<TStatData>()");
+                p.WithIncreasedIndent().PrintLine("where TStatData : unmanaged, IStatData");
+                p.OpenScope();
+                {
+                    for (var i = 0; i < count; i++)
+                    {
+                        var statData = statDataCollection[i];
+
+                        p.PrintBeginLine("if (typeof(TStatData) == typeof(").Print(statData.typeName).PrintEndLine("))");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine("return (StatHandle<TStatData>)((StatHandle)")
+                                .Print(statData.fieldName).PrintEndLine(");");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+
+                    p.PrintLine("return default;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private readonly void WriteStatDataCollection(ref Printer p)
+        {
+            var statDataCollection = this.statDataCollection;
+            var length = statDataCollection.Count;
+
+            for (var i = 0; i < length; i++)
+            {
+                WriteStatCreation(ref p, statDataCollection[i]);
+            }
+
+            return;
+
+            static void WriteStatCreation(ref Printer p, StatDataDefinition statData)
+            {
+                var typeName = statData.typeName;
+
+                p.PrintBeginLine("partial struct ").PrintEndLine(typeName);
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintBeginLine("public static StatData<")
+                        .Print(typeName)
+                        .PrintEndLine("> Create(bool produceChangeEvents = false)");
+                    p.WithIncreasedIndent().PrintBeginLine("=> new(new ")
+                        .Print(typeName).PrintEndLine("(), produceChangeEvents);");
+                    p.PrintEndLine();
+
+                    var singleArgName = statData.singleValue ? "value" : "baseValue";
+
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintBeginLine("public static StatData<")
+                        .Print(typeName).Print("> Create(")
+                        .Print(statData.valueTypeName).Print(" ").Print(singleArgName)
+                        .PrintEndLine(", bool produceChangeEvents = false)");
+                    p.WithIncreasedIndent().PrintBeginLine("=> new(new ")
+                        .Print(typeName).Print("(").Print(singleArgName).PrintEndLine("), produceChangeEvents);");
+                    p.PrintEndLine();
+
+                    if (statData.singleValue == false)
+                    {
+                        p.PrintLine(AGGRESSIVE_INLINING);
+                        p.PrintBeginLine("public static StatData<")
+                            .Print(typeName).Print("> Create(")
+                            .Print(statData.valueTypeName).Print(" baseValue, ")
+                            .Print(statData.valueTypeName).Print(" currentValue, ")
+                            .PrintEndLine("bool produceChangeEvents = false)");
+                        p.WithIncreasedIndent().PrintBeginLine("=> new(new ")
+                            .Print(typeName).PrintEndLine("(baseValue, currentValue), produceChangeEvents);");
+                        p.PrintEndLine();
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+        }
+
+        private readonly void WriteBakingStruct(ref Printer p)
+        {
+            var count = statDataCollection.Count;
+
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public partial struct Baking");
+            p.OpenScope();
+            {
+                p.PrintLine("public StatSystem.StatBaker statBaker;");
+                p.PrintBeginLine("public ").Print(typeName).PrintEndLine(" statCollection;");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public static Baking Begin(StatSystem.StatBaker statBaker)");
+                p.OpenScope();
+                {
+                    p.PrintLine("return new() { statBaker = statBaker, statCollection = new(), };");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                for (var i = 0; i < count; i++)
+                {
+                    WriteSetStatMethod(ref p, statDataCollection[i]);
+                }
+
+                p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+                p.PrintBeginLine("/// ").Print("Converts <see cref=\"statCollection\"/> into the component ")
+                    .PrintEndLine("<typeparamref name=\"T\"/> then adds to the entity.");
+                p.PrintBeginLine("/// ").PrintEndLine("</summary>");
+                p.PrintBeginLine("/// ").PrintEndLine("<remarks>");
+                p.PrintBeginLine("/// ").Print("The layout and size of <typeparamref name=\"T\"/> must be the same ")
+                    .Print("as <see cref=\"").Print(typeName).PrintEndLine("\"/>");
+                p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
+                p.PrintLine("public T FinishThenAddComponent<T>()");
+                p.WithIncreasedIndent().PrintLine("where T : unmanaged, IComponentData");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("ref var component = ref UnsafeUtility.As<").Print(typeName)
+                        .PrintEndLine(", T>(ref statCollection);");
+
+                    p.PrintLine("statBaker.Baker.AddComponent(statBaker.Entity, component);");
+                    p.PrintLine("return component;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            return;
+
+            static void WriteSetStatMethod(ref Printer p, StatDataDefinition statData)
+            {
+                p.PrintBeginLine("public Baking SetStat(StatData<").Print(statData.typeName)
+                    .PrintEndLine("> value)");
+                p.OpenScope();
+                {
+                    p.PrintLine("if (value.IsValid)");
+                    p.OpenScope();
+                    {
+                        p.PrintBeginLine("statCollection.indices.").Print(statData.fieldName)
+                            .PrintEndLine(" = statBaker.CreateStatHandle(value.Data, value.ProduceChangeEvents).index;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("return this;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
         }
     }
 }

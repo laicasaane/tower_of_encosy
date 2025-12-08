@@ -44,55 +44,17 @@ namespace EncosyTower.Entities.Stats
         internal DynamicBuffer<TStatModifier> _modifierBuffer;
         internal DynamicBuffer<TStatObserver> _observerBuffer;
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public ref TStatData CreateStat<TStatData>(
-        //      ref TStatData statDataWithIndex
-        //    , bool produceChangeEvents
-        //)
-        //    where TStatData : unmanaged, IStatDataWithIndex
-        //{
-        //    statDataWithIndex = StatAPI.CreateStat<TValuePair, TStat, TStatData, TValuePairComposer>(
-        //          _entity
-        //        , ref statDataWithIndex
-        //        , produceChangeEvents
-        //        , ref _statBuffer
-        //        , _valuePairComposer
-        //    );
+        public readonly IBaker Baker
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _baker;
+        }
 
-        //    return ref statDataWithIndex;
-        //}
-
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public TStatData CreateStat<TStatData>(
-        //      TStatData statDataWithIndex
-        //    , bool produceChangeEvents
-        //)
-        //    where TStatData : unmanaged, IStatDataWithIndex
-        //{
-        //    return StatAPI.CreateStat<TValuePair, TStat, TStatData, TValuePairComposer>(
-        //          _entity
-        //        , ref statDataWithIndex
-        //        , produceChangeEvents
-        //        , ref _statBuffer
-        //        , _valuePairComposer
-        //    );
-        //}
-
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public TStatData CreateStat<TStatData>(
-        //      TValuePair valuePair
-        //    , bool produceChangeEvents
-        //)
-        //    where TStatData : unmanaged, IStatDataWithIndex
-        //{
-        //    return StatAPI.CreateStat<TValuePair, TStat, TStatData, TValuePairComposer>(
-        //          _entity
-        //        , valuePair
-        //        , produceChangeEvents
-        //        , ref _statBuffer
-        //        , _valuePairComposer
-        //    );
-        //}
+        public readonly Entity Entity
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _entity;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public StatHandle<TStatData> CreateStatHandle<TStatData>(

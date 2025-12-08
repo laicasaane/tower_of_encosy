@@ -49,7 +49,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             return node is StructDeclarationSyntax syntax
                 && syntax.TypeParameterList is null
                 && syntax.AttributeLists.Count > 0
-                && syntax.HasAttributeCandidate(NAMESPACE, STAT_DATA)
+                && syntax.GetAttribute(NAMESPACE, STAT_DATA) is AttributeSyntax attributeSyntax
+                && attributeSyntax.ArgumentList is AttributeArgumentListSyntax argumentList
+                && argumentList.Arguments.Count > 0
                 ;
         }
 

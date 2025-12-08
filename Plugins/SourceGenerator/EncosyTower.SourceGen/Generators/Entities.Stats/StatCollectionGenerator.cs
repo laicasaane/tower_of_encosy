@@ -13,6 +13,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         private const string STAT_DATA = $"StatData";
         private const string STAT_COLLECTION = $"StatCollection";
         private const string STAT_COLLECTION_ATTRIBUTE = $"global::{NAMESPACE}.StatCollectionAttribute";
+        private const string STAT_SYSTEM_ATTRIBUTE = $"global::{NAMESPACE}.StatSystemAttribute";
         private const string GENERATOR_NAME = nameof(StatCollectionGenerator);
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -50,7 +51,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             return node is StructDeclarationSyntax syntax
                 && syntax.TypeParameterList is null
                 && syntax.AttributeLists.Count > 0
-                && syntax.HasAttributeCandidate(NAMESPACE, STAT_COLLECTION)
+                && syntax.GetAttribute(NAMESPACE, STAT_COLLECTION) is AttributeSyntax attributeSyntax
+                && attributeSyntax.ArgumentList is AttributeArgumentListSyntax argumentList
+                && argumentList.Arguments.Count > 0
+                && argumentList.Arguments[0].Expression is TypeOfExpressionSyntax
                 ;
         }
 
@@ -64,6 +68,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             if (context.Node is not StructDeclarationSyntax syntax
                 || syntax.TypeParameterList is not null
                 || syntax.GetAttribute(NAMESPACE, STAT_COLLECTION) is not AttributeSyntax attributeSyntax
+                || attributeSyntax.ArgumentList is not AttributeArgumentListSyntax argumentList
+                || argumentList.Arguments.Count < 1
+                || argumentList.Arguments[0].Expression is not TypeOfExpressionSyntax typeOfExpr
             )
             {
                 return default;
@@ -79,7 +86,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             var attribute = structSymbol.GetAttribute(STAT_COLLECTION_ATTRIBUTE);
 
-            if (attribute == null)
+            if (attribute == null || attribute.ConstructorArguments.Length < 1)
+            {
+                return default;
+            }
+
+            var statSystemTypeSymbol = semanticModel.GetSymbolInfo(typeOfExpr.Type, token).Symbol as INamedTypeSymbol;
+
+            if (statSystemTypeSymbol.HasAttribute(STAT_SYSTEM_ATTRIBUTE) == false)
             {
                 return default;
             }
@@ -89,6 +103,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             var typeIdentifier = symbol.ToValidIdentifier();
             var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, typeIdentifier);
             var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME);
+            var statSystemFullTypeName = statSystemTypeSymbol.ToFullName();
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   syntax
@@ -102,6 +117,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 typeName = symbol.Name,
                 typeNamespace = symbol.ContainingNamespace.ToDisplayString(),
                 typeIdentifier = typeIdentifier,
+                statSystemFullTypeName = statSystemFullTypeName,
                 hintName = hintName,
                 sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
@@ -113,7 +129,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             return result;
 
-            static void PrintAdditionalUsings(ref Printer p)
+            void PrintAdditionalUsings(ref Printer p)
             {
                 p.PrintEndLine();
                 p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
@@ -123,12 +139,16 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine("using System.Diagnostics.CodeAnalysis;");
                 p.PrintLine("using System.Runtime.CompilerServices;");
                 p.PrintLine("using System.Runtime.InteropServices;");
+                p.PrintLine("using EncosyTower.Collections;");
                 p.PrintLine("using EncosyTower.Logging;");
+                p.PrintLine("using Unity.Collections.LowLevel.Unsafe;");
                 p.PrintLine("using Unity.Entities;");
                 p.PrintLine("using Unity.Mathematics;");
                 p.PrintLine($"using {StatGeneratorAPI.NAMESPACE};");
                 p.PrintEndLine();
                 p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+                p.PrintEndLine();
+                p.PrintBeginLine("using StatSystem = ").Print(statSystemFullTypeName).PrintEndLine(";");
             }
 
             static void GetStatDataDefintions(
@@ -194,13 +214,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         return default;
                     }
 
-                    var typeNames = StatGeneratorAPI.TypeNames.AsSpan();
-                    var sizes = StatGeneratorAPI.Sizes.AsSpan();
-
-                    var type = types[index];
-                    var typeName = typeNames[index];
-
-                    result.valueTypeName = typeName;
+                    result.valueTypeName = types[index];
                 }
                 else if (args[0].Expression is TypeOfExpressionSyntax typeOfExpr)
                 {

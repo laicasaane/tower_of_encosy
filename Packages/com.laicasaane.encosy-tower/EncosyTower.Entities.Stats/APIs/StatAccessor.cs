@@ -69,82 +69,6 @@ namespace EncosyTower.Entities.Stats
             _lookupObservers.Update(ref state);
         }
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public bool TryCreateStat<TStatData>(
-        //      Entity entity
-        //    , ref TStatData statDataWithIndex
-        //    , bool produceChangeEvents
-        //)
-        //    where TStatData : unmanaged, IStatDataWithIndex
-        //{
-        //    if (_lookupStats.TryGetBuffer(entity, out var statBuffer))
-        //    {
-        //        statDataWithIndex = StatAPI.CreateStat<TValuePair, TStat, TStatData, TValuePairComposer>(
-        //              entity
-        //            , ref statDataWithIndex
-        //            , produceChangeEvents
-        //            , ref statBuffer
-        //            , _valuePairComposer
-        //        );
-
-        //        return true;
-        //    }
-
-        //    return false;
-        //}
-
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public bool TryCreateStat<TStatData>(
-        //      Entity entity
-        //    , TStatData statDataWithIndex
-        //    , bool produceChangeEvents
-        //    , out TStatData statData
-        //)
-        //    where TStatData : unmanaged, IStatDataWithIndex
-        //{
-        //    if (_lookupStats.TryGetBuffer(entity, out var statBuffer))
-        //    {
-        //        statData = StatAPI.CreateStat<TValuePair, TStat, TStatData, TValuePairComposer>(
-        //              entity
-        //            , statDataWithIndex
-        //            , produceChangeEvents
-        //            , ref statBuffer
-        //            , _valuePairComposer
-        //        );
-
-        //        return true;
-        //    }
-
-        //    statData = default;
-        //    return false;
-        //}
-
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public bool TryCreateStat<TStatData>(
-        //      Entity entity
-        //    , TValuePair valuePair
-        //    , bool produceChangeEvents
-        //    , out TStatData statDataWithIndex
-        //)
-        //    where TStatData : unmanaged, IStatDataWithIndex
-        //{
-        //    if (_lookupStats.TryGetBuffer(entity, out var statBuffer))
-        //    {
-        //        statDataWithIndex = StatAPI.CreateStat<TValuePair, TStat, TStatData, TValuePairComposer>(
-        //              entity
-        //            , valuePair
-        //            , produceChangeEvents
-        //            , ref statBuffer
-        //            , _valuePairComposer
-        //        );
-
-        //        return true;
-        //    }
-
-        //    statDataWithIndex = default;
-        //    return false;
-        //}
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryCreateStatHandle<TStatData>(
               Entity entity
@@ -271,38 +195,6 @@ namespace EncosyTower.Entities.Stats
         {
             return StatAPI.TryGetStatData<TValuePair, TStat, TStatData>(statHandle, statBuffer, out statData);
         }
-
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public readonly bool TryGetStatDataWithIndex<TStatData>(
-        //      StatHandle<TStatData> statHandle
-        //    , out TStatData statData
-        //)
-        //    where TStatData : unmanaged, IStatDataWithIndex
-        //{
-        //    return StatAPI.TryGetStatDataWithIndex<TValuePair, TStat, TStatData>(
-        //          statHandle
-        //        , _lookupStats
-        //        , out statData
-        //    );
-        //}
-
-        ///// <summary>
-        ///// Note: Assumes the "statBuffer" is on the entity of the statHandle
-        ///// </summary>
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public readonly bool TryGetStatDataWithIndex<TStatData>(
-        //      StatHandle<TStatData> statHandle
-        //    , ReadOnlySpan<TStat> statBuffer
-        //    , out TStatData statData
-        //)
-        //    where TStatData : unmanaged, IStatDataWithIndex
-        //{
-        //    return StatAPI.TryGetStatDataWithIndex<TValuePair, TStat, TStatData>(
-        //          statHandle
-        //        , statBuffer
-        //        , out statData
-        //    );
-        //}
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryGetStat(StatHandle statHandle, out TStat stat)
@@ -550,43 +442,6 @@ namespace EncosyTower.Entities.Stats
                 , ref worldData
             );
         }
-
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public bool TrySetStatData<TStatData>(
-        //      Entity entity
-        //    , TStatData statDataWithIndex
-        //    , ref StatWorldData<TValuePair, TStat, TStatModifier, TStatModifierStack, TStatObserver> worldData
-        //)
-        //    where TStatData : unmanaged, IStatDataWithIndex
-        //{
-        //    return TrySetStatValues(
-        //          new StatHandle(entity, statDataWithIndex.StatIndex)
-        //        , statDataWithIndex.BaseValue
-        //        , statDataWithIndex.CurrentValue
-        //        , ref worldData
-        //    );
-        //}
-
-        ///// <summary>
-        ///// Note: Assumes the "statBuffer" is on the entity
-        ///// </summary>
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public bool TrySetStatData<TStatData>(
-        //      Entity entity
-        //    , TStatData statDataWithIndex
-        //    , ref DynamicBuffer<TStat> statBuffer
-        //    , ref StatWorldData<TValuePair, TStat, TStatModifier, TStatModifierStack, TStatObserver> worldData
-        //)
-        //    where TStatData : unmanaged, IStatDataWithIndex
-        //{
-        //    return TrySetStatValues(
-        //          new StatHandle(entity, statDataWithIndex.StatIndex)
-        //        , statDataWithIndex.BaseValue
-        //        , statDataWithIndex.CurrentValue
-        //        , ref statBuffer
-        //        , ref worldData
-        //    );
-        //}
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TrySetStatValues(

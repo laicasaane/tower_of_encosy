@@ -55,7 +55,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         private const string MODIFIER_RANGE = $"ModifierRange";
         private const string OBSERVER_RANGE = $"ObserverRange";
         private const string ISTAT_DATA = $"IStatData";
-        private const string ISTAT_DATA_INDEX = $"IStatDataWithIndex";
         private const string ISTAT_VALUE_PAIR = $"IStatValuePair";
         private const string ISTAT_VALUE_PAIR_COMPOSER = $"IStatValuePairComposer<ValuePair>";
         private const string ISTAT = $"IStat<ValuePair>";
@@ -240,31 +239,31 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 .PrintEndLine();
             p.OpenScope();
             {
-                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintLine(SERIALIZED_FIELD);
                 p.PrintBeginLine("private ").Print(MODIFIER_RANGE).PrintEndLine(" _modifierRange;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintLine(SERIALIZED_FIELD);
                 p.PrintBeginLine("private ").Print(OBSERVER_RANGE).PrintEndLine(" _observerRange;");
                 p.PrintEndLine();
 
-                p.PrintLine(SERIALIZED_FIELD).PrintLine(GENERATED_CODE);
+                p.PrintLine(SERIALIZED_FIELD);
                 p.PrintLine("private StatDataStore _valueData;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintLine(SERIALIZED_FIELD);
                 p.PrintBeginLine("private ").Print(STAT_VARIANT_TYPE).PrintEndLine(" _valueType;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintLine(SERIALIZED_FIELD);
                 p.PrintLine("private bool _valueIsPair;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintLine(SERIALIZED_FIELD);
                 p.PrintLine("private bool _produceChangeEvents;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(SERIALIZED_FIELD);
                 p.PrintBeginLine("public ").Print(MODIFIER_RANGE).PrintEndLine(" ModifierRange");
                 p.OpenScope();
                 {
@@ -278,7 +277,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ").Print(OBSERVER_RANGE).PrintEndLine(" ObserverRange");
                 p.OpenScope();
                 {
@@ -292,7 +290,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public bool ProduceChangeEvents");
                 p.OpenScope();
                 {
@@ -306,7 +303,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public ValuePair ValuePair");
                 p.OpenScope();
                 {
@@ -320,19 +316,19 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly ").Print(STAT_VARIANT).Print(" GetBaseValueOrDefault(in ")
                     .Print(STAT_VARIANT).PrintEndLine(" defaultValue = default)");
                 p.WithIncreasedIndent().PrintLine("=> ValuePair.GetBaseValueOrDefault(defaultValue);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly ").Print(STAT_VARIANT).Print(" GetCurrentValueOrDefault(in ")
                     .Print(STAT_VARIANT).PrintEndLine(" defaultValue = default)");
                 p.WithIncreasedIndent().PrintLine("=> ValuePair.GetCurrentValueOrDefault(defaultValue);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetBaseValue(in ").Print(STAT_VARIANT).PrintEndLine(" value)");
                 p.OpenScope();
                 {
@@ -348,7 +344,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public bool TrySetCurrentValue(in ").Print(STAT_VARIANT).PrintEndLine(" value)");
                 p.OpenScope();
                 {
@@ -364,7 +359,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public bool TrySetValues(in ").Print(STAT_VARIANT).Print(" baseValue, in ")
                     .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
                 p.OpenScope();
@@ -391,7 +385,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.PrintLine("partial struct Stat");
             p.OpenScope();
             {
-                p.PrintLine(STRUCT_LAYOUT_EXPLICIT).PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(STRUCT_LAYOUT_EXPLICIT);
                 p.PrintLine("struct StatValueUnion");
                 p.OpenScope();
                 {
@@ -399,15 +393,12 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     p.PrintLine("private struct ExposedValuePair");
                     p.OpenScope();
                     {
-                        p.PrintLine(GENERATED_CODE);
                         p.PrintLine("public StatDataStore data;");
                         p.PrintEndLine();
 
-                        p.PrintLine(GENERATED_CODE);
                         p.PrintBeginLine("public ").Print(STAT_VARIANT_TYPE).PrintEndLine(" type;");
                         p.PrintEndLine();
 
-                        p.PrintLine(GENERATED_CODE);
                         p.PrintLine("public bool isPair;");
                         p.PrintEndLine();
                     }
@@ -468,7 +459,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA);
             p.OpenScope();
             {
-                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintLine(SERIALIZED_FIELD);
                 p.PrintLine("private Stat _value;");
                 p.PrintEndLine();
 
@@ -480,7 +471,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public Stat(in Stat value)");
                 p.OpenScope();
                 {
@@ -489,7 +480,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ").Print(MODIFIER_RANGE).PrintEndLine(" ModifierRange");
                 p.OpenScope();
                 {
@@ -503,7 +493,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ").Print(OBSERVER_RANGE).PrintEndLine(" ObserverRange");
                 p.OpenScope();
                 {
@@ -517,7 +506,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public bool ProduceChangeEvents");
                 p.OpenScope();
                 {
@@ -531,7 +519,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public TStatData Data");
                 p.OpenScope();
                 {
@@ -582,7 +569,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public ValuePair ValuePair");
                 p.OpenScope();
                 {
@@ -603,29 +589,29 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public static implicit operator Stat<TStatData>(in Stat value)");
                 p.WithIncreasedIndent().PrintLine("=> new(value);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public static implicit operator Stat(in Stat<TStatData> value)");
                 p.WithIncreasedIndent().PrintLine("=> value._value;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly ").Print(STAT_VARIANT).Print(" GetBaseValueOrDefault(in ")
                     .Print(STAT_VARIANT).PrintEndLine(" defaultValue = default)");
                 p.WithIncreasedIndent().PrintLine("=> _value.GetBaseValueOrDefault(defaultValue);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly ").Print(STAT_VARIANT).Print(" GetCurrentValueOrDefault(in ")
                     .Print(STAT_VARIANT).PrintEndLine(" defaultValue = default)");
                 p.WithIncreasedIndent().PrintLine("=> _value.GetCurrentValueOrDefault(defaultValue);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetBaseValue(in ").Print(STAT_VARIANT).PrintEndLine(" value)");
                 p.OpenScope();
                 {
@@ -637,7 +623,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetCurrentValue(in ").Print(STAT_VARIANT).PrintEndLine(" value)");
                 p.OpenScope();
                 {
@@ -649,7 +635,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetValues(in ").Print(STAT_VARIANT).Print(" baseValue, in ")
                     .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
                 p.OpenScope();
@@ -673,11 +659,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 .PrintEndLine();
             p.OpenScope();
             {
-                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintLine(SERIALIZED_FIELD);
                 p.PrintBeginLine("private ").Print(STAT_HANDLE).PrintEndLine(" _observerHandle;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ").Print(STAT_HANDLE).PrintEndLine(" ObserverHandle");
                 p.OpenScope();
                 {
@@ -702,7 +687,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 .PrintEndLine();
             p.OpenScope();
             {
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public uint Id");
                 p.OpenScope();
                 {
@@ -733,7 +717,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 p.PrintLine("partial void SetIdInternal(uint value);");
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly void AddObservedStatsToList(")
                     .Print(NATIVE_LIST_STAT_HANDLE).PrintEndLine(" observedStatHandles)");
                 p.OpenScope();
@@ -747,7 +731,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(NATIVE_LIST_STAT_HANDLE).PrintEndLine(" observedStatHandles);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public void Apply(").Print(STAT_READER)
                     .PrintEndLine(" reader, ref StatModifier.Stack stack, out bool shouldProduceModifierTriggerEvent)");
                 p.OpenScope();
@@ -777,7 +761,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .PrintEndLine();
                 p.OpenScope();
                 {
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public void Apply(in ").Print(STAT_VARIANT).Print(" baseValue, ref ")
                         .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
                     p.OpenScope();
@@ -791,7 +775,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         .Print(STAT_VARIANT).PrintEndLine(" currentValue);");
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintLine("public void Reset(in Stat stat)");
                     p.OpenScope();
                     {
@@ -826,7 +810,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.CloseScope();
             p.PrintEndLine();
 
-            WriteAPI(ref p, "Baker", STAT_BAKER, "baker", WriteBakerConstructor);
+            WriteAPI(ref p, "StatBaker", STAT_BAKER, "baker", WriteBakerConstructor);
             WriteAPI(ref p, "WorldData", STAT_WORLD_DATA, "worldData", WriteWorldDataConstructor);
 
             return;
@@ -842,13 +826,12 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintBeginLine("public partial struct ").PrintEndLine(wrapperName);
                 p.OpenScope();
                 {
-                    p.PrintLine(GENERATED_CODE);
                     p.PrintBeginLine("public ").Print(fieldTypeName).Print(" ").Print(fieldName).PrintEndLine(";");
                     p.PrintEndLine();
 
                     constructorWriter(ref p);
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("private ").Print(wrapperName).Print("(in ")
                         .Print(fieldTypeName).Print(" ").Print(fieldName).PrintEndLine(")");
                     p.OpenScope();
@@ -858,14 +841,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static implicit operator ").Print(wrapperName).Print("(in ")
                         .Print(fieldTypeName).Print(" ").Print(fieldName).PrintEndLine(")");
                     p.WithIncreasedIndent()
                         .PrintBeginLine("=> new(").Print(fieldName).PrintEndLine(");");
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static implicit operator ").Print(fieldTypeName).Print("(in ")
                         .Print(wrapperName).Print(" ").Print(fieldName).PrintEndLine(")");
                     p.WithIncreasedIndent()
@@ -881,12 +864,12 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             static void WriteAccessorConstructor(ref Printer p)
             {
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public Accessor(ref ").Print(SYSTEM_STATE)
                     .PrintEndLine(" state) : this(ref state, default) { }");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public Accessor(ref ").Print(SYSTEM_STATE)
                     .PrintEndLine(" state, ValuePair.Composer valuePairComposer)");
                 p.OpenScope();
@@ -899,7 +882,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             static void WriteAccessorReadOnlyConstructor(ref Printer p)
             {
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public ReadOnly(ref ").Print(SYSTEM_STATE).PrintEndLine(" state)");
                 p.OpenScope();
                 {
@@ -915,7 +898,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             static void WriteWorldDataConstructor(ref Printer p)
             {
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public WorldData(").Print(ALLOCATOR_HANDLE).PrintEndLine(" allocator)");
                 p.OpenScope();
                 {
@@ -924,7 +907,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public WorldData(int initialCapacity, ").Print(ALLOCATOR_HANDLE).PrintEndLine(" allocator)");
                 p.OpenScope();
                 {
@@ -939,15 +922,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintBeginLine("public partial struct ").PrintEndLine(name);
                 p.OpenScope();
                 {
-                    p.PrintLine(GENERATED_CODE);
                     p.PrintBeginLine("public ").Print(STAT_MODIFIER_HANDLE).PrintEndLine(" handle;");
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE);
                     p.PrintLine("public StatModifier modifier;");
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public ").Print(name)
                         .Print("(").Print(STAT_MODIFIER_HANDLE).PrintEndLine(" handle, StatModifier modifier)");
                     p.OpenScope();
@@ -958,7 +939,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public readonly void Deconstruct(out ")
                         .Print(STAT_MODIFIER_HANDLE).PrintEndLine(" handle, out StatModifier modifier)");
                     p.OpenScope();
@@ -993,11 +974,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintBeginLine("public partial struct ").Print(name).Print(" : ").PrintEndLine(IJOB);
                 p.OpenScope();
                 {
-                    p.PrintLine(GENERATED_CODE);
                     p.PrintBeginLine("private ").Print(typeName).PrintEndLine(" _jobData;");
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public ").Print(name)
                         .Print("(in Accessor accessor, in WorldData worldData, ")
                         .Print(collectionName).PrintEndLine(" statsToUpdate)");
@@ -1015,7 +995,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintLine("public void Execute()");
                     p.WithIncreasedIndent().PrintLine("=> _jobData.Execute();");
                 }
@@ -1033,19 +1013,19 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 .PrintEndLine();
             p.OpenScope();
             {
-                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintLine(SERIALIZED_FIELD);
                 p.PrintLine("internal StatDataStore _data;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintLine(SERIALIZED_FIELD);
                 p.PrintBeginLine("internal ").Print(STAT_VARIANT_TYPE).PrintEndLine(" _type;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(GENERATED_CODE);
+                p.PrintLine(SERIALIZED_FIELD);
                 p.PrintLine("internal bool _isPair;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public ValuePair(in ").Print(STAT_VARIANT).PrintEndLine(" value)");
                 p.OpenScope();
                 {
@@ -1055,7 +1035,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public ValuePair(in ").Print(STAT_VARIANT).Print(" baseValue, in ")
                     .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
                 p.OpenScope();
@@ -1066,7 +1046,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("private ValuePair(bool isPair, in ").Print(STAT_VARIANT).Print(" baseValue, in ")
                     .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
                 p.OpenScope();
@@ -1077,7 +1057,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public readonly ").Print(STAT_VARIANT_TYPE).PrintEndLine(" Type");
                 p.OpenScope();
                 {
@@ -1087,7 +1066,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public readonly bool IsPair");
                 p.OpenScope();
                 {
@@ -1097,48 +1075,48 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public readonly override bool Equals(object obj)");
                 p.WithIncreasedIndent().PrintLine("=> obj is ValuePair other && Equals(other);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public readonly bool Equals(ValuePair other)");
                 p.WithIncreasedIndent().PrintLine("=> StatDataStore.Equals(this, other);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public readonly override int GetHashCode()");
                 p.WithIncreasedIndent().PrintLine("=> StatDataStore.GetHashCode(this);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly ").Print(STAT_VARIANT).Print(" GetBaseValueOrDefault(in ")
                     .Print(STAT_VARIANT).PrintEndLine(" defaultValue = default)");
                 p.WithIncreasedIndent()
                     .PrintLine("=> StatDataStore.TryGetBaseValue(this, out var value) ? value : defaultValue;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly ").Print(STAT_VARIANT).Print(" GetCurrentValueOrDefault(in ")
                     .Print(STAT_VARIANT).PrintEndLine(" defaultValue = default)");
                 p.WithIncreasedIndent()
                     .PrintLine("=> StatDataStore.TryGetCurrentValue(this, out var value) ? value : defaultValue;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetBaseValue(in ").Print(STAT_VARIANT).PrintEndLine(" value)");
                 p.WithIncreasedIndent()
                     .PrintLine("=> StatDataStore.TrySetBaseValue(ref this, value);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetCurrentValue(in ").Print(STAT_VARIANT).PrintEndLine(" value)");
                 p.WithIncreasedIndent()
                     .PrintLine("=> StatDataStore.TrySetCurrentValue(ref this, value);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetValues(in ").Print(STAT_VARIANT).Print(" baseValue, in ")
                     .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
                 p.WithIncreasedIndent()
@@ -1160,7 +1138,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .PrintEndLine();
                 p.OpenScope();
                 {
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public ValuePair Compose(bool isPair, in ").Print(STAT_VARIANT).Print(" baseValue, in ")
                         .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
                     p.OpenScope();
@@ -1190,7 +1168,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".AddStatComponents{").Print(TYPES_5_T).Print("}(")
                     .Print(ENTITY).Print(", ").Print(ENTITY_MANAGER)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static void AddStatComponents(")
                     .Print(ENTITY).Print(" entity, ")
                     .Print(ENTITY_MANAGER).PrintEndLine(" entityManager)");
@@ -1203,7 +1181,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".AddStatComponents{").Print(TYPES_5_T).Print("}(")
                     .Print(ENTITY).Print(", ").Print(ECB)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static void AddStatComponents(")
                     .Print(ENTITY).Print(" entity, ")
                     .Print(ECB).PrintEndLine(" ecb)");
@@ -1216,7 +1194,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".AddStatComponents{").Print(TYPES_5_T).Print("}(")
                     .Print(ENTITY).Print(", ").Print(ECB_WRITER).Print(", int")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static void AddStatComponents(")
                     .Print(ENTITY).Print(" entity, ")
                     .Print(ECB_WRITER).PrintEndLine(" ecb, int sortKey)");
@@ -1230,8 +1208,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(IBAKER).Print(", ").Print(ENTITY).Print(", out ").Print(STAT_BAKER_XML)
                     .Print(", TValuePairComposer")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public static Baker BakeStatComponents(")
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("public static StatBaker BakeStatComponents(")
                     .Print(IBAKER).Print(" baker, ")
                     .Print(ENTITY).PrintEndLine(" entity, ValuePair.Composer valuePairComposer = default)");
                 p.OpenScope();
@@ -1244,56 +1222,11 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_API)
-                //    .Print(".CreateStat{").Print(TYPES_4_T_COMPOSER).Print("}(")
-                //    .Print(ENTITY).Print(", ref TStatData, bool, ref ").Print(STAT_BUFFER_XML).Print(", TValuePairComposer")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public static ref TStatData CreateStat<TStatData>(")
-                //    .Print(ENTITY).Print(" entity, ref TStatData statDataWithIndex, bool produceChangeEvents, ref ")
-                //    .Print(STAT_BUFFER).PrintEndLine(" statBuffer, ValuePair.Composer valuePairComposer = default)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintBeginLine("=> ref ").Print(STAT_API)
-                //    .Print(".CreateStat<ValuePair, Stat, TStatData, ValuePair.Composer>")
-                //    .PrintEndLine("(entity, ref statDataWithIndex, produceChangeEvents, ref statBuffer, valuePairComposer);");
-                //p.PrintEndLine();
-
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_API)
-                //    .Print(".CreateStat{").Print(TYPES_4_T_COMPOSER).Print("}(")
-                //    .Print(ENTITY).Print(", TStatData, bool, ref ").Print(STAT_BUFFER_XML).Print(", TValuePairComposer")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public static TStatData CreateStat<TStatData>(")
-                //    .Print(ENTITY).Print(" entity, TStatData statDataWithIndex, bool produceChangeEvents, ref ")
-                //    .Print(STAT_BUFFER).PrintEndLine(" statBuffer, ValuePair.Composer valuePairComposer = default)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintBeginLine("=> ").Print(STAT_API)
-                //    .Print(".CreateStat<ValuePair, Stat, TStatData, ValuePair.Composer>")
-                //    .PrintEndLine("(entity, statDataWithIndex, produceChangeEvents, ref statBuffer, valuePairComposer);");
-                //p.PrintEndLine();
-
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_API)
-                //    .Print(".CreateStat{").Print(TYPES_4_T_COMPOSER).Print("}(")
-                //    .Print(ENTITY).Print(", TValuePair, bool, ref ").Print(STAT_BUFFER_XML).Print(", TValuePairComposer")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public static TStatData CreateStat<TStatData>(")
-                //    .Print(ENTITY).Print(" entity, ValuePair valuePair, bool produceChangeEvents, ref ")
-                //    .Print(STAT_BUFFER).PrintEndLine(" statBuffer, ValuePair.Composer valuePairComposer = default)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintBeginLine("=> ").Print(STAT_API)
-                //    .Print(".CreateStat<ValuePair, Stat, TStatData, ValuePair.Composer>")
-                //    .PrintEndLine("(entity, valuePair, produceChangeEvents, ref statBuffer, valuePairComposer);");
-                //p.PrintEndLine();
-
                 p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_API)
                     .Print(".CreateStatHandle{").Print(TYPES_4_T_COMPOSER).Print("}(")
                     .Print(ENTITY).Print(", TStatData, bool, ref ").Print(STAT_BUFFER_XML).Print(", TValuePairComposer")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static ").Print(STAT_HANDLE_T).Print(" CreateStatHandle<TStatData>(")
                     .Print(ENTITY).Print(" entity, TStatData statData, bool produceChangeEvents, ref ")
                     .Print(STAT_BUFFER).PrintEndLine(" statBuffer, ValuePair.Composer valuePairComposer = default)");
@@ -1309,7 +1242,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(ENTITY).Print(", TValuePair, bool, ref ")
                     .Print(STAT_BUFFER_XML).Print(", out TStatData, TValuePairComposer")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static ").Print(STAT_HANDLE_T).Print(" CreateStatHandle<TStatData>(")
                     .Print(ENTITY).Print(" entity, ValuePair valuePair, bool produceChangeEvents, ref ")
                     .Print(STAT_BUFFER).Print(" statBuffer, out TStatData statData, ")
@@ -1325,7 +1258,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".CreateStatHandle{").Print(TYPES_2_T).Print("}(")
                     .Print(ENTITY).Print(", TValuePair, bool, ref ").Print(STAT_BUFFER_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static ").Print(STAT_HANDLE).Print(" CreateStatHandle(")
                     .Print(ENTITY).Print(" entity, ValuePair valuePair, bool produceChangeEvents, ref ")
                     .Print(STAT_BUFFER).PrintEndLine(" statBuffer)");
@@ -1338,7 +1271,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".EntityHasAnyOtherDependantStatEntities{TStatObserver}(")
                     .Print(ENTITY).Print(", ").Print(LOOKUP_OBSERVER_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static void EntityHasAnyOtherDependantStatEntities(")
                     .Print(ENTITY).Print(" entity, ")
                     .Print(LOOKUP_OBSERVER).PrintEndLine(" lookupObservers)");
@@ -1351,7 +1284,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".EntityHasAnyOtherDependantStatEntities{TStatObserver}(")
                     .Print(ENTITY).Print(", ").Print(RO_SPAN_OBSERVER_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static void EntityHasAnyOtherDependantStatEntities(")
                     .Print(ENTITY).Print(" entity, ")
                     .Print(RO_SPAN_OBSERVER).PrintEndLine(" observerBufferOnEntity)");
@@ -1364,7 +1297,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".GetOtherDependantStatEntitiesOfEntity{TStatObserver}(")
                     .Print(ENTITY).Print(", ").Print(LOOKUP_OBSERVER_XML).Print(", ").Print(NATIVE_SET_ENTITY_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static void GetOtherDependantStatEntitiesOfEntity(")
                     .Print(ENTITY).Print(" entity, ")
                     .Print(LOOKUP_OBSERVER).Print(" lookupObservers, ")
@@ -1378,7 +1311,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".GetOtherDependantStatEntitiesOfEntity{TStatObserver}(")
                     .Print(ENTITY).Print(", ").Print(RO_SPAN_OBSERVER_XML).Print(", ").Print(NATIVE_SET_ENTITY_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static void GetOtherDependantStatEntitiesOfEntity(")
                     .Print(ENTITY).Print(" entity, ")
                     .Print(RO_SPAN_OBSERVER).Print(" observerBufferOnEntity, ")
@@ -1392,7 +1325,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".GetOtherDependantStatsOfEntity{TStatObserver}(")
                     .Print(ENTITY).Print(", ").Print(LOOKUP_OBSERVER_XML).Print(", ").Print(NATIVE_LIST_STAT_HANDLE_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static void GetOtherDependantStatsOfEntity(")
                     .Print(ENTITY).Print(" entity, ")
                     .Print(LOOKUP_OBSERVER).Print(" lookupObservers, ")
@@ -1406,7 +1339,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".GetOtherDependantStatsOfEntity{TStatObserver}(")
                     .Print(ENTITY).Print(", ").Print(RO_SPAN_OBSERVER_XML).Print(", ").Print(NATIVE_LIST_STAT_HANDLE_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static void GetOtherDependantStatsOfEntity(")
                     .Print(ENTITY).Print(" entity, ")
                     .Print(RO_SPAN_OBSERVER).Print(" observerBufferOnEntity, ")
@@ -1420,7 +1353,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".GetStatData{").Print(TYPES_3_T_DATA).Print("}(")
                     .Print(STAT_HANDLE_T_XML).Print(", ").Print(RO_SPAN_STAT_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static TStatData GetStatData<TStatData>(")
                     .Print(STAT_HANDLE_T).Print(" statHandle, ")
                     .Print(RO_SPAN_STAT).PrintEndLine(" statBuffer)");
@@ -1430,25 +1363,11 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .PrintEndLine(".GetStatData<ValuePair, Stat, TStatData>(statHandle, statBuffer);");
                 p.PrintEndLine();
 
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_API)
-                //    .Print(".GetStatDataWithIndex{").Print(TYPES_3_T_DATA).Print("}(")
-                //    .Print(STAT_HANDLE_T_XML).Print(", ").Print(RO_SPAN_STAT_XML)
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public static TStatData GetStatDataWithIndex<TStatData>(")
-                //    .Print(STAT_HANDLE_T).Print(" statHandle, ")
-                //    .Print(RO_SPAN_STAT).PrintEndLine(" statBuffer)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintBeginLine("=> ").Print(STAT_API)
-                //    .PrintEndLine(".GetStatDataWithIndex<ValuePair, Stat, TStatData>(statHandle, statBuffer);");
-                //p.PrintEndLine();
-
                 p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_API)
                     .Print(".GetStat{").Print(TYPES_2_T).Print("}(")
                     .Print(STAT_HANDLE_T_XML).Print(", ").Print(RO_SPAN_STAT_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static Stat<TStatData> GetStat<TStatData>(")
                     .Print(STAT_HANDLE_T).Print(" statHandle, ")
                     .Print(RO_SPAN_STAT).PrintEndLine(" statBuffer)");
@@ -1462,7 +1381,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".GetStat{").Print(TYPES_2_T).Print("}(")
                     .Print(STAT_HANDLE).Print(", ").Print(RO_SPAN_STAT_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static Stat GetStat(")
                     .Print(STAT_HANDLE).Print(" statHandle, ")
                     .Print(RO_SPAN_STAT).PrintEndLine(" statBuffer)");
@@ -1475,7 +1394,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".GetStatValue{").Print(TYPES_2_T).Print("}(")
                     .Print(STAT_HANDLE).Print(", ").Print(RO_SPAN_STAT_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static ValuePair GetStatValue(")
                     .Print(STAT_HANDLE).Print(" statHandle, ")
                     .Print(RO_SPAN_STAT).PrintEndLine(" statBuffer)");
@@ -1489,7 +1408,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(ENTITY).Print(", ").Print(LOOKUP_MODIFIER_XML).Print(", ")
                     .Print(NATIVE_SET_ENTITY_XML).Print(", ").Print(NATIVE_LIST_STAT_HANDLE_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static void GetStatEntitiesThatEntityDependsOn(")
                     .Print(ENTITY).Print(" entity, ")
                     .Print(LOOKUP_MODIFIER).Print(" lookupModifiers, ")
@@ -1506,7 +1425,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(RO_SPAN_MODIFIER_XML).Print(", ").Print(NATIVE_SET_ENTITY_XML).Print(", ")
                     .Print(NATIVE_LIST_STAT_HANDLE_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static void GetStatEntitiesThatEntityDependsOn(")
                     .Print(RO_SPAN_MODIFIER).Print(" modifierBufferOnEntity, ")
                     .Print(NATIVE_SET_ENTITY).Print(" dependsOnEntities, ")
@@ -1521,7 +1440,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetAllObservers{TStatObserver}(")
                     .Print(ENTITY).Print(", ").Print(LOOKUP_OBSERVER_XML).Print(", ").Print(NATIVE_LIST_OBSERVER_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetAllObservers(")
                     .Print(ENTITY).Print(" entity, ")
                     .Print(LOOKUP_OBSERVER).Print(" lookupObservers, ")
@@ -1549,7 +1468,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(STAT_HANDLE).Print(", ").Print(LOOKUP_STAT_XML).Print(", ")
                     .Print(LOOKUP_MODIFIER_XML).Print(", ").Print(NATIVE_LIST_MODIFIER_RECORD_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetModifiersOfStat(")
                     .Print(STAT_HANDLE).Print(" statHandle, ")
                     .Print(LOOKUP_STAT).Print(" lookupStats, ")
@@ -1573,7 +1492,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetObserverCount{").Print(TYPES_2_T).Print("}(")
                     .Print(STAT_HANDLE).Print(", ").Print(LOOKUP_STAT_XML).Print(", out int")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetObserverCount(")
                     .Print(STAT_HANDLE).Print(" statHandle, ")
                     .Print(LOOKUP_STAT).PrintEndLine(" lookupStats, out int observerCount)");
@@ -1587,7 +1506,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(STAT_HANDLE).Print(", ").Print(LOOKUP_STAT_XML).Print(", ")
                     .Print(LOOKUP_OBSERVER_XML).Print(", ").Print(NATIVE_LIST_OBSERVER_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetObserversOfStat(")
                     .Print(STAT_HANDLE).Print(" statHandle, ")
                     .Print(LOOKUP_STAT).Print(" lookupStats, ")
@@ -1603,7 +1522,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatData{").Print(TYPES_3_T_DATA).Print("}(")
                     .Print(STAT_HANDLE_T_XML).Print(", ").Print(LOOKUP_STAT_XML).Print(", out TStatData")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetStatData<TStatData>(")
                     .Print(STAT_HANDLE_T).Print(" statHandle, ")
                     .Print(LOOKUP_STAT).PrintEndLine(" lookupStats, out TStatData statData)");
@@ -1617,7 +1536,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatData{").Print(TYPES_3_T_DATA).Print("}(")
                     .Print(STAT_HANDLE_T_XML).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TStatData")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetStatData<TStatData>(")
                     .Print(STAT_HANDLE_T).Print(" statHandle, ")
                     .Print(RO_SPAN_STAT).PrintEndLine(" statBuffer, out TStatData statData)");
@@ -1627,39 +1546,11 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .PrintEndLine(".TryGetStatData<ValuePair, Stat, TStatData>(statHandle, statBuffer, out statData);");
                 p.PrintEndLine();
 
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_API)
-                //    .Print(".TryGetStatDataWithIndex{").Print(TYPES_3_T_DATA).Print("}(")
-                //    .Print(STAT_HANDLE_T_XML).Print(", ").Print(LOOKUP_STAT_XML).Print(", out TStatData")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public static bool TryGetStatDataWithIndex<TStatData>(")
-                //    .Print(STAT_HANDLE_T).Print(" statHandle, ")
-                //    .Print(LOOKUP_STAT).PrintEndLine(" lookupStats, out TStatData statData)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintBeginLine("=> ").Print(STAT_API)
-                //    .PrintEndLine(".TryGetStatDataWithIndex<ValuePair, Stat, TStatData>(statHandle, lookupStats, out statData);");
-                //p.PrintEndLine();
-
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_API)
-                //    .Print(".TryGetStatDataWithIndex{").Print(TYPES_3_T_DATA).Print("}(")
-                //    .Print(STAT_HANDLE_T_XML).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TStatData")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public static bool TryGetStatDataWithIndex<TStatData>(")
-                //    .Print(STAT_HANDLE_T).Print(" statHandle, ")
-                //    .Print(RO_SPAN_STAT).PrintEndLine(" statBuffer, out TStatData statData)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintBeginLine("=> ").Print(STAT_API)
-                //    .PrintEndLine(".TryGetStatDataWithIndex<ValuePair, Stat, TStatData>(statHandle, statBuffer, out statData);");
-                //p.PrintEndLine();
-
                 p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_API)
                     .Print(".TryGetStat{").Print(TYPES_2_T).Print("}(")
                     .Print(STAT_HANDLE).Print(", ").Print(LOOKUP_STAT_XML).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetStat<TStatData>(")
                     .Print(STAT_HANDLE_T).Print(" statHandle, ")
                     .Print(LOOKUP_STAT).PrintEndLine(" lookupStats, out Stat<TStatData> stat)");
@@ -1678,7 +1569,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStat{").Print(TYPES_2_T).Print("}(")
                     .Print(STAT_HANDLE).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetStat<TStatData>(")
                     .Print(STAT_HANDLE_T).Print(" statHandle, ")
                     .Print(RO_SPAN_STAT).PrintEndLine(" statBuffer, out Stat<TStatData> stat)");
@@ -1697,7 +1588,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStat{").Print(TYPES_2_T).Print("}(")
                     .Print(STAT_HANDLE).Print(", ").Print(LOOKUP_STAT_XML).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetStat(")
                     .Print(STAT_HANDLE).Print(" statHandle, ")
                     .Print(LOOKUP_STAT).PrintEndLine(" lookupStats, out Stat stat)");
@@ -1710,7 +1601,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStat{").Print(TYPES_2_T).Print("}(")
                     .Print(STAT_HANDLE).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetStat(")
                     .Print(STAT_HANDLE).Print(" statHandle, ")
                     .Print(RO_SPAN_STAT).PrintEndLine(" statBuffer, out Stat stat)");
@@ -1723,7 +1614,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatValue{").Print(TYPES_2_T).Print("}(")
                     .Print(STAT_HANDLE).Print(", ").Print(LOOKUP_STAT_XML).Print(", out TValuePair")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetStatValue(")
                     .Print(STAT_HANDLE).Print(" statHandle, ")
                     .Print(LOOKUP_STAT).PrintEndLine(" lookupStats, out ValuePair valuePair)");
@@ -1736,7 +1627,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatValue{").Print(TYPES_2_T).Print("}(")
                     .Print(STAT_HANDLE).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TValuePair")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetStatValue(")
                     .Print(STAT_HANDLE).Print(" statHandle, ")
                     .Print(RO_SPAN_STAT).PrintEndLine(" statBuffer, out ValuePair valuePair)");
@@ -1755,7 +1646,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.PrintLine("partial struct Reader");
             p.OpenScope();
             {
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public readonly bool IsCreated");
                 p.OpenScope();
                 {
@@ -1765,7 +1655,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public readonly bool UseLookup");
                 p.OpenScope();
                 {
@@ -1779,7 +1668,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatData{TStatData}(")
                     .Print(STAT_HANDLE_T_XML).Print(", out TStatData")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStatData<TStatData>(")
                     .Print(STAT_HANDLE_T).PrintEndLine(" statHandle, out TStatData statData)");
                 p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA);
@@ -1790,7 +1679,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStat{TStatData}(")
                     .Print(STAT_HANDLE_T_XML).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStat<TStatData>(")
                     .Print(STAT_HANDLE_T).PrintEndLine(" statHandle, out Stat<TStatData> stat)");
                 p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA);
@@ -1807,7 +1696,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStat(")
                     .Print(STAT_HANDLE).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStat(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, out Stat stat)");
                 p.WithIncreasedIndent().PrintLine("=> this.reader.TryGetStat(statHandle, out stat);");
@@ -1817,7 +1706,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatValue(")
                     .Print(STAT_HANDLE).Print(", out TValuePair")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStatValue(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, out ValuePair valuePair)");
                 p.WithIncreasedIndent().PrintLine("=> this.reader.TryGetStatValue(statHandle, out valuePair);");
@@ -1838,7 +1727,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(STAT_HANDLE).Print(", TStatModifier, out ").Print(STAT_MODIFIER_HANDLE)
                     .Print(", ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TryAddStatModifier(")
                     .Print(STAT_HANDLE).Print(" affectedStatHandle, StatModifier statModifier, out ")
                     .Print(STAT_MODIFIER_HANDLE).PrintEndLine(" statModifierHandle, ref WorldData worldData)");
@@ -1851,7 +1740,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(STAT_HANDLE).Print(", ").Print(RO_SPAN_MODIFIER_XML).Print(", ")
                     .Print(NATIVE_LIST_MODIFIER_HANDLE_XML).Print(", ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TryAddStatModifiersBatch(")
                     .Print(STAT_HANDLE).Print(" affectedStatHandle, ")
                     .Print(RO_SPAN_MODIFIER).Print(" modifiers, ")
@@ -1860,52 +1749,11 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .PrintLine("=> this.accessor.TryAddStatModifiersBatch(affectedStatHandle, modifiers, statModifierHandles, ref worldData.worldData);");
                 p.PrintEndLine();
 
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_ACCESSOR_XML)
-                //    .Print(".TryCreateStat{TStatData}(")
-                //    .Print(ENTITY).Print(", ref TStatData, bool")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public bool TryCreateStat<TStatData>(")
-                //    .Print(ENTITY).Print(" entity, ref TStatData statDataWithIndex, ")
-                //    .PrintEndLine("bool produceChangeEvents)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintLine("=> this.accessor.TryCreateStat<TStatData>(entity, ref statDataWithIndex, produceChangeEvents);");
-                //p.PrintEndLine();
-
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_ACCESSOR_XML)
-                //    .Print(".TryCreateStat{TStatData}(")
-                //    .Print(ENTITY).Print(", TStatData, bool, out TStatData")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public bool TryCreateStat<TStatData>(")
-                //    .Print(ENTITY).Print(" entity, ref TStatData statDataWithIndex, ")
-                //    .PrintEndLine("bool produceChangeEvents, out TStatData statData)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintBeginLine("=> this.accessor.TryCreateStat<TStatData>(entity, statDataWithIndex, ")
-                //    .PrintEndLine("produceChangeEvents, out statData);");
-                //p.PrintEndLine();
-
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_ACCESSOR_XML)
-                //    .Print(".TryCreateStat{TStatData}(")
-                //    .Print(ENTITY).Print(", TValuePair, bool, out TStatData")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public bool TryCreateStat<TStatData>(")
-                //    .Print(ENTITY).Print(" entity, ValuePair valuePair, ")
-                //    .PrintEndLine("bool produceChangeEvents, out TStatData statDataWithIndex)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintBeginLine("=> this.accessor.TryCreateStat<TStatData>(entity, valuePair, produceChangeEvents, ")
-                //    .PrintEndLine("out statDataWithIndex);");
-                //p.PrintEndLine();
-
                 p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_ACCESSOR_XML)
                     .Print(".TryCreateStatHandle{TStatData}(")
                     .Print(ENTITY).Print(", TValuePair, bool, out ").Print(STAT_HANDLE_T_XML).Print(", out TStatData")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TryCreateStatHandle<TStatData>(")
                     .Print(ENTITY).Print(" entity, ValuePair valuePair, ")
                     .Print("bool produceChangeEvents, out ").Print(STAT_HANDLE_T)
@@ -1920,7 +1768,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryCreateStatHandle{TStatData}(")
                     .Print(ENTITY).Print(", TValuePair, bool, out ").Print(STAT_HANDLE_T_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TryCreateStatHandle<TStatData>(")
                     .Print(ENTITY).Print(" entity, ValuePair valuePair, ")
                     .Print("bool produceChangeEvents, out ").Print(STAT_HANDLE_T)
@@ -1935,7 +1783,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryCreateStatHandle{TStatData}(")
                     .Print(ENTITY).Print(", TStatData, bool, out ").Print(STAT_HANDLE_T_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TryCreateStatHandle<TStatData>(")
                     .Print(ENTITY).Print(" entity, TStatData statData, bool produceChangeEvents, out ")
                     .Print(STAT_HANDLE_T).PrintEndLine(" statHandle)");
@@ -1948,7 +1796,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryCreateStatHandle(")
                     .Print(ENTITY).Print(", TValuePair, bool, out ").Print(STAT_HANDLE)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TryCreateStatHandle(")
                     .Print(ENTITY).Print(" entity, ValuePair valuePair, bool produceChangeEvents, out ")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle)");
@@ -1960,7 +1808,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetAllObservers(")
                     .Print(ENTITY).Print(", ").Print(NATIVE_LIST_OBSERVER_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetAllObservers(")
                     .Print(ENTITY).Print(" entity, ").Print(NATIVE_LIST_OBSERVER).PrintEndLine(" observers)");
                 p.WithIncreasedIndent()
@@ -1971,7 +1819,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetObserverCount(")
                     .Print(STAT_HANDLE).Print(", out int")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetObserverCount(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, out int observerCount)");
                 p.WithIncreasedIndent()
@@ -1982,7 +1830,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatData{TStatData}(")
                     .Print(STAT_HANDLE_T_XML).Print(", out TStatData")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStatData<TStatData>(")
                     .Print(STAT_HANDLE_T).PrintEndLine(" statHandle, out TStatData statData)");
                 p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA);
@@ -1994,7 +1842,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatData{TStatData}(")
                     .Print(STAT_HANDLE_T_XML).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TStatData")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStatData<TStatData>(")
                     .Print(STAT_HANDLE_T).Print(" statHandle, ").Print(RO_SPAN_STAT)
                     .PrintEndLine(" statBuffer, out TStatData statData)");
@@ -2003,36 +1851,11 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .PrintLine("=> this.accessor.TryGetStatData<TStatData>(statHandle, statBuffer, out statData);");
                 p.PrintEndLine();
 
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_ACCESSOR_XML)
-                //    .Print(".TryGetStatDataWithIndex{TStatData}(")
-                //    .Print(STAT_HANDLE_T_XML).Print(", out TStatData")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public readonly bool TryGetStatDataWithIndex<TStatData>(")
-                //    .Print(STAT_HANDLE_T).PrintEndLine(" statHandle, out TStatData statData)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintLine("=> this.accessor.TryGetStatDataWithIndex<TStatData>(statHandle, out statData);");
-                //p.PrintEndLine();
-
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_ACCESSOR_XML)
-                //    .Print(".TryGetStatDataWithIndex{TStatData}(")
-                //    .Print(STAT_HANDLE_T_XML).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TStatData")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public readonly bool TryGetStatDataWithIndex<TStatData>(")
-                //    .Print(STAT_HANDLE_T).Print(" statHandle, ").Print(RO_SPAN_STAT)
-                //    .PrintEndLine(" statBuffer, out TStatData statData)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintLine("=> this.accessor.TryGetStatDataWithIndex<TStatData>(statHandle, statBuffer, out statData);");
-                //p.PrintEndLine();
-
                 p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_ACCESSOR_XML)
                     .Print(".TryGetStat(")
                     .Print(STAT_HANDLE).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStat<TStatData>(")
                     .Print(STAT_HANDLE_T).PrintEndLine(" statHandle, out Stat<TStatData> stat)");
                 p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA);
@@ -2049,7 +1872,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStat(")
                     .Print(STAT_HANDLE).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStat<TStatData>(")
                     .Print(STAT_HANDLE_T).Print(" statHandle, ").Print(RO_SPAN_STAT)
                     .PrintEndLine(" statBuffer, out Stat<TStatData> stat)");
@@ -2067,7 +1890,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStat(")
                     .Print(STAT_HANDLE).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStat(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, out Stat stat)");
                 p.WithIncreasedIndent()
@@ -2078,7 +1901,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStat(")
                     .Print(STAT_HANDLE).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStat(")
                     .Print(STAT_HANDLE).Print(" statHandle, ").Print(RO_SPAN_STAT)
                     .PrintEndLine(" statBuffer, out Stat stat)");
@@ -2090,7 +1913,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatValue(")
                     .Print(STAT_HANDLE).Print(", out TValuePair")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStatValue(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, out ValuePair valuePair)");
                 p.WithIncreasedIndent()
@@ -2101,7 +1924,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatValue(")
                     .Print(STAT_HANDLE).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TValuePair")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStatValue(")
                     .Print(STAT_HANDLE).Print(" statHandle, ").Print(RO_SPAN_STAT)
                     .PrintEndLine(" statBuffer, out ValuePair valuePair)");
@@ -2113,7 +1936,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatModifier(")
                     .Print(STAT_MODIFIER_HANDLE).Print(", out TStatModifier")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStatModifier(")
                     .Print(STAT_MODIFIER_HANDLE).PrintEndLine(" modifierHandle, out StatModifier statModifier)");
                 p.WithIncreasedIndent()
@@ -2124,7 +1947,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetModifierCount(")
                     .Print(STAT_HANDLE).Print(", out int")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetModifierCount(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, out int modifierCount)");
                 p.WithIncreasedIndent()
@@ -2135,7 +1958,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetModifiersOfStat(")
                     .Print(STAT_HANDLE).Print(", ").Print(NATIVE_LIST_MODIFIER_RECORD_GENERIC_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetModifiersOfStat(")
                     .Print(STAT_HANDLE).Print(" statHandle, ").Print(NATIVE_LIST_MODIFIER_RECORD)
                     .PrintEndLine(" modifiers)");
@@ -2155,7 +1978,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryRemoveModifiersOfStat(")
                     .Print(STAT_HANDLE).Print(", ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TryRemoveModifiersOfStat(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, ref WorldData worldData)");
                 p.WithIncreasedIndent()
@@ -2166,7 +1989,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryRemoveStatModifier(")
                     .Print(STAT_MODIFIER_HANDLE).Print(", ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TryRemoveStatModifier(")
                     .Print(STAT_MODIFIER_HANDLE).PrintEndLine(" modifierHandle, ref WorldData worldData)");
                 p.WithIncreasedIndent()
@@ -2178,7 +2001,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(STAT_HANDLE).Print(", in TValuePair, ref ")
                     .Print(STAT_BUFFER_XML).Print(", ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetStatBaseValue(")
                     .Print(STAT_HANDLE).Print(" statHandle, in ValuePair value, ref ").Print(STAT_BUFFER)
                     .PrintEndLine(" statBuffer, ref WorldData worldData)");
@@ -2190,7 +2013,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TrySetStatBaseValue(")
                     .Print(STAT_HANDLE).Print(", in TValuePair, ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetStatBaseValue(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, in ValuePair value, ref WorldData worldData)");
                 p.WithIncreasedIndent()
@@ -2202,7 +2025,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(STAT_HANDLE).Print(", in TValuePair, ref ")
                     .Print(STAT_BUFFER_XML).Print(", ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetStatCurrentValue(")
                     .Print(STAT_HANDLE).Print(" statHandle, in ValuePair value, ref ").Print(STAT_BUFFER)
                     .PrintEndLine(" statBuffer, ref WorldData worldData)");
@@ -2214,7 +2037,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TrySetStatCurrentValue(")
                     .Print(STAT_HANDLE).Print(", in TValuePair, ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetStatCurrentValue(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, in ValuePair value, ref WorldData worldData)");
                 p.WithIncreasedIndent()
@@ -2226,7 +2049,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(STAT_HANDLE_T_XML).Print(", TStatData, ref ")
                     .Print(STAT_BUFFER_XML).Print(", ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetStatData<TStatData>(")
                     .Print(STAT_HANDLE_T).Print(" statHandle, TStatData statData, ref ").Print(STAT_BUFFER)
                     .PrintEndLine(" statBuffer, ref WorldData worldData)");
@@ -2239,7 +2062,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TrySetStatData{TStatData}(")
                     .Print(STAT_HANDLE_T_XML).Print(", TStatData, ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetStatData<TStatData>(")
                     .Print(STAT_HANDLE_T).PrintEndLine(" statHandle, TStatData statData, ref WorldData worldData)");
                 p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA);
@@ -2247,38 +2070,12 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .PrintLine("=> this.accessor.TrySetStatData<TStatData>(statHandle, statData, ref worldData.worldData);");
                 p.PrintEndLine();
 
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_ACCESSOR_XML)
-                //    .Print(".TrySetStatData{TStatData}(")
-                //    .Print(ENTITY).Print(", TStatData, ref ")
-                //    .Print(STAT_BUFFER_XML).Print(", ref ").Print(STAT_WORLD_DATA_XML)
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public bool TrySetStatData<TStatData>(")
-                //    .Print(ENTITY).Print(" entity, TStatData statDataWithIndex, ref ").Print(STAT_BUFFER)
-                //    .PrintEndLine(" statBuffer, ref WorldData worldData)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintLine("=> this.accessor.TrySetStatData<TStatData>(entity, statDataWithIndex, ref statBuffer, ref worldData.worldData);");
-                //p.PrintEndLine();
-
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_ACCESSOR_XML)
-                //    .Print(".TrySetStatData{TStatData}(")
-                //    .Print(ENTITY).Print(", TStatData, ref ").Print(STAT_WORLD_DATA_XML)
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public bool TrySetStatData<TStatData>(")
-                //    .Print(ENTITY).PrintEndLine(" entity, TStatData statDataWithIndex, ref WorldData worldData)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintLine("=> this.accessor.TrySetStatData<TStatData>(entity, statDataWithIndex, ref worldData.worldData);");
-                //p.PrintEndLine();
-
                 p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_ACCESSOR_XML)
                     .Print(".TrySetStatValues(")
                     .Print(STAT_HANDLE).Print(", in TValuePair, in ").Print(STAT_VARIANT)
                     .Print(", ref ").Print(STAT_BUFFER_XML).Print(", ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetStatValues(")
                     .Print(STAT_HANDLE).Print(" statHandle, in ValuePair value, ref ")
                     .Print(STAT_BUFFER).PrintEndLine(" statBuffer, ref WorldData worldData)");
@@ -2291,7 +2088,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(STAT_HANDLE).Print(", in TValuePair, in ")
                     .Print(STAT_VARIANT).Print(", ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetStatValues(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, in ValuePair value, ref WorldData worldData)");
                 p.WithIncreasedIndent()
@@ -2303,7 +2100,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(STAT_HANDLE).Print(", in ").Print(STAT_VARIANT).Print(", in ").Print(STAT_VARIANT)
                     .Print(", ref ").Print(STAT_BUFFER_XML).Print(", ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetStatValues(")
                     .Print(STAT_HANDLE).Print(" statHandle, in ")
                     .Print(STAT_VARIANT).Print(" baseValue, in ")
@@ -2318,7 +2115,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(STAT_HANDLE).Print(", in ").Print(STAT_VARIANT).Print(", in ")
                     .Print(STAT_VARIANT).Print(", ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetStatValues(")
                     .Print(STAT_HANDLE).Print(" statHandle, in ")
                     .Print(STAT_VARIANT).Print(" baseValue, in ")
@@ -2331,7 +2128,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TrySetStatProduceChangeEvents(")
                     .Print(STAT_HANDLE).Print(", bool")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetStatProduceChangeEvents(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, bool value)");
                 p.WithIncreasedIndent()
@@ -2342,7 +2139,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TrySetStatProduceChangeEvents(")
                     .Print(STAT_HANDLE).Print(", bool, ref ").Print(STAT_BUFFER_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TrySetStatProduceChangeEvents(")
                     .Print(STAT_HANDLE).Print(" statHandle, bool value, ref ")
                     .Print(STAT_BUFFER).PrintEndLine(" statBuffer)");
@@ -2354,7 +2151,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryUpdateAllStats(")
                     .Print(ENTITY).Print(", ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public void TryUpdateAllStats(")
                     .Print(ENTITY).PrintEndLine(" entity, ref WorldData worldData)");
                 p.WithIncreasedIndent().PrintLine("=> this.accessor.TryUpdateAllStats(entity, ref worldData.worldData);");
@@ -2364,7 +2161,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryUpdateStat(")
                     .Print(STAT_HANDLE).Print(", ref ").Print(STAT_WORLD_DATA_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public void TryUpdateStat(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, ref WorldData worldData)");
                 p.WithIncreasedIndent().PrintLine("=> this.accessor.TryUpdateStat(statHandle, ref worldData.worldData);");
@@ -2374,7 +2171,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".Update(")
                     .Print("ref ").Print(SYSTEM_STATE)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public void Update(ref ").Print(SYSTEM_STATE).PrintEndLine(" state)");
                 p.WithIncreasedIndent().PrintLine("=> this.accessor.Update(ref state);");
                 p.PrintEndLine();
@@ -2395,7 +2192,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetAllObservers(")
                     .Print(ENTITY).Print(", ").Print(NATIVE_LIST_OBSERVER_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetAllObservers(")
                     .Print(ENTITY).Print(" entity, ").Print(NATIVE_LIST_OBSERVER).PrintEndLine(" observers)");
                 p.WithIncreasedIndent()
@@ -2406,7 +2203,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetObserverCount(")
                     .Print(STAT_HANDLE).Print(", out int")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetObserverCount(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, out int observerCount)");
                 p.WithIncreasedIndent()
@@ -2417,7 +2214,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatData{TStatData}(")
                     .Print(STAT_HANDLE_T_XML).Print(", out TStatData")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStatData<TStatData>(")
                     .Print(STAT_HANDLE_T).PrintEndLine(" statHandle, out TStatData statData)");
                 p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA);
@@ -2429,7 +2226,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatData{TStatData}(")
                     .Print(STAT_HANDLE_T_XML).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TStatData")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStatData<TStatData>(")
                     .Print(STAT_HANDLE_T).Print(" statHandle, ").Print(RO_SPAN_STAT)
                     .PrintEndLine(" statBuffer, out TStatData statData)");
@@ -2438,36 +2235,11 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .PrintLine("=> this.accessor.TryGetStatData<TStatData>(statHandle, statBuffer, out statData);");
                 p.PrintEndLine();
 
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_ACCESSOR_READONLY_XML)
-                //    .Print(".TryGetStatDataWithIndex{TStatData}(")
-                //    .Print(STAT_HANDLE_T_XML).Print(", out TStatData")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public readonly bool TryGetStatDataWithIndex<TStatData>(")
-                //    .Print(STAT_HANDLE_T).PrintEndLine(" statHandle, out TStatData statData)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintLine("=> this.accessor.TryGetStatDataWithIndex<TStatData>(statHandle, out statData);");
-                //p.PrintEndLine();
-
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_ACCESSOR_READONLY_XML)
-                //    .Print(".TryGetStatDataWithIndex{TStatData}(")
-                //    .Print(STAT_HANDLE_T_XML).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TStatData")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public readonly bool TryGetStatDataWithIndex<TStatData>(")
-                //    .Print(STAT_HANDLE_T).Print(" statHandle, ").Print(RO_SPAN_STAT)
-                //    .PrintEndLine(" statBuffer, out TStatData statData)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintLine("=> this.accessor.TryGetStatDataWithIndex<TStatData>(statHandle, statBuffer, out statData);");
-                //p.PrintEndLine();
-
                 p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_ACCESSOR_READONLY_XML)
                     .Print(".TryGetStat(")
                     .Print(STAT_HANDLE).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStat<TStatData>(")
                     .Print(STAT_HANDLE_T).PrintEndLine(" statHandle, out Stat<TStatData> stat)");
                 p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA);
@@ -2484,7 +2256,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStat(")
                     .Print(STAT_HANDLE).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStat<TStatData>(")
                     .Print(STAT_HANDLE_T).Print(" statHandle, ").Print(RO_SPAN_STAT)
                     .PrintEndLine(" statBuffer, out Stat<TStatData> stat)");
@@ -2502,7 +2274,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStat(")
                     .Print(STAT_HANDLE).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStat(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, out Stat stat)");
                 p.WithIncreasedIndent()
@@ -2513,7 +2285,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStat(")
                     .Print(STAT_HANDLE).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TStat")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStat(")
                     .Print(STAT_HANDLE).Print(" statHandle, ").Print(RO_SPAN_STAT)
                     .PrintEndLine(" statBuffer, out Stat stat)");
@@ -2525,7 +2297,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatValue(")
                     .Print(STAT_HANDLE).Print(", out TValuePair")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStatValue(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, out ValuePair valuePair)");
                 p.WithIncreasedIndent()
@@ -2536,7 +2308,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatValue(")
                     .Print(STAT_HANDLE).Print(", ").Print(RO_SPAN_STAT_XML).Print(", out TValuePair")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStatValue(")
                     .Print(STAT_HANDLE).Print(" statHandle, ").Print(RO_SPAN_STAT)
                     .PrintEndLine(" statBuffer, out ValuePair valuePair)");
@@ -2548,7 +2320,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetStatModifier(")
                     .Print(STAT_MODIFIER_HANDLE).Print(", out TStatModifier")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetStatModifier(")
                     .Print(STAT_MODIFIER_HANDLE).PrintEndLine(" modifierHandle, out StatModifier statModifier)");
                 p.WithIncreasedIndent()
@@ -2559,7 +2331,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetModifierCount(")
                     .Print(STAT_HANDLE).Print(", out int")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetModifierCount(")
                     .Print(STAT_HANDLE).PrintEndLine(" statHandle, out int modifierCount)");
                 p.WithIncreasedIndent()
@@ -2570,7 +2342,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryGetModifiersOfStat(")
                     .Print(STAT_HANDLE).Print(", ").Print(NATIVE_LIST_MODIFIER_RECORD_GENERIC_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryGetModifiersOfStat(")
                     .Print(STAT_HANDLE).Print(" statHandle, ").Print(NATIVE_LIST_MODIFIER_RECORD)
                     .PrintEndLine(" modifiers)");
@@ -2590,7 +2362,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".Update(")
                     .Print("ref ").Print(SYSTEM_STATE)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public void Update(ref ").Print(SYSTEM_STATE).PrintEndLine(" state)");
                 p.WithIncreasedIndent().PrintLine("=> this.accessor.Update(ref state);");
                 p.PrintEndLine();
@@ -2603,52 +2375,32 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         private static void WriteBakerImpl(ref Printer p)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("partial struct Baker");
+            p.PrintLine("partial struct StatBaker");
             p.OpenScope();
             {
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_BAKER_XML)
-                //    .Print(".CreateStat{TStatData}(")
-                //    .Print("ref TStatData, bool")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public ref TStatData CreateStat<TStatData>(")
-                //    .PrintEndLine("ref TStatData statDataWithIndex, bool produceChangeEvents)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintBeginLine("=> ref this.baker.CreateStat<TStatData>(ref statDataWithIndex, ")
-                //    .PrintEndLine("produceChangeEvents);");
-                //p.PrintEndLine();
+                p.PrintLine("public readonly IBaker Baker");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => this.baker.Baker;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
 
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_BAKER_XML)
-                //    .Print(".CreateStat{TStatData}(")
-                //    .Print("TStatData, bool")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public TStatData CreateStat<TStatData>(")
-                //    .PrintEndLine("TStatData statDataWithIndex, bool produceChangeEvents)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintBeginLine("=> this.baker.CreateStat<TStatData>(statDataWithIndex, ")
-                //    .PrintEndLine("produceChangeEvents);");
-                //p.PrintEndLine();
-
-                //p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_BAKER_XML)
-                //    .Print(".CreateStat{TStatData}(")
-                //    .Print("TValuePair, bool")
-                //    .PrintEndLine(")\"/>");
-                //p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                //p.PrintBeginLine("public TStatData CreateStat<TStatData>(")
-                //    .PrintEndLine("ValuePair valuePair, bool produceChangeEvents)");
-                //p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA_INDEX);
-                //p.WithIncreasedIndent()
-                //    .PrintLine("=> this.baker.CreateStat<TStatData>(valuePair, produceChangeEvents);");
-                //p.PrintEndLine();
+                p.PrintLine("public readonly Entity Entity");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => this.baker.Entity;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
 
                 p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_BAKER_XML)
                     .Print(".CreateStatHandle{TStatData}(")
                     .Print("TStatData, bool")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public ").Print(STAT_HANDLE_T).Print(" CreateStatHandle<TStatData>(")
                     .PrintEndLine("TStatData statData, bool produceChangeEvents)");
                 p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA);
@@ -2660,7 +2412,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".CreateStatHandle{TStatData}(")
                     .Print("TValuePair, bool")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public ").Print(STAT_HANDLE_T).Print(" CreateStatHandle<TStatData>(")
                     .PrintEndLine("ValuePair valuePair, bool produceChangeEvents)");
                 p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA);
@@ -2672,7 +2424,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".CreateStatHandle{TStatData}(")
                     .Print("TValuePair, bool, out TStatData")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public ").Print(STAT_HANDLE_T).Print(" CreateStatHandle<TStatData>(")
                     .PrintEndLine("ValuePair valuePair, bool produceChangeEvents, out TStatData statData)");
                 p.WithIncreasedIndent().PrintBeginLine("where TStatData : unmanaged, ").PrintEndLine(ISTAT_DATA);
@@ -2684,7 +2436,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".CreateStatHandle(")
                     .Print("TValuePair, bool")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public ").Print(STAT_HANDLE)
                     .PrintEndLine(" CreateStatHandle(ValuePair valuePair, bool produceChangeEvents)");
                 p.WithIncreasedIndent()
@@ -2695,7 +2447,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".TryAddStatModifier(")
                     .Print(STAT_HANDLE).Print(", TStatModifier, out ").Print(STAT_MODIFIER_HANDLE)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public bool TryAddStatModifier(")
                     .Print(STAT_HANDLE).Print(" affectedStatHandle, ")
                     .Print("StatModifier modifier, out ")
@@ -2717,7 +2469,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 .PrintLine(", global::Unity.Collections.INativeDisposable");
             p.OpenScope();
             {
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public readonly bool IsCreated");
                 p.OpenScope();
                 {
@@ -2731,7 +2482,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".AddModifierTriggerEvent(")
                     .Print("in ").Print(MODIFIER_TRIGGER_EVENT_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public void AddModifierTriggerEvent(in ModifierTriggerEvent evt)");
                 p.WithIncreasedIndent().PrintLine("=> this.worldData.AddModifierTriggerEvent(new(evt.handle, evt.modifier));");
                 p.PrintEndLine();
@@ -2740,7 +2491,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".AddStatChangeEvent(")
                     .Print("in ").Print(STAT_CHANGE_EVENT_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public void AddStatChangeEvent(in ").Print(STAT_CHANGE_EVENT).PrintEndLine(" evt)");
                 p.WithIncreasedIndent().PrintLine("=> this.worldData.AddStatChangeEvent(evt);");
                 p.PrintEndLine();
@@ -2748,7 +2499,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_WORLD_DATA_XML)
                     .Print(".ClearModifierTriggerEvents(")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public void ClearModifierTriggerEvents()");
                 p.WithIncreasedIndent().PrintLine("=> this.worldData.ClearModifierTriggerEvents();");
                 p.PrintEndLine();
@@ -2756,7 +2507,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_WORLD_DATA_XML)
                     .Print(".ClearStatChangeEvents(")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public void ClearStatChangeEvents()");
                 p.WithIncreasedIndent().PrintLine("=> this.worldData.ClearStatChangeEvents();");
                 p.PrintEndLine();
@@ -2764,7 +2515,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_WORLD_DATA_XML)
                     .Print(".Clear(")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public void Clear()");
                 p.WithIncreasedIndent().PrintLine("=> this.worldData.Clear();");
                 p.PrintEndLine();
@@ -2772,7 +2523,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintBeginLine("/// <inheritdoc cref=\"").Print(STAT_WORLD_DATA_XML)
                     .Print(".Dispose(")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public void Dispose()");
                 p.WithIncreasedIndent().PrintLine("=> this.worldData.Dispose();");
                 p.PrintEndLine();
@@ -2781,7 +2532,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".Dispose(")
                     .Print(JOB_HANDLE)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public ").Print(JOB_HANDLE).Print(" Dispose(")
                     .Print(JOB_HANDLE).PrintEndLine(" inputDeps)");
                 p.WithIncreasedIndent().PrintLine("=> this.worldData.Dispose(inputDeps);");
@@ -2791,7 +2542,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".GetModifierTriggerEvents(")
                     .Print(ALLOCATOR_HANDLE)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly ").Print(NATIVE_ARRAY_MODIFIER_EVENT)
                     .Print(" GetModifierTriggerEvents(").Print(ALLOCATOR_HANDLE).PrintEndLine(" allocator)");
                 p.WithIncreasedIndent().PrintBeginLine("=> this.worldData.GetModifierTriggerEvents(allocator)")
@@ -2802,7 +2553,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".GetModifierTriggerEvents(")
                     .Print(NATIVE_LIST_MODIFIER_EVENT_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly void GetModifierTriggerEvents(")
                     .Print(NATIVE_LIST_MODIFIER_EVENT).PrintEndLine(" result)");
                 p.OpenScope();
@@ -2820,7 +2571,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".GetStatChangeEvents(")
                     .Print(ALLOCATOR_HANDLE)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly ").Print(NATIVE_ARRAY_STAT_CHANGE_EVENT)
                     .Print(" GetStatChangeEvents(").Print(ALLOCATOR_HANDLE).PrintEndLine(" allocator)");
                 p.WithIncreasedIndent().PrintLine("=> this.worldData.GetStatChangeEvents(allocator);");
@@ -2830,7 +2581,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".GetStatChangeEvents(")
                     .Print(NATIVE_LIST_STAT_CHANGE_EVENT_XML)
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly void GetStatChangeEvents(")
                     .Print(NATIVE_LIST_STAT_CHANGE_EVENT).PrintEndLine(" result)");
                 p.WithIncreasedIndent().PrintLine("=> this.worldData.GetStatChangeEvents(result);");
@@ -2840,7 +2591,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(".SetStatModifierStack(")
                     .Print("in TStatModifierStack")
                     .PrintEndLine(")\"/>");
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public void SetStatModifierStack(in StatModifier.Stack stack)");
                 p.WithIncreasedIndent().PrintLine("=> this.worldData.SetStatModifierStack(stack);");
             }
@@ -2907,7 +2658,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 {
                     var (ns, type, _, size, customNs) = singleTypes[i];
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static implicit operator ValuePair(")
                         .PrintIf(size > 8, "in ")
                         .Print(STAT_SINGLE).Print("<")
@@ -2923,7 +2674,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 {
                     var (ns, type, _, size, customNs) = pairTypes[i];
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static implicit operator ValuePair(")
                         .PrintIf(size > 8, "in ")
                         .PrintIf(customNs, ns)
@@ -2935,7 +2686,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                     size += size;
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static implicit operator ValuePair(")
                         .PrintIf(size > 8, "in ")
                         .Print("(")
@@ -2969,7 +2720,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         .Print(type).Print("' is ").Print(size)
                         .Print(" bytes thus cannot be stored as a pair value.")
                         .PrintEndLine("\", true)]");
-                    p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                     p.PrintBeginLine("public static implicit operator ValuePair(")
                         .PrintIf(size > 8, "in ")
                         .PrintIf(customNs, ns)
@@ -2989,7 +2739,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         .Print(maxDataSize).Print(" bytes for a single value, while '")
                         .Print(type).Print("' is ").Print(size).Print(" bytes thus incompatible.")
                         .PrintEndLine("\", true)]");
-                    p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                     p.PrintBeginLine("public static implicit operator ValuePair(")
                         .PrintIf(size > 8, "in ")
                         .Print(STAT_SINGLE).Print("<")
@@ -3010,7 +2759,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         .Print(halfDataSize).Print(" bytes for a pair value, while '")
                         .Print(type).Print("' is ").Print(size).Print(" bytes thus incompatible.")
                         .PrintEndLine("\", true)]");
-                    p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                     p.PrintBeginLine("public static implicit operator ValuePair(")
                         .PrintIf(size > 8, "in ")
                         .PrintIf(customNs, ns)
@@ -3036,7 +2784,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 {
                     var (ns, type, typeName, _, customNs) = singleTypes[i];
 
-                    p.PrintBeginLine(SERIALIZED_FIELD).Print(FIELD_OFFSET_0).PrintEndLine(GENERATED_CODE);
+                    p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(FIELD_OFFSET_0);
                     p.PrintBeginLine("private ")
                         .PrintIf(customNs, ns)
                         .PrintIf(customNs, ".")
@@ -3044,7 +2792,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     p.PrintEndLine();
                 }
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static StatDataStore Store(bool isPair, in ")
                     .Print(STAT_VARIANT).Print(" baseValue, in ")
                     .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
@@ -3110,7 +2858,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetBaseValue(in ValuePair pair, out ")
                     .Print(STAT_VARIANT).PrintEndLine(" result)");
                 p.OpenScope();
@@ -3190,7 +2938,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TryGetCurrentValue(in ValuePair pair, out ")
                     .Print(STAT_VARIANT).PrintEndLine(" result)");
                 p.OpenScope();
@@ -3269,7 +3017,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TrySetBaseValue(ref ValuePair pair, in ")
                     .Print(STAT_VARIANT).PrintEndLine(" value)");
                 p.OpenScope();
@@ -3353,7 +3101,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TrySetCurrentValue(ref ValuePair pair, in ")
                     .Print(STAT_VARIANT).PrintEndLine(" value)");
                 p.OpenScope();
@@ -3438,7 +3186,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool TrySetValues(ref ValuePair pair, in ")
                     .Print(STAT_VARIANT).Print(" baseValue, in ")
                     .Print(STAT_VARIANT).PrintEndLine(" currentValue)");
@@ -3530,7 +3278,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public static int GetHashCode(in ValuePair pair)");
                 p.OpenScope();
                 {
@@ -3585,7 +3333,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public static bool Equals(in ValuePair pairA, in ValuePair pairB)");
                 p.OpenScope();
                 {
@@ -3657,25 +3405,25 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(" : ").Print(IEQUATABLE).Print("<Pair").Print(typeName).PrintEndLine(">");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine(FIELD_OFFSET_0).PrintEndLine(GENERATED_CODE);
+                    p.PrintLine(FIELD_OFFSET_0);
                     p.PrintLine("public StatDataStore data;");
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(FIELD_OFFSET_0).PrintEndLine(GENERATED_CODE);
+                    p.PrintLine(FIELD_OFFSET_0);
                     p.PrintBeginLine("public ")
                         .PrintIf(customNs, ns)
                         .PrintIf(customNs, ".")
                         .Print(type).PrintEndLine(" baseValue;");
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(string.Format(FIELD_OFFSET_X, size)).PrintEndLine(GENERATED_CODE);
+                    p.PrintLine(string.Format(FIELD_OFFSET_X, size));
                     p.PrintBeginLine("public ")
                         .PrintIf(customNs, ns)
                         .PrintIf(customNs, ".")
                         .Print(type).PrintEndLine(" currentValue;");
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public Pair").Print(typeName).PrintEndLine("(in StatDataStore data) : this()");
                     p.OpenScope();
                     {
@@ -3684,7 +3432,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public Pair").Print(typeName).Print("(")
                         .PrintIf(size > 8, "in ")
                         .PrintIf(customNs, ns).PrintIf(customNs, ".").Print(type).Print(" baseValue, ")
@@ -3699,19 +3447,19 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintLine("public readonly override int GetHashCode()");
                     p.WithIncreasedIndent().PrintBeginLine("=> ")
                         .Print(HASH_VALUE).PrintEndLine(".Combine(baseValue, currentValue);");
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintLine("public readonly override bool Equals(object obj)");
                     p.WithIncreasedIndent().PrintBeginLine("=> obj is Pair")
                         .Print(typeName).PrintEndLine(" other && Equals(other);");
                     p.PrintEndLine();
 
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public readonly bool Equals(Pair").Print(typeName).PrintEndLine(" other)");
                     p.WithIncreasedIndent()
                         .PrintLine("=> baseValue.Equals(other.baseValue) && currentValue.Equals(other.currentValue);");

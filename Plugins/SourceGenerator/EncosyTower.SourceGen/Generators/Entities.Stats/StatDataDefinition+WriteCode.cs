@@ -24,6 +24,7 @@
 
             p = p.IncreasedIndent();
             {
+                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("partial struct ").Print(typeName).Print(" : ").PrintEndLine(ISTAT_DATA);
                 p.OpenScope();
                 {
@@ -43,17 +44,14 @@
         {
             if (singleValue)
             {
-                p.PrintLine(GENERATED_CODE);
                 p.PrintBeginLine("public ").Print(valueFullTypeName).PrintEndLine(" value;");
                 p.PrintEndLine();
             }
             else
             {
-                p.PrintLine(GENERATED_CODE);
                 p.PrintBeginLine("public ").Print(valueFullTypeName).PrintEndLine(" baseValue;");
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE);
                 p.PrintBeginLine("public ").Print(valueFullTypeName).PrintEndLine(" currentValue;");
                 p.PrintEndLine();
             }
@@ -63,7 +61,7 @@
         {
             var @in = size > 8 ? "in " : "";
 
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public ").Print(typeName).Print("(")
                 .Print(@in).Print(valueFullTypeName).PrintEndLine(" value) : this()");
             p.OpenScope();
@@ -82,7 +80,7 @@
                 return;
             }
 
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public ").Print(typeName).Print("(")
                 .Print(@in).Print(valueFullTypeName).Print(" baseValue, ")
                 .Print(@in).Print(valueFullTypeName).PrintEndLine(" currentValue) : this()");
@@ -97,7 +95,6 @@
 
         private readonly void WriteIStatData(ref Printer p)
         {
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly bool IsValuePair");
             p.OpenScope();
             {
@@ -107,7 +104,6 @@
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public readonly ").Print(STAT_VARIANT_TYPE).PrintEndLine(" ValueType");
             p.OpenScope();
             {
@@ -117,7 +113,6 @@
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(STAT_VARIANT).PrintEndLine(" BaseValue");
             p.OpenScope();
             {
@@ -169,7 +164,6 @@
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(STAT_VARIANT).PrintEndLine(" CurrentValue");
             p.OpenScope();
             {
@@ -221,23 +215,6 @@
             }
             p.CloseScope();
             p.PrintEndLine();
-        }
-
-        private static void WriteStatIndexXmlDoc(ref Printer p, string typeName)
-        {
-            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
-            p.PrintBeginLine("/// ").PrintEndLine("The index associated with a specific DynamicBuffer&lt;Stat&gt;.");
-            p.PrintBeginLine("/// ").PrintEndLine("<br/>");
-            p.PrintBeginLine("/// ").Print("It shoud be assigned upon the creation of a Stat&lt;").Print(typeName).PrintEndLine("&gt;.");
-            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
-            p.PrintBeginLine("/// ").PrintEndLine("<remarks>");
-            p.PrintBeginLine("/// ").PrintEndLine("A valid index should be greater than 0.");
-            p.PrintBeginLine("/// ").PrintEndLine("Index 0 equals to the first element in DynamicBuffer&lt;Stat&gt;");
-            p.PrintBeginLine("/// ").PrintEndLine("whose type is <see cref=\"StatVariantType.None\"/>.");
-            p.PrintBeginLine("/// ").PrintEndLine("<br/>");
-            p.PrintBeginLine("/// ").Print("Use <see cref=\"MakeStatHandleFor\"/> ").PrintEndLine("to compose a <see cref=\"StatHandle{T}\"/> ");
-            p.PrintBeginLine("/// ").Print("which associates <see cref=\"").Print(typeName).PrintEndLine("\"/> with the <paramref name=\"entity\"/>.");
-            p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
         }
     }
 }
