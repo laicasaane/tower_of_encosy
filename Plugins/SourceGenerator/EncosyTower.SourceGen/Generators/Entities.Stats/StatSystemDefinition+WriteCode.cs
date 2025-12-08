@@ -263,7 +263,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine("private bool _produceChangeEvents;");
                 p.PrintEndLine();
 
-                p.PrintLine(SERIALIZED_FIELD);
                 p.PrintBeginLine("public ").Print(MODIFIER_RANGE).PrintEndLine(" ModifierRange");
                 p.OpenScope();
                 {
