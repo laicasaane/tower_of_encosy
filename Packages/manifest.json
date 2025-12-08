@@ -12,7 +12,7 @@
     "com.latios.latiosframework": "0.14.4",
     "com.lwduai": "https://gitlab.com/lclemens/lightweightdotsutilityai.git",
     "com.needle.compilation-visualizer": "1.8.8",
-    "com.needle.console": "2.6.1",
+    "com.needle.console": "2.6.2",
     "com.quickeye.ui-toolkit-plus": "3.0.3",
     "com.roytheunissen.assetpalette": "0.4.7",
     "com.unity.addressables": "2.7.6",
@@ -37,6 +37,7 @@
     "com.xarbrough.renamer": "1.0.1",
     "jp.co.cyberagent.smartaddresser": "1.1.0",
     "org.nuget.raffinert.fuzzysharp": "3.0.6",
+    "today.comes.saintsfield": "5.5.1",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
@@ -60,8 +61,7 @@
     "com.unity.modules.unitywebrequesttexture": "1.0.0",
     "com.unity.modules.unitywebrequestwww": "1.0.0",
     "com.unity.modules.video": "1.0.0",
-    "com.unity.modules.wind": "1.0.0",
-    "today.comes.saintsfield": "5.5.1"
+    "com.unity.modules.wind": "1.0.0"
   },
   "scopedRegistries": [
     {
