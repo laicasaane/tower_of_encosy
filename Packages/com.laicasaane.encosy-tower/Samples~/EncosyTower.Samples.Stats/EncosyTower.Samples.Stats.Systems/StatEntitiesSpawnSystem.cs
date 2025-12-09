@@ -124,7 +124,7 @@ namespace EncosyTower.Samples.Stats
                 for (var i = startIndex; i < end; i++)
                 {
                     var entity = entities[i];
-                    var statHandles = lookupStats[entity].value.MakeHandlesFor(entity);
+                    var statHandles = lookupStats[entity].value.indices.ToHandles(entity);
 
                     accessor.TrySetStatBaseValue(statHandles.hp, 200f, ref worldData);
                     accessor.TrySetStatBaseValue(statHandles.moveSpeed, 100f, ref worldData);

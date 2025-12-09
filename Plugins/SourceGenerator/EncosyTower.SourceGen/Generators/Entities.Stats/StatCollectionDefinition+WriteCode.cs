@@ -12,7 +12,6 @@
 
         public readonly string WriteCode()
         {
-            var count = statDataCollection.Count;
             var p = Printer.DefaultLarge;
 
             p.PrintEndLine();
@@ -24,11 +23,16 @@
                 p.PrintBeginLine("partial struct ").PrintEndLine(typeName);
                 p.OpenScope();
                 {
+                    WriteConsts(ref p);
+
                     p.PrintLine("public Indices indices;");
                     p.PrintEndLine();
 
+                    WriteProperties(ref p);
                     WriteMethods(ref p);
                     WriteTypeEnum(ref p);
+                    WriteIndexRecordStruct(ref p);
+                    WriteHandleRecordStruct(ref p);
                     WriteIndicesStruct(ref p);
                     WriteHandlesStruct(ref p);
                     WriteStatDataCollection(ref p);
@@ -40,6 +44,7 @@
                     WriteBakingStruct(ref p);
                 }
                 p.CloseScope();
+                p.PrintEndLine();
 
                 p.Print("#region INTERNALS").PrintEndLine();
                 p.Print("#endregion ======").PrintEndLine();
@@ -57,18 +62,48 @@
                     p.PrintEndLine();
                 }
                 p.CloseScope();
+                p.PrintEndLine();
             }
             p = p.DecreasedIndent();
 
             return p.Result;
         }
 
+        private readonly void WriteConsts(ref Printer p)
+        {
+            var count = statDataCollection.Count;
+
+            p.PrintBeginLine("public const int LENGTH = ").Print(count).PrintEndLine(";");
+            p.PrintEndLine();
+
+            p.PrintLine("private readonly static Type[] s_types = new Type[]");
+            p.OpenScope();
+            {
+                for (var i = 0; i < count; i++)
+                {
+                    var statData = statDataCollection[i];
+
+                    p.PrintBeginLine("Type.").Print(statData.typeName).PrintEndLine(",");
+                }
+            }
+            p.CloseScope("};");
+            p.PrintEndLine();
+        }
+
+        private readonly void WriteProperties(ref Printer p)
+        {
+            p.PrintLine("public static ReadOnlySpan<Type> Types");
+            p.OpenScope();
+            {
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("get => s_types;");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
         private readonly void WriteMethods(ref Printer p)
         {
-            p.PrintLine(AGGRESSIVE_INLINING);
-            p.PrintLine("public readonly Handles MakeHandlesFor(Entity entity)");
-            p.WithIncreasedIndent().PrintLine("=> indices.ToHandles(entity);");
-            p.PrintEndLine();
         }
 
         private readonly void WriteTypeEnum(ref Printer p)
@@ -91,6 +126,112 @@
             p.PrintEndLine();
         }
 
+        private readonly void WriteIndexRecordStruct(ref Printer p)
+        {
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public readonly partial struct IndexRecord : IEquatable<IndexRecord>");
+            p.OpenScope();
+            {
+                p.PrintLine("public readonly StatIndex Index;");
+                p.PrintLine("public readonly Type Type;");
+                p.PrintLine("public readonly bool IsValid;");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public IndexRecord(StatIndex index, Type type, bool isValid)");
+                p.OpenScope();
+                {
+                    p.PrintLine("Index = index;");
+                    p.PrintLine("Type = type;");
+                    p.PrintLine("IsValid = isValid;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public void Deconstruct(out StatIndex index, out Type type, out bool isValid)");
+                p.OpenScope();
+                {
+                    p.PrintLine("index = Index;");
+                    p.PrintLine("type = Type;");
+                    p.PrintLine("isValid = IsValid;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public bool Equals(IndexRecord other)");
+                p.WithIncreasedIndent().PrintBeginLine("=> Index == other.Index && Type == other.Type")
+                    .PrintEndLine(" && IsValid == other.IsValid;");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public override bool Equals(object obj)");
+                p.WithIncreasedIndent().PrintLine("=> obj is IndexRecord other && Equals(other);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public override int GetHashCode()");
+                p.WithIncreasedIndent().PrintLine("=> HashValue.Combine(Index, Type, IsValid);");
+                p.PrintEndLine();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private readonly void WriteHandleRecordStruct(ref Printer p)
+        {
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public readonly partial struct HandleRecord : IEquatable<HandleRecord>");
+            p.OpenScope();
+            {
+                p.PrintLine("public readonly StatHandle Handle;");
+                p.PrintLine("public readonly Type Type;");
+                p.PrintLine("public readonly bool IsValid;");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public HandleRecord(StatHandle handle, Type type, bool isValid)");
+                p.OpenScope();
+                {
+                    p.PrintLine("Handle = handle;");
+                    p.PrintLine("Type = type;");
+                    p.PrintLine("IsValid = isValid;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public void Deconstruct(out StatHandle handle, out Type type, out bool isValid)");
+                p.OpenScope();
+                {
+                    p.PrintLine("handle = Handle;");
+                    p.PrintLine("type = Type;");
+                    p.PrintLine("isValid = IsValid;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public bool Equals(HandleRecord other)");
+                p.WithIncreasedIndent().PrintBeginLine("=> Handle == other.Handle && Type == other.Type")
+                    .PrintEndLine(" && IsValid == other.IsValid;");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public override bool Equals(object obj)");
+                p.WithIncreasedIndent().PrintLine("=> obj is HandleRecord other && Equals(other);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public override int GetHashCode()");
+                p.WithIncreasedIndent().PrintLine("=> HashValue.Combine(Handle, Type, IsValid);");
+                p.PrintEndLine();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
         private readonly void WriteIndicesStruct(ref Printer p)
         {
             var count = statDataCollection.Count;
@@ -99,7 +240,7 @@
             p.PrintLine("public partial struct Indices : IHasLength, IAsSpan<StatIndex>, IAsReadOnlySpan<StatIndex>");
             p.OpenScope();
             {
-                p.PrintLine($"public const int LENGTH = {count};");
+                p.PrintBeginLine("public const int LENGTH = ").Print(typeName).PrintEndLine(".LENGTH;");
                 p.PrintEndLine();
 
                 for (var i = 0; i < count; i++)
@@ -231,6 +372,57 @@
                 }
                 p.CloseScope();
                 p.PrintEndLine();
+
+                p.PrintLine("public readonly NativeList<IndexRecord> ToRecords(AllocatorManager.AllocatorHandle allocator)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var result = new NativeList<IndexRecord>(LENGTH, allocator);");
+                    p.PrintLine("var types = Types;");
+                    p.PrintLine("var indices = AsReadOnlySpan();");
+                    p.PrintEndLine();
+
+                    p.PrintLine("for (var i = 0; i < LENGTH; i++)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("var index = indices[i];");
+                        p.PrintLine("result.AddNoResize(new IndexRecord(index, types[i], index.IsValid));");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("return result;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public readonly NativeList<IndexRecord> ToValidRecords(AllocatorManager.AllocatorHandle allocator)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var result = new NativeList<IndexRecord>(LENGTH, allocator);");
+                    p.PrintLine("var types = Types;");
+                    p.PrintLine("var indices = AsReadOnlySpan();");
+                    p.PrintEndLine();
+
+                    p.PrintLine("for (var i = 0; i < LENGTH; i++)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("var index = indices[i];");
+                        p.PrintEndLine();
+
+                        p.PrintLine("if (index.IsValid)");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("result.AddNoResize(new IndexRecord(index, types[i], true));");
+                        }
+                        p.CloseScope();
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("return result;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -244,7 +436,7 @@
             p.PrintLine("public partial struct Handles : IHasLength, IAsSpan<StatHandle>, IAsReadOnlySpan<StatHandle>");
             p.OpenScope();
             {
-                p.PrintLine($"public const int LENGTH = {count};");
+                p.PrintBeginLine("public const int LENGTH = ").Print(typeName).PrintEndLine(".LENGTH;");
                 p.PrintEndLine();
 
                 for (var i = 0; i < count; i++)
@@ -373,6 +565,57 @@
                     }
 
                     p.PrintLine("return default;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public readonly NativeList<HandleRecord> ToRecords(AllocatorManager.AllocatorHandle allocator)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var result = new NativeList<HandleRecord>(LENGTH, allocator);");
+                    p.PrintLine("var types = Types;");
+                    p.PrintLine("var handles = AsReadOnlySpan();");
+                    p.PrintEndLine();
+
+                    p.PrintLine("for (var i = 0; i < LENGTH; i++)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("var handle = handles[i];");
+                        p.PrintLine("result.AddNoResize(new HandleRecord(handle, types[i], handle.IsValid));");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("return result;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public readonly NativeList<HandleRecord> ToValidRecords(AllocatorManager.AllocatorHandle allocator)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var result = new NativeList<HandleRecord>(LENGTH, allocator);");
+                    p.PrintLine("var types = Types;");
+                    p.PrintLine("var handles = AsReadOnlySpan();");
+                    p.PrintEndLine();
+
+                    p.PrintLine("for (var i = 0; i < LENGTH; i++)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("var handle = handles[i];");
+                        p.PrintEndLine();
+
+                        p.PrintLine("if (handle.IsValid)");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("result.AddNoResize(new HandleRecord(handle, types[i], true));");
+                        }
+                        p.CloseScope();
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("return result;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
