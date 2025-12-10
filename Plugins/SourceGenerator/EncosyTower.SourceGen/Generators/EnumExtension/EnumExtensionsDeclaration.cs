@@ -14,25 +14,25 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         public string StructName { get; set; }
 
-        public bool ParentIsNamespace { get; set; }
-
         public string FullyQualifiedName { get; set; }
 
         public string UnderlyingTypeName { get; set; }
+
+        public string FixedStringTypeName { get; }
+
+        public string FixedStringTypeFullyQualifiedName { get; }
 
         public List<EnumMemberDeclaration> Members { get; set; }
 
         public Accessibility Accessibility { get; set; }
 
+        public int FixedStringBytes { get; }
+
+        public bool ParentIsNamespace { get; set; }
+
         public bool HasFlags { get; set; }
 
         public bool ReferenceUnityCollections { get; }
-
-        public int FixedStringBytes { get; }
-
-        public string FixedStringTypeName { get; }
-
-        public string FixedStringTypeFullyQualifiedName { get; }
 
         public bool IsDisplayAttributeUsed { get; set; }
 

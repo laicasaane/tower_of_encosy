@@ -48,6 +48,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             token.ThrowIfCancellationRequested();
 
             return node is ClassDeclarationSyntax syntax
+                && syntax.HasModifier(SyntaxKind.StaticKeyword)
                 && syntax.AttributeLists.Count > 0
                 && syntax.HasAttributeCandidate(NAMESPACE, "EnumExtensionsFor")
                 ;
@@ -60,7 +61,9 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.Node is not ClassDeclarationSyntax syntax)
+            if (context.Node is not ClassDeclarationSyntax syntax
+                || syntax.HasModifier(SyntaxKind.StaticKeyword) == false
+            )
             {
                 return default;
             }
@@ -68,7 +71,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             var semanticModel = context.SemanticModel;
             var classSymbol = semanticModel.GetDeclaredSymbol(syntax, token);
 
-            if (classSymbol == null || classSymbol.IsStatic == false)
+            if (classSymbol == null)
             {
                 return default;
             }
