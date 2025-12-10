@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.TypeWraps
 {
-    public struct MethodDeclaration
+    public struct MethodDeclaration : IEquatable<MethodDeclaration>
     {
         public string name;
         public string returnTypeName;
@@ -13,6 +14,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         public string parameters;
         public string arguments;
         public int explicitInterfaceImplementationsLength;
+        public RefKind refKind;
         public bool sameType;
         public bool isPublic;
         public bool isUnsafe;
@@ -20,7 +22,10 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         public bool isReadOnly;
         public bool isStatic;
         public bool returnsVoid;
-        public RefKind refKind;
+
+        public readonly bool IsValid
+            => string.IsNullOrEmpty(name) == false
+            && string.IsNullOrEmpty(returnTypeName) == false;
 
         public static MethodDeclaration Create(
               IMethodSymbol method
@@ -337,5 +342,17 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
         }
 
+        public readonly bool Equals(MethodDeclaration other)
+            => string.Equals(name, other.name, StringComparison.Ordinal)
+            && string.Equals(returnTypeName, other.returnTypeName, StringComparison.Ordinal)
+            && string.Equals(typeParameters, other.typeParameters, StringComparison.Ordinal)
+            && string.Equals(parameters, other.parameters, StringComparison.Ordinal)
+            && refKind == other.refKind;
+
+        public readonly override bool Equals(object obj)
+            => obj is MethodDeclaration other && Equals(other);
+
+        public readonly override int GetHashCode()
+            => HashValue.Combine(name, returnTypeName, typeParameters, parameters, refKind);
     }
 }

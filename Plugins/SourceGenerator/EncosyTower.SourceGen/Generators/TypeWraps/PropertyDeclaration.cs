@@ -1,14 +1,16 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System;
+using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.TypeWraps
 {
-    public struct PropertyDeclaration
+    public struct PropertyDeclaration : IEquatable<PropertyDeclaration>
     {
         public string name;
         public string typeName;
         public string parameters;
         public string arguments;
         public int explicitInterfaceImplementationsLength;
+        public RefKind refKind;
         public bool sameType;
         public bool isPublic;
         public bool isReadOnly;
@@ -24,7 +26,10 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         public bool isSetterRO;
         public bool withoutSetter;
         public bool isUnsafe;
-        public RefKind refKind;
+
+        public readonly bool IsValid
+            => string.IsNullOrEmpty(name) == false
+            && string.IsNullOrEmpty(typeName) == false;
 
         public static PropertyDeclaration Create(
               IPropertySymbol property
@@ -127,5 +132,17 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 withoutSetter = withoutSetter,
             };
         }
+
+        public readonly bool Equals(PropertyDeclaration other)
+            => string.Equals(name, other.name, StringComparison.Ordinal)
+            && string.Equals(typeName, other.typeName, StringComparison.Ordinal)
+            && string.Equals(parameters, other.parameters, StringComparison.Ordinal)
+            && refKind == other.refKind;
+
+        public readonly override bool Equals(object obj)
+            => obj is PropertyDeclaration other && Equals(other);
+
+        public readonly override int GetHashCode()
+            => HashValue.Combine(name, typeName, parameters, refKind);
     }
 }

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.TypeWraps
@@ -15,17 +13,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         public TypeDeclarationSyntax Syntax { get; }
 
-        public bool IsRecord { get; }
-
-        public bool IsStruct { get; }
-
-        public bool IsRefStruct { get; }
-
-        public bool FieldTypeIsInterface { get; }
-
-        public bool ExcludeConverter { get; }
-
-        public string TypeName  { get; }
+        public string TypeName { get; }
 
         public string TypeNameWithTypeParams { get; }
 
@@ -37,17 +25,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         public string FieldEnumUnderlyingTypeName { get; }
 
-        public bool IsFieldDeclared { get; }
-
-        public bool IsFieldEnum { get; }
-
-        public bool IsReadOnly { get; }
-
-        public bool FieldTypeIsReadOnly { get; }
-
-        public bool IsSealed { get; }
-
-        public bool EnableNullable { get; }
+        public string FieldName { get; }
 
         public InterfaceKind IgnoreInterfaceMethods { get; }
 
@@ -63,15 +41,35 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         public SpecialType FieldUnderlyingSpecialType { get; }
 
-        public string FieldName { get; }
+        public bool IsRecord { get; }
 
-        public ImmutableArray<FieldDeclaration> Fields { get; }
+        public bool IsStruct { get; }
 
-        public ImmutableArray<PropertyDeclaration> Properties { get; }
+        public bool IsRefStruct { get; }
 
-        public ImmutableArray<EventDeclaration> Events { get; }
+        public bool FieldTypeIsInterface { get; }
 
-        public ImmutableArray<MethodDeclaration> Methods { get; }
+        public bool ExcludeConverter { get; }
+
+        public bool IsFieldDeclared { get; }
+
+        public bool IsFieldEnum { get; }
+
+        public bool IsReadOnly { get; }
+
+        public bool FieldTypeIsReadOnly { get; }
+
+        public bool IsSealed { get; }
+
+        public bool EnableNullable { get; }
+
+        public EquatableArray<FieldDeclaration> Fields { get; }
+
+        public EquatableArray<PropertyDeclaration> Properties { get; }
+
+        public EquatableArray<EventDeclaration> Events { get; }
+
+        public EquatableArray<MethodDeclaration> Methods { get; }
 
         public Dictionary<OperatorKind, HashSet<Operator>> OperatorMap { get; }
 
