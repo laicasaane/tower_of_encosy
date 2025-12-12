@@ -75,7 +75,7 @@ namespace EncosyTower.SourceGen
         /// <sinheritdoc/>
         public bool Equals(EquatableArray<T> array)
         {
-            return AsSpan().SequenceEqual(array.AsSpan());
+            return AsReadOnlySpan().SequenceEqual(array.AsReadOnlySpan());
         }
 
         /// <sinheritdoc/>
@@ -126,7 +126,7 @@ namespace EncosyTower.SourceGen
         /// Returns a <see cref="ReadOnlySpan{T}"/> wrapping the current items.
         /// </summary>
         /// <returns>A <see cref="ReadOnlySpan{T}"/> wrapping the current items.</returns>
-        public ReadOnlySpan<T> AsSpan()
+        public ReadOnlySpan<T> AsReadOnlySpan()
         {
             return AsImmutableArray().AsSpan();
         }
