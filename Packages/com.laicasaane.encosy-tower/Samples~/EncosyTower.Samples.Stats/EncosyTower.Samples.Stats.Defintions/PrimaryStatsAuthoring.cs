@@ -16,12 +16,15 @@ namespace EncosyTower.Samples.Stats
             {
                 var entity = GetEntity(authoring, TransformUsageFlags.None);
 
-                Stats.Baking.Begin(StatSystem.API.BakeStatComponents(this, entity))
-                    .SetStat(Stats.Hp.Create(authoring.hp))
-                    .SetStat(Stats.MoveSpeed.Create(authoring.moveSpeed))
-                    .SetStat(Stats.DirectionFlags.Create(authoring.direction))
-                    .SetStat(Stats.MotionFlags.Create(authoring.motion))
-                    .FinishThenAddComponent<PrimaryStats>();
+                Stats.Baker.Bake(this, entity)
+                    .CreateStats(
+                          Stats.Hp.Create(authoring.hp)
+                        , Stats.MoveSpeed.Create(authoring.moveSpeed)
+                        , Stats.DirectionFlags.Create(authoring.direction)
+                        , Stats.MotionFlags.Create(authoring.motion)
+                    )
+                    .CreateComponentData<PrimaryStats>()
+                    .AddComponentToEntity();
 
                 AddComponent<OmitLinkedEntityGroupFromPrefabInstance>(entity);
             }

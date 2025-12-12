@@ -47,7 +47,7 @@ namespace EncosyTower.Entities.Stats
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BakeStatComponents<TValuePair, TStat, TStatModifier, TStatModifierStack, TStatObserver, TValuePairComposer>(
-              IBaker baker
+              IBaker ibaker
             , Entity entity
             , out StatBaker<TValuePair, TStat, TStatModifier, TStatModifierStack, TStatObserver, TValuePairComposer> statBaker
             , TValuePairComposer valuePairComposer = default
@@ -59,16 +59,16 @@ namespace EncosyTower.Entities.Stats
             where TStatObserver : unmanaged, IStatObserver
             where TValuePairComposer : unmanaged, IStatValuePairComposer<TValuePair>
         {
-            baker.AddComponent(entity, new StatOwner());
+            ibaker.AddComponent(entity, new StatOwner());
 
             statBaker = new() {
-                _baker = baker,
+                _ibaker = ibaker,
                 _entity = entity,
                 _valuePairComposer = valuePairComposer,
                 _statOwner = default,
-                _statBuffer = baker.AddBuffer<TStat>(entity),
-                _modifierBuffer = baker.AddBuffer<TStatModifier>(entity),
-                _observerBuffer = baker.AddBuffer<TStatObserver>(entity),
+                _statBuffer = ibaker.AddBuffer<TStat>(entity),
+                _modifierBuffer = ibaker.AddBuffer<TStatModifier>(entity),
+                _observerBuffer = ibaker.AddBuffer<TStatObserver>(entity),
             };
 
             statBaker._statBuffer.Add(new TStat());
@@ -230,6 +230,7 @@ namespace EncosyTower.Entities.Stats
               Entity entity
             , TValuePair valuePair
             , bool produceChangeEvents
+            , uint userData
             , out TStat newStat
             , out StatHandle statHandle
         )
@@ -244,6 +245,7 @@ namespace EncosyTower.Entities.Stats
             newStat = new TStat {
                 ValuePair = valuePair,
                 ProduceChangeEvents = produceChangeEvents,
+                UserData = userData,
             };
         }
 
@@ -252,6 +254,7 @@ namespace EncosyTower.Entities.Stats
               Entity entity
             , TStatData statData
             , bool produceChangeEvents
+            , uint userData
             , ref DynamicBuffer<TStat> statBuffer
             , TValuePairComposer valuePairComposer = default
         )
@@ -262,7 +265,7 @@ namespace EncosyTower.Entities.Stats
         {
             var value = valuePairComposer.Compose(statData.IsValuePair, statData.BaseValue, statData.CurrentValue);
 
-            CreateStatCommon(entity, value, produceChangeEvents, out TStat newStat, out var statHandle);
+            CreateStatCommon(entity, value, produceChangeEvents, userData, out TStat newStat, out var statHandle);
 
             statHandle.index = statBuffer.Length;
             statBuffer.Add(newStat);
@@ -275,6 +278,7 @@ namespace EncosyTower.Entities.Stats
               Entity entity
             , TValuePair valuePair
             , bool produceChangeEvents
+            , uint userData
             , ref DynamicBuffer<TStat> statBuffer
             , out TStatData statData
             , TValuePairComposer valuePairComposer = default
@@ -284,27 +288,17 @@ namespace EncosyTower.Entities.Stats
             where TStatData : unmanaged, IStatData
             where TValuePairComposer : unmanaged, IStatValuePairComposer<TValuePair>
         {
-            statData = new TStatData();
-
-            ThrowHelper.ThrowIfPairsMismatch(valuePair.Type, statData);
-
+            statData = MakeStatData<TValuePair, TStatData>(valuePair);
             valuePair = valuePairComposer.Compose(
                   statData.IsValuePair
                 , valuePair.GetBaseValueOrDefault()
                 , valuePair.GetCurrentValueOrDefault()
             );
 
-            CreateStatCommon(entity, valuePair, produceChangeEvents, out TStat newStat, out var statHandle);
+            CreateStatCommon(entity, valuePair, produceChangeEvents, userData, out TStat newStat, out var statHandle);
 
             statHandle.index = statBuffer.Length;
             statBuffer.Add(newStat);
-
-            statData.CurrentValue = valuePair.GetCurrentValueOrDefault();
-
-            if (statData.IsValuePair)
-            {
-                statData.BaseValue = valuePair.GetBaseValueOrDefault();
-            }
 
             return (StatHandle<TStatData>)statHandle;
         }
@@ -314,12 +308,13 @@ namespace EncosyTower.Entities.Stats
               Entity entity
             , TValuePair valuePair
             , bool produceChangeEvents
+            , uint userData
             , ref DynamicBuffer<TStat> statBuffer
         )
             where TValuePair : unmanaged, IStatValuePair
             where TStat : unmanaged, IStat<TValuePair>
         {
-            CreateStatCommon(entity, valuePair, produceChangeEvents, out TStat newStat, out var statHandle);
+            CreateStatCommon(entity, valuePair, produceChangeEvents, userData, out TStat newStat, out var statHandle);
 
             statHandle.index = statBuffer.Length;
             statBuffer.Add(newStat);
@@ -504,15 +499,8 @@ namespace EncosyTower.Entities.Stats
             where TStat : unmanaged, IStat<TValuePair>
             where TStatData : unmanaged, IStatData
         {
-            var valuePair = GetStat<TValuePair, TStat>(statHandle, statBuffer);
-            var statData = new TStatData { CurrentValue = valuePair.GetCurrentValueOrDefault() };
-
-            if (statData.IsValuePair)
-            {
-                statData.BaseValue = valuePair.GetBaseValueOrDefault();
-            }
-
-            return statData;
+            var stat = GetStat<TValuePair, TStat>(statHandle, statBuffer);
+            return MakeStatData<TValuePair, TStatData>(stat.ValuePair);
         }
 
         /// <summary>
@@ -528,20 +516,13 @@ namespace EncosyTower.Entities.Stats
             where TStat : unmanaged, IStat<TValuePair>
             where TStatData : unmanaged, IStatData
         {
-            statData = new TStatData();
-
             if (TryGetStat<TValuePair, TStat>(statHandle, statBuffer, out TStat stat) == false)
             {
+                statData = default;
                 return false;
             }
 
-            statData.CurrentValue = stat.GetCurrentValueOrDefault();
-
-            if (statData.IsValuePair)
-            {
-                statData.BaseValue = stat.GetBaseValueOrDefault();
-            }
-
+            statData = MakeStatData<TValuePair, TStatData>(stat.ValuePair);
             return true;
         }
 
@@ -555,20 +536,13 @@ namespace EncosyTower.Entities.Stats
             where TStat : unmanaged, IStat<TValuePair>
             where TStatData : unmanaged, IStatData
         {
-            statData = new TStatData();
-
             if (TryGetStat<TValuePair, TStat>(statHandle, lookupStats, out TStat stat) == false)
             {
+                statData = default;
                 return false;
             }
 
-            statData.CurrentValue = stat.GetCurrentValueOrDefault();
-
-            if (statData.IsValuePair)
-            {
-                statData.BaseValue = stat.GetBaseValueOrDefault();
-            }
-
+            statData = MakeStatData<TValuePair, TStatData>(stat.ValuePair);
             return true;
         }
 
@@ -620,7 +594,7 @@ namespace EncosyTower.Entities.Stats
             where TStat : unmanaged, IStat<TValuePair>
         {
             if (lookupStats.TryGetBuffer(statHandle.entity, out var statBuffer)
-                && TryGetStat<TValuePair, TStat>(statHandle, statBuffer.AsNativeArray().AsReadOnly(), out TStat stat)
+                && TryGetStat<TValuePair, TStat>(statHandle, statBuffer.AsNativeArray(), out TStat stat)
             )
             {
                 valuePair = stat.ValuePair;
@@ -628,6 +602,67 @@ namespace EncosyTower.Entities.Stats
             }
 
             valuePair = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Note: Assumes the "statBuffer" is on the entity of the statHandle
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Contains<TValuePair, TStat>(StatHandle statHandle, ReadOnlySpan<TStat> statBuffer)
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+        {
+            return (uint)statHandle.index < (uint)statBuffer.Length;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Contains<TValuePair, TStat>(StatHandle statHandle, BufferLookup<TStat> lookupStats)
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+        {
+            if (lookupStats.TryGetBuffer(statHandle.entity, out var statBuffer))
+            {
+                return Contains<TValuePair, TStat>(statHandle, statBuffer.AsNativeArray());
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Note: Assumes the "statBuffer" is on the entity of the statHandle
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Contains<TValuePair, TStat>(
+              StatHandle statHandle
+            , uint userData
+            , ReadOnlySpan<TStat> statBuffer
+        )
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+        {
+            if (TryGetStat<TValuePair, TStat>(statHandle, statBuffer, out var stat))
+            {
+                return stat.UserData == userData;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Contains<TValuePair, TStat>(
+              StatHandle statHandle
+            , uint userData
+            , BufferLookup<TStat> lookupStats
+        )
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+        {
+            if (lookupStats.TryGetBuffer(statHandle.entity, out var statBuffer))
+            {
+                return Contains<TValuePair, TStat>(statHandle, userData, statBuffer.AsNativeArray());
+            }
+
             return false;
         }
 
@@ -680,10 +715,244 @@ namespace EncosyTower.Entities.Stats
         {
             if (lookupStats.TryGetBuffer(statHandle.entity, out var statBuffer))
             {
-                return TryGetStat<TValuePair, TStat>(statHandle, statBuffer.AsNativeArray().AsReadOnly(), out stat);
+                return TryGetStat<TValuePair, TStat>(statHandle, statBuffer.AsNativeArray(), out stat);
             }
 
             stat = default;
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<TStat> GetStats<TValuePair, TStat>(
+              Entity entity
+            , BufferLookup<TStat> lookupStats
+        )
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+        {
+            if (lookupStats.TryGetBuffer(entity, out var statBuffer))
+            {
+                return statBuffer.AsNativeArray().AsReadOnly();
+            }
+
+            return default;
+        }
+
+        /// <summary>
+        /// Note: Assumes the "statBuffer" is on the entity of the statHandle
+        /// <br/>
+        /// Note: Assumes index is valid
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void SetStatData<TValuePair, TStat, TStatData>(
+              StatHandle<TStatData> statHandle
+            , TStatData statData
+            , bool produceChangeEvents
+            , uint userData
+            , ref DynamicBuffer<TStat> statBuffer
+        )
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+            where TStatData : unmanaged, IStatData
+        {
+            ref var statRef = ref statBuffer.ElementAt(statHandle.index);
+
+            statRef.ProduceChangeEvents = produceChangeEvents;
+            statRef.UserData = userData;
+            statRef.TrySetCurrentValue(statData.CurrentValue);
+
+            if (statData.IsValuePair)
+            {
+                statRef.TrySetBaseValue(statData.BaseValue);
+            }
+        }
+
+        /// <summary>
+        /// Note: Assumes the "statBuffer" is on the entity of the statHandle
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool TrySetStatData<TValuePair, TStat, TStatData>(
+              StatHandle<TStatData> statHandle
+            , TStatData statData
+            , bool produceChangeEvents
+            , uint userData
+            , ref DynamicBuffer<TStat> statBuffer
+        )
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+            where TStatData : unmanaged, IStatData
+        {
+            if ((uint)statHandle.index >= (uint)statBuffer.Length)
+            {
+                return false;
+            }
+
+            SetStatData<TValuePair, TStat, TStatData>(
+                  statHandle
+                , statData
+                , produceChangeEvents
+                , userData
+                , ref statBuffer
+            );
+
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool TrySetStatData<TValuePair, TStat, TStatData>(
+              StatHandle<TStatData> statHandle
+            , TStatData statData
+            , bool produceChangeEvents
+            , uint userData
+            , BufferLookup<TStat> lookupStats
+        )
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+            where TStatData : unmanaged, IStatData
+        {
+            if (lookupStats.TryGetBuffer(statHandle.entity, out var statBuffer))
+            {
+                return TrySetStatData<TValuePair, TStat, TStatData>(
+                      statHandle
+                    , statData
+                    , produceChangeEvents
+                    , userData
+                    , ref statBuffer
+                );
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Note: Assumes the "statBuffer" is on the entity of the statHandle
+        /// <br/>
+        /// Note: Assumes index is valid
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void SetStatValue<TValuePair, TStat>(
+              StatHandle statHandle
+            , TValuePair valuePair
+            , bool produceChangeEvents
+            , uint userData
+            , ref DynamicBuffer<TStat> statBuffer
+        )
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+        {
+            ref var statRef = ref statBuffer.ElementAt(statHandle.index);
+            statRef.ProduceChangeEvents = produceChangeEvents;
+            statRef.UserData = userData;
+            statRef.ValuePair = valuePair;
+        }
+
+        /// <summary>
+        /// Note: Assumes the "statBuffer" is on the entity of the statHandle
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool TrySetStatValue<TValuePair, TStat>(
+              StatHandle statHandle
+            , TValuePair valuePair
+            , bool produceChangeEvents
+            , uint userData
+            , ref DynamicBuffer<TStat> statBuffer
+        )
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+        {
+            if ((uint)statHandle.index < (uint)statBuffer.Length)
+            {
+                SetStatValue<TValuePair, TStat>(
+                      statHandle
+                    , valuePair
+                    , produceChangeEvents
+                    , userData
+                    , ref statBuffer
+                );
+
+                return true;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool TrySetStatValue<TValuePair, TStat>(
+              StatHandle statHandle
+            , TValuePair valuePair
+            , bool produceChangeEvents
+            , uint userData
+            , BufferLookup<TStat> lookupStats
+        )
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+        {
+            if (lookupStats.TryGetBuffer(statHandle.entity, out var statBuffer))
+            {
+                return TrySetStatValue<TValuePair, TStat>(
+                      statHandle
+                    , valuePair
+                    , produceChangeEvents
+                    , userData
+                    , ref statBuffer
+                );
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Note: Assumes the "statBuffer" is on the entity of the statHandle
+        /// <br/>
+        /// Note: Assumes index is valid
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void SetStat<TValuePair, TStat>(
+              StatHandle statHandle
+            , TStat stat
+            , ref DynamicBuffer<TStat> statBuffer
+        )
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+        {
+            statBuffer[statHandle.index] = stat;
+        }
+
+        /// <summary>
+        /// Note: Assumes the "statBuffer" is on the entity of the statHandle
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool TrySetStat<TValuePair, TStat>(
+              StatHandle statHandle
+            , TStat stat
+            , ref DynamicBuffer<TStat> statBuffer
+        )
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+        {
+            if ((uint)statHandle.index < (uint)statBuffer.Length)
+            {
+                SetStat<TValuePair, TStat>(statHandle, stat, ref statBuffer);
+                return true;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool TrySetStat<TValuePair, TStat>(
+              StatHandle statHandle
+            , TStat stat
+            , BufferLookup<TStat> lookupStats
+        )
+            where TValuePair : unmanaged, IStatValuePair
+            where TStat : unmanaged, IStat<TValuePair>
+        {
+            if (lookupStats.TryGetBuffer(statHandle.entity, out var statBuffer))
+            {
+                return TrySetStat<TValuePair, TStat>(statHandle, stat, ref statBuffer);
+            }
+
             return false;
         }
 
@@ -730,7 +999,7 @@ namespace EncosyTower.Entities.Stats
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe ref TStat GetStatRefWithBufferUnsafe<TValuePair, TStat>(
+        internal static unsafe ref TStat GetStatRefUnsafe<TValuePair, TStat>(
               StatHandle statHandle
             , BufferLookup<TStat> lookupStats
             , out DynamicBuffer<TStat> statBuffer
@@ -920,7 +1189,7 @@ namespace EncosyTower.Entities.Stats
             {
                 return EntityHasAnyOtherDependantStatEntities<TStatObserver>(
                       entity
-                    , observerBuffer.AsNativeArray().AsReadOnly()
+                    , observerBuffer.AsNativeArray()
                 );
             }
 
@@ -966,7 +1235,7 @@ namespace EncosyTower.Entities.Stats
             {
                 GetOtherDependantStatsOfEntity<TStatObserver>(
                       entity
-                    , observerBuffer.AsNativeArray().AsReadOnly()
+                    , observerBuffer.AsNativeArray()
                     , dependentStats
                 );
             }
@@ -1015,7 +1284,7 @@ namespace EncosyTower.Entities.Stats
             {
                 GetOtherDependantStatEntitiesOfEntity<TStatObserver>(
                       entity
-                    , observerBuffer.AsNativeArray().AsReadOnly()
+                    , observerBuffer.AsNativeArray()
                     , dependentEntities
                 );
             }
@@ -1065,7 +1334,7 @@ namespace EncosyTower.Entities.Stats
             if (lookupModifiers.TryGetBuffer(entity, out var modifierBuffer))
             {
                 GetStatEntitiesThatEntityDependsOn<TValuePair, TStat, TStatModifier, TStatModifierStack>(
-                      modifierBuffer.AsNativeArray().AsReadOnly()
+                      modifierBuffer.AsNativeArray()
                     , dependsOnEntities
                     , observerStatHandles
                 );
@@ -1101,6 +1370,24 @@ namespace EncosyTower.Entities.Stats
             {
                 dependsOnEntities.Add(observerStatHandles[i].entity);
             }
+        }
+
+        public static TStatData MakeStatData<TValuePair, TStatData>(TValuePair valuePair)
+            where TValuePair : unmanaged, IStatValuePair
+            where TStatData : unmanaged, IStatData
+        {
+            var statData = new TStatData();
+
+            ThrowHelper.ThrowIfPairsMismatch(valuePair.Type, statData);
+
+            statData.CurrentValue = valuePair.GetCurrentValueOrDefault();
+
+            if (statData.IsValuePair)
+            {
+                statData.BaseValue = valuePair.GetBaseValueOrDefault();
+            }
+
+            return statData;
         }
     }
 }

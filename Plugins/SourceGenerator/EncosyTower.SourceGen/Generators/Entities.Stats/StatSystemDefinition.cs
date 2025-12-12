@@ -15,6 +15,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public string closingSource;
         public Location location;
         public int maxDataSize;
+        public int maxUserDataSize;
         public bool isStatic;
 
         public readonly bool IsValid
@@ -26,6 +27,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             && string.IsNullOrEmpty(sourceFilePath) == false
             && string.IsNullOrEmpty(openingSource) == false
             && string.IsNullOrEmpty(closingSource) == false
+            && maxDataSize > 0
+            && maxUserDataSize > 0
             && location != null
             ;
 
@@ -39,6 +42,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
             && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && maxDataSize == other.maxDataSize
+            && maxUserDataSize == other.maxUserDataSize
             && isStatic == other.isStatic
             ;
 
@@ -50,6 +54,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 , openingSource
                 , closingSource
                 , maxDataSize
+                , maxUserDataSize
                 , isStatic
             );
     }

@@ -34,7 +34,7 @@ namespace EncosyTower.Entities.Stats
                 $"'{lhs.ToStringFast()}' and '{rhs.ToStringFast()}'."
             );
         }
-        
+
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void ThrowIfMismatchedFunctionTypes(StatVariantType a, StatVariantType b, string func)
         {
@@ -48,7 +48,7 @@ namespace EncosyTower.Entities.Stats
                 $"'{a.ToStringFast()}' and '{b.ToStringFast()}'."
             );
         }
-        
+
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void ThrowIfMismatchedClampTypes(
             StatVariantType value, StatVariantType lowerBound, StatVariantType upperBound

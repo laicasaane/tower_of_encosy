@@ -124,10 +124,10 @@ namespace EncosyTower.Samples.Stats
                 for (var i = startIndex; i < end; i++)
                 {
                     var entity = entities[i];
-                    var statHandles = lookupStats[entity].value.indices.ToHandles(entity);
 
-                    accessor.TrySetStatBaseValue(statHandles.hp, 200f, ref worldData);
-                    accessor.TrySetStatBaseValue(statHandles.moveSpeed, 100f, ref worldData);
+                    Stats.Accessor.Create(entity, lookupStats[entity], accessor, worldData)
+                        .TrySetStatBaseValue(new Stats.Hp(200f), out _)
+                        .TrySetStatBaseValue(new Stats.MoveSpeed(100f), out _);
 
                     var lifeTimeRef = lookupLifetime.GetRefRW(entity);
                     lifeTimeRef.ValueRW.value = random.NextFloat(1f, 6f);
@@ -168,6 +168,7 @@ namespace EncosyTower.Samples.Stats
             [BurstCompile]
             public void Execute()
             {
+                var accessor = this.accessor;
                 var lookups = this.lookups;
                 var lookupModifierHandles = this.lookupModifierHandles;
 
@@ -184,7 +185,7 @@ namespace EncosyTower.Samples.Stats
                 var statEntities = new NativeList<Entity>(primaryEntities.Length, Allocator.Temp);
                 statEntities.AddRange(primaryEntities);
 
-                var modifierHandles = new NativeList<ModifierHandle>(Stats.Indices.LENGTH, Allocator.Temp);
+                var modifierHandles = new NativeList<ModifierHandle>(Stats.LENGTH, Allocator.Temp);
 
                 for (var i = 0; i < affectorEntities.Length; i++)
                 {
@@ -200,27 +201,25 @@ namespace EncosyTower.Samples.Stats
                     lookups.GetComponentData(statEntity, out PrimaryStats primaryStats);
                     lookups.GetComponentData(affectorEntity, out AffectorStats affectorStats);
 
-                    var primaryIndices = primaryStats.value.indices;
-                    var affectorIndices = affectorStats.value.indices;
+                    var primaryHandles = Stats.GetStatHandlesFrom(primaryStats, statEntity);
+                    var affectorHandles = Stats.GetStatHandlesFrom(affectorStats, affectorEntity);
 
                     modifierHandles.Clear();
 
-                    var linkCount = random.NextInt(1, Stats.Indices.LENGTH + 1);
+                    var linkCount = random.NextInt(1, Stats.LENGTH + 1);
 
                     for (var k = 0; k < linkCount; k++)
                     {
                         var statTypeIndex = random.NextInt(0, statTypes.Length);
                         var statType = statTypes[statTypeIndex];
-                        var primaryIndex = primaryIndices[statType];
-                        var affectorIndex = affectorIndices[statType];
+                        var primaryHandle = primaryHandles[statType];
+                        var affectorHandle = affectorHandles[statType];
 
-                        if (primaryIndex.IsValid == false || affectorIndex.IsValid == false)
+                        if (primaryHandle.IsValid == false || affectorHandle.IsValid == false)
                         {
                             continue;
                         }
 
-                        var primaryHandle = new StatHandle(statEntity, primaryIndex);
-                        var affectorHandle = new StatHandle(affectorEntity, affectorIndex);
                         var statOpIndex = random.NextInt(0, statOps.Length);
                         var statOp = statOps[statOpIndex];
 

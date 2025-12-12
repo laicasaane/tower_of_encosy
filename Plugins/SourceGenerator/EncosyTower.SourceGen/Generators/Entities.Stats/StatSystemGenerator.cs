@@ -82,12 +82,38 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             var attribute = typeSymbol.GetAttribute(STAT_SYSTEM_ATTRIBUTE);
 
-            if (attribute == null
-                || attribute.ConstructorArguments.Length < 1
-                || attribute.ConstructorArguments[0].Value is not byte maxDataSize
-            )
+            if (attribute == null || attribute.ConstructorArguments.Length < 1)
             {
                 return default;
+            }
+
+            var args = attribute.ConstructorArguments;
+
+            if (args[0].Value is not byte maxDataSize)
+            {
+                return default;
+            }
+
+            int maxUserDataSize;
+
+            if (args.Length > 1 && args[1].Value is byte userDataSize)
+            {
+                if (userDataSize > 2)
+                {
+                    maxUserDataSize = 4;
+                }
+                else if (userDataSize > 1)
+                {
+                    maxUserDataSize = 2;
+                }
+                else
+                {
+                    maxUserDataSize = 1;
+                }
+            }
+            else
+            {
+                maxUserDataSize = 1;
             }
 
             var assemblyName = semanticModel.Compilation.AssemblyName;
@@ -113,7 +139,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
                 closingSource = closingSource,
-                maxDataSize = maxDataSize,
+                maxDataSize = Math.Max((int)maxDataSize, 1),
+                maxUserDataSize = maxUserDataSize,
                 isStatic = symbol.IsStatic,
                 location = syntax.GetLocation()
             };

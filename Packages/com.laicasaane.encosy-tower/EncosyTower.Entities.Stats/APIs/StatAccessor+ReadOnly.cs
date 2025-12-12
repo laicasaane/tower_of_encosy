@@ -54,6 +54,12 @@ namespace EncosyTower.Entities.Stats
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly ReadOnlySpan<TStat> GetStats(Entity entity)
+            {
+                return StatAPI.GetStats<TValuePair, TStat>(entity, _lookupStats);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly bool TryGetStatData<TStatData>(StatHandle<TStatData> statHandle, out TStatData statData)
                 where TStatData : unmanaged, IStatData
             {

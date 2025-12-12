@@ -1,5 +1,9 @@
 ﻿using System;
+using EncosyTower.Collections;
+using EncosyTower.Common;
 using EncosyTower.Entities.Stats;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using UnityEngine;
 
@@ -46,13 +50,25 @@ namespace EncosyTower.Tests.Entities.Stats
         [StatData(typeof(MotionFlag))]
         public partial struct Motion { }
 
-        partial struct Indices
-        {
-        }
+        partial struct TypeId { }
 
-        partial struct Handles
-        {
-        }
+        partial struct Indices { }
+
+        partial struct StatIndices { }
+
+        partial struct StatHandles { }
+
+        static partial class Baker { }
+
+        partial struct Baker<T> { }
+
+        static partial class Accessor { }
+
+        partial struct Accessor<T> { }
+    }
+
+    static partial class StatsExtensions
+    {
     }
 
     internal class StatsAuthoring : MonoBehaviour
@@ -68,12 +84,13 @@ namespace EncosyTower.Tests.Entities.Stats
             {
                 var entity = GetEntity(authoring, TransformUsageFlags.None);
 
-                Stats.Baking.Begin(StatSystem.API.BakeStatComponents(this, entity))
-                    .SetStat(Stats.Hp.Create(authoring.hp))
-                    .SetStat(Stats.MoveSpeed.Create(authoring.moveSpeed))
-                    .SetStat(Stats.Direction.Create(authoring.direction))
-                    .SetStat(Stats.Motion.Create(authoring.motion))
-                    .FinishThenAddComponent<Stats>();
+                Stats.Baker.Bake(this, entity)
+                    .CreateStat(Stats.Hp.Create(authoring.hp))
+                    .CreateStat(Stats.MoveSpeed.Create(authoring.moveSpeed))
+                    .CreateStat(Stats.Direction.Create(authoring.direction))
+                    .CreateStat(Stats.Motion.Create(authoring.motion))
+                    .CreateComponentData<Stats>()
+                    .AddComponentToEntity();
 
                 AddComponent<OmitLinkedEntityGroupFromPrefabInstance>(entity);
             }

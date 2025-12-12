@@ -22,7 +22,9 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using EncosyTower.Collections;
 using EncosyTower.TypeWraps;
+using Unity.Collections;
 
 namespace EncosyTower.Entities.Stats
 {
@@ -44,12 +46,16 @@ namespace EncosyTower.Entities.Stats
         public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Equals(Null) == false;
+            get => value > Null.value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator uint(StatIndex value)
-            => (uint)value.value;
+        public static explicit operator uint(StatIndex index)
+            => (uint)index.value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly FixedString32Bytes ToFixedString()
+            => value.ToFixedString();
     }
 
     [Serializable, WrapType(typeof(int), nameof(value))]
@@ -64,23 +70,27 @@ namespace EncosyTower.Entities.Stats
         public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Equals(Null) == false;
+            get => value > Null.value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator StatIndex<TStatData>(StatIndex value)
+        public static explicit operator StatIndex<TStatData>(StatIndex index)
         {
-            return new(value.value);
+            return new(index.value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator StatIndex(StatIndex<TStatData> value)
+        public static implicit operator StatIndex(StatIndex<TStatData> index)
         {
-            return new(value.value);
+            return new(index.value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator uint(StatIndex<TStatData> value)
             => (uint)value.value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly FixedString32Bytes ToFixedString()
+            => value.ToFixedString();
     }
 }

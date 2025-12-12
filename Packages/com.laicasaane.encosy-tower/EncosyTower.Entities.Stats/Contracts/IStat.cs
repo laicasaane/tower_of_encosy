@@ -13,6 +13,22 @@ namespace EncosyTower.Entities.Stats
 
         TValuePair ValuePair { get; set; }
 
+        /// <summary>
+        /// To store user-defined values.
+        /// </summary>
+        /// <remarks>
+        /// Must be either <see cref="byte"/>, <see cref="ushort"/>, or <see cref="uint"/>.
+        /// </remarks>
+        uint UserData { get; set; }
+
+        /// <summary>
+        /// Size of the underlying <see cref="UserData"/> in bytes.
+        /// </summary>
+        /// <remarks>
+        /// Must equal to the size of either <see cref="byte"/>, <see cref="ushort"/>, or <see cref="uint"/>.
+        /// </remarks>
+        int UserDataSize { get; }
+
         StatVariant GetBaseValueOrDefault(in StatVariant defaultValue = default);
 
         StatVariant GetCurrentValueOrDefault(in StatVariant defaultValue = default);

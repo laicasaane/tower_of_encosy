@@ -10,12 +10,11 @@ namespace EncosyTower.Samples.Stats
             public override void Bake(AffectorStatsAuthoring authoring)
             {
                 var entity = GetEntity(authoring, TransformUsageFlags.None);
-                var statIndices = Stats.Baking.Begin(StatSystem.API.BakeStatComponents(this, entity))
-                    .SetStat(Stats.Hp.Create())
-                    .SetStat(Stats.MoveSpeed.Create())
-                    .SetStat(Stats.DirectionFlags.Create())
-                    .SetStat(Stats.MotionFlags.Create())
-                    .FinishThenAddComponent<AffectorStats>();
+
+                Stats.Baker.Bake(this, entity)
+                    .CreateAllStats()
+                    .CreateComponentData<AffectorStats>()
+                    .AddComponentToEntity();
 
                 //AddComponent(entity, new AffectorStats { value = new })
                 AddComponent<Lifetime>(entity);

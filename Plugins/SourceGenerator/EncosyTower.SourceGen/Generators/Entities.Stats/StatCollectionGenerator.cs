@@ -136,6 +136,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
                 p.PrintLine("using System;");
                 p.PrintLine("using System.CodeDom.Compiler;");
+                p.PrintLine("using System.Diagnostics;");
                 p.PrintLine("using System.Diagnostics.CodeAnalysis;");
                 p.PrintLine("using System.Runtime.CompilerServices;");
                 p.PrintLine("using System.Runtime.InteropServices;");
@@ -146,6 +147,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine("using Unity.Collections.LowLevel.Unsafe;");
                 p.PrintLine("using Unity.Entities;");
                 p.PrintLine("using Unity.Mathematics;");
+                p.PrintLine("using UnityEngine;");
                 p.PrintLine($"using {StatGeneratorAPI.NAMESPACE};");
                 p.PrintEndLine();
                 p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();

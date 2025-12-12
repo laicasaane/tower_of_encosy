@@ -91,14 +91,11 @@
 
 #pragma warning disable
 
-using EncosyTower.EnumExtensions;
-
 namespace EncosyTower.Entities.Stats
 {
     /// <summary>
     /// Represents a collection of supported data sizes, in bytes, to store stat variants.
     /// </summary>
-    [EnumExtensions]
     public enum StatDataSize : byte
     {
         /// <summary>

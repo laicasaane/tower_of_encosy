@@ -42,12 +42,28 @@ namespace EncosyTower.Entities.Stats
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Contains(StatHandle statHandle)
+        {
+            return UseLookup
+                ? StatAPI.Contains<TValuePair, TStat>(statHandle, _lookupStats)
+                : StatAPI.Contains<TValuePair, TStat>(statHandle, _statBuffer.AsNativeArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Contains(StatHandle statHandle, uint userData)
+        {
+            return UseLookup
+                ? StatAPI.Contains<TValuePair, TStat>(statHandle, userData, _lookupStats)
+                : StatAPI.Contains<TValuePair, TStat>(statHandle, userData, _statBuffer.AsNativeArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryGetStatData<TStatData>(StatHandle<TStatData> statHandle, out TStatData statData)
             where TStatData : unmanaged, IStatData
         {
             return UseLookup
                 ? StatAPI.TryGetStatData<TValuePair, TStat, TStatData>(statHandle, _lookupStats, out statData)
-                : StatAPI.TryGetStatData<TValuePair, TStat, TStatData>(statHandle, _statBuffer.AsNativeArray().AsReadOnly(), out statData);
+                : StatAPI.TryGetStatData<TValuePair, TStat, TStatData>(statHandle, _statBuffer.AsNativeArray(), out statData);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -55,7 +71,7 @@ namespace EncosyTower.Entities.Stats
         {
             return UseLookup
                 ? StatAPI.TryGetStat<TValuePair, TStat>(statHandle, _lookupStats, out stat)
-                : StatAPI.TryGetStat<TValuePair, TStat>(statHandle, _statBuffer.AsNativeArray().AsReadOnly(), out stat);
+                : StatAPI.TryGetStat<TValuePair, TStat>(statHandle, _statBuffer.AsNativeArray(), out stat);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -63,7 +79,7 @@ namespace EncosyTower.Entities.Stats
         {
             return UseLookup
                 ? StatAPI.TryGetStatValue<TValuePair, TStat>(statHandle, _lookupStats, out valuePair)
-                : StatAPI.TryGetStatValue<TValuePair, TStat>(statHandle, _statBuffer.AsNativeArray().AsReadOnly(), out valuePair);
+                : StatAPI.TryGetStatValue<TValuePair, TStat>(statHandle, _statBuffer.AsNativeArray(), out valuePair);
         }
     }
 }

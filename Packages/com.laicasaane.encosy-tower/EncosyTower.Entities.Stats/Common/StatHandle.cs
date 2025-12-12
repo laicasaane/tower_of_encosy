@@ -23,6 +23,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace EncosyTower.Entities.Stats
@@ -54,7 +55,7 @@ namespace EncosyTower.Entities.Stats
         public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Equals(Null) == false;
+            get => entity.Equals(Null.entity) == false && index.IsValid;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,6 +94,25 @@ namespace EncosyTower.Entities.Stats
         {
             return HashValue.Combine(index, entity);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override string ToString()
+        {
+            return $"({entity}, {index})";
+        }
+
+        public readonly FixedString64Bytes ToFixedString()
+        {
+            var fs = new FixedString64Bytes();
+            fs.Append('(');
+            fs.Append(entity.ToFixedString());
+            fs.Append(',');
+            fs.Append(' ');
+            fs.Append(index);
+            fs.Append(')');
+
+            return fs;
+        }
     }
 
     [Serializable]
@@ -116,19 +136,19 @@ namespace EncosyTower.Entities.Stats
         public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Equals(Null) == false;
+            get => entity.Equals(Null.entity) == false && index.IsValid;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator StatHandle<TStatData>(StatHandle value)
+        public static explicit operator StatHandle<TStatData>(StatHandle handle)
         {
-            return new(value.entity, (StatIndex<TStatData>)value.index);
+            return new(handle.entity, (StatIndex<TStatData>)handle.index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator StatHandle(StatHandle<TStatData> value)
+        public static implicit operator StatHandle(StatHandle<TStatData> handle)
         {
-            return new(value.entity, value.index);
+            return new(handle.entity, handle.index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -166,6 +186,25 @@ namespace EncosyTower.Entities.Stats
         public readonly override int GetHashCode()
         {
             return HashValue.Combine(index, entity);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override string ToString()
+        {
+            return $"({entity}, {index})";
+        }
+
+        public readonly FixedString64Bytes ToFixedString()
+        {
+            var fs = new FixedString64Bytes();
+            fs.Append('(');
+            fs.Append(entity.ToFixedString());
+            fs.Append(',');
+            fs.Append(' ');
+            fs.Append(index);
+            fs.Append(')');
+
+            return fs;
         }
     }
 }

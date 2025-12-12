@@ -35,7 +35,7 @@ namespace EncosyTower.Entities.Stats
         where TStatObserver : unmanaged, IStatObserver
         where TValuePairComposer : unmanaged, IStatValuePairComposer<TValuePair>
     {
-        internal IBaker _baker;
+        internal IBaker _ibaker;
         internal Entity _entity;
         internal TValuePairComposer _valuePairComposer;
 
@@ -44,10 +44,10 @@ namespace EncosyTower.Entities.Stats
         internal DynamicBuffer<TStatModifier> _modifierBuffer;
         internal DynamicBuffer<TStatObserver> _observerBuffer;
 
-        public readonly IBaker Baker
+        public readonly IBaker IBaker
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _baker;
+            get => _ibaker;
         }
 
         public readonly Entity Entity
@@ -56,10 +56,20 @@ namespace EncosyTower.Entities.Stats
             get => _entity;
         }
 
+        public void Clear(TValuePairComposer valuePairComposer = default)
+        {
+            _valuePairComposer = valuePairComposer;
+            _statOwner = default;
+            _statBuffer.Clear();
+            _modifierBuffer.Clear();
+            _observerBuffer.Clear();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public StatHandle<TStatData> CreateStatHandle<TStatData>(
               TStatData statData
             , bool produceChangeEvents
+            , uint userData
         )
             where TStatData : unmanaged, IStatData
         {
@@ -67,6 +77,7 @@ namespace EncosyTower.Entities.Stats
                   _entity
                 , statData
                 , produceChangeEvents
+                , userData
                 , ref _statBuffer
                 , _valuePairComposer
             );
@@ -76,6 +87,7 @@ namespace EncosyTower.Entities.Stats
         public StatHandle<TStatData> CreateStatHandle<TStatData>(
               TValuePair valuePair
             , bool produceChangeEvents
+            , uint userData
         )
             where TStatData : unmanaged, IStatData
         {
@@ -83,6 +95,7 @@ namespace EncosyTower.Entities.Stats
                   _entity
                 , valuePair
                 , produceChangeEvents
+                , userData
                 , ref _statBuffer
                 , out _
                 , _valuePairComposer
@@ -93,6 +106,7 @@ namespace EncosyTower.Entities.Stats
         public StatHandle<TStatData> CreateStatHandle<TStatData>(
               TValuePair valuePair
             , bool produceChangeEvents
+            , uint userData
             , out TStatData statData
         )
             where TStatData : unmanaged, IStatData
@@ -101,6 +115,7 @@ namespace EncosyTower.Entities.Stats
                   _entity
                 , valuePair
                 , produceChangeEvents
+                , userData
                 , ref _statBuffer
                 , out statData
                 , _valuePairComposer
@@ -108,9 +123,120 @@ namespace EncosyTower.Entities.Stats
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public StatHandle CreateStatHandle(TValuePair valuePair, bool produceChangeEvents)
+        public StatHandle CreateStatHandle(TValuePair valuePair, bool produceChangeEvents, uint userData)
         {
-            return StatAPI.CreateStatHandle(_entity, valuePair, produceChangeEvents, ref _statBuffer);
+            return StatAPI.CreateStatHandle(_entity, valuePair, produceChangeEvents, userData, ref _statBuffer);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Contains(StatHandle handle)
+        {
+            return StatAPI.Contains<TValuePair, TStat>(handle, _statBuffer.AsNativeArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Contains(StatHandle handle, uint userData)
+        {
+            return StatAPI.Contains<TValuePair, TStat>(handle, userData, _statBuffer.AsNativeArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public StatHandle<TStatData> SetStatOrCreateHandle<TStatData>(
+              StatHandle<TStatData> handle
+            , TStatData statData
+            , bool produceChangeEvents
+            , uint userData
+        )
+            where TStatData : unmanaged, IStatData
+        {
+            if (StatAPI.TrySetStatData<TValuePair, TStat, TStatData>(
+                  handle
+                , statData
+                , produceChangeEvents
+                , userData
+                , ref _statBuffer
+            ))
+            {
+                return handle;
+            }
+
+            return CreateStatHandle(statData, produceChangeEvents, userData);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public StatHandle<TStatData> SetStatOrCreateHandle<TStatData>(
+              StatHandle<TStatData> handle
+            , TValuePair valuePair
+            , bool produceChangeEvents
+            , uint userData
+            , out TStatData statData
+        )
+            where TStatData : unmanaged, IStatData
+        {
+            if (StatAPI.TrySetStatValue(handle, valuePair, produceChangeEvents, userData, ref _statBuffer))
+            {
+                statData = StatAPI.MakeStatData<TValuePair, TStatData>(valuePair);
+                return handle;
+            }
+
+            return CreateStatHandle<TStatData>(valuePair, produceChangeEvents, userData, out statData);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public StatHandle<TStatData> SetStatOrCreateHandle<TStatData>(
+              StatHandle<TStatData> handle
+            , TValuePair valuePair
+            , bool produceChangeEvents
+            , uint userData
+        )
+            where TStatData : unmanaged, IStatData
+        {
+            if (StatAPI.TrySetStatValue(handle, valuePair, produceChangeEvents, userData, ref _statBuffer))
+            {
+                return handle;
+            }
+
+            return CreateStatHandle<TStatData>(valuePair, produceChangeEvents, userData);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public StatHandle SetStatOrCreateHandle(
+              StatHandle handle
+            , TValuePair valuePair
+            , bool produceChangeEvents
+            , uint userData
+        )
+        {
+            if (StatAPI.TrySetStatValue(handle, valuePair, produceChangeEvents, userData, ref _statBuffer))
+            {
+                return handle;
+            }
+
+            return CreateStatHandle(valuePair, produceChangeEvents, userData);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetStat<TStatData>(
+              StatHandle<TStatData> handle
+            , TStatData statData
+            , bool produceChangeEvents
+            , uint userData
+        )
+            where TStatData : unmanaged, IStatData
+        {
+            StatAPI.SetStatData<TValuePair, TStat, TStatData>(
+                  handle
+                , statData
+                , produceChangeEvents
+                , userData
+                , ref _statBuffer
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetStat(StatHandle handle, TValuePair valuePair, bool produceChangeEvents, uint userData)
+        {
+            StatAPI.SetStatValue(handle, valuePair, produceChangeEvents, userData, ref _statBuffer);
         }
 
         public bool TryAddStatModifier(
@@ -155,7 +281,7 @@ namespace EncosyTower.Entities.Stats
                 , ref worldData
             );
 
-            _baker.SetComponent(_entity, _statOwner);
+            _ibaker.SetComponent(_entity, _statOwner);
 
             return success;
         }

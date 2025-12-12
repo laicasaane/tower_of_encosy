@@ -66,6 +66,7 @@ namespace EncosyTower.Samples.Stats
                 for (var i = 0; i < tempHandles.Length; i++)
                 {
                     var modifierHandle = tempHandles[i];
+                    var modifierHandleIndex = modifierHandle.value.affectedStatHandle.index;
 
                     if (accessor.TryRemoveStatModifier(modifierHandle.value, ref worldData) == false)
                     {
@@ -75,10 +76,11 @@ namespace EncosyTower.Samples.Stats
                     for (var k = i + 1; k < tempHandles.Length; k++)
                     {
                         ref var nextHandleRef = ref tempHandles.ElementAt(k);
+                        ref var nextHandleIndex = ref nextHandleRef.value.affectedStatHandle.index;
 
-                        if (nextHandleRef.value.affectedStatHandle.index > modifierHandle.value.affectedStatHandle.index)
+                        if (nextHandleIndex > modifierHandleIndex)
                         {
-                            nextHandleRef.value.affectedStatHandle.index--;
+                            nextHandleIndex--;
                         }
                     }
                 }

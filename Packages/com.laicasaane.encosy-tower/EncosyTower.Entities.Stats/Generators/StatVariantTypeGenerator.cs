@@ -62,19 +62,19 @@ using Unity.Mathematics;
                 {
                     p.PrintLine("partial class DisplayNames { }");
                     p.PrintEndLine();
-                    
+
                     p.PrintLine("partial class FixedDisplayNames { }");
                     p.PrintEndLine();
-                    
+
                     p.PrintLine("partial class FixedNames { }");
                     p.PrintEndLine();
-                    
+
                     p.PrintLine("partial class Names { }");
                     p.PrintEndLine();
-                    
+
                     p.PrintLine("partial class UnderlyingValues { }");
                     p.PrintEndLine();
-                    
+
                     p.PrintLine("partial class Values { }");
                     p.PrintEndLine();
                 }
