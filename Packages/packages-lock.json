@@ -73,7 +73,7 @@
       }
     },
     "com.latios.latiosframework": {
-      "version": "0.14.4",
+      "version": "0.14.5",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -538,7 +538,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.timeline": {
-      "version": "1.8.9",
+      "version": "1.8.10",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -625,7 +625,7 @@
       "url": "https://package.openupm.com"
     },
     "today.comes.saintsfield": {
-      "version": "5.5.1",
+      "version": "5.6.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
