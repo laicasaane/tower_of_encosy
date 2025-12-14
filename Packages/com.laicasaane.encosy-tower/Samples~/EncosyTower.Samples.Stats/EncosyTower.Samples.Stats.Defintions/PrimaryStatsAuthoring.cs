@@ -18,10 +18,10 @@ namespace EncosyTower.Samples.Stats
 
                 Stats.Baker.Bake(this, entity)
                     .CreateStats(
-                          Stats.Hp.Create(authoring.hp)
-                        , Stats.MoveSpeed.Create(authoring.moveSpeed)
-                        , Stats.DirectionFlags.Create(authoring.direction)
-                        , Stats.MotionFlags.Create(authoring.motion)
+                          Stats.Hp.Params.Create(authoring.hp)
+                        , Stats.MoveSpeed.Params.Create(authoring.moveSpeed)
+                        , Stats.DirectionFlags.Params.Create(authoring.direction)
+                        , Stats.MotionFlags.Params.Create(authoring.motion)
                     )
                     .CreateComponentData<PrimaryStats>()
                     .AddComponentToEntity();

@@ -81,10 +81,10 @@ namespace EncosyTower.Tests.Entities.Stats
                 var entity = GetEntity(authoring, TransformUsageFlags.None);
 
                 Stats.Baker.Bake(this, entity)
-                    .CreateStat(Stats.Hp.Create(authoring.hp))
-                    .CreateStat(Stats.MoveSpeed.Create(authoring.moveSpeed))
-                    .CreateStat(Stats.Direction.Create(authoring.direction))
-                    .CreateStat(Stats.Motion.Create(authoring.motion))
+                    .CreateStat(Stats.Hp.Params.Create(authoring.hp))
+                    .CreateStat(Stats.MoveSpeed.Params.Create(authoring.moveSpeed))
+                    .CreateStat(Stats.Direction.Params.Create(authoring.direction))
+                    .CreateStat(Stats.Motion.Params.Create(authoring.motion))
                     .CreateComponentData<Stats>()
                     .AddComponentToEntity();
 

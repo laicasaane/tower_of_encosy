@@ -23,7 +23,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 _ => "byte",
             };
 
-            var p = Printer.DefaultLarge;
+            var p = new Printer(0, 1024 * 512);
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
@@ -52,6 +52,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     WriteStatIndicesStruct(ref p);
                     WriteStatHandlesStruct(ref p);
                     WriteStatDataCollection(ref p);
+                    WriteOptionsStruct(ref p);
                     WriteBakerStruct(ref p);
                     WriteAccessorStruct(ref p);
                 }
@@ -1598,50 +1599,170 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.OpenScope();
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public static StatDataParams<")
-                        .Print(typeName)
-                        .PrintEndLine("> Create(Option<bool> produceChangeEvents = default)");
-                    p.WithIncreasedIndent().PrintBeginLine("=> new(new ")
-                        .Print(typeName).Print("(), default, produceChangeEvents, TypeId.EncodeToStatUserData(Type.")
-                        .Print(typeName).PrintEndLine("));");
-                    p.PrintEndLine();
-
-                    var singleArgName = statData.singleValue ? "value" : "baseValue";
-
-                    p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public static StatDataParams<")
-                        .Print(typeName).Print("> Create(")
-                        .Print(statData.valueTypeName).Print(" ").Print(singleArgName)
-                        .PrintEndLine(", Option<bool> produceChangeEvents = default)");
-                    p.WithIncreasedIndent().PrintBeginLine("=> new(new ")
-                        .Print(typeName).Print("(").Print(singleArgName).Print("), default, produceChangeEvents, ")
-                        .Print("TypeId.EncodeToStatUserData(Type.").Print(typeName).PrintEndLine("));");
-                    p.PrintEndLine();
-
-                    if (statData.singleValue == false)
-                    {
-                        p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintBeginLine("public static StatDataParams<")
-                            .Print(typeName).Print("> Create(")
-                            .Print(statData.valueTypeName).Print(" baseValue, ")
-                            .Print(statData.valueTypeName).Print(" currentValue, ")
-                            .PrintEndLine("Option<bool> produceChangeEvents = default)");
-                        p.WithIncreasedIndent().PrintBeginLine("=> new(new ")
-                            .Print(typeName).Print("(baseValue, currentValue), default, produceChangeEvents, ")
-                            .Print("TypeId.EncodeToStatUserData(Type.").Print(typeName).PrintEndLine("));");
-                        p.PrintEndLine();
-                    }
-
-                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintLine("public readonly StatSystem.ValuePair ToValuePair()");
                     p.WithIncreasedIndent().PrintBeginLine("=> IsValuePair ")
                         .Print("? new StatSystem.ValuePair(BaseValue, CurrentValue) ")
                         .PrintEndLine(": new StatSystem.ValuePair(CurrentValue);");
                     p.PrintEndLine();
+
+                    p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintLine("public static partial class Params");
+                    p.OpenScope();
+                    {
+                        p.PrintLine(AGGRESSIVE_INLINING);
+                        p.PrintBeginLine("public static StatDataParams<")
+                            .Print(typeName)
+                            .PrintEndLine("> Create(Option<bool> produceChangeEvents = default)");
+                        p.WithIncreasedIndent().PrintBeginLine("=> new(new ")
+                            .Print(typeName).Print("(), default, produceChangeEvents, TypeId.EncodeToStatUserData(Type.")
+                            .Print(typeName).PrintEndLine("));");
+                        p.PrintEndLine();
+
+                        var singleArgName = statData.singleValue ? "value" : "baseValue";
+
+                        p.PrintLine(AGGRESSIVE_INLINING);
+                        p.PrintBeginLine("public static StatDataParams<")
+                            .Print(typeName).Print("> Create(")
+                            .Print(statData.valueTypeName).Print(" ").Print(singleArgName)
+                            .PrintEndLine(", Option<bool> produceChangeEvents = default)");
+                        p.WithIncreasedIndent().PrintBeginLine("=> new(new ")
+                            .Print(typeName).Print("(").Print(singleArgName).Print("), default, produceChangeEvents, ")
+                            .Print("TypeId.EncodeToStatUserData(Type.").Print(typeName).PrintEndLine("));");
+                        p.PrintEndLine();
+
+                        if (statData.singleValue == false)
+                        {
+                            p.PrintLine(AGGRESSIVE_INLINING);
+                            p.PrintBeginLine("public static StatDataParams<")
+                                .Print(typeName).Print("> Create(")
+                                .Print(statData.valueTypeName).Print(" baseValue, ")
+                                .Print(statData.valueTypeName).Print(" currentValue, ")
+                                .PrintEndLine("Option<bool> produceChangeEvents = default)");
+                            p.WithIncreasedIndent().PrintBeginLine("=> new(new ")
+                                .Print(typeName).Print("(baseValue, currentValue), default, produceChangeEvents, ")
+                                .Print("TypeId.EncodeToStatUserData(Type.").Print(typeName).PrintEndLine("));");
+                            p.PrintEndLine();
+                        }
+                    }
+                    p.CloseScope();
                 }
                 p.CloseScope();
                 p.PrintEndLine();
             }
+        }
+
+        private readonly void WriteOptionsStruct(ref Printer p)
+        {
+            p.Print("#region OPTIONS").PrintEndLine();
+            p.Print("#endregion ====").PrintEndLine();
+            p.PrintEndLine();
+
+            var count = statDataCollection.Count;
+
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public static partial class Options");
+            p.OpenScope();
+            {
+                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine("public partial struct Data");
+                p.OpenScope();
+                {
+                    for (var i = 0; i < count; i++)
+                    {
+                        var statData = statDataCollection[i];
+                        var fieldName = statData.fieldName;
+                        var typeName = statData.typeName;
+
+                        p.PrintBeginLine("public Option<").Print(typeName).Print("> ")
+                            .Print(fieldName).PrintEndLine(";");
+                    }
+
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("public Data(");
+                    p = p.IncreasedIndent();
+                    {
+                        for (var i = 0; i < count; i++)
+                        {
+                            var comma = i > 0 ? ", " : "  ";
+                            var statData = statDataCollection[i];
+                            var fieldName = statData.fieldName;
+                            var typeName = statData.typeName;
+
+                            p.PrintBeginLine(comma).Print("Option<").Print(typeName).Print("> ")
+                                .Print(fieldName).PrintEndLine(" = default");
+                        }
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintLine(")");
+                    p.OpenScope();
+                    {
+                        for (var i = 0; i < count; i++)
+                        {
+                            var statData = statDataCollection[i];
+                            var fieldName = statData.fieldName;
+
+                            p.PrintBeginLine("this.").Print(fieldName).Print(" = ")
+                                .Print(fieldName).PrintEndLine(";");
+                        }
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine("public partial struct ProduceChangeEvents");
+                p.OpenScope();
+                {
+                    for (var i = 0; i < count; i++)
+                    {
+                        var statData = statDataCollection[i];
+                        var fieldName = statData.fieldName;
+
+                        p.PrintBeginLine("public Option<bool> ")
+                            .Print(fieldName).PrintEndLine(";");
+                    }
+
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("public ProduceChangeEvents(");
+                    p = p.IncreasedIndent();
+                    {
+                        for (var i = 0; i < count; i++)
+                        {
+                            var comma = i > 0 ? ", " : "  ";
+                            var statData = statDataCollection[i];
+                            var fieldName = statData.fieldName;
+
+                            p.PrintBeginLine(comma).Print("Option<bool> ")
+                                .Print(fieldName).PrintEndLine(" = default");
+                        }
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintLine(")");
+                    p.OpenScope();
+                    {
+                        for (var i = 0; i < count; i++)
+                        {
+                            var statData = statDataCollection[i];
+                            var fieldName = statData.fieldName;
+
+                            p.PrintBeginLine("this.").Print(fieldName).Print(" = ")
+                                .Print(fieldName).PrintEndLine(";");
+                        }
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
         }
 
         private readonly void WriteBakerStruct(ref Printer p)
@@ -2514,6 +2635,28 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             {
                 var count = statDataCollection.Length;
 
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public Accessor<T> TrySetBaseValueToStats(in Options.Data options)");
+                p.OpenScope();
+                {
+                    p.PrintLine("return TrySetBaseValueToStats(");
+                    p = p.IncreasedIndent();
+                    {
+                        for (var i = 0; i < count; i++)
+                        {
+                            var comma = i > 0 ? ", " : "  ";
+                            var statData = statDataCollection[i];
+                            var fieldName = statData.fieldName;
+
+                            p.PrintBeginLine(comma).Print("options.").Print(fieldName).PrintEndLine(".TryGetBaseValue()");
+                        }
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintLine(");");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
                 p.PrintLine("public Accessor<T> TrySetBaseValueToStats(");
                 p = p.IncreasedIndent();
                 {
@@ -2583,6 +2726,28 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             static void WriteTrySetCurrentValueToStatsMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
             {
                 var count = statDataCollection.Length;
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public Accessor<T> TrySetCurrentValueToStats(in Options.Data options)");
+                p.OpenScope();
+                {
+                    p.PrintLine("return TrySetCurrentValueToStats(");
+                    p = p.IncreasedIndent();
+                    {
+                        for (var i = 0; i < count; i++)
+                        {
+                            var comma = i > 0 ? ", " : "  ";
+                            var statData = statDataCollection[i];
+                            var fieldName = statData.fieldName;
+
+                            p.PrintBeginLine(comma).Print("options.").Print(fieldName).PrintEndLine(".TryGetCurrentValue()");
+                        }
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintLine(");");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
 
                 p.PrintLine("public Accessor<T> TrySetCurrentValueToStats(");
                 p = p.IncreasedIndent();
@@ -2654,6 +2819,28 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             {
                 var count = statDataCollection.Length;
 
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public Accessor<T> TrySetValuesToStats(in Options.Data options)");
+                p.OpenScope();
+                {
+                    p.PrintLine("return TrySetValuesToStats(");
+                    p = p.IncreasedIndent();
+                    {
+                        for (var i = 0; i < count; i++)
+                        {
+                            var comma = i > 0 ? ", " : "  ";
+                            var statData = statDataCollection[i];
+                            var fieldName = statData.fieldName;
+
+                            p.PrintBeginLine(comma).Print("options.").Print(fieldName).PrintEndLine();
+                        }
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintLine(");");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
                 p.PrintLine("public Accessor<T> TrySetValuesToStats(");
                 p = p.IncreasedIndent();
                 {
@@ -2684,7 +2871,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         var fieldName = statData.fieldName;
 
                         p.PrintBeginLine("paramsForStats[").Print(i).Print("] = new(")
-                            .Print(fieldName).Print(".ToValuePair(), (StatHandle)handles.")
+                            .Print(fieldName).Print(".TryGetValuePair(), (StatHandle)handles.")
                             .Print(fieldName).PrintEndLine(");");
                     }
 
@@ -2758,6 +2945,28 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             )
             {
                 var count = statDataCollection.Length;
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public Accessor<T> TrySetProduceChangeEventsForStats(in Options.ProduceChangeEvents options)");
+                p.OpenScope();
+                {
+                    p.PrintLine("return TrySetProduceChangeEventsForStats(");
+                    p = p.IncreasedIndent();
+                    {
+                        for (var i = 0; i < count; i++)
+                        {
+                            var comma = i > 0 ? ", " : "  ";
+                            var statData = statDataCollection[i];
+                            var fieldName = statData.fieldName;
+
+                            p.PrintBeginLine(comma).Print("options.").Print(fieldName).PrintEndLine();
+                        }
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintLine(");");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
 
                 p.PrintLine("public Accessor<T> TrySetProduceChangeEventsForStats(");
                 p = p.IncreasedIndent();
@@ -2837,12 +3046,28 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 {
                     var statData = statDataCollection[i];
                     var typeName = statData.typeName;
+                    var valueTypeName = statData.valueTypeName;
+                    var singleValue = statData.singleValue;
 
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public static Option<StatSystem.ValuePair> ToValuePair(this Option<")
+                    p.PrintBeginLine("public static Option<StatSystem.ValuePair> TryGetValuePair(this Option<")
                         .Print(statCollectionType).Print(".").Print(typeName).PrintEndLine("> value)");
                     p.WithIncreasedIndent().PrintBeginLine("=> value.TryGetValue(out var stat) ")
                         .PrintEndLine("? stat.ToValuePair() : Option.None;");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintBeginLine("public static Option<").Print(valueTypeName).Print("> TryGetBaseValue(this Option<")
+                        .Print(statCollectionType).Print(".").Print(typeName).PrintEndLine("> value)");
+                    p.WithIncreasedIndent().PrintBeginLine("=> value.TryGetValue(out var stat) ")
+                        .Print("? stat.").PrintIf(singleValue, "value", "baseValue").PrintEndLine(" : Option.None;");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintBeginLine("public static Option<").Print(valueTypeName).Print("> TryGetCurrentValue(this Option<")
+                        .Print(statCollectionType).Print(".").Print(typeName).PrintEndLine("> value)");
+                    p.WithIncreasedIndent().PrintBeginLine("=> value.TryGetValue(out var stat) ")
+                        .Print("? stat.").PrintIf(singleValue, "value", "currentValue").PrintEndLine(" : Option.None;");
                     p.PrintEndLine();
                 }
 
