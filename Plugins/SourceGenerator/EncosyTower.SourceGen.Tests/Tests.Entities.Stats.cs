@@ -54,6 +54,13 @@ namespace EncosyTower.Tests.Entities.Stats
 
         partial struct StatHandles { }
 
+        static partial class Options
+        {
+            partial struct Data { }
+
+            partial struct ProduceChangeEvents { }
+        }
+
         static partial class Baker { }
 
         partial struct Baker<T> { }
@@ -61,6 +68,8 @@ namespace EncosyTower.Tests.Entities.Stats
         static partial class Accessor { }
 
         partial struct Accessor<T> { }
+
+        partial struct Reader<T> { }
     }
 
     static partial class StatsExtensions

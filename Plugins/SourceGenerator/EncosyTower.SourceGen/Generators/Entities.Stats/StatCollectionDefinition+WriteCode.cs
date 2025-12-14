@@ -17,6 +17,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public readonly string WriteCode()
         {
             var count = statDataCollection.Count;
+
+            var enumUnderlyingType = (count + 1) switch {
+                > ushort.MaxValue => "int",
+                > byte.MaxValue => "ushort",
+                _ => "byte",
+            };
+
             var underlyingType = count switch {
                 > ushort.MaxValue => "int",
                 > byte.MaxValue => "ushort",
@@ -42,8 +49,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     WriteConstructors(ref p);
                     WriteProperties(ref p);
                     WriteMethods(ref p);
-                    WriteTypeEnum(ref p, underlyingType);
-                    WriteTypeIdStruct(ref p, underlyingType);
+                    WriteTypeEnum(ref p, enumUnderlyingType);
+                    WriteTypeIdStruct(ref p, enumUnderlyingType);
                     WriteIndicesStruct(ref p);
                     WriteIndexStructs(ref p, underlyingType);
                     WriteIndexRecordStruct(ref p);
@@ -55,6 +62,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     WriteOptionsStruct(ref p);
                     WriteBakerStruct(ref p);
                     WriteAccessorStruct(ref p);
+                    WriteBufferReaderStruct(ref p);
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -337,11 +345,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.PrintBeginLine("public enum Type : ").PrintEndLine(underlyingType);
             p.OpenScope();
             {
+                p.PrintLine("Undefined = 0,");
+
                 for (var i = 0; i < count; i++)
                 {
                     var statData = statDataCollection[i];
 
-                    p.PrintBeginLine(statData.typeName).Print(" = ").Print(i).PrintEndLine(",");
+                    p.PrintBeginLine(statData.typeName).Print(" = ").Print(i + 1).PrintEndLine(",");
                 }
             }
             p.CloseScope();
@@ -389,6 +399,23 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public static bool operator !=(TypeId lhs, TypeId rhs)");
                 p.WithIncreasedIndent().PrintLine("=> !lhs.Equals(rhs);");
+                p.PrintEndLine();
+
+                p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+                p.PrintBeginLine("/// ").Print("Converts <paramref name=\"type\"/> to the corresponding valid index")
+                    .Print(" of the array <see cref=\"").Print(typeName).PrintEndLine(".Types\"/>.");
+                p.PrintBeginLine("/// ").PrintEndLine("</summary>");
+                p.PrintBeginLine("/// ").PrintEndLine("<remarks>");
+                p.PrintBeginLine("/// ").PrintEndLine("The value of <see cref=\"Type.Undefined\"/> is invalid.");
+                p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public static int ToValidArrayIndex(Type type)");
+                p.OpenScope();
+                {
+                    p.PrintLine("// Remove the value of Type.Undefined");
+                    p.PrintLine("return (int)type - 1;");
+                }
+                p.CloseScope();
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING);
@@ -570,6 +597,11 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine("public readonly FixedString32Bytes ToFixedString()");
                 p.WithIncreasedIndent().PrintLine("=> value.ToFixedString();");
                 p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly StatHandle ToStatHandle(Entity entity)");
+                p.WithIncreasedIndent().PrintLine("=> new(entity, this);");
+                p.PrintEndLine();
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -669,6 +701,11 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public readonly FixedString32Bytes ToFixedString()");
                 p.WithIncreasedIndent().PrintLine("=> value.ToFixedString();");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly StatHandle<TStatData> ToStatHandle(Entity entity)");
+                p.WithIncreasedIndent().PrintLine("=> new(entity, this);");
                 p.PrintEndLine();
             }
             p.CloseScope();
@@ -893,7 +930,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.OpenScope();
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintLine("get => ref AsSpan()[(int)type];");
+                    p.PrintLine("get => ref AsSpan()[TypeId.ToValidArrayIndex(type)];");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -921,7 +958,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine("public readonly bool TryGet(Type type, out Index result)");
                 p.OpenScope();
                 {
-                    p.PrintLine("var index = (int)type;");
+                    p.PrintLine("var index = TypeId.ToValidArrayIndex(type);");
                     p.PrintEndLine();
 
                     p.PrintLine("if ((uint)index < (uint)LENGTH)");
@@ -1134,7 +1171,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.OpenScope();
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintLine("get => ref AsSpan()[(int)type];");
+                    p.PrintLine("get => ref AsSpan()[TypeId.ToValidArrayIndex(type)];");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -1161,7 +1198,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine("public readonly bool TryGet(Type type, out StatIndex result)");
                 p.OpenScope();
                 {
-                    p.PrintLine("var index = (int)type;");
+                    p.PrintLine("var index = TypeId.ToValidArrayIndex(type);");
                     p.PrintEndLine();
 
                     p.PrintLine("if ((uint)index < (uint)LENGTH)");
@@ -1378,7 +1415,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.OpenScope();
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintLine("get => ref AsSpan()[(int)type];");
+                    p.PrintLine("get => ref AsSpan()[TypeId.ToValidArrayIndex(type)];");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -1405,7 +1442,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine("public readonly bool TryGet(Type type, out StatHandle result)");
                 p.OpenScope();
                 {
-                    p.PrintLine("var index = (int)type;");
+                    p.PrintLine("var index = TypeId.ToValidArrayIndex(type);");
                     p.PrintEndLine();
 
                     p.PrintLine("if ((uint)index < (uint)LENGTH)");
@@ -2926,7 +2963,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         var fieldName = statData.fieldName;
 
                         p.PrintBeginLine("paramsForStats[").Print(i)
-                            .Print("] = new(default, (StatHandle)handles.")
+                            .Print("] = new(Option.None, (StatHandle)handles.")
                             .Print(fieldName).PrintEndLine(", value);");
                     }
 
@@ -2995,7 +3032,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         var fieldName = statData.fieldName;
 
                         p.PrintBeginLine("paramsForStats[").Print(i)
-                            .Print("] = new(default, (StatHandle)handles.")
+                            .Print("] = new(Option.None, (StatHandle)handles.")
                             .Print(fieldName).Print(", ").Print(fieldName).PrintEndLine(");");
                     }
 
@@ -3023,6 +3060,303 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         .Print(">(entity, Indices.").Print(fieldName).PrintEndLine(");");
 
                     p.PrintLine("success = accessor.TrySetStatProduceChangeEvents(handle, value);");
+                    p.PrintLine("return this;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+        }
+
+        private readonly void WriteBufferReaderStruct(ref Printer p)
+        {
+            p.Print("#region READER").PrintEndLine();
+            p.Print("#endregion ===").PrintEndLine();
+            p.PrintEndLine();
+
+            var count = statDataCollection.Count;
+
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public static partial class Reader");
+            p.OpenScope();
+            {
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("public static Reader<T> Create<T>(Entity entity, T statCollection, ")
+                    .PrintEndLine("DynamicBuffer<StatSystem.Stat> statBuffer)");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintLine("where T : unmanaged");
+                }
+                p = p.DecreasedIndent();
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("return new() { entity = entity")
+                        .Print(", statBuffer = statBuffer.AsNativeArray().AsReadOnly()")
+                        .Print(", statCollection = ").Print(typeName).Print(".CastFrom(statCollection)")
+                        .PrintEndLine(" };");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public partial struct Reader<T> where T : unmanaged");
+            p.OpenScope();
+            {
+                p.PrintLine("public Entity entity;");
+                p.PrintLine("public NativeArray<StatSystem.Stat>.ReadOnly statBuffer;");
+                p.PrintBeginLine("public ").Print(typeName).PrintEndLine(" statCollection;");
+                p.PrintEndLine();
+
+                p.PrintLine("static Reader()");
+                p.OpenScope();
+                {
+                    p.PrintLine("ThrowIfCannotCastFromType<T>();");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public readonly bool IsCreated");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => entity != Entity.Null && statBuffer.IsCreated;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public readonly Indices Indices");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => statCollection.indices;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                WriteContainsTypeMethod(ref p, statDataCollection.AsReadOnlySpan());
+                WriteContainsTStatDataMethod(ref p, statDataCollection.AsReadOnlySpan());
+
+                for (var i = 0; i < count; i++)
+                {
+                    WriteContainsMethod(ref p, statDataCollection[i]);
+                }
+
+                WriteFindValidStatsMethod(ref p);
+                WriteTryGetStatForTypeMethod(ref p);
+
+                for (var i = 0; i < count; i++)
+                {
+                    WriteTryGetStatMethod(ref p, statDataCollection[i]);
+                }
+
+                for (var i = 0; i < count; i++)
+                {
+                    WriteTryGetStatDataMethod(ref p, statDataCollection[i]);
+                }
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            return;
+
+            static void WriteContainsTypeMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
+            {
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly Reader<T> Contains(Type type, out bool result)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var stats = statBuffer.AsReadOnlySpan();");
+                    p.PrintLine("result = Indices.ToStatHandles(entity).TryGet(type, out var handle)");
+                    p.WithIncreasedIndent()
+                        .PrintLine("&& StatSystem.API.Contains(handle, TypeId.EncodeToStatUserData(type), stats);");
+                    p.PrintLine("return this;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+
+            static void WriteContainsTStatDataMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
+            {
+                var count = statDataCollection.Length;
+
+                p.PrintLine("public readonly Reader<T> Contains<TStatData>(out bool result)");
+                p.WithIncreasedIndent().PrintLine("where TStatData : unmanaged, IStatData");
+                p.OpenScope();
+                {
+                    p.PrintLine("var stats = statBuffer.AsReadOnlySpan();");
+                    p.PrintLine("var handles = Indices.ToStatHandles(entity);");
+                    p.PrintEndLine();
+
+                    for (var i = 0; i < count; i++)
+                    {
+                        var statData = statDataCollection[i];
+                        var fieldName = statData.fieldName;
+                        var typeName = statData.typeName;
+
+                        p.PrintBeginLine("if (typeof(TStatData) == typeof(").Print(statData.typeName).PrintEndLine("))");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine("result = StatSystem.API.Contains(handles.")
+                                .Print(fieldName).Print(", TypeId.EncodeToStatUserData(Type.")
+                                .Print(typeName).PrintEndLine("), stats);");
+                            p.PrintLine("return this;");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+
+                    p.PrintLine("result = false;");
+                    p.PrintLine("return this;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+
+            static void WriteContainsMethod(ref Printer p, StatDataDefinition statData)
+            {
+                var typeName = statData.typeName;
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("public readonly Reader<T> Contains(Index<").Print(typeName)
+                    .PrintEndLine("> index, out bool result)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var stats = statBuffer.AsReadOnlySpan();");
+                    p.PrintBeginLine("var handle = new StatHandle<").Print(typeName).PrintEndLine(">(entity, index);");
+                    p.PrintBeginLine("result = StatSystem.API.Contains(handle, TypeId.EncodeToStatUserData(Type.")
+                        .Print(typeName).PrintEndLine("), stats);");
+                    p.PrintLine("return this;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+
+            static void WriteFindValidStatsMethod(ref Printer p)
+            {
+                p.PrintLine("public readonly Reader<T> FindValidStats(NativeHashMap<TypeId, StatSystem.Stat> result)");
+                p.OpenScope();
+                {
+                    p.PrintLine("result.Clear();");
+                    p.PrintLine("result.IncreaseCapacityTo(LENGTH);");
+                    p.PrintEndLine();
+
+                    p.PrintLine("var stats = statBuffer.AsReadOnlySpan();");
+                    p.PrintLine("var length = stats.Length;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("for (var i = 0; i < length; i++)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("var stat = stats[i];");
+                        p.PrintLine("var type = TypeId.DecodeFromStatUserData(stat.UserData);");
+                        p.PrintEndLine();
+
+                        p.PrintLine("if (TypeId.ValidateType(type))");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("result.TryAdd(type, stat);");
+                        }
+                        p.CloseScope();
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("return this;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+
+            static void WriteTryGetStatForTypeMethod(ref Printer p)
+            {
+                p.PrintBeginLine("public readonly Reader<T> TryGetStat(Type type, out StatSystem.Stat stat, ")
+                    .PrintEndLine("out StatHandle handle, out bool success)");
+                p.OpenScope();
+                {
+                    p.PrintLine("if (Indices.TryGet(type, out var index))");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("var stats = statBuffer.AsReadOnlySpan();");
+                        p.PrintLine("handle = new StatHandle(entity, index);");
+                        p.PrintBeginLine("success = StatSystem.API.TryGetStat(handle, stats, out stat) && ")
+                            .PrintEndLine("TypeId.DecodeFromStatUserData(stat.UserData) == type;");
+                    }
+                    p.CloseScope();
+                    p.PrintLine("else");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("handle = default;");
+                        p.PrintLine("stat = default;");
+                        p.PrintLine("success = false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("return this;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+
+            static void WriteTryGetStatMethod(ref Printer p, StatDataDefinition statData)
+            {
+                var typeName = statData.typeName;
+                var fieldName = statData.fieldName;
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("public readonly Reader<T> TryGetStat(out StatSystem.Stat<")
+                    .Print(typeName).Print("> stat, out bool success, out StatHandle<")
+                    .Print(typeName).PrintEndLine("> handle, out bool typeMatched)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var stats = statBuffer.AsReadOnlySpan();");
+                    p.PrintBeginLine("handle = new StatHandle<").Print(typeName)
+                        .Print(">(entity, Indices.").Print(fieldName).PrintEndLine(");");
+                    p.PrintLine("success = StatSystem.API.TryGetStat(handle, stats, out stat);");
+                    p.PrintBeginLine("typeMatched = TypeId.DecodeFromStatUserData(stat.UserData) == Type.")
+                        .Print(typeName).PrintEndLine(";");
+                    p.PrintLine("return this;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+
+            static void WriteTryGetStatDataMethod(ref Printer p, StatDataDefinition statData)
+            {
+                var typeName = statData.typeName;
+                var fieldName = statData.fieldName;
+
+                p.PrintBeginLine("public readonly Reader<T> TryGetStatData(out ")
+                    .Print(typeName).Print(" statData, out bool success, out StatHandle<").Print(typeName)
+                    .PrintEndLine("> handle)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var stats = statBuffer.AsReadOnlySpan();");
+                    p.PrintBeginLine("handle = new StatHandle<").Print(typeName)
+                        .Print(">(entity, Indices.").Print(fieldName).PrintEndLine(");");
+                    p.PrintEndLine();
+
+                    p.PrintBeginLine("if (StatSystem.API.TryGetStat(handle, stats, out var stat) && ")
+                        .Print("TypeId.DecodeFromStatUserData(stat.UserData) == Type.")
+                        .Print(typeName).PrintEndLine(")");
+                    p.OpenScope();
+                    {
+                        p.PrintBeginLine("statData = StatSystem.API.MakeStatData<")
+                            .Print(typeName).PrintEndLine(">(stat.ValuePair);");
+                        p.PrintLine("success = true;");
+                    }
+                    p.CloseScope();
+                    p.PrintLine("else");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("statData = default;");
+                        p.PrintLine("success = false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
                     p.PrintLine("return this;");
                 }
                 p.CloseScope();

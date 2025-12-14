@@ -25,6 +25,7 @@ using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.TypeWraps;
 using Unity.Collections;
+using Unity.Entities;
 
 namespace EncosyTower.Entities.Stats
 {
@@ -66,6 +67,10 @@ namespace EncosyTower.Entities.Stats
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly FixedString32Bytes ToFixedString()
             => value.ToFixedString();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly StatHandle ToStatHandle(Entity entity)
+            => new(entity, this);
     }
 
     [Serializable, WrapType(typeof(int), nameof(value))]
@@ -106,5 +111,9 @@ namespace EncosyTower.Entities.Stats
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly FixedString32Bytes ToFixedString()
             => value.ToFixedString();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly StatHandle<TStatData> ToStatHandle(Entity entity)
+            => new(entity, this);
     }
 }
