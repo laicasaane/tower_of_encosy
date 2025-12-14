@@ -209,6 +209,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine($"using {StatGeneratorAPI.NAMESPACE};");
                 p.PrintEndLine();
                 p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+                p.PrintEndLine();
+                p.PrintLine("using UnityDebug = global::UnityEngine.Debug;");
             }
         }
 

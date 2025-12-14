@@ -10,7 +10,7 @@
         private const string STAT_VARIANT = $"StatVariant";
         private const string STAT_VARIANT_TYPE = $"StatVariantType";
 
-        private const string LOG_ERROR = "StaticDevLogger.LogError";
+        private const string LOG_ERROR = "UnityDebug.LogError";
         private const string IF_DEBUG = "#if UNITY_EDITOR || DEVELOPMENT_BUILD";
         private const string ENDIF_DEBUG = "#endif";
 
