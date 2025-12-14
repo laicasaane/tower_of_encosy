@@ -125,7 +125,19 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 location = syntax.GetLocation(),
             };
 
+            var args = attribute.ConstructorArguments;
+
+            if (args.Length > 1 && args[1].Value is uint typeIdOffset)
+            {
+                result.typeIdOffset = typeIdOffset;
+            }
+
             GetStatDataDefintions(syntax, token, ref result);
+
+            if ((result.typeIdOffset + (ulong)result.statDataCollection.Count) > uint.MaxValue)
+            {
+                return default;
+            }
 
             return result;
 

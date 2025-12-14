@@ -15,6 +15,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public string closingSource;
         public Location location;
         public EquatableArray<StatDataDefinition> statDataCollection;
+        public uint typeIdOffset;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(typeName) == false
@@ -33,6 +34,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             && string.Equals(typeNamespace, other.typeNamespace, StringComparison.Ordinal)
             && string.Equals(statSystemFullTypeName, other.statSystemFullTypeName, StringComparison.Ordinal)
             && statDataCollection.Equals(other.statDataCollection)
+            && typeIdOffset == other.typeIdOffset
             ;
 
         public readonly override bool Equals(object obj)
@@ -44,6 +46,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 , typeNamespace
                 , statSystemFullTypeName
                 , statDataCollection
+                , typeIdOffset
             );
 
         internal partial struct StatDataDefinition : IEquatable<StatDataDefinition>

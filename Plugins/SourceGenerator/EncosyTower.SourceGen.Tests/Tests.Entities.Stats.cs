@@ -1,9 +1,5 @@
 ﻿using System;
-using EncosyTower.Collections;
-using EncosyTower.Common;
 using EncosyTower.Entities.Stats;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using UnityEngine;
 
@@ -35,7 +31,7 @@ namespace EncosyTower.Tests.Entities.Stats
         IsFrozen          = 1 << 2,
     }
 
-    [StatCollection(typeof(StatSystem))]
+    [StatCollection(typeof(StatSystem), 1000)]
     public partial struct Stats : IComponentData
     {
         [StatData(StatVariantType.Float)]

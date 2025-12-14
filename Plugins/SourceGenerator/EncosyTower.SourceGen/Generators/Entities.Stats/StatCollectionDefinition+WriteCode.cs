@@ -158,12 +158,36 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.CloseScope();
             p.PrintEndLine();
 
+            p.PrintLine("/// <inheritdoc cref=\"CastFrom{T}(T)\"/>");
+            p.PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine("public static ref ").Print(typeName).PrintEndLine(" CastFrom<T>(ref T value)");
+            p.WithIncreasedIndent().PrintLine("where T : unmanaged");
+            p.OpenScope();
+            {
+                p.PrintLine("ThrowIfCannotCastFromType<T>();");
+                p.PrintEndLine();
+
+                p.PrintBeginLine("return ref UnsafeUtility.As<T, ").Print(typeName).PrintEndLine(">(ref value);");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintLine("public static Indices GetIndicesFrom<T>(T value)");
             p.WithIncreasedIndent().PrintLine("where T : unmanaged");
             p.OpenScope();
             {
                 p.PrintLine("return CastFrom<T>(value).indices;");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintLine(AGGRESSIVE_INLINING);
+            p.PrintLine("public static ref Indices GetIndicesFrom<T>(ref T value)");
+            p.WithIncreasedIndent().PrintLine("where T : unmanaged");
+            p.OpenScope();
+            {
+                p.PrintLine("return ref CastFrom<T>(ref value).indices;");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -205,6 +229,99 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             }
             p.CloseScope();
             p.PrintEndLine();
+
+            p.PrintLine("public readonly void FindValidIndices(NativeHashMap<TypeId, Index> result)");
+            p.OpenScope();
+            {
+                p.PrintLine("result.Clear();");
+                p.PrintLine("result.IncreaseCapacityTo(LENGTH);");
+                p.PrintEndLine();
+
+                p.PrintLine("var indices = this.indices;");
+                p.PrintLine("var types = Types;");
+                p.PrintLine("var length = types.Length;");
+                p.PrintEndLine();
+
+                p.PrintLine("for (var i = 0; i < length; i++)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var type = types[i];");
+                    p.PrintLine("var index = indices[type];");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (index.IsValid)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("result.TryAdd(type, index);");
+                    }
+                    p.CloseScope();
+                }
+                p.CloseScope();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintLine("public readonly void FindValidStatIndices(NativeHashMap<TypeId, StatIndex> result)");
+            p.OpenScope();
+            {
+                p.PrintLine("result.Clear();");
+                p.PrintLine("result.IncreaseCapacityTo(LENGTH);");
+                p.PrintEndLine();
+
+                p.PrintLine("var indices = this.indices;");
+                p.PrintLine("var types = Types;");
+                p.PrintLine("var length = types.Length;");
+                p.PrintEndLine();
+
+                p.PrintLine("for (var i = 0; i < length; i++)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var type = types[i];");
+                    p.PrintLine("var index = indices[type];");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (index.IsValid)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("result.TryAdd(type, index);");
+                    }
+                    p.CloseScope();
+                }
+                p.CloseScope();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintLine("public readonly void FindValidStatHandles(Entity entity, NativeHashMap<TypeId, StatHandle> result)");
+            p.OpenScope();
+            {
+                p.PrintLine("result.Clear();");
+                p.PrintLine("result.IncreaseCapacityTo(LENGTH);");
+                p.PrintEndLine();
+
+                p.PrintLine("var indices = this.indices;");
+                p.PrintLine("var types = Types;");
+                p.PrintLine("var length = types.Length;");
+                p.PrintEndLine();
+
+                p.PrintLine("for (var i = 0; i < length; i++)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var type = types[i];");
+                    p.PrintLine("var index = indices[type];");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (index.IsValid)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("result.TryAdd(type, new(entity, index));");
+                    }
+                    p.CloseScope();
+                }
+                p.CloseScope();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
         }
 
         private readonly void WriteTypeEnum(ref Printer p, string underlyingType)
@@ -238,6 +355,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.PrintLine("public readonly partial struct TypeId : IEquatable<TypeId>");
             p.OpenScope();
             {
+                p.PrintBeginLine("public const uint OFFSET = ").Print(typeIdOffset).PrintEndLine(";");
+                p.PrintEndLine();
+
                 p.PrintLine("public readonly Type Value;");
                 p.PrintEndLine();
 
@@ -274,7 +394,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine("public static uint EncodeToStatUserData(Type type)");
                 p.OpenScope();
                 {
-                    p.PrintLine("return (uint)type;");
+                    p.PrintLine("return (uint)type + OFFSET;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -283,7 +403,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine("public static Type DecodeFromStatUserData(uint userData)");
                 p.OpenScope();
                 {
-                    p.PrintLine("return (Type)userData;");
+                    p.PrintLine("return (Type)(userData - OFFSET);");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -307,28 +427,28 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintLine("public static bool ValidateType(uint userData)");
+                p.PrintLine("public static bool ValidateStatUserData(uint userData)");
                 p.OpenScope();
                 {
-                    p.PrintLine("return userData < (uint)LENGTH;");
+                    p.PrintLine("return (uint)DecodeFromStatUserData(userData) < (uint)LENGTH;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintLine("public static bool ValidateType(in StatSystem.Stat stat)");
+                p.PrintLine("public static bool ValidateStatUserData(in StatSystem.Stat stat)");
                 p.OpenScope();
                 {
-                    p.PrintLine("return ValidateType(stat.UserData);");
+                    p.PrintLine("return ValidateStatUserData(stat.UserData);");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public static bool ValidateType<TStatData>(in StatSystem.Stat<TStatData> stat)");
+                p.PrintLine("public static bool ValidateStat<TStatData>(in StatSystem.Stat<TStatData> stat)");
                 p.WithIncreasedIndent().PrintLine("where TStatData : unmanaged, IStatData");
                 p.OpenScope();
                 {
-                    p.PrintLine("if (ValidateType(stat.UserData) == false) return false;");
+                    p.PrintLine("if (ValidateStatUserData(stat.UserData) == false) return false;");
                     p.PrintEndLine();
 
                     for (var i = 0; i < count; i++)
@@ -2000,7 +2120,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     WriteTryCreateOrsSetStatMethod(ref p, statDataCollection[i]);
                 }
 
-                WriteFindStatsMethod(ref p);
+                WriteFindValidStatsMethod(ref p);
                 WriteTryGetStatForTypeMethod(ref p);
 
                 for (var i = 0; i < count; i++)
@@ -2039,7 +2159,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 for (var i = 0; i < count; i++)
                 {
-                    WriteTrySetStatProduceChangeEventsMethod(ref p, typeName, statDataCollection[i]);
+                    WriteTrySetStatProduceChangeEventsMethod(ref p, statDataCollection[i]);
                 }
             }
             p.CloseScope();
@@ -2263,9 +2383,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteFindStatsMethod(ref Printer p)
+            static void WriteFindValidStatsMethod(ref Printer p)
             {
-                p.PrintLine("public readonly Accessor<T> FindStats(NativeHashMap<TypeId, StatSystem.Stat> result)");
+                p.PrintLine("public readonly Accessor<T> FindValidStats(NativeHashMap<TypeId, StatSystem.Stat> result)");
                 p.OpenScope();
                 {
                     p.PrintLine("result.Clear();");
@@ -2680,11 +2800,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             }
 
 
-            static void WriteTrySetStatProduceChangeEventsMethod(
-                  ref Printer p
-                , string statCollectionType
-                , StatDataDefinition statData
-            )
+            static void WriteTrySetStatProduceChangeEventsMethod(ref Printer p, StatDataDefinition statData)
             {
                 var typeName = statData.typeName;
                 var fieldName = statData.fieldName;
