@@ -1823,7 +1823,7 @@ namespace EncosyTower.Entities.Stats
 
             if (lookupStats.TryGetBuffer(affectedEntity, out var statBufferOnAffectedEntity) == false
                 || lookupModifiers.TryGetBuffer(affectedEntity, out var modifierBufferOnAffectedEntity) == false
-                || (uint)affectedHandle.index >= (uint)statBufferOnAffectedEntity.Length
+                || affectedHandle.index.IsValidInRange(statBufferOnAffectedEntity.Length) == false
             )
             {
                 return false;
@@ -1872,7 +1872,7 @@ namespace EncosyTower.Entities.Stats
 
                     if (lookupStats.TryGetBuffer(observedEntity, out var statBufferOnObservedEntity) == false
                         || lookupObservers.TryGetBuffer(observedEntity, out var observerBufferOnObservedEntity) == false
-                        || (uint)observedStatHandle.index >= (uint)statBufferOnObservedEntity.Length
+                        || observedStatHandle.index.IsValidInRange(statBufferOnObservedEntity.Length) == false
                     )
                     {
                         continue;

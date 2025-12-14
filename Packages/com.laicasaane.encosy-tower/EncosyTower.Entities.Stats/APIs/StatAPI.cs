@@ -238,7 +238,6 @@ namespace EncosyTower.Entities.Stats
             where TStat : unmanaged, IStat<TValuePair>
         {
             statHandle = new StatHandle {
-                index = -1,
                 entity = entity,
             };
 
@@ -453,7 +452,7 @@ namespace EncosyTower.Entities.Stats
         {
             Assert.IsTrue(observerStatHandle.entity != Entity.Null);
 
-            if ((uint)observedStatHandle.index >= (uint)statBufferOnObservedStat.Length)
+            if (observedStatHandle.index.IsValidInRange(statBufferOnObservedStat.Length) == false)
             {
                 return;
             }
@@ -574,7 +573,7 @@ namespace EncosyTower.Entities.Stats
             where TValuePair : unmanaged, IStatValuePair
             where TStat : unmanaged, IStat<TValuePair>
         {
-            if ((uint)statHandle.index < (uint)statBuffer.Length)
+            if (statHandle.index.IsValidInRange(statBuffer.Length))
             {
                 valuePair = statBuffer[statHandle.index].ValuePair;
                 return true;
@@ -613,7 +612,7 @@ namespace EncosyTower.Entities.Stats
             where TValuePair : unmanaged, IStatValuePair
             where TStat : unmanaged, IStat<TValuePair>
         {
-            return (uint)statHandle.index < (uint)statBuffer.Length;
+            return statHandle.index.IsValidInRange(statBuffer.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -694,7 +693,7 @@ namespace EncosyTower.Entities.Stats
             where TValuePair : unmanaged, IStatValuePair
             where TStat : unmanaged, IStat<TValuePair>
         {
-            if ((uint)statHandle.index < (uint)statBuffer.Length)
+            if (statHandle.index.IsValidInRange(statBuffer.Length))
             {
                 stat = statBuffer[statHandle.index];
                 return true;
@@ -782,7 +781,7 @@ namespace EncosyTower.Entities.Stats
             where TStat : unmanaged, IStat<TValuePair>
             where TStatData : unmanaged, IStatData
         {
-            if ((uint)statHandle.index >= (uint)statBuffer.Length)
+            if (statHandle.index.IsValidInRange(statBuffer.Length) == false)
             {
                 return false;
             }
@@ -860,7 +859,7 @@ namespace EncosyTower.Entities.Stats
             where TValuePair : unmanaged, IStatValuePair
             where TStat : unmanaged, IStat<TValuePair>
         {
-            if ((uint)statHandle.index < (uint)statBuffer.Length)
+            if (statHandle.index.IsValidInRange(statBuffer.Length))
             {
                 SetStatValue<TValuePair, TStat>(
                       statHandle
@@ -930,7 +929,7 @@ namespace EncosyTower.Entities.Stats
             where TValuePair : unmanaged, IStatValuePair
             where TStat : unmanaged, IStat<TValuePair>
         {
-            if ((uint)statHandle.index < (uint)statBuffer.Length)
+            if (statHandle.index.IsValidInRange(statBuffer.Length))
             {
                 SetStat<TValuePair, TStat>(statHandle, stat, ref statBuffer);
                 return true;
@@ -967,7 +966,7 @@ namespace EncosyTower.Entities.Stats
             where TStat : unmanaged, IStat<TValuePair>
         {
             if (lookupStats.TryGetBuffer(statHandle.entity, out var statBuffer)
-                && statHandle.index < statBuffer.Length
+                && statHandle.index.IsValidInRange(statBuffer.Length)
             )
             {
                 success = true;
@@ -988,7 +987,7 @@ namespace EncosyTower.Entities.Stats
             where TValuePair : unmanaged, IStatValuePair
             where TStat : unmanaged, IStat<TValuePair>
         {
-            if (statHandle.index < statBuffer.Length)
+            if (statHandle.index.IsValidInRange(statBuffer.Length))
             {
                 success = true;
                 return ref statBuffer.ElementAt(statHandle.index);
@@ -1010,7 +1009,7 @@ namespace EncosyTower.Entities.Stats
             where TStat : unmanaged, IStat<TValuePair>
         {
             if (lookupStats.TryGetBuffer(statHandle.entity, out statBuffer)
-                && statHandle.index < statBuffer.Length
+                && statHandle.index.IsValidInRange(statBuffer.Length)
             )
             {
                 success = true;
@@ -1032,15 +1031,15 @@ namespace EncosyTower.Entities.Stats
         {
             modifierCount = 0;
 
-            if (lookupStats.TryGetBuffer(statHandle.entity, out var statBuffer) == false
-                || (uint)statHandle.index >= (uint)statBuffer.Length
+            if (lookupStats.TryGetBuffer(statHandle.entity, out var statBuffer)
+                && statHandle.index.IsValidInRange(statBuffer.Length)
             )
             {
-                return false;
+                modifierCount = statBuffer[statHandle.index].ModifierRange.count;
+                return true;
             }
 
-            modifierCount = statBuffer[statHandle.index].ModifierRange.count;
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -1066,7 +1065,7 @@ namespace EncosyTower.Entities.Stats
                 return false;
             }
 
-            if ((uint)statHandle.index >= (uint)statBuffer.Length)
+            if (statHandle.index.IsValidInRange(statBuffer.Length) == false)
             {
                 return false;
             }
@@ -1113,7 +1112,7 @@ namespace EncosyTower.Entities.Stats
                 return false;
             }
 
-            if ((uint)statHandle.index >= (uint)statBuffer.Length)
+            if (statHandle.index.IsValidInRange(statBuffer.Length) == false)
             {
                 return false;
             }
@@ -1143,13 +1142,13 @@ namespace EncosyTower.Entities.Stats
                 return false;
             }
 
-            if ((uint)statHandle.index >= (uint)statBuffer.Length)
+            if (statHandle.index.IsValidInRange(statBuffer.Length))
             {
-                return false;
+                observerCount = statBuffer[statHandle.index].ObserverRange.count;
+                return true;
             }
 
-            observerCount = statBuffer[statHandle.index].ObserverRange.count;
-            return true;
+            return false;
         }
 
         /// <summary>

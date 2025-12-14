@@ -53,6 +53,16 @@ namespace EncosyTower.Entities.Stats
         public static explicit operator uint(StatIndex index)
             => (uint)index.value;
 
+        /// <summary>
+        /// Verify if this index is greater than 0 and lesser than <paramref name="length"/>.
+        /// </summary>
+        /// <returns>
+        /// True if the index is greater than 0 and lesser than <paramref name="length"/>; otherwise false.
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool IsValidInRange(int length)
+            => IsValid && (uint)value < (uint)(length);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly FixedString32Bytes ToFixedString()
             => value.ToFixedString();
@@ -88,6 +98,10 @@ namespace EncosyTower.Entities.Stats
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator uint(StatIndex<TStatData> value)
             => (uint)value.value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool IsValidInRange(int length)
+            => IsValid && (uint)value < (uint)(length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly FixedString32Bytes ToFixedString()
