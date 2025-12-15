@@ -62,7 +62,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     WriteOptionsStruct(ref p);
                     WriteBakerStruct(ref p);
                     WriteAccessorStruct(ref p);
-                    WriteBufferReaderStruct(ref p);
+                    WriteReaderStruct(ref p);
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -1746,6 +1746,42 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     }
                     p.CloseScope();
                     p.PrintEndLine();
+
+                    p.PrintLine("public bool TrySet(Type type, in StatSystem.Stat stat)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("switch (type)");
+                        p.OpenScope();
+                        {
+                            for (var i = 0; i < count; i++)
+                            {
+                                var statData = statDataCollection[i];
+                                var fieldName = statData.fieldName;
+                                var typeName = statData.typeName;
+
+                                p.PrintBeginLine("case Type.").Print(typeName).PrintEndLine(":");
+                                p.OpenScope();
+                                {
+                                    p.PrintBeginLine("this.").Print(fieldName).Print(" = ")
+                                        .Print("StatSystem.API.MakeStatData<").Print(typeName)
+                                        .PrintEndLine(">(stat.ValuePair);");
+                                    p.PrintLine("return true;");
+                                }
+                                p.CloseScope();
+                                p.PrintEndLine();
+                            }
+
+                            p.PrintLine("default:");
+                            p.OpenScope();
+                            {
+                                p.PrintLine("return false;");
+                            }
+                            p.CloseScope();
+                        }
+                        p.CloseScope();
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -1791,6 +1827,41 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                             p.PrintBeginLine("this.").Print(fieldName).Print(" = ")
                                 .Print(fieldName).PrintEndLine(";");
                         }
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("public bool TrySet(Type type, in StatSystem.Stat stat)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("switch (type)");
+                        p.OpenScope();
+                        {
+                            for (var i = 0; i < count; i++)
+                            {
+                                var statData = statDataCollection[i];
+                                var fieldName = statData.fieldName;
+                                var typeName = statData.typeName;
+
+                                p.PrintBeginLine("case Type.").Print(typeName).PrintEndLine(":");
+                                p.OpenScope();
+                                {
+                                    p.PrintBeginLine("this.").Print(fieldName)
+                                        .PrintEndLine(" = stat.ProduceChangeEvents;");
+                                    p.PrintLine("return true;");
+                                }
+                                p.CloseScope();
+                                p.PrintEndLine();
+                            }
+
+                            p.PrintLine("default:");
+                            p.OpenScope();
+                            {
+                                p.PrintLine("return false;");
+                            }
+                            p.CloseScope();
+                        }
+                        p.CloseScope();
                     }
                     p.CloseScope();
                     p.PrintEndLine();
@@ -3067,7 +3138,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             }
         }
 
-        private readonly void WriteBufferReaderStruct(ref Printer p)
+        private readonly void WriteReaderStruct(ref Printer p)
         {
             p.Print("#region READER").PrintEndLine();
             p.Print("#endregion ===").PrintEndLine();
@@ -3135,7 +3206,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.CloseScope();
                 p.PrintEndLine();
 
-                WriteContainsTypeMethod(ref p, statDataCollection.AsReadOnlySpan());
+                WriteContainsTypeMethod(ref p);
                 WriteContainsTStatDataMethod(ref p, statDataCollection.AsReadOnlySpan());
 
                 for (var i = 0; i < count; i++)
@@ -3144,6 +3215,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 }
 
                 WriteFindValidStatsMethod(ref p);
+                WriteGetStatDataOptionsMethod(ref p);
+                WriteGetProduceChangeEventsOptionsMethod(ref p);
                 WriteTryGetStatForTypeMethod(ref p);
 
                 for (var i = 0; i < count; i++)
@@ -3161,7 +3234,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             return;
 
-            static void WriteContainsTypeMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
+            static void WriteContainsTypeMethod(ref Printer p)
             {
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public readonly Reader<T> Contains(Type type, out bool result)");
@@ -3257,6 +3330,76 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         p.OpenScope();
                         {
                             p.PrintLine("result.TryAdd(type, stat);");
+                        }
+                        p.CloseScope();
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("return this;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+
+            static void WriteGetStatDataOptionsMethod(ref Printer p)
+            {
+                p.PrintLine("public readonly Reader<T> GetStatDataOptions(out Options.Data result)");
+                p.OpenScope();
+                {
+                    p.PrintLine("result = new();");
+                    p.PrintEndLine();
+
+                    p.PrintLine("var stats = statBuffer.AsReadOnlySpan();");
+                    p.PrintLine("var length = stats.Length;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("for (var i = 0; i < length; i++)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("var stat = stats[i];");
+                        p.PrintLine("var type = TypeId.DecodeFromStatUserData(stat.UserData);");
+                        p.PrintEndLine();
+
+                        p.PrintLine("if (TypeId.ValidateType(type))");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("result.TrySet(type, stat);");
+                        }
+                        p.CloseScope();
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("return this;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+
+            static void WriteGetProduceChangeEventsOptionsMethod(ref Printer p)
+            {
+                p.PrintLine("public readonly Reader<T> GetProduceChangeEventsOptions(out Options.ProduceChangeEvents result)");
+                p.OpenScope();
+                {
+                    p.PrintLine("result = new();");
+                    p.PrintEndLine();
+
+                    p.PrintLine("var stats = statBuffer.AsReadOnlySpan();");
+                    p.PrintLine("var length = stats.Length;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("for (var i = 0; i < length; i++)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("var stat = stats[i];");
+                        p.PrintLine("var type = TypeId.DecodeFromStatUserData(stat.UserData);");
+                        p.PrintEndLine();
+
+                        p.PrintLine("if (TypeId.ValidateType(type))");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("result.TrySet(type, stat);");
                         }
                         p.CloseScope();
                     }
