@@ -29,28 +29,97 @@ namespace EncosyTower.UnityExtensions
     public static class UnityObjectAPI
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ConvertIdsToObjects(
+        public static void ConvertEntityIdsToObjectList(
+              ReadOnlySpan<EntityId> entityIds
+            , [NotNull] List<UnityObject> objectList
+        )
+        {
+            var idArray = NativeArray.CreateFrom(entityIds, Allocator.Temp);
+            ConvertEntityIdsToObjectList(idArray, objectList);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ConvertGameObjectIdsToObjectList(
+              ReadOnlySpan<GameObjectId> gameObjectIds
+            , [NotNull] List<UnityObject> objectList
+        )
+        {
+            var idArray = NativeArray.CreateFrom(gameObjectIds, Allocator.Temp);
+            ConvertGameObjectIdsToObjectList(idArray, objectList);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ConvertTransformIdsToObjectList(
+              ReadOnlySpan<TransformId> transformIds
+            , [NotNull] List<UnityObject> objectList
+        )
+        {
+            var idArray = NativeArray.CreateFrom(transformIds, Allocator.Temp);
+            ConvertTransformIdsToObjectList(idArray, objectList);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ConvertGameObjectIdsToGameObjects(
               ReadOnlySpan<GameObjectId> gameObjectIds
             , Span<GameObject> gameObjects
             , [NotNull] List<UnityObject> temporaryList
         )
         {
             var idArray = NativeArray.CreateFrom(gameObjectIds, Allocator.Temp);
-            ConvertIdsToObjects(idArray, gameObjects, temporaryList);
+            ConvertGameObjectIdsToGameObjects(idArray, gameObjects, temporaryList);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ConvertIdsToObjects(
+        public static void ConvertTransformIdsToTransforms(
               ReadOnlySpan<TransformId> transformIds
             , Span<Transform> transforms
             , [NotNull] List<UnityObject> temporaryList
         )
         {
             var idArray = NativeArray.CreateFrom(transformIds, Allocator.Temp);
-            ConvertIdsToObjects(idArray, transforms, temporaryList);
+            ConvertTransformIdsToTransforms(idArray, transforms, temporaryList);
         }
 
-        public static void ConvertIdsToObjects(
+        public static void ConvertEntityIdsToObjectList(
+              NativeArray<EntityId> entityIds
+            , [NotNull] List<UnityObject> objectList
+        )
+        {
+            if (entityIds.Length < 1)
+            {
+                return;
+            }
+
+            ConvertEntityIdsToObjectListInternal(entityIds, objectList);
+        }
+
+        public static void ConvertGameObjectIdsToObjectList(
+              NativeArray<GameObjectId> gameObjectIds
+            , [NotNull] List<UnityObject> objectList
+        )
+        {
+            if (gameObjectIds.Length < 1)
+            {
+                return;
+            }
+
+            ConvertEntityIdsToObjectListInternal(gameObjectIds.Reinterpret<EntityId>(), objectList);
+        }
+
+        public static void ConvertTransformIdsToObjectList(
+              NativeArray<TransformId> transformIds
+            , [NotNull] List<UnityObject> objectList
+        )
+        {
+            if (transformIds.Length < 1)
+            {
+                return;
+            }
+
+            ConvertEntityIdsToObjectListInternal(transformIds.Reinterpret<EntityId>(), objectList);
+        }
+
+        public static void ConvertGameObjectIdsToGameObjects(
               NativeArray<GameObjectId> gameObjectIds
             , Span<GameObject> gameObjects
             , [NotNull] List<UnityObject> temporaryList
@@ -58,17 +127,14 @@ namespace EncosyTower.UnityExtensions
         {
             var length = gameObjects.Length;
 
-            Checks.IsTrue(length == gameObjects.Length, "arrays do not have the same size");
-            Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
+            Checks.IsTrue(length == gameObjects.Length, "'gameObjectIds' and 'gameObjects' do not have the same size");
 
-            temporaryList.Clear();
-            temporaryList.IncreaseCapacityTo(length);
+            if (length < 1)
+            {
+                return;
+            }
 
-#if UNITY_6000_3_OR_NEWER
-            Resources.EntityIdsToObjectList(gameObjectIds.Reinterpret<EntityId>(), temporaryList);
-#else
-            Resources.InstanceIDToObjectList(gameObjectIds.Reinterpret<EntityId>(), temporaryList);
-#endif
+            ConvertEntityIdsToObjectListInternal(gameObjectIds.Reinterpret<EntityId>(), temporaryList);
 
             var objects = temporaryList.AsReadOnlySpan();
 
@@ -80,7 +146,7 @@ namespace EncosyTower.UnityExtensions
             temporaryList.Clear();
         }
 
-        public static void ConvertIdsToObjects(
+        public static void ConvertTransformIdsToTransforms(
               NativeArray<TransformId> transformIds
             , Span<Transform> transforms
             , [NotNull] List<UnityObject> temporaryList
@@ -88,17 +154,14 @@ namespace EncosyTower.UnityExtensions
         {
             var length = transforms.Length;
 
-            Checks.IsTrue(length == transforms.Length, "arrays do not have the same size");
-            Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
+            Checks.IsTrue(length == transforms.Length, "'transformIds' and 'transforms' do not have the same size");
 
-            temporaryList.Clear();
-            temporaryList.IncreaseCapacityTo(length);
+            if (length < 1)
+            {
+                return;
+            }
 
-#if UNITY_6000_3_OR_NEWER
-            Resources.EntityIdsToObjectList(transformIds.Reinterpret<EntityId>(), temporaryList);
-#else
-            Resources.InstanceIDToObjectList(transformIds.Reinterpret<EntityId>(), temporaryList);
-#endif
+            ConvertEntityIdsToObjectListInternal(transformIds.Reinterpret<EntityId>(), temporaryList);
 
             var objects = temporaryList.AsReadOnlySpan();
 
@@ -108,6 +171,21 @@ namespace EncosyTower.UnityExtensions
             }
 
             temporaryList.Clear();
+        }
+
+        private static void ConvertEntityIdsToObjectListInternal(
+              NativeArray<EntityId> entityIds
+            , List<UnityObject> objectList
+        )
+        {
+            objectList.Clear();
+            objectList.IncreaseCapacityTo(entityIds.Length);
+
+#if UNITY_6000_3_OR_NEWER
+            Resources.EntityIdsToObjectList(entityIds, objectList);
+#else
+            Resources.InstanceIDToObjectList(entityIds, objectList);
+#endif
         }
     }
 }

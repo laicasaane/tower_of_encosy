@@ -140,14 +140,7 @@ namespace EncosyTower.Pooling
                 return false;
             }
 
-            _objectList.Clear();
-            _objectList.IncreaseCapacityTo(amount);
-
-#if UNITY_6000_3_OR_NEWER
-            Resources.EntityIdsToObjectList(gameObjectIds.Reinterpret<EntityId>(), _objectList);
-#else
-            Resources.InstanceIDToObjectList(gameObjectIds.Reinterpret<EntityId>(), _objectList);
-#endif
+            UnityObjectAPI.ConvertGameObjectIdsToObjectList(gameObjectIds, _objectList);
 
             var unusedGameObjects = _unusedGameObjects;
             unusedGameObjects.IncreaseCapacityBy(amount);
@@ -335,7 +328,7 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.RemoveRange(startIndex, length);
             _unusedTransformIds.RemoveRange(startIndex, length);
 
-            UnityObjectAPI.ConvertIdsToObjects(transformIds, transforms, _objectList);
+            UnityObjectAPI.ConvertTransformIdsToTransforms(transformIds, transforms, _objectList);
 
             Prefab.MoveToScene(gameObjectIds);
 
@@ -400,7 +393,7 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.RemoveRange(startIndex, length);
             _unusedTransformIds.RemoveRange(startIndex, length);
 
-            UnityObjectAPI.ConvertIdsToObjects(transformIds, transforms, _objectList);
+            UnityObjectAPI.ConvertTransformIdsToTransforms(transformIds, transforms, _objectList);
 
             Prefab.MoveToScene(gameObjectIds);
 
@@ -435,7 +428,7 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.RemoveRange(startIndex, length);
             _unusedTransformIds.RemoveRange(startIndex, length);
 
-            UnityObjectAPI.ConvertIdsToObjects(transformIds, transforms, _objectList);
+            UnityObjectAPI.ConvertTransformIdsToTransforms(transformIds, transforms, _objectList);
 
             Prefab.MoveToScene(gameObjectIds);
 
@@ -470,7 +463,7 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.RemoveRange(startIndex, length);
             _unusedTransformIds.RemoveRange(startIndex, length);
 
-            UnityObjectAPI.ConvertIdsToObjects(transformIds, transforms, _objectList);
+            UnityObjectAPI.ConvertTransformIdsToTransforms(transformIds, transforms, _objectList);
 
             Prefab.MoveToScene(gameObjectIds);
 
@@ -501,7 +494,7 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.RemoveRange(startIndex, length);
             _unusedTransformIds.RemoveRange(startIndex, length);
 
-            UnityObjectAPI.ConvertIdsToObjects(transformIds, transforms, _objectList);
+            UnityObjectAPI.ConvertTransformIdsToTransforms(transformIds, transforms, _objectList);
 
             Prefab.MoveToScene(gameObjectIds);
 
@@ -556,7 +549,7 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.RemoveRange(startIndex, length);
             _unusedTransformIds.RemoveRange(startIndex, length);
 
-            UnityObjectAPI.ConvertIdsToObjects(transformIds, transforms, _objectList);
+            UnityObjectAPI.ConvertTransformIdsToTransforms(transformIds, transforms, _objectList);
 
             Prefab.MoveToScene(gameObjectIds);
 
@@ -920,18 +913,7 @@ namespace EncosyTower.Pooling
                 return;
             }
 
-            _objectList.Clear();
-            _objectList.IncreaseCapacityTo(length);
-
-            var reGameObjectIds = MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds);
-            var gameObjectIdArray = NativeArray.CreateFast<EntityId>(length, Allocator.Temp);
-            reGameObjectIds.CopyTo(gameObjectIdArray);
-
-#if UNITY_6000_3_OR_NEWER
-            Resources.EntityIdsToObjectList(gameObjectIdArray, _objectList);
-#else
-            Resources.InstanceIDToObjectList(gameObjectIdArray, _objectList);
-#endif
+            UnityObjectAPI.ConvertGameObjectIdsToObjectList(gameObjectIds, _objectList);
 
             var unusedGameObjects = _unusedGameObjects;
             var unusedGameObjectIds = _unusedGameObjectIds;
@@ -943,6 +925,7 @@ namespace EncosyTower.Pooling
             unusedTransformIds.IncreaseCapacityTo(capacity);
 
             var objects = _objectList.AsReadOnlySpan();
+            var reGameObjectIds = MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds);
             var gameObjectIdBuffer = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
             var gameObjectIdCount = 0;
 
@@ -985,15 +968,7 @@ namespace EncosyTower.Pooling
             _objectList.Clear();
             _objectList.IncreaseCapacityTo(length);
 
-            var reTransformIds = MemoryMarshal.Cast<TransformId, EntityId>(transformIds);
-            var transformIdArray = NativeArray.CreateFast<EntityId>(length, Allocator.Temp);
-            reTransformIds.CopyTo(transformIdArray);
-
-#if UNITY_6000_3_OR_NEWER
-            Resources.EntityIdsToObjectList(transformIdArray, _objectList);
-#else
-            Resources.InstanceIDToObjectList(transformIdArray, _objectList);
-#endif
+            UnityObjectAPI.ConvertTransformIdsToObjectList(transformIds, _objectList);
 
             var unusedGameObjects = _unusedGameObjects;
             var unusedGameObjectIds = _unusedGameObjectIds;
@@ -1005,6 +980,7 @@ namespace EncosyTower.Pooling
             unusedTransformIds.IncreaseCapacityTo(capacity);
 
             var objects = _objectList.AsReadOnlySpan();
+            var reTransformIds = MemoryMarshal.Cast<TransformId, EntityId>(transformIds);
             var gameObjectIdBuffer = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
             var gameObjectIdCount = 0;
 
