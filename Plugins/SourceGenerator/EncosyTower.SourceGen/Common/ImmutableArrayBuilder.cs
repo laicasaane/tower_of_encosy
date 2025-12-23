@@ -62,6 +62,18 @@ namespace EncosyTower.SourceGen
             get => this._writer!.WrittenSpan;
         }
 
+        /// <inheritdoc cref="ImmutableArray{T}.Builder.Clear"/>
+        public readonly void Clear()
+        {
+            this._writer!.Clear();
+        }
+
+        /// <inheritdoc cref="ImmutableArray{T}.Builder.Insert(int, T)"/>
+        public readonly void Insert(int index, T item)
+        {
+            this._writer!.Insert(index, item);
+        }
+
         /// <inheritdoc cref="ImmutableArray{T}.Builder.Add(T)"/>
         public readonly void Add(T item)
         {
@@ -170,7 +182,26 @@ namespace EncosyTower.SourceGen
                 get => new(this._array, 0, this._index);
             }
 
-            /// <inheritdoc cref="ImmutableArrayBuilder{T}.Add"/>
+            /// <inheritdoc cref="ImmutableArray{T}.Builder.Insert(int, T)"/>
+            public void Insert(int index, T value)
+            {
+                if (index < 0 || index > this._index)
+                {
+                    ImmutableArrayBuilder.ThrowArgumentOutOfRangeExceptionForIndex();
+                }
+
+                EnsureCapacity(1);
+
+                if (index < this._index)
+                {
+                    Array.Copy(this._array, index, this._array, index + 1, this._index - index);
+                }
+
+                this._array[index] = value;
+                this._index++;
+            }
+
+            /// <inheritdoc cref="ImmutableArray{T}.Builder.Add(T)"/>
             public void Add(T value)
             {
                 EnsureCapacity(1);
@@ -178,7 +209,7 @@ namespace EncosyTower.SourceGen
                 this._array[this._index++] = value;
             }
 
-            /// <inheritdoc cref="ImmutableArrayBuilder{T}.AddRange"/>
+            /// <inheritdoc cref="ImmutableArray{T}.Builder.AddRange(ImmutableArray{T})"/>
             public void AddRange(ReadOnlySpan<T> items)
             {
                 EnsureCapacity(items.Length);

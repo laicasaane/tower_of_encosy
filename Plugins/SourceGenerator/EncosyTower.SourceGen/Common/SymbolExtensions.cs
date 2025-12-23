@@ -1363,6 +1363,25 @@ namespace EncosyTower.SourceGen
                 && symbol is INamedTypeSymbol namedType
                 && namedType.EnumUnderlyingType is not null;
         }
+
+        public static string GetEnumMemberName(this ITypeSymbol symbol, object rawValue)
+        {
+            var members = symbol.GetMembers();
+            var length = members.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                if (members[i] is IFieldSymbol fieldSymbol
+                    && fieldSymbol.IsConst
+                    && Equals(fieldSymbol.ConstantValue, rawValue)
+                )
+                {
+                    return fieldSymbol.Name;
+                }
+            }
+
+            return rawValue.ToString();
+        }
     }
 }
 

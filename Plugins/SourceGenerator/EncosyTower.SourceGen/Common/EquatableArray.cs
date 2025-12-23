@@ -45,6 +45,7 @@ namespace EncosyTower.SourceGen
         /// Creates a new <see cref="EquatableArray{T}"/> instance.
         /// </summary>
         /// <param name="array">The input <see cref="ImmutableArray{T}"/> to wrap.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EquatableArray(ImmutableArray<T> array)
         {
             this._array = Unsafe.As<ImmutableArray<T>, T[]>(ref array);
@@ -72,13 +73,19 @@ namespace EncosyTower.SourceGen
 
         public int Count => _array?.Length ?? 0;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator ReadOnlySpan<T>(EquatableArray<T> array)
+            => array.AsReadOnlySpan();
+
         /// <sinheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(EquatableArray<T> array)
         {
             return AsReadOnlySpan().SequenceEqual(array.AsReadOnlySpan());
         }
 
         /// <sinheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
             return obj is EquatableArray<T> array && Equals(this, array);
@@ -117,6 +124,7 @@ namespace EncosyTower.SourceGen
         /// </summary>
         /// <param name="array">The input <see cref="ImmutableArray{T}"/> instance.</param>
         /// <returns>An <see cref="EquatableArray{T}"/> instance from a given <see cref="ImmutableArray{T}"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static EquatableArray<T> FromImmutableArray(ImmutableArray<T> array)
         {
             return new(array);
@@ -126,24 +134,27 @@ namespace EncosyTower.SourceGen
         /// Returns a <see cref="ReadOnlySpan{T}"/> wrapping the current items.
         /// </summary>
         /// <returns>A <see cref="ReadOnlySpan{T}"/> wrapping the current items.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<T> AsReadOnlySpan()
         {
-            return AsImmutableArray().AsSpan();
+            return _array.AsSpan();
         }
 
         /// <summary>
         /// Copies the contents of this <see cref="EquatableArray{T}"/> instance. to a mutable array.
         /// </summary>
         /// <returns>The newly instantiated array.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] ToArray()
         {
-            return AsImmutableArray().ToArray();
+            return AsReadOnlySpan().ToArray();
         }
 
         /// <summary>
         /// Gets an <see cref="ImmutableArray{T}.Enumerator"/> value to traverse items in the current array.
         /// </summary>
         /// <returns>An <see cref="ImmutableArray{T}.Enumerator"/> value to traverse items in the current array.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ImmutableArray<T>.Enumerator GetEnumerator()
         {
             return AsImmutableArray().GetEnumerator();
@@ -165,6 +176,7 @@ namespace EncosyTower.SourceGen
         /// Implicitly converts an <see cref="ImmutableArray{T}"/> to <see cref="EquatableArray{T}"/>.
         /// </summary>
         /// <returns>An <see cref="EquatableArray{T}"/> instance from a given <see cref="ImmutableArray{T}"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator EquatableArray<T>(ImmutableArray<T> array)
         {
             return FromImmutableArray(array);
@@ -174,6 +186,7 @@ namespace EncosyTower.SourceGen
         /// Implicitly converts an <see cref="EquatableArray{T}"/> to <see cref="ImmutableArray{T}"/>.
         /// </summary>
         /// <returns>An <see cref="ImmutableArray{T}"/> instance from a given <see cref="EquatableArray{T}"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ImmutableArray<T>(EquatableArray<T> array)
         {
             return array.AsImmutableArray();
@@ -185,6 +198,7 @@ namespace EncosyTower.SourceGen
         /// <param name="left">The first <see cref="EquatableArray{T}"/> value.</param>
         /// <param name="right">The second <see cref="EquatableArray{T}"/> value.</param>
         /// <returns>Whether <paramref name="left"/> and <paramref name="right"/> are equal.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(EquatableArray<T> left, EquatableArray<T> right)
         {
             return left.Equals(right);
@@ -196,6 +210,7 @@ namespace EncosyTower.SourceGen
         /// <param name="left">The first <see cref="EquatableArray{T}"/> value.</param>
         /// <param name="right">The second <see cref="EquatableArray{T}"/> value.</param>
         /// <returns>Whether <paramref name="left"/> and <paramref name="right"/> are not equal.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(EquatableArray<T> left, EquatableArray<T> right)
         {
             return !left.Equals(right);
