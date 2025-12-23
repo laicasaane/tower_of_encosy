@@ -73,14 +73,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             }
 
             var semanticModel = context.SemanticModel;
-            var typeSymbol = semanticModel.GetDeclaredSymbol(syntax, token);
+            var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
 
-            if (typeSymbol is not INamedTypeSymbol symbol)
+            if (symbol is not INamedTypeSymbol typeSymbol)
             {
                 return default;
             }
 
-            var attribute = typeSymbol.GetAttribute(STAT_SYSTEM_ATTRIBUTE);
+            var attribute = symbol.GetAttribute(STAT_SYSTEM_ATTRIBUTE);
 
             if (attribute == null || attribute.ConstructorArguments.Length < 1)
             {
@@ -118,7 +118,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             var assemblyName = semanticModel.Compilation.AssemblyName;
             var syntaxTree = syntax.SyntaxTree;
-            var typeIdentifier = symbol.ToValidIdentifier();
+            var typeIdentifier = typeSymbol.ToValidIdentifier();
             var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, typeIdentifier);
             var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME);
 
@@ -131,8 +131,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             );
 
             return new StatSystemDefinition {
-                typeName = symbol.Name,
-                typeNamespace = symbol.ContainingNamespace.ToDisplayString(),
+                typeName = typeSymbol.Name,
+                typeNamespace = typeSymbol.ContainingNamespace.ToDisplayString(),
                 syntaxKeyword = syntax.Keyword.ValueText,
                 typeIdentifier = typeIdentifier,
                 hintName = hintName,
@@ -141,7 +141,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 closingSource = closingSource,
                 maxDataSize = Math.Max((int)maxDataSize, 1),
                 maxUserDataSize = maxUserDataSize,
-                isStatic = symbol.IsStatic,
+                isStatic = typeSymbol.IsStatic,
                 location = syntax.GetLocation()
             };
 

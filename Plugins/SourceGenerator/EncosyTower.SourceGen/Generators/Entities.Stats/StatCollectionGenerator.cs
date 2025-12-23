@@ -77,14 +77,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             }
 
             var semanticModel = context.SemanticModel;
-            var structSymbol = semanticModel.GetDeclaredSymbol(syntax, token);
+            var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
 
-            if (structSymbol is not INamedTypeSymbol symbol)
+            if (symbol is not INamedTypeSymbol structSymbol)
             {
                 return default;
             }
 
-            var attribute = structSymbol.GetAttribute(STAT_COLLECTION_ATTRIBUTE);
+            var attribute = symbol.GetAttribute(STAT_COLLECTION_ATTRIBUTE);
 
             if (attribute == null || attribute.ConstructorArguments.Length < 1)
             {
@@ -100,7 +100,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             var assemblyName = semanticModel.Compilation.AssemblyName;
             var syntaxTree = syntax.SyntaxTree;
-            var typeIdentifier = symbol.ToValidIdentifier();
+            var typeIdentifier = structSymbol.ToValidIdentifier();
             var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, typeIdentifier);
             var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME);
             var statSystemFullTypeName = statSystemTypeSymbol.ToFullName();
@@ -114,8 +114,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             );
 
             var result = new StatCollectionDefinition {
-                typeName = symbol.Name,
-                typeNamespace = symbol.ContainingNamespace.ToDisplayString(),
+                typeName = structSymbol.Name,
+                typeNamespace = structSymbol.ContainingNamespace.ToDisplayString(),
                 typeIdentifier = typeIdentifier,
                 statSystemFullTypeName = statSystemFullTypeName,
                 hintName = hintName,

@@ -3633,7 +3633,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         private static void WriteHelperConstants(ref Printer p)
         {
             p.PrintBeginLine("private const ").Print(METHOD_IMPL_OPTIONS)
-                        .Print(" INLINING = ").Print(INLINING).PrintEndLine(";");
+                .Print(" INLINING = ").Print(INLINING).PrintEndLine(";");
             p.PrintEndLine();
 
             p.PrintBeginLine("private const string GENERATOR = ").Print(GENERATOR).PrintEndLine(";");
