@@ -144,6 +144,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.PrintLine("using System.Runtime.CompilerServices;");
                 p.PrintLine("using System.Runtime.InteropServices;");
                 p.PrintLine("using EncosyTower.Common;");
+                p.PrintLine("using UnityEngine;");
                 p.PrintEndLine();
                 p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
                 p.PrintEndLine();
