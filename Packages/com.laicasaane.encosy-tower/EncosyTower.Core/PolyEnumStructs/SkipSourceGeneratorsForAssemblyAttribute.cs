@@ -1,6 +1,6 @@
 using System;
 
-namespace EncosyTower.PolyStructs
+namespace EncosyTower.PolyEnumStructs
 {
     [AttributeUsage(AttributeTargets.Assembly)]
     public sealed class SkipSourceGeneratorsForAssemblyAttribute : Attribute { }
