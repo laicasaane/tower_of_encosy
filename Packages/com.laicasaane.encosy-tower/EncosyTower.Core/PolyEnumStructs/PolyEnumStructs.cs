@@ -12,15 +12,16 @@ namespace EncosyTower.PolyEnumStructs
     /// <item>The idea of Polymorphic Enum Struct is based on both 'discriminated union' and 'interface polymorphism'.</item>
     /// <item>Any nested struct will be automatically recognized as a case-struct for the outer enum-struct.</item>
     /// <item>In polymorphism terms, the enum-struct acts as the base type, where case-structs act as derived types.</item>
-    /// <item>
-    /// A common interface named <c>IEnumCase</c> will be generated into the enum-struct.
-    /// The members of the enum-struct are aggregated from the identical members of all case-structs,
-    /// given that they have the same name, same return type, same parameters.
-    /// </item>
+    /// <item>A common interface named <c>IEnumCase</c> will be generated into the enum-struct.</item>
+    /// <item>The members of <c>IEnumCase</c> are aggregated from the identical members of all case-structs.
+    /// They must have the same name, same return type, same parameters.</item>
     /// <item>Both the enum-struct and case-structs will automatically derive <c>IEnumCase</c>.</item>
     /// <item>The members of <c>IEnumCase</c> will be automatically implemented on the enum-struct.</item>
     /// <item>Additional facilities to convert the enum-struct to a case-struct, and vice versa, will be generated.</item>
     /// <item>Additional facilities to help the polymorphism usage will be generated.</item>
+    /// <item>If <see cref="SortFieldsBySize"/> is enabled, the fields of the enum-struct will be sorted by size (in bytes).</item>
+    /// <item>If <see cref="AutoEquatable"/> is enabled, <see cref="IEquatable{T}"/> will be implemented for all structs.</item>
+    /// <item>If <see cref="WithEnumExtensions"/> is enabled, the <c>EnumCase</c> will have its extensions generated.</item>
     /// </list>
     /// </remarks>
     /// <example>
@@ -68,7 +69,12 @@ namespace EncosyTower.PolyEnumStructs
         /// For performance reason, this feature will assume that <see cref="IEquatable{T}"/> and <c>GetHashCode</c>
         /// have already been implemented on the type of each field.
         /// </remarks>
-        public bool AutoEquatable { get; set;  }
+        public bool AutoEquatable { get; set; }
+
+        /// <summary>
+        /// Determines whether enum extensions should be generated for the nested <c>EnumCase</c> type.
+        /// </summary>
+        public bool WithEnumExtensions { get; set; }
     }
 
     /// <summary>

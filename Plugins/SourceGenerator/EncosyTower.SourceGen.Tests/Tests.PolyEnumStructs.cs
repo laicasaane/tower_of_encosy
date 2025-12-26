@@ -20,6 +20,7 @@ namespace EncosyTower.Tests.PolyEnumStructs
 namespace EncosyTower.Tests.PolyEnumStructs
 {
     using System.ComponentModel;
+    using EncosyTower.Annotations;
     using EncosyTower.PolyEnumStructs;
     using UnityEngine;
 
@@ -33,7 +34,7 @@ namespace EncosyTower.Tests.PolyEnumStructs
         public static int Value;
     }
 
-    [PolyEnumStruct(SortFieldsBySize = true, AutoEquatable = true)]
+    [PolyEnumStruct(SortFieldsBySize = true, AutoEquatable = true, WithEnumExtensions = true)]
     public partial struct ColorEnum
     {
         public partial interface IEnumCase
@@ -48,13 +49,9 @@ namespace EncosyTower.Tests.PolyEnumStructs
             }
         }
 
-        public partial struct Undefined
-        {
-            public bool capture;
-        }
-
         [ConstructEnumCaseFrom(1)]
         [ConstructEnumCaseFrom(ColorEnumType.Red)]
+        [Label("RED")]
         public partial struct Red : IDisposable
         {
             public int value;
@@ -100,6 +97,11 @@ namespace EncosyTower.Tests.PolyEnumStructs
                 return ref ColorAPI.Value;
             }
         }
+        public partial struct Undefined
+        {
+            public bool capture;
+        }
+
     }
 }
 

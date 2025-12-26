@@ -114,6 +114,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 openingSource = openingSource,
                 closingSource = closingSource,
                 location = structSyntax.GetLocation(),
+                parentIsNamespace = structSyntax.Parent is BaseNamespaceDeclarationSyntax,
             };
 
             foreach (var arg in attribute.NamedArguments)
@@ -125,6 +126,10 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 else if (arg.Key == "AutoEquatable" && arg.Value.Value is bool autoEquatable)
                 {
                     result.autoEquatable = autoEquatable;
+                }
+                else if (arg.Key == "WithEnumExtensions" && arg.Value.Value is bool withEnumExtensions)
+                {
+                    result.withEnumExtensions = withEnumExtensions;
                 }
             }
 
@@ -335,9 +340,9 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 token.ThrowIfCancellationRequested();
 
                 var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
-
                 var result = new PolyEnumStructDefinition.StructDefinition {
                     name = syntax.Identifier.Text,
+                    displayName = syntax.GetDisplayNameOrDefault(syntax.Identifier.Text),
                     identifier = syntax.Identifier.Text.ToValidIdentifier(),
                     isUndefined = false,
                 };
@@ -759,7 +764,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidateSlim _
+            , CompilationCandidateSlim compilation
             , PolyEnumStructDefinition candidate
             , string projectPath
             , bool outputSourceGenFiles
@@ -779,7 +784,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 context.OutputSource(
                       outputSourceGenFiles
                     , candidate.openingSource
-                    , candidate.WriteCode()
+                    , candidate.WriteCode(compilation.references.unityCollections)
                     , candidate.closingSource
                     , candidate.hintName
                     , candidate.sourceFilePath

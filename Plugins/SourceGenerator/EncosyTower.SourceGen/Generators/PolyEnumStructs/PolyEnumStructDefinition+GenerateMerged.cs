@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using EncosyTower.SourceGen.Generators.EnumExtensions;
 
 namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 {
@@ -69,23 +71,25 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             public List<MethodDefinition> Methods { get; } = new();
         }
 
+        public class EnumCaseType
+        {
+            public string UnderlyingType { get; set; }
+
+            public int MaxByteCount { get; set; }
+
+            public List<EnumMemberDeclaration> Members { get; } = new();
+        }
+
         private readonly void GenerateMerged(
               out List<StructRef> structRefs
             , out MergedStructRef mergedStructRef
             , out PartialInterfaceRef partialInterfaceRef
             , out string undefinedType
-            , out string enumCaseType
+            , out EnumCaseType enumCaseType
         )
         {
             var structs = this.structs;
             var structCount = structs.Count;
-
-            enumCaseType = (ulong)(structCount + 1) switch {
-                > uint.MaxValue => "ulong",
-                > ushort.MaxValue => "uint",
-                > byte.MaxValue => "ushort",
-                _ => "byte",
-            };
 
             var enumCaseSize = (ulong)(structCount + 1) switch {
                 > uint.MaxValue => 8,
@@ -97,6 +101,14 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             structRefs = new List<StructRef>(structCount);
             mergedStructRef = new MergedStructRef { Size = enumCaseSize };
             partialInterfaceRef = new PartialInterfaceRef();
+            enumCaseType = new EnumCaseType {
+                UnderlyingType = (ulong)(structCount + 1) switch {
+                    > uint.MaxValue => "ulong",
+                    > ushort.MaxValue => "uint",
+                    > byte.MaxValue => "ushort",
+                    _ => "byte",
+                }
+            };
 
             mergedStructRef.FieldRefs.Add(new MergedFieldRef {
                 Name = "enumCase",
@@ -121,7 +133,17 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             var propertyCountMap = new Dictionary<PropertyDefinition, int>(structCount);
             var indexerCountMap = new Dictionary<IndexerDefinition, int>(structCount);
             var methodCountMap = new Dictionary<MethodDefinition, int>(structCount);
+            var enumCaseMembers = enumCaseType.Members;
             var mergedStructSize = 0;
+            var structNameByteCountMax = 0;
+
+            enumCaseMembers.Add(new EnumMemberDeclaration {
+                name = UNDEFINED_NAME,
+                displayName = UNDEFINED_NAME,
+                order = 0,
+            });
+
+            var lastStructIndex = structCount - 1;
 
             for (var i = 0; i < structCount; i++)
             {
@@ -142,6 +164,16 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 Aggregator.AggregateCountMap(@struct.indexers, indexerCountMap, indexerSignatures);
                 Aggregator.AggregateCountMap(@struct.methods, methodCountMap, methodSignatures);
                 Aggregator.AggregateConstructionMaps(@struct, mergedStructRef);
+
+                if (i < lastStructIndex)
+                {
+                    structNameByteCountMax = Math.Max(structNameByteCountMax, Encoding.UTF8.GetByteCount(@struct.name));
+                    enumCaseMembers.Add(new EnumMemberDeclaration {
+                        name = @struct.name,
+                        displayName = @struct.displayName,
+                        order = (ulong)(i + 1),
+                    });
+                }
             }
 
             var maxCount = definedUndefinedStruct == DefinedUndefinedStruct.None
@@ -157,6 +189,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 _ => $"{typeName}_Undefined",
             };
 
+            enumCaseType.MaxByteCount = structNameByteCountMax;
             mergedStructRef.Size += mergedStructSize;
 
             if (sortFieldsBySize)

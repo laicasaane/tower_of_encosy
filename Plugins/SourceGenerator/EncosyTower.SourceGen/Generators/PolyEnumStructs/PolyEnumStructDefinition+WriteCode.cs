@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EncosyTower.SourceGen.Generators.EnumExtensions;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
@@ -16,10 +17,11 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         private const string VALIDATION_ATTRIBUTES = "[HideInCallstack, StackTraceHidden, " +
             "Conditional(\"UNITY_EDITOR\"), Conditional(\"DEVELOPMENT_BUILD\")]";
         private const string UNDEFINED_NAME = "Undefined";
+        private const string ENUM_CASE_NAME = "EnumCase";
 
         private static readonly List<ConstructionValue> s_emptyValues = new();
 
-        public readonly string WriteCode()
+        public readonly string WriteCode(bool referenceUnityCollections)
         {
             var tempCollections = new TempCollections();
 
@@ -39,20 +41,34 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             p = p.IncreasedIndent();
             {
-                p.PrintBeginLine("partial struct ").PrintEndLine(typeName);
+                p.Print("#region ENUM CASE").PrintEndLine();
+                p.Print("#endregion ======").PrintEndLine();
+                p.PrintEndLine();
+
+                p.PrintBeginLine("partial struct ").Print(typeName).PrintEndLine(" // EnumCase");
                 p.OpenScope();
                 {
-                    WriteEnumCaseEnum(ref p, enumCaseType, undefinedType);
-                    WriteInterface(ref p, partialInterfaceRef, mergedStructRef);
+                    WriteEnumCaseEnum(ref p, enumCaseType.UnderlyingType, undefinedType);
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.Print("#region INTERFACE ENUM CASE").PrintEndLine();
+                p.Print("#endregion ================").PrintEndLine();
+                p.PrintEndLine();
+
+                p.PrintBeginLine("partial struct ").Print(typeName).PrintEndLine(" // IEnumCase");
+                p.OpenScope();
+                {
+                    WriteInterface(ref p, partialInterfaceRef, mergedStructRef);
+                }
+                p.CloseScope();
+                p.PrintEndLine();
                 p.Print("#region CASE STRUCTS").PrintEndLine();
                 p.Print("#endregion =========").PrintEndLine();
                 p.PrintEndLine();
 
-                p.PrintBeginLine("partial struct ").PrintEndLine(typeName);
+                p.PrintBeginLine("partial struct ").Print(typeName).PrintEndLine(" // Case Structs");
                 p.OpenScope();
                 {
                     WriteUndefinedStruct(ref p, undefinedType, mergedStructRef);
@@ -61,8 +77,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.Print("#region MERGED STRUCT").PrintEndLine();
-                p.Print("#endregion ==========").PrintEndLine();
+                p.Print("#region ENUM STRUCT").PrintEndLine();
+                p.Print("#endregion ========").PrintEndLine();
                 p.PrintEndLine();
 
                 p.PrintBeginLine("partial struct ").Print(typeName)
@@ -73,7 +89,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     p.Print(", IEquatable<").Print(typeName).Print(">");
                 }
 
-                p.PrintEndLine();
+                p.PrintEndLine(" // Enum Struct");
                 p.OpenScope();
                 {
                     WriteMergedFields(ref p, mergedStructRef.FieldRefs);
@@ -95,7 +111,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.Print("#endregion ==========").PrintEndLine();
                 p.PrintEndLine();
 
-                p.PrintBeginLine("partial struct ").PrintEndLine(typeName);
+                p.PrintBeginLine("partial struct ").Print(typeName).PrintEndLine(" // Enum Case API");
                 p.OpenScope();
                 {
                     p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
@@ -116,13 +132,15 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.PrintEndLine();
 
                 p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("partial struct ").PrintEndLine(typeName);
+                p.PrintBeginLine("partial struct ").Print(typeName).PrintEndLine(" // Internals");
                 p.OpenScope();
                 {
                     WriteHelperConstants(ref p);
                 }
                 p.CloseScope();
                 p.PrintEndLine();
+
+                WriteEnumCaseExtensions(ref p, referenceUnityCollections, enumCaseType);
             }
             p = p.DecreasedIndent();
 
@@ -139,7 +157,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             p.PrintBeginLine("public enum EnumCase : ").PrintEndLine(underlyingType);
             p.OpenScope();
             {
-                p.PrintBeginLine("/// <see cref=\"").Print(typeName).Print(".").Print(undefinedType).PrintEndLine("\"/>");
+                p.PrintBeginLine("/// <inheritdoc cref=\"").Print(typeName).Print(".").Print(undefinedType).PrintEndLine("\"/>");
+                p.PrintBeginLine("/// <seealso cref=\"").Print(typeName).Print(".").Print(undefinedType).PrintEndLine("\"/>");
                 p.PrintLine("Undefined = 0,");
                 p.PrintEndLine();
 
@@ -151,7 +170,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     var def = structs[i];
                     var value = i + 1;
 
-                    p.PrintBeginLine("/// <see cref=\"").Print(typeName).Print(".").Print(def.name).PrintEndLine("\"/>");
+                    p.PrintBeginLine("/// <inheritdoc cref=\"").Print(typeName).Print(".").Print(def.name).PrintEndLine("\"/>");
+                    p.PrintBeginLine("/// <seealso cref=\"").Print(typeName).Print(".").Print(def.name).PrintEndLine("\"/>");
                     p.PrintBeginLine(def.identifier).Print(" = ").Print(value).PrintEndLine(",");
                     p.PrintEndLine();
                 }
@@ -1572,6 +1592,60 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.CloseScope();
                 p.PrintEndLine();
             }
+        }
+
+        private readonly void WriteEnumCaseExtensions(
+              ref Printer p
+            , bool referenceUnityCollections
+            , EnumCaseType enumCaseType
+        )
+        {
+            if (withEnumExtensions == false)
+            {
+                return;
+            }
+
+            var typeName = $"{this.typeName}_{ENUM_CASE_NAME}";
+            var qualifiedName = $"{this.typeName}.{ENUM_CASE_NAME}";
+            var extensionsName = EnumExtensionsDeclaration.GetNameExtensionsClass(typeName);
+            var structName = EnumExtensionsDeclaration.GetNameExtendedStruct(typeName);
+
+            p.PrintBeginLine("partial struct ").Print(structName).PrintEndLine(" // EnumCaseExtended");
+            p.OpenScope();
+            {
+                WriteHelperConstants(ref p);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintBeginLine("static partial class ").Print(extensionsName).PrintEndLine(" // EnumCaseExtensions");
+            p.OpenScope();
+            {
+                WriteHelperConstants(ref p);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.Print("#region ENUM CASE - ENUM EXTENSIONS").PrintEndLine();
+            p.Print("#endregion ========================").PrintEndLine();
+            p.PrintEndLine();
+
+            var enumExtensions = new EnumExtensionsDeclaration(referenceUnityCollections, enumCaseType.MaxByteCount) {
+                GeneratedCode = GENERATED_CODE,
+                ExcludeCoverage = EXCLUDE_COVERAGE,
+                AggressiveInlining = AGGRESSIVE_INLINING,
+                Name = typeName,
+                ExtensionsName = extensionsName,
+                StructName = structName,
+                ParentIsNamespace = parentIsNamespace,
+                FullyQualifiedName = qualifiedName,
+                UnderlyingTypeName = enumCaseType.UnderlyingType,
+                Accessibility = Accessibility.Public,
+                IsDisplayAttributeUsed = false,
+                Members = enumCaseType.Members,
+            };
+
+            enumExtensions.WriteCode(ref p);
         }
 
         private static void WriteHelperConstants(ref Printer p)

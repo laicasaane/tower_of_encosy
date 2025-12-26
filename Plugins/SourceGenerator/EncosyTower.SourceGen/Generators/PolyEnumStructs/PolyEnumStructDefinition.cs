@@ -16,8 +16,10 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         public InterfaceDefinition interfaceDef;
         public EquatableArray<StructDefinition> structs;
         public DefinedUndefinedStruct definedUndefinedStruct;
+        public bool parentIsNamespace;
         public bool sortFieldsBySize;
         public bool autoEquatable;
+        public bool withEnumExtensions;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(typeName) == false
@@ -35,23 +37,29 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             && interfaceDef.Equals(other.interfaceDef)
             && structs.Equals(other.structs)
             && definedUndefinedStruct == other.definedUndefinedStruct
+            && parentIsNamespace == other.parentIsNamespace
             && sortFieldsBySize == other.sortFieldsBySize
             && autoEquatable == other.autoEquatable
+            && withEnumExtensions == other.withEnumExtensions
             ;
 
         public readonly override bool Equals(object obj)
             => obj is PolyEnumStructDefinition other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(
-                  typeName
-                , typeNamespace
-                , interfaceDef
-                , structs
-                , definedUndefinedStruct
-                , sortFieldsBySize
-                , autoEquatable
-            );
+        {
+            var hash = new HashValue();
+            hash.Add(typeName);
+            hash.Add(typeNamespace);
+            hash.Add(interfaceDef);
+            hash.Add(structs);
+            hash.Add(definedUndefinedStruct);
+            hash.Add(parentIsNamespace);
+            hash.Add(sortFieldsBySize);
+            hash.Add(autoEquatable);
+            hash.Add(withEnumExtensions);
+            return hash.ToHashCode();
+        }
 
         internal enum DefinedUndefinedStruct
         {
@@ -154,6 +162,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         internal struct StructDefinition : IEquatable<StructDefinition>
         {
             public string name;
+            public string displayName;
             public string identifier;
             public EquatableArray<ConstructionDefinition> constructions;
             public EquatableArray<FieldDefinition> fields;
@@ -173,6 +182,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             public readonly bool Equals(StructDefinition other)
                 => string.Equals(name, other.name, StringComparison.Ordinal)
+                && string.Equals(displayName, other.displayName, StringComparison.Ordinal)
                 && constructions.Equals(other.constructions)
                 && fields.Equals(other.fields)
                 && properties.Equals(other.properties)
@@ -187,6 +197,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             {
                 var hash = new HashValue();
                 hash.Add(name);
+                hash.Add(displayName);
                 hash.Add(constructions);
                 hash.Add(fields);
                 hash.Add(properties);
