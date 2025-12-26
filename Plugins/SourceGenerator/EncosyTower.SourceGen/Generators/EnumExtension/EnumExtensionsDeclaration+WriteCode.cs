@@ -21,6 +21,10 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         public string GeneratedCode { get; set; } = GENERATED_CODE;
 
+        public string ExcludeCoverage { get; set; } = EXCLUDE_COVERAGE;
+
+        public string AggressiveInlining { get; set; } = AGGRESSIVE_INLINING;
+
         public string WriteCode()
         {
             var p = Printer.DefaultLarge;
@@ -50,7 +54,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         {
             WriteAttribute(ref p);
 
-            p.PrintLine(GeneratedCode);
+            p.PrintLine(GENERATED_CODE);
             p.PrintBeginLine(Accessibility.GetKeyword()).Print(" partial interface I").PrintEndLine(ExtensionsName);
             p = p.IncreasedIndent();
             {
@@ -81,7 +85,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         {
             WriteAttribute(ref p);
 
-            p.PrintLine(GeneratedCode);
+            p.PrintLine(GeneratedCode).PrintLine(ExcludeCoverage);
             p.PrintLine("[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit)]");
             p.PrintBeginLine(Accessibility.GetKeyword()).Print(" readonly partial struct ").Print(StructName)
                 .Print(" : I").PrintEndLine(ExtensionsName);
@@ -93,17 +97,15 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             p = p.DecreasedIndent();
             p.OpenScope();
             {
-                p.PrintLine(GeneratedCode);
                 p.PrintLine("[global::System.Runtime.InteropServices.FieldOffset(0)]");
                 p.PrintBeginLine("public readonly ").Print(FullyQualifiedName).PrintEndLine(" Value;");
                 p.PrintEndLine();
 
-                p.PrintLine(GeneratedCode);
                 p.PrintLine("[global::System.Runtime.InteropServices.FieldOffset(0)]");
                 p.PrintBeginLine("public readonly ").Print(UnderlyingTypeName).PrintEndLine(" UnderlyingValue;");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public ").Print(StructName).Print("(")
                     .Print(FullyQualifiedName).PrintEndLine(" value) : this()");
                 p.OpenScope();
@@ -113,45 +115,44 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public int Length");
                 p.OpenScope();
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("get => ").Print(ExtensionsName).PrintEndLine(".Length;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public string ToStringFast() => ")
                     .Print(ExtensionsName).PrintEndLine(".ToStringFast(this.Value);");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public string ToDisplayStringFast() => ")
                     .Print(ExtensionsName).PrintEndLine(".ToDisplayStringFast(this.Value);");
                 p.PrintEndLine();
 
                 if (ReferenceUnityCollections)
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public ").Print(FixedStringTypeFullyQualifiedName).Print(" ToFixedString() => ")
                         .Print(ExtensionsName).PrintEndLine(".ToFixedString(this.Value);");
                     p.PrintEndLine();
 
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public ").Print(FixedStringTypeFullyQualifiedName).Print(" ToDisplayFixedString() => ")
                         .Print(ExtensionsName).PrintEndLine(".ToDisplayFixedString(this.Value);");
                     p.PrintEndLine();
                 }
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public ").Print(UnderlyingTypeName).Print(" ToUnderlyingValue() => ")
                     .Print(ExtensionsName).PrintEndLine(".ToUnderlyingValue(this.Value);");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine("public bool TryFormat(");
                 p = p.IncreasedIndent();
                 {
@@ -165,105 +166,105 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     .PrintEndLine(".TryFormat(this.Value, destination, out charsWritten, format, provider);");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public bool IsDefined() => ")
                     .Print(ExtensionsName).PrintEndLine(".IsDefined(this.Value);");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public bool IsNameDefined(string name) => ")
                     .Print(ExtensionsName).Print(".IsNameDefined(name, default(")
                     .Print(FullyQualifiedName).PrintEndLine("));");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public bool IsNameDefined(string name, bool allowMatchingMetadataAttribute) => ")
                     .Print(ExtensionsName).Print(".IsNameDefined(name, default(")
                     .Print(FullyQualifiedName).PrintEndLine("), allowMatchingMetadataAttribute);");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public int ToIndex() => ")
                     .Print(ExtensionsName).PrintEndLine(".FindIndex(this.Value);");
                 p.PrintEndLine();
 
                 if (HasFlags)
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public bool Contains(").Print(FullyQualifiedName).Print(" flags) => ")
                         .Print(ExtensionsName).PrintEndLine(".Contains(this.Value, flags);");
                     p.PrintEndLine();
 
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public bool Any(").Print(FullyQualifiedName).Print(" flags) => ")
                         .Print(ExtensionsName).PrintEndLine(".Any(this.Value, flags);");
                     p.PrintEndLine();
 
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public ").Print(FullyQualifiedName).Print(" Unset(").Print(FullyQualifiedName).Print(" flags) => ")
                         .Print(ExtensionsName).PrintEndLine(".Unset(this.Value, flags);");
                     p.PrintEndLine();
 
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public ").Print(FullyQualifiedName).Print(" Set(").Print(FullyQualifiedName).Print(" flags) => ")
                         .Print(ExtensionsName).PrintEndLine(".Set(this.Value, flags);");
                     p.PrintEndLine();
                 }
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public override string ToString() => ")
                     .Print(ExtensionsName).PrintEndLine(".ToStringFast(this.Value);");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public string ToString(string format, global::System.IFormatProvider formatProvider) => ")
                     .Print(ExtensionsName).PrintEndLine(".ToStringFast(this.Value);");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine("public override int GetHashCode() => this.UnderlyingValue.GetHashCode();");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public int CompareTo(").Print(StructName)
                     .PrintEndLine(" other) => this.UnderlyingValue.CompareTo(other.UnderlyingValue);");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public bool Equals(").Print(StructName)
                     .PrintEndLine(" other) => this.UnderlyingValue == other.UnderlyingValue;");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public override bool Equals(object obj) => obj is ").Print(StructName)
                     .PrintEndLine(" other && this.UnderlyingValue == other.UnderlyingValue;");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public static implicit operator ")
                     .Print(StructName).Print("(").Print(FullyQualifiedName)
                     .Print(" value) => new ").Print(StructName).PrintEndLine("(value);");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public static bool operator ==(")
                     .Print(StructName).Print(" left, ")
                     .Print(StructName).PrintEndLine(" right) => left.UnderlyingValue == right.UnderlyingValue;");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public static bool operator !=(")
                     .Print(StructName).Print(" left, ")
                     .Print(StructName).PrintEndLine(" right) => left.UnderlyingValue != right.UnderlyingValue;");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public static bool operator <(")
                     .Print(StructName).Print(" left, ")
                     .Print(StructName).PrintEndLine(" right) => left.UnderlyingValue < right.UnderlyingValue;");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public static bool operator >(")
                     .Print(StructName).Print(" left, ")
                     .Print(StructName).PrintEndLine(" right) => left.UnderlyingValue > right.UnderlyingValue;");
@@ -271,41 +272,41 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
                 if (HasFlags)
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public static ").Print(StructName).Print(" operator ~(")
                         .Print(StructName).Print(" value) => new ")
                         .Print(StructName).PrintEndLine("(~value.Value);");
                     p.PrintEndLine();
 
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public static ").Print(StructName).Print(" operator <<(")
                         .Print(StructName).Print(" value, int bits) => new ")
                         .Print(StructName).Print("((").Print(FullyQualifiedName)
                         .PrintEndLine(")(value.UnderlyingValue << bits));");
                     p.PrintEndLine();
 
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public static ").Print(StructName).Print(" operator >>(")
                         .Print(StructName).Print(" value, int bits) => new ")
                         .Print(StructName).Print("((").Print(FullyQualifiedName)
                         .PrintEndLine(")(value.UnderlyingValue >> bits));");
                     p.PrintEndLine();
 
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public static ").Print(StructName).Print(" operator &(")
                         .Print(StructName).Print(" left, ")
                         .Print(StructName).Print(" right) => new ")
                         .Print(StructName).PrintEndLine("(left.Value & right.Value);");
                     p.PrintEndLine();
 
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public static ").Print(StructName).Print(" operator |(")
                         .Print(StructName).Print(" left, ")
                         .Print(StructName).Print(" right) => new ")
                         .Print(StructName).PrintEndLine("(left.Value | right.Value);");
                     p.PrintEndLine();
 
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public static ").Print(StructName).Print(" operator ^(")
                         .Print(StructName).Print(" left, ")
                         .Print(StructName).Print(" right) => new ")
@@ -323,7 +324,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
             var @this = ParentIsNamespace ? "this " : "";
 
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(GeneratedCode).PrintLine(ExcludeCoverage);
             p.PrintBeginLine(Accessibility.GetKeyword()).Print(" static partial class ").PrintEndLine(ExtensionsName);
             p.OpenScope();
             {
@@ -335,7 +336,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintLine("/// </summary>");
                 }
 
-                p.PrintLine(GeneratedCode);
                 p.PrintLine($"public const int Length = {Members.Count};");
                 p.PrintEndLine();
 
@@ -343,7 +343,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
                 if (OnlyNames == false)
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintLine($"public static {StructName} AsExtended({@this}{FullyQualifiedName} value)");
                     p = p.IncreasedIndent();
                     p.PrintLine($"=> new {StructName}(value);");
@@ -352,7 +352,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
                     foreach (var type in s_primitiveTypes)
                     {
-                        p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                        p.PrintLine(AggressiveInlining);
                         p.PrintLine($"public static {StructName} As{StructName}({@this}{type} value)");
                         p = p.IncreasedIndent();
                         p.PrintLine($"=> new {StructName}(({FullyQualifiedName})({UnderlyingTypeName})value);");
@@ -361,7 +361,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     }
                 }
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine($"public static {UnderlyingTypeName} ToUnderlyingValue({@this}{FullyQualifiedName} value)");
                 p = p.IncreasedIndent();
                 p.PrintLine($"=> ({UnderlyingTypeName})value;");
@@ -415,24 +415,22 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 return;
             }
 
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(GeneratedCode).PrintLine(ExcludeCoverage);
             p.PrintBeginLine("public static partial class ").PrintEndLine(CLASS_FIXED_DISPLAY_NAMES);
             p.OpenScope();
             {
                 foreach (var member in Members)
                 {
-                    p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} {member.name}");
                     p.OpenScope();
                     {
-                        p.PrintLine(AGGRESSIVE_INLINING);
+                        p.PrintLine(AggressiveInlining);
                         p.PrintLine($"get => ({FixedStringTypeFullyQualifiedName}){CLASS_DISPLAY_NAMES}.{member.name};");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
                 }
 
-                p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"public static global::Unity.Collections.NativeArray<{FixedStringTypeFullyQualifiedName}> AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
                 p.OpenScope();
                 {
@@ -458,7 +456,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
                 foreach (var fixedTypeName in GeneratorHelpers.FullyQualifiedFixedStringTypeNames)
                 {
-                    p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintLine($"public static void Get({UNITY_COLLECTIONS_ALLOCATOR} allocator, out global::Unity.Collections.NativeArray<{fixedTypeName}> names)");
                     p.OpenScope();
                     {
@@ -481,7 +478,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
                 }
 
-                p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value)");
                 p = p.IncreasedIndent();
                 p.PrintLine($"=> value switch");
@@ -508,24 +504,22 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 return;
             }
 
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(GeneratedCode).PrintLine(ExcludeCoverage);
             p.PrintBeginLine("public static partial class ").PrintEndLine(CLASS_FIXED_NAMES);
             p.OpenScope();
             {
                 foreach (var member in Members)
                 {
-                    p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} {member.name}");
                     p.OpenScope();
                     {
-                        p.PrintLine(AGGRESSIVE_INLINING);
+                        p.PrintLine(AggressiveInlining);
                         p.PrintLine($"get => ({FixedStringTypeFullyQualifiedName}){CLASS_NAMES}.{member.name};");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
                 }
 
-                p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"public static global::Unity.Collections.NativeArray<{FixedStringTypeFullyQualifiedName}> AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
                 p.OpenScope();
                 {
@@ -551,7 +545,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
                 foreach (var fixedTypeName in GeneratorHelpers.FullyQualifiedFixedStringTypeNames)
                 {
-                    p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintLine($"public static void Get({UNITY_COLLECTIONS_ALLOCATOR} allocator, out global::Unity.Collections.NativeArray<{fixedTypeName}> names)");
                     p.OpenScope();
                     {
@@ -574,7 +567,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
                 }
 
-                p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value)");
                 p = p.IncreasedIndent();
                 p.PrintLine($"=> value switch");
@@ -596,14 +588,12 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         private void WriteClassDisplayNames(ref Printer p)
         {
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(GeneratedCode).PrintLine(ExcludeCoverage);
             p.PrintBeginLine("public static partial class ").PrintEndLine(CLASS_DISPLAY_NAMES);
             p.OpenScope();
             {
                 foreach (var member in Members)
                 {
-                    p.PrintLine(GeneratedCode);
-
                     if (string.IsNullOrEmpty(member.displayName) == false)
                     {
                         p.PrintLine($"public const string {member.name} = \"{member.displayName}\";");
@@ -627,15 +617,14 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.CloseScope("};");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine("public static global::System.ReadOnlyMemory<string> AsMemory() => s_names;");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine("public static global::System.ReadOnlySpan<string> AsSpan() => s_names;");
                 p.PrintEndLine();
 
-                p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"public static string Get({FullyQualifiedName} value)");
                 p = p.IncreasedIndent();
                 p.PrintLine("=> value switch");
@@ -657,13 +646,12 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         private void WriteClassNames(ref Printer p)
         {
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(GeneratedCode).PrintLine(ExcludeCoverage);
             p.PrintBeginLine("public static partial class ").PrintEndLine(CLASS_NAMES);
             p.OpenScope();
             {
                 foreach (var member in Members)
                 {
-                    p.PrintLine(GeneratedCode);
                     p.PrintLine($"public const string {member.name} = nameof({FullyQualifiedName}.{member.name});");
                     p.PrintEndLine();
                 }
@@ -679,15 +667,14 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.CloseScope("};");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine("public static global::System.ReadOnlyMemory<string> AsMemory() => s_names;");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine("public static global::System.ReadOnlySpan<string> AsSpan() => s_names;");
                 p.PrintEndLine();
 
-                p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine($"public static string Get({FullyQualifiedName} value)");
                 p = p.IncreasedIndent();
                 p.PrintLine("=> value switch");
@@ -709,7 +696,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         private void WriteClassUnderlyingValues(ref Printer p)
         {
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(GeneratedCode).PrintLine(ExcludeCoverage);
             p.PrintBeginLine("public static partial class ").PrintEndLine(CLASS_UNDERLYING_VALUES);
             p.OpenScope();
             {
@@ -724,18 +711,18 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.CloseScope("};");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine($"public static global::System.ReadOnlyMemory<{UnderlyingTypeName}> AsMemory() => s_values;");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine($"public static global::System.ReadOnlySpan<{UnderlyingTypeName}> AsSpan() => s_values;");
 
                 if (ReferenceUnityCollections)
                 {
                     p.PrintEndLine();
 
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintLine($"public static global::Unity.Collections.NativeArray<{UnderlyingTypeName}> AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
                     p = p.IncreasedIndent();
                     p.PrintLine($"=> global::Unity.Collections.CollectionHelper.CreateNativeArray<{UnderlyingTypeName}>(s_values, allocator);");
@@ -748,7 +735,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         private void WriteClassValues(ref Printer p)
         {
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(GeneratedCode).PrintLine(ExcludeCoverage);
             p.PrintBeginLine("public static partial class ").PrintEndLine(CLASS_VALUES);
             p.OpenScope();
             {
@@ -763,18 +750,18 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.CloseScope("};");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine($"public static global::System.ReadOnlyMemory<{FullyQualifiedName}> AsMemory() => s_values;");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine($"public static global::System.ReadOnlySpan<{FullyQualifiedName}> AsSpan() => s_values;");
 
                 if (ReferenceUnityCollections)
                 {
                     p.PrintEndLine();
 
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AggressiveInlining);
                     p.PrintLine($"public static global::Unity.Collections.NativeArray<{FullyQualifiedName}> AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
                     p = p.IncreasedIndent();
                     p.PrintLine($"=> global::Unity.Collections.CollectionHelper.CreateNativeArray<{FullyQualifiedName}>(s_values, allocator);");
@@ -803,7 +790,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns><c>true</c> if the value parameter was converted successfully; otherwise, <c>false</c>.</returns>");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static bool TryParse({@this}string name, out {FullyQualifiedName} value)");
             p = p.IncreasedIndent();
             p.PrintLine("=> TryParse(name, out value, false, false);");
@@ -827,7 +814,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns><c>true</c> if the value parameter was converted successfully; otherwise, <c>false</c>.</returns>");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static bool TryParse({@this}string name, out {FullyQualifiedName} value, bool ignoreCase)");
             p = p.IncreasedIndent();
             p.PrintLine("=> TryParse(name, out value, ignoreCase, false);");
@@ -853,7 +840,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns><c>true</c> if the value parameter was converted successfully; otherwise, <c>false</c>.</returns>");
             }
 
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine($"public static bool TryParse({@this}string name, out {FullyQualifiedName} value, bool ignoreCase, bool allowMatchingMetadataAttribute)");
             p.OpenScope();
             {
@@ -956,7 +942,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns><c>true</c> if the value parameter was converted successfully; otherwise, <c>false</c>.</returns>");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static bool TryParse({@this}{SPAN} name, out {FullyQualifiedName} value)");
             p = p.IncreasedIndent();
             p.PrintLine("=> TryParse(name, out value, false, false);");
@@ -980,7 +966,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns><c>true</c> if the value parameter was converted successfully; otherwise, <c>false</c>.</returns>");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static bool TryParse({@this}{SPAN} name, out {FullyQualifiedName} value, bool ignoreCase)");
             p = p.IncreasedIndent();
             p.PrintLine("=> TryParse(name, out value, ignoreCase, false);");
@@ -1006,7 +992,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns><c>true</c> if the value parameter was converted successfully; otherwise, <c>false</c>.</returns>");
             }
 
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine($"public static bool TryParse({@this}{SPAN} name, out {FullyQualifiedName} value, bool ignoreCase, bool allowMatchingMetadataAttribute)");
             p.OpenScope();
             {
@@ -1104,7 +1089,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns><c>true</c> if all of the bit fields that are set in <c>flags</c> are also set in the current instance; otherwise, <c>false</c>.</returns>");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static bool Contains({@this}{FullyQualifiedName} value, {FullyQualifiedName} flags)");
             p = p.IncreasedIndent();
             p.PrintLine($"=> (value & flags) == flags;");
@@ -1119,7 +1104,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns><c>true</c> if any of the bit fields that are set in <c>flags</c> is also set in the current instance; otherwise, <c>false</c>.</returns>");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static bool Any({@this}{FullyQualifiedName} value, {FullyQualifiedName} flags)");
             p = p.IncreasedIndent();
             p.PrintLine($"=> (value & flags) != 0;");
@@ -1134,7 +1119,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns>A new instance without bit fields that are set in <c>flags</c>.</returns>");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static {FullyQualifiedName} Unset({@this}{FullyQualifiedName} value, {FullyQualifiedName} flags)");
             p = p.IncreasedIndent();
             p.PrintLine($"=> value & (~flags);");
@@ -1149,7 +1134,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns>A new instance with bit fields that are set in <c>flags</c>.</returns>");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static {FullyQualifiedName} Set({@this}{FullyQualifiedName} value, {FullyQualifiedName} flags)");
             p = p.IncreasedIndent();
             p.PrintLine($"=> value | flags;");
@@ -1168,7 +1153,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns><c>true</c> if the value exists in the enumeration, <c>false</c> otherwise</returns>");
             }
 
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine($"public static bool IsDefined({@this}{FullyQualifiedName} value)");
             p = p.IncreasedIndent();
             {
@@ -1196,7 +1180,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns><c>true</c> if a member with the name exists in the enumeration, <c>false</c> otherwise</returns>");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static bool IsNameDefined({@this}string name, {FullyQualifiedName} _)");
             p = p.IncreasedIndent();
             p.PrintLine($"=> IsNameDefined(name, default({FullyQualifiedName}), allowMatchingMetadataAttribute: false);");
@@ -1216,7 +1200,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// with a <c>[Display]</c> attribute with the name, <c>false</c> otherwise</returns>");
             }
 
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine($"public static bool IsNameDefined({@this}string name, {FullyQualifiedName} _, bool allowMatchingMetadataAttribute)");
             p.OpenScope();
             {
@@ -1279,7 +1262,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns>The zero-based index if the enum value exists in the enumeration, otherwise -1.</returns>");
             }
 
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine($"public static int FindIndex({@this}{FullyQualifiedName} value)");
             p = p.IncreasedIndent();
             {
@@ -1304,7 +1286,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         private void WriteTryFormat(ref Printer p, string @this)
         {
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public static bool TryFormat(");
             p = p.IncreasedIndent();
             {
@@ -1362,7 +1343,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns>The string representation of the value</returns>");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static string ToStringFast({@this}{FullyQualifiedName} value)");
             p = p.IncreasedIndent();
             p.PrintBeginLine("=> ").Print(CLASS_NAMES).PrintEndLine(".Get(value);");
@@ -1381,7 +1362,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns>The string representation of the value</returns>");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static string ToDisplayStringFast({@this}{FullyQualifiedName} value)");
             p = p.IncreasedIndent();
             p.PrintBeginLine("=> ").Print(CLASS_DISPLAY_NAMES).PrintEndLine(".Get(value);");
@@ -1402,7 +1383,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns>The fixed string representation of the value</returns>");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} ToFixedString({@this}{FullyQualifiedName} value)");
             p = p.IncreasedIndent();
             p.PrintBeginLine("=> ").Print(CLASS_FIXED_NAMES).PrintEndLine(".Get(value);");
@@ -1421,14 +1402,13 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("/// <returns>The fixed string representation of the value</returns>");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} ToDisplayFixedString({@this}{FullyQualifiedName} value)");
             p = p.IncreasedIndent();
             p.PrintBeginLine("=> ").Print(CLASS_FIXED_DISPLAY_NAMES).PrintEndLine(".Get(value);");
             p = p.DecreasedIndent();
             p.PrintEndLine();
 
-            p.PrintLine(GeneratedCode).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine($"private static {FixedStringTypeFullyQualifiedName} ToFixedString({UnderlyingTypeName} value)");
             p.OpenScope();
             {

@@ -89,6 +89,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                             goto CONTINUE;
                         }
 
+                        case "LabelAttribute":
                         case "DescriptionAttribute":
                         case "DisplayAttribute":
                         case "DisplayNameAttribute":
