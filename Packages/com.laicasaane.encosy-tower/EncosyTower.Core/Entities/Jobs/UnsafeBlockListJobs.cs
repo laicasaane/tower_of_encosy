@@ -1,9 +1,11 @@
 #if UNITY_ENTITIES && LATIOS_FRAMEWORK
 
+using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using Latios;
 using Latios.Unsafe;
 using Unity.Burst;
+using Unity.Entities;
 using Unity.Jobs;
 
 namespace EncosyTower.Jobs
@@ -272,6 +274,62 @@ namespace EncosyTower.Jobs
                 list = list,
                 indexToClear = indexToClear,
             };
+        }
+    }
+
+    public static class EntitiesUnsafeParallelBlockListJobExtensions
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ScheduleIfCreated(
+              this ClearUnsafeParallelBlockListJob job
+            , ref SystemState state
+        )
+        {
+            if (job.list.isCreated)
+            {
+                state.Dependency = job.Schedule(state.Dependency);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ScheduleIfCreated<TData>(
+              this ClearUnsafeParallelBlockListJob<TData> job
+            , ref SystemState state
+        )
+            where TData : unmanaged
+        {
+            if (job.list.isCreated)
+            {
+                state.Dependency = job.Schedule(state.Dependency);
+            }
+        }
+    }
+
+    public static class EntitiesUnsafeIndexedBlockListJobExtensions
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ScheduleIfCreated(
+              this ClearUnsafeIndexedBlockListJob job
+            , ref SystemState state
+        )
+        {
+            if (job.list.isCreated)
+            {
+                state.Dependency = job.Schedule(state.Dependency);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ScheduleIfCreated<TData>(
+              this ClearUnsafeIndexedBlockListJob<TData> job
+            , ref SystemState state
+        )
+            where TData : unmanaged
+        {
+            if (job.list.isCreated)
+            {
+                state.Dependency = job.Schedule(state.Dependency);
+            }
         }
     }
 }
