@@ -877,11 +877,19 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         public readonly bool Equals(TypeWrapDeclaration other)
             => string.Equals(FullTypeName, other.FullTypeName, StringComparison.Ordinal)
             && string.Equals(FieldTypeName, other.FieldTypeName, StringComparison.Ordinal)
+            && string.Equals(FieldEnumUnderlyingTypeName, other.FieldEnumUnderlyingTypeName, StringComparison.Ordinal)
             && string.Equals(FieldName, other.FieldName, StringComparison.Ordinal)
+            && ExcludeConverter == other.ExcludeConverter
             ;
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(FullTypeName, FieldTypeName, FieldName);
+            => HashValue.Combine(
+                  FullTypeName
+                , FieldTypeName
+                , FieldEnumUnderlyingTypeName
+                , FieldName
+                , ExcludeConverter
+            );
 
         public readonly struct Operator : IEquatable<Operator>
         {
