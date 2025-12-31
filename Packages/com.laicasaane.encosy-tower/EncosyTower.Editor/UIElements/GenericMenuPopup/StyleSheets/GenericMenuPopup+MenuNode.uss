@@ -33,7 +33,7 @@
 
     margin-left: 15px;
 
-    font-size: 13px;
+    font-size: 12px;
     -unity-text-align: middle-left;
 }
 
@@ -42,14 +42,14 @@
 }
 
 .node-title-root {
-    font-size: 15px;
+    font-size: 12px;
     -unity-font-style: bold;
 }
 
 .plus-sign {
     height: 15px;
-
-    font-size: 20px;
+    padding-top: -5px;
+    font-size: 14px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
