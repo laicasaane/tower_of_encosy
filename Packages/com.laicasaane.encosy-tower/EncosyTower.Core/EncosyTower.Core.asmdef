@@ -13,6 +13,7 @@
         "Unity.Collections",
         "Unity.Entities",
         "Unity.Entities.Hybrid",
+        "Unity.InternalAPIEngineBridge.017",
         "Unity.Localization",
         "Unity.Mathematics",
         "Unity.ResourceManager",
