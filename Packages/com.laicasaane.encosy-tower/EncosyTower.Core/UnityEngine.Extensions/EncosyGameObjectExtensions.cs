@@ -9,6 +9,8 @@ namespace EncosyTower.UnityExtensions
 {
     public static partial class EncosyGameObjectExtensions
     {
+        private const string CLONE_SUFFIX = "(Clone)";
+
         public static Component GetOrAddComponent([NotNull] this GameObject self, [NotNull] Type componentType)
         {
             ThrowIfGameObjectInvalid(self);
@@ -67,12 +69,11 @@ namespace EncosyTower.UnityExtensions
         {
             ThrowIfGameObjectInvalid(self);
 
-            const string SUFFIX = "(Clone)";
             var name = self.name.AsSpan();
 
-            if (name.Length >= SUFFIX.Length)
+            if (name.Length >= CLONE_SUFFIX.Length)
             {
-                self.name = name[..^SUFFIX.Length].ToString();
+                self.name = name[..^CLONE_SUFFIX.Length].ToString();
             }
 
             return self;
