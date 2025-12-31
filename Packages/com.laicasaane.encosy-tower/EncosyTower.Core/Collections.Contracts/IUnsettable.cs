@@ -1,6 +1,6 @@
 namespace EncosyTower.Collections
 {
-    public interface IUnset<T>
+    public interface IUnsettable<T>
     {
         T Unset(T value);
     }

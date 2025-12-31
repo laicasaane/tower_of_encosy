@@ -1,6 +1,6 @@
 namespace EncosyTower.Collections
 {
-    public interface ISet<T>
+    public interface ISettable<T>
     {
         T Set(T value);
     }
