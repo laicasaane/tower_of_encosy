@@ -75,35 +75,35 @@ namespace EncosyTower.Types.Editor
             var tempTypeStore = new TempTypeStore();
             linkXmlTypeStore = new LinkXmlTypeStore();
 
-            GetTypesFromThisAttribute<CacheTypesDerivedFromThisTypeAttribute>(
+            GetTypesAnnotatedWithAttribute<CacheTypesDerivedFromThisTypeAttribute>(
                 playerAssemblyNames, tempTypeStore, baseTypeToAssemblyMap
             );
 
-            GetTypesFromNonThisAttribute<CacheTypesDerivedFromAttribute>(
+            GetTypesProvidedByAttribute<CacheTypesDerivedFromAttribute>(
                 playerAssemblyNames, tempTypeStore, baseTypeToAssemblyMap
             );
 
-            GetTypesFromThisAttribute<CacheTypesWithThisAttributeAttribute>(
+            GetTypesAnnotatedWithAttribute<CacheTypesWithThisAttributeAttribute>(
                 playerAssemblyNames, tempTypeStore, typeAttribToAssemblyMap
             );
 
-            GetTypesFromNonThisAttribute<CacheTypesWithAttributeAttribute>(
+            GetTypesProvidedByAttribute<CacheTypesWithAttributeAttribute>(
                 playerAssemblyNames, tempTypeStore, typeAttribToAssemblyMap
             );
 
-            GetTypesFromThisAttribute<CacheFieldsWithThisAttributeAttribute>(
+            GetTypesAnnotatedWithAttribute<CacheFieldsWithThisAttributeAttribute>(
                 playerAssemblyNames, tempTypeStore, fieldAttribToAssemblyMap
             );
 
-            GetTypesFromNonThisAttribute<CacheFieldsWithAttributeAttribute>(
+            GetTypesProvidedByAttribute<CacheFieldsWithAttributeAttribute>(
                 playerAssemblyNames, tempTypeStore, fieldAttribToAssemblyMap
             );
 
-            GetTypesFromThisAttribute<CacheMethodsWithThisAttributeAttribute>(
+            GetTypesAnnotatedWithAttribute<CacheMethodsWithThisAttributeAttribute>(
                 playerAssemblyNames, tempTypeStore, methodAttribToAssemblyMap
             );
 
-            GetTypesFromNonThisAttribute<CacheMethodsWithAttributeAttribute>(
+            GetTypesProvidedByAttribute<CacheMethodsWithAttributeAttribute>(
                 playerAssemblyNames, tempTypeStore, methodAttribToAssemblyMap
             );
 
@@ -169,7 +169,7 @@ namespace EncosyTower.Types.Editor
                 .ToHashSet();
         }
 
-        private static void GetTypesFromThisAttribute<TAttribute>(
+        private static void GetTypesAnnotatedWithAttribute<TAttribute>(
               HashSet<string> playerAssemblyNames
             , TempTypeStore typeStore
             , Dictionary<Type, HashSet<string>> typeToAssemblyMap
@@ -218,18 +218,18 @@ namespace EncosyTower.Types.Editor
             }
         }
 
-        private static void GetTypesFromNonThisAttribute<TAttribute>(
+        private static void GetTypesProvidedByAttribute<TAttribute>(
               HashSet<string> playerAssemblyNames
             , TempTypeStore typeStore
             , Dictionary<Type, HashSet<string>> typeToAssemblyMap
         )
             where TAttribute : Attribute, ICacheAttributeWithType, ICacheAttributeWithAssemblyNames
         {
-            var runtimeTypeCacheTypes = TypeCache.GetTypesWithAttribute<TAttribute>();
+            var types = TypeCache.GetTypesWithAttribute<TAttribute>();
 
-            foreach (var runtimeTypeCacheType in runtimeTypeCacheTypes)
+            foreach (var type in types)
             {
-                var attributes = runtimeTypeCacheType.GetCustomAttributes<TAttribute>();
+                var attributes = type.GetCustomAttributes<TAttribute>();
 
                 foreach (var attribute in attributes)
                 {
