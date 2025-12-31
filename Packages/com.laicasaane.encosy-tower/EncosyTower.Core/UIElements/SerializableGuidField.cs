@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.UIElements
 {
-    [UxmlElement]
+    [UxmlElement(libraryPath = "Encosy Tower")]
     public partial class SerializableGuidField : TextValueField<SerializableGuid>, IHasBindingPath
     {
         public static readonly string UssClassName = "serializable-guid-field";

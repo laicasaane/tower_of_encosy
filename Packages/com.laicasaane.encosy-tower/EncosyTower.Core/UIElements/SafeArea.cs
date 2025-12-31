@@ -28,9 +28,7 @@ namespace EncosyTower.UIElements
     /// <summary>
     /// SafeArea Container for UI Toolkit.
     /// </summary>
-#if UNITY_6000_0_OR_NEWER
-    [UxmlElement]
-#endif
+    [UxmlElement(libraryPath = "Encosy Tower")]
     public partial class SafeArea : VisualElement
     {
         public static readonly string UssClassName = "safe-area";
@@ -65,34 +63,22 @@ namespace EncosyTower.UIElements
             get => _contentContainer;
         }
 
-#if UNITY_6000_0_OR_NEWER
         [UxmlAttribute("collapse-margins")]
-#endif
         public bool CollapseMargins { get; set; }
 
-#if UNITY_6000_0_OR_NEWER
         [UxmlAttribute("exclude-left")]
-#endif
         public bool ExcludeLeft { get; set; }
 
-#if UNITY_6000_0_OR_NEWER
         [UxmlAttribute("exclude-right")]
-#endif
         public bool ExcludeRight { get; set; }
 
-#if UNITY_6000_0_OR_NEWER
         [UxmlAttribute("exclude-top")]
-#endif
         public bool ExcludeTop { get; set; }
 
-#if UNITY_6000_0_OR_NEWER
         [UxmlAttribute("exclude-bottom")]
-#endif
         public bool ExcludeBottom { get; set; }
 
-#if UNITY_6000_0_OR_NEWER
         [UxmlAttribute("exclude-tvos")]
-#endif
         public bool ExcludeTvOs { get; set; }
 
         private void OnGeometryChanged(GeometryChangedEvent evt)
@@ -161,73 +147,3 @@ namespace EncosyTower.UIElements
         private readonly record struct Offset(float Left, float Right, float Top, float Bottom);
     }
 }
-
-#if !UNITY_6000_0_OR_NEWER
-
-namespace EncosyTower.UIElements
-{
-    using System.Collections.Generic;
-    using UnityEngine.UIElements;
-
-    /// <summary>
-    /// SafeArea Container for UI Toolkit.
-    /// </summary>
-    partial class SafeArea
-    {
-        public new class UxmlFactory : UxmlFactory<SafeArea, UxmlTraits> { }
-
-        public new class UxmlTraits : VisualElement.UxmlTraits
-        {
-            private readonly UxmlBoolAttributeDescription _collapseMarginsAttr = new() {
-                name = "collapse-margins",
-                defaultValue = true
-            };
-
-            private readonly UxmlBoolAttributeDescription _excludeLeftAttr = new() {
-                name = "exclude-left",
-                defaultValue = false
-            };
-
-            private readonly UxmlBoolAttributeDescription _excludeRightAttr = new() {
-                name = "exclude-right",
-                defaultValue = false
-            };
-
-            private readonly UxmlBoolAttributeDescription _excludeTopAttr = new() {
-                name = "exclude-top",
-                defaultValue = false
-            };
-
-            private readonly UxmlBoolAttributeDescription _excludeBottomAttr = new() {
-                name = "exclude-bottom",
-                defaultValue = false
-            };
-
-            private readonly UxmlBoolAttributeDescription _excludeTvOsAttr = new() {
-                name = "exclude-tvos",
-                defaultValue = false
-            };
-
-            public override IEnumerable<UxmlChildElementDescription> uxmlChildElementsDescription
-            {
-                get { yield break; }
-            }
-
-            public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
-            {
-                base.Init(ve, bag, cc);
-
-                var ate = ve as SafeArea;
-                ate.CollapseMargins = _collapseMarginsAttr.GetValueFromBag(bag, cc);
-                ate.ExcludeLeft = _excludeLeftAttr.GetValueFromBag(bag, cc);
-                ate.ExcludeRight = _excludeRightAttr.GetValueFromBag(bag, cc);
-                ate.ExcludeTop = _excludeTopAttr.GetValueFromBag(bag, cc);
-                ate.ExcludeBottom = _excludeBottomAttr.GetValueFromBag(bag, cc);
-                ate.ExcludeTvOs = _excludeTvOsAttr.GetValueFromBag(bag, cc);
-            }
-        }
-    }
-}
-
-#endif
-

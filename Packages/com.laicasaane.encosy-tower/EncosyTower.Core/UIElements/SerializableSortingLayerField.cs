@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.UIElements
 {
-    [UxmlElement]
+    [UxmlElement(libraryPath = "Encosy Tower")]
     public partial class SerializableSortingLayerField : PopupField<SerializableSortingLayer>, IHasBindingPath
     {
         public static readonly string UssClassName = "serializable-soring-layer-field";

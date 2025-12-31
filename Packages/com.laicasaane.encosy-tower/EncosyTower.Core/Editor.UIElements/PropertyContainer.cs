@@ -60,7 +60,7 @@ namespace EncosyTower.Editor.UIElements
     /// }
     /// ]]></code>
     /// </example>
-    [UxmlElement]
+    [UxmlElement(libraryPath = "Encosy Tower")]
     public partial class PropertyContainer : VisualElement, IHasBindingPath
     {
         /// <summary> USS class name of elements of this type. </summary>

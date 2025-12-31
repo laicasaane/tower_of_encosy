@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 namespace EncosyTower.UIElements
 {
 #if UNITY_6000_0_OR_NEWER
-    [UxmlElement]
+    [UxmlElement(libraryPath = "Encosy Tower")]
 #endif
     public partial class VisualSeparator : VisualElement
     {

@@ -3,9 +3,7 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.UIElements
 {
-#if UNITY_6000_0_OR_NEWER
-    [UxmlElement]
-#endif
+    [UxmlElement(libraryPath = "Encosy Tower")]
     public partial class ButtonTextField : VisualElement, IHasBindingPath
     {
         public static readonly string UssClassName = "button-text-field";
@@ -30,13 +28,7 @@ namespace EncosyTower.UIElements
             AddToClassList(UssClassName);
 
             TextField = new(textLabel);
-
-#if UNITY_6000_0_OR_NEWER
             Button = new(iconImage, Button_OnClick);
-#else
-            Button = ButtonAPI.CreateButton(iconImage, Button_OnClick);
-#endif
-
             hierarchy.Add(TextField);
             hierarchy.Add(Button);
         }
