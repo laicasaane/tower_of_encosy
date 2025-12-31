@@ -11,6 +11,7 @@
         public const string DATA_TABLE_ASSET = $"global::{NAMESPACE}.DataTableAsset";
         public const string DATA_PROPERTY_ATTRIBUTE = $"global::{NAMESPACE}.DataPropertyAttribute";
         public const string DATA_CONVERTER_ATTRIBUTE = $"global::{NAMESPACE}.DataConverterAttribute";
+        public const string DATA_COMPARER_ATTRIBUTE = $"global::{NAMESPACE}.DataComparerAttribute";
         public const string SERIALIZABLE_ATTRIBUTE = "global::System.SerializableAttribute";
         public const string SERIALIZE_FIELD_ATTRIBUTE = "global::UnityEngine.SerializeField";
         public const string DATA_MUTABLE_ATTRIBUTE = $"global::{NAMESPACE}.DataMutableAttribute";
@@ -31,6 +32,7 @@
         public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Data.DataGenerator\", \"{SourceGenVersion.VALUE}\")]";
         public const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
 
+        public const string LIST_FAST_TYPE_T = "global::EncosyTower.Collections.ListFast<";
         public const string LIST_TYPE_T = "global::System.Collections.Generic.List<";
         public const string DICTIONARY_TYPE_T = "global::System.Collections.Generic.Dictionary<";
         public const string HASH_SET_TYPE_T = "global::System.Collections.Generic.HashSet<";
@@ -46,6 +48,8 @@
         public const string READONLY_SPAN_TYPE_T = "global::System.ReadOnlySpan<";
         public const string MEMORY_TYPE_T = "global::System.Memory<";
         public const string SPAN_TYPE_T = "global::System.Span<";
+
+        public const string LIST_FAST_EXTENSIONS_UNSAFE = "global::EncosyTower.Collections.Extensions.Unsafe.ListFastExtensionsUnsafe";
 
         public const string GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE = $"[global::{NAMESPACE}.SourceGen.GeneratedPropertyFromField(nameof({{0}}), typeof({{1}}))]";
         public const string GENERATED_FIELD_FROM_PROPERTY_ATTRIBUTE = $"[global::{NAMESPACE}.SourceGen.GeneratedFieldFromProperty(nameof({{0}}))]";

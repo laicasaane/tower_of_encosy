@@ -197,8 +197,9 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                     var fieldType = field.Type;
 
                     if (field.TryGetAttribute(PROPERTY_TYPE_ATTRIBUTE, out var propertyTypeAttrib)
-                        && propertyTypeAttrib.ConstructorArguments is { Length: > 0 } args
-                        && args[0].Value is ITypeSymbol propTypeSymbol)
+                        && propertyTypeAttrib.ConstructorArguments is { Length: > 0 } propertyTypeArgs
+                        && propertyTypeArgs[0].Value is ITypeSymbol propTypeSymbol
+                    )
                     {
                         propertyType = propTypeSymbol;
                         implicitlyConvertible = true;
@@ -239,6 +240,9 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                         FieldCollection = GetCollection(fieldType),
                         ImplicitlyConvertible = implicitlyConvertible,
                     };
+
+                    MakeConverters(fieldRef, field, symbol);
+                    MakeFieldComparer(fieldRef, field, symbol);
 
                     var index = fieldArrayBuilder.Count;
                     orderBuilder.Add(new Order { index = index });
@@ -339,6 +343,9 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                         ImplicitlyConvertible = implicitlyConvertible,
                         DoesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE),
                     };
+
+                    MakeConverters(propRef, property, symbol);
+                    MakeFieldComparer(propRef, property, symbol);
 
                     var index = propArrayBuilder.Count;
                     orderBuilder.Add(new Order { index = index, isPropRef = true });
@@ -675,6 +682,16 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 };
             }
 
+            if (namedType.TryGetGenericType(LIST_FAST_TYPE_T, 1, out var listFastType, out var listFastFullName))
+            {
+                var isReadOnly = listFastFullName.EndsWith(">.ReadOnly");
+
+                return new CollectionRef {
+                    Kind = isReadOnly ? CollectionKind.ReadOnlyList : CollectionKind.List,
+                    ElementType = listFastType.TypeArguments[0],
+                };
+            }
+
             if (namedType.TryGetGenericType(LIST_TYPE_T, 1, out var listType))
             {
                 return new CollectionRef {
@@ -745,6 +762,308 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             return default;
         }
 
+        private static void MakeConverters(
+              MemberRef memberRef
+            , ISymbol targetSymbol
+            , ITypeSymbol containingTypeSymbol
+        )
+        {
+            ITypeSymbol converterType;
+
+            if (targetSymbol.GetAttribute(DATA_CONVERTER_ATTRIBUTE) is AttributeData attrib
+                && attrib.ConstructorArguments.Length > 0
+                && attrib.ConstructorArguments[0].Value is ITypeSymbol converterTypeCandidate
+            )
+            {
+                converterType = converterTypeCandidate;
+            }
+            else
+            {
+                converterType = null;
+            }
+
+            if (converterType is not null)
+            {
+                if (TryGetConvertMethod(converterType, out var fieldConvertMethod, memberRef.PropertyType, memberRef.FieldType))
+                {
+                    memberRef.FieldConverter = Make(converterType, fieldConvertMethod);
+                }
+
+                if (TryGetConvertMethod(converterType, out var propConvertMethod, memberRef.FieldType, memberRef.PropertyType))
+                {
+                    memberRef.PropertyConverter = Make(converterType, propConvertMethod);
+                }
+
+                return;
+            }
+
+            if (TryGetConvertMethod(containingTypeSymbol, out var fieldConvertMethod1, memberRef.PropertyType, memberRef.FieldType))
+            {
+                memberRef.FieldConverter = Make(containingTypeSymbol, fieldConvertMethod1);
+            }
+            else if (TryGetConvertMethod(memberRef.FieldType, out var fieldConvertMethod2, memberRef.PropertyType, memberRef.FieldType))
+            {
+                memberRef.FieldConverter = Make(memberRef.FieldType, fieldConvertMethod2);
+            }
+            else if (TryGetConvertMethod(memberRef.PropertyType, out var fieldConvertMethod3, memberRef.PropertyType, memberRef.FieldType))
+            {
+                memberRef.FieldConverter = Make(memberRef.PropertyType, fieldConvertMethod3);
+            }
+
+            if (TryGetConvertMethod(containingTypeSymbol, out var propConvertMethod1, memberRef.FieldType, memberRef.PropertyType))
+            {
+                memberRef.PropertyConverter = Make(containingTypeSymbol, propConvertMethod1);
+            }
+            else if (TryGetConvertMethod(memberRef.PropertyType, out var propConvertMethod2, memberRef.FieldType, memberRef.PropertyType))
+            {
+                memberRef.PropertyConverter = Make(memberRef.PropertyType, propConvertMethod2);
+            }
+            else if (TryGetConvertMethod(memberRef.FieldType, out var propConvertMethod3, memberRef.FieldType, memberRef.PropertyType))
+            {
+                memberRef.PropertyConverter = Make(memberRef.FieldType, propConvertMethod3);
+            }
+
+            return;
+
+            static string Make(ITypeSymbol type, IMethodSymbol method)
+            {
+                if (method.IsStatic)
+                {
+                    return $"{type.ToFullName()}.{method.Name}";
+                }
+                else
+                {
+                    return $"new {type.ToFullName()}().{method.Name}";
+                }
+            }
+        }
+
+        private static bool TryGetConvertMethod(
+              ITypeSymbol converterType
+            , out IMethodSymbol convertMethod
+            , ITypeSymbol paramType
+            , ITypeSymbol returnType
+        )
+        {
+            if (converterType.IsAbstract)
+            {
+                convertMethod = null;
+                return false;
+            }
+
+            if (converterType is INamedTypeSymbol { IsUnboundGenericType: true })
+            {
+                convertMethod = null;
+                return false;
+            }
+
+            if (converterType.IsValueType == false)
+            {
+                var ctors = converterType.GetMembers(".ctor");
+                IMethodSymbol ctorMethod = null;
+
+                foreach (var ctor in ctors)
+                {
+                    if (ctor is not IMethodSymbol method
+                        || method.DeclaredAccessibility != Accessibility.Public
+                    )
+                    {
+                        continue;
+                    }
+
+                    if (method.Parameters.Length == 0)
+                    {
+                        ctorMethod = method;
+                        break;
+                    }
+                }
+
+                if (ctorMethod == null)
+                {
+                    convertMethod = null;
+                    return false;
+                }
+            }
+
+            var members = converterType.GetMembers("Convert");
+            var comparer = SymbolEqualityComparer.Default;
+
+            foreach (var member in members)
+            {
+                if (member is not IMethodSymbol method
+                    || method.IsGenericMethod
+                    || method.DeclaredAccessibility != Accessibility.Public
+                    || method.Parameters.Length != 1
+                )
+                {
+                    continue;
+                }
+
+                if (comparer.Equals(method.ReturnType, returnType) == false
+                    || comparer.Equals(method.Parameters[0].Type, paramType) == false
+                )
+                {
+                    continue;
+                }
+
+                if (method.IsStatic)
+                {
+                    convertMethod = method;
+                    return true;
+                }
+                else
+                {
+                    convertMethod = method;
+                    return true;
+                }
+            }
+
+            convertMethod = default;
+            return false;
+        }
+
+        private static void MakeFieldComparer(
+              MemberRef memberRef
+            , ISymbol targetSymbol
+            , ITypeSymbol containingTypeSymbol
+        )
+        {
+            ITypeSymbol comparerType;
+
+            if (targetSymbol.GetAttribute(DATA_COMPARER_ATTRIBUTE) is AttributeData attrib
+                && attrib.ConstructorArguments.Length > 0
+                && attrib.ConstructorArguments[0].Value is ITypeSymbol comparerTypeCandidate
+            )
+            {
+                comparerType = comparerTypeCandidate;
+            }
+            else
+            {
+                comparerType = null;
+            }
+
+            if (comparerType is not null)
+            {
+                if (TryGetEqualsMethod(comparerType, out var equalsMethod, memberRef.FieldType))
+                {
+                    memberRef.FieldEqualityComparer = Make(comparerType, equalsMethod);
+                }
+            }
+            else if (TryGetEqualsMethod(containingTypeSymbol, out var equalsMethod1, memberRef.FieldType))
+            {
+                memberRef.FieldEqualityComparer = Make(containingTypeSymbol, equalsMethod1);
+            }
+            else if (TryGetEqualsMethod(memberRef.FieldType, out var equalsMethod2, memberRef.FieldType))
+            {
+                memberRef.FieldEqualityComparer = Make(memberRef.FieldType, equalsMethod2);
+            }
+            else if (TryGetEqualsMethod(memberRef.PropertyType, out var equalsMethod3, memberRef.FieldType))
+            {
+                memberRef.FieldEqualityComparer = Make(memberRef.PropertyType, equalsMethod3);
+            }
+
+            return;
+
+            static string Make(ITypeSymbol type, IMethodSymbol method)
+            {
+                if (method.IsStatic)
+                {
+                    return $"{type.ToFullName()}.{method.Name}";
+                }
+                else
+                {
+                    return $"new {type.ToFullName()}().{method.Name}";
+                }
+            }
+        }
+
+        private static bool TryGetEqualsMethod(
+              ITypeSymbol converterType
+            , out IMethodSymbol equalsMethod
+            , ITypeSymbol paramType
+        )
+        {
+            if (converterType.IsAbstract)
+            {
+                equalsMethod = null;
+                return false;
+            }
+
+            if (converterType is INamedTypeSymbol { IsUnboundGenericType: true })
+            {
+                equalsMethod = null;
+                return false;
+            }
+
+            if (converterType.IsValueType == false)
+            {
+                var ctors = converterType.GetMembers(".ctor");
+                IMethodSymbol ctorMethod = null;
+
+                foreach (var ctor in ctors)
+                {
+                    if (ctor is not IMethodSymbol method
+                        || method.DeclaredAccessibility != Accessibility.Public
+                    )
+                    {
+                        continue;
+                    }
+
+                    if (method.Parameters.Length == 0)
+                    {
+                        ctorMethod = method;
+                        break;
+                    }
+                }
+
+                if (ctorMethod == null)
+                {
+                    equalsMethod = null;
+                    return false;
+                }
+            }
+
+            var members = converterType.GetMembers("Equals");
+            var comparer = SymbolEqualityComparer.Default;
+
+            foreach (var member in members)
+            {
+                if (member is not IMethodSymbol method
+                    || method.IsGenericMethod
+                    || method.DeclaredAccessibility != Accessibility.Public
+                    || method.Parameters.Length != 2
+                )
+                {
+                    continue;
+                }
+
+                var parameters = method.Parameters;
+
+                if (method.ReturnType.IsUnmanagedType == false
+                    || method.ReturnType.ToFullName() != "bool"
+                    || comparer.Equals(parameters[0].Type, paramType) == false
+                    || comparer.Equals(parameters[1].Type, paramType) == false
+                )
+                {
+                    continue;
+                }
+
+                if (method.IsStatic)
+                {
+                    equalsMethod = method;
+                    return true;
+                }
+                else
+                {
+                    equalsMethod = method;
+                    return true;
+                }
+            }
+
+            equalsMethod = default;
+            return false;
+        }
+
         public record struct IDataType(
               bool IsMutable
             , bool WithReadOnlyView
@@ -763,6 +1082,12 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             public CollectionRef PropertyCollection { get; set; }
 
             public Equality FieldEquality { get; set; }
+
+            public string FieldConverter { get; set; }
+
+            public string PropertyConverter { get; set; }
+
+            public string FieldEqualityComparer { get; set; }
 
             public bool ImplicitlyConvertible { get; set; }
         }

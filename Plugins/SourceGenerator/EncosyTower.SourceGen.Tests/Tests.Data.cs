@@ -40,7 +40,6 @@ namespace EncosyTower.Tests.DatabaseAuthoring
 namespace EncosyTower.Tests.Data
 {
     using System;
-    using System.Runtime.InteropServices;
     using EncosyTower.Data;
     using EncosyTower.Tests.DataConverters;
     using Newtonsoft.Json;
@@ -288,6 +287,10 @@ namespace EncosyTower.Tests.Data.ConvertibleIds
 
         public static implicit operator int(IdData id)
             => id.Value;
+
+        public static int Convert(int a) => a;
+
+        public static bool Equals(int a, int b) => a == b;
     }
 
     [DataMutable(DataMutableOptions.WithReadOnlyView)]

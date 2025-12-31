@@ -30,6 +30,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         public const string SERIALIZE_FIELD_ATTRIBUTE = "global::UnityEngine.SerializeField";
 
+        public const string LIST_FAST_TYPE_T = "global::EncosyTower.Collections.ListFast<";
         public const string LIST_TYPE_T = "global::System.Collections.Generic.List<";
         public const string DICTIONARY_TYPE_T = "global::System.Collections.Generic.Dictionary<";
         public const string HASH_SET_TYPE_T = "global::System.Collections.Generic.HashSet<";
@@ -114,7 +115,12 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
             else if (typeRef.Type is INamedTypeSymbol namedType)
             {
-                if (namedType.TryGetGenericType(LIST_TYPE_T, 1, out var listType))
+                if (namedType.TryGetGenericType(LIST_FAST_TYPE_T, 1, out var listFastType))
+                {
+                    collectionTypeRef.Kind = CollectionKind.List;
+                    collectionTypeRef.ElementType = listFastType.TypeArguments[0];
+                }
+                else if (namedType.TryGetGenericType(LIST_TYPE_T, 1, out var listType))
                 {
                     collectionTypeRef.Kind = CollectionKind.List;
                     collectionTypeRef.ElementType = listType.TypeArguments[0];
@@ -304,6 +310,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             foreach (var member in members)
             {
                 if (member is not IMethodSymbol method
+                    || method.IsGenericMethod
                     || method.DeclaredAccessibility != Accessibility.Public
                 )
                 {

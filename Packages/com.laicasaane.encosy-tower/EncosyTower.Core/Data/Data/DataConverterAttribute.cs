@@ -8,9 +8,8 @@ namespace EncosyTower.Data
     /// </summary>
     /// <remarks>
     /// <para>
-    /// <see cref="Type"/> must include a public <c>Convert</c> method
-    /// that accepts a single parameter of any type
-    /// and must return a value of the same type as the annotated member.
+    /// <see cref="Type"/> must include a public <c>Convert</c> method that accepts a single parameter
+    /// of any type and must return a value of the same type as the annotated member.
     /// </para>
     /// </remarks>
     /// <example>
