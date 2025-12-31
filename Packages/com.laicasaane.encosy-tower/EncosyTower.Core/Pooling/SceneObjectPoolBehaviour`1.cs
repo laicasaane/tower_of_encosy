@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using EncosyTower.Collections;
 using EncosyTower.Collections.Extensions;
-using EncosyTower.Common;
 using EncosyTower.Debugging;
 using EncosyTower.UnityExtensions;
 using Unity.Collections;
@@ -113,6 +112,25 @@ namespace EncosyTower.Pooling
             _pool.Prepool(amount, strategy);
 
             IncreaseCapacityBy(amount);
+        }
+
+        /// <summary>
+        /// Prepool the difference between <paramref name="estimatedAmount"/> and <see cref="SceneObjectPool.UnusedCount"/>.
+        /// </summary>
+        /// <param name="estimatedAmount">The estimated amount to be prepooled.</param>
+        /// <returns>The actual amount to be prepooled. The value is either a positive number or zero.</returns>
+        public int PrepoolDifference(int estimatedAmount, ReturningStrategy strategy)
+        {
+            AssertInitialization(this);
+
+            var diffAmount = _pool.PrepoolDifference(estimatedAmount, strategy);
+
+            if (diffAmount > 0)
+            {
+                IncreaseCapacityBy(diffAmount);
+            }
+
+            return diffAmount;
         }
 
         public GameObject RentGameObject(RentingStrategy strategy)

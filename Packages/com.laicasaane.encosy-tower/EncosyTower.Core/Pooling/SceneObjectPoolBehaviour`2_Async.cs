@@ -7,7 +7,6 @@ using System.Threading;
 using EncosyTower.Common;
 using EncosyTower.Loaders;
 using EncosyTower.Tasks;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -26,7 +25,7 @@ namespace EncosyTower.Pooling
         where TKeyComparer : IEqualityComparer<TKey>, new()
     {
         protected async UnityTask InitializeAsync(
-              [NotNull] IReadOnlyCollection<Entry> entries
+              [NotNull] IReadOnlyCollection<KeyEntry<TKey>> entries
             , int desiredJobCount = -1
             , CancellationToken token = default
         )

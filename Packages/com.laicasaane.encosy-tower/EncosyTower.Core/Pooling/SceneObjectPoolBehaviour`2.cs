@@ -53,7 +53,7 @@ namespace EncosyTower.Pooling
 
         protected virtual bool HideDefaultGameObject => false;
 
-        protected void Initialize([NotNull] IReadOnlyCollection<Entry> entries, int desiredJobCount = -1)
+        protected void Initialize([NotNull] IReadOnlyCollection<KeyEntry<TKey>> entries, int desiredJobCount = -1)
         {
             Dispose();
 
@@ -203,6 +203,116 @@ namespace EncosyTower.Pooling
             {
                 IncreaseCapacityBy(count * amount);
             }
+        }
+
+        /// <summary>
+        /// Prepool the difference between <paramref name="estimatedAmount"/> and
+        /// <see cref="SceneObjectPool.UnusedCount"/> of the pool associated with <paramref name="key"/>.
+        /// </summary>
+        /// <param name="key">The key to be prepooled.</param>
+        /// <param name="estimatedAmount">The estimated amount to be prepooled.</param>
+        /// <param name="strategy"></param>
+        /// <returns>The actual amount to be prepooled. The value is either a positive number or zero.</returns>
+        public int PrepoolDifference([NotNull] TKey key, int estimatedAmount, ReturningStrategy strategy)
+        {
+            AssertInitialization(this);
+
+            if (_poolMap.TryGetValue(key, out var record) == false)
+            {
+                return 0;
+            }
+
+            var diffAmount = record.Pool.PrepoolDifference(estimatedAmount, strategy);
+
+            if (diffAmount > 0)
+            {
+                IncreaseCapacityBy(diffAmount);
+            }
+
+            return diffAmount;
+        }
+
+        /// <summary>
+        /// Prepool the difference between <paramref name="estimatedAmountPerKey"/> and
+        /// <see cref="SceneObjectPool.UnusedCount"/> of the pool associated with each of <paramref name="keys"/>.
+        /// </summary>
+        /// <param name="keys">The collection of keys to be prepooled.</param>
+        /// <param name="estimatedAmountPerKey">The estimated amount to be prepooled for each key</param>
+        /// <param name="strategy"></param>
+        /// <returns>The total amount from all keys to be prepooled. The value is either a positive number or zero.</returns>
+        public int PrepoolDifference(ReadOnlySpan<TKey> keys, int estimatedAmountPerKey, ReturningStrategy strategy)
+        {
+            AssertInitialization(this);
+
+            var totalDiffAmount = 0;
+
+            foreach (var key in keys)
+            {
+                if (_poolMap.TryGetValue(key, out var record) == false)
+                {
+                    continue;
+                }
+
+                var diffAmount = record.Pool.PrepoolDifference(estimatedAmountPerKey, strategy);
+                totalDiffAmount += diffAmount;
+            }
+
+            if (totalDiffAmount > 0)
+            {
+                IncreaseCapacityBy(totalDiffAmount);
+            }
+
+            return totalDiffAmount;
+        }
+
+        /// <summary>
+        /// Prepool the difference between <see cref="KeyAmount{TKey}.EstimatedAmount"/> and
+        /// <see cref="SceneObjectPool.UnusedCount"/> of the pool associated with each <see cref="KeyAmount{TKey}.Key"/>.
+        /// </summary>
+        /// <param name="keyAmounts">
+        /// The collection of keys and their estimated amount to be prepooled.
+        /// It must have the same length as <paramref name="prepooledAmounts"/>.
+        /// </param>
+        /// <param name="prepooledAmounts">
+        /// The actual amount associated with each key to be prepooled.
+        /// It must have the same length as <paramref name="keyAmounts"/>.
+        /// </param>
+        /// <param name="strategy"></param>
+        /// <returns>The total amount from all keys to be prepooled. The value is either a positive number or zero.</returns>
+        public int PrepoolDifference(
+              ReadOnlySpan<KeyAmount<TKey>> keyAmounts
+            , Span<int> prepooledAmounts
+            , ReturningStrategy strategy
+        )
+        {
+            AssertInitialization(this);
+
+            var length = keyAmounts.Length;
+
+            Checks.IsTrue(length == prepooledAmounts.Length, "arrays must have the same length.");
+
+            var totalDiffAmount = 0;
+
+            for (var i = 0; i < length; i++)
+            {
+                var (key, estimatedAmount) = keyAmounts[i];
+
+                if (_poolMap.TryGetValue(key, out var record) == false)
+                {
+                    prepooledAmounts[i] = 0;
+                    continue;
+                }
+
+                var diffAmount = prepooledAmounts[i] = record.Pool.PrepoolDifference(estimatedAmount, strategy);
+                totalDiffAmount += diffAmount;
+            }
+
+            if (totalDiffAmount > 0)
+            {
+                IncreaseCapacityBy(totalDiffAmount);
+            }
+
+            return totalDiffAmount;
         }
 
         public GameObject RentGameObject([NotNull] TKey key, RentingStrategy strategy)

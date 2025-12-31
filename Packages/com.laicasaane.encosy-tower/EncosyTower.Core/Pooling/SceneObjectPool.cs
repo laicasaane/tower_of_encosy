@@ -63,11 +63,7 @@ namespace EncosyTower.Pooling
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (value.IsInvalid())
-                {
-                    throw new MissingReferenceException(nameof(Source));
-                }
-
+                Checks.IsTrue(value.IsValid(), "Cannot assign invalid value to Source.");
                 _source = value;
             }
         }
@@ -80,11 +76,7 @@ namespace EncosyTower.Pooling
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (value.IsValid() == false)
-                {
-                    throw new MissingReferenceException(nameof(Scene));
-                }
-
+                Checks.IsTrue(value.IsValid(), "Cannot assign invalid value to Scene.");
                 _scene = value;
             }
         }
@@ -92,28 +84,36 @@ namespace EncosyTower.Pooling
         public bool TrimCloneSuffix { get; set; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Prepool(int amount)
+        public void Prepool(int amount)
             => Prepool(amount, default);
 
-        public bool Prepool(int amount, ReturningStrategy strategy)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Prepool(int amount, ReturningStrategy strategy)
         {
-            if (_scene.IsValid() == false)
-            {
-                throw new MissingReferenceException(nameof(Scene));
-            }
+            var gameObjectIds = NativeArray.CreateFast<GameObjectId>(amount, Allocator.Temp);
+            var transformIds = NativeArray.CreateFast<TransformId>(amount, Allocator.Temp);
+            Prepool(gameObjectIds, transformIds, strategy);
+        }
 
-            if (_source.IsInvalid())
-            {
-                throw new MissingReferenceException(nameof(Source));
-            }
+        public void Prepool(
+              NativeArray<GameObjectId> gameObjectIds
+            , NativeArray<TransformId> transformIds
+            , ReturningStrategy strategy
+        )
+        {
+            Checks.IsTrue(_source.IsValid(), "Source must be initialized before Prepool is called.");
+            Checks.IsTrue(_scene.IsValid(), "Scene must be initialized before Prepool is called.");
+            Checks.IsTrue(gameObjectIds.IsCreated, "gameObjectIds must be created before passing into Prepool.");
+            Checks.IsTrue(transformIds.IsCreated, "transformIds must be created before passing into Prepool.");
+
+            var amount = gameObjectIds.Length;
+
+            Checks.IsTrue(amount == transformIds.Length, "arrays do not have the same size");
 
             if (amount <= 0)
             {
-                return false;
+                return;
             }
-
-            var gameObjectIds = NativeArray.CreateFast<GameObjectId>(amount, Allocator.Temp);
-            var transformIds = NativeArray.CreateFast<TransformId>(amount, Allocator.Temp);
 
             GameObject.InstantiateGameObjects(
 #if UNITY_6000_2_OR_NEWER
@@ -130,6 +130,7 @@ namespace EncosyTower.Pooling
             if (TrimCloneSuffix)
             {
                 TrimCloneSuffixFrom(gameObjectIds, _objectList);
+                _objectList.Clear();
             }
 
             _unusedGameObjectIds.IncreaseCapacityBy(amount);
@@ -142,26 +143,120 @@ namespace EncosyTower.Pooling
             {
                 GameObject.SetGameObjectsActive(gameObjectIds.Reinterpret<EntityId>(), false);
             }
+        }
 
-            return true;
+        public void Prepool(
+              Span<GameObjectId> gameObjectIds
+            , Span<TransformId> transformIds
+            , ReturningStrategy strategy
+        )
+        {
+            Checks.IsTrue(_source.IsValid(), "Source must be initialized before Prepool is called.");
+            Checks.IsTrue(_scene.IsValid(), "Scene must be initialized before Prepool is called.");
 
-            static void TrimCloneSuffixFrom(NativeArray<GameObjectId> gameObjectIds, List<UnityObject> objectList)
+            var amount = gameObjectIds.Length;
+
+            Checks.IsTrue(amount == transformIds.Length, "arrays do not have the same size");
+
+            if (amount <= 0)
             {
-                if (gameObjectIds.IsCreated == false || gameObjectIds.Length < 1)
-                {
-                    return;
-                }
-
-                UnityObjectAPI.ConvertGameObjectIdsToObjectList(gameObjectIds, objectList);
-
-                var objects = objectList.AsReadOnlySpan();
-
-                for (var i = objects.Length - 1; i >= 0; i--)
-                {
-                    var gameObject = (objects[i] as GameObject).AssumeValid();
-                    gameObject.TrimCloneSuffix();
-                }
+                return;
             }
+
+            var gameObjectIdArray = NativeArray.CreateFast<GameObjectId>(amount, Allocator.Temp);
+            var transformIdArray = NativeArray.CreateFast<TransformId>(amount, Allocator.Temp);
+
+            GameObject.InstantiateGameObjects(
+#if UNITY_6000_2_OR_NEWER
+                  _source.GetEntityId()
+#else
+                  _source.GetInstanceID()
+#endif
+                , amount
+                , gameObjectIdArray.Reinterpret<EntityId>()
+                , transformIdArray.Reinterpret<EntityId>()
+                , _scene
+            );
+
+            if (TrimCloneSuffix)
+            {
+                TrimCloneSuffixFrom(gameObjectIdArray, _objectList);
+                _objectList.Clear();
+            }
+
+            gameObjectIdArray.AsReadOnlySpan().CopyTo(gameObjectIds);
+            transformIdArray.AsReadOnlySpan().CopyTo(transformIds);
+
+            _unusedGameObjectIds.IncreaseCapacityBy(amount);
+            _unusedTransformIds.IncreaseCapacityBy(amount);
+
+            _unusedGameObjectIds.AddRange(gameObjectIds);
+            _unusedTransformIds.AddRange(transformIds);
+
+            if (new ReturnOperation(ReturningStrategy, strategy).ShouldDeactivate())
+            {
+                GameObject.SetGameObjectsActive(gameObjectIdArray.Reinterpret<EntityId>(), false);
+            }
+        }
+
+        /// <summary>
+        /// Prepool the difference between <paramref name="estimatedAmount"/> and <see cref="UnusedCount"/>.
+        /// </summary>
+        /// <param name="estimatedAmount">The estimated amount to be prepooled.</param>
+        /// <returns>The actual amount to be prepooled. The value is either a positive number or zero.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int PrepoolDifference(int estimatedAmount)
+            => PrepoolDifference(estimatedAmount, default);
+
+        /// <inheritdoc cref="PrepoolDifference(int)"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int PrepoolDifference(int estimatedAmount, ReturningStrategy strategy)
+        {
+            var diffAmount = Mathf.Max(estimatedAmount - UnusedCount, 0);
+
+            if (diffAmount > 0)
+            {
+                Prepool(diffAmount, strategy);
+            }
+
+            return diffAmount;
+        }
+
+        public int PrepoolDifference(
+              NativeArray<GameObjectId> gameObjectIds
+            , NativeArray<TransformId> transformIds
+            , ReturningStrategy strategy
+        )
+        {
+            Checks.IsTrue(gameObjectIds.IsCreated, "gameObjectIds must be created before passing into Prepool.");
+            Checks.IsTrue(transformIds.IsCreated, "transformIds must be created before passing into Prepool.");
+            return PrepoolDifference(gameObjectIds.AsSpan(), transformIds.AsSpan(), strategy);
+        }
+
+        public int PrepoolDifference(
+              Span<GameObjectId> gameObjectIds
+            , Span<TransformId> transformIds
+            , ReturningStrategy strategy
+        )
+        {
+            var estimatedAmount = gameObjectIds.Length;
+
+            Checks.IsTrue(estimatedAmount == transformIds.Length, "arrays do not have the same size");
+
+            var diffAmount = Mathf.Max(estimatedAmount - UnusedCount, 0);
+
+            if (diffAmount > 0)
+            {
+                var gameObjectIdArray = NativeArray.CreateFast<GameObjectId>(diffAmount, Allocator.Temp);
+                var transformIdArray = NativeArray.CreateFast<TransformId>(diffAmount, Allocator.Temp);
+
+                Prepool(gameObjectIdArray, transformIdArray, strategy);
+
+                gameObjectIdArray.AsReadOnlySpan().CopyTo(gameObjectIds);
+                transformIdArray.AsReadOnlySpan().CopyTo(transformIds);
+            }
+
+            return diffAmount;
         }
 
         public void ReleaseInstances(int keep, Action<GameObject> onReleased = null)
@@ -200,10 +295,7 @@ namespace EncosyTower.Pooling
 
         public GameObject RentGameObject(RentingStrategy strategy)
         {
-            if (UnusedCount < 1)
-            {
-                Prepool(1);
-            }
+            PrepoolDifference(1);
 
             var last = UnusedCount - 1;
             var result = _unusedGameObjectIds[last];
@@ -224,10 +316,7 @@ namespace EncosyTower.Pooling
 
         public Transform RentTransform(RentingStrategy strategy)
         {
-            if (UnusedCount < 1)
-            {
-                Prepool(1);
-            }
+            PrepoolDifference(1);
 
             var last = UnusedCount - 1;
             var result = _unusedTransformIds[last];
@@ -248,10 +337,7 @@ namespace EncosyTower.Pooling
 
         public GameObjectId RentGameObjectId(RentingStrategy strategy)
         {
-            if (UnusedCount < 1)
-            {
-                Prepool(1);
-            }
+            PrepoolDifference(1);
 
             var last = UnusedCount - 1;
             var result = _unusedGameObjectIds[last];
@@ -272,10 +358,7 @@ namespace EncosyTower.Pooling
 
         public TransformId RentTransformId(RentingStrategy strategy)
         {
-            if (UnusedCount < 1)
-            {
-                Prepool(1);
-            }
+            PrepoolDifference(1);
 
             var last = UnusedCount - 1;
             var id = _unusedGameObjectIds[last];
@@ -312,7 +395,7 @@ namespace EncosyTower.Pooling
 
             Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
 
-            Prepool(length - UnusedCount);
+            PrepoolDifference(length);
 
             var startIndex = UnusedCount - length;
 
@@ -329,6 +412,8 @@ namespace EncosyTower.Pooling
             {
                 GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
             }
+
+            _objectList.Clear();
         }
 
         public void Rent(
@@ -343,7 +428,7 @@ namespace EncosyTower.Pooling
             Checks.IsTrue(length == gameObjectIds.Length && length == transformIds.Length, "arrays do not have the same size");
             Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
 
-            Prepool(length - UnusedCount);
+            PrepoolDifference(length);
 
             var startIndex = UnusedCount - length;
 
@@ -359,6 +444,8 @@ namespace EncosyTower.Pooling
             {
                 GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
             }
+
+            _objectList.Clear();
         }
 
         public void Rent(
@@ -373,7 +460,7 @@ namespace EncosyTower.Pooling
             Checks.IsTrue(length == gameObjectIds.Length && length == transformIds.Length, "arrays do not have the same size");
             Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
 
-            Prepool(length - UnusedCount);
+            PrepoolDifference(length);
 
             var startIndex = UnusedCount - length;
 
@@ -389,6 +476,8 @@ namespace EncosyTower.Pooling
             {
                 GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
             }
+
+            _objectList.Clear();
         }
 
         public void Rent(
@@ -408,7 +497,7 @@ namespace EncosyTower.Pooling
 
             Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
 
-            Prepool(length - UnusedCount);
+            PrepoolDifference(length);
 
             var startIndex = UnusedCount - length;
             var transformIds = NativeArray.CreateFast<TransformId>(length, Allocator.Temp);
@@ -426,6 +515,8 @@ namespace EncosyTower.Pooling
             {
                 GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
             }
+
+            _objectList.Clear();
         }
 
         public void Rent(
@@ -440,7 +531,7 @@ namespace EncosyTower.Pooling
             Checks.IsTrue(length == transforms.Length && length == transformIds.Length, "arrays do not have the same size");
             Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
 
-            Prepool(length - UnusedCount);
+            PrepoolDifference(length);
 
             var startIndex = UnusedCount - length;
             var gameObjectIds = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
@@ -458,6 +549,8 @@ namespace EncosyTower.Pooling
             {
                 GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
             }
+
+            _objectList.Clear();
         }
 
         public void Rent(Span<GameObject> gameObjects, Span<Transform> transforms, RentingStrategy strategy)
@@ -467,7 +560,7 @@ namespace EncosyTower.Pooling
             Checks.IsTrue(length == transforms.Length, "arrays do not have the same size");
             Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
 
-            Prepool(length - UnusedCount);
+            PrepoolDifference(length);
 
             var startIndex = UnusedCount - length;
             var gameObjectIds = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
@@ -486,6 +579,8 @@ namespace EncosyTower.Pooling
             {
                 GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
             }
+
+            _objectList.Clear();
         }
 
         public void Rent(Span<GameObject> gameObjects, RentingStrategy strategy)
@@ -494,7 +589,7 @@ namespace EncosyTower.Pooling
 
             Checks.IsTrue(length > 0, "array does not have enough space to contain the items");
 
-            Prepool(length - UnusedCount);
+            PrepoolDifference(length);
 
             var startIndex = UnusedCount - length;
             var gameObjectIds = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
@@ -512,6 +607,8 @@ namespace EncosyTower.Pooling
             {
                 GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
             }
+
+            _objectList.Clear();
         }
 
         public void Rent(Span<Transform> transforms, RentingStrategy strategy)
@@ -520,7 +617,7 @@ namespace EncosyTower.Pooling
 
             Checks.IsTrue(length > 0, "array does not have enough space to contain the items");
 
-            Prepool(length - UnusedCount);
+            PrepoolDifference(length);
 
             var startIndex = UnusedCount - length;
             var gameObjectIds = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
@@ -538,6 +635,8 @@ namespace EncosyTower.Pooling
             {
                 GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
             }
+
+            _objectList.Clear();
         }
 
         public void Rent(Span<GameObjectId> gameObjectIds, Span<TransformId> transformIds, RentingStrategy strategy)
@@ -547,7 +646,7 @@ namespace EncosyTower.Pooling
             Checks.IsTrue(length == transformIds.Length, "arrays do not have the same size");
             Checks.IsTrue(length > 0, "arrays do not have enough space to contain the items");
 
-            Prepool(length - UnusedCount);
+            PrepoolDifference(length);
 
             var startIndex = UnusedCount - length;
 
@@ -569,7 +668,7 @@ namespace EncosyTower.Pooling
 
             Checks.IsTrue(length > 0, "\"gameObjectIds\" array does not have enough space to contain the items");
 
-            Prepool(length - UnusedCount);
+            PrepoolDifference(length);
 
             var startIndex = UnusedCount - length;
             _unusedGameObjectIds.CopyTo(startIndex, gameObjectIds);
@@ -589,7 +688,7 @@ namespace EncosyTower.Pooling
 
             Checks.IsTrue(length > 0, "\"transformIds\" array does not have enough space to contain the items");
 
-            Prepool(length - UnusedCount);
+            PrepoolDifference(length);
 
             var startIndex = UnusedCount - length;
             var gameObjectIds = NativeArray.CreateFast<GameObjectId>(length, Allocator.Temp);
@@ -604,6 +703,58 @@ namespace EncosyTower.Pooling
             {
                 GameObject.SetGameObjectsActive(MemoryMarshal.Cast<GameObjectId, EntityId>(gameObjectIds), true);
             }
+        }
+
+        /// <summary>
+        /// Remove a number of <see cref="GameObjectId"/> and <see cref="TransformId"/> from the pool.
+        /// </summary>
+        /// <param name="estimatedAmount">The amount to be removed.</param>
+        /// <returns>The actual amount to be removed.</returns>
+        /// <remarks>
+        /// The items are always removed from the end of the internal containers.
+        /// </remarks>
+        public int RemoveUnused(int estimatedAmount)
+        {
+            var startIndex = Mathf.Max(UnusedCount - estimatedAmount, 0);
+            var length = UnusedCount - startIndex;
+
+            _unusedGameObjectIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
+
+            return length;
+        }
+
+        /// <summary>
+        /// Remove a number of <see cref="GameObjectId"/> and <see cref="TransformId"/> from the pool.
+        /// </summary>
+        /// <param name="gameObjectIds">
+        /// The buffer to contain the removed values of <see cref="GameObjectId"/>.
+        /// It must have the same length as <paramref name="transformIds"/>.
+        /// </param>
+        /// <param name="transformIds">
+        /// The buffer to contain the removed values of <see cref="TransformId"/>.
+        /// It must have the same length as <paramref name="gameObjectIds"/>.
+        /// </param>
+        /// <returns>The actual amount to be removed.</returns>
+        /// <remarks>
+        /// The items are always removed from the end of the internal containers.
+        /// </remarks>
+        public int RemoveUnused(Span<GameObjectId> gameObjectIds, Span<TransformId> transformIds)
+        {
+            var estimatedAmount = gameObjectIds.Length;
+
+            Checks.IsTrue(estimatedAmount == transformIds.Length, "arrays do not have the same size");
+
+            var startIndex = Mathf.Max(UnusedCount - estimatedAmount, 0);
+            var length = UnusedCount - startIndex;
+
+            _unusedTransformIds.CopyTo(startIndex, transformIds[..length]);
+            _unusedGameObjectIds.CopyTo(startIndex, gameObjectIds[..length]);
+
+            _unusedGameObjectIds.RemoveRange(startIndex, length);
+            _unusedTransformIds.RemoveRange(startIndex, length);
+
+            return length;
         }
 
         public void Return(GameObject gameObject, ReturningStrategy strategy)
@@ -946,6 +1097,39 @@ namespace EncosyTower.Pooling
             _unusedGameObjectIds.Clear();
             _unusedTransformIds.Clear();
             _objectList.Clear();
+        }
+
+        private static void TrimCloneSuffixFrom(Span<GameObjectId> gameObjectIds, List<UnityObject> objectList)
+        {
+            if (gameObjectIds.Length < 1)
+            {
+                return;
+            }
+
+            UnityObjectAPI.ConvertGameObjectIdsToObjectList(gameObjectIds, objectList);
+            TrimCloneSuffixFrom(objectList);
+        }
+
+        private static void TrimCloneSuffixFrom(NativeArray<GameObjectId> gameObjectIds, List<UnityObject> objectList)
+        {
+            if (gameObjectIds.IsCreated == false || gameObjectIds.Length < 1)
+            {
+                return;
+            }
+
+            UnityObjectAPI.ConvertGameObjectIdsToObjectList(gameObjectIds, objectList);
+            TrimCloneSuffixFrom(objectList);
+        }
+
+        private static void TrimCloneSuffixFrom(List<UnityObject> objectList)
+        {
+            var objects = objectList.AsReadOnlySpan();
+
+            for (var i = objects.Length - 1; i >= 0; i--)
+            {
+                var gameObject = (objects[i] as GameObject).AssumeValid();
+                gameObject.TrimCloneSuffix();
+            }
         }
     }
 }
