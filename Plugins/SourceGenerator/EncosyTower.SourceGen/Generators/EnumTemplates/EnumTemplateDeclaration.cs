@@ -385,6 +385,8 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                         goto RETURN;
                     }
 
+                    case "LabelAttribute":
+                    case "DescriptionAttribute":
                     case "DisplayAttribute":
                     case "DisplayNameAttribute":
                     case "InspectorNameAttribute":
