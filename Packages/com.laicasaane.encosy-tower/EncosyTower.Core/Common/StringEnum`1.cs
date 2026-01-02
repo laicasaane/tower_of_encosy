@@ -21,7 +21,7 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal StringEnum(string value)
+        public StringEnum(string value)
         {
             _value = value;
         }
@@ -31,6 +31,14 @@ namespace EncosyTower.Common
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _value.IsNotEmpty();
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator StringEnum<TEnum>(string value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator string(StringEnum<TEnum> value)
+            => value._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator StringEnum<TEnum>(TEnum value)
