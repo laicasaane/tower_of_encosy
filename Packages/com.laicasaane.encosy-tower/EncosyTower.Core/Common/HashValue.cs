@@ -558,9 +558,7 @@ namespace EncosyTower.Common
         /// <returns>The new hash code.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static HashValue CombineEach<T>(ReadOnlySpan<T> items)
-            => items == null
-            ? new(BASIS)
-            : new(GetHashCodeEach(BASIS, items));
+            => new(GetHashCodeEach(BASIS, items));
 
         /// <summary>
         /// Takes the hash code of the specified items.
@@ -577,9 +575,7 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static HashValue CombineEach<T, TComparer>(ReadOnlySpan<T> items, [NotNull] TComparer comparer)
             where TComparer : IEqualityComparer<T>
-            => items == null
-            ? new(BASIS)
-            : new(GetHashCodeEach(BASIS, items, comparer));
+            => new(GetHashCodeEach(BASIS, items, comparer));
 
         /// <summary>
         /// Takes the hash code of the specified items.
@@ -692,9 +688,7 @@ namespace EncosyTower.Common
         /// <param name="items">The collection of items to add to the hash code.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public HashValue AddEach<T>(ReadOnlySpan<T> items)
-            => items == null
-            ? new(_value)
-            : new(GetHashCodeEach(_value, items));
+            => new(GetHashCodeEach(_value, items));
 
         /// <summary>
         /// Adds a collection of items to the hash code, specifying the type that provides the hash code function.
@@ -710,9 +704,7 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public HashValue AddEach<T, TComparer>(ReadOnlySpan<T> items, [NotNull] TComparer comparer)
             where TComparer : IEqualityComparer<T>
-            => items == null
-            ? new(_value)
-            : new(GetHashCodeEach(_value, items, comparer));
+            => new(GetHashCodeEach(_value, items, comparer));
 
         /// <summary>
         /// Adds a collection of items to the hash code.
