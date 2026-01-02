@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.SystemExtensions;
 
 namespace EncosyTower.Collections.Extensions
 {
@@ -128,6 +129,36 @@ namespace EncosyTower.Collections.Extensions
             {
                 dest.TryAdd(convertKey(key), value);
             }
+        }
+
+        public static bool Overlaps<TKey, TValue>(this Dictionary<TKey, TValue> self, Dictionary<TKey, TValue> other)
+            where TKey : IEquatable<TKey>
+            where TValue : IEquatable<TValue>
+        {
+            if (self.ReferenceEquals(other, out var bothIsNotNull) == false || bothIsNotNull == false)
+            {
+                return false;
+            }
+
+            if (self.Count != other.Count)
+            {
+                return false;
+            }
+
+            if (self.Count == 0)
+            {
+                return true;
+            }
+
+            foreach (var (key, value) in self)
+            {
+                if (other.TryGetValue(key, out var otherValue) == false || value.Equals(otherValue) == false)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
