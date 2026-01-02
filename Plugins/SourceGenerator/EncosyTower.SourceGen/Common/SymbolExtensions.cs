@@ -537,6 +537,34 @@ namespace EncosyTower.SourceGen
             return false;
         }
 
+        public static bool TryGetGenericFromContainingType(
+              this INamedTypeSymbol symbol
+            , string startWith
+            , int genericArgumentCount
+            , out INamedTypeSymbol result
+        )
+        {
+            var baseType = symbol.ContainingType;
+
+            while (baseType != null)
+            {
+                var fullName = baseType.ToFullName();
+
+                if (fullName.StartsWith(startWith)
+                    && baseType.TypeArguments.Length == genericArgumentCount
+                )
+                {
+                    result = baseType;
+                    return true;
+                }
+
+                baseType = baseType.BaseType;
+            }
+
+            result = null;
+            return false;
+        }
+
         public static bool TryGetGenericType(
               this INamedTypeSymbol symbol
             , string startWith

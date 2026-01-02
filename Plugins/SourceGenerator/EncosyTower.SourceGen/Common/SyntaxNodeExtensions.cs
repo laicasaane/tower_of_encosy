@@ -114,8 +114,11 @@ namespace EncosyTower.SourceGen
         }
 
         public static string GetGeneratedSourceFilePath(this SyntaxTree syntaxTree, string assemblyName, string generatorName)
+            => GetGeneratedSourceFilePath(syntaxTree, assemblyName, generatorName, string.Empty);
+
+        public static string GetGeneratedSourceFilePath(this SyntaxTree syntaxTree, string assemblyName, string generatorName, string typeName)
         {
-            var fileName = GetGeneratedSourceFileName(syntaxTree, generatorName);
+            var fileName = GetGeneratedSourceFileName(syntaxTree, generatorName, 0, typeName);
 
             if (SourceGenHelpers.CanWriteToProjectPath)
             {

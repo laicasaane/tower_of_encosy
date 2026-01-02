@@ -278,6 +278,7 @@ namespace EncosyTower.Tests.DataConverters
 
 namespace EncosyTower.Tests.Data.ConvertibleIds
 {
+    using EncosyTower.Collections;
     using EncosyTower.Data;
     using EncosyTower.Databases;
 
@@ -285,12 +286,16 @@ namespace EncosyTower.Tests.Data.ConvertibleIds
     {
         [DataProperty] public readonly int Value => Get_Value();
 
+        [DataProperty] public readonly ListFast<int>.ReadOnly Values => Get_Values();
+
         public static implicit operator int(IdData id)
             => id.Value;
 
         public static int Convert(int a) => a;
 
         public static bool Equals(int a, int b) => a == b;
+
+        public static bool Equals<T, U>(T a, T b) => false;
     }
 
     [DataMutable(DataMutableOptions.WithReadOnlyView)]

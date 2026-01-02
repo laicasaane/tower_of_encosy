@@ -215,12 +215,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             {
                 string casting;
 
-                if (prop.FieldCollection.Kind == CollectionKind.List && IsMutable == false)
-                {
-                    casting = $"{LIST_FAST_EXTENSIONS_UNSAFE}.GetListUnsafe";
-                    mustCast = true;
-                }
-                else if (string.IsNullOrEmpty(prop.FieldConverter) == false)
+                if (string.IsNullOrEmpty(prop.FieldConverter) == false)
                 {
                     casting = prop.FieldConverter;
                     mustCast = true;
@@ -243,10 +238,6 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 )
                 {
                     p.PrintIf(mustCast, casting).PrintEndLine("(value);");
-                }
-                else if (prop.FieldCollection.Kind == CollectionKind.Array)
-                {
-                    p.PrintIf(mustCast, casting).PrintEndLine("(value.ToArray());");
                 }
                 else if (mustCast)
                 {
@@ -426,12 +417,48 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
                 foreach (var field in FieldRefs)
                 {
-                    p.PrintLine($"hash.Add({field.Field.Name});");
+                    var collectionKind = field.FieldCollection.Kind;
+
+                    p.PrintBeginLineIf(
+                          collectionKind == CollectionKind.NotCollection
+                        , "hash.Add("
+                        , "hash.AddEach("
+                    );
+
+                    if (collectionKind == CollectionKind.Array)
+                    {
+                        p.Print(ARRAY_EXTENSIONS).Print(".AsReadOnlySpan");
+                    }
+                    else if (collectionKind == CollectionKind.List)
+                    {
+                        p.Print(LIST_EXTENSIONS).Print(".AsReadOnlySpan");
+                    }
+
+                    p.Print("(").Print(field.Field.Name)
+                        .PrintEndLine("));");
                 }
 
                 foreach (var prop in PropRefs)
                 {
-                    p.PrintLine($"hash.Add({prop.FieldName});");
+                    var collectionKind = prop.FieldCollection.Kind;
+
+                    p.PrintBeginLineIf(
+                          prop.FieldCollection.Kind == CollectionKind.NotCollection
+                        , "hash.Add("
+                        , "hash.AddEach("
+                    );
+
+                    if (collectionKind == CollectionKind.Array)
+                    {
+                        p.Print(ARRAY_EXTENSIONS).Print(".AsReadOnlySpan");
+                    }
+                    else if (collectionKind == CollectionKind.List)
+                    {
+                        p.Print(LIST_EXTENSIONS).Print(".AsReadOnlySpan");
+                    }
+
+                    p.Print("(").Print(prop.FieldName)
+                        .PrintEndLine("));");
                 }
 
                 p.PrintLine("return hash;");

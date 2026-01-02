@@ -49,6 +49,8 @@
         public const string MEMORY_TYPE_T = "global::System.Memory<";
         public const string SPAN_TYPE_T = "global::System.Span<";
 
+        public const string ARRAY_EXTENSIONS = "global::EncosyTower.Collections.Extensions.EncosyArrayExtensions";
+        public const string LIST_EXTENSIONS = "global::EncosyTower.Collections.Extensions.EncosyListExtensions";
         public const string LIST_FAST_EXTENSIONS_UNSAFE = "global::EncosyTower.Collections.Extensions.Unsafe.ListFastExtensionsUnsafe";
 
         public const string GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE = $"[global::{NAMESPACE}.SourceGen.GeneratedPropertyFromField(nameof({{0}}), typeof({{1}}))]";
