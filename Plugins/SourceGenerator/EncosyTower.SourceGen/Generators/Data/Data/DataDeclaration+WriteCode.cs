@@ -565,12 +565,18 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
                     if (string.IsNullOrEmpty(fieldRef.FieldEqualityComparer))
                     {
-                        var equality = fieldRef.FieldEquality;
-                        var fieldType = equality.IsNullable ? fieldRef.FieldType.GetTypeFromNullable() : fieldRef.FieldType;
-                        var fieldTypeName = fieldType.ToFullName();
-                        previous = true;
+                        if (TryWriteCollectionEquality(ref p, fieldName, fieldRef.FieldCollection, and) == false)
+                        {
+                            var equality = fieldRef.FieldEquality;
+                            var fieldType = equality.IsNullable
+                                ? fieldRef.FieldType.GetTypeFromNullable()
+                                : fieldRef.FieldType;
 
-                        WriteEquality(ref p, fieldName, fieldTypeName, equality, and, "&&", fieldType.IsReferenceType);
+                            var fieldTypeName = fieldType.ToFullName();
+                            previous = true;
+
+                            WriteEquality(ref p, fieldName, fieldTypeName, equality, and, "&&", fieldType.IsReferenceType);
+                        }
                     }
                     else
                     {
@@ -589,12 +595,18 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
                     if (string.IsNullOrEmpty(propRef.FieldEqualityComparer))
                     {
-                        var equality = propRef.FieldEquality;
-                        var fieldType = equality.IsNullable ? propRef.FieldType.GetTypeFromNullable() : propRef.FieldType;
-                        var fieldTypeName = GetFieldTypeName(fieldType, propRef.FieldCollection);
-                        previous = true;
+                        if (TryWriteCollectionEquality(ref p, fieldName, propRef.FieldCollection, and) == false)
+                        {
+                            var equality = propRef.FieldEquality;
+                            var fieldType = equality.IsNullable
+                                ? propRef.FieldType.GetTypeFromNullable()
+                                : propRef.FieldType;
 
-                        WriteEquality(ref p, fieldName, fieldTypeName, equality, and, "&&", fieldType.IsReferenceType);
+                            var fieldTypeName = GetFieldTypeName(fieldType, propRef.FieldCollection);
+                            previous = true;
+
+                            WriteEquality(ref p, fieldName, fieldTypeName, equality, and, "&&", fieldType.IsReferenceType);
+                        }
                     }
                     else
                     {
@@ -607,6 +619,54 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             }
             p = p.DecreasedIndent();
             p.PrintLine(";");
+
+            static bool TryWriteCollectionEquality(
+                  ref Printer p
+                , string fieldName
+                , in CollectionRef collection
+                , string and
+            )
+            {
+                if (IsSupported(collection) == false)
+                {
+                    return false;
+                }
+
+                if (collection.Kind is CollectionKind.Array or CollectionKind.List)
+                {
+                    p.PrintBeginLine(and).Print(" ").Print(MEMORY_EXTENSIONS).Print(".SequenceEqual(")
+                        .PrintIf(collection.Kind is CollectionKind.Array, ARRAY_EXTENSIONS, LIST_EXTENSIONS)
+                        .Print(".AsReadOnlySpan")
+                        .Print("(this.").Print(fieldName).Print("), ")
+                        .PrintIf(collection.Kind is CollectionKind.Array, ARRAY_EXTENSIONS, LIST_EXTENSIONS)
+                        .Print(".AsReadOnlySpan")
+                        .Print("(other.").Print(fieldName).PrintEndLine("))");
+                    return true;
+                }
+
+                if (collection.Kind is CollectionKind.HashSet or CollectionKind.Dictionary)
+                {
+                    p.PrintBeginLine(and).Print(" ")
+                        .PrintIf(collection.Kind is CollectionKind.HashSet, HASH_SET_API, DICTIONARY_EXTENSIONS)
+                        .Print(".Overlaps(")
+                        .Print("this.").Print(fieldName)
+                        .Print(", other.").Print(fieldName).PrintEndLine(")");
+                    return true;
+                }
+
+                return false;
+            }
+
+            static bool IsSupported(in CollectionRef collection)
+            {
+                return collection.Kind switch {
+                    CollectionKind.Array
+                    or CollectionKind.List
+                    or CollectionKind.HashSet => collection.IsElementEquatable,
+                    CollectionKind.Dictionary => collection.IsKeyEquatable && collection.IsElementEquatable,
+                    _ => false,
+                };
+            }
 
             static void WriteEquality(
                   ref Printer p
@@ -987,7 +1047,17 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
 
         private static string GetFieldTypeName(ITypeSymbol typeSymbol, in CollectionRef collection)
         {
-            var (kind, keyType, elementType) = collection;
+            if (TryGetFieldTypeName(collection, out var result) == false)
+            {
+                result = typeSymbol.ToFullName();
+            }
+
+            return result;
+        }
+
+        private static bool TryGetFieldTypeName(in CollectionRef collection, out string result)
+        {
+            var (kind, keyType, elementType, _, _) = collection;
 
             switch (kind)
             {
@@ -997,28 +1067,33 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 case CollectionKind.Span:
                 case CollectionKind.Array:
                 {
-                    return $"{elementType.ToFullName()}[]";
+                    result = $"{elementType.ToFullName()}[]";
+                    return true;
                 }
 
                 case CollectionKind.ReadOnlyList:
                 case CollectionKind.List:
                 {
-                    return $"{LIST_TYPE_T}{elementType.ToFullName()}>";
+                    result = $"{LIST_TYPE_T}{elementType.ToFullName()}>";
+                    return true;
                 }
 
                 case CollectionKind.HashSet:
                 {
-                    return $"{HASH_SET_TYPE_T}{elementType.ToFullName()}>";
+                    result = $"{HASH_SET_TYPE_T}{elementType.ToFullName()}>";
+                    return true;
                 }
 
                 case CollectionKind.Stack:
                 {
-                    return $"{STACK_TYPE_T}{elementType.ToFullName()}>";
+                    result = $"{STACK_TYPE_T}{elementType.ToFullName()}>";
+                    return true;
                 }
 
                 case CollectionKind.Queue:
                 {
-                    return $"{QUEUE_TYPE_T}{elementType.ToFullName()}>";
+                    result = $"{QUEUE_TYPE_T}{elementType.ToFullName()}>";
+                    return true;
                 }
 
                 case CollectionKind.ReadOnlyDictionary:
@@ -1026,12 +1101,14 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 {
                     var keyTypeFullName = keyType.ToFullName();
                     var valueTypeFullName = elementType.ToFullName();
-                    return $"{DICTIONARY_TYPE_T}{keyTypeFullName}, {valueTypeFullName}>";
+                    result = $"{DICTIONARY_TYPE_T}{keyTypeFullName}, {valueTypeFullName}>";
+                    return true;
                 }
 
                 default:
                 {
-                    return typeSymbol.ToFullName();
+                    result = string.Empty;
+                    return false;
                 }
             }
         }
@@ -1046,7 +1123,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
         {
             sameType = false;
 
-            var (kind, keyType, elementType) = collection;
+            var (kind, keyType, elementType, _, _) = collection;
 
             switch (kind)
             {

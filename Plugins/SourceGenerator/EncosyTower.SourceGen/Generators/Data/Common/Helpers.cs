@@ -49,9 +49,13 @@
         public const string MEMORY_TYPE_T = "global::System.Memory<";
         public const string SPAN_TYPE_T = "global::System.Span<";
 
+        public const string MEMORY_EXTENSIONS = "global::System.MemoryExtensions";
         public const string ARRAY_EXTENSIONS = "global::EncosyTower.Collections.Extensions.EncosyArrayExtensions";
         public const string LIST_EXTENSIONS = "global::EncosyTower.Collections.Extensions.EncosyListExtensions";
+        public const string DICTIONARY_EXTENSIONS = "global::EncosyTower.Collections.Extensions.EncosyDictionaryExtensions";
         public const string LIST_FAST_EXTENSIONS_UNSAFE = "global::EncosyTower.Collections.Extensions.Unsafe.ListFastExtensionsUnsafe";
+        public const string HASH_SET_API = "global::EncosyTower.Collections.Extensions.HashSetAPI";
+        public const string REFERENCE_EXTENSIONS = "global::EncosyTower.SystemExtensions.EncosyReferenceExtensions";
 
         public const string GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE = $"[global::{NAMESPACE}.SourceGen.GeneratedPropertyFromField(nameof({{0}}), typeof({{1}}))]";
         public const string GENERATED_FIELD_FROM_PROPERTY_ATTRIBUTE = $"[global::{NAMESPACE}.SourceGen.GeneratedFieldFromProperty(nameof({{0}}))]";

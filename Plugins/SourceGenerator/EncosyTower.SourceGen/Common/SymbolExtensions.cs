@@ -1365,6 +1365,29 @@ namespace EncosyTower.SourceGen
             return default;
         }
 
+        public static bool DetermineIEquatable(this ITypeSymbol type)
+        {
+            const string IEQUATABLE = "global::System.IEquatable<";
+
+            var interfaces = type.AllInterfaces;
+            var length = interfaces.Length;
+            var comparer = SymbolEqualityComparer.Default;
+
+            for (var i = 0; i < length; i++)
+            {
+                var iface = interfaces[i];
+
+                if (iface.TryGetGenericType(IEQUATABLE, 1, out var iequatableType)
+                    && comparer.Equals(type, iequatableType.TypeArguments[0])
+                )
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static Equality DetermineEquality(this ITypeSymbol type)
         {
             var (doesExist, isStatic, isNullable) = type.FindOpEquality();

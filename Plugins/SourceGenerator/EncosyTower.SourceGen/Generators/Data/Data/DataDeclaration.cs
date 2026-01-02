@@ -219,21 +219,11 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                     );
 
                     var propertyName = field.ToPropertyName();
-                    var fieldEquality = fieldType.DetermineEquality();
-
-                    if (fieldType.InheritsFromInterface(IDATA))
-                    {
-                        fieldEquality = new Equality(EqualityStrategy.Equals, false, false);
-                    }
-                    else if (fieldType.HasAttribute(UNION_ID_ATTRIBUTE))
-                    {
-                        fieldEquality = new Equality(EqualityStrategy.Operator, false, false);
-                    }
 
                     var fieldRef = new FieldRef {
                         Field = field,
                         FieldType = fieldType,
-                        FieldEquality = fieldEquality,
+                        FieldEquality = GetEquality(fieldType),
                         PropertyType = propertyType,
                         PropertyName = propertyName,
                         ForwardedPropertyAttributes = propertyAttributes,
@@ -319,21 +309,11 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                     );
 
                     var fieldName = property.ToPrivateFieldName();
-                    var fieldEquality = fieldType.DetermineEquality();
-
-                    if (fieldType.InheritsFromInterface(IDATA))
-                    {
-                        fieldEquality = new Equality(EqualityStrategy.Equals, false, false);
-                    }
-                    else if (fieldType.HasAttribute(UNION_ID_ATTRIBUTE))
-                    {
-                        fieldEquality = new Equality(EqualityStrategy.Operator, false, false);
-                    }
 
                     var propRef = new PropertyRef {
                         Property = property,
                         FieldType = fieldType,
-                        FieldEquality = fieldEquality,
+                        FieldEquality = GetEquality(fieldType),
                         PropertyType = property.Type,
                         FieldName = fieldName,
                         FieldIsImplemented = existingFields.Contains(fieldName),
@@ -481,6 +461,30 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             IsValid = true;
         }
 
+        private static Equality GetEquality(ITypeSymbol type)
+        {
+            var fieldEquality = type.DetermineEquality();
+
+            if (type.InheritsFromInterface(IDATA))
+            {
+                fieldEquality = new Equality(EqualityStrategy.Equals, false, false);
+            }
+            else if (type.HasAttribute(UNION_ID_ATTRIBUTE))
+            {
+                fieldEquality = new Equality(EqualityStrategy.Operator, false, false);
+            }
+
+            return fieldEquality;
+        }
+
+        private static bool GetEquatable(ITypeSymbol type)
+        {
+            return type.InheritsFromInterface(IDATA)
+                || type.HasAttribute(UNION_ID_ATTRIBUTE)
+                || type.DetermineIEquatable()
+                ;
+        }
+
         public static IDataType? GetIDataType(StringBuilder sb, ITypeSymbol type)
         {
             if (type.InheritsFromInterface(IDATA) == false)
@@ -626,6 +630,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 return new CollectionRef {
                     Kind = CollectionKind.Array,
                     ElementType = arrayType.ElementType,
+                    IsElementEquatable = GetEquatable(arrayType.ElementType),
                 };
             }
 
@@ -639,6 +644,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 return new CollectionRef {
                     Kind = isField ? CollectionKind.Array : CollectionKind.ReadOnlyMemory,
                     ElementType = readMemoryType.TypeArguments[0],
+                    IsElementEquatable = GetEquatable(readMemoryType.TypeArguments[0]),
                 };
             }
 
@@ -647,6 +653,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 return new CollectionRef {
                     Kind = isField ? CollectionKind.Array : CollectionKind.Memory,
                     ElementType = memoryType.TypeArguments[0],
+                    IsElementEquatable = GetEquatable(memoryType.TypeArguments[0]),
                 };
             }
 
@@ -655,6 +662,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 return new CollectionRef {
                     Kind = isField ? CollectionKind.Array : CollectionKind.ReadOnlySpan,
                     ElementType = readSpanType.TypeArguments[0],
+                    IsElementEquatable = GetEquatable(readSpanType.TypeArguments[0]),
                 };
             }
 
@@ -663,6 +671,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 return new CollectionRef {
                     Kind = isField ? CollectionKind.Array : CollectionKind.Span,
                     ElementType = spanType.TypeArguments[0],
+                    IsElementEquatable = GetEquatable(spanType.TypeArguments[0]),
                 };
             }
 
@@ -671,6 +680,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 return new CollectionRef {
                     Kind = isField ? CollectionKind.List : CollectionKind.ReadOnlyList,
                     ElementType = iReadListType.TypeArguments[0],
+                    IsElementEquatable = GetEquatable(iReadListType.TypeArguments[0]),
                 };
             }
 
@@ -679,6 +689,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 return new CollectionRef {
                     Kind = CollectionKind.List,
                     ElementType = iListType.TypeArguments[0],
+                    IsElementEquatable = GetEquatable(iListType.TypeArguments[0]),
                 };
             }
 
@@ -689,6 +700,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 return new CollectionRef {
                     Kind = isField || isReadOnly == false ? CollectionKind.List : CollectionKind.ReadOnlyList,
                     ElementType = listFastType.TypeArguments[0],
+                    IsElementEquatable = GetEquatable(listFastType.TypeArguments[0]),
                 };
             }
 
@@ -697,6 +709,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 return new CollectionRef {
                     Kind = CollectionKind.List,
                     ElementType = listType.TypeArguments[0],
+                    IsElementEquatable = GetEquatable(listType.TypeArguments[0]),
                 };
             }
 
@@ -705,6 +718,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 return new CollectionRef {
                     Kind = CollectionKind.HashSet,
                     ElementType = iSetType.TypeArguments[0],
+                    IsElementEquatable = iSetType.TypeArguments[0].DetermineIEquatable(),
                 };
             }
 
@@ -713,6 +727,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 return new CollectionRef {
                     Kind = CollectionKind.HashSet,
                     ElementType = hashSetType.TypeArguments[0],
+                    IsElementEquatable = hashSetType.TypeArguments[0].DetermineIEquatable(),
                 };
             }
 
@@ -738,6 +753,8 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                     Kind = isField ? CollectionKind.Dictionary : CollectionKind.ReadOnlyDictionary,
                     KeyType = iReadDictType.TypeArguments[0],
                     ElementType = iReadDictType.TypeArguments[1],
+                    IsKeyEquatable = iReadDictType.TypeArguments[0].DetermineIEquatable(),
+                    IsElementEquatable = iReadDictType.TypeArguments[1].DetermineIEquatable(),
                 };
             }
 
@@ -747,6 +764,8 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                     Kind = CollectionKind.Dictionary,
                     KeyType = iDictType.TypeArguments[0],
                     ElementType = iDictType.TypeArguments[1],
+                    IsKeyEquatable = iDictType.TypeArguments[0].DetermineIEquatable(),
+                    IsElementEquatable = iDictType.TypeArguments[1].DetermineIEquatable(),
                 };
             }
 
@@ -756,6 +775,8 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                     Kind = CollectionKind.Dictionary,
                     KeyType = dictType.TypeArguments[0],
                     ElementType = dictType.TypeArguments[1],
+                    IsKeyEquatable = dictType.TypeArguments[0].DetermineIEquatable(),
+                    IsElementEquatable = dictType.TypeArguments[1].DetermineIEquatable(),
                 };
             }
 
@@ -785,14 +806,17 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             var propertyType = memberRef.PropertyType;
             var fieldType = memberRef.FieldType;
 
+            Predicate<Accessibility> isPublic = IsPublic;
+            Predicate<Accessibility> isAny = IsAny;
+
             if (converterType is not null)
             {
-                if (TryGetConvertMethod(converterType, out var fieldConvertMethod, propertyType, fieldType))
+                if (TryGetConvertMethod(converterType, out var fieldConvertMethod, propertyType, fieldType, isPublic))
                 {
                     memberRef.FieldConverter = Make(converterType, fieldConvertMethod);
                 }
 
-                if (TryGetConvertMethod(converterType, out var propConvertMethod, fieldType, propertyType))
+                if (TryGetConvertMethod(converterType, out var propConvertMethod, fieldType, propertyType, isPublic))
                 {
                     memberRef.PropertyConverter = Make(converterType, propConvertMethod);
                 }
@@ -800,28 +824,28 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 return;
             }
 
-            if (TryGetConvertMethod(containingTypeSymbol, out var fieldConvertMethod1, propertyType, fieldType))
+            if (TryGetConvertMethod(containingTypeSymbol, out var fieldConvertMethod1, propertyType, fieldType, isAny))
             {
                 memberRef.FieldConverter = Make(containingTypeSymbol, fieldConvertMethod1);
             }
-            else if (TryGetConvertMethod(fieldType, out var fieldConvertMethod2, propertyType, fieldType))
+            else if (TryGetConvertMethod(fieldType, out var fieldConvertMethod2, propertyType, fieldType, isPublic))
             {
                 memberRef.FieldConverter = Make(fieldType, fieldConvertMethod2);
             }
-            else if (TryGetConvertMethod(propertyType, out var fieldConvertMethod3, propertyType, fieldType))
+            else if (TryGetConvertMethod(propertyType, out var fieldConvertMethod3, propertyType, fieldType, isPublic))
             {
                 memberRef.FieldConverter = Make(propertyType, fieldConvertMethod3);
             }
 
-            if (TryGetConvertMethod(containingTypeSymbol, out var propConvertMethod1, fieldType, propertyType))
+            if (TryGetConvertMethod(containingTypeSymbol, out var propConvertMethod1, fieldType, propertyType, isAny))
             {
                 memberRef.PropertyConverter = Make(containingTypeSymbol, propConvertMethod1);
             }
-            else if (TryGetConvertMethod(propertyType, out var propConvertMethod2, fieldType, propertyType))
+            else if (TryGetConvertMethod(propertyType, out var propConvertMethod2, fieldType, propertyType, isPublic))
             {
                 memberRef.PropertyConverter = Make(propertyType, propConvertMethod2);
             }
-            else if (TryGetConvertMethod(fieldType, out var propConvertMethod3, fieldType, propertyType))
+            else if (TryGetConvertMethod(fieldType, out var propConvertMethod3, fieldType, propertyType, isPublic))
             {
                 memberRef.PropertyConverter = Make(fieldType, propConvertMethod3);
             }
@@ -846,6 +870,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             , out IMethodSymbol convertMethod
             , ITypeSymbol paramType
             , ITypeSymbol returnType
+            , Predicate<Accessibility> validateAccessibility
         )
         {
             if (converterType.IsAbstract)
@@ -868,7 +893,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 foreach (var ctor in ctors)
                 {
                     if (ctor is not IMethodSymbol method
-                        || method.DeclaredAccessibility != Accessibility.Public
+                        || validateAccessibility(method.DeclaredAccessibility) == false
                     )
                     {
                         continue;
@@ -953,22 +978,25 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             var propertyType = memberRef.PropertyType;
             var fieldType = memberRef.FieldType;
 
+            Predicate<Accessibility> isPublic = IsPublic;
+            Predicate<Accessibility> isAny = IsAny;
+
             if (comparerType is not null)
             {
-                if (TryGetEqualsMethod(comparerType, out var equalsMethod, fieldType))
+                if (TryGetEqualsMethod(comparerType, out var equalsMethod, fieldType, isPublic))
                 {
                     memberRef.FieldEqualityComparer = Make(comparerType, equalsMethod);
                 }
             }
-            else if (TryGetEqualsMethod(containingTypeSymbol, out var equalsMethod1, fieldType))
+            else if (TryGetEqualsMethod(containingTypeSymbol, out var equalsMethod1, fieldType, isAny))
             {
                 memberRef.FieldEqualityComparer = Make(containingTypeSymbol, equalsMethod1);
             }
-            else if (TryGetEqualsMethod(fieldType, out var equalsMethod2, fieldType))
+            else if (TryGetEqualsMethod(fieldType, out var equalsMethod2, fieldType, isPublic))
             {
                 memberRef.FieldEqualityComparer = Make(fieldType, equalsMethod2);
             }
-            else if (TryGetEqualsMethod(propertyType, out var equalsMethod3, fieldType))
+            else if (TryGetEqualsMethod(propertyType, out var equalsMethod3, fieldType, isPublic))
             {
                 memberRef.FieldEqualityComparer = Make(propertyType, equalsMethod3);
             }
@@ -992,6 +1020,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
               ITypeSymbol converterType
             , out IMethodSymbol equalsMethod
             , ITypeSymbol paramType
+            , Predicate<Accessibility> validateAccessibility
         )
         {
             if (converterType.IsAbstract)
@@ -1014,7 +1043,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 foreach (var ctor in ctors)
                 {
                     if (ctor is not IMethodSymbol method
-                        || method.DeclaredAccessibility != Accessibility.Public
+                        || validateAccessibility(method.DeclaredAccessibility) == false
                     )
                     {
                         continue;
@@ -1085,6 +1114,13 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
             return false;
         }
 
+
+        private static bool IsPublic(Accessibility value)
+            => value == Accessibility.Public;
+
+        private static bool IsAny(Accessibility _)
+            => true;
+
         public record struct IDataType(
               bool IsMutable
             , bool WithReadOnlyView
@@ -1141,6 +1177,8 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
               CollectionKind Kind
             , ITypeSymbol KeyType
             , ITypeSymbol ElementType
+            , bool IsKeyEquatable
+            , bool IsElementEquatable
         );
 
         public struct Order
