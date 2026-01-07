@@ -29,10 +29,9 @@ namespace EncosyTower.Buffers
 {
     public interface IBufferStrategy<T> : IAlloc
         , IAsSpan<T>, IAsReadOnlySpan<T>
-        , IResizable, IClearable, IDisposable
+        , IResizable, IClearable, IHasCapacity
+        , IDisposable
     {
-        int Capacity { get; }
-
         bool IsCreated { get; }
 
         ref T this[int index] { get; }
@@ -40,5 +39,13 @@ namespace EncosyTower.Buffers
         void Resize(int newCapacity, bool copyContent, bool memClear);
 
         void FastClear();
+    }
+
+    public interface IReadOnlyBufferStrategy<T> : IAsReadOnlySpan<T>, IHasCapacity
+    {
+        bool IsCreated { get; }
+
+        ref readonly T this[int index] { get; }
+
     }
 }

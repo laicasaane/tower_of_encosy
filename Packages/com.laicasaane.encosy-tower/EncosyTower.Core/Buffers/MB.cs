@@ -46,24 +46,24 @@ namespace EncosyTower.Buffers
     /// <typeparam name="T"></typeparam>
     public ref struct MB<T>
     {
-        private MBInternal<T> _bufferImplementation;
+        internal MBInternal<T> _buffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal MB(MBInternal<T> mbInternal)
         {
-            _bufferImplementation = mbInternal;
+            _buffer = mbInternal;
         }
 
         public readonly int Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _bufferImplementation.Capacity;
+            get => _buffer.Capacity;
         }
 
         public readonly bool IsCreated
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _bufferImplementation.IsCreated;
+            get => _buffer.IsCreated;
         }
 
         public ref T this[int index]
@@ -76,21 +76,17 @@ namespace EncosyTower.Buffers
                     throw new IndexOutOfRangeException("Paranoid check failed!");
 #endif
 
-                return ref _bufferImplementation[index];
+                return ref _buffer[index];
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(T[] array)
-        {
-            _bufferImplementation.Set(array);
-        }
+            => _buffer.Set(array);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void Clear()
-        {
-            _bufferImplementation.Clear();
-        }
+            => _buffer.Clear();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void CopyFrom(ReadOnlySpan<T> source)
@@ -163,20 +159,106 @@ namespace EncosyTower.Buffers
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal readonly T[] ToManagedArray()
-        {
-            return _bufferImplementation.ToManagedArray();
-        }
+            => _buffer.ToManagedArray();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Span<T> AsSpan()
-        {
-            return _bufferImplementation.AsSpan();
-        }
+            => _buffer.AsSpan();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ReadOnlySpan<T> AsReadOnlySpan()
+            => _buffer.AsReadOnlySpan();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ReadOnly AsReadOnly()
+            => new(this);
+
+        public readonly ref struct ReadOnly
         {
-            return _bufferImplementation.AsSpan();
+            internal readonly MBInternal<T>.ReadOnly _buffer;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal ReadOnly(MBInternal<T> mbInternal)
+            {
+                _buffer = mbInternal;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal ReadOnly(MBInternal<T>.ReadOnly mbInternal)
+            {
+                _buffer = mbInternal;
+            }
+
+            public readonly int Capacity
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _buffer.Capacity;
+            }
+
+            public readonly bool IsCreated
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _buffer.IsCreated;
+            }
+
+            public ref readonly T this[int index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get
+                {
+#if DEBUG && ENABLE_PARANOID_CHECKS
+                    if (index >= _buffer.Length)
+                        throw new IndexOutOfRangeException("Paranoid check failed!");
+#endif
+
+                    return ref _buffer[index];
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly void CopyTo(Span<T> destination)
+                => CopyTo(0, destination);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly void CopyTo(Span<T> destination, int length)
+                => CopyTo(0, destination, length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly void CopyTo(int sourceStartIndex, Span<T> destination)
+                => CopyTo(sourceStartIndex, destination, destination.Length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly void CopyTo(int sourceStartIndex, Span<T> destination, int length)
+                => AsReadOnlySpan().Slice(sourceStartIndex, length).CopyTo(destination[..length]);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly bool TryCopyTo(Span<T> destination)
+                => TryCopyTo(0, destination);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly bool TryCopyTo(Span<T> destination, int length)
+                => TryCopyTo(0, destination, length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly bool TryCopyTo(int sourceStartIndex, Span<T> destination)
+                => TryCopyTo(sourceStartIndex, destination, destination.Length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly bool TryCopyTo(int sourceStartIndex, Span<T> destination, int length)
+                => AsReadOnlySpan().Slice(sourceStartIndex, length).TryCopyTo(destination[..length]);
+
+            /// <summary>
+            /// todo: this must go away, it's not safe. it must become internal and only used by the framework
+            /// externally should use the AsReader, AsWriter, AsReadOnly, AsParallelReader, AsParallelWriter pattern
+            /// </summary>
+            /// <returns></returns>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal readonly T[] ToManagedArray()
+                => _buffer.ToManagedArray();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly ReadOnlySpan<T> AsReadOnlySpan()
+                => _buffer.AsReadOnlySpan();
         }
     }
 
@@ -185,7 +267,7 @@ namespace EncosyTower.Buffers
         private T[] _buffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        MBInternal(T[] array)
+        internal MBInternal(T[] array)
         {
             _buffer = array;
         }
@@ -218,15 +300,11 @@ namespace EncosyTower.Buffers
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(T[] array)
-        {
-            _buffer = array;
-        }
+            => _buffer = array;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void Clear()
-        {
-            Array.Clear(_buffer, 0, _buffer.Length);
-        }
+            => Array.Clear(_buffer, 0, _buffer.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void CopyFrom(ReadOnlySpan<T> source)
@@ -294,34 +372,129 @@ namespace EncosyTower.Buffers
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal readonly T[] ToManagedArray()
-        {
-            return _buffer;
-        }
+            => _buffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ArraySegment<T> AsArraySegment()
-        {
-            return new ArraySegment<T>(_buffer);
-        }
+            => new(_buffer);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Span<T> AsSpan()
-        {
-            return _buffer;
-        }
+            => _buffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ReadOnlySpan<T> AsReadOnlySpan()
+            => _buffer;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ReadOnly AsReadOnly()
+            => this;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator MB<T>(MBInternal<T> mbInternal)
+            => new(mbInternal);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator MBInternal<T>(MB<T> mb)
+            => new(mb.ToManagedArray());
+
+        public readonly struct ReadOnly : IReadOnlyBuffer<T>
         {
-            return _buffer;
+            private readonly T[] _buffer;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private ReadOnly(MBInternal<T> mbInternal)
+            {
+                _buffer = mbInternal._buffer;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private ReadOnly(T[] buffer)
+            {
+                _buffer = buffer;
+            }
+
+            public readonly int Capacity
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _buffer.Length;
+            }
+
+            public readonly bool IsCreated
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _buffer != null;
+            }
+
+            public readonly ref readonly T this[int index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get
+                {
+#if DEBUG && ENABLE_PARANOID_CHECKS
+                    if (index >= _buffer.Length)
+                        throw new IndexOutOfRangeException("Paranoid check failed!");
+                    if
+#endif
+                    return ref _buffer[index];
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly void CopyTo(Span<T> destination)
+                => CopyTo(0, destination);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly void CopyTo(Span<T> destination, int length)
+                => CopyTo(0, destination, length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly void CopyTo(int sourceStartIndex, Span<T> destination)
+                => CopyTo(sourceStartIndex, destination, destination.Length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly void CopyTo(int sourceStartIndex, Span<T> destination, int length)
+                => new CopyToSpan<T>(AsReadOnlySpan()).CopyTo(sourceStartIndex, destination, length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly bool TryCopyTo(Span<T> destination)
+                => TryCopyTo(0, destination);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly bool TryCopyTo(Span<T> destination, int length)
+                => TryCopyTo(0, destination, length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly bool TryCopyTo(int sourceStartIndex, Span<T> destination)
+                => TryCopyTo(sourceStartIndex, destination, destination.Length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly bool TryCopyTo(int sourceStartIndex, Span<T> destination, int length)
+                => new CopyToSpan<T>(AsReadOnlySpan()).TryCopyTo(sourceStartIndex, destination, length);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal readonly T[] ToManagedArray()
+                => _buffer;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly ReadOnlySpan<T> AsReadOnlySpan()
+                => _buffer;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator MB<T>.ReadOnly(ReadOnly mbInternal)
+                => new(mbInternal);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator ReadOnly(MBInternal<T> mb)
+                => new(mb);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator ReadOnly(MB<T> mb)
+                => new(mb._buffer);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator ReadOnly(MB<T>.ReadOnly mb)
+                => new(mb._buffer._buffer);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator MB<T>(MBInternal<T> proxy)
-            => new(proxy);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator MBInternal<T>(MB<T> proxy)
-            => new(proxy.ToManagedArray());
     }
 }

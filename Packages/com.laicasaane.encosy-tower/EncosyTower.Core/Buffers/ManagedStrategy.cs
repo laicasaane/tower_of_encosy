@@ -133,6 +133,51 @@ namespace EncosyTower.Buffers
             => _realBuffer.AsSpan();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ReadOnly AsReadOnly()
+            => this;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void Dispose() { }
+
+        public struct ReadOnly : IReadOnlyBufferStrategy<T>
+        {
+            internal MBInternal<T>.ReadOnly _realBuffer;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private ReadOnly(ManagedStrategy<T> strategy) : this()
+            {
+                _realBuffer = strategy._realBuffer;
+            }
+
+            public readonly int Capacity
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _realBuffer.Capacity;
+            }
+
+            public readonly bool IsCreated
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _realBuffer.IsCreated;
+            }
+
+            public ref readonly T this[int index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ref _realBuffer[index];
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly MB<T>.ReadOnly ToRealBuffer()
+                => _realBuffer;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly ReadOnlySpan<T> AsReadOnlySpan()
+                => _realBuffer.AsReadOnlySpan();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator ReadOnly(ManagedStrategy<T> strategy)
+                => new(strategy);
+        }
     }
 }

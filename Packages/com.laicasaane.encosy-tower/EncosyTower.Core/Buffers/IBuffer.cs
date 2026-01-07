@@ -29,9 +29,19 @@ namespace EncosyTower.Buffers
     public interface IBuffer<T> : IClearable, IAsSpan<T>, IAsReadOnlySpan<T>
         , ICopyFromSpan<T>, ITryCopyFromSpan<T>
         , ICopyToSpan<T>, ITryCopyToSpan<T>
+        , IHasCapacity
     {
-        int Capacity { get; }
-
         bool IsCreated { get; }
+
+        ref T this[int index] { get; }
+    }
+
+    public interface IReadOnlyBuffer<T> : IAsReadOnlySpan<T>
+        , ICopyToSpan<T>, ITryCopyToSpan<T>
+        , IHasCapacity
+    {
+        bool IsCreated { get; }
+
+        ref readonly T this[int index] { get; }
     }
 }

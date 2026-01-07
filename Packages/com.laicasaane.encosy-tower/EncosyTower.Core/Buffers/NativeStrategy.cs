@@ -210,11 +210,13 @@ namespace EncosyTower.Buffers
             => _realBuffer.AsSpan();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ReadOnly AsReadOnly()
+            => this;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly NativeStrategy<U> Reinterpret<U>()
             where U : unmanaged
-        {
-            return new NativeStrategy<U>(_nativeAllocator, _realBuffer.Reinterpret<U>());
-        }
+            => new(_nativeAllocator, _realBuffer.Reinterpret<U>());
 
         public void Dispose()
         {
@@ -242,6 +244,73 @@ namespace EncosyTower.Buffers
                 "Allocator strategy must be either Unity.Collections.Allocator " +
                 "or Unity.Collections.AllocatorManager.AllocatorHandle"
             );
+        }
+
+        public readonly struct ReadOnly : IReadOnlyBufferStrategy<T>
+        {
+#if DEBUG && !PROFILE_SVELTO
+            static ReadOnly()
+            {
+                if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+                    throw new InvalidOperationException("Only unmanaged data can be stored natively");
+            }
+#endif
+
+            internal readonly NativeReference<AllocatorStrategy>.ReadOnly _nativeAllocator;
+            internal readonly NBInternal<T>.ReadOnly _realBuffer;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private ReadOnly(NativeStrategy<T> strategy)
+            {
+                _nativeAllocator = strategy._nativeAllocator;
+                _realBuffer = strategy._realBuffer;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private ReadOnly(NativeReference<AllocatorStrategy>.ReadOnly nativeAllocator, NBInternal<T>.ReadOnly realBuffer)
+            {
+                _nativeAllocator = nativeAllocator;
+                _realBuffer = realBuffer;
+            }
+
+            public readonly int Capacity
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _realBuffer.Capacity;
+            }
+
+            public readonly bool IsCreated
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _realBuffer.IsCreated;
+            }
+
+            public ref readonly T this[int index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ref _realBuffer[index];
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal readonly NativeArray<T>.ReadOnly ToNativeArray()
+                => _realBuffer.ToNativeArray();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly NB<T>.ReadOnly ToRealBuffer()
+                => _realBuffer;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly ReadOnlySpan<T> AsReadOnlySpan()
+                => _realBuffer.AsReadOnlySpan();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly NativeStrategy<U>.ReadOnly Reinterpret<U>()
+                where U : unmanaged
+                => new(_nativeAllocator, _realBuffer.Reinterpret<U>());
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator ReadOnly(NativeStrategy<T> strategy)
+                => new(strategy);
         }
     }
 }
