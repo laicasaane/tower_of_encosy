@@ -11,9 +11,16 @@ namespace EncosyTower.Collections.Extensions
         public static Span<TValue> GetValues<TKey, TValue>(this in ArrayMapNative<TKey, TValue> self)
             where TKey : unmanaged, IEquatable<TKey>
             where TValue : unmanaged
-        {
-            return self._values.ToRealBuffer().AsSpan()[..self._freeValueCellIndex.Value];
-        }
+            => self._values.ToRealBuffer().AsSpan()[..self._freeValueCellIndex.Value];
+    }
+
+    public static class ArrayMapNativeReadOnlyExtensions
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<TValue> GetValues<TKey, TValue>(this in ArrayMapNative<TKey, TValue>.ReadOnly self)
+            where TKey : unmanaged, IEquatable<TKey>
+            where TValue : unmanaged
+            => self._values.AsReadOnlySpan()[..self._freeValueCellIndex.Value];
     }
 }
 

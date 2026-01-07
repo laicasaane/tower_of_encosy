@@ -9,6 +9,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EncosyTower.Buffers;
 using EncosyTower.Debugging;
 using Unity.Collections;
 
@@ -22,9 +23,9 @@ namespace EncosyTower.Collections
 
         public readonly struct ReadOnly : IHasCount, IHasCapacity, ITryGetValue<TKey, TValue>
         {
-            internal readonly NativeArray<ArrayMapNode<TKey>>.ReadOnly _valuesInfo;
-            internal readonly NativeArray<TValue>.ReadOnly _values;
-            internal readonly NativeArray<int>.ReadOnly _buckets;
+            internal readonly NativeStrategy<ArrayMapNode<TKey>>.ReadOnly _valuesInfo;
+            internal readonly NativeStrategy<TValue>.ReadOnly _values;
+            internal readonly NativeStrategy<int>.ReadOnly _buckets;
 
             internal readonly NativeReference<int>.ReadOnly _freeValueCellIndex;
             internal readonly NativeReference<uint>.ReadOnly _collisions;
@@ -32,9 +33,9 @@ namespace EncosyTower.Collections
 
             public ReadOnly(ArrayMapNative<TKey, TValue> map)
             {
-                _valuesInfo = map._valuesInfo.ToNativeArray().AsReadOnly();
-                _values = map._values.ToNativeArray().AsReadOnly();
-                _buckets = map._buckets.ToNativeArray().AsReadOnly();
+                _valuesInfo = map._valuesInfo.AsReadOnly();
+                _values = map._values.AsReadOnly();
+                _buckets = map._buckets.AsReadOnly();
                 _freeValueCellIndex = map._freeValueCellIndex.AsReadOnly();
                 _collisions = map._collisions.AsReadOnly();
                 _fastModBucketsMultiplier = map._fastModBucketsMultiplier.AsReadOnly();
@@ -49,7 +50,7 @@ namespace EncosyTower.Collections
             public readonly int Capacity
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _values.Length;
+                get => _values.Capacity;
             }
 
             public readonly int Count
@@ -73,7 +74,7 @@ namespace EncosyTower.Collections
             public TValue this[TKey key]
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _values[GetIndex(key)];
+                get => _values[FindIndex(key)];
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -89,9 +90,9 @@ namespace EncosyTower.Collections
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly bool TryGetValue(TKey key, out TValue result)
             {
-                if (TryFindIndex(key, out var findIndex))
+                if (TryFindIndex(key, out var index))
                 {
-                    result = _values[findIndex];
+                    result = _values[index];
                     return true;
                 }
 
@@ -100,11 +101,11 @@ namespace EncosyTower.Collections
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly int GetIndex(TKey key)
+            public ref readonly TValue GetValueByRef(TKey key)
             {
-                var found = TryFindIndex(key, out var findIndex);
+                var found = TryFindIndex(key, out var index);
 
-                //Burst is not able to vectorise code if throw is found, regardless if it's actually ever thrown
+                // Burst is not able to vectorise code if throw is found, regardless if it's actually ever thrown
 #if __ENCOSY_VALIDATION__
                 if (found == false)
                 {
@@ -112,7 +113,14 @@ namespace EncosyTower.Collections
                 }
 #endif
 
-                return findIndex;
+                return ref _values[(int)index];
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly int FindIndex(TKey key)
+            {
+                var found = TryFindIndex(key, out var index);
+                return found ? index : -1;
             }
 
             //I store all the index with an offset + 1, so that in the bucket list 0 means actually not existing.
@@ -122,12 +130,12 @@ namespace EncosyTower.Collections
             //WARNING this method must stay stateless (not relying on states that can change, it's ok to read
             //constant states) because it will be used in multithreaded parallel code
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly bool TryFindIndex(TKey key, out int findIndex)
+            public readonly bool TryFindIndex(TKey key, out int index)
             {
-                Checks.IsTrue(_buckets.Length > 0, "Map arrays are not correctly initialized (0 size)");
+                Checks.IsTrue(_buckets.Capacity > 0, "Map arrays are not correctly initialized (0 size)");
 
                 var hash = key.GetHashCode();
-                var bucketIndex = (int)Reduce((uint)hash, (uint)_buckets.Length, _fastModBucketsMultiplier.Value);
+                var bucketIndex = (int)Reduce((uint)hash, (uint)_buckets.Capacity, _fastModBucketsMultiplier.Value);
                 var valueIndex = _buckets[bucketIndex] - 1;
 
                 //even if we found an existing value we need to be sure it's the one we requested
@@ -135,19 +143,18 @@ namespace EncosyTower.Collections
                 {
                     //Comparer<TKey>.default needs to create a new comparer, so it is much slower
                     //than assuming that Equals is implemented through IEquatable
-                    var node = _valuesInfo[valueIndex];
-
+                    ref readonly var node = ref _valuesInfo[valueIndex];
                     if (node._hashcode == hash && node.key.Equals(key))
                     {
                         //this is the one
-                        findIndex = valueIndex;
+                        index = valueIndex;
                         return true;
                     }
 
                     valueIndex = node._previous;
                 }
 
-                findIndex = 0;
+                index = 0;
                 return false;
             }
         }
@@ -210,7 +217,7 @@ namespace EncosyTower.Collections
         public readonly ArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => new(_map._valuesInfo[_index].key, _map._values, _index);
+            get => new(_map._valuesInfo[_index].key, _map._values.ToNativeArray(), _index);
         }
 
         readonly object IEnumerator.Current

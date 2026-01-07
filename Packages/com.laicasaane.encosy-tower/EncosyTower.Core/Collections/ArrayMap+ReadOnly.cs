@@ -83,16 +83,16 @@ namespace EncosyTower.Collections
                 => _map.TryGetValue(key, out result);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref TValue GetValueByRef(TKey key)
+            public ref readonly TValue GetValueByRef(TKey key)
                 => ref _map.GetValueByRef(key);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool TryFindIndex(TKey key, out int findIndex)
-                => _map.TryFindIndex(key, out findIndex);
+            public bool TryFindIndex(TKey key, out int index)
+                => _map.TryFindIndex(key, out index);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int GetIndex(TKey key)
-                => _map.GetIndex(key);
+            public int FindIndex(TKey key)
+                => _map.FindIndex(key);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             IEnumerator<ArrayMapKeyValuePairFast<TKey, TValue>> IEnumerable<ArrayMapKeyValuePairFast<TKey, TValue>>.GetEnumerator()
@@ -104,9 +104,7 @@ namespace EncosyTower.Collections
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator ReadOnly(ArrayMap<TKey, TValue> map)
-            {
-                return map.AsReadOnly();
-            }
+                => map.AsReadOnly();
         }
     }
 }

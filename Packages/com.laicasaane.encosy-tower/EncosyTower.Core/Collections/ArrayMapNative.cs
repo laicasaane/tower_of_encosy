@@ -196,7 +196,7 @@ namespace EncosyTower.Collections
         public TValue this[TKey key]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            readonly get => _values[GetIndex(key)];
+            readonly get => _values[FindIndex(key)];
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
@@ -323,9 +323,9 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryGetValue(TKey key, out TValue result)
         {
-            if (TryFindIndex(key, out var findIndex))
+            if (TryFindIndex(key, out var index))
             {
-                result = _values[findIndex];
+                result = _values[index];
                 return true;
             }
 
@@ -336,31 +336,31 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetOrAdd(TKey key)
         {
-            if (TryFindIndex(key, out var findIndex))
+            if (TryFindIndex(key, out var index))
             {
-                return ref _values[findIndex];
+                return ref _values[index];
             }
 
-            AddValue(key, out findIndex);
+            AddValue(key, out index);
 
-            _values[findIndex] = default;
+            _values[index] = default;
 
-            return ref _values[findIndex];
+            return ref _values[index];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetOrAdd(TKey key, Func<TValue> builder)
         {
-            if (TryFindIndex(key, out var findIndex))
+            if (TryFindIndex(key, out var index))
             {
-                return ref _values[findIndex];
+                return ref _values[index];
             }
 
-            AddValue(key, out findIndex);
+            AddValue(key, out index);
 
-            _values[findIndex] = builder();
+            _values[index] = builder();
 
-            return ref _values[findIndex];
+            return ref _values[index];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -379,22 +379,22 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetOrAdd<W>(TKey key, FuncRef<W, TValue> builder, ref W parameter)
         {
-            if (TryFindIndex(key, out var findIndex))
+            if (TryFindIndex(key, out var index))
             {
-                return ref _values[findIndex];
+                return ref _values[index];
             }
 
-            AddValue(key, out findIndex);
+            AddValue(key, out index);
 
-            _values[findIndex] = builder(ref parameter);
+            _values[index] = builder(ref parameter);
 
-            return ref _values[findIndex];
+            return ref _values[index];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ref TValue GetValueByRef(TKey key)
         {
-            var found = TryFindIndex(key, out var findIndex);
+            var found = TryFindIndex(key, out var index);
 
             // Burst is not able to vectorise code if throw is found, regardless if it's actually ever thrown
 #if __ENCOSY_VALIDATION__
@@ -404,7 +404,7 @@ namespace EncosyTower.Collections
             }
 #endif
 
-            return ref _values[(int)findIndex];
+            return ref _values[(int)index];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -551,7 +551,7 @@ namespace EncosyTower.Collections
         //WARNING this method must stay stateless (not relying on states that can change, it's ok to read
         //constant states) because it will be used in multithreaded parallel code
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool TryFindIndex(TKey key, out int findIndex)
+        public readonly bool TryFindIndex(TKey key, out int index)
         {
             Checks.IsTrue(_buckets.Capacity > 0, "Map arrays are not correctly initialized (0 size)");
 
@@ -568,31 +568,22 @@ namespace EncosyTower.Collections
                 if (node._hashcode == hash && node.key.Equals(key))
                 {
                     //this is the one
-                    findIndex = valueIndex;
+                    index = valueIndex;
                     return true;
                 }
 
                 valueIndex = node._previous;
             }
 
-            findIndex = 0;
+            index = 0;
             return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly int GetIndex(TKey key)
+        public readonly int FindIndex(TKey key)
         {
-            var found = TryFindIndex(key, out var findIndex);
-
-            //Burst is not able to vectorise code if throw is found, regardless if it's actually ever thrown
-#if __ENCOSY_VALIDATION__
-            if (found == false)
-            {
-                ThrowHelper.ThrowKeyNotFoundException_KeyNotFound();
-            }
-#endif
-
-            return findIndex;
+            var found = TryFindIndex(key, out var index);
+            return found ? index : -1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
