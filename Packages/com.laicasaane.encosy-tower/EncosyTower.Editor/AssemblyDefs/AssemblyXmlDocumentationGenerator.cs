@@ -14,6 +14,7 @@ using UnityEditorInternal;
 
 namespace EncosyTower.Editor.AssemblyDefs
 {
+    [InitializeOnLoad]
     internal static class AssemblyXmlDocumentationGenerator
     {
         private readonly struct AsmdefXmlDoc
@@ -46,8 +47,17 @@ namespace EncosyTower.Editor.AssemblyDefs
         private const string SCRIPT_ASSEMBLIES_FOLDER = "Library/ScriptAssemblies";
         private const string MENU_AUTO_GENERATE = $"{MENU_ROOT}/Auto Generate";
         private const string MENU_AUTO_LOG = $"{MENU_ROOT}/Auto Log";
+        private const string MENU_GENERATE = $"{MENU_ROOT}/Generate";
+        private const string MENU_DELETE = $"{MENU_ROOT}/Delete";
+        private const string MENU_DELETE_ALL = $"{MENU_ROOT}/Delete All";
         private const string AUTO_GENERATE_KEY = "XML_DOCUMENTATION_AUTO_GENERATE";
         private const string AUTO_LOG_KEY = "XML_DOCUMENTATION_AUTO_LOG";
+
+        static AssemblyXmlDocumentationGenerator()
+        {
+            EditorApplication.update -= Update;
+            EditorApplication.update += Update;
+        }
 
         [MenuItem(MENU_AUTO_GENERATE, priority = 88_00_00_00)]
         private static void ToggleAutoGenerate()
@@ -89,8 +99,8 @@ namespace EncosyTower.Editor.AssemblyDefs
             AssetDatabase.Refresh();
         }
 
-        [MenuItem($"{MENU_ROOT}/Generate", priority = 88_00_00_02)]
-        private static void GenerateXmlDocumentation()
+        [MenuItem(MENU_GENERATE, priority = 88_00_00_02)]
+        private static void Generate()
         {
             const string TITLE = "Generate XML Documentation";
             const string INFO = "Generating...";
@@ -176,48 +186,31 @@ namespace EncosyTower.Editor.AssemblyDefs
             }
         }
 
-        [MenuItem($"{MENU_ROOT}/Delete", priority = 88_00_00_03)]
-        private static void DeleteXmlDocumentation()
+        [MenuItem(MENU_DELETE, priority = 88_00_00_03)]
+        private static void Delete()
         {
-            const string TITLE = "Delete XML Documentation";
+            const string TITLE = "Delete";
             const string INFO = "Deleting...";
 
             EditorUtility.DisplayProgressBar(TITLE, INFO, 0f);
 
-            var packages = GetPackageDefs(true);
+            DeleteCscRspFiles();
 
-            if (packages.Length < 1)
-            {
-                EditorUtility.ClearProgressBar();
-                return;
-            }
+            EditorUtility.DisplayProgressBar(TITLE, INFO, 100f);
+            EditorUtility.ClearProgressBar();
 
-            foreach (var package in packages)
-            {
-                foreach (var asmdef in package.Asmdefs)
-                {
-                    var cscFilePath = asmdef.Root.GetFileAbsolutePath("csc.rsp");
-                    var cscBackupFilePath = asmdef.Root.GetFileAbsolutePath(".csc-rsp-backup");
-                    var cscMetaFilePath = asmdef.Root.GetFileAbsolutePath("csc.rsp.meta");
-                    var generatedFilePath = asmdef.Root.GetFileAbsolutePath(GENERATED_FILE);
+            AssetDatabase.Refresh();
+        }
 
-                    if (File.Exists(cscBackupFilePath))
-                    {
-                        File.Copy(cscBackupFilePath, cscFilePath, true);
-                        File.Delete(cscBackupFilePath);
-                    }
-                    else if (File.Exists(cscFilePath))
-                    {
-                        File.Delete(cscFilePath);
-                        File.Delete(cscMetaFilePath);
-                    }
+        [MenuItem(MENU_DELETE_ALL, priority = 88_00_00_04)]
+        private static void DeleteAll()
+        {
+            const string TITLE = "Delete All";
+            const string INFO = "Deleting...";
 
-                    if (File.Exists(generatedFilePath))
-                    {
-                        File.Delete(generatedFilePath);
-                    }
-                }
-            }
+            EditorUtility.DisplayProgressBar(TITLE, INFO, 0f);
+
+            DeleteCscRspFiles();
 
             var projectRoot = GetProjectRootPath();
             var xmlDocumentationFolderPath = projectRoot.GetFolderAbsolutePath(XML_DOCUMENTATION_FOLDER);
@@ -231,6 +224,70 @@ namespace EncosyTower.Editor.AssemblyDefs
             EditorUtility.ClearProgressBar();
 
             AssetDatabase.Refresh();
+        }
+
+        [MenuItem(MENU_GENERATE, true)]
+        private static bool ValidateGeneratee()
+        {
+            return ValidateAutoGenerate() == false;
+        }
+
+        [MenuItem(MENU_DELETE, true)]
+        private static bool ValidateDelete()
+        {
+            return ValidateAutoGenerate() == false;
+        }
+
+        [MenuItem(MENU_DELETE_ALL, true)]
+        private static bool ValidateDeleteAll()
+        {
+            return ValidateAutoGenerate() == false;
+        }
+
+        private static bool ValidateAutoGenerate()
+        {
+            return TryGetConfigAutoGenerate(out var value) && value;
+        }
+
+        private static void DeleteCscRspFiles()
+        {
+            var packages = GetPackageDefs(true);
+
+            if (packages.Length < 1)
+            {
+                EditorUtility.ClearProgressBar();
+                return;
+            }
+
+            foreach (var package in packages)
+            {
+                foreach (var asmdef in package.Asmdefs)
+                {
+                    var generatedFilePath = asmdef.Root.GetFileAbsolutePath(GENERATED_FILE);
+
+                    if (File.Exists(generatedFilePath) == false)
+                    {
+                        continue;
+                    }
+
+                    File.Delete(generatedFilePath);
+
+                    var cscFilePath = asmdef.Root.GetFileAbsolutePath("csc.rsp");
+                    var cscBackupFilePath = asmdef.Root.GetFileAbsolutePath(".csc-rsp-backup");
+                    var cscMetaFilePath = asmdef.Root.GetFileAbsolutePath("csc.rsp.meta");
+
+                    if (File.Exists(cscBackupFilePath))
+                    {
+                        File.Copy(cscBackupFilePath, cscFilePath, true);
+                        File.Delete(cscBackupFilePath);
+                    }
+                    else if (File.Exists(cscFilePath))
+                    {
+                        File.Delete(cscFilePath);
+                        File.Delete(cscMetaFilePath);
+                    }
+                }
+            }
         }
 
         private static PackageDef[] GetPackageDefs(bool onlyGenerated)
@@ -306,6 +363,13 @@ namespace EncosyTower.Editor.AssemblyDefs
             CopyXmlDocToScriptAssembliesFolder();
         }
 
+        private static void Update()
+        {
+            EditorApplication.update -= Update;
+
+            SetMenuCheckState();
+        }
+
         private static void SetMenuCheckState()
         {
             if (TryGetConfigAutoGenerate(out var autoGenerate) == false)
@@ -330,7 +394,7 @@ namespace EncosyTower.Editor.AssemblyDefs
                 return;
             }
 
-            GenerateXmlDocumentation();
+            Generate();
         }
 
         private static void CopyXmlDocToScriptAssembliesFolder()
