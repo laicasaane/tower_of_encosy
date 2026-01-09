@@ -120,7 +120,7 @@ namespace EncosyTower.EnumExtensions
     /// </remarks>
     /// <example>
     /// <code>
-    /// [TypeNameMemberForEnumTemplate(typeof(ProductType_EnumTemplate), 500)]
+    /// [TypeNameAsEnumMemberForTemplate(typeof(ProductType_EnumTemplate), 500)]
     /// public struct CustomFruit { }
     /// </code>
     /// </example>
@@ -132,13 +132,13 @@ namespace EncosyTower.EnumExtensions
         | AttributeTargets.Interface
         , AllowMultiple = true
     )]
-    public sealed class TypeNameMemberForEnumTemplateAttribute : Attribute
+    public sealed class TypeNameAsEnumMemberForTemplateAttribute : Attribute
     {
         public Type TemplateType { get; }
 
         public ulong Order { get; }
 
-        public TypeNameMemberForEnumTemplateAttribute(Type templateType, ulong order)
+        public TypeNameAsEnumMemberForTemplateAttribute(Type templateType, ulong order)
         {
             TemplateType = templateType;
             Order = order;

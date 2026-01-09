@@ -17,6 +17,8 @@ namespace EncosyTower.Tests.EnumTemplates
     [EnumMembersForTemplate(typeof(ResourceType_EnumTemplate), 200)]
     public enum GrainType : byte { Wheat, Rice, }
 
-    //[TypeNameMemberForEnumTemplate(typeof(ResourceType_EnumTemplate), 500)]
     public readonly struct CustomFruit<T> { }
+
+    [TypeNameAsEnumMemberForTemplate(typeof(ResourceType_EnumTemplate), 600)]
+    public class SpecialPowerFruit { }
 }

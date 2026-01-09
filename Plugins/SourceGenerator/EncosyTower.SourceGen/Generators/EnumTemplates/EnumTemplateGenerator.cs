@@ -13,7 +13,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         public const string NAMESPACE = "EncosyTower.EnumExtensions";
         public const string ENUM_TEMPLATE_ATTRIBUTE = $"global::{NAMESPACE}.EnumTemplateAttribute";
         public const string ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE = $"global::{NAMESPACE}.EnumMembersForTemplateAttribute";
-        public const string TYPE_MEMBER_FOR_ENUM_TEMPLATE_ATTRIBUTE = $"global::{NAMESPACE}.TypeNameMemberForEnumTemplateAttribute";
+        public const string TYPE_NAME_AS_MEMBER_ATTRIBUTE = $"global::{NAMESPACE}.TypeNameAsEnumMemberForTemplateAttribute";
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
         public const string GENERATOR_NAME = nameof(EnumTemplateGenerator);
 
@@ -64,18 +64,25 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         {
             token.ThrowIfCancellationRequested();
 
-            switch (syntaxNode)
+            if (syntaxNode is not BaseTypeDeclarationSyntax baseTypeSyntax)
             {
-                case not (EnumDeclarationSyntax or TypeDeclarationSyntax):
-                case TypeDeclarationSyntax { TypeParameterList: not null }:
-                    return false;
+                return false;
             }
 
-            var baseTypeSyntax = (BaseTypeDeclarationSyntax)syntaxNode;
-            var attribSyntax = baseTypeSyntax.GetAttribute(NAMESPACE, "EnumMembersForTemplate");
-            attribSyntax ??= baseTypeSyntax.GetAttribute(NAMESPACE, "TypeNameMemberForEnumTemplate");
+            if (baseTypeSyntax is TypeDeclarationSyntax typeSyntax && typeSyntax.TypeParameterList is not null)
+            {
+                return false;
+            }
 
-            return attribSyntax?.ArgumentList is { Arguments: { Count: > 1 } args }
+            var attribSyntax = baseTypeSyntax.GetAttribute(NAMESPACE, "EnumMembersForTemplate");
+            attribSyntax ??= baseTypeSyntax.GetAttribute(NAMESPACE, "TypeNameAsEnumMemberForTemplate");
+
+            if (attribSyntax is null)
+            {
+                return false;
+            }
+
+            return attribSyntax.ArgumentList is { Arguments: { Count: > 1 } args }
                 && args[0].Expression is TypeOfExpressionSyntax
                 && args[1].Expression is LiteralExpressionSyntax
                 ;
@@ -133,9 +140,9 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
             var attrib = typeSymbol.GetAttribute(ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE);
             var isEnum = attrib is not null;
-            attrib ??= typeSymbol.GetAttribute(TYPE_MEMBER_FOR_ENUM_TEMPLATE_ATTRIBUTE);
+            attrib ??= typeSymbol.GetAttribute(TYPE_NAME_AS_MEMBER_ATTRIBUTE);
 
-            if (attrib == null || attrib.ConstructorArguments.Length < 2)
+            if (attrib is not { ConstructorArguments.Length: > 1 })
             {
                 return default;
             }
