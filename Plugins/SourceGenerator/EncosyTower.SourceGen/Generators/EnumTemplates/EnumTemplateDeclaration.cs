@@ -132,7 +132,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                         member = new EnumMemberDeclaration {
                             name = typeName,
                             order = currentBaseOrder,
-                            displayName = typeName,
+                            displayName = string.IsNullOrEmpty(candidate.displayName) ? typeName : candidate.displayName,
                         },
                     });
 
@@ -295,13 +295,28 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     enumMembers = typeSymbol.TypeKind == TypeKind.Enum,
                 };
 
-                var orderArg = args[1];
-
-                if (orderArg.Kind == TypedConstantKind.Primitive
-                    && orderArg.Value is ulong value
-                )
+                if (args.Length > 1)
                 {
-                    candidate.order = value;
+                    var arg = args[1];
+
+                    if (arg.Kind == TypedConstantKind.Primitive
+                        && arg.Value is ulong value
+                    )
+                    {
+                        candidate.order = value;
+                    }
+                }
+
+                if (args.Length > 2)
+                {
+                    var arg = args[2];
+
+                    if (arg.Kind == TypedConstantKind.Primitive
+                        && arg.Value is string displayName
+                    )
+                    {
+                        candidate.displayName = displayName;
+                    }
                 }
 
                 output.Add(candidate);

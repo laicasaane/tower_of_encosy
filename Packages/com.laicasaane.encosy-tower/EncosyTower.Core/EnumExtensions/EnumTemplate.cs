@@ -76,10 +76,13 @@ namespace EncosyTower.EnumExtensions
 
         public ulong Order { get; }
 
-        public EnumTemplateMemberFromTypeNameAttribute(Type type, ulong order)
+        public string DisplayName { get; }
+
+        public EnumTemplateMemberFromTypeNameAttribute(Type type, ulong order, string displayName = "")
         {
             Type = type;
             Order = order;
+            DisplayName = displayName;
         }
     }
 
@@ -138,10 +141,13 @@ namespace EncosyTower.EnumExtensions
 
         public ulong Order { get; }
 
-        public TypeNameAsEnumMemberForTemplateAttribute(Type templateType, ulong order)
+        public string DisplayName { get; }
+
+        public TypeNameAsEnumMemberForTemplateAttribute(Type templateType, ulong order, string displayName = "")
         {
             TemplateType = templateType;
             Order = order;
+            DisplayName = displayName;
         }
     }
 }

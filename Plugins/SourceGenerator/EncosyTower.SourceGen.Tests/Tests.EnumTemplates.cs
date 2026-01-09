@@ -19,6 +19,6 @@ namespace EncosyTower.Tests.EnumTemplates
 
     public readonly struct CustomFruit<T> { }
 
-    [TypeNameAsEnumMemberForTemplate(typeof(ResourceType_EnumTemplate), 600)]
+    [TypeNameAsEnumMemberForTemplate(typeof(ResourceType_EnumTemplate), 600, "Special Power Fruit")]
     public class SpecialPowerFruit { }
 }

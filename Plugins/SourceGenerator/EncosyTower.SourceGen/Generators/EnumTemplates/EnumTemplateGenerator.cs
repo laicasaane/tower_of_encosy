@@ -179,6 +179,18 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 }
             }
 
+            if (isEnum == false && args.Length > 2)
+            {
+                var arg = args[2];
+
+                if (arg.Kind == TypedConstantKind.Primitive
+                    && arg.Value is string value
+                )
+                {
+                    candidate.displayName = value;
+                }
+            }
+
             return candidate;
         }
 
