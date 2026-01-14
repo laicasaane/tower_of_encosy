@@ -8,7 +8,7 @@ namespace EncosyTower.StringIds
 {
     internal static class GlobalStringVault
     {
-        private readonly static StringVault s_vault = new(256);
+        internal readonly static StringVault s_vault = new(256);
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnEnterPlayMode, UnityEngine.Scripting.Preserve]

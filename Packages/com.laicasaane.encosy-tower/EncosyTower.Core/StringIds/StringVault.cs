@@ -17,6 +17,11 @@ namespace EncosyTower.StringIds
         , ICopyToSpan<string>, ITryCopyToSpan<string>
         , ICopyToSpan<UnmanagedString>, ITryCopyToSpan<UnmanagedString>
     {
+        /// <summary>
+        /// The default instance used by <see cref="StringToId"/> and <see cref="IdToString"/>.
+        /// </summary>
+        public static StringVault Default => GlobalStringVault.s_vault;
+
         internal readonly SharedArrayMap<StringHash, StringId> _map;
         internal readonly SharedList<Range> _unmanagedStringRanges;
         internal readonly SharedList<byte> _unmanagedStringBuffer;
