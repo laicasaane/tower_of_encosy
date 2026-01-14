@@ -35,10 +35,7 @@ namespace EncosyTower.Vaults
         {
             if (_singletons.ContainsKey(Type<T>.Hash))
             {
-#if __ENCOSY_VALIDATION__
-                StaticDevLogger.LogError($"An instance of {typeof(T)} has already been existing");
-#endif
-
+                LogError_InstanceAlreadyExists<T>();
                 return false;
             }
 
@@ -51,7 +48,7 @@ namespace EncosyTower.Vaults
             if (instance == null)
             {
 #if __ENCOSY_VALIDATION__
-                throw new ArgumentNullException(nameof(instance));
+                throw CreateArgumentNullException_Instance();
 #else
                 return false;
 #endif
@@ -59,10 +56,7 @@ namespace EncosyTower.Vaults
 
             if (_singletons.ContainsKey(Type<T>.Hash))
             {
-#if __ENCOSY_VALIDATION__
-                StaticDevLogger.LogError($"An instance of {typeof(T)} has already been existing");
-#endif
-
+                LogError_InstanceAlreadyExists<T>();
                 return false;
             }
 
@@ -123,6 +117,13 @@ namespace EncosyTower.Vaults
 
             singletons.Clear();
         }
+
+        private static Exception CreateArgumentNullException_Instance()
+            => new ArgumentNullException("instance");
+
+        [Conditional("__ENCOSY_VALIDATION__")]
+        private static void LogError_InstanceAlreadyExists<T>()
+            => StaticDevLogger.LogError($"An instance of {typeof(T)} has already been existing");
 
         [Conditional("__ENCOSY_VALIDATION__")]
         private static void ThrowIfNotReferenceType()

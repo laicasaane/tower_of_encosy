@@ -64,7 +64,9 @@ namespace EncosyTower.Common
         public static int GetPrime(int min)
         {
             if (min < 0)
-                throw new ArgumentException("Cannot get the next prime from a negative number.");
+            {
+                throw CreateArgumentException_PrimeFromNegative();
+            }
 
             var primes = Primes;
 
@@ -112,5 +114,8 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint FastMod(uint value, uint divisor, ulong multiplier)
             => (uint)(((multiplier * (ulong)value >> 32) + 1UL) * (ulong)divisor >> 32);
+
+        private static Exception CreateArgumentException_PrimeFromNegative()
+            => new ArgumentException("Cannot get the next prime from a negative number.");
     }
 }

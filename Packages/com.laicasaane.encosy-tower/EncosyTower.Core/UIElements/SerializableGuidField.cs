@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using EncosyTower.Common;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -155,9 +156,7 @@ namespace EncosyTower.UIElements
                         return;
                     }
 
-                    throw new FormatException(
-                        $"The value of format is not null, an empty string (\"\"), \"N\", \"D\", \"B\", \"P\", or \"X\""
-                    );
+                    ThrowFormatException();
                 }
             }
 
@@ -176,6 +175,15 @@ namespace EncosyTower.UIElements
             {
                 return Guid.TryParse(str, out var result) ? result : Guid.Empty;
             }
+
+        }
+
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void ThrowFormatException()
+        {
+            throw new FormatException(
+                "The value of format is not null, an empty string (\"\"), \"N\", \"D\", \"B\", \"P\", or \"X\""
+            );
         }
     }
 }

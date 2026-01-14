@@ -22,9 +22,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#if !(UNITY_EDITOR || DEBUG || ENABLE_UNITY_COLLECTIONS_CHECKS || UNITY_DOTS_DEBUG) || DISABLE_ENCOSY_CHECKS
+#define __ENCOSY_NO_VALIDATION__
+#else
+#define __ENCOSY_VALIDATION__
+#endif
+
 using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
+using EncosyTower.Debugging;
 
 namespace EncosyTower.Buffers
 {
@@ -71,9 +78,8 @@ namespace EncosyTower.Buffers
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-#if DEBUG && ENABLE_PARANOID_CHECKS
-                if (index >= _buffer.Length)
-                    throw new IndexOutOfRangeException("Paranoid check failed!");
+#if __ENCOSY_VALIDATION__
+                ThrowHelper.ThrowIfIndexOutOfRangeException((uint)index < (uint)_buffer.Capacity);
 #endif
 
                 return ref _buffer[index];
@@ -206,9 +212,8 @@ namespace EncosyTower.Buffers
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get
                 {
-#if DEBUG && ENABLE_PARANOID_CHECKS
-                    if (index >= _buffer.Length)
-                        throw new IndexOutOfRangeException("Paranoid check failed!");
+#if __ENCOSY_VALIDATION__
+                    ThrowHelper.ThrowIfIndexOutOfRangeException((uint)index < (uint)_buffer.Capacity);
 #endif
 
                     return ref _buffer[index];
@@ -289,9 +294,8 @@ namespace EncosyTower.Buffers
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-#if DEBUG && ENABLE_PARANOID_CHECKS
-                if (index >= _buffer.Length)
-                    throw new IndexOutOfRangeException("Paranoid check failed!");
+#if __ENCOSY_VALIDATION__
+                ThrowHelper.ThrowIfIndexOutOfRangeException((uint)index < (uint)_buffer.Length);
 #endif
 
                 return ref _buffer[index];
@@ -431,11 +435,10 @@ namespace EncosyTower.Buffers
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get
                 {
-#if DEBUG && ENABLE_PARANOID_CHECKS
-                    if (index >= _buffer.Length)
-                        throw new IndexOutOfRangeException("Paranoid check failed!");
-                    if
+#if __ENCOSY_VALIDATION__
+                    ThrowHelper.ThrowIfIndexOutOfRangeException((uint)index < (uint)_buffer.Length);
 #endif
+
                     return ref _buffer[index];
                 }
             }

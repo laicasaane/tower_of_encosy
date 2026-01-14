@@ -31,6 +31,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
+using EncosyTower.Debugging;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -84,9 +85,8 @@ namespace EncosyTower.Buffers
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-#if DEBUG && ENABLE_PARANOID_CHECKS
-                if (index >= _buffer.Length)
-                    throw new IndexOutOfRangeException("Paranoid check failed!");
+#if __ENCOSY_VALIDATION__
+                ThrowHelper.ThrowIfIndexOutOfRangeException((uint)index < (uint)_buffer.Capacity);
 #endif
 
                 return ref _buffer[index];
@@ -215,9 +215,8 @@ namespace EncosyTower.Buffers
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get
                 {
-#if DEBUG && ENABLE_PARANOID_CHECKS
-                if (index >= _buffer.Length)
-                    throw new IndexOutOfRangeException("Paranoid check failed!");
+#if __ENCOSY_VALIDATION__
+                    ThrowHelper.ThrowIfIndexOutOfRangeException((uint)index < (uint)_buffer.Capacity);
 #endif
 
                     return ref _buffer[index];
@@ -309,10 +308,10 @@ namespace EncosyTower.Buffers
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-#if DEBUG && ENABLE_PARANOID_CHECKS
-                if (index >= _buffer.Length)
-                    throw new IndexOutOfRangeException("Paranoid check failed!");
+#if __ENCOSY_VALIDATION__
+                ThrowHelper.ThrowIfIndexOutOfRangeException((uint)index < (uint)_buffer.Length);
 #endif
+
                 unsafe
                 {
                     return ref UnsafeUtility.ArrayElementAsRef<T>(_buffer.GetUnsafePtr(), index);
@@ -466,10 +465,10 @@ namespace EncosyTower.Buffers
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get
                 {
-#if DEBUG && ENABLE_PARANOID_CHECKS
-                if (index >= _buffer.Length)
-                    throw new IndexOutOfRangeException("Paranoid check failed!");
+#if __ENCOSY_VALIDATION__
+                    ThrowHelper.ThrowIfIndexOutOfRangeException((uint)index < (uint)_buffer.Length);
 #endif
+
                     unsafe
                     {
                         return ref UnsafeUtility.ArrayElementAsRef<T>(_buffer.GetUnsafeReadOnlyPtr(), index);

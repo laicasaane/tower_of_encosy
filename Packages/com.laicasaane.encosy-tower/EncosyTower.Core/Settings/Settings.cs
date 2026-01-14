@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using EncosyTower.Logging;
@@ -82,11 +83,7 @@ namespace EncosyTower.Settings
                 }
                 else
                 {
-                    StaticDevLogger.LogWarningFormat(
-                        $"Failed to move previous settings asset '{oldPath}' to '{path}'. " +
-                        $"A new settings asset will be created."
-                        , s_instance
-                    );
+                    LogWarning_FailedToMoveAsset(path, oldPath);
                 }
             }
 #endif
@@ -108,9 +105,7 @@ namespace EncosyTower.Settings
                 DestroyImmediate(s_instance);
                 s_instance = null;
 
-                throw new InvalidOperationException(
-                    $"Settings-derived class and filename must match: {type.Name}"
-                );
+                throw CreateInvalidOperationException_ClassNameFileNameMustMatch(type);
             }
 
             // Create a new settings instance if it was not found.
@@ -161,6 +156,23 @@ namespace EncosyTower.Settings
 #if UNITY_EDITOR
             EditorUtility.SetDirty(this);
 #endif
+        }
+
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void LogWarning_FailedToMoveAsset(string path, string oldPath)
+        {
+            StaticDevLogger.LogWarningFormat(
+                  $"Failed to move previous settings asset '{oldPath}' to '{path}'. " +
+                  $"A new settings asset will be created."
+                , s_instance
+            );
+        }
+
+        private static Exception CreateInvalidOperationException_ClassNameFileNameMustMatch(Type type)
+        {
+            return new InvalidOperationException(
+                $"Settings-derived class and filename must match: {type.Name}"
+            );
         }
 
         /// <summary>
