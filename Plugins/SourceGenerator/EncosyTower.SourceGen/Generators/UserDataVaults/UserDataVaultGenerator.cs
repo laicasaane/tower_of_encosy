@@ -293,7 +293,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("using NotNullAttribute = global::System.Diagnostics.CodeAnalysis.NotNullAttribute;");
                 p.PrintLine("using SpanᐸIUserDataᐳ = global::System.Span<global::EncosyTower.UserDataVaults.IUserData>;");
                 p.PrintLine("using StringIdᐸstringᐳ = global::EncosyTower.StringIds.StringId<string>;");
-                p.PrintLine("using StringToId = global::EncosyTower.StringIds.StringToId;");
+                p.PrintLine("using StringVault = global::EncosyTower.StringIds.StringVault;");
                 p.PrintLine("using ThrowHelper = global::EncosyTower.Debugging.ThrowHelper;");
                 p.PrintLine("using UnityTasks = global::EncosyTower.Tasks.UnityTasks;");
                 p.PrintLine("using UserDataStorageArgs = global::EncosyTower.UserDataVaults.UserDataStorageArgs;");

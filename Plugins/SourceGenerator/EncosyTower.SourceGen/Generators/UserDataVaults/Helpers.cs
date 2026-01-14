@@ -16,7 +16,6 @@
         public const string WHEN_ALL_TASKS = "UnityTasks.WhenAll(tasks)";
         public const string NOT_NULL = "[NotNull]";
         public const string STRING_ID = "StringIdᐸstringᐳ";
-        public const string STRING_ID_GET = "StringToId.Get";
         public const string GENERATED_CODE = $"[GeneratedCode(GENERATOR, \"{SourceGenVersion.VALUE}\")]";
         public const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
         public const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";

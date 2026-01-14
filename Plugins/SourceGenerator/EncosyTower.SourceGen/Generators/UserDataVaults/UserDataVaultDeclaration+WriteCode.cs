@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Newtonsoft.Json.Utilities;
 
 namespace EncosyTower.SourceGen.Generators.UserDataVaults
 {
@@ -26,6 +25,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 }
             }
 
+            var isStatic = Symbol.IsStatic;
             var orderedStorageDefs = storageDefs
                 .OrderBy(x => x.DataType.Name)
                 .ToArray()
@@ -35,36 +35,25 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             var p = scopePrinter.printer;
             p = p.IncreasedIndent();
 
-            var staticKeyword = Symbol.IsStatic ? "static " : "";
-            var fieldPrefix = Symbol.IsStatic ? "s_" : "_";
+            var staticKeyword = isStatic ? "static " : "";
+            var fieldPrefix = isStatic ? "s_" : "_";
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            p.PrintBeginLine(staticKeyword).Print("partial class ").PrintEndLine(Syntax.Identifier.Text);
-            p.OpenScope();
-            {
-                WriteFields(ref p, staticKeyword, fieldPrefix);
-                WriteProperties(ref p, staticKeyword, accessDefs);
-                WriteInitializeAsync(ref p, staticKeyword, fieldPrefix, accessDefs);
-                WriteTryLoadUserDataAsync(ref p, staticKeyword, fieldPrefix);
-                WriteDeinitialize(ref p, staticKeyword, fieldPrefix, accessDefs);
-                WriteOnUserDataLoaded(ref p, staticKeyword, accessDefs);
-                WriteSave(ref p, staticKeyword, fieldPrefix);
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-
-            p.Print("#region DATA STORAGE").PrintEndLine();
-            p.Print("#endregion =========").PrintEndLine();
-            p.PrintEndLine();
-
             p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
-                .PrintEndLine(" // DataStorage");
+                .PrintIf(isStatic == false, " : IDisposable, IDeinitializable")
+                .PrintEndLine();
             p.OpenScope();
             {
-                WriteDataStorageClass(ref p, orderedStorageDefs);
+                WriteFields(ref p, isStatic, staticKeyword, fieldPrefix);
+                WriteConstructor(ref p, isStatic, Syntax.Identifier.Text, accessDefs);
+                WriteProperties(ref p, isStatic, staticKeyword, accessDefs);
+                WriteInitializeAsync(ref p, isStatic, staticKeyword, fieldPrefix, accessDefs);
+                WriteTryLoadUserDataAsync(ref p, isStatic, staticKeyword, fieldPrefix, accessDefs);
+                WriteDeinitialize(ref p, isStatic, staticKeyword, fieldPrefix, accessDefs);
+                WriteSave(ref p, staticKeyword, fieldPrefix);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -77,7 +66,20 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .PrintEndLine(" // Ids");
             p.OpenScope();
             {
-                WriteIdsClass(ref p, orderedStorageDefs);
+                WriteIds(ref p, isStatic, orderedStorageDefs);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.Print("#region DATA STORAGE").PrintEndLine();
+            p.Print("#endregion =========").PrintEndLine();
+            p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
+                .PrintEndLine(" // DataStorage");
+            p.OpenScope();
+            {
+                WriteDataStorageClass(ref p, isStatic, orderedStorageDefs);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -112,20 +114,205 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             return p.Result;
         }
 
-        private void WriteFields(ref Printer p, string staticKeyword, string fieldPrefix)
+        private void WriteFields(ref Printer p, bool isStatic, string staticKeyword, string fieldPrefix)
         {
             p.PrintLine(GENERATED_CODE);
-            p.PrintBeginLine("private ").Print(staticKeyword).Print("DataStorage ")
-                .Print(fieldPrefix).PrintEndLine("storage;");
+            p.PrintBeginLine("private ").Print(staticKeyword)
+                .PrintIf(isStatic == false, "readonly ")
+                .Print("DataStorage ").Print(fieldPrefix).PrintEndLine("storage;");
             p.PrintEndLine();
 
+            if (isStatic == false)
+            {
+                p.PrintLine(GENERATED_CODE);
+                p.PrintBeginLine("private readonly ")
+                    .Print("Ids ").Print(fieldPrefix).PrintEndLine("ids;");
+                p.PrintEndLine();
+            }
+
             p.PrintLine(GENERATED_CODE);
-            p.PrintBeginLine("private ").Print(staticKeyword).Print("bool ")
-                .Print(fieldPrefix).PrintEndLine("isSavedOnLoaded;");
+            p.PrintBeginLine("private ").Print(staticKeyword)
+                .Print("bool ").Print(fieldPrefix).PrintEndLine("isSavedOnLoaded;");
             p.PrintEndLine();
         }
 
-        private void WriteProperties(ref Printer p, string staticKeyword, List<UserDataAccessDefinition> defs)
+        private static void WriteConstructor(
+              ref Printer p
+            , bool isStatic
+            , string className
+            , List<UserDataAccessDefinition> defs
+        )
+        {
+            if (isStatic)
+            {
+                return;
+            }
+
+            var typeSet = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+            var queue = new Queue<UserDataAccessDefinition>(defs.Count);
+            var loopMap = new Dictionary<ITypeSymbol, int>(defs.Count, SymbolEqualityComparer.Default);
+
+            foreach (var def in defs)
+            {
+                queue.Enqueue(def);
+            }
+
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(className).PrintEndLine("(");
+            p = p.IncreasedIndent();
+            {
+                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").PrintEndLine("StringVault stringVault");
+                p.PrintLine(", string userId");
+            }
+            p = p.DecreasedIndent();
+            p.PrintLine(")");
+            p.OpenScope();
+            {
+                p.PrintLine("_ids = new(stringVault);");
+                p.PrintEndLine();
+
+                p.PrintLine("OnBeginConstructor(encryption, logger, taskArrayPool, userId);");
+                p.PrintEndLine();
+
+                p.PrintLine("_storage = new(encryption, logger, taskArrayPool, _ids, userId);");
+
+                var loopBreakCondition = defs.Count;
+
+                while (queue.Count > 0)
+                {
+                    var def = queue.Dequeue();
+                    var needDependency = false;
+
+                    foreach (var arg in def.Args)
+                    {
+                        if (arg.Type != null && typeSet.Contains(arg.Type) == false)
+                        {
+                            needDependency = true;
+                            break;
+                        }
+                    }
+
+                    if (needDependency)
+                    {
+                        if (loopMap.TryGetValue(def.Symbol, out var loop))
+                        {
+                            loop += 1;
+                        }
+
+                        if (loop == loopBreakCondition)
+                        {
+                            break;
+                        }
+
+                        loopMap[def.Symbol] = loop;
+                        queue.Enqueue(def);
+                        continue;
+                    }
+
+                    typeSet.Add(def.Symbol);
+                    loopMap.Remove(def.Symbol);
+                    Write(ref p, def);
+                }
+
+                p.PrintEndLine();
+
+                foreach (var kv in loopMap)
+                {
+                    p.PrintBeginLine("LogErrorCyclicDependency(logger, \"").Print(kv.Key.Name).PrintEndLine("\");");
+                }
+
+                if (loopMap.Count > 0)
+                {
+                    p.PrintEndLine();
+                }
+
+                p.PrintLine("OnFinishConstructor(encryption, logger, taskArrayPool, userId);");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintLine("partial void OnBeginConstructor(");
+            p = p.IncreasedIndent();
+            {
+                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
+                p.PrintLine(", string userId");
+            }
+            p = p.DecreasedIndent();
+            p.PrintLine(");");
+            p.PrintEndLine();
+
+            p.PrintLine("partial void OnFinishConstructor(");
+            p = p.IncreasedIndent();
+            {
+                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
+                p.PrintLine(", string userId");
+            }
+            p = p.DecreasedIndent();
+            p.PrintLine(");");
+            p.PrintEndLine();
+
+            return;
+
+            static void Write(ref Printer p, UserDataAccessDefinition def)
+            {
+                if (def.Args.Count < 2)
+                {
+                    p.PrintBeginLine(def.FieldName).Print(" = new(");
+
+                    foreach (var arg in def.Args)
+                    {
+                        if (arg.Type != null)
+                        {
+                            p.Print(arg.Type.Name);
+                        }
+                        else
+                        {
+                            p.Print("_storage.").Print(arg.StorageDef.DataType.Name);
+                        }
+                    }
+
+                    p.PrintEndLine(");");
+                }
+                else
+                {
+                    p.PrintBeginLine(def.Symbol.Name).PrintEndLine(" = new(");
+                    p = p.IncreasedIndent();
+                    {
+                        var args = def.Args;
+
+                        for (var i = 0; i < args.Count; i++)
+                        {
+                            var arg = args[i];
+                            var comma = i == 0 ? " " : ",";
+
+                            p.PrintBeginLine(comma).Print(" ");
+
+                            if (arg.Type != null)
+                            {
+                                p.Print(arg.Type.Name);
+                            }
+                            else
+                            {
+                                p.Print("_storage.").Print(arg.StorageDef.DataType.Name);
+                            }
+
+                            p.PrintEndLine();
+                        }
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintLine(");");
+                }
+            }
+        }
+
+        private void WriteProperties(ref Printer p, bool isStatic, string staticKeyword, List<UserDataAccessDefinition> defs)
         {
             foreach (var def in defs)
             {
@@ -134,18 +321,24 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ").Print(staticKeyword).Print(typeName).Print(" ")
-                    .Print(fieldName).PrintEndLine(" { get; private set; }")
+                    .Print(fieldName).Print(" { get; ").PrintIf(isStatic, "private set; ").PrintEndLine("}")
                     .PrintEndLine();
             }
         }
 
         private static void WriteInitializeAsync(
               ref Printer p
+            , bool isStatic
             , string staticKeyword
             , string fieldPrefix
             , List<UserDataAccessDefinition> defs
         )
         {
+            if (isStatic == false)
+            {
+                return;
+            }
+
             var typeSet = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
             var queue = new Queue<UserDataAccessDefinition>(defs.Count);
             var loopMap = new Dictionary<ITypeSymbol, int>(defs.Count, SymbolEqualityComparer.Default);
@@ -162,6 +355,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
                 p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
                 p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").PrintEndLine("StringVault stringVault");
                 p.PrintLine(", string userId");
                 p.PrintLine(", bool loadFromCloud");
                 p.PrintLine(", CancellationToken token = default");
@@ -170,7 +364,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintLine(")");
             p.OpenScope();
             {
-                p.PrintLine("Ids.Initialize();");
+                p.PrintLine("Ids.Initialize(stringVault);");
                 p.PrintEndLine();
 
                 p.PrintLine("UnityTask beginTask = UnityTasks.GetCompleted();");
@@ -330,8 +524,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private static void WriteTryLoadUserDataAsync(
               ref Printer p
+            , bool isStatic
             , string staticKeyword
             , string fieldPrefix
+            , List<UserDataAccessDefinition> defs
         )
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
@@ -350,13 +546,16 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("var result = false;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine("if (").Print(fieldPrefix).PrintEndLine("storage == null)");
-                p.OpenScope();
+                if (isStatic)
                 {
-                    p.PrintLine("return result;");
+                    p.PrintBeginLine("if (").Print(fieldPrefix).PrintEndLine("storage == null)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("return result;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
                 }
-                p.CloseScope();
-                p.PrintEndLine();
 
                 p.PrintLine("UnityTask beginTask = UnityTasks.GetCompleted();");
                 p.PrintLine("OnBeginTryLoadUserDataAsync(logger, userId, loadFromCloud, token, ref beginTask);");
@@ -369,7 +568,14 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.UserId = userId;");
                 p.PrintEndLine();
 
-                p.PrintLine("if (string.IsNullOrEmpty(userId) == false)");
+                p.PrintLine("if (string.IsNullOrEmpty(userId))");
+                p.OpenScope();
+                {
+                    p.PrintLine("result = false;");
+                    p.PrintLine("LogWarningInvalidUserId(logger);");
+                }
+                p.CloseScope();
+                p.PrintLine("else");
                 p.OpenScope();
                 {
                     p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.Initialize();");
@@ -393,31 +599,42 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.OpenScope();
                     {
                         p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.CreateDataIfNotExist();");
-                        p.PrintLine("OnUserDataLoaded();");
-                        p.PrintLine("Save(token: token);");
-                        p.PrintLine("result = true;");
+                        p.PrintEndLine();
+
+                        var initCount = 0;
+
+                        foreach (var def in defs)
+                        {
+                            if (def.Symbol.InheritsFromInterface("global::EncosyTower.Initialization.IInitializable"))
+                            {
+                                p.PrintBeginLine(def.FieldName).PrintIf(isStatic, "?").PrintEndLine(".Initialize();");
+                                initCount += 1;
+                            }
+                        }
+
+                        if (initCount > 0)
+                        {
+                            p.PrintEndLine();
+                        }
+
+                        p.PrintLine("await SaveAsync(token: token);");
                     }
                     p.CloseScope();
-                    p.PrintLine("else");
-                    p.OpenScope();
-                    {
-                        p.PrintLine("result = false;");
-                    }
-                    p.CloseScope();
-                }
-                p.CloseScope();
-                p.PrintLine("else");
-                p.OpenScope();
-                {
-                    p.PrintLine("result = false;");
-                    p.PrintLine("LogWarningInvalidUserId(logger);");
+                    p.PrintEndLine();
+
+                    p.PrintLine("result = token.IsCancellationRequested == false;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("UnityTask finishTask = UnityTasks.GetCompleted();");
-                p.PrintLine("OnFinishTryLoadUserDataAsync(logger, userId, loadFromCloud, token, ref finishTask);");
-                p.PrintLine("await finishTask;");
+                p.PrintLine("if (token.IsCancellationRequested == false)");
+                p.OpenScope();
+                {
+                    p.PrintLine("UnityTask finishTask = UnityTasks.GetCompleted();");
+                    p.PrintLine("OnFinishTryLoadUserDataAsync(logger, userId, loadFromCloud, token, ref finishTask);");
+                    p.PrintLine("await finishTask;");
+                }
+                p.CloseScope();
                 p.PrintEndLine();
 
                 p.PrintLine("return result;");
@@ -454,6 +671,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private void WriteDeinitialize(
               ref Printer p
+            , bool isStatic
             , string staticKeyword
             , string fieldPrefix
             , List<UserDataAccessDefinition> defs
@@ -473,15 +691,24 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     if (def.Symbol.InheritsFromInterface("global::EncosyTower.Initialization.IDeinitializable"))
                     {
-                        p.PrintBeginLine(def.FieldName).PrintEndLine("?.Deinitialize();");
+                        p.PrintBeginLine(def.FieldName).PrintIf(isStatic, "?").PrintEndLine(".Deinitialize();");
                     }
 
-                    p.PrintBeginLine(def.FieldName).PrintEndLine(" = null;");
+                    if (isStatic)
+                    {
+                        p.PrintBeginLine(def.FieldName).PrintEndLine(" = null;");
+                    }
+
                     p.PrintEndLine();
                 }
 
-                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage?.Dispose();");
-                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage = null;");
+                p.PrintBeginLine(fieldPrefix).Print("storage").PrintIf(isStatic, "?").PrintEndLine(".Dispose();");
+
+                if (isStatic)
+                {
+                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage = null;");
+                }
+
                 p.PrintEndLine();
 
                 p.PrintLine("OnFinishDeinitialize();");
@@ -493,6 +720,16 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
 
             p.PrintBeginLine(staticKeyword).PrintEndLine("partial void OnFinishDeinitialize();");
+            p.PrintEndLine();
+
+            if (isStatic)
+            {
+                return;
+            }
+
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public void Dispose()");
+            p.WithIncreasedIndent().PrintLine("=> Deinitialize();");
             p.PrintEndLine();
         }
 
@@ -579,29 +816,44 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private static void WriteOnUserDataLoaded(
-              ref Printer p
-            , string staticKeyword
-            , List<UserDataAccessDefinition> defs
-        )
+        private static void WriteIds(ref Printer p, bool isStatic, ReadOnlySpan<StorageDefinition> defs)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("private ").Print(staticKeyword).PrintEndLine("void OnUserDataLoaded()");
+            p.PrintBeginLine().PrintIf(isStatic, "static ", "readonly ").Print("partial ")
+                .PrintIf(isStatic, "class", "struct").PrintEndLine(" Ids");
             p.OpenScope();
             {
+                p.PrintBeginLineIf(
+                      isStatic
+                    , "internal static void Initialize"
+                    , "public Ids"
+                ).PrintEndLine("([NotNull] StringVault stringVault)");
+                p.OpenScope();
+                {
+                    foreach (var def in defs)
+                    {
+                        var name = def.DataType.Name;
+
+                        p.PrintBeginLine(name)
+                            .Print(" = stringVault.GetOrMakeId(nameof(").Print(name).PrintEndLine("));");
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
                 foreach (var def in defs)
                 {
-                    if (def.Symbol.InheritsFromInterface("global::EncosyTower.Initialization.IInitializable"))
-                    {
-                        p.PrintBeginLine(def.FieldName).PrintEndLine("?.Initialize();");
-                    }
+                    p.PrintBeginLine("public ").PrintIf(isStatic, "static ")
+                        .Print(STRING_ID).Print(" ").Print(def.DataType.Name)
+                        .Print(" { get; ").PrintIf(isStatic, "private set; ").PrintEndLine("}");
+                    p.PrintEndLine();
                 }
             }
             p.CloseScope();
             p.PrintEndLine();
         }
 
-        private void WriteDataStorageClass(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
+        private void WriteDataStorageClass(ref Printer p, bool isStatic, ReadOnlySpan<StorageDefinition> defs)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("partial class DataStorage : IDisposable, IInitializable");
@@ -610,6 +862,12 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintBeginLine("private readonly ").Print(ENCRYPTION_BASE).PrintEndLine(" _encryption;");
                 p.PrintBeginLine("private readonly ").Print(ILOGGER).PrintEndLine(" _logger;");
                 p.PrintBeginLine("private readonly ").Print(TASK_ARRAY_POOL).PrintEndLine(" _taskArrayPool;");
+
+                if (isStatic == false)
+                {
+                    p.PrintLine("private readonly Ids _ids;");
+                }
+
                 p.PrintEndLine();
 
                 p.PrintLine("private string _userId;");
@@ -621,6 +879,12 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
                     p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
                     p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
+
+                    if (isStatic == false)
+                    {
+                        p.PrintBeginLine(", ").Print(NOT_NULL).PrintEndLine(" Ids ids");
+                    }
+
                     p.PrintLine(", string userId");
                 }
                 p = p.DecreasedIndent();
@@ -630,6 +894,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintLine("_encryption = encryption;");
                     p.PrintLine("_logger = logger;");
                     p.PrintLine("_taskArrayPool = taskArrayPool;");
+                    p.PrintLineIf(isStatic == false, "_ids = ids;");
                     p.PrintLine("_userId = userId;");
                     p.PrintEndLine();
 
@@ -652,7 +917,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                                 .PrintEndLine(">(ref storageArgs);");
 
                             p.PrintBeginLine(def.DataType.Name).Print(" = new(")
-                                .Print("Ids.").Print(StringUtils.ToSnakeCase(def.DataType.Name).ToUpperInvariant())
+                                .PrintIf(isStatic, "Ids.", "_ids.").Print(def.DataType.Name)
                                 .Print(", encryption, logger, ignoreEncryption, storageArgs")
                                 .PrintEndLine(") { UserId = userId };");
                         }
@@ -1177,48 +1442,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 }
                 p.CloseScope();
                 p.PrintEndLine();
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-        }
-
-        private static void WriteIdsClass(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
-        {
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("public static class Ids");
-            p.OpenScope();
-            {
-                foreach (var def in defs)
-                {
-                    var name = StringUtils.ToSnakeCase(def.DataType.Name);
-                    var nameUpper = name.ToUpperInvariant();
-
-                    p.PrintBeginLine("private static ").Print(STRING_ID).Print(" s_").Print(name).PrintEndLine(";");
-                    p.PrintEndLine();
-
-                    p.PrintBeginLine("public static ").Print(STRING_ID).Print(" ").PrintEndLine(nameUpper);
-                    p.OpenScope();
-                    {
-                        p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintBeginLine("get => s_").Print(name).PrintEndLine(";");
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-                }
-
-                p.PrintLine("internal static void Initialize()");
-                p.OpenScope();
-                {
-                    foreach (var def in defs)
-                    {
-                        var name = StringUtils.ToSnakeCase(def.DataType.Name);
-                        var nameUpper = name.ToUpperInvariant();
-
-                        p.PrintBeginLine("s_").Print(name).Print(" = ")
-                            .Print(STRING_ID_GET).Print("(nameof(").Print(nameUpper).PrintEndLine("));");
-                    }
-                }
-                p.CloseScope();
             }
             p.CloseScope();
             p.PrintEndLine();
