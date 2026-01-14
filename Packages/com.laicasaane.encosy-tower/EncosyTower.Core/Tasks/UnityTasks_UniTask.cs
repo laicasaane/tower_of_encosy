@@ -1,8 +1,10 @@
 #if UNITASK
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 
 namespace EncosyTower.Tasks
@@ -54,8 +56,26 @@ namespace EncosyTower.Tasks
             => UniTaskExtensions.Forget<T>(self);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static async UniTask AsUnityTask<T>(this UniTask<T> self)
-            => await self;
+        public static UniTask AsUnityTask<T>(this UniTask<T> self)
+            => self;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static async UniTask AsUnityTask(
+              [NotNull] this Task task
+            , bool useCurrentSynchronizationContext = true
+        )
+        {
+            await task.AsUniTask(useCurrentSynchronizationContext);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static async UniTask<T> AsUnityTask<T>(
+              [NotNull] this Task<T> task
+            , bool useCurrentSynchronizationContext = true
+        )
+        {
+            return await task.AsUniTask(useCurrentSynchronizationContext);
+        }
     }
 }
 

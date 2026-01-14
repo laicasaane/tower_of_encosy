@@ -78,7 +78,7 @@ namespace EncosyTower.Tasks
             => await self;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Awaitable AsAwaitable(
+        public static Awaitable AsUnityTask(
               [NotNull] this Task task
             , bool useCurrentSynchronizationContext = true
         )
@@ -87,7 +87,7 @@ namespace EncosyTower.Tasks
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Awaitable<T> AsAwaitable<T>(
+        public static Awaitable<T> AsUnityTask<T>(
               [NotNull] this Task<T> task
             , bool useCurrentSynchronizationContext = true
         )
