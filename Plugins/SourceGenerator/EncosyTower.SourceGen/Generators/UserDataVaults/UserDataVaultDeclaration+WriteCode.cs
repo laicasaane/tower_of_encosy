@@ -471,7 +471,11 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 foreach (var def in defs)
                 {
-                    p.PrintBeginLine("(").Print(def.FieldName).PrintEndLine(" as IDeinitializable)?.Deinitialize();");
+                    if (def.Symbol.InheritsFromInterface("global::EncosyTower.Initialization.IDeinitializable"))
+                    {
+                        p.PrintBeginLine(def.FieldName).PrintEndLine("?.Deinitialize();");
+                    }
+
                     p.PrintBeginLine(def.FieldName).PrintEndLine(" = null;");
                     p.PrintEndLine();
                 }
@@ -587,7 +591,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             {
                 foreach (var def in defs)
                 {
-                    p.PrintBeginLine("(").Print(def.FieldName).PrintEndLine(" as IInitializable)?.Initialize();");
+                    if (def.Symbol.InheritsFromInterface("global::EncosyTower.Initialization.IInitializable"))
+                    {
+                        p.PrintBeginLine(def.FieldName).PrintEndLine("?.Initialize();");
+                    }
                 }
             }
             p.CloseScope();
