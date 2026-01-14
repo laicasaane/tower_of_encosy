@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using EncosyTower.Common;
 using EncosyTower.Encryption;
+using EncosyTower.Initialization;
 using EncosyTower.Logging;
 using EncosyTower.StringIds;
 
@@ -11,11 +12,11 @@ namespace EncosyTower.UserDataVaults
 {
 #if UNITASK
     using UnityTask = Cysharp.Threading.Tasks.UniTask;
-
 #else
+    using UnityTask = UnityEngine.Awaitable;
 #endif
 
-    public abstract class UserDataStoreLocation<TData>
+    public abstract class UserDataStoreLocation<TData> : IInitializable
         where TData : IUserData
     {
         protected UserDataStoreLocation(
@@ -48,6 +49,8 @@ namespace EncosyTower.UserDataVaults
 
         public ILogger Logger { get; }
 
+        public string UserId { get; set; }
+
         public bool IsDirty { get; set; }
 
         public virtual void Initialize() { }
@@ -73,6 +76,8 @@ namespace EncosyTower.UserDataVaults
             UnityEngine.Awaitable
 #endif
             <Option<TData>> TryLoadAsync(CancellationToken token);
+
+        public abstract Option<TData> TryCloneData(TData source);
     }
 }
 

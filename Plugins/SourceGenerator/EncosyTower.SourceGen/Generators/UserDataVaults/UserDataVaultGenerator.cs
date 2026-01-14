@@ -270,6 +270,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             {
                 p.PrintEndLine();
                 p.PrintLine("using UnityTask = global::Cysharp.Threading.Tasks.UniTask;");
+                p.PrintLine("using UnityTaskᐸboolᐳ = global::Cysharp.Threading.Tasks.UniTask<bool>;");
                 PrintAdditionalUsings(ref p);
             }
 
@@ -277,18 +278,40 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             {
                 p.PrintEndLine();
                 p.PrintLine("using UnityTask = global::UnityEngine.Awaitable;");
+                p.PrintLine("using UnityTaskᐸboolᐳ = global::UnityEngine.Awaitable<bool>;");
                 PrintAdditionalUsings(ref p);
             }
 
             static void PrintAdditionalUsings(ref Printer p)
             {
                 p.PrintLine("using CancellationToken = global::System.Threading.CancellationToken;");
-                p.PrintLine("using ExcludeFromCodeCoverage = global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute;");
-                p.PrintLine("using GeneratedCode = global::System.CodeDom.Compiler.GeneratedCodeAttribute;");
-                p.PrintLine("using MethodImpl = global::System.Runtime.CompilerServices.MethodImplAttribute;");
+                p.PrintLine("using EncryptionBase = global::EncosyTower.Encryption.EncryptionBase;");
+                p.PrintLine("using ExcludeFromCodeCoverageAttribute = global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute;");
+                p.PrintLine("using GeneratedCodeAttribute = global::System.CodeDom.Compiler.GeneratedCodeAttribute;");
+                p.PrintLine("using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;");
                 p.PrintLine("using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;");
-                p.PrintLine("using NotNull = global::System.Diagnostics.CodeAnalysis.NotNullAttribute;");
+                p.PrintLine("using NotNullAttribute = global::System.Diagnostics.CodeAnalysis.NotNullAttribute;");
+                p.PrintLine("using SpanᐸIUserDataᐳ = global::System.Span<global::EncosyTower.UserDataVaults.IUserData>;");
+                p.PrintLine("using StringIdᐸstringᐳ = global::EncosyTower.StringIds.StringId<string>;");
+                p.PrintLine("using StringToId = global::EncosyTower.StringIds.StringToId;");
+                p.PrintLine("using ThrowHelper = global::EncosyTower.Debugging.ThrowHelper;");
                 p.PrintLine("using UnityTasks = global::EncosyTower.Tasks.UnityTasks;");
+                p.PrintLine("using UserDataStorageArgs = global::EncosyTower.UserDataVaults.UserDataStorageArgs;");
+                p.PrintEndLine();
+
+                p.PrintLine("using ICopyToSpanᐸIUserDataᐳ = global::EncosyTower.Collections.ICopyToSpan<global::EncosyTower.UserDataVaults.IUserData>;");
+                p.PrintLine("using IDeinitializable = global::EncosyTower.Initialization.IDeinitializable;");
+                p.PrintLine("using IDisposable = global::System.IDisposable;");
+                p.PrintLine("using IEnumerable = global::System.Collections.IEnumerable;");
+                p.PrintLine("using IEnumerator = global::System.Collections.IEnumerator;");
+                p.PrintLine("using IEnumerableᐸIUserDataᐳ = global::System.Collections.Generic.IEnumerable<global::EncosyTower.UserDataVaults.IUserData>;");
+                p.PrintLine("using IEnumeratorᐸIUserDataᐳ = global::System.Collections.Generic.IEnumerator<global::EncosyTower.UserDataVaults.IUserData>;");
+                p.PrintLine("using IInitializable = global::EncosyTower.Initialization.IInitializable;");
+                p.PrintLine("using ILogger = global::EncosyTower.Logging.ILogger;");
+                p.PrintLine("using IReadOnlyListᐸIUserDataᐳ = global::System.Collections.Generic.IReadOnlyList<global::EncosyTower.UserDataVaults.IUserData>;");
+                p.PrintLine("using ITryCopyToSpanᐸIUserDataᐳ = global::EncosyTower.Collections.ITryCopyToSpan<global::EncosyTower.UserDataVaults.IUserData>;");
+                p.PrintLine("using IUserData = global::EncosyTower.UserDataVaults.IUserData;");
+                p.PrintLine("using IUserDataAccess = global::EncosyTower.UserDataVaults.IUserDataAccess;");
             }
         }
 

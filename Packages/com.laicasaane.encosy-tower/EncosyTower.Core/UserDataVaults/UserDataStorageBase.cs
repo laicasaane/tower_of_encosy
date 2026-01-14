@@ -49,9 +49,7 @@ namespace EncosyTower.UserDataVaults
 
         public abstract string UserId { get; set; }
 
-        public TData Data { get; protected set; }
-
-        public bool IsDataValid => Data != null;
+        public abstract bool IsDataValid { get; }
 
         public abstract void Initialize();
 
@@ -69,7 +67,7 @@ namespace EncosyTower.UserDataVaults
 
         public abstract TData GetDataFromCloud();
 
-        public abstract void SetToDevice(TData data);
+        public abstract void SetData(TData data);
 
         public abstract UnityTask SaveToDeviceAsync(CancellationToken token);
 
@@ -79,7 +77,9 @@ namespace EncosyTower.UserDataVaults
 
         public abstract void Save(bool forceToCloud, CancellationToken token);
 
-        public abstract void DeepCloneDataFromCloudToDevice();
+        public abstract bool TryCloneData(out TData result);
+
+        public abstract void CloneDataFromCloudToDevice();
     }
 }
 

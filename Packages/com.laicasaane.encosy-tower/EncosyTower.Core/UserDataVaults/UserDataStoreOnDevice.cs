@@ -3,11 +3,15 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using EncosyTower.Common;
 using EncosyTower.Conversion;
 using EncosyTower.Encryption;
+using EncosyTower.IO;
 using EncosyTower.Logging;
+using EncosyTower.Pooling;
 using EncosyTower.StringIds;
 using EncosyTower.Tasks;
 
@@ -23,7 +27,7 @@ namespace EncosyTower.UserDataVaults
         where TData : IUserData
     {
         private readonly string _directoryPath;
-        private readonly string _filePath;
+        private readonly string _fileExtension;
         private readonly TransformFunc<TData, string> _serializeFunc;
         private readonly TransformFunc<string, TData> _deserializeFunc;
 
@@ -38,32 +42,61 @@ namespace EncosyTower.UserDataVaults
         {
             if (args is not Args deviceArgs)
             {
-                throw new ArgumentException(
-                      $"'{nameof(args)}' must be an instance of '{typeof(Args)}'."
-                    , nameof(args)
-                );
+                throw CreateArgumentException_InstanceOfType();
             }
 
             _directoryPath = deviceArgs.DirectoryPath;
 
-            var fileName = IdToString.GetManaged(Key);
-
 #if FORCE_USER_DATA_ENCRYPTION
-            var fileExtension = "user";
+            var fileExtension = "enc";
 #else
-            var fileExtension = deviceArgs.FileExtension.NotEmptyOr(ignoreEncryption ? "txt" : "user");
+            var fileExtension = deviceArgs.FileExtension.NotEmptyOr(ignoreEncryption ? "txt" : "enc");
 #endif
 
-            _filePath = Path.Combine(_directoryPath, $"{fileName}.{fileExtension}");
+            _fileExtension = fileExtension;
             _serializeFunc = deviceArgs.SerializeFunc;
             _deserializeFunc = deviceArgs.DeserializeFunc;
         }
 
+        private string UserIdFileName
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                using var _ = StringBuilderPool.Rent(out var sb);
+                return PathAPI.ToFileName(UserId, sb);
+            }
+        }
+
+        private string KeyFileName
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                using var _ = StringBuilderPool.Rent(out var sb);
+                return PathAPI.ToFileName(IdToString.GetManaged(Key), sb);
+            }
+        }
+
+        private string FilePath
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Path.Combine(_directoryPath, UserIdFileName, $"{KeyFileName}.{_fileExtension}");
+        }
+
         public override void Initialize()
         {
-            if (Directory.Exists(_directoryPath) == false)
+            if (string.IsNullOrEmpty(UserId))
             {
-                Directory.CreateDirectory(_directoryPath);
+                throw CreateInvalidOperationException_UserIdNotSet();
+            }
+
+            var filePath = FilePath;
+            var directoryPath = Path.GetDirectoryName(filePath);
+
+            if (Directory.Exists(directoryPath) == false)
+            {
+                Directory.CreateDirectory(directoryPath);
             }
         }
 
@@ -71,6 +104,8 @@ namespace EncosyTower.UserDataVaults
         {
             try
             {
+                var filePath = FilePath;
+
                 if (_serializeFunc(data, out var text))
                 {
 #if FORCE_USER_DATA_ENCRYPTION
@@ -79,7 +114,7 @@ namespace EncosyTower.UserDataVaults
                     var raw = IgnoreEncryption ? text : Encryption.Encrypt(text);
 #endif
 
-                    await File.WriteAllTextAsync(_filePath, raw, System.Text.Encoding.UTF8).AsUnityTask();
+                    await File.WriteAllTextAsync(filePath, raw, Encoding.UTF8, token).AsUnityTask();
                 }
             }
             catch (Exception ex)
@@ -98,9 +133,16 @@ namespace EncosyTower.UserDataVaults
         {
             try
             {
-                if (File.Exists(_filePath))
+                var filePath = FilePath;
+
+                if (File.Exists(filePath))
                 {
-                    var raw = await File.ReadAllTextAsync(_filePath, token).AsUnityTask();
+                    var raw = await File.ReadAllTextAsync(filePath, token).AsUnityTask();
+
+                    if (token.IsCancellationRequested)
+                    {
+                        return Option.None;
+                    }
 
 #if FORCE_USER_DATA_ENCRYPTION
                     var text = Encryption.Decrypt(raw);
@@ -119,8 +161,29 @@ namespace EncosyTower.UserDataVaults
                 Logger.LogException(ex);
             }
 
-            return Option<TData>.None;
+            return Option.None;
         }
+
+        public override Option<TData> TryCloneData(TData source)
+        {
+            if (_serializeFunc(source, out var text) == false)
+            {
+                return Option.None;
+            }
+
+            if (_deserializeFunc(text, out var dest))
+            {
+                return Option.Some(dest);
+            }
+
+            return Option.None;
+        }
+
+        private static Exception CreateArgumentException_InstanceOfType()
+            => new ArgumentException($"'args' must be an instance of '{typeof(Args).FullName}'.");
+
+        private static Exception CreateInvalidOperationException_UserIdNotSet()
+            => new InvalidOperationException("'UserId' must be set before calling this method.");
 
         public class Args : UserDataStorageArgs
         {

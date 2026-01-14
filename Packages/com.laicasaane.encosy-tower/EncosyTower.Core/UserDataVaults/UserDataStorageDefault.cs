@@ -19,6 +19,7 @@ namespace EncosyTower.UserDataVaults
         where TData : IUserData, new()
     {
         private readonly UserDataStoreOnDevice<TData> _store;
+        private string _userId;
 
         public UserDataStorageDefault(
               StringId<string> key
@@ -29,6 +30,7 @@ namespace EncosyTower.UserDataVaults
         )
             : base(key, encryption, logger, ignoreEncryption, args)
         {
+            _userId = string.Empty;
             _store = new UserDataStoreOnDevice<TData>(
                   key
                 , encryption
@@ -40,26 +42,32 @@ namespace EncosyTower.UserDataVaults
 
         public override string UserId
         {
-            get
-            {
-                return Data?.Id ?? string.Empty;
-            }
-
-            set
-            {
-                if (Data != null)
-                {
-                    Data.Id = value;
-                }
-            }
+            get => _userId;
+            set => _store.UserId = _userId = value ?? string.Empty;
         }
+
+        public TData Data { get; private set; }
+
+        public override bool IsDataValid => Data != null;
 
         public override void CreateData()
         {
             Data = new();
         }
 
-        public override void DeepCloneDataFromCloudToDevice()
+        public override bool TryCloneData(out TData result)
+        {
+            if (IsDataValid && _store.TryCloneData(Data).TryGetValue(out var clone))
+            {
+                result = clone;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public override void CloneDataFromCloudToDevice()
         {
         }
 
@@ -122,7 +130,7 @@ namespace EncosyTower.UserDataVaults
             }
         }
 
-        public override void SetToDevice(TData data)
+        public override void SetData(TData data)
         {
             if (data != null)
             {
@@ -134,7 +142,7 @@ namespace EncosyTower.UserDataVaults
         public override void SetUserData(string userId, string version)
         {
             var data = Data;
-            data.Id = userId;
+            data.Id = _userId = userId;
             data.Version = version;
         }
     }

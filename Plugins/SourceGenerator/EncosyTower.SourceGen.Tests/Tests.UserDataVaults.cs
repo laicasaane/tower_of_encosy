@@ -1,4 +1,6 @@
-﻿using EncosyTower.Initialization;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using EncosyTower.Initialization;
 using EncosyTower.UserDataVaults;
 
 namespace EncosyTower.Tests.UserDataVaults
@@ -57,6 +59,10 @@ namespace EncosyTower.Tests.UserDataVaults
                 where TStorage : UserDataStorageBase<TData>
             {
             }
+        }
+
+        partial class Collection
+        {
         }
     }
 }
