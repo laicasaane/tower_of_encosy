@@ -39,15 +39,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             var fieldPrefix = Symbol.IsStatic ? "s_" : "_";
 
             p.PrintEndLine();
-            p.Print("#if UNITASK").PrintEndLine();
-            p.Print("    using UnityTask = global::Cysharp.Threading.Tasks.UniTask;").PrintEndLine();
-            p.Print("#elif UNITY_6000_0_OR_NEWER").PrintEndLine();
-            p.Print("    using UnityTask = global::UnityEngine.Awaitable;").PrintEndLine();
-            p.Print("#else").PrintEndLine();
-            p.Print("    using UnityTask = global::System.Threading.Tasks.ValueTask;").PrintEndLine();
-            p.Print("#endif").PrintEndLine();
-
-            p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
@@ -63,7 +54,19 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 WriteDataStorageClass(ref p, orderedStorageDefs);
                 WriteIdsClass(ref p, orderedStorageDefs);
                 WriteDataInspector(ref p, orderedStorageDefs);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
 
+            p.Print("#region INTERNALS").PrintEndLine();
+            p.Print("#endregion ======").PrintEndLine();
+            p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
+                .PrintEndLine(" // Internals");
+            p.OpenScope();
+            {
+                WriteHelperConstants(ref p);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -92,7 +95,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 var typeName = def.Symbol.ToFullName();
                 var fieldName = def.FieldName;
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ").Print(staticKeyword).Print(typeName).Print(" ")
                     .Print(fieldName).PrintEndLine(" { get; private set; }")
                     .PrintEndLine();
@@ -115,23 +118,28 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 queue.Enqueue(def);
             }
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine(" async UnityTask InitializeAsync(");
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("async UnityTask InitializeAsync(");
             p = p.IncreasedIndent();
             {
                 p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
                 p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
                 p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
                 p.PrintLine(", bool loadFromCloud");
+                p.PrintLine(", CancellationToken token = default");
             }
             p = p.DecreasedIndent();
             p.PrintLine(")");
             p.OpenScope();
             {
                 p.PrintLine("Ids.Initialize();");
+                p.PrintLine("OnBeginInitializing(encryption, logger, taskArrayPool, loadFromCloud, token);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage = new(encryption, logger, taskArrayPool);");
+                p.PrintBeginLine(fieldPrefix).PrintEndLine(
+                    "storage = new(encryption, logger, taskArrayPool);"
+                );
+
                 p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.Initialize();");
                 p.PrintEndLine();
 
@@ -189,23 +197,54 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("if (loadFromCloud)");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine("await ").Print(fieldPrefix).PrintEndLine("storage.LoadFromCloudAsync();");
+                    p.PrintBeginLine("await ").Print(fieldPrefix).PrintEndLine("storage.LoadFromCloudAsync(token: token);");
                 }
                 p.CloseScope();
                 p.PrintLine("else");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine("await ").Print(fieldPrefix).PrintEndLine("storage.LoadFromDeviceAsync();");
+                    p.PrintBeginLine("await ").Print(fieldPrefix).PrintEndLine("storage.LoadFromDeviceAsync(token: token);");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
                 p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.CreateDataIfNotExist();");
                 p.PrintLine("OnUserDataLoaded();");
-                p.PrintLine("Save();");
+                p.PrintLine("Save(token: token);");
+                p.PrintEndLine();
+
+                p.PrintLine("OnFinishInitializing(encryption, logger, taskArrayPool, loadFromCloud, token);");
             }
             p.CloseScope();
             p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword).PrintEndLine("partial void OnBeginInitializing(");
+            p = p.IncreasedIndent();
+            {
+                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
+                p.PrintLine(", bool loadFromCloud");
+                p.PrintLine(", CancellationToken token");
+            }
+            p = p.DecreasedIndent();
+            p.PrintLine(");");
+            p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword).PrintEndLine("partial void OnFinishInitializing(");
+            p = p.IncreasedIndent();
+            {
+                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
+                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
+                p.PrintLine(", bool loadFromCloud");
+                p.PrintLine(", CancellationToken token");
+            }
+            p = p.DecreasedIndent();
+            p.PrintLine(");");
+            p.PrintEndLine();
+
+            return;
 
             static void Write(ref Printer p, string fieldPrefix, UserDataAccessDefinition def)
             {
@@ -266,12 +305,23 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             , List<UserDataAccessDefinition> defs
         )
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("internal ").Print(staticKeyword).PrintEndLine("void Deinitialize()");
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("void Deinitialize()");
             p.OpenScope();
             {
+                p.PrintLine("OnBeginDeinitializing();");
+                p.PrintEndLine();
+
                 p.PrintBeginLine(fieldPrefix).PrintEndLine("isSavedOnLoaded = false;");
                 p.PrintEndLine();
+
+                foreach (var def in defs)
+                {
+                    if (def.Symbol.InheritsFromInterface("global::EncosyTower.Initialization.IDeinitializable"))
+                    {
+                        p.PrintBeginLine(def.FieldName).PrintEndLine("?.Deinitialize();");
+                    }
+                }
 
                 p.PrintBeginLine(fieldPrefix).PrintEndLine("storage?.Dispose();");
                 p.PrintBeginLine(fieldPrefix).PrintEndLine("storage = default;");
@@ -281,8 +331,17 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     p.PrintBeginLine(def.FieldName).PrintEndLine(" = null;");
                 }
+
+                p.PrintEndLine();
+                p.PrintLine("OnFinishDeinitializing();");
             }
             p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword).PrintEndLine("partial void OnBeginDeinitializing();");
+            p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword).PrintEndLine("partial void OnFinishDeinitializing();");
             p.PrintEndLine();
         }
 
@@ -292,10 +351,14 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             , string fieldPrefix
         )
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("void Save(bool forceToCloud = false)");
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(staticKeyword)
+                .PrintEndLine("void Save(bool forceToCloud = false, CancellationToken token = default)");
             p.OpenScope();
             {
+                p.PrintLine("OnBeginSaving(forceToCloud, token);");
+                p.PrintEndLine();
+
                 p.PrintBeginLine("if (").Print(fieldPrefix).PrintEndLine("isSavedOnLoaded == false)");
                 p.OpenScope();
                 {
@@ -305,9 +368,45 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.Save(forceToCloud);");
+                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.Save(forceToCloud, token: token);");
+                p.PrintEndLine();
+
+                p.PrintLine("OnFinishSaving(forceToCloud, token);");
             }
             p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("public ").Print(staticKeyword)
+                .PrintEndLine("async UnityTask SaveAsync(bool forceToCloud = false, CancellationToken token = default)");
+            p.OpenScope();
+            {
+                p.PrintLine("OnBeginSaving(forceToCloud, token);");
+                p.PrintEndLine();
+
+                p.PrintBeginLine("if (").Print(fieldPrefix).PrintEndLine("isSavedOnLoaded == false)");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine(fieldPrefix).PrintEndLine("isSavedOnLoaded = true;");
+                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.MarkDirty(true);");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintBeginLine("await ").Print(fieldPrefix).PrintEndLine("storage.SaveAsync(forceToCloud, token: token);");
+                p.PrintEndLine();
+
+                p.PrintLine("OnFinishSaving(forceToCloud, token);");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword)
+                .PrintEndLine("partial void OnBeginSaving(bool forceToCloud, CancellationToken token);");
+            p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword)
+                .PrintEndLine("partial void OnFinishSaving(bool forceToCloud, CancellationToken token);");
             p.PrintEndLine();
         }
 
@@ -317,8 +416,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             , List<UserDataAccessDefinition> defs
         )
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("void OnUserDataLoaded()");
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine("private ").Print(staticKeyword).PrintEndLine("void OnUserDataLoaded()");
             p.OpenScope();
             {
                 foreach (var def in defs)
@@ -335,22 +434,14 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private void WriteDataStorageClass(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
         {
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("partial class DataStorage : global::System.IDisposable");
             p.OpenScope();
             {
-                p.PrintLine(GENERATED_CODE);
-                p.PrintBeginLine("private readonly ").Print(ENCRYPTION_BASE).PrintEndLine(" _encryption;")
-                    .PrintEndLine();
-
-                p.PrintLine(GENERATED_CODE);
-                p.PrintBeginLine("private readonly ").Print(ILOGGER).PrintEndLine(" _logger;")
-                    .PrintEndLine();
-
-                p.PrintLine(GENERATED_CODE);
+                p.PrintBeginLine("private readonly ").Print(ENCRYPTION_BASE).PrintEndLine(" _encryption;");
+                p.PrintBeginLine("private readonly ").Print(ILOGGER).PrintEndLine(" _logger;");
                 p.PrintBeginLine("private readonly ").Print(TASK_ARRAY_POOL).PrintEndLine(" _taskArrayPool;");
-                p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public DataStorage(");
                 p = p.IncreasedIndent();
                 {
@@ -367,21 +458,31 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintLine("_taskArrayPool = taskArrayPool;");
                     p.PrintEndLine();
 
+                    p.PrintLine("bool ignoreEncryption = false;");
+                    p.PrintBeginLine(STORAGE_ARGS).PrintEndLine(" storageArgs = null;");
+                    p.PrintEndLine();
+
+                    p.Print("#if !FORCE_USER_DATA_ENCRYPTION").PrintEndLine();
+                    p.PrintLine("GetIgnoreEncryption(ref ignoreEncryption);");
+                    p.Print("#endif").PrintEndLine();
+                    p.PrintEndLine();
+
                     foreach (var def in defs)
                     {
-                        p.PrintBeginLine(def.DataType.Name).Print(" = new(")
-                            .Print("Ids.").Print(StringUtils.ToSnakeCase(def.DataType.Name).ToUpperInvariant())
-                            .PrintEndLine(", encryption, logger);");
-                    }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
+                        p.OpenScope();
+                        {
+                            p.PrintLine("storageArgs = null;");
+                            p.PrintBeginLine("GetArgsForStorage<")
+                                .Print(def.DataType.ToFullName()).Print(", ").Print(def.StorageType.ToFullName())
+                                .PrintEndLine(">(ref storageArgs);");
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintLine("public void Dispose()");
-                p.OpenScope();
-                {
-                    p.PrintLine("_encryption.Dispose();");
+                            p.PrintBeginLine(def.DataType.Name).Print(" = new(")
+                                .Print("Ids.").Print(StringUtils.ToSnakeCase(def.DataType.Name).ToUpperInvariant())
+                                .Print(", encryption, logger, ignoreEncryption, storageArgs")
+                                .PrintEndLine(");");
+                        }
+                        p.CloseScope();
+                    }
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -394,7 +495,23 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         .PrintEndLine();
                 }
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine("static partial void GetIgnoreEncryption(ref bool ignoreEncryption);");
+                p.PrintEndLine();
+
+                p.PrintBeginLine("static partial void GetArgsForStorage<TData, TStorage>(ref ")
+                    .Print(STORAGE_ARGS).PrintEndLine(" storageArgs)");
+                p.WithIncreasedIndent().PrintBeginLine("where TData : ").PrintEndLine(IUSER_DATA);
+                p.WithIncreasedIndent().PrintBeginLine("where TStorage : ").Print(USER_DATA_STORAGE_BASE).PrintEndLine("TData>;");
+                p.PrintEndLine();
+
+                p.PrintLine("public void Dispose()");
+                p.OpenScope();
+                {
+                    p.PrintLine("_encryption.Dispose();");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
                 p.PrintLine("public void Initialize()");
                 p.OpenScope();
                 {
@@ -407,7 +524,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public void MarkDirty(bool isDirty)");
                 p.OpenScope();
                 {
@@ -419,55 +535,46 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ").PrintEndLine("UnityTask LoadFromDeviceAsync()");
+                p.PrintLine("public void CreateDataIfNotExist()");
                 p.OpenScope();
                 {
-                    if (defs.Length > 1)
+                    foreach (var def in defs)
                     {
-                        p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
-                        p.PrintEndLine();
-
-                        for (var i = 0; i < defs.Length; i++)
+                        p.PrintBeginLine("if (").Print(def.DataType.Name).PrintEndLine(".IsDataValid == false)");
+                        p.OpenScope();
                         {
-                            p.PrintBeginLine($"tasks[{i}] = ").Print(defs[i].DataType.Name).PrintEndLine(".LoadFromDeviceAsync();");
+                            p.PrintBeginLine(def.DataType.Name).PrintEndLine(".CreateData();");
                         }
-
+                        p.CloseScope();
                         p.PrintEndLine();
-                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
-
-                        p.PrintEndLine();
-                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
-                    }
-                    else if (defs.Length == 1)
-                    {
-                        p.PrintBeginLine("await ").Print(defs[0].DataType.Name).PrintEndLine(".LoadFromDeviceAsync();");
-                    }
-                    else
-                    {
-                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
                     }
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ").PrintEndLine("UnityTask LoadFromCloudAsync(");
+                p.PrintLine("public void CreateData()");
+                p.OpenScope();
+                {
+                    foreach (var def in defs)
+                    {
+                        p.PrintBeginLine(def.DataType.Name).PrintEndLine(".CreateData();");
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ")
+                    .PrintEndLine("UnityTask LoadFromCloudAsync(");
                 p = p.IncreasedIndent();
                 {
                     for (var i = 0; i < defs.Length; i++)
                     {
-                        if (i == 0)
-                        {
-                            p.PrintBeginLine("  ");
-                        }
-                        else
-                        {
-                            p.PrintBeginLine(", ");
-                        }
+                        var comma = i == 0 ? "  " : ", ";
 
-                        p.Print("bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
+                        p.PrintBeginLine(comma).Print("bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
                     }
+
+                    p.PrintLine(", CancellationToken token = default");
                 }
                 p = p.DecreasedIndent();
                 p.PrintLine(")");
@@ -487,7 +594,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                             p.PrintBeginLine($"tasks[{i}] = include").PrintEndLine(name);
                             p = p.IncreasedIndent();
                             {
-                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".LoadFromCloudAsync()");
+                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".LoadFromCloudAsync(token)");
                                 p.PrintBeginLine(": ").Print(COMPLETED_TASK).PrintEndLine(";");
                             }
                             p = p.DecreasedIndent();
@@ -508,7 +615,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
                         p.OpenScope();
                         {
-                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".LoadFromCloudAsync();");
+                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".LoadFromCloudAsync(token);");
                         }
                         p.CloseScope();
                         p.PrintEndLine();
@@ -521,8 +628,21 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ").PrintEndLine("UnityTask SaveToCloudAsync()");
+                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ")
+                    .PrintEndLine("UnityTask LoadFromDeviceAsync(");
+                p = p.IncreasedIndent();
+                {
+                    for (var i = 0; i < defs.Length; i++)
+                    {
+                        var comma = i == 0 ? "  " : ", ";
+
+                        p.PrintBeginLine(comma).Print("bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
+                    }
+
+                    p.PrintLine(", CancellationToken token = default");
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
                 p.OpenScope();
                 {
                     if (defs.Length > 1)
@@ -530,9 +650,21 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
                         p.PrintEndLine();
 
+                        var lastIndex = defs.Length - 1;
+
                         for (var i = 0; i < defs.Length; i++)
                         {
-                            p.PrintBeginLine($"tasks[{i}] = ").Print(defs[i].DataType.Name).PrintEndLine(".SaveToCloudAsync();");
+                            var name = defs[i].DataType.Name;
+
+                            p.PrintBeginLine($"tasks[{i}] = include").PrintEndLine(name);
+                            p = p.IncreasedIndent();
+                            {
+                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".LoadFromDeviceAsync(token)");
+                                p.PrintBeginLine(": ").Print(COMPLETED_TASK).PrintEndLine(";");
+                            }
+                            p = p.DecreasedIndent();
+
+                            p.PrintEndLineIf(i < lastIndex, "");
                         }
 
                         p.PrintEndLine();
@@ -543,72 +675,39 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     }
                     else if (defs.Length == 1)
                     {
-                        p.PrintBeginLine("await ").Print(defs[0].DataType.Name).PrintEndLine(".SaveToCloudAsync();");
-                    }
-                    else
-                    {
-                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
-                    }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
+                        var name = defs[0].DataType.Name;
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintLine("public void CreateDataIfNotExist()");
-                p.OpenScope();
-                {
-                    foreach (var def in defs)
-                    {
-                        p.PrintBeginLine("if (").Print(def.DataType.Name).PrintEndLine(".IsDataValid == false)");
+                        p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
                         p.OpenScope();
                         {
-                            p.PrintBeginLine(def.DataType.Name).PrintEndLine(".CreateData();");
+                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".LoadFromDeviceAsync(token);");
                         }
                         p.CloseScope();
                         p.PrintEndLine();
                     }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintLine("public void CreateData()");
-                p.OpenScope();
-                {
-                    foreach (var def in defs)
+                    else
                     {
-                        p.PrintBeginLine(def.DataType.Name).PrintEndLine(".CreateData();");
+                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
                     }
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintLine("public void SaveToDevice()");
-                p.OpenScope();
+                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ")
+                    .PrintEndLine("UnityTask SaveToCloudAsync(");
+                p = p.IncreasedIndent();
                 {
-                    foreach (var def in defs)
+                    for (var i = 0; i < defs.Length; i++)
                     {
-                        p.PrintBeginLine(def.DataType.Name).PrintEndLine(".SaveToDevice();");
-                    }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
+                        var comma = i == 0 ? "  " : ", ";
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintLine("public void Save(bool forceToCloud)");
-                p.OpenScope();
-                {
-                    foreach (var def in defs)
-                    {
-                        p.PrintBeginLine(def.DataType.Name).PrintEndLine(".Save(forceToCloud);");
+                        p.PrintBeginLine(comma).Print("bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
                     }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ").PrintEndLine("UnityTask SaveAsync(bool forceToCloud)");
+                    p.PrintLine(", CancellationToken token = default");
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
                 p.OpenScope();
                 {
                     if (defs.Length > 1)
@@ -616,9 +715,21 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
                         p.PrintEndLine();
 
+                        var lastIndex = defs.Length - 1;
+
                         for (var i = 0; i < defs.Length; i++)
                         {
-                            p.PrintBeginLine($"tasks[{i}] = ").Print(defs[i].DataType.Name).PrintEndLine(".SaveAsync(forceToCloud);");
+                            var name = defs[i].DataType.Name;
+
+                            p.PrintBeginLine($"tasks[{i}] = include").PrintEndLine(name);
+                            p = p.IncreasedIndent();
+                            {
+                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".SaveToCloudAsync(token)");
+                                p.PrintBeginLine(": ").Print(COMPLETED_TASK).PrintEndLine(";");
+                            }
+                            p = p.DecreasedIndent();
+
+                            p.PrintEndLineIf(i < lastIndex, "");
                         }
 
                         p.PrintEndLine();
@@ -629,7 +740,15 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     }
                     else if (defs.Length == 1)
                     {
-                        p.PrintBeginLine("await ").Print(defs[0].DataType.Name).PrintEndLine(".SaveAsync(forceToCloud);");
+                        var name = defs[0].DataType.Name;
+
+                        p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".SaveToCloudAsync(token);");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
                     }
                     else
                     {
@@ -639,25 +758,217 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintLine("public void DeepCloneDataFromCloudToDevice()");
+                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ")
+                    .PrintEndLine("UnityTask SaveToDeviceAsync(");
+                p = p.IncreasedIndent();
+                {
+                    for (var i = 0; i < defs.Length; i++)
+                    {
+                        var comma = i == 0 ? "  " : ", ";
+
+                        p.PrintBeginLine(comma).Print("bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
+                    }
+
+                    p.PrintLine(", CancellationToken token = default");
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
                 p.OpenScope();
                 {
-                    foreach (var def in defs)
+                    if (defs.Length > 1)
                     {
-                        p.PrintBeginLine(def.DataType.Name).PrintEndLine(".DeepCloneDataFromCloudToDevice();");
+                        p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
+                        p.PrintEndLine();
+
+                        var lastIndex = defs.Length - 1;
+
+                        for (var i = 0; i < defs.Length; i++)
+                        {
+                            var name = defs[i].DataType.Name;
+
+                            p.PrintBeginLine($"tasks[{i}] = include").PrintEndLine(name);
+                            p = p.IncreasedIndent();
+                            {
+                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".SaveToDeviceAsync(token)");
+                                p.PrintBeginLine(": ").Print(COMPLETED_TASK).PrintEndLine(";");
+                            }
+                            p = p.DecreasedIndent();
+
+                            p.PrintEndLineIf(i < lastIndex, "");
+                        }
+
+                        p.PrintEndLine();
+                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
+
+                        p.PrintEndLine();
+                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
+                    }
+                    else if (defs.Length == 1)
+                    {
+                        var name = defs[0].DataType.Name;
+
+                        p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".SaveToDeviceAsync(token);");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+                    else
+                    {
+                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
                     }
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintLine("public void SetUserData(string userId, string version)");
+                p.PrintLine("public void Save(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintLine("  bool forceToCloud");
+
+                    for (var i = 0; i < defs.Length; i++)
+                    {
+                        p.PrintBeginLine(", bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
+                    }
+
+                    p.PrintLine(", CancellationToken token = default");
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
                 p.OpenScope();
                 {
                     foreach (var def in defs)
                     {
-                        p.PrintBeginLine(def.DataType.Name).PrintEndLine(".SetUserData(userId, version);");
+                        p.PrintBeginLine("if (include").Print(def.DataType.Name).PrintEndLine(")");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine(def.DataType.Name).PrintEndLine(".Save(forceToCloud, token);");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ")
+                    .PrintEndLine("UnityTask SaveAsync(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintLine("  bool forceToCloud");
+
+                    for (var i = 0; i < defs.Length; i++)
+                    {
+                        p.PrintBeginLine(", bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
+                    }
+
+                    p.PrintLine(", CancellationToken token = default");
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
+                p.OpenScope();
+                {
+                    if (defs.Length > 1)
+                    {
+                        p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
+                        p.PrintEndLine();
+
+                        var lastIndex = defs.Length - 1;
+
+                        for (var i = 0; i < defs.Length; i++)
+                        {
+                            var name = defs[i].DataType.Name;
+
+                            p.PrintBeginLine($"tasks[{i}] = include").PrintEndLine(name);
+                            p = p.IncreasedIndent();
+                            {
+                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".SaveAsync(forceToCloud, token)");
+                                p.PrintBeginLine(": ").Print(COMPLETED_TASK).PrintEndLine(";");
+                            }
+                            p = p.DecreasedIndent();
+
+                            p.PrintEndLineIf(i < lastIndex, "");
+                        }
+
+                        p.PrintEndLine();
+                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
+
+                        p.PrintEndLine();
+                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
+                    }
+                    else if (defs.Length == 1)
+                    {
+                        var name = defs[0].DataType.Name;
+
+                        p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".SaveAsync(forceToCloud, token);");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+                    else
+                    {
+                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public void DeepCloneDataFromCloudToDevice(");
+                p = p.IncreasedIndent();
+                {
+                    for (var i = 0; i < defs.Length; i++)
+                    {
+                        var comma = i == 0 ? "  " : ", ";
+                        p.PrintBeginLine(comma).Print("bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
+                    }
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
+                p.OpenScope();
+                {
+                    foreach (var def in defs)
+                    {
+                        p.PrintBeginLine("if (include").Print(def.DataType.Name).PrintEndLine(")");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine(def.DataType.Name).PrintEndLine(".DeepCloneDataFromCloudToDevice();");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public void SetUserData(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintLine("  string userId");
+                    p.PrintLine(", string version");
+
+                    for (var i = 0; i < defs.Length; i++)
+                    {
+                        p.PrintBeginLine(", bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
+                    }
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
+                p.OpenScope();
+                {
+                    foreach (var def in defs)
+                    {
+                        p.PrintBeginLine("if (include").Print(def.DataType.Name).PrintEndLine(")");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine(def.DataType.Name).PrintEndLine(".SetUserData(userId, version);");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
                     }
                 }
                 p.CloseScope();
@@ -669,7 +980,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private static void WriteIdsClass(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("public static class Ids");
             p.OpenScope();
             {
@@ -678,11 +989,9 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     var name = StringUtils.ToSnakeCase(def.DataType.Name);
                     var nameUpper = name.ToUpperInvariant();
 
-                    p.PrintLine(GENERATED_CODE);
                     p.PrintBeginLine("private static ").Print(STRING_ID).Print(" s_").Print(name).PrintEndLine(";");
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintBeginLine("public static ").Print(STRING_ID).Print(" ").PrintEndLine(nameUpper);
                     p.OpenScope();
                     {
@@ -693,7 +1002,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintEndLine();
                 }
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("internal static void Initialize()");
                 p.OpenScope();
                 {
@@ -782,6 +1090,12 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
             p.CloseScope();
             p.Print("#endif").PrintEndLine().PrintEndLine();
+        }
+
+        private static void WriteHelperConstants(ref Printer p)
+        {
+            p.PrintBeginLine("private const string GENERATOR = ").Print(GENERATOR).PrintEndLine(";");
+            p.PrintEndLine();
         }
     }
 }

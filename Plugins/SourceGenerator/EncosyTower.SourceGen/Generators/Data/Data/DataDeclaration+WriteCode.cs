@@ -854,8 +854,10 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 return;
             }
 
+            var accessibility = Symbol.DeclaredAccessibility.ToKeyword();
+
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public readonly partial struct ").Print(ReadOnlyTypeName)
+            p.PrintBeginLine(accessibility).Print(" readonly partial struct ").Print(ReadOnlyTypeName)
                 .Print(" : ")
                 .Print(IREADONLY_DATA).Print("<").Print(TypeName).Print(">")
                 .Print(", ")
@@ -868,7 +870,7 @@ namespace EncosyTower.SourceGen.Generators.Data.Data
                 p.PrintEndLine();
 
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
-                p.PrintBeginLine(Symbol.DeclaredAccessibility.ToKeyword())
+                p.PrintBeginLine(accessibility)
                     .Print(" ReadOnly").Print(TypeIdentifier).Print("(")
                     .PrintIf(IsValueType, "in ")
                     .Print(TypeName)

@@ -1,4 +1,7 @@
+#if UNITASK || UNITY_6000_0_OR_NEWER
+
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using EncosyTower.Encryption;
 using EncosyTower.Logging;
 using EncosyTower.StringIds;
@@ -6,24 +9,26 @@ using EncosyTower.StringIds;
 namespace EncosyTower.UserDataVaults
 {
 #if UNITASK
-    using UnityTask = global::Cysharp.Threading.Tasks.UniTask;
-#elif UNITY_6000_0_OR_NEWER
-    using UnityTask = global::UnityEngine.Awaitable;
+    using UnityTask = Cysharp.Threading.Tasks.UniTask;
 #else
-    using UnityTask = global::System.Threading.Tasks.ValueTask;
+    using UnityTask = UnityEngine.Awaitable;
 #endif
 
-    public abstract class UserDataStorageBase<T> where T : IUserData, new()
+    public abstract class UserDataStorageBase<TData>
+        where TData : IUserData
     {
         protected UserDataStorageBase(
               StringId<string> key
             , [NotNull] EncryptionBase encryption
-            , [NotNull] ILogger logger
+            , ILogger logger
+            , bool ignoreEncryption
+            , UserDataStorageArgs _
         )
         {
             Key = key;
             Encryption = encryption;
-            Logger = logger;
+            Logger = logger ?? DevLogger.Default;
+            IgnoreEncryption = ignoreEncryption;
         }
 
         public StringId<string> Key { get; }
@@ -32,9 +37,19 @@ namespace EncosyTower.UserDataVaults
 
         public ILogger Logger { get; }
 
+        public bool IgnoreEncryption
+        {
+#if FORCE_USER_DATA_ENCRYPTION
+            get => false;
+            set { }
+#else
+            get;
+#endif
+        }
+
         public abstract string UserId { get; set; }
 
-        public abstract T Data { get; }
+        public TData Data { get; protected set; }
 
         public bool IsDataValid => Data != null;
 
@@ -46,24 +61,26 @@ namespace EncosyTower.UserDataVaults
 
         public abstract void CreateData();
 
-        public abstract UnityTask LoadFromDeviceAsync();
+        public abstract UnityTask LoadFromDeviceAsync(CancellationToken token);
 
-        public abstract UnityTask LoadFromCloudAsync();
+        public abstract UnityTask LoadFromCloudAsync(CancellationToken token);
 
-        public abstract T GetDataFromDevice();
+        public abstract TData GetDataFromDevice();
 
-        public abstract T GetDataFromCloud();
+        public abstract TData GetDataFromCloud();
 
-        public abstract void SetToDevice(T data);
+        public abstract void SetToDevice(TData data);
 
-        public abstract void SaveToDevice();
+        public abstract UnityTask SaveToDeviceAsync(CancellationToken token);
 
-        public abstract UnityTask SaveToCloudAsync();
+        public abstract UnityTask SaveToCloudAsync(CancellationToken token);
 
-        public abstract UnityTask SaveAsync(bool forceToCloud);
+        public abstract UnityTask SaveAsync(bool forceToCloud, CancellationToken token);
 
-        public abstract void Save(bool forceToCloud);
+        public abstract void Save(bool forceToCloud, CancellationToken token);
 
         public abstract void DeepCloneDataFromCloudToDevice();
     }
 }
+
+#endif

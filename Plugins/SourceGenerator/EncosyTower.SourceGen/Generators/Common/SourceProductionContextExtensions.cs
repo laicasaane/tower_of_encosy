@@ -34,7 +34,7 @@ namespace EncosyTower.SourceGen.Generators
                 );
             }
         }
-        
+
         public static void OutputSource(
               this ref SourceProductionContext context
             , bool outputSourceGenFiles

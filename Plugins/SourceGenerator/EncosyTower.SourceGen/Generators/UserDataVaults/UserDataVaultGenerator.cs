@@ -231,12 +231,23 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 SourceGenHelpers.ProjectPath = projectPath;
 
+                TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                      providerSyntax
+                    , context.CancellationToken
+                    , out var openingSource
+                    , out var closingSource
+                    , printAdditionalUsings: compilationCandidate.references.unitask
+                        ? PrintUsingUniTask : PrintUsingAwaitable
+                );
+
                 context.OutputSource(
                       outputSourceGenFiles
-                    , providerSyntax
+                    , openingSource
                     , declaration.WriteCode()
+                    , closingSource
                     , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, providerSyntax, providerSymbol.ToValidIdentifier())
                     , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME)
+                    , providerSyntax.GetLocation()
                 );
             }
             catch (Exception e)
@@ -251,6 +262,33 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     , vaultCandidate.syntax.GetLocation()
                     , e.ToUnityPrintableString()
                 ));
+            }
+
+            return;
+
+            static void PrintUsingUniTask(ref Printer p)
+            {
+                p.PrintEndLine();
+                p.PrintLine("using UnityTask = global::Cysharp.Threading.Tasks.UniTask;");
+                PrintAdditionalUsings(ref p);
+            }
+
+            static void PrintUsingAwaitable(ref Printer p)
+            {
+                p.PrintEndLine();
+                p.PrintLine("using UnityTask = global::UnityEngine.Awaitable;");
+                PrintAdditionalUsings(ref p);
+            }
+
+            static void PrintAdditionalUsings(ref Printer p)
+            {
+                p.PrintLine("using CancellationToken = global::System.Threading.CancellationToken;");
+                p.PrintLine("using ExcludeFromCodeCoverage = global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute;");
+                p.PrintLine("using GeneratedCode = global::System.CodeDom.Compiler.GeneratedCodeAttribute;");
+                p.PrintLine("using MethodImpl = global::System.Runtime.CompilerServices.MethodImplAttribute;");
+                p.PrintLine("using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;");
+                p.PrintLine("using NotNull = global::System.Diagnostics.CodeAnalysis.NotNullAttribute;");
+                p.PrintLine("using UnityTasks = global::EncosyTower.Tasks.UnityTasks;");
             }
         }
 

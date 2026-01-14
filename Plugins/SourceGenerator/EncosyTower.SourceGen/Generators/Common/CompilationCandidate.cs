@@ -78,6 +78,7 @@ namespace EncosyTower.SourceGen.Generators
         public bool unity;
         public bool unityCollections;
         public bool unityEntities;
+        public bool unitask;
         public bool latiosCore;
 
         public static References Create(Compilation compilation)
@@ -107,6 +108,12 @@ namespace EncosyTower.SourceGen.Generators
                 if (assembly.Name is "Unity.Entities")
                 {
                     result.unityEntities = true;
+                    continue;
+                }
+
+                if (assembly.Name is "UniTask")
+                {
+                    result.unitask = true;
                     continue;
                 }
 
