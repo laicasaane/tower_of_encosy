@@ -24,6 +24,8 @@ namespace EncosyTower.Databases
         private readonly Dictionary<Type, DataTableAssetBase> _typeToAsset = new();
         private readonly Dictionary<Type, List<StringId>> _typeToIds = new();
 
+        private StringVault _stringVault;
+
         protected IReadOnlyDictionary<StringId, DataTableAssetBase> IdToAsset => _idToAsset;
 
         protected IReadOnlyDictionary<Type, DataTableAssetBase> TypeToAsset => _typeToAsset;
@@ -34,7 +36,14 @@ namespace EncosyTower.Databases
 
         public bool IsInitialized { get; protected set; }
 
-        public StringVault StringVault { get; set; }
+        public StringVault StringVault
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _stringVault ?? StringVault.Default;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => _stringVault = value;
+        }
 
         public virtual void Initialize()
         {
@@ -243,24 +252,17 @@ namespace EncosyTower.Databases
             return false;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private string GetName(StringId id)
         {
-            if (StringVault != null)
-            {
-                StringVault.TryGetManagedString(id, out var name);
-                return name;
-            }
-            else
-            {
-                return IdToString.GetManaged(id);
-            }
+            StringVault.TryGetManagedString(id, out var name);
+            return name;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private StringId GetId(string name)
         {
-            return StringVault != null
-                ? StringVault.GetOrMakeId(name)
-                : StringToId.Get(name);
+            return StringVault.GetOrMakeId(name);
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
