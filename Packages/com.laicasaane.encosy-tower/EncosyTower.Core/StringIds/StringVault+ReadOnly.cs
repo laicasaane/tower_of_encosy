@@ -61,6 +61,10 @@ namespace EncosyTower.StringIds
                 get => UnmanagedString.FromBufferAt(_unmanagedStringRanges[index], _unmanagedStringBuffer).GetValueOrThrow();
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public Option<StringId> TryGetId(in UnmanagedString str)
+                => TryGetId(str, out var result) ? Option.Some(result) : Option.None;
+
             public bool TryGetId(in UnmanagedString str, out StringId result)
             {
                 var hash = str.GetHashCode64();
@@ -76,6 +80,10 @@ namespace EncosyTower.StringIds
                 return false;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public Option<UnmanagedString> TryGetString(StringId id)
+                => TryGetString(id, out var result) ? Option.Some(result) : Option.None;
+
             public bool TryGetString(StringId id, out UnmanagedString result)
             {
                 var indexUnsigned = (uint)id.Id;
@@ -90,6 +98,7 @@ namespace EncosyTower.StringIds
                 return resultOpt.HasValue;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool ContainsId(StringId id)
             {
                 var indexUnsigned = (uint)id.Id;

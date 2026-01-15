@@ -154,6 +154,9 @@ namespace EncosyTower.StringIds
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<UnmanagedString> TryGetString(StringId id)
+            => TryGetString(id, out var result) ? Option.Some(result) : Option.None;
+
         public bool TryGetString(StringId id, out UnmanagedString result)
         {
             var indexUnsigned = (uint)id.Id;

@@ -240,6 +240,9 @@ namespace EncosyTower.StringIds
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<UnmanagedString> TryGetUnmanagedString(StringId id)
+            => TryGetUnmanagedString(id, out var result) ? Option.Some(result) : Option.None;
+
         public bool TryGetUnmanagedString(StringId id, out UnmanagedString result)
         {
             var indexUnsigned = (uint)id.Id;
@@ -255,6 +258,9 @@ namespace EncosyTower.StringIds
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<string> TryGetManagedString(StringId id)
+            => TryGetManagedString(id, out var result) ? Option.Some(result) : Option.None;
+
         public bool TryGetManagedString(StringId id, out string result)
         {
             var indexUnsigned = (uint)id.Id;
