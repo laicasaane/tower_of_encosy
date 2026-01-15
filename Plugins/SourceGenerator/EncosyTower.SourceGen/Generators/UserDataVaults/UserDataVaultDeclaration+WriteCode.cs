@@ -25,7 +25,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 }
             }
 
-            var isStatic = Symbol.IsStatic;
             var orderedStorageDefs = storageDefs
                 .OrderBy(x => x.DataType.Name)
                 .ToArray()
@@ -35,27 +34,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             var p = scopePrinter.printer;
             p = p.IncreasedIndent();
 
-            var staticKeyword = isStatic ? "static " : "";
-            var fieldPrefix = isStatic ? "s_" : "_";
+            var staticKeyword = Symbol.IsStatic ? "static " : "";
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
-            p.PrintEndLine();
-
-            p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
-                .PrintIf(isStatic == false, " : IDisposable, IDeinitializable")
-                .PrintEndLine();
-            p.OpenScope();
-            {
-                WriteFields(ref p, isStatic, staticKeyword, fieldPrefix);
-                WriteConstructor(ref p, isStatic, Syntax.Identifier.Text, accessDefs);
-                WriteProperties(ref p, isStatic, staticKeyword, accessDefs);
-                WriteInitializeAsync(ref p, isStatic, staticKeyword, fieldPrefix, accessDefs);
-                WriteTryLoadUserDataAsync(ref p, isStatic, staticKeyword, fieldPrefix, accessDefs);
-                WriteDeinitialize(ref p, isStatic, staticKeyword, fieldPrefix, accessDefs);
-                WriteSave(ref p, staticKeyword, fieldPrefix);
-            }
-            p.CloseScope();
             p.PrintEndLine();
 
             p.Print("#region IDS").PrintEndLine();
@@ -66,7 +48,33 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .PrintEndLine(" // Ids");
             p.OpenScope();
             {
-                WriteIds(ref p, isStatic, orderedStorageDefs);
+                WriteIds(ref p, orderedStorageDefs);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.Print("#region VAULT").PrintEndLine();
+            p.Print("#endregion ==").PrintEndLine();
+            p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
+                .PrintEndLine(" // Vault");
+            p.OpenScope();
+            {
+                WriteVault(ref p);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.Print("#region ACCESSOR").PrintEndLine();
+            p.Print("#endregion =====").PrintEndLine();
+            p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
+                .PrintEndLine(" // Accessor");
+            p.OpenScope();
+            {
+                WriteAccessor(ref p, accessDefs);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -79,7 +87,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .PrintEndLine(" // DataStorage");
             p.OpenScope();
             {
-                WriteDataStorageClass(ref p, isStatic, orderedStorageDefs);
+                WriteDataStorageClass(ref p, orderedStorageDefs);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -114,40 +122,320 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             return p.Result;
         }
 
-        private void WriteFields(ref Printer p, bool isStatic, string staticKeyword, string fieldPrefix)
+        private static void WriteIds(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
         {
-            p.PrintLine(GENERATED_CODE);
-            p.PrintBeginLine("private ").Print(staticKeyword)
-                .PrintIf(isStatic == false, "readonly ")
-                .Print("DataStorage ").Print(fieldPrefix).PrintEndLine("storage;");
-            p.PrintEndLine();
-
-            if (isStatic == false)
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("readonly partial struct Ids");
+            p.OpenScope();
             {
-                p.PrintLine(GENERATED_CODE);
-                p.PrintBeginLine("private readonly ")
-                    .Print("Ids ").Print(fieldPrefix).PrintEndLine("ids;");
-                p.PrintEndLine();
-            }
+                p.PrintLine("public Ids([NotNull] StringVault stringVault)");
+                p.OpenScope();
+                {
+                    foreach (var def in defs)
+                    {
+                        var name = def.DataType.Name;
 
-            p.PrintLine(GENERATED_CODE);
-            p.PrintBeginLine("private ").Print(staticKeyword)
-                .Print("bool ").Print(fieldPrefix).PrintEndLine("isSavedOnLoaded;");
+                        p.PrintBeginLine(name)
+                            .Print(" = stringVault.GetOrMakeId(nameof(").Print(name).PrintEndLine("));");
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                foreach (var def in defs)
+                {
+                    p.PrintBeginLine("public ").Print(STRING_ID).Print(" ").Print(def.DataType.Name)
+                        .PrintEndLine(" { get; }");
+                    p.PrintEndLine();
+                }
+            }
+            p.CloseScope();
             p.PrintEndLine();
         }
 
-        private static void WriteConstructor(
-              ref Printer p
-            , bool isStatic
-            , string className
-            , List<UserDataAccessDefinition> defs
-        )
+        private static void WriteVault(ref Printer p)
         {
-            if (isStatic)
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("partial class Vault : IDisposable, IDeinitializable");
+            p.OpenScope();
             {
-                return;
+                WriteFields(ref p);
+                WriteConstructor(ref p);
+                WriteTryLoadUserDataAsync(ref p);
+                WriteDeinitialize(ref p);
+                WriteSave(ref p);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            return;
+
+            static void WriteFields(ref Printer p)
+            {
+                p.PrintLine("private readonly DataStorage _storage;");
+                p.PrintLine("private readonly Accessor _accessor;");
+                p.PrintLine("private readonly Ids _ids;");
+                p.PrintEndLine();
+
+                p.PrintLine("private bool _isSavedOnLoaded;");
+                p.PrintEndLine();
             }
 
+            static void WriteConstructor(ref Printer p)
+            {
+                p.PrintLine("public Vault(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(STRING_VAULT).PrintEndLine(" stringVault");
+                    p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
+                    p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
+                    p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
+                    p.PrintLine(", string userId");
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
+                p.OpenScope();
+                {
+                    p.PrintLine("_ids = new(stringVault);");
+                    p.PrintLine("_storage = new(stringVault, encryption, logger, taskArrayPool, _ids, userId);");
+                    p.PrintLine("_accessor = new(_storage);");
+                    p.PrintEndLine();
+
+                    p.PrintLine("OnFinishConstructor(encryption, logger, taskArrayPool, userId);");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("partial void OnFinishConstructor(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
+                    p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
+                    p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
+                    p.PrintLine(", string userId");
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(");");
+                p.PrintEndLine();
+            }
+
+            static void WriteTryLoadUserDataAsync(ref Printer p)
+            {
+                p.PrintLine("public async UnityTaskᐸboolᐳ TryLoadUserDataAsync(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
+                    p.PrintLine(", string userId");
+                    p.PrintLine(", bool loadFromCloud");
+                    p.PrintLine(", CancellationToken token = default");
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
+                p.OpenScope();
+                {
+                    p.PrintLine("var result = false;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("UnityTask beginTask = UnityTasks.GetCompleted();");
+                    p.PrintLine("OnBeginTryLoadUserDataAsync(logger, userId, loadFromCloud, token, ref beginTask);");
+                    p.PrintLine("await beginTask;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (token.IsCancellationRequested) return result;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("_storage.UserId = userId;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (string.IsNullOrEmpty(userId))");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("LogWarningInvalidUserId(logger);");
+                        p.PrintLine("result = false;");
+                    }
+                    p.CloseScope();
+                    p.PrintLine("else");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("_storage.Initialize();");
+                        p.PrintEndLine();
+
+                        p.PrintLine("if (loadFromCloud)");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("await _storage.LoadFromCloudAsync(token: token);");
+                        }
+                        p.CloseScope();
+                        p.PrintLine("else");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("await _storage.LoadFromDeviceAsync(token: token);");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+
+                        p.PrintLine("if (token.IsCancellationRequested == false)");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("_storage.CreateDataIfNotExist();");
+                            p.PrintLine("_accessor.Initialize();");
+                            p.PrintEndLine();
+
+                            p.PrintLine("await SaveAsync(token: token);");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+
+                        p.PrintLine("result = token.IsCancellationRequested == false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (token.IsCancellationRequested == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("UnityTask finishTask = UnityTasks.GetCompleted();");
+                        p.PrintLine("OnFinishTryLoadUserDataAsync(logger, userId, loadFromCloud, token, ref finishTask);");
+                        p.PrintLine("await finishTask;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("return result;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("partial void OnBeginTryLoadUserDataAsync(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
+                    p.PrintLine(", string userId");
+                    p.PrintLine(", bool loadFromCloud");
+                    p.PrintLine(", CancellationToken token");
+                    p.PrintLine(", ref UnityTask returnTask");
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(");");
+                p.PrintEndLine();
+
+                p.PrintLine("partial void OnFinishTryLoadUserDataAsync(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
+                    p.PrintLine(", string userId");
+                    p.PrintLine(", bool loadFromCloud");
+                    p.PrintLine(", CancellationToken token");
+                    p.PrintLine(", ref UnityTask returnTask");
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(");");
+                p.PrintEndLine();
+            }
+
+            static void WriteDeinitialize(ref Printer p)
+            {
+                p.PrintLine("public void Deinitialize()");
+                p.OpenScope();
+                {
+                    p.PrintLine("OnBeginDeinitialize();");
+                    p.PrintEndLine();
+
+                    p.PrintLine("_isSavedOnLoaded = false;");
+                    p.PrintLine("_accessor.Deinitialize();");
+                    p.PrintLine("_storage.Dispose();");
+                    p.PrintEndLine();
+
+                    p.PrintLine("OnFinishDeinitialize();");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("partial void OnBeginDeinitialize();");
+                p.PrintEndLine();
+
+                p.PrintLine("partial void OnFinishDeinitialize();");
+                p.PrintEndLine();
+
+                p.PrintLine("public void Dispose()");
+                p.WithIncreasedIndent().PrintLine("=> Deinitialize();");
+                p.PrintEndLine();
+            }
+
+            static void WriteSave(ref Printer p)
+            {
+                p.PrintLine("public void Save(bool forceToCloud = false, CancellationToken token = default)");
+                p.OpenScope();
+                {
+                    p.PrintLine("OnBeginSave(forceToCloud, token);");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (_isSavedOnLoaded == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("_isSavedOnLoaded = true;");
+                        p.PrintLine("_storage.MarkDirty(true);");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("_storage.Save(forceToCloud, token: token);");
+                    p.PrintEndLine();
+
+                    p.PrintLine("OnFinishSave(forceToCloud, token);");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("partial void OnBeginSave(bool forceToCloud, CancellationToken token);");
+                p.PrintEndLine();
+
+                p.PrintLine("partial void OnFinishSave(bool forceToCloud, CancellationToken token);");
+                p.PrintEndLine();
+
+                p.PrintLine("public async UnityTask SaveAsync(bool forceToCloud = false, CancellationToken token = default)");
+                p.OpenScope();
+                {
+                    p.PrintLine("UnityTask beginTask = UnityTasks.GetCompleted();");
+                    p.PrintLine("OnBeginSaveAsync(forceToCloud, token, ref beginTask);");
+                    p.PrintLine("await beginTask;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (token.IsCancellationRequested) return;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (_isSavedOnLoaded == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("_isSavedOnLoaded = true;");
+                        p.PrintLine("_storage.MarkDirty(true);");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("await _storage.SaveAsync(forceToCloud, token: token);");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (token.IsCancellationRequested) return;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("UnityTask finishTask = UnityTasks.GetCompleted();");
+                    p.PrintLine("OnFinishSaveAsync(forceToCloud, token, ref finishTask);");
+                    p.PrintLine("await finishTask;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("partial void OnBeginSaveAsync(bool forceToCloud, CancellationToken token, ref UnityTask returnTask);");
+                p.PrintEndLine();
+
+                p.PrintLine("partial void OnFinishSaveAsync(bool forceToCloud, CancellationToken token, ref UnityTask returnTask);");
+                p.PrintEndLine();
+            }
+        }
+
+        private static void WriteAccessor(ref Printer p, List<UserDataAccessDefinition> defs)
+        {
             var typeSet = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
             var queue = new Queue<UserDataAccessDefinition>(defs.Count);
             var loopMap = new Dictionary<ITypeSymbol, int>(defs.Count, SymbolEqualityComparer.Default);
@@ -158,104 +446,99 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
 
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public ").Print(className).PrintEndLine("(");
-            p = p.IncreasedIndent();
-            {
-                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").PrintEndLine("StringVault stringVault");
-                p.PrintLine(", string userId");
-            }
-            p = p.DecreasedIndent();
-            p.PrintLine(")");
+            p.PrintLine("partial class Accessor : IInitializable, IDeinitializable");
             p.OpenScope();
             {
-                p.PrintLine("_ids = new(stringVault);");
-                p.PrintEndLine();
-
-                p.PrintLine("OnBeginConstructor(encryption, logger, taskArrayPool, userId);");
-                p.PrintEndLine();
-
-                p.PrintLine("_storage = new(encryption, logger, taskArrayPool, _ids, userId);");
-
-                var loopBreakCondition = defs.Count;
-
-                while (queue.Count > 0)
+                p.PrintLine("public Accessor([NotNull] DataStorage storage)");
+                p.OpenScope();
                 {
-                    var def = queue.Dequeue();
-                    var needDependency = false;
+                    var loopBreakCondition = defs.Count;
 
-                    foreach (var arg in def.Args)
+                    while (queue.Count > 0)
                     {
-                        if (arg.Type != null && typeSet.Contains(arg.Type) == false)
+                        var def = queue.Dequeue();
+                        var needDependency = false;
+
+                        foreach (var arg in def.Args)
                         {
-                            needDependency = true;
-                            break;
+                            if (arg.Type != null && typeSet.Contains(arg.Type) == false)
+                            {
+                                needDependency = true;
+                                break;
+                            }
                         }
+
+                        if (needDependency)
+                        {
+                            if (loopMap.TryGetValue(def.Symbol, out var loop))
+                            {
+                                loop += 1;
+                            }
+
+                            if (loop == loopBreakCondition)
+                            {
+                                break;
+                            }
+
+                            loopMap[def.Symbol] = loop;
+                            queue.Enqueue(def);
+                            continue;
+                        }
+
+                        typeSet.Add(def.Symbol);
+                        loopMap.Remove(def.Symbol);
+                        Write(ref p, def);
                     }
 
-                    if (needDependency)
-                    {
-                        if (loopMap.TryGetValue(def.Symbol, out var loop))
-                        {
-                            loop += 1;
-                        }
-
-                        if (loop == loopBreakCondition)
-                        {
-                            break;
-                        }
-
-                        loopMap[def.Symbol] = loop;
-                        queue.Enqueue(def);
-                        continue;
-                    }
-
-                    typeSet.Add(def.Symbol);
-                    loopMap.Remove(def.Symbol);
-                    Write(ref p, def);
-                }
-
-                p.PrintEndLine();
-
-                foreach (var kv in loopMap)
-                {
-                    p.PrintBeginLine("LogErrorCyclicDependency(logger, \"").Print(kv.Key.Name).PrintEndLine("\");");
-                }
-
-                if (loopMap.Count > 0)
-                {
                     p.PrintEndLine();
+
+                    foreach (var kv in loopMap)
+                    {
+                        p.PrintBeginLine("LogErrorCyclicDependency(logger, \"").Print(kv.Key.Name).PrintEndLine("\");");
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                foreach (var def in defs)
+                {
+                    var typeName = def.Symbol.ToFullName();
+                    var fieldName = def.FieldName;
+
+                    p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public ").Print(typeName).Print(" ")
+                        .Print(fieldName).PrintEndLine(" { get; }")
+                        .PrintEndLine();
                 }
 
-                p.PrintLine("OnFinishConstructor(encryption, logger, taskArrayPool, userId);");
+                p.PrintLine("public void Initialize()");
+                p.OpenScope();
+                {
+                    foreach (var def in defs)
+                    {
+                        if (def.Symbol.InheritsFromInterface("global::EncosyTower.Initialization.IInitializable"))
+                        {
+                            p.PrintBeginLine(def.FieldName).PrintEndLine(".Initialize();");
+                        }
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public void Deinitialize()");
+                p.OpenScope();
+                {
+                    foreach (var def in defs)
+                    {
+                        if (def.Symbol.InheritsFromInterface("global::EncosyTower.Initialization.IDeinitializable"))
+                        {
+                            p.PrintBeginLine(def.FieldName).PrintEndLine(".Deinitialize();");
+                        }
+                    }
+                }
+                p.CloseScope();
             }
             p.CloseScope();
-            p.PrintEndLine();
-
-            p.PrintLine("partial void OnBeginConstructor(");
-            p = p.IncreasedIndent();
-            {
-                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
-                p.PrintLine(", string userId");
-            }
-            p = p.DecreasedIndent();
-            p.PrintLine(");");
-            p.PrintEndLine();
-
-            p.PrintLine("partial void OnFinishConstructor(");
-            p = p.IncreasedIndent();
-            {
-                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
-                p.PrintLine(", string userId");
-            }
-            p = p.DecreasedIndent();
-            p.PrintLine(");");
             p.PrintEndLine();
 
             return;
@@ -274,7 +557,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         }
                         else
                         {
-                            p.Print("_storage.").Print(arg.StorageDef.DataType.Name);
+                            p.Print("storage.").Print(arg.StorageDef.DataType.Name);
                         }
                     }
 
@@ -300,7 +583,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                             }
                             else
                             {
-                                p.Print("_storage.").Print(arg.StorageDef.DataType.Name);
+                                p.Print("storage.").Print(arg.StorageDef.DataType.Name);
                             }
 
                             p.PrintEndLine();
@@ -312,562 +595,17 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
         }
 
-        private void WriteProperties(ref Printer p, bool isStatic, string staticKeyword, List<UserDataAccessDefinition> defs)
-        {
-            foreach (var def in defs)
-            {
-                var typeName = def.Symbol.ToFullName();
-                var fieldName = def.FieldName;
-
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public ").Print(staticKeyword).Print(typeName).Print(" ")
-                    .Print(fieldName).Print(" { get; ").PrintIf(isStatic, "private set; ").PrintEndLine("}")
-                    .PrintEndLine();
-            }
-        }
-
-        private static void WriteInitializeAsync(
-              ref Printer p
-            , bool isStatic
-            , string staticKeyword
-            , string fieldPrefix
-            , List<UserDataAccessDefinition> defs
-        )
-        {
-            if (isStatic == false)
-            {
-                return;
-            }
-
-            var typeSet = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
-            var queue = new Queue<UserDataAccessDefinition>(defs.Count);
-            var loopMap = new Dictionary<ITypeSymbol, int>(defs.Count, SymbolEqualityComparer.Default);
-
-            foreach (var def in defs)
-            {
-                queue.Enqueue(def);
-            }
-
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("async UnityTask InitializeAsync(");
-            p = p.IncreasedIndent();
-            {
-                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").PrintEndLine("StringVault stringVault");
-                p.PrintLine(", string userId");
-                p.PrintLine(", bool loadFromCloud");
-                p.PrintLine(", CancellationToken token = default");
-            }
-            p = p.DecreasedIndent();
-            p.PrintLine(")");
-            p.OpenScope();
-            {
-                p.PrintLine("Ids.Initialize(stringVault);");
-                p.PrintEndLine();
-
-                p.PrintLine("UnityTask beginTask = UnityTasks.GetCompleted();");
-                p.PrintLine("OnBeginInitializeAsync(encryption, logger, taskArrayPool, userId, token, ref beginTask);");
-                p.PrintLine("await beginTask;");
-                p.PrintEndLine();
-
-                p.PrintLine("if (token.IsCancellationRequested) return;");
-                p.PrintEndLine();
-
-                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage ??= new(encryption, logger, taskArrayPool, userId);");
-
-                var loopBreakCondition = defs.Count;
-
-                while (queue.Count > 0)
-                {
-                    var def = queue.Dequeue();
-                    var needDependency = false;
-
-                    foreach (var arg in def.Args)
-                    {
-                        if (arg.Type != null && typeSet.Contains(arg.Type) == false)
-                        {
-                            needDependency = true;
-                            break;
-                        }
-                    }
-
-                    if (needDependency)
-                    {
-                        if (loopMap.TryGetValue(def.Symbol, out var loop))
-                        {
-                            loop += 1;
-                        }
-
-                        if (loop == loopBreakCondition)
-                        {
-                            break;
-                        }
-
-                        loopMap[def.Symbol] = loop;
-                        queue.Enqueue(def);
-                        continue;
-                    }
-
-                    typeSet.Add(def.Symbol);
-                    loopMap.Remove(def.Symbol);
-                    Write(ref p, fieldPrefix, def);
-                }
-
-                p.PrintEndLine();
-
-                foreach (var kv in loopMap)
-                {
-                    p.PrintBeginLine("LogErrorCyclicDependency(logger, \"").Print(kv.Key.Name).PrintEndLine("\");");
-                }
-
-                if (loopMap.Count > 0)
-                {
-                    p.PrintEndLine();
-                }
-
-                p.PrintLine("await TryLoadUserDataAsync(logger, userId, loadFromCloud, token);");
-                p.PrintEndLine();
-
-                p.PrintLine("if (token.IsCancellationRequested) return;");
-                p.PrintEndLine();
-
-                p.PrintLine("UnityTask finishTask = UnityTasks.GetCompleted();");
-                p.PrintLine("OnFinishInitializeAsync(encryption, logger, taskArrayPool, userId, token, ref finishTask);");
-                p.PrintLine("await finishTask;");
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-
-            p.PrintBeginLine(staticKeyword).PrintEndLine("partial void OnBeginInitializeAsync(");
-            p = p.IncreasedIndent();
-            {
-                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
-                p.PrintLine(", string userId");
-                p.PrintLine(", CancellationToken token");
-                p.PrintLine(", ref UnityTask returnTask");
-            }
-            p = p.DecreasedIndent();
-            p.PrintLine(");");
-            p.PrintEndLine();
-
-            p.PrintBeginLine(staticKeyword).PrintEndLine("partial void OnFinishInitializeAsync(");
-            p = p.IncreasedIndent();
-            {
-                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
-                p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
-                p.PrintLine(", string userId");
-                p.PrintLine(", CancellationToken token");
-                p.PrintLine(", ref UnityTask returnTask");
-            }
-            p = p.DecreasedIndent();
-            p.PrintLine(");");
-            p.PrintEndLine();
-
-            return;
-
-            static void Write(ref Printer p, string fieldPrefix, UserDataAccessDefinition def)
-            {
-                if (def.Args.Count < 2)
-                {
-                    p.PrintBeginLine(def.FieldName).Print(" ??= new(");
-
-                    foreach (var arg in def.Args)
-                    {
-                        if (arg.Type != null)
-                        {
-                            p.Print(arg.Type.Name);
-                        }
-                        else
-                        {
-                            p.Print(fieldPrefix).Print("storage.").Print(arg.StorageDef.DataType.Name);
-                        }
-                    }
-
-                    p.PrintEndLine(");");
-                }
-                else
-                {
-                    p.PrintBeginLine(def.Symbol.Name).PrintEndLine(" ??= new(");
-                    p = p.IncreasedIndent();
-                    {
-                        var args = def.Args;
-
-                        for (var i = 0; i < args.Count; i++)
-                        {
-                            var arg = args[i];
-                            var comma = i == 0 ? " " : ",";
-
-                            p.PrintBeginLine(comma).Print(" ");
-
-                            if (arg.Type != null)
-                            {
-                                p.Print(arg.Type.Name);
-                            }
-                            else
-                            {
-                                p.Print(fieldPrefix).Print("storage.").Print(arg.StorageDef.DataType.Name);
-                            }
-
-                            p.PrintEndLine();
-                        }
-                    }
-                    p = p.DecreasedIndent();
-                    p.PrintLine(");");
-                }
-            }
-        }
-
-        private static void WriteTryLoadUserDataAsync(
-              ref Printer p
-            , bool isStatic
-            , string staticKeyword
-            , string fieldPrefix
-            , List<UserDataAccessDefinition> defs
-        )
-        {
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("async UnityTaskᐸboolᐳ TryLoadUserDataAsync(");
-            p = p.IncreasedIndent();
-            {
-                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
-                p.PrintLine(", string userId");
-                p.PrintLine(", bool loadFromCloud");
-                p.PrintLine(", CancellationToken token = default");
-            }
-            p = p.DecreasedIndent();
-            p.PrintLine(")");
-            p.OpenScope();
-            {
-                p.PrintLine("var result = false;");
-                p.PrintEndLine();
-
-                if (isStatic)
-                {
-                    p.PrintBeginLine("if (").Print(fieldPrefix).PrintEndLine("storage == null)");
-                    p.OpenScope();
-                    {
-                        p.PrintLine("return result;");
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-                }
-
-                p.PrintLine("UnityTask beginTask = UnityTasks.GetCompleted();");
-                p.PrintLine("OnBeginTryLoadUserDataAsync(logger, userId, loadFromCloud, token, ref beginTask);");
-                p.PrintLine("await beginTask;");
-                p.PrintEndLine();
-
-                p.PrintLine("if (token.IsCancellationRequested) return result;");
-                p.PrintEndLine();
-
-                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.UserId = userId;");
-                p.PrintEndLine();
-
-                p.PrintLine("if (string.IsNullOrEmpty(userId))");
-                p.OpenScope();
-                {
-                    p.PrintLine("result = false;");
-                    p.PrintLine("LogWarningInvalidUserId(logger);");
-                }
-                p.CloseScope();
-                p.PrintLine("else");
-                p.OpenScope();
-                {
-                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.Initialize();");
-                    p.PrintEndLine();
-
-                    p.PrintLine("if (loadFromCloud)");
-                    p.OpenScope();
-                    {
-                        p.PrintBeginLine("await ").Print(fieldPrefix).PrintEndLine("storage.LoadFromCloudAsync(token: token);");
-                    }
-                    p.CloseScope();
-                    p.PrintLine("else");
-                    p.OpenScope();
-                    {
-                        p.PrintBeginLine("await ").Print(fieldPrefix).PrintEndLine("storage.LoadFromDeviceAsync(token: token);");
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-
-                    p.PrintLine("if (token.IsCancellationRequested == false)");
-                    p.OpenScope();
-                    {
-                        p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.CreateDataIfNotExist();");
-                        p.PrintEndLine();
-
-                        var initCount = 0;
-
-                        foreach (var def in defs)
-                        {
-                            if (def.Symbol.InheritsFromInterface("global::EncosyTower.Initialization.IInitializable"))
-                            {
-                                p.PrintBeginLine(def.FieldName).PrintIf(isStatic, "?").PrintEndLine(".Initialize();");
-                                initCount += 1;
-                            }
-                        }
-
-                        if (initCount > 0)
-                        {
-                            p.PrintEndLine();
-                        }
-
-                        p.PrintLine("await SaveAsync(token: token);");
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-
-                    p.PrintLine("result = token.IsCancellationRequested == false;");
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine("if (token.IsCancellationRequested == false)");
-                p.OpenScope();
-                {
-                    p.PrintLine("UnityTask finishTask = UnityTasks.GetCompleted();");
-                    p.PrintLine("OnFinishTryLoadUserDataAsync(logger, userId, loadFromCloud, token, ref finishTask);");
-                    p.PrintLine("await finishTask;");
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine("return result;");
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-
-            p.PrintBeginLine(staticKeyword).PrintEndLine("partial void OnBeginTryLoadUserDataAsync(");
-            p = p.IncreasedIndent();
-            {
-                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
-                p.PrintLine(", string userId");
-                p.PrintLine(", bool loadFromCloud");
-                p.PrintLine(", CancellationToken token");
-                p.PrintLine(", ref UnityTask returnTask");
-            }
-            p = p.DecreasedIndent();
-            p.PrintLine(");");
-            p.PrintEndLine();
-
-            p.PrintBeginLine(staticKeyword).PrintEndLine("partial void OnFinishTryLoadUserDataAsync(");
-            p = p.IncreasedIndent();
-            {
-                p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
-                p.PrintLine(", string userId");
-                p.PrintLine(", bool loadFromCloud");
-                p.PrintLine(", CancellationToken token");
-                p.PrintLine(", ref UnityTask returnTask");
-            }
-            p = p.DecreasedIndent();
-            p.PrintLine(");");
-            p.PrintEndLine();
-        }
-
-        private void WriteDeinitialize(
-              ref Printer p
-            , bool isStatic
-            , string staticKeyword
-            , string fieldPrefix
-            , List<UserDataAccessDefinition> defs
-        )
-        {
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("void Deinitialize()");
-            p.OpenScope();
-            {
-                p.PrintLine("OnBeginDeinitialize();");
-                p.PrintEndLine();
-
-                p.PrintBeginLine(fieldPrefix).PrintEndLine("isSavedOnLoaded = false;");
-                p.PrintEndLine();
-
-                foreach (var def in defs)
-                {
-                    if (def.Symbol.InheritsFromInterface("global::EncosyTower.Initialization.IDeinitializable"))
-                    {
-                        p.PrintBeginLine(def.FieldName).PrintIf(isStatic, "?").PrintEndLine(".Deinitialize();");
-                    }
-
-                    if (isStatic)
-                    {
-                        p.PrintBeginLine(def.FieldName).PrintEndLine(" = null;");
-                    }
-
-                    p.PrintEndLine();
-                }
-
-                p.PrintBeginLine(fieldPrefix).Print("storage").PrintIf(isStatic, "?").PrintEndLine(".Dispose();");
-
-                if (isStatic)
-                {
-                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage = null;");
-                }
-
-                p.PrintEndLine();
-
-                p.PrintLine("OnFinishDeinitialize();");
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-
-            p.PrintBeginLine(staticKeyword).PrintEndLine("partial void OnBeginDeinitialize();");
-            p.PrintEndLine();
-
-            p.PrintBeginLine(staticKeyword).PrintEndLine("partial void OnFinishDeinitialize();");
-            p.PrintEndLine();
-
-            if (isStatic)
-            {
-                return;
-            }
-
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("public void Dispose()");
-            p.WithIncreasedIndent().PrintLine("=> Deinitialize();");
-            p.PrintEndLine();
-        }
-
-        private void WriteSave(
-              ref Printer p
-            , string staticKeyword
-            , string fieldPrefix
-        )
-        {
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public ").Print(staticKeyword)
-                .PrintEndLine("void Save(bool forceToCloud = false, CancellationToken token = default)");
-            p.OpenScope();
-            {
-                p.PrintLine("OnBeginSave(forceToCloud, token);");
-                p.PrintEndLine();
-
-                p.PrintBeginLine("if (").Print(fieldPrefix).PrintEndLine("isSavedOnLoaded == false)");
-                p.OpenScope();
-                {
-                    p.PrintBeginLine(fieldPrefix).PrintEndLine("isSavedOnLoaded = true;");
-                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.MarkDirty(true);");
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.Save(forceToCloud, token: token);");
-                p.PrintEndLine();
-
-                p.PrintLine("OnFinishSave(forceToCloud, token);");
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-
-            p.PrintBeginLine(staticKeyword)
-                .PrintEndLine("partial void OnBeginSave(bool forceToCloud, CancellationToken token);");
-            p.PrintEndLine();
-
-            p.PrintBeginLine(staticKeyword)
-                .PrintEndLine("partial void OnFinishSave(bool forceToCloud, CancellationToken token);");
-            p.PrintEndLine();
-
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine("public ").Print(staticKeyword)
-                .PrintEndLine("async UnityTask SaveAsync(bool forceToCloud = false, CancellationToken token = default)");
-            p.OpenScope();
-            {
-                p.PrintLine("UnityTask beginTask = UnityTasks.GetCompleted();");
-                p.PrintLine("OnBeginSaveAsync(forceToCloud, token, ref beginTask);");
-                p.PrintLine("await beginTask;");
-                p.PrintEndLine();
-
-                p.PrintLine("if (token.IsCancellationRequested) return;");
-                p.PrintEndLine();
-
-                p.PrintBeginLine("if (").Print(fieldPrefix).PrintEndLine("isSavedOnLoaded == false)");
-                p.OpenScope();
-                {
-                    p.PrintBeginLine(fieldPrefix).PrintEndLine("isSavedOnLoaded = true;");
-                    p.PrintBeginLine(fieldPrefix).PrintEndLine("storage.MarkDirty(true);");
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintBeginLine("await ").Print(fieldPrefix).PrintEndLine("storage.SaveAsync(forceToCloud, token: token);");
-                p.PrintEndLine();
-
-                p.PrintLine("if (token.IsCancellationRequested) return;");
-                p.PrintEndLine();
-
-                p.PrintLine("UnityTask finishTask = UnityTasks.GetCompleted();");
-                p.PrintLine("OnFinishSaveAsync(forceToCloud, token, ref finishTask);");
-                p.PrintLine("await finishTask;");
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-
-            p.PrintBeginLine(staticKeyword)
-                .PrintEndLine("partial void OnBeginSaveAsync(bool forceToCloud, CancellationToken token, ref UnityTask returnTask);");
-            p.PrintEndLine();
-
-            p.PrintBeginLine(staticKeyword)
-                .PrintEndLine("partial void OnFinishSaveAsync(bool forceToCloud, CancellationToken token, ref UnityTask returnTask);");
-            p.PrintEndLine();
-        }
-
-        private static void WriteIds(ref Printer p, bool isStatic, ReadOnlySpan<StorageDefinition> defs)
-        {
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine().PrintIf(isStatic, "static ", "readonly ").Print("partial ")
-                .PrintIf(isStatic, "class", "struct").PrintEndLine(" Ids");
-            p.OpenScope();
-            {
-                p.PrintBeginLineIf(
-                      isStatic
-                    , "internal static void Initialize"
-                    , "public Ids"
-                ).PrintEndLine("([NotNull] StringVault stringVault)");
-                p.OpenScope();
-                {
-                    foreach (var def in defs)
-                    {
-                        var name = def.DataType.Name;
-
-                        p.PrintBeginLine(name)
-                            .Print(" = stringVault.GetOrMakeId(nameof(").Print(name).PrintEndLine("));");
-                    }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                foreach (var def in defs)
-                {
-                    p.PrintBeginLine("public ").PrintIf(isStatic, "static ")
-                        .Print(STRING_ID).Print(" ").Print(def.DataType.Name)
-                        .Print(" { get; ").PrintIf(isStatic, "private set; ").PrintEndLine("}");
-                    p.PrintEndLine();
-                }
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-        }
-
-        private void WriteDataStorageClass(ref Printer p, bool isStatic, ReadOnlySpan<StorageDefinition> defs)
+        private void WriteDataStorageClass(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("partial class DataStorage : IDisposable, IInitializable");
             p.OpenScope();
             {
+                p.PrintBeginLine("private readonly ").Print(STRING_VAULT).PrintEndLine(" _stringVault;");
                 p.PrintBeginLine("private readonly ").Print(ENCRYPTION_BASE).PrintEndLine(" _encryption;");
                 p.PrintBeginLine("private readonly ").Print(ILOGGER).PrintEndLine(" _logger;");
                 p.PrintBeginLine("private readonly ").Print(TASK_ARRAY_POOL).PrintEndLine(" _taskArrayPool;");
-
-                if (isStatic == false)
-                {
-                    p.PrintLine("private readonly Ids _ids;");
-                }
-
+                p.PrintLine("private readonly Ids _ids;");
                 p.PrintEndLine();
 
                 p.PrintLine("private string _userId;");
@@ -876,25 +614,22 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("public DataStorage(");
                 p = p.IncreasedIndent();
                 {
-                    p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
+                    p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(STRING_VAULT).PrintEndLine(" stringVault");
+                    p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
                     p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
                     p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
-
-                    if (isStatic == false)
-                    {
-                        p.PrintBeginLine(", ").Print(NOT_NULL).PrintEndLine(" Ids ids");
-                    }
-
+                    p.PrintBeginLine(", Ids ids");
                     p.PrintLine(", string userId");
                 }
                 p = p.DecreasedIndent();
                 p.PrintLine(")");
                 p.OpenScope();
                 {
+                    p.PrintLine("_stringVault = stringVault;");
                     p.PrintLine("_encryption = encryption;");
                     p.PrintLine("_logger = logger;");
                     p.PrintLine("_taskArrayPool = taskArrayPool;");
-                    p.PrintLineIf(isStatic == false, "_ids = ids;");
+                    p.PrintLine("_ids = ids;");
                     p.PrintLine("_userId = userId;");
                     p.PrintEndLine();
 
@@ -917,8 +652,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                                 .PrintEndLine(">(ref storageArgs);");
 
                             p.PrintBeginLine(def.DataType.Name).Print(" = new(")
-                                .PrintIf(isStatic, "Ids.", "_ids.").Print(def.DataType.Name)
-                                .Print(", encryption, logger, ignoreEncryption, storageArgs")
+                                .Print("_ids.").Print(def.DataType.Name)
+                                .Print(", stringVault, encryption, logger, ignoreEncryption, storageArgs")
                                 .PrintEndLine(") { UserId = userId };");
                         }
                         p.CloseScope();
@@ -1768,6 +1503,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintBeginLine("private const string GENERATOR = ").Print(GENERATOR).PrintEndLine(";");
             p.PrintEndLine();
 
+            p.PrintLine(HIDE_IN_CALL_STACK);
             p.PrintLine("private static void LogErrorCyclicDependency(ILogger logger, string name)");
             p.OpenScope();
             {
@@ -1778,6 +1514,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.CloseScope();
             p.PrintEndLine();
 
+            p.PrintLine(HIDE_IN_CALL_STACK);
             p.PrintLine("private static void LogWarningInvalidUserId(ILogger logger)");
             p.OpenScope();
             {

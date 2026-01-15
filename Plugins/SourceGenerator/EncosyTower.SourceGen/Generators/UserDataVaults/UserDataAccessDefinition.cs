@@ -48,6 +48,11 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 }
             }
 
+            if (string.IsNullOrEmpty(suffix))
+            {
+                suffix = "Access";
+            }
+
             if (string.IsNullOrEmpty(suffix) == false)
             {
                 var index = classNameSpan.IndexOf(suffix.AsSpan(), StringComparison.Ordinal);
@@ -55,7 +60,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 if (index == lastIndex)
                 {
-                    sb.Remove(0, suffix.Length);
+                    sb.Remove(lastIndex, suffix.Length);
                 }
             }
 

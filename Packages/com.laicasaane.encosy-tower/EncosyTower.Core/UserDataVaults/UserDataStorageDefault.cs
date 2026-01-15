@@ -19,20 +19,24 @@ namespace EncosyTower.UserDataVaults
         where TData : IUserData, new()
     {
         private readonly UserDataStoreOnDevice<TData> _store;
+
         private string _userId;
+        private TData _data;
 
         public UserDataStorageDefault(
               StringId<string> key
+            , [NotNull] StringVault stringVault
             , [NotNull] EncryptionBase encryption
             , ILogger logger
             , bool ignoreEncryption
             , [NotNull] UserDataStorageArgs args
         )
-            : base(key, encryption, logger, ignoreEncryption, args)
+            : base(key, stringVault, encryption, logger, ignoreEncryption, args)
         {
             _userId = string.Empty;
             _store = new UserDataStoreOnDevice<TData>(
                   key
+                , stringVault
                 , encryption
                 , logger
                 , ignoreEncryption
@@ -46,13 +50,13 @@ namespace EncosyTower.UserDataVaults
             set => _store.UserId = _userId = value ?? string.Empty;
         }
 
-        public TData Data { get; private set; }
+        public TData Data => _data;
 
-        public override bool IsDataValid => Data != null;
+        public override bool IsDataValid => Data is not null;
 
         public override void CreateData()
         {
-            Data = new();
+            _data = new();
         }
 
         public override bool TryCloneData(out TData result)
@@ -95,7 +99,7 @@ namespace EncosyTower.UserDataVaults
 
             if (dataOpt.TryGetValue(out var data))
             {
-                Data = data;
+                _data = data;
             }
         }
 
@@ -106,11 +110,9 @@ namespace EncosyTower.UserDataVaults
 
         public override void Save(bool forceToCloud, CancellationToken token)
         {
-            var data = Data;
-
-            if (data != null)
+            if (IsDataValid)
             {
-                UnityTasks.Forget(_store.SaveAsync(data, token));
+                UnityTasks.Forget(_store.SaveAsync(Data, token));
             }
         }
 
@@ -122,26 +124,24 @@ namespace EncosyTower.UserDataVaults
 
         public override async UnityTask SaveToDeviceAsync(CancellationToken token)
         {
-            var data = Data;
-
-            if (data != null)
+            if (IsDataValid)
             {
-                await _store.SaveAsync(data, token);
+                await _store.SaveAsync(Data, token);
             }
         }
 
         public override void SetData(TData data)
         {
-            if (data != null)
+            if (data is not null)
             {
-                Data = data;
+                _data = data;
                 _store.IsDirty = true;
             }
         }
 
         public override void SetUserData(string userId, string version)
         {
-            var data = Data;
+            ref var data = ref _data;
             data.Id = _userId = userId;
             data.Version = version;
         }

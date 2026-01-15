@@ -25,8 +25,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .Select(CompilationCandidate.GetCompilation);
 
             var providerClassProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                  predicate: IsSyntaxMatchProviderClass
-                , transform: GetProviderCandidate
+                  predicate: IsSyntaxMatchVaultClass
+                , transform: GetVaultCandidate
             ).Where(static t => t.syntax is { } && t.symbol is { });
 
             var accessProvider = context.SyntaxProvider.CreateSyntaxProvider(
@@ -52,22 +52,27 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             });
         }
 
-        private static bool IsSyntaxMatchProviderClass(SyntaxNode syntaxNode, CancellationToken token)
+        private static bool IsSyntaxMatchVaultClass(SyntaxNode syntaxNode, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
 
             return syntaxNode is ClassDeclarationSyntax syntax
-                && syntax.HasAttributeCandidate(NAMESPACE, "UserDataVault");
+                && syntax.HasAttributeCandidate(NAMESPACE, "UserDataVault")
+                && syntax.HasModifier(SyntaxKind.AbstractKeyword) == false
+                && syntax.TypeParameterList is null
+                ;
         }
 
-        private static UserDataVaultCandidate GetProviderCandidate(
+        private static UserDataVaultCandidate GetVaultCandidate(
               GeneratorSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.Node is not ClassDeclarationSyntax syntax)
+            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
+                || context.Node is not ClassDeclarationSyntax syntax
+            )
             {
                 return default;
             }
@@ -78,7 +83,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             if (symbol == null
                 || symbol.IsAbstract
                 || symbol.IsUnboundGenericType
-                || symbol.GetAttribute(ATTRIBUTE) is not AttributeData attrib
+                || symbol.GetAttribute(VAULT_ATTRIBUTE) is not AttributeData attrib
             )
             {
                 return default;
@@ -123,11 +128,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             token.ThrowIfCancellationRequested();
 
             return syntaxNode is ClassDeclarationSyntax syntax
-                && syntax.BaseList != null
-                && syntax.BaseList.Types.Count > 0
-                && syntax.BaseList.Types.Any(
-                    static x => x.Type.IsTypeNameCandidate(NAMESPACE, "IUserDataAccess"
-                ));
+                && syntax.HasAttributeCandidate(NAMESPACE, "UserDataAccess")
+                && syntax.HasModifier(SyntaxKind.AbstractKeyword) == false
+                && syntax.TypeParameterList is null
+                ;
         }
 
         public static INamedTypeSymbol GetDataAccessClass(
@@ -137,8 +141,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         {
             if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
                 || context.Node is not ClassDeclarationSyntax syntax
-                || syntax.BaseList == null
-                || syntax.BaseList.Types.Count < 1
             )
             {
                 return default;
@@ -147,19 +149,16 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             var semanticModel = context.SemanticModel;
             var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
 
-            if (symbol == null || symbol.IsAbstract || symbol.IsUnboundGenericType)
+            if (symbol == null
+                || symbol.IsAbstract
+                || symbol.IsUnboundGenericType
+                || symbol.GetAttribute(ACCESS_ATTRIBUTE) is null
+            )
             {
                 return default;
             }
 
-            if (symbol.Interfaces.DoesMatchInterface(IUSER_DATA_ACCESS)
-                || symbol.AllInterfaces.DoesMatchInterface(IUSER_DATA_ACCESS)
-            )
-            {
-                return symbol;
-            }
-
-            return default;
+            return symbol;
         }
 
         private static void GenerateOutput(
@@ -189,12 +188,22 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 var sb = new StringBuilder();
                 var prefix = vaultCandidate.prefix;
                 var suffix = vaultCandidate.suffix;
+                var equalityComparer = SymbolEqualityComparer.Default;
 
                 for (var i = 0; i < accessCandidates.Length; i++)
                 {
                     var symbol = accessCandidates[i];
+                    var attrib = symbol.GetAttribute(ACCESS_ATTRIBUTE);
 
-                    if (symbol == null)
+                    if (attrib is null)
+                    {
+                        continue;
+                    }
+
+                    if (attrib.ConstructorArguments.Length > 0
+                        && attrib.ConstructorArguments[0].Value is ITypeSymbol vaultType
+                        && equalityComparer.Equals(vaultType, vaultCandidate.symbol) == false
+                    )
                     {
                         continue;
                     }
@@ -287,11 +296,13 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("using CancellationToken = global::System.Threading.CancellationToken;");
                 p.PrintLine("using EncryptionBase = global::EncosyTower.Encryption.EncryptionBase;");
                 p.PrintLine("using ExcludeFromCodeCoverageAttribute = global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute;");
+                p.PrintLine("using HideInCallstackAttribute = global::UnityEngine.HideInCallstackAttribute;");
                 p.PrintLine("using GeneratedCodeAttribute = global::System.CodeDom.Compiler.GeneratedCodeAttribute;");
                 p.PrintLine("using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;");
                 p.PrintLine("using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;");
                 p.PrintLine("using NotNullAttribute = global::System.Diagnostics.CodeAnalysis.NotNullAttribute;");
                 p.PrintLine("using SpanᐸIUserDataᐳ = global::System.Span<global::EncosyTower.UserDataVaults.IUserData>;");
+                p.PrintLine("using StackTraceHiddenAttribute = global::System.Diagnostics.StackTraceHiddenAttribute;");
                 p.PrintLine("using StringIdᐸstringᐳ = global::EncosyTower.StringIds.StringId<string>;");
                 p.PrintLine("using StringVault = global::EncosyTower.StringIds.StringVault;");
                 p.PrintLine("using ThrowHelper = global::EncosyTower.Debugging.ThrowHelper;");

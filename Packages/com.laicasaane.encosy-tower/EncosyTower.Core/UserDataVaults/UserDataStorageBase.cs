@@ -15,10 +15,10 @@ namespace EncosyTower.UserDataVaults
 #endif
 
     public abstract class UserDataStorageBase<TData>
-        where TData : IUserData
     {
         protected UserDataStorageBase(
               StringId<string> key
+            , [NotNull] StringVault stringVault
             , [NotNull] EncryptionBase encryption
             , ILogger logger
             , bool ignoreEncryption
@@ -26,12 +26,15 @@ namespace EncosyTower.UserDataVaults
         )
         {
             Key = key;
+            StringVault = stringVault;
             Encryption = encryption;
             Logger = logger ?? DevLogger.Default;
             IgnoreEncryption = ignoreEncryption;
         }
 
         public StringId<string> Key { get; }
+
+        public StringVault StringVault { get; }
 
         public EncryptionBase Encryption { get; }
 

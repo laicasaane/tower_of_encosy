@@ -17,10 +17,10 @@ namespace EncosyTower.UserDataVaults
 #endif
 
     public abstract class UserDataStoreLocation<TData> : IInitializable
-        where TData : IUserData
     {
         protected UserDataStoreLocation(
-              [NotNull] StringId<string> key
+              StringId<string> key
+            , [NotNull] StringVault stringVault
             , [NotNull] EncryptionBase encryption
             , ILogger logger
             , bool ignoreEncryption
@@ -28,12 +28,15 @@ namespace EncosyTower.UserDataVaults
         )
         {
             Key = key;
+            StringVault = stringVault;
             Encryption = encryption;
             Logger = logger ?? DevLogger.Default;
             IgnoreEncryption = ignoreEncryption;
         }
 
         public StringId<string> Key { get; }
+
+        public StringVault StringVault { get; }
 
         public EncryptionBase Encryption { get; }
 
@@ -48,8 +51,6 @@ namespace EncosyTower.UserDataVaults
         }
 
         public ILogger Logger { get; }
-
-        public string UserId { get; set; }
 
         public bool IsDirty { get; set; }
 

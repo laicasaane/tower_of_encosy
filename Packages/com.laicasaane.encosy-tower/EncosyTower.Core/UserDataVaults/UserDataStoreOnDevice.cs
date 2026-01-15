@@ -24,7 +24,6 @@ namespace EncosyTower.UserDataVaults
 #endif
 
     public class UserDataStoreOnDevice<TData> : UserDataStoreLocation<TData>
-        where TData : IUserData
     {
         private readonly string _directoryPath;
         private readonly string _fileExtension;
@@ -32,13 +31,14 @@ namespace EncosyTower.UserDataVaults
         private readonly TransformFunc<string, TData> _deserializeFunc;
 
         public UserDataStoreOnDevice(
-              [NotNull] StringId<string> key
+              StringId<string> key
+            , [NotNull] StringVault stringVault
             , [NotNull] EncryptionBase encryption
             , ILogger logger
             , bool ignoreEncryption
             , [NotNull] UserDataStorageArgs args
         )
-            : base(key, encryption, logger, ignoreEncryption, args)
+            : base(key, stringVault, encryption, logger, ignoreEncryption, args)
         {
             if (args is not Args deviceArgs)
             {
@@ -58,6 +58,8 @@ namespace EncosyTower.UserDataVaults
             _deserializeFunc = deviceArgs.DeserializeFunc;
         }
 
+        public string UserId { get; set; }
+
         private string UserIdFileName
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,7 +76,7 @@ namespace EncosyTower.UserDataVaults
             get
             {
                 using var _ = StringBuilderPool.Rent(out var sb);
-                return PathAPI.ToFileName(IdToString.GetManaged(Key), sb);
+                return PathAPI.ToFileName(StringVault.TryGetManagedString(Key).GetValueOrThrow(), sb);
             }
         }
 
