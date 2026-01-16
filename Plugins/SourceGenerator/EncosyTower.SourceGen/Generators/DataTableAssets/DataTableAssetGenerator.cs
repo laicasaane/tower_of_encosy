@@ -164,15 +164,18 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                     return;
                 }
 
+                var fileTypeName = declaration.TypeRef.Symbol.ToFileName();
+
                 var hintName = syntaxTree.GetGeneratedSourceFileName(
                       GENERATOR_NAME
                     , syntax
-                    , declaration.TypeRef.Symbol.ToValidIdentifier()
+                    , fileTypeName
                 );
 
                 var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
                       compilation.Assembly.Name
                     , GENERATOR_NAME
+                    , fileTypeName
                 );
 
                 context.OutputSource(

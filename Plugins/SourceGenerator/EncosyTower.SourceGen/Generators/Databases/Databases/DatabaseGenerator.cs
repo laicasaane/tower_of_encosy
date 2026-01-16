@@ -109,7 +109,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     var declaration = new DatabaseDeclaration(context, candidate);
                     var databaseRef = declaration.DatabaseRef;
                     var syntaxTree = candidate.Syntax.SyntaxTree;
-                    var databaseIdentifier = candidate.Symbol.ToValidIdentifier();
                     var tables = databaseRef.Tables;
 
                     if (tables.Length < 1)
@@ -119,15 +118,18 @@ namespace EncosyTower.SourceGen.Generators.Databases
 
                     // Database
                     {
+                        var fileTypeName = candidate.Symbol.ToFileName();
+
                         var databaseHintName = syntaxTree.GetGeneratedSourceFileName(
                               GENERATOR_NAME
                             , candidate.Syntax
-                            , databaseIdentifier
+                            , fileTypeName
                         );
 
                         var databaseSourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
                               assemblyName
                             , GENERATOR_NAME
+                            , fileTypeName
                         );
 
                         var printer = Printer.DefaultLarge;

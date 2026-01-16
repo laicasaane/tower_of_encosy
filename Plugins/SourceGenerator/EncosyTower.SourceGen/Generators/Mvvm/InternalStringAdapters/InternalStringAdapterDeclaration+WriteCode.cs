@@ -33,7 +33,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 var assemblyName = compilation.Assembly.Name;
                 var fileName = $"InternalStringAdapters_{assemblyName}";
                 var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, fileName, syntax);
-                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME);
+                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileName);
 
                 context.OutputSource(
                       outputSourceGenFiles

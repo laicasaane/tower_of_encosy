@@ -206,14 +206,14 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
 
                 try
                 {
-                    var identifier = containingType.ToValidIdentifier();
+                    var fileTypeName = containingType.ToFileName();
 
                     context.OutputSource(
                           outputSourceGenFiles
                         , containingSyntax
                         , WriteCode(containingSyntax, containingType, list)
-                        , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, containingSyntax, identifier)
-                        , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME)
+                        , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, containingSyntax, fileTypeName)
+                        , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName)
                     );
                 }
                 catch (Exception e)

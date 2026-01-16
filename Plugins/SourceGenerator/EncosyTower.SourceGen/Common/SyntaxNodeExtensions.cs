@@ -87,7 +87,7 @@ namespace EncosyTower.SourceGen
             var (isSuccess, fileName) = TryGetFileNameWithoutExtension(syntaxTree);
             var stableHashCode = syntaxTree.GetStableHashCode();
 
-            var postfix = generatorName.Length > 0 ? $"__{generatorName}" : string.Empty;
+            var postfix = string.Empty;
 
             if (string.IsNullOrWhiteSpace(typeName) == false)
             {

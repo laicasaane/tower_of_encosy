@@ -208,6 +208,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                 var syntaxTree = helperSyntax.SyntaxTree;
                 var compilation = compilationCandidate.compilation;
                 var assemblyName = compilation.Assembly.Name;
+                var fileTypeName = helperSymbol.ToFileName();
 
                 SourceGenHelpers.ProjectPath = projectPath;
 
@@ -215,8 +216,8 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                       outputSourceGenFiles
                     , helperSyntax
                     , new HelperDeclaration().WriteCode(helperCandidate, types)
-                    , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, helperSyntax, helperSymbol.ToValidIdentifier())
-                    , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME)
+                    , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, helperSyntax, fileTypeName)
+                    , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName)
                 );
 
             }

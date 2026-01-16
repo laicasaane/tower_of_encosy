@@ -119,8 +119,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             var assemblyName = semanticModel.Compilation.AssemblyName;
             var syntaxTree = syntax.SyntaxTree;
             var typeIdentifier = typeSymbol.ToValidIdentifier();
-            var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, typeIdentifier);
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME);
+            var fileTypeName = typeSymbol.ToFileName();
+            var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, fileTypeName);
+            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName);
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   syntax

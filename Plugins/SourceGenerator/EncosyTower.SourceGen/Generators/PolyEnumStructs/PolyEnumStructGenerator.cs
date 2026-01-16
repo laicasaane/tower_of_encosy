@@ -93,8 +93,9 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             var assemblyName = semanticModel.Compilation.AssemblyName;
             var syntaxTree = structSyntax.SyntaxTree;
             var typeIdentifier = structSymbol.ToValidIdentifier();
-            var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, structSyntax, typeIdentifier);
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME);
+            var fileTypeName = structSymbol.ToFileName();
+            var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, structSyntax, fileTypeName);
+            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName);
             var symbolUniqueSet = new HashSet<ISymbol>(SymbolEqualityComparer.Default);
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(

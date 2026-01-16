@@ -90,8 +90,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 var syntaxTree = candidate.SyntaxTree;
                 var semanticModel = compilation.GetSemanticModel(syntaxTree);
                 var declaration = new BinderDeclaration(candidate, semanticModel, context.CancellationToken);
-                var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, candidate);
-                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(compilation.Assembly.Name, GENERATOR_NAME);
+                var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, candidate, candidate.Identifier.Text);
+                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(compilation.Assembly.Name, GENERATOR_NAME, candidate.Identifier.Text);
 
                 context.OutputSource(
                       outputSourceGenFiles

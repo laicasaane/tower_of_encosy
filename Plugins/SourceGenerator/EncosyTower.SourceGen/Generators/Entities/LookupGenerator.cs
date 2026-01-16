@@ -88,13 +88,14 @@ namespace EncosyTower.SourceGen.Generators.Entities
 
                 var assemblyName = compilation.Assembly.Name;
                 var generatorName = GetType().Name;
+                var fileTypeName = declaration.Symbol.ToFileName();
 
                 context.OutputSource(
                       outputSourceGenFiles
                     , declaration.Syntax
                     , CodeWriter.Write(declaration)
-                    , syntaxTree.GetGeneratedSourceFileName(generatorName, declaration.Syntax, declaration.Symbol.ToValidIdentifier())
-                    , syntaxTree.GetGeneratedSourceFilePath(assemblyName, generatorName)
+                    , syntaxTree.GetGeneratedSourceFileName(generatorName, declaration.Syntax, fileTypeName)
+                    , syntaxTree.GetGeneratedSourceFilePath(assemblyName, generatorName, fileTypeName)
                 );
             }
             catch (Exception e)

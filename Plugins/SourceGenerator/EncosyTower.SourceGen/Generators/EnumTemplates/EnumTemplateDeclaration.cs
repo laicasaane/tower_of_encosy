@@ -416,12 +416,11 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                                 goto RETURN;
                             }
                         }
-
-                        if (attribute.NamedArguments.Length > 0)
+                        else if (attribute.NamedArguments.Length > 0)
                         {
                             foreach (var arg in attribute.NamedArguments)
                             {
-                                if (arg.Key == "Name"
+                                if (arg.Key is "Name" or "DisplayName"
                                     && arg.Value.Kind == TypedConstantKind.Primitive
                                     && arg.Value.Value?.ToString() is string dn
                                 )

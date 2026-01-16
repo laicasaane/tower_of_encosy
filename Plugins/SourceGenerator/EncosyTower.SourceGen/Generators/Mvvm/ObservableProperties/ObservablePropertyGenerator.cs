@@ -102,15 +102,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     source = declaration.WriteCodeWithoutMember();
                 }
 
+                var fileTypeName = declaration.Symbol.ToFileName();
                 var hintName = syntaxTree.GetGeneratedSourceFileName(
                       GENERATOR_NAME
                     , candidate
-                    , declaration.Symbol.ToValidIdentifier()
+                    , fileTypeName
                 );
 
                 var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
                       compilation.Assembly.Name
                     , GENERATOR_NAME
+                    , fileTypeName
                 );
 
                 context.OutputSource(

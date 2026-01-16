@@ -227,12 +227,14 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     , compilationCandidate.references
                 );
 
+                var fileTypeName = symbol.ToFileName();
+
                 context.OutputSource(
                       outputSourceGenFiles
                     , syntax
                     , declaration.WriteCode()
-                    , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, symbol.ToValidIdentifier())
-                    , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME)
+                    , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, fileTypeName)
+                    , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName)
                 );
             }
             catch (Exception e)

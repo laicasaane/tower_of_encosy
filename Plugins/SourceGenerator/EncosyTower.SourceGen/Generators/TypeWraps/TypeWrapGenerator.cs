@@ -449,15 +449,17 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 var syntaxTree = declaration.Syntax.SyntaxTree;
                 var source = declaration.WriteCode();
+                var fileTypeName = declaration.TypeNameIndentifier.ToFileName();
                 var hintName = syntaxTree.GetGeneratedSourceFileName(
                       GENERATOR_NAME
                     , declaration.Syntax
-                    , declaration.TypeNameIndentifier
+                    , fileTypeName
                 );
 
                 var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
                       compilation.assemblyName
                     , GENERATOR_NAME
+                    , fileTypeName
                 );
 
                 context.OutputSource(

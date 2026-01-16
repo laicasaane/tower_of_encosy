@@ -34,7 +34,7 @@ namespace EncosyTower.SourceGen.Generators.Variants.InternalVariants
                 var assemblyName = compilation.Assembly.Name;
                 var fileName = $"InternalVariants_{assemblyName}";
                 var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, fileName, syntax);
-                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME);
+                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileName);
 
                 context.OutputSource(
                       outputSourceGenFiles
@@ -170,15 +170,17 @@ namespace EncosyTower.SourceGen.Generators.Variants.InternalVariants
                 {
                     var syntax = typeRef.Syntax;
                     var syntaxTree = syntax.SyntaxTree;
+                    var fileTypeName = typeRef.Symbol.ToFileName();
                     var hintName = syntaxTree.GetGeneratedSourceFileName(
                           GENERATOR_NAME
                         , syntax
-                        , typeRef.Symbol.ToValidIdentifier()
+                        , fileTypeName
                     );
 
                     var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
                           compilation.Assembly.Name
                         , GENERATOR_NAME
+                        , fileTypeName
                     );
 
                     context.OutputSource(
@@ -214,15 +216,17 @@ namespace EncosyTower.SourceGen.Generators.Variants.InternalVariants
                 {
                     var syntax = typeRef.Syntax;
                     var syntaxTree = syntax.SyntaxTree;
+                    var fileTypeName = typeRef.Symbol.ToFileName();
                     var hintName = syntaxTree.GetGeneratedSourceFileName(
                           GENERATOR_NAME
                         , syntax
-                        , typeRef.Symbol.ToValidIdentifier()
+                        , fileTypeName
                     );
 
                     var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
                           compilation.Assembly.Name
                         , GENERATOR_NAME
+                        , fileTypeName
                     );
 
                     context.OutputSource(
