@@ -1,4 +1,5 @@
-﻿using EncosyTower.Initialization;
+﻿using System.ComponentModel;
+using EncosyTower.Initialization;
 using EncosyTower.UserDataVaults;
 
 namespace EncosyTower.Tests.UserDataVaults
@@ -24,10 +25,11 @@ namespace EncosyTower.Tests.UserDataVaults
         public string Version { get; set; }
     }
 
-    [UserDataAccess(typeof(UserCommonVault))]
-    public sealed class UserCommonDataAccess : IUserDataAccess, IInitializable, IDeinitializable
+    [DisplayName("Common")]
+    [UserDataAccessor(typeof(UserCommonVault))]
+    public sealed class UserCommonDataAccessor : IUserDataAccessor, IInitializable, IDeinitializable
     {
-        internal UserCommonDataAccess(UserDataStorageDefault<UserCommonData> storage) { }
+        internal UserCommonDataAccessor(UserDataStoreDefault<UserCommonData> storage) { }
 
         public void Deinitialize()
         {
@@ -38,10 +40,11 @@ namespace EncosyTower.Tests.UserDataVaults
         }
     }
 
-    [UserDataAccess(typeof(UserProgressVault))]
-    public sealed class UserProgressDataAccess : IUserDataAccess, IInitializable, IDeinitializable
+    [DisplayName("Progress")]
+    [UserDataAccessor(typeof(UserProgressVault))]
+    public sealed class UserProgressDataAccessor : IUserDataAccessor, IInitializable, IDeinitializable
     {
-        internal UserProgressDataAccess(UserDataStorageDefault<UserProgressData> storage) { }
+        internal UserProgressDataAccessor(UserDataStoreDefault<UserProgressData> storage) { }
 
         public void Deinitialize()
         {
@@ -52,10 +55,11 @@ namespace EncosyTower.Tests.UserDataVaults
         }
     }
 
-    [UserDataAccess(typeof(UserProgressVault))]
-    public sealed class UserEventDataAccess : IUserDataAccess, IInitializable, IDeinitializable
+    [DisplayName("Event")]
+    [UserDataAccessor(typeof(UserProgressVault))]
+    public sealed class UserEventDataAccessor : IUserDataAccessor, IInitializable, IDeinitializable
     {
-        internal UserEventDataAccess(UserDataStorageDefault<UserEventData> storage) { }
+        internal UserEventDataAccessor(UserDataStoreDefault<UserEventData> storage) { }
 
         public void Deinitialize()
         {
@@ -69,42 +73,34 @@ namespace EncosyTower.Tests.UserDataVaults
     [UserDataVault]
     internal static partial class UserCommonVault
     {
-        partial class DataStorage
+        partial class DataDirectory
         {
             static partial void GetIgnoreEncryption(ref bool ignoreEncryption)
             {
             }
 
-            static partial void GetArgsForStorage<TData, TStorage>(ref UserDataStorageArgs storageArgs)
+            static partial void GetStoreArgs<TData, TStorage>(ref UserDataStoreArgs storageArgs)
                 where TData : IUserData
-                where TStorage : UserDataStorageBase<TData>
+                where TStorage : UserDataStoreBase<TData>
             {
             }
-        }
-
-        partial class Collection
-        {
         }
     }
 
     [UserDataVault]
-    internal static partial class UserProgressVault
+    public static partial class UserProgressVault
     {
-        partial class DataStorage
+        partial class DataDirectory
         {
             static partial void GetIgnoreEncryption(ref bool ignoreEncryption)
             {
             }
 
-            static partial void GetArgsForStorage<TData, TStorage>(ref UserDataStorageArgs storageArgs)
+            static partial void GetStoreArgs<TData, TStorage>(ref UserDataStoreArgs storageArgs)
                 where TData : IUserData
-                where TStorage : UserDataStorageBase<TData>
+                where TStorage : UserDataStoreBase<TData>
             {
             }
-        }
-
-        partial class Collection
-        {
         }
     }
 }

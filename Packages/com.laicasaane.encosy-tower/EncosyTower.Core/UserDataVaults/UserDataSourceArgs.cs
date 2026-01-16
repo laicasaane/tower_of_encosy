@@ -2,7 +2,7 @@
 
 namespace EncosyTower.UserDataVaults
 {
-    public interface IUserDataAccess { }
+    public abstract record class UserDataSourceArgs();
 }
 
 #endif

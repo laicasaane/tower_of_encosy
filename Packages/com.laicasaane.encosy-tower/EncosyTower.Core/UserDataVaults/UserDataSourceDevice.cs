@@ -23,20 +23,20 @@ namespace EncosyTower.UserDataVaults
     using UnityTask = UnityEngine.Awaitable;
 #endif
 
-    public class UserDataStoreOnDevice<TData> : UserDataStoreLocation<TData>
+    public class UserDataSourceDevice<TData> : UserDataSourceBase<TData>
     {
         private readonly string _directoryPath;
         private readonly string _fileExtension;
         private readonly TransformFunc<TData, string> _serializeFunc;
         private readonly TransformFunc<string, TData> _deserializeFunc;
 
-        public UserDataStoreOnDevice(
+        public UserDataSourceDevice(
               StringId<string> key
             , [NotNull] StringVault stringVault
             , [NotNull] EncryptionBase encryption
             , ILogger logger
             , bool ignoreEncryption
-            , [NotNull] UserDataStorageArgs args
+            , [NotNull] UserDataSourceArgs args
         )
             : base(key, stringVault, encryption, logger, ignoreEncryption, args)
         {
@@ -187,27 +187,12 @@ namespace EncosyTower.UserDataVaults
         private static Exception CreateInvalidOperationException_UserIdNotSet()
             => new InvalidOperationException("'UserId' must be set before calling this method.");
 
-        public class Args : UserDataStorageArgs
-        {
-            public readonly string DirectoryPath;
-            public readonly TransformFunc<TData, string> SerializeFunc;
-            public readonly TransformFunc<string, TData> DeserializeFunc;
-            public readonly string FileExtension;
-
-            public Args(
-                  [NotNull] string directoryPath
-                , [NotNull] TransformFunc<TData, string> serializeFunc
-                , [NotNull] TransformFunc<string, TData> deserializeFunc
-                , string fileExtension = null
-            )
-            {
-                DirectoryPath = directoryPath;
-                SerializeFunc = serializeFunc;
-                DeserializeFunc = deserializeFunc;
-                FileExtension = fileExtension;
-            }
-        }
-
+        public sealed record class Args(
+              [NotNull] string DirectoryPath
+            , [NotNull] TransformFunc<TData, string> SerializeFunc
+            , [NotNull] TransformFunc<string, TData> DeserializeFunc
+            , string FileExtension = null
+        ) : UserDataSourceArgs;
     }
 }
 

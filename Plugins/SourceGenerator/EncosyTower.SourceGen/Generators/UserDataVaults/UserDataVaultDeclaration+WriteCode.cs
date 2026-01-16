@@ -11,21 +11,21 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
     {
         public string WriteCode()
         {
-            var accessDefs = AccessDefs;
-            var storageDefs = new HashSet<StorageDefinition>();
+            var accessorDefs = AccessorDefs;
+            var storeDefs = new HashSet<StoreDefinition>();
 
-            foreach (var accessDef in accessDefs)
+            foreach (var accessorDef in accessorDefs)
             {
-                foreach (var arg in accessDef.Args)
+                foreach (var arg in accessorDef.Args)
                 {
-                    if (arg.StorageDef.IsValid)
+                    if (arg.StoreDef.IsValid)
                     {
-                        storageDefs.Add(arg.StorageDef);
+                        storeDefs.Add(arg.StoreDef);
                     }
                 }
             }
 
-            var orderedStorageDefs = storageDefs
+            var orderedStoreDefs = storeDefs
                 .OrderBy(x => x.DataType.Name)
                 .ToArray()
                 .AsSpan();
@@ -48,7 +48,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .PrintEndLine(" // Ids");
             p.OpenScope();
             {
-                WriteIds(ref p, orderedStorageDefs);
+                WriteIds(ref p, orderedStoreDefs);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -66,41 +66,80 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.CloseScope();
             p.PrintEndLine();
 
-            p.Print("#region ACCESSOR").PrintEndLine();
-            p.Print("#endregion =====").PrintEndLine();
+            p.Print("#region READ-ONLY VAULT").PrintEndLine();
+            p.Print("#endregion ============").PrintEndLine();
             p.PrintEndLine();
 
             p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
-                .PrintEndLine(" // Accessor");
+                .PrintEndLine(" // ReadOnlyVault");
             p.OpenScope();
             {
-                WriteAccessor(ref p, accessDefs);
+                WriteReadOnlyVault(ref p);
             }
             p.CloseScope();
             p.PrintEndLine();
 
-            p.Print("#region DATA STORAGE").PrintEndLine();
-            p.Print("#endregion =========").PrintEndLine();
+            p.Print("#region ACCESSORS").PrintEndLine();
+            p.Print("#endregion ======").PrintEndLine();
             p.PrintEndLine();
 
             p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
-                .PrintEndLine(" // DataStorage");
+                .PrintEndLine(" // Accessors");
             p.OpenScope();
             {
-                WriteDataStorageClass(ref p, orderedStorageDefs);
+                WriteAccessors(ref p, accessorDefs);
             }
             p.CloseScope();
             p.PrintEndLine();
 
-            p.Print("#region COLLECTION").PrintEndLine();
-            p.Print("#endregion =======").PrintEndLine();
+            p.Print("#region READ-ONLY ACCESSORS").PrintEndLine();
+            p.Print("#endregion ================").PrintEndLine();
             p.PrintEndLine();
 
             p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
-                .PrintEndLine(" // Collection");
+                .PrintEndLine(" // ReadOnlyAccessors");
             p.OpenScope();
             {
-                WriteCollection(ref p, orderedStorageDefs);
+                WriteReadOnlyAccessors(ref p, accessorDefs);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.Print("#region ACCESSOR ENUMERATOR").PrintEndLine();
+            p.Print("#endregion ================").PrintEndLine();
+            p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
+                .PrintEndLine(" // AccessorEnumerator");
+            p.OpenScope();
+            {
+                WriteAccessorEnumerator(ref p, accessorDefs);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.Print("#region DATA DIRECTORY").PrintEndLine();
+            p.Print("#endregion ===========").PrintEndLine();
+            p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
+                .PrintEndLine(" // DataDirectory");
+            p.OpenScope();
+            {
+                WriteDataDirectory(ref p, orderedStoreDefs);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.Print("#region DATA COLLECTION").PrintEndLine();
+            p.Print("#endregion ============").PrintEndLine();
+            p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
+                .PrintEndLine(" // DataCollection");
+            p.OpenScope();
+            {
+                WriteDataCollection(ref p, orderedStoreDefs);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -122,10 +161,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             return p.Result;
         }
 
-        private static void WriteIds(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
+        private static void WriteIds(ref Printer p, ReadOnlySpan<StoreDefinition> defs)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("readonly partial struct Ids");
+            p.PrintLine("public readonly partial struct Ids");
             p.OpenScope();
             {
                 p.PrintLine("public Ids([NotNull] StringVault stringVault)");
@@ -156,34 +195,15 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         private static void WriteVault(ref Printer p)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("partial class Vault : IDisposable, IDeinitializable");
+            p.PrintLine("internal partial class Vault : UserDataVaultBase");
             p.OpenScope();
             {
-                WriteFields(ref p);
-                WriteConstructor(ref p);
-                WriteTryLoadUserDataAsync(ref p);
-                WriteDeinitialize(ref p);
-                WriteSave(ref p);
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-
-            return;
-
-            static void WriteFields(ref Printer p)
-            {
-                p.PrintLine("private readonly DataStorage _storage;");
-                p.PrintLine("private readonly Accessor _accessor;");
-                p.PrintLine("private readonly Ids _ids;");
+                p.PrintLine("internal readonly DataDirectory _directory;");
+                p.PrintLine("internal readonly Accessors _accessors;");
+                p.PrintLine("internal readonly Ids _ids;");
                 p.PrintEndLine();
 
-                p.PrintLine("private bool _isSavedOnLoaded;");
-                p.PrintEndLine();
-            }
-
-            static void WriteConstructor(ref Printer p)
-            {
-                p.PrintLine("public Vault(");
+                p.PrintLine("internal Vault(");
                 p = p.IncreasedIndent();
                 {
                     p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(STRING_VAULT).PrintEndLine(" stringVault");
@@ -197,247 +217,128 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.OpenScope();
                 {
                     p.PrintLine("_ids = new(stringVault);");
-                    p.PrintLine("_storage = new(stringVault, encryption, logger, taskArrayPool, _ids, userId);");
-                    p.PrintLine("_accessor = new(_storage);");
-                    p.PrintEndLine();
-
-                    p.PrintLine("OnFinishConstructor(encryption, logger, taskArrayPool, userId);");
+                    p.PrintLine("_directory = new(stringVault, encryption, logger, taskArrayPool, _ids, userId);");
+                    p.PrintLine("_accessors = new(_directory);");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("partial void OnFinishConstructor(");
-                p = p.IncreasedIndent();
+                p.PrintLine("public ReadOnlyAccessors Accessors");
+                p.OpenScope();
                 {
-                    p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
-                    p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
-                    p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
-                    p.PrintLine(", string userId");
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => _accessors.AsReadOnly();");
                 }
-                p = p.DecreasedIndent();
-                p.PrintLine(");");
+                p.CloseScope();
                 p.PrintEndLine();
-            }
 
-            static void WriteTryLoadUserDataAsync(ref Printer p)
-            {
-                p.PrintLine("public async UnityTaskᐸboolᐳ TryLoadUserDataAsync(");
+                p.PrintLine("protected override IUserDataDirectory DataDirectory");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => _directory;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("protected sealed override void OnDeinitialize()");
+                p.OpenScope();
+                {
+                    p.PrintLine("_accessors.Deinitialize();");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("protected sealed override void Dispose(bool disposing)");
+                p.OpenScope();
+                {
+                    p.PrintLine("if (disposing)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("_directory.Dispose();");
+                    }
+                    p.CloseScope();
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("protected sealed override UnityTaskᐸboolᐳ OnTryLoadAsync(");
                 p = p.IncreasedIndent();
                 {
                     p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
                     p.PrintLine(", string userId");
-                    p.PrintLine(", bool loadFromCloud");
-                    p.PrintLine(", CancellationToken token = default");
+                    p.PrintLine(", SourcePriority priority");
+                    p.PrintLine(", SaveDestination destination");
+                    p.PrintLine(", CancellationToken token");
                 }
                 p = p.DecreasedIndent();
                 p.PrintLine(")");
                 p.OpenScope();
                 {
-                    p.PrintLine("var result = false;");
-                    p.PrintEndLine();
-
-                    p.PrintLine("UnityTask beginTask = UnityTasks.GetCompleted();");
-                    p.PrintLine("OnBeginTryLoadUserDataAsync(logger, userId, loadFromCloud, token, ref beginTask);");
-                    p.PrintLine("await beginTask;");
-                    p.PrintEndLine();
-
-                    p.PrintLine("if (token.IsCancellationRequested) return result;");
-                    p.PrintEndLine();
-
-                    p.PrintLine("_storage.UserId = userId;");
-                    p.PrintEndLine();
-
-                    p.PrintLine("if (string.IsNullOrEmpty(userId))");
-                    p.OpenScope();
-                    {
-                        p.PrintLine("LogWarningInvalidUserId(logger);");
-                        p.PrintLine("result = false;");
-                    }
-                    p.CloseScope();
-                    p.PrintLine("else");
-                    p.OpenScope();
-                    {
-                        p.PrintLine("_storage.Initialize();");
-                        p.PrintEndLine();
-
-                        p.PrintLine("if (loadFromCloud)");
-                        p.OpenScope();
-                        {
-                            p.PrintLine("await _storage.LoadFromCloudAsync(token: token);");
-                        }
-                        p.CloseScope();
-                        p.PrintLine("else");
-                        p.OpenScope();
-                        {
-                            p.PrintLine("await _storage.LoadFromDeviceAsync(token: token);");
-                        }
-                        p.CloseScope();
-                        p.PrintEndLine();
-
-                        p.PrintLine("if (token.IsCancellationRequested == false)");
-                        p.OpenScope();
-                        {
-                            p.PrintLine("_storage.CreateDataIfNotExist();");
-                            p.PrintLine("_accessor.Initialize();");
-                            p.PrintEndLine();
-
-                            p.PrintLine("await SaveAsync(token: token);");
-                        }
-                        p.CloseScope();
-                        p.PrintEndLine();
-
-                        p.PrintLine("result = token.IsCancellationRequested == false;");
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-
-                    p.PrintLine("if (token.IsCancellationRequested == false)");
-                    p.OpenScope();
-                    {
-                        p.PrintLine("UnityTask finishTask = UnityTasks.GetCompleted();");
-                        p.PrintLine("OnFinishTryLoadUserDataAsync(logger, userId, loadFromCloud, token, ref finishTask);");
-                        p.PrintLine("await finishTask;");
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-
-                    p.PrintLine("return result;");
+                    p.PrintLine("_accessors.Initialize();");
+                    p.PrintLine("return UnityTasks.GetCompleted(true);");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("partial void OnBeginTryLoadUserDataAsync(");
-                p = p.IncreasedIndent();
-                {
-                    p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
-                    p.PrintLine(", string userId");
-                    p.PrintLine(", bool loadFromCloud");
-                    p.PrintLine(", CancellationToken token");
-                    p.PrintLine(", ref UnityTask returnTask");
-                }
-                p = p.DecreasedIndent();
-                p.PrintLine(");");
-                p.PrintEndLine();
-
-                p.PrintLine("partial void OnFinishTryLoadUserDataAsync(");
-                p = p.IncreasedIndent();
-                {
-                    p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
-                    p.PrintLine(", string userId");
-                    p.PrintLine(", bool loadFromCloud");
-                    p.PrintLine(", CancellationToken token");
-                    p.PrintLine(", ref UnityTask returnTask");
-                }
-                p = p.DecreasedIndent();
-                p.PrintLine(");");
-                p.PrintEndLine();
-            }
-
-            static void WriteDeinitialize(ref Printer p)
-            {
-                p.PrintLine("public void Deinitialize()");
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public ReadOnlyVault AsReadOnly()");
                 p.OpenScope();
                 {
-                    p.PrintLine("OnBeginDeinitialize();");
-                    p.PrintEndLine();
-
-                    p.PrintLine("_isSavedOnLoaded = false;");
-                    p.PrintLine("_accessor.Deinitialize();");
-                    p.PrintLine("_storage.Dispose();");
-                    p.PrintEndLine();
-
-                    p.PrintLine("OnFinishDeinitialize();");
+                    p.PrintLine("return new ReadOnlyVault(this);");
                 }
                 p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine("partial void OnBeginDeinitialize();");
-                p.PrintEndLine();
-
-                p.PrintLine("partial void OnFinishDeinitialize();");
-                p.PrintEndLine();
-
-                p.PrintLine("public void Dispose()");
-                p.WithIncreasedIndent().PrintLine("=> Deinitialize();");
-                p.PrintEndLine();
             }
-
-            static void WriteSave(ref Printer p)
-            {
-                p.PrintLine("public void Save(bool forceToCloud = false, CancellationToken token = default)");
-                p.OpenScope();
-                {
-                    p.PrintLine("OnBeginSave(forceToCloud, token);");
-                    p.PrintEndLine();
-
-                    p.PrintLine("if (_isSavedOnLoaded == false)");
-                    p.OpenScope();
-                    {
-                        p.PrintLine("_isSavedOnLoaded = true;");
-                        p.PrintLine("_storage.MarkDirty(true);");
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-
-                    p.PrintLine("_storage.Save(forceToCloud, token: token);");
-                    p.PrintEndLine();
-
-                    p.PrintLine("OnFinishSave(forceToCloud, token);");
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine("partial void OnBeginSave(bool forceToCloud, CancellationToken token);");
-                p.PrintEndLine();
-
-                p.PrintLine("partial void OnFinishSave(bool forceToCloud, CancellationToken token);");
-                p.PrintEndLine();
-
-                p.PrintLine("public async UnityTask SaveAsync(bool forceToCloud = false, CancellationToken token = default)");
-                p.OpenScope();
-                {
-                    p.PrintLine("UnityTask beginTask = UnityTasks.GetCompleted();");
-                    p.PrintLine("OnBeginSaveAsync(forceToCloud, token, ref beginTask);");
-                    p.PrintLine("await beginTask;");
-                    p.PrintEndLine();
-
-                    p.PrintLine("if (token.IsCancellationRequested) return;");
-                    p.PrintEndLine();
-
-                    p.PrintLine("if (_isSavedOnLoaded == false)");
-                    p.OpenScope();
-                    {
-                        p.PrintLine("_isSavedOnLoaded = true;");
-                        p.PrintLine("_storage.MarkDirty(true);");
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-
-                    p.PrintLine("await _storage.SaveAsync(forceToCloud, token: token);");
-                    p.PrintEndLine();
-
-                    p.PrintLine("if (token.IsCancellationRequested) return;");
-                    p.PrintEndLine();
-
-                    p.PrintLine("UnityTask finishTask = UnityTasks.GetCompleted();");
-                    p.PrintLine("OnFinishSaveAsync(forceToCloud, token, ref finishTask);");
-                    p.PrintLine("await finishTask;");
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine("partial void OnBeginSaveAsync(bool forceToCloud, CancellationToken token, ref UnityTask returnTask);");
-                p.PrintEndLine();
-
-                p.PrintLine("partial void OnFinishSaveAsync(bool forceToCloud, CancellationToken token, ref UnityTask returnTask);");
-                p.PrintEndLine();
-            }
+            p.CloseScope();
+            p.PrintEndLine();
         }
 
-        private static void WriteAccessor(ref Printer p, List<UserDataAccessDefinition> defs)
+        private static void WriteReadOnlyVault(ref Printer p)
+        {
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public readonly partial struct ReadOnlyVault");
+            p.OpenScope();
+            {
+                p.PrintLine("internal readonly Vault _vault;");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("internal ReadOnlyVault([NotNull] Vault vault)");
+                p.OpenScope();
+                {
+                    p.PrintLine("_vault = vault;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public bool IsCreated");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => _vault != null;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public ReadOnlyAccessors Accessors");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => _vault.Accessors;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private static void WriteAccessors(ref Printer p, List<UserDataAccessorDefinition> defs)
         {
             var typeSet = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
-            var queue = new Queue<UserDataAccessDefinition>(defs.Count);
+            var queue = new Queue<UserDataAccessorDefinition>(defs.Count);
             var loopMap = new Dictionary<ITypeSymbol, int>(defs.Count, SymbolEqualityComparer.Default);
 
             foreach (var def in defs)
@@ -446,10 +347,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
 
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("partial class Accessor : IInitializable, IDeinitializable");
+            p.PrintLine("internal partial class Accessors : IUserDataAccessorCollection");
             p.OpenScope();
             {
-                p.PrintLine("public Accessor([NotNull] DataStorage storage)");
+                p.PrintLine("internal Accessors([NotNull] DataDirectory directory)");
                 p.OpenScope();
                 {
                     var loopBreakCondition = defs.Count;
@@ -502,7 +403,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 foreach (var def in defs)
                 {
-                    var typeName = def.Symbol.ToFullName();
+                    var typeName = def.FullTypeName;
                     var fieldName = def.FieldName;
 
                     p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
@@ -510,6 +411,28 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         .Print(fieldName).PrintEndLine(" { get; }")
                         .PrintEndLine();
                 }
+
+                p.PrintLine("public int Count");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintBeginLine("get => ").Print(defs.Count).PrintEndLine(";");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public IUserDataAccessor this[int index] => index switch");
+                p.OpenScope();
+                {
+                    for (var i = 0; i < defs.Count; i++)
+                    {
+                        p.PrintBeginLine().Print(i).Print(" => ").Print(defs[i].FieldName).PrintEndLine(",");
+                    }
+
+                    p.PrintLine("_ => throw ThrowHelper.CreateIndexOutOfRangeException_Collection()");
+                }
+                p.CloseScope("};");
+                p.PrintEndLine();
 
                 p.PrintLine("public void Initialize()");
                 p.OpenScope();
@@ -537,13 +460,140 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     }
                 }
                 p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public AccessorEnumerator GetEnumerator()");
+                p.WithIncreasedIndent().PrintLine("=> new AccessorEnumerator(new ReadOnlyAccessors(this));");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("IEnumeratorᐸIUserDataAccessorᐳ IEnumerableᐸIUserDataAccessorᐳ.GetEnumerator()");
+                p.WithIncreasedIndent().PrintLine("=> GetEnumerator();");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("IEnumerator IEnumerable.GetEnumerator()");
+                p.WithIncreasedIndent().PrintLine("=> GetEnumerator();");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public void CopyTo(SpanᐸIUserDataAccessorᐳ destination)");
+                p.WithIncreasedIndent().PrintLine("=> CopyTo(0, destination);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public void CopyTo(SpanᐸIUserDataAccessorᐳ destination, int length)");
+                p.WithIncreasedIndent().PrintLine("=> CopyTo(0, destination, length);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public void CopyTo(int sourceStartIndex, SpanᐸIUserDataAccessorᐳ destination)");
+                p.WithIncreasedIndent().PrintLine("=> CopyTo(sourceStartIndex, destination, destination.Length);");
+                p.PrintEndLine();
+
+                p.PrintLine("public void CopyTo(int sourceStartIndex, SpanᐸIUserDataAccessorᐳ destination, int length)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var count = Count - sourceStartIndex;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (length < 0)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("throw ThrowHelper.CreateArgumentOutOfRangeException_LengthNegative();");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (count < length)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("throw ThrowHelper.CreateArgumentException_SourceStartIndex_Length();");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (destination.Length < length)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("throw ThrowHelper.CreateArgumentException_DestinationTooShort();");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("destination = destination[..length];");
+                    p.PrintEndLine();
+
+                    p.PrintLine("for (int i = 0; i < length; i++)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("destination[i] = this[sourceStartIndex + i];");
+                    }
+                    p.CloseScope();
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public bool TryCopyTo(SpanᐸIUserDataAccessorᐳ destination)");
+                p.WithIncreasedIndent().PrintLine("=> TryCopyTo(0, destination);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public bool TryCopyTo(SpanᐸIUserDataAccessorᐳ destination, int length)");
+                p.WithIncreasedIndent().PrintLine("=> TryCopyTo(0, destination, length);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public bool TryCopyTo(int sourceStartIndex, SpanᐸIUserDataAccessorᐳ destination)");
+                p.WithIncreasedIndent().PrintLine("=> TryCopyTo(sourceStartIndex, destination, destination.Length);");
+                p.PrintEndLine();
+
+                p.PrintLine("public bool TryCopyTo(int sourceStartIndex, SpanᐸIUserDataAccessorᐳ destination, int length)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var count = Count - sourceStartIndex;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (length < 0 || count < length || destination.Length < length)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("destination = destination[..length];");
+                    p.PrintEndLine();
+
+                    p.PrintLine("for (int i = 0; i < length; i++)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("destination[i] = this[sourceStartIndex + i];");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("return true;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public ReadOnlyAccessors AsReadOnly()");
+                p.OpenScope();
+                {
+                    p.PrintLine("return new ReadOnlyAccessors(this);");
+                }
+                p.CloseScope();
             }
             p.CloseScope();
             p.PrintEndLine();
 
             return;
 
-            static void Write(ref Printer p, UserDataAccessDefinition def)
+            static void Write(ref Printer p, UserDataAccessorDefinition def)
             {
                 if (def.Args.Count < 2)
                 {
@@ -557,7 +607,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         }
                         else
                         {
-                            p.Print("storage.").Print(arg.StorageDef.DataType.Name);
+                            p.Print("directory.").Print(arg.StoreDef.DataType.Name);
                         }
                     }
 
@@ -583,7 +633,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                             }
                             else
                             {
-                                p.Print("storage.").Print(arg.StorageDef.DataType.Name);
+                                p.Print("directory.").Print(arg.StoreDef.DataType.Name);
                             }
 
                             p.PrintEndLine();
@@ -595,10 +645,173 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
         }
 
-        private void WriteDataStorageClass(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
+        private void WriteAccessorEnumerator(ref Printer p, List<UserDataAccessorDefinition> defs)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("partial class DataStorage : IDisposable, IInitializable");
+            p.PrintLine("public readonly partial struct ReadOnlyAccessors : IUserDataAccessorReadOnlyCollection");
+            p.OpenScope();
+            {
+                p.PrintLine("internal readonly Accessors _accessors;");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("internal ReadOnlyAccessors([NotNull] Accessors accessors)");
+                p.OpenScope();
+                {
+                    p.PrintLine("_accessors = accessors;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                foreach (var def in defs)
+                {
+                    var typeName = def.FullTypeName;
+                    var fieldName = def.FieldName;
+
+                    p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public ").Print(typeName).Print(" ").PrintEndLine(fieldName);
+                    p.OpenScope();
+                    {
+                        p.PrintLine(AGGRESSIVE_INLINING);
+                        p.PrintBeginLine("get => _accessors.").Print(fieldName).PrintEndLine(";");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
+
+                p.PrintLine("public int Count");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintBeginLine("get => ").Print(defs.Count).PrintEndLine(";");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public IUserDataAccessor this[int index] => index switch");
+                p.OpenScope();
+                {
+                    for (var i = 0; i < defs.Count; i++)
+                    {
+                        p.PrintBeginLine().Print(i).Print(" => ").Print(defs[i].FieldName).PrintEndLine(",");
+                    }
+
+                    p.PrintLine("_ => throw ThrowHelper.CreateIndexOutOfRangeException_Collection()");
+                }
+                p.CloseScope("};");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public AccessorEnumerator GetEnumerator()");
+                p.WithIncreasedIndent().PrintLine("=> new AccessorEnumerator(this);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("IEnumeratorᐸIUserDataAccessorᐳ IEnumerableᐸIUserDataAccessorᐳ.GetEnumerator()");
+                p.WithIncreasedIndent().PrintLine("=> GetEnumerator();");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("IEnumerator IEnumerable.GetEnumerator()");
+                p.WithIncreasedIndent().PrintLine("=> GetEnumerator();");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public void CopyTo(SpanᐸIUserDataAccessorᐳ destination)");
+                p.WithIncreasedIndent().PrintLine("=> CopyTo(0, destination);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public void CopyTo(SpanᐸIUserDataAccessorᐳ destination, int length)");
+                p.WithIncreasedIndent().PrintLine("=> CopyTo(0, destination, length);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public void CopyTo(int sourceStartIndex, SpanᐸIUserDataAccessorᐳ destination)");
+                p.WithIncreasedIndent().PrintLine("=> CopyTo(sourceStartIndex, destination, destination.Length);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public void CopyTo(int sourceStartIndex, SpanᐸIUserDataAccessorᐳ destination, int length)");
+                p.WithIncreasedIndent().PrintLine("=> _accessors.CopyTo(sourceStartIndex, destination, length);");
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public bool TryCopyTo(SpanᐸIUserDataAccessorᐳ destination)");
+                p.WithIncreasedIndent().PrintLine("=> TryCopyTo(0, destination);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public bool TryCopyTo(SpanᐸIUserDataAccessorᐳ destination, int length)");
+                p.WithIncreasedIndent().PrintLine("=> TryCopyTo(0, destination, length);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public bool TryCopyTo(int sourceStartIndex, SpanᐸIUserDataAccessorᐳ destination)");
+                p.WithIncreasedIndent().PrintLine("=> TryCopyTo(sourceStartIndex, destination, destination.Length);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public bool TryCopyTo(int sourceStartIndex, SpanᐸIUserDataAccessorᐳ destination, int length)");
+                p.WithIncreasedIndent().PrintLine("=> _accessors.TryCopyTo(sourceStartIndex, destination, length);");
+                p.PrintEndLine();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteReadOnlyAccessors(ref Printer p, List<UserDataAccessorDefinition> defs)
+        {
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public partial struct AccessorEnumerator : IEnumeratorᐸIUserDataAccessorᐳ");
+            p.OpenScope();
+            {
+                p.PrintLine("private readonly ReadOnlyAccessors _source;");
+                p.PrintLine("private int _index;");
+                p.PrintEndLine();
+
+                p.PrintLine("internal AccessorEnumerator([NotNull] ReadOnlyAccessors source)");
+                p.OpenScope();
+                {
+                    p.PrintLine("_source = source;");
+                    p.PrintLine("_index = -1;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public readonly IUserDataAccessor Current => _source[_index];");
+                p.PrintEndLine();
+
+                p.PrintLine("readonly object IEnumerator.Current => Current;");
+                p.PrintEndLine();
+
+                p.PrintLine("public void Dispose() { }");
+                p.PrintEndLine();
+
+                p.PrintLine("public bool MoveNext()");
+                p.OpenScope();
+                {
+                    p.PrintLine("_index++;");
+                    p.PrintLine("return (uint)_index < (uint)_source.Count;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public void Reset()");
+                p.OpenScope();
+                {
+                    p.PrintLine("_index = -1;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private void WriteDataDirectory(ref Printer p, ReadOnlySpan<StoreDefinition> defs)
+        {
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("internal partial class DataDirectory : IUserDataDirectory, IDisposable");
             p.OpenScope();
             {
                 p.PrintBeginLine("private readonly ").Print(STRING_VAULT).PrintEndLine(" _stringVault;");
@@ -611,7 +824,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("private string _userId;");
                 p.PrintEndLine();
 
-                p.PrintLine("public DataStorage(");
+                p.PrintLine("internal DataDirectory(");
                 p = p.IncreasedIndent();
                 {
                     p.PrintBeginLine("  ").Print(NOT_NULL).Print(" ").Print(STRING_VAULT).PrintEndLine(" stringVault");
@@ -634,7 +847,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintEndLine();
 
                     p.PrintLine("bool ignoreEncryption = false;");
-                    p.PrintBeginLine(STORAGE_ARGS).PrintEndLine(" storageArgs = null;");
+                    p.PrintBeginLine(STORE_ARGS).PrintEndLine(" args = null;");
                     p.PrintEndLine();
 
                     p.Print("#if !FORCE_USER_DATA_ENCRYPTION").PrintEndLine();
@@ -646,14 +859,14 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     {
                         p.OpenScope();
                         {
-                            p.PrintLine("storageArgs = null;");
-                            p.PrintBeginLine("GetArgsForStorage<")
-                                .Print(def.DataType.ToFullName()).Print(", ").Print(def.StorageType.ToFullName())
-                                .PrintEndLine(">(ref storageArgs);");
+                            p.PrintLine("args = null;");
+                            p.PrintBeginLine("GetStoreArgs<")
+                                .Print(def.FullDataTypeName).Print(", ").Print(def.FullStoreTypeName)
+                                .PrintEndLine(">(ref args);");
 
                             p.PrintBeginLine(def.DataType.Name).Print(" = new(")
                                 .Print("_ids.").Print(def.DataType.Name)
-                                .Print(", stringVault, encryption, logger, ignoreEncryption, storageArgs")
+                                .Print(", stringVault, encryption, logger, ignoreEncryption, args")
                                 .PrintEndLine(") { UserId = userId };");
                         }
                         p.CloseScope();
@@ -665,7 +878,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 foreach (var def in defs)
                 {
                     p.PrintBeginLine("public ")
-                        .Print(def.StorageType.ToFullName()).Print(" ")
+                        .Print(def.FullStoreTypeName).Print(" ")
                         .Print(def.DataType.Name).PrintEndLine(" { get; }")
                         .PrintEndLine();
                 }
@@ -702,18 +915,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("static partial void GetIgnoreEncryption(ref bool ignoreEncryption);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine("static partial void GetArgsForStorage<TData, TStorage>(ref ")
-                    .Print(STORAGE_ARGS).PrintEndLine(" storageArgs)");
+                p.PrintBeginLine("static partial void GetStoreArgs<TData, TStore>(ref ")
+                    .Print(STORE_ARGS).PrintEndLine(" args)");
                 p.WithIncreasedIndent().PrintLine("where TData : IUserData");
-                p.WithIncreasedIndent().PrintBeginLine("where TStorage : ").Print(USER_DATA_STORAGE_BASE).PrintEndLine("TData>;");
-                p.PrintEndLine();
-
-                p.PrintLine("public void Dispose()");
-                p.OpenScope();
-                {
-                    p.PrintLine("_encryption.Dispose();");
-                }
-                p.CloseScope();
+                p.WithIncreasedIndent().PrintBeginLine("where TStore : ").Print(USER_DATA_STORE_BASE).PrintEndLine("TData>;");
                 p.PrintEndLine();
 
                 p.PrintLine("public void Initialize()");
@@ -728,13 +933,22 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public void MarkDirty(bool isDirty)");
+                p.PrintLine("public void Deinitialize()");
                 p.OpenScope();
                 {
                     foreach (var def in defs)
                     {
-                        p.PrintBeginLine(def.DataType.Name).PrintEndLine(".MarkDirty(isDirty);");
+                        p.PrintBeginLine(def.DataType.Name)
+                            .PrintEndLine(".Deinitialize();");
                     }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public void Dispose()");
+                p.OpenScope();
+                {
+                    p.PrintLine("_encryption.Dispose();");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -767,383 +981,12 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ")
-                    .PrintEndLine("UnityTask LoadFromCloudAsync(");
-                p = p.IncreasedIndent();
-                {
-                    for (var i = 0; i < defs.Length; i++)
-                    {
-                        var comma = i == 0 ? "  " : ", ";
-
-                        p.PrintBeginLine(comma).Print("bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
-                    }
-
-                    p.PrintLine(", CancellationToken token = default");
-                }
-                p = p.DecreasedIndent();
-                p.PrintLine(")");
-                p.OpenScope();
-                {
-                    if (defs.Length > 1)
-                    {
-                        p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
-                        p.PrintEndLine();
-
-                        var lastIndex = defs.Length - 1;
-
-                        for (var i = 0; i < defs.Length; i++)
-                        {
-                            var name = defs[i].DataType.Name;
-
-                            p.PrintBeginLine($"tasks[{i}] = include").PrintEndLine(name);
-                            p = p.IncreasedIndent();
-                            {
-                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".LoadFromCloudAsync(token)");
-                                p.PrintBeginLine(": ").Print(COMPLETED_TASK).PrintEndLine(";");
-                            }
-                            p = p.DecreasedIndent();
-
-                            p.PrintEndLineIf(i < lastIndex, "");
-                        }
-
-                        p.PrintEndLine();
-                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
-
-                        p.PrintEndLine();
-                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
-                    }
-                    else if (defs.Length == 1)
-                    {
-                        var name = defs[0].DataType.Name;
-
-                        p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
-                        p.OpenScope();
-                        {
-                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".LoadFromCloudAsync(token);");
-                        }
-                        p.CloseScope();
-                        p.PrintEndLine();
-                    }
-                    else
-                    {
-                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
-                    }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ")
-                    .PrintEndLine("UnityTask LoadFromDeviceAsync(");
-                p = p.IncreasedIndent();
-                {
-                    for (var i = 0; i < defs.Length; i++)
-                    {
-                        var comma = i == 0 ? "  " : ", ";
-
-                        p.PrintBeginLine(comma).Print("bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
-                    }
-
-                    p.PrintLine(", CancellationToken token = default");
-                }
-                p = p.DecreasedIndent();
-                p.PrintLine(")");
-                p.OpenScope();
-                {
-                    if (defs.Length > 1)
-                    {
-                        p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
-                        p.PrintEndLine();
-
-                        var lastIndex = defs.Length - 1;
-
-                        for (var i = 0; i < defs.Length; i++)
-                        {
-                            var name = defs[i].DataType.Name;
-
-                            p.PrintBeginLine($"tasks[{i}] = include").PrintEndLine(name);
-                            p = p.IncreasedIndent();
-                            {
-                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".LoadFromDeviceAsync(token)");
-                                p.PrintBeginLine(": ").Print(COMPLETED_TASK).PrintEndLine(";");
-                            }
-                            p = p.DecreasedIndent();
-
-                            p.PrintEndLineIf(i < lastIndex, "");
-                        }
-
-                        p.PrintEndLine();
-                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
-
-                        p.PrintEndLine();
-                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
-                    }
-                    else if (defs.Length == 1)
-                    {
-                        var name = defs[0].DataType.Name;
-
-                        p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
-                        p.OpenScope();
-                        {
-                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".LoadFromDeviceAsync(token);");
-                        }
-                        p.CloseScope();
-                        p.PrintEndLine();
-                    }
-                    else
-                    {
-                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
-                    }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ")
-                    .PrintEndLine("UnityTask SaveToCloudAsync(");
-                p = p.IncreasedIndent();
-                {
-                    for (var i = 0; i < defs.Length; i++)
-                    {
-                        var comma = i == 0 ? "  " : ", ";
-
-                        p.PrintBeginLine(comma).Print("bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
-                    }
-
-                    p.PrintLine(", CancellationToken token = default");
-                }
-                p = p.DecreasedIndent();
-                p.PrintLine(")");
-                p.OpenScope();
-                {
-                    if (defs.Length > 1)
-                    {
-                        p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
-                        p.PrintEndLine();
-
-                        var lastIndex = defs.Length - 1;
-
-                        for (var i = 0; i < defs.Length; i++)
-                        {
-                            var name = defs[i].DataType.Name;
-
-                            p.PrintBeginLine($"tasks[{i}] = include").PrintEndLine(name);
-                            p = p.IncreasedIndent();
-                            {
-                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".SaveToCloudAsync(token)");
-                                p.PrintBeginLine(": ").Print(COMPLETED_TASK).PrintEndLine(";");
-                            }
-                            p = p.DecreasedIndent();
-
-                            p.PrintEndLineIf(i < lastIndex, "");
-                        }
-
-                        p.PrintEndLine();
-                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
-
-                        p.PrintEndLine();
-                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
-                    }
-                    else if (defs.Length == 1)
-                    {
-                        var name = defs[0].DataType.Name;
-
-                        p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
-                        p.OpenScope();
-                        {
-                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".SaveToCloudAsync(token);");
-                        }
-                        p.CloseScope();
-                        p.PrintEndLine();
-                    }
-                    else
-                    {
-                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
-                    }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ")
-                    .PrintEndLine("UnityTask SaveToDeviceAsync(");
-                p = p.IncreasedIndent();
-                {
-                    for (var i = 0; i < defs.Length; i++)
-                    {
-                        var comma = i == 0 ? "  " : ", ";
-
-                        p.PrintBeginLine(comma).Print("bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
-                    }
-
-                    p.PrintLine(", CancellationToken token = default");
-                }
-                p = p.DecreasedIndent();
-                p.PrintLine(")");
-                p.OpenScope();
-                {
-                    if (defs.Length > 1)
-                    {
-                        p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
-                        p.PrintEndLine();
-
-                        var lastIndex = defs.Length - 1;
-
-                        for (var i = 0; i < defs.Length; i++)
-                        {
-                            var name = defs[i].DataType.Name;
-
-                            p.PrintBeginLine($"tasks[{i}] = include").PrintEndLine(name);
-                            p = p.IncreasedIndent();
-                            {
-                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".SaveToDeviceAsync(token)");
-                                p.PrintBeginLine(": ").Print(COMPLETED_TASK).PrintEndLine(";");
-                            }
-                            p = p.DecreasedIndent();
-
-                            p.PrintEndLineIf(i < lastIndex, "");
-                        }
-
-                        p.PrintEndLine();
-                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
-
-                        p.PrintEndLine();
-                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
-                    }
-                    else if (defs.Length == 1)
-                    {
-                        var name = defs[0].DataType.Name;
-
-                        p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
-                        p.OpenScope();
-                        {
-                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".SaveToDeviceAsync(token);");
-                        }
-                        p.CloseScope();
-                        p.PrintEndLine();
-                    }
-                    else
-                    {
-                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
-                    }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine("public void Save(");
-                p = p.IncreasedIndent();
-                {
-                    p.PrintLine("  bool forceToCloud");
-
-                    for (var i = 0; i < defs.Length; i++)
-                    {
-                        p.PrintBeginLine(", bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
-                    }
-
-                    p.PrintLine(", CancellationToken token = default");
-                }
-                p = p.DecreasedIndent();
-                p.PrintLine(")");
+                p.PrintLine("public void MarkDirty(bool isDirty)");
                 p.OpenScope();
                 {
                     foreach (var def in defs)
                     {
-                        p.PrintBeginLine("if (include").Print(def.DataType.Name).PrintEndLine(")");
-                        p.OpenScope();
-                        {
-                            p.PrintBeginLine(def.DataType.Name).PrintEndLine(".Save(forceToCloud, token);");
-                        }
-                        p.CloseScope();
-                        p.PrintEndLine();
-                    }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ")
-                    .PrintEndLine("UnityTask SaveAsync(");
-                p = p.IncreasedIndent();
-                {
-                    p.PrintLine("  bool forceToCloud");
-
-                    for (var i = 0; i < defs.Length; i++)
-                    {
-                        p.PrintBeginLine(", bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
-                    }
-
-                    p.PrintLine(", CancellationToken token = default");
-                }
-                p = p.DecreasedIndent();
-                p.PrintLine(")");
-                p.OpenScope();
-                {
-                    if (defs.Length > 1)
-                    {
-                        p.PrintLine($"var tasks = _taskArrayPool.Rent({defs.Length});");
-                        p.PrintEndLine();
-
-                        var lastIndex = defs.Length - 1;
-
-                        for (var i = 0; i < defs.Length; i++)
-                        {
-                            var name = defs[i].DataType.Name;
-
-                            p.PrintBeginLine($"tasks[{i}] = include").PrintEndLine(name);
-                            p = p.IncreasedIndent();
-                            {
-                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".SaveAsync(forceToCloud, token)");
-                                p.PrintBeginLine(": ").Print(COMPLETED_TASK).PrintEndLine(";");
-                            }
-                            p = p.DecreasedIndent();
-
-                            p.PrintEndLineIf(i < lastIndex, "");
-                        }
-
-                        p.PrintEndLine();
-                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
-
-                        p.PrintEndLine();
-                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
-                    }
-                    else if (defs.Length == 1)
-                    {
-                        var name = defs[0].DataType.Name;
-
-                        p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
-                        p.OpenScope();
-                        {
-                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".SaveAsync(forceToCloud, token);");
-                        }
-                        p.CloseScope();
-                        p.PrintEndLine();
-                    }
-                    else
-                    {
-                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
-                    }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine("public void CloneDataFromCloudToDevice(");
-                p = p.IncreasedIndent();
-                {
-                    for (var i = 0; i < defs.Length; i++)
-                    {
-                        var comma = i == 0 ? "  " : ", ";
-                        p.PrintBeginLine(comma).Print("bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
-                    }
-                }
-                p = p.DecreasedIndent();
-                p.PrintLine(")");
-                p.OpenScope();
-                {
-                    foreach (var def in defs)
-                    {
-                        p.PrintBeginLine("if (include").Print(def.DataType.Name).PrintEndLine(")");
-                        p.OpenScope();
-                        {
-                            p.PrintBeginLine(def.DataType.Name).PrintEndLine(".CloneDataFromCloudToDevice();");
-                        }
-                        p.CloseScope();
-                        p.PrintEndLine();
+                        p.PrintBeginLine(def.DataType.Name).PrintEndLine(".MarkDirty(isDirty);");
                     }
                 }
                 p.CloseScope();
@@ -1177,38 +1020,273 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 }
                 p.CloseScope();
                 p.PrintEndLine();
+
+                p.PrintLine("public UnityTask LoadEntireDirectoryAsync(SourcePriority priority, CancellationToken token = default)");
+                p.WithIncreasedIndent().PrintLine("=> LoadAsync(priority, token);");
+                p.PrintEndLine();
+
+                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ")
+                    .PrintEndLine("UnityTask LoadAsync(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintLine("  SourcePriority priority");
+                    p.PrintLine(", CancellationToken token = default");
+
+                    for (var i = 0; i < defs.Length; i++)
+                    {
+                        p.PrintBeginLine(", bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
+                    }
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
+                p.OpenScope();
+                {
+                    if (defs.Length > 1)
+                    {
+                        p.PrintBeginLine("var tasks = _taskArrayPool.Rent(").Print(defs.Length).PrintEndLine(");");
+                        p.PrintEndLine();
+
+                        var lastIndex = defs.Length - 1;
+
+                        for (var i = 0; i < defs.Length; i++)
+                        {
+                            var name = defs[i].DataType.Name;
+
+                            p.PrintBeginLine("tasks[").Print(i).Print("] = include").PrintEndLine(name);
+                            p = p.IncreasedIndent();
+                            {
+                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".LoadAsync(priority, token)");
+                                p.PrintBeginLine(": ").Print(COMPLETED_TASK).PrintEndLine(";");
+                            }
+                            p = p.DecreasedIndent();
+
+                            p.PrintEndLineIf(i < lastIndex, "");
+                        }
+
+                        p.PrintEndLine();
+                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
+
+                        p.PrintEndLine();
+                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
+                    }
+                    else if (defs.Length == 1)
+                    {
+                        var name = defs[0].DataType.Name;
+
+                        p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".LoadAsync(priority, token);");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+                    else
+                    {
+                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public UnityTask SaveEntireDirectoryAsync(SaveDestination destination, CancellationToken token = default)");
+                p.WithIncreasedIndent().PrintLine("=> SaveAsync(destination, token);");
+                p.PrintEndLine();
+
+                p.PrintBeginLine("public ").PrintIf(defs.Length > 0, "async ")
+                    .PrintEndLine("UnityTask SaveAsync(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintLine("  SaveDestination destination");
+                    p.PrintLine(", CancellationToken token = default");
+
+                    for (var i = 0; i < defs.Length; i++)
+                    {
+                        p.PrintBeginLine(", bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
+                    }
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
+                p.OpenScope();
+                {
+                    if (defs.Length > 1)
+                    {
+                        p.PrintBeginLine("var tasks = _taskArrayPool.Rent(").Print(defs.Length).PrintEndLine(");");
+                        p.PrintEndLine();
+
+                        var lastIndex = defs.Length - 1;
+
+                        for (var i = 0; i < defs.Length; i++)
+                        {
+                            var name = defs[i].DataType.Name;
+
+                            p.PrintBeginLine("tasks[").Print(i).Print("] = include").PrintEndLine(name);
+                            p = p.IncreasedIndent();
+                            {
+                                p.PrintBeginLine("? ").Print(name).PrintEndLine(".SaveAsync(destination, token)");
+                                p.PrintBeginLine(": ").Print(COMPLETED_TASK).PrintEndLine(";");
+                            }
+                            p = p.DecreasedIndent();
+
+                            p.PrintEndLineIf(i < lastIndex, "");
+                        }
+
+                        p.PrintEndLine();
+                        p.PrintBeginLine("await ").Print(WHEN_ALL_TASKS).PrintEndLine(";");
+
+                        p.PrintEndLine();
+                        p.PrintLine("_taskArrayPool.Return(tasks, true);");
+                    }
+                    else if (defs.Length == 1)
+                    {
+                        var name = defs[0].DataType.Name;
+
+                        p.PrintBeginLine("if (include").Print(name).PrintEndLine(")");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine("await ").Print(name).PrintEndLine(".SaveAsync(destination, token);");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+                    else
+                    {
+                        p.PrintBeginLine("return ").Print(COMPLETED_TASK).PrintEndLine(";");
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public void CloneDataFromCloud(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintLine("  SourcePriority priority");
+
+                    for (var i = 0; i < defs.Length; i++)
+                    {
+                        p.PrintBeginLine(", bool include").Print(defs[i].DataType.Name).PrintEndLine(" = true");
+                    }
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
+                p.OpenScope();
+                {
+                    foreach (var def in defs)
+                    {
+                        p.PrintBeginLine("if (include").Print(def.DataType.Name).PrintEndLine(")");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine(def.DataType.Name).PrintEndLine(".TryCloneDataFromCloud();");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+                }
+                p.CloseScope();
+                p.PrintEndLine();
             }
             p.CloseScope();
             p.PrintEndLine();
         }
 
-        private void WriteCollection(ref Printer p, ReadOnlySpan<StorageDefinition> defs)
+        private void WriteDataCollection(ref Printer p, ReadOnlySpan<StoreDefinition> defs)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("[global::System.Serializable]");
-            p.PrintLine("partial class Collection : IReadOnlyListᐸIUserDataᐳ, ICopyToSpanᐸIUserDataᐳ, ITryCopyToSpanᐸIUserDataᐳ");
+            p.PrintLine("[Serializable]");
+            p.PrintLine("public partial struct DataCollection : IUserDataCollection");
             p.OpenScope();
             {
+                p.PrintLine("[SerializeField] private string _userId;");
+
                 foreach (var def in defs)
                 {
-                    p.PrintLine("[global::UnityEngine.SerializeField]");
-                    p.PrintBeginLine("public ").Print(def.DataType.ToFullName()).Print(" ")
-                        .Print(def.DataType.Name).PrintEndLine(";");
-                    p.PrintEndLine();
+                    p.PrintBeginLine("[SerializeField] private ").Print(def.FullDataTypeName).Print(" ")
+                        .Print(def.DataFieldName).PrintEndLine(";");
                 }
+
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public DataCollection(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintLine("  [NotNull] string userId");
+                    p.PrintLine(", DataCollection source");
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
+                p.OpenScope();
+                {
+                    p.PrintLine("if (source.IsCreated == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("throw ThrowHelper.CreateArgumentException_CollectionNotCreated(\"source\");");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("_userId = userId;");
+
+                    for (var i = 0; i < defs.Length; i++)
+                    {
+                        var def = defs[i];
+
+                        p.PrintBeginLine(def.DataFieldName).Print(" = source.").Print(def.DataFieldName).PrintEndLine(";");
+                    }
+
+                    p.PrintEndLine();
+                    p.PrintLine("IsCreated = true;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("internal DataCollection(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintLine("  [NotNull] string userId");
+
+                    for (var i = 0; i < defs.Length; i++)
+                    {
+                        var def = defs[i];
+
+                        p.PrintBeginLine(", ").Print(def.FullDataTypeName).Print(" ").PrintEndLine(def.DataArgName);
+                    }
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
+                p.OpenScope();
+                {
+                    p.PrintLine("_userId = userId;");
+
+                    for (var i = 0; i < defs.Length; i++)
+                    {
+                        var def = defs[i];
+
+                        p.PrintBeginLine(def.DataFieldName).Print(" = ").Print(def.DataArgName).PrintEndLine(";");
+                    }
+
+                    p.PrintEndLine();
+                    p.PrintLine("IsCreated = true;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
 
                 p.PrintLine("public IUserData this[int index] => index switch");
                 p.OpenScope();
                 {
                     for (var i = 0; i < defs.Length; i++)
                     {
-                        p.PrintBeginLine().Print(i).Print(" => ").Print(defs[i].DataType.Name).PrintEndLine(",");
+                        p.PrintBeginLine().Print(i).Print(" => ").Print(defs[i].DataFieldName).PrintEndLine(",");
                     }
 
                     p.PrintLine("_ => throw ThrowHelper.CreateIndexOutOfRangeException_Collection()");
 
                 }
                 p.CloseScope("};");
+                p.PrintEndLine();
+
+                p.PrintLine("public bool IsCreated { get; }");
                 p.PrintEndLine();
 
                 p.PrintLine("public int Count");
@@ -1220,10 +1298,116 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public string UserId { get; set; }");
+                p.PrintLine("public string UserId");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => _userId;");
+                }
+                p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public bool IsCloud { get; set; }");
+                p.PrintLine("public static DataCollection GetFrom(ReadOnlyVault vault, SourcePriority priority)");
+                p.OpenScope();
+                {
+                    p.PrintLine("if (vault.IsCreated == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("throw ThrowHelper.CreateArgumentNullException(\"vault\");");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("var directory = vault._vault._directory;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("return new DataCollection(");
+                    p = p.IncreasedIndent();
+                    {
+                        p.PrintLine("  directory.UserId");
+
+                        foreach (var def in defs)
+                        {
+                            var name = def.DataType.Name;
+
+                            p.PrintBeginLine(", directory.").Print(name).PrintEndLine(".GetData(priority)");
+                        }
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintLine(");");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public static DataCollection CloneFrom(ReadOnlyVault vault, SourcePriority priority)");
+                p.OpenScope();
+                {
+                    p.PrintLine("if (vault.IsCreated == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("throw ThrowHelper.CreateArgumentNullException(\"vault\");");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("var directory = vault._vault._directory;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("return new DataCollection(");
+                    p = p.IncreasedIndent();
+                    {
+                        p.PrintLine("  directory.UserId");
+
+                        foreach (var def in defs)
+                        {
+                            var name = def.DataType.Name;
+                            p.PrintBeginLine(", directory.").Print(name)
+                                .PrintEndLine(".TryCloneData(priority).GetValueOrDefault()");
+                        }
+                    }
+                    p = p.DecreasedIndent();
+                    p.PrintLine(");");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public DataCollection ChangeUserId([NotNull] string userId)");
+                p.WithIncreasedIndent().PrintLine("=> new DataCollection(userId, this);");
+                p.PrintEndLine();
+
+                p.PrintLine("public void SetTo(ReadOnlyVault vault)");
+                p.OpenScope();
+                {
+                    p.PrintLine("if (IsCreated == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("throw ThrowHelper.CreateInvalidOperationException_CollectionNotCreated();");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (vault.IsCreated == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("throw ThrowHelper.CreateArgumentNullException(\"vault\");");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("var directory = vault._vault._directory;");
+                    p.PrintEndLine();
+
+                    foreach (var def in defs)
+                    {
+                        var name = def.DataType.Name;
+                        var fieldName = def.DataFieldName;
+
+                        p.PrintBeginLine("directory.").Print(name)
+                            .Print(".SetData(").Print(fieldName).PrintEndLine(");");
+                    }
+                }
+                p.CloseScope();
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING);
@@ -1346,128 +1530,25 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public void CloneDataFrom([NotNull] Collection source)");
-                p.OpenScope();
-                {
-                    p.PrintLine("DataStorage sourceStorage = null;");
-                    p.PrintLine("source.GetLoadedStorage(ref sourceStorage);");
-                    p.PrintEndLine();
-
-                    p.PrintLine("if (sourceStorage == null)");
-                    p.OpenScope();
-                    {
-                        p.PrintLine("return;");
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-
-                    foreach (var def in defs)
-                    {
-                        var name = def.DataType.Name;
-
-                        p.PrintBeginLine("if (sourceStorage.").Print(name).Print(".TryCloneData(out var cloned")
-                            .Print(name).PrintEndLine("))");
-                        p.OpenScope();
-                        {
-                            p.PrintBeginLine(name).Print(" = cloned").Print(name).PrintEndLine(";");
-                        }
-                        p.CloseScope();
-                        p.PrintEndLine();
-                    }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine("public void RetrieveFromStorage()");
-                p.OpenScope();
-                {
-                    p.PrintLine("DataStorage storage = null;");
-                    p.PrintLine("GetLoadedStorage(ref storage);");
-                    p.PrintEndLine();
-
-                    p.PrintLine("if (storage == null)");
-                    p.OpenScope();
-                    {
-                        p.PrintLine("return;");
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-
-                    p.PrintLine("if (IsCloud)");
-                    p.OpenScope();
-                    {
-                        foreach (var def in defs)
-                        {
-                            var name = def.DataType.Name;
-
-                            p.PrintBeginLine(name).Print(" = storage.")
-                                .Print(name).PrintEndLine(".GetDataFromCloud();");
-                        }
-                    }
-                    p.CloseScope();
-                    p.PrintLine("else");
-                    p.OpenScope();
-                    {
-                        foreach (var def in defs)
-                        {
-                            var name = def.DataType.Name;
-
-                            p.PrintBeginLine(name).Print(" = storage.")
-                                .Print(name).PrintEndLine(".GetDataFromDevice();");
-                        }
-                    }
-                    p.CloseScope();
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine("public void ApplyToStorage()");
-                p.OpenScope();
-                {
-                    p.PrintLine("DataStorage storage = null;");
-                    p.PrintLine("GetLoadedStorage(ref storage);");
-                    p.PrintEndLine();
-
-                    p.PrintLine("if (storage == null)");
-                    p.OpenScope();
-                    {
-                        p.PrintLine("return;");
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-
-                    foreach (var def in defs)
-                    {
-                        var name = def.DataType.Name;
-
-                        p.PrintBeginLine("storage.").Print(name)
-                            .Print(".SetData(").Print(name).PrintEndLine(");");
-                    }
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine("partial void GetLoadedStorage(ref DataStorage storage);");
-                p.PrintEndLine();
-
                 p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public struct Enumerator : IEnumeratorᐸIUserDataᐳ");
                 p.OpenScope();
                 {
-                    p.PrintLine("private readonly Collection _collection;");
+                    p.PrintLine("private readonly DataCollection _source;");
                     p.PrintLine("private int _index;");
                     p.PrintEndLine();
 
-                    p.PrintLine("public Enumerator([NotNull] Collection collection)");
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("public Enumerator([NotNull] DataCollection source)");
                     p.OpenScope();
                     {
-                        p.PrintLine("_collection = collection;");
+                        p.PrintLine("_source = source;");
                         p.PrintLine("_index = -1;");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintLine("public readonly IUserData Current => _collection[_index];");
+                    p.PrintLine("public readonly IUserData Current => _source[_index];");
                     p.PrintEndLine();
 
                     p.PrintLine("readonly object IEnumerator.Current => Current;");
@@ -1480,7 +1561,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.OpenScope();
                     {
                         p.PrintLine("_index++;");
-                        p.PrintLine("return (uint)_index < (uint)_collection.Count;");
+                        p.PrintLine("return (uint)_index < (uint)_source.Count;");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
@@ -1509,17 +1590,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             {
                 p.PrintBeginLine("logger.LogError(")
                     .PrintEndLine("$\"Detect cyclic dependency in the constructor of type '{name}'\");");
-                p.PrintEndLine();
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-
-            p.PrintLine(HIDE_IN_CALL_STACK);
-            p.PrintLine("private static void LogWarningInvalidUserId(ILogger logger)");
-            p.OpenScope();
-            {
-                p.PrintBeginLine("logger.LogWarning(")
-                    .PrintEndLine("\"User data cannot be loaded because 'userId' is invalid.\");");
                 p.PrintEndLine();
             }
             p.CloseScope();

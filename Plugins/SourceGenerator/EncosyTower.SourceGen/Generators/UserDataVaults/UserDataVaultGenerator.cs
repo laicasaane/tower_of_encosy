@@ -83,44 +83,16 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             if (symbol == null
                 || symbol.IsAbstract
                 || symbol.IsUnboundGenericType
-                || symbol.GetAttribute(VAULT_ATTRIBUTE) is not AttributeData attrib
+                || symbol.GetAttribute(VAULT_ATTRIBUTE) is null
             )
             {
                 return default;
             }
 
-            var candidate = new UserDataVaultCandidate {
+            return new UserDataVaultCandidate {
                 syntax = syntax,
                 symbol = symbol,
             };
-
-            var args = attrib.NamedArguments;
-
-            foreach (var arg in args)
-            {
-                switch (arg.Key)
-                {
-                    case "Prefix":
-                    {
-                        if (arg.Value.Value is string stringVal)
-                        {
-                            candidate.prefix = stringVal;
-                        }
-                        break;
-                    }
-
-                    case "Suffix":
-                    {
-                        if (arg.Value.Value is string stringVal)
-                        {
-                            candidate.suffix = stringVal;
-                        }
-                        break;
-                    }
-                }
-            }
-
-            return candidate;
         }
 
         public static bool IsSyntaxMatchDataAccessClass(SyntaxNode syntaxNode, CancellationToken token)
@@ -128,7 +100,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             token.ThrowIfCancellationRequested();
 
             return syntaxNode is ClassDeclarationSyntax syntax
-                && syntax.HasAttributeCandidate(NAMESPACE, "UserDataAccess")
+                && syntax.HasAttributeCandidate(NAMESPACE, "UserDataAccessor")
                 && syntax.HasModifier(SyntaxKind.AbstractKeyword) == false
                 && syntax.TypeParameterList is null
                 ;
@@ -152,7 +124,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             if (symbol == null
                 || symbol.IsAbstract
                 || symbol.IsUnboundGenericType
-                || symbol.GetAttribute(ACCESS_ATTRIBUTE) is null
+                || symbol.GetAttribute(ACCESSOR_ATTRIBUTE) is null
             )
             {
                 return default;
@@ -165,7 +137,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
               SourceProductionContext context
             , CompilationCandidate compilationCandidate
             , UserDataVaultCandidate vaultCandidate
-            , ImmutableArray<INamedTypeSymbol> accessCandidates
+            , ImmutableArray<INamedTypeSymbol> accessorCandidates
             , string projectPath
             , bool outputSourceGenFiles
         )
@@ -173,7 +145,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             if (compilationCandidate.compilation == null
                 || vaultCandidate.syntax == null
                 || vaultCandidate.symbol == null
-                || accessCandidates.Length < 1
+                || accessorCandidates.Length < 1
             )
             {
                 return;
@@ -184,16 +156,14 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             try
             {
                 var providerSyntax = vaultCandidate.syntax;
-                var accessDeclarations = new List<UserDataAccessDefinition>(accessCandidates.Length);
+                var accessDeclarations = new List<UserDataAccessorDefinition>(accessorCandidates.Length);
                 var sb = new StringBuilder();
-                var prefix = vaultCandidate.prefix;
-                var suffix = vaultCandidate.suffix;
                 var equalityComparer = SymbolEqualityComparer.Default;
 
-                for (var i = 0; i < accessCandidates.Length; i++)
+                for (var i = 0; i < accessorCandidates.Length; i++)
                 {
-                    var symbol = accessCandidates[i];
-                    var attrib = symbol.GetAttribute(ACCESS_ATTRIBUTE);
+                    var symbol = accessorCandidates[i];
+                    var attrib = symbol.GetAttribute(ACCESSOR_ATTRIBUTE);
 
                     if (attrib is null)
                     {
@@ -208,8 +178,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         continue;
                     }
 
-                    var accessDeclaration = new UserDataAccessDefinition(
-                        context, providerSyntax, symbol, prefix, suffix, sb
+                    var accessDeclaration = new UserDataAccessorDefinition(
+                        context, providerSyntax, symbol
                     );
 
                     if (accessDeclaration.IsValid)
@@ -228,13 +198,13 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 });
 
                 var syntaxTree = providerSyntax.SyntaxTree;
-                var providerSymbol = vaultCandidate.symbol;
+                var vaultSymbol = vaultCandidate.symbol;
                 var compilation = compilationCandidate.compilation;
                 var assemblyName = compilation.Assembly.Name;
 
                 var declaration = new UserDataVaultDeclaration(
                       providerSyntax
-                    , providerSymbol
+                    , vaultSymbol
                     , accessDeclarations
                 );
 
@@ -249,13 +219,15 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         ? PrintUsingUniTask : PrintUsingAwaitable
                 );
 
+                var fileTypeName = vaultSymbol.ToFileName();
+
                 context.OutputSource(
                       outputSourceGenFiles
                     , openingSource
                     , declaration.WriteCode()
                     , closingSource
-                    , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, providerSyntax, providerSymbol.ToValidIdentifier())
-                    , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME)
+                    , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, providerSyntax, fileTypeName)
+                    , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName)
                     , providerSyntax.GetLocation()
                 );
             }
@@ -301,28 +273,36 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;");
                 p.PrintLine("using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;");
                 p.PrintLine("using NotNullAttribute = global::System.Diagnostics.CodeAnalysis.NotNullAttribute;");
+                p.PrintLine("using SaveDestination = global::EncosyTower.UserDataVaults.SaveDestination;");
+                p.PrintLine("using SerializableAttribute = global::System.SerializableAttribute;");
+                p.PrintLine("using SerializeField = global::UnityEngine.SerializeField;");
                 p.PrintLine("using SpanᐸIUserDataᐳ = global::System.Span<global::EncosyTower.UserDataVaults.IUserData>;");
+                p.PrintLine("using SpanᐸIUserDataAccessorᐳ = global::System.Span<global::EncosyTower.UserDataVaults.IUserDataAccessor>;");
                 p.PrintLine("using StackTraceHiddenAttribute = global::System.Diagnostics.StackTraceHiddenAttribute;");
                 p.PrintLine("using StringIdᐸstringᐳ = global::EncosyTower.StringIds.StringId<string>;");
                 p.PrintLine("using StringVault = global::EncosyTower.StringIds.StringVault;");
+                p.PrintLine("using SourcePriority = global::EncosyTower.UserDataVaults.SourcePriority;");
                 p.PrintLine("using ThrowHelper = global::EncosyTower.Debugging.ThrowHelper;");
                 p.PrintLine("using UnityTasks = global::EncosyTower.Tasks.UnityTasks;");
-                p.PrintLine("using UserDataStorageArgs = global::EncosyTower.UserDataVaults.UserDataStorageArgs;");
+                p.PrintLine("using UserDataStoreArgs = global::EncosyTower.UserDataVaults.UserDataStoreArgs;");
+                p.PrintLine("using UserDataVaultBase = global::EncosyTower.UserDataVaults.UserDataVaultBase;");
                 p.PrintEndLine();
 
-                p.PrintLine("using ICopyToSpanᐸIUserDataᐳ = global::EncosyTower.Collections.ICopyToSpan<global::EncosyTower.UserDataVaults.IUserData>;");
                 p.PrintLine("using IDeinitializable = global::EncosyTower.Initialization.IDeinitializable;");
                 p.PrintLine("using IDisposable = global::System.IDisposable;");
                 p.PrintLine("using IEnumerable = global::System.Collections.IEnumerable;");
                 p.PrintLine("using IEnumerator = global::System.Collections.IEnumerator;");
                 p.PrintLine("using IEnumerableᐸIUserDataᐳ = global::System.Collections.Generic.IEnumerable<global::EncosyTower.UserDataVaults.IUserData>;");
                 p.PrintLine("using IEnumeratorᐸIUserDataᐳ = global::System.Collections.Generic.IEnumerator<global::EncosyTower.UserDataVaults.IUserData>;");
+                p.PrintLine("using IEnumerableᐸIUserDataAccessorᐳ = global::System.Collections.Generic.IEnumerable<global::EncosyTower.UserDataVaults.IUserDataAccessor>;");
+                p.PrintLine("using IEnumeratorᐸIUserDataAccessorᐳ = global::System.Collections.Generic.IEnumerator<global::EncosyTower.UserDataVaults.IUserDataAccessor>;");
                 p.PrintLine("using IInitializable = global::EncosyTower.Initialization.IInitializable;");
                 p.PrintLine("using ILogger = global::EncosyTower.Logging.ILogger;");
-                p.PrintLine("using IReadOnlyListᐸIUserDataᐳ = global::System.Collections.Generic.IReadOnlyList<global::EncosyTower.UserDataVaults.IUserData>;");
-                p.PrintLine("using ITryCopyToSpanᐸIUserDataᐳ = global::EncosyTower.Collections.ITryCopyToSpan<global::EncosyTower.UserDataVaults.IUserData>;");
                 p.PrintLine("using IUserData = global::EncosyTower.UserDataVaults.IUserData;");
-                p.PrintLine("using IUserDataAccess = global::EncosyTower.UserDataVaults.IUserDataAccess;");
+                p.PrintLine("using IUserDataAccessor = global::EncosyTower.UserDataVaults.IUserDataAccessor;");
+                p.PrintLine("using IUserDataAccessorCollection = global::EncosyTower.UserDataVaults.IUserDataAccessorCollection;");
+                p.PrintLine("using IUserDataCollection = global::EncosyTower.UserDataVaults.IUserDataCollection;");
+                p.PrintLine("using IUserDataDirectory = global::EncosyTower.UserDataVaults.IUserDataDirectory;");
             }
         }
 

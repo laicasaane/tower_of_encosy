@@ -7,7 +7,5 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
     {
         public ClassDeclarationSyntax syntax;
         public INamedTypeSymbol symbol;
-        public string prefix;
-        public string suffix;
     }
 }

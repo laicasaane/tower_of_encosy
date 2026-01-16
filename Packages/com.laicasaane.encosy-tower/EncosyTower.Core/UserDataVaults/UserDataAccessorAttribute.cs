@@ -5,9 +5,9 @@ using System;
 namespace EncosyTower.UserDataVaults
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
-    public sealed class UserDataAccessAttribute : Attribute
+    public sealed class UserDataAccessorAttribute : Attribute
     {
-        public UserDataAccessAttribute(Type vaultType)
+        public UserDataAccessorAttribute(Type vaultType)
         {
             VaultType = vaultType;
         }

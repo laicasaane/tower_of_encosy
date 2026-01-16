@@ -10,17 +10,17 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         public INamedTypeSymbol Symbol { get; }
 
-        public List<UserDataAccessDefinition> AccessDefs { get; }
+        public List<UserDataAccessorDefinition> AccessorDefs { get; }
 
         public UserDataVaultDeclaration(
               ClassDeclarationSyntax syntax
             , INamedTypeSymbol symbol
-            , List<UserDataAccessDefinition> accessDefs
+            , List<UserDataAccessorDefinition> accessorDefs
         )
         {
             Syntax = syntax;
             Symbol = symbol;
-            AccessDefs = accessDefs;
+            AccessorDefs = accessorDefs;
         }
     }
 }

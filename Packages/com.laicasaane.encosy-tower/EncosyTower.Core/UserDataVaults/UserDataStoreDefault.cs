@@ -1,0 +1,140 @@
+#if UNITASK || UNITY_6000_0_OR_NEWER
+
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
+using EncosyTower.Common;
+using EncosyTower.Encryption;
+using EncosyTower.Logging;
+using EncosyTower.StringIds;
+
+namespace EncosyTower.UserDataVaults
+{
+#if UNITASK
+    using UnityTask = Cysharp.Threading.Tasks.UniTask;
+#else
+    using UnityTask = UnityEngine.Awaitable;
+#endif
+
+    public sealed class UserDataStoreDefault<TData> : UserDataStoreBase<TData>
+        where TData : IUserData, new()
+    {
+        private readonly UserDataSourceDevice<TData> _source;
+
+        private string _userId;
+        private TData _data;
+
+        public UserDataStoreDefault(
+              StringId<string> key
+            , [NotNull] StringVault stringVault
+            , [NotNull] EncryptionBase encryption
+            , ILogger logger
+            , bool ignoreEncryption
+            , [NotNull] UserDataStoreArgs args
+        )
+            : base(key, stringVault, encryption, logger, ignoreEncryption, args)
+        {
+            if (args is not Args storeArgs)
+            {
+                throw CreateArgumentException_InstanceOfType();
+            }
+
+            _userId = string.Empty;
+            _source = new UserDataSourceDevice<TData>(
+                  key
+                , stringVault
+                , encryption
+                , logger
+                , ignoreEncryption
+                , storeArgs.Source
+            );
+        }
+
+        public override string UserId
+        {
+            get => _userId;
+            set => _source.UserId = _userId = value ?? string.Empty;
+        }
+
+        public TData Data => _data;
+
+        public bool IsDataValid => Data is not null;
+
+        public override void Initialize()
+        {
+            _source.Initialize();
+        }
+
+        public override void Deinitialize()
+        {
+        }
+
+        public override void CreateData()
+        {
+            _data = new();
+        }
+
+        public override TData GetData(SourcePriority priority)
+        {
+            return Data;
+        }
+
+        public override void SetData(TData data)
+        {
+            if (data is not null)
+            {
+                _data = data;
+                _source.IsDirty = true;
+            }
+        }
+
+        public override void SetUserData(string userId, string version)
+        {
+            ref var data = ref _data;
+            data.Id = _userId = userId;
+            data.Version = version;
+        }
+
+        public override void MarkDirty(bool isDirty = true)
+        {
+            _source.IsDirty = isDirty;
+        }
+
+        public override async UnityTask LoadAsync(SourcePriority priority, CancellationToken token)
+        {
+            var dataOpt = await _source.TryLoadAsync(token);
+
+            if (dataOpt.TryGetValue(out var data))
+            {
+                _data = data;
+            }
+        }
+
+        public override async UnityTask SaveAsync(SaveDestination destination, CancellationToken token)
+        {
+            if (IsDataValid && destination.Contains(SaveDestination.Device))
+            {
+                await _source.SaveAsync(Data, token);
+            }
+        }
+
+        public override Option<TData> TryCloneData(SourcePriority priority)
+        {
+            return IsDataValid && _source.TryCloneData(GetData(priority)).TryGetValue(out var clone)
+                ? Option.Some(clone)
+                : Option.None;
+        }
+
+        public override bool TryCloneDataFromCloud()
+        {
+            return false;
+        }
+
+        private static Exception CreateArgumentException_InstanceOfType()
+            => new ArgumentException($"'args' must be an instance of '{typeof(Args).FullName}'.");
+
+        public sealed record class Args([NotNull] UserDataSourceArgs Source) : UserDataStoreArgs;
+    }
+}
+
+#endif

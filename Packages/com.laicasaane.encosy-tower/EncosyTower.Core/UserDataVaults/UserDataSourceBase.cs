@@ -16,15 +16,15 @@ namespace EncosyTower.UserDataVaults
     using UnityTask = UnityEngine.Awaitable;
 #endif
 
-    public abstract class UserDataStoreLocation<TData> : IInitializable
+    public abstract class UserDataSourceBase<TData> : IInitializable
     {
-        protected UserDataStoreLocation(
+        protected UserDataSourceBase(
               StringId<string> key
             , [NotNull] StringVault stringVault
             , [NotNull] EncryptionBase encryption
             , ILogger logger
             , bool ignoreEncryption
-            , UserDataStorageArgs _
+            , UserDataSourceArgs _
         )
         {
             Key = key;

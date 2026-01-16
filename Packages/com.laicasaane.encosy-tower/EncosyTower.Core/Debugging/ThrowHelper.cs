@@ -18,7 +18,8 @@ namespace EncosyTower.Debugging
         }
 
         [DoesNotReturn]
-        public static void ThrowInvalidOperationException_EnumFailedVersion() => throw new InvalidOperationException("Collection was modified after the enumerator was instantiated.");
+        public static void ThrowInvalidOperationException_EnumFailedVersion()
+            => throw new InvalidOperationException("Collection was modified after the enumerator was instantiated.");
 
         [DoesNotReturn]
         public static void ThrowInvalidOperationException_EnumOpCantHappen()
@@ -50,6 +51,15 @@ namespace EncosyTower.Debugging
 
         public static IndexOutOfRangeException CreateIndexOutOfRangeException_Collection()
             => new("Index was out of range. Must be non-negative and less than the size of the collection.");
+
+        public static InvalidOperationException CreateInvalidOperationException_CollectionNotCreated()
+            => new("Collection was not created.");
+
+        public static ArgumentException CreateArgumentException_CollectionNotCreated(string paramName)
+            => new("Collection was not created.", paramName);
+
+        public static ArgumentNullException CreateArgumentNullException(string paramName)
+            => new(paramName);
 
         public static ArgumentOutOfRangeException CreateArgumentOutOfRangeException_LengthNegative()
             => new("length", "The value must be non-negative.");

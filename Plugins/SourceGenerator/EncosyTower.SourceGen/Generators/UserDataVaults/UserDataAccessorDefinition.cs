@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -9,63 +7,68 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 {
     using static Helpers;
 
-    internal class UserDataAccessDefinition
+    internal class UserDataAccessorDefinition
     {
         public bool IsValid { get; }
 
         public INamedTypeSymbol Symbol { get; }
 
+        public string FullTypeName { get; }
+
         public string FieldName { get; }
 
         public List<ParamDefinition> Args { get; }
 
-        public UserDataAccessDefinition(
+        public UserDataAccessorDefinition(
               SourceProductionContext context
             , ClassDeclarationSyntax providerSyntax
             , INamedTypeSymbol symbol
-            , string prefix
-            , string suffix
-            , StringBuilder sb
         )
         {
             Symbol = symbol;
+            FullTypeName = symbol.ToFullName();
 
-            var className = symbol.Name;
-            var classNameSpan = className.AsSpan();
-            var classNameLength = classNameSpan.Length;
-
-            sb.Clear();
-            sb.Append(className);
-
-            if (string.IsNullOrEmpty(prefix) == false)
+            foreach (var attribute in symbol.GetAttributes())
             {
-                var index = classNameSpan.IndexOf(prefix.AsSpan(), StringComparison.Ordinal);
+                var attributeName = attribute.AttributeClass?.Name ?? string.Empty;
 
-                if (index == 0)
+                if (attributeName is not ("LabelAttribute" or "DisplayNameAttribute"))
                 {
-                    sb.Remove(0, prefix.Length);
-                    classNameLength -= prefix.Length;
+                    continue;
+                }
+
+                if (attribute.ConstructorArguments.Length > 0)
+                {
+                    var arg = attribute.ConstructorArguments[0];
+
+                    if (arg.Kind == TypedConstantKind.Primitive && arg.Value?.ToString() is string dn)
+                    {
+                        FieldName = dn;
+                        goto NEXT;
+                    }
+                }
+                else if (attribute.NamedArguments.Length > 0)
+                {
+                    foreach (var arg in attribute.NamedArguments)
+                    {
+                        if (arg.Key is "Name" or "DisplayName"
+                            && arg.Value.Kind == TypedConstantKind.Primitive
+                            && arg.Value.Value?.ToString() is string dn
+                        )
+                        {
+                            FieldName = dn;
+                            goto NEXT;
+                        }
+                    }
                 }
             }
 
-            if (string.IsNullOrEmpty(suffix))
+            NEXT:
+
+            if (string.IsNullOrEmpty(FieldName))
             {
-                suffix = "Access";
+                FieldName = symbol.Name;
             }
-
-            if (string.IsNullOrEmpty(suffix) == false)
-            {
-                var index = classNameSpan.IndexOf(suffix.AsSpan(), StringComparison.Ordinal);
-                var lastIndex = classNameLength - suffix.Length;
-
-                if (index == lastIndex)
-                {
-                    sb.Remove(lastIndex, suffix.Length);
-                }
-            }
-
-            FieldName = sb.ToString();
-            sb.Clear();
 
             var constructors = symbol.Constructors;
             var constructorIndex = -1;
@@ -87,9 +90,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 context.ReportDiagnostic(
                       DiagnosticDescriptors.MustHaveOnlyOneConstructor
                     , providerSyntax
-                    , className
+                    , symbol.Name
                 );
-                return;
             }
             else
             {
@@ -110,7 +112,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         context.ReportDiagnostic(
                               DiagnosticDescriptors.ConstructorContainsUnsupportedType
                             , providerSyntax
-                            , className
+                            , symbol.Name
                             , param.Name
                         );
                     }
@@ -123,19 +125,19 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
     internal readonly struct ParamDefinition
     {
-        public readonly StorageDefinition StorageDef;
+        public readonly StoreDefinition StoreDef;
         public readonly ITypeSymbol Type;
 
         public ParamDefinition(ITypeSymbol type, ITypeSymbol argType)
         {
             if (argType != null)
             {
-                StorageDef = new StorageDefinition(type, argType);
+                StoreDef = new StoreDefinition(type, argType);
                 Type = default;
             }
             else
             {
-                StorageDef = default;
+                StoreDef = default;
                 Type = type;
             }
         }
@@ -150,7 +152,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
 
             if (type is INamedTypeSymbol namedType
-                && namedType.TryGetGenericType(USER_DATA_STORAGE_BASE, 1, out var baseType)
+                && namedType.TryGetGenericType(USER_DATA_STORE_BASE, 1, out var baseType)
                 && baseType.TypeArguments.Length == 1
                 && baseType.TypeArguments[0].IsAbstract == false
             )
@@ -159,31 +161,39 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 return true;
             }
 
-            return type.Interfaces.DoesMatchInterface(IUSER_DATA_ACCESS)
-                || type.AllInterfaces.DoesMatchInterface(IUSER_DATA_ACCESS);
+            return type.Interfaces.DoesMatchInterface(IUSER_DATA_ACCESSOR)
+                || type.AllInterfaces.DoesMatchInterface(IUSER_DATA_ACCESSOR);
         }
     }
 
-    internal readonly struct StorageDefinition : IEquatable<StorageDefinition>
+    internal readonly struct StoreDefinition : IEquatable<StoreDefinition>
     {
-        public readonly ITypeSymbol StorageType;
+        public readonly ITypeSymbol StoreType;
         public readonly ITypeSymbol DataType;
+        public readonly string FullStoreTypeName;
+        public readonly string FullDataTypeName;
+        public readonly string DataFieldName;
+        public readonly string DataArgName;
 
-        public bool IsValid => StorageType != null && DataType != null;
+        public bool IsValid => StoreType != null && DataType != null;
 
-        public StorageDefinition(ITypeSymbol storageType, ITypeSymbol dataType)
+        public StoreDefinition(ITypeSymbol storeType, ITypeSymbol dataType)
         {
-            StorageType = storageType;
+            StoreType = storeType;
             DataType = dataType;
+            FullStoreTypeName = storeType.ToFullName();
+            FullDataTypeName = dataType.ToFullName();
+            DataFieldName = dataType.Name.ToPrivateFieldName();
+            DataArgName = dataType.Name.ToArgumentName();
         }
 
-        public bool Equals(StorageDefinition other)
-            => SymbolEqualityComparer.Default.Equals(StorageType, other.StorageType);
+        public bool Equals(StoreDefinition other)
+            => SymbolEqualityComparer.Default.Equals(StoreType, other.StoreType);
 
         public override bool Equals(object obj)
-            => obj is StorageDefinition other && Equals(other);
+            => obj is StoreDefinition other && Equals(other);
 
         public override int GetHashCode()
-            => SymbolEqualityComparer.Default.GetHashCode(StorageType);
+            => SymbolEqualityComparer.Default.GetHashCode(StoreType);
     }
 }

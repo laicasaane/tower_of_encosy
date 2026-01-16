@@ -2,7 +2,7 @@
 
 namespace EncosyTower.UserDataVaults
 {
-    public abstract class UserDataStorageArgs { }
+    public abstract record class UserDataStoreArgs();
 }
 
 #endif

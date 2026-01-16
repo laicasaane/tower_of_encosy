@@ -307,6 +307,11 @@ namespace EncosyTower.SourceGen.Generators
             return $"{FIELD_PREFIX_UNDERSCORE}{MakeFirstCharLowerCase(propertyName.AsSpan())}";
         }
 
+        public static string ToArgumentName(this string propertyName)
+        {
+            return $"{MakeFirstCharLowerCase(propertyName.AsSpan())}";
+        }
+
         public static string MakeFirstCharUpperCase(this ReadOnlySpan<char> value)
         {
             return $"{char.ToUpper(value[0])}{value.Slice(1).ToString()}";
