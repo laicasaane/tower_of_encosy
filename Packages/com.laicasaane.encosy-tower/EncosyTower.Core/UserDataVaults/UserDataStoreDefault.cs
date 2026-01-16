@@ -17,9 +17,10 @@ namespace EncosyTower.UserDataVaults
 #endif
 
     public sealed class UserDataStoreDefault<TData> : UserDataStoreBase<TData>
-        where TData : IUserData, new()
+        where TData : IUserData
     {
         private readonly UserDataSourceDevice<TData> _source;
+        private readonly Func<TData> _createDataFunc;
 
         private string _userId;
         private TData _data;
@@ -40,13 +41,14 @@ namespace EncosyTower.UserDataVaults
             }
 
             _userId = string.Empty;
+            _createDataFunc = storeArgs.CreateDataFunc;
             _source = new UserDataSourceDevice<TData>(
                   key
                 , stringVault
                 , encryption
                 , logger
                 , ignoreEncryption
-                , storeArgs.Source
+                , storeArgs.SourceArgs
             );
         }
 
@@ -71,12 +73,14 @@ namespace EncosyTower.UserDataVaults
 
         public override void CreateData()
         {
-            _data = new();
+            var data = _createDataFunc();
+            data.Id = _userId ?? string.Empty;
+            _data = data;
         }
 
         public override TData GetData(SourcePriority priority)
         {
-            return Data;
+            return _data;
         }
 
         public override void SetData(TData data)
@@ -91,8 +95,8 @@ namespace EncosyTower.UserDataVaults
         public override void SetUserData(string userId, string version)
         {
             ref var data = ref _data;
-            data.Id = _userId = userId;
-            data.Version = version;
+            data.Id = _userId = userId ?? string.Empty;
+            data.Version = version ?? string.Empty;
         }
 
         public override void MarkDirty(bool isDirty = true)
@@ -133,7 +137,10 @@ namespace EncosyTower.UserDataVaults
         private static Exception CreateArgumentException_InstanceOfType()
             => new ArgumentException($"'args' must be an instance of '{typeof(Args).FullName}'.");
 
-        public sealed record class Args([NotNull] UserDataSourceArgs Source) : UserDataStoreArgs;
+        public sealed record class Args(
+              [NotNull] Func<TData> CreateDataFunc
+            , [NotNull] UserDataSourceArgs SourceArgs
+        ) : UserDataStoreArgs;
     }
 }
 

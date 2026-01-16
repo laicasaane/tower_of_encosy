@@ -17,6 +17,7 @@ namespace EncosyTower.UserDataVaults
 #endif
 
     public abstract class UserDataSourceBase<TData> : IInitializable
+        where TData : IUserData
     {
         protected UserDataSourceBase(
               StringId<string> key

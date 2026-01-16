@@ -24,6 +24,7 @@ namespace EncosyTower.UserDataVaults
 #endif
 
     public class UserDataSourceDevice<TData> : UserDataSourceBase<TData>
+        where TData : IUserData
     {
         private readonly string _directoryPath;
         private readonly string _fileExtension;

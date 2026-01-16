@@ -17,6 +17,7 @@ namespace EncosyTower.UserDataVaults
 #endif
 
     public abstract class UserDataStoreBase<TData> : IInitializable, IDeinitializable
+        where TData : IUserData
     {
 #pragma warning disable IDE0060 // Remove unused parameter
         protected UserDataStoreBase(
