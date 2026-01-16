@@ -100,7 +100,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .PrintEndLine(" // ReadOnlyAccessors");
             p.OpenScope();
             {
-                WriteReadOnlyAccessors(ref p, accessorDefs);
+                WriteReadOnlyAccessors(ref p);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -759,7 +759,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private void WriteReadOnlyAccessors(ref Printer p, List<UserDataAccessorDefinition> defs)
+        private void WriteReadOnlyAccessors(ref Printer p)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("public partial struct AccessorEnumerator : IEnumeratorᐸIUserDataAccessorᐳ");
@@ -810,6 +810,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private void WriteDataDirectory(ref Printer p, ReadOnlySpan<StoreDefinition> defs)
         {
+            var generateCreateMethods = new List<StoreDefinition>(defs.Length);
+
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("internal partial class DataDirectory : IUserDataDirectory, IDisposable");
             p.OpenScope();
@@ -831,7 +833,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
                     p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
                     p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
-                    p.PrintBeginLine(", Ids ids");
+                    p.PrintLine(", Ids ids");
                     p.PrintLine(", string userId");
                 }
                 p = p.DecreasedIndent();
@@ -847,7 +849,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintEndLine();
 
                     p.PrintLine("bool ignoreEncryption = false;");
-                    p.PrintBeginLine(STORE_ARGS).PrintEndLine(" args = null;");
                     p.PrintEndLine();
 
                     p.Print("#if !FORCE_USER_DATA_ENCRYPTION").PrintEndLine();
@@ -857,12 +858,53 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     foreach (var def in defs)
                     {
+                        var nonDefaultConstructorCount = 0;
+                        var defaultConstructorCount = 0;
+
+                        foreach (var member in def.DataType.GetMembers())
+                        {
+                            if (member is not IMethodSymbol method)
+                            {
+                                continue;
+                            }
+
+                            if (method.MethodKind == MethodKind.Constructor)
+                            {
+                                if (method.Parameters.Length > 0)
+                                {
+                                    nonDefaultConstructorCount++;
+                                }
+                                else
+                                {
+                                    defaultConstructorCount++;
+                                }
+                            }
+                        }
+
+                        var hasDefaultConstructor = defaultConstructorCount > 0 || nonDefaultConstructorCount < 1;
+
+                        if (hasDefaultConstructor == false)
+                        {
+                            generateCreateMethods.Add(def);
+                        }
+
                         p.OpenScope();
                         {
-                            p.PrintLine("args = null;");
-                            p.PrintBeginLine("GetStoreArgs<")
+                            p.PrintBeginLine("global::System.Func<").Print(def.FullDataTypeName).Print("> ")
+                                .Print("createFunc = ");
+
+                            if (hasDefaultConstructor)
+                            {
+                                p.Print("static () => new ").Print(def.FullDataTypeName).PrintEndLine("();");
+                            }
+                            else
+                            {
+                                p.Print("Create").Print(def.DataType.Name).PrintEndLine(";");
+                            }
+
+                            p.PrintBeginLine("var args = GetStoreArgs<")
                                 .Print(def.FullDataTypeName).Print(", ").Print(def.FullStoreTypeName)
-                                .PrintEndLine(">(ref args);");
+                                .PrintEndLine(">(createFunc);");
 
                             p.PrintBeginLine(def.DataType.Name).Print(" = new(")
                                 .Print("_ids.").Print(def.DataType.Name)
@@ -915,11 +957,18 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("static partial void GetIgnoreEncryption(ref bool ignoreEncryption);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine("static partial void GetStoreArgs<TData, TStore>(ref ")
-                    .Print(STORE_ARGS).PrintEndLine(" args)");
+                p.PrintBeginLine("private static partial ").Print(STORE_ARGS)
+                    .PrintEndLine(" GetStoreArgs<TData, TStore>(global::System.Func<TData> createDataFunc)");
                 p.WithIncreasedIndent().PrintLine("where TData : IUserData");
                 p.WithIncreasedIndent().PrintBeginLine("where TStore : ").Print(USER_DATA_STORE_BASE).PrintEndLine("TData>;");
                 p.PrintEndLine();
+
+                foreach (var def in generateCreateMethods)
+                {
+                    p.PrintBeginLine("private static partial ").Print(def.FullDataTypeName)
+                        .Print(" Create").Print(def.DataType.Name).PrintEndLine("();");
+                    p.PrintEndLine();
+                }
 
                 p.PrintLine("public void Initialize()");
                 p.OpenScope();

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using EncosyTower.Initialization;
 using EncosyTower.UserDataVaults;
 
@@ -79,10 +80,11 @@ namespace EncosyTower.Tests.UserDataVaults
             {
             }
 
-            static partial void GetStoreArgs<TData, TStorage>(ref UserDataStoreArgs storageArgs)
+            private static partial UserDataStoreArgs GetStoreArgs<TData, TStore>(Func<TData> createDataFunc)
                 where TData : IUserData
-                where TStorage : UserDataStoreBase<TData>
+                where TStore : UserDataStoreBase<TData>
             {
+                return default;
             }
         }
     }
@@ -96,10 +98,11 @@ namespace EncosyTower.Tests.UserDataVaults
             {
             }
 
-            static partial void GetStoreArgs<TData, TStorage>(ref UserDataStoreArgs storageArgs)
+            private static partial UserDataStoreArgs GetStoreArgs<TData, TStore>(Func<TData> createDataFunc)
                 where TData : IUserData
-                where TStorage : UserDataStoreBase<TData>
+                where TStore : UserDataStoreBase<TData>
             {
+                return default;
             }
         }
     }
