@@ -5,7 +5,8 @@ using EncosyTower.Collections;
 
 namespace EncosyTower.UserDataVaults
 {
-    public interface IUserDataCollection : IReadOnlyList<IUserData>, ICopyToSpan<IUserData>, ITryCopyToSpan<IUserData>
+    public interface IUserDataCollection : IReadOnlyList<IUserData>
+        , ICopyToSpan<IUserData>, ITryCopyToSpan<IUserData>
     {
     }
 }

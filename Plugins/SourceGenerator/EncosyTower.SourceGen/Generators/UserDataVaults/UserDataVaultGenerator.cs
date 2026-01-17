@@ -276,6 +276,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("using SaveDestination = global::EncosyTower.UserDataVaults.SaveDestination;");
                 p.PrintLine("using SerializableAttribute = global::System.SerializableAttribute;");
                 p.PrintLine("using SerializeField = global::UnityEngine.SerializeField;");
+                p.PrintLine("using SpanᐸStringIdᐸstringᐳᐳ = global::System.Span<global::EncosyTower.StringIds.StringId<string>>;");
                 p.PrintLine("using SpanᐸIUserDataᐳ = global::System.Span<global::EncosyTower.UserDataVaults.IUserData>;");
                 p.PrintLine("using SpanᐸIUserDataAccessorᐳ = global::System.Span<global::EncosyTower.UserDataVaults.IUserDataAccessor>;");
                 p.PrintLine("using StackTraceHiddenAttribute = global::System.Diagnostics.StackTraceHiddenAttribute;");
@@ -292,6 +293,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("using IDisposable = global::System.IDisposable;");
                 p.PrintLine("using IEnumerable = global::System.Collections.IEnumerable;");
                 p.PrintLine("using IEnumerator = global::System.Collections.IEnumerator;");
+                p.PrintLine("using IEnumerableᐸStringIdᐸstringᐳᐳ = global::System.Collections.Generic.IEnumerable<global::EncosyTower.StringIds.StringId<string>>;");
+                p.PrintLine("using IEnumeratorᐸStringIdᐸstringᐳᐳ = global::System.Collections.Generic.IEnumerator<global::EncosyTower.StringIds.StringId<string>>;");
                 p.PrintLine("using IEnumerableᐸIUserDataᐳ = global::System.Collections.Generic.IEnumerable<global::EncosyTower.UserDataVaults.IUserData>;");
                 p.PrintLine("using IEnumeratorᐸIUserDataᐳ = global::System.Collections.Generic.IEnumerator<global::EncosyTower.UserDataVaults.IUserData>;");
                 p.PrintLine("using IEnumerableᐸIUserDataAccessorᐳ = global::System.Collections.Generic.IEnumerable<global::EncosyTower.UserDataVaults.IUserDataAccessor>;");

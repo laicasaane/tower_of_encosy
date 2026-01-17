@@ -40,19 +40,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            p.Print("#region IDS").PrintEndLine();
-            p.Print("#endregion").PrintEndLine();
-            p.PrintEndLine();
-
-            p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
-                .PrintEndLine(" // Ids");
-            p.OpenScope();
-            {
-                WriteIds(ref p, orderedStoreDefs);
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-
             p.Print("#region VAULT").PrintEndLine();
             p.Print("#endregion ==").PrintEndLine();
             p.PrintEndLine();
@@ -79,28 +66,41 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.CloseScope();
             p.PrintEndLine();
 
-            p.Print("#region ACCESSORS").PrintEndLine();
-            p.Print("#endregion ======").PrintEndLine();
+            p.Print("#region ID COLLECTION").PrintEndLine();
+            p.Print("#endregion").PrintEndLine();
             p.PrintEndLine();
 
             p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
-                .PrintEndLine(" // Accessors");
+                .PrintEndLine(" // IdCollection");
             p.OpenScope();
             {
-                WriteAccessors(ref p, accessorDefs);
+                WriteIdCollection(ref p, orderedStoreDefs);
             }
             p.CloseScope();
             p.PrintEndLine();
 
-            p.Print("#region READ-ONLY ACCESSORS").PrintEndLine();
+            p.Print("#region ACCESSOR COLLECTION").PrintEndLine();
             p.Print("#endregion ================").PrintEndLine();
             p.PrintEndLine();
 
             p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
-                .PrintEndLine(" // ReadOnlyAccessors");
+                .PrintEndLine(" // AccessorCollection");
             p.OpenScope();
             {
-                WriteReadOnlyAccessors(ref p, accessorDefs);
+                WriteAccessorCollection(ref p, accessorDefs);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.Print("#region READ-ONLY ACCESSOR COLLECTION").PrintEndLine();
+            p.Print("#endregion ==========================").PrintEndLine();
+            p.PrintEndLine();
+
+            p.PrintBeginLine(staticKeyword).Print("partial class ").Print(Syntax.Identifier.Text)
+                .PrintEndLine(" // ReadOnlyAccessorCollection");
+            p.OpenScope();
+            {
+                WriteReadOnlyAccessorCollection(ref p, accessorDefs);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -161,41 +161,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             return p.Result;
         }
 
-        private static void WriteIds(ref Printer p, ReadOnlySpan<StoreDefinition> defs)
-        {
-            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("public readonly partial struct Ids : IIsCreated");
-            p.OpenScope();
-            {
-
-                foreach (var def in defs)
-                {
-                    p.PrintBeginLine("public readonly ").Print(STRING_ID).Print(" ").Print(def.DataType.Name)
-                        .PrintEndLine(";");
-                }
-
-                p.PrintLine("internal Ids([NotNull] StringVault stringVault)");
-                p.OpenScope();
-                {
-                    foreach (var def in defs)
-                    {
-                        var name = def.DataType.Name;
-
-                        p.PrintBeginLine(name)
-                            .Print(" = stringVault.GetOrMakeId(nameof(").Print(name).PrintEndLine("));");
-                    }
-
-                    p.PrintLine("IsCreated = true;");
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine("public bool IsCreated { get; }");
-            }
-            p.CloseScope();
-            p.PrintEndLine();
-        }
-
         private static void WriteVault(ref Printer p)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
@@ -203,8 +168,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.OpenScope();
             {
                 p.PrintLine("internal readonly DataDirectory _directory;");
-                p.PrintLine("internal readonly Accessors _accessors;");
-                p.PrintLine("internal readonly Ids _ids;");
+                p.PrintLine("internal readonly AccessorCollection _accessors;");
+                p.PrintLine("internal readonly IdCollection _ids;");
                 p.PrintEndLine();
 
                 p.PrintLine("internal Vault(");
@@ -227,7 +192,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public Ids Ids");
+                p.PrintLine("public IdCollection Ids");
                 p.OpenScope();
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
@@ -236,7 +201,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public ReadOnlyAccessors Accessors");
+                p.PrintLine("public ReadOnlyAccessorCollection Accessors");
                 p.OpenScope();
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
@@ -335,7 +300,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public Ids Ids");
+                p.PrintLine("public IdCollection Ids");
                 p.OpenScope();
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
@@ -344,7 +309,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public ReadOnlyAccessors Accessors");
+                p.PrintLine("public ReadOnlyAccessorCollection Accessors");
                 p.OpenScope();
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
@@ -357,7 +322,238 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private static void WriteAccessors(ref Printer p, List<UserDataAccessorDefinition> defs)
+        private static void WriteIdCollection(ref Printer p, ReadOnlySpan<StoreDefinition> defs)
+        {
+            p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+            p.PrintLine("public readonly partial struct IdCollection : IUserDataIdCollection, IIsCreated");
+            p.OpenScope();
+            {
+                foreach (var def in defs)
+                {
+                    p.PrintBeginLine("public readonly StringIdᐸstringᐳ ").Print(def.DataType.Name)
+                        .PrintEndLine(";");
+                }
+
+                p.PrintLine("internal IdCollection([NotNull] StringVault stringVault)");
+                p.OpenScope();
+                {
+                    foreach (var def in defs)
+                    {
+                        var name = def.DataType.Name;
+
+                        p.PrintBeginLine(name)
+                            .Print(" = stringVault.GetOrMakeId(nameof(").Print(name).PrintEndLine("));");
+                    }
+
+                    p.PrintLine("IsCreated = true;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public StringIdᐸstringᐳ this[int index] => index switch");
+                p.OpenScope();
+                {
+                    for (var i = 0; i < defs.Length; i++)
+                    {
+                        p.PrintBeginLine().Print(i).Print(" => ").Print(defs[i].DataType.Name).PrintEndLine(",");
+                    }
+
+                    p.PrintLine("_ => throw ThrowHelper.CreateIndexOutOfRangeException_Collection()");
+                }
+                p.CloseScope("};");
+                p.PrintEndLine();
+
+                p.PrintLine("public bool IsCreated { get; }");
+                p.PrintEndLine();
+
+                p.PrintLine("public int Count");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintBeginLine("get => ").Print(defs.Length).PrintEndLine(";");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public Enumerator GetEnumerator()");
+                p.WithIncreasedIndent().PrintLine("=> new Enumerator(this);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("IEnumeratorᐸStringIdᐸstringᐳᐳ IEnumerableᐸStringIdᐸstringᐳᐳ.GetEnumerator()");
+                p.WithIncreasedIndent().PrintLine("=> GetEnumerator();");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("IEnumerator IEnumerable.GetEnumerator()");
+                p.WithIncreasedIndent().PrintLine("=> GetEnumerator();");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public void CopyTo(SpanᐸStringIdᐸstringᐳᐳ destination)");
+                p.WithIncreasedIndent().PrintLine("=> CopyTo(0, destination);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public void CopyTo(SpanᐸStringIdᐸstringᐳᐳ destination, int length)");
+                p.WithIncreasedIndent().PrintLine("=> CopyTo(0, destination, length);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public void CopyTo(int sourceStartIndex, SpanᐸStringIdᐸstringᐳᐳ destination)");
+                p.WithIncreasedIndent().PrintLine("=> CopyTo(sourceStartIndex, destination, destination.Length);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public void CopyTo(int sourceStartIndex, SpanᐸStringIdᐸstringᐳᐳ destination, int length)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var count = Count - sourceStartIndex;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (length < 0)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("throw ThrowHelper.CreateArgumentOutOfRangeException_LengthNegative();");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (count < length)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("throw ThrowHelper.CreateArgumentException_SourceStartIndex_Length();");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (destination.Length < length)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("throw ThrowHelper.CreateArgumentException_DestinationTooShort();");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("destination = destination[..length];");
+                    p.PrintEndLine();
+
+                    p.PrintLine("for (int i = 0; i < length; i++)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("destination[i] = this[sourceStartIndex + i];");
+                    }
+                    p.CloseScope();
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public bool TryCopyTo(SpanᐸStringIdᐸstringᐳᐳ destination)");
+                p.WithIncreasedIndent().PrintLine("=> TryCopyTo(0, destination);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public bool TryCopyTo(SpanᐸStringIdᐸstringᐳᐳ destination, int length)");
+                p.WithIncreasedIndent().PrintLine("=> TryCopyTo(0, destination, length);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public bool TryCopyTo(int sourceStartIndex, SpanᐸStringIdᐸstringᐳᐳ destination)");
+                p.WithIncreasedIndent().PrintLine("=> TryCopyTo(sourceStartIndex, destination, destination.Length);");
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine("public bool TryCopyTo(int sourceStartIndex, SpanᐸStringIdᐸstringᐳᐳ destination, int length)");
+                p.OpenScope();
+                {
+                    p.PrintLine("var count = Count - sourceStartIndex;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (length < 0 || count < length || destination.Length < length)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("destination = destination[..length];");
+                    p.PrintEndLine();
+
+                    p.PrintLine("for (int i = 0; i < length; i++)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("destination[i] = this[sourceStartIndex + i];");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("return true;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                p.PrintLine("public struct Enumerator : IEnumeratorᐸStringIdᐸstringᐳᐳ");
+                p.OpenScope();
+                {
+                    p.PrintLine("private readonly IdCollection _source;");
+                    p.PrintLine("private int _index;");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("public Enumerator(IdCollection source)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("if (source.IsCreated == false)");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("throw ThrowHelper.CreateArgumentException_CollectionNotCreated(\"source\");");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+
+                        p.PrintLine("_source = source;");
+                        p.PrintLine("_index = -1;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("public readonly StringIdᐸstringᐳ Current => _source[_index];");
+                    p.PrintEndLine();
+
+                    p.PrintLine("readonly object IEnumerator.Current => Current;");
+                    p.PrintEndLine();
+
+                    p.PrintLine("public void Dispose() { }");
+                    p.PrintEndLine();
+
+                    p.PrintLine("public bool MoveNext()");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("_index++;");
+                        p.PrintLine("return (uint)_index < (uint)_source.Count;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("public void Reset()");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("_index = -1;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
+                p.CloseScope();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private static void WriteAccessorCollection(ref Printer p, List<UserDataAccessorDefinition> defs)
         {
             var typeSet = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
             var queue = new Queue<UserDataAccessorDefinition>(defs.Count);
@@ -369,10 +565,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
 
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("internal partial class Accessors : IUserDataAccessorCollection");
+            p.PrintLine("internal partial class AccessorCollection : IUserDataAccessorCollection");
             p.OpenScope();
             {
-                p.PrintLine("internal Accessors([NotNull] DataDirectory directory)");
+                p.PrintLine("internal AccessorCollection([NotNull] DataDirectory directory)");
                 p.OpenScope();
                 {
                     var loopBreakCondition = defs.Count;
@@ -423,26 +619,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                foreach (var def in defs)
-                {
-                    var typeName = def.FullTypeName;
-                    var fieldName = def.FieldName;
-
-                    p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                    p.PrintBeginLine("public ").Print(typeName).Print(" ")
-                        .Print(fieldName).PrintEndLine(" { get; }")
-                        .PrintEndLine();
-                }
-
-                p.PrintLine("public int Count");
-                p.OpenScope();
-                {
-                    p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("get => ").Print(defs.Count).PrintEndLine(";");
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
                 p.PrintLine("public IUserDataAccessor this[int index] => index switch");
                 p.OpenScope();
                 {
@@ -455,6 +631,26 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 }
                 p.CloseScope("};");
                 p.PrintEndLine();
+
+                p.PrintLine("public int Count");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintBeginLine("get => ").Print(defs.Count).PrintEndLine(";");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                foreach (var def in defs)
+                {
+                    var typeName = def.FullTypeName;
+                    var fieldName = def.FieldName;
+
+                    p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine("public ").Print(typeName).Print(" ")
+                        .Print(fieldName).PrintEndLine(" { get; }")
+                        .PrintEndLine();
+                }
 
                 p.PrintLine("public void Initialize()");
                 p.OpenScope();
@@ -486,7 +682,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public AccessorEnumerator GetEnumerator()");
-                p.WithIncreasedIndent().PrintLine("=> new AccessorEnumerator(new ReadOnlyAccessors(this));");
+                p.WithIncreasedIndent().PrintLine("=> new AccessorEnumerator(new ReadOnlyAccessorCollection(this));");
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING);
@@ -603,10 +799,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintLine("public ReadOnlyAccessors AsReadOnly()");
+                p.PrintLine("public ReadOnlyAccessorCollection AsReadOnly()");
                 p.OpenScope();
                 {
-                    p.PrintLine("return new ReadOnlyAccessors(this);");
+                    p.PrintLine("return new ReadOnlyAccessorCollection(this);");
                 }
                 p.CloseScope();
             }
@@ -667,17 +863,18 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
         }
 
-        private void WriteReadOnlyAccessors(ref Printer p, List<UserDataAccessorDefinition> defs)
+        private void WriteReadOnlyAccessorCollection(ref Printer p, List<UserDataAccessorDefinition> defs)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("public readonly partial struct ReadOnlyAccessors : IUserDataAccessorReadOnlyCollection, IIsCreated");
+            p.PrintBeginLine("public readonly partial struct ReadOnlyAccessorCollection")
+                .PrintEndLine(" : IUserDataAccessorReadOnlyCollection, IIsCreated");
             p.OpenScope();
             {
-                p.PrintLine("internal readonly Accessors _accessors;");
+                p.PrintLine("internal readonly AccessorCollection _accessors;");
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintLine("internal ReadOnlyAccessors([NotNull] Accessors accessors)");
+                p.PrintLine("internal ReadOnlyAccessorCollection([NotNull] AccessorCollection accessors)");
                 p.OpenScope();
                 {
                     p.PrintLine("_accessors = accessors;");
@@ -690,6 +887,28 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintLine("get => _accessors != null;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public IUserDataAccessor this[int index] => index switch");
+                p.OpenScope();
+                {
+                    for (var i = 0; i < defs.Count; i++)
+                    {
+                        p.PrintBeginLine().Print(i).Print(" => ").Print(defs[i].FieldName).PrintEndLine(",");
+                    }
+
+                    p.PrintLine("_ => throw ThrowHelper.CreateIndexOutOfRangeException_Collection()");
+                }
+                p.CloseScope("};");
+                p.PrintEndLine();
+
+                p.PrintLine("public int Count");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintBeginLine("get => ").Print(defs.Count).PrintEndLine(";");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -709,28 +928,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.CloseScope();
                     p.PrintEndLine();
                 }
-
-                p.PrintLine("public int Count");
-                p.OpenScope();
-                {
-                    p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("get => ").Print(defs.Count).PrintEndLine(";");
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine("public IUserDataAccessor this[int index] => index switch");
-                p.OpenScope();
-                {
-                    for (var i = 0; i < defs.Count; i++)
-                    {
-                        p.PrintBeginLine().Print(i).Print(" => ").Print(defs[i].FieldName).PrintEndLine(",");
-                    }
-
-                    p.PrintLine("_ => throw ThrowHelper.CreateIndexOutOfRangeException_Collection()");
-                }
-                p.CloseScope("};");
-                p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public AccessorEnumerator GetEnumerator()");
@@ -796,13 +993,21 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintLine("public partial struct AccessorEnumerator : IEnumeratorᐸIUserDataAccessorᐳ");
             p.OpenScope();
             {
-                p.PrintLine("private readonly ReadOnlyAccessors _source;");
+                p.PrintLine("private readonly ReadOnlyAccessorCollection _source;");
                 p.PrintLine("private int _index;");
                 p.PrintEndLine();
 
-                p.PrintLine("internal AccessorEnumerator([NotNull] ReadOnlyAccessors source)");
+                p.PrintLine("internal AccessorEnumerator([NotNull] ReadOnlyAccessorCollection source)");
                 p.OpenScope();
                 {
+                    p.PrintLine("if (source.IsCreated == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("throw ThrowHelper.CreateArgumentException_CollectionNotCreated(\"source\");");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
                     p.PrintLine("_source = source;");
                     p.PrintLine("_index = -1;");
                 }
@@ -851,7 +1056,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintBeginLine("private readonly ").Print(ENCRYPTION_BASE).PrintEndLine(" _encryption;");
                 p.PrintBeginLine("private readonly ").Print(ILOGGER).PrintEndLine(" _logger;");
                 p.PrintBeginLine("private readonly ").Print(TASK_ARRAY_POOL).PrintEndLine(" _taskArrayPool;");
-                p.PrintLine("private readonly Ids _ids;");
+                p.PrintLine("private readonly IdCollection _ids;");
                 p.PrintEndLine();
 
                 p.PrintLine("private string _userId;");
@@ -864,7 +1069,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
                     p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
                     p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
-                    p.PrintLine(", Ids ids");
+                    p.PrintLine(", IdCollection ids");
                     p.PrintLine(", string userId");
                 }
                 p = p.DecreasedIndent();
@@ -1276,11 +1481,11 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintLine("public partial struct DataCollection : IUserDataCollection, IIsCreated");
             p.OpenScope();
             {
-                p.PrintLine("[SerializeField] private string _userId;");
+                p.PrintLine("[SerializeField] internal string _userId;");
 
                 foreach (var def in defs)
                 {
-                    p.PrintBeginLine("[SerializeField] private ").Print(def.FullDataTypeName).Print(" ")
+                    p.PrintBeginLine("[SerializeField] internal ").Print(def.FullDataTypeName).Print(" ")
                         .Print(def.DataFieldName).PrintEndLine(";");
                 }
 
@@ -1622,6 +1827,14 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintLine("public Enumerator([NotNull] DataCollection source)");
                     p.OpenScope();
                     {
+                        p.PrintLine("if (source.IsCreated == false)");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("throw ThrowHelper.CreateArgumentException_CollectionNotCreated(\"source\");");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+
                         p.PrintLine("_source = source;");
                         p.PrintLine("_index = -1;");
                     }
