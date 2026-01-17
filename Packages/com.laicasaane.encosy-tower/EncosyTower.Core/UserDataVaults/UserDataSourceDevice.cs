@@ -48,7 +48,7 @@ namespace EncosyTower.UserDataVaults
 
             _directoryPath = deviceArgs.DirectoryPath;
 
-#if FORCE_USER_DATA_ENCRYPTION
+#if ENFORCE_USER_DATA_ENCRYPTION
             var fileExtension = "enc";
 #else
             var fileExtension = deviceArgs.FileExtension.NotEmptyOr(ignoreEncryption ? "txt" : "enc");
@@ -111,10 +111,12 @@ namespace EncosyTower.UserDataVaults
 
                 if (_serializeFunc(data, out var text))
                 {
-#if FORCE_USER_DATA_ENCRYPTION
+#if ENFORCE_USER_DATA_ENCRYPTION
                     var raw = Encryption.Encrypt(text);
 #else
-                    var raw = IgnoreEncryption ? text : Encryption.Encrypt(text);
+                    var raw = (IgnoreEncryption || Encryption.IsInitialized == false)
+                        ? text
+                        : Encryption.Encrypt(text);
 #endif
 
                     await File.WriteAllTextAsync(filePath, raw, Encoding.UTF8, token).AsUnityTask();
@@ -147,10 +149,12 @@ namespace EncosyTower.UserDataVaults
                         return Option.None;
                     }
 
-#if FORCE_USER_DATA_ENCRYPTION
+#if ENFORCE_USER_DATA_ENCRYPTION
                     var text = Encryption.Decrypt(raw);
 #else
-                    var text = IgnoreEncryption ? raw : Encryption.Decrypt(raw);
+                    var text = (IgnoreEncryption || Encryption.IsInitialized == false)
+                        ? raw
+                        : Encryption.Decrypt(raw);
 #endif
 
                     if (_deserializeFunc(text, out TData data) && data != null)

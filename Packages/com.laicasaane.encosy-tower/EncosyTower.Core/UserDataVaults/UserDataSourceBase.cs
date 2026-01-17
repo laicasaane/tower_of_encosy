@@ -43,7 +43,7 @@ namespace EncosyTower.UserDataVaults
 
         public bool IgnoreEncryption
         {
-#if FORCE_USER_DATA_ENCRYPTION
+#if ENFORCE_USER_DATA_ENCRYPTION
             get => false;
             set { }
 #else
