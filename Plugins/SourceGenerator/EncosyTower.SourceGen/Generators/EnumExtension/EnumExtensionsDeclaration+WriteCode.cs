@@ -124,6 +124,15 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.CloseScope();
                 p.PrintEndLine();
 
+                p.PrintBeginLine("public bool IsDefined");
+                p.OpenScope();
+                {
+                    p.PrintLine(AggressiveInlining);
+                    p.PrintBeginLine("get => ").Print(ExtensionsName).PrintEndLine(".IsDefined(this.Value);");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
                 p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public string ToStringFast() => ")
                     .Print(ExtensionsName).PrintEndLine(".ToStringFast(this.Value);");
@@ -164,11 +173,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p = p.DecreasedIndent();
                 p.PrintBeginLine(") => ").Print(ExtensionsName)
                     .PrintEndLine(".TryFormat(this.Value, destination, out charsWritten, format, provider);");
-                p.PrintEndLine();
-
-                p.PrintLine(AggressiveInlining);
-                p.PrintBeginLine("public bool IsDefined() => ")
-                    .Print(ExtensionsName).PrintEndLine(".IsDefined(this.Value);");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);

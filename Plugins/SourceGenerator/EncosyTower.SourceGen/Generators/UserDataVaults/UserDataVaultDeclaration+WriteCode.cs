@@ -100,7 +100,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .PrintEndLine(" // ReadOnlyAccessors");
             p.OpenScope();
             {
-                WriteReadOnlyAccessors(ref p);
+                WriteReadOnlyAccessors(ref p, accessorDefs);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -113,7 +113,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .PrintEndLine(" // AccessorEnumerator");
             p.OpenScope();
             {
-                WriteAccessorEnumerator(ref p, accessorDefs);
+                WriteAccessorEnumerator(ref p);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -164,10 +164,17 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         private static void WriteIds(ref Printer p, ReadOnlySpan<StoreDefinition> defs)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("public readonly partial struct Ids");
+            p.PrintLine("public readonly partial struct Ids : IIsCreated");
             p.OpenScope();
             {
-                p.PrintLine("public Ids([NotNull] StringVault stringVault)");
+
+                foreach (var def in defs)
+                {
+                    p.PrintBeginLine("public readonly ").Print(STRING_ID).Print(" ").Print(def.DataType.Name)
+                        .PrintEndLine(";");
+                }
+
+                p.PrintLine("internal Ids([NotNull] StringVault stringVault)");
                 p.OpenScope();
                 {
                     foreach (var def in defs)
@@ -177,16 +184,13 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         p.PrintBeginLine(name)
                             .Print(" = stringVault.GetOrMakeId(nameof(").Print(name).PrintEndLine("));");
                     }
+
+                    p.PrintLine("IsCreated = true;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                foreach (var def in defs)
-                {
-                    p.PrintBeginLine("public ").Print(STRING_ID).Print(" ").Print(def.DataType.Name)
-                        .PrintEndLine(" { get; }");
-                    p.PrintEndLine();
-                }
+                p.PrintLine("public bool IsCreated { get; }");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -219,6 +223,15 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintLine("_ids = new(stringVault);");
                     p.PrintLine("_directory = new(stringVault, encryption, logger, taskArrayPool, _ids, userId);");
                     p.PrintLine("_accessors = new(_directory);");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public Ids Ids");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => _ids;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -298,7 +311,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         private static void WriteReadOnlyVault(ref Printer p)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("public readonly partial struct ReadOnlyVault");
+            p.PrintLine("public readonly partial struct ReadOnlyVault : IIsCreated");
             p.OpenScope();
             {
                 p.PrintLine("internal readonly Vault _vault;");
@@ -318,6 +331,15 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintLine("get => _vault != null;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public Ids Ids");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => _vault.Ids;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -645,10 +667,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
         }
 
-        private void WriteAccessorEnumerator(ref Printer p, List<UserDataAccessorDefinition> defs)
+        private void WriteReadOnlyAccessors(ref Printer p, List<UserDataAccessorDefinition> defs)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("public readonly partial struct ReadOnlyAccessors : IUserDataAccessorReadOnlyCollection");
+            p.PrintLine("public readonly partial struct ReadOnlyAccessors : IUserDataAccessorReadOnlyCollection, IIsCreated");
             p.OpenScope();
             {
                 p.PrintLine("internal readonly Accessors _accessors;");
@@ -659,6 +681,15 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.OpenScope();
                 {
                     p.PrintLine("_accessors = accessors;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public bool IsCreated");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => _accessors != null;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -759,7 +790,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private void WriteReadOnlyAccessors(ref Printer p)
+        private void WriteAccessorEnumerator(ref Printer p)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("public partial struct AccessorEnumerator : IEnumeratorᐸIUserDataAccessorᐳ");
@@ -1242,7 +1273,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("[Serializable]");
-            p.PrintLine("public partial struct DataCollection : IUserDataCollection");
+            p.PrintLine("public partial struct DataCollection : IUserDataCollection, IIsCreated");
             p.OpenScope();
             {
                 p.PrintLine("[SerializeField] private string _userId;");

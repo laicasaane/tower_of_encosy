@@ -297,6 +297,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("using IEnumerableᐸIUserDataAccessorᐳ = global::System.Collections.Generic.IEnumerable<global::EncosyTower.UserDataVaults.IUserDataAccessor>;");
                 p.PrintLine("using IEnumeratorᐸIUserDataAccessorᐳ = global::System.Collections.Generic.IEnumerator<global::EncosyTower.UserDataVaults.IUserDataAccessor>;");
                 p.PrintLine("using IInitializable = global::EncosyTower.Initialization.IInitializable;");
+                p.PrintLine("using IIsCreated = global::EncosyTower.Common.IIsCreated;");
                 p.PrintLine("using ILogger = global::EncosyTower.Logging.ILogger;");
                 p.PrintLine("using IUserData = global::EncosyTower.UserDataVaults.IUserData;");
                 p.PrintLine("using IUserDataAccessor = global::EncosyTower.UserDataVaults.IUserDataAccessor;");
