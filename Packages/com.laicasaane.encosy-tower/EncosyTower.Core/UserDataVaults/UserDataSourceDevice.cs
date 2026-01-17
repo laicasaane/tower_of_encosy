@@ -26,10 +26,16 @@ namespace EncosyTower.UserDataVaults
     public class UserDataSourceDevice<TData> : UserDataSourceBase<TData>
         where TData : IUserData
     {
-        private readonly string _directoryPath;
+        private readonly RootPath _rootPath;
         private readonly string _fileExtension;
         private readonly TransformFunc<TData, string> _serializeFunc;
         private readonly TransformFunc<string, TData> _deserializeFunc;
+        private readonly MakeFilePathFunc _makeFilePathFunc;
+
+        private string _userId;
+        private string _fileName;
+        private string _subFolderName;
+        private string _filePath;
 
         public UserDataSourceDevice(
               StringId<string> key
@@ -46,7 +52,12 @@ namespace EncosyTower.UserDataVaults
                 throw CreateArgumentException_InstanceOfType();
             }
 
-            _directoryPath = deviceArgs.DirectoryPath;
+            if (deviceArgs.RootPath.IsValid == false)
+            {
+                throw CreateArgumentException_RootPathInvalid();
+            }
+
+            _rootPath = deviceArgs.RootPath;
 
 #if ENFORCE_USER_DATA_ENCRYPTION
             var fileExtension = "enc";
@@ -57,44 +68,49 @@ namespace EncosyTower.UserDataVaults
             _fileExtension = fileExtension;
             _serializeFunc = deviceArgs.SerializeFunc;
             _deserializeFunc = deviceArgs.DeserializeFunc;
+            _makeFilePathFunc = deviceArgs.MakeFilePathFunc;
         }
 
-        public string UserId { get; set; }
-
-        private string UserIdFileName
+        public string UserId
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                using var _ = StringBuilderPool.Rent(out var sb);
-                return PathAPI.ToFileName(UserId, sb);
+                return _userId;
             }
-        }
 
-        private string KeyFileName
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
+            set
             {
-                using var _ = StringBuilderPool.Rent(out var sb);
-                return PathAPI.ToFileName(StringVault.TryGetManagedString(Key).GetValueOrThrow(), sb);
+                _userId = value;
+
+                if (IsInitialized == false)
+                {
+                    return;
+                }
+
+                MakeSubFolderName();
+                MakeFilePath();
             }
         }
 
-        private string FilePath
+        private bool IsInitialized
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Path.Combine(_directoryPath, UserIdFileName, $"{KeyFileName}.{_fileExtension}");
+            get => _filePath.IsNotEmpty();
         }
 
         public override void Initialize()
         {
-            if (string.IsNullOrEmpty(UserId))
+            if (string.IsNullOrEmpty(_userId))
             {
                 throw CreateInvalidOperationException_UserIdNotSet();
             }
 
-            var filePath = FilePath;
+            MakeFileName();
+            MakeSubFolderName();
+            MakeFilePath();
+
+            var filePath = _filePath;
             var directoryPath = Path.GetDirectoryName(filePath);
 
             if (Directory.Exists(directoryPath) == false)
@@ -105,9 +121,14 @@ namespace EncosyTower.UserDataVaults
 
         protected override async UnityTask OnSaveAsync([NotNull] TData data, CancellationToken token)
         {
+            if (IsInitialized == false)
+            {
+                throw CreateInvalidOperationException_NotInitialized_SaveAsync();
+            }
+
             try
             {
-                var filePath = FilePath;
+                var filePath = _filePath;
 
                 if (_serializeFunc(data, out var text))
                 {
@@ -138,7 +159,12 @@ namespace EncosyTower.UserDataVaults
         {
             try
             {
-                var filePath = FilePath;
+                if (IsInitialized == false)
+                {
+                    throw CreateInvalidOperationException_NotInitialized_TryLoadAsync();
+                }
+
+                var filePath = _filePath;
 
                 if (File.Exists(filePath))
                 {
@@ -186,17 +212,48 @@ namespace EncosyTower.UserDataVaults
             return Option.None;
         }
 
+        private void MakeFileName()
+        {
+            using var _ = StringBuilderPool.Rent(out var sb);
+            var value = StringVault.TryGetManagedString(Key).GetValueOrDefault(string.Empty);
+            _fileName = PathAPI.ToFileName(value, sb);
+        }
+
+        private void MakeSubFolderName()
+        {
+            using var _ = StringBuilderPool.Rent(out var sb);
+            _subFolderName = PathAPI.ToFileName(_userId, sb);
+        }
+
+        private void MakeFilePath()
+        {
+            _filePath = _makeFilePathFunc
+                ?.Invoke(_rootPath, _subFolderName, _fileName, _fileExtension, typeof(TData))
+                .NotEmptyOr(Path.Combine(_rootPath.Root, _subFolderName, $"{_fileName}.{_fileExtension}"))
+                ;
+        }
+
         private static Exception CreateArgumentException_InstanceOfType()
             => new ArgumentException($"'args' must be an instance of '{typeof(Args).FullName}'.");
+
+        private static Exception CreateInvalidOperationException_NotInitialized_SaveAsync()
+            => new InvalidOperationException("The data source must be initialized before calling SaveAsync.");
+
+        private static Exception CreateInvalidOperationException_NotInitialized_TryLoadAsync()
+            => new InvalidOperationException("The data source must be initialized before calling TryLoadAsync.");
 
         private static Exception CreateInvalidOperationException_UserIdNotSet()
             => new InvalidOperationException("'UserId' must be set before calling this method.");
 
+        private static Exception CreateArgumentException_RootPathInvalid()
+            => new ArgumentException("'RootPath' must be a valid rooted directory path.", "args");
+
         public sealed record class Args(
-              [NotNull] string DirectoryPath
+              RootPath RootPath
             , [NotNull] TransformFunc<TData, string> SerializeFunc
             , [NotNull] TransformFunc<string, TData> DeserializeFunc
             , string FileExtension = null
+            , MakeFilePathFunc MakeFilePathFunc = null
         ) : UserDataSourceArgs;
     }
 }
