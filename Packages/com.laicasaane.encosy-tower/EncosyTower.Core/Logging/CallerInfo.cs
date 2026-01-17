@@ -71,20 +71,20 @@ namespace EncosyTower.Logging
         {
             if (MemberName.IsNotEmpty() && FilePath.IsNotEmpty())
             {
-                return $"{LineNumber} :: {MemberName} :: {FilePath}";
+                return $"{MemberName} (at {FilePath}:{LineNumber})";
             }
 
             if (MemberName.IsNotEmpty())
             {
-                return $"{LineNumber} :: {MemberName}";
+                return $"{MemberName} (at :{LineNumber})";
             }
 
             if (FilePath.IsNotEmpty())
             {
-                return $"{LineNumber} :: {FilePath}";
+                return $"(at {FilePath}:{LineNumber})";
             }
 
-            return LineNumber.ToString();
+            return $"(at :{LineNumber})";
         }
     }
 }
