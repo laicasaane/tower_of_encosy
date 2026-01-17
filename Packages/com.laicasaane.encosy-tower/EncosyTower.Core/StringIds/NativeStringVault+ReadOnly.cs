@@ -16,7 +16,7 @@ namespace EncosyTower.StringIds
         public ReadOnly AsReadOnly()
             => new(this);
 
-        public readonly struct ReadOnly : IReadOnlyList<UnmanagedString>
+        public readonly struct ReadOnly : IReadOnlyList<UnmanagedString>, IIsCreated
             , ICopyToSpan<UnmanagedString>, ITryCopyToSpan<UnmanagedString>
         {
             internal readonly NativeHashMap<StringHash, StringId>.ReadOnly _map;

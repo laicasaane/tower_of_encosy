@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.PubSub.Internals;
 using EncosyTower.UnityExtensions;
@@ -47,7 +48,7 @@ namespace EncosyTower.PubSub
 
     partial class MessageSubscriber
     {
-        public readonly partial struct UnitySubscriber<TScope, TState>
+        public readonly partial struct UnitySubscriber<TScope, TState> : IIsCreated
             where TScope : UnityEngine.Object
             where TState : class
         {

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections.Unsafe;
+using EncosyTower.Common;
 using EncosyTower.Debugging;
 using Unity.Collections;
 
@@ -24,7 +25,7 @@ namespace EncosyTower.Collections
     /// <para>The capacity of SharedListNative is immutable, cannot change.</para>
     /// </remarks>
     public readonly partial struct SharedListNative<T>
-        : IReadOnlyList<T>
+        : IReadOnlyList<T>, IIsCreated
         , IAsSpan<T>, IAsReadOnlySpan<T>, IAsNativeSlice<T>
         , ICopyFromSpan<T>, ITryCopyFromSpan<T>
         , ICopyToSpan<T>, ITryCopyToSpan<T>

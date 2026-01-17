@@ -24,16 +24,15 @@
 
 using System;
 using EncosyTower.Collections;
+using EncosyTower.Common;
 
 namespace EncosyTower.Buffers
 {
     public interface IBufferStrategy<T> : IAlloc
         , IAsSpan<T>, IAsReadOnlySpan<T>
-        , IResizable, IClearable, IHasCapacity
+        , IResizable, IClearable, IHasCapacity, IIsCreated
         , IDisposable
     {
-        bool IsCreated { get; }
-
         ref T this[int index] { get; }
 
         void Resize(int newCapacity, bool copyContent, bool memClear);
@@ -41,11 +40,8 @@ namespace EncosyTower.Buffers
         void FastClear();
     }
 
-    public interface IReadOnlyBufferStrategy<T> : IAsReadOnlySpan<T>, IHasCapacity
+    public interface IReadOnlyBufferStrategy<T> : IAsReadOnlySpan<T>, IHasCapacity, IIsCreated
     {
-        bool IsCreated { get; }
-
         ref readonly T this[int index] { get; }
-
     }
 }

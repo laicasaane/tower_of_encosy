@@ -44,7 +44,7 @@ namespace EncosyTower.Collections
     /// <para>The capacity of SharedArrayMapNative is immutable, cannot change.</para>
     /// </remarks>
     public readonly partial struct SharedArrayMapNative<TKey, TValue> : IClearable, IHasCapacity
-        , IHasCount, ITryGetValue<TKey, TValue>
+        , IHasCount, ITryGetValue<TKey, TValue>, IIsCreated
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EncosyTower.Common;
 using EncosyTower.Debugging;
 using Unity.Collections;
 
@@ -28,7 +29,7 @@ namespace EncosyTower.Collections
             );
 
         public readonly struct ReadOnly : IReadOnlyList<T>, IAsReadOnlySpan<T>, ICopyToSpan<T>, ITryCopyToSpan<T>
-            , IHasCapacity, IHasCount
+            , IHasCapacity, IHasCount, IIsCreated
         {
             internal readonly NativeArray<T>.ReadOnly _buffer;
             internal readonly NativeArray<int>.ReadOnly _count;

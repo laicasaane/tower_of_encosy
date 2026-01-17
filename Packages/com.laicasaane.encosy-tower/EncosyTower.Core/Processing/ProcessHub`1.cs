@@ -30,7 +30,7 @@ namespace EncosyTower.Processing
         }
     }
 
-    public readonly partial struct ProcessHub<TScope>
+    public readonly partial struct ProcessHub<TScope> : IIsCreated
     {
         internal readonly ProcessHandlerMap _map;
         internal readonly ICollection<ProcessRegistry> _registries;

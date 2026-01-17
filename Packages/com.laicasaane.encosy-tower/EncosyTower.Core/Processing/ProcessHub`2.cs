@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.Common;
 using EncosyTower.Types;
 
 namespace EncosyTower.Processing
@@ -36,7 +37,7 @@ namespace EncosyTower.Processing
         }
     }
 
-    public readonly partial struct ProcessHub<TScope, TState>
+    public readonly partial struct ProcessHub<TScope, TState> : IIsCreated
         where TState : class
     {
         internal readonly ProcessHub<TScope> _hub;

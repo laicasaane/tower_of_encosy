@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.PubSub.Internals;
 
@@ -34,7 +35,7 @@ namespace EncosyTower.PubSub
 
     partial class MessageSubscriber
     {
-        public readonly partial struct Subscriber<TScope>
+        public readonly partial struct Subscriber<TScope> : IIsCreated
         {
             internal readonly MessageSubscriber _subscriber;
             internal readonly ICollection<ISubscription> _subscriptions;

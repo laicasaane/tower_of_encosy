@@ -9,6 +9,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.UnityExtensions;
 
@@ -16,7 +17,7 @@ namespace EncosyTower.PubSub
 {
     partial class MessagePublisher
     {
-        public readonly partial struct UnityPublisher<TScope>
+        public readonly partial struct UnityPublisher<TScope> : IIsCreated
             where TScope : UnityEngine.Object
         {
 #if UNITY_6000_2_OR_NEWER

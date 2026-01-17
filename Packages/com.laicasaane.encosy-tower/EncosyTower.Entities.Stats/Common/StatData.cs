@@ -3,12 +3,13 @@ using EncosyTower.Common;
 
 namespace EncosyTower.Entities.Stats
 {
-    public readonly struct StatData<TStatData> where TStatData : unmanaged, IStatData
+    public readonly struct StatData<TStatData> : IIsCreated
+        where TStatData : unmanaged, IStatData
     {
         public readonly TStatData Data;
         public readonly uint UserData;
         public readonly bool ProduceChangeEvents;
-        public readonly bool IsValid;
+        private readonly bool _isCreated;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public StatData(TStatData data, bool produceChangeEvents = false, uint userData = default)
@@ -16,11 +17,18 @@ namespace EncosyTower.Entities.Stats
             Data = data;
             UserData = userData;
             ProduceChangeEvents = produceChangeEvents;
-            IsValid = true;
+            _isCreated = true;
+        }
+
+        public bool IsCreated
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _isCreated;
         }
     }
 
-    public readonly struct StatDataParams<TStatData> where TStatData : unmanaged, IStatData
+    public readonly struct StatDataParams<TStatData> : IIsCreated
+        where TStatData : unmanaged, IStatData
     {
         public readonly Option<TStatData> StatData;
         public readonly Option<StatHandle<TStatData>> Handle;
@@ -45,7 +53,8 @@ namespace EncosyTower.Entities.Stats
             => StatData.HasValue || Handle.HasValue || UserData.HasValue || ProduceChangeEvents.HasValue;
     }
 
-    public readonly struct StatValueParams<TValuePair> where TValuePair : unmanaged, IStatValuePair
+    public readonly struct StatValueParams<TValuePair> : IIsCreated
+        where TValuePair : unmanaged, IStatValuePair
     {
         public readonly Option<TValuePair> StatValues;
         public readonly Option<StatHandle> Handle;

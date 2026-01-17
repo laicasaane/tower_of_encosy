@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.Common;
 
 namespace EncosyTower.Collections
 {
@@ -17,7 +18,7 @@ namespace EncosyTower.Collections
 
         /// <inheritdoc cref="ArrayMap{TKey, TValue}"/>
         [DebuggerTypeProxy(typeof(ArrayMapDebugProxy<,>))]
-        public readonly struct ReadOnly : IDisposable
+        public readonly struct ReadOnly : IDisposable, IIsCreated
             , IReadOnlyCollection<ArrayMapKeyValuePairFast<TKey, TValue>>, IHasCount
             , ITryGetValue<TKey, TValue>
         {

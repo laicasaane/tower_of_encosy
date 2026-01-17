@@ -10,6 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using EncosyTower.Buffers;
+using EncosyTower.Common;
 using EncosyTower.Debugging;
 using Unity.Collections;
 
@@ -21,7 +22,7 @@ namespace EncosyTower.Collections
         public readonly ReadOnly AsReadOnly()
             => new(this);
 
-        public readonly struct ReadOnly : IHasCount, IHasCapacity, ITryGetValue<TKey, TValue>
+        public readonly struct ReadOnly : IIsCreated, IHasCount, IHasCapacity, ITryGetValue<TKey, TValue>
         {
             internal readonly NativeStrategy<ArrayMapNode<TKey>>.ReadOnly _valuesInfo;
             internal readonly NativeStrategy<TValue>.ReadOnly _values;

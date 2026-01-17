@@ -4,7 +4,7 @@ using Unity.Entities;
 
 namespace EncosyTower.Entities.Stats
 {
-    public struct StatReader<TValuePair, TStat>
+    public struct StatReader<TValuePair, TStat> : IIsCreated
         where TValuePair : unmanaged, IStatValuePair
         where TStat : unmanaged, IStat<TValuePair>
     {

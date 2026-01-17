@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
+using EncosyTower.Common;
 using EncosyTower.UnityExtensions;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -28,7 +29,7 @@ namespace EncosyTower.Pooling.Native
     using EntityId = System.Int32;
 #endif
 
-    public struct NativeGameObjectPool : IDisposable
+    public struct NativeGameObjectPool : IDisposable, IIsCreated
     {
         public static readonly Allocator Allocator = Allocator.Persistent;
 

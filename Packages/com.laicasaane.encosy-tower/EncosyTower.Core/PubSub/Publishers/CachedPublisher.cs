@@ -9,12 +9,13 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.PubSub.Internals;
 
 namespace EncosyTower.PubSub
 {
-    public partial struct CachedPublisher<TMessage> : IDisposable
+    public partial struct CachedPublisher<TMessage> : IDisposable, IIsCreated
 #if ENCOSY_PUBSUB_RELAX_MODE
         where TMessage : new()
 #else

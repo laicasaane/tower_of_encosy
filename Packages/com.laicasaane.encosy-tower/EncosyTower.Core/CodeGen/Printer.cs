@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using EncosyTower.Common;
 
 namespace EncosyTower.CodeGen
 {
-    public struct Printer
+    public struct Printer : IIsCreated
     {
         public const char NEWLINE = '\n';
         public const string INDENT = "    ";

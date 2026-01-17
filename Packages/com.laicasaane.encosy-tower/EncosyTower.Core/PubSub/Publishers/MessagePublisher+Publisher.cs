@@ -7,6 +7,7 @@
 #endif
 
 using System.Diagnostics.CodeAnalysis;
+using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.PubSub.Internals;
 
@@ -14,7 +15,7 @@ namespace EncosyTower.PubSub
 {
     partial class MessagePublisher
     {
-        public readonly partial struct Publisher<TScope>
+        public readonly partial struct Publisher<TScope> : IIsCreated
         {
             internal readonly MessagePublisher _publisher;
 

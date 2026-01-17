@@ -34,11 +34,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections.Extensions.Unsafe;
+using EncosyTower.Common;
 using UnityEngine;
 
 namespace EncosyTower.Types.Internals
 {
-    internal readonly struct TypeCacheSourceRuntime
+    internal readonly struct TypeCacheSourceRuntime : IIsCreated
     {
         private readonly DeserializedTypeCache _cache;
 

@@ -20,7 +20,7 @@ namespace EncosyTower.Collections
         , ICopyFromSpan<T>, ITryCopyFromSpan<T>
         , ICopyToSpan<T>, ITryCopyToSpan<T>
         , IAddRangeSpan<T>, IContains<T>
-        , IClearable, IIncreaseCapacity, IHasCount
+        , IClearable, IIncreaseCapacity, IHasCount, IIsCreated
     {
         internal readonly ListExposed<T> _list;
         internal readonly IListProxy<T> _proxy;

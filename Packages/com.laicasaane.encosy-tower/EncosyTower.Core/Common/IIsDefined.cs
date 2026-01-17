@@ -2,6 +2,6 @@ namespace EncosyTower.Common
 {
     public interface IIsDefined
     {
-        bool IsDefined();
+        bool IsDefined { get; }
     }
 }

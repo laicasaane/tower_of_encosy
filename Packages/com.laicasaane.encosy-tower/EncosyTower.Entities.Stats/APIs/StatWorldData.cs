@@ -22,12 +22,14 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using EncosyTower.Common;
 using Unity.Collections;
 using Unity.Jobs;
 
 namespace EncosyTower.Entities.Stats
 {
-    public struct StatWorldData<TValuePair, TStat, TStatModifier, TStatModifierStack, TStatObserver> : IDisposable, INativeDisposable
+    public struct StatWorldData<TValuePair, TStat, TStatModifier, TStatModifierStack, TStatObserver>
+        : IDisposable, INativeDisposable, IIsCreated
         where TValuePair : unmanaged, IStatValuePair
         where TStat : unmanaged, IStat<TValuePair>
         where TStatModifier : unmanaged, IStatModifier<TValuePair, TStat, TStatModifierStack>
