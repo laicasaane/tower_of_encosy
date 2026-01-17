@@ -1,10 +1,10 @@
 using System;
-using System.Text;
-using System.Security.Cryptography;
-using System.IO;
-using EncosyTower.Logging;
-using EncosyTower.IO;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using EncosyTower.IO;
+using EncosyTower.Logging;
 
 namespace EncosyTower.Encryption
 {
@@ -12,12 +12,13 @@ namespace EncosyTower.Encryption
     {
         private ICryptoTransform _encryptor;
         private ICryptoTransform _decryptor;
-        private bool _disposedValue;
 
         protected EncryptionBase([NotNull] ILogger logger)
         {
             Logger = logger;
         }
+
+        public bool IsInitialized => _encryptor != null && _decryptor != null;
 
         protected ILogger Logger { get; }
 
@@ -33,6 +34,8 @@ namespace EncosyTower.Encryption
             {
                 return string.Empty;
             }
+
+            ThrowIfNotInitialized(IsInitialized);
 
             try
             {
@@ -61,6 +64,8 @@ namespace EncosyTower.Encryption
                 return string.Empty;
             }
 
+            ThrowIfNotInitialized(IsInitialized);
+
             try
             {
                 using var memoryStream = new MemoryStream();
@@ -83,24 +88,26 @@ namespace EncosyTower.Encryption
 
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposedValue)
-            {
-                return;
-            }
-
-            if (disposing)
-            {
-                _encryptor.Dispose();
-                _decryptor.Dispose();
-            }
-
-            _disposedValue = true;
         }
 
         public void Dispose()
         {
+            _encryptor?.Dispose();
+            _encryptor = null;
+
+            _decryptor?.Dispose();
+            _decryptor = null;
+
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        private static void ThrowIfNotInitialized([DoesNotReturnIf(false)] bool isInitialized)
+        {
+            if (isInitialized == false)
+            {
+                throw new InvalidOperationException("Encryption is not initialized.");
+            }
         }
     }
 }

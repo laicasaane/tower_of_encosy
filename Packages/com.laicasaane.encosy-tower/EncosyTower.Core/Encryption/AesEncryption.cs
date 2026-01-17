@@ -1,6 +1,6 @@
-using System.Text;
-using System.Security.Cryptography;
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography;
+using System.Text;
 using EncosyTower.Logging;
 
 namespace EncosyTower.Encryption
