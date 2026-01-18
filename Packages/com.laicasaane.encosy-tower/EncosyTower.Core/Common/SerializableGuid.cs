@@ -1,17 +1,20 @@
 namespace EncosyTower.Common
 {
     using System;
+    using System.ComponentModel;
     using System.Runtime.CompilerServices;
     using EncosyTower.Collections;
+    using EncosyTower.Conversion;
+    using EncosyTower.Serialization;
     using EncosyTower.SystemExtensions;
     using UnityEngine;
 
-    [Serializable]
+    [Serializable, TypeConverter(typeof(TypeConverter))]
     public unsafe partial struct SerializableGuid
         : IEquatable<SerializableGuid>, IEquatable<Guid>
         , IComparable<SerializableGuid>, IComparable<Guid>, IComparable
-        , ISpanFormattable
-        , IAsReadOnlySpan<byte>
+        , ITryParse<SerializableGuid>, ITryParseSpan<SerializableGuid>
+        , ISpanFormattable, IAsReadOnlySpan<byte>
     {
         /// <summary>
         /// Size in bytes.
@@ -155,6 +158,34 @@ namespace EncosyTower.Common
             {
                 return new ReadOnlySpan<byte>(ptr, SIZE);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool TryParse(
+              string str
+            , out SerializableGuid result
+            , bool ignoreCase = true
+            , bool allowMatchingMetadataAttribute = false
+        )
+        {
+            return TryParse(str.AsSpan(), out result);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool TryParse(
+              ReadOnlySpan<char> str
+            , out SerializableGuid result
+            , bool ignoreCase = true
+            , bool allowMatchingMetadataAttribute = false
+        )
+        {
+            var parseResult = Guid.TryParse(str, out var value);
+            result = value.AsSerializable();
+            return parseResult;
+        }
+
+        public sealed class TypeConverter : ParsableStructConverter<SerializableGuid>
+        {
         }
     }
 }
