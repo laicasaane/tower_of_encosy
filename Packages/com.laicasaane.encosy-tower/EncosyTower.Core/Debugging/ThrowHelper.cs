@@ -52,6 +52,9 @@ namespace EncosyTower.Debugging
         public static IndexOutOfRangeException CreateIndexOutOfRangeException_Collection()
             => new("Index was out of range. Must be non-negative and less than the size of the collection.");
 
+        public static InvalidOperationException CreateInvalidOperationException_TypeNotCreatedCorrectly(string name)
+            => new($"Type '{name}' was not created correctly.");
+
         public static InvalidOperationException CreateInvalidOperationException_CollectionNotCreated()
             => new("Collection was not created.");
 
