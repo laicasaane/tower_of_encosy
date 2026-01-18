@@ -61,7 +61,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .PrintEndLine(" // ReadOnlyVault");
             p.OpenScope();
             {
-                WriteReadOnlyVault(ref p);
+                WriteReadOnlyVault(ref p, Syntax.Identifier.Text);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -273,7 +273,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private static void WriteReadOnlyVault(ref Printer p)
+        private static void WriteReadOnlyVault(ref Printer p, string outerTypeName)
         {
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly partial struct ReadOnlyVault : IIsCreated");
@@ -317,6 +317,32 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 }
                 p.CloseScope();
                 p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("public UnityTask SaveAsync")
+                    .PrintEndLine("(SaveDestination destination, CancellationToken token = default)");
+                p.OpenScope();
+                {
+                    p.PrintLine("ThrowIfNotCreated(IsCreated);");
+                    p.PrintEndLine();
+
+                    p.PrintLine("return _vault.SaveAsync(destination, token);");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("private static void ThrowIfNotCreated([DoesNotReturnIf(false)] bool isCreated)");
+                p.OpenScope();
+                {
+                    p.PrintLine("if (isCreated == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintBeginLine("throw ThrowHelper.CreateInvalidOperationException_TypeNotCreatedCorrectly")
+                            .Print("(\"").Print(outerTypeName).PrintEndLine("+ReadOnlyVault\");");
+                    }
+                    p.CloseScope();
+                }
+                p.CloseScope();
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -333,6 +359,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintBeginLine("public readonly StringIdᐸstringᐳ ").Print(def.DataType.Name)
                         .PrintEndLine(";");
                 }
+
+                p.PrintEndLine();
 
                 p.PrintLine("internal IdCollection([NotNull] StringVault stringVault)");
                 p.OpenScope();

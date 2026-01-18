@@ -266,6 +266,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             static void PrintAdditionalUsings(ref Printer p)
             {
                 p.PrintLine("using CancellationToken = global::System.Threading.CancellationToken;");
+                p.PrintLine("using DoesNotReturnIfAttribute = global::System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute;");
                 p.PrintLine("using EncryptionBase = global::EncosyTower.Encryption.EncryptionBase;");
                 p.PrintLine("using ExcludeFromCodeCoverageAttribute = global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute;");
                 p.PrintLine("using HideInCallstackAttribute = global::UnityEngine.HideInCallstackAttribute;");
