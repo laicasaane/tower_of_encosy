@@ -6,6 +6,7 @@ namespace EncosyTower.Tests.UnionIds
     [UnionId]
     [UnionIdKind(typeof(MusicType), 0, "Music")]
     [UnionIdKind(typeof(SpecialId), 4)]
+    [UnionIdKind(typeof(ComplexId), 5)]
     public readonly partial struct AudioId
     {
     }
@@ -38,6 +39,12 @@ namespace EncosyTower.Tests.UnionIds
 
     [WrapRecord]
     public readonly partial record struct SpecialId(uint Id);
+
+    public readonly struct ComplexId
+    {
+        public readonly byte Id1;
+        public readonly byte Id2;
+    }
 
     static partial class ResourceIdEnumeration
     {

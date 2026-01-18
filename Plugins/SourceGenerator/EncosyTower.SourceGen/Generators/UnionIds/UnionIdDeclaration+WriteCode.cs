@@ -2270,26 +2270,17 @@
                         p.PrintBeginLine("public ").Print(fullName).Print(" Id_").PrintEndLine(kindName);
                         p.OpenScope();
                         {
-                            if (kind.signed)
-                            {
-                                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                                p.PrintBeginLine("get => (").Print(fullName).Print(")(")
-                                    .Print(IdRawSignedTypeName).PrintEndLine(")Id;");
-                                p.PrintEndLine();
+                            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                            p.PrintBeginLine("get => new ").Print(typeName).Print("(Kind, (")
+                                .PrintIf(kind.signed, IdRawSignedTypeName, IdRawUnsignedTypeName)
+                                .Print(")Id).Id_")
+                                .Print(kindName).PrintEndLine(";");
+                            p.PrintEndLine();
 
-                                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                                p.PrintBeginLine("set => Id = (").Print(IdRawSignedTypeName).PrintEndLine(")value;");
-                            }
-                            else
-                            {
-                                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                                p.PrintBeginLine("get => (").Print(fullName).Print(")(")
-                                    .Print(IdRawUnsignedTypeName).PrintEndLine(")Id;");
-                                p.PrintEndLine();
-
-                                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                                p.PrintBeginLine("set => Id = (long)(").Print(IdRawUnsignedTypeName).PrintEndLine(")value;");
-                            }
+                            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                            p.PrintBeginLine("set => Id = (long)new ").Print(typeName).Print("(value).")
+                                .PrintIf(kind.signed, "IdSigned", "IdUnsigned")
+                                .PrintEndLine(";");
                         }
                         p.CloseScope();
                         p.PrintEndLine();
@@ -2319,15 +2310,9 @@
                         p.OpenScope();
                         {
                             p.PrintBeginLine("Kind = IdKind.").Print(kindName).PrintEndLine(";");
-
-                            if (kind.signed)
-                            {
-                                p.PrintBeginLine("Id = (long)(").Print(IdRawSignedTypeName).PrintEndLine(")id;");
-                            }
-                            else
-                            {
-                                p.PrintBeginLine("Id = (long)(").Print(IdRawUnsignedTypeName).PrintEndLine(")id;");
-                            }
+                            p.PrintBeginLine("Id = (long)new ").Print(typeName).Print("(id).")
+                                .PrintIf(kind.signed, "IdSigned", "IdUnsigned")
+                                .PrintEndLine(";");
                         }
                         p.CloseScope();
                         p.PrintEndLine();
