@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Common;
 using EncosyTower.Encryption;
@@ -52,15 +53,38 @@ namespace EncosyTower.UserDataVaults
             );
         }
 
+        public bool IsInitialized
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _source.IsInitialized;
+        }
+
+        public string FilePath
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _source.FilePath;
+        }
+
         public override string UserId
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _userId;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => _source.UserId = _userId = value ?? string.Empty;
         }
 
-        public TData Data => _data;
+        public TData Data
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _data;
+        }
 
-        public bool IsDataValid => Data is not null;
+        public bool IsDataValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Data is not null;
+        }
 
         public override void Initialize()
         {

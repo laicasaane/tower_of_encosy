@@ -71,6 +71,18 @@ namespace EncosyTower.UserDataVaults
             _makeFilePathFunc = deviceArgs.MakeFilePathFunc;
         }
 
+        public bool IsInitialized
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _filePath.IsNotEmpty();
+        }
+
+        public string FilePath
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _filePath;
+        }
+
         public string UserId
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -91,12 +103,6 @@ namespace EncosyTower.UserDataVaults
                 MakeSubFolderName();
                 MakeFilePath();
             }
-        }
-
-        private bool IsInitialized
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _filePath.IsNotEmpty();
         }
 
         public override void Initialize()
