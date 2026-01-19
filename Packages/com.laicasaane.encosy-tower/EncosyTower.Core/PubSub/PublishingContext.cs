@@ -9,19 +9,24 @@ namespace EncosyTower.PubSub
     {
         private readonly ILogger _logger;
         private readonly CallerInfo _callerInfo;
+        private readonly PublishingStrategy _strategy;
         private readonly bool _warnNoSubscriber;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private PublishingContext(
-              bool warmNoSubscriber
+              PublishingStrategy strategy
+            , bool warmNoSubscriber
             , ILogger logger
             , in CallerInfo callerInfo
         )
         {
             _logger = logger;
+            _strategy = strategy;
             _warnNoSubscriber = warmNoSubscriber;
             _callerInfo = callerInfo;
         }
+
+        public PublishingStrategy Strategy => _strategy;
 
         public bool WarnNoSubscriber => _warnNoSubscriber;
 
@@ -30,14 +35,43 @@ namespace EncosyTower.PubSub
         public CallerInfo CallerInfo => _callerInfo;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PublishingContext Get(
+        public static PublishingContext Default(
+              bool warnNoSubscriber = true
+            , ILogger logger = default
+            , in CallerInfo callerInfo = default
+        )
+        {
+            return DropIfNoSubscriber(
+                  warnNoSubscriber
+                , logger
+                , callerInfo
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static PublishingContext DropIfNoSubscriber(
               bool warnNoSubscriber = true
             , ILogger logger = default
             , in CallerInfo callerInfo = default
         )
         {
             return new(
-                  warnNoSubscriber
+                  PublishingStrategy.DropIfNoSubscriber
+                , warnNoSubscriber
+                , logger
+                , callerInfo
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static PublishingContext WaitForSubscriber(
+              ILogger logger = default
+            , in CallerInfo callerInfo = default
+        )
+        {
+            return new(
+                  PublishingStrategy.WaitForSubscriber
+                , false
                 , logger
                 , callerInfo
             );

@@ -570,7 +570,7 @@ namespace EncosyTower.PageFlows
 #endif
         )
         {
-            return PublishingContext.Get(
+            return PublishingContext.Default(
                   warnNoSubscriber: _warnNoSubscriber
                 , logger: _logger
 #if __PUBSUB_INCLUDE_CALLER_INFO__
