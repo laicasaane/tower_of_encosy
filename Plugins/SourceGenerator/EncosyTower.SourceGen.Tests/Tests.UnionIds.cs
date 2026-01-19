@@ -1,5 +1,7 @@
-﻿using EncosyTower.TypeWraps;
+﻿using System;
+using EncosyTower.TypeWraps;
 using EncosyTower.UnionIds;
+using Unity.Collections;
 
 namespace EncosyTower.Tests.UnionIds
 {
@@ -9,6 +11,25 @@ namespace EncosyTower.Tests.UnionIds
     [UnionIdKind(typeof(ComplexId), 5)]
     public readonly partial struct AudioId
     {
+        private static partial void Append_ComplexId(ref FixedString32Bytes fs, ComplexId value)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        private static partial void Append_SpecialId(ref FixedString32Bytes fs, SpecialId value)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        private static partial bool TryParse_ComplexId(ReadOnlySpan<char> str, out ComplexId value)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static partial bool TryParse_SpecialId(ReadOnlySpan<char> str, out SpecialId value)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public enum MusicType : ushort

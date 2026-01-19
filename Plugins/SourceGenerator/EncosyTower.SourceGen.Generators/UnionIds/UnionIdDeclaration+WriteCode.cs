@@ -381,11 +381,8 @@
                                     }
                                     else
                                     {
-                                        p.PrintLine("var idResult = false;");
-                                        p.PrintBeginLine("var idValue = default(").Print(fullName).PrintEndLine(");");
-                                        p.PrintEndLine();
-
-                                        p.PrintBeginLine("TryParse_").Print(kindName).PrintEndLine("(id, ref idResult, ref idValue);");
+                                        p.PrintBeginLine("var idResult = TryParse_").Print(kindName)
+                                            .PrintEndLine("(id, out var idValue);");
                                         p.PrintEndLine();
                                     }
 
@@ -496,11 +493,8 @@
                                     }
                                     else
                                     {
-                                        p.PrintLine("var idResult = false;");
-                                        p.PrintBeginLine("var idValue = default(").Print(fullName).PrintEndLine(");");
-                                        p.PrintEndLine();
-
-                                        p.PrintBeginLine("TryParse_").Print(kindName).PrintEndLine("(id, ref idResult, ref idValue);");
+                                        p.PrintBeginLine("var idResult = TryParse_").Print(kindName)
+                                            .PrintEndLine("(id, out var idValue);");
                                         p.PrintEndLine();
                                     }
 
@@ -663,8 +657,8 @@
                 if (tryParse.DoesExist == false)
                 {
                     p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintBeginLine("static partial void TryParse_").Print(kind.name)
-                        .Print("(global::System.ReadOnlySpan<char> str, ref bool result, ref ").Print(kind.fullName).PrintEndLine(" value);");
+                    p.PrintBeginLine("private static partial bool TryParse_").Print(kind.name)
+                        .Print("(global::System.ReadOnlySpan<char> str, out ").Print(kind.fullName).PrintEndLine(" value);");
                     p.PrintEndLine();
                 }
             }
@@ -872,11 +866,8 @@
                                     }
                                     else
                                     {
-                                        p.PrintLine("var idResult = false;");
-                                        p.PrintBeginLine("var idValue = default(").Print(fullName).PrintEndLine(");");
-                                        p.PrintEndLine();
-
-                                        p.PrintBeginLine("TryParse_").Print(kindName).PrintEndLine("(id, ref idResult, ref idValue);");
+                                        p.PrintBeginLine("var idResult = TryParse_").Print(kindName)
+                                            .PrintEndLine("(id, out var idValue);");
                                         p.PrintEndLine();
                                     }
 
@@ -985,11 +976,8 @@
                                     }
                                     else
                                     {
-                                        p.PrintLine("var idResult = false;");
-                                        p.PrintBeginLine("var idValue = default(").Print(fullName).PrintEndLine(");");
-                                        p.PrintEndLine();
-
-                                        p.PrintBeginLine("TryParse_").Print(kindName).PrintEndLine("(id, ref idResult, ref idValue);");
+                                        p.PrintBeginLine("var idResult = TryParse_").Print(kindName)
+                                            .PrintEndLine("(id, out var idValue);");
                                         p.PrintEndLine();
                                     }
 
@@ -2147,7 +2135,7 @@
                 }
 
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("static partial void Append_").Print(kind.name)
+                p.PrintBeginLine("private static partial void Append_").Print(kind.name)
                     .Print("(ref ").Print(FixedStringType).Print(" fs, ").Print(kind.fullName).PrintEndLine(" value);");
                 p.PrintEndLine();
             }
