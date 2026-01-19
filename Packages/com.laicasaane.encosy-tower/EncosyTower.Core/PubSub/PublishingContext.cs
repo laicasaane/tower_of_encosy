@@ -9,31 +9,39 @@ namespace EncosyTower.PubSub
     {
         private readonly ILogger _logger;
         private readonly CallerInfo _callerInfo;
-        private readonly bool _ignoreEmptySubscriber;
+        private readonly bool _warnNoSubscriber;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private PublishingContext(bool ignoreEmptySubscriber, ILogger logger, in CallerInfo callerInfo)
-        {
-            _logger = logger;
-            _callerInfo = callerInfo;
-            _ignoreEmptySubscriber = ignoreEmptySubscriber;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PublishingContext Get(
-              bool ignoreEmptySubscriber = false
-            , ILogger logger = default
-            , in CallerInfo callerInfo = default
+        private PublishingContext(
+              bool warmNoSubscriber
+            , ILogger logger
+            , in CallerInfo callerInfo
         )
         {
-            return new(ignoreEmptySubscriber, logger, callerInfo);
+            _logger = logger;
+            _warnNoSubscriber = warmNoSubscriber;
+            _callerInfo = callerInfo;
         }
+
+        public bool WarnNoSubscriber => _warnNoSubscriber;
 
         public ILogger Logger => _logger ?? DevLogger.Default;
 
         public CallerInfo CallerInfo => _callerInfo;
 
-        public bool IgnoreEmptySubscriber => _ignoreEmptySubscriber;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static PublishingContext Get(
+              bool warnNoSubscriber = true
+            , ILogger logger = default
+            , in CallerInfo callerInfo = default
+        )
+        {
+            return new(
+                  warnNoSubscriber
+                , logger
+                , callerInfo
+            );
+        }
     }
 }
 

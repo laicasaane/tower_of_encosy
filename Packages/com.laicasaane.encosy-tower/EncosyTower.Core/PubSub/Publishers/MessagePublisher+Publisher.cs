@@ -116,14 +116,12 @@ namespace EncosyTower.PubSub
 
             private static void LogWarning<TMessage>(TScope scope, PublishingContext context)
             {
-                if (context.IgnoreEmptySubscriber)
+                if (context.WarnNoSubscriber)
                 {
-                    return;
+                    context.Logger.LogWarning(
+                        $"Found no subscription for `{typeof(TMessage)}` in scope `{scope}`"
+                    );
                 }
-
-                context.Logger.LogWarning(
-                    $"Found no subscription for `{typeof(TMessage)}` in scope `{scope}`"
-                );
             }
 
             private static void LogUnexpectedErrorWhenCache<TMessage>(ILogger logger)
