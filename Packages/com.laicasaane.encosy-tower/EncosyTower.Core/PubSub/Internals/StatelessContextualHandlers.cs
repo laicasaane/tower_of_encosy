@@ -1,7 +1,6 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 using System;
-using System.Threading;
 using EncosyTower.Common;
 using EncosyTower.Tasks;
 
@@ -12,62 +11,6 @@ namespace EncosyTower.PubSub.Internals
 #else
     using UnityTask = UnityEngine.Awaitable;
 #endif
-
-    internal sealed class ContextualHandlerFuncMessageToken<TMessage> : IHandler<TMessage>
-    {
-        private Func<TMessage, PublishingContext, CancellationToken, UnityTask> _handler;
-
-        public ContextualHandlerFuncMessageToken(Func<TMessage, PublishingContext, CancellationToken, UnityTask> handler)
-        {
-            _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            Id = new(handler);
-        }
-
-        public DelegateId Id { get; }
-
-        public void Dispose()
-        {
-            _handler = null;
-        }
-
-        public UnityTask Handle(TMessage message, PublishingContext context, CancellationToken token)
-        {
-            if (token.IsCancellationRequested)
-            {
-                return UnityTasks.GetCompleted();
-            }
-
-            return _handler?.Invoke(message, context, token) ?? UnityTasks.GetCompleted();
-        }
-    }
-
-    internal sealed class ContextualHandlerFuncToken<TMessage> : IHandler<TMessage>
-    {
-        private Func<PublishingContext, CancellationToken, UnityTask> _handler;
-
-        public ContextualHandlerFuncToken(Func<PublishingContext, CancellationToken, UnityTask> handler)
-        {
-            _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            Id = new(handler);
-        }
-
-        public DelegateId Id { get; }
-
-        public void Dispose()
-        {
-            _handler = null;
-        }
-
-        public UnityTask Handle(TMessage message, PublishingContext context, CancellationToken token)
-        {
-            if (token.IsCancellationRequested)
-            {
-                return UnityTasks.GetCompleted();
-            }
-
-            return _handler?.Invoke(context, token) ?? UnityTasks.GetCompleted();
-        }
-    }
 
     internal sealed class ContextualHandlerFuncMessage<TMessage> : IHandler<TMessage>
     {
@@ -86,9 +29,9 @@ namespace EncosyTower.PubSub.Internals
             _handler = null;
         }
 
-        public UnityTask Handle(TMessage message, PublishingContext context, CancellationToken token)
+        public UnityTask Handle(TMessage message, PublishingContext context)
         {
-            if (token.IsCancellationRequested)
+            if (context.Token.IsCancellationRequested)
             {
                 return UnityTasks.GetCompleted();
             }
@@ -114,9 +57,9 @@ namespace EncosyTower.PubSub.Internals
             _handler = null;
         }
 
-        public UnityTask Handle(TMessage message, PublishingContext context, CancellationToken token)
+        public UnityTask Handle(TMessage message, PublishingContext context)
         {
-            if (token.IsCancellationRequested)
+            if (context.Token.IsCancellationRequested)
             {
                 return UnityTasks.GetCompleted();
             }
@@ -142,9 +85,9 @@ namespace EncosyTower.PubSub.Internals
             _handler = null;
         }
 
-        public UnityTask Handle(TMessage message, PublishingContext context, CancellationToken token)
+        public UnityTask Handle(TMessage message, PublishingContext context)
         {
-            if (token.IsCancellationRequested)
+            if (context.Token.IsCancellationRequested)
             {
                 return UnityTasks.GetCompleted();
             }
@@ -171,9 +114,9 @@ namespace EncosyTower.PubSub.Internals
             _handler = null;
         }
 
-        public UnityTask Handle(TMessage message, PublishingContext context, CancellationToken token)
+        public UnityTask Handle(TMessage message, PublishingContext context)
         {
-            if (token.IsCancellationRequested)
+            if (context.Token.IsCancellationRequested)
             {
                 return UnityTasks.GetCompleted();
             }

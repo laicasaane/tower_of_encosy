@@ -8,7 +8,6 @@
 
 using System;
 using System.Buffers;
-using System.Threading;
 using EncosyTower.Collections;
 using EncosyTower.Collections.Extensions.Unsafe;
 using EncosyTower.Tasks;
@@ -31,11 +30,7 @@ namespace EncosyTower.PubSub.Internals
             set => _taskArrayPool = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public async UnityTask PublishAsync(
-              TMessage message
-            , PublishingContext context
-            , CancellationToken token
-        )
+        public async UnityTask PublishAsync(TMessage message, PublishingContext context)
         {
             var handlerListList = GetHandlerListList(context.Logger);
 
@@ -48,14 +43,14 @@ namespace EncosyTower.PubSub.Internals
 
                 for (var i = 0; i < length; i++)
                 {
-                    if (token.IsCancellationRequested)
+                    if (context.Token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    await PublishAsync(handlerListArray[i], message, context, token, taskArrayPool);
+                    await PublishAsync(handlerListArray[i], message, context, taskArrayPool);
 
-                    if (token.IsCancellationRequested)
+                    if (context.Token.IsCancellationRequested)
                     {
                         break;
                     }
@@ -77,7 +72,6 @@ namespace EncosyTower.PubSub.Internals
               FasterList<IHandler<TMessage>> handlerList
             , TMessage message
             , PublishingContext context
-            , CancellationToken token
             , ArrayPool<UnityTask> taskArrayPool
         )
         {
@@ -92,7 +86,7 @@ namespace EncosyTower.PubSub.Internals
             try
 #endif
             {
-                GetTasks(handlerList, message, context, token, tasks);
+                GetTasks(handlerList, message, context, tasks);
 
                 await UnityTasks.WhenAll(tasks);
             }
@@ -112,7 +106,6 @@ namespace EncosyTower.PubSub.Internals
               FasterList<IHandler<TMessage>> handlerList
             , TMessage message
             , PublishingContext context
-            , CancellationToken token
             , UnityTask[] resultTasks
         )
         {
@@ -125,7 +118,7 @@ namespace EncosyTower.PubSub.Internals
                 try
 #endif
                 {
-                    resultTasks[i] = handlers[i]?.Handle(message, context, token) ?? UnityTasks.GetCompleted();
+                    resultTasks[i] = handlers[i]?.Handle(message, context) ?? UnityTasks.GetCompleted();
                 }
 #if __ENCOSY_VALIDATION__
                 catch (Exception ex)

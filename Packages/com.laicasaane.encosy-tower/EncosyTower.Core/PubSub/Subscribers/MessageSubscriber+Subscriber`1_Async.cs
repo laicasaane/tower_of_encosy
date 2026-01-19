@@ -60,38 +60,6 @@ namespace EncosyTower.PubSub
 #if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-            public ISubscription Subscribe<TMessage>(
-                  [NotNull] Func<CancellationToken, UnityTask> handler
-                , int order = 0
-                , ILogger logger = null
-            )
-#if !ENCOSY_PUBSUB_RELAX_MODE
-                where TMessage : IMessage
-#endif
-            {
-                TrySubscribe(new HandlerFuncToken<TMessage>(handler), order, out var subscription, logger);
-                return subscription;
-            }
-
-#if __ENCOSY_NO_VALIDATION__
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-            public ISubscription Subscribe<TMessage>(
-                  [NotNull] Func<TMessage, CancellationToken, UnityTask> handler
-                , int order = 0
-                , ILogger logger = null
-            )
-#if !ENCOSY_PUBSUB_RELAX_MODE
-                where TMessage : IMessage
-#endif
-            {
-                TrySubscribe(new HandlerFuncMessageToken<TMessage>(handler), order, out var subscription, logger);
-                return subscription;
-            }
-
-#if __ENCOSY_NO_VALIDATION__
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
             public void Subscribe<TMessage>(
                   [NotNull] Func<UnityTask> handler
                 , CancellationToken unsubscribeToken
@@ -122,44 +90,6 @@ namespace EncosyTower.PubSub
 #endif
             {
                 if (TrySubscribe(new HandlerFuncMessage<TMessage>(handler), order, out var subscription, logger))
-                {
-                    subscription.RegisterTo(unsubscribeToken);
-                }
-            }
-
-#if __ENCOSY_NO_VALIDATION__
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-            public void Subscribe<TMessage>(
-                  [NotNull] Func<CancellationToken, UnityTask> handler
-                , CancellationToken unsubscribeToken
-                , int order = 0
-                , ILogger logger = null
-            )
-#if !ENCOSY_PUBSUB_RELAX_MODE
-                where TMessage : IMessage
-#endif
-            {
-                if (TrySubscribe(new HandlerFuncToken<TMessage>(handler), order, out var subscription, logger))
-                {
-                    subscription.RegisterTo(unsubscribeToken);
-                }
-            }
-
-#if __ENCOSY_NO_VALIDATION__
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-            public void Subscribe<TMessage>(
-                  [NotNull] Func<TMessage, CancellationToken, UnityTask> handler
-                , CancellationToken unsubscribeToken
-                , int order = 0
-                , ILogger logger = null
-            )
-#if !ENCOSY_PUBSUB_RELAX_MODE
-                where TMessage : IMessage
-#endif
-            {
-                if (TrySubscribe(new HandlerFuncMessageToken<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
                 }
@@ -200,38 +130,6 @@ namespace EncosyTower.PubSub
 #if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-            public ISubscription Subscribe<TMessage>(
-                  [NotNull] Func<PublishingContext, CancellationToken, UnityTask> handler
-                , int order = 0
-                , ILogger logger = null
-            )
-#if !ENCOSY_PUBSUB_RELAX_MODE
-                where TMessage : IMessage
-#endif
-            {
-                TrySubscribe(new ContextualHandlerFuncToken<TMessage>(handler), order, out var subscription, logger);
-                return subscription;
-            }
-
-#if __ENCOSY_NO_VALIDATION__
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-            public ISubscription Subscribe<TMessage>(
-                  [NotNull] Func<TMessage, PublishingContext, CancellationToken, UnityTask> handler
-                , int order = 0
-                , ILogger logger = null
-            )
-#if !ENCOSY_PUBSUB_RELAX_MODE
-                where TMessage : IMessage
-#endif
-            {
-                TrySubscribe(new ContextualHandlerFuncMessageToken<TMessage>(handler), order, out var subscription, logger);
-                return subscription;
-            }
-
-#if __ENCOSY_NO_VALIDATION__
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
             public void Subscribe<TMessage>(
                   [NotNull] Func<PublishingContext, UnityTask> handler
                 , CancellationToken unsubscribeToken
@@ -262,44 +160,6 @@ namespace EncosyTower.PubSub
 #endif
             {
                 if (TrySubscribe(new ContextualHandlerFuncMessage<TMessage>(handler), order, out var subscription, logger))
-                {
-                    subscription.RegisterTo(unsubscribeToken);
-                }
-            }
-
-#if __ENCOSY_NO_VALIDATION__
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-            public void Subscribe<TMessage>(
-                  [NotNull] Func<PublishingContext, CancellationToken, UnityTask> handler
-                , CancellationToken unsubscribeToken
-                , int order = 0
-                , ILogger logger = null
-            )
-#if !ENCOSY_PUBSUB_RELAX_MODE
-                where TMessage : IMessage
-#endif
-            {
-                if (TrySubscribe(new ContextualHandlerFuncToken<TMessage>(handler), order, out var subscription, logger))
-                {
-                    subscription.RegisterTo(unsubscribeToken);
-                }
-            }
-
-#if __ENCOSY_NO_VALIDATION__
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-            public void Subscribe<TMessage>(
-                  [NotNull] Func<TMessage, PublishingContext, CancellationToken, UnityTask> handler
-                , CancellationToken unsubscribeToken
-                , int order = 0
-                , ILogger logger = null
-            )
-#if !ENCOSY_PUBSUB_RELAX_MODE
-                where TMessage : IMessage
-#endif
-            {
-                if (TrySubscribe(new ContextualHandlerFuncMessageToken<TMessage>(handler), order, out var subscription, logger))
                 {
                     subscription.RegisterTo(unsubscribeToken);
                 }

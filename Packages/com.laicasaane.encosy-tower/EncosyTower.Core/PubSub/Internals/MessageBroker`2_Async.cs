@@ -1,7 +1,6 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 using System.Buffers;
-using System.Threading;
 using EncosyTower.Logging;
 using EncosyTower.Tasks;
 
@@ -15,15 +14,10 @@ namespace EncosyTower.PubSub.Internals
 
     internal sealed partial class MessageBroker<TScope, TMessage>
     {
-        public UnityTask PublishAsync(
-              TScope scope
-            , TMessage message
-            , PublishingContext context
-            , CancellationToken token
-        )
+        public UnityTask PublishAsync(TScope scope, TMessage message, PublishingContext context)
         {
             return _scopedBrokers.TryGetValue(scope, out var broker)
-                ? broker.PublishAsync(message, context, token)
+                ? broker.PublishAsync(message, context)
                 : UnityTasks.GetCompleted();
         }
 

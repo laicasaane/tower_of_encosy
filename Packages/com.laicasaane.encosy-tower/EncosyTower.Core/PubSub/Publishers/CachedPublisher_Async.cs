@@ -7,7 +7,6 @@
 #endif
 
 using System.Runtime.CompilerServices;
-using System.Threading;
 using EncosyTower.Tasks;
 
 namespace EncosyTower.PubSub
@@ -23,11 +22,7 @@ namespace EncosyTower.PubSub
 #if __ENCOSY_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public readonly void Publish(
-              TMessage message
-            , PublishingContext context = default
-            , CancellationToken token = default
-        )
+        public readonly void Publish(TMessage message, PublishingContext context = default)
         {
 #if __ENCOSY_VALIDATION__
             if (Validate(message, context.Logger) == false)
@@ -36,26 +31,19 @@ namespace EncosyTower.PubSub
             }
 #endif
 
-            _broker.PublishAsync(message, context, token).Forget();
+            _broker.PublishAsync(message, context).Forget();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly UnityTask PublishAsync(
-              PublishingContext context = default
-            , CancellationToken token = default
-        )
+        public readonly UnityTask PublishAsync(PublishingContext context = default)
         {
-            return PublishAsync(new TMessage(), context, token);
+            return PublishAsync(new TMessage(), context);
         }
 
 #if __ENCOSY_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public readonly UnityTask PublishAsync(
-              TMessage message
-            , PublishingContext context = default
-            , CancellationToken token = default
-        )
+        public readonly UnityTask PublishAsync(TMessage message, PublishingContext context = default)
         {
 #if __ENCOSY_VALIDATION__
             if (Validate(message, context.Logger) == false)
@@ -64,7 +52,7 @@ namespace EncosyTower.PubSub
             }
 #endif
 
-            return _broker.PublishAsync(message, context, token);
+            return _broker.PublishAsync(message, context);
         }
     }
 }

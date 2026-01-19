@@ -7,7 +7,6 @@
 #endif
 
 using System.Runtime.CompilerServices;
-using System.Threading;
 using EncosyTower.PubSub.Internals;
 using EncosyTower.Tasks;
 
@@ -24,54 +23,40 @@ namespace EncosyTower.PubSub
         partial struct Publisher<TScope>
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Publish<TMessage>(
-                  PublishingContext context = default
-                , CancellationToken token = default
-            )
+            public void Publish<TMessage>(PublishingContext context = default)
 #if ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : new()
 #else
                 where TMessage : IMessage, new()
 #endif
             {
-                Publish(new TMessage(), context, token);
+                Publish(new TMessage(), context);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Publish<TMessage>(
-                  TMessage message
-                , PublishingContext context = default
-                , CancellationToken token = default
-            )
+            public void Publish<TMessage>(TMessage message, PublishingContext context = default)
 #if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
             {
-                PublishAsync(message, context, token).Forget();
+                PublishAsync(message, context).Forget();
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public UnityTask PublishAsync<TMessage>(
-                  PublishingContext context = default
-                , CancellationToken token = default
-            )
+            public UnityTask PublishAsync<TMessage>(PublishingContext context = default)
 #if ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : new()
 #else
                 where TMessage : IMessage, new()
 #endif
             {
-                return PublishAsync(new TMessage(), context, token);
+                return PublishAsync(new TMessage(), context);
             }
 
 #if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-            public UnityTask PublishAsync<TMessage>(
-                  TMessage message
-                , PublishingContext context = default
-                , CancellationToken token = default
-            )
+            public UnityTask PublishAsync<TMessage>(TMessage message, PublishingContext context = default)
 #if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
@@ -85,11 +70,11 @@ namespace EncosyTower.PubSub
 
                 if (TryGetBroker<TMessage>(_publisher, out var broker))
                 {
-                    return broker.PublishAsync(Scope, message, context, token);
+                    return broker.PublishAsync(Scope, message, context);
                 }
                 else if (context.Strategy == PublishingStrategy.WaitForSubscriber)
                 {
-                    return LatePublishAsync(_publisher, Scope, message, context, token);
+                    return LatePublishAsync(_publisher, Scope, message, context);
                 }
 #if __ENCOSY_VALIDATION__
                 else
@@ -118,23 +103,22 @@ namespace EncosyTower.PubSub
                 , TScope scope
                 , TMessage message
                 , PublishingContext context
-                , CancellationToken token
             )
             {
                 await UnityTasks.WaitUntil(
                       publisher
                     , static x => x._brokers.Contains<MessageBroker<TScope, TMessage>>()
-                    , token
+                    , context.Token
                 );
 
-                if (token.IsCancellationRequested)
+                if (context.Token.IsCancellationRequested)
                 {
                     return;
                 }
 
                 if (TryGetBroker<TMessage>(publisher, out var broker))
                 {
-                    await broker.PublishAsync(scope, message, context, token);
+                    await broker.PublishAsync(scope, message, context);
                 }
 #if __ENCOSY_VALIDATION__
                 else

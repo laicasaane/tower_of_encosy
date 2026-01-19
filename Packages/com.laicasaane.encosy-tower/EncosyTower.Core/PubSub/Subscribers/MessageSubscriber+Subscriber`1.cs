@@ -69,9 +69,7 @@ namespace EncosyTower.PubSub
             /// <summary>
             /// Remove empty handler groups to optimize performance.
             /// </summary>
-#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
             public void Compress<TMessage>(ILogger logger = null)
 #if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
@@ -84,15 +82,10 @@ namespace EncosyTower.PubSub
                 }
 #endif
 
-                if (_subscriber._brokers.TryGet<MessageBroker<TScope, TMessage>>(out var broker))
-                {
-                    broker.Compress(Scope, logger);
-                }
+                _subscriber.Compress<TScope, TMessage>(Scope, logger);
             }
 
-#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
             public ISubscription Subscribe<TMessage>(
                   [NotNull] Action handler
                 , int order = 0
@@ -106,9 +99,7 @@ namespace EncosyTower.PubSub
                 return subscription;
             }
 
-#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
             public ISubscription Subscribe<TMessage>(
                   [NotNull] Action<TMessage> handler
                 , int order = 0
@@ -122,9 +113,7 @@ namespace EncosyTower.PubSub
                 return subscription;
             }
 
-#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
             public void Subscribe<TMessage>(
                   [NotNull] Action handler
                 , CancellationToken unsubscribeToken
@@ -141,9 +130,7 @@ namespace EncosyTower.PubSub
                 }
             }
 
-#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
             public void Subscribe<TMessage>(
                   [NotNull] Action<TMessage> handler
                 , CancellationToken unsubscribeToken
@@ -160,9 +147,7 @@ namespace EncosyTower.PubSub
                 }
             }
 
-#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
             public ISubscription Subscribe<TMessage>(
                   [NotNull] Action<PublishingContext> handler
                 , int order = 0
@@ -176,9 +161,7 @@ namespace EncosyTower.PubSub
                 return subscription;
             }
 
-#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
             public ISubscription Subscribe<TMessage>(
                   [NotNull] Action<TMessage, PublishingContext> handler
                 , int order = 0
@@ -192,9 +175,7 @@ namespace EncosyTower.PubSub
                 return subscription;
             }
 
-#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
             public void Subscribe<TMessage>(
                   [NotNull] Action<PublishingContext> handler
                 , CancellationToken unsubscribeToken
@@ -211,9 +192,7 @@ namespace EncosyTower.PubSub
                 }
             }
 
-#if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
             public void Subscribe<TMessage>(
                   [NotNull] Action<TMessage, PublishingContext> handler
                 , CancellationToken unsubscribeToken
@@ -230,6 +209,9 @@ namespace EncosyTower.PubSub
                 }
             }
 
+#if __ENCOSY_NO_VALIDATION__
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
             internal bool TrySubscribe<TMessage>(
                   IHandler<TMessage> handler
                 , int order
@@ -245,28 +227,13 @@ namespace EncosyTower.PubSub
                 }
 #endif
 
-                var taskArrayPool = _subscriber._taskArrayPool;
-                var brokers = _subscriber._brokers;
-
-                lock (brokers)
+                if (_subscriber.TrySubscribe(handler, order, Scope, out subscription, logger))
                 {
-                    if (brokers.TryGet<MessageBroker<TScope, TMessage>>(out var broker) == false)
-                    {
-                        broker = new MessageBroker<TScope, TMessage>();
-
-                        if (brokers.TryAdd(broker) == false)
-                        {
-                            broker?.Dispose();
-                            subscription = Subscription<TMessage>.None;
-                            return false;
-                        }
-                    }
-
-                    subscription = broker.Subscribe(Scope, handler, order, taskArrayPool, logger);
+                    Subscriptions.Add(subscription);
+                    return true;
                 }
 
-                Subscriptions.Add(subscription);
-                return true;
+                return false;
             }
 
 #if __ENCOSY_VALIDATION__
@@ -284,9 +251,6 @@ namespace EncosyTower.PubSub
                 return false;
             }
 #endif
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            partial void RetainUsings();
         }
     }
 }

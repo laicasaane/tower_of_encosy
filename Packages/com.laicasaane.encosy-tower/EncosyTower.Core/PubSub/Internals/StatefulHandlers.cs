@@ -1,7 +1,6 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 using System;
-using System.Threading;
 using EncosyTower.Common;
 using EncosyTower.Tasks;
 
@@ -12,69 +11,6 @@ namespace EncosyTower.PubSub.Internals
 #else
     using UnityTask = UnityEngine.Awaitable;
 #endif
-
-    internal sealed class StatefulHandlerFuncMessageToken<TState, TMessage> : IHandler<TMessage>
-        where TState : class
-    {
-        private WeakReference<TState> _state;
-        private Func<TState, TMessage, CancellationToken, UnityTask> _handler;
-
-        public StatefulHandlerFuncMessageToken(TState state, Func<TState, TMessage, CancellationToken, UnityTask> handler)
-        {
-            _state = new(state ?? throw new ArgumentNullException(nameof(state)));
-            _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            Id = new(handler, state.GetHashCode());
-        }
-
-        public DelegateId Id { get; }
-
-        public void Dispose()
-        {
-            _handler = null;
-            _state = null;
-        }
-
-        public UnityTask Handle(TMessage message, PublishingContext context, CancellationToken token)
-        {
-            if (token.IsCancellationRequested || _state.TryGetTarget(out var state) == false)
-            {
-                return UnityTasks.GetCompleted();
-            }
-
-            return _handler?.Invoke(state, message, token) ?? UnityTasks.GetCompleted();
-        }
-    }
-
-    internal sealed class StatefulHandlerFuncToken<TState, TMessage> : IHandler<TMessage> where TState : class
-    {
-        private WeakReference<TState> _state;
-        private Func<TState, CancellationToken, UnityTask> _handler;
-
-        public StatefulHandlerFuncToken(TState state, Func<TState, CancellationToken, UnityTask> handler)
-        {
-            _state = new(state ?? throw new ArgumentNullException(nameof(state)));
-            _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            Id = new(handler, state.GetHashCode());
-        }
-
-        public DelegateId Id { get; }
-
-        public void Dispose()
-        {
-            _handler = null;
-            _state = null;
-        }
-
-        public UnityTask Handle(TMessage message, PublishingContext context, CancellationToken token)
-        {
-            if (token.IsCancellationRequested || _state.TryGetTarget(out var state) == false)
-            {
-                return UnityTasks.GetCompleted();
-            }
-
-            return _handler?.Invoke(state, token) ?? UnityTasks.GetCompleted();
-        }
-    }
 
     internal sealed class StatefulHandlerFuncMessage<TState, TMessage> : IHandler<TMessage> where TState : class
     {
@@ -96,9 +32,9 @@ namespace EncosyTower.PubSub.Internals
             _state = null;
         }
 
-        public UnityTask Handle(TMessage message, PublishingContext context, CancellationToken token)
+        public UnityTask Handle(TMessage message, PublishingContext context)
         {
-            if (token.IsCancellationRequested || _state.TryGetTarget(out var state) == false)
+            if (context.Token.IsCancellationRequested || _state.TryGetTarget(out var state) == false)
             {
                 return UnityTasks.GetCompleted();
             }
@@ -127,9 +63,9 @@ namespace EncosyTower.PubSub.Internals
             _state = null;
         }
 
-        public UnityTask Handle(TMessage message, PublishingContext context, CancellationToken token)
+        public UnityTask Handle(TMessage message, PublishingContext context)
         {
-            if (token.IsCancellationRequested || _state.TryGetTarget(out var state) == false)
+            if (context.Token.IsCancellationRequested || _state.TryGetTarget(out var state) == false)
             {
                 return UnityTasks.GetCompleted();
             }
@@ -158,9 +94,9 @@ namespace EncosyTower.PubSub.Internals
             _state = null;
         }
 
-        public UnityTask Handle(TMessage message, PublishingContext context, CancellationToken token)
+        public UnityTask Handle(TMessage message, PublishingContext context)
         {
-            if (token.IsCancellationRequested || _state.TryGetTarget(out var state) == false)
+            if (context.Token.IsCancellationRequested || _state.TryGetTarget(out var state) == false)
             {
                 return UnityTasks.GetCompleted();
             }
@@ -190,9 +126,9 @@ namespace EncosyTower.PubSub.Internals
             _state = null;
         }
 
-        public UnityTask Handle(TMessage message, PublishingContext context, CancellationToken token)
+        public UnityTask Handle(TMessage message, PublishingContext context)
         {
-            if (token.IsCancellationRequested || _state.TryGetTarget(out var state) == false)
+            if (context.Token.IsCancellationRequested || _state.TryGetTarget(out var state) == false)
             {
                 return UnityTasks.GetCompleted();
             }

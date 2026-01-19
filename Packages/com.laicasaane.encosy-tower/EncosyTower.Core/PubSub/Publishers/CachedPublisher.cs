@@ -8,7 +8,6 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.PubSub.Internals;
@@ -38,12 +37,9 @@ namespace EncosyTower.PubSub
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly void Publish(
-              PublishingContext context = default
-            , CancellationToken token = default
-        )
+        public readonly void Publish(PublishingContext context = default)
         {
-            Publish(new TMessage(), context, token);
+            Publish(new TMessage(), context);
         }
 
 #if __ENCOSY_VALIDATION__

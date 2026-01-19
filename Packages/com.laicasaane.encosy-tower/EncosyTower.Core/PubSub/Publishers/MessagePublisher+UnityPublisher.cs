@@ -8,7 +8,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.UnityExtensions;
@@ -62,10 +61,7 @@ namespace EncosyTower.PubSub
 #if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-            public void Publish<TMessage>(
-                  PublishingContext context = default
-                , CancellationToken token = default
-            )
+            public void Publish<TMessage>(PublishingContext context = default)
 #if ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : new()
 #else
@@ -79,17 +75,13 @@ namespace EncosyTower.PubSub
                 }
 #endif
 
-                _publisher.Publish<TMessage>(context, token);
+                _publisher.Publish<TMessage>(context);
             }
 
 #if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-            public void Publish<TMessage>(
-                  TMessage message
-                , PublishingContext context = default
-                , CancellationToken token = default
-            )
+            public void Publish<TMessage>(TMessage message, PublishingContext context = default)
 #if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
@@ -101,7 +93,7 @@ namespace EncosyTower.PubSub
                 }
 #endif
 
-                _publisher.Publish(message, context, token);
+                _publisher.Publish(message, context);
             }
 
 #if __ENCOSY_VALIDATION__

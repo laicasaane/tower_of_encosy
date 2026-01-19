@@ -7,7 +7,6 @@
 #endif
 
 using System.Runtime.CompilerServices;
-using System.Threading;
 using EncosyTower.Tasks;
 
 namespace EncosyTower.PubSub
@@ -25,10 +24,7 @@ namespace EncosyTower.PubSub
 #if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-            public UnityTask PublishAsync<TMessage>(
-                  PublishingContext context = default
-                , CancellationToken token = default
-            )
+            public UnityTask PublishAsync<TMessage>(PublishingContext context = default)
 #if ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : new()
 #else
@@ -42,17 +38,13 @@ namespace EncosyTower.PubSub
                 }
 #endif
 
-                return _publisher.PublishAsync<TMessage>(context, token);
+                return _publisher.PublishAsync<TMessage>(context);
             }
 
 #if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-            public UnityTask PublishAsync<TMessage>(
-                  TMessage message
-                , PublishingContext context = default
-                , CancellationToken token = default
-            )
+            public UnityTask PublishAsync<TMessage>(TMessage message, PublishingContext context = default)
 #if !ENCOSY_PUBSUB_RELAX_MODE
                 where TMessage : IMessage
 #endif
@@ -64,7 +56,7 @@ namespace EncosyTower.PubSub
                 }
 #endif
 
-                return _publisher.PublishAsync(message, context, token);
+                return _publisher.PublishAsync(message, context);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

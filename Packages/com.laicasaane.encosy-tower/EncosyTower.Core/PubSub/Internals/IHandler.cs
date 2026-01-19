@@ -1,7 +1,6 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 using System;
-using System.Threading;
 using EncosyTower.Common;
 
 namespace EncosyTower.PubSub.Internals
@@ -15,7 +14,7 @@ namespace EncosyTower.PubSub.Internals
 #else
         UnityEngine.Awaitable
 #endif
-        Handle(TMessage message, PublishingContext context, CancellationToken token);
+        Handle(TMessage message, PublishingContext context);
     }
 }
 
