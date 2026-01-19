@@ -1,7 +1,7 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-#if PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV
+#if ENCOSY_PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV
 #define __PUBSUB_INCLUDE_CALLER_INFO_DEV__
 #endif
 #endif
@@ -16,7 +16,7 @@ namespace EncosyTower.PageFlows
             {
 #if __PUBSUB_INCLUDE_CALLER_INFO_DEV__
                 return PubSubCallerInfoOption.ForDevelopment;
-#elif PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO
+#elif ENCOSY_PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO
                 return PubSubCallerInfoOption.Always;
 #else
                 return PubSubCallerInfoOption.Never;

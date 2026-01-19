@@ -18,8 +18,8 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
 {
     internal class MonoPageFlowSettingsEditor
     {
-        public const string PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO = nameof(PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO);
-        public const string PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV = nameof(PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV);
+        public const string SYMBOL_ALWAYS = "ENCOSY_PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO";
+        public const string SYMBOL_FOR_DEV = "ENCOSY_PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV";
 
         public static readonly string ProjectSettingsUssClassName = "project-settings";
         public static readonly string ProjectSettingsTitleBarUssClassName = $"{ProjectSettingsUssClassName}-title-bar";
@@ -76,9 +76,9 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
                     "Including caller info can be useful for debugging purposes, but may increase build size.\n" +
                     "- <b>Never:</b> Do not include caller info.\n" +
                     "- <b>For Development:</b> Include only for Editor and Development builds.\n" +
-                    $"\tSymbol '{PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV}' will be added to Player Settings.\n" +
+                    $"\tSymbol '{SYMBOL_FOR_DEV}' will be added to Player Settings.\n" +
                     "- <b>Always:</b> Include for all environments.\n" +
-                    $"\tSymbol '{PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO}' will be added to Player Settings.",
+                    $"\tSymbol '{SYMBOL_ALWAYS}' will be added to Player Settings.",
             };
 
             contentContainer.Add(warnNoSubscriber.WithAlignFieldClass());
@@ -181,15 +181,15 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
             {
                 BuildAPI.RemoveScriptingDefineSymbols(
                       buildTarget
-                    , PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV
-                    , PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO
+                    , SYMBOL_FOR_DEV
+                    , SYMBOL_ALWAYS
                 );
             }
 
             var symbol = newValue switch
             {
-                PubSubCallerInfoOption.ForDevelopment => PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV,
-                PubSubCallerInfoOption.Always => PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO,
+                PubSubCallerInfoOption.ForDevelopment => SYMBOL_FOR_DEV,
+                PubSubCallerInfoOption.Always => SYMBOL_ALWAYS,
                 _ => string.Empty,
             };
 
