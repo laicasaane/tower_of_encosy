@@ -18,13 +18,17 @@ namespace EncosyTower.Editor.CSharpProjectGeneration
 
     internal static class CSharpProjectGenerationMenu
     {
+        private const string ENABLE_SDK_STYLE_PROJECTS = nameof(ENABLE_SDK_STYLE_PROJECTS);
+
         [MenuItem("Encosy Tower/Project Settings/CSharp/Switch to Legacy", priority = 80_67_00_01)]
         private static void SwitchToLegacy()
         {
-            UserBuildAPI.RemoveScriptingDefineSymbols(
-                  UserBuildAPI.ActiveNamedBuildTarget
-                , "ENABLE_SDK_STYLE_PROJECTS"
-            );
+            var buildTargets = BuildAPI.GetSupportedNamedBuildTargets();
+
+            foreach (var buildTarget in buildTargets)
+            {
+                BuildAPI.RemoveScriptingDefineSymbols(buildTarget, ENABLE_SDK_STYLE_PROJECTS);
+            }
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -33,15 +37,17 @@ namespace EncosyTower.Editor.CSharpProjectGeneration
         [MenuItem("Encosy Tower/Project Settings/CSharp/Switch to SDK-style", priority = 80_67_00_00)]
         private static void SwitchToSdkStyle()
         {
-            UserBuildAPI.RemoveScriptingDefineSymbols(
-                  UserBuildAPI.ActiveNamedBuildTarget
-                , "ENABLE_SDK_STYLE_PROJECTS"
-            );
+            var buildTargets = BuildAPI.GetSupportedNamedBuildTargets();
 
-            UserBuildAPI.AddScriptingDefineSymbols(
-                  UserBuildAPI.ActiveNamedBuildTarget
-                , "ENABLE_SDK_STYLE_PROJECTS"
-            );
+            foreach (var buildTarget in buildTargets)
+            {
+                BuildAPI.RemoveScriptingDefineSymbols(buildTarget, ENABLE_SDK_STYLE_PROJECTS);
+            }
+
+            foreach (var buildTarget in buildTargets)
+            {
+                BuildAPI.AddScriptingDefineSymbols(buildTarget, ENABLE_SDK_STYLE_PROJECTS);
+            }
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();

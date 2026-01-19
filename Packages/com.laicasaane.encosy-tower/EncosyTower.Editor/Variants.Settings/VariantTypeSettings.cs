@@ -27,22 +27,25 @@ namespace EncosyTower.Editor.Variants.Settings
             var currLongSymbol = string.Format(LONG_SYMBOL_FORMAT, currLongCount);
             var currIntSymbol = string.Format(INT_SYMBOL_FORMAT, currIntCount);
             var currByteSymbol = string.Format(BYTE_SYMBOL_FORMAT, currByteCount);
-
             var nextLongSymbol = string.Format(LONG_SYMBOL_FORMAT, nextLongCount);
+            var buildTargets = BuildAPI.GetSupportedNamedBuildTargets();
 
-            UserBuildAPI.RemoveScriptingDefineSymbols(
-                  UserBuildAPI.ActiveNamedBuildTarget
-                , currLongSymbol
-                , currIntSymbol
-                , currByteSymbol
-            );
+            foreach (var buildTarget in buildTargets)
+            {
+                BuildAPI.RemoveScriptingDefineSymbols(
+                      buildTarget
+                    , currLongSymbol
+                    , currIntSymbol
+                    , currByteSymbol
+                );
+            }
 
             if (nextLongCount > minLongCount)
             {
-                UserBuildAPI.AddScriptingDefineSymbols(
-                      UserBuildAPI.ActiveNamedBuildTarget
-                    , nextLongSymbol
-                );
+                foreach (var buildTarget in buildTargets)
+                {
+                    BuildAPI.AddScriptingDefineSymbols(buildTarget, nextLongSymbol);
+                }
             }
 
             AssetDatabase.SaveAssets();

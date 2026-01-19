@@ -37,7 +37,7 @@ namespace EncosyTower.Editor.ProjectSetup
             else
             {
                 buildScenes = EditorBuildSettings.scenes;
-                buildSymbols = UserBuildAPI.GetScriptingDefineSymbols(UserBuildAPI.ActiveNamedBuildTarget);
+                buildSymbols = BuildAPI.GetScriptingDefineSymbols(BuildAPI.ActiveNamedBuildTarget);
             }
 
             var result = new List<SceneMissingSymbols>();
