@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace EncosyTower.SourceGen.Generators.EnumTemplates
 {
@@ -58,6 +59,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         private void WriteMembers(ref Printer p)
         {
             var isNext = false;
+            var sb = new StringBuilder();
 
             foreach (var memberRef in MemberRefs)
             {
@@ -70,7 +72,9 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                         p.PrintEndLine();
                     }
 
-                    p.PrintBeginLine("/// <seealso cref=\"").Print(member.name).PrintEndLine("\"/>");
+                    sb.Clear();
+                    sb.Append(member.name).Replace("<", "&lt;").Replace(">", "&gt;");
+                    p.PrintBeginLine("/// <seealso cref=\"").Print(sb.ToString()).PrintEndLine("\"/>");
                 }
                 else
                 {
