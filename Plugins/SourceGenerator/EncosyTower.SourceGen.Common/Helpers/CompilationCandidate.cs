@@ -2,7 +2,7 @@
 using System.Threading;
 using Microsoft.CodeAnalysis;
 
-namespace EncosyTower.SourceGen.Generators
+namespace EncosyTower.SourceGen
 {
     public struct CompilationCandidate : IEquatable<CompilationCandidate>
     {

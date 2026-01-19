@@ -12,7 +12,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm
     /// <summary>
     /// A container for all <see cref="DiagnosticDescriptor"/> instances for errors reported by analyzers in this project.
     /// </summary>
-    internal static class DiagnosticDescriptors
+    public static class DiagnosticDescriptors
     {
         /// <summary>
         /// Gets a <see cref="DiagnosticDescriptor"/> indicating when a field with <c>[ObservableProperty]</c> is using an invalid attribute targeting the property.

@@ -105,8 +105,34 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                             candidate.isStruct = recordSyntax.ClassOrStructKeyword.IsKind(SyntaxKind.StructKeyword);
                             candidate.isRecord = true;
 
+                            var syntaxTree = recordSyntax.SyntaxTree;
+                            var fileTypeName = symbol.ToFileName();
+                            var hintName = syntaxTree.GetGeneratedSourceFileName(
+                                  GENERATOR_NAME
+                                , recordSyntax
+                                , fileTypeName
+                            );
+
+                            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                                  semanticModel.Compilation.AssemblyName
+                                , GENERATOR_NAME
+                                , fileTypeName
+                            );
+
+                            TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                                  recordSyntax
+                                , token
+                                , out var openingSource
+                                , out var closingSource
+                                , printAdditionalUsings: PrintAdditionalUsings
+                            );
+
                             return new TypeWrapDeclaration(
-                                  candidate.syntax
+                                  candidate.syntax.GetLocation()
+                                , hintName
+                                , sourceFilePath
+                                , openingSource
+                                , closingSource
                                 , candidate.symbol
                                 , candidate.typeName
                                 , candidate.typeNameWithTypeParams
@@ -136,8 +162,34 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         candidate.isStruct = true;
                         candidate.isRefStruct = structSyntax.Modifiers.Any(SyntaxKind.RefKeyword);
 
+                        var syntaxTree = structSyntax.SyntaxTree;
+                        var fileTypeName = symbol.ToFileName();
+                        var hintName = syntaxTree.GetGeneratedSourceFileName(
+                                  GENERATOR_NAME
+                                , structSyntax
+                                , fileTypeName
+                            );
+
+                        var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                                  semanticModel.Compilation.AssemblyName
+                                , GENERATOR_NAME
+                                , fileTypeName
+                            );
+
+                        TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                              structSyntax
+                            , token
+                            , out var openingSource
+                            , out var closingSource
+                            , printAdditionalUsings: PrintAdditionalUsings
+                        );
+
                         return new TypeWrapDeclaration(
-                              candidate.syntax
+                              candidate.syntax.GetLocation()
+                            , hintName
+                            , sourceFilePath
+                            , openingSource
+                            , closingSource
                             , candidate.symbol
                             , candidate.typeName
                             , candidate.typeNameWithTypeParams
@@ -166,8 +218,34 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                             GetTypeName(classSyntax, ref candidate);
                             SetOtherFields(ref candidate, classSyntax, symbol, semanticModel, token);
 
+                            var syntaxTree = classSyntax.SyntaxTree;
+                            var fileTypeName = symbol.ToFileName();
+                            var hintName = syntaxTree.GetGeneratedSourceFileName(
+                                  GENERATOR_NAME
+                                , classSyntax
+                                , fileTypeName
+                            );
+
+                            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                                  semanticModel.Compilation.AssemblyName
+                                , GENERATOR_NAME
+                                , fileTypeName
+                            );
+
+                            TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                                  classSyntax
+                                , token
+                                , out var openingSource
+                                , out var closingSource
+                                , printAdditionalUsings: PrintAdditionalUsings
+                            );
+
                             return new TypeWrapDeclaration(
-                                  candidate.syntax
+                                  candidate.syntax.GetLocation()
+                                , hintName
+                                , sourceFilePath
+                                , openingSource
+                                , closingSource
                                 , candidate.symbol
                                 , candidate.typeName
                                 , candidate.typeNameWithTypeParams
@@ -183,6 +261,26 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     }
 
                     break;
+                }
+
+                static void PrintAdditionalUsings(ref Printer p)
+                {
+                    p.PrintEndLine();
+                    p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+                    p.PrintEndLine();
+                    p.PrintLine("using System;");
+                    p.PrintLine("using System.ComponentModel;");
+                    p.PrintLine("using System.CodeDom.Compiler;");
+                    p.PrintLine("using System.Diagnostics;");
+                    p.PrintLine("using System.Diagnostics.CodeAnalysis;");
+                    p.PrintLine("using System.Globalization;");
+                    p.PrintLine("using System.Runtime.CompilerServices;");
+                    p.PrintLine("using System.Runtime.InteropServices;");
+                    p.PrintLine("using EncosyTower.Common;");
+                    p.PrintLine("using EncosyTower.TypeWraps;");
+                    p.PrintEndLine();
+                    p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+                    p.PrintEndLine();
                 }
             }
 
@@ -447,27 +545,14 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             {
                 SourceGenHelpers.ProjectPath = projectPath;
 
-                var syntaxTree = declaration.Syntax.SyntaxTree;
-                var source = declaration.WriteCode();
-                var fileTypeName = declaration.TypeNameIndentifier.ToFileName();
-                var hintName = syntaxTree.GetGeneratedSourceFileName(
-                      GENERATOR_NAME
-                    , declaration.Syntax
-                    , fileTypeName
-                );
-
-                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                      compilation.assemblyName
-                    , GENERATOR_NAME
-                    , fileTypeName
-                );
-
                 context.OutputSource(
                       outputSourceGenFiles
-                    , declaration.Syntax
-                    , source
-                    , hintName
-                    , sourceFilePath
+                    , declaration.OpeningSource
+                    , declaration.WriteCode()
+                    , declaration.ClosingSource
+                    , declaration.HintName
+                    , declaration.SourceFilePath
+                    , declaration.Location
                 );
             }
             catch (Exception e)
@@ -479,7 +564,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
-                    , declaration.Syntax.GetLocation()
+                    , declaration.Location
                     , e.ToUnityPrintableString()
                 ));
             }

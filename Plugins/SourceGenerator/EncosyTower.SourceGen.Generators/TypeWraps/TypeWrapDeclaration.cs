@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.TypeWraps
 {
@@ -11,13 +10,19 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         public const string OBSOLETE_ATTRIBUTE = "global::System.ObsoleteAttribute";
         public const string FIELD_NAME_FORMAT = "{0}Of{1}";
 
-        public TypeDeclarationSyntax Syntax { get; }
+        public Location Location { get; }
+
+        public string HintName { get; }
+
+        public string SourceFilePath { get; }
+
+        public string OpeningSource { get; }
+
+        public string ClosingSource { get; }
 
         public string TypeName { get; }
 
         public string TypeNameWithTypeParams { get; }
-
-        public string TypeNameIndentifier { get; }
 
         public string FullTypeName { get; }
 
@@ -79,7 +84,11 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             && string.IsNullOrEmpty(FieldName) == false;
 
         public TypeWrapDeclaration(
-              TypeDeclarationSyntax syntax
+              Location location
+            , string hintName
+            , string sourceFilePath
+            , string openingSource
+            , string closingSource
             , INamedTypeSymbol symbol
             , string typeName
             , string typeNameWithTypeParams
@@ -97,10 +106,13 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 fieldName = FIELD_NAME_FORMAT;
             }
 
-            Syntax = syntax;
+            Location = location;
+            HintName = hintName;
+            SourceFilePath = sourceFilePath;
+            OpeningSource = openingSource;
+            ClosingSource = closingSource;
             TypeName = typeName;
             TypeNameWithTypeParams = typeNameWithTypeParams;
-            TypeNameIndentifier = symbol.ToValidIdentifier();
             FullTypeName = symbol.ToFullName();
             IsReadOnly = symbol.IsReadOnly;
             IsSealed = symbol.IsSealed;
@@ -875,21 +887,33 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             => obj is TypeWrapDeclaration other && Equals(other);
 
         public readonly bool Equals(TypeWrapDeclaration other)
-            => string.Equals(FullTypeName, other.FullTypeName, StringComparison.Ordinal)
+            => Location == other.Location
+            && string.Equals(FullTypeName, other.FullTypeName, StringComparison.Ordinal)
             && string.Equals(FieldTypeName, other.FieldTypeName, StringComparison.Ordinal)
             && string.Equals(FieldEnumUnderlyingTypeName, other.FieldEnumUnderlyingTypeName, StringComparison.Ordinal)
             && string.Equals(FieldName, other.FieldName, StringComparison.Ordinal)
             && ExcludeConverter == other.ExcludeConverter
+            && Fields.Equals(other.Fields)
+            && Properties.Equals(other.Properties)
+            && Events.Equals(other.Events)
+            && Methods.Equals(other.Methods)
             ;
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(
-                  FullTypeName
-                , FieldTypeName
-                , FieldEnumUnderlyingTypeName
-                , FieldName
-                , ExcludeConverter
-            );
+        {
+            var hash = new HashValue();
+            hash.Add(Location);
+            hash.Add(FullTypeName);
+            hash.Add(FieldTypeName);
+            hash.Add(FieldEnumUnderlyingTypeName);
+            hash.Add(FieldName);
+            hash.Add(ExcludeConverter);
+            hash.Add(Fields);
+            hash.Add(Properties);
+            hash.Add(Events);
+            hash.Add(Methods);
+            return hash.ToHashCode();
+        }
 
         public readonly struct Operator : IEquatable<Operator>
         {

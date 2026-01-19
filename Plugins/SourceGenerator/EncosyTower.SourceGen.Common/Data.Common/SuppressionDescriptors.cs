@@ -9,7 +9,7 @@ namespace EncosyTower.SourceGen.Generators.Data
     /// <summary>
     /// A container for all <see cref="SuppressionDescriptors"/> instances for suppressed diagnostics by analyzers in this project.
     /// </summary>
-    internal static class SuppressionDescriptors
+    public static class SuppressionDescriptors
     {
         /// <summary>
         /// Gets a <see cref="SuppressionDescriptor"/> for a field using [SerializeField] with an attribute list targeting a property.

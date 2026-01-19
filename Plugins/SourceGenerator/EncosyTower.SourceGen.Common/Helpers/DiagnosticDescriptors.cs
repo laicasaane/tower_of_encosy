@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 #pragma warning disable IDE0090 // Use 'new DiagnosticDescriptor(...)'
 #pragma warning disable RS2008 // Enable analyzer release tracking
 
-namespace EncosyTower.SourceGen.Generators
+namespace EncosyTower.SourceGen
 {
     /// <summary>
     /// A container for all <see cref="DiagnosticDescriptor"/> instances for errors reported by analyzers in this project.

@@ -40,7 +40,9 @@
         <Reference Include="$(UnityScriptAssembliesPath)/EncosyTower.Databases.Authoring.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/EncosyTower.Entities.Stats.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/BakingSheet.dll" Private="false" />
-        <ProjectReference Include="../EncosyTower.SourceGen/EncosyTower.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\EncosyTower.SourceGen.Common\EncosyTower.SourceGen.Common.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\EncosyTower.SourceGen.CodeRefactors\EncosyTower.SourceGen.CodeRefactors.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\EncosyTower.SourceGen.Generators\EncosyTower.SourceGen.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
 </Project>

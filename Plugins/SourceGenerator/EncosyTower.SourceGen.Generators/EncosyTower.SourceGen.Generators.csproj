@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>10.0</LangVersion>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+        <IsRoslynComponent>true</IsRoslynComponent>
+
+        <!-- does not need runtime self -->
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+        <IncludeSymbols>false</IncludeSymbols>
+        <DevelopmentDependency>true</DevelopmentDependency>
+    </PropertyGroup>
+
+	<ItemGroup>
+		<Compile Remove="bin/**" />
+		<EmbeddedResource Remove="bin/**" />
+		<None Remove="bin/**" />
+	</ItemGroup>
+
+	<ItemGroup>
+        <!-- Create nuget package as analyzer -->
+        <None Include="$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.Text.Json" Version="8.0.5" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.1" PrivateAssets="all" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\EncosyTower.SourceGen.Common\EncosyTower.SourceGen.Common.csproj" />
+    </ItemGroup>
+
+    <Target Name="CopyBuildArtifacts" AfterTargets="Build" Condition=" '$(Configuration)'=='Release' ">
+        <ItemGroup>
+            <DataFiles Include="$(ProjectDir)$(OutDir)*.dll" />
+        </ItemGroup>
+        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(ProjectDir)../../../Packages/com.laicasaane.encosy-tower/EncosyTower.Core/SourceGenerators/" SkipUnchangedFiles="true" />
+    </Target>
+
+</Project>

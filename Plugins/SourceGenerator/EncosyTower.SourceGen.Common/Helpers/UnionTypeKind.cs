@@ -1,4 +1,4 @@
-﻿namespace EncosyTower.SourceGen.Generators
+﻿namespace EncosyTower.SourceGen
 {
     public enum UnionTypeKind : byte
     {

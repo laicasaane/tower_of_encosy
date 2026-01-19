@@ -9,7 +9,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm
     /// <summary>
     /// A container for all <see cref="SuppressionDescriptors"/> instances for suppressed diagnostics by analyzers in this project.
     /// </summary>
-    internal static class SuppressionDescriptors
+    public static class SuppressionDescriptors
     {
         /// <summary>
         /// Gets a <see cref="SuppressionDescriptor"/> for a field using [ObservableProperty] with an attribute list targeting a property.

@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace EncosyTower.SourceGen.Generators
+namespace EncosyTower.SourceGen
 {
     public static class GeneratorHelpers
     {

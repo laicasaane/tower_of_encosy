@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="EncosyTower.SourceGen.CodeRefactors/EncosyTower.SourceGen.CodeRefactors.csproj" />
+  <Project Path="EncosyTower.SourceGen.Common/EncosyTower.SourceGen.Common.csproj" />
   <Project Path="EncosyTower.SourceGen.Tests/EncosyTower.SourceGen.Tests.csproj" />
-  <Project Path="EncosyTower.SourceGen/EncosyTower.SourceGen.csproj" />
+  <Project Path="EncosyTower.SourceGen.Generators/EncosyTower.SourceGen.Generators.csproj" />
 </Solution>
