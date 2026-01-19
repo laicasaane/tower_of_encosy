@@ -10,8 +10,7 @@ namespace EncosyTower.PageFlows.MonoPages
     [GeneratePropertyBag]
     public sealed partial class MonoPageFlowSettings : Settings<MonoPageFlowSettings>
     {
-        public bool slimPublishingContext = true;
-        public bool ignoreEmptySubscriber = true;
+        public bool warnNoSubscriber = false;
         public MonoPageLoaderStrategy loaderStrategy;
 
         public RentingStrategy poolRentingStrategy;

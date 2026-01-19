@@ -1,9 +1,11 @@
 #if UNITY_EDITOR
 
 using System;
+using EncosyTower.Common;
 using EncosyTower.Editor.Settings;
 using EncosyTower.Editor.UIElements;
 using EncosyTower.Logging;
+using EncosyTower.PageFlows;
 using EncosyTower.PageFlows.MonoPages;
 using EncosyTower.Pooling;
 using EncosyTower.UIElements;
@@ -16,6 +18,9 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
 {
     internal class MonoPageFlowSettingsEditor
     {
+        public const string PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO = nameof(PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO);
+        public const string PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV = nameof(PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV);
+
         public static readonly string ProjectSettingsUssClassName = "project-settings";
         public static readonly string ProjectSettingsTitleBarUssClassName = $"{ProjectSettingsUssClassName}-title-bar";
         public static readonly string ProjectSettingsTitleBarLabelUssClassName = $"{ProjectSettingsTitleBarUssClassName}__label";
@@ -52,17 +57,31 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
 
             var contentContainer = container.Q("unity-content-container");
 
-            var slimPublishingContext = new Toggle("Slim Publishing Context");
-            var ignoreEmptySubscriber = new Toggle("Ignore Empty Subscriber");
+            var warnNoSubscriber = new Toggle("Warn No Subscriber");
             var loaderStrategy = new EnumField("Loader Strategy", default(MonoPageLoaderStrategy));
             var messageScope = new EnumField("Message Scope", default(MonoMessageScope));
             var logEnvironment = new EnumField("Log Environment", default(LogEnvironment));
             var poolFoldout = new Foldout { text = "GameObject Pooling Strategies" };
             var poolRentingStrategy = new EnumField("Renting", default(RentingStrategy));
             var poolReturningStrategy = new EnumField("Returning", default(ReturningStrategy));
+            var callerInfoFoldout = new Foldout { text = "Caller Info Option For Publishing Page Flow Messages" };
+            var callerInfoOption = new EnumField("Option", default(PubSubCallerInfoOption)) {
+                value = default(PageFlowPublishingContext).CallerInfoOption,
+            };
 
-            contentContainer.Add(slimPublishingContext.WithAlignFieldClass());
-            contentContainer.Add(ignoreEmptySubscriber.WithAlignFieldClass());
+            var callerInfoOptionHelpBox = new HelpBox {
+                messageType = HelpBoxMessageType.Info,
+                text =
+                    "Choose whether to include caller info when publishing page flow messages.\n" +
+                    "Including caller info can be useful for debugging purposes, but may increase build size.\n" +
+                    "- <b>Never:</b> Do not include caller info.\n" +
+                    "- <b>For Development:</b> Include only for Editor and Development builds.\n" +
+                    $"\tSymbol '{PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV}' will be added to Player Settings.\n" +
+                    "- <b>Always:</b> Include for all environments.\n" +
+                    $"\tSymbol '{PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO}' will be added to Player Settings.",
+            };
+
+            contentContainer.Add(warnNoSubscriber.WithAlignFieldClass());
             contentContainer.Add(loaderStrategy.WithAlignFieldClass());
             contentContainer.Add(messageScope.WithAlignFieldClass());
             contentContainer.Add(logEnvironment.WithAlignFieldClass());
@@ -71,16 +90,20 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
             poolFoldout.Add(poolRentingStrategy.WithAlignFieldClass());
             poolFoldout.Add(poolReturningStrategy.WithAlignFieldClass());
 
-            slimPublishingContext.RegisterValueChangedCallback(OnValueChanged);
-            ignoreEmptySubscriber.RegisterValueChangedCallback(OnValueChanged);
+            contentContainer.Add(callerInfoFoldout);
+            callerInfoFoldout.Add(callerInfoOption.WithAlignFieldClass());
+            callerInfoFoldout.Add(callerInfoOptionHelpBox.WithAlignFieldClass());
+
+            callerInfoFoldout.RegisterValueChangedCallback(OnValueChanged);
+            warnNoSubscriber.RegisterValueChangedCallback(OnValueChanged);
             loaderStrategy.RegisterValueChangedCallback(OnValueChanged);
             poolRentingStrategy.RegisterValueChangedCallback(OnValueChanged);
             poolReturningStrategy.RegisterValueChangedCallback(OnValueChanged);
             messageScope.RegisterValueChangedCallback(OnValueChanged);
             logEnvironment.RegisterValueChangedCallback(OnValueChanged);
+            callerInfoOption.RegisterValueChangedCallback(IncludeCallerInfoToggle_OnValueChanged);
 
-            slimPublishingContext.WithBindProperty(context.GetSlimPublishingContext());
-            ignoreEmptySubscriber.WithBindProperty(context.GetIgnoreEmptySubscriber());
+            warnNoSubscriber.WithBindProperty(context.GetWarnNoSubscriber());
             loaderStrategy.WithBindProperty(context.GetLoaderStrategyProperty());
             poolRentingStrategy.WithBindProperty(context.GetPoolRentingStrategyProperty());
             poolReturningStrategy.WithBindProperty(context.GetPoolReturningStrategyProperty());
@@ -136,6 +159,50 @@ namespace EncosyTower.Editor.PageFlows.MonoPages.Settings.Views
                 }
             }
             catch { }
+        }
+
+        private void IncludeCallerInfoToggle_OnValueChanged(ChangeEvent<Enum> evt)
+        {
+            if (evt.newValue is not PubSubCallerInfoOption newValue)
+            {
+                return;
+            }
+
+            var currentOption = default(PageFlowPublishingContext).CallerInfoOption;
+
+            if (currentOption == newValue)
+            {
+                return;
+            }
+
+            var buildTargets = BuildAPI.GetSupportedNamedBuildTargets();
+
+            foreach (var buildTarget in buildTargets)
+            {
+                BuildAPI.RemoveScriptingDefineSymbols(
+                      buildTarget
+                    , PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV
+                    , PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO
+                );
+            }
+
+            var symbol = newValue switch
+            {
+                PubSubCallerInfoOption.ForDevelopment => PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV,
+                PubSubCallerInfoOption.Always => PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO,
+                _ => string.Empty,
+            };
+
+            if (symbol.IsNotEmpty())
+            {
+                foreach (var buildTarget in buildTargets)
+                {
+                    BuildAPI.AddScriptingDefineSymbols(buildTarget, symbol);
+                }
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
 
         [CustomEditor(typeof(MonoPageFlowSettings), true)]

@@ -1,5 +1,15 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV
+#define __PUBSUB_INCLUDE_CALLER_INFO__
+#endif
+#endif
+
+#if PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO
+#define __PUBSUB_INCLUDE_CALLER_INFO__
+#endif
+
 using System;
 using System.Buffers;
 using System.Diagnostics;
@@ -32,8 +42,7 @@ namespace EncosyTower.PageFlows
         private readonly ILogger _logger;
         private readonly PageFlowScope _flowScope;
         private readonly Option<IPageFlowScopeCollectionApplier> _flowScopeCollectionApplier;
-        private readonly bool _slimPublishingContext;
-        private readonly bool _ignoreEmptySubscriber;
+        private readonly bool _warnNoSubscriber;
 
         public PageFlow(
               [NotNull] ArrayPool<UnityTaskUntyped> taskArrayPool
@@ -41,8 +50,7 @@ namespace EncosyTower.PageFlows
             , MessagePublisher publisher
             , PageFlowScope flowScope
             , Option<IPageFlowScopeCollectionApplier> flowScopeCollectionApplier
-            , bool slimPublisingContext
-            , bool ignoreEmptySubscriber
+            , bool warnNoSubscriber
             , [NotNull] ILogger logger
         )
         {
@@ -53,8 +61,7 @@ namespace EncosyTower.PageFlows
             _logger = logger;
             _flowScope = flowScope;
             _flowScopeCollectionApplier = flowScopeCollectionApplier;
-            _slimPublishingContext = slimPublisingContext;
-            _ignoreEmptySubscriber = ignoreEmptySubscriber;
+            _warnNoSubscriber = warnNoSubscriber;
         }
 
         public ArrayPool<UnityTaskUntyped> TaskArrayPool { get; }
@@ -70,13 +77,9 @@ namespace EncosyTower.PageFlows
 
             InitializeIPageNeedsInterfaces(page, this);
 
-            var publishingContext = _slimPublishingContext
-                ? PublishingContext.Get(_ignoreEmptySubscriber, _logger)
-                : PublishingContext.Get(_ignoreEmptySubscriber, _logger, CallerInfo.GetFull());
-
             await _publisher.Scope(_flowScope).PublishAsync(
                   new AttachPageMessage(flow, page ?? _defaultPage, token)
-                , publishingContext
+                , GetPublishingContext()
                 , token
             );
 
@@ -111,13 +114,9 @@ namespace EncosyTower.PageFlows
                 }
             }
 
-            var publishingContext = _slimPublishingContext
-                ? PublishingContext.Get(_ignoreEmptySubscriber, _logger)
-                : PublishingContext.Get(_ignoreEmptySubscriber, _logger, CallerInfo.GetFull());
-
             await _publisher.Scope(_flowScope).PublishAsync(
                   new DetachPageMessage(flow, page ?? _defaultPage, token)
-                , publishingContext
+                , GetPublishingContext()
                 , token
             );
 
@@ -130,13 +129,9 @@ namespace EncosyTower.PageFlows
         {
             if (token.IsCancellationRequested == false)
             {
-                var publishingContext = _slimPublishingContext
-                    ? PublishingContext.Get(_ignoreEmptySubscriber, _logger)
-                    : PublishingContext.Get(_ignoreEmptySubscriber, _logger, CallerInfo.GetFull());
-
                 await _publisher.Scope(_flowScope).PublishAsync(
                       new DetachPageMessage(flow, page ?? _defaultPage, token)
-                    , publishingContext
+                    , GetPublishingContext()
                     , token
                 );
             }
@@ -166,13 +161,9 @@ namespace EncosyTower.PageFlows
             {
                 if (token.IsCancellationRequested == false)
                 {
-                    var publishingContext = _slimPublishingContext
-                    ? PublishingContext.Get(_ignoreEmptySubscriber, _logger)
-                    : PublishingContext.Get(_ignoreEmptySubscriber, _logger, CallerInfo.GetFull());
-
                     await _publisher.Scope(_flowScope).PublishAsync(
                           new BeginTransitionMessage(pageToHide ?? defaultPage, pageToShow ?? defaultPage, token)
-                        , publishingContext
+                        , GetPublishingContext()
                         , token
                     );
                 }
@@ -268,13 +259,9 @@ namespace EncosyTower.PageFlows
                         , context.HideOptions
                     );
 
-                    var publishingContext = _slimPublishingContext
-                        ? PublishingContext.Get(_ignoreEmptySubscriber, _logger)
-                        : PublishingContext.Get(_ignoreEmptySubscriber, _logger, CallerInfo.GetFull());
-
                     await _publisher.Scope(_flowScope).PublishAsync(
                           new EndTransitionMessage(pageToHide, pageToShow, token)
-                        , publishingContext
+                        , GetPublishingContext()
                         , token
                     );
                 }
@@ -573,6 +560,23 @@ namespace EncosyTower.PageFlows
 
                 await UnityTasks.WhenAll(tasks);
             }
+        }
+
+        private PublishingContext GetPublishingContext(
+#if __PUBSUB_INCLUDE_CALLER_INFO__
+              [CallerLineNumber] int lineNumber = 0
+            , [CallerMemberName] string memberName = ""
+            , [CallerFilePath] string filePath = ""
+#endif
+        )
+        {
+            return PublishingContext.Get(
+                  warnNoSubscriber: _warnNoSubscriber
+                , logger: _logger
+#if __PUBSUB_INCLUDE_CALLER_INFO__
+                , callerInfo: new(lineNumber, memberName, filePath)
+#endif
+            );
         }
 
         [UnityEngine.HideInCallstack, StackTraceHidden]

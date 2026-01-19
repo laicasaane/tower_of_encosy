@@ -37,8 +37,7 @@ namespace EncosyTower.PageFlows.MonoPages
     {
         public bool autoInitializeOnAwake;
         public bool useProjectSettings = true;
-        public bool slimPublishingContext = true;
-        public bool ignoreEmptySubscriber = true;
+        public bool warnNoSubscriber = false;
         public MonoPageLoaderStrategy loadStrategy;
 
         public RentingStrategy poolRentingStrategy;
@@ -99,16 +98,10 @@ namespace EncosyTower.PageFlows.MonoPages
             get => _processor.Scope(FlowScope);
         }
 
-        public bool SlimPublishingContext
+        public bool WarnNoSubscriber
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => slimPublishingContext;
-        }
-
-        public bool IgnoreEmptySubscriber
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ignoreEmptySubscriber;
+            get => warnNoSubscriber;
         }
 
         public Logging.ILogger Logger
@@ -129,8 +122,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
             if (settings.IsValid() && useProjectSettings)
             {
-                slimPublishingContext = settings.slimPublishingContext;
-                ignoreEmptySubscriber = settings.ignoreEmptySubscriber;
+                warnNoSubscriber = settings.warnNoSubscriber;
                 loadStrategy = settings.loaderStrategy;
                 poolRentingStrategy = settings.poolRentingStrategy;
                 poolReturningStrategy = settings.poolReturningStrategy;
@@ -149,8 +141,7 @@ namespace EncosyTower.PageFlows.MonoPages
             => new() {
                 autoInitializeOnAwake = autoInitializeOnAwake,
                 useProjectSettings = useProjectSettings,
-                slimPublishingContext = slimPublishingContext,
-                ignoreEmptySubscriber = ignoreEmptySubscriber,
+                warnNoSubscriber = warnNoSubscriber,
                 loadStrategy = loadStrategy,
                 poolRentingStrategy = poolRentingStrategy,
                 poolReturningStrategy = poolReturningStrategy,

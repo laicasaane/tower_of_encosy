@@ -25,9 +25,7 @@ namespace EncosyTower.PageFlows
 
         Option<IPageFlowScopeCollectionApplier> FlowScopeCollectionApplier { get; }
 
-        bool SlimPublishingContext { get; }
-
-        bool IgnoreEmptySubscriber { get; }
+        bool WarnNoSubscriber { get; }
 
         ILogger Logger { get; }
     }

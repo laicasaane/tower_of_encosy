@@ -33,8 +33,7 @@ namespace EncosyTower.PageFlows
                 , context.Publisher
                 , context.FlowScope
                 , context.FlowScopeCollectionApplier
-                , context.SlimPublishingContext
-                , context.IgnoreEmptySubscriber
+                , context.WarnNoSubscriber
                 , _logger
             );
         }
