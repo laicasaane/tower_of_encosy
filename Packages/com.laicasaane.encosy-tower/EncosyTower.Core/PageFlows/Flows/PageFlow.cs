@@ -79,8 +79,7 @@ namespace EncosyTower.PageFlows
 
             await _publisher.Scope(_flowScope).PublishAsync(
                   new AttachPageMessage(flow, page ?? _defaultPage, token)
-                , GetPublishingContext()
-                , token
+                , GetPublishingContext(token)
             );
 
             if (token.IsCancellationRequested)
@@ -116,8 +115,7 @@ namespace EncosyTower.PageFlows
 
             await _publisher.Scope(_flowScope).PublishAsync(
                   new DetachPageMessage(flow, page ?? _defaultPage, token)
-                , GetPublishingContext()
-                , token
+                , GetPublishingContext(token)
             );
 
             DeinitializeIPageNeedsInterfaces(page);
@@ -131,8 +129,7 @@ namespace EncosyTower.PageFlows
             {
                 await _publisher.Scope(_flowScope).PublishAsync(
                       new DetachPageMessage(flow, page ?? _defaultPage, token)
-                    , GetPublishingContext()
-                    , token
+                    , GetPublishingContext(token)
                 );
             }
             else
@@ -163,8 +160,7 @@ namespace EncosyTower.PageFlows
                 {
                     await _publisher.Scope(_flowScope).PublishAsync(
                           new BeginTransitionMessage(pageToHide ?? defaultPage, pageToShow ?? defaultPage, token)
-                        , GetPublishingContext()
-                        , token
+                        , GetPublishingContext(token)
                     );
                 }
                 else
@@ -261,8 +257,7 @@ namespace EncosyTower.PageFlows
 
                     await _publisher.Scope(_flowScope).PublishAsync(
                           new EndTransitionMessage(pageToHide, pageToShow, token)
-                        , GetPublishingContext()
-                        , token
+                        , GetPublishingContext(token)
                     );
                 }
                 else
@@ -563,8 +558,9 @@ namespace EncosyTower.PageFlows
         }
 
         private PublishingContext GetPublishingContext(
+              CancellationToken token
 #if __PUBSUB_INCLUDE_CALLER_INFO__
-              [CallerLineNumber] int lineNumber = 0
+            , [CallerLineNumber] int lineNumber = 0
             , [CallerMemberName] string memberName = ""
             , [CallerFilePath] string filePath = ""
 #endif
@@ -576,6 +572,7 @@ namespace EncosyTower.PageFlows
 #if __PUBSUB_INCLUDE_CALLER_INFO__
                 , callerInfo: new(lineNumber, memberName, filePath)
 #endif
+                , token: token
             );
         }
 

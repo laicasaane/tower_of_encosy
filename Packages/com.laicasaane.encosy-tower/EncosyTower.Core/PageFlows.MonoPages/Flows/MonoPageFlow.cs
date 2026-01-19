@@ -418,8 +418,8 @@ namespace EncosyTower.PageFlows.MonoPages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static UnityTask HandleAsync(MonoPageFlow flow, PrepoolPageAsyncMessage msg, CancellationToken token)
-            => flow.PrepoolPageAsync(msg.AssetKey, msg.Amount, token);
+        private static UnityTask HandleAsync(MonoPageFlow flow, PrepoolPageAsyncMessage msg, PublishingContext context)
+            => flow.PrepoolPageAsync(msg.AssetKey, msg.Amount, context.Token);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Handle(MonoPageFlow flow, TrimPoolMessage msg)

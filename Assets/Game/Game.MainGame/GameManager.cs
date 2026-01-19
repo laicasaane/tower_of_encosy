@@ -15,8 +15,7 @@ namespace Module.MainGame
 
             GlobalMessenger.Publisher.UnityScope(this).Publish(
                   new TestMsg("From Awake")
-                , PublishingContext.WaitForSubscriber()
-                , destroyCancellationToken
+                , PublishingContext.WaitForSubscriber(token: destroyCancellationToken)
             );
         }
 

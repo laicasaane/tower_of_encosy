@@ -115,30 +115,30 @@ namespace EncosyTower.PageFlows.MonoPages
         private static UnityTask HandleAsync(
               MonoMultiPageList list
             , AddPageAsyncMessage msg
-            , CancellationToken token
+            , PublishingContext context
         )
         {
-            return list.AddPageAsync(msg.AssetKey, msg.Context, token);
+            return list.AddPageAsync(msg.AssetKey, msg.Context, context.Token);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static UnityTask HandleAsync(
               MonoMultiPageList list
             , ShowPageAtIndexAsyncMessage msg
-            , CancellationToken token
+            , PublishingContext context
         )
         {
-            return list.ShowPageAtIndexAsync(msg.Index, msg.Context, token);
+            return list.ShowPageAtIndexAsync(msg.Index, msg.Context, context.Token);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static UnityTask HandleAsync(
               MonoMultiPageList list
             , HidePageAtIndexAsyncMessage msg
-            , CancellationToken token
+            , PublishingContext context
         )
         {
-            return list.HidePageAtIndexAsync(msg.Index, msg.Context, token);
+            return list.HidePageAtIndexAsync(msg.Index, msg.Context, context.Token);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

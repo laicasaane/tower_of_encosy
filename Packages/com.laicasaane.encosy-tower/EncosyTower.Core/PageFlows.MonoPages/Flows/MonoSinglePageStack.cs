@@ -100,20 +100,20 @@ namespace EncosyTower.PageFlows.MonoPages
         private static UnityTask HandleAsync(
               MonoSinglePageStack stack
             , ShowPageAsyncMessage msg
-            , CancellationToken token
+            , PublishingContext context
         )
         {
-            return stack.ShowPageAsync(msg.AssetKey, msg.Context, token);
+            return stack.ShowPageAsync(msg.AssetKey, msg.Context, context.Token);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static UnityTask HandleAsync(
               MonoSinglePageStack stack
             , HideActivePageAsyncMessage msg
-            , CancellationToken token
+            , PublishingContext context
         )
         {
-            return stack.HideActivePageAsync(msg.Context, token);
+            return stack.HideActivePageAsync(msg.Context, context.Token);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
