@@ -21,10 +21,10 @@ namespace EncosyTower.PubSub.Internals
 
         public override void Dispose()
         {
-            var scopedBrokers = _scopedBrokers;
-
-            lock (scopedBrokers)
+            lock (_scopedBrokers)
             {
+                var scopedBrokers = _scopedBrokers;
+
                 var brokers = scopedBrokers.GetValues();
 
                 foreach (var broker in brokers)
@@ -81,10 +81,10 @@ namespace EncosyTower.PubSub.Internals
         /// </summary>
         public void Compress(TScope scope, ILogger logger)
         {
-            var scopedBrokers = _scopedBrokers;
-
-            lock (scopedBrokers)
+            lock (_scopedBrokers)
             {
+                var scopedBrokers = _scopedBrokers;
+
                 if (scopedBrokers.TryGetValue(scope, out var broker) == false)
                 {
                     return;

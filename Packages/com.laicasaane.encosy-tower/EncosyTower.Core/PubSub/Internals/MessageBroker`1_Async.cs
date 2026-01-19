@@ -92,7 +92,7 @@ namespace EncosyTower.PubSub.Internals
             try
 #endif
             {
-                ToTasks(handlerList, message, context, token, tasks);
+                GetTasks(handlerList, message, context, token, tasks);
 
                 await UnityTasks.WhenAll(tasks);
             }
@@ -108,12 +108,12 @@ namespace EncosyTower.PubSub.Internals
             }
         }
 
-        private static void ToTasks(
+        private static void GetTasks(
               FasterList<IHandler<TMessage>> handlerList
             , TMessage message
             , PublishingContext context
             , CancellationToken token
-            , UnityTask[] result
+            , UnityTask[] resultTasks
         )
         {
             var handlers = handlerList.AsReadOnlySpan();
@@ -125,12 +125,12 @@ namespace EncosyTower.PubSub.Internals
                 try
 #endif
                 {
-                    result[i] = handlers[i]?.Handle(message, context, token) ?? UnityTasks.GetCompleted();
+                    resultTasks[i] = handlers[i]?.Handle(message, context, token) ?? UnityTasks.GetCompleted();
                 }
 #if __ENCOSY_VALIDATION__
                 catch (Exception ex)
                 {
-                    result[i] = UnityTasks.GetCompleted();
+                    resultTasks[i] = UnityTasks.GetCompleted();
                     context.Logger.LogException(ex);
                 }
 #endif

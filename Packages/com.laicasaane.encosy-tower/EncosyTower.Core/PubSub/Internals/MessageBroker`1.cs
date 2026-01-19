@@ -26,13 +26,8 @@ namespace EncosyTower.PubSub.Internals
 
         public bool IsEmpty
         {
-            get
-            {
-                lock (_ordering)
-                {
-                    return _ordering.Count < 1;
-                }
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _ordering.Count < 1;
         }
 
         public bool IsCached => _refCount > 0;
@@ -148,43 +143,40 @@ namespace EncosyTower.PubSub.Internals
 
         private FasterList<FasterList<IHandler<TMessage>>> GetHandlerListList(ILogger logger)
         {
-            lock (_orderToHandlerMap)
+            var orderToHandlerMap = _orderToHandlerMap;
+            var orders = _ordering.AsSpan();
+            var handlerListList = GetHandlerListList();
+
+#if __ENCOSY_VALIDATION__
+            try
+#endif
             {
-                var orderToHandlerMap = _orderToHandlerMap;
-                var orders = _ordering.AsSpan();
-                var handlerListList = GetHandlerListList();
-
-#if __ENCOSY_VALIDATION__
-                try
-#endif
+                for (var i = orders.Length - 1; i >= 0; i--)
                 {
-                    for (var i = orders.Length - 1; i >= 0; i--)
+                    var order = orders[i];
+
+                    if (orderToHandlerMap.TryGetValue(order, out var handlerMap) == false
+                        || handlerMap.Count < 1
+                    )
                     {
-                        var order = orders[i];
-
-                        if (orderToHandlerMap.TryGetValue(order, out var handlerMap) == false
-                            || handlerMap.Count < 1
-                        )
-                        {
-                            continue;
-                        }
-
-                        var handlerArray = handlerMap.GetValues();
-                        var handlerList = GetHandlerList();
-                        var handlerSpan = handlerList.AddReplicateNoInit(handlerArray.Length);
-                        handlerArray.CopyTo(handlerSpan);
-                        handlerListList.Add(handlerList);
+                        continue;
                     }
+
+                    var handlerArray = handlerMap.GetValues();
+                    var handlerList = GetHandlerList();
+                    var handlerSpan = handlerList.AddReplicateNoInit(handlerArray.Length);
+                    handlerArray.CopyTo(handlerSpan);
+                    handlerListList.Add(handlerList);
                 }
+            }
 #if __ENCOSY_VALIDATION__
-                catch (Exception ex)
-                {
-                    logger?.LogException(ex);
-                }
+            catch (Exception ex)
+            {
+                logger?.LogException(ex);
+            }
 #endif
 
-                return handlerListList;
-            }
+            return handlerListList;
         }
 
         private static void Dispose(FasterList<FasterList<IHandler<TMessage>>> handlersList)

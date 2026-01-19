@@ -22,14 +22,9 @@ namespace EncosyTower.PubSub.Internals
             , CancellationToken token
         )
         {
-            var scopedBrokers = _scopedBrokers;
-
-            lock (scopedBrokers)
-            {
-                return scopedBrokers.TryGetValue(scope, out var broker)
-                    ? broker.PublishAsync(message, context, token)
-                    : UnityTasks.GetCompleted();
-            }
+            return _scopedBrokers.TryGetValue(scope, out var broker)
+                ? broker.PublishAsync(message, context, token)
+                : UnityTasks.GetCompleted();
         }
 
         public Subscription<TMessage> Subscribe(
@@ -40,10 +35,10 @@ namespace EncosyTower.PubSub.Internals
             , ILogger logger
         )
         {
-            var scopedBrokers = _scopedBrokers;
-
-            lock (scopedBrokers)
+            lock (_scopedBrokers)
             {
+                var scopedBrokers = _scopedBrokers;
+
                 if (scopedBrokers.TryGetValue(scope, out var broker) == false)
                 {
                     scopedBrokers[scope] = broker = new MessageBroker<TMessage>();
@@ -56,10 +51,10 @@ namespace EncosyTower.PubSub.Internals
 
         public MessageBroker<TMessage> Cache(TScope scope, ArrayPool<UnityTask> taskArrayPool)
         {
-            var scopedBrokers = _scopedBrokers;
-
-            lock (scopedBrokers)
+            lock (_scopedBrokers)
             {
+                var scopedBrokers = _scopedBrokers;
+
                 if (scopedBrokers.TryGetValue(scope, out var broker) == false)
                 {
                     scopedBrokers[scope] = broker = new MessageBroker<TMessage>();
