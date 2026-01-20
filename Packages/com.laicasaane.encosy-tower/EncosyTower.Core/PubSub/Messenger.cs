@@ -3,6 +3,7 @@
 using System;
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
+using EncosyTower.Pooling;
 using EncosyTower.PubSub.Internals;
 using EncosyTower.Vaults;
 
@@ -16,12 +17,12 @@ namespace EncosyTower.PubSub
 
     public sealed class Messenger : IDisposable
     {
-        private readonly SingletonVault<MessageBroker> _brokers = new();
+        private readonly SingletonVault<IMessageBroker> _messageBrokers = new();
 
-        public Messenger([NotNull] ArrayPool<UnityTask> taskArrayPool)
+        public Messenger([NotNull] ArrayPool<UnityTask> taskArrayPool )
         {
-            Subscriber = new(_brokers, taskArrayPool);
-            Publisher = new(_brokers, taskArrayPool);
+            Subscriber = new(_messageBrokers, taskArrayPool);
+            Publisher = new(_messageBrokers, taskArrayPool);
         }
 
         public MessageSubscriber Subscriber { get; }
@@ -30,7 +31,7 @@ namespace EncosyTower.PubSub
 
         public void Dispose()
         {
-            _brokers.Dispose();
+            _messageBrokers.Dispose();
         }
     }
 }

@@ -1,5 +1,6 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
@@ -9,9 +10,25 @@ using EncosyTower.Vaults;
 
 namespace EncosyTower.PubSub
 {
+#if UNITASK
+    using UnityTask = Cysharp.Threading.Tasks.UniTask;
+#else
+    using UnityTask = UnityEngine.Awaitable;
+#endif
+
     public partial class MessagePublisher
     {
-        private readonly SingletonVault<MessageBroker> _brokers;
+        private readonly SingletonVault<IMessageBroker> _messageBrokers;
+        private readonly ArrayPool<UnityTask> _taskArrayPool;
+
+        internal MessagePublisher(
+              SingletonVault<IMessageBroker> messageBrokers
+            , ArrayPool<UnityTask> taskArrayPool
+        )
+        {
+            _messageBrokers = messageBrokers;
+            _taskArrayPool = taskArrayPool;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Publisher<GlobalScope> Global()

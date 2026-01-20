@@ -1,5 +1,6 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
@@ -9,9 +10,25 @@ using EncosyTower.Vaults;
 
 namespace EncosyTower.PubSub
 {
+#if UNITASK
+    using UnityTask = Cysharp.Threading.Tasks.UniTask;
+#else
+    using UnityTask = UnityEngine.Awaitable;
+#endif
+
     public partial class MessageSubscriber
     {
-        private readonly SingletonVault<MessageBroker> _brokers;
+        private readonly SingletonVault<IMessageBroker> _messageBrokers;
+        private readonly ArrayPool<UnityTask> _taskArrayPool;
+
+        internal MessageSubscriber(
+              SingletonVault<IMessageBroker> messageBrokers
+            , ArrayPool<UnityTask> taskArrayPool
+        )
+        {
+            _messageBrokers = messageBrokers;
+            _taskArrayPool = taskArrayPool;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Subscriber<GlobalScope> Global()
@@ -42,7 +59,7 @@ namespace EncosyTower.PubSub
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Compress<TScope, TMessage>(TScope scope, ILogger logger = null)
         {
-            if (_brokers.TryGet<MessageBroker<TScope, TMessage>>(out var broker))
+            if (_messageBrokers.TryGet<MessageBroker<TScope, TMessage>>(out var broker))
             {
                 broker.Compress(scope, logger);
             }
@@ -56,10 +73,10 @@ namespace EncosyTower.PubSub
             , ILogger logger
         )
         {
-            lock (_brokers)
+            lock (_messageBrokers)
             {
                 var taskArrayPool = _taskArrayPool;
-                var brokers = _brokers;
+                var brokers = _messageBrokers;
 
                 if (brokers.TryGet<MessageBroker<TScope, TMessage>>(out var broker) == false)
                 {

@@ -7,9 +7,11 @@
 #endif
 
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.PubSub.Internals;
+using EncosyTower.Tasks;
 
 namespace EncosyTower.PubSub
 {
@@ -43,9 +45,9 @@ namespace EncosyTower.PubSub
                 }
 #endif
 
-                lock (_publisher._brokers)
+                lock (_publisher._messageBrokers)
                 {
-                    var brokers = _publisher._brokers;
+                    var brokers = _publisher._messageBrokers;
 
                     if (brokers.TryGet<MessageBroker<TScope, TMessage>>(out var scopedBroker) == false)
                     {
@@ -65,6 +67,26 @@ namespace EncosyTower.PubSub
                     var broker = scopedBroker.Cache(Scope, _publisher._taskArrayPool);
                     return new CachedPublisher<TMessage>(broker);
                 }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Publish<TMessage>(PublishingContext context = default)
+#if ENCOSY_PUBSUB_RELAX_MODE
+                where TMessage : new()
+#else
+                where TMessage : IMessage, new()
+#endif
+            {
+                Publish(new TMessage(), context);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Publish<TMessage>(TMessage message, PublishingContext context = default)
+#if !ENCOSY_PUBSUB_RELAX_MODE
+                where TMessage : IMessage
+#endif
+            {
+                PublishAsync(message, context).Forget();
             }
 
 #if __ENCOSY_VALIDATION__

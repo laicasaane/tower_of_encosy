@@ -11,9 +11,16 @@ using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.PubSub.Internals;
+using EncosyTower.Tasks;
 
 namespace EncosyTower.PubSub
 {
+#if UNITASK
+    using UnityTask = Cysharp.Threading.Tasks.UniTask;
+#else
+    using UnityTask = UnityEngine.Awaitable;
+#endif
+
     public partial struct CachedPublisher<TMessage> : IDisposable, IIsCreated
 #if ENCOSY_PUBSUB_RELAX_MODE
         where TMessage : new()
@@ -40,6 +47,42 @@ namespace EncosyTower.PubSub
         public readonly void Publish(PublishingContext context = default)
         {
             Publish(new TMessage(), context);
+        }
+
+#if __ENCOSY_NO_VALIDATION__
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public readonly void Publish(TMessage message, PublishingContext context = default)
+        {
+#if __ENCOSY_VALIDATION__
+            if (Validate(message, context.Logger) == false)
+            {
+                return;
+            }
+#endif
+
+            _broker.PublishAsync(message, context).Forget();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly UnityTask PublishAsync(PublishingContext context = default)
+        {
+            return PublishAsync(new TMessage(), context);
+        }
+
+#if __ENCOSY_NO_VALIDATION__
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public readonly UnityTask PublishAsync(TMessage message, PublishingContext context = default)
+        {
+#if __ENCOSY_VALIDATION__
+            if (Validate(message, context.Logger) == false)
+            {
+                return UnityTasks.GetCompleted();
+            }
+#endif
+
+            return _broker.PublishAsync(message, context);
         }
 
 #if __ENCOSY_VALIDATION__

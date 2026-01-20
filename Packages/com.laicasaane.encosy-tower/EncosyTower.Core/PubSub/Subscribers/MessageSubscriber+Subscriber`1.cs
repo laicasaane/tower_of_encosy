@@ -239,7 +239,7 @@ namespace EncosyTower.PubSub
 #if __ENCOSY_VALIDATION__
             private bool Validate(ILogger logger)
             {
-                if (_subscriber != null)
+                if (IsCreated)
                 {
                     return true;
                 }

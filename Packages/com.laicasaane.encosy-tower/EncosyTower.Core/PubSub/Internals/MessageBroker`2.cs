@@ -7,19 +7,28 @@
 #endif
 
 using System;
+using System.Buffers;
+using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Logging;
+using EncosyTower.Tasks;
 
 namespace EncosyTower.PubSub.Internals
 {
-    internal sealed partial class MessageBroker<TScope, TMessage> : MessageBroker
+#if UNITASK
+    using UnityTask = Cysharp.Threading.Tasks.UniTask;
+#else
+    using UnityTask = UnityEngine.Awaitable;
+#endif
+
+    internal sealed class MessageBroker<TScope, TMessage> : IMessageBroker
     {
         private readonly ArrayMap<TScope, MessageBroker<TMessage>> _scopedBrokers = new();
         private readonly FasterList<TScope> _scopesToRemove = new();
 
         public bool IsEmpty => _scopedBrokers.Count <= 0;
 
-        public override void Dispose()
+        public void Dispose()
         {
             lock (_scopedBrokers)
             {
@@ -36,7 +45,7 @@ namespace EncosyTower.PubSub.Internals
             }
         }
 
-        public override void Compress(ILogger logger)
+        public void Compress(ILogger logger)
         {
             lock (_scopedBrokers)
             {
@@ -102,6 +111,53 @@ namespace EncosyTower.PubSub.Internals
                     scopedBrokers.Remove(scope);
                     broker.Dispose();
                 }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public UnityTask PublishAsync(TScope scope, TMessage message, PublishingContext context)
+        {
+            return _scopedBrokers.TryGetValue(scope, out var broker)
+                ? broker.PublishAsync(message, context)
+                : UnityTasks.GetCompleted();
+        }
+
+        public Subscription<TMessage> Subscribe(
+              TScope scope
+            , IHandler<TMessage> handler
+            , int order
+            , ArrayPool<UnityTask> taskArrayPool
+            , ILogger logger
+        )
+        {
+            lock (_scopedBrokers)
+            {
+                var scopedBrokers = _scopedBrokers;
+
+                if (scopedBrokers.TryGetValue(scope, out var broker) == false)
+                {
+                    scopedBrokers[scope] = broker = new MessageBroker<TMessage>();
+                    broker.TaskArrayPool = taskArrayPool;
+                }
+
+                return broker.Subscribe(handler, order, logger);
+            }
+        }
+
+        public MessageBroker<TMessage> Cache(TScope scope, ArrayPool<UnityTask> taskArrayPool)
+        {
+            lock (_scopedBrokers)
+            {
+                var scopedBrokers = _scopedBrokers;
+
+                if (scopedBrokers.TryGetValue(scope, out var broker) == false)
+                {
+                    scopedBrokers[scope] = broker = new MessageBroker<TMessage>();
+                    broker.TaskArrayPool = taskArrayPool;
+                }
+
+                broker.OnCache();
+                return broker;
             }
         }
     }
