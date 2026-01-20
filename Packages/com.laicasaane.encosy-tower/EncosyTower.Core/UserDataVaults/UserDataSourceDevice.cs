@@ -233,10 +233,8 @@ namespace EncosyTower.UserDataVaults
 
         private void MakeFilePath()
         {
-            _filePath = _makeFilePathFunc
-                ?.Invoke(_rootPath, _subFolderName, _fileName, _fileExtension, typeof(TData))
-                .NotEmptyOr(Path.Combine(_rootPath.Root, _subFolderName, $"{_fileName}.{_fileExtension}"))
-                ;
+            _filePath = (_makeFilePathFunc?.Invoke(_rootPath, _subFolderName, _fileName, _fileExtension, typeof(TData)))
+                .NotEmptyOr(Path.Combine(_rootPath.Root, _subFolderName, $"{_fileName}.{_fileExtension}"));
         }
 
         private static Exception CreateArgumentException_InstanceOfType()
