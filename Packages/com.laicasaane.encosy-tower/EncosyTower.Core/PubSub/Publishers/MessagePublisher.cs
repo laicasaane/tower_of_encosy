@@ -19,14 +19,17 @@ namespace EncosyTower.PubSub
     public partial class MessagePublisher
     {
         private readonly SingletonVault<IMessageBroker> _messageBrokers;
+        private readonly InterceptorBrokers _interceptorBrokers;
         private readonly ArrayPool<UnityTask> _taskArrayPool;
 
         internal MessagePublisher(
               SingletonVault<IMessageBroker> messageBrokers
+            , InterceptorBrokers interceptorBrokers
             , ArrayPool<UnityTask> taskArrayPool
         )
         {
             _messageBrokers = messageBrokers;
+            _interceptorBrokers = interceptorBrokers;
             _taskArrayPool = taskArrayPool;
         }
 

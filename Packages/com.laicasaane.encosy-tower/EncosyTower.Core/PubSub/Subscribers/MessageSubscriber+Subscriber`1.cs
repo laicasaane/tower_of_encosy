@@ -66,6 +66,8 @@ namespace EncosyTower.PubSub
 
             public ICollection<ISubscription> Subscriptions => _subscriptions ?? EmptySubscriptions.Default;
 
+            public MessageInterceptors Interceptors => _subscriber?.Interceptors ?? default;
+
             /// <summary>
             /// Remove empty handler groups to optimize performance.
             /// </summary>

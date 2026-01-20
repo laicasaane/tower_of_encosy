@@ -19,16 +19,21 @@ namespace EncosyTower.PubSub
     public partial class MessageSubscriber
     {
         private readonly SingletonVault<IMessageBroker> _messageBrokers;
+        private readonly InterceptorBrokers _interceptorBrokers;
         private readonly ArrayPool<UnityTask> _taskArrayPool;
 
         internal MessageSubscriber(
               SingletonVault<IMessageBroker> messageBrokers
+            , InterceptorBrokers interceptorBrokers
             , ArrayPool<UnityTask> taskArrayPool
         )
         {
             _messageBrokers = messageBrokers;
+            _interceptorBrokers = interceptorBrokers;
             _taskArrayPool = taskArrayPool;
         }
+
+        public MessageInterceptors Interceptors => new(_interceptorBrokers);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Subscriber<GlobalScope> Global()

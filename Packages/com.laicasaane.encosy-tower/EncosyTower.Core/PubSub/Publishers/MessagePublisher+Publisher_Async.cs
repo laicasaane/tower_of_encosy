@@ -48,18 +48,72 @@ namespace EncosyTower.PubSub
                 }
 #endif
 
+                if (_publisher._interceptorBrokers.HasInterceptors)
+                {
+                    var publisher = InterceptablePublisher<TScope, TMessage>.Rent();
+                    publisher.scope = Scope;
+                    publisher.message = message;
+                    publisher.context = context;
+                    publisher.publisher = this;
+
+                    _publisher._interceptorBrokers.GetInterceptors<TScope, TMessage>(
+                          publisher.Interceptors
+                        , publisher.ObjectStack
+                    );
+
+                    return ContinueAsync(publisher.PublishAsync(), publisher);
+                }
+                else
+                {
+                    return PublishAsyncInternal(Scope, message, context);
+                }
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                static async UnityTask ContinueAsync(
+                      UnityTask task
+                    , InterceptablePublisher<TScope, TMessage> publisher
+                )
+                {
+                    try
+                    {
+                        await task;
+                    }
+                    finally
+                    {
+                        publisher.Return();
+                    }
+                }
+            }
+
+#if __ENCOSY_NO_VALIDATION__
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+            internal UnityTask PublishCoreAsync<TMessage>(TScope scope, TMessage message, PublishingContext context)
+            {
+#if __ENCOSY_VALIDATION__
+                if (Validate(message, context.Logger) == false)
+                {
+                    return UnityTasks.GetCompleted();
+                }
+#endif
+
+                return PublishAsyncInternal(scope, message, context);
+            }
+
+            private UnityTask PublishAsyncInternal<TMessage>(TScope scope, TMessage message, PublishingContext context)
+            {
                 if (TryGetMessageBroker<TMessage>(_publisher, out var messageBroker))
                 {
-                    return messageBroker.PublishAsync(Scope, message, context);
+                    return messageBroker.PublishAsync(scope, message, context);
                 }
                 else if (context.Strategy == PublishingStrategy.WaitForSubscriber)
                 {
-                    return LatePublishAsync(_publisher, Scope, message, context);
+                    return LatePublishAsync(_publisher, scope, message, context);
                 }
 #if __ENCOSY_VALIDATION__
                 else
                 {
-                    LogWarningNoSubscriber<TMessage>(Scope, context);
+                    LogWarningNoSubscriber<TMessage>(scope, context);
                 }
 #endif
 

@@ -1,15 +1,15 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
-namespace EncosyTower.PubSub
-{
-    using System.Buffers;
+using System.Buffers;
 
 #if UNITASK
-    using UnityTask = Cysharp.Threading.Tasks.UniTask;
+using UnityTask = Cysharp.Threading.Tasks.UniTask;
 #else
     using UnityTask = UnityEngine.Awaitable;
 #endif
 
+namespace EncosyTower.PubSub
+{
     public static partial class GlobalMessenger
     {
         private static Messenger s_instance;
@@ -19,6 +19,8 @@ namespace EncosyTower.PubSub
         public static MessagePublisher Publisher => Instance.Publisher;
 
         public static MessageSubscriber Subscriber => Instance.Subscriber;
+
+        public static MessageInterceptors Interceptors => Instance.Interceptors;
     }
 }
 
@@ -35,11 +37,10 @@ namespace EncosyTower.PubSub
         private static void InitWhenDomainReloadDisabled()
         {
             s_instance?.Dispose();
-            s_instance = null;
+            s_instance = new(ArrayPool<UnityTask>.Shared);
         }
     }
 }
 
 #endif
-
 #endif
