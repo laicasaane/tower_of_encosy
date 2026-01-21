@@ -16,16 +16,22 @@ namespace EncosyTower.Processing.Internals.Async
     internal sealed class AsyncProcessHandler<TRequest> : IAsyncProcessHandler<TRequest>
     {
         private static readonly TypeId s_typeId;
-        private readonly Func<TRequest, UnityTask> _process;
+        private readonly Func<TRequest, UnityTask> _process1;
+        private readonly Func<TRequest, CancellationToken, UnityTask> _process2;
 
         static AsyncProcessHandler()
         {
-            s_typeId = (TypeId)Type<Func<TRequest, UnityTask>>.Id;
+            s_typeId = (TypeId)Type<Func<TRequest, CancellationToken, UnityTask>>.Id;
         }
 
         public AsyncProcessHandler(Func<TRequest, UnityTask> process)
         {
-            _process = process ?? throw new ArgumentNullException(nameof(process));
+            _process1 = process ?? throw new ArgumentNullException(nameof(process));
+        }
+
+        public AsyncProcessHandler(Func<TRequest, CancellationToken, UnityTask> process)
+        {
+            _process2 = process ?? throw new ArgumentNullException(nameof(process));
         }
 
         public TypeId Id
@@ -37,7 +43,9 @@ namespace EncosyTower.Processing.Internals.Async
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UnityTask ProcessAsync(TRequest request, CancellationToken token)
         {
-            return _process(request);
+            return _process1 is not null
+                ? _process1(request)
+                : _process2(request, token);
         }
     }
 
@@ -46,17 +54,19 @@ namespace EncosyTower.Processing.Internals.Async
         private static readonly TypeId s_typeId;
 
 #if UNITASK
-        private readonly Func<TRequest, Cysharp.Threading.Tasks.UniTask<TResult>> _process;
+        private readonly Func<TRequest, Cysharp.Threading.Tasks.UniTask<TResult>> _process1;
+        private readonly Func<TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<TResult>> _process2;
 #else
-        private readonly Func<TRequest, UnityEngine.Awaitable<TResult>> _process;
+        private readonly Func<TRequest, UnityEngine.Awaitable<TResult>> _process1;
+        private readonly Func<TRequest, CancellationToken, UnityEngine.Awaitable<TResult>> _process2;
 #endif
 
         static AsyncProcessHandler()
         {
 #if UNITASK
-            s_typeId = (TypeId)Type<Func<TRequest, Cysharp.Threading.Tasks.UniTask<TResult>>>.Id;
+            s_typeId = (TypeId)Type<Func<TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<TResult>>>.Id;
 #else
-            s_typeId = (TypeId)Type<Func<TRequest, UnityEngine.Awaitable<TResult>>>.Id;
+            s_typeId = (TypeId)Type<Func<TRequest, CancellationToken, UnityEngine.Awaitable<TResult>>>.Id;
 #endif
         }
 
@@ -68,76 +78,10 @@ namespace EncosyTower.Processing.Internals.Async
 #endif
         )
         {
-            _process = process ?? throw new ArgumentNullException(nameof(process));
+            _process1 = process ?? throw new ArgumentNullException(nameof(process));
         }
 
-        public TypeId Id
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => s_typeId;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public
-#if UNITASK
-            Cysharp.Threading.Tasks.UniTask<TResult>
-#else
-            UnityEngine.Awaitable<TResult>
-#endif
-            ProcessAsync(TRequest request, CancellationToken token)
-        {
-            return _process(request);
-        }
-    }
-
-    internal sealed class CancellableAsyncProcessHandler<TRequest> : IAsyncProcessHandler<TRequest>
-    {
-        private static readonly TypeId s_typeId;
-        private readonly Func<TRequest, CancellationToken, UnityTask> _process;
-
-        static CancellableAsyncProcessHandler()
-        {
-            s_typeId = (TypeId)Type<Func<TRequest, CancellationToken, UnityTask>>.Id;
-        }
-
-        public CancellableAsyncProcessHandler(Func<TRequest, CancellationToken, UnityTask> process)
-        {
-            _process = process ?? throw new ArgumentNullException(nameof(process));
-        }
-
-        public TypeId Id
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => s_typeId;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UnityTask ProcessAsync(TRequest request, CancellationToken token)
-        {
-            return _process(request, token);
-        }
-    }
-
-    internal sealed class CancellableAsyncProcessHandler<TRequest, TResult> : IAsyncProcessHandler<TRequest, TResult>
-    {
-        private static readonly TypeId s_typeId;
-
-#if UNITASK
-        private readonly Func<TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<TResult>> _process;
-#else
-        private readonly Func<TRequest, CancellationToken, UnityEngine.Awaitable<TResult>> _process;
-#endif
-
-        static CancellableAsyncProcessHandler()
-        {
-#if UNITASK
-            s_typeId = (TypeId)Type<Func<TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<TResult>>>.Id;
-#else
-            s_typeId = (TypeId)Type<Func<TRequest, CancellationToken, UnityEngine.Awaitable<TResult>>>.Id;
-#endif
-        }
-
-        public CancellableAsyncProcessHandler(
+        public AsyncProcessHandler(
 #if UNITASK
             Func<TRequest, CancellationToken, Cysharp.Threading.Tasks.UniTask<TResult>> process
 #else
@@ -145,7 +89,7 @@ namespace EncosyTower.Processing.Internals.Async
 #endif
         )
         {
-            _process = process ?? throw new ArgumentNullException(nameof(process));
+            _process2 = process ?? throw new ArgumentNullException(nameof(process));
         }
 
         public TypeId Id
@@ -163,7 +107,9 @@ namespace EncosyTower.Processing.Internals.Async
 #endif
             ProcessAsync(TRequest request, CancellationToken token)
         {
-            return _process(request, token);
+            return _process1 is not null
+                ? _process1(request)
+                : _process2(request, token);
         }
     }
 }
