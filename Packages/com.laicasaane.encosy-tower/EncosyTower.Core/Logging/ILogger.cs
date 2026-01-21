@@ -17,18 +17,6 @@ namespace EncosyTower.Logging
         void LogError(object message);
 
         void LogErrorFormat(string format, params object[] args);
-
-        void LogInfoSlim(object message);
-
-        void LogInfoFormatSlim(string format, params object[] args);
-
-        void LogWarningSlim(object message);
-
-        void LogWarningFormatSlim(string format, params object[] args);
-
-        void LogErrorSlim(object message);
-
-        void LogErrorFormatSlim(string format, params object[] args);
     }
 }
 

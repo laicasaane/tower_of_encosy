@@ -56,48 +56,6 @@ namespace EncosyTower.Logging
         {
             StaticDevLogger.LogErrorFormat(format, args);
         }
-
-        /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void LogInfoSlim(object message)
-        {
-            StaticDevLogger.LogInfoSlim(message);
-        }
-
-        /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void LogInfoFormatSlim(string format, params object[] args)
-        {
-            StaticDevLogger.LogInfoFormatSlim(format, args);
-        }
-
-        /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void LogWarningSlim(object message)
-        {
-            StaticDevLogger.LogWarningSlim(message);
-        }
-
-        /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void LogWarningFormatSlim(string format, params object[] args)
-        {
-            StaticDevLogger.LogWarningFormatSlim(format, args);
-        }
-
-        /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void LogErrorSlim(object message)
-        {
-            StaticDevLogger.LogErrorSlim(message);
-        }
-
-        /// <see cref="LogOption.NoStacktrace"/>
-        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void LogErrorFormatSlim(string format, params object[] args)
-        {
-            StaticDevLogger.LogErrorFormatSlim(format, args);
-        }
     }
 }
 

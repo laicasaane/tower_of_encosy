@@ -5,9 +5,13 @@ namespace EncosyTower.Logging
     using System.Runtime.CompilerServices;
     using UnityEngine;
 
-    public partial class Logger : ILogger
+    /// <summary>
+    /// A slim logger that omits stack traces for performance.
+    /// </summary>
+    /// <seealso cref="LogOption.NoStacktrace"/>
+    public partial class SlimLogger : ILogger
     {
-        public static readonly Logger Default = new();
+        public static readonly SlimLogger Default = new();
 
         [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogException(Exception value)
@@ -18,37 +22,37 @@ namespace EncosyTower.Logging
         [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogInfo(object message)
         {
-            StaticLogger.LogInfo(message);
+            StaticLogger.LogInfoSlim(message);
         }
 
         [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogInfoFormat(string format, params object[] args)
         {
-            StaticLogger.LogInfoFormat(format, args);
+            StaticLogger.LogInfoFormatSlim(format, args);
         }
 
         [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogWarning(object message)
         {
-            StaticLogger.LogWarning(message);
+            StaticLogger.LogWarningSlim(message);
         }
 
         [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogWarningFormat(string format, params object[] args)
         {
-            StaticLogger.LogWarningFormat(format, args);
+            StaticLogger.LogWarningFormatSlim(format, args);
         }
 
         [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogError(object message)
         {
-            StaticLogger.LogError(message);
+            StaticLogger.LogErrorSlim(message);
         }
 
         [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogErrorFormat(string format, params object[] args)
         {
-            StaticLogger.LogErrorFormat(format, args);
+            StaticLogger.LogErrorFormatSlim(format, args);
         }
     }
 }
@@ -62,27 +66,27 @@ namespace EncosyTower.Logging
     using Unity.Collections;
     using UnityEngine;
 
-    partial class Logger
+    partial class SlimLogger
     {
         [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogFixedInfo<TFixedString>(in TFixedString message)
             where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
         {
-            StaticLogger.LogInfo(message);
+            StaticLogger.LogInfoSlim(message);
         }
 
         [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogFixedWarning<TFixedString>(in TFixedString message)
             where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
         {
-            StaticLogger.LogWarning(message);
+            StaticLogger.LogWarningSlim(message);
         }
 
         [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogFixedError<TFixedString>(in TFixedString message)
             where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
         {
-            StaticLogger.LogError(message);
+            StaticLogger.LogErrorSlim(message);
         }
     }
 }
