@@ -108,7 +108,7 @@ namespace EncosyTower.PubSub
                 }
                 else if (context.Strategy == PublishingStrategy.WaitForSubscriber)
                 {
-                    return LatePublishAsync(_publisher, scope, message, context);
+                    return WaitThenPublishAsync(_publisher, scope, message, context);
                 }
 #if __ENCOSY_VALIDATION__
                 else
@@ -129,7 +129,7 @@ namespace EncosyTower.PubSub
                 return publisher._messageBrokers.TryGet(out messageBroker);
             }
 
-            private static async UnityTask LatePublishAsync<TMessage>(
+            private static async UnityTask WaitThenPublishAsync<TMessage>(
                   MessagePublisher publisher
                 , TScope scope
                 , TMessage message
@@ -154,7 +154,7 @@ namespace EncosyTower.PubSub
 #if __ENCOSY_VALIDATION__
                 else
                 {
-                    LogErrorFailedLatePublishAsync<TMessage>(scope, context);
+                    LogErrorFailedWaitThenPublishAsync<TMessage>(scope, context);
                 }
 #endif
             }
@@ -169,11 +169,11 @@ namespace EncosyTower.PubSub
                 }
             }
 
-            private static void LogErrorFailedLatePublishAsync<TMessage>(TScope scope, PublishingContext context)
+            private static void LogErrorFailedWaitThenPublishAsync<TMessage>(TScope scope, PublishingContext context)
             {
                 context.Logger.LogError(
-                    $"Failed late publish: No subscriber for message type `{typeof(TMessage)}` in scope `{scope}`. " +
-                    $"This should never happen!"
+                    $"Failed to wait then publish: No subscriber for message type `{typeof(TMessage)}` " +
+                    $"in scope `{scope}`. This should never happen!"
                 );
             }
         }
