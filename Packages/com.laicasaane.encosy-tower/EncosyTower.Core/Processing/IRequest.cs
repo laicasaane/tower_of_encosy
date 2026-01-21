@@ -1,3 +1,5 @@
+#if UNITASK || UNITY_6000_0_OR_NEWER
+
 namespace EncosyTower.Processing
 {
     public interface IRequest { }
@@ -8,3 +10,5 @@ namespace EncosyTower.Processing
 
     public interface IAsyncRequest<TResult> { }
 }
+
+#endif
