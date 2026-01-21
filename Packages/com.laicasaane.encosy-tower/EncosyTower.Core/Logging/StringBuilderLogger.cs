@@ -10,8 +10,6 @@ namespace EncosyTower.Logging
     /// </summary>
     public partial class StringBuilderLogger : ILogger
     {
-        public event Action OnLogEntryWritten;
-
         private readonly StringBuilder _builder;
 
         public StringBuilderLogger() : this(new StringBuilder())
@@ -23,10 +21,12 @@ namespace EncosyTower.Logging
             _builder = builder;
         }
 
+        public event Action OnLogEntryWritten;
+
         /// <summary>
-        /// Gets the number of lines written to the <see cref="StringBuilder"/>.
+        /// Gets the number of log entries written to the <see cref="StringBuilder"/>.
         /// </summary>
-        public int LineCount { get; private set; }
+        public int LogEntryCount { get; private set; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
@@ -36,10 +36,14 @@ namespace EncosyTower.Logging
 
         public void Clear()
         {
-            LineCount = 0;
+            LogEntryCount = 0;
             _builder.Clear();
         }
 
+        /// <summary>
+        /// Logs a message followed by a newline without any prefix.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogLine(object message)
         {
@@ -47,6 +51,11 @@ namespace EncosyTower.Logging
             InvokeOnLogEntryWritten();
         }
 
+        /// <summary>
+        /// Logs a formatted message followed by a newline without any prefix.
+        /// </summary>
+        /// <param name="format">The format string.</param>
+        /// <param name="args">The arguments to format.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogLineFormat(string format, params object[] args)
         {
@@ -106,7 +115,7 @@ namespace EncosyTower.Logging
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void InvokeOnLogEntryWritten()
         {
-            LineCount++;
+            LogEntryCount++;
             OnLogEntryWritten?.Invoke();
         }
     }
