@@ -140,32 +140,25 @@ namespace EncosyTower.Processing
             return _map.Unregister(id);
         }
 
+        #region    PROCESS - SYNC
+        #endregion ==============
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Process<TRequest>(TRequest request)
         {
-            if (TryGet((TypeId)Type<Action<TRequest>>.Id, out var result)
-                && result is IProcessHandler<TRequest> handler
-            )
+            if (TryGet(out IProcessHandler<TRequest> handler, out var hasCandidate))
             {
                 handler.Process(request);
                 return;
             }
 
-            throw ExceptionNotFound(Scope);
-
-            static InvalidOperationException ExceptionNotFound(TScope scope)
-            {
-                return new InvalidOperationException(
-                    $"Cannot find any process handler for the request {typeof(TRequest)} " +
-                    $"inside the scope {typeof(TScope)}({scope})"
-                );
-            }
+            throw CreateExceptionNotFound<TRequest>(Scope, hasCandidate);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryProcess<TRequest>(TRequest request, bool silent = false)
         {
-            if (TryGet((TypeId)Type<Action<TRequest>>.Id, out var result)
-                && result is IProcessHandler<TRequest> handler
-            )
+            if (TryGet(out IProcessHandler<TRequest> handler, out var hasCandidate))
             {
                 handler.Process(request);
                 return true;
@@ -173,67 +166,97 @@ namespace EncosyTower.Processing
 
             if (silent == false)
             {
-                ErrorNotFound(Scope);
+                LogErrorNotFound<TRequest>(Scope, hasCandidate);
             }
 
             return false;
-
-            [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-            static void ErrorNotFound(TScope scope)
-            {
-                StaticDevLogger.LogError(
-                    $"Cannot find any process handler for the request {typeof(TRequest)} " +
-                    $"inside the scope {typeof(TScope)}({scope})"
-                );
-            }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TResult Process<TRequest, TResult>(TRequest request)
         {
-            if (TryGet((TypeId)Type<Func<TRequest, TResult>>.Id, out var result)
-                && result is IProcessHandler<TRequest, TResult> handler
-            )
+            if (TryGet(out IProcessHandler<TRequest, TResult> handler, out var hasCandidate))
             {
                 return handler.Process(request);
             }
 
-            throw ExceptionNotFound(Scope);
-
-            static InvalidOperationException ExceptionNotFound(TScope scope)
-            {
-                return new InvalidOperationException(
-                    $"Cannot find any process handler for the request {typeof(TRequest)} " +
-                    $"which returns a {typeof(TResult)} " +
-                    $"inside the scope {typeof(TScope)}({scope})"
-                );
-            }
+            throw CreateExceptionNotFound<TRequest, TResult>(Scope, hasCandidate);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> TryProcess<TRequest, TResult>(TRequest request, bool silent = false)
         {
-            if (TryGet((TypeId)Type<Func<TRequest, TResult>>.Id, out var result)
-                && result is IProcessHandler<TRequest, TResult> handler
-            )
+            if (TryGet(out IProcessHandler<TRequest, TResult> handler, out var hasCandidate))
             {
                 return handler.Process(request);
             }
 
             if (silent == false)
             {
-                ErrorNotFound(Scope);
+                LogErrorNotFound<TRequest, TResult>(Scope, hasCandidate);
             }
 
             return Option.None;
+        }
 
-            [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-            static void ErrorNotFound(TScope scope)
+        #region    CONTAINS HANDLER - ASYNC
+        #endregion ========================
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool ContainsHandler<TRequest>()
+            => TryGet(out IProcessHandler<TRequest> _, out _);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool ContainsHandler<TRequest, TResult>()
+            => TryGet(out IProcessHandler<TRequest, TResult> _, out _);
+
+        #region    TRY GET - SYNC
+        #endregion ==============
+
+        private bool TryGet<TRequest>(out IProcessHandler<TRequest> result, out bool hasCandidate)
+        {
+            var id = (TypeId)Type<Action<TRequest>>.Id;
+
+            if (TryGet(id, out var candidate))
             {
-                StaticDevLogger.LogError(
-                    $"Cannot find any process handler for the request {typeof(TRequest)} " +
-                    $"which returns a {typeof(TResult)} " +
-                    $"inside the scope {typeof(TScope)}({scope})"
-                );
+                hasCandidate = true;
+
+                if (candidate is IProcessHandler<TRequest> handler)
+                {
+                    result = handler;
+                    return true;
+                }
             }
+            else
+            {
+                hasCandidate = false;
+            }
+
+            result = null;
+            return false;
+        }
+
+        private bool TryGet<TRequest, TResult>(out IProcessHandler<TRequest, TResult> result, out bool hasCandidate)
+        {
+            var id = (TypeId)Type<Func<TRequest, TResult>>.Id;
+
+            if (TryGet(id, out var candidate))
+            {
+                hasCandidate = true;
+
+                if (candidate is IProcessHandler<TRequest, TResult> handler)
+                {
+                    result = handler;
+                    return true;
+                }
+            }
+            else
+            {
+                hasCandidate = false;
+            }
+
+            result = null;
+            return false;
         }
 
 #if __ENCOSY_PROCESSING_NO_VALIDATION__
@@ -252,6 +275,9 @@ namespace EncosyTower.Processing
             return _map.TryGet(typeId, out handler);
         }
 
+        #region    HELPERS - SYNC
+        #endregion ==============
+
 #if __ENCOSY_PROCESSING_VALIDATION__
         private bool Validate()
         {
@@ -267,6 +293,83 @@ namespace EncosyTower.Processing
             return false;
         }
 #endif
+
+        private static InvalidOperationException CreateExceptionNotFound<TRequest>(TScope scope, bool hasCandidate)
+        {
+            if (hasCandidate)
+            {
+                return new InvalidOperationException(
+                    $"Found a candidate process handler for the request {typeof(TRequest)} " +
+                    $"inside the scope {typeof(TScope)}({scope}), " +
+                    $"but it has an invalid type."
+                );
+            }
+
+            return new InvalidOperationException(
+                $"Cannot find any process handler for the request {typeof(TRequest)} " +
+                $"inside the scope {typeof(TScope)}({scope})"
+            );
+        }
+
+        private static InvalidOperationException CreateExceptionNotFound<TRequest, TResult>(
+              TScope scope
+            , bool hasCandidate
+        )
+        {
+            if (hasCandidate)
+            {
+                return new InvalidOperationException(
+                    $"Found a candidate process handler for the request {typeof(TRequest)} " +
+                    $"inside the scope {typeof(TScope)}({scope}), " +
+                    $"but it has an invalid type."
+                );
+            }
+
+            return new InvalidOperationException(
+                $"Cannot find any process handler for the request {typeof(TRequest)} " +
+                $"which returns a {typeof(TResult)} " +
+                $"inside the scope {typeof(TScope)}({scope})"
+            );
+        }
+
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void LogErrorNotFound<TRequest>(TScope scope, bool hasCandidate)
+        {
+            if (hasCandidate)
+            {
+                StaticDevLogger.LogError(
+                    $"Found a candidate process handler for the request {typeof(TRequest)} " +
+                    $"inside the scope {typeof(TScope)}({scope}), " +
+                    $"but it has an invalid type."
+                );
+                return;
+            }
+
+            StaticDevLogger.LogError(
+                $"Cannot find any process handler for the request {typeof(TRequest)} " +
+                $"inside the scope {typeof(TScope)}({scope})"
+            );
+        }
+
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void LogErrorNotFound<TRequest, TResult>(TScope scope, bool hasCandidate)
+        {
+            if (hasCandidate)
+            {
+                StaticDevLogger.LogError(
+                    $"Found a candidate process handler for the request {typeof(TRequest)} " +
+                    $"inside the scope {typeof(TScope)}({scope}), " +
+                    $"but it has an invalid type."
+                );
+                return;
+            }
+
+            StaticDevLogger.LogError(
+                $"Cannot find any process handler for the request {typeof(TRequest)} " +
+                $"which returns a {typeof(TResult)} " +
+                $"inside the scope {typeof(TScope)}({scope})"
+            );
+        }
     }
 }
 
