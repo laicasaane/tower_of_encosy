@@ -6,6 +6,7 @@
 #define __ENCOSY_VALIDATION__
 #endif
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
@@ -41,11 +42,15 @@ namespace EncosyTower.PubSub
 #if __ENCOSY_NO_VALIDATION__
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-            public CachedPublisher<TMessage> Cache<TMessage>(ILogger logger = null)
-#if ENCOSY_PUBSUB_RELAX_MODE
-                where TMessage : new()
+            public
+#if UNITY_6000_2_OR_NEWER
+                CachedPublisher<UnityEntityId<TScope>, TMessage>
 #else
-                where TMessage : IMessage, new()
+                CachedPublisher<UnityInstanceId<TScope>, TMessage>
+#endif
+            Cache<TMessage>([NotNull] Func<TMessage> createFunc, ILogger logger = null)
+#if !ENCOSY_PUBSUB_RELAX_MODE
+                where TMessage : IMessage
 #endif
             {
 #if __ENCOSY_VALIDATION__
@@ -55,7 +60,7 @@ namespace EncosyTower.PubSub
                 }
 #endif
 
-                return _publisher.Cache<TMessage>(logger);
+                return _publisher.Cache<TMessage>(createFunc, logger);
             }
 
 #if __ENCOSY_NO_VALIDATION__

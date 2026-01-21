@@ -6,6 +6,7 @@
 #define __ENCOSY_VALIDATION__
 #endif
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
@@ -31,11 +32,12 @@ namespace EncosyTower.PubSub
                 Scope = scope;
             }
 
-            public CachedPublisher<TMessage> Cache<TMessage>(ILogger logger = null)
-#if ENCOSY_PUBSUB_RELAX_MODE
-                where TMessage : new()
-#else
-                where TMessage : IMessage, new()
+            public CachedPublisher<TScope, TMessage> Cache<TMessage>(
+                  [NotNull] Func<TMessage> createFunc
+                , ILogger logger = null
+            )
+#if !ENCOSY_PUBSUB_RELAX_MODE
+                where TMessage : IMessage
 #endif
             {
 #if __ENCOSY_VALIDATION__
@@ -64,8 +66,12 @@ namespace EncosyTower.PubSub
                         }
                     }
 
-                    var broker = scopedBroker.Cache(Scope, _publisher._taskArrayPool);
-                    return new CachedPublisher<TMessage>(broker);
+                    return new CachedPublisher<TScope, TMessage>(
+                          scopedBroker.Cache(Scope, _publisher._taskArrayPool)
+                        , _publisher._interceptorBrokers
+                        , createFunc
+                        , Scope
+                    );
                 }
             }
 

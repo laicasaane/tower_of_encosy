@@ -24,6 +24,8 @@ namespace EncosyTower.PubSub
 
         public bool IsCreated => _brokers != null;
 
+        public bool HasInterceptors => _brokers.HasInterceptors;
+
 #if __ENCOSY_NO_VALIDATION__
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
@@ -230,10 +232,10 @@ namespace EncosyTower.PubSub
                 return true;
             }
 
-            //(logger ?? DevLogger.Default).LogError(
-            //    $"{nameof(MessageInterceptors)} must be retrieved via " +
-            //    $"`{nameof(Messenger)}.{nameof(Messenger.Interceptors)}` API"
-            //);
+            (logger ?? DevLogger.Default).LogError(
+                $"{nameof(MessageInterceptors)} must be retrieved via " +
+                $"`{nameof(Messenger)}.{nameof(Messenger.Interceptors)}` API"
+            );
 
             return false;
         }

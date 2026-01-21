@@ -40,10 +40,10 @@ namespace EncosyTower.PubSub.Internals
             set => _taskArrayPool = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public bool IsEmpty
+        public bool HasHandlers
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _ordering.Count < 1;
+            get => _ordering.Count > 0;
         }
 
         public bool IsCached => _refCount > 0;
@@ -73,7 +73,7 @@ namespace EncosyTower.PubSub.Internals
 
                     if (handlerMap.TryAdd(handler.Id, handler))
                     {
-                        return new Subscription<TMessage>(handler, handlerMap);
+                        return new Subscription<TMessage>(this, handler, order);
                     }
                 }
 #if __ENCOSY_VALIDATION__
@@ -99,6 +99,26 @@ namespace EncosyTower.PubSub.Internals
                 }
 
                 orderToHandlerMap.Clear();
+            }
+        }
+
+        public void RemoveHandler(DelegateId id, int order)
+        {
+            lock (_orderToHandlerMap)
+            {
+                if (_orderToHandlerMap.TryGetValue(order, out var handlerMap) == false)
+                {
+                    _ordering.Remove(order);
+                    return;
+                }
+
+                handlerMap.Remove(id);
+
+                if (handlerMap.Count < 1)
+                {
+                    _orderToHandlerMap.Remove(order);
+                    _ordering.Remove(order);
+                }
             }
         }
 
@@ -157,7 +177,13 @@ namespace EncosyTower.PubSub.Internals
             }
         }
 
-        public async UnityTask PublishAsync(TMessage message, PublishingContext context)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<UnityTask> TryPublishAsync(TMessage message, PublishingContext context)
+        {
+            return HasHandlers ? PublishAsync(message, context) : Option.None;
+        }
+
+        private async UnityTask PublishAsync(TMessage message, PublishingContext context)
         {
             var handlerListList = GetHandlerListList(context.Logger);
 

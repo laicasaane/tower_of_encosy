@@ -1,11 +1,13 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+using System;
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.Logging;
 using EncosyTower.PubSub.Internals;
+using EncosyTower.UnityExtensions;
 using EncosyTower.Vaults;
 
 namespace EncosyTower.PubSub
@@ -53,40 +55,6 @@ namespace EncosyTower.PubSub
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public CachedPublisher<TMessage> GlobalCache<TMessage>(ILogger logger = null)
-#if ENCOSY_PUBSUB_RELAX_MODE
-            where TMessage : new()
-#else
-            where TMessage : IMessage, new()
-#endif
-        {
-            return Global().Cache<TMessage>(logger);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public CachedPublisher<TMessage> Cache<TScope, TMessage>(ILogger logger = null)
-            where TScope : struct
-#if ENCOSY_PUBSUB_RELAX_MODE
-            where TMessage : new()
-#else
-            where TMessage : IMessage, new()
-#endif
-        {
-            return Scope(default(TScope)).Cache<TMessage>(logger);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public CachedPublisher<TMessage> Cache<TScope, TMessage>([NotNull] TScope scope, ILogger logger = null)
-#if ENCOSY_PUBSUB_RELAX_MODE
-            where TMessage : new()
-#else
-            where TMessage : IMessage, new()
-#endif
-        {
-            return Scope(scope).Cache<TMessage>(logger);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UnityPublisher<TScope> UnityScope<TScope>([NotNull] TScope scope)
             where TScope : UnityEngine.Object
         {
@@ -94,15 +62,61 @@ namespace EncosyTower.PubSub
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public CachedPublisher<TMessage> UnityCache<TScope, TMessage>([NotNull] TScope scope, ILogger logger = null)
-            where TScope : UnityEngine.Object
-#if ENCOSY_PUBSUB_RELAX_MODE
-            where TMessage : new()
-#else
-            where TMessage : IMessage, new()
+        public CachedPublisher<GlobalScope, TMessage> GlobalCache<TMessage>(
+              [NotNull] Func<TMessage> createFunc
+            , ILogger logger = null
+        )
+#if !ENCOSY_PUBSUB_RELAX_MODE
+            where TMessage : IMessage
 #endif
         {
-            return UnityScope(scope).Cache<TMessage>(logger);
+            return Global().Cache<TMessage>(createFunc, logger);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public CachedPublisher<TScope, TMessage> Cache<TScope, TMessage>(
+              [NotNull] Func<TMessage> createFunc
+            , ILogger logger = null
+        )
+            where TScope : struct
+#if !ENCOSY_PUBSUB_RELAX_MODE
+            where TMessage : IMessage
+#endif
+        {
+            return Scope(default(TScope)).Cache<TMessage>(createFunc, logger);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public CachedPublisher<TScope, TMessage> Cache<TScope, TMessage>(
+              [NotNull] Func<TMessage> createFunc
+            , [NotNull] TScope scope
+            , ILogger logger = null
+        )
+#if !ENCOSY_PUBSUB_RELAX_MODE
+            where TMessage : IMessage
+#endif
+        {
+            return Scope(scope).Cache<TMessage>(createFunc, logger);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public
+#if UNITY_6000_2_OR_NEWER
+                CachedPublisher<UnityEntityId<TScope>, TMessage>
+#else
+                CachedPublisher<UnityInstanceId<TScope>, TMessage>
+#endif
+        UnityCache<TScope, TMessage>(
+              [NotNull] Func<TMessage> createFunc
+            , [NotNull] TScope scope
+            , ILogger logger = null
+       )
+            where TScope : UnityEngine.Object
+#if !ENCOSY_PUBSUB_RELAX_MODE
+            where TMessage : IMessage
+#endif
+        {
+            return UnityScope(scope).Cache<TMessage>(createFunc, logger);
         }
     }
 }

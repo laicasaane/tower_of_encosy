@@ -102,11 +102,14 @@ namespace EncosyTower.PubSub
 
             private UnityTask PublishAsyncInternal<TMessage>(TScope scope, TMessage message, PublishingContext context)
             {
-                if (TryGetMessageBroker<TMessage>(_publisher, out var messageBroker))
+                if (TryGetMessageBroker<TMessage>(_publisher, out var messageBroker)
+                    && messageBroker.TryPublishAsync(scope, message, context).TryGetValue(out var task)
+                )
                 {
-                    return messageBroker.PublishAsync(scope, message, context);
+                    return task;
                 }
-                else if (context.Strategy == PublishingStrategy.WaitForSubscriber)
+
+                if (context.Strategy == PublishingStrategy.WaitForSubscriber)
                 {
                     return WaitThenPublishAsync(_publisher, scope, message, context);
                 }
@@ -136,27 +139,34 @@ namespace EncosyTower.PubSub
                 , PublishingContext context
             )
             {
-                await UnityTasks.WaitUntil(
-                      publisher
-                    , static x => x._messageBrokers.Contains<MessageBroker<TScope, TMessage>>()
-                    , context.Token
-                );
+                await UnityTasks.WaitUntil(publisher, static x => HasHandlers(x), context.Token);
 
                 if (context.Token.IsCancellationRequested)
                 {
                     return;
                 }
 
-                if (TryGetMessageBroker<TMessage>(publisher, out var broker))
+                if (TryGetMessageBroker<TMessage>(publisher, out var broker)
+                    && broker.TryPublishAsync(scope, message, context).TryGetValue(out var task)
+                )
                 {
-                    await broker.PublishAsync(scope, message, context);
+                    await task;
+                    return;
                 }
+
 #if __ENCOSY_VALIDATION__
-                else
+
                 {
                     LogErrorFailedWaitThenPublishAsync<TMessage>(scope, context);
                 }
 #endif
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                static bool HasHandlers(MessagePublisher publisher)
+                {
+                    return publisher._messageBrokers.TryGet(out MessageBroker<TScope, TMessage> broker)
+                        && broker.HasHandlers;
+                }
             }
 
             private static void LogWarningNoSubscriber<TMessage>(TScope scope, PublishingContext context)

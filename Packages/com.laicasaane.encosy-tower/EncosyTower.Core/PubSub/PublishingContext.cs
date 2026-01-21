@@ -8,11 +8,17 @@ namespace EncosyTower.PubSub
 {
     public readonly struct PublishingContext
     {
+        private readonly ILogger _logger;
+
         public PublishingStrategy Strategy { get; init; }
 
         public bool WarnNoSubscriber { get; init; }
 
-        public ILogger Logger { get; init; }
+        public ILogger Logger
+        {
+            get => _logger ?? DevLogger.Default;
+            init => _logger = value;
+        }
 
         public CallerInfo CallerInfo { get; init; }
 

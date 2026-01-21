@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Common;
 using EncosyTower.Initialization;
+using EncosyTower.Tasks;
 
 namespace EncosyTower.PubSub.Internals
 {
@@ -29,6 +30,7 @@ namespace EncosyTower.PubSub.Internals
         public TMessage message;
         public PublishingContext context;
         public MessagePublisher.Publisher<TScope> publisher;
+        public CachedPublisher<TScope, TMessage> cachedPublisher;
 
         private int _currentInterceptorIndex;
 
@@ -54,6 +56,7 @@ namespace EncosyTower.PubSub.Internals
             message = default;
             context = default;
             publisher = default;
+            cachedPublisher = default;
 
             Interceptors.Clear();
             ObjectStack.Clear();
@@ -85,7 +88,17 @@ namespace EncosyTower.PubSub.Internals
                 return task;
             }
 
-            return publisher.PublishCoreAsync(this.scope, this.message, this.context);
+            if (publisher.IsCreated)
+            {
+                return publisher.PublishCoreAsync(this.scope, this.message, this.context);
+            }
+
+            if (cachedPublisher.IsCreated)
+            {
+                return cachedPublisher.PublishCoreAsync(this.scope, this.message, this.context);
+            }
+
+            return UnityTasks.GetCompleted();
         }
 
         private UnityTask PublishRecursiveAsync(TMessage message, PublishingContext context)
@@ -100,7 +113,17 @@ namespace EncosyTower.PubSub.Internals
                 return task;
             }
 
-            return publisher.PublishCoreAsync(this.scope, this.message, this.context);
+            if (publisher.IsCreated)
+            {
+                return publisher.PublishCoreAsync(this.scope, this.message, this.context);
+            }
+
+            if (cachedPublisher.IsCreated)
+            {
+                return cachedPublisher.PublishCoreAsync(this.scope, this.message, this.context);
+            }
+
+            return UnityTasks.GetCompleted();
         }
 
         private bool MoveNextInterceptor(out object nextInterceptor)

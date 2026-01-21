@@ -4,22 +4,22 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using EncosyTower.Collections;
-using EncosyTower.Common;
 
 namespace EncosyTower.PubSub.Internals
 {
     internal sealed class Subscription<TMessage> : ISubscription
     {
-        public static readonly Subscription<TMessage> None = new(default, default);
+        public static readonly Subscription<TMessage> None = new(default, default, 0);
 
+        private readonly WeakReference<MessageBroker<TMessage>> _broker;
+        private readonly int _order;
         private IHandler<TMessage> _handler;
-        private readonly WeakReference<ArrayMap<DelegateId, IHandler<TMessage>>> _handlers;
 
-        public Subscription(IHandler<TMessage> handler, ArrayMap<DelegateId, IHandler<TMessage>> handlers)
+        public Subscription([NotNull] MessageBroker<TMessage> broker, [NotNull] IHandler<TMessage> handler, int order)
         {
+            _broker = new WeakReference<MessageBroker<TMessage>>(broker);
             _handler = handler;
-            _handlers = new WeakReference<ArrayMap<DelegateId, IHandler<TMessage>>>(handlers);
+            _order = order;
         }
 
         public void Dispose()
@@ -33,9 +33,9 @@ namespace EncosyTower.PubSub.Internals
             _handler.Dispose();
             _handler = null;
 
-            if (_handlers.TryGetTarget(out var handlers))
+            if (_broker.TryGetTarget(out var broker))
             {
-                handlers.Remove(id);
+                broker.RemoveHandler(id, _order);
             }
         }
     }

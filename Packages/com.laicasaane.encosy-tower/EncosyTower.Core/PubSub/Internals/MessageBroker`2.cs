@@ -10,8 +10,8 @@ using System;
 using System.Buffers;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
+using EncosyTower.Common;
 using EncosyTower.Logging;
-using EncosyTower.Tasks;
 
 namespace EncosyTower.PubSub.Internals
 {
@@ -26,7 +26,26 @@ namespace EncosyTower.PubSub.Internals
         private readonly ArrayMap<TScope, MessageBroker<TMessage>> _scopedBrokers = new();
         private readonly FasterList<TScope> _scopesToRemove = new();
 
-        public bool IsEmpty => _scopedBrokers.Count <= 0;
+        public bool HasHandlers
+        {
+            get
+            {
+                lock (_scopedBrokers)
+                {
+                    var scopedBrokers = _scopedBrokers;
+
+                    foreach (var (_, broker) in scopedBrokers)
+                    {
+                        if (broker.HasHandlers)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+            }
+        }
 
         public void Dispose()
         {
@@ -62,7 +81,7 @@ namespace EncosyTower.PubSub.Internals
                     {
                         broker.Compress(logger);
 
-                        if (broker.IsEmpty)
+                        if (broker.HasHandlers == false)
                         {
                             broker.Dispose();
                             scopesToRemove.Add(key);
@@ -106,7 +125,7 @@ namespace EncosyTower.PubSub.Internals
 
                 broker.Compress(logger);
 
-                if (broker.IsEmpty)
+                if (broker.HasHandlers == false)
                 {
                     scopedBrokers.Remove(scope);
                     broker.Dispose();
@@ -115,11 +134,11 @@ namespace EncosyTower.PubSub.Internals
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UnityTask PublishAsync(TScope scope, TMessage message, PublishingContext context)
+        public Option<UnityTask> TryPublishAsync(TScope scope, TMessage message, PublishingContext context)
         {
             return _scopedBrokers.TryGetValue(scope, out var broker)
-                ? broker.PublishAsync(message, context)
-                : UnityTasks.GetCompleted();
+                ? broker.TryPublishAsync(message, context)
+                : Option.None;
         }
 
         public Subscription<TMessage> Subscribe(
