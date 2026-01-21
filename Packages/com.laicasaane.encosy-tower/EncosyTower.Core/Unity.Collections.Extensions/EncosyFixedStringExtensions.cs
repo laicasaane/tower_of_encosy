@@ -1,7 +1,9 @@
 #if UNITY_COLLECTIONS
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Unity.Collections;
 
 namespace EncosyTower.Collections
@@ -297,9 +299,32 @@ namespace EncosyTower.Collections
                         , out destLength
                         , dest.Length
                     );
-                    
+
                     return result == ConversionError.None ? CopyError.None : CopyError.Truncation;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Appends this FixedString to a StringBuilder.
+        /// </summary>
+        /// <typeparam name="TFixedString">A string type.</typeparam>
+        /// <param name="fs">A string to append.</param>
+        /// <param name="stringBuilder">The StringBuilder to append to.</param>
+        /// <param name="destLength">The number of characters written to the StringBuilder.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AppendTo<TFixedString>(
+              this TFixedString fs
+            , [NotNull] StringBuilder stringBuilder
+            , out int destLength
+        )
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            unsafe
+            {
+                Span<char> utf16Chars = stackalloc char[fs.Length];
+                fs.CopyTo(utf16Chars, out destLength);
+                stringBuilder.Append(utf16Chars[..destLength]);
             }
         }
 
