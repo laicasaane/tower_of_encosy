@@ -156,6 +156,7 @@
 ^.*(\/|\\)(Assets)(\/|\\)(Samples)(\/|\\)(Encosy Tower)(\/|\\)(\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?)(\/|\\)(EncosyTower\.Samples\.MonoPages)(\/|\\).*$
 ^.*(\/|\\)(Assets)(\/|\\)(Samples)(\/|\\)(Encosy Tower)(\/|\\)(\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?)(\/|\\)(EncosyTower\.Samples\.Mvvm)(\/|\\).*$
 ^.*(\/|\\)(Assets)(\/|\\)(Samples)(\/|\\)(Encosy Tower)(\/|\\)(\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?)(\/|\\)(EncosyTower\.Samples\.Pooling)(\/|\\).*$
+^.*(\/|\\)(Assets)(\/|\\)(Samples)(\/|\\)(Encosy Tower)(\/|\\)(\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?)(\/|\\)(EncosyTower\.Samples\.PubSub)(\/|\\).*$
 ^.*(\/|\\)(Assets)(\/|\\)(Samples)(\/|\\)(Encosy Tower)(\/|\\)(\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?)(\/|\\)(EncosyTower\.Samples\.Stats)(\/|\\).*$
 
 
@@ -171,7 +172,5 @@
 ^.*(\/|\\)(Assets)(\/|\\)(Game)(\/|\\)(Localization)(\/|\\).*$
 ^.*(\/|\\)(Assets)(\/|\\)(Game)(\/|\\)(Resources)(\/|\\).*$
 ^.*(\/|\\)(Assets)(\/|\\)(Game)(\/|\\)(Scenes)(\/|\\).*$
-
-
 
 
