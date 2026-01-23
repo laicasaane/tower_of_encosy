@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -58,6 +59,21 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(Bool<T> other)
+            => HasValue == other;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Equals(object obj)
+            => obj switch {
+                Option<T> other => Equals(other),
+                _ => false,
+            };
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode()
+            => HashCode.Combine(HasValue, _value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetValueOrThrow()
         {
             ThrowIfHasNoValue(HasValue);
@@ -88,6 +104,22 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Option<T>(Option _)
             => default;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(in Option<T> left, in Bool<T> right)
+            => left.HasValue == right;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(in Option<T> left, in Bool<T> right)
+            => left.HasValue != right;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(in Bool<T> left, in Option<T> right)
+            => left == right.HasValue;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(in Bool<T> left, in Option<T> right)
+            => left != right.HasValue;
 
 #if UNITY_BURST
         [Unity.Burst.BurstDiscard]
@@ -179,5 +211,17 @@ namespace EncosyTower.Common
             charsWritten = prefixChars + valueCharsWritten + 1;
             return true;
         }
+    }
+
+    public readonly struct OptionEqualityComparer<T> : IEqualityComparer<Option<T>>
+        where T : IEquatable<T>
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(Option<T> x, Option<T> y)
+            => Option.Equals(in x, in y);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetHashCode(Option<T> obj)
+            => obj.GetHashCode();
     }
 }
