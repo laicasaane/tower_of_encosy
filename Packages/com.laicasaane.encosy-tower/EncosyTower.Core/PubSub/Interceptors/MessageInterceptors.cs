@@ -8,12 +8,13 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.Logging;
 
 namespace EncosyTower.PubSub
 {
-    public readonly struct MessageInterceptors : IIsCreated
+    public readonly partial struct MessageInterceptors : IIsCreated
     {
         private readonly Internals.InterceptorBrokers _brokers;
 
@@ -240,6 +241,9 @@ namespace EncosyTower.PubSub
             return false;
         }
 #endif
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        partial void RetainUsings();
     }
 }
 
