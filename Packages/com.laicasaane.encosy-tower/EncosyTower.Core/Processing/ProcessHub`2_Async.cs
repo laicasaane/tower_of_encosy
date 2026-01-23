@@ -204,7 +204,7 @@ namespace EncosyTower.Processing
 #endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        partial void RetainUsings_UniTask();
+        partial void RetainUsings_Async();
     }
 }
 
