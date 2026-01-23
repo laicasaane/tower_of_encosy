@@ -206,7 +206,7 @@ namespace EncosyTower.PubSub
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            partial void RetainUsings_UniTask();
+            partial void RetainUsings_Async();
         }
     }
 }
