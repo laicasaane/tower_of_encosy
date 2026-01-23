@@ -9,7 +9,7 @@ namespace EncosyTower.Common
     /// </summary>
     /// <typeparam name="TEnum">The enum type to be serialized as string.</typeparam>
     [Serializable]
-    public struct StringEnum<TEnum> : IEquatable<TEnum>
+    public struct StringEnum<TEnum> :IEquatable<StringEnum<TEnum>>, IEquatable<TEnum>
         where TEnum : unmanaged, Enum
     {
         [SerializeField, HideInInspector] internal string _value;
