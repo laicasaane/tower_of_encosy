@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -109,6 +110,25 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(Bool<TValue> other)
+            => IsSuccess == other;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(Bool<Error> other)
+            => IsError == other;
+
+        public override bool Equals(object obj)
+            => obj switch {
+                Bool<Error> other => IsError == other,
+                Bool<TValue> other => IsSuccess == other,
+                _ => false,
+            };
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode()
+            => HashValue.Combine(_hasValue, _value, Error);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TValue GetValueOrThrow()
             => Value.GetValueOrThrow();
 
@@ -171,6 +191,38 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Result<TValue>(Exception error)
             => new(new Error(error));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(in Result<TValue> left, in Bool<TValue> right)
+            => left.IsSuccess == right;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(in Result<TValue> left, in Bool<TValue> right)
+            => left.IsSuccess != right;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(in Bool<TValue> left, in Result<TValue> right)
+            => left == right.IsSuccess;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(in Bool<TValue> left, in Result<TValue> right)
+            => left != right.IsSuccess;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(in Result<TValue> left, in Bool<Error> right)
+            => left.IsError == right;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(in Result<TValue> left, in Bool<Error> right)
+            => left.IsError != right;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(in Bool<Error> left, in Result<TValue> right)
+            => left == right.IsError;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(in Bool<Error> left, in Result<TValue> right)
+            => left != right.IsError;
     }
 
     public readonly struct Result<TValue, TError> : IResult<TValue, TError>
@@ -239,6 +291,25 @@ namespace EncosyTower.Common
             value = Value;
             error = Error;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(Bool<TValue> other)
+            => IsSuccess == other;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(Bool<TError> other)
+            => IsError == other;
+
+        public override bool Equals(object obj)
+            => obj switch {
+                Bool<Error> other => IsError == other,
+                Bool<TValue> other => IsSuccess == other,
+                _ => false,
+            };
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode()
+            => HashValue.Combine(_hasValue, _value, _hasError, _error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TValue GetValueOrThrow()
@@ -461,5 +532,30 @@ namespace EncosyTower.Common
             charsWritten = prefixChars + resultCharsWritten + 1;
             return true;
         }
+    }
+
+    public readonly struct ResultEqualityComparer<TValue> : IEqualityComparer<Result<TValue>>
+        where TValue : IEquatable<TValue>
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(Result<TValue> x, Result<TValue> y)
+            => Result.Equals(x, y);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetHashCode(Result<TValue> obj)
+            => obj.GetHashCode();
+    }
+
+    public readonly struct ResultEqualityComparer<TValue, TError> : IEqualityComparer<Result<TValue, TError>>
+        where TValue : IEquatable<TValue>
+        where TError : IEquatable<TError>
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(Result<TValue, TError> x, Result<TValue, TError> y)
+            => Result.Equals(x, y);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetHashCode(Result<TValue, TError> obj)
+            => obj.GetHashCode();
     }
 }
