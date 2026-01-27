@@ -283,7 +283,7 @@ namespace EncosyTower.Collections
     }
 
     public struct SharedArrayMapNativeReadOnlyKeyValueEnumerator<TKey, TValue>
-        : IEnumerator<SharedArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue>>
+        : IEnumerator<SharedArrayMapNativeReadOnlyKeyValuePair<TKey, TValue>>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -337,7 +337,7 @@ namespace EncosyTower.Collections
             return true;
         }
 
-        public readonly SharedArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue> Current
+        public readonly SharedArrayMapNativeReadOnlyKeyValuePair<TKey, TValue> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(_map._valuesInfo.AsReadOnlySpan()[_index].key, _map._values, _index);
@@ -384,7 +384,7 @@ namespace EncosyTower.Collections
         public readonly void Dispose() { }
     }
 
-    public readonly struct SharedArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue>
+    public readonly struct SharedArrayMapNativeReadOnlyKeyValuePair<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -393,7 +393,7 @@ namespace EncosyTower.Collections
         private readonly int _index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SharedArrayMapNativeReadOnlyKeyValuePairFast(in TKey key, NativeArray<TValue>.ReadOnly mapValues, int index)
+        public SharedArrayMapNativeReadOnlyKeyValuePair(in TKey key, NativeArray<TValue>.ReadOnly mapValues, int index)
         {
             _mapValues = mapValues;
             _index = index;
