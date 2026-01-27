@@ -61,8 +61,8 @@ namespace EncosyTower.Collections
     /// </typeparam>
     [DebuggerTypeProxy(typeof(SharedArrayMapDebugProxy<,,>))]
     public partial class SharedArrayMap<TKey, TValue, TValueNative> : IDisposable
-        , ICollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>
-        , IReadOnlyCollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>
+        , ICollection<SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>>
+        , IReadOnlyCollection<SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>>
         , IClearable, IIncreaseCapacity, IHasCount, ITryGetValue<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
@@ -169,7 +169,7 @@ namespace EncosyTower.Collections
             get => _values.AsArraySegment().Slice(0, _freeValueCellIndex.ValueRO);
         }
 
-        bool ICollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>.IsReadOnly
+        bool ICollection<SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>>.IsReadOnly
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => false;
@@ -773,7 +773,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        IEnumerator<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>> IEnumerable<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>.GetEnumerator()
+        IEnumerator<SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>> IEnumerable<SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>>.GetEnumerator()
             => new SharedArrayMapKeyValueEnumerator<TKey, TValue, TValueNative>(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -781,25 +781,25 @@ namespace EncosyTower.Collections
             => new SharedArrayMapKeyValueEnumerator<TKey, TValue, TValueNative>(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void ICollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>.Add(SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative> item)
+        void ICollection<SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>>.Add(SharedArrayMapKeyValuePair<TKey, TValue, TValueNative> item)
         {
             TryAdd(item.Key, item.Value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        bool ICollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>.Contains(SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative> item)
+        bool ICollection<SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>>.Contains(SharedArrayMapKeyValuePair<TKey, TValue, TValueNative> item)
         {
             return ContainsKey(item.Key);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void ICollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>.CopyTo(SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>[] array, int arrayIndex)
+        void ICollection<SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>>.CopyTo(SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>[] array, int arrayIndex)
         {
             throw new NotImplementedException("This method is not implemented by design.");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        bool ICollection<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>.Remove(SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative> item)
+        bool ICollection<SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>>.Remove(SharedArrayMapKeyValuePair<TKey, TValue, TValueNative> item)
         {
             return Remove(item.Key);
         }
@@ -899,7 +899,7 @@ namespace EncosyTower.Collections
     }
 
     public struct SharedArrayMapKeyValueEnumerator<TKey, TValue, TValueNative>
-        : IEnumerator<SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>>
+        : IEnumerator<SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
         where TValueNative : unmanaged
@@ -954,7 +954,7 @@ namespace EncosyTower.Collections
             return true;
         }
 
-        public readonly SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative> Current
+        public readonly SharedArrayMapKeyValuePair<TKey, TValue, TValueNative> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(_map._valuesInfo.AsReadOnlySpan()[_index].key, _map._values, _index);
@@ -1002,8 +1002,8 @@ namespace EncosyTower.Collections
     }
 
     [DebuggerDisplay("[{Key}] = {Value}")]
-    [DebuggerTypeProxy(typeof(SharedArrayMapKeyValuePairFastDebugProxy<,,>))]
-    public readonly struct SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>
+    [DebuggerTypeProxy(typeof(SharedArrayMapKeyValuePairDebugProxy<,,>))]
+    public readonly struct SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
         where TValueNative : unmanaged
@@ -1013,7 +1013,7 @@ namespace EncosyTower.Collections
         private readonly int _index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SharedArrayMapKeyValuePairFast(in TKey key, [NotNull] SharedArray<TValue, TValueNative> mapValues, int index)
+        public SharedArrayMapKeyValuePair(in TKey key, [NotNull] SharedArray<TValue, TValueNative> mapValues, int index)
         {
             _mapValues = mapValues;
             _index = index;
@@ -1046,15 +1046,15 @@ namespace EncosyTower.Collections
         }
     }
 
-    internal sealed class SharedArrayMapKeyValuePairFastDebugProxy<TKey, TValue, TValueNative>
+    internal sealed class SharedArrayMapKeyValuePairDebugProxy<TKey, TValue, TValueNative>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
         where TValueNative : unmanaged
     {
 
-        private readonly SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative> _keyValue;
+        private readonly SharedArrayMapKeyValuePair<TKey, TValue, TValueNative> _keyValue;
 
-        public SharedArrayMapKeyValuePairFastDebugProxy(in SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative> keyValue)
+        public SharedArrayMapKeyValuePairDebugProxy(in SharedArrayMapKeyValuePair<TKey, TValue, TValueNative> keyValue)
         {
             _keyValue = keyValue;
         }
@@ -1091,12 +1091,12 @@ namespace EncosyTower.Collections
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public SharedArrayMapKeyValuePairFast<TKey, TValue, TValue>[] KeyValues
+        public SharedArrayMapKeyValuePair<TKey, TValue, TValue>[] KeyValues
         {
             get
             {
                 var map = _map;
-                var array = new SharedArrayMapKeyValuePairFast<TKey, TValue, TValue>[map.Count];
+                var array = new SharedArrayMapKeyValuePair<TKey, TValue, TValue>[map.Count];
                 var i = 0;
 
                 foreach (var keyValue in map)
@@ -1129,12 +1129,12 @@ namespace EncosyTower.Collections
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>[] KeyValues
+        public SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>[] KeyValues
         {
             get
             {
                 var map = _map;
-                var array = new SharedArrayMapKeyValuePairFast<TKey, TValue, TValueNative>[map.Count];
+                var array = new SharedArrayMapKeyValuePair<TKey, TValue, TValueNative>[map.Count];
                 var i = 0;
 
                 foreach (var keyValue in map)
