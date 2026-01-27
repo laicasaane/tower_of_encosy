@@ -3,14 +3,14 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace EncosyTower.NewtonsoftAot
+namespace EncosyTower.NewtonsoftJson
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
-    public sealed class NewtonsoftAotHelperAttribute : Attribute
+    public sealed class NewtonsoftJsonAotHelperAttribute : Attribute
     {
         public Type BaseType { get; }
 
-        public NewtonsoftAotHelperAttribute([NotNull] Type baseType)
+        public NewtonsoftJsonAotHelperAttribute([NotNull] Type baseType)
         {
             BaseType = baseType;
         }

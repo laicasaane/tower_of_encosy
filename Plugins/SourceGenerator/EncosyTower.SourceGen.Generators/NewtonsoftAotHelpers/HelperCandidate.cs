@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
+namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
 {
     internal struct HelperCandidate
     {

@@ -2,21 +2,20 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
+namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
 {
     [Generator]
-    internal class NewtonsoftAotHelperGenerator : IIncrementalGenerator
+    internal class NewtonsoftJsonAotHelperGenerator : IIncrementalGenerator
     {
-        private const string NAMESPACE = "EncosyTower.NewtonsoftAot";
+        private const string NAMESPACE = "EncosyTower.NewtonsoftJson";
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
-        public const string GENERATOR_NAME = nameof(NewtonsoftAotHelperGenerator);
-        private const string ATTRIBUTE = $"global::{NAMESPACE}.NewtonsoftAotHelperAttribute";
+        public const string GENERATOR_NAME = nameof(NewtonsoftJsonAotHelperGenerator);
+        private const string ATTRIBUTE = $"global::{NAMESPACE}.NewtonsoftJsonAotHelperAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -59,7 +58,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
             return syntaxNode is TypeDeclarationSyntax syntax
                 && syntax.Kind() is (SyntaxKind.ClassDeclaration or SyntaxKind.StructDeclaration)
-                && syntax.HasAttributeCandidate("EncosyTower.NewtonsoftAot", "NewtonsoftAotHelper");
+                && syntax.HasAttributeCandidate("EncosyTower.NewtonsoftJson", "NewtonsoftJsonAotHelper");
         }
 
         private static HelperCandidate GetHelperCandidate(
@@ -238,9 +237,9 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
             = new("SG_NEWTONSOFT_AOT_HELPER_01"
-                , "NewtonsoftAotHelper Generator Error"
-                , "This error indicates a bug in the NewtonsoftAotHelper source generators. Error message: '{0}'."
-                , $"{NAMESPACE}.NewtonsoftAotHelperAttribute"
+                , "NewtonsoftJsonHelper Generator Error"
+                , "This error indicates a bug in the NewtonsoftJsonHelper source generators. Error message: '{0}'."
+                , $"{NAMESPACE}.NewtonsoftJsonHelperAttribute"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""

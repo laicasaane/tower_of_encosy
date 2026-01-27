@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using EncosyTower.NewtonsoftAot;
+using EncosyTower.NewtonsoftJson;
 using UnityEngine;
 
-namespace EncosyTower.Tests.NewtonsoftAotHelperTests
+namespace EncosyTower.Tests.NewtonsoftJsonHelperTests
 {
-    [NewtonsoftAotHelper(typeof(MyClass))]
+    [NewtonsoftJsonAotHelper(typeof(MyClass))]
     public static partial class Helper { }
 
     public class MyClass

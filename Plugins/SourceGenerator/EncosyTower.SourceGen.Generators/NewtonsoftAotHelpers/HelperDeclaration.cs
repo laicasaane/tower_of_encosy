@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
-namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
+namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
 {
     internal partial struct HelperDeclaration
     {
@@ -33,7 +33,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             p.OpenScope();
             {
                 p.PrintLine("[global::UnityEngine.Scripting.Preserve]");
-                p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("void EnsureNewtonsoftAot()");
+                p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("void EnsureNewtonsoftJson()");
                 p.OpenScope();
                 {
                     foreach (var type in types)

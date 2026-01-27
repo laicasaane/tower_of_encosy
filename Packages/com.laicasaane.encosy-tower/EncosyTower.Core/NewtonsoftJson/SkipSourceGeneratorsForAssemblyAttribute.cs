@@ -1,6 +1,6 @@
 using System;
 
-namespace EncosyTower.NewtonsoftAot
+namespace EncosyTower.NewtonsoftJson
 {
     [AttributeUsage(AttributeTargets.Assembly)]
     public sealed class SkipSourceGeneratorsForAssemblyAttribute : Attribute { }
