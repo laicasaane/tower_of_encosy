@@ -850,7 +850,7 @@ namespace EncosyTower.Collections
         }
     }
 
-    public struct ArrayMapNativeKeyValueEnumerator<TKey, TValue> : IEnumerator<ArrayMapNativeKeyValuePairFast<TKey, TValue>>
+    public struct ArrayMapNativeKeyValueEnumerator<TKey, TValue> : IEnumerator<ArrayMapNativeKeyValuePair<TKey, TValue>>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -904,7 +904,7 @@ namespace EncosyTower.Collections
             return false;
         }
 
-        public readonly ArrayMapNativeKeyValuePairFast<TKey, TValue> Current
+        public readonly ArrayMapNativeKeyValuePair<TKey, TValue> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(_map._valuesInfo[_index].key, _map._values, _index);
@@ -952,8 +952,8 @@ namespace EncosyTower.Collections
     }
 
     [DebuggerDisplay("[{Key}] = {Value}")]
-    [DebuggerTypeProxy(typeof(ArrayMapNativeKeyValuePairFastDebugProxy<,>))]
-    public readonly struct ArrayMapNativeKeyValuePairFast<TKey, TValue>
+    [DebuggerTypeProxy(typeof(ArrayMapNativeKeyValuePairDebugProxy<,>))]
+    public readonly struct ArrayMapNativeKeyValuePair<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -962,7 +962,7 @@ namespace EncosyTower.Collections
         private readonly int _index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ArrayMapNativeKeyValuePairFast(in TKey key, in NativeStrategy<TValue> mapValues, int index)
+        public ArrayMapNativeKeyValuePair(in TKey key, in NativeStrategy<TValue> mapValues, int index)
         {
             _mapValues = mapValues;
             _index = index;
@@ -995,14 +995,14 @@ namespace EncosyTower.Collections
         }
     }
 
-    internal sealed class ArrayMapNativeKeyValuePairFastDebugProxy<TKey, TValue>
+    internal sealed class ArrayMapNativeKeyValuePairDebugProxy<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
 
-        private readonly ArrayMapNativeKeyValuePairFast<TKey, TValue> _keyValue;
+        private readonly ArrayMapNativeKeyValuePair<TKey, TValue> _keyValue;
 
-        public ArrayMapNativeKeyValuePairFastDebugProxy(in ArrayMapNativeKeyValuePairFast<TKey, TValue> keyValue)
+        public ArrayMapNativeKeyValuePairDebugProxy(in ArrayMapNativeKeyValuePair<TKey, TValue> keyValue)
         {
             _keyValue = keyValue;
         }
@@ -1039,12 +1039,12 @@ namespace EncosyTower.Collections
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public ArrayMapNativeKeyValuePairFast<TKey, TValue>[] KeyValues
+        public ArrayMapNativeKeyValuePair<TKey, TValue>[] KeyValues
         {
             get
             {
                 var map = _map;
-                var array = new ArrayMapNativeKeyValuePairFast<TKey, TValue>[map.Count];
+                var array = new ArrayMapNativeKeyValuePair<TKey, TValue>[map.Count];
                 var i = 0;
 
                 foreach (var keyValue in map)

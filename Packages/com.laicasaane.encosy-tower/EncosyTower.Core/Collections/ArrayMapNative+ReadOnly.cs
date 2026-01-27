@@ -161,7 +161,7 @@ namespace EncosyTower.Collections
         }
     }
 
-    public struct ArrayMapNativeReadOnlyKeyValueEnumerator<TKey, TValue> : IEnumerator<ArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue>>
+    public struct ArrayMapNativeReadOnlyKeyValueEnumerator<TKey, TValue> : IEnumerator<ArrayMapNativeReadOnlyKeyValuePair<TKey, TValue>>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -215,7 +215,7 @@ namespace EncosyTower.Collections
             return false;
         }
 
-        public readonly ArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue> Current
+        public readonly ArrayMapNativeReadOnlyKeyValuePair<TKey, TValue> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(_map._valuesInfo[_index].key, _map._values.ToNativeArray(), _index);
@@ -257,7 +257,7 @@ namespace EncosyTower.Collections
         public readonly void Dispose() { }
     }
 
-    public readonly struct ArrayMapNativeReadOnlyKeyValuePairFast<TKey, TValue>
+    public readonly struct ArrayMapNativeReadOnlyKeyValuePair<TKey, TValue>
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
@@ -266,7 +266,7 @@ namespace EncosyTower.Collections
         private readonly int _index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ArrayMapNativeReadOnlyKeyValuePairFast(in TKey key, in NativeArray<TValue>.ReadOnly mapValues, int index)
+        public ArrayMapNativeReadOnlyKeyValuePair(in TKey key, in NativeArray<TValue>.ReadOnly mapValues, int index)
         {
             _mapValues = mapValues;
             _index = index;
