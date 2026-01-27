@@ -19,7 +19,7 @@ namespace EncosyTower.Collections
         /// <inheritdoc cref="ArrayMap{TKey, TValue}"/>
         [DebuggerTypeProxy(typeof(ArrayMapDebugProxy<,>))]
         public readonly struct ReadOnly : IDisposable, IIsCreated
-            , IReadOnlyCollection<ArrayMapKeyValuePairFast<TKey, TValue>>, IHasCount
+            , IReadOnlyCollection<ArrayMapKeyValuePair<TKey, TValue>>, IHasCount
             , ITryGetValue<TKey, TValue>
         {
             internal readonly ArrayMap<TKey, TValue> _map;
@@ -96,7 +96,7 @@ namespace EncosyTower.Collections
                 => _map.FindIndex(key);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            IEnumerator<ArrayMapKeyValuePairFast<TKey, TValue>> IEnumerable<ArrayMapKeyValuePairFast<TKey, TValue>>.GetEnumerator()
+            IEnumerator<ArrayMapKeyValuePair<TKey, TValue>> IEnumerable<ArrayMapKeyValuePair<TKey, TValue>>.GetEnumerator()
                 => _map.GetEnumerator();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -55,8 +55,8 @@ namespace EncosyTower.Collections
     /// </remarks>
     [DebuggerTypeProxy(typeof(ArrayMapDebugProxy<,>))]
     public partial class ArrayMap<TKey, TValue> : IDisposable
-        , ICollection<ArrayMapKeyValuePairFast<TKey, TValue>>
-        , IReadOnlyCollection<ArrayMapKeyValuePairFast<TKey, TValue>>
+        , ICollection<ArrayMapKeyValuePair<TKey, TValue>>
+        , IReadOnlyCollection<ArrayMapKeyValuePair<TKey, TValue>>
         , IClearable, IIncreaseCapacity, IHasCount, ITryGetValue<TKey, TValue>
     {
         internal ManagedStrategy<ArrayMapNode<TKey>> _valuesInfo;
@@ -131,7 +131,7 @@ namespace EncosyTower.Collections
             get => _values.AsArraySegment().Slice(0, _freeValueCellIndex);
         }
 
-        bool ICollection<ArrayMapKeyValuePairFast<TKey, TValue>>.IsReadOnly
+        bool ICollection<ArrayMapKeyValuePair<TKey, TValue>>.IsReadOnly
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => false;
@@ -746,7 +746,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        IEnumerator<ArrayMapKeyValuePairFast<TKey, TValue>> IEnumerable<ArrayMapKeyValuePairFast<TKey, TValue>>.GetEnumerator()
+        IEnumerator<ArrayMapKeyValuePair<TKey, TValue>> IEnumerable<ArrayMapKeyValuePair<TKey, TValue>>.GetEnumerator()
             => new ArrayMapKeyValueEnumerator<TKey, TValue>(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -754,25 +754,25 @@ namespace EncosyTower.Collections
             => new ArrayMapKeyValueEnumerator<TKey, TValue>(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void ICollection<ArrayMapKeyValuePairFast<TKey, TValue>>.Add(ArrayMapKeyValuePairFast<TKey, TValue> item)
+        void ICollection<ArrayMapKeyValuePair<TKey, TValue>>.Add(ArrayMapKeyValuePair<TKey, TValue> item)
         {
             TryAdd(item.Key, item.Value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        bool ICollection<ArrayMapKeyValuePairFast<TKey, TValue>>.Contains(ArrayMapKeyValuePairFast<TKey, TValue> item)
+        bool ICollection<ArrayMapKeyValuePair<TKey, TValue>>.Contains(ArrayMapKeyValuePair<TKey, TValue> item)
         {
             return ContainsKey(item.Key);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void ICollection<ArrayMapKeyValuePairFast<TKey, TValue>>.CopyTo(ArrayMapKeyValuePairFast<TKey, TValue>[] array, int arrayIndex)
+        void ICollection<ArrayMapKeyValuePair<TKey, TValue>>.CopyTo(ArrayMapKeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
             throw new NotImplementedException("This method is not implemented by design.");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        bool ICollection<ArrayMapKeyValuePairFast<TKey, TValue>>.Remove(ArrayMapKeyValuePairFast<TKey, TValue> item)
+        bool ICollection<ArrayMapKeyValuePair<TKey, TValue>>.Remove(ArrayMapKeyValuePair<TKey, TValue> item)
         {
             return Remove(item.Key);
         }
@@ -871,7 +871,7 @@ namespace EncosyTower.Collections
         }
     }
 
-    public struct ArrayMapKeyValueEnumerator<TKey, TValue> : IEnumerator<ArrayMapKeyValuePairFast<TKey, TValue>>
+    public struct ArrayMapKeyValueEnumerator<TKey, TValue> : IEnumerator<ArrayMapKeyValuePair<TKey, TValue>>
     {
         private readonly ArrayMap<TKey, TValue> _map;
 
@@ -923,7 +923,7 @@ namespace EncosyTower.Collections
             return true;
         }
 
-        public readonly ArrayMapKeyValuePairFast<TKey, TValue> Current
+        public readonly ArrayMapKeyValuePair<TKey, TValue> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new(_map._valuesInfo[_index].key, _map._values, _index);
@@ -971,15 +971,15 @@ namespace EncosyTower.Collections
     }
 
     [DebuggerDisplay("[{Key}] = {Value}")]
-    [DebuggerTypeProxy(typeof(ArrayMapKeyValuePairFastDebugProxy<,>))]
-    public readonly struct ArrayMapKeyValuePairFast<TKey, TValue>
+    [DebuggerTypeProxy(typeof(ArrayMapKeyValuePairDebugProxy<,>))]
+    public readonly struct ArrayMapKeyValuePair<TKey, TValue>
     {
         private readonly ManagedStrategy<TValue> _mapValues;
         private readonly TKey _key;
         private readonly int _index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ArrayMapKeyValuePairFast(in TKey key, in ManagedStrategy<TValue> mapValues, int index)
+        public ArrayMapKeyValuePair(in TKey key, in ManagedStrategy<TValue> mapValues, int index)
         {
             _mapValues = mapValues;
             _index = index;
@@ -1012,12 +1012,12 @@ namespace EncosyTower.Collections
         }
     }
 
-    internal sealed class ArrayMapKeyValuePairFastDebugProxy<TKey, TValue>
+    internal sealed class ArrayMapKeyValuePairDebugProxy<TKey, TValue>
     {
 
-        private readonly ArrayMapKeyValuePairFast<TKey, TValue> _keyValue;
+        private readonly ArrayMapKeyValuePair<TKey, TValue> _keyValue;
 
-        public ArrayMapKeyValuePairFastDebugProxy(in ArrayMapKeyValuePairFast<TKey, TValue> keyValue)
+        public ArrayMapKeyValuePairDebugProxy(in ArrayMapKeyValuePair<TKey, TValue> keyValue)
         {
             _keyValue = keyValue;
         }
@@ -1052,12 +1052,12 @@ namespace EncosyTower.Collections
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public ArrayMapKeyValuePairFast<TKey, TValue>[] KeyValues
+        public ArrayMapKeyValuePair<TKey, TValue>[] KeyValues
         {
             get
             {
                 var map = _map;
-                var array = new ArrayMapKeyValuePairFast<TKey, TValue>[map.Count];
+                var array = new ArrayMapKeyValuePair<TKey, TValue>[map.Count];
                 var i = 0;
 
                 foreach (var keyValue in map)
