@@ -14,11 +14,13 @@ namespace EncosyTower.Collections
 
         internal readonly HashSetExposed<T> _set;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public HashSetReadOnly()
         {
             _set = s_empty._set;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public HashSetReadOnly([NotNull] HashSet<T> set)
         {
             _set = new(set);
@@ -113,8 +115,8 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
             => obj switch {
-                HashSetReadOnly<T> other => _set.Set.Equals(other._set.Set),
-                HashSet<T> otherSet => _set.Set.Equals(otherSet),
+                HashSetReadOnly<T> other => ReferenceEquals(_set.Set, other._set.Set),
+                HashSet<T> other => ReferenceEquals(_set.Set, other),
                 _ => false,
             };
 

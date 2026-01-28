@@ -12,11 +12,13 @@ namespace EncosyTower.Collections
 
         internal readonly DictionaryExposed<TKey, TValue> _dictionary;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public DictionaryReadOnly()
         {
             _dictionary = s_empty._dictionary;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public DictionaryReadOnly([NotNull] Dictionary<TKey, TValue> dictionary)
         {
             _dictionary = new(dictionary);
@@ -93,6 +95,18 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ContainsValue(TValue value)
             => _dictionary.Dictionary.ContainsValue(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Equals(object obj)
+            => obj switch {
+                DictionaryReadOnly<TKey, TValue> other => ReferenceEquals(_dictionary.Dictionary, other._dictionary.Dictionary),
+                Dictionary<TKey, TValue> other => ReferenceEquals(_dictionary.Dictionary, other),
+                _ => false
+            };
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode()
+            => _dictionary.Dictionary.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)

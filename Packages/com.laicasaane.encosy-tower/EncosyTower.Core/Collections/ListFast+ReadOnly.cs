@@ -113,6 +113,19 @@ namespace EncosyTower.Collections
                 => new CopyToSpan<T>(AsReadOnlySpan()).CopyTo(sourceStartIndex, destination, length);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public override int GetHashCode()
+                => _list._list.GetHashCode();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public override bool Equals(object obj)
+                => obj switch {
+                    ReadOnly other => ReferenceEquals(_list.List, other._list.List),
+                    ListFast<T> other => ReferenceEquals(_list.List, other.List),
+                    List<T> other => ReferenceEquals(_list.List, other),
+                    _ => false
+                };
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool TryCopyTo(Span<T> destination)
                 => TryCopyTo(0, destination);
 

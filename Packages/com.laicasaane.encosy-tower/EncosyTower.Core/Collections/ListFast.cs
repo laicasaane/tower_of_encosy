@@ -18,11 +18,13 @@ namespace EncosyTower.Collections
     {
         internal readonly ListExposed<T> _list;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ListFast()
         {
             _list = new(new List<T>());
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ListFast([NotNull] List<T> list)
         {
             _list = new(list);
@@ -98,7 +100,12 @@ namespace EncosyTower.Collections
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
-            => obj is ListFast<T> other && ReferenceEquals(List, other.List);
+            => obj switch {
+                ListFast<T> other => ReferenceEquals(List, other.List),
+                ReadOnly other => ReferenceEquals(List, other._list.List),
+                List<T> other => ReferenceEquals(List, other),
+                _ => false
+            };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Exists([NotNull] Predicate<T> match)
