@@ -67,10 +67,16 @@ namespace EncosyTower.Debugging
         public static ArgumentOutOfRangeException CreateArgumentOutOfRangeException_LengthNegative()
             => new("length", "The value must be non-negative.");
 
+        public static ArgumentOutOfRangeException CreateArgumentOutOfRangeException_IndexNegative()
+            => new("index", "The value must be non-negative.");
+
         public static ArgumentException CreateArgumentException_SourceStartIndex_Length()
             => new("The number of elements from 'sourceStartIndex' to the end of the collection is lesser than 'length'.");
 
         public static ArgumentException CreateArgumentException_DestinationTooShort()
             => new("The destination span is too short to copy the requested number of elements.");
+
+        public static ArgumentException CreateArgumentException_ArrayPlusOffTooSmall()
+            => new("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
     }
 }

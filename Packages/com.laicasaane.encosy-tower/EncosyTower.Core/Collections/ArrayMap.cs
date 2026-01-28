@@ -762,7 +762,7 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         bool ICollection<ArrayMapKeyValuePair<TKey, TValue>>.Contains(ArrayMapKeyValuePair<TKey, TValue> item)
         {
-            return ContainsKey(item.Key);
+            return TryGetValue(item.Key, out var value) && EqualityComparer<TValue>.Default.Equals(value, item.Value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
