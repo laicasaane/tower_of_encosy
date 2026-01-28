@@ -3,7 +3,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace EncosyTower.NewtonsoftJson
+namespace EncosyTower.Serialization.NewtonsoftJson
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
     public sealed class NewtonsoftJsonAotHelperAttribute : Attribute

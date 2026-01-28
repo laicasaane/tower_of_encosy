@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using EncosyTower.NewtonsoftJson;
+using EncosyTower.Serialization.NewtonsoftJson;
 using UnityEngine;
 
 namespace EncosyTower.Tests.NewtonsoftJsonHelperTests

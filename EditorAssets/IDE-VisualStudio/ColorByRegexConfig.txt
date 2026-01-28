@@ -31,7 +31,6 @@
 ^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(Logging)(\/|\\).*$
 ^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(Mvvm)(\/|\\).*$
 ^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(Naming)(\/|\\).*$
-^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(NewtonsoftAot)(\/|\\).*$
 ^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(PageFlows)(\/|\\).*$
 ^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(PageFlows\.MonoPages)(\/|\\).*$
 ^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(PolyEnumStructs)(\/|\\).*$
@@ -43,6 +42,7 @@
 ^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(Scenes)(\/|\\).*$
 ^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(Search)(\/|\\).*$
 ^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(Serialization)(\/|\\).*$
+^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(Serialization\.NewtonsoftJson)(\/|\\).*$
 ^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(Settings)(\/|\\).*$
 ^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(SourceGenerators)(\/|\\).*$
 ^.*(\/|\\)(Packages)(\/|\\)(com\.laicasaane\.encosy-tower)(\/|\\)(EncosyTower\.Core)(\/|\\)(StringIds)(\/|\\).*$

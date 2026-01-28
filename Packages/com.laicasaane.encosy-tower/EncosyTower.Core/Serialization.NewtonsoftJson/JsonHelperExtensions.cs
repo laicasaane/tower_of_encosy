@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace EncosyTower.Serialization
+namespace EncosyTower.Serialization.NewtonsoftJson
 {
     public static class JsonHelperExtensions
     {
