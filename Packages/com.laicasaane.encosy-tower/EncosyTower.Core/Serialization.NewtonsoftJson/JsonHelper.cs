@@ -61,7 +61,7 @@ namespace EncosyTower.Serialization.NewtonsoftJson
             )
             {
                 var props = base.CreateProperties(type, memberSerialization);
-                return props.Where(p => p.Writable).ToList();
+                return props.Where(static p => p.Writable).ToList();
             }
         }
 
