@@ -12,6 +12,10 @@ namespace EncosyTower.Collections.Extensions
         public static bool IsNullOrEmpty<TKey, TValue>(this IDictionary<TKey, TValue> dict)
             => dict == null || dict.Count < 1;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DictionaryReadOnly<TKey, TValue> AsReadOnly<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
+            => dictionary;
+
         public static void AddRange<TKey, TValue>(
               [NotNull] this Dictionary<TKey, TValue> dest
             , IEnumerable<KeyValuePair<TKey, TValue>> collection

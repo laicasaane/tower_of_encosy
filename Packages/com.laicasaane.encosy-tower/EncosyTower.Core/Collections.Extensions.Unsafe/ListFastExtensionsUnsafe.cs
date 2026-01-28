@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EncosyTower.Debugging;
 
 namespace EncosyTower.Collections.Extensions.Unsafe
 {
@@ -7,6 +8,9 @@ namespace EncosyTower.Collections.Extensions.Unsafe
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static List<T> GetListUnsafe<T>(this ListFast<T>.ReadOnly list)
-            => list._list.List;
+        {
+            ThrowHelper.ThrowInvalidOperationException_ReadOnlyCollectionNotCreated(list.IsCreated);
+            return list._list.List;
+        }
     }
 }

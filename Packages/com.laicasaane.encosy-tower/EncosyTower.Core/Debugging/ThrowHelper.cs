@@ -17,6 +17,34 @@ namespace EncosyTower.Debugging
             }
         }
 
+        public static void ThrowArgumentOutOfRangeException_IfNegative(int value, string paramName)
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(paramName, "The value must be non-negative.");
+            }
+        }
+
+        public static void ThrowArgumentOutOfRangeException_IfNegativeZero(int value, string paramName)
+        {
+            if (value <= 0)
+            {
+                throw new ArgumentOutOfRangeException(paramName, "The value must be positive and non-zero.");
+            }
+        }
+
+        public static void ThrowArgumentException_ArrayPlusOffTooSmall()
+            => throw CreateArgumentException_ArrayPlusOffTooSmall();
+
+        public static void ThrowInvalidOperationException_ReadOnlyCollectionNotCreated([DoesNotReturnIf(false)] bool isCreated)
+        {
+            if (isCreated == false)
+            {
+                throw new InvalidOperationException("The read-only collection is not created.");
+            }
+
+        }
+
         [DoesNotReturn]
         public static void ThrowInvalidOperationException_EnumFailedVersion()
             => throw new InvalidOperationException("Collection was modified after the enumerator was instantiated.");
