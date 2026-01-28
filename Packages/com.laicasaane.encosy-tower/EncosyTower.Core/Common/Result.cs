@@ -103,6 +103,14 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Result<TValue> Succeed(TValue value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Result<TValue> Err(Error error)
+            => new(error);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Deconstruct(out Option<TValue> value, out Error error)
         {
             value = Value;
@@ -284,6 +292,14 @@ namespace EncosyTower.Common
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _hasError ? Option.Some(_error) : Option.None;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Result<TValue, TError> Succeed(TValue value)
+            => new(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Result<TValue, TError> Err(TError error)
+            => new(error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Deconstruct(out Option<TValue> value, out Option<TError> error)
