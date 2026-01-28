@@ -121,6 +121,11 @@ namespace EncosyTower.Editor.ProjectSetup
             EditorApplication.update -= ListRequestProgress;
             EditorUtility.ClearProgressBar();
 
+            OnListRequestCompleted();
+        }
+
+        private void OnListRequestCompleted()
+        {
             var result = s_listRequest.Result;
             s_listRequest = null;
 
