@@ -22,12 +22,20 @@ namespace EncosyTower.Collections
             , IReadOnlyCollection<ArrayMapKeyValuePair<TKey, TValue>>, IHasCount
             , ITryGetValue<TKey, TValue>
         {
+            private static readonly ReadOnly s_empty = new(new ArrayMap<TKey, TValue>());
+
             internal readonly ArrayMap<TKey, TValue> _map;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ReadOnly([NotNull] ArrayMap<TKey, TValue> map)
             {
                 _map = map;
+            }
+
+            public static ReadOnly Empty
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => s_empty;
             }
 
             public bool IsCreated
@@ -66,6 +74,11 @@ namespace EncosyTower.Collections
                 get => _map[key];
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator ReadOnly(ArrayMap<TKey, TValue> map)
+                => map is not null ? map.AsReadOnly() : Empty;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Dispose()
             {
                 _map.Dispose();
@@ -102,10 +115,6 @@ namespace EncosyTower.Collections
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             IEnumerator IEnumerable.GetEnumerator()
                 => _map.GetEnumerator();
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator ReadOnly(ArrayMap<TKey, TValue> map)
-                => map.AsReadOnly();
         }
     }
 }

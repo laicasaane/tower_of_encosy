@@ -60,11 +60,11 @@ namespace EncosyTower.Collections
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator ReadOnly(ListFast<T> list)
-                => new(list);
+                => list.IsCreated ? new(list) : Empty;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator ReadOnly([NotNull] List<T> list)
-                => new(list);
+            public static implicit operator ReadOnly(List<T> list)
+                => list is not null ? new(list) : Empty;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator ReadOnlySpan<T>(in ReadOnly list)

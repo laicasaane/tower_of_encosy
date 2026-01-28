@@ -22,6 +22,8 @@ namespace EncosyTower.Collections
 
         public readonly partial struct ReadOnly : IHasCapacity, IHasCount, ITryGetValue<TKey, TValue>, IIsCreated
         {
+            private static readonly ReadOnly s_empty = new(new());
+
             internal readonly NativeArray<ArrayMapNode<TKey>>.ReadOnly _valuesInfo;
             internal readonly NativeArray<TValue>.ReadOnly _values;
             internal readonly NativeArray<int>.ReadOnly _buckets;
@@ -38,6 +40,12 @@ namespace EncosyTower.Collections
                 _freeValueCellIndex = map._freeValueCellIndex.AsNativeArray().AsReadOnly();
                 _collisions = map._collisions.AsNativeArray().AsReadOnly();
                 _fastModBucketsMultiplier = map._fastModBucketsMultiplier.AsNativeArray().AsReadOnly();
+            }
+
+            public static ReadOnly Empty
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => s_empty;
             }
 
             public readonly bool IsCreated
@@ -78,7 +86,7 @@ namespace EncosyTower.Collections
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator ReadOnly(SharedArrayMap<TKey, TValue, TValueNative> map)
-                => map.AsReadOnly();
+                => map is not null ? map.AsReadOnly() : Empty;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly SharedArrayMapReadOnlyKeyValueEnumerator<TKey, TValue, TValueNative> GetEnumerator()

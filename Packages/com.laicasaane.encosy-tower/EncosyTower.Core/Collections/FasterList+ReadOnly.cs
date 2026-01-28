@@ -40,12 +40,20 @@ namespace EncosyTower.Collections
         public readonly struct ReadOnly : IReadOnlyList<T>, IAsReadOnlySpan<T>
             , ICopyToSpan<T>, ITryCopyToSpan<T>, IContains<T>, IHasCapacity, IHasCount, IIsCreated
         {
+            private static readonly ReadOnly s_empty = new(null);
+
             internal readonly FasterList<T> _list;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ReadOnly([NotNull] FasterList<T> list)
             {
                 _list = list;
+            }
+
+            public static ReadOnly Empty
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => s_empty;
             }
 
             public bool IsCreated
@@ -70,7 +78,7 @@ namespace EncosyTower.Collections
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator ReadOnly(FasterList<T> list)
-                => new(list);
+                => list is not null ? list.AsReadOnly() : Empty;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator ReadOnlySpan<T>(in ReadOnly list)

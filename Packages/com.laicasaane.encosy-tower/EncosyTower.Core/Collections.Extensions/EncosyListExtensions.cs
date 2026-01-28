@@ -33,8 +33,8 @@ namespace EncosyTower.Collections.Extensions
             => list;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ListFast<T>.ReadOnly AsReadOnlyList<T>([NotNull] this List<T> list)
-            => list;
+        public static ListFast<T>.ReadOnly AsReadOnly<T>(this List<T> list)
+            => list is not null ? list : ListFast<T>.ReadOnly.Empty;
 
         public static void AddRange<T>(
               [NotNull] this List<T> list
