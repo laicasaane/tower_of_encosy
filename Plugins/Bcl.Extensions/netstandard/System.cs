@@ -1,3 +1,5 @@
+#pragma warning disable
+
 namespace System;
 
 public class Object
@@ -48,10 +50,58 @@ public enum AttributeTargets
                         Delegate | ReturnValue | GenericParameter
 }
 
+public interface IDisposable
+{
+    void Dispose();
+}
+
+
+public readonly struct ArraySegment<T>
+{
+
+}
+
 #if NETSTANDARD2_1_OR_GREATER
 public readonly ref struct Span<T>
 {
+    public Span(T[] array)
+    {
+    }
+
     public Span(T[] array, int start, int length)
+    {
+    }
+}
+
+public readonly ref struct ReadOnlySpan<T>
+{
+    public ReadOnlySpan(T[] array)
+    {
+    }
+
+    public ReadOnlySpan(T[] array, int start, int length)
+    {
+    }
+}
+
+public readonly struct Memory<T>
+{
+    public Memory(T[] array)
+    {
+    }
+
+    public Memory(T[] array, int start, int length)
+    {
+    }
+}
+
+public readonly struct ReadOnlyMemory<T>
+{
+    public ReadOnlyMemory(T[] array)
+    {
+    }
+
+    public ReadOnlyMemory(T[] array, int start, int length)
     {
     }
 }
@@ -92,6 +142,10 @@ public class NullReferenceException : Exception
 public class ArgumentOutOfRangeException : Exception
 {
     public ArgumentOutOfRangeException(string? paramName, string? message) { }
+}
+
+public class NotImplementedException : Exception
+{
 }
 
 public sealed class String

@@ -1,3 +1,5 @@
+#pragma warning disable
+
 namespace System.Security.Permissions;
 
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]

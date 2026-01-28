@@ -5,6 +5,7 @@
         <NoWarn>CS8618</NoWarn>
         <TargetFrameworks>netstandard2.1</TargetFrameworks>
         <RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
         <!-- Disable default references -->
         <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>

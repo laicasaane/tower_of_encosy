@@ -1,3 +1,5 @@
+#pragma warning disable
+
 namespace System.Reflection;
 
 [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]

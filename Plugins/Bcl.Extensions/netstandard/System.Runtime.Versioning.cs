@@ -1,3 +1,5 @@
+#pragma warning disable
+
 namespace System.Runtime.Versioning;
 
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
