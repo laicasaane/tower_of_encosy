@@ -4,7 +4,7 @@ namespace System.Collections.Generic;
 
 public interface IEqualityComparer<in T>
 {
-    bool Equals(T? x, T? y);
+    bool Equals(T x, T y);
 
     int GetHashCode(T obj);
 }
@@ -21,16 +21,16 @@ public interface IEnumerator<out T> : IDisposable, IEnumerator
 
 public class List<T>
 {
-    public T?[] _items;
+    public T[] _items;
     public int _size;
     public int _version;
 
     public int Capacity { get => default; set { } }
 
-    public void EnsureCapacity(int min) { }
+    public void Grow(int capacity) { }
 }
 
-public class Dictionary<TKey, TValue>
+public class Dictionary<TKey, TValue> where TKey : notnull
 {
     public int[] _buckets;
     public Entry[] _entries;
@@ -43,7 +43,10 @@ public class Dictionary<TKey, TValue>
 
     public void Add(TKey key, TValue value) { }
 
-    public int FindEntry(TKey key) => default;
+    public ref TValue FindValue(TKey key)
+    {
+        throw new NotImplementedException();
+    }
 
     public struct Entry
     {
@@ -51,6 +54,14 @@ public class Dictionary<TKey, TValue>
         public int next;
         public TKey key;
         public TValue value;
+    }
+
+    public static class CollectionsMarshalHelper
+    {
+        public static ref TValue GetValueRefOrAddDefault(Dictionary<TKey, TValue> dictionary, TKey key, out bool exists)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 
@@ -64,6 +75,11 @@ public class HashSet<T>
     public int _freeCount;
     public int _version;
     public IEqualityComparer<T> _comparer;
+
+    public int FindItemIndex(T item)
+    {
+        throw new NotImplementedException();
+    }
 
     public struct Entry
     {

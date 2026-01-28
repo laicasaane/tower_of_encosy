@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace System.Collections.Generic.Unsafe;
+namespace System.Collections.Generic.Exposed;
 
 [method: MethodImpl(MethodImplOptions.AggressiveInlining)]
 internal readonly struct ListExposed<T>([NotNull] List<T> list)

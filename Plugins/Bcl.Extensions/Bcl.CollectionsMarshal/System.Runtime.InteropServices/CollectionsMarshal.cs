@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace System.Runtime.InteropServices;
@@ -16,9 +17,30 @@ public static class CollectionsMarshal
     /// Items should not be added or removed from the <see cref="List{T}"/> while the <see cref="Span{T}"/> is in use.
     /// </summary>
     /// <param name="list">The list to get the data view over.</param>
+    /// <typeparam name="T">The type of the elements in the list.</typeparam>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<T?> AsSpan<T>(List<T>? list)
-        => list is null ? default : new Span<T?>(list._items, 0, list._size);
+    public static Span<T> AsSpan<T>(List<T> list)
+    {
+        Span<T> span = default;
+
+        if (list is not null)
+        {
+            int size = list._size;
+            T[] items = list._items;
+            Debug.Assert(items is not null, "Implementation depends on List<T> always having an array.");
+
+            if ((uint)size > (uint)items.Length)
+            {
+                // List<T> was erroneously mutated concurrently with this call, leading to a count larger than its array.
+                ThrowInvalidOperationException_ConcurrentOperationsNotSupported();
+            }
+
+            Debug.Assert(typeof(T[]) == list._items.GetType(), "Implementation depends on List<T> always using a T[] and not U[] where U : T.");
+            span = new Span<T>(ref MemoryMarshal.GetArrayDataReference(items), size);
+        }
+
+        return span;
+    }
 
     /// <summary>
     /// Gets either a ref to a <typeparamref name="TValue"/> in the <see cref="Dictionary{TKey, TValue}"/> or a ref null if it does not exist in the <paramref name="dictionary"/>.
@@ -31,15 +53,8 @@ public static class CollectionsMarshal
     /// Items should not be added or removed from the <see cref="Dictionary{TKey, TValue}"/> while the ref <typeparamref name="TValue"/> is in use.
     /// The ref null can be detected using System.Runtime.CompilerServices.Unsafe.IsNullRef
     /// </remarks>
-    public static unsafe ref TValue? GetValueRefOrNullRef<TKey, TValue>(Dictionary<TKey, TValue?> dictionary, TKey key) where TKey : notnull
-    {
-        int num = dictionary.FindEntry(key);
-        if (num >= 0)
-        {
-            return ref dictionary._entries[num].value;
-        }
-        return ref *(TValue*)null;
-    }
+    public static ref TValue GetValueRefOrNullRef<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey key) where TKey : notnull
+        => ref dictionary.FindValue(key);
 
     /// <summary>
     /// Gets a ref to a <typeparamref name="TValue"/> in the <see cref="Dictionary{TKey, TValue}"/>, adding a new entry with a default value if it does not exist in the <paramref name="dictionary"/>.
@@ -50,18 +65,8 @@ public static class CollectionsMarshal
     /// <typeparam name="TKey">The type of the keys in the dictionary.</typeparam>
     /// <typeparam name="TValue">The type of the values in the dictionary.</typeparam>
     /// <remarks>Items should not be added to or removed from the <see cref="Dictionary{TKey, TValue}"/> while the ref <typeparamref name="TValue"/> is in use.</remarks>
-    public static ref TValue? GetValueRefOrAddDefault<TKey, TValue>(Dictionary<TKey, TValue?> dictionary, TKey key, out bool exists) where TKey : notnull
-    {
-        int num = dictionary.FindEntry(key);
-        exists = true;
-        if (num < 0)
-        {
-            exists = false;
-            dictionary.Add(key, default);
-            num = dictionary.FindEntry(key);
-        }
-        return ref dictionary._entries[num].value;
-    }
+    public static ref TValue GetValueRefOrAddDefault<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey key, out bool exists) where TKey : notnull
+        => ref Dictionary<TKey, TValue>.CollectionsMarshalHelper.GetValueRefOrAddDefault(dictionary, key, out exists);
 
     /// <summary>
     /// Sets the count of the <see cref="List{T}"/> to the specified value.
@@ -89,15 +94,9 @@ public static class CollectionsMarshal
 
         if (count > list.Capacity)
         {
-            list.EnsureCapacity(count);
+            list.Grow(count);
         }
-        else if (count < list._size &&
-#if NETSTANDARD2_1_OR_GREATER
-            RuntimeHelpers.IsReferenceOrContainsReferences<T>()
-#else
-            ClearCache<T>.MustClear
-#endif
-        )
+        else if (count < list._size && RuntimeHelpers.IsReferenceOrContainsReferences<T>())
         {
             Array.Clear(list._items, count, list._size - count);
         }
@@ -110,10 +109,8 @@ public static class CollectionsMarshal
         throw new ArgumentOutOfRangeException(paramName, "Non-negative number required.");
     }
 
-#if !NETSTANDARD2_1_OR_GREATER
-    private static unsafe class ClearCache<T>
+    private static void ThrowInvalidOperationException_ConcurrentOperationsNotSupported()
     {
-        public static readonly bool MustClear = sizeof(T) >= sizeof(void*) && !typeof(T).IsPrimitive && !typeof(T).IsEnum;
+        throw new InvalidOperationException("Operations that change the collection cannot be performed during enumeration.");
     }
-#endif
 }

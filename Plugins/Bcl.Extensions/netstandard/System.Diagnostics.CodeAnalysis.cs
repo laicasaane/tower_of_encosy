@@ -1,3 +1,5 @@
+#pragma warning disable
+
 namespace System.Diagnostics.CodeAnalysis;
 
 /// <summary>Specifies that an output will not be null even if the corresponding type allows it. Specifies that an input argument was not null when the call returns.</summary>
@@ -12,5 +14,16 @@ public sealed class NotNullWhenAttribute : Attribute
     public NotNullWhenAttribute(bool returnValue)
     {
         ReturnValue = returnValue;
+    }
+}
+
+[AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+public sealed class DoesNotReturnIfAttribute : Attribute
+{
+    public bool ParameterValue { get; }
+
+    public DoesNotReturnIfAttribute(bool parameterValue)
+    {
+        ParameterValue = parameterValue;
     }
 }

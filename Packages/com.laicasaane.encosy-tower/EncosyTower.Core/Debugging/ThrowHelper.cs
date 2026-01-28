@@ -45,6 +45,11 @@ namespace EncosyTower.Debugging
 
         }
 
+        public static void ThrowKeyNotFoundException<TKey>(TKey key)
+        {
+            throw new KeyNotFoundException($"The given key '{key}' was not present in the dictionary.");
+        }
+
         [DoesNotReturn]
         public static void ThrowInvalidOperationException_EnumFailedVersion()
             => throw new InvalidOperationException("Collection was modified after the enumerator was instantiated.");

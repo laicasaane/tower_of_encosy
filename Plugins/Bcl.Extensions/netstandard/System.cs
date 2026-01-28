@@ -4,6 +4,7 @@ namespace System;
 
 public class Object
 {
+    public Type GetType() => throw new NotImplementedException();
 }
 
 public abstract class Attribute
@@ -23,6 +24,11 @@ public sealed class AttributeUsageAttribute : Attribute
 
 [AttributeUsage(AttributeTargets.Enum, Inherited = false)]
 public sealed class FlagsAttribute : Attribute
+{
+}
+
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, Inherited = false)]
+public sealed class AllowNullAttribute : Attribute
 {
 }
 
@@ -55,6 +61,15 @@ public interface IDisposable
     void Dispose();
 }
 
+public readonly struct IntPtr
+{
+
+}
+
+public readonly struct UIntPtr
+{
+
+}
 
 public readonly struct ArraySegment<T>
 {
@@ -71,6 +86,14 @@ public readonly ref struct Span<T>
     public Span(T[] array, int start, int length)
     {
     }
+
+    public unsafe Span(void* pointer, int length)
+    {
+    }
+
+    public Span(ref T ptr, int length)
+    {
+    }
 }
 
 public readonly ref struct ReadOnlySpan<T>
@@ -80,6 +103,14 @@ public readonly ref struct ReadOnlySpan<T>
     }
 
     public ReadOnlySpan(T[] array, int start, int length)
+    {
+    }
+
+    public unsafe ReadOnlySpan(void* pointer, int length)
+    {
+    }
+
+    public ReadOnlySpan(ref T ptr, int length)
     {
     }
 }
@@ -126,8 +157,10 @@ public abstract class Type
     public static Type? GetTypeFromHandle(RuntimeTypeHandle handle) => default;
 }
 
-public abstract class Array
+public abstract class Array : Object
 {
+    public int Length => throw new NotImplementedException();
+
     public static void Clear(Array array, int index, int length) { }
 }
 
@@ -147,6 +180,22 @@ public class ArgumentOutOfRangeException : Exception
 public class NotImplementedException : Exception
 {
 }
+
+public class InvalidOperationException : Exception
+{
+    public InvalidOperationException()
+    {
+    }
+
+    public InvalidOperationException(string message)
+    {
+    }
+
+    public InvalidOperationException(string message, Exception innerException)
+    {
+    }
+}
+
 
 public sealed class String
 {

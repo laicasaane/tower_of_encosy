@@ -3,7 +3,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Generic.Unsafe;
+using System.Collections.Generic.Exposed;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Debugging;

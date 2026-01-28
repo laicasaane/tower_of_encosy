@@ -1,69 +1,74 @@
+#pragma warning disable
+
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace System.Collections.Generic.Unsafe;
+namespace System.Collections.Generic.Exposed;
 
-internal readonly struct DictionaryExposed<TKey, TValue>([NotNull] Dictionary<TKey, TValue> dictionary)
+internal readonly struct HashSetExposed<T>([NotNull] HashSet<T> set)
 {
-    public readonly Dictionary<TKey, TValue> Dictionary = dictionary;
+    public readonly HashSet<T> Set = set;
 
     public ReadOnlySpan<int> Buckets
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new(Dictionary._buckets);
+        get => new(Set._buckets);
     }
 
     public ReadOnlySpan<Entry> Entries
     {
         get
         {
-            var span = new ReadOnlySpan<Dictionary<TKey, TValue>.Entry>(Dictionary._entries, 0, Dictionary._count);
-            return MemoryMarshal.Cast<Dictionary<TKey, TValue>.Entry, Entry>(span);
+            var span = new ReadOnlySpan<HashSet<T>.Entry>(Set._entries, 0, Set._count);
+            return MemoryMarshal.Cast<HashSet<T>.Entry, Entry>(span);
         }
     }
 
     public ulong FastModMultiplier
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Dictionary._fastModMultiplier;
+        get => Set._fastModMultiplier;
     }
 
     public int Count
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Dictionary._count;
+        get => Set._count;
     }
 
     public int FreeList
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Dictionary._freeList;
+        get => Set._freeList;
     }
 
     public int FreeCount
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Dictionary._freeCount;
+        get => Set._freeCount;
     }
 
     public int Version
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Dictionary._version;
+        get => Set._version;
     }
 
-    public IEqualityComparer<TKey> Comparer
+    public IEqualityComparer<T> Comparer
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Dictionary._comparer;
+        get => Set._comparer;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int FindItemIndex(T item)
+        => Set.FindItemIndex(item);
 
     public struct Entry
     {
-        public uint hashCode;
-        public int next;
-        public TKey key;
-        public TValue value;
+        public int HashCode;
+        public int Next;
+        public T Value;
     }
 }
