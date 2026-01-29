@@ -1,4 +1,5 @@
 using System;
+using EncosyTower.Serialization;
 
 namespace EncosyTower.UnionIds
 {
@@ -9,21 +10,44 @@ namespace EncosyTower.UnionIds
     [AttributeUsage(AttributeTargets.Struct)]
     public sealed class UnionIdAttribute : Attribute
     {
-        public UnionIdSize Size { get; set; }
+        /// <summary>
+        /// The size of the union id in the string representation.
+        /// </summary>
+        public UnionIdSize Size { get; set; } = UnionIdSize.Auto;
 
-        public string DisplayNameForId { get; set; }
+        /// <summary>
+        /// The display name for the id part in the string representation.
+        /// </summary>
+        /// <remarks>
+        /// Default is <c>"Id"</c>.
+        /// </remarks>
+        public string DisplayNameForId { get; set; } = "Id";
 
-        public string DisplayNameForKind { get; set; }
+        /// <summary>
+        /// The display name for the kind part in the string representation.
+        /// </summary>
+        /// <remarks>
+        /// Default is <c>"Kind"</c>.
+        /// </remarks>
+        public string DisplayNameForKind { get; set; } = "Kind";
 
-        public UnionIdKindSettings KindSettings { get; set; }
+        /// <summary>
+        /// The character used to separate the kind and id parts in the string representation.
+        /// </summary>
+        /// <remarks>
+        /// Default is <c>-</c>.
+        /// </remarks>
+        public char Separator { get; set; } = '-';
 
-        public UnionIdAttribute()
-        {
-            Size = UnionIdSize.Auto;
-            DisplayNameForId = "Id";
-            DisplayNameForKind = "Kind";
-            KindSettings = UnionIdKindSettings.None;
-        }
+        /// <summary>
+        /// Settings that control the behavior of the union id kinds.
+        /// </summary>
+        public UnionIdKindSettings KindSettings { get; set; } = UnionIdKindSettings.None;
+
+        /// <summary>
+        /// Settings that control the behavior of the parsable struct converter.
+        /// </summary>
+        public ParsableStructConverterSettings ConverterSettings { get; set; } = ParsableStructConverterSettings.None;
     }
 
     /// <summary>
@@ -39,6 +63,9 @@ namespace EncosyTower.UnionIds
 
         public string DisplayName { get; }
 
+        /// <summary>
+        /// Indicates whether the kind type is an signed or unsigned integer.
+        /// </summary>
         public bool Signed { get; }
 
         /// <param name="kindType">The type size must be 8 bytes or lesser.</param>
@@ -68,6 +95,9 @@ namespace EncosyTower.UnionIds
 
         public string DisplayName { get; }
 
+        /// <summary>
+        /// Indicates whether the kind type is an signed or unsigned integer.
+        /// </summary>
         public bool Signed { get; }
 
         /// <param name="idType">The type that is annotated with [UnionId].</param>

@@ -86,6 +86,12 @@ namespace EncosyTower.UserDataVaults
             get => Data is not null;
         }
 
+        public bool IsDataDirty
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _source.IsDirty;
+        }
+
         public override void Initialize()
         {
             _source.Initialize();

@@ -152,7 +152,7 @@ namespace EncosyTower.SourceGen
         /// <returns></returns>
         public Printer Print(bool value)
         {
-            _builder.Append(value);
+            _builder.Append(value ? "true" : "false");
             return this;
         }
 

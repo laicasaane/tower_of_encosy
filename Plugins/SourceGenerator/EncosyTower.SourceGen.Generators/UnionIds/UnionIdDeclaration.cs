@@ -33,9 +33,15 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
         public string KindRawTypeName { get; }
 
+        public char Separator { get; }
+
         public int TypeSize { get; }
 
         public int KindFieldOffset { get; }
+
+        public bool IgnoreCase { get; }
+
+        public bool AllowMatchingMetadataAttribute { get; }
 
         public List<KindRef> KindRefs { get; }
 
@@ -56,7 +62,10 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         {
             Syntax = idCandidate.syntax;
             Size = idCandidate.size;
+            Separator = idCandidate.separator;
             PreserveIdKindOrder = idCandidate.kindSettings.HasFlag(UnionIdKindSettings.PreserveOrder);
+            IgnoreCase = idCandidate.converterSettings.HasFlag(ParsableStructConverterSettings.IgnoreCase);
+            AllowMatchingMetadataAttribute = idCandidate.converterSettings.HasFlag(ParsableStructConverterSettings.AllowMatchingMetadataAttribute);
             DisplayNameForId = string.IsNullOrWhiteSpace(idCandidate.displayNameForId) ? string.Empty : idCandidate.displayNameForId;
             DisplayNameForKind = string.IsNullOrWhiteSpace(idCandidate.displayNameForKind) ? string.Empty : idCandidate.displayNameForKind;
             References = references;
@@ -407,6 +416,9 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 <= 1 => "byte",
                 <= 2 => "ushort",
                 <= 4 => "uint",
+                <= 8 => "ulong",
+                <= 12 => "global::EncosyTower.UnionIds.Types.UnionId_UInt3",
+                <= 16 => "global::EncosyTower.UnionIds.Types.UnionId_ULong2",
                 _ => "ulong",
             };
 
@@ -416,6 +428,9 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 <= 1 => "sbyte",
                 <= 2 => "short",
                 <= 4 => "int",
+                <= 8 => "ulong",
+                <= 12 => "global::EncosyTower.UnionIds.Types.UnionId_UInt3",
+                <= 16 => "global::EncosyTower.UnionIds.Types.UnionId_ULong2",
                 _ => "long",
             };
 
@@ -424,6 +439,9 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 <= 1 => 1,
                 <= 2 => 2,
                 <= 4 => 4,
+                <= 8 => 8,
+                <= 12 => 12,
+                <= 16 => 16,
                 _ => 8,
             };
 
@@ -446,6 +464,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 UnionIdSize.UShort => 2,
                 UnionIdSize.UInt => 4,
                 UnionIdSize.ULong => 8,
+                UnionIdSize.UInt3 => 12,
+                UnionIdSize.ULong2 => 16,
                 _ => 4,
             };
 
@@ -454,6 +474,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 UnionIdSize.UShort => 2,
                 UnionIdSize.UInt => 4,
                 UnionIdSize.ULong => 8,
+                UnionIdSize.UInt3 => 12,
+                UnionIdSize.ULong2 => 16,
                 _ => NormalizeSize(candidate),
             };
 

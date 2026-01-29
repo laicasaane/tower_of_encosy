@@ -10,6 +10,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         public UnionIdSize size;
         public string displayNameForId;
         public string displayNameForKind;
+        public char separator;
         public UnionIdKindSettings kindSettings;
+        public ParsableStructConverterSettings converterSettings;
     }
 }

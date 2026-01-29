@@ -5,28 +5,38 @@ using Unity.Collections;
 
 namespace EncosyTower.Tests.UnionIds
 {
-    [UnionId]
+    [UnionId(Size = UnionIdSize.ULong2)]
     [UnionIdKind(typeof(MusicType), 0, "Music")]
     [UnionIdKind(typeof(SpecialId), 4)]
     [UnionIdKind(typeof(ComplexId), 5)]
     public readonly partial struct AudioId
     {
-        private static partial void Append_ComplexId(ref FixedString32Bytes fs, ComplexId value)
+        private static partial void Append_ComplexId(ref FixedString32Bytes fs, ComplexId value, bool isDisplay)
         {
             throw new System.NotImplementedException();
         }
 
-        private static partial void Append_SpecialId(ref FixedString32Bytes fs, SpecialId value)
+        private static partial void Append_SpecialId(ref FixedString32Bytes fs, SpecialId value, bool isDisplay)
         {
             throw new System.NotImplementedException();
         }
 
-        private static partial bool TryParse_ComplexId(ReadOnlySpan<char> str, out ComplexId value)
+        private static partial bool TryParse_ComplexId(
+              ReadOnlySpan<char> str
+            , out ComplexId value
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
         {
             throw new NotImplementedException();
         }
 
-        private static partial bool TryParse_SpecialId(ReadOnlySpan<char> str, out SpecialId value)
+        private static partial bool TryParse_SpecialId(
+              ReadOnlySpan<char> str
+            , out SpecialId value
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
         {
             throw new NotImplementedException();
         }

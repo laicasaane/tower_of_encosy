@@ -98,6 +98,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             var candidate = new IdCandidate {
                 syntax = syntax,
                 symbol = symbol,
+                separator = '-',
             };
 
             var args = attrib.NamedArguments;
@@ -133,11 +134,29 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                         break;
                     }
 
+                    case "Separator":
+                    {
+                        if (arg.Value.Value is char charVal)
+                        {
+                            candidate.separator = charVal;
+                        }
+                        break;
+                    }
+
                     case "KindSettings":
                     {
                         if (arg.Value.Value is byte byteVal)
                         {
                             candidate.kindSettings = (UnionIdKindSettings)byteVal;
+                        }
+                        break;
+                    }
+
+                    case "ConverterSettings":
+                    {
+                        if (arg.Value.Value is byte byteVal)
+                        {
+                            candidate.converterSettings = (ParsableStructConverterSettings)byteVal;
                         }
                         break;
                     }

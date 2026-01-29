@@ -35,6 +35,7 @@
             p.PrintEndLine();
 
             p.PrintLine(string.Format(STRUCT_LAYOUT_SIZE, TypeSize));
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("[global::System.ComponentModel.TypeConverter(typeof(TypeConverter))]");
             p.PrintBeginLine("partial struct ").Print(typeName).Print(" ")
                 .Print(": global::System.IEquatable<").Print(typeName).Print(">")
@@ -111,7 +112,10 @@
 
         private void WriteFields(ref Printer p)
         {
-            p.PrintLine(FIELD_OFFSET, 0).PrintLine(GENERATED_CODE);
+            p.PrintBeginLine("public const char SEPARATOR = '").Print(Separator).PrintEndLine("';");
+            p.PrintEndLine();
+
+            p.PrintLine(FIELD_OFFSET, 0);
             p.PrintBeginLine("private readonly ").Print(RawTypeName).PrintEndLine(" _raw;");
             p.PrintEndLine();
 
@@ -155,7 +159,7 @@
                         p.PrintLineIf(hasLabel && this.References.odin, ODIN_LABEL, (object)label);
                         p.PrintLineIf(References.odin, ODIN_SHOW_IN_INSPECTOR);
                         p.PrintLineIf(References.odin, ODIN_PROPERTY_ORDER, order);
-                        p.PrintLineIf(this.References.odin, ODIN_SHOW_IF, (object)kindName).PrintLine(GENERATED_CODE);
+                        p.PrintLineIf(this.References.odin, ODIN_SHOW_IF, (object)kindName);
                         p.PrintBeginLine("public readonly ").Print(fullName).Print(" Id_").Print(kindName).PrintEndLine(";");
                         p.PrintEndLine();
 
@@ -173,7 +177,7 @@
                 p.PrintLineIf(hasLabel, DESCRIPTION, (object)label);
                 p.PrintLineIf(hasLabel && canShowKind, ODIN_LABEL, (object)label);
                 p.PrintLineIf(canShowKind, ODIN_SHOW_IN_INSPECTOR);
-                p.PrintLineIf(canShowKind, ODIN_PROPERTY_ORDER, 0).PrintLine(GENERATED_CODE);
+                p.PrintLineIf(canShowKind, ODIN_PROPERTY_ORDER, 0);
                 p.PrintLine("public readonly IdKind Kind;");
                 p.PrintEndLine();
             }
@@ -181,7 +185,6 @@
 
         private void WriteConstructors(ref Printer p, string typeName)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("private ").Print(typeName).Print("(").Print(RawTypeName).PrintEndLine(" value) : this()");
             p.OpenScope();
             {
@@ -190,7 +193,6 @@
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(typeName).Print("(IdKind kind, ").Print(IdRawUnsignedTypeName).PrintEndLine(" id) : this()");
             p.OpenScope();
             {
@@ -200,7 +202,6 @@
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(typeName).Print("(IdKind kind, ").Print(IdRawSignedTypeName).PrintEndLine(" id) : this()");
             p.OpenScope();
             {
@@ -215,7 +216,6 @@
                 var kindName = kind.name;
                 var fullName = kind.fullName;
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ").Print(typeName).Print("(").Print(fullName).PrintEndLine(" id) : this()");
                 p.OpenScope();
                 {
@@ -230,7 +230,7 @@
             {
                 var fullName = kind.fullName;
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static implicit operator ").Print(typeName)
                     .Print("(").Print(fullName).PrintEndLine(" id)");
                 p.OpenScope();
@@ -244,7 +244,7 @@
 
         private void WriteConstructor_IdKind_IdString(ref Printer p, string typeName)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public ").Print(typeName)
                 .Print("(IdKind kind, string id, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)")
                 .PrintEndLine(" : this(kind, global::System.MemoryExtensions.AsSpan(id), ignoreCase, allowMatchingMetadataAttribute)");
@@ -257,7 +257,7 @@
 
         private void WriteConstructor_IdKindString_IdString(ref Printer p, string typeName)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public ").Print(typeName)
                 .Print("(string kind, string id, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)")
                 .PrintEndLine(" : this(global::System.MemoryExtensions.AsSpan(kind), global::System.MemoryExtensions.AsSpan(id), ignoreCase, allowMatchingMetadataAttribute)");
@@ -270,7 +270,7 @@
 
         private void WriteConstructor_IdKindString_IdLong(ref Printer p, string typeName)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public ").Print(typeName)
                 .Print("(string kind, long id, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)")
                 .PrintEndLine(" : this(global::System.MemoryExtensions.AsSpan(kind), id, ignoreCase, allowMatchingMetadataAttribute)");
@@ -283,7 +283,7 @@
 
         private void WriteConstructor_IdKindString_IdUnsigned(ref Printer p, string typeName)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public ").Print(typeName).Print("(string kind, ")
                 .Print(IdRawUnsignedTypeName).Print(" id")
                 .Print(", bool ignoreCase = true")
@@ -298,7 +298,7 @@
 
         private void WriteConstructor_IdKindString_IdSigned(ref Printer p, string typeName)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public ").Print(typeName).Print("(string kind, ")
                 .Print(IdRawSignedTypeName).Print(" id")
                 .Print(", bool ignoreCase = true")
@@ -313,7 +313,6 @@
 
         private void WriteConstructor_IdKind_IdSpan(ref Printer p, string typeName, bool isSerializableStruct)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(typeName).Print("(IdKind kind")
                 .Print(", global::System.ReadOnlySpan<char> id")
                 .Print(", bool ignoreCase = true")
@@ -382,8 +381,7 @@
                                     else
                                     {
                                         p.PrintBeginLine("var idResult = TryParse_").Print(kindName)
-                                            .PrintEndLine("(id, out var idValue);");
-                                        p.PrintEndLine();
+                                            .PrintEndLine("(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
                                     }
 
                                     p.PrintBeginLine("Id_").Print(kindName).PrintEndLine(" = idValue;");
@@ -407,7 +405,6 @@
 
         private void WriteConstructor_IdKindSpan_IdSpan(ref Printer p, string typeName, bool isSerializableStruct)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(typeName).Print("(global::System.ReadOnlySpan<char> kind")
                 .Print(", global::System.ReadOnlySpan<char> id")
                 .Print(", bool ignoreCase = true")
@@ -494,8 +491,7 @@
                                     else
                                     {
                                         p.PrintBeginLine("var idResult = TryParse_").Print(kindName)
-                                            .PrintEndLine("(id, out var idValue);");
-                                        p.PrintEndLine();
+                                            .PrintEndLine("(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
                                     }
 
                                     p.PrintBeginLine("Id_").Print(kindName).PrintEndLine(" = idValue;");
@@ -519,7 +515,6 @@
 
         private void WriteConstructor_IdKindSpan_IdLong(ref Printer p, string typeName)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(typeName).Print("(global::System.ReadOnlySpan<char> kind")
                 .Print(", long id")
                 .Print(", bool ignoreCase = true")
@@ -561,7 +556,6 @@
 
         private void WriteConstructor_IdKindSpan_IdUnsigned(ref Printer p, string typeName)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(typeName).Print("(global::System.ReadOnlySpan<char> kind, ")
                 .Print(IdRawUnsignedTypeName).Print(" id")
                 .Print(", bool ignoreCase = true")
@@ -603,7 +597,6 @@
 
         private void WriteConstructor_IdKindSpan_IdSigned(ref Printer p, string typeName)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(typeName).Print("(global::System.ReadOnlySpan<char> kind, ")
                 .Print(IdRawSignedTypeName).Print(" id")
                 .Print(", bool ignoreCase = true")
@@ -656,9 +649,10 @@
 
                 if (tryParse.DoesExist == false)
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("private static partial bool TryParse_").Print(kind.name)
-                        .Print("(global::System.ReadOnlySpan<char> str, out ").Print(kind.fullName).PrintEndLine(" value);");
+                        .Print("(global::System.ReadOnlySpan<char> str, out ").Print(kind.fullName)
+                        .PrintEndLine(" value, bool ignoreCase, bool allowMatchingMetadataAttribute);");
                     p.PrintEndLine();
                 }
             }
@@ -666,7 +660,7 @@
 
         private void WriteTryParse_String(ref Printer p, string typeName)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public bool TryParse(string str, out ")
                 .Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
@@ -680,7 +674,6 @@
 
         private void WriteTryParse_Span(ref Printer p, string typeName)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public bool TryParse(global::System.ReadOnlySpan<char> str, out ")
                 .Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
@@ -695,11 +688,7 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.Print("#if NET9_0_OR_GREATER").PrintEndLine();
-                p.PrintLine("var ranges = global::System.Buffers.MemoryExtensions.Split(str, '-');");
-                p.Print("#else").PrintEndLine();
-                p.PrintLine("var ranges = global::System.Buffers.SpanSplitExtensions.Split(str, '-');");
-                p.Print("#endif").PrintEndLine();
+                p.PrintLine("var ranges = global::EncosyTower.Common.SpanAPI.Split(str, SEPARATOR, 2);");
                 p.PrintEndLine();
 
                 p.PrintLine("global::System.Range? kindRange = default;");
@@ -727,8 +716,12 @@
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintLine("result = default;");
-                    p.PrintLine("return false;");
+                    p.PrintLine("if (kindRange.HasValue && idRange.HasValue)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("break;");
+                    }
+                    p.CloseScope();
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -754,7 +747,7 @@
 
         private void WriteTryParse_IdKind_IdString(ref Printer p, string typeName)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public bool TryParse(IdKind kind, string id, out ")
                 .Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
@@ -768,7 +761,7 @@
 
         private void WriteTryParse_IdKindString_IdString(ref Printer p, string typeName)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public bool TryParse(string kind, string id, out ")
                 .Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
@@ -782,7 +775,7 @@
 
         private void WriteTryParse_IdKindString_IdUnsigned(ref Printer p, string typeName)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public bool TryParse(string kind, ")
                 .Print(IdRawUnsignedTypeName).Print(" id, out ").Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
@@ -796,7 +789,7 @@
 
         private void WriteTryParse_IdKindString_IdSigned(ref Printer p, string typeName)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public bool TryParse(string kind, ")
                 .Print(IdRawSignedTypeName).Print(" id, out ").Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
@@ -810,7 +803,6 @@
 
         private void WriteTryParse_IdKind_IdSpan(ref Printer p, string typeName)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public bool TryParse(IdKind kind, global::System.ReadOnlySpan<char> id, out ")
                 .Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
@@ -867,9 +859,10 @@
                                     else
                                     {
                                         p.PrintBeginLine("var idResult = TryParse_").Print(kindName)
-                                            .PrintEndLine("(id, out var idValue);");
-                                        p.PrintEndLine();
+                                            .PrintEndLine("(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
                                     }
+
+                                    p.PrintEndLine();
 
                                     p.PrintLine("if (idResult)");
                                     p.OpenScope();
@@ -901,7 +894,6 @@
 
         private void WriteTryParse_IdKindSpan_IdSpan(ref Printer p, string typeName)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public bool TryParse(global::System.ReadOnlySpan<char> kind, global::System.ReadOnlySpan<char> id, out ")
                 .Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
@@ -977,8 +969,7 @@
                                     else
                                     {
                                         p.PrintBeginLine("var idResult = TryParse_").Print(kindName)
-                                            .PrintEndLine("(id, out var idValue);");
-                                        p.PrintEndLine();
+                                            .PrintEndLine("(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
                                     }
 
                                     p.PrintEndLine();
@@ -1013,7 +1004,6 @@
 
         private void WriteTryParse_IdKindSpan_IdUnsigned(ref Printer p, string typeName)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public bool TryParse(global::System.ReadOnlySpan<char> kind, ")
                 .Print(IdRawUnsignedTypeName).Print(" id, out ").Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
@@ -1055,7 +1045,6 @@
 
         private void WriteTryParse_IdKindSpan_IdSigned(ref Printer p, string typeName)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public bool TryParse(global::System.ReadOnlySpan<char> kind, ")
                 .Print(IdRawSignedTypeName).Print(" id, out ").Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
@@ -1097,7 +1086,7 @@
 
         private void WriteCommonMethods(ref Printer p, string typeName)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public readonly bool Equals(").Print(typeName).PrintEndLine(" other)");
             p.OpenScope();
             {
@@ -1106,7 +1095,7 @@
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintLine("public readonly override bool Equals(object obj)");
             p.OpenScope();
             {
@@ -1115,7 +1104,7 @@
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public readonly int CompareTo(").Print(typeName).PrintEndLine(" other)");
             p.OpenScope();
             {
@@ -1124,7 +1113,7 @@
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintLine("public readonly override int GetHashCode()");
             p.OpenScope();
             {
@@ -1133,7 +1122,7 @@
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static explicit operator ").Print(RawTypeName)
                 .Print("(").Print(typeName).PrintEndLine(" value)");
             p.OpenScope();
@@ -1143,7 +1132,7 @@
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static implicit operator ").Print(typeName)
                 .Print("(").Print(RawTypeName).PrintEndLine(" value)");
             p.OpenScope();
@@ -1155,7 +1144,7 @@
 
             foreach (var op in s_operators)
             {
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static bool operator ").Print(op)
                     .Print("(").Print(typeName).Print(" left, ").Print(typeName).PrintEndLine(" right)");
                 p.OpenScope();
@@ -1178,7 +1167,7 @@
                     continue;
                 }
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool Equals(").Print(fullName).PrintEndLine(" other)");
                 p.OpenScope();
                 {
@@ -1250,7 +1239,7 @@
 
                 foreach (var (op1, op2) in s_equalityOps)
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static bool operator ").Print(op1)
                         .Print("(").Print(typeName).Print(" left, ").Print(fullName).PrintEndLine(" right)");
                     p.OpenScope();
@@ -1260,7 +1249,7 @@
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static bool operator ").Print(op1)
                         .Print("(").Print(fullName).Print(" left, ").Print(typeName).PrintEndLine(" right)");
                     p.OpenScope();
@@ -1275,7 +1264,6 @@
 
         private void WriteToString(ref Printer p, bool isSerializableStruct)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly override string ToString()");
             p.OpenScope();
             {
@@ -1296,7 +1284,7 @@
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
                                     .Print(" => $\"")
-                                    .Print("{Kind.ToStringFast()}-{")
+                                    .Print("{Kind.ToStringFast()}{SEPARATOR}{")
                                     .Print(kindName).Print("Extensions.ToStringFast(Id_").Print(kindName)
                                     .PrintEndLine(")}\",");
                             }
@@ -1304,16 +1292,15 @@
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
                                     .Print(" => $\"")
-                                    .Print("{Kind.ToStringFast()}-{Id_").Print(kindName)
+                                    .Print("{Kind.ToStringFast()}{SEPARATOR}{Id_").Print(kindName)
                                     .PrintEndLine("}\",");
                             }
                         }
 
-                        p.PrintLineIf(
-                              isSerializableStruct
-                            , "_ => $\"{Kind.ToStringFast()}-{Id}\","
-                            , "_ => $\"{Kind.ToStringFast()}-{IdUnsigned}\","
-                        );
+                        var idField = isSerializableStruct ? "Id" : "IdUnsigned";
+
+                        p.PrintBeginLine("_ => $\"{Kind.ToStringFast()}{SEPARATOR}{")
+                            .Print(idField).PrintEndLine("}\",");
                     }
                     p.CloseScope("};");
                 }
@@ -1324,7 +1311,6 @@
 
         private void WriteToDisplayString(ref Printer p, bool isSerializableStruct)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly string ToDisplayString()");
             p.OpenScope();
             {
@@ -1345,7 +1331,7 @@
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
                                     .Print(" => $\"")
-                                    .Print("{Kind.ToDisplayStringFast()}-{")
+                                    .Print("{Kind.ToDisplayStringFast()}{SEPARATOR}{")
                                     .Print(kindName).Print("Extensions.ToDisplayStringFast(Id_").Print(kindName)
                                     .PrintEndLine(")}\",");
                             }
@@ -1353,16 +1339,15 @@
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
                                     .Print(" => $\"")
-                                    .Print("{Kind.ToDisplayStringFast()}-{Id_").Print(kindName)
+                                    .Print("{Kind.ToDisplayStringFast()}{SEPARATOR}{Id_").Print(kindName)
                                     .PrintEndLine("}\",");
                             }
                         }
 
-                        p.PrintLineIf(
-                              isSerializableStruct
-                            , "_ => $\"{Kind.ToDisplayStringFast()}-{Id}\","
-                            , "_ => $\"{Kind.ToDisplayStringFast()}-{IdUnsigned}\","
-                        );
+                        var idField = isSerializableStruct ? "Id" : "IdUnsigned";
+
+                        p.PrintBeginLine("_ => $\"{Kind.ToDisplayStringFast()}{SEPARATOR}{")
+                            .Print(idField).PrintEndLine("}\",");
                     }
                     p.CloseScope("};");
                 }
@@ -1378,7 +1363,6 @@
                 return;
             }
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public readonly ").Print(FixedStringType).PrintEndLine(" ToFixedString()");
             p.OpenScope();
             {
@@ -1395,7 +1379,8 @@
                 else
                 {
                     p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Kind.ToFixedString());");
-                    p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, '-');");
+                    p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, '")
+                        .Print(Separator).PrintEndLine("');");
                     p.PrintEndLine();
 
                     p.PrintLine("switch (Kind)");
@@ -1422,7 +1407,8 @@
                                 }
                                 else
                                 {
-                                    p.PrintBeginLine("Append_").Print(kindName).Print("(ref fs, Id_").Print(kindName).PrintEndLine(");");
+                                    p.PrintBeginLine("Append_").Print(kindName)
+                                        .Print("(ref fs, Id_").Print(kindName).PrintEndLine(", false);");
                                 }
 
                                 p.PrintLine("break;");
@@ -1461,7 +1447,6 @@
                 return;
             }
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public readonly ").Print(FixedStringType).PrintEndLine(" ToDisplayFixedString()");
             p.OpenScope();
             {
@@ -1478,7 +1463,8 @@
                 else
                 {
                     p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Kind.ToDisplayFixedString());");
-                    p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, '-');");
+                    p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, '")
+                        .Print(Separator).PrintEndLine("');");
                     p.PrintEndLine();
 
                     p.PrintLine("switch (Kind)");
@@ -1505,7 +1491,8 @@
                                 }
                                 else
                                 {
-                                    p.PrintBeginLine("Append_").Print(kindName).Print("(ref fs, Id_").Print(kindName).PrintEndLine(");");
+                                    p.PrintBeginLine("Append_").Print(kindName)
+                                        .Print("(ref fs, Id_").Print(kindName).PrintEndLine(", true);");
                                 }
 
                                 p.PrintLine("break;");
@@ -1539,7 +1526,6 @@
 
         private void WriteGetIdStringFast(ref Printer p, bool isSerializableStruct)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly string GetIdStringFast()");
             p.OpenScope();
             {
@@ -1582,7 +1568,6 @@
 
         private void WriteGetIdDisplayStringFast(ref Printer p, bool isSerializableStruct)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly string GetIdDisplayStringFast()");
             p.OpenScope();
             {
@@ -1630,7 +1615,6 @@
                 return;
             }
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public readonly ").Print(FixedStringType).PrintEndLine(" GetIdFixedString()");
             p.OpenScope();
             {
@@ -1672,7 +1656,8 @@
                                 }
                                 else
                                 {
-                                    p.PrintBeginLine("Append_").Print(kindName).Print("(ref fs, Id_").Print(kindName).PrintEndLine(");");
+                                    p.PrintBeginLine("Append_").Print(kindName)
+                                        .Print("(ref fs, Id_").Print(kindName).PrintEndLine(", false);");
                                 }
 
                                 p.PrintLine("break;");
@@ -1711,7 +1696,6 @@
                 return;
             }
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public readonly ").Print(FixedStringType).PrintEndLine(" GetIdDisplayFixedString()");
             p.OpenScope();
             {
@@ -1753,7 +1737,8 @@
                                 }
                                 else
                                 {
-                                    p.PrintBeginLine("Append_").Print(kindName).Print("(ref fs, Id_").Print(kindName).PrintEndLine(");");
+                                    p.PrintBeginLine("Append_").Print(kindName)
+                                        .Print("(ref fs, Id_").Print(kindName).PrintEndLine(", true);");
                                 }
 
                                 p.PrintLine("break;");
@@ -1787,7 +1772,7 @@
 
         private void WriteTryGetIListNames(ref Printer p)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetNames(")
                 .PrintEndLine("IdKind kind, global::System.Collections.Generic.IList<string> result)");
             p.OpenScope();
@@ -1852,7 +1837,7 @@
 
         private void WriteTryGetIListDisplayNames(ref Printer p)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetDisplayNames(")
                 .PrintEndLine("IdKind kind, global::System.Collections.Generic.IList<string> result)");
             p.OpenScope();
@@ -1918,7 +1903,7 @@
 
         private void WriteTryGetNames(ref Printer p)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetNames(")
                 .PrintEndLine("IdKind kind, out global::System.ReadOnlyMemory<string> result)");
             p.OpenScope();
@@ -1965,7 +1950,7 @@
 
         private void WriteTryGetDisplayNames(ref Printer p)
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetDisplayNames(")
                 .PrintEndLine("IdKind kind, out global::System.ReadOnlyMemory<string> result)");
             p.OpenScope();
@@ -2017,7 +2002,7 @@
                 return;
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetFixedNames(")
                 .Print("IdKind kind, global::Unity.Collections.AllocatorManager.AllocatorHandle allocator, ")
                 .Print("out global::Unity.Collections.NativeArray<").Print(FixedStringType)
@@ -2072,7 +2057,7 @@
                 return;
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetFixedDisplayNames(")
                 .Print("IdKind kind, global::Unity.Collections.AllocatorManager.AllocatorHandle allocator, ")
                 .Print("out global::Unity.Collections.NativeArray<").Print(FixedStringType)
@@ -2134,9 +2119,10 @@
                     continue;
                 }
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("private static partial void Append_").Print(kind.name)
-                    .Print("(ref ").Print(FixedStringType).Print(" fs, ").Print(kind.fullName).PrintEndLine(" value);");
+                    .Print("(ref ").Print(FixedStringType).Print(" fs, ")
+                    .Print(kind.fullName).PrintEndLine(" value, bool isDisplay);");
                 p.PrintEndLine();
             }
         }
@@ -2184,10 +2170,11 @@
                 .Print(typeName).PrintEndLine(">");
             p.OpenScope();
             {
-                p.PrintLine("public override bool IgnoreCase => false;");
+                p.PrintBeginLine("public override bool IgnoreCase => ").Print(IgnoreCase).PrintEndLine(";");
                 p.PrintEndLine();
 
-                p.PrintLine("public override bool AllowMatchingMetadataAttribute => false;");
+                p.PrintBeginLine("public override bool AllowMatchingMetadataAttribute => ")
+                    .Print(AllowMatchingMetadataAttribute).PrintEndLine(";");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -2218,7 +2205,6 @@
                     p.PrintLineIf(References.odin, ODIN_PROPERTY_ORDER, 0);
                 }
 
-                p.PrintLine(GENERATED_CODE);
                 p.PrintLine("public IdKind Kind;");
                 p.PrintEndLine();
 
@@ -2232,7 +2218,6 @@
                 }
 
                 p.PrintLineIf(References.unity, SERIALIZE_FIELD);
-                p.PrintLine(GENERATED_CODE);
                 p.PrintLine("public long Id;");
                 p.PrintEndLine();
 
@@ -2253,19 +2238,18 @@
                         p.PrintLineIf(References.odin, ODIN_SHOW_IN_INSPECTOR);
                         p.PrintLineIf(References.odin, ODIN_PROPERTY_ORDER, order);
                         p.PrintLineIf(this.References.odin, ODIN_SHOW_IF, (object)kindName);
-                        p.PrintLine(GENERATED_CODE);
                         p.PrintLine(NON_SERIALIZED);
                         p.PrintBeginLine("public ").Print(fullName).Print(" Id_").PrintEndLine(kindName);
                         p.OpenScope();
                         {
-                            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                            p.PrintLine(AGGRESSIVE_INLINING);
                             p.PrintBeginLine("get => new ").Print(typeName).Print("(Kind, (")
                                 .PrintIf(kind.signed, IdRawSignedTypeName, IdRawUnsignedTypeName)
                                 .Print(")Id).Id_")
                                 .Print(kindName).PrintEndLine(";");
                             p.PrintEndLine();
 
-                            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                            p.PrintLine(AGGRESSIVE_INLINING);
                             p.PrintBeginLine("set => Id = (long)new ").Print(typeName).Print("(value).")
                                 .PrintIf(kind.signed, "IdSigned", "IdUnsigned")
                                 .PrintEndLine(";");
@@ -2293,7 +2277,6 @@
                         var kindName = kind.name;
                         var fullName = kind.fullName;
 
-                        p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                         p.PrintBeginLine("public Serializable").Print("(").Print(fullName).PrintEndLine(" id) : this()");
                         p.OpenScope();
                         {
@@ -2314,7 +2297,6 @@
                 WriteConstructor_IdKindSpan_IdSpan(ref p, "Serializable", true);
                 WriteConstructor_IdKindSpan_IdLong(ref p, "Serializable");
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public readonly bool TryConvert(out ").Print(typeName).PrintEndLine(" result)");
                 p.OpenScope();
                 {
@@ -2357,7 +2339,7 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public readonly bool Equals(Serializable other)");
                 p.OpenScope();
                 {
@@ -2366,7 +2348,7 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public readonly override bool Equals(object obj)");
                 p.OpenScope();
                 {
@@ -2375,7 +2357,7 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public readonly int CompareTo(Serializable other)");
                 p.OpenScope();
                 {
@@ -2385,7 +2367,7 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public readonly override int GetHashCode()");
                 p.OpenScope();
                 {
@@ -2403,7 +2385,7 @@
                 WriteGetIdFixedString(ref p, true);
                 WriteGetIdDisplayFixedString(ref p, true);
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static explicit operator ").Print(RawTypeName).PrintEndLine("(Serializable value)");
                 p.OpenScope();
                 {
@@ -2413,7 +2395,7 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public static bool operator ==(Serializable left, Serializable right)");
                 p.OpenScope();
                 {
@@ -2422,7 +2404,7 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintLine("public static bool operator !=(Serializable left, Serializable right)");
                 p.OpenScope();
                 {
@@ -2433,7 +2415,7 @@
 
                 foreach (var op in s_comparerOps)
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static bool operator ").Print(op)
                         .PrintEndLine("(Serializable left, Serializable right)");
                     p.OpenScope();
@@ -2450,7 +2432,7 @@
                 p.PrintLine("private struct Union");
                 p.OpenScope();
                 {
-                    p.PrintLine(FIELD_OFFSET, 0).PrintLine(GENERATED_CODE);
+                    p.PrintLine(FIELD_OFFSET, 0);
                     p.PrintBeginLine("public ").Print(RawTypeName).PrintEndLine(" raw;");
                     p.PrintEndLine();
 
@@ -2518,7 +2500,6 @@
 
                 p.PrintLine("/// </list>");
                 p.PrintLine("/// </summary>");
-                p.PrintLine(GENERATED_CODE);
                 p.PrintBeginLine("public const int Length = ").Print(length.ToString()).PrintEndLine(";");
                 p.PrintEndLine();
 
