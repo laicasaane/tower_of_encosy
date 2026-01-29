@@ -36,7 +36,7 @@ public static class CollectionsMarshal
             }
 
             Debug.Assert(typeof(T[]) == list._items.GetType(), "Implementation depends on List<T> always using a T[] and not U[] where U : T.");
-            span = new Span<T>(ref MemoryMarshal.GetArrayDataReference(items), size);
+            span = new Span<T>(items, 0, size);
         }
 
         return span;
