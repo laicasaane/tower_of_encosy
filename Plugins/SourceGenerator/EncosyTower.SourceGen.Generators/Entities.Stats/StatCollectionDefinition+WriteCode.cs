@@ -523,7 +523,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("[Serializable]");
-            p.PrintLine("public partial struct Index : IEquatable<Index>");
+            p.PrintLine("public partial struct Index : IEquatable<Index>, IToFixedString<FixedString32Bytes>");
             p.OpenScope();
             {
                 p.PrintLine("public static readonly Index Null = default;");
@@ -612,7 +612,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("[Serializable]");
-            p.PrintLine("public partial struct Index<TStatData> : IEquatable<Index<TStatData>>");
+            p.PrintBeginLine("public partial struct Index<TStatData> : IEquatable<Index<TStatData>>")
+                .PrintEndLine(", IToFixedString<FixedString32Bytes>");
             p.WithIncreasedIndent().PrintLine("where TStatData : unmanaged, IStatData");
             p.OpenScope();
             {

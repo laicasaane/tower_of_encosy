@@ -155,6 +155,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine("using System.Runtime.InteropServices;");
                 p.PrintLine("using EncosyTower.Common;");
                 p.PrintLine("using EncosyTower.Collections;");
+                p.PrintLine("using EncosyTower.Conversion;");
                 p.PrintLine("using EncosyTower.Logging;");
                 p.PrintLine("using Unity.Collections;");
                 p.PrintLine("using Unity.Collections.LowLevel.Unsafe;");
