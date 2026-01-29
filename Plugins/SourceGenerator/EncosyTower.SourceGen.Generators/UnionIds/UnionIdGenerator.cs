@@ -213,11 +213,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             {
                 var arg = args[i];
 
-                if (arg.Kind != TypedConstantKind.Primitive)
-                {
-                    continue;
-                }
-
                 if (i == 1 && arg.Value is ulong ulongVal1)
                 {
                     candidate.order = ulongVal1;

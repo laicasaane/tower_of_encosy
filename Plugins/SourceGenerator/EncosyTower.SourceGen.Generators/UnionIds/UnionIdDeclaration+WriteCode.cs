@@ -1356,7 +1356,7 @@
                                 }
                                 else
                                 {
-                                    p.Print("ToStringInternal(");
+                                    p.Print("ToString_").Print(kind.name).Print("(");
                                 }
 
                                 p.Print("Id_").Print(kindName).PrintEndLine(")}\",");
@@ -1388,7 +1388,8 @@
                     }
 
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("static string ToStringInternal(").Print(kind.name).PrintEndLine(" value)");
+                    p.PrintBeginLine("static string ToString_").Print(kind.name).Print("(")
+                        .Print(kind.name).PrintEndLine(" value)");
                     p.OpenScope();
                     {
                         p.PrintBeginLine("return ").Print(kind.enumExtensionsName)
@@ -1432,7 +1433,7 @@
                                 }
                                 else
                                 {
-                                    p.Print("ToStringInternal(");
+                                    p.Print("ToString_").Print(kind.name).Print("(");
                                 }
 
                                 p.Print("Id_").Print(kindName).PrintEndLine(")}\",");
@@ -1470,7 +1471,8 @@
                         }
 
                         p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintBeginLine("static string ToStringInternal(").Print(kind.name).PrintEndLine(" value)");
+                        p.PrintBeginLine("static string ToString_").Print(kind.name).Print("(")
+                            .Print(kind.name).PrintEndLine(" value)");
                         p.OpenScope();
                         {
                             p.PrintBeginLine("return ").Print(kind.enumExtensionsName)

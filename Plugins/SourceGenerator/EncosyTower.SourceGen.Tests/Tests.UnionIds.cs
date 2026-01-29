@@ -1,11 +1,11 @@
-﻿using System;
-using EncosyTower.Conversion;
-using EncosyTower.TypeWraps;
-using EncosyTower.UnionIds;
-using Unity.Collections;
-
-namespace EncosyTower.Tests.UnionIds
+﻿namespace EncosyTower.Tests.UnionIds.Game1
 {
+    using System;
+    using EncosyTower.Conversion;
+    using EncosyTower.TypeWraps;
+    using EncosyTower.UnionIds;
+    using Unity.Collections;
+
     [UnionId(Size = UnionIdSize.ULong2)]
     [UnionIdKind(typeof(MusicType), 0, "Music")]
     [UnionIdKind(typeof(SpecialId), 4)]
@@ -49,6 +49,7 @@ namespace EncosyTower.Tests.UnionIds
     partial class MusicTypeExtensions { }
 
     [KindForUnionId(typeof(AudioId), 1, displayName: "Common")]
+    [EncosyTower.EnumExtensions.EnumExtensions]
     public enum SoundCommon : byte
     {
         None = 0,
@@ -90,14 +91,104 @@ namespace EncosyTower.Tests.UnionIds
             throw new NotImplementedException();
         }
     }
+}
 
-    static partial class ResourceIdEnumeration
+namespace EncosyTower.Tests.UnionIds.Game2
+{
+    using System;
+    using EncosyTower.Conversion;
+    using EncosyTower.EnumExtensions;
+    using EncosyTower.TypeWraps;
+    using EncosyTower.UnionIds;
+    using Unity.Collections;
+
+    [UnionId(KindSettings = UnionIdKindSettings.PreserveOrder)]
+    public readonly partial struct ItemId { }
+
+    [EnumTemplate]
+    public readonly partial struct ItemType_EnumTemplate { }
+
+    [EnumMembersForTemplate(typeof(ItemType_EnumTemplate), 000)]
+    [KindForUnionId(typeof(ItemId), 000, nameof(None))]
+    public enum ItemNone : byte
     {
-        public static void Do()
+        None = 0,
+    }
+
+    [WrapRecord(ExcludeConverter = true)]
+    [TypeNameAsEnumMemberForTemplate(typeof(ItemType_EnumTemplate), 100)]
+    [KindForUnionId(typeof(ItemId), 100, toStringMethods: ToStringMethods.All, tryParseSpan: TryParseMethodType.Instance)]
+    public readonly partial record struct MapClearToken(MapId _);
+
+    public readonly struct MapId : IEquatable<MapId>
+    {
+        public readonly byte Map;
+        public readonly byte Region;
+
+        public override bool Equals(object obj)
         {
-            //Length
+            throw new NotImplementedException();
+        }
+
+        public bool Equals(MapId other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
+        }
+
+        public FixedString32Bytes ToFixedString()
+        {
+            throw new NotImplementedException();
+        }
+
+        public FixedString32Bytes ToDisplayFixedString()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string ToString()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string ToDisplayString()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryParse(
+              string str
+            , out MapId result
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryParse(
+              ReadOnlySpan<char> str
+            , out MapId result
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
+        {
+            throw new NotImplementedException();
         }
     }
+}
+
+namespace EncosyTower.Tests.UnionIds.Game3
+{
+    using System;
+    using EncosyTower.Conversion;
+    using EncosyTower.TypeWraps;
+    using EncosyTower.UnionIds;
+    using Unity.Collections;
 
     [UnionId]
     [UnionIdKind(typeof(MoneyType), 0, "Money", signed: false)]
