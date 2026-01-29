@@ -139,6 +139,17 @@ namespace EncosyTower.CodeGen
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
+        public readonly Printer Print(bool value)
+        {
+            _builder.Append(value ? "true" : "false");
+            return this;
+        }
+
+        /// <summary>
+        /// Print a number
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public readonly Printer Print(sbyte value)
         {
             _builder.Append(value);
