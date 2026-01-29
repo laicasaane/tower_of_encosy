@@ -81,7 +81,19 @@ namespace EncosyTower.UnionIds
         /// <summary>
         /// Indicates which ToString methods are available on <see cref="KindType"/>.
         /// </summary>
+        /// <remarks>
+        /// This option is used to optimize the source generator.
+        /// </remarks>
         public ToStringMethods ToStringMethods { get; }
+
+        /// <summary>
+        /// Indicates whether TryParse methods that accept ReadOnlySpan&lt;char&gt;
+        /// are available on <see cref="KindType"/>.
+        /// </summary>
+        /// <remarks>
+        /// This option is used to optimize the source generator.
+        /// </remarks>
+        public TryParseMethodType TryParseSpan { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnionIdKindAttribute"/> class.
@@ -90,13 +102,22 @@ namespace EncosyTower.UnionIds
         /// <param name="order">The order of the kind in the union id kinds.</param>
         /// <param name="displayName">The display name for the kind.</param>
         /// <param name="signed">Indicates whether the kind type is an signed or unsigned integer.</param>
-        /// <param name="toStringMethods">Indicates which ToString methods are available on <see cref="KindType"/>.</param>
+        /// <param name="toStringMethods">
+        /// Indicates which ToString methods are available on <see cref="KindType"/>.
+        /// This option is used to optimize the source generator.
+        /// </param>
+        /// <param name="tryParseSpan">
+        /// Indicates whether TryParse methods that accept ReadOnlySpan&lt;char&gt;
+        /// are available on <see cref="KindType"/>.
+        /// This option is used to optimize the source generator.
+        /// </param>
         public UnionIdKindAttribute(
               Type kindType
             , ulong order
             , string displayName = ""
             , bool signed = false
             , ToStringMethods toStringMethods = ToStringMethods.Default
+            , TryParseMethodType tryParseSpan = TryParseMethodType.None
         )
         {
             KindType = kindType;
@@ -104,6 +125,7 @@ namespace EncosyTower.UnionIds
             DisplayName = displayName;
             Signed = signed;
             ToStringMethods = toStringMethods;
+            TryParseSpan = tryParseSpan;
         }
     }
 
@@ -141,7 +163,18 @@ namespace EncosyTower.UnionIds
         /// <summary>
         /// Indicates which ToString methods are available on this type.
         /// </summary>
+        /// <remarks>
+        /// This option is used to optimize the source generator.
+        /// </remarks>
         public ToStringMethods ToStringMethods { get; }
+
+        /// <summary>
+        /// Indicates whether TryParse methods that accept ReadOnlySpan&lt;char&gt; are available on this type.
+        /// </summary>
+        /// <remarks>
+        /// This option is used to optimize the source generator.
+        /// </remarks>
+        public TryParseMethodType TryParseSpan { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KindForUnionIdAttribute"/> class.
@@ -150,13 +183,21 @@ namespace EncosyTower.UnionIds
         /// <param name="order">The order of the kind in the union id.</param>
         /// <param name="displayName">The display name for the kind.</param>
         /// <param name="signed">Indicates whether the kind type is an signed or unsigned integer.</param>
-        /// <param name="toStringMethods">Indicates which ToString methods are available on this type.</param>
+        /// <param name="toStringMethods">
+        /// Indicates which ToString methods are available on this type.
+        /// This option is used to optimize the source generator.
+        /// </param>
+        /// <param name="tryParseSpan">
+        /// Indicates whether TryParse methods that accept ReadOnlySpan&lt;char&gt; are available on this type.
+        /// This option is used to optimize the source generator.
+        /// </param>
         public KindForUnionIdAttribute(
               Type idType
             , ulong order
             , string displayName = ""
             , bool signed = false
             , ToStringMethods toStringMethods = ToStringMethods.Default
+            , TryParseMethodType tryParseSpan = TryParseMethodType.None
         )
         {
             IdType = idType;
@@ -164,6 +205,7 @@ namespace EncosyTower.UnionIds
             DisplayName = displayName;
             Signed = signed;
             ToStringMethods = toStringMethods;
+            TryParseSpan = tryParseSpan;
         }
     }
 }

@@ -218,21 +218,25 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     continue;
                 }
 
-                if (i == 1 && arg.Value is ulong ulongVal)
+                if (i == 1 && arg.Value is ulong ulongVal1)
                 {
-                    candidate.order = ulongVal;
+                    candidate.order = ulongVal1;
                 }
-                else if (i == 2 && arg.Value is string stringVal)
+                else if (i == 2 && arg.Value is string stringVal1)
                 {
-                    candidate.displayName = stringVal;
+                    candidate.displayName = stringVal1;
                 }
-                else if (i == 3 && arg.Value is bool boolVal)
+                else if (i == 3 && arg.Value is bool boolVal1)
                 {
-                    candidate.signed = boolVal;
+                    candidate.signed = boolVal1;
                 }
                 else if (i == 4 && arg.Value is byte byteVal1)
                 {
                     candidate.toStringMethods = (ToStringMethods)byteVal1;
+                }
+                else if (i == 5 && arg.Value is byte byteVal2)
+                {
+                    candidate.tryParseSpan = (TryParseMethodType)byteVal2;
                 }
             }
 

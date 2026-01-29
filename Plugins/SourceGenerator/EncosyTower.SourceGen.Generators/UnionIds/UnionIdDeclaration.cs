@@ -9,6 +9,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 {
     internal partial class UnionIdDeclaration
     {
+        private const string UNION_ID_ATTRIBUTE = "global::EncosyTower.UnionIds.UnionIdAttribute";
         private const string UNION_ID_KIND_ATTRIBUTE = "global::EncosyTower.UnionIds.UnionIdKindAttribute";
         private const string ENUM_EXTENSIONS_ATTRIBUTE = "global::EncosyTower.EnumExtensions.EnumExtensionsAttribute";
 
@@ -147,6 +148,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 var toStringMethods = candidate.toStringMethods;
                 var enumExtensionsName = string.Empty;
                 var nestedEnumExtensions = false;
+                var tryParseSpan = default(MemberExistence);
+                var equality = default(Equality);
 
                 if (isEnum)
                 {
@@ -182,8 +185,23 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                         toStringMethods |= ToStringMethods.ToFixedString | ToStringMethods.ToDisplayString;
                     }
                 }
+                else if (kindSymbol.HasAttribute(UNION_ID_ATTRIBUTE))
+                {
+                    tryParseSpan = new MemberExistence(true, false, false, 4);
+                    equality = new Equality(EqualityStrategy.Equals, false, false);
+                    toStringMethods |= ToStringMethods.All;
+                    idFixedStringBytes = 128;
+                }
                 else
                 {
+                    tryParseSpan = candidate.tryParseSpan switch {
+                        TryParseMethodType.Instance => new MemberExistence(true, false, false, 4),
+                        TryParseMethodType.Static => new MemberExistence(true, true, false, 4),
+                        _ => kindSymbol.FindTryParseSpan().DefaultIfNullableIs(true),
+                    };
+
+                    equality = kindSymbol.DetermineEquality();
+
                     if (toStringMethods.HasFlag(ToStringMethods.ToDisplayString) == false
                         && CheckToDisplayFixedString(kindSymbol)
                     )
@@ -213,15 +231,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                         idFixedStringBytes = Math.Max(Math.Max(idFixedStringBytes, displayByteCount), byteCount);
                     }
                 }
-
-                var tryParseSpan = kindSymbol.FindTryParseSpan();
-
-                if (tryParseSpan.IsNullable)
-                {
-                    tryParseSpan = default;
-                }
-
-                var equality = kindSymbol.DetermineEquality();
 
                 kindRefs.Add(new KindRef {
                     name = kindName,
@@ -381,21 +390,25 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                         continue;
                     }
 
-                    if (i == 1 && arg.Value is ulong ulongVal)
+                    if (i == 1 && arg.Value is ulong ulongVal1)
                     {
-                        candidate.order = ulongVal;
+                        candidate.order = ulongVal1;
                     }
-                    else if (i == 2 && arg.Value is string stringVal)
+                    else if (i == 2 && arg.Value is string stringVal1)
                     {
-                        candidate.displayName = stringVal;
+                        candidate.displayName = stringVal1;
                     }
-                    else if (i == 3 && arg.Value is bool boolVal)
+                    else if (i == 3 && arg.Value is bool boolVal1)
                     {
-                        candidate.signed = boolVal;
+                        candidate.signed = boolVal1;
                     }
-                    else if (i == 4 && arg.Value is byte byteVal)
+                    else if (i == 4 && arg.Value is byte byteVal1)
                     {
-                        candidate.toStringMethods = (ToStringMethods)byteVal;
+                        candidate.toStringMethods = (ToStringMethods)byteVal1;
+                    }
+                    else if (i == 5 && arg.Value is byte byteVal2)
+                    {
+                        candidate.tryParseSpan = (TryParseMethodType)byteVal2;
                     }
                 }
 
@@ -465,13 +478,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     || method.DeclaredAccessibility != Accessibility.Public
                     || method.IsStatic == true
                     || method.Parameters.Length != 0
-                    || method.ReturnsVoid
+                    || method.ReturnType.SpecialType != SpecialType.System_String
                 )
-                {
-                    continue;
-                }
-
-                if (method.ReturnType.SpecialType != SpecialType.System_String)
                 {
                     continue;
                 }

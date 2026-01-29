@@ -383,8 +383,21 @@
 
                                     if (tryParse.DoesExist)
                                     {
-                                        p.PrintBeginLineIf(tryParse.IsStatic, fullName, $"default({fullName})")
-                                            .PrintEndLine(".TryParse(id, out var idValue);");
+                                        if (tryParse.ParamCount == 2)
+                                        {
+                                            p.PrintBeginLineIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                                .PrintEndLine(".TryParse(id, out var idValue);");
+                                        }
+                                        else if (tryParse.ParamCount == 4)
+                                        {
+                                            p.PrintBeginLineIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                                .PrintEndLine(".TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
+                                        }
+                                        else
+                                        {
+                                            p.PrintBeginLine("var idResult = TryParse_").Print(kindName)
+                                                .PrintEndLine("(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
+                                        }
                                     }
                                     else
                                     {
@@ -493,8 +506,21 @@
 
                                     if (tryParse.DoesExist)
                                     {
-                                        p.PrintBeginLineIf(tryParse.IsStatic, fullName, $"default({fullName})")
-                                            .PrintEndLine(".TryParse(id, out var idValue);");
+                                        if (tryParse.ParamCount == 2)
+                                        {
+                                            p.PrintBeginLineIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                                .PrintEndLine(".TryParse(id, out var idValue);");
+                                        }
+                                        else if (tryParse.ParamCount == 4)
+                                        {
+                                            p.PrintBeginLineIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                                .PrintEndLine(".TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
+                                        }
+                                        else
+                                        {
+                                            p.PrintBeginLine("var idResult = TryParse_").Print(kindName)
+                                                .PrintEndLine("(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
+                                        }
                                     }
                                     else
                                     {
@@ -655,14 +681,16 @@
 
                 var tryParse = kind.tryParseSpan;
 
-                if (tryParse.DoesExist == false)
+                if (tryParse.DoesExist && tryParse.ParamCount is 2 or 4)
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("private static partial bool TryParse_").Print(kind.name)
-                        .Print("(global::System.ReadOnlySpan<char> str, out ").Print(kind.fullName)
-                        .PrintEndLine(" value, bool ignoreCase, bool allowMatchingMetadataAttribute);");
-                    p.PrintEndLine();
+                    continue;
                 }
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("private static partial bool TryParse_").Print(kind.name)
+                    .Print("(global::System.ReadOnlySpan<char> str, out ").Print(kind.fullName)
+                    .PrintEndLine(" value, bool ignoreCase, bool allowMatchingMetadataAttribute);");
+                p.PrintEndLine();
             }
         }
 
@@ -860,9 +888,23 @@
 
                                     if (tryParse.DoesExist)
                                     {
-                                        p.PrintBeginLine("var idResult = ")
-                                            .PrintIf(tryParse.IsStatic, fullName, $"default({fullName})")
-                                            .PrintEndLine(".TryParse(id, out var idValue);");
+                                        if (tryParse.ParamCount == 2)
+                                        {
+                                            p.PrintBeginLine("var idResult = ")
+                                                .PrintIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                                .PrintEndLine(".TryParse(id, out var idValue);");
+                                        }
+                                        else if (tryParse.ParamCount == 4)
+                                        {
+                                            p.PrintBeginLine("var idResult = ")
+                                                .PrintIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                                .PrintEndLine(".TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
+                                        }
+                                        else
+                                        {
+                                            p.PrintBeginLine("var idResult = TryParse_").Print(kindName)
+                                                .PrintEndLine("(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
+                                        }
                                     }
                                     else
                                     {
@@ -970,9 +1012,23 @@
 
                                     if (tryParse.DoesExist)
                                     {
-                                        p.PrintBeginLine("var idResult = ")
-                                            .PrintIf(tryParse.IsStatic, fullName, $"default({fullName})")
-                                            .PrintEndLine(".TryParse(id, out var idValue);");
+                                        if (tryParse.ParamCount == 2)
+                                        {
+                                            p.PrintBeginLine("var idResult = ")
+                                                .PrintIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                                .PrintEndLine(".TryParse(id, out var idValue);");
+                                        }
+                                        else if (tryParse.ParamCount == 4)
+                                        {
+                                            p.PrintBeginLine("var idResult = ")
+                                                .PrintIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                                .PrintEndLine(".TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
+                                        }
+                                        else
+                                        {
+                                            p.PrintBeginLine("var idResult = TryParse_").Print(kindName)
+                                                .PrintEndLine("(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
+                                        }
                                     }
                                     else
                                     {
@@ -1381,6 +1437,13 @@
 
                                 p.Print("Id_").Print(kindName).PrintEndLine(")}\",");
                             }
+                            else if (kind.toStringMethods.HasFlag(ToStringMethods.ToDisplayString))
+                            {
+                                p.PrintBeginLine("IdKind.").Print(kindName)
+                                    .Print(" => $\"")
+                                    .Print("{Kind.ToDisplayStringFast()}{SEPARATOR}{Id_").Print(kindName)
+                                    .PrintEndLine(".ToDisplayString()}\",");
+                            }
                             else
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
@@ -1656,6 +1719,12 @@
                                     .Print(" => ")
                                     .Print(kind.enumExtensionsName).Print(".ToDisplayStringFast(Id_").Print(kindName)
                                     .PrintEndLine("),");
+                            }
+                            else if (kind.toStringMethods.HasFlag(ToStringMethods.ToDisplayString))
+                            {
+                                p.PrintBeginLine("IdKind.").Print(kindName)
+                                    .Print(" => Id_").Print(kindName).Print(".ToDisplayString()")
+                                    .PrintEndLine(",");
                             }
                             else
                             {

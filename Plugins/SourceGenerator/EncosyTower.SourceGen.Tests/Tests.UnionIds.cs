@@ -64,9 +64,6 @@ namespace EncosyTower.Tests.UnionIds
         Die = 3,
     }
 
-    [UnionId(KindSettings = UnionIdKindSettings.PreserveOrder)]
-    public readonly partial struct ResourceId { }
-
     [WrapRecord]
     public readonly partial record struct SpecialId(uint Id)
         : IToFixedString<FixedString32Bytes>
@@ -100,5 +97,57 @@ namespace EncosyTower.Tests.UnionIds
         {
             //Length
         }
+    }
+
+    [UnionId]
+    [UnionIdKind(typeof(MoneyType), 0, "Money", signed: false)]
+    [UnionIdKind(typeof(EquipmentId), 1, "Equipment", signed: false)]
+    public readonly partial struct ResourceId
+    {
+    }
+
+    public enum MoneyType : ushort
+    {
+        Gold = 0,
+        Diamond = 1,
+    }
+
+    [WrapRecord]
+    public readonly partial record struct OutfitId(byte Value)
+        : ITryParseSpan<OutfitId>
+        , IToDisplayString
+        , IToFixedString<FixedString32Bytes>
+        , IToDisplayFixedString<FixedString32Bytes>
+    {
+        public string ToDisplayString()
+        {
+            throw new NotImplementedException();
+        }
+
+        public FixedString32Bytes ToFixedString()
+        {
+            throw new NotImplementedException();
+        }
+
+        public FixedString32Bytes ToDisplayFixedString()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryParse(
+              ReadOnlySpan<char> str
+            , out OutfitId result
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    [UnionId]
+    [UnionIdKind(typeof(OutfitId), 0, displayName: "Outfit", signed: false)]
+    public readonly partial struct EquipmentId
+    {
     }
 }

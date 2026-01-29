@@ -1150,7 +1150,7 @@ namespace EncosyTower.SourceGen
         {
             if (symbol.IsEnumType())
             {
-                return new(true, true, false);
+                return new(true, true, false, 4);
             }
 
             switch (symbol.SpecialType)
@@ -1172,7 +1172,7 @@ namespace EncosyTower.SourceGen
                 case SpecialType.System_IntPtr:
                 case SpecialType.System_UIntPtr:
                 case SpecialType.System_DateTime:
-                    return new(true, true, false);
+                    return new(true, true, false, 2);
 
                 case SpecialType.System_Nullable_T:
                 {
@@ -1180,11 +1180,11 @@ namespace EncosyTower.SourceGen
                         && nullableType.TypeArguments.FirstOrDefault() is { } typeArgument
                     )
                     {
-                        var (doestExist, isStatic, _) = FindTryParseSpan(typeArgument);
-                        return new(doestExist, isStatic, true);
+                        var (doestExist, isStatic, _, paramCount) = FindTryParseSpan(typeArgument);
+                        return new(doestExist, isStatic, true, paramCount);
                     }
 
-                    return new(false, false, true);
+                    return new(false, false, true, 2);
                 }
             }
 
@@ -1194,7 +1194,6 @@ namespace EncosyTower.SourceGen
             {
                 if (member is not IMethodSymbol method
                     || method.DeclaredAccessibility != Accessibility.Public
-                    || method.ReturnsVoid
                     || method.ReturnType.SpecialType != SpecialType.System_Boolean
                 )
                 {
@@ -1203,7 +1202,7 @@ namespace EncosyTower.SourceGen
 
                 var parameters = method.Parameters;
 
-                if (parameters.Length != 2
+                if (parameters.Length < 2
                     || parameters[0].Type.Is("global::System.ReadOnlySpan<char>", false) == false
                 )
                 {
@@ -1219,7 +1218,7 @@ namespace EncosyTower.SourceGen
                     continue;
                 }
 
-                return new(true, method.IsStatic, false);
+                return new(true, method.IsStatic, false, parameters.Length);
             }
 
             return default;
@@ -1229,13 +1228,13 @@ namespace EncosyTower.SourceGen
         {
             if (symbol.IsEnumType())
             {
-                return new(true, true, false);
+                return new(true, true, false, 1);
             }
 
             switch (symbol.SpecialType)
             {
                 case SpecialType.System_Enum:
-                    return new(true, false, false);
+                    return new(true, false, false, 1);
 
                 case SpecialType.System_Boolean:
                 case SpecialType.System_Char:
@@ -1254,7 +1253,7 @@ namespace EncosyTower.SourceGen
                 case SpecialType.System_IntPtr:
                 case SpecialType.System_UIntPtr:
                 case SpecialType.System_DateTime:
-                    return new(true, true, false);
+                    return new(true, false, false, 1);
 
                 case SpecialType.System_Nullable_T:
                 {
@@ -1263,11 +1262,11 @@ namespace EncosyTower.SourceGen
                         && nullableType.TypeArguments.FirstOrDefault() is { } typeArgument
                     )
                     {
-                        var (doestExist, isStatic, _) = FindEquals(typeArgument);
-                        return new(doestExist, isStatic, true);
+                        var (doestExist, isStatic, _, _) = FindEquals(typeArgument);
+                        return new(doestExist, isStatic, true, 1);
                     }
 
-                    return new(false, false, true);
+                    return new(false, false, true, 1);
                 }
             }
 
@@ -1277,15 +1276,14 @@ namespace EncosyTower.SourceGen
             {
                 if (member is not IMethodSymbol method
                     || method.DeclaredAccessibility != Accessibility.Public
-                    || method.ReturnsVoid
                     || method.ReturnType.SpecialType != SpecialType.System_Boolean
-                    || method.Parameters.Length != 0
+                    || method.Parameters.Length < 1
                 )
                 {
                     continue;
                 }
 
-                return new(true, method.IsStatic, false);
+                return new(true, method.IsStatic, false, method.Parameters.Length);
             }
 
             return default;
@@ -1295,13 +1293,13 @@ namespace EncosyTower.SourceGen
         {
             if (symbol.IsEnumType())
             {
-                return new(true, true, false);
+                return new(true, true, false, 2);
             }
 
             switch (symbol.SpecialType)
             {
                 case SpecialType.System_Enum:
-                    return new(false, false, false);
+                    return new(false, false, false, 2);
 
                 case SpecialType.System_Boolean:
                 case SpecialType.System_Char:
@@ -1320,7 +1318,7 @@ namespace EncosyTower.SourceGen
                 case SpecialType.System_IntPtr:
                 case SpecialType.System_UIntPtr:
                 case SpecialType.System_DateTime:
-                    return new(true, true, false);
+                    return new(true, true, false, 2);
 
                 case SpecialType.System_Nullable_T:
                 {
@@ -1329,11 +1327,11 @@ namespace EncosyTower.SourceGen
                         && nullableType.TypeArguments.FirstOrDefault() is { } typeArgument
                     )
                     {
-                        var (doestExist, isStatic, _) = FindOpEquality(typeArgument);
-                        return new(doestExist, isStatic, true);
+                        var (doestExist, isStatic, _, _) = FindOpEquality(typeArgument);
+                        return new(doestExist, isStatic, true, 2);
                     }
 
-                    return new(false, false, true);
+                    return new(false, false, true, 2);
                 }
             }
 
@@ -1344,7 +1342,6 @@ namespace EncosyTower.SourceGen
             {
                 if (member is not IMethodSymbol method
                     || method.DeclaredAccessibility != Accessibility.Public
-                    || method.ReturnsVoid
                     || method.IsStatic == false
                     || method.ReturnType.SpecialType != SpecialType.System_Boolean
                 )
@@ -1362,7 +1359,7 @@ namespace EncosyTower.SourceGen
                     continue;
                 }
 
-                return new(true, method.IsStatic, false);
+                return new(true, method.IsStatic, false, 2);
             }
 
             return default;
@@ -1393,14 +1390,14 @@ namespace EncosyTower.SourceGen
 
         public static Equality DetermineEquality(this ITypeSymbol type)
         {
-            var (doesExist, isStatic, isNullable) = type.FindOpEquality();
+            var (doesExist, isStatic, isNullable, _) = type.FindOpEquality();
 
             if (doesExist)
             {
                 return new(EqualityStrategy.Operator, isStatic, isNullable);
             }
 
-            (doesExist, isStatic, isNullable) = type.FindEquals();
+            (doesExist, isStatic, isNullable, _) = type.FindEquals();
 
             if (doesExist)
             {

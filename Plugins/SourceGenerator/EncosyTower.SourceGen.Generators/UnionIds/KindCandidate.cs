@@ -11,5 +11,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         public ulong order;
         public ToStringMethods toStringMethods;
         public bool signed;
+        public TryParseMethodType tryParseSpan;
     }
 }
