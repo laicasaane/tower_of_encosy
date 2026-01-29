@@ -230,6 +230,10 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 {
                     candidate.signed = boolVal;
                 }
+                else if (i == 4 && arg.Value is byte byteVal1)
+                {
+                    candidate.toStringMethods = (ToStringMethods)byteVal1;
+                }
             }
 
             return candidate;

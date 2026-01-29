@@ -10,6 +10,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
     internal partial class UnionIdDeclaration
     {
         private const string UNION_ID_KIND_ATTRIBUTE = "global::EncosyTower.UnionIds.UnionIdKindAttribute";
+        private const string ENUM_EXTENSIONS_ATTRIBUTE = "global::EncosyTower.EnumExtensions.EnumExtensionsAttribute";
 
         public StructDeclarationSyntax Syntax { get; }
 
@@ -39,9 +40,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
         public int KindFieldOffset { get; }
 
-        public bool IgnoreCase { get; }
-
-        public bool AllowMatchingMetadataAttribute { get; }
+        public ParsableStructConverterSettings ConverterSettings { get; }
 
         public List<KindRef> KindRefs { get; }
 
@@ -64,8 +63,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             Size = idCandidate.size;
             Separator = idCandidate.separator;
             PreserveIdKindOrder = idCandidate.kindSettings.HasFlag(UnionIdKindSettings.PreserveOrder);
-            IgnoreCase = idCandidate.converterSettings.HasFlag(ParsableStructConverterSettings.IgnoreCase);
-            AllowMatchingMetadataAttribute = idCandidate.converterSettings.HasFlag(ParsableStructConverterSettings.AllowMatchingMetadataAttribute);
+            ConverterSettings = idCandidate.converterSettings;
             DisplayNameForId = string.IsNullOrWhiteSpace(idCandidate.displayNameForId) ? string.Empty : idCandidate.displayNameForId;
             DisplayNameForKind = string.IsNullOrWhiteSpace(idCandidate.displayNameForKind) ? string.Empty : idCandidate.displayNameForKind;
             References = references;
@@ -146,7 +144,9 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 kindFixedStringBytes = Math.Max(kindFixedStringBytes, nameByteCount);
 
                 var isEnum = kindSymbol.TypeKind == TypeKind.Enum;
-                bool hasToFixedString;
+                var toStringMethods = candidate.toStringMethods;
+                var enumExtensionsName = string.Empty;
+                var nestedEnumExtensions = false;
 
                 if (isEnum)
                 {
@@ -163,14 +163,55 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                         OnlyClass = true,
                     };
 
+                    if (kindSymbol.TryGetAttribute(ENUM_EXTENSIONS_ATTRIBUTE, out _))
+                    {
+                        enumExtensionsName = $"{kindSymbol.ToFullName()}Extensions";
+                    }
+                    else
+                    {
+                        enumExtensionsName = extensions.ExtensionsName;
+                        idExtensionsRefs.Add(extensions);
+                        nestedEnumExtensions = true;
+                    }
+
                     idFixedStringBytes = Math.Max(idFixedStringBytes, extensions.FixedStringBytes);
-                    idExtensionsRefs.Add(extensions);
-                    hasToFixedString = true;
+                    toStringMethods |= ToStringMethods.ToDisplayString;
+
+                    if (references.unityCollections)
+                    {
+                        toStringMethods |= ToStringMethods.ToFixedString | ToStringMethods.ToDisplayString;
+                    }
                 }
                 else
                 {
-                    hasToFixedString = CheckToFixedString(kindSymbol, out var byteCount);
-                    idFixedStringBytes = Math.Max(idFixedStringBytes, byteCount);
+                    if (toStringMethods.HasFlag(ToStringMethods.ToDisplayString) == false
+                        && CheckToDisplayFixedString(kindSymbol)
+                    )
+                    {
+                        toStringMethods |= ToStringMethods.ToDisplayString;
+                    }
+
+                    if (references.unityCollections)
+                    {
+                        var byteCount = 128;
+                        var displayByteCount = 128;
+
+                        if (toStringMethods.HasFlag(ToStringMethods.ToFixedString) == false
+                            && CheckToFixedString(kindSymbol, "ToFixedString", out byteCount)
+                        )
+                        {
+                            toStringMethods |= ToStringMethods.ToFixedString;
+                        }
+
+                        if (toStringMethods.HasFlag(ToStringMethods.ToDisplayFixedString) == false
+                            && CheckToFixedString(kindSymbol, "ToDisplayFixedString", out displayByteCount)
+                        )
+                        {
+                            toStringMethods |= ToStringMethods.ToDisplayFixedString;
+                        }
+
+                        idFixedStringBytes = Math.Max(Math.Max(idFixedStringBytes, displayByteCount), byteCount);
+                    }
                 }
 
                 var tryParseSpan = kindSymbol.FindTryParseSpan();
@@ -187,13 +228,15 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     fullName = kindSymbol.ToFullName(),
                     fullNameFromNullable = equality.IsNullable ? kindSymbol.GetTypeFromNullable().ToFullName() : "",
                     displayName = candidate.displayName,
+                    enumExtensionsName = enumExtensionsName,
                     order = order,
                     size = size,
                     isEnum = isEnum,
                     signed = candidate.signed,
-                    hasToFixedString = hasToFixedString,
+                    toStringMethods = toStringMethods,
                     tryParseSpan = tryParseSpan,
                     equality = equality,
+                    nestedEnumExtensions = nestedEnumExtensions,
                 });
 
                 enumMembers.Add(new EnumMemberDeclaration {
@@ -350,6 +393,10 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     {
                         candidate.signed = boolVal;
                     }
+                    else if (i == 4 && arg.Value is byte byteVal)
+                    {
+                        candidate.toStringMethods = (ToStringMethods)byteVal;
+                    }
                 }
 
                 output.Add(candidate);
@@ -366,9 +413,9 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             return name;
         }
 
-        private static bool CheckToFixedString(INamedTypeSymbol symbol, out int byteCount)
+        private static bool CheckToFixedString(INamedTypeSymbol symbol, string name, out int byteCount)
         {
-            var members = symbol.GetMembers("ToFixedString");
+            var members = symbol.GetMembers(name);
 
             foreach (var member in members)
             {
@@ -396,8 +443,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     continue;
                 }
 
-
-
                 if (int.TryParse(returnTypeName.Substring(37, indexOfBytes - 37), out byteCount) == false)
                 {
                     continue;
@@ -407,6 +452,33 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             }
 
             byteCount = 0;
+            return false;
+        }
+
+        private static bool CheckToDisplayFixedString(INamedTypeSymbol symbol)
+        {
+            var members = symbol.GetMembers("ToDisplayString");
+
+            foreach (var member in members)
+            {
+                if (member is not IMethodSymbol method
+                    || method.DeclaredAccessibility != Accessibility.Public
+                    || method.IsStatic == true
+                    || method.Parameters.Length != 0
+                    || method.ReturnsVoid
+                )
+                {
+                    continue;
+                }
+
+                if (method.ReturnType.SpecialType != SpecialType.System_String)
+                {
+                    continue;
+                }
+
+                return true;
+            }
+
             return false;
         }
 
@@ -548,13 +620,15 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             public string fullName;
             public string fullNameFromNullable;
             public string displayName;
+            public string enumExtensionsName;
             public ulong order;
             public int size;
             public bool isEnum;
             public bool signed;
-            public bool hasToFixedString;
+            public ToStringMethods toStringMethods;
             public MemberExistence tryParseSpan;
             public Equality equality;
+            public bool nestedEnumExtensions;
         }
     }
 }

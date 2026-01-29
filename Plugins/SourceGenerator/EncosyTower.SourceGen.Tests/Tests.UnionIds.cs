@@ -1,4 +1,5 @@
 ﻿using System;
+using EncosyTower.Conversion;
 using EncosyTower.TypeWraps;
 using EncosyTower.UnionIds;
 using Unity.Collections;
@@ -11,16 +12,6 @@ namespace EncosyTower.Tests.UnionIds
     [UnionIdKind(typeof(ComplexId), 5)]
     public readonly partial struct AudioId
     {
-        private static partial void Append_ComplexId(ref FixedString32Bytes fs, ComplexId value, bool isDisplay)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        private static partial void Append_SpecialId(ref FixedString32Bytes fs, SpecialId value, bool isDisplay)
-        {
-            throw new System.NotImplementedException();
-        }
-
         private static partial bool TryParse_ComplexId(
               ReadOnlySpan<char> str
             , out ComplexId value
@@ -40,14 +31,22 @@ namespace EncosyTower.Tests.UnionIds
         {
             throw new NotImplementedException();
         }
+
+        private static partial void Append_ComplexId(ref FixedString64Bytes fs, ComplexId value, bool isDisplay)
+        {
+            throw new NotImplementedException();
+        }
     }
 
+    [EncosyTower.EnumExtensions.EnumExtensions]
     public enum MusicType : ushort
     {
         None = 0,
         Main = 1,
         Combat = 2,
     }
+
+    partial class MusicTypeExtensions { }
 
     [KindForUnionId(typeof(AudioId), 1, displayName: "Common")]
     public enum SoundCommon : byte
@@ -69,12 +68,30 @@ namespace EncosyTower.Tests.UnionIds
     public readonly partial struct ResourceId { }
 
     [WrapRecord]
-    public readonly partial record struct SpecialId(uint Id);
+    public readonly partial record struct SpecialId(uint Id)
+        : IToFixedString<FixedString32Bytes>
+        , IToDisplayFixedString<FixedString32Bytes>
+    {
+        public FixedString32Bytes ToDisplayFixedString()
+        {
+            throw new NotImplementedException();
+        }
 
-    public readonly struct ComplexId
+        public FixedString32Bytes ToFixedString()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public readonly struct ComplexId : IToFixedString<FixedString32Bytes>
     {
         public readonly byte Id1;
         public readonly byte Id2;
+
+        public FixedString32Bytes ToFixedString()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     static partial class ResourceIdEnumeration

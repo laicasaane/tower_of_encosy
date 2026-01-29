@@ -43,6 +43,14 @@
                 .PrintEndLine();
             p = p.IncreasedIndent();
             {
+                p.PrintLine(", global::EncosyTower.Conversion.IToDisplayString");
+
+                if (References.unityCollections && string.IsNullOrEmpty(FixedStringType) == false)
+                {
+                    p.PrintBeginLine(", global::EncosyTower.Conversion.IToFixedString<").Print(FixedStringType).PrintEndLine(">");
+                    p.PrintBeginLine(", global::EncosyTower.Conversion.IToDisplayFixedString<").Print(FixedStringType).PrintEndLine(">");
+                }
+
                 p.PrintBeginLine(", global::EncosyTower.Conversion.ITryParse<").Print(typeName).PrintEndLine(">");
                 p.PrintBeginLine(", global::EncosyTower.Conversion.ITryParseSpan<").Print(typeName).PrintEndLine(">");
 
@@ -364,8 +372,8 @@
                             {
                                 if (kind.isEnum)
                                 {
-                                    p.PrintBeginLine(kindName)
-                                        .PrintEndLine("Extensions.TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
+                                    p.PrintBeginLine(kind.enumExtensionsName)
+                                        .PrintEndLine(".TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
 
                                     p.PrintBeginLine("Id_").Print(kindName).PrintEndLine(" = idValue;");
                                 }
@@ -474,8 +482,8 @@
                             {
                                 if (kind.isEnum)
                                 {
-                                    p.PrintBeginLine(kindName)
-                                        .PrintEndLine("Extensions.TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
+                                    p.PrintBeginLine(kind.enumExtensionsName)
+                                        .PrintEndLine(".TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
 
                                     p.PrintBeginLine("Id_").Print(kindName).PrintEndLine(" = idValue;");
                                 }
@@ -837,8 +845,8 @@
                             {
                                 if (kind.isEnum)
                                 {
-                                    p.PrintBeginLine("if (").Print(kindName)
-                                        .PrintEndLine("Extensions.TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute))");
+                                    p.PrintBeginLine("if (").Print(kind.enumExtensionsName)
+                                        .PrintEndLine(".TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute))");
                                     p.OpenScope();
                                     {
                                         p.PrintLine("result = new(idValue);");
@@ -947,8 +955,8 @@
                             {
                                 if (kind.isEnum)
                                 {
-                                    p.PrintBeginLine("if (").Print(kindName)
-                                        .PrintEndLine("Extensions.TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute))");
+                                    p.PrintBeginLine("if (").Print(kind.enumExtensionsName)
+                                        .PrintEndLine(".TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute))");
                                     p.OpenScope();
                                     {
                                         p.PrintLine("result = new(idValue);");
@@ -1284,9 +1292,18 @@
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
                                     .Print(" => $\"")
-                                    .Print("{Kind.ToStringFast()}{SEPARATOR}{")
-                                    .Print(kindName).Print("Extensions.ToStringFast(Id_").Print(kindName)
-                                    .PrintEndLine(")}\",");
+                                    .Print("{Kind.ToStringFast()}{SEPARATOR}{");
+
+                                if (kind.nestedEnumExtensions)
+                                {
+                                    p.Print(kind.enumExtensionsName).Print(".ToStringFast(");
+                                }
+                                else
+                                {
+                                    p.Print("ToStringInternal(");
+                                }
+
+                                p.Print("Id_").Print(kindName).PrintEndLine(")}\",");
                             }
                             else
                             {
@@ -1303,6 +1320,26 @@
                             .Print(idField).PrintEndLine("}\",");
                     }
                     p.CloseScope("};");
+                }
+
+                p.PrintEndLine();
+
+                foreach (var kind in KindRefs)
+                {
+                    if (kind.isEnum == false || kind.nestedEnumExtensions)
+                    {
+                        continue;
+                    }
+
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintBeginLine("static string ToStringInternal(").Print(kind.name).PrintEndLine(" value)");
+                    p.OpenScope();
+                    {
+                        p.PrintBeginLine("return ").Print(kind.enumExtensionsName)
+                            .PrintEndLine(".ToStringFast(value);");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
                 }
             }
             p.CloseScope();
@@ -1331,9 +1368,18 @@
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
                                     .Print(" => $\"")
-                                    .Print("{Kind.ToDisplayStringFast()}{SEPARATOR}{")
-                                    .Print(kindName).Print("Extensions.ToDisplayStringFast(Id_").Print(kindName)
-                                    .PrintEndLine(")}\",");
+                                    .Print("{Kind.ToDisplayStringFast()}{SEPARATOR}{");
+
+                                if (kind.nestedEnumExtensions)
+                                {
+                                    p.Print(kind.enumExtensionsName).Print(".ToDisplayStringFast(");
+                                }
+                                else
+                                {
+                                    p.Print("ToStringInternal(");
+                                }
+
+                                p.Print("Id_").Print(kindName).PrintEndLine(")}\",");
                             }
                             else
                             {
@@ -1350,6 +1396,26 @@
                             .Print(idField).PrintEndLine("}\",");
                     }
                     p.CloseScope("};");
+
+                    p.PrintEndLine();
+
+                    foreach (var kind in KindRefs)
+                    {
+                        if (kind.isEnum == false || kind.nestedEnumExtensions)
+                        {
+                            continue;
+                        }
+
+                        p.PrintLine(AGGRESSIVE_INLINING);
+                        p.PrintBeginLine("static string ToStringInternal(").Print(kind.name).PrintEndLine(" value)");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine("return ").Print(kind.enumExtensionsName)
+                                .PrintEndLine(".ToDisplayStringFast(value);");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
                 }
             }
             p.CloseScope();
@@ -1396,11 +1462,11 @@
                                 if (kind.isEnum)
                                 {
                                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, ")
-                                        .Print(kindName).Print("Extensions").Print(".ToFixedString(Id_")
+                                        .Print(kind.enumExtensionsName).Print(".ToFixedString(Id_")
                                         .Print(kindName)
                                         .PrintEndLine("));");
                                 }
-                                else if (kind.hasToFixedString)
+                                else if (kind.toStringMethods.HasFlag(ToStringMethods.ToFixedString))
                                 {
                                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id_")
                                         .Print(kindName).PrintEndLine(".ToFixedString());");
@@ -1480,14 +1546,14 @@
                                 if (kind.isEnum)
                                 {
                                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, ")
-                                        .Print(kindName).Print("Extensions").Print(".ToDisplayFixedString(Id_")
+                                        .Print(kind.enumExtensionsName).Print(".ToDisplayFixedString(Id_")
                                         .Print(kindName)
                                         .PrintEndLine("));");
                                 }
-                                else if (kind.hasToFixedString)
+                                else if (kind.toStringMethods.HasFlag(ToStringMethods.ToDisplayFixedString))
                                 {
                                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id_")
-                                        .Print(kindName).PrintEndLine(".ToFixedString());");
+                                        .Print(kindName).PrintEndLine(".ToDisplayFixedString());");
                                 }
                                 else
                                 {
@@ -1546,7 +1612,7 @@
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
                                     .Print(" => ")
-                                    .Print(kindName).Print("Extensions.ToStringFast(Id_").Print(kindName)
+                                    .Print(kind.enumExtensionsName).Print(".ToStringFast(Id_").Print(kindName)
                                     .PrintEndLine("),");
                             }
                             else
@@ -1588,7 +1654,7 @@
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
                                     .Print(" => ")
-                                    .Print(kindName).Print("Extensions.ToDisplayStringFast(Id_").Print(kindName)
+                                    .Print(kind.enumExtensionsName).Print(".ToDisplayStringFast(Id_").Print(kindName)
                                     .PrintEndLine("),");
                             }
                             else
@@ -1645,11 +1711,11 @@
                                 if (kind.isEnum)
                                 {
                                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, ")
-                                        .Print(kindName).Print("Extensions").Print(".ToFixedString(Id_")
+                                        .Print(kind.enumExtensionsName).Print(".ToFixedString(Id_")
                                         .Print(kindName)
                                         .PrintEndLine("));");
                                 }
-                                else if (kind.hasToFixedString)
+                                else if (kind.toStringMethods.HasFlag(ToStringMethods.ToFixedString))
                                 {
                                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id_")
                                         .Print(kindName).PrintEndLine(".ToFixedString());");
@@ -1726,14 +1792,14 @@
                                 if (kind.isEnum)
                                 {
                                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, ")
-                                        .Print(kindName).Print("Extensions").Print(".ToDisplayFixedString(Id_")
+                                        .Print(kind.enumExtensionsName).Print(".ToDisplayFixedString(Id_")
                                         .Print(kindName)
                                         .PrintEndLine("));");
                                 }
-                                else if (kind.hasToFixedString)
+                                else if (kind.toStringMethods.HasFlag(ToStringMethods.ToDisplayFixedString))
                                 {
                                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id_")
-                                        .Print(kindName).PrintEndLine(".ToFixedString());");
+                                        .Print(kindName).PrintEndLine(".ToDisplayFixedString());");
                                 }
                                 else
                                 {
@@ -1792,15 +1858,15 @@
                             p.PrintLine("if (result is global::EncosyTower.Collections.FasterList<string> fasterList)");
                             p.OpenScope();
                             {
-                                p.PrintBeginLine("fasterList.AddRange(").Print(kindName)
-                                    .PrintEndLine("Extensions.Names.AsSpan());");
+                                p.PrintBeginLine("fasterList.AddRange(").Print(kind.enumExtensionsName)
+                                    .PrintEndLine(".Names.AsSpan());");
                             }
                             p.CloseScope();
                             p.PrintLine("else");
                             p.OpenScope();
                             {
-                                p.PrintBeginLine("foreach (var name in ").Print(kindName)
-                                    .PrintEndLine("Extensions.Names.AsSpan())");
+                                p.PrintBeginLine("foreach (var name in ").Print(kind.enumExtensionsName)
+                                    .PrintEndLine(".Names.AsSpan())");
                                 p.OpenScope();
                                 {
                                     p.PrintLine("result.Add(name);");
@@ -1857,15 +1923,15 @@
                             p.PrintLine("if (result is global::EncosyTower.Collections.FasterList<string> fasterList)");
                             p.OpenScope();
                             {
-                                p.PrintBeginLine("fasterList.AddRange(").Print(kindName)
-                                    .PrintEndLine("Extensions.DisplayNames.AsSpan());");
+                                p.PrintBeginLine("fasterList.AddRange(").Print(kind.enumExtensionsName)
+                                    .PrintEndLine(".DisplayNames.AsSpan());");
                             }
                             p.CloseScope();
                             p.PrintLine("else");
                             p.OpenScope();
                             {
-                                p.PrintBeginLine("foreach (var name in ").Print(kindName)
-                                    .PrintEndLine("Extensions.DisplayNames.AsSpan())");
+                                p.PrintBeginLine("foreach (var name in ").Print(kind.enumExtensionsName)
+                                    .PrintEndLine(".DisplayNames.AsSpan())");
                                 p.OpenScope();
                                 {
                                     p.PrintLine("result.Add(name);");
@@ -1920,8 +1986,8 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintBeginLine("result = ").Print(kindName)
-                                .PrintEndLine("Extensions.Names.AsMemory();");
+                            p.PrintBeginLine("result = ").Print(kind.enumExtensionsName)
+                                .PrintEndLine(".Names.AsMemory();");
                             p.PrintLine("return true;");
                         }
                         else
@@ -1967,8 +2033,8 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintBeginLine("result = ").Print(kindName)
-                                .PrintEndLine("Extensions.DisplayNames.AsMemory();");
+                            p.PrintBeginLine("result = ").Print(kind.enumExtensionsName)
+                                .PrintEndLine(".DisplayNames.AsMemory();");
                             p.PrintLine("return true;");
                         }
                         else
@@ -2021,7 +2087,8 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintBeginLine(kindName).PrintEndLine("Extensions.FixedNames.Get(allocator, out result);");
+                            p.PrintBeginLine(kind.enumExtensionsName)
+                                .PrintEndLine(".FixedNames.Get(allocator, out result);");
                             p.PrintLine("return true;");
                         }
                         else
@@ -2076,7 +2143,8 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintBeginLine(kindName).PrintEndLine("Extensions.FixedDisplayNames.Get(allocator, out result);");
+                            p.PrintBeginLine(kind.enumExtensionsName)
+                                .PrintEndLine(".FixedDisplayNames.Get(allocator, out result);");
                             p.PrintLine("return true;");
                         }
                         else
@@ -2114,7 +2182,14 @@
 
             foreach (var kind in KindRefs)
             {
-                if (kind.isEnum || kind.hasToFixedString)
+                if (kind.isEnum)
+                {
+                    continue;
+                }
+
+                if (kind.toStringMethods.HasFlag(ToStringMethods.ToFixedString)
+                    && kind.toStringMethods.HasFlag(ToStringMethods.ToDisplayFixedString)
+                )
                 {
                     continue;
                 }
@@ -2170,11 +2245,15 @@
                 .Print(typeName).PrintEndLine(">");
             p.OpenScope();
             {
-                p.PrintBeginLine("public override bool IgnoreCase => ").Print(IgnoreCase).PrintEndLine(";");
+                var ignoreCase = ConverterSettings.HasFlag(ParsableStructConverterSettings.IgnoreCase);
+                var allowMatching = ConverterSettings.HasFlag(ParsableStructConverterSettings.AllowMatchingMetadataAttribute);
+
+                p.PrintBeginLine("public override bool IgnoreCase => ")
+                    .Print(ignoreCase).PrintEndLine(";");
                 p.PrintEndLine();
 
                 p.PrintBeginLine("public override bool AllowMatchingMetadataAttribute => ")
-                    .Print(AllowMatchingMetadataAttribute).PrintEndLine(";");
+                    .Print(allowMatching).PrintEndLine(";");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -2185,9 +2264,18 @@
             p.PrintLine(SERIALIZABLE).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public partial struct Serializable ")
                 .Print(": global::EncosyTower.Conversion.ITryConvert<").Print(typeName).Print(">")
-                .Print(", global::System.IEquatable<Serializable>")
-                .Print(", global::System.IComparable<Serializable>")
                 .PrintEndLine();
+
+            p.PrintLine(", global::System.IEquatable<Serializable>");
+            p.PrintLine(", global::System.IComparable<Serializable>");
+            p.PrintLine(", global::EncosyTower.Conversion.IToDisplayString");
+
+            if (References.unityCollections && string.IsNullOrEmpty(FixedStringType) == false)
+            {
+                p.PrintBeginLine(", global::EncosyTower.Conversion.IToFixedString<").Print(FixedStringType).PrintEndLine(">");
+                p.PrintBeginLine(", global::EncosyTower.Conversion.IToDisplayFixedString<").Print(FixedStringType).PrintEndLine(">");
+            }
+
             p.OpenScope();
             {
                 if (KindRefs.Count < 1)

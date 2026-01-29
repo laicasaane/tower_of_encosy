@@ -1,4 +1,5 @@
 using System;
+using EncosyTower.Conversion;
 using EncosyTower.Serialization;
 
 namespace EncosyTower.UnionIds
@@ -57,10 +58,19 @@ namespace EncosyTower.UnionIds
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true)]
     public sealed class UnionIdKindAttribute : Attribute
     {
+        /// <summary>
+        /// The type that represents the kind.
+        /// </summary>
         public Type KindType { get; }
 
+        /// <summary>
+        /// The order of the kind in the union id.
+        /// </summary>
         public ulong Order { get; }
 
+        /// <summary>
+        /// The display name for the kind.
+        /// </summary>
         public string DisplayName { get; }
 
         /// <summary>
@@ -68,13 +78,32 @@ namespace EncosyTower.UnionIds
         /// </summary>
         public bool Signed { get; }
 
-        /// <param name="kindType">The type size must be 8 bytes or lesser.</param>
-        public UnionIdKindAttribute(Type kindType, ulong order, string displayName = "", bool signed = false)
+        /// <summary>
+        /// Indicates which ToString methods are available on <see cref="KindType"/>.
+        /// </summary>
+        public ToStringMethods ToStringMethods { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnionIdKindAttribute"/> class.
+        /// </summary>
+        /// <param name="kindType">The type that represents the kind.</param>
+        /// <param name="order">The order of the kind in the union id kinds.</param>
+        /// <param name="displayName">The display name for the kind.</param>
+        /// <param name="signed">Indicates whether the kind type is an signed or unsigned integer.</param>
+        /// <param name="toStringMethods">Indicates which ToString methods are available on <see cref="KindType"/>.</param>
+        public UnionIdKindAttribute(
+              Type kindType
+            , ulong order
+            , string displayName = ""
+            , bool signed = false
+            , ToStringMethods toStringMethods = ToStringMethods.Default
+        )
         {
             KindType = kindType;
             Order = order;
             DisplayName = displayName;
             Signed = signed;
+            ToStringMethods = toStringMethods;
         }
     }
 
@@ -89,10 +118,19 @@ namespace EncosyTower.UnionIds
     [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Enum)]
     public sealed class KindForUnionIdAttribute : Attribute
     {
+        /// <summary>
+        /// The type that is annotated with [UnionId].
+        /// </summary>
         public Type IdType { get; }
 
+        /// <summary>
+        /// The order of the kind in the union id.
+        /// </summary>
         public ulong Order { get; }
 
+        /// <summary>
+        /// The display name for the kind.
+        /// </summary>
         public string DisplayName { get; }
 
         /// <summary>
@@ -100,13 +138,32 @@ namespace EncosyTower.UnionIds
         /// </summary>
         public bool Signed { get; }
 
+        /// <summary>
+        /// Indicates which ToString methods are available on this type.
+        /// </summary>
+        public ToStringMethods ToStringMethods { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KindForUnionIdAttribute"/> class.
+        /// </summary>
         /// <param name="idType">The type that is annotated with [UnionId].</param>
-        public KindForUnionIdAttribute(Type idType, ulong order, string displayName = "", bool signed = false)
+        /// <param name="order">The order of the kind in the union id.</param>
+        /// <param name="displayName">The display name for the kind.</param>
+        /// <param name="signed">Indicates whether the kind type is an signed or unsigned integer.</param>
+        /// <param name="toStringMethods">Indicates which ToString methods are available on this type.</param>
+        public KindForUnionIdAttribute(
+              Type idType
+            , ulong order
+            , string displayName = ""
+            , bool signed = false
+            , ToStringMethods toStringMethods = ToStringMethods.Default
+        )
         {
             IdType = idType;
             Order = order;
             DisplayName = displayName;
             Signed = signed;
+            ToStringMethods = toStringMethods;
         }
     }
 }
