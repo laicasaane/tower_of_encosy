@@ -7,8 +7,8 @@ namespace EncosyTower.Collections
         NativeArray<T> AsNativeArray();
     }
 
-    public interface IAsNativeSlice<T> where T : struct
+    public interface IAsNativeArrayReadOnly<T> where T : struct
     {
-        NativeSlice<T> AsNativeSlice();
+        NativeArray<T>.ReadOnly AsNativeArrayReadOnly();
     }
 }
