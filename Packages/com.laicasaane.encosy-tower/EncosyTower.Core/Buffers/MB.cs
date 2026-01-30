@@ -168,6 +168,18 @@ namespace EncosyTower.Buffers
             => _buffer.ToManagedArray();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ArraySegment<T> AsArraySegment()
+            => _buffer.AsArraySegment();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly Memory<T> AsMemory()
+            => _buffer.AsMemory();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ReadOnlyMemory<T> AsReadOnlyMemory()
+            => _buffer.AsReadOnlyMemory();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Span<T> AsSpan()
             => _buffer.AsSpan();
 
@@ -262,12 +274,16 @@ namespace EncosyTower.Buffers
                 => _buffer.ToManagedArray();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly ReadOnlyMemory<T> AsReadOnlyMemory()
+                => _buffer.AsReadOnlyMemory();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly ReadOnlySpan<T> AsReadOnlySpan()
                 => _buffer.AsReadOnlySpan();
         }
     }
 
-    internal struct MBInternal<T> : IBuffer<T>
+    internal struct MBInternal<T> : IBuffer<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
     {
         private T[] _buffer;
 
@@ -383,6 +399,14 @@ namespace EncosyTower.Buffers
             => new(_buffer);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly Memory<T> AsMemory()
+            => _buffer;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ReadOnlyMemory<T> AsReadOnlyMemory()
+            => _buffer;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Span<T> AsSpan()
             => _buffer;
 
@@ -402,7 +426,7 @@ namespace EncosyTower.Buffers
         public static explicit operator MBInternal<T>(MB<T> mb)
             => new(mb.ToManagedArray());
 
-        public readonly struct ReadOnly : IReadOnlyBuffer<T>
+        public readonly struct ReadOnly : IReadOnlyBuffer<T>, IAsReadOnlyMemory<T>
         {
             private readonly T[] _buffer;
 
@@ -477,6 +501,10 @@ namespace EncosyTower.Buffers
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal readonly T[] ToManagedArray()
+                => _buffer;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly ReadOnlyMemory<T> AsReadOnlyMemory()
                 => _buffer;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

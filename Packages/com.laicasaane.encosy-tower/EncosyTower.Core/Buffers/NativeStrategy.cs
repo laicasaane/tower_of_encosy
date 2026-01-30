@@ -44,7 +44,8 @@ namespace EncosyTower.Buffers
     /// Through the IBufferStrategy interface, with these, datastructure can use interchangeably
     /// native and managed memory and other strategies.
     /// </summary>
-    public struct NativeStrategy<T> : IBufferStrategy<T> where T : unmanaged
+    public struct NativeStrategy<T> : IBufferStrategy<T>, IAsNativeSlice<T>, IAsNativeSliceReadOnly<T>
+        where T : unmanaged
     {
 #if DEBUG && !PROFILE_SVELTO
         static NativeStrategy()
@@ -202,6 +203,10 @@ namespace EncosyTower.Buffers
             => _realBuffer.AsNativeSlice();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly NativeSliceReadOnly<T> AsNativeSliceReadOnly()
+            => _realBuffer.AsNativeSliceReadOnly();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Span<T> AsSpan()
             => _realBuffer.AsSpan();
 
@@ -246,7 +251,7 @@ namespace EncosyTower.Buffers
             );
         }
 
-        public readonly struct ReadOnly : IReadOnlyBufferStrategy<T>
+        public readonly struct ReadOnly : IReadOnlyBufferStrategy<T>, IAsNativeSliceReadOnly<T>
         {
 #if DEBUG && !PROFILE_SVELTO
             static ReadOnly()
@@ -298,6 +303,10 @@ namespace EncosyTower.Buffers
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly NB<T>.ReadOnly ToRealBuffer()
                 => _realBuffer;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly NativeSliceReadOnly<T> AsNativeSliceReadOnly()
+                => _realBuffer.AsNativeSliceReadOnly();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly ReadOnlySpan<T> AsReadOnlySpan()

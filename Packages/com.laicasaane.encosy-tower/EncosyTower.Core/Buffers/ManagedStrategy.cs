@@ -24,6 +24,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using EncosyTower.Collections;
 
 namespace EncosyTower.Buffers
 {
@@ -32,7 +33,7 @@ namespace EncosyTower.Buffers
     /// Through the IBufferStrategy interface, external datastructure can use interchangeably native and managed memory.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public struct ManagedStrategy<T> : IBufferStrategy<T>
+    public struct ManagedStrategy<T> : IBufferStrategy<T>, IAsMemory<T>, IAsReadOnlyMemory<T>
     {
         internal MBInternal<T> _realBuffer;
 
@@ -125,6 +126,14 @@ namespace EncosyTower.Buffers
             => _realBuffer.AsArraySegment();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly Memory<T> AsMemory()
+            => _realBuffer.AsMemory();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ReadOnlyMemory<T> AsReadOnlyMemory()
+            => _realBuffer.AsMemory();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Span<T> AsSpan()
             => _realBuffer.AsSpan();
 
@@ -139,7 +148,7 @@ namespace EncosyTower.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void Dispose() { }
 
-        public struct ReadOnly : IReadOnlyBufferStrategy<T>
+        public struct ReadOnly : IReadOnlyBufferStrategy<T>, IAsReadOnlyMemory<T>
         {
             internal MBInternal<T>.ReadOnly _realBuffer;
 
@@ -170,6 +179,10 @@ namespace EncosyTower.Buffers
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly MB<T>.ReadOnly ToRealBuffer()
                 => _realBuffer;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public readonly ReadOnlyMemory<T> AsReadOnlyMemory()
+                => _realBuffer.AsReadOnlyMemory();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly ReadOnlySpan<T> AsReadOnlySpan()

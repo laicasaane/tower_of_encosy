@@ -166,6 +166,14 @@ namespace EncosyTower.Buffers
             => _buffer.ToNativeArray();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public NativeSlice<T> AsNativeSlice()
+            => _buffer.AsNativeSlice();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public NativeSliceReadOnly<T> AsNativeSliceReadOnly()
+            => _buffer.AsNativeSliceReadOnly();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span<T> AsSpan()
             => _buffer.AsSpan();
 
@@ -260,6 +268,10 @@ namespace EncosyTower.Buffers
                 => _buffer.ToNativeArray();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public NativeSliceReadOnly<T> AsNativeSliceReadOnly()
+                => _buffer.AsNativeSliceReadOnly();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ReadOnlySpan<T> AsReadOnlySpan()
                 => _buffer.AsReadOnlySpan();
 
@@ -270,7 +282,8 @@ namespace EncosyTower.Buffers
         }
     }
 
-    internal readonly struct NBInternal<T> : IBuffer<T> where T : struct
+    internal readonly struct NBInternal<T> : IBuffer<T>, IAsNativeSlice<T>, IAsNativeSliceReadOnly<T>
+        where T : struct
     {
         static NBInternal()
         {
@@ -401,6 +414,10 @@ namespace EncosyTower.Buffers
             => new(_buffer);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public NativeSliceReadOnly<T> AsNativeSliceReadOnly()
+            => new(_buffer);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span<T> AsSpan()
             => _buffer.AsSpan();
 
@@ -421,7 +438,7 @@ namespace EncosyTower.Buffers
         public static explicit operator NBInternal<T>(NB<T> proxy)
             => new(proxy.ToNativeArray());
 
-        internal readonly struct ReadOnly : IReadOnlyBuffer<T>
+        internal readonly struct ReadOnly : IReadOnlyBuffer<T>, IAsNativeSliceReadOnly<T>
         {
             static ReadOnly()
             {
@@ -511,6 +528,10 @@ namespace EncosyTower.Buffers
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal NativeArray<T>.ReadOnly ToNativeArray()
                 => _buffer;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public NativeSliceReadOnly<T> AsNativeSliceReadOnly()
+                => new(_buffer);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ReadOnlySpan<T> AsReadOnlySpan()
