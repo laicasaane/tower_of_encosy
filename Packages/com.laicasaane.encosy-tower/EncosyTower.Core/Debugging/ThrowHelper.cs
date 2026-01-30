@@ -9,6 +9,62 @@ namespace EncosyTower.Debugging
 {
     public static class ThrowHelper
     {
+        [DoesNotReturn]
+        public static void ThrowArrayLengthMismatchException(int arrayLength, int length)
+        {
+            throw new ArgumentException($"array.Length ({arrayLength}) does not match the Length of this instance ({length}).", "array");
+        }
+
+        [DoesNotReturn]
+        public static void ThrowSliceWithStrideOffsetAndSizeExceededException()
+        {
+            throw new ArgumentException("SliceWithStride sizeof(U) + offset must be <= sizeof(T)", "offset");
+        }
+
+        [DoesNotReturn]
+        public static void ThrowSliceWithStrideOffsetOutOfRangeException()
+        {
+            throw new ArgumentOutOfRangeException("offset", "SliceWithStride offset must be >= 0");
+        }
+
+        [DoesNotReturn]
+        public static void ThrowSliceConvertSizeMismatchException()
+        {
+            throw new InvalidOperationException("SliceConvert requires that Length * sizeof(T) is a multiple of sizeof(U).");
+        }
+
+        [DoesNotReturn]
+        public static void ThrowSliceConvertOnRestrictedRangeException()
+        {
+            throw new InvalidOperationException("SliceConvert may not be used on a restricted range array");
+        }
+
+        [DoesNotReturn]
+        public static void ThrowSliceConvertStrideMismatchException()
+        {
+            throw new InvalidOperationException("SliceConvert requires that stride matches the size of the source type");
+        }
+
+        [DoesNotReturn]
+        public static void ThrowSliceOnRestrictedRangeException(string paramName)
+            => throw new ArgumentException($"Slice may not be used on a restricted range {paramName}", paramName);
+
+        [DoesNotReturn]
+        public static void ThrowSliceRangeExceedsLengthException(int sourceLength, int start, int length, string paramName)
+            => throw new ArgumentException($"Slice start + length ({start + length}) range must be <= {paramName}.Length ({sourceLength})");
+
+        [DoesNotReturn]
+        public static void ThrowSliceNegativeLengthException(int length)
+            => throw new ArgumentOutOfRangeException("length", $"Slice length {length} < 0.");
+
+        [DoesNotReturn]
+        public static void ThrowSliceNegativeStartException(int start)
+            => throw new ArgumentOutOfRangeException("start", $"Slice start {start} < 0.");
+
+        [DoesNotReturn]
+        public static void ThrowSliceIntegerOverflowException()
+            => throw new ArgumentException("Slice start + length ({start + length}) causes an integer overflow");
+
         public static void ThrowIfIndexOutOfRangeException([DoesNotReturnIf(false)] bool condition)
         {
             if (condition == false)
@@ -33,6 +89,7 @@ namespace EncosyTower.Debugging
             }
         }
 
+        [DoesNotReturn]
         public static void ThrowArgumentException_ArrayPlusOffTooSmall()
             => throw CreateArgumentException_ArrayPlusOffTooSmall();
 
@@ -45,10 +102,9 @@ namespace EncosyTower.Debugging
 
         }
 
+        [DoesNotReturn]
         public static void ThrowKeyNotFoundException<TKey>(TKey key)
-        {
-            throw new KeyNotFoundException($"The given key '{key}' was not present in the dictionary.");
-        }
+            => throw new KeyNotFoundException($"The given key '{key}' was not present in the dictionary.");
 
         [DoesNotReturn]
         public static void ThrowInvalidOperationException_EnumFailedVersion()
@@ -69,6 +125,10 @@ namespace EncosyTower.Debugging
         [DoesNotReturn]
         public static void ThrowInvalidOperationException_ModifyWhileBeingIterated_Map()
             => throw new InvalidOperationException("Cannot modify a map while it is being iterated");
+
+        [DoesNotReturn]
+        public static void ThrowInvalidOperationException_ModifyWhileBeingIterated_Set()
+            => throw new InvalidOperationException("Cannot modify a set while it is being iterated");
 
         [DoesNotReturn]
         public static void ThrowInvalidOperationException_SetCountGreaterThanStartingOne()
