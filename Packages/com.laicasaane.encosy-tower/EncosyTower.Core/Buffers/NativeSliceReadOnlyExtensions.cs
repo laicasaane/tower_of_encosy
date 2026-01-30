@@ -6,45 +6,52 @@ namespace EncosyTower.Buffers
     public static class NativeSliceReadOnlyExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeSliceReadOnly<T> Slice<T>(this NativeArray<T>.ReadOnly thisSlice)
+        public static NativeSliceReadOnly<T> AsReadOnly<T>(this NativeSlice<T> slice)
             where T : struct
         {
-            return thisSlice;
+            return new NativeSliceReadOnly<T>(slice);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeSliceReadOnly<T> Slice<T>(this NativeArray<T>.ReadOnly thisSlice, int start)
+        public static NativeSliceReadOnly<T> Slice<T>(this NativeArray<T>.ReadOnly array)
             where T : struct
         {
-            return new NativeSliceReadOnly<T>(thisSlice, start);
+            return array;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeSliceReadOnly<T> Slice<T>(this NativeArray<T>.ReadOnly thisSlice, int start, int length)
+        public static NativeSliceReadOnly<T> Slice<T>(this NativeArray<T>.ReadOnly array, int start)
             where T : struct
         {
-            return new NativeSliceReadOnly<T>(thisSlice, start, length);
+            return new NativeSliceReadOnly<T>(array, start);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeSliceReadOnly<T> Slice<T>(this NativeSliceReadOnly<T> thisSlice)
+        public static NativeSliceReadOnly<T> Slice<T>(this NativeArray<T>.ReadOnly array, int start, int length)
             where T : struct
         {
-            return thisSlice;
+            return new NativeSliceReadOnly<T>(array, start, length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeSliceReadOnly<T> Slice<T>(this NativeSliceReadOnly<T> thisSlice, int start)
+        public static NativeSliceReadOnly<T> Slice<T>(this NativeSliceReadOnly<T> slice)
             where T : struct
         {
-            return new NativeSliceReadOnly<T>(thisSlice, start);
+            return slice;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeSliceReadOnly<T> Slice<T>(this NativeSliceReadOnly<T> thisSlice, int start, int length)
+        public static NativeSliceReadOnly<T> Slice<T>(this NativeSliceReadOnly<T> slice, int start)
             where T : struct
         {
-            return new NativeSliceReadOnly<T>(thisSlice, start, length);
+            return new NativeSliceReadOnly<T>(slice, start);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NativeSliceReadOnly<T> Slice<T>(this NativeSliceReadOnly<T> slice, int start, int length)
+            where T : struct
+        {
+            return new NativeSliceReadOnly<T>(slice, start, length);
         }
     }
 }
