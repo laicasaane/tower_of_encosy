@@ -2,7 +2,6 @@
     "name": "Game.MainGame",
     "rootNamespace": "Game.MainGame",
     "references": [
-        "DebugUI",
         "EncosyTower.Core",
         "EncosyTower.Entities.Stats",
         "Game.Common",
