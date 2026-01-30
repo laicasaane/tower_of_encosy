@@ -1389,7 +1389,7 @@
 
                     p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("static string ToString_").Print(kind.name).Print("(")
-                        .Print(kind.name).PrintEndLine(" value)");
+                        .Print(kind.fullName).PrintEndLine(" value)");
                     p.OpenScope();
                     {
                         p.PrintBeginLine("return ").Print(kind.enumExtensionsName)
@@ -1472,7 +1472,7 @@
 
                         p.PrintLine(AGGRESSIVE_INLINING);
                         p.PrintBeginLine("static string ToString_").Print(kind.name).Print("(")
-                            .Print(kind.name).PrintEndLine(" value)");
+                            .Print(kind.fullName).PrintEndLine(" value)");
                         p.OpenScope();
                         {
                             p.PrintBeginLine("return ").Print(kind.enumExtensionsName)
