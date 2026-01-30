@@ -211,6 +211,20 @@ namespace EncosyTower.Common
             charsWritten = prefixChars + valueCharsWritten + 1;
             return true;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T? AsNullable<T>(in this Option<T> self)
+            where T : struct
+        {
+            return self.HasValue ? self._value : null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T GetValueOrNull<T>(in this Option<T> self)
+            where T : class
+        {
+            return self.HasValue ? self._value : null;
+        }
     }
 
     public readonly struct OptionEqualityComparer<T> : IEqualityComparer<Option<T>>
