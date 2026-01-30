@@ -10,6 +10,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EncosyTower.Buffers;
 using EncosyTower.Common;
 using EncosyTower.Debugging;
 using Unity.Collections;
@@ -97,7 +98,7 @@ namespace EncosyTower.Collections
             get => new(this);
         }
 
-        public NativeSlice<TValue> Values
+        public NativeSliceReadOnly<TValue> Values
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _values.Slice(0, _freeValueCellIndex.AsSpan()[0]);
@@ -274,7 +275,6 @@ namespace EncosyTower.Collections
             return Remove(key, out _, out _);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Remove(TKey key, out int index, out TValue value)
         {
             var buckets = _buckets.AsSpan();
@@ -391,7 +391,6 @@ namespace EncosyTower.Collections
 
         //WARNING this method must stay stateless (not relying on states that can change, it's ok to read
         //constant states) because it will be used in multithreaded parallel code
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryFindIndex(TKey key, out int findIndex)
         {
             var buckets = _buckets.AsReadOnlySpan();
@@ -482,7 +481,6 @@ namespace EncosyTower.Collections
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool AddValue(TKey key, out int indexSet)
         {
             var valuesInfo = _valuesInfo.AsSpan();
@@ -554,7 +552,6 @@ namespace EncosyTower.Collections
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RecomputeBuckets(int newSize)
         {
             ResizeBuckets(newSize);

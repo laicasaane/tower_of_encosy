@@ -163,7 +163,7 @@ namespace EncosyTower.Collections
             get => new(this);
         }
 
-        public ArraySegment<TValue> Values
+        public ReadOnlyMemory<TValue> Values
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _values.AsArraySegment().Slice(0, _freeValueCellIndex.ValueRO);
@@ -394,7 +394,6 @@ namespace EncosyTower.Collections
             return Remove(key, out _, out _);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Remove(TKey key, out int index, out TValue value)
         {
             var buckets = _buckets.AsSpan();
@@ -519,7 +518,6 @@ namespace EncosyTower.Collections
 
         //WARNING this method must stay stateless (not relying on states that can change, it's ok to read
         //constant states) because it will be used in multithreaded parallel code
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryFindIndex(TKey key, out int findIndex)
         {
             var buckets = _buckets.AsReadOnlySpan();
@@ -612,7 +610,6 @@ namespace EncosyTower.Collections
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool AddValue(TKey key, out int indexSet)
         {
             var valuesInfo = _valuesInfo.AsSpan();
@@ -691,7 +688,6 @@ namespace EncosyTower.Collections
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RecomputeBuckets(int newSize)
         {
             //we need more space and less collisions

@@ -66,10 +66,10 @@ namespace EncosyTower.Collections
                 get => new(this);
             }
 
-            public readonly ReadOnlySpan<TValue> Values
+            public readonly NativeSliceReadOnly<TValue> Values
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _values.AsReadOnlySpan()[.._freeValueCellIndex.Value];
+                get => _values.AsNativeSliceReadOnly().Slice(0, _freeValueCellIndex.Value);
             }
 
             public TValue this[TKey key]
@@ -130,7 +130,6 @@ namespace EncosyTower.Collections
 
             //WARNING this method must stay stateless (not relying on states that can change, it's ok to read
             //constant states) because it will be used in multithreaded parallel code
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly bool TryFindIndex(TKey key, out int index)
             {
                 Checks.IsTrue(_buckets.Capacity > 0, "Map arrays are not correctly initialized (0 size)");

@@ -18,7 +18,7 @@ namespace EncosyTower.Collections
 
         /// <inheritdoc cref="ArrayMap{TKey, TValue}"/>
         [DebuggerTypeProxy(typeof(ArrayMapDebugProxy<,>))]
-        public readonly struct ReadOnly : IDisposable, IIsCreated
+        public readonly struct ReadOnly : IIsCreated
             , IReadOnlyCollection<ArrayMapKeyValuePair<TKey, TValue>>, IHasCount
             , ITryGetValue<TKey, TValue>
         {
@@ -62,7 +62,7 @@ namespace EncosyTower.Collections
                 get => new(_map);
             }
 
-            public ArraySegment<TValue> Values
+            public ReadOnlyMemory<TValue> Values
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _map.Values;
@@ -77,12 +77,6 @@ namespace EncosyTower.Collections
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator ReadOnly(ArrayMap<TKey, TValue> map)
                 => map is not null ? map.AsReadOnly() : Empty;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Dispose()
-            {
-                _map.Dispose();
-            }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ArrayMapKeyValueEnumerator<TKey, TValue> GetEnumerator()

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
+using EncosyTower.Collections.Unsafe;
 using EncosyTower.Debugging;
 
 namespace EncosyTower.Serialization.NewtonsoftJson.Collections
@@ -30,7 +31,14 @@ namespace EncosyTower.Serialization.NewtonsoftJson.Collections
 
         ICollection<TKey> IDictionary<TKey, TValue>.Keys => new JsonArrayMapKeyCollection(this);
 
-        ICollection<TValue> IDictionary<TKey, TValue>.Values => Values;
+        ICollection<TValue> IDictionary<TKey, TValue>.Values
+        {
+            get
+            {
+                var values = this.GetValuesUnsafe(out var count);
+                return values.AsArraySegment().Slice(0, count);
+            }
+        }
 
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item)
         {

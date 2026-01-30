@@ -187,7 +187,7 @@ namespace EncosyTower.Collections
             get => new(AsReadOnly());
         }
 
-        public readonly NativeSlice<TValue> Values
+        public readonly NativeSliceReadOnly<TValue> Values
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _values.AsNativeSlice().Slice(0, _freeValueCellIndex.Value);
@@ -433,7 +433,6 @@ namespace EncosyTower.Collections
             return Remove(key, out _, out _);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Remove(TKey key, out int index, out TValue value)
         {
             var hash = key.GetHashCode();
@@ -550,7 +549,6 @@ namespace EncosyTower.Collections
 
         //WARNING this method must stay stateless (not relying on states that can change, it's ok to read
         //constant states) because it will be used in multithreaded parallel code
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryFindIndex(TKey key, out int index)
         {
             Checks.IsTrue(_buckets.Capacity > 0, "Map arrays are not correctly initialized (0 size)");
@@ -621,7 +619,6 @@ namespace EncosyTower.Collections
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool AddValue(TKey key, out int indexSet)
         {
             var hash = key.GetHashCode(); //IEquatable doesn't enforce the override of GetHashCode
@@ -688,7 +685,6 @@ namespace EncosyTower.Collections
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RecomputeBuckets(int newSize)
         {
             //we need more space and less collisions
