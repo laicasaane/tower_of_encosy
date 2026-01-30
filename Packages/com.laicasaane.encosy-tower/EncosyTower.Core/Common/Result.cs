@@ -59,8 +59,8 @@ namespace EncosyTower.Common
     {
         public readonly Error Error;
 
-        private readonly TValue _value;
-        private readonly ByteBool _hasValue;
+        internal readonly TValue _value;
+        internal readonly ByteBool _hasValue;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(TValue value)
@@ -235,10 +235,10 @@ namespace EncosyTower.Common
 
     public readonly struct Result<TValue, TError> : IResult<TValue, TError>
     {
-        private readonly TValue _value;
-        private readonly TError _error;
-        private readonly ByteBool _hasValue;
-        private readonly ByteBool _hasError;
+        internal readonly TValue _value;
+        internal readonly TError _error;
+        internal readonly ByteBool _hasValue;
+        internal readonly ByteBool _hasError;
 
         static Result()
         {
@@ -547,6 +547,54 @@ namespace EncosyTower.Common
             destination[0] = ')';
             charsWritten = prefixChars + resultCharsWritten + 1;
             return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T? AsNullableValue<T>(in this Result<T> self)
+            where T : struct
+        {
+            return self._hasValue ? self._value : null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Error? AsNullableError<T>(in this Result<T> self)
+        {
+            return self.Error.IsValid ? self.Error : default(Error?);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T GetValueOrNull<T>(in this Result<T> self)
+            where T : class
+        {
+            return self._hasValue ? self._value : null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TValue? AsNullableValue<TValue, TError>(in this Result<TValue, TError> self)
+            where TValue : struct
+        {
+            return self._hasValue ? self._value : null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TError? AsNullableError<TValue, TError>(in this Result<TValue, TError> self)
+            where TError : struct
+        {
+            return self._hasError ? self._error : null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TValue GetValueOrNull<TValue, TError>(in this Result<TValue, TError> self)
+            where TValue : class
+        {
+            return self._hasValue ? self._value : null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TError GetErrorOrNull<TValue, TError>(in this Result<TValue, TError> self)
+            where TError : class
+        {
+            return self._hasError ? self._error : null;
         }
     }
 
