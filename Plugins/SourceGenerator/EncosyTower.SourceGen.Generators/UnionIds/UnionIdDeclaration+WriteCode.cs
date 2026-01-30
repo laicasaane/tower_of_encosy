@@ -160,7 +160,7 @@
                     foreach (var kind in KindRefs)
                     {
                         var kindName = kind.name;
-                        var fullName = kind.fullName;
+                        var kindFullName = kind.fullName;
 
                         p.PrintLine(FIELD_OFFSET, 0);
                         p.PrintLineIf(hasLabel, DESCRIPTION, (object)label);
@@ -168,7 +168,7 @@
                         p.PrintLineIf(References.odin, ODIN_SHOW_IN_INSPECTOR);
                         p.PrintLineIf(References.odin, ODIN_PROPERTY_ORDER, order);
                         p.PrintLineIf(this.References.odin, ODIN_SHOW_IF, (object)kindName);
-                        p.PrintBeginLine("public readonly ").Print(fullName).Print(" Id_").Print(kindName).PrintEndLine(";");
+                        p.PrintBeginLine("public readonly ").Print(kindFullName).Print(" Id_").Print(kindName).PrintEndLine(";");
                         p.PrintEndLine();
 
                         order += 1;
@@ -222,9 +222,8 @@
             foreach (var kind in KindRefs)
             {
                 var kindName = kind.name;
-                var fullName = kind.fullName;
 
-                p.PrintBeginLine("public ").Print(typeName).Print("(").Print(fullName).PrintEndLine(" id) : this()");
+                p.PrintBeginLine("public ").Print(typeName).Print("(").Print(kind.fullName).PrintEndLine(" id) : this()");
                 p.OpenScope();
                 {
                     p.PrintBeginLine("Id_").Print(kindName).PrintEndLine(" = id;");
@@ -236,11 +235,9 @@
 
             foreach (var kind in KindRefs)
             {
-                var fullName = kind.fullName;
-
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public static implicit operator ").Print(typeName)
-                    .Print("(").Print(fullName).PrintEndLine(" id)");
+                    .Print("(").Print(kind.fullName).PrintEndLine(" id)");
                 p.OpenScope();
                 {
                     p.PrintLine("return new(id);");
@@ -365,7 +362,7 @@
                         foreach (var kind in KindRefs)
                         {
                             var kindName = kind.name;
-                            var fullName = kind.fullName;
+                            var kindFullName = kind.fullName;
 
                             p.PrintBeginLine("case IdKind.").Print(kindName).PrintEndLine(":");
                             p.OpenScope();
@@ -385,12 +382,12 @@
                                     {
                                         if (tryParse.ParamCount == 2)
                                         {
-                                            p.PrintBeginLineIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                            p.PrintBeginLineIf(tryParse.IsStatic, kindFullName, $"default({kindFullName})")
                                                 .PrintEndLine(".TryParse(id, out var idValue);");
                                         }
                                         else if (tryParse.ParamCount == 4)
                                         {
-                                            p.PrintBeginLineIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                            p.PrintBeginLineIf(tryParse.IsStatic, kindFullName, $"default({kindFullName})")
                                                 .PrintEndLine(".TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
                                         }
                                         else
@@ -488,7 +485,7 @@
                         foreach (var kind in KindRefs)
                         {
                             var kindName = kind.name;
-                            var fullName = kind.fullName;
+                            var kindFullName = kind.fullName;
 
                             p.PrintBeginLine("case IdKind.").Print(kindName).PrintEndLine(":");
                             p.OpenScope();
@@ -508,12 +505,12 @@
                                     {
                                         if (tryParse.ParamCount == 2)
                                         {
-                                            p.PrintBeginLineIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                            p.PrintBeginLineIf(tryParse.IsStatic, kindFullName, $"default({kindFullName})")
                                                 .PrintEndLine(".TryParse(id, out var idValue);");
                                         }
                                         else if (tryParse.ParamCount == 4)
                                         {
-                                            p.PrintBeginLineIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                            p.PrintBeginLineIf(tryParse.IsStatic, kindFullName, $"default({kindFullName})")
                                                 .PrintEndLine(".TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
                                         }
                                         else
@@ -866,7 +863,7 @@
                         foreach (var kind in KindRefs)
                         {
                             var kindName = kind.name;
-                            var fullName = kind.fullName;
+                            var kindFullName = kind.fullName;
 
                             p.PrintBeginLine("case IdKind.").Print(kindName).PrintEndLine(":");
                             p.OpenScope();
@@ -891,13 +888,13 @@
                                         if (tryParse.ParamCount == 2)
                                         {
                                             p.PrintBeginLine("var idResult = ")
-                                                .PrintIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                                .PrintIf(tryParse.IsStatic, kindFullName, $"default({kindFullName})")
                                                 .PrintEndLine(".TryParse(id, out var idValue);");
                                         }
                                         else if (tryParse.ParamCount == 4)
                                         {
                                             p.PrintBeginLine("var idResult = ")
-                                                .PrintIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                                .PrintIf(tryParse.IsStatic, kindFullName, $"default({kindFullName})")
                                                 .PrintEndLine(".TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
                                         }
                                         else
@@ -917,7 +914,7 @@
                                     p.PrintLine("if (idResult)");
                                     p.OpenScope();
                                     {
-                                        p.PrintLine("result = new(idValue);");
+                                        p.PrintBeginLine("result = new((").Print(kindFullName).PrintEndLine(")idValue);");
                                         p.PrintLine("return true;");
                                     }
                                     p.CloseScope();
@@ -990,7 +987,7 @@
                         foreach (var kind in KindRefs)
                         {
                             var kindName = kind.name;
-                            var fullName = kind.fullName;
+                            var kindFullName = kind.fullName;
 
                             p.PrintBeginLine("case IdKind.").Print(kindName).PrintEndLine(":");
                             p.OpenScope();
@@ -1015,13 +1012,13 @@
                                         if (tryParse.ParamCount == 2)
                                         {
                                             p.PrintBeginLine("var idResult = ")
-                                                .PrintIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                                .PrintIf(tryParse.IsStatic, kindFullName, $"default({kindFullName})")
                                                 .PrintEndLine(".TryParse(id, out var idValue);");
                                         }
                                         else if (tryParse.ParamCount == 4)
                                         {
                                             p.PrintBeginLine("var idResult = ")
-                                                .PrintIf(tryParse.IsStatic, fullName, $"default({fullName})")
+                                                .PrintIf(tryParse.IsStatic, kindFullName, $"default({kindFullName})")
                                                 .PrintEndLine(".TryParse(id, out var idValue, ignoreCase, allowMatchingMetadataAttribute);");
                                         }
                                         else
@@ -1041,7 +1038,7 @@
                                     p.PrintLine("if (idResult)");
                                     p.OpenScope();
                                     {
-                                        p.PrintLine("result = new(idValue);");
+                                        p.PrintBeginLine("result = new((").Print(kindFullName).PrintEndLine(")idValue);");
                                         p.PrintLine("return true;");
                                     }
                                     p.CloseScope();
@@ -1222,8 +1219,8 @@
             foreach (var kind in KindRefs)
             {
                 var kindName = kind.name;
-                var fullName = kind.fullName;
-                var fullNameFromNullable = kind.fullNameFromNullable;
+                var kindFullName = kind.fullName;
+                var kindFullNameFromNullable = kind.fullNameFromNullable;
                 var equality = kind.equality;
 
                 if (equality.Strategy == EqualityStrategy.Default)
@@ -1232,7 +1229,7 @@
                 }
 
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintBeginLine("public readonly bool Equals(").Print(fullName).PrintEndLine(" other)");
+                p.PrintBeginLine("public readonly bool Equals(").Print(kindFullName).PrintEndLine(" other)");
                 p.OpenScope();
                 {
                     if (equality.Strategy == EqualityStrategy.Operator)
@@ -1260,7 +1257,7 @@
 
                             if (equality.IsStatic)
                             {
-                                p.Print(" && ").Print(fullNameFromNullable)
+                                p.Print(" && ").Print(kindFullNameFromNullable)
                                     .Print(".Equals(Id_").Print(kindName).PrintEndLine(".Value, other.Value);");
                             }
                             else
@@ -1274,7 +1271,7 @@
 
                             if (equality.IsStatic)
                             {
-                                p.Print(" && ").Print(fullName)
+                                p.Print(" && ").Print(kindFullName)
                                     .Print(".Equals(Id_").Print(kindName).PrintEndLine(", other);");
                             }
                             else
@@ -1288,13 +1285,13 @@
                         p.PrintBeginLine("return (Kind == IdKind.").Print(kindName).Print(")")
                             .Print(" && (Id_").Print(kindName).Print(".HasValue == other.HasValue)")
                             .Print(" && other.HasValue ")
-                            .Print(" && global::System.Collections.Generic.EqualityComparer<").Print(fullNameFromNullable)
+                            .Print(" && global::System.Collections.Generic.EqualityComparer<").Print(kindFullNameFromNullable)
                             .Print(">.Default.Equals(Id_").Print(kindName).PrintEndLine(".Value, other.Value);");
                     }
                     else
                     {
                         p.PrintBeginLine("return Kind == IdKind.").Print(kindName)
-                            .Print(" && global::System.Collections.Generic.EqualityComparer<").Print(fullName)
+                            .Print(" && global::System.Collections.Generic.EqualityComparer<").Print(kindFullName)
                             .Print(">.Default.Equals(Id_").Print(kindName).PrintEndLine(", other);");
                     }
                 }
@@ -1305,7 +1302,7 @@
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static bool operator ").Print(op1)
-                        .Print("(").Print(typeName).Print(" left, ").Print(fullName).PrintEndLine(" right)");
+                        .Print("(").Print(typeName).Print(" left, ").Print(kindFullName).PrintEndLine(" right)");
                     p.OpenScope();
                     {
                         p.PrintBeginLine("return ").Print(op2).PrintEndLine("left.Equals(right);");
@@ -1315,7 +1312,7 @@
 
                     p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static bool operator ").Print(op1)
-                        .Print("(").Print(fullName).Print(" left, ").Print(typeName).PrintEndLine(" right)");
+                        .Print("(").Print(kindFullName).Print(" left, ").Print(typeName).PrintEndLine(" right)");
                     p.OpenScope();
                     {
                         p.PrintBeginLine("return ").Print(op2).PrintEndLine("right.Equals(left);");
@@ -2390,7 +2387,6 @@
                     foreach (var kind in KindRefs)
                     {
                         var kindName = kind.name;
-                        var fullName = kind.fullName;
 
                         p.PrintLineIf(hasLabel, DESCRIPTION, (object)label);
                         p.PrintLineIf(hasLabel && this.References.odin, ODIN_LABEL, (object)label);
@@ -2398,7 +2394,7 @@
                         p.PrintLineIf(References.odin, ODIN_PROPERTY_ORDER, order);
                         p.PrintLineIf(this.References.odin, ODIN_SHOW_IF, (object)kindName);
                         p.PrintLine(NON_SERIALIZED);
-                        p.PrintBeginLine("public ").Print(fullName).Print(" Id_").PrintEndLine(kindName);
+                        p.PrintBeginLine("public ").Print(kind.fullName).Print(" Id_").PrintEndLine(kindName);
                         p.OpenScope();
                         {
                             p.PrintLine(AGGRESSIVE_INLINING);
@@ -2434,9 +2430,8 @@
                     foreach (var kind in KindRefs)
                     {
                         var kindName = kind.name;
-                        var fullName = kind.fullName;
 
-                        p.PrintBeginLine("public Serializable").Print("(").Print(fullName).PrintEndLine(" id) : this()");
+                        p.PrintBeginLine("public Serializable").Print("(").Print(kind.fullName).PrintEndLine(" id) : this()");
                         p.OpenScope();
                         {
                             p.PrintBeginLine("Kind = IdKind.").Print(kindName).PrintEndLine(";");
