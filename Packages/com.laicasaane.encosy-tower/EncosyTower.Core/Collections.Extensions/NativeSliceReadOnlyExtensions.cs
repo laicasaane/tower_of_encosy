@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 
-namespace EncosyTower.Buffers
+namespace EncosyTower.Collections.Extensions
 {
     public static class NativeSliceReadOnlyExtensions
     {

@@ -1,6 +1,6 @@
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace EncosyTower.Buffers.Unsafe
+namespace EncosyTower.Collections.Unsafe
 {
     public static class NativeSliceReadOnlyUnsafeUtility
     {

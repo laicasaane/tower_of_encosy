@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using EncosyTower.Buffers.Unsafe;
+using EncosyTower.Collections.Unsafe;
 using EncosyTower.Common;
 using EncosyTower.Debugging;
 using Unity.Collections;
 using Unity.Collections.Internals;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace EncosyTower.Buffers
+namespace EncosyTower.Collections
 {
     [NativeContainer]
     [NativeContainerSupportsMinMaxWriteRestriction]
@@ -326,7 +326,6 @@ namespace EncosyTower.Buffers
                 ThrowHelper.ThrowArrayLengthMismatchException(array.Length, Length);
                 return;
             }
-
             var sizeOf = UnsafeUtility.SizeOf<T>();
             UnsafeUtility.MemCpyStride(array.GetUnsafePtr(), sizeOf, this.GetUnsafeReadOnlyPtr(), Stride, sizeOf, _length);
         }
