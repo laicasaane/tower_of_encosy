@@ -304,8 +304,6 @@ namespace EncosyTower.Editor.AssemblyDefs
                 return Array.Empty<PackageDef>();
             }
 
-            var projectRoot = GetProjectRootPath();
-
             var packageMap = new Dictionary<string, PackageDef>();
 
             for (var i = 0; i < guidStringsLength; i++)
