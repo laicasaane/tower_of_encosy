@@ -65,7 +65,8 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
             => obj switch {
-                Option<T> other => Equals(other),
+                Option<T> other => DefaultEquals(this, other),
+                Bool<T> other => Equals(other),
                 _ => false,
             };
 
@@ -120,6 +121,10 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in Bool<T> left, in Option<T> right)
             => left != right.HasValue;
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static bool DefaultEquals(in Option<T> a, in Option<T> b)
+            => a.HasValue == b.HasValue && EqualityComparer<T>.Default.Equals(a._value, b._value);
 
 #if UNITY_BURST
         [Unity.Burst.BurstDiscard]
