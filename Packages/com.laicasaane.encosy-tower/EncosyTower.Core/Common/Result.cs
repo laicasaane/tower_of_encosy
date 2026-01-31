@@ -127,6 +127,7 @@ namespace EncosyTower.Common
 
         public override bool Equals(object obj)
             => obj switch {
+                Result<TValue> other => DefaultEquals(this, other),
                 Bool<Error> other => IsError == other,
                 Bool<TValue> other => IsSuccess == other,
                 _ => false,
@@ -231,6 +232,10 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in Bool<Error> left, in Result<TValue> right)
             => left != right.IsError;
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static bool DefaultEquals(in Result<TValue> a, in Result<TValue> b)
+            => Option<TValue>.DefaultEquals(a.Value, b.Value) || a.Error.Equals(b.Error);
     }
 
     public readonly struct Result<TValue, TError> : IResult<TValue, TError>
@@ -318,6 +323,7 @@ namespace EncosyTower.Common
 
         public override bool Equals(object obj)
             => obj switch {
+                Result<TValue, TError> other => DefaultEquals(this, other),
                 Bool<Error> other => IsError == other,
                 Bool<TValue> other => IsSuccess == other,
                 _ => false,
@@ -375,6 +381,10 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Result<TValue, TError>(TError error)
             => new(error);
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static bool DefaultEquals(in Result<TValue, TError> a, in Result<TValue, TError> b)
+            => Option<TValue>.DefaultEquals(a.Value, b.Value) || Option<TError>.DefaultEquals(a.Error, b.Error);
 
         [HideInCallstack, StackTraceHidden, DoesNotReturn]
         private static void ThrowIfSameType()
