@@ -47,7 +47,7 @@ namespace EncosyTower.Editor.ProjectSetup
             {
                 GetMissingSymbols(buildScene, gameObjects, buildSymbols, out var sceneMissingSymbols);
 
-                if (sceneMissingSymbols.Count > 0)
+                if (sceneMissingSymbols is { Count: > 0 })
                 {
                     result.Add(sceneMissingSymbols);
                 }
@@ -88,14 +88,30 @@ namespace EncosyTower.Editor.ProjectSetup
             , out SceneMissingSymbols result
         )
         {
+            gameObjects.Clear();
+
             var scene = SceneManager.GetSceneByPath(buildScene.path);
 
-            Debug.Log($"Validating missing scripting symbols on scene '{scene.name}'...");
+            if (scene.IsValid() == false)
+            {
+                result = default;
+                return;
+            }
 
-            gameObjects.Clear();
-            scene.GetRootGameObjects(gameObjects);
+            try
+            {
+                scene.GetRootGameObjects(gameObjects);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning(ex);
+                result = default;
+                return;
+            }
 
             result = new SceneMissingSymbols(scene.name, buildSymbols.Count);
+
+            Debug.Log($"Validating missing scripting symbols on scene '{scene.name}'...");
 
             foreach (var gameObject in gameObjects)
             {
@@ -119,7 +135,7 @@ namespace EncosyTower.Editor.ProjectSetup
             }
         }
 
-        private readonly struct SceneMissingSymbols
+        private class SceneMissingSymbols
         {
             public readonly string Name;
             public readonly List<string> Symbols;
