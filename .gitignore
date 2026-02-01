@@ -77,6 +77,10 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+# Unity
+
+.utmp/
+
 [Aa]ssets/**/addressables_content_state.bin
 [Aa]ssets/**/addressables_content_state.bin.meta
 
