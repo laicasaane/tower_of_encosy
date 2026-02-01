@@ -1,6 +1,5 @@
 <Solution>
   <Project Path="netstandard/netstandard.csproj" />
+  <Project Path="Bcl.RuntimeUnsafe/Bcl.RuntimeUnsafe.csproj" />
   <Project Path="Bcl.Runtime/Bcl.Runtime.csproj" />
-  <Project Path="Bcl.CollectionsMarshal/Bcl.CollectionsMarshal.csproj" />
-  <Project Path="Bcl.CollectionsUnsafe/Bcl.CollectionsUnsafe.csproj" />
 </Solution>

@@ -16,5 +16,9 @@
     <ItemGroup>
         <ProjectReference Include="../netstandard/netstandard.csproj" Private="false" PrivateAssets="all" />
         <ProjectReference Include="../Bcl.Runtime/Bcl.Runtime.csproj" Private="false" PrivateAssets="all" />
+        <Reference Include="EncosyTower.Core.LowLevel.Unsafe">
+            <HintPath>EncosyTower.LowLevel.Unsafe.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
     </ItemGroup>
 </Project>

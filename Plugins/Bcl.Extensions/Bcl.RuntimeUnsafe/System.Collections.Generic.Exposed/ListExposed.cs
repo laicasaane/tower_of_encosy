@@ -8,7 +8,7 @@ internal readonly struct ListExposed<T>([NotNull] List<T> list)
 {
     public readonly List<T> List = list;
 
-    public ref T?[] Items
+    public ref T[] Items
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref List._items;

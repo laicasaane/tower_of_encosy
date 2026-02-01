@@ -5,6 +5,9 @@ namespace System;
 public class Object
 {
     public Type GetType() => throw new NotImplementedException();
+    public int GetHashCode() => throw new NotImplementedException();
+    public string ToString() => throw new NotImplementedException();
+    public bool Equals(object? obj) => throw new NotImplementedException();
 }
 
 public abstract class Attribute
@@ -154,6 +157,7 @@ public abstract class Type
 {
     public bool IsPrimitive { get => default; }
     public bool IsEnum { get => default; }
+    public bool IsValueType { get => default; }
     public static Type? GetTypeFromHandle(RuntimeTypeHandle handle) => default;
 }
 
@@ -170,6 +174,11 @@ public class Exception
 
 public class NullReferenceException : Exception
 {
+}
+
+public class ArgumentNullException : Exception
+{
+    public ArgumentNullException(string? paramName) { }
 }
 
 public class ArgumentOutOfRangeException : Exception

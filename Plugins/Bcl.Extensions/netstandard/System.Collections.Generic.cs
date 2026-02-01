@@ -19,6 +19,21 @@ public interface IEnumerator<out T> : IDisposable, IEnumerator
     new T Current { get; }
 }
 
+public abstract partial class EqualityComparer<T> : IEqualityComparer<T>
+{
+    public static EqualityComparer<T> Default = default;
+
+    public bool Equals(T x, T y)
+    {
+        throw new NotImplementedException();
+    }
+
+    public int GetHashCode(T obj)
+    {
+        throw new NotImplementedException();
+    }
+}
+
 public class List<T>
 {
     public T[] _items;
@@ -30,22 +45,39 @@ public class List<T>
     public void Grow(int capacity) { }
 }
 
+public enum InsertionBehavior : byte
+{
+    None,
+    OverwriteExisting,
+    ThrowOnExisting
+}
+
 public class Dictionary<TKey, TValue> where TKey : notnull
 {
     public int[] _buckets;
     public Entry[] _entries;
-    public ulong _fastModMultiplier;
     public int _count;
     public int _freeList;
     public int _freeCount;
     public int _version;
     public IEqualityComparer<TKey> _comparer;
+    public KeyCollection _keys;
+    public ValueCollection _values;
+    public object _syncRoot;
+
+    public int Initialize(int capacity) => default;
 
     public void Add(TKey key, TValue value) { }
 
-    public ref TValue FindValue(TKey key)
+    public int FindEntry(TKey key) => default;
+
+    public void Resize() { }
+
+    public void Resize(int newSize, bool forceNewHashCodes) { }
+
+    public bool TryInsert(TKey key, TValue value, InsertionBehavior behavior)
     {
-        throw new NotImplementedException();
+        return default;
     }
 
     public struct Entry
@@ -56,12 +88,12 @@ public class Dictionary<TKey, TValue> where TKey : notnull
         public TValue value;
     }
 
-    public static class CollectionsMarshalHelper
+    public sealed class KeyCollection
     {
-        public static ref TValue GetValueRefOrAddDefault(Dictionary<TKey, TValue> dictionary, TKey key, out bool exists)
-        {
-            throw new NotImplementedException();
-        }
+    }
+
+    public sealed class ValueCollection
+    {
     }
 }
 

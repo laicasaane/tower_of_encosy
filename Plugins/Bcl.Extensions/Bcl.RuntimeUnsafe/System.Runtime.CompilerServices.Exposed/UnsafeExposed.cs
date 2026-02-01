@@ -1,6 +1,6 @@
-namespace System.Runtime.CompilerServices.Exposed;
+using EncosyTower.LowLevel.Unsafe;
 
-using Unsafe = Internal.Runtime.CompilerServices.Unsafe;
+namespace System.Runtime.CompilerServices.Exposed;
 
 internal static class UnsafeExposed
 {
@@ -53,12 +53,6 @@ internal static class UnsafeExposed
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsAddressGreaterThan<T>([AllowNull] ref T left, [AllowNull] ref T right)
-    {
-        return Unsafe.IsAddressGreaterThan(ref left, ref right);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsAddressLessThan<T>([AllowNull] ref T left, [AllowNull] ref T right)
     {
         return Unsafe.IsAddressLessThan(ref left, ref right);
@@ -71,21 +65,9 @@ internal static class UnsafeExposed
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public unsafe static T ReadUnaligned<T>(void* source)
-    {
-        return Unsafe.ReadUnaligned<T>(source);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T ReadUnaligned<T>(ref byte source)
     {
         return Unsafe.ReadUnaligned<T>(ref source);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public unsafe static void WriteUnaligned<T>(void* destination, T value)
-    {
-        Unsafe.WriteUnaligned(destination, value);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -107,24 +89,6 @@ internal static class UnsafeExposed
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T Read<T>(ref byte source)
-    {
-        return Unsafe.Read<T>(ref source);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public unsafe static void Write<T>(void* destination, T value)
-    {
-        Unsafe.Write(destination, value);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Write<T>(ref byte destination, T value)
-    {
-        Unsafe.Write(ref destination, value);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public unsafe static ref T AsRef<T>(void* source)
     {
         return ref Unsafe.AsRef<T>(source);
@@ -137,26 +101,20 @@ internal static class UnsafeExposed
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr ByteOffset<T>([AllowNull] ref T origin, [AllowNull] ref T target)
-    {
-        return Unsafe.ByteOffset(ref origin, ref target);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public unsafe static ref T NullRef<T>()
     {
-        return ref Unsafe.NullRef<T>();
+        return ref ILSupport.NullRef<T>();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public unsafe static bool IsNullRef<T>(ref T source)
+    public unsafe static bool IsNullRef<T>(in T source)
     {
-        return Unsafe.IsNullRef(ref source);
+        return ILSupport.IsNullRef(source);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void SkipInit<T>(out T value)
     {
-        Unsafe.SkipInit(out value);
+        ILSupport.SkipInit(out value);
     }
 }

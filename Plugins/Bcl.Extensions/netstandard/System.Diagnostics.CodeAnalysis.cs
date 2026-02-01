@@ -17,6 +17,10 @@ public sealed class NotNullWhenAttribute : Attribute
     }
 }
 
+[AttributeUsage(AttributeTargets.Method, Inherited = false)]
+public sealed class DoesNotReturnAttribute : Attribute
+{ }
+
 [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
 public sealed class DoesNotReturnIfAttribute : Attribute
 {
