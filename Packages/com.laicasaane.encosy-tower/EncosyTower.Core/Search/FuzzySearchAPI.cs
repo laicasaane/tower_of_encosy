@@ -133,17 +133,17 @@ namespace EncosyTower.Search
 {
     using System.Diagnostics;
     using EncosyTower.Logging;
-    using UnityEditor;
     using UnityEngine;
 
     partial class FuzzySearchAPI
     {
         private static class PluginValidator
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if DEVELOPMENT_BUILD
             [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+#elif UNITY_EDITOR
+            [UnityEditor.InitializeOnLoadMethod]
 #endif
-            [InitializeOnLoadMethod]
             [HideInCallstack, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
             public static void LogErrorIfFuzzySharpIsNotInstalled()
             {

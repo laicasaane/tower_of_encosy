@@ -35,7 +35,7 @@ namespace EncosyTower.VisualDebugging.Commands
         }
 
 #if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        [UnityEditor.InitializeOnLoadMethod]
         private static void InitWhenDomainReloadDisabled()
         {
             s_directoryToCommands = null;
