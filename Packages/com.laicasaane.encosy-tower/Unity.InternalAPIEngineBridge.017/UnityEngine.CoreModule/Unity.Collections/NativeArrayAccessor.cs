@@ -25,6 +25,7 @@ namespace Unity.Collections.Internals
             get => Array.m_Length;
         }
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
         public int MinIndex
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -42,5 +43,6 @@ namespace Unity.Collections.Internals
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => Array.m_Safety;
         }
+#endif
     }
 }

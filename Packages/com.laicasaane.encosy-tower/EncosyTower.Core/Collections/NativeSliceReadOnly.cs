@@ -25,18 +25,24 @@ namespace EncosyTower.Collections
 
         internal int _stride;
         internal int _length;
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
         internal int _minIndex;
         internal int _maxIndex;
 
 #pragma warning disable IDE1006 // Naming Styles
         internal AtomicSafetyHandle m_Safety;
 #pragma warning restore IDE1006 // Naming Styles
+#endif
 
         public readonly unsafe T this[int index]
         {
             get
             {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
                 AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+#endif
+
                 return UnsafeUtility.ReadArrayElementWithStride<T>(_buffer, index, _stride);
             }
         }
@@ -67,6 +73,9 @@ namespace EncosyTower.Collections
 
         public NativeSliceReadOnly(NativeSlice<T> slice, int start, int length)
         {
+            var accessor = new NativeSliceAccessor<T>(slice);
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
             if (start < 0)
             {
                 ThrowHelper.ThrowSliceNegativeStartException(start);
@@ -82,21 +91,23 @@ namespace EncosyTower.Collections
                 ThrowHelper.ThrowSliceRangeExceedsLengthException(slice.Length, start, length, nameof(slice));
             }
 
-            var accessor = new NativeSliceAccessor<T>(slice);
-
             if ((accessor.MinIndex != 0 || accessor.MaxIndex != accessor.Length - 1)
                 && (start < accessor.MinIndex || accessor.MaxIndex < start || accessor.MaxIndex < start + length - 1)
             )
             {
                 ThrowHelper.ThrowSliceOnRestrictedRangeException(nameof(slice));
             }
+#endif
 
-            _minIndex = 0;
-            _maxIndex = length - 1;
-            m_Safety = accessor.Safety;
             _stride = accessor.Stride;
             _buffer = accessor.Buffer + _stride * start;
             _length = length;
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            _minIndex = 0;
+            _maxIndex = length - 1;
+            m_Safety = accessor.Safety;
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -113,6 +124,7 @@ namespace EncosyTower.Collections
 
         public NativeSliceReadOnly(NativeSliceReadOnly<T> slice, int start, int length)
         {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
             if (start < 0)
             {
                 ThrowHelper.ThrowSliceNegativeStartException(start);
@@ -134,13 +146,17 @@ namespace EncosyTower.Collections
             {
                 ThrowHelper.ThrowSliceOnRestrictedRangeException(nameof(slice));
             }
+#endif
 
-            _minIndex = 0;
-            _maxIndex = length - 1;
-            m_Safety = slice.m_Safety;
             _stride = slice.Stride;
             _buffer = slice._buffer + _stride * start;
             _length = length;
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            _minIndex = 0;
+            _maxIndex = length - 1;
+            m_Safety = slice.m_Safety;
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -157,6 +173,9 @@ namespace EncosyTower.Collections
 
         public NativeSliceReadOnly(NativeArray<T> array, int start, int length)
         {
+            var accessor = new NativeArrayAccessor<T>(array);
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
             if (start < 0)
             {
                 ThrowHelper.ThrowSliceNegativeStartException(start);
@@ -172,8 +191,6 @@ namespace EncosyTower.Collections
                 ThrowHelper.ThrowSliceRangeExceedsLengthException(array.Length, start, length, nameof(array));
             }
 
-            var accessor = new NativeArrayAccessor<T>(array);
-
             if ((accessor.MinIndex != 0 || accessor.MaxIndex != accessor.Length - 1)
                 && (start < accessor.MinIndex || accessor.MaxIndex < start || accessor.MaxIndex < start + length - 1)
             )
@@ -185,14 +202,18 @@ namespace EncosyTower.Collections
             {
                 ThrowHelper.ThrowSliceIntegerOverflowException();
             }
+#endif
 
-            _minIndex = 0;
-            _maxIndex = length - 1;
-            m_Safety = accessor.Safety;
             _stride = UnsafeUtility.SizeOf<T>();
             byte* buffer = (byte*)accessor.Buffer + _stride * start;
             _buffer = buffer;
             _length = length;
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            _minIndex = 0;
+            _maxIndex = length - 1;
+            m_Safety = accessor.Safety;
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -209,6 +230,9 @@ namespace EncosyTower.Collections
 
         public NativeSliceReadOnly(NativeArray<T>.ReadOnly array, int start, int length)
         {
+            var accessor = new NativeArrayReadOnlyAccessor<T>(array);
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
             if (start < 0)
             {
                 ThrowHelper.ThrowSliceNegativeStartException(start);
@@ -224,8 +248,6 @@ namespace EncosyTower.Collections
                 ThrowHelper.ThrowSliceRangeExceedsLengthException(array.Length, start, length, nameof(array));
             }
 
-            var accessor = new NativeArrayReadOnlyAccessor<T>(array);
-
             if (start < 0 || (accessor.Length - 1) < start || (accessor.Length - 1) < start + length - 1)
             {
                 ThrowHelper.ThrowSliceOnRestrictedRangeException(nameof(array));
@@ -235,14 +257,18 @@ namespace EncosyTower.Collections
             {
                 ThrowHelper.ThrowSliceIntegerOverflowException();
             }
+#endif
 
-            _minIndex = 0;
-            _maxIndex = length - 1;
-            m_Safety = accessor.Safety;
             _stride = UnsafeUtility.SizeOf<T>();
             byte* buffer = (byte*)accessor.Buffer + _stride * start;
             _buffer = buffer;
             _length = length;
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            _minIndex = 0;
+            _maxIndex = length - 1;
+            m_Safety = accessor.Safety;
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -257,6 +283,13 @@ namespace EncosyTower.Collections
         public static implicit operator NativeSliceReadOnly<T>(NativeArray<T>.ReadOnly array)
             => new(array);
 
+        /// <summary>
+        /// Reinterprets a NativeSliceReadOnly with a different data type (type punning).
+        /// </summary>
+        /// <typeparam name="U">The target data type.</typeparam>
+        /// <returns>
+        /// A new NativeSliceReadOnly that views the same memory, but is reinterpreted as the target type.
+        /// </returns>
         public readonly NativeSliceReadOnly<U> SliceConvert<U>()
             where U : struct
         {
@@ -267,6 +300,7 @@ namespace EncosyTower.Collections
             outputSlice._stride = sizeofU;
             outputSlice._length = (_length * _stride) / sizeofU;
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
             if (_stride != UnsafeUtility.SizeOf<T>())
             {
                 ThrowHelper.ThrowSliceConvertStrideMismatchException();
@@ -285,6 +319,8 @@ namespace EncosyTower.Collections
             outputSlice._minIndex = 0;
             outputSlice._maxIndex = outputSlice._length - 1;
             outputSlice.m_Safety = m_Safety;
+#endif
+
             return outputSlice;
         }
 
@@ -296,6 +332,7 @@ namespace EncosyTower.Collections
             outputSlice._stride = _stride;
             outputSlice._length = _length;
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
             if (offset < 0)
             {
                 ThrowHelper.ThrowSliceWithStrideOffsetOutOfRangeException();
@@ -309,6 +346,8 @@ namespace EncosyTower.Collections
             outputSlice._minIndex = _minIndex;
             outputSlice._maxIndex = _maxIndex;
             outputSlice.m_Safety = m_Safety;
+#endif
+
             return outputSlice;
         }
 

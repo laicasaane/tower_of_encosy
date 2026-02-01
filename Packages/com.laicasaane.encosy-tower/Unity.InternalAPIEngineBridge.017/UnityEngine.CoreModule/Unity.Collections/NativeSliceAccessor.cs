@@ -31,6 +31,7 @@ namespace Unity.Collections.Internals
             get => Slice.m_Length;
         }
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
         public int MinIndex
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -48,5 +49,6 @@ namespace Unity.Collections.Internals
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => Slice.m_Safety;
         }
+#endif
     }
 }

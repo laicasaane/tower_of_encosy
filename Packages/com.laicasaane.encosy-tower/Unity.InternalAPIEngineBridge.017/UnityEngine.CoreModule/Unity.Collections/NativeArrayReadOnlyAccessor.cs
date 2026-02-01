@@ -25,10 +25,12 @@ namespace Unity.Collections.Internals
             get => Array.m_Length;
         }
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
         public AtomicSafetyHandle Safety
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => Array.m_Safety;
         }
+#endif
     }
 }
