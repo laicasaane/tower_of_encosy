@@ -164,9 +164,15 @@ namespace EncosyTower.Types.Editor
 
                 CreateLinkXmlFile(linkXmlTypeStore, onlyDebug);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                DeleteAndRemoveAsset();
+                StaticDevLogger.LogException(ex);
+
+                if (onlyDebug == false)
+                {
+                    DeleteAndRemoveAsset();
+                }
+
                 throw;
             }
         }
@@ -263,16 +269,21 @@ namespace EncosyTower.Types.Editor
                                             .Print(method.Name)
                                             .Print("(");
 
-                                        var args = method.GetParameters().AsSpan();
-                                        var argsLength = args.Length;
+                                        var parameters = method.GetParameters();
 
-                                        for (var k = 0; k < argsLength; k++)
+                                        if (parameters.Length > 0)
                                         {
-                                            p.Print(args[k].ParameterType.FullName);
+                                            var args = parameters.AsSpan();
+                                            var argsLength = args.Length;
 
-                                            if (k < argsLength - 1)
+                                            for (var k = 0; k < argsLength; k++)
                                             {
-                                                p.Print(",");
+                                                p.Print(args[k].ParameterType.FullName);
+
+                                                if (k < argsLength - 1)
+                                                {
+                                                    p.Print(",");
+                                                }
                                             }
                                         }
 
