@@ -124,9 +124,10 @@ namespace Unity.Collections.LowLevel.Unsafe
             if ((index > capacity - 1) || (index < 0))
             {
                 throw new IndexOutOfRangeException(
-                    $"Attempt to read or write from array index {index}, which is out of bounds. Array capacity is {capacity}. "
-                    + "This may lead to a crash, data corruption, or reading invalid data."
-                    );
+                    $"Attempt to read or write from array index {index}, which is out of bounds. " +
+                    $"Array capacity is {capacity}. " +
+                    "This may lead to a crash, data corruption, or reading invalid data."
+                );
             }
         }
     }
