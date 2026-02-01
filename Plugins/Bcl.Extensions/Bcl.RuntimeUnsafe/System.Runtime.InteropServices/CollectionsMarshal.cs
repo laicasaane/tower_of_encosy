@@ -94,7 +94,7 @@ public static class CollectionsMarshal
 
         IEqualityComparer<TKey>? comparer = dictionary._comparer;
         Debug.Assert(comparer is not null || typeof(TKey).IsValueType);
-        uint hashCode = (uint)((typeof(TKey).IsValueType && comparer == null) ? key.GetHashCode() : comparer!.GetHashCode(key));
+        int hashCode = ((typeof(TKey).IsValueType && comparer == null) ? key.GetHashCode() : comparer!.GetHashCode(key));
 
         uint collisionCount = 0;
         ref int bucket = ref GetBucket(dictionary, hashCode);
@@ -201,7 +201,7 @@ public static class CollectionsMarshal
         return ref entry.value!;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static ref int GetBucket(Dictionary<TKey, TValue> dictionary, uint hashCode)
+        static ref int GetBucket(Dictionary<TKey, TValue> dictionary, int hashCode)
         {
             return ref dictionary._buckets[hashCode % dictionary._buckets.Length];
         }

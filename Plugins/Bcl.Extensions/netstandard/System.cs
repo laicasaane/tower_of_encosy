@@ -28,11 +28,7 @@ public sealed class AttributeUsageAttribute : Attribute
 [AttributeUsage(AttributeTargets.Enum, Inherited = false)]
 public sealed class FlagsAttribute : Attribute
 {
-}
-
-[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, Inherited = false)]
-public sealed class AllowNullAttribute : Attribute
-{
+    public FlagsAttribute() { }
 }
 
 [Flags]

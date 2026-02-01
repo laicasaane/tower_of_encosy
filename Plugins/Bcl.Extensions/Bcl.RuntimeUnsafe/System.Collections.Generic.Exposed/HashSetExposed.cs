@@ -20,15 +20,9 @@ internal readonly struct HashSetExposed<T>([NotNull] HashSet<T> set)
     {
         get
         {
-            var span = new ReadOnlySpan<HashSet<T>.Entry>(Set._entries, 0, Set._count);
-            return MemoryMarshal.Cast<HashSet<T>.Entry, Entry>(span);
+            var span = new ReadOnlySpan<HashSet<T>.Slot>(Set._slots, 0, Set._count);
+            return MemoryMarshal.Cast<HashSet<T>.Slot, Entry>(span);
         }
-    }
-
-    public ulong FastModMultiplier
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Set._fastModMultiplier;
     }
 
     public int Count
@@ -43,10 +37,10 @@ internal readonly struct HashSetExposed<T>([NotNull] HashSet<T> set)
         get => Set._freeList;
     }
 
-    public int FreeCount
+    public int LastIndex
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Set._freeCount;
+        get => Set._lastIndex;
     }
 
     public int Version
@@ -61,14 +55,10 @@ internal readonly struct HashSetExposed<T>([NotNull] HashSet<T> set)
         get => Set._comparer;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int FindItemIndex(T item)
-        => Set.FindItemIndex(item);
-
     public struct Entry
     {
-        public int HashCode;
-        public int Next;
-        public T Value;
+        public int hashCode;
+        public int next;
+        public T value;
     }
 }

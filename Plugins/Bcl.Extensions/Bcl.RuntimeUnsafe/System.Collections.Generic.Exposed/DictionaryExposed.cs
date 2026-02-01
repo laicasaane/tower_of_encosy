@@ -80,12 +80,6 @@ internal readonly struct DictionaryExposed<TKey, TValue>([NotNull] Dictionary<TK
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool TryInsert(TKey key, TValue value, InsertionBehavior behavior)
-    {
-        return Dictionary.TryInsert(key, value, (Generic.InsertionBehavior)(byte)behavior);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ref TValue FindValue(TKey key)
     {
         var i = Dictionary.FindEntry(key);
@@ -94,16 +88,9 @@ internal readonly struct DictionaryExposed<TKey, TValue>([NotNull] Dictionary<TK
 
     public struct Entry
     {
-        public uint hashCode;
+        public int hashCode;
         public int next;
         public TKey key;
         public TValue value;
-    }
-
-    public enum InsertionBehavior : byte
-    {
-        None = Generic.InsertionBehavior.None,
-        OverwriteExisting = Generic.InsertionBehavior.OverwriteExisting,
-        ThrowOnExisting = Generic.InsertionBehavior.ThrowOnExisting,
     }
 }

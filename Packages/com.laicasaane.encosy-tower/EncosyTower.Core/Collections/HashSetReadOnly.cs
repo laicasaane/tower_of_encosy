@@ -104,9 +104,9 @@ namespace EncosyTower.Collections
             {
                 ref readonly var entry = ref entries[i];
 
-                if (entry.Next >= -1)
+                if (entry.next >= -1)
                 {
-                    array[arrayIndex++] = entry.Value;
+                    array[arrayIndex++] = entry.value;
                     count--;
                 }
             }

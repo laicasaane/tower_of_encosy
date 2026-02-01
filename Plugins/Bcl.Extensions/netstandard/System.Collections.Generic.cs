@@ -21,7 +21,7 @@ public interface IEnumerator<out T> : IDisposable, IEnumerator
 
 public abstract partial class EqualityComparer<T> : IEqualityComparer<T>
 {
-    public static EqualityComparer<T> Default = default;
+    public static EqualityComparer<T> Default { get => default; }
 
     public bool Equals(T x, T y)
     {
@@ -43,13 +43,6 @@ public class List<T>
     public int Capacity { get => default; set { } }
 
     public void Grow(int capacity) { }
-}
-
-public enum InsertionBehavior : byte
-{
-    None,
-    OverwriteExisting,
-    ThrowOnExisting
 }
 
 public class Dictionary<TKey, TValue> where TKey : notnull
@@ -75,14 +68,9 @@ public class Dictionary<TKey, TValue> where TKey : notnull
 
     public void Resize(int newSize, bool forceNewHashCodes) { }
 
-    public bool TryInsert(TKey key, TValue value, InsertionBehavior behavior)
-    {
-        return default;
-    }
-
     public struct Entry
     {
-        public uint hashCode;
+        public int hashCode;
         public int next;
         public TKey key;
         public TValue value;
@@ -100,23 +88,17 @@ public class Dictionary<TKey, TValue> where TKey : notnull
 public class HashSet<T>
 {
     public int[] _buckets;
-    public Entry[] _entries;
-    public ulong _fastModMultiplier;
+    public Slot[] _slots;
     public int _count;
+    public int _lastIndex;
     public int _freeList;
-    public int _freeCount;
-    public int _version;
     public IEqualityComparer<T> _comparer;
+    public int _version;
 
-    public int FindItemIndex(T item)
+    public struct Slot
     {
-        throw new NotImplementedException();
-    }
-
-    public struct Entry
-    {
-        public int HashCode;
-        public int Next;
-        public T Value;
+        public int hashCode;
+        public int next;
+        public T value;
     }
 }

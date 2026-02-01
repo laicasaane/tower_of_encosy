@@ -47,13 +47,13 @@ internal static class UnsafeExposed
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool AreSame<T>([AllowNull] ref T left, [AllowNull] ref T right)
+    public static bool AreSame<T>(ref T left, ref T right)
     {
         return Unsafe.AreSame(ref left, ref right);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsAddressLessThan<T>([AllowNull] ref T left, [AllowNull] ref T right)
+    public static bool IsAddressLessThan<T>(ref T left, ref T right)
     {
         return Unsafe.IsAddressLessThan(ref left, ref right);
     }
