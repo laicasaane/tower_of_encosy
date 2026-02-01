@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices.Exposed;
 using System.Runtime.InteropServices;
 using EncosyTower.Common;
 using Unity.Collections;
@@ -226,7 +227,7 @@ namespace EncosyTower.Collections
                 return ref _managed[0];
             }
 
-            return ref NullRef();
+            return ref UnsafeExposed.NullRef<T>();
         }
 
         /// <summary>
@@ -396,12 +397,6 @@ namespace EncosyTower.Collections
             {
                 throw new InvalidOperationException("size must be equal or greater than 0");
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private unsafe static ref T NullRef()
-        {
-            return ref *(T*)null;
         }
 
         internal void Initialize(T[] managed)
