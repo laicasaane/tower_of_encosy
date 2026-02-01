@@ -26,8 +26,12 @@ MonoBehaviour:
   - DISABLE_DEBUG_ASSERT
   - REMOVE_DISPOSE_SENTINEL
   - ENTITY_STORE_V1
+  - LATIOS_ENTITIES_1_4
   - UNITY_BURST_EXPERIMENTAL_ATOMIC_INTRINSICS
+  - ENABLE_SDK_STYLE_PROJECTS
+  - SAINTSFIELD_SAINTS_EDITOR_APPLY
   - INCLUDE_ENCOSY_SAMPLES_PUBSUB
+  - ENCOSY_PAGE_FLOW_PUBSUB_INCLUDE_CALLER_INFO_DEV
   m_PlayerSettingsYaml:
     m_Settings:
     - line: '| PlayerSettings:'
@@ -89,8 +93,8 @@ MonoBehaviour:
     - line: '|   iosShowActivityIndicatorOnLoading: -1'
     - line: '|   androidShowActivityIndicatorOnLoading: -1'
     - line: '|   iosUseCustomAppBackgroundBehavior: 0'
-    - line: '|   allowedAutorotateToPortrait: 1'
-    - line: '|   allowedAutorotateToPortraitUpsideDown: 1'
+    - line: '|   allowedAutorotateToPortrait: 0'
+    - line: '|   allowedAutorotateToPortraitUpsideDown: 0'
     - line: '|   allowedAutorotateToLandscapeRight: 1'
     - line: '|   allowedAutorotateToLandscapeLeft: 1'
     - line: '|   useOSAutorotation: 1'
@@ -110,7 +114,7 @@ MonoBehaviour:
     - line: '|   androidFullscreenMode: 1'
     - line: '|   androidAutoRotationBehavior: 1'
     - line: '|   androidPredictiveBackSupport: 0'
-    - line: '|   androidApplicationEntry: 1'
+    - line: '|   androidApplicationEntry: 2'
     - line: '|   defaultIsNativeResolution: 1'
     - line: '|   macRetinaSupport: 1'
     - line: '|   runInBackground: 0'
@@ -179,8 +183,6 @@ MonoBehaviour:
     - line: '|   - {fileID: -944628639613478452, guid: d79d94034bd10f64689b5913bf9089bf,
         type: 3}'
     - line: '|   - {fileID: 11400000, guid: 76868f32d89e44946ae346fdfc288838, type:
-        2}'
-    - line: '|   - {fileID: 11400000, guid: c8c21ba0961891f429a607a5a4445006, type:
         2}'
     - line: '|   metroInputSource: 0'
     - line: '|   wsaTransparentSwapchain: 0'
@@ -868,7 +870,24 @@ MonoBehaviour:
     - line: '|   webGLCloseOnQuit: 0'
     - line: '|   webWasm2023: 0'
     - line: '|   scriptingDefineSymbols:'
-    - line: '|     Android: DISABLE_DEBUG_ASSERT;REMOVE_DISPOSE_SENTINEL;ENTITY_STORE_V1;UNITY_BURST_EXPERIMENTAL_ATOMIC_INTRINSICS;INCLUDE_ENCOSY_SAMPLES_PUBSUB;ENABLE_SDK_STYLE_PROJECTS'
+    - line: '|     Android: DISABLE_DEBUG_ASSERT;REMOVE_DISPOSE_SENTINEL;ENTITY_STORE_V1;UNITY_BURST_EXPERIMENTAL_ATOMIC_INTRINSICS;INCLUDE_ENCOSY_SAMPLES_PUBSUB;ENABLE_SDK_STYLE_PROJECTS;SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     EmbeddedLinux: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     GameCoreScarlett: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     GameCoreXboxOne: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     Kepler: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     LinuxHeadlessSimulation: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     Nintendo Switch: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     Nintendo Switch 2: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     PS4: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     PS5: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     QNX: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     Standalone: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     VisionOS: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     WebGL: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     Windows Store Apps: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     XboxOne: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     iPhone: SAINTSFIELD_SAINTS_EDITOR_APPLY'
+    - line: '|     tvOS: SAINTSFIELD_SAINTS_EDITOR_APPLY'
     - line: '|   additionalCompilerArguments:'
     - line: '|     Standalone: []'
     - line: '|   platformArchitecture: {}'
@@ -1013,8 +1032,8 @@ MonoBehaviour:
     - rid: 2851290962524635235
       type: {class: AndroidPlatformBuildSettings, ns: UnityEditor.Android, asm: UnityEditor.Android.Extensions}
       data:
-        m_Development: 1
-        m_ConnectProfiler: 0
+        m_Development: 0
+        m_ConnectProfiler: 1
         m_BuildWithDeepProfilingSupport: 0
         m_AllowDebugging: 0
         m_WaitForManagedDebugger: 0
@@ -1027,10 +1046,10 @@ MonoBehaviour:
         m_BuildSubtarget: 0
         m_BuildSystem: 1
         m_ExportAsGoogleAndroidProject: 0
-        m_DebugSymbolLevel: 1
-        m_DebugSymbolFormat: 5
+        m_DebugSymbolLevel: 4
+        m_DebugSymbolFormat: 1
         m_CurrentDeploymentTargetId: __builtin__target_default
-        m_BuildType: 1
+        m_BuildType: 2
         m_BuildAppBundle: 0
         m_IPAddressToConnect: 
         m_SymlinkSources: 0
