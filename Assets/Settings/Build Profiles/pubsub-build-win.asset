@@ -865,7 +865,7 @@ MonoBehaviour:
     - line: '|   webGLCloseOnQuit: 0'
     - line: '|   webWasm2023: 0'
     - line: '|   scriptingDefineSymbols:'
-    - line: '|     Standalone: DISABLE_DEBUG_ASSERT;REMOVE_DISPOSE_SENTINEL;ENTITY_STORE_V1;UNITY_BURST_EXPERIMENTAL_ATOMIC_INTRINSICS;INCLUDE_ENCOSY_SAMPLES_MONO_PAGES;ENABLE_SDK_STYLE_PROJECTS'
+    - line: '|     Standalone: DISABLE_DEBUG_ASSERT;REMOVE_DISPOSE_SENTINEL;ENTITY_STORE_V1;UNITY_BURST_EXPERIMENTAL_ATOMIC_INTRINSICS;INCLUDE_ENCOSY_SAMPLES_PUBSUB;ENABLE_SDK_STYLE_PROJECTS'
     - line: '|   additionalCompilerArguments:'
     - line: '|     Standalone: []'
     - line: '|   platformArchitecture: {}'

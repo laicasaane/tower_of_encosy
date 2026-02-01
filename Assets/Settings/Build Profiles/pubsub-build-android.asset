@@ -22,7 +22,12 @@ MonoBehaviour:
   m_Scenes:
   - m_enabled: 1
     m_path: Assets/Samples/Encosy Tower/0.1.2-preview.2/EncosyTower.Samples.PubSub/encosy-sample-pubsub.unity
-  m_ScriptingDefines: []
+  m_ScriptingDefines:
+  - DISABLE_DEBUG_ASSERT
+  - REMOVE_DISPOSE_SENTINEL
+  - ENTITY_STORE_V1
+  - UNITY_BURST_EXPERIMENTAL_ATOMIC_INTRINSICS
+  - INCLUDE_ENCOSY_SAMPLES_PUBSUB
   m_PlayerSettingsYaml:
     m_Settings:
     - line: '| PlayerSettings:'
@@ -168,7 +173,15 @@ MonoBehaviour:
     - line: '|   visionOSBundleVersion: 1.0'
     - line: '|   tvOSBundleVersion: 1.0'
     - line: '|   bundleVersion: 0.1.0'
-    - line: '|   preloadedAssets: []'
+    - line: '|   preloadedAssets:'
+    - line: '|   - {fileID: 11400000, guid: a1a43384e5ff3e14db233a70b1817714, type:
+        2}'
+    - line: '|   - {fileID: -944628639613478452, guid: d79d94034bd10f64689b5913bf9089bf,
+        type: 3}'
+    - line: '|   - {fileID: 11400000, guid: 76868f32d89e44946ae346fdfc288838, type:
+        2}'
+    - line: '|   - {fileID: 11400000, guid: c8c21ba0961891f429a607a5a4445006, type:
+        2}'
     - line: '|   metroInputSource: 0'
     - line: '|   wsaTransparentSwapchain: 0'
     - line: '|   m_HolographicPauseOnTrackingLoss: 1'
@@ -547,7 +560,11 @@ MonoBehaviour:
     - line: '|       m_Kind: 1'
     - line: '|       m_SubKind: '
     - line: '|   m_BuildTargetBatching: []'
-    - line: '|   m_BuildTargetShaderSettings: []'
+    - line: '|   m_BuildTargetShaderSettings:'
+    - line: '|   - m_BuildTarget: Android'
+    - line: '|     m_ChunkSizeInMB: 16'
+    - line: '|     m_MaxChunks: 0'
+    - line: '|     m_OverrideDefaultSettings: 0'
     - line: '|   m_BuildTargetGraphicsJobs: []'
     - line: '|   m_BuildTargetGraphicsJobMode: []'
     - line: '|   m_BuildTargetGraphicsAPIs:'
@@ -851,7 +868,7 @@ MonoBehaviour:
     - line: '|   webGLCloseOnQuit: 0'
     - line: '|   webWasm2023: 0'
     - line: '|   scriptingDefineSymbols:'
-    - line: '|     Android: DISABLE_DEBUG_ASSERT;REMOVE_DISPOSE_SENTINEL;ENTITY_STORE_V1;UNITY_BURST_EXPERIMENTAL_ATOMIC_INTRINSICS;INCLUDE_ENCOSY_SAMPLES_MONO_PAGES;ENABLE_SDK_STYLE_PROJECTS'
+    - line: '|     Android: DISABLE_DEBUG_ASSERT;REMOVE_DISPOSE_SENTINEL;ENTITY_STORE_V1;UNITY_BURST_EXPERIMENTAL_ATOMIC_INTRINSICS;INCLUDE_ENCOSY_SAMPLES_PUBSUB;ENABLE_SDK_STYLE_PROJECTS'
     - line: '|   additionalCompilerArguments:'
     - line: '|     Standalone: []'
     - line: '|   platformArchitecture: {}'
@@ -866,6 +883,7 @@ MonoBehaviour:
     - line: '|     Standalone: 1'
     - line: '|     iPhone: 1'
     - line: '|   il2cppStacktraceInformation:'
+    - line: '|     Android: 1'
     - line: '|     Standalone: 1'
     - line: '|   managedStrippingLevel:'
     - line: '|     EmbeddedLinux: 1'
@@ -995,7 +1013,7 @@ MonoBehaviour:
     - rid: 2851290962524635235
       type: {class: AndroidPlatformBuildSettings, ns: UnityEditor.Android, asm: UnityEditor.Android.Extensions}
       data:
-        m_Development: 0
+        m_Development: 1
         m_ConnectProfiler: 0
         m_BuildWithDeepProfilingSupport: 0
         m_AllowDebugging: 0
@@ -1012,7 +1030,7 @@ MonoBehaviour:
         m_DebugSymbolLevel: 1
         m_DebugSymbolFormat: 5
         m_CurrentDeploymentTargetId: __builtin__target_default
-        m_BuildType: 2
+        m_BuildType: 1
         m_BuildAppBundle: 0
         m_IPAddressToConnect: 
         m_SymlinkSources: 0
