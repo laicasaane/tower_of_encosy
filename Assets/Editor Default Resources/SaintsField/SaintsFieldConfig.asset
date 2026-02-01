@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1dfca40bf97cbd41a14c6c5a28e98af, type: 3}
   m_Name: SaintsFieldConfig
   m_EditorClassIdentifier: 
+  monoBehaviorSearchableOverride: 0
+  monoBehaviorSearchable: 1
   resizableTextAreaMinRowOverride: 0
   resizableTextAreaMinRow: 3
   validateInputLoopCheckUIToolkit: 0
