@@ -73,14 +73,14 @@
       }
     },
     "com.latios.latiosframework": {
-      "version": "0.14.10",
+      "version": "0.14.11",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.entities": "1.4.4",
         "com.unity.audio.dspgraph": "0.1.0-preview.22",
-        "com.unity.entities.graphics": "1.4.17",
-        "com.unity.burst": "1.8.27"
+        "com.unity.burst": "1.8.27",
+        "com.unity.entities": "1.4.4",
+        "com.unity.entities.graphics": "1.4.17"
       },
       "url": "https://package.openupm.com"
     },
@@ -243,7 +243,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.burst": {
-      "version": "1.8.27",
+      "version": "1.8.28",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -389,6 +389,13 @@
         "com.unity.mathematics": "1.2.1",
         "com.unity.test-framework": "1.1.23"
       },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.mobile.android-logcat": {
+      "version": "1.4.7",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.multiplayer.center": {
@@ -625,7 +632,7 @@
       "url": "https://package.openupm.com"
     },
     "today.comes.saintsfield": {
-      "version": "5.7.6",
+      "version": "5.11.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
