@@ -1,6 +1,6 @@
 {
-    "name": "EncosyTower.Core.LowLevel.Unsafe",
-    "rootNamespace": "EncosyTower.Core.LowLevel.Unsafe",
+    "name": "EncosyTower.LowLevel.Unsafe",
+    "rootNamespace": "EncosyTower.LowLevel.Unsafe",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
