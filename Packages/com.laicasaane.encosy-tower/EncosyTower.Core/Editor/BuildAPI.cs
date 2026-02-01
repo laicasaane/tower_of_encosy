@@ -2,8 +2,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using EncosyTower.Collections.Extensions;
+using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEditor.Build;
+using UnityEditor.Build.Profile;
 
 namespace EncosyTower.Editor
 {
@@ -18,6 +22,23 @@ namespace EncosyTower.Editor
 #else
                 return GetNamedBuildTarget(EditorUserBuildSettings.activeBuildTarget);
 #endif
+            }
+        }
+
+        public static BuildProfile ActiveBuildProfile
+        {
+            get
+            {
+                return BuildProfile.GetActiveBuildProfile();
+            }
+        }
+
+        public static BuildProfileOrTarget ActiveProfileOrTarget
+        {
+            get
+            {
+                var profile = ActiveBuildProfile;
+                return profile.IsValid() ? profile : ActiveNamedBuildTarget;
             }
         }
 
@@ -64,9 +85,43 @@ namespace EncosyTower.Editor
             return namedBuildTarget;
         }
 
+        public static HashSet<string> GetScriptingDefineSymbols(BuildProfile profile)
+        {
+            var result = new HashSet<string>();
+
+            if (profile.IsValid())
+            {
+                result.AddRange(profile.scriptingDefines);
+            }
+
+            return result;
+        }
+
+        public static void SetScriptingDefineSymbols(BuildProfile profile, params string[] symbols)
+        {
+            if (profile.IsValid() == false)
+            {
+                return;
+            }
+
+            profile.scriptingDefines = symbols;
+            EditorUtility.SetDirty(profile);
+        }
+
+        public static void SetScriptingDefineSymbols(BuildProfile profile, IEnumerable<string> symbols)
+        {
+            if (profile.IsValid() == false)
+            {
+                return;
+            }
+
+            profile.scriptingDefines = symbols.ToArray();
+            EditorUtility.SetDirty(profile);
+        }
+
         public static HashSet<string> GetScriptingDefineSymbols(NamedBuildTarget buildTarget)
         {
-            var symbolStr = PlayerSettings.GetScriptingDefineSymbols(buildTarget);
+            var symbolStr = PlayerSettings.GetScriptingDefineSymbols(buildTarget) ?? string.Empty;
             var symbols = symbolStr.Split(';', StringSplitOptions.RemoveEmptyEntries);
             return new HashSet<string>(symbols);
         }
