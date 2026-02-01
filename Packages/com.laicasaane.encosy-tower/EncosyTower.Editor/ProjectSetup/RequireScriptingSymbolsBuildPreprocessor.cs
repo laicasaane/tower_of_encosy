@@ -2,11 +2,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEditor.Build;
-using UnityEditor.Build.Profile;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -26,18 +24,22 @@ namespace EncosyTower.Editor.ProjectSetup
 
         public void OnPreprocessBuild(BuildReport report)
         {
-            EditorBuildSettingsScene[] buildScenes;
-            HashSet<string> buildSymbols;
+            var profileOrTarget = BuildAPI.ActiveProfileOrTarget;
+            var buildScenes = profileOrTarget.GetScenesForBuild();
+            var buildSymbols = profileOrTarget.GetScriptingDefineSymbols();
 
-            if (BuildProfile.GetActiveBuildProfile() is BuildProfile buildProfile)
+            if (profileOrTarget.IsProfile)
             {
-                buildScenes = buildProfile.GetScenesForBuild();
-                buildSymbols = buildProfile.scriptingDefines.ToHashSet();
+                Debug.Log($"Using build profile '{profileOrTarget.Name}' with {buildSymbols.Count} scripting symbols.");
             }
             else
             {
-                buildScenes = EditorBuildSettings.scenes;
-                buildSymbols = BuildAPI.GetScriptingDefineSymbols(BuildAPI.ActiveNamedBuildTarget);
+                Debug.Log($"Using default build settings for '{profileOrTarget.Name}' with {buildSymbols.Count} scripting symbols.");
+            }
+
+            foreach (var buildSymbol in buildSymbols)
+            {
+                Debug.Log($"- {buildSymbol}");
             }
 
             var result = new List<SceneMissingSymbols>();
