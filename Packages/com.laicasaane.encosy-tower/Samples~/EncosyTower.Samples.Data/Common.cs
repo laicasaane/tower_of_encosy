@@ -18,14 +18,24 @@ namespace EncosyTower.Samples.Data
     [UnionIdKind(typeof(EnemyId), 1, "Enemy", signed: true)]
     public readonly partial struct EntityId
     {
-        private static partial bool TryParse_EnemyId(ReadOnlySpan<char> str, out EnemyId value)
+        private static partial bool TryParse_EnemyId(
+              ReadOnlySpan<char> str
+            , out EnemyId value
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
         {
             var result = short.TryParse(str, out var v);
             value = v;
             return result;
         }
 
-        private static partial bool TryParse_HeroId(ReadOnlySpan<char> str, out HeroId value)
+        private static partial bool TryParse_HeroId(
+              ReadOnlySpan<char> str
+            , out HeroId value
+            , bool ignoreCase
+            , bool allowMatchingMetadataAttribute
+        )
         {
             var result = short.TryParse(str, out var v);
             value = v;

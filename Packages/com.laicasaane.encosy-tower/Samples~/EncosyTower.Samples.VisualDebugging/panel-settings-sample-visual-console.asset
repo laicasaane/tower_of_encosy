@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 19101, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: panel-settings-sample-visual-console
   m_EditorClassIdentifier: 
-  themeUss: {fileID: -4733365628477956816, guid: 231302bff2d9d9f47bb84efc9f2090e7,
+  themeUss: {fileID: -4733365628477956816, guid: 41f1d9809422a034aad6415344019cde,
     type: 3}
   m_DisableNoThemeWarning: 0
   m_TargetTexture: {fileID: 0}
