@@ -67,8 +67,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintBeginLine(", global::EncosyTower.EnumExtensions.IEnumBitField<").Print(FullyQualifiedName).PrintEndLine(">");
                 }
 
-                p.PrintLine(", global::EncosyTower.Conversion.IToDisplayString");
-
                 if (ReferenceUnityCollections)
                 {
                     p.PrintBeginLine(", global::EncosyTower.Conversion.IToFixedString<").Print(FixedStringTypeFullyQualifiedName).PrintEndLine(">");

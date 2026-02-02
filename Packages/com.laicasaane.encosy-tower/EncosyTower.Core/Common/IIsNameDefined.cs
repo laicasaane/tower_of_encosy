@@ -1,4 +1,4 @@
-namespace EncosyTower.EnumExtensions
+namespace EncosyTower.Common
 {
     public interface IIsNameDefined
     {

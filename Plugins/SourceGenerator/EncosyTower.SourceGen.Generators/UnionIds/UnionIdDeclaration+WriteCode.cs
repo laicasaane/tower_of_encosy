@@ -37,22 +37,17 @@
             p.PrintLine(string.Format(STRUCT_LAYOUT_SIZE, TypeSize));
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("[global::System.ComponentModel.TypeConverter(typeof(TypeConverter))]");
-            p.PrintBeginLine("partial struct ").Print(typeName).Print(" ")
-                .Print(": global::System.IEquatable<").Print(typeName).Print(">")
-                .Print(", global::System.IComparable<").Print(typeName).Print(">")
-                .PrintEndLine();
+            p.PrintBeginLine("partial struct ").Print(typeName).Print(" : ")
+                .Print("global::EncosyTower.UnionIds.IUnionId<")
+                .Print(RawTypeName).Print(", ").Print(typeName)
+                .PrintEndLine(">");
             p = p.IncreasedIndent();
             {
-                p.PrintLine(", global::EncosyTower.Conversion.IToDisplayString");
-
                 if (References.unityCollections && string.IsNullOrEmpty(FixedStringType) == false)
                 {
                     p.PrintBeginLine(", global::EncosyTower.Conversion.IToFixedString<").Print(FixedStringType).PrintEndLine(">");
                     p.PrintBeginLine(", global::EncosyTower.Conversion.IToDisplayFixedString<").Print(FixedStringType).PrintEndLine(">");
                 }
-
-                p.PrintBeginLine(", global::EncosyTower.Conversion.ITryParse<").Print(typeName).PrintEndLine(">");
-                p.PrintBeginLine(", global::EncosyTower.Conversion.ITryParseSpan<").Print(typeName).PrintEndLine(">");
 
                 foreach (var kind in KindRefs)
                 {
@@ -2331,12 +2326,9 @@
         {
             p.PrintLine(SERIALIZABLE).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public partial struct Serializable ")
-                .Print(": global::EncosyTower.Conversion.ITryConvert<").Print(typeName).Print(">")
-                .PrintEndLine();
-
-            p.PrintLine(", global::System.IEquatable<Serializable>");
-            p.PrintLine(", global::System.IComparable<Serializable>");
-            p.PrintLine(", global::EncosyTower.Conversion.IToDisplayString");
+                .Print(": global::EncosyTower.UnionIds.ISerializableUnionId<")
+                .Print(RawTypeName).Print(", ").Print(typeName).Print(", Serializable")
+                .PrintEndLine(">");
 
             if (References.unityCollections && string.IsNullOrEmpty(FixedStringType) == false)
             {

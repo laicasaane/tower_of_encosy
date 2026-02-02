@@ -5,23 +5,23 @@ using EncosyTower.Conversion;
 
 namespace EncosyTower.EnumExtensions
 {
-    public interface IEnumExtensions<TEnum, out TUnderlyingValue>
-        : IHasLength
+    public interface IEnumUnderlying<out TUnderlyingValue> : IToUnderlyingValue<TUnderlyingValue>
+        where TUnderlyingValue : unmanaged
+    {
+    }
+
+    public interface IEnumExtensions<TEnum, out TUnderlyingValue> : IEnumUnderlying<TUnderlyingValue>
+        , IHasLength
+        , IToDisplayString
         , IToStringFast
         , IToDisplayStringFast
         , IToIndex
         , ISpanFormattable
-        , IToUnderlyingValue<TUnderlyingValue>
         , IIsDefined
         , IIsNameDefined
         where TEnum : struct, Enum
         where TUnderlyingValue : unmanaged
     {
-    }
-
-    public interface IToIndex
-    {
-        int ToIndex();
     }
 }
 

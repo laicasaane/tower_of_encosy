@@ -1,4 +1,4 @@
-namespace EncosyTower.EnumExtensions
+namespace EncosyTower.Conversion
 {
     public interface IToStringFast
     {
