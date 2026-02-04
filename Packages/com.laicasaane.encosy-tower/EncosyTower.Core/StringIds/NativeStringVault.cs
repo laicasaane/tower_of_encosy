@@ -75,6 +75,7 @@ namespace EncosyTower.StringIds
         {
             _map.Dispose();
             _stringRanges.Dispose();
+            _stringBuffer.Dispose();
             _hashes.Dispose();
             _count.Dispose();
         }
