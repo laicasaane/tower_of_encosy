@@ -6,12 +6,7 @@ namespace EncosyTower.Editor.AddressableKeys
 {
     [Feature("1. EncosyTower: Addressables")]
 
-#if UNITY_6000_0_OR_NEWER
-    [RequiresPackage(PackageRegistry.Unity, "com.unity.addressables", "2.7.6")]
-#else
-    [RequiresPackage(PackageRegistry.Unity, "com.unity.addressables", "1.22.3")]
-#endif
-
+    [RequiresPackage(PackageRegistry.Unity, "com.unity.addressables", "2.8.1")]
     [RequiresPackage(PackageRegistry.OpenUpm, "com.littlebigfun.addressable-importer", isOptional: true)]
     [RequiresPackage(PackageRegistry.OpenUpm, "jp.co.cyberagent.smartaddresser", isOptional: true)]
     internal readonly struct FeatureAddressables { }
