@@ -71,22 +71,22 @@ namespace EncosyTower.Common
             => HashCode.Combine(IsFailure, _failure);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TFailure GetValueOrThrow()
+        public TFailure GetFailureOrThrow()
         {
             ThrowIfHasNoValue(IsFailure);
             return _failure;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetValue(out TFailure value)
+        public bool TryGetFailure(out TFailure value)
         {
             value = IsFailure ? _failure : default;
             return IsFailure;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TFailure GetValueOrDefault(TFailure defaultValue = default)
-            => IsFailure ? _failure : defaultValue;
+        public TFailure GetFailureOrDefault(TFailure defaultFailure = default)
+            => IsFailure ? _failure : defaultFailure;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
@@ -153,7 +153,7 @@ namespace EncosyTower.Common
                 return false;
             }
 
-            if (self.TryGetValue(out var value) == false)
+            if (self.TryGetFailure(out var value) == false)
             {
                 var successSpan = SUCCESS_SUCCESS_STRING.AsSpan();
 
