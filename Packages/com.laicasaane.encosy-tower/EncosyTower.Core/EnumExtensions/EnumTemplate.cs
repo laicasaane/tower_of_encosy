@@ -54,23 +54,24 @@ namespace EncosyTower.EnumExtensions
 
     /// <summary>
     /// Place on the struct decorated with [EnumTemplate]
-    /// and delcare from which type name the member will be made.
+    /// and declare from which type the member will be made.
     /// </summary>
     /// <remarks>
     /// <list type="bullet">
     /// <item>The name of <see cref="Type"/> will be used to made a member for the enum generated from [EnumTemplate].</item>
+    /// <item>If <see cref="AlternateName"/> is provided, it will be used as the member name instead of the type name.</item>
     /// <item>Cannot use with unbound generic types.</item>
     /// </list>
     /// </remarks>
     /// <example>
     /// <code>
     /// [EnumTemplate]
-    /// [EnumTemplateMemberFromTypeName(typeof(CustomFruit&lt;int&gt;)), 500]
+    /// [EnumTemplateMemberFromType(typeof(CustomFruit&lt;int&gt;)), 500]
     /// public readonly struct ProductType_EnumTemplate { }
     /// </code>
     /// </example>
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true)]
-    public sealed class EnumTemplateMemberFromTypeNameAttribute : Attribute
+    public sealed class EnumTemplateMemberFromTypeAttribute : Attribute
     {
         public Type Type { get; }
 
@@ -78,11 +79,19 @@ namespace EncosyTower.EnumExtensions
 
         public string DisplayName { get; }
 
-        public EnumTemplateMemberFromTypeNameAttribute(Type type, ulong order, string displayName = "")
+        public string AlternateName { get; }
+
+        public EnumTemplateMemberFromTypeAttribute(
+              Type type
+            , ulong order
+            , string displayName = ""
+            , string alternateName = ""
+        )
         {
             Type = type;
             Order = order;
             DisplayName = displayName;
+            AlternateName = alternateName;
         }
     }
 
@@ -115,15 +124,18 @@ namespace EncosyTower.EnumExtensions
     }
 
     /// <summary>
-    /// Place on a type to indicate that its type name will be used to
+    /// Place on a type to indicate that its type name or an alias will be used to
     /// generate a member for the enum generated from [EnumTemplate].
     /// </summary>
     /// <remarks>
-    /// Cannot use with unbound generic types.
+    /// <list type="bullet">
+    /// <item>If <see cref="AlternateName"/> is provided, it will be used instead of the type name.</item>
+    /// <item>Cannot use with unbound generic types.</item>
+    /// </list>
     /// </remarks>
     /// <example>
     /// <code>
-    /// [TypeNameAsEnumMemberForTemplate(typeof(ProductType_EnumTemplate), 500)]
+    /// [TypeAsEnumMemberForTemplate(typeof(ProductType_EnumTemplate), 500)]
     /// public struct CustomFruit { }
     /// </code>
     /// </example>
@@ -135,7 +147,7 @@ namespace EncosyTower.EnumExtensions
         | AttributeTargets.Interface
         , AllowMultiple = true
     )]
-    public sealed class TypeNameAsEnumMemberForTemplateAttribute : Attribute
+    public sealed class TypeAsEnumMemberForTemplateAttribute : Attribute
     {
         public Type TemplateType { get; }
 
@@ -143,11 +155,19 @@ namespace EncosyTower.EnumExtensions
 
         public string DisplayName { get; }
 
-        public TypeNameAsEnumMemberForTemplateAttribute(Type templateType, ulong order, string displayName = "")
+        public string AlternateName { get; }
+
+        public TypeAsEnumMemberForTemplateAttribute(
+              Type templateType
+            , ulong order
+            , string displayName = ""
+            , string alternateName = ""
+        )
         {
             TemplateType = templateType;
             Order = order;
             DisplayName = displayName;
+            AlternateName = alternateName;
         }
     }
 }

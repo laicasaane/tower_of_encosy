@@ -13,7 +13,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         public const string NAMESPACE = "EncosyTower.EnumExtensions";
         public const string ENUM_TEMPLATE_ATTRIBUTE = $"global::{NAMESPACE}.EnumTemplateAttribute";
         public const string ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE = $"global::{NAMESPACE}.EnumMembersForTemplateAttribute";
-        public const string TYPE_NAME_AS_MEMBER_ATTRIBUTE = $"global::{NAMESPACE}.TypeNameAsEnumMemberForTemplateAttribute";
+        public const string TYPE_AS_MEMBER_ATTRIBUTE = $"global::{NAMESPACE}.TypeAsEnumMemberForTemplateAttribute";
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
         public const string GENERATOR_NAME = nameof(EnumTemplateGenerator);
 
@@ -75,7 +75,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             }
 
             var attribSyntax = baseTypeSyntax.GetAttribute(NAMESPACE, "EnumMembersForTemplate");
-            attribSyntax ??= baseTypeSyntax.GetAttribute(NAMESPACE, "TypeNameAsEnumMemberForTemplate");
+            attribSyntax ??= baseTypeSyntax.GetAttribute(NAMESPACE, "TypeAsEnumMemberForTemplate");
 
             if (attribSyntax is null)
             {
@@ -140,7 +140,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
             var attrib = typeSymbol.GetAttribute(ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE);
             var isEnum = attrib is not null;
-            attrib ??= typeSymbol.GetAttribute(TYPE_NAME_AS_MEMBER_ATTRIBUTE);
+            attrib ??= typeSymbol.GetAttribute(TYPE_AS_MEMBER_ATTRIBUTE);
 
             if (attrib is not { ConstructorArguments.Length: > 1 })
             {
@@ -188,6 +188,18 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 )
                 {
                     candidate.displayName = value;
+                }
+            }
+
+            if (isEnum == false && args.Length > 3)
+            {
+                var arg = args[3];
+
+                if (arg.Kind == TypedConstantKind.Primitive
+                    && arg.Value is string value
+                )
+                {
+                    candidate.alternateName = value;
                 }
             }
 

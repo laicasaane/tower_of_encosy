@@ -3,7 +3,7 @@
 namespace EncosyTower.Tests.EnumTemplates
 {
     [EnumTemplate]
-    [EnumTemplateMemberFromTypeName(typeof(CustomFruit<int>), 500)]
+    [EnumTemplateMemberFromType(typeof(CustomFruit<int>), 500, "Integer Fruit", "IntFruit")]
     public readonly partial struct ResourceType_EnumTemplate { }
 
     partial class ResourceTypeExtensions { }
@@ -19,6 +19,6 @@ namespace EncosyTower.Tests.EnumTemplates
 
     public readonly struct CustomFruit<T> { }
 
-    [TypeNameAsEnumMemberForTemplate(typeof(ResourceType_EnumTemplate), 600, "Special Power Fruit")]
+    [TypeAsEnumMemberForTemplate(typeof(ResourceType_EnumTemplate), 600, "Special Power Fruit", "SP Fruit")]
     public class SpecialPowerFruit { }
 }

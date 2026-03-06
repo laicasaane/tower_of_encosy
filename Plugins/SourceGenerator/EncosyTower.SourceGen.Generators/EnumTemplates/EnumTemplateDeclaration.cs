@@ -12,7 +12,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
     internal partial class EnumTemplateDeclaration
     {
         private const string MEMBERS_FROM_ENUM_ATTRIBUTE = "global::EncosyTower.EnumExtensions.EnumTemplateMembersFromEnumAttribute";
-        private const string MEMBER_FROM_TYPE_NAME_ATTRIBUTE = "global::EncosyTower.EnumExtensions.EnumTemplateMemberFromTypeNameAttribute";
+        private const string MEMBER_FROM_TYPE_ATTRIBUTE = "global::EncosyTower.EnumExtensions.EnumTemplateMemberFromTypeAttribute";
 
         public StructDeclarationSyntax Syntax { get; }
 
@@ -124,15 +124,17 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 if (candidate.enumMembers == false)
                 {
                     var typeName = typeSymbol.ToSimpleValidIdentifier();
+                    var name = string.IsNullOrEmpty(candidate.alternateName) ? typeName : candidate.alternateName.ToValidIdentifier();
+                    var displayName =  string.IsNullOrEmpty(candidate.displayName) ? name : candidate.displayName;
 
                     memberRefs.Add(new EnumMemberRef {
                         typeSymbol = typeSymbol,
                         baseOrder = currentBaseOrder,
                         attributes = ImmutableArray<AttributeInfo>.Empty,
                         member = new EnumMemberDeclaration {
-                            name = typeName,
+                            name = name,
                             order = currentBaseOrder,
-                            displayName = string.IsNullOrEmpty(candidate.displayName) ? typeName : candidate.displayName,
+                            displayName = displayName,
                         },
                     });
 
@@ -256,7 +258,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             , List<KindCandidate> output
         )
         {
-            var attributes = symbol.GetAttributes(MEMBERS_FROM_ENUM_ATTRIBUTE, MEMBER_FROM_TYPE_NAME_ATTRIBUTE);
+            var attributes = symbol.GetAttributes(MEMBERS_FROM_ENUM_ATTRIBUTE, MEMBER_FROM_TYPE_ATTRIBUTE);
 
             foreach (var attrib in attributes)
             {
@@ -312,10 +314,22 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     var arg = args[2];
 
                     if (arg.Kind == TypedConstantKind.Primitive
-                        && arg.Value is string displayName
+                        && arg.Value is string value
                     )
                     {
-                        candidate.displayName = displayName;
+                        candidate.displayName = value;
+                    }
+                }
+
+                if (args.Length > 3)
+                {
+                    var arg = args[3];
+
+                    if (arg.Kind == TypedConstantKind.Primitive
+                        && arg.Value is string value
+                    )
+                    {
+                        candidate.alternateName = value;
                     }
                 }
 

@@ -9,6 +9,7 @@ namespace EncosyTower.SourceGen
 
         public static string ToValidIdentifier(this string value)
             => value
+                .Replace(' ', '_')
                 .Replace('.', '_')
                 .Replace("-", "__")
                 .Replace('<', 'ᐸ')

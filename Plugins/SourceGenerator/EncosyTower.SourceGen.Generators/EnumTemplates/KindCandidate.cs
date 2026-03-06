@@ -8,6 +8,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         public INamedTypeSymbol templateSymbol;
         public AttributeData attributeData;
         public string displayName;
+        public string alternateName;
         public ulong order;
         public bool enumMembers;
     }
