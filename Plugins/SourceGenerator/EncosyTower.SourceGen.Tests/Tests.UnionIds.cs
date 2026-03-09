@@ -116,7 +116,7 @@ namespace EncosyTower.Tests.UnionIds.Game2
     }
 
     [WrapRecord(ExcludeConverter = true)]
-    [TypeNameAsEnumMemberForTemplate(typeof(ItemType_EnumTemplate), 100)]
+    [TypeAsEnumMemberForTemplate(typeof(ItemType_EnumTemplate), 100)]
     [KindForUnionId(typeof(ItemId), 100, toStringMethods: ToStringMethods.All, tryParseSpan: TryParseMethodType.Instance)]
     public readonly partial record struct MapClearToken(MapId _);
 
