@@ -50,17 +50,23 @@ namespace EncosyTower.Collections.Extensions
                     fasterList.AddRange(items);
                     return;
                 }
+
+                case ICollection<T> coll:
+                {
+                    if (coll is IIncreaseCapacity increaseCapacity)
+                    {
+                        increaseCapacity.IncreaseCapacityTo(coll.Count + items.Length);
+                    }
+
+                    foreach (var item in items)
+                    {
+                        self.Add(item);
+                    }
+
+                    return;
+                }
             }
 
-            if (self is null)
-            {
-                return;
-            }
-
-            foreach (var item in items)
-            {
-                self.Add(item);
-            }
         }
 
         /// <summary>
@@ -115,16 +121,21 @@ namespace EncosyTower.Collections.Extensions
                     hashSet.UnionWith(items);
                     return;
                 }
-            }
 
-            if (self is null)
-            {
-                return;
-            }
+                case ICollection<T> coll:
+                {
+                    if (coll is IIncreaseCapacity increaseCapacity && items is ICollection<T> itemsColl)
+                    {
+                        increaseCapacity.IncreaseCapacityTo(coll.Count + itemsColl.Count);
+                    }
 
-            foreach (var item in items)
-            {
-                self.Add(item);
+                    foreach (var item in items)
+                    {
+                        self.Add(item);
+                    }
+
+                    break;
+                }
             }
         }
     }

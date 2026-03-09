@@ -13,6 +13,8 @@ namespace EncosyTower.Collections.Extensions
             => list == null || list.Count < 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNullOrEmpty<T>(this IReadOnlyList<T> list)
+            => list == null || list.Count < 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>([NotNull] this List<T> list)
