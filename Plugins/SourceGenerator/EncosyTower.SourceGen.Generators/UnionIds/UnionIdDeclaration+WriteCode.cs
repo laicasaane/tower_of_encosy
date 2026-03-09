@@ -716,7 +716,7 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("var ranges = global::EncosyTower.Common.SpanAPI.Split(str, SEPARATOR, 2);");
+                p.PrintLine("var ranges = global::EncosyTower.SystemExtensions.SpanAPI.Split(str, SEPARATOR, 2);");
                 p.PrintEndLine();
 
                 p.PrintLine("global::System.Range? kindRange = default;");
