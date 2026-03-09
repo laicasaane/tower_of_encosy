@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace EncosyTower.Common
+namespace EncosyTower.SystemExtensions
 {
 #if NET9_0_OR_GREATER
     using API = System.MemoryExtensions;
