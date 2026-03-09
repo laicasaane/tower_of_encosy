@@ -22,7 +22,7 @@ namespace EncosyTower.SystemExtensions
         /// <param name="separator">The separator element.</param>
         /// <returns>An enumerator over the split ranges.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static API.SpanSplitEnumerator<T> Split<T>(this ReadOnlySpan<T> source, T separator)
+        public static API.SpanSplitEnumerator<T> Split<T>(ReadOnlySpan<T> source, T separator)
             where T : IEquatable<T>
         {
             return API.Split(source, separator);
@@ -36,7 +36,7 @@ namespace EncosyTower.SystemExtensions
         /// <param name="separator">The separator sequence.</param>
         /// <returns>An enumerator over the split ranges.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static API.SpanSplitEnumerator<T> Split<T>(this ReadOnlySpan<T> source, ReadOnlySpan<T> separator)
+        public static API.SpanSplitEnumerator<T> Split<T>(ReadOnlySpan<T> source, ReadOnlySpan<T> separator)
             where T : IEquatable<T>
         {
             return API.Split(source, separator);
@@ -50,7 +50,7 @@ namespace EncosyTower.SystemExtensions
         /// <param name="separators">The separator elements.</param>
         /// <returns>An enumerator over the split ranges.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static API.SpanSplitEnumerator<T> SplitAny<T>(this ReadOnlySpan<T> source, ReadOnlySpan<T> separators)
+        public static API.SpanSplitEnumerator<T> SplitAny<T>(ReadOnlySpan<T> source, ReadOnlySpan<T> separators)
             where T : IEquatable<T>
         {
             return API.SplitAny(source, separators);
@@ -65,7 +65,7 @@ namespace EncosyTower.SystemExtensions
         /// <param name="count">The maximum number of split results to return.</param>
         /// <returns>A counted enumerator over the split ranges.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static CountedSplitEnumerator<T> Split<T>(this ReadOnlySpan<T> source, T separator, int count)
+        public static CountedSplitEnumerator<T> Split<T>(ReadOnlySpan<T> source, T separator, int count)
             where T : IEquatable<T>
         {
             return new(source, Split(source, separator), count);
@@ -80,7 +80,7 @@ namespace EncosyTower.SystemExtensions
         /// <param name="count">The maximum number of split results to return.</param>
         /// <returns>A counted enumerator over the split ranges.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static CountedSplitEnumerator<T> Split<T>(this ReadOnlySpan<T> source, ReadOnlySpan<T> separator, int count)
+        public static CountedSplitEnumerator<T> Split<T>(ReadOnlySpan<T> source, ReadOnlySpan<T> separator, int count)
             where T : IEquatable<T>
         {
             return new(source, Split(source, separator), count);
@@ -95,7 +95,7 @@ namespace EncosyTower.SystemExtensions
         /// <param name="count">The maximum number of split results to return.</param>
         /// <returns>A counted enumerator over the split ranges.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static CountedSplitEnumerator<T> SplitAny<T>(this ReadOnlySpan<T> source, ReadOnlySpan<T> separators, int count)
+        public static CountedSplitEnumerator<T> SplitAny<T>(ReadOnlySpan<T> source, ReadOnlySpan<T> separators, int count)
             where T : IEquatable<T>
         {
             return new(source, SplitAny(source, separators), count);
