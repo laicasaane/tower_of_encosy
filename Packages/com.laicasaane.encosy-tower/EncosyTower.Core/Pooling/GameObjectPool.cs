@@ -966,7 +966,7 @@ namespace EncosyTower.Pooling
             }
 
             _objectList.Clear();
-            _objectList.IncreaseCapacityTo(length);
+            _objectList.AsListFast().IncreaseCapacityTo(length);
 
             UnityObjectAPI.ConvertTransformIdsToObjectList(transformIds, _objectList);
 

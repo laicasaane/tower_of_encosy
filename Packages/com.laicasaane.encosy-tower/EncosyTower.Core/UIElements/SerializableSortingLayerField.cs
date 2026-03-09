@@ -58,7 +58,7 @@ namespace EncosyTower.UIElements
                 var layerIds = s_layerIds;
 
                 layerIds.Clear();
-                layerIds.IncreaseCapacityTo(length);
+                layerIds.AsListFast().IncreaseCapacityTo(length);
 
                 for (var i = 0; i < length; i++)
                 {

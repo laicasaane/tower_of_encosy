@@ -27,7 +27,7 @@ namespace EncosyTower.Collections.Extensions
             var length = items.Length;
             return length > 0 && MemoryExtensions.IndexOf(items, item) >= 0;
         }
-        
+
         public static bool Contains<T, TNative, TComparer>(
               this SharedList<T, TNative>.ReadOnly self
             , T item
@@ -50,7 +50,7 @@ namespace EncosyTower.Collections.Extensions
 
             return false;
         }
-        
+
         public static bool Contains<T, TNative, TComparer>(
               this SharedList<T, TNative>.ReadOnly self
             , in T item

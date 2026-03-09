@@ -91,7 +91,7 @@ namespace EncosyTower.Editor
 
             if (profile.IsValid())
             {
-                result.AddRange(profile.scriptingDefines);
+                result.AddRange(profile.scriptingDefines.AsSpan());
             }
 
             return result;

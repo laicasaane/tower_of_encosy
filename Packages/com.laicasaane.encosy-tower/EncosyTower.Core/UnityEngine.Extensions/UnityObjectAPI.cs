@@ -179,7 +179,7 @@ namespace EncosyTower.UnityExtensions
         )
         {
             objectList.Clear();
-            objectList.IncreaseCapacityTo(entityIds.Length);
+            objectList.AsListFast().IncreaseCapacityTo(entityIds.Length);
 
 #if UNITY_6000_3_OR_NEWER
             Resources.EntityIdsToObjectList(entityIds, objectList);

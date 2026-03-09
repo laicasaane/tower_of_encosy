@@ -37,7 +37,7 @@ namespace EncosyTower.Search
 
             if (source.TryGetCountFast(out var count))
             {
-                choices.IncreaseCapacityTo(count);
+                choices.AsListFast().IncreaseCapacityTo(count);
             }
 
             foreach (var item in source)
@@ -85,7 +85,7 @@ namespace EncosyTower.Search
 
             if (source.TryGetCountFast(out var count))
             {
-                choices.IncreaseCapacityTo(count);
+                choices.AsListFast().IncreaseCapacityTo(count);
             }
 
             foreach (var item in source)

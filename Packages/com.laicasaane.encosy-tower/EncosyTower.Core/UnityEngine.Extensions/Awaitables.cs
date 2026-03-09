@@ -128,7 +128,7 @@ namespace EncosyTower.UnityExtensions
 
             using (ListPool<Exception>.Get(out var exceptions))
             {
-                exceptions.IncreaseCapacityTo(awaitables.Length);
+                exceptions.AsListFast().IncreaseCapacityTo(awaitables.Length);
 
                 await CaptureExceptionsAsync(awaitables, exceptions);
 
@@ -156,7 +156,7 @@ namespace EncosyTower.UnityExtensions
             {
                 if (awaitables.TryGetCountFast(out var count))
                 {
-                    exceptions.IncreaseCapacityTo(count);
+                    exceptions.AsListFast().IncreaseCapacityTo(count);
                 }
 
                 await CaptureExceptionsAsync(awaitables, exceptions);
@@ -184,8 +184,8 @@ namespace EncosyTower.UnityExtensions
             using (ListPool<T>.Get(out var results))
             using (ListPool<Exception>.Get(out var exceptions))
             {
-                results.IncreaseCapacityTo(awaitables.Length);
-                exceptions.IncreaseCapacityTo(awaitables.Length);
+                results.AsListFast().IncreaseCapacityTo(awaitables.Length);
+                exceptions.AsListFast().IncreaseCapacityTo(awaitables.Length);
 
                 await CaptureExceptionsAsync(awaitables, results, exceptions);
 
@@ -220,8 +220,8 @@ namespace EncosyTower.UnityExtensions
             {
                 if (awaitables.TryGetCountFast(out var count))
                 {
-                    results.IncreaseCapacityTo(count);
-                    exceptions.IncreaseCapacityTo(count);
+                    results.AsListFast().IncreaseCapacityTo(count);
+                    exceptions.AsListFast().IncreaseCapacityTo(count);
                 }
 
                 await CaptureExceptionsAsync(awaitables, results, exceptions);
@@ -255,7 +255,7 @@ namespace EncosyTower.UnityExtensions
         {
             using (ListPool<Awaitable>.Get(out var awaitables))
             {
-                awaitables.IncreaseCapacityTo(2);
+                awaitables.AsListFast().IncreaseCapacityTo(2);
                 awaitables.Add(awaitable1);
                 awaitables.Add(awaitable2);
 
@@ -275,7 +275,7 @@ namespace EncosyTower.UnityExtensions
         {
             using (ListPool<Awaitable>.Get(out var awaitables))
             {
-                awaitables.IncreaseCapacityTo(3);
+                awaitables.AsListFast().IncreaseCapacityTo(3);
                 awaitables.Add(awaitable1);
                 awaitables.Add(awaitable2);
                 awaitables.Add(awaitable3);
@@ -297,7 +297,7 @@ namespace EncosyTower.UnityExtensions
         {
             using (ListPool<Awaitable>.Get(out var awaitables))
             {
-                awaitables.IncreaseCapacityTo(4);
+                awaitables.AsListFast().IncreaseCapacityTo(4);
                 awaitables.Add(awaitable1);
                 awaitables.Add(awaitable2);
                 awaitables.Add(awaitable3);
@@ -331,7 +331,7 @@ namespace EncosyTower.UnityExtensions
         {
             using (ListPool<Exception>.Get(out var exceptions))
             {
-                exceptions.IncreaseCapacityTo(2);
+                exceptions.AsListFast().IncreaseCapacityTo(2);
 
                 var result = await CaptureExceptionsAsync(awaitable1, exceptions);
 
@@ -357,7 +357,7 @@ namespace EncosyTower.UnityExtensions
         {
             using (ListPool<Exception>.Get(out var exceptions))
             {
-                exceptions.IncreaseCapacityTo(2);
+                exceptions.AsListFast().IncreaseCapacityTo(2);
 
                 var result1 = await CaptureExceptionsAsync(awaitable1, exceptions);
                 var result2 = await CaptureExceptionsAsync(awaitable2, exceptions);
@@ -383,7 +383,7 @@ namespace EncosyTower.UnityExtensions
         {
             using (ListPool<Exception>.Get(out var exceptions))
             {
-                exceptions.IncreaseCapacityTo(3);
+                exceptions.AsListFast().IncreaseCapacityTo(3);
 
                 var result1 = await CaptureExceptionsAsync(awaitable1, exceptions);
                 var result2 = await CaptureExceptionsAsync(awaitable2, exceptions);
@@ -411,7 +411,7 @@ namespace EncosyTower.UnityExtensions
         {
             using (ListPool<Exception>.Get(out var exceptions))
             {
-                exceptions.IncreaseCapacityTo(4);
+                exceptions.AsListFast().IncreaseCapacityTo(4);
 
                 var result1 = await CaptureExceptionsAsync(awaitable1, exceptions);
                 var result2 = await CaptureExceptionsAsync(awaitable2, exceptions);
@@ -446,7 +446,7 @@ namespace EncosyTower.UnityExtensions
         {
             using (ListPool<Exception>.Get(out var exceptions))
             {
-                exceptions.IncreaseCapacityTo(5);
+                exceptions.AsListFast().IncreaseCapacityTo(5);
 
                 var result1 = await CaptureExceptionsAsync(awaitable1, exceptions);
                 var result2 = await CaptureExceptionsAsync(awaitable2, exceptions);
@@ -484,7 +484,7 @@ namespace EncosyTower.UnityExtensions
         {
             using (ListPool<Exception>.Get(out var exceptions))
             {
-                exceptions.IncreaseCapacityTo(6);
+                exceptions.AsListFast().IncreaseCapacityTo(6);
 
                 var result1 = await CaptureExceptionsAsync(awaitable1, exceptions);
                 var result2 = await CaptureExceptionsAsync(awaitable2, exceptions);
@@ -525,7 +525,7 @@ namespace EncosyTower.UnityExtensions
         {
             using (ListPool<Exception>.Get(out var exceptions))
             {
-                exceptions.IncreaseCapacityTo(7);
+                exceptions.AsListFast().IncreaseCapacityTo(7);
 
                 var result1 = await CaptureExceptionsAsync(awaitable1, exceptions);
                 var result2 = await CaptureExceptionsAsync(awaitable2, exceptions);
@@ -569,7 +569,7 @@ namespace EncosyTower.UnityExtensions
         {
             using (ListPool<Exception>.Get(out var exceptions))
             {
-                exceptions.IncreaseCapacityTo(8);
+                exceptions.AsListFast().IncreaseCapacityTo(8);
 
                 var result1 = await CaptureExceptionsAsync(awaitable1, exceptions);
                 var result2 = await CaptureExceptionsAsync(awaitable2, exceptions);
@@ -616,7 +616,7 @@ namespace EncosyTower.UnityExtensions
         {
             using (ListPool<Exception>.Get(out var exceptions))
             {
-                exceptions.IncreaseCapacityTo(9);
+                exceptions.AsListFast().IncreaseCapacityTo(9);
 
                 var result1 = await CaptureExceptionsAsync(awaitable1, exceptions);
                 var result2 = await CaptureExceptionsAsync(awaitable2, exceptions);

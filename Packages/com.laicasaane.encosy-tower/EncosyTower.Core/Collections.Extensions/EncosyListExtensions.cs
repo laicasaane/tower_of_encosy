@@ -13,12 +13,6 @@ namespace EncosyTower.Collections.Extensions
             => list == null || list.Count < 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void IncreaseCapacityBy<T>([NotNull] this List<T> list, int amount)
-            => list.Capacity += amount;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void IncreaseCapacityTo<T>([NotNull] this List<T> list, int capacity)
-            => list.Capacity = Math.Max(list.Capacity, capacity);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>([NotNull] this List<T> list)
@@ -35,47 +29,6 @@ namespace EncosyTower.Collections.Extensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ListFast<T>.ReadOnly AsReadOnly<T>(this List<T> list)
             => list is not null ? list : ListFast<T>.ReadOnly.Empty;
-
-        public static void AddRange<T>(
-              [NotNull] this List<T> list
-            , ReadOnlyMemory<T> collection
-        )
-        {
-            var span = collection.Span;
-            var length = span.Length;
-
-            if (length < 1)
-            {
-                return;
-            }
-
-            list.Capacity = list.Count + length;
-
-            for (var i = 0; i < length; i++)
-            {
-                list.Add(span[i]);
-            }
-        }
-
-        public static void AddRangeTo<T>(
-              this IEnumerable<T> src
-            , ref List<T> dest
-        )
-        {
-            if (src == null)
-            {
-                return;
-            }
-
-            if (dest == null)
-            {
-                dest = new(src);
-            }
-            else
-            {
-                dest.AddRange(src);
-            }
-        }
     }
 }
 
