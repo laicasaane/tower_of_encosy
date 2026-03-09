@@ -18,7 +18,7 @@ namespace EncosyTower.Samples.Data
     [UnionIdKind(typeof(EnemyId), 1, "Enemy", signed: true)]
     public readonly partial struct EntityId
     {
-        private static partial bool TryParse_EnemyId(
+        private static partial bool TryParse_Enemy(
               ReadOnlySpan<char> str
             , out EnemyId value
             , bool ignoreCase
@@ -30,7 +30,7 @@ namespace EncosyTower.Samples.Data
             return result;
         }
 
-        private static partial bool TryParse_HeroId(
+        private static partial bool TryParse_Hero(
               ReadOnlySpan<char> str
             , out HeroId value
             , bool ignoreCase

@@ -69,6 +69,11 @@ namespace EncosyTower.UnionIds
         public ulong Order { get; }
 
         /// <summary>
+        /// The name for the kind. Must be a valid identifier.
+        /// </summary>
+        public string Name { get; }
+
+        /// <summary>
         /// The display name for the kind.
         /// </summary>
         public string DisplayName { get; }
@@ -100,6 +105,7 @@ namespace EncosyTower.UnionIds
         /// </summary>
         /// <param name="kindType">The type that represents the kind.</param>
         /// <param name="order">The order of the kind in the union id kinds.</param>
+        /// <param name="name">The name for the kind. Must be a valid identifier.</param>
         /// <param name="displayName">The display name for the kind.</param>
         /// <param name="signed">Indicates whether the kind type is an signed or unsigned integer.</param>
         /// <param name="toStringMethods">
@@ -114,6 +120,7 @@ namespace EncosyTower.UnionIds
         public UnionIdKindAttribute(
               Type kindType
             , ulong order
+            , string name = ""
             , string displayName = ""
             , bool signed = false
             , ToStringMethods toStringMethods = ToStringMethods.Default
@@ -122,6 +129,7 @@ namespace EncosyTower.UnionIds
         {
             KindType = kindType;
             Order = order;
+            Name = name;
             DisplayName = displayName;
             Signed = signed;
             ToStringMethods = toStringMethods;
@@ -149,6 +157,11 @@ namespace EncosyTower.UnionIds
         /// The order of the kind in the union id.
         /// </summary>
         public ulong Order { get; }
+
+        /// <summary>
+        /// The name for the kind. Must be a valid identifier.
+        /// </summary>
+        public string Name { get; }
 
         /// <summary>
         /// The display name for the kind.
@@ -181,6 +194,7 @@ namespace EncosyTower.UnionIds
         /// </summary>
         /// <param name="idType">The type that is annotated with [UnionId].</param>
         /// <param name="order">The order of the kind in the union id.</param>
+        /// <param name="name">The name for the kind. Must be a valid identifier.</param>
         /// <param name="displayName">The display name for the kind.</param>
         /// <param name="signed">Indicates whether the kind type is an signed or unsigned integer.</param>
         /// <param name="toStringMethods">
@@ -194,6 +208,7 @@ namespace EncosyTower.UnionIds
         public KindForUnionIdAttribute(
               Type idType
             , ulong order
+            , string name = ""
             , string displayName = ""
             , bool signed = false
             , ToStringMethods toStringMethods = ToStringMethods.Default
@@ -202,6 +217,7 @@ namespace EncosyTower.UnionIds
         {
             IdType = idType;
             Order = order;
+            Name = name;
             DisplayName = displayName;
             Signed = signed;
             ToStringMethods = toStringMethods;

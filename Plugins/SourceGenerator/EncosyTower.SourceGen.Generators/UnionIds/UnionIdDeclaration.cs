@@ -115,7 +115,9 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     continue;
                 }
 
-                var kindName = kindSymbol.Name;
+                var customName = candidate.name.ToValidIdentifier();
+                var hasCustomName = string.IsNullOrEmpty(customName) == false;
+                var kindName = hasCustomName ? customName : kindSymbol.Name;
 
                 if (uniqueKinds.TryGetValue(kindName, out var otherKind))
                 {
@@ -131,7 +133,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 kinds.Add(kindSymbol);
                 uniqueKinds.Add(kindName, kindSymbol);
 
-                if (removeSuffix)
+                if (hasCustomName == false && removeSuffix)
                 {
                     kindName = RemoveTypeKindSuffix(kindName);
                 }
@@ -391,17 +393,21 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     }
                     else if (i == 2 && arg.Value is string stringVal1)
                     {
-                        candidate.displayName = stringVal1;
+                        candidate.name = stringVal1;
                     }
-                    else if (i == 3 && arg.Value is bool boolVal1)
+                    else if (i == 3 && arg.Value is string stringVal2)
+                    {
+                        candidate.displayName = stringVal2;
+                    }
+                    else if (i == 4 && arg.Value is bool boolVal1)
                     {
                         candidate.signed = boolVal1;
                     }
-                    else if (i == 4 && arg.Value is byte byteVal1)
+                    else if (i == 5 && arg.Value is byte byteVal1)
                     {
                         candidate.toStringMethods = (ToStringMethods)byteVal1;
                     }
-                    else if (i == 5 && arg.Value is byte byteVal2)
+                    else if (i == 6 && arg.Value is byte byteVal2)
                     {
                         candidate.tryParseSpan = (TryParseMethodType)byteVal2;
                     }

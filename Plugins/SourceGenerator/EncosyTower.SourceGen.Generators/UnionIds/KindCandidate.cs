@@ -7,6 +7,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         public INamedTypeSymbol kindSymbol;
         public INamedTypeSymbol idSymbol;
         public AttributeData attributeData;
+        public string name;
         public string displayName;
         public ulong order;
         public ToStringMethods toStringMethods;
