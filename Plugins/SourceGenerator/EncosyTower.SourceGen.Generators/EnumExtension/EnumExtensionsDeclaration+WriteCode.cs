@@ -497,7 +497,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                         p.PrintLine($"{FullyQualifiedName}.{member.name} => {member.name},");
                     }
 
-                    p.PrintLine($"_ => ToFixedString(ToUnderlyingValue(value)),");
+                    p.PrintLine($"_ => default,");
                 }
                 p.CloseScope("};");
                 p = p.DecreasedIndent();
@@ -586,7 +586,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                         p.PrintLine($"{FullyQualifiedName}.{member.name} => {member.name},");
                     }
 
-                    p.PrintLine($"_ => ToFixedString(ToUnderlyingValue(value)),");
+                    p.PrintLine($"_ => default,");
                 }
                 p.CloseScope("};");
                 p = p.DecreasedIndent();
@@ -644,7 +644,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                         p.PrintLine($"{FullyQualifiedName}.{member.name} => {member.name},");
                     }
 
-                    p.PrintLine("_ => ToUnderlyingValue(value).ToString(),");
+                    p.PrintLine("_ => string.Empty,");
                 }
                 p.CloseScope("};");
                 p = p.DecreasedIndent();
@@ -694,7 +694,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                         p.PrintLine($"{FullyQualifiedName}.{member.name} => {member.name},");
                     }
 
-                    p.PrintLine("_ => ToUnderlyingValue(value).ToString(),");
+                    p.PrintLine("_ => string.Empty,");
                 }
                 p.CloseScope("};");
                 p = p.DecreasedIndent();
