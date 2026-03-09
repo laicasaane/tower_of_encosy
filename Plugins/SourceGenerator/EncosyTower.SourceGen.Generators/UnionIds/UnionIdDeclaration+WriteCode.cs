@@ -1320,6 +1320,8 @@
 
         private void WriteToString(ref Printer p, bool isSerializableStruct)
         {
+            var kindExtensionsName = KindExtensionsRef.ExtensionsName;
+
             p.PrintLine("public readonly override string ToString()");
             p.OpenScope();
             {
@@ -1339,8 +1341,9 @@
                             if (kind.isEnum)
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
-                                    .Print(" => $\"")
-                                    .Print("{Kind.ToStringFast()}{SEPARATOR}{");
+                                    .Print(" => $\"{")
+                                    .Print(kindExtensionsName).Print(".Names.").Print(kindName)
+                                    .Print("}{SEPARATOR}{");
 
                                 if (kind.nestedEnumExtensions)
                                 {
@@ -1356,15 +1359,16 @@
                             else
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
-                                    .Print(" => $\"")
-                                    .Print("{Kind.ToStringFast()}{SEPARATOR}{Id_").Print(kindName)
+                                    .Print(" => $\"{")
+                                    .Print(kindExtensionsName).Print(".Names.").Print(kindName)
+                                    .Print("}{SEPARATOR}{Id_").Print(kindName)
                                     .PrintEndLine("}\",");
                             }
                         }
 
                         var idField = isSerializableStruct ? "Id" : "IdUnsigned";
 
-                        p.PrintBeginLine("_ => $\"{Kind.ToStringFast()}{SEPARATOR}{")
+                        p.PrintBeginLine("_ => $\"{Kind.ToUnderlyingValue().ToString()}{SEPARATOR}{")
                             .Print(idField).PrintEndLine("}\",");
                     }
                     p.CloseScope("};");
@@ -1385,7 +1389,7 @@
                     p.OpenScope();
                     {
                         p.PrintBeginLine("return ").Print(kind.enumExtensionsName)
-                            .PrintEndLine(".ToStringFast(value);");
+                            .PrintEndLine(".ToStringFast(value, false);");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
@@ -1397,6 +1401,8 @@
 
         private void WriteToDisplayString(ref Printer p, bool isSerializableStruct)
         {
+            var kindExtensionsName = KindExtensionsRef.ExtensionsName;
+
             p.PrintLine("public readonly string ToDisplayString()");
             p.OpenScope();
             {
@@ -1416,8 +1422,9 @@
                             if (kind.isEnum)
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
-                                    .Print(" => $\"")
-                                    .Print("{Kind.ToDisplayStringFast()}{SEPARATOR}{");
+                                    .Print(" => $\"{")
+                                    .Print(kindExtensionsName).Print(".DisplayNames.").Print(kindName)
+                                    .Print("}{SEPARATOR}{");
 
                                 if (kind.nestedEnumExtensions)
                                 {
@@ -1433,8 +1440,9 @@
                             else if (kind.toStringMethods.HasFlag(ToStringMethods.ToDisplayString))
                             {
                                 p.PrintBeginLine("IdKind.").Print(kindName)
-                                    .Print(" => $\"")
-                                    .Print("{Kind.ToDisplayStringFast()}{SEPARATOR}{Id_").Print(kindName)
+                                    .Print(" => $\"{")
+                                    .Print(kindExtensionsName).Print(".DisplayNames.").Print(kindName)
+                                    .Print("}{SEPARATOR}{Id_").Print(kindName)
                                     .PrintEndLine(".ToDisplayString()}\",");
                             }
                             else
@@ -1448,7 +1456,7 @@
 
                         var idField = isSerializableStruct ? "Id" : "IdUnsigned";
 
-                        p.PrintBeginLine("_ => $\"{Kind.ToDisplayStringFast()}{SEPARATOR}{")
+                        p.PrintBeginLine("_ => $\"{Kind.ToUnderlyingValue().ToString()}{SEPARATOR}{")
                             .Print(idField).PrintEndLine("}\",");
                     }
                     p.CloseScope("};");
@@ -1468,7 +1476,7 @@
                         p.OpenScope();
                         {
                             p.PrintBeginLine("return ").Print(kind.enumExtensionsName)
-                                .PrintEndLine(".ToDisplayStringFast(value);");
+                                .PrintEndLine(".ToDisplayStringFast(value, false);");
                         }
                         p.CloseScope();
                         p.PrintEndLine();
@@ -1501,7 +1509,7 @@
                 }
                 else
                 {
-                    p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Kind.ToFixedString());");
+                    p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Kind.ToFixedString(false));");
                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, '")
                         .Print(Separator).PrintEndLine("');");
                     p.PrintEndLine();
@@ -1521,7 +1529,7 @@
                                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, ")
                                         .Print(kind.enumExtensionsName).Print(".ToFixedString(Id_")
                                         .Print(kindName)
-                                        .PrintEndLine("));");
+                                        .PrintEndLine(", false));");
                                 }
                                 else if (kind.toStringMethods.HasFlag(ToStringMethods.ToFixedString))
                                 {
@@ -1585,7 +1593,7 @@
                 }
                 else
                 {
-                    p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Kind.ToDisplayFixedString());");
+                    p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Kind.ToDisplayFixedString(false));");
                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, '")
                         .Print(Separator).PrintEndLine("');");
                     p.PrintEndLine();
@@ -1605,7 +1613,7 @@
                                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, ")
                                         .Print(kind.enumExtensionsName).Print(".ToDisplayFixedString(Id_")
                                         .Print(kindName)
-                                        .PrintEndLine("));");
+                                        .PrintEndLine(", false));");
                                 }
                                 else if (kind.toStringMethods.HasFlag(ToStringMethods.ToDisplayFixedString))
                                 {
@@ -1670,7 +1678,7 @@
                                 p.PrintBeginLine("IdKind.").Print(kindName)
                                     .Print(" => ")
                                     .Print(kind.enumExtensionsName).Print(".ToStringFast(Id_").Print(kindName)
-                                    .PrintEndLine("),");
+                                    .PrintEndLine(", false),");
                             }
                             else
                             {
@@ -1712,7 +1720,7 @@
                                 p.PrintBeginLine("IdKind.").Print(kindName)
                                     .Print(" => ")
                                     .Print(kind.enumExtensionsName).Print(".ToDisplayStringFast(Id_").Print(kindName)
-                                    .PrintEndLine("),");
+                                    .PrintEndLine(", false),");
                             }
                             else if (kind.toStringMethods.HasFlag(ToStringMethods.ToDisplayString))
                             {
@@ -1776,7 +1784,7 @@
                                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, ")
                                         .Print(kind.enumExtensionsName).Print(".ToFixedString(Id_")
                                         .Print(kindName)
-                                        .PrintEndLine("));");
+                                        .PrintEndLine(", false));");
                                 }
                                 else if (kind.toStringMethods.HasFlag(ToStringMethods.ToFixedString))
                                 {
@@ -1857,7 +1865,7 @@
                                     p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, ")
                                         .Print(kind.enumExtensionsName).Print(".ToDisplayFixedString(Id_")
                                         .Print(kindName)
-                                        .PrintEndLine("));");
+                                        .PrintEndLine(", false));");
                                 }
                                 else if (kind.toStringMethods.HasFlag(ToStringMethods.ToDisplayFixedString))
                                 {
