@@ -44,7 +44,12 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             if (OnlyClass == false)
             {
                 WriteInterface(ref p);
-                WriteStruct(ref p);
+                WriteExtendedStruct(ref p);
+
+                if (HasFlags)
+                {
+                    WriteExtendedStruct_BitFlagEnumerator(ref p);
+                }
             }
 
             WriteClass(ref p);
@@ -81,7 +86,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             p.PrintEndLine();
         }
 
-        private void WriteStruct(ref Printer p)
+        private void WriteExtendedStruct(ref Printer p)
         {
             WriteAttribute(ref p);
 
@@ -124,7 +129,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine("public bool IsDefined");
+                p.PrintLine("public bool IsDefined");
                 p.OpenScope();
                 {
                     p.PrintLine(AggressiveInlining);
@@ -134,30 +139,54 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintBeginLine("public string ToStringFast() => ")
-                    .Print(ExtensionsName).PrintEndLine(".ToStringFast(this.Value);");
+                p.PrintLine("public string ToStringFast() => ToStringFast(true);");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintBeginLine("public string ToDisplayString() => ")
-                    .Print(ExtensionsName).PrintEndLine(".ToDisplayStringFast(this.Value);");
+                p.PrintBeginLine("public string ToStringFast(bool emptyIfUndefined) => ")
+                    .Print(ExtensionsName).PrintEndLine(".ToStringFast(this.Value, emptyIfUndefined);");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintBeginLine("public string ToDisplayStringFast() => ")
-                    .Print(ExtensionsName).PrintEndLine(".ToDisplayStringFast(this.Value);");
+                p.PrintLine("public string ToDisplayString() => ToDisplayString(true);");
+                p.PrintEndLine();
+
+                p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("public string ToDisplayString(bool emptyIfUndefined) => ")
+                    .Print(ExtensionsName).PrintEndLine(".ToDisplayStringFast(this.Value, emptyIfUndefined);");
+                p.PrintEndLine();
+
+                p.PrintLine(AggressiveInlining);
+                p.PrintLine("public string ToDisplayStringFast() => ToDisplayStringFast(true);");
+                p.PrintEndLine();
+
+                p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("public string ToDisplayStringFast(bool emptyIfUndefined) => ")
+                    .Print(ExtensionsName).PrintEndLine(".ToDisplayStringFast(this.Value, emptyIfUndefined);");
                 p.PrintEndLine();
 
                 if (ReferenceUnityCollections)
                 {
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public ").Print(FixedStringTypeFullyQualifiedName).Print(" ToFixedString() => ")
-                        .Print(ExtensionsName).PrintEndLine(".ToFixedString(this.Value);");
+                        .PrintEndLine("ToFixedString(true);");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AggressiveInlining);
+                    p.PrintBeginLine("public ").Print(FixedStringTypeFullyQualifiedName)
+                        .Print(" ToFixedString(bool emptyIfUndefined) => ")
+                        .Print(ExtensionsName).PrintEndLine(".ToFixedString(this.Value, emptyIfUndefined);");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public ").Print(FixedStringTypeFullyQualifiedName).Print(" ToDisplayFixedString() => ")
-                        .Print(ExtensionsName).PrintEndLine(".ToDisplayFixedString(this.Value);");
+                        .PrintEndLine("ToDisplayFixedString(true);");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AggressiveInlining);
+                    p.PrintBeginLine("public ").Print(FixedStringTypeFullyQualifiedName)
+                        .Print(" ToDisplayFixedString(bool emptyIfUndefined) => ")
+                        .Print(ExtensionsName).PrintEndLine(".ToDisplayFixedString(this.Value, emptyIfUndefined);");
                     p.PrintEndLine();
                 }
 
@@ -221,13 +250,12 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 }
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintBeginLine("public override string ToString() => ")
-                    .Print(ExtensionsName).PrintEndLine(".ToStringFast(this.Value);");
+                p.PrintLine("public override string ToString() => ToStringFast(true);");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public string ToString(string format, global::System.IFormatProvider formatProvider) => ")
-                    .Print(ExtensionsName).PrintEndLine(".ToStringFast(this.Value);");
+                    .PrintEndLine("ToStringFast(true);");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
@@ -327,6 +355,132 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             p.PrintEndLine();
         }
 
+        private void WriteExtendedStruct_BitFlagEnumerator(ref Printer p)
+        {
+            p.PrintBeginLine("partial struct ").Print(StructName)
+                .Print(" : global::System.Collections.Generic.IEnumerable<")
+                .Print(FullyQualifiedName).PrintEndLine(">");
+            p.OpenScope();
+            {
+                p.PrintLine(AggressiveInlining);
+                p.PrintLine("public readonly Enumerator GetEnumerator()");
+                p.OpenScope();
+                {
+                    p.PrintLine("return new Enumerator(this);");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("readonly global::System.Collections.Generic.IEnumerator<")
+                    .Print(FullyQualifiedName).Print("> global::System.Collections.Generic.IEnumerable<")
+                    .Print(FullyQualifiedName).PrintEndLine(">.GetEnumerator()");
+                p.OpenScope();
+                {
+                    p.PrintLine("return GetEnumerator();");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("readonly global::System.Collections.IEnumerator ")
+                    .PrintEndLine("global::System.Collections.IEnumerable.GetEnumerator()");
+                p.OpenScope();
+                {
+                    p.PrintLine("return GetEnumerator();");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintBeginLine("public partial struct Enumerator")
+                    .Print(" : global::System.Collections.Generic.IEnumerator<")
+                    .Print(FullyQualifiedName).PrintEndLine(">");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("private readonly ").Print(StructName).PrintEndLine(" _value;");
+                    p.PrintLine("private int _index;");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AggressiveInlining);
+                    p.PrintBeginLine("public Enumerator(").Print(StructName).PrintEndLine(" value)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("_value = value;");
+                        p.PrintLine("_index = -1;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintBeginLine("public readonly ").Print(FullyQualifiedName).PrintEndLine(" Current");
+                    p.OpenScope();
+                    {
+                        p.PrintLine(AggressiveInlining);
+                        p.PrintBeginLine("get => ").Print(ExtensionsName).PrintEndLine(".Values.AsSpan()[_index];");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("readonly object global::System.Collections.IEnumerator.Current");
+                    p.OpenScope();
+                    {
+                        p.PrintLine(AggressiveInlining);
+                        p.PrintLine("get => this.Current;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("public bool MoveNext()");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("var value = _value;");
+                        p.PrintLine("var index = _index + 1;");
+                        p.PrintBeginLine("var length = (uint)").Print(ExtensionsName).PrintEndLine(".Length;");
+                        p.PrintBeginLine("var flags = ").Print(ExtensionsName).PrintEndLine(".Values.AsSpan();");
+                        p.PrintEndLine();
+
+                        p.PrintLine("while ((uint)index < length)");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("var flag = flags[index];");
+                            p.PrintEndLine();
+
+                            p.PrintLine("if (flag != 0 && value.Contains(flag))");
+                            p.OpenScope();
+                            {
+                                p.PrintLine("_index = index;");
+                                p.PrintLine("return true;");
+                            }
+                            p.CloseScope();
+                            p.PrintEndLine();
+
+                            p.PrintLine("index++;");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine(AggressiveInlining);
+                    p.PrintLine("public void Reset()");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("_index = -1;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine(AggressiveInlining);
+                    p.PrintLine("public readonly void Dispose() { }");
+                }
+                p.CloseScope();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
         private void WriteClass(ref Printer p)
         {
             WriteAttribute(ref p);
@@ -383,10 +537,14 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     WriteTryParseSpan(ref p, @this);
                 }
 
+                if (WithoutIsDefined == false)
+                {
+                    WriteIsDefined(ref p, @this);
+                }
+
                 if (OnlyNames == false)
                 {
                     WriteTryFormat(ref p, @this);
-                    WriteIsDefined(ref p, @this);
                     WriteFindIndex(ref p, @this);
                     WriteFlags(ref p, @this);
                     WriteClassValues(ref p);
@@ -487,7 +645,13 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
                 }
 
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value)");
+                p.WithIncreasedIndent().PrintLine("=> Get(value, true);");
+                p.PrintEndLine();
+
+                p.PrintBeginLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value")
+                    .PrintEndLine(", bool emptyIfUndefined)");
                 p = p.IncreasedIndent();
                 p.PrintLine($"=> value switch");
                 p.OpenScope();
@@ -497,7 +661,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                         p.PrintLine($"{FullyQualifiedName}.{member.name} => {member.name},");
                     }
 
-                    p.PrintLine($"_ => default,");
+                    p.PrintLine($"_ => emptyIfUndefined ? default : ToFixedString(ToUnderlyingValue(value)),");
                 }
                 p.CloseScope("};");
                 p = p.DecreasedIndent();
@@ -576,7 +740,13 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
                 }
 
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value)");
+                p.WithIncreasedIndent().PrintLine("=> Get(value, true);");
+                p.PrintEndLine();
+
+                p.PrintBeginLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value")
+                    .PrintEndLine(", bool emptyIfUndefined)");
                 p = p.IncreasedIndent();
                 p.PrintLine($"=> value switch");
                 p.OpenScope();
@@ -586,7 +756,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                         p.PrintLine($"{FullyQualifiedName}.{member.name} => {member.name},");
                     }
 
-                    p.PrintLine($"_ => default,");
+                    p.PrintLine($"_ => emptyIfUndefined ? default : ToFixedString(ToUnderlyingValue(value)),");
                 }
                 p.CloseScope("};");
                 p = p.DecreasedIndent();
@@ -634,7 +804,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("public static global::System.ReadOnlySpan<string> AsSpan() => s_names;");
                 p.PrintEndLine();
 
-                p.PrintLine($"public static string Get({FullyQualifiedName} value)");
+                p.PrintLine(AggressiveInlining);
+                p.PrintLine($"public static string Get({FullyQualifiedName} value) => Get(value, true);");
+                p.PrintEndLine();
+
+                p.PrintLine($"public static string Get({FullyQualifiedName} value, bool emptyIfUndefined)");
                 p = p.IncreasedIndent();
                 p.PrintLine("=> value switch");
                 p.OpenScope();
@@ -644,7 +818,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                         p.PrintLine($"{FullyQualifiedName}.{member.name} => {member.name},");
                     }
 
-                    p.PrintLine("_ => string.Empty,");
+                    p.PrintLine("_ => emptyIfUndefined ? string.Empty : ToUnderlyingValue(value).ToString(),");
                 }
                 p.CloseScope("};");
                 p = p.DecreasedIndent();
@@ -684,7 +858,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("public static global::System.ReadOnlySpan<string> AsSpan() => s_names;");
                 p.PrintEndLine();
 
-                p.PrintLine($"public static string Get({FullyQualifiedName} value)");
+                p.PrintLine(AggressiveInlining);
+                p.PrintLine($"public static string Get({FullyQualifiedName} value) => Get(value, true);");
+                p.PrintEndLine();
+
+                p.PrintLine($"public static string Get({FullyQualifiedName} value, bool emptyIfUndefined)");
                 p = p.IncreasedIndent();
                 p.PrintLine("=> value switch");
                 p.OpenScope();
@@ -694,7 +872,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                         p.PrintLine($"{FullyQualifiedName}.{member.name} => {member.name},");
                     }
 
-                    p.PrintLine("_ => string.Empty,");
+                    p.PrintLine("_ => emptyIfUndefined ? string.Empty : ToUnderlyingValue(value).ToString(),");
                 }
                 p.CloseScope("};");
                 p = p.DecreasedIndent();
@@ -1354,8 +1532,24 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
             p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static string ToStringFast({@this}{FullyQualifiedName} value)");
+            p.WithIncreasedIndent().PrintLine("=> ToStringFast(value, true);");
+            p.PrintEndLine();
+
+            if (NoDocumentation == false)
+            {
+                p.PrintLine("/// <summary>");
+                p.PrintLine($"/// Returns the string representation of the <see cref=\"{FullyQualifiedName}\"/> value.");
+                p.PrintLine("/// </summary>");
+                p.PrintLine("/// <param name=\"value\">The value to retrieve the string value for</param>");
+                p.PrintBeginLine("/// <param name=\"emptyIfUndefined\">If <c>true</c>, returns an empty string for ")
+                    .PrintEndLine("undefined values; otherwise, returns the string representation of the value</param>");
+                p.PrintLine("/// <returns>The string representation of the value</returns>");
+            }
+
+            p.PrintLine(AggressiveInlining);
+            p.PrintLine($"public static string ToStringFast({@this}{FullyQualifiedName} value, bool emptyIfUndefined)");
             p = p.IncreasedIndent();
-            p.PrintBeginLine("=> ").Print(CLASS_NAMES).PrintEndLine(".Get(value);");
+            p.PrintBeginLine("=> ").Print(CLASS_NAMES).PrintEndLine(".Get(value, emptyIfUndefined);");
             p = p.DecreasedIndent();
             p.PrintEndLine();
 
@@ -1373,8 +1567,27 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
             p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static string ToDisplayStringFast({@this}{FullyQualifiedName} value)");
+            p.WithIncreasedIndent().PrintLine("=> ToDisplayStringFast(value, true);");
+            p.PrintEndLine();
+
+            if (NoDocumentation == false)
+            {
+                p.PrintLine("/// <summary>");
+                p.PrintLine($"/// Returns the string representation of the <see cref=\"{FullyQualifiedName}\"/> value.");
+                p.PrintLine("/// If the attribute is decorated with a <c>[Display]</c> attribute, then");
+                p.PrintLine("/// uses the provided value. Otherwise uses the name of the member, equivalent to");
+                p.PrintLine("/// calling <c>ToString()</c> on <paramref name=\"value\"/>.");
+                p.PrintLine("/// </summary>");
+                p.PrintLine("/// <param name=\"value\">The value to retrieve the string value for</param>");
+                p.PrintBeginLine("/// <param name=\"emptyIfUndefined\">If <c>true</c>, returns an empty string for ")
+                    .PrintEndLine("undefined values; otherwise, returns the string representation of the value</param>");
+                p.PrintLine("/// <returns>The string representation of the value</returns>");
+            }
+
+            p.PrintLine(AggressiveInlining);
+            p.PrintLine($"public static string ToDisplayStringFast({@this}{FullyQualifiedName} value, bool emptyIfUndefined)");
             p = p.IncreasedIndent();
-            p.PrintBeginLine("=> ").Print(CLASS_DISPLAY_NAMES).PrintEndLine(".Get(value);");
+            p.PrintBeginLine("=> ").Print(CLASS_DISPLAY_NAMES).PrintEndLine(".Get(value, emptyIfUndefined);");
             p = p.DecreasedIndent();
             p.PrintEndLine();
 
@@ -1394,8 +1607,24 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
             p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} ToFixedString({@this}{FullyQualifiedName} value)");
+            p.WithIncreasedIndent().PrintLine("=> ToFixedString(value, true);");
+            p.PrintEndLine();
+
+            if (NoDocumentation == false)
+            {
+                p.PrintLine("/// <summary>");
+                p.PrintLine($"/// Returns the fixed string representation of the <see cref=\"{FullyQualifiedName}\"/> value.");
+                p.PrintLine("/// </summary>");
+                p.PrintLine("/// <param name=\"value\">The value to retrieve the string value for</param>");
+                p.PrintBeginLine("/// <param name=\"emptyIfUndefined\">If <c>true</c>, returns an empty string for ")
+                    .PrintEndLine("undefined values; otherwise, returns the string representation of the value</param>");
+                p.PrintLine("/// <returns>The fixed string representation of the value</returns>");
+            }
+
+            p.PrintLine(AggressiveInlining);
+            p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} ToFixedString({@this}{FullyQualifiedName} value, bool emptyIfUndefined)");
             p = p.IncreasedIndent();
-            p.PrintBeginLine("=> ").Print(CLASS_FIXED_NAMES).PrintEndLine(".Get(value);");
+            p.PrintBeginLine("=> ").Print(CLASS_FIXED_NAMES).PrintEndLine(".Get(value, emptyIfUndefined);");
             p = p.DecreasedIndent();
             p.PrintEndLine();
 
@@ -1413,8 +1642,27 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
             p.PrintLine(AggressiveInlining);
             p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} ToDisplayFixedString({@this}{FullyQualifiedName} value)");
+            p.WithIncreasedIndent().PrintLine("=> ToDisplayFixedString(value, true);");
+            p.PrintEndLine();
+
+            if (NoDocumentation == false)
+            {
+                p.PrintLine("/// <summary>");
+                p.PrintLine($"/// Returns the fixed string representation of the <see cref=\"{FullyQualifiedName}\"/> value.");
+                p.PrintLine("/// If the attribute is decorated with a <c>[Display]</c> attribute, then");
+                p.PrintLine("/// uses the provided value. Otherwise uses the name of the member, equivalent to");
+                p.PrintLine("/// calling <c>ToString()</c> on <paramref name=\"value\"/>.");
+                p.PrintLine("/// </summary>");
+                p.PrintLine("/// <param name=\"value\">The value to retrieve the string value for</param>");
+                p.PrintBeginLine("/// <param name=\"emptyIfUndefined\">If <c>true</c>, returns an empty string for ")
+                    .PrintEndLine("undefined values; otherwise, returns the string representation of the value</param>");
+                p.PrintLine("/// <returns>The fixed string representation of the value</returns>");
+            }
+
+            p.PrintLine(AggressiveInlining);
+            p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} ToDisplayFixedString({@this}{FullyQualifiedName} value, bool emptyIfUndefined)");
             p = p.IncreasedIndent();
-            p.PrintBeginLine("=> ").Print(CLASS_FIXED_DISPLAY_NAMES).PrintEndLine(".Get(value);");
+            p.PrintBeginLine("=> ").Print(CLASS_FIXED_DISPLAY_NAMES).PrintEndLine(".Get(value, emptyIfUndefined);");
             p = p.DecreasedIndent();
             p.PrintEndLine();
 

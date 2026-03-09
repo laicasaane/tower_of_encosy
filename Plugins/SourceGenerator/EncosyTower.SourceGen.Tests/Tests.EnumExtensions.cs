@@ -16,8 +16,8 @@ namespace EncosyTower.Tests.EnumExtensions
     {
         None = 0,
         Bit1 = 1 << 0,
-        Bit2 = 2 << 0,
-        Bit3 = 3 << 0,
+        Bit2 = 1 << 1,
+        Bit3 = 1 << 2,
     }
 
     partial class BitFlagsExtensions { }
