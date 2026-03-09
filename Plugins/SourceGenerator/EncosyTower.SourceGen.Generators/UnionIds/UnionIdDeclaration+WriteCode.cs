@@ -1911,7 +1911,7 @@
         {
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetNames(")
-                .PrintEndLine("IdKind kind, global::System.Collections.Generic.IList<string> result)");
+                .PrintEndLine("IdKind kind, global::System.Collections.Generic.ICollection<string> result)");
             p.OpenScope();
             {
                 p.PrintLine("switch (kind)");
@@ -1926,26 +1926,10 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintLine("if (result is global::EncosyTower.Collections.FasterList<string> fasterList)");
-                            p.OpenScope();
-                            {
-                                p.PrintBeginLine("fasterList.AddRange(").Print(kind.enumExtensionsName)
-                                    .PrintEndLine(".Names.AsSpan());");
-                            }
-                            p.CloseScope();
-                            p.PrintLine("else");
-                            p.OpenScope();
-                            {
-                                p.PrintBeginLine("foreach (var name in ").Print(kind.enumExtensionsName)
-                                    .PrintEndLine(".Names.AsSpan())");
-                                p.OpenScope();
-                                {
-                                    p.PrintLine("result.Add(name);");
-                                }
-                                p.CloseScope();
-                            }
-                            p.CloseScope();
-                            p.PrintEndLine();
+                            p.PrintBeginLine("global::EncosyTower.Collections.Extensions.")
+                                .Print("EncosyICollectionExtensions.AddRange(result, ")
+                                .Print(kind.enumExtensionsName)
+                                .PrintEndLine(".Names.AsSpan());");
 
                             p.PrintLine("return true;");
                         }
@@ -1976,7 +1960,7 @@
         {
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetDisplayNames(")
-                .PrintEndLine("IdKind kind, global::System.Collections.Generic.IList<string> result)");
+                .PrintEndLine("IdKind kind, global::System.Collections.Generic.ICollection<string> result)");
             p.OpenScope();
             {
                 p.PrintLine("switch (kind)");
@@ -1991,26 +1975,10 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintLine("if (result is global::EncosyTower.Collections.FasterList<string> fasterList)");
-                            p.OpenScope();
-                            {
-                                p.PrintBeginLine("fasterList.AddRange(").Print(kind.enumExtensionsName)
-                                    .PrintEndLine(".DisplayNames.AsSpan());");
-                            }
-                            p.CloseScope();
-                            p.PrintLine("else");
-                            p.OpenScope();
-                            {
-                                p.PrintBeginLine("foreach (var name in ").Print(kind.enumExtensionsName)
-                                    .PrintEndLine(".DisplayNames.AsSpan())");
-                                p.OpenScope();
-                                {
-                                    p.PrintLine("result.Add(name);");
-                                }
-                                p.CloseScope();
-                            }
-                            p.CloseScope();
-                            p.PrintEndLine();
+                            p.PrintBeginLine("global::EncosyTower.Collections.Extensions.")
+                                .Print("EncosyICollectionExtensions.AddRange(result, ")
+                                .Print(kind.enumExtensionsName)
+                                .PrintEndLine(".DisplayNames.AsSpan());");
 
                             p.PrintLine("return true;");
                         }
