@@ -76,13 +76,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     continue;
                 }
 
-                if (property.DeclaringSyntaxReferences.Length < 1)
-                {
-                    continue;
-                }
-
-                var syntaxNode = property.DeclaringSyntaxReferences[0].GetSyntax(token);
-
                 if (type.BaseType == null
                     || type.TryGetGenericType(DATA_TABLE_ASSET, 3, 2, out var baseType) == false
                 )
@@ -91,7 +84,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
 
                 var table = new TableRef {
-                    SyntaxNode = syntaxNode,
                     Type = type,
                     BaseType = baseType,
                     PropertyName = property.Name,

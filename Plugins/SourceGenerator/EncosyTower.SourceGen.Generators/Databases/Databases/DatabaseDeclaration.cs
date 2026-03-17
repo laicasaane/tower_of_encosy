@@ -94,11 +94,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     continue;
                 }
 
-                if (property.DeclaringSyntaxReferences.Length < 1)
-                {
-                    continue;
-                }
-
                 if (type.IsAbstract)
                 {
                     context.ReportDiagnostic(

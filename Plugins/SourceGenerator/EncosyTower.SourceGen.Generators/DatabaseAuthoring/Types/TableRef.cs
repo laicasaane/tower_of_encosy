@@ -6,8 +6,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
     public class TableRef
     {
-        public SyntaxNode SyntaxNode { get; set; }
-
         public INamedTypeSymbol Type { get; set; }
 
         public INamedTypeSymbol BaseType { get; set; }

@@ -203,7 +203,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         context.OutputSource(
                               outputSourceGenFiles
                             , databaseRef.Syntax
-                            , table.SyntaxNode
                             , declaration.WriteSheet(tableAssetRef, dataTypeDeclaration, dataMap, objectType)
                             , sheetHintName
                             , sheetSourceFilePath
