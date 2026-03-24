@@ -107,12 +107,12 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 return default;
             }
 
-            return BuildDeclaration(typeArg, context.Node.GetLocation(), token);
+            return BuildDeclaration(typeArg, LocationInfo.From(context.Node.GetLocation()), token);
         }
 
         internal static InternalVariantDeclaration BuildDeclaration(
               INamedTypeSymbol typeArg
-            , Location location
+            , LocationInfo location
             , CancellationToken token
         )
         {
@@ -167,8 +167,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 using var valueTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
                 using var refTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
                 var seenTypeNames = new HashSet<string>(StringComparer.Ordinal);
@@ -187,6 +185,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                         , assemblyName
                         , outputSourceGenFiles
                         , s_errorDescriptor
+                        , projectPath
                     );
 
                     if (candidate.isValueType)
@@ -206,6 +205,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                     , assemblyName
                     , outputSourceGenFiles
                     , s_errorDescriptor
+                    , projectPath
                 );
             }
             catch (Exception e)

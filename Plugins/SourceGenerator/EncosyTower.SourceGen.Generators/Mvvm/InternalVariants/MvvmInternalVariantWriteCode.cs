@@ -32,12 +32,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             , string assemblyName
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
+            , string projectPath = null
         )
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
             var hintName = $"{GENERATOR_NAME}__{decl.fileHintName}.g.cs";
-            var sourceFilePath = BuildSourceFilePath(assemblyName, hintName);
+            var sourceFilePath = BuildSourceFilePath(assemblyName, hintName, projectPath);
 
             try
             {
@@ -51,7 +52,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 
                 if (outputSourceGenFiles)
                 {
-                    SourceGenHelpers.OutputSourceToFile(context, decl.location, sourceFilePath, sourceText);
+                    SourceGenHelpers.OutputSourceToFile(context, decl.location.ToLocation(), sourceFilePath, sourceText, projectPath);
                 }
             }
             catch (Exception e)
@@ -61,7 +62,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                     throw;
                 }
 
-                context.ReportDiagnostic(Diagnostic.Create(errorDescriptor, decl.location, e.ToUnityPrintableString()));
+                context.ReportDiagnostic(Diagnostic.Create(errorDescriptor, decl.location.ToLocation(), e.ToUnityPrintableString()));
             }
         }
 
@@ -116,12 +117,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             , string assemblyName
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
+            , string projectPath = null
         )
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
             var hintName = $"{GENERATOR_NAME}__InternalVariants__{assemblyName.ToValidIdentifier()}.g.cs";
-            var sourceFilePath = BuildSourceFilePath(assemblyName, hintName);
+            var sourceFilePath = BuildSourceFilePath(assemblyName, hintName, projectPath);
 
             try
             {
@@ -135,7 +137,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 
                 if (outputSourceGenFiles)
                 {
-                    SourceGenHelpers.OutputSourceToFile(context, Location.None, sourceFilePath, sourceText);
+                    SourceGenHelpers.OutputSourceToFile(context, Location.None, sourceFilePath, sourceText, projectPath);
                 }
             }
             catch (Exception e)
@@ -240,8 +242,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             return p.Result;
         }
 
-        internal static string BuildSourceFilePath(string assemblyName, string hintName)
+        internal static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath = null)
         {
+            if (projectPath is not null)
+            {
+                var dir = $"{projectPath}/Temp/GeneratedCode/{assemblyName}/";
+                Directory.CreateDirectory(dir);
+                return $"{dir}{hintName}";
+            }
+
             if (SourceGenHelpers.CanWriteToProjectPath)
             {
                 var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";

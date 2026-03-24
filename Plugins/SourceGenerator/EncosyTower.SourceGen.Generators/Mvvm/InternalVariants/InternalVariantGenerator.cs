@@ -121,18 +121,18 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 
             var semanticModel = context.SemanticModel;
             ITypeSymbol typeSymbol;
-            Location location;
+            LocationInfo location;
 
             if (context.Node is FieldDeclarationSyntax field)
             {
                 typeSymbol = semanticModel.GetTypeInfo(field.Declaration.Type, token).Type;
-                location = field.Declaration.Type.GetLocation();
+                location = LocationInfo.From(field.Declaration.Type.GetLocation());
             }
             else if (context.Node is MethodDeclarationSyntax method)
             {
                 var typeSyntax = method.ParameterList.Parameters[0].Type;
                 typeSymbol = semanticModel.GetTypeInfo(typeSyntax, token).Type;
-                location = typeSyntax.GetLocation();
+                location = LocationInfo.From(typeSyntax.GetLocation());
             }
             else if (context.Node is PropertyDeclarationSyntax property
                 && property.Parent is ClassDeclarationSyntax classSyntax
@@ -141,7 +141,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             )
             {
                 typeSymbol = semanticModel.GetTypeInfo(property.Type, token).Type;
-                location = property.Type.GetLocation();
+                location = LocationInfo.From(property.Type.GetLocation());
             }
             else
             {
@@ -244,8 +244,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 // Pre-seed the set with ignored names so a single Add() covers both the ignore-list
                 // check and deduplication in one pass.
                 var seenTypeNames = new HashSet<string>(typeNamesToIgnore, StringComparer.Ordinal);
@@ -266,6 +264,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                         , assemblyName
                         , outputSourceGenFiles
                         , s_errorDescriptor
+                        , projectPath
                     );
 
                     if (candidate.isValueType)
@@ -285,6 +284,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                     , assemblyName
                     , outputSourceGenFiles
                     , s_errorDescriptor
+                    , projectPath
                 );
             }
             catch (Exception e)

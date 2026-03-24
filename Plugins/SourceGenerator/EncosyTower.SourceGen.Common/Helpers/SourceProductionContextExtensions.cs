@@ -44,6 +44,7 @@ namespace EncosyTower.SourceGen
             , string hintName
             , string sourceFilePath
             , Location location
+            , string projectPath = null
             , Printer? overridePrinter = default
         )
         {
@@ -64,6 +65,7 @@ namespace EncosyTower.SourceGen
                     , location
                     , sourceFilePath
                     , outputSource
+                    , projectPath
                 );
             }
         }

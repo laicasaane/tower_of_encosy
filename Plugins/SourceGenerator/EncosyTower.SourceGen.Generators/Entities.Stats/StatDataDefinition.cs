@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
@@ -15,7 +14,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public string sourceFilePath;
         public string openingSource;
         public string closingSource;
-        public Location location;
+        public LocationInfo location;
         public int size;
         public bool singleValue;
         public bool isEnum;
@@ -30,7 +29,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             && string.IsNullOrEmpty(sourceFilePath) == false
             && string.IsNullOrEmpty(openingSource) == false
             && string.IsNullOrEmpty(closingSource) == false
-            && location != null
             ;
 
         public readonly override bool Equals(object obj)
@@ -42,6 +40,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             && string.Equals(valueTypeName, other.valueTypeName, StringComparison.Ordinal)
             && string.Equals(valueFullTypeName, other.valueFullTypeName, StringComparison.Ordinal)
             && string.Equals(underlyingTypeName, other.underlyingTypeName, StringComparison.Ordinal)
+            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
+            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
+            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
+            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && size == other.size
             && singleValue == other.singleValue
             && isEnum == other.isEnum
@@ -54,9 +56,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 , valueTypeName
                 , valueFullTypeName
                 , underlyingTypeName
-                , size
-                , singleValue
-                , isEnum
-            );
+                , hintName
+                , sourceFilePath
+                , openingSource
+            )
+            .Add(closingSource)
+            .Add(size)
+            .Add(singleValue)
+            .Add(isEnum)
+            ;
     }
 }

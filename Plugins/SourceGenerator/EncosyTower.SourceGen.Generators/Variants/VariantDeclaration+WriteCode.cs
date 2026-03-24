@@ -24,12 +24,13 @@ namespace EncosyTower.SourceGen.Generators.Variants
             , CompilationCandidateSlim compilation
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
+            , string projectPath = null
         )
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
             var hintName = $"{GENERATOR_NAME_STRUCT}__{fileHintName}.g.cs";
-            var sourceFilePath = VariantDeclarationWriteCode.BuildSourceFilePath(compilation.assemblyName, hintName);
+            var sourceFilePath = VariantDeclarationWriteCode.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
             var variantName = $"global::{VARIANTS_NAMESPACE}.Variant<{fullTypeName}>";
 
             try
@@ -44,7 +45,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
                 if (outputSourceGenFiles)
                 {
-                    SourceGenHelpers.OutputSourceToFile(context, location, sourceFilePath, sourceText);
+                    SourceGenHelpers.OutputSourceToFile(context, location.ToLocation(), sourceFilePath, sourceText, projectPath);
                 }
             }
             catch (Exception e)
@@ -54,7 +55,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                     throw;
                 }
 
-                context.ReportDiagnostic(Diagnostic.Create(errorDescriptor, location, e.ToUnityPrintableString()));
+                context.ReportDiagnostic(Diagnostic.Create(errorDescriptor, location.ToLocation(), e.ToUnityPrintableString()));
             }
         }
 
@@ -132,13 +133,14 @@ namespace EncosyTower.SourceGen.Generators.Variants
             , CompilationCandidateSlim compilation
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
+            , string projectPath = null
         )
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
             var assemblyName = compilation.assemblyName;
             var hintName = $"{GENERATOR_NAME_REG}__AttributeVariants__{assemblyName.ToValidIdentifier()}.g.cs";
-            var sourceFilePath = BuildSourceFilePath(assemblyName, hintName);
+            var sourceFilePath = BuildSourceFilePath(assemblyName, hintName, projectPath);
 
             try
             {
@@ -152,7 +154,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
                 if (outputSourceGenFiles)
                 {
-                    SourceGenHelpers.OutputSourceToFile(context, Location.None, sourceFilePath, sourceText);
+                    SourceGenHelpers.OutputSourceToFile(context, Location.None, sourceFilePath, sourceText, projectPath);
                 }
             }
             catch (Exception e)
@@ -264,12 +266,13 @@ namespace EncosyTower.SourceGen.Generators.Variants
             , CompilationCandidateSlim compilation
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
+            , string projectPath = null
         )
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
             var hintName = $"{GENERATOR_NAME_REG}__Redundant__{declaration.fileHintName}.g.cs";
-            var sourceFilePath = BuildSourceFilePath(compilation.assemblyName, hintName);
+            var sourceFilePath = BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
 
             try
             {
@@ -283,7 +286,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
                 if (outputSourceGenFiles)
                 {
-                    SourceGenHelpers.OutputSourceToFile(context, declaration.location, sourceFilePath, sourceText);
+                    SourceGenHelpers.OutputSourceToFile(context, declaration.location.ToLocation(), sourceFilePath, sourceText, projectPath);
                 }
             }
             catch (Exception e)
@@ -293,7 +296,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                     throw;
                 }
 
-                context.ReportDiagnostic(Diagnostic.Create(errorDescriptor, declaration.location, e.ToUnityPrintableString()));
+                context.ReportDiagnostic(Diagnostic.Create(errorDescriptor, declaration.location.ToLocation(), e.ToUnityPrintableString()));
             }
         }
 
@@ -342,8 +345,15 @@ namespace EncosyTower.SourceGen.Generators.Variants
             return p.Result;
         }
 
-        internal static string BuildSourceFilePath(string assemblyName, string hintName)
+        internal static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath = null)
         {
+            if (projectPath is not null)
+            {
+                var dir = $"{projectPath}/Temp/GeneratedCode/{assemblyName}/";
+                Directory.CreateDirectory(dir);
+                return $"{dir}{hintName}";
+            }
+
             if (SourceGenHelpers.CanWriteToProjectPath)
             {
                 var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";

@@ -47,16 +47,38 @@ namespace EncosyTower.SourceGen
 
         public static bool CanWriteToProjectPath => !string.IsNullOrEmpty(s_projectPath);
 
-        public struct SourceGenConfig
+        public struct SourceGenConfig : IEquatable<SourceGenConfig>
         {
             public string projectPath;
             public bool outputSourceGenFiles;
+
+            public readonly override bool Equals(object obj)
+                => obj is SourceGenConfig other && Equals(other);
+
+            public readonly bool Equals(SourceGenConfig other)
+                => string.Equals(projectPath, other.projectPath, StringComparison.Ordinal)
+                && outputSourceGenFiles == other.outputSourceGenFiles
+                ;
+
+            public readonly override int GetHashCode()
+                => HashValue.Combine(projectPath, outputSourceGenFiles);
         }
 
-        public struct ParseOptionConfig
+        public struct ParseOptionConfig : IEquatable<ParseOptionConfig>
         {
             public bool outputSourceGenFiles;
             public bool pathIsInFirstAdditionalTextItem;
+
+            public readonly override bool Equals(object obj)
+                => obj is ParseOptionConfig other && Equals(other);
+
+            public readonly bool Equals(ParseOptionConfig other)
+                => outputSourceGenFiles == other.outputSourceGenFiles
+                && pathIsInFirstAdditionalTextItem == other.pathIsInFirstAdditionalTextItem
+                ;
+
+            public readonly override int GetHashCode()
+                => HashValue.Combine(outputSourceGenFiles, pathIsInFirstAdditionalTextItem);
         }
 
         public static IncrementalValueProvider<SourceGenConfig> GetSourceGenConfigProvider(
@@ -189,12 +211,15 @@ namespace EncosyTower.SourceGen
             , Location locationToErrorAt
             , string generatedSourceFilePath
             , SourceText sourceTextForNewClass
+            , string projectPath = null
             , string errorCode = "SGE000"
             , string errorTitle = "Generator"
             , string errorCategory = "Generator"
         )
         {
-            if (!CanWriteToProjectPath)
+            var resolvedPath = projectPath ?? (CanWriteToProjectPath ? s_projectPath : null);
+
+            if (string.IsNullOrEmpty(resolvedPath))
                 return;
 
             try

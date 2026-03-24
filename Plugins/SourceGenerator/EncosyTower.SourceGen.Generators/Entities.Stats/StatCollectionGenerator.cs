@@ -33,7 +33,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 .Combine(projectPathProvider)
                 .Where(static t => t.Left.Right.isValid);
 
-            context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
+            context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
                     , source.Left.Right
@@ -123,7 +123,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
                 closingSource = closingSource,
-                location = syntax.GetLocation(),
+                location = LocationInfo.From(syntax.GetLocation()),
             };
 
             var args = attribute.ConstructorArguments;
@@ -285,8 +285,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 context.OutputSource(
                       outputSourceGenFiles
                     , candidate.openingSource
@@ -294,7 +292,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     , candidate.closingSource
                     , candidate.hintName
                     , candidate.sourceFilePath
-                    , candidate.location
+                    , candidate.location.ToLocation()
+                    , projectPath
                 );
             }
             catch (Exception e)
@@ -306,7 +305,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
-                    , candidate.location
+                    , candidate.location.ToLocation()
                     , e.ToUnityPrintableString()
                 ));
             }

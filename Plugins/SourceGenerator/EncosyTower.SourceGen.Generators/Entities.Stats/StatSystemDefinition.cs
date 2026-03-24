@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
@@ -13,7 +12,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public string sourceFilePath;
         public string openingSource;
         public string closingSource;
-        public Location location;
+        public LocationInfo location;
         public int maxDataSize;
         public int maxUserDataSize;
         public bool isStatic;
@@ -29,7 +28,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             && string.IsNullOrEmpty(closingSource) == false
             && maxDataSize > 0
             && maxUserDataSize > 0
-            && location != null
             ;
 
         public readonly override bool Equals(object obj)
@@ -39,6 +37,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(typeNamespace, other.typeNamespace, StringComparison.Ordinal)
             && string.Equals(syntaxKeyword, other.syntaxKeyword, StringComparison.Ordinal)
+            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
+            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
             && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
             && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && maxDataSize == other.maxDataSize
@@ -51,11 +51,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                   typeName
                 , typeNamespace
                 , syntaxKeyword
+                , hintName
+                , sourceFilePath
                 , openingSource
                 , closingSource
                 , maxDataSize
-                , maxUserDataSize
-                , isStatic
-            );
+            )
+            .Add(maxUserDataSize)
+            .Add(isStatic)
+            ;
     }
 }

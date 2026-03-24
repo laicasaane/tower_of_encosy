@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
@@ -13,7 +12,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public string sourceFilePath;
         public string openingSource;
         public string closingSource;
-        public Location location;
+        public LocationInfo location;
         public EquatableArray<StatDataDefinition> statDataCollection;
         public uint typeIdOffset;
 
@@ -25,7 +24,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             && string.IsNullOrEmpty(sourceFilePath) == false
             && string.IsNullOrEmpty(openingSource) == false
             && string.IsNullOrEmpty(closingSource) == false
-            && location != null
             && statDataCollection.IsEmpty == false
             ;
 
@@ -33,6 +31,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(typeNamespace, other.typeNamespace, StringComparison.Ordinal)
             && string.Equals(statSystemFullTypeName, other.statSystemFullTypeName, StringComparison.Ordinal)
+            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
+            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
+            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
+            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && statDataCollection.Equals(other.statDataCollection)
             && typeIdOffset == other.typeIdOffset
             ;
@@ -45,9 +47,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                   typeName
                 , typeNamespace
                 , statSystemFullTypeName
+                , hintName
+                , sourceFilePath
+                , openingSource
+                , closingSource
                 , statDataCollection
-                , typeIdOffset
-            );
+            )
+            .Add(typeIdOffset)
+            ;
 
         internal partial struct StatDataDefinition : IEquatable<StatDataDefinition>
         {

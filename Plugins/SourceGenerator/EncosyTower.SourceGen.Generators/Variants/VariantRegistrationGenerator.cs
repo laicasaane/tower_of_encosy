@@ -73,7 +73,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             return VariantStructGenerator.BuildDeclaration(
                   structSymbol
                 , typeArg
-                , context.TargetNode.GetLocation()
+                , LocationInfo.From(context.TargetNode.GetLocation())
                 , token
             );
         }
@@ -95,8 +95,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 using var uniqueBuilder = ImmutableArrayBuilder<VariantDeclaration>.Rent();
                 using var redundants = ImmutableArrayBuilder<VariantDeclaration>.Rent();
                 var seenTypeNames = new HashSet<string>(StringComparer.Ordinal);
@@ -119,6 +117,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                     , compilation
                     , outputSourceGenFiles
                     , s_errorDescriptor
+                    , projectPath
                 );
 
                 foreach (var redundant in redundants.ToImmutable())
@@ -129,6 +128,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                         , compilation
                         , outputSourceGenFiles
                         , s_errorDescriptor
+                        , projectPath
                     );
                 }
             }

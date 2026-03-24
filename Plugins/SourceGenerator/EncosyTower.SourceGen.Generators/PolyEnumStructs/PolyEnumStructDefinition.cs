@@ -5,6 +5,9 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 {
     internal partial struct PolyEnumStructDefinition : IEquatable<PolyEnumStructDefinition>
     {
+        /// <summary>Excluded from equality/hash — location is not stable across incremental runs.</summary>
+        public LocationInfo location;
+
         public string typeName;
         public string typeNamespace;
         public string typeIdentifier;
@@ -12,7 +15,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         public string sourceFilePath;
         public string openingSource;
         public string closingSource;
-        public Location location;
         public InterfaceDefinition interfaceDef;
         public EquatableArray<StructDefinition> structs;
         public DefinedUndefinedStruct definedUndefinedStruct;
@@ -28,12 +30,15 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             && string.IsNullOrEmpty(sourceFilePath) == false
             && string.IsNullOrEmpty(openingSource) == false
             && string.IsNullOrEmpty(closingSource) == false
-            && location != null
             ;
 
         public readonly bool Equals(PolyEnumStructDefinition other)
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(typeNamespace, other.typeNamespace, StringComparison.Ordinal)
+            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
+            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
+            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
+            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && interfaceDef.Equals(other.interfaceDef)
             && structs.Equals(other.structs)
             && definedUndefinedStruct == other.definedUndefinedStruct
@@ -51,6 +56,10 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             var hash = new HashValue();
             hash.Add(typeName);
             hash.Add(typeNamespace);
+            hash.Add(hintName);
+            hash.Add(sourceFilePath);
+            hash.Add(openingSource);
+            hash.Add(closingSource);
             hash.Add(interfaceDef);
             hash.Add(structs);
             hash.Add(definedUndefinedStruct);

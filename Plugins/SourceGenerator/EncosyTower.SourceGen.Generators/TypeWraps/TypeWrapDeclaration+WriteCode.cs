@@ -21,29 +21,29 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             p = p.IncreasedIndent();
             {
-                if (ExcludeConverter == false && IsRefStruct == false)
+                if (excludeConverter == false && isRefStruct == false)
                 {
                     p.PrintBeginLine("[TypeConverter(typeof(")
-                        .Print(FullTypeName).Print(".")
-                        .Print(TypeNameWithTypeParams).PrintEndLine("TypeConverter))]");
+                        .Print(fullTypeName).Print(".")
+                        .Print(typeNameWithTypeParams).PrintEndLine("TypeConverter))]");
                 }
 
                 p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine()
-                    .PrintIf(IsRefStruct, "ref ")
+                    .PrintIf(isRefStruct, "ref ")
                     .Print("partial ")
-                    .PrintIf(IsRecord, "record ")
-                    .PrintIf(IsStruct, "struct ", "class ")
-                    .Print(TypeNameWithTypeParams);
+                    .PrintIf(isRecord, "record ")
+                    .PrintIf(isStruct, "struct ", "class ")
+                    .Print(typeNameWithTypeParams);
 
-                if (IsRefStruct)
+                if (isRefStruct)
                 {
                     p.PrintEndLine();
                 }
                 else
                 {
                     p.Print(" : ").Print(IWRAP)
-                        .Print(FieldTypeName)
+                        .Print(fieldTypeName)
                         .PrintEndLine(">");
 
                     WriteInterfaces(ref p);
@@ -51,7 +51,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 p.OpenScope();
                 {
-                    if (IsRecord == false)
+                    if (isRecord == false)
                     {
                         WriteBackingField(ref p);
                         WritePrimaryConstructor(ref p);
@@ -72,9 +72,9 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 p.PrintEndLine();
 
                 p.PrintBeginLine("partial ")
-                    .PrintIf(IsRecord, "record ")
-                    .PrintIf(IsStruct, "struct ", "class ")
-                    .Print(TypeNameWithTypeParams)
+                    .PrintIf(isRecord, "record ")
+                    .PrintIf(isStruct, "struct ", "class ")
+                    .Print(typeNameWithTypeParams)
                     .PrintEndLine(" // Internals");
                 p.OpenScope();
                 {
@@ -92,25 +92,25 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         {
             p = p.IncreasedIndent();
 
-            if (ImplementInterfaces.HasFlag(InterfaceKind.EquatableT))
+            if (implementInterfaces.HasFlag(InterfaceKind.EquatableT))
             {
-                p.PrintBeginLine(", ").Print("IEquatable<").Print(FullTypeName).PrintEndLine(">");
-                p.PrintBeginLine(", ").Print("IEquatable<").Print(FieldTypeName).PrintEndLine(">");
+                p.PrintBeginLine(", ").Print("IEquatable<").Print(fullTypeName).PrintEndLine(">");
+                p.PrintBeginLine(", ").Print("IEquatable<").Print(fieldTypeName).PrintEndLine(">");
             }
 
-            var hasCompareToT = ImplementInterfaces.HasFlag(InterfaceKind.ComparableT);
-            var hasCompareTo = ImplementInterfaces.HasFlag(InterfaceKind.Comparable)
-                && ImplementSpecialMethods.HasFlag(SpecialMethodType.CompareTo);
+            var hasCompareToT = implementInterfaces.HasFlag(InterfaceKind.ComparableT);
+            var hasCompareTo = implementInterfaces.HasFlag(InterfaceKind.Comparable)
+                && implementSpecialMethods.HasFlag(SpecialMethodType.CompareTo);
 
             if (hasCompareToT || hasCompareTo)
             {
                 p.PrintBeginLine(", ").PrintEndLine("IComparable");
             }
 
-            if (ImplementInterfaces.HasFlag(InterfaceKind.ComparableT))
+            if (implementInterfaces.HasFlag(InterfaceKind.ComparableT))
             {
-                p.PrintBeginLine(", ").Print("IComparable<").Print(FullTypeName).PrintEndLine(">");
-                p.PrintBeginLine(", ").Print("IComparable<").Print(FieldTypeName).PrintEndLine(">");
+                p.PrintBeginLine(", ").Print("IComparable<").Print(fullTypeName).PrintEndLine(">");
+                p.PrintBeginLine(", ").Print("IComparable<").Print(fieldTypeName).PrintEndLine(">");
             }
 
             p = p.DecreasedIndent();
@@ -118,16 +118,16 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private readonly void WriteBackingField(ref Printer p)
         {
-            if (IsFieldDeclared)
+            if (isFieldDeclared)
             {
                 return;
             }
 
             p.PrintBeginLine("public ")
-                .PrintIf(IsReadOnly || IsStruct == false, "readonly ")
-                .Print(FieldTypeName)
+                .PrintIf(isReadOnly || isStruct == false, "readonly ")
+                .Print(fieldTypeName)
                 .Print(" ")
-                .Print(FieldName)
+                .Print(fieldName)
                 .PrintEndLine($";");
             p.PrintEndLine();
         }
@@ -135,11 +135,11 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         private readonly void WritePrimaryConstructor(ref Printer p)
         {
             p.PrintLine(AGGRESSIVE_INLINING);
-            p.PrintBeginLine($"public {TypeName}({FieldTypeName} value)");
-            p.PrintEndLineIf(IsStruct, " : this()", "");
+            p.PrintBeginLine($"public {typeName}({fieldTypeName} value)");
+            p.PrintEndLineIf(isStruct, " : this()", "");
             p.OpenScope();
             {
-                p.PrintLine($"this.{FieldName} = value;");
+                p.PrintLine($"this.{fieldName} = value;");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -147,7 +147,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private readonly void WriteFields(ref Printer p)
         {
-            foreach (var field in Fields)
+            foreach (var field in fields)
             {
                 WriteField(ref p, field);
             }
@@ -163,18 +163,18 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             {
                 if (sameType)
                 {
-                    p.PrintLine($"public static readonly {FullTypeName} {name} = new {FullTypeName}({FieldTypeName}.{name});");
+                    p.PrintLine($"public static readonly {fullTypeName} {name} = new {fullTypeName}({fieldTypeName}.{name});");
                 }
                 else
                 {
-                    p.PrintLine($"public const {returnTypeName} {name} = {FieldTypeName}.{name};");
+                    p.PrintLine($"public const {returnTypeName} {name} = {fieldTypeName}.{name};");
                 }
             }
             else if (field.isStatic)
             {
                 if (field.isReadOnly && sameType)
                 {
-                    p.PrintLine($"public static readonly {FullTypeName} {name} = new {FullTypeName}({FieldTypeName}.{name});");
+                    p.PrintLine($"public static readonly {fullTypeName} {name} = new {fullTypeName}({fieldTypeName}.{name});");
                 }
                 else if (field.isReadOnly)
                 {
@@ -182,21 +182,21 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     p.OpenScope();
                     {
                         p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintLine($"get => {FieldTypeName}.{name};");
+                        p.PrintLine($"get => {fieldTypeName}.{name};");
                     }
                     p.CloseScope();
                 }
                 else if (sameType)
                 {
-                    p.PrintLine($"public static {FullTypeName} {name}");
+                    p.PrintLine($"public static {fullTypeName} {name}");
                     p.OpenScope();
                     {
                         p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintLine($"get => new {FullTypeName}({FieldTypeName}.{name});");
+                        p.PrintLine($"get => new {fullTypeName}({fieldTypeName}.{name});");
                         p.PrintEndLine();
 
                         p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintLine($"set => {FieldTypeName}.{name} = value.{FieldName};");
+                        p.PrintLine($"set => {fieldTypeName}.{name} = value.{fieldName};");
                     }
                     p.CloseScope();
                 }
@@ -206,22 +206,22 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     p.OpenScope();
                     {
                         p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintLine($"get => {FieldTypeName}.{name};");
+                        p.PrintLine($"get => {fieldTypeName}.{name};");
                         p.PrintEndLine();
 
                         p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintLine($"set => {FieldTypeName}.{name} = value;");
+                        p.PrintLine($"set => {fieldTypeName}.{name} = value;");
                     }
                     p.CloseScope();
                 }
             }
             else
             {
-                var isReadOnly = IsReadOnly || field.isReadOnly;
+                var isReadOnly = this.isReadOnly || field.isReadOnly;
 
                 if (isReadOnly && sameType)
                 {
-                    p.PrintLine($"public readonly {FullTypeName} {name} = new {FullTypeName}(this.{FieldName}.{name});");
+                    p.PrintLine($"public readonly {fullTypeName} {name} = new {fullTypeName}(this.{fieldName}.{name});");
                 }
                 else if (isReadOnly)
                 {
@@ -229,21 +229,21 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     p.OpenScope();
                     {
                         p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintLine($"get => this.{FieldName}.{name};");
+                        p.PrintLine($"get => this.{fieldName}.{name};");
                     }
                     p.CloseScope();
                 }
                 else if (sameType)
                 {
-                    p.PrintLine($"public {FullTypeName} {name}");
+                    p.PrintLine($"public {fullTypeName} {name}");
                     p.OpenScope();
                     {
                         p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintLine($"get => new {FullTypeName}(this.{FieldName}.{name});");
+                        p.PrintLine($"get => new {fullTypeName}(this.{fieldName}.{name});");
                         p.PrintEndLine();
 
                         p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintLine($"set => this.{FieldName}.{name} = value.{FieldName};");
+                        p.PrintLine($"set => this.{fieldName}.{name} = value.{fieldName};");
                     }
                     p.CloseScope();
                 }
@@ -253,11 +253,11 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     p.OpenScope();
                     {
                         p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintLine($"get => this.{FieldName}.{name};");
+                        p.PrintLine($"get => this.{fieldName}.{name};");
                         p.PrintEndLine();
 
                         p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintLine($"set => this.{FieldName}.{name} = value;");
+                        p.PrintLine($"set => this.{fieldName}.{name} = value;");
                     }
                     p.CloseScope();
                 }
@@ -268,7 +268,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private readonly void WriteProperties(ref Printer p)
         {
-            foreach (var property in Properties)
+            foreach (var property in properties)
             {
                 if (property.explicitInterfaceImplementationsLength > 0)
                 {
@@ -288,7 +288,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             var isStatic = property.isStatic;
             var isReadOnly = property.isReadOnly;
             var refKind = property.refKind;
-            var wrapperIsStruct = IsStruct;
+            var wrapperIsStruct = isStruct;
             var withoutSetter = property.withoutSetter;
             var getterSetterCanBeReadOnly = property.getterSetterCanBeReadOnly;
             var getterCanBeReadOnly = property.getterCanBeReadOnly;
@@ -306,7 +306,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             {
                 p.Print("ref ");
             }
-            else if (IsStruct && isStatic == false)
+            else if (isStruct && isStatic == false)
             {
                 if (isReadOnly || getterCanBeReadOnly)
                 {
@@ -318,7 +318,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             var isRef = refKind is RefKind.Ref or RefKind.RefReadOnly;
             var canConvertType = wrapperIsStruct && sameType && isRef == false;
 
-            p.PrintIf(canConvertType, FullTypeName, returnTypeName);
+            p.PrintIf(canConvertType, fullTypeName, returnTypeName);
             p.Print(" ");
 
             var explicitTypeName = string.Empty;
@@ -337,10 +337,10 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p.OpenScope();
             {
                 var fieldName = string.IsNullOrEmpty(explicitTypeName)
-                    ? $"this.{FieldName}"
-                    : $"(({explicitTypeName})this.{FieldName})";
+                    ? $"this.{this.fieldName}"
+                    : $"(({explicitTypeName})this.{this.fieldName})";
 
-                var accessor = isStatic ? FieldTypeName : fieldName;
+                var accessor = isStatic ? fieldTypeName : fieldName;
 
                 if (hasParams)
                 {
@@ -468,7 +468,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private readonly void WriteEvents(ref Printer p)
         {
-            foreach (var evt in Events)
+            foreach (var evt in events)
             {
                 if (evt.explicitInterfaceImplementationsLength > 0)
                 {
@@ -498,8 +498,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p.OpenScope();
             {
                 var fieldName = string.IsNullOrEmpty(explicitTypeName)
-                    ? $"this.{FieldName}"
-                    : $"(({explicitTypeName})this.{FieldName})";
+                    ? $"this.{this.fieldName}"
+                    : $"(({explicitTypeName})this.{this.fieldName})";
 
                 var accessor = evt.isStatic ? returnTypeName : fieldName;
 
@@ -518,7 +518,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         {
             SpecialMethodType writtenSpecialMethods = default;
 
-            foreach (var method in Methods)
+            foreach (var method in methods)
             {
                 if (method.explicitInterfaceImplementationsLength > 0)
                 {
@@ -545,7 +545,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p.PrintBeginLineIf(method.isPublic, "public ", "");
             p.PrintIf(method.isUnsafe, "unsafe ");
             p.PrintIf(method.isStatic, "static ");
-            p.PrintIf(IsStruct == false && method.isOverride, "override ");
+            p.PrintIf(isStruct == false && method.isOverride, "override ");
             p.PrintIf(method.isReadOnly, "readonly ");
             p.PrintIf(method.refKind == RefKind.Ref, "ref ");
             p.PrintIf(method.refKind == RefKind.RefReadOnly, "ref readonly ");
@@ -586,11 +586,11 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 if (method.isStatic)
                 {
-                    p.Print(FieldTypeName);
+                    p.Print(fieldTypeName);
                 }
                 else
                 {
-                    p.Print($"this.{FieldName}");
+                    p.Print($"this.{fieldName}");
                 }
 
                 p.Print(".").Print(method.name).Print(method.typeParameters).Print("(");
@@ -608,31 +608,31 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private readonly void WriteAdditionalMethods(ref Printer p, SpecialMethodType writtenSpecialMethods)
         {
-            var hasCompareToT = IgnoreInterfaceMethods.HasFlag(InterfaceKind.ComparableT) == false
-                && ImplementInterfaces.HasFlag(InterfaceKind.ComparableT);
+            var hasCompareToT = ignoreInterfaceMethods.HasFlag(InterfaceKind.ComparableT) == false
+                && implementInterfaces.HasFlag(InterfaceKind.ComparableT);
 
             if (hasCompareToT)
             {
-                if (IsFieldEnum)
+                if (isFieldEnum)
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
-                        .Print("int CompareTo(").Print(FieldTypeName).PrintEndLine(" other)");
+                    p.PrintBeginLine("public ").PrintIf(isStruct, "readonly ", "virtual ")
+                        .Print("int CompareTo(").Print(fieldTypeName).PrintEndLine(" other)");
                     p = p.IncreasedIndent();
                     {
-                        p.PrintBeginLine("=> ((").Print(FieldEnumUnderlyingTypeName)
-                            .Print(")this.").Print(FieldName).Print(").CompareTo((")
-                            .Print(FieldEnumUnderlyingTypeName).PrintEndLine(")other);");
+                        p.PrintBeginLine("=> ((").Print(fieldEnumUnderlyingTypeName)
+                            .Print(")this.").Print(fieldName).Print(").CompareTo((")
+                            .Print(fieldEnumUnderlyingTypeName).PrintEndLine(")other);");
                     }
                     p = p.DecreasedIndent();
                     p.PrintEndLine();
 
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
-                        .Print("int CompareTo(").Print(FullTypeName).PrintEndLine(" other)");
+                    p.PrintBeginLine("public ").PrintIf(isStruct, "readonly ", "virtual ")
+                        .Print("int CompareTo(").Print(fullTypeName).PrintEndLine(" other)");
                     p = p.IncreasedIndent();
                     {
-                        p.PrintBeginLine("=> this.CompareTo(other.").Print(FieldName).PrintEndLine(");");
+                        p.PrintBeginLine("=> this.CompareTo(other.").Print(fieldName).PrintEndLine(");");
                     }
                     p = p.DecreasedIndent();
                     p.PrintEndLine();
@@ -640,32 +640,32 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 else
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
-                        .Print("int CompareTo(").Print(FullTypeName).PrintEndLine(" other)");
+                    p.PrintBeginLine("public ").PrintIf(isStruct, "readonly ", "virtual ")
+                        .Print("int CompareTo(").Print(fullTypeName).PrintEndLine(" other)");
                     p = p.IncreasedIndent();
                     {
-                        p.PrintBeginLine("=> this.").Print(FieldName).Print(".CompareTo(other.").Print(FieldName).PrintEndLine(");");
+                        p.PrintBeginLine("=> this.").Print(fieldName).Print(".CompareTo(other.").Print(fieldName).PrintEndLine(");");
                     }
                     p = p.DecreasedIndent();
                     p.PrintEndLine();
                 }
             }
 
-            var hasCompareTo = IgnoreInterfaceMethods.HasFlag(InterfaceKind.Comparable) == false
-                && ImplementInterfaces.HasFlag(InterfaceKind.Comparable)
-                && ImplementSpecialMethods.HasFlag(SpecialMethodType.CompareTo);
+            var hasCompareTo = ignoreInterfaceMethods.HasFlag(InterfaceKind.Comparable) == false
+                && implementInterfaces.HasFlag(InterfaceKind.Comparable)
+                && implementSpecialMethods.HasFlag(SpecialMethodType.CompareTo);
 
-            if ((hasCompareToT || hasCompareTo) && IsRefStruct == false)
+            if ((hasCompareToT || hasCompareTo) && isRefStruct == false)
             {
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ").PrintEndLine("int CompareTo(object obj)");
+                p.PrintBeginLine("public ").PrintIf(isStruct, "readonly ").PrintEndLine("int CompareTo(object obj)");
                 p = p.IncreasedIndent();
                 {
                     p.PrintLine("=> obj switch");
                     p.OpenScope();
                     {
-                        p.PrintBeginLine(TypeNameWithTypeParams).PrintEndLine(" other => CompareTo(other),");
-                        p.PrintBeginLine(FieldTypeName).Print(" other => this.").Print(FieldName).PrintEndLine(".CompareTo(other),");
+                        p.PrintBeginLine(typeNameWithTypeParams).PrintEndLine(" other => CompareTo(other),");
+                        p.PrintBeginLine(fieldTypeName).Print(" other => this.").Print(fieldName).PrintEndLine(".CompareTo(other),");
                         p.PrintLine("_ => 1,");
                     }
                     p.CloseScope("};");
@@ -674,34 +674,34 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 p.PrintEndLine();
             }
 
-            if (IsStruct == false && IsRecord)
+            if (isStruct == false && isRecord)
             {
                 return;
             }
 
-            if (IgnoreInterfaceMethods.HasFlag(InterfaceKind.EquatableT) == false
-                && (ImplementOperators.HasFlag(OperatorKind.Equal)
-                || ImplementInterfaces.HasFlag(InterfaceKind.EquatableT)
+            if (ignoreInterfaceMethods.HasFlag(InterfaceKind.EquatableT) == false
+                && (implementOperators.HasFlag(OperatorKind.Equal)
+                || implementInterfaces.HasFlag(InterfaceKind.EquatableT)
             ))
             {
-                if (IsFieldEnum)
+                if (isFieldEnum)
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
-                        .Print("bool Equals(").Print(FieldTypeName).PrintEndLine(" other)");
+                    p.PrintBeginLine("public ").PrintIf(isStruct, "readonly ", "virtual ")
+                        .Print("bool Equals(").Print(fieldTypeName).PrintEndLine(" other)");
                     p = p.IncreasedIndent();
                     {
-                        p.PrintBeginLine("=> this.").Print(FieldName).Print(" == other").PrintEndLine(";");
+                        p.PrintBeginLine("=> this.").Print(fieldName).Print(" == other").PrintEndLine(";");
                     }
                     p = p.DecreasedIndent();
                     p.PrintEndLine();
 
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
-                        .Print("bool Equals(").Print(FullTypeName).PrintEndLine(" other)");
+                    p.PrintBeginLine("public ").PrintIf(isStruct, "readonly ", "virtual ")
+                        .Print("bool Equals(").Print(fullTypeName).PrintEndLine(" other)");
                     p = p.IncreasedIndent();
                     {
-                        p.PrintBeginLine("=> this.").Print(FieldName).Print(" == other.").Print(FieldName).PrintEndLine(";");
+                        p.PrintBeginLine("=> this.").Print(fieldName).Print(" == other.").Print(fieldName).PrintEndLine(";");
                     }
                     p = p.DecreasedIndent();
                     p.PrintEndLine();
@@ -709,17 +709,17 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 else
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ", "virtual ")
-                        .Print("bool Equals(").Print(FullTypeName).PrintEndLine(" other)");
+                    p.PrintBeginLine("public ").PrintIf(isStruct, "readonly ", "virtual ")
+                        .Print("bool Equals(").Print(fullTypeName).PrintEndLine(" other)");
                     p = p.IncreasedIndent();
                     {
-                        if (ImplementOperators.HasFlag(OperatorKind.Equal))
+                        if (implementOperators.HasFlag(OperatorKind.Equal))
                         {
-                            p.PrintBeginLine("=> this.").Print(FieldName).Print(" == other.").Print(FieldName).PrintEndLine(";");
+                            p.PrintBeginLine("=> this.").Print(fieldName).Print(" == other.").Print(fieldName).PrintEndLine(";");
                         }
                         else
                         {
-                            p.PrintBeginLine("=> this.").Print(FieldName).Print(".Equals(other.").Print(FieldName).PrintEndLine(");");
+                            p.PrintBeginLine("=> this.").Print(fieldName).Print(".Equals(other.").Print(fieldName).PrintEndLine(");");
                         }
                     }
                     p = p.DecreasedIndent();
@@ -727,25 +727,25 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 }
             }
 
-            var hasEquals = IgnoreInterfaceMethods.HasFlag(InterfaceKind.EquatableT)
-                || ImplementOperators.HasFlag(OperatorKind.Equal)
-                || ImplementInterfaces.HasFlag(InterfaceKind.EquatableT);
+            var hasEquals = ignoreInterfaceMethods.HasFlag(InterfaceKind.EquatableT)
+                || implementOperators.HasFlag(OperatorKind.Equal)
+                || implementInterfaces.HasFlag(InterfaceKind.EquatableT);
 
-            if (IsRecord == false
+            if (isRecord == false
                 && hasEquals
-                && ImplementSpecialMethods.HasFlag(SpecialMethodType.Equals)
-                && IsRefStruct == false
+                && implementSpecialMethods.HasFlag(SpecialMethodType.Equals)
+                && isRefStruct == false
             )
             {
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ").PrintEndLine("override bool Equals(object obj)");
+                p.PrintBeginLine("public ").PrintIf(isStruct, "readonly ").PrintEndLine("override bool Equals(object obj)");
                 p = p.IncreasedIndent();
                 {
                     p.PrintLine("=> obj switch");
                     p.OpenScope();
                     {
-                        p.PrintBeginLine(TypeNameWithTypeParams).PrintEndLine(" other => Equals(other),");
-                        p.PrintBeginLine(FieldTypeName).Print(" other => this.").Print(FieldName).PrintEndLine(".Equals(other),");
+                        p.PrintBeginLine(typeNameWithTypeParams).PrintEndLine(" other => Equals(other),");
+                        p.PrintBeginLine(fieldTypeName).Print(" other => this.").Print(fieldName).PrintEndLine(".Equals(other),");
                         p.PrintLine("_ => false,");
                     }
                     p.CloseScope("};");
@@ -755,18 +755,18 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
 
             if (writtenSpecialMethods.HasFlag(SpecialMethodType.GetHashCode) == false
-                && ImplementSpecialMethods.HasFlag(SpecialMethodType.GetHashCode)
-                && IsRefStruct == false
+                && implementSpecialMethods.HasFlag(SpecialMethodType.GetHashCode)
+                && isRefStruct == false
             )
             {
-                if (IsFieldEnum)
+                if (isFieldEnum)
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ").PrintEndLine("override int GetHashCode()");
+                    p.PrintBeginLine("public ").PrintIf(isStruct, "readonly ").PrintEndLine("override int GetHashCode()");
                     p = p.IncreasedIndent();
                     {
-                        p.PrintBeginLine("=> ((").Print(FieldEnumUnderlyingTypeName).Print(")this.")
-                            .Print(FieldName).PrintEndLine(").GetHashCode();");
+                        p.PrintBeginLine("=> ((").Print(fieldEnumUnderlyingTypeName).Print(")this.")
+                            .Print(fieldName).PrintEndLine(").GetHashCode();");
                     }
                     p = p.DecreasedIndent();
                     p.PrintEndLine();
@@ -774,10 +774,10 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 else
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ").PrintEndLine("override int GetHashCode()");
+                    p.PrintBeginLine("public ").PrintIf(isStruct, "readonly ").PrintEndLine("override int GetHashCode()");
                     p = p.IncreasedIndent();
                     {
-                        p.PrintBeginLine("=> this.").Print(FieldName).PrintEndLine(".GetHashCode();");
+                        p.PrintBeginLine("=> this.").Print(fieldName).PrintEndLine(".GetHashCode();");
                     }
                     p = p.DecreasedIndent();
                     p.PrintEndLine();
@@ -785,21 +785,21 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
 
             if (writtenSpecialMethods.HasFlag(SpecialMethodType.ToString) == false
-                && ImplementSpecialMethods.HasFlag(SpecialMethodType.ToString)
-                && IsRefStruct == false
+                && implementSpecialMethods.HasFlag(SpecialMethodType.ToString)
+                && isRefStruct == false
             )
             {
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintBeginLine("public ").PrintIf(IsStruct, "readonly ").PrintEndLine("override string ToString()");
+                p.PrintBeginLine("public ").PrintIf(isStruct, "readonly ").PrintEndLine("override string ToString()");
                 p = p.IncreasedIndent();
                 {
-                    p.PrintBeginLine("=> this.").Print(FieldName).PrintEndLine(".ToString();");
+                    p.PrintBeginLine("=> this.").Print(fieldName).PrintEndLine(".ToString();");
                 }
                 p = p.DecreasedIndent();
                 p.PrintEndLine();
             }
 
-            if (IsRefStruct)
+            if (isRefStruct)
             {
                 p.PrintLine(OBSOLETE_REF_STRUCT);
                 p.PrintLine("public override int GetHashCode() => throw null;");
@@ -813,28 +813,28 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private readonly void WriteConversionOperators(ref Printer p)
         {
-            if (FieldTypeIsInterface)
+            if (fieldTypeIsInterface)
             {
                 return;
             }
 
             p.PrintLine(AGGRESSIVE_INLINING);
-            p.PrintBeginLine("public static ").PrintIf(IsStruct, "implicit", "explicit")
-                .Print(" operator ").Print(FullTypeName)
-                .Print("(").Print(FieldTypeName).PrintEndLine(" value)");
+            p.PrintBeginLine("public static ").PrintIf(isStruct, "implicit", "explicit")
+                .Print(" operator ").Print(fullTypeName)
+                .Print("(").Print(fieldTypeName).PrintEndLine(" value)");
             p = p.IncreasedIndent();
             {
-                p.PrintBeginLine("=> new ").Print(FullTypeName).PrintEndLine("(value);");
+                p.PrintBeginLine("=> new ").Print(fullTypeName).PrintEndLine("(value);");
             }
             p = p.DecreasedIndent();
             p.PrintEndLine();
 
             p.PrintLine(AGGRESSIVE_INLINING);
-            p.PrintBeginLine("public static implicit operator ").Print(FieldTypeName)
-                .Print("(").Print(FullTypeName).PrintEndLine(" value)");
+            p.PrintBeginLine("public static implicit operator ").Print(fieldTypeName)
+                .Print("(").Print(fullTypeName).PrintEndLine(" value)");
             p = p.IncreasedIndent();
             {
-                p.PrintBeginLine("=> value.").Print(FieldName).PrintEndLine(";");
+                p.PrintBeginLine("=> value.").Print(fieldName).PrintEndLine(";");
             }
             p = p.DecreasedIndent();
             p.PrintEndLine();
@@ -843,14 +843,14 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         private readonly void WriteOperators(ref Printer p)
         {
             var operatorKinds = OperatorKinds.All;
-            var ignoreOperators = IgnoreOperators;
-            var implementOperators = ImplementOperators;
-            var operatorMap = OperatorMap;
-            var fullTypeName = FullTypeName;
-            var fieldTypeName = FieldTypeName;
-            var fieldSpecialType = FieldSpecialType;
-            var fieldUnderlyingSpecialType = FieldUnderlyingSpecialType;
-            var fieldName = FieldName;
+            var ignoreOperators = this.ignoreOperators;
+            var implementOperators = this.implementOperators;
+            var operatorMap = this.operatorMap;
+            var fullTypeName = this.fullTypeName;
+            var fieldTypeName = this.fieldTypeName;
+            var fieldSpecialType = this.fieldSpecialType;
+            var fieldUnderlyingSpecialType = this.fieldUnderlyingSpecialType;
+            var fieldName = this.fieldName;
 
             foreach (var operatorKind in operatorKinds)
             {
@@ -1139,7 +1139,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             , string fieldName
         )
         {
-            var map = OperatorMap;
+            var map = operatorMap;
 
             {
                 var kind = OperatorKind.Substraction;
@@ -1248,17 +1248,17 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private readonly void WriteTypeConverter(ref Printer p)
         {
-            if (ExcludeConverter || IsRefStruct)
+            if (excludeConverter || isRefStruct)
             {
                 return;
             }
 
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine($"private sealed class {TypeNameWithTypeParams}TypeConverter : TypeConverter");
+            p.PrintLine($"private sealed class {typeNameWithTypeParams}TypeConverter : TypeConverter");
             p.OpenScope();
             {
-                p.PrintLine($"private static readonly Type s_wrapperType = typeof({FullTypeName});");
-                p.PrintLine($"private static readonly Type s_underlyingType = typeof({FieldTypeName});");
+                p.PrintLine($"private static readonly Type s_wrapperType = typeof({fullTypeName});");
+                p.PrintLine($"private static readonly Type s_underlyingType = typeof({fieldTypeName});");
 
                 p.PrintEndLine();
 
@@ -1292,8 +1292,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     p.OpenScope();
                     {
                         p.PrintLine("var t = value.GetType();");
-                        p.PrintLine($"if (t == typeof({FullTypeName})) return ({FullTypeName})value;");
-                        p.PrintLine($"if (t == typeof({FieldTypeName})) return new {FullTypeName}(({FieldTypeName})value);");
+                        p.PrintLine($"if (t == typeof({fullTypeName})) return ({fullTypeName})value;");
+                        p.PrintLine($"if (t == typeof({fieldTypeName})) return new {fullTypeName}(({fieldTypeName})value);");
                     }
                     p.CloseScope();
 
@@ -1307,11 +1307,11 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 p.PrintLine($"public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)");
                 p.OpenScope();
                 {
-                    p.PrintLine($"if (value is {FullTypeName} wrappedValue)");
+                    p.PrintLine($"if (value is {fullTypeName} wrappedValue)");
                     p.OpenScope();
                     {
                         p.PrintLine("if (destinationType == s_wrapperType) return wrappedValue;");
-                        p.PrintLine($"if (destinationType == s_underlyingType) return wrappedValue.{FieldName};");
+                        p.PrintLine($"if (destinationType == s_underlyingType) return wrappedValue.{fieldName};");
                     }
                     p.CloseScope();
 

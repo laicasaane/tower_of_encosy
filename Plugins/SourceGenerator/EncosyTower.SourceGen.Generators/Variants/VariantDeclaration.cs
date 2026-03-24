@@ -1,12 +1,11 @@
 using System;
-using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Variants
 {
     public partial struct VariantDeclaration : IEquatable<VariantDeclaration>
     {
         /// <summary>Excluded from equality/hash — location is not stable across incremental runs.</summary>
-        public Location location;
+        public LocationInfo location;
 
         /// <summary>
         /// Fully-qualified name of the wrapped type <c>T</c> (e.g. <c>global::System.Int32</c>).
@@ -123,6 +122,8 @@ namespace EncosyTower.SourceGen.Generators.Variants
             )
             .Add(isValueType)
             .Add(hasImplicitFromStructToType)
+            .Add(isValid)
+            .Add(containingTypes.GetHashCode())
             ;
         }
     }

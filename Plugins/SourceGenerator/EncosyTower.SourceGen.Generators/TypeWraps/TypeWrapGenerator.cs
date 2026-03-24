@@ -128,7 +128,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                             );
 
                             return new TypeWrapDeclaration(
-                                  candidate.syntax.GetLocation()
+                                  LocationInfo.From(candidate.syntax.GetLocation())
                                 , hintName
                                 , sourceFilePath
                                 , openingSource
@@ -185,7 +185,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         );
 
                         return new TypeWrapDeclaration(
-                              candidate.syntax.GetLocation()
+                              LocationInfo.From(candidate.syntax.GetLocation())
                             , hintName
                             , sourceFilePath
                             , openingSource
@@ -241,7 +241,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                             );
 
                             return new TypeWrapDeclaration(
-                                  candidate.syntax.GetLocation()
+                                  LocationInfo.From(candidate.syntax.GetLocation())
                                 , hintName
                                 , sourceFilePath
                                 , openingSource
@@ -543,16 +543,15 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 context.OutputSource(
                       outputSourceGenFiles
-                    , declaration.OpeningSource
+                    , declaration.openingSource
                     , declaration.WriteCode()
-                    , declaration.ClosingSource
-                    , declaration.HintName
-                    , declaration.SourceFilePath
-                    , declaration.Location
+                    , declaration.closingSource
+                    , declaration.hintName
+                    , declaration.sourceFilePath
+                    , declaration.location.ToLocation()
+                    , projectPath
                 );
             }
             catch (Exception e)
@@ -564,7 +563,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
-                    , declaration.Location
+                    , declaration.location.ToLocation()
                     , e.ToUnityPrintableString()
                 ));
             }

@@ -31,7 +31,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 .Combine(projectPathProvider)
                 .Where(static t => t.Left.Right.isValid);
 
-            context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
+            context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
                     , source.Left.Right
@@ -143,7 +143,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 maxDataSize = Math.Max((int)maxDataSize, 1),
                 maxUserDataSize = maxUserDataSize,
                 isStatic = typeSymbol.IsStatic,
-                location = syntax.GetLocation()
+                location = LocationInfo.From(syntax.GetLocation())
             };
 
             static void PrintAdditionalUsings(ref Printer p)
@@ -188,8 +188,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 context.OutputSource(
                       outputSourceGenFiles
                     , candidate.openingSource
@@ -197,7 +195,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     , candidate.closingSource
                     , candidate.hintName
                     , candidate.sourceFilePath
-                    , candidate.location
+                    , candidate.location.ToLocation()
+                    , projectPath
                 );
             }
             catch (Exception e)
@@ -209,7 +208,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
-                    , candidate.location
+                    , candidate.location.ToLocation()
                     , e.ToUnityPrintableString()
                 ));
             }

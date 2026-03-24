@@ -65,13 +65,13 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 return default;
             }
 
-            return BuildDeclaration(structSymbol, typeArg, context.TargetNode.GetLocation(), token);
+            return BuildDeclaration(structSymbol, typeArg, LocationInfo.From(context.TargetNode.GetLocation()), token);
         }
 
         internal static VariantDeclaration BuildDeclaration(
               INamedTypeSymbol structSymbol
             , ITypeSymbol typeArg
-            , Location location
+            , LocationInfo location
             , CancellationToken token
         )
         {
@@ -158,9 +158,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
-                declaration.WriteVariantCode(ref context, compilation, outputSourceGenFiles, s_errorDescriptor);
+                declaration.WriteVariantCode(ref context, compilation, outputSourceGenFiles, s_errorDescriptor, projectPath);
             }
             catch (Exception e)
             {
@@ -171,7 +169,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
-                    , declaration.location
+                    , declaration.location.ToLocation()
                     , e.ToUnityPrintableString()
                 ));
             }

@@ -1,12 +1,11 @@
 using System;
-using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Variants
 {
     internal partial struct InternalVariantDeclaration : IEquatable<InternalVariantDeclaration>
     {
         /// <summary>Excluded from equality/hash — location is not stable across incremental runs.</summary>
-        public Location location;
+        public LocationInfo location;
 
         /// <summary>
         /// Fully-qualified name of the type <c>T</c> detected from usage of
@@ -99,6 +98,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             )
             .Add(isValueType)
             .Add(hasImplicitFromStructToType)
+            .Add(isValid)
             ;
         }
     }

@@ -38,7 +38,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 .Combine(projectPathProvider)
                 .Where(static t => t.Left.Right.isValid);
 
-            context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
+            context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
                     , source.Left.Right
@@ -114,7 +114,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
                 closingSource = closingSource,
-                location = structSyntax.GetLocation(),
+                location = LocationInfo.From(structSyntax.GetLocation()),
                 parentIsNamespace = structSyntax.Parent is BaseNamespaceDeclarationSyntax,
             };
 
@@ -780,8 +780,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 context.OutputSource(
                       outputSourceGenFiles
                     , candidate.openingSource
@@ -789,7 +787,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     , candidate.closingSource
                     , candidate.hintName
                     , candidate.sourceFilePath
-                    , candidate.location
+                    , candidate.location.ToLocation()
+                    , projectPath
                 );
             }
             catch (Exception e)
@@ -801,7 +800,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
-                    , candidate.location
+                    , candidate.location.ToLocation()
                     , e.ToUnityPrintableString()
                 ));
             }

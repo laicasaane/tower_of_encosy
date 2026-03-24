@@ -29,10 +29,11 @@ namespace EncosyTower.SourceGen
             => string.Equals(assemblyName, other.assemblyName, StringComparison.Ordinal)
             && references.Equals(other.references)
             && enableNullable == other.enableNullable
+            && isValid == other.isValid
             ;
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(assemblyName, references, enableNullable);
+            => HashValue.Combine(assemblyName, references, enableNullable, isValid);
     }
 
     public struct CompilationCandidateSlim : IEquatable<CompilationCandidateSlim>
@@ -66,10 +67,11 @@ namespace EncosyTower.SourceGen
             => string.Equals(assemblyName, other.assemblyName, StringComparison.Ordinal)
             && references.Equals(other.references)
             && enableNullable == other.enableNullable
+            && isValid == other.isValid
             ;
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(assemblyName, references, enableNullable);
+            => HashValue.Combine(assemblyName, references, enableNullable, isValid);
     }
 
     public struct References : IEquatable<References>
