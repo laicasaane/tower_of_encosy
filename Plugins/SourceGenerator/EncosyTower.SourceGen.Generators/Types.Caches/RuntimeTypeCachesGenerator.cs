@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
+using System.IO;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+#pragma warning disable RS2008 // Enable analyzer release tracking
 
 namespace EncosyTower.SourceGen.Generators.Types.Caches
 {
@@ -16,54 +18,60 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         public const string NAMESPACE_PREFIX = $"global::{NAMESPACE}";
         public const string SKIP_ATTRIBUTE = $"{NAMESPACE_PREFIX}.SkipSourceGeneratorsForAssemblyAttribute";
         public const string GENERATOR_NAME = nameof(RuntimeTypeCachesGenerator);
+        public const string RUNTIME_TYPE_CACHE = "global::EncosyTower.Types.RuntimeTypeCache";
 
         private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Types.Caches.RuntimeTypeCachesGenerator\", \"{SourceGenVersion.VALUE}\")]";
         private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
-        private const string RUNTIME_TYPE_CACHE = "global::EncosyTower.Types.RuntimeTypeCache";
         private const string GENERATED_RUNTIME_TYPE_CACHES = $"[{NAMESPACE_PREFIX}.SourceGen.GeneratedRuntimeTypeCaches]";
         private const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
         private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
-        private const string METHOD_GET_INFO = "GetInfo";
-        private const string METHOD_GET_TYPES_DERIVED_FROM = "GetTypesDerivedFrom";
-        private const string METHOD_GET_TYPES_WITH_ATTRIBUTE = "GetTypesWithAttribute";
-        private const string METHOD_GET_FIELDS_WITH_ATTRIBUTE = "GetFieldsWithAttribute";
-        private const string METHOD_GET_METHODS_WITH_ATTRIBUTE = "GetMethodsWithAttribute";
+
+        public const string METHOD_GET_INFO = "GetInfo";
+        public const string METHOD_GET_TYPES_DERIVED_FROM = "GetTypesDerivedFrom";
+        public const string METHOD_GET_TYPES_WITH_ATTRIBUTE = "GetTypesWithAttribute";
+        public const string METHOD_GET_FIELDS_WITH_ATTRIBUTE = "GetFieldsWithAttribute";
+        public const string METHOD_GET_METHODS_WITH_ATTRIBUTE = "GetMethodsWithAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
-            var compilationProvider = context.CompilationProvider
-                .Select(CompilationCandidate.GetCompilation);
-
+            // Each matched call site is processed independently — no Collect() — so that
+            // editing one call site only re-runs that single output node.
             var typeProvider = context.SyntaxProvider.CreateSyntaxProvider(
                   predicate: IsSyntaxMatched
                 , transform: GetMatchedType
-            ).Where(ValidateCandiate);
+            ).Where(static c => c.IsValid);
 
-            var combined = typeProvider.Collect()
-                .Combine(compilationProvider)
-                .Combine(projectPathProvider);
+            // Call-site branch: one file per call site, [CacheXxx] attr only.
+            context.RegisterSourceOutput(
+                  typeProvider.Combine(projectPathProvider)
+                , static (sourceProductionContext, source) => {
+                    GenerateOutput(
+                          sourceProductionContext
+                        , source.Left
+                        , source.Right.projectPath
+                        , source.Right.outputSourceGenFiles
+                    );
+                }
+            );
 
-            context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
-                GenerateOutput(
-                      sourceProductionContext
-                    , source.Left.Right
-                    , source.Left.Left
-                    , source.Right.projectPath
-                    , source.Right.outputSourceGenFiles
-                );
-            });
+            // Header branch: one file per containing type, 5 decorating attrs + empty partial struct.
+            // Collect() on ContainingTypeKey is acceptable — the struct is small and equatable,
+            // so it only re-runs when containing type shape changes, not on call-site edits.
+            var typeKeyProvider = typeProvider.Select(static (c, _) => ContainingTypeKey.From(c));
 
-            static bool ValidateCandiate(Candidate candidate)
-            {
-                return candidate.cacheAttributeType is not CacheAttributeType.None
-                    && string.IsNullOrEmpty(candidate.methodName) == false
-                    && candidate.containingSyntax is not null
-                    && candidate.containingType is not null
-                    && candidate.typeSyntax is not null
-                    ;
-            }
+            context.RegisterSourceOutput(
+                  typeKeyProvider.Collect().Combine(projectPathProvider)
+                , static (sourceProductionContext, source) => {
+                    GenerateHeaderOutput(
+                          sourceProductionContext
+                        , source.Left
+                        , source.Right.projectPath
+                        , source.Right.outputSourceGenFiles
+                    );
+                }
+            );
         }
 
         private static bool IsSyntaxMatched(SyntaxNode syntaxNode, CancellationToken token)
@@ -89,7 +97,15 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             };
         }
 
-        private static Candidate GetMatchedType(
+        /// <summary>
+        /// Extracts an equatable <see cref="TypeCacheCallSite"/> value from the semantic model.
+        /// All ISymbol and SyntaxNode data is converted to primitive/string representations so
+        /// the incremental pipeline can correctly compare successive runs and skip unchanged steps.
+        /// Invalid call sites (wrong type, forbidden namespace, non-constant assembly name, etc.)
+        /// are returned as <c>default</c> and filtered by <see cref="TypeCacheCallSite.IsValid"/>;
+        /// the <see cref="RuntimeTypeCachesAnalyzer"/> is responsible for reporting those errors.
+        /// </summary>
+        private static TypeCacheCallSite GetMatchedType(
               GeneratorSyntaxContext context
             , CancellationToken token
         )
@@ -115,8 +131,11 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             var typeArgList = member.TypeArgumentList;
             var typeInfo = semanticModel.GetTypeInfo(typeArgList.Arguments[0], token);
 
-            var containingSyntax = GetContainingType(syntax);
-            var containingType = semanticModel.GetDeclaredSymbol(containingSyntax, token);
+            // Type parameters are not applicable; the analyzer will report the diagnostic.
+            if (typeInfo.Type is not INamedTypeSymbol type)
+            {
+                return default;
+            }
 
             var cacheAttributeType = member.Identifier.ValueText switch {
                 METHOD_GET_INFO => CacheAttributeType.CacheType,
@@ -132,30 +151,92 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 return default;
             }
 
-            var candidate = new Candidate {
-                containingSyntax = containingSyntax,
-                containingType = containingType,
-                typeSyntax = typeArgList.Arguments[0],
-                type = typeInfo.Type,
-                cacheAttributeType = cacheAttributeType,
-                methodName = member.Identifier.ValueText,
-            };
+            // Validate type constraints; the analyzer will report the corresponding diagnostics.
+            var typeFullName = type.ToFullName();
+
+            if (cacheAttributeType == CacheAttributeType.CacheType)
+            {
+                if (type.IsStatic)
+                {
+                    return default;
+                }
+            }
+            else if (cacheAttributeType == CacheAttributeType.CacheTypesDerivedFrom)
+            {
+                if (type.TypeKind is not (TypeKind.Class or TypeKind.Interface)
+                    || type.IsStatic
+                    || type.IsSealed)
+                {
+                    return default;
+                }
+            }
+            else
+            {
+                // CacheTypesWithAttribute, CacheFieldsWithAttribute, CacheMethodsWithAttribute
+                if (typeFullName.StartsWith(NAMESPACE_PREFIX))
+                {
+                    return default;
+                }
+            }
+
+            // Validate the optional assembly-name argument is a compile-time constant.
+            // A non-constant argument is silently filtered; the analyzer reports the diagnostic.
+            var assemblyName = string.Empty;
 
             if (syntax.Parent is InvocationExpressionSyntax { ArgumentList.Arguments: { Count: 1 } arguments })
             {
                 var constValueOpt = semanticModel.GetConstantValue(arguments[0].Expression, token);
 
-                if (constValueOpt is { HasValue: true, Value: string assemblyName })
+                if (constValueOpt is { HasValue: true, Value: string asmName })
                 {
-                    candidate.assemblyName = string.IsNullOrWhiteSpace(assemblyName) ? string.Empty : assemblyName;
+                    assemblyName = string.IsNullOrWhiteSpace(asmName) ? string.Empty : asmName;
                 }
                 else
                 {
-                    candidate.invalidAssemblyNameSyntax = arguments[0].Expression;
+                    return default;
                 }
             }
 
-            return candidate;
+            var containingSyntax = GetContainingType(syntax);
+
+            if (containingSyntax is null)
+            {
+                return default;
+            }
+
+            var containingType = semanticModel.GetDeclaredSymbol(containingSyntax, token) as INamedTypeSymbol;
+
+            if (containingType is null)
+            {
+                return default;
+            }
+
+            var isStruct = containingType.TypeKind == TypeKind.Struct;
+
+            TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                  containingSyntax
+                , token
+                , out var scopeOpening
+                , out var scopeClosing
+            );
+
+            return new TypeCacheCallSite {
+                  compilationAssemblyName = semanticModel.Compilation.Assembly.Name
+                , containingTypeFullName = containingType.ToFullName()
+                , containingTypeFileName = containingType.ToFileName()
+                , containingTypeIdentifier = containingSyntax.Identifier.ValueText
+                , isStruct = isStruct
+                , isRefStruct = isStruct && containingSyntax.Modifiers.Any(SyntaxKind.RefKeyword)
+                , isRecord = containingSyntax.Modifiers.Any(SyntaxKind.RecordKeyword)
+                , syntaxTreeStableHash = containingSyntax.SyntaxTree.GetStableHashCode()
+                , sourceFileBaseName = Path.GetFileNameWithoutExtension(containingSyntax.SyntaxTree.FilePath)
+                , callSiteLineNumber = syntax.GetLineNumber()
+                , scopeOpening = scopeOpening
+                , scopeClosing = scopeClosing
+                , typeFullName = typeFullName
+                , cacheAttributeType = cacheAttributeType
+                , assemblyName = assemblyName
+            };
         }
 
         private static TypeDeclarationSyntax GetContainingType(SyntaxNode node)
@@ -172,48 +253,108 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidate compilationCandidate
-            , ImmutableArray<Candidate> candidates
+            , TypeCacheCallSite candidate
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            if (candidates.Length < 1)
+            SourceGenHelpers.ProjectPath = projectPath;
+
+            var compilationAssemblyName = candidate.compilationAssemblyName;
+            var fileTypeName = candidate.containingTypeFileName;
+            var hintName = $"{candidate.sourceFileBaseName}__{fileTypeName}_{candidate.syntaxTreeStableHash}_{candidate.callSiteLineNumber}.g.cs";
+            var filePathName = $"{candidate.sourceFileBaseName}__{fileTypeName}_{candidate.syntaxTreeStableHash}_{candidate.callSiteLineNumber}.g.cs";
+            string filePath;
+
+            if (SourceGenHelpers.CanWriteToProjectPath)
             {
-                return;
+                var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{compilationAssemblyName}/";
+                Directory.CreateDirectory(dir);
+                filePath = $"{dir}{filePathName}";
             }
+            else
+            {
+                filePath = $"Temp/GeneratedCode/{compilationAssemblyName}/{filePathName}";
+            }
+
+            try
+            {
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , candidate.scopeOpening
+                    , WriteCode(candidate)
+                    , candidate.scopeClosing
+                    , hintName
+                    , filePath
+                    , Location.None
+                );
+            }
+            catch (Exception e)
+            {
+                if (e is OperationCanceledException)
+                {
+                    throw;
+                }
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      s_errorDescriptor
+                    , Location.None
+                    , e.ToUnityPrintableString()
+                ));
+            }
+        }
+
+        private static void GenerateHeaderOutput(
+              SourceProductionContext context
+            , ImmutableArray<ContainingTypeKey> keys
+            , string projectPath
+            , bool outputSourceGenFiles
+        )
+        {
+            context.CancellationToken.ThrowIfCancellationRequested();
 
             SourceGenHelpers.ProjectPath = projectPath;
 
-            var cacheMap = MakeCacheMap(context, candidates);
-            var compilation = compilationCandidate.compilation;
-            var assemblyName = compilation.Assembly.Name;
+            var seen = new HashSet<ContainingTypeKey>();
 
-            foreach (var kvp in cacheMap)
+            foreach (var key in keys)
             {
-                var containingType = kvp.Key;
-                var list = kvp.Value;
-
-                if (list.Count < 1)
+                if (seen.Add(key) == false)
                 {
                     continue;
                 }
 
-                var containingSyntax = list[0].containingSyntax;
-                var syntaxTree = containingSyntax.SyntaxTree;
+                context.CancellationToken.ThrowIfCancellationRequested();
+
+                var compilationAssemblyName = key.compilationAssemblyName;
+                var fileTypeName = key.containingTypeFileName;
+                var hintName = $"{key.sourceFileBaseName}__{fileTypeName}_{key.syntaxTreeStableHash}_header.g.cs";
+                var filePathName = $"{key.sourceFileBaseName}__{fileTypeName}_{key.syntaxTreeStableHash}_header.g.cs";
+                string filePath;
+
+                if (SourceGenHelpers.CanWriteToProjectPath)
+                {
+                    var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{compilationAssemblyName}/";
+                    Directory.CreateDirectory(dir);
+                    filePath = $"{dir}{filePathName}";
+                }
+                else
+                {
+                    filePath = $"Temp/GeneratedCode/{compilationAssemblyName}/{filePathName}";
+                }
 
                 try
                 {
-                    var fileTypeName = containingType.ToFileName();
-
                     context.OutputSource(
                           outputSourceGenFiles
-                        , containingSyntax
-                        , WriteCode(containingSyntax, containingType, list)
-                        , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, containingSyntax, fileTypeName)
-                        , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName)
+                        , key.scopeOpening
+                        , WriteHeaderCode(key)
+                        , key.scopeClosing
+                        , hintName
+                        , filePath
+                        , Location.None
                     );
                 }
                 catch (Exception e)
@@ -225,7 +366,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
 
                     context.ReportDiagnostic(Diagnostic.Create(
                           s_errorDescriptor
-                        , containingSyntax.GetLocation()
+                        , Location.None
                         , e.ToUnityPrintableString()
                     ));
                 }
@@ -233,7 +374,8 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_RUNTIME_TYPE_CACHE_01"
+            = new DiagnosticDescriptor(
+                  "SG_RUNTIME_TYPE_CACHE_01"
                 , "Runtime Type Cache Generator Error"
                 , "This error indicates a bug in the Runtime Type Caches source generators. Error message: '{0}'."
                 , "RuntimeTypeCache"
@@ -242,129 +384,88 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 , description: ""
             );
 
-        private static CacheMap MakeCacheMap(
-              SourceProductionContext context
-            , ImmutableArray<Candidate> candidates
-        )
+        private static string WriteCode(in TypeCacheCallSite cdd)
         {
-            var map = new CacheMap(SymbolEqualityComparer.Default);
-
-            foreach (var candidate in candidates)
-            {
-                if (candidate.type is not INamedTypeSymbol type)
-                {
-                    context.ReportDiagnostic(
-                          DiagnosticDescriptors.TypeParameterIsNotApplicable
-                        , candidate.typeSyntax
-                        , (candidate.typeSyntax as IdentifierNameSyntax)?.Identifier.ValueText ?? "T"
-                        , candidate.methodName
-                    );
-                    continue;
-                }
-
-                if (candidate.invalidAssemblyNameSyntax is ExpressionSyntax invalidAssemblyNameSyntax)
-                {
-                    context.ReportDiagnostic(
-                          DiagnosticDescriptors.AssemblyNameMustBeStringLiteralOrConstant
-                        , invalidAssemblyNameSyntax
-                    );
-                    continue;
-                }
-
-                if (candidate.cacheAttributeType == CacheAttributeType.CacheType)
-                {
-                    if (type.IsStatic)
-                    {
-                        context.ReportDiagnostic(
-                              DiagnosticDescriptors.StaticClassIsNotApplicable
-                            , candidate.typeSyntax
-                            , type.ToFullName()
-                        );
-                        continue;
-                    }
-                }
-                else if (candidate.cacheAttributeType == CacheAttributeType.CacheTypesDerivedFrom)
-                {
-                    if (type.TypeKind is not (TypeKind.Class or TypeKind.Interface))
-                    {
-                        context.ReportDiagnostic(
-                              DiagnosticDescriptors.OnlyClassOrInterfaceIsApplicable
-                            , candidate.typeSyntax
-                            , type.ToFullName()
-                        );
-                        continue;
-                    }
-
-                    if (type.IsStatic)
-                    {
-                        context.ReportDiagnostic(
-                              DiagnosticDescriptors.StaticClassIsNotApplicable
-                            , candidate.typeSyntax
-                            , type.ToFullName()
-                        );
-                        continue;
-                    }
-
-                    if (type.IsSealed)
-                    {
-                        context.ReportDiagnostic(
-                              DiagnosticDescriptors.SealedClassIsNotApplicable
-                            , candidate.typeSyntax
-                            , type.ToFullName()
-                        );
-                        continue;
-                    }
-                }
-                else if (candidate.cacheAttributeType != CacheAttributeType.CacheTypesDerivedFrom)
-                {
-                    if (type.ToFullName().StartsWith(NAMESPACE_PREFIX))
-                    {
-                        context.ReportDiagnostic(
-                              DiagnosticDescriptors.TypesFromCachesAreProhibited
-                            , candidate.typeSyntax
-                            , type.ToFullName()
-                        );
-                        continue;
-                    }
-                }
-
-                if (map.TryGetValue(candidate.containingType, out var list) == false)
-                {
-                    list = new List<Candidate>();
-                    map.Add(candidate.containingType, list);
-                }
-
-                list.Add(candidate);
-            }
-
-            return map;
-        }
-
-        private static string WriteCode(
-              TypeDeclarationSyntax containingSyntax
-            , INamedTypeSymbol containingType
-            , List<Candidate> candidates
-        )
-        {
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, containingSyntax.Parent);
-            var p = scopePrinter.printer;
+            var p = Printer.DefaultLarge;
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            var isStruct = containingType.TypeKind == TypeKind.Struct;
-            var isRefStruct = isStruct && containingSyntax.Modifiers.Any(SyntaxKind.RefKeyword);
-            var isRecord = containingSyntax.Modifiers.Any(SyntaxKind.RecordKeyword);
+            p = p.IncreasedIndent();
+            {
+                p.PrintBeginLine()
+                    .PrintIf(cdd.isRefStruct, "ref ")
+                    .Print("partial ")
+                    .PrintIf(cdd.isRecord, "record ")
+                    .PrintIf(cdd.isStruct, "struct ", "class ")
+                    .Print(cdd.containingTypeIdentifier)
+                    .PrintEndLine();
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("[").Print(NAMESPACE_PREFIX).Print(".");
+
+                    switch (cdd.cacheAttributeType)
+                    {
+                        case CacheAttributeType.CacheType:
+                            p.Print(nameof(CacheAttributeType.CacheType));
+                            break;
+
+                        case CacheAttributeType.CacheTypesDerivedFrom:
+                            p.Print(nameof(CacheAttributeType.CacheTypesDerivedFrom));
+                            break;
+
+                        case CacheAttributeType.CacheTypesWithAttribute:
+                            p.Print(nameof(CacheAttributeType.CacheTypesWithAttribute));
+                            break;
+
+                        case CacheAttributeType.CacheFieldsWithAttribute:
+                            p.Print(nameof(CacheAttributeType.CacheFieldsWithAttribute));
+                            break;
+
+                        case CacheAttributeType.CacheMethodsWithAttribute:
+                            p.Print(nameof(CacheAttributeType.CacheMethodsWithAttribute));
+                            break;
+                    }
+
+                    p.Print("(typeof(").Print(cdd.typeFullName).Print(")");
+
+                    if (string.IsNullOrEmpty(cdd.assemblyName) == false)
+                    {
+                        p.Print(", \"").Print(cdd.assemblyName).Print("\"");
+                    }
+
+                    p.PrintEndLine(")]");
+
+                    p.PrintBeginLine("private partial struct ")
+                        .Print(cdd.containingTypeIdentifier)
+                        .Print("_RuntimeTypeCaches_")
+                        .Print(cdd.syntaxTreeStableHash.ToString())
+                        .PrintEndLine(" { }");
+                }
+                p.CloseScope();
+            }
+            p = p.DecreasedIndent();
+
+            return p.Result;
+        }
+
+        private static string WriteHeaderCode(in ContainingTypeKey key)
+        {
+            var p = Printer.DefaultLarge;
+
+            p.PrintEndLine();
+            p.Print("#pragma warning disable").PrintEndLine();
+            p.PrintEndLine();
 
             p = p.IncreasedIndent();
             {
                 p.PrintBeginLine()
-                    .PrintIf(isRefStruct, "ref ")
+                    .PrintIf(key.isRefStruct, "ref ")
                     .Print("partial ")
-                    .PrintIf(isRecord, "record ")
-                    .PrintIf(isStruct, "struct ", "class ")
-                    .Print(containingSyntax.Identifier.ValueText)
+                    .PrintIf(key.isRecord, "record ")
+                    .PrintIf(key.isStruct, "struct ", "class ")
+                    .Print(key.containingTypeIdentifier)
                     .PrintEndLine();
                 p.OpenScope();
                 {
@@ -377,47 +478,10 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                         .PrintLine(EDITOR_BROWSABLE_NEVER)
                         .PrintLine(PRESERVE);
 
-                    foreach (var cdd in candidates)
-                    {
-                        p.PrintBeginLine("[").Print(NAMESPACE_PREFIX).Print(".");
-
-                        switch (cdd.cacheAttributeType)
-                        {
-                            case CacheAttributeType.CacheType:
-                                p.Print(nameof(CacheAttributeType.CacheType));
-                                break;
-
-                            case CacheAttributeType.CacheTypesDerivedFrom:
-                                p.Print(nameof(CacheAttributeType.CacheTypesDerivedFrom));
-                                break;
-
-                            case CacheAttributeType.CacheTypesWithAttribute:
-                                p.Print(nameof(CacheAttributeType.CacheTypesWithAttribute));
-                                break;
-
-                            case CacheAttributeType.CacheFieldsWithAttribute:
-                                p.Print(nameof(CacheAttributeType.CacheFieldsWithAttribute));
-                                break;
-
-                            case CacheAttributeType.CacheMethodsWithAttribute:
-                                p.Print(nameof(CacheAttributeType.CacheMethodsWithAttribute));
-                                break;
-                        }
-
-                        p.Print("(typeof(").Print(cdd.type.ToFullName()).Print(")");
-
-                        if (string.IsNullOrEmpty(cdd.assemblyName) == false)
-                        {
-                            p.Print(", \"").Print(cdd.assemblyName).Print("\"");
-                        }
-
-                        p.PrintEndLine(")]");
-                    }
-
-                    p.PrintBeginLine("private struct ")
-                        .Print(containingSyntax.Identifier.ValueText)
+                    p.PrintBeginLine("private partial struct ")
+                        .Print(key.containingTypeIdentifier)
                         .Print("_RuntimeTypeCaches_")
-                        .Print(containingSyntax.SyntaxTree.GetStableHashCode().ToString())
+                        .Print(key.syntaxTreeStableHash.ToString())
                         .PrintEndLine(" { }");
                 }
                 p.CloseScope();
@@ -427,7 +491,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             return p.Result;
         }
 
-        private enum CacheAttributeType
+        internal enum CacheAttributeType
         {
             None,
             CacheType,
@@ -437,21 +501,142 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             CacheMethodsWithAttribute,
         }
 
-        private struct Candidate
+        /// <summary>
+        /// Represents a single <c>RuntimeTypeCache.GetXxx&lt;T&gt;()</c> call site.
+        /// All fields are primitive or string values so the incremental pipeline can correctly
+        /// compare successive runs and avoid re-running unchanged downstream steps.
+        /// </summary>
+        private struct TypeCacheCallSite : IEquatable<TypeCacheCallSite>
         {
-            public TypeDeclarationSyntax containingSyntax;
-            public INamedTypeSymbol containingType;
-            public TypeSyntax typeSyntax;
-            public ITypeSymbol type;
-            public string assemblyName;
-            public string methodName;
-            public ExpressionSyntax invalidAssemblyNameSyntax;
+            // ── Compilation ───────────────────────────────────────────────────────────────
+            public string compilationAssemblyName;
+
+            // ── Equatable data extracted from INamedTypeSymbol ───────────────────────────
+            public string containingTypeFullName;
+            public string containingTypeFileName;
+            public string containingTypeIdentifier;
+            public bool isStruct;
+            public bool isRefStruct;
+            public bool isRecord;
+
+            // ── Equatable data extracted from TypeDeclarationSyntax / SyntaxTree ─────────
+            public int syntaxTreeStableHash;
+            public string sourceFileBaseName;
+            public string scopeOpening;
+            public string scopeClosing;
+
+            // ── Equatable data for this individual call site ─────────────────────────────
+            public int callSiteLineNumber;
+            public string typeFullName;
             public CacheAttributeType cacheAttributeType;
+            public string assemblyName;
+
+            public readonly bool IsValid => containingTypeFullName is not null;
+
+            public readonly bool Equals(TypeCacheCallSite other)
+            {
+                return compilationAssemblyName == other.compilationAssemblyName
+                    && containingTypeFullName == other.containingTypeFullName
+                    && containingTypeFileName == other.containingTypeFileName
+                    && containingTypeIdentifier == other.containingTypeIdentifier
+                    && isStruct == other.isStruct
+                    && isRefStruct == other.isRefStruct
+                    && isRecord == other.isRecord
+                    && syntaxTreeStableHash == other.syntaxTreeStableHash
+                    && sourceFileBaseName == other.sourceFileBaseName
+                    && scopeOpening == other.scopeOpening
+                    && scopeClosing == other.scopeClosing
+                    && callSiteLineNumber == other.callSiteLineNumber
+                    && typeFullName == other.typeFullName
+                    && cacheAttributeType == other.cacheAttributeType
+                    && assemblyName == other.assemblyName;
+            }
+
+            public readonly override bool Equals(object obj)
+                => obj is TypeCacheCallSite other && Equals(other);
+
+            public readonly override int GetHashCode()
+                => HashValue.Combine(compilationAssemblyName)
+                    .Add(containingTypeFullName)
+                    .Add(containingTypeIdentifier)
+                    .Add(sourceFileBaseName)
+                    .Add(scopeOpening)
+                    .Add(typeFullName)
+                    .Add(assemblyName)
+                    .Add((int)cacheAttributeType)
+                    .Add(syntaxTreeStableHash)
+                    .Add(callSiteLineNumber)
+                    .Add(isStruct)
+                    .Add(isRefStruct)
+                    .Add(isRecord);
         }
 
-        private class CacheMap : Dictionary<INamedTypeSymbol, List<Candidate>>
+        /// <summary>
+        /// Identifies a containing type by its shape — used to deduplicate header output
+        /// across multiple call sites inside the same type.
+        /// All fields are primitive or string values for stable incremental pipeline comparison.
+        /// </summary>
+        private struct ContainingTypeKey : IEquatable<ContainingTypeKey>
         {
-            public CacheMap(IEqualityComparer<ISymbol> comparer) : base(comparer) { }
+            // ── Compilation ───────────────────────────────────────────────────────────────
+            public string compilationAssemblyName;
+
+            // ── Equatable data extracted from INamedTypeSymbol ───────────────────────────
+            public string containingTypeFullName;
+            public string containingTypeFileName;
+            public string containingTypeIdentifier;
+            public bool isStruct;
+            public bool isRefStruct;
+            public bool isRecord;
+
+            // ── Equatable data extracted from TypeDeclarationSyntax / SyntaxTree ─────────
+            public int syntaxTreeStableHash;
+            public string sourceFileBaseName;
+            public string scopeOpening;
+            public string scopeClosing;
+
+            public static ContainingTypeKey From(TypeCacheCallSite c) => new() {
+                  compilationAssemblyName = c.compilationAssemblyName
+                , containingTypeFullName = c.containingTypeFullName
+                , containingTypeFileName = c.containingTypeFileName
+                , containingTypeIdentifier = c.containingTypeIdentifier
+                , isStruct = c.isStruct
+                , isRefStruct = c.isRefStruct
+                , isRecord = c.isRecord
+                , syntaxTreeStableHash = c.syntaxTreeStableHash
+                , sourceFileBaseName = c.sourceFileBaseName
+                , scopeOpening = c.scopeOpening
+                , scopeClosing = c.scopeClosing
+            };
+
+            public readonly bool Equals(ContainingTypeKey other)
+            {
+                return compilationAssemblyName == other.compilationAssemblyName
+                    && containingTypeFullName == other.containingTypeFullName
+                    && containingTypeFileName == other.containingTypeFileName
+                    && containingTypeIdentifier == other.containingTypeIdentifier
+                    && isStruct == other.isStruct
+                    && isRefStruct == other.isRefStruct
+                    && isRecord == other.isRecord
+                    && syntaxTreeStableHash == other.syntaxTreeStableHash
+                    && sourceFileBaseName == other.sourceFileBaseName
+                    && scopeOpening == other.scopeOpening
+                    && scopeClosing == other.scopeClosing;
+            }
+
+            public readonly override bool Equals(object obj)
+                => obj is ContainingTypeKey other && Equals(other);
+
+            public readonly override int GetHashCode()
+                => HashValue.Combine(compilationAssemblyName)
+                    .Add(containingTypeFullName)
+                    .Add(containingTypeIdentifier)
+                    .Add(sourceFileBaseName)
+                    .Add(scopeOpening)
+                    .Add(syntaxTreeStableHash)
+                    .Add(isStruct)
+                    .Add(isRefStruct)
+                    .Add(isRecord);
         }
     }
 }
