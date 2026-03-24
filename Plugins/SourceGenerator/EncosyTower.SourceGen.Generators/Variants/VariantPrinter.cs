@@ -16,13 +16,6 @@
         public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.BeforeSceneLoad)]";
         public const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
 
-        private readonly string _generatedCodeAttribute;
-
-        public VariantPrinter(string generatedCodeAttribute)
-        {
-            _generatedCodeAttribute = generatedCodeAttribute;
-        }
-
         public void WriteRegister(
               ref Printer p
             , string typeName
@@ -60,7 +53,7 @@
             p.Print("#if !UNITY_EDITOR || !").Print(LOG_REGISTRIES).PrintEndLine();
             p.PrintLine(AGGRESSIVE_INLINING);
             p.Print("#endif").PrintEndLine();
-            p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+            p.PrintLine(PRESERVE);
             p.OpenScope("private static void Register<T>(");
             {
                 p.PrintLine($"  global::{NAMESPACE}.Converters.IVariantConverter<T> converter");
@@ -141,22 +134,22 @@
 
         private void WriteFieldsForValueType(ref Printer p, string typeName, string variantName)
         {
-            p.PrintLine(META_OFFSET).PrintLine(_generatedCodeAttribute).PrintLine(PRESERVE);
+            p.PrintLine(META_OFFSET).PrintLine(PRESERVE);
             p.PrintLine($"public readonly {variantName} Variant;");
             p.PrintEndLine();
 
-            p.PrintLine(DATA_OFFSET).PrintLine(_generatedCodeAttribute).PrintLine(PRESERVE);
+            p.PrintLine(DATA_OFFSET).PrintLine(PRESERVE);
             p.PrintLine($"public readonly {typeName} Value;");
             p.PrintEndLine();
         }
 
         private void WriteFieldsForRefType(ref Printer p, string typeName, string variantName)
         {
-            p.PrintLine(_generatedCodeAttribute).PrintLine(PRESERVE);
+            p.PrintLine(PRESERVE);
             p.PrintLine($"public readonly {variantName} Variant;");
             p.PrintEndLine();
 
-            p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+            p.PrintLine(PRESERVE);
             p.PrintLine($"public {typeName} Value");
             p.OpenScope();
             {
@@ -179,7 +172,7 @@
             , string variantName
         )
         {
-            p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+            p.PrintLine(PRESERVE);
             p.PrintLine($"public {structName}({typeName} value)");
             p.OpenScope();
             {
@@ -197,7 +190,7 @@
             , string variantName
         )
         {
-            p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+            p.PrintLine(PRESERVE);
             p.PrintLine($"public {structName}({typeName} value)");
             p.OpenScope();
             {
@@ -209,7 +202,7 @@
 
         private void WriteOtherConstructors(ref Printer p, string structName, string variantName)
         {
-            p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+            p.PrintLine(PRESERVE);
             p.PrintLine($"public {structName}(in {variantName} variant) : this()");
             p.OpenScope();
             {
@@ -218,7 +211,7 @@
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+            p.PrintLine(PRESERVE);
             p.PrintLine($"public {structName}(in {VARIANT_TYPE} variant) : this()");
             p.OpenScope();
             {
@@ -231,7 +224,7 @@
 
         private void WriteValidateTypeIdMethod(ref Printer p, string typeName, string variantName)
         {
-            p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+            p.PrintLine(PRESERVE);
             p.PrintLine($"private static void ValidateTypeId(in {VARIANT_TYPE} variant)");
             p.OpenScope();
             {
@@ -245,7 +238,7 @@
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(DOES_NOT_RETURN);
+            p.PrintLine(DOES_NOT_RETURN);
             p.PrintLine($"private static void ThrowIfInvalidCast(in {VARIANT_TYPE} variant)");
             p.OpenScope();
             {
@@ -273,50 +266,50 @@
         {
             if (hasImplicitFromStructToType)
             {
-                p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
+                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
                 p.PrintLine($"public static implicit operator {structName}({typeName} value) => new {structName}(value);");
                 p.PrintEndLine();
             }
 
-            p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
             p.PrintLine($"public static implicit operator {VARIANT_TYPE}(in {structName} value) => value.Variant;");
             p.PrintEndLine();
 
-            p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
             p.PrintLine($"public static implicit operator {variantName}(in {structName} value) => value.Variant;");
             p.PrintEndLine();
 
-            p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
             p.PrintLine($"public static implicit operator {structName}(in {variantName} value) => new {structName}(value);");
             p.PrintEndLine();
         }
 
         private void WriteConverterClass(ref Printer p, string typeName, string structName, string variantName)
         {
-            p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+            p.PrintLine(PRESERVE);
             p.PrintBeginLine()
                 .Print("public sealed class Converter")
                 .Print($" : global::EncosyTower.Variants.Converters.IVariantConverter<{typeName}>")
                 .PrintEndLine();
             p.OpenScope();
             {
-                p.PrintLine(_generatedCodeAttribute).PrintLine(PRESERVE);
+                p.PrintLine(PRESERVE);
                 p.PrintLine("public static readonly Converter Default = new Converter();");
                 p.PrintEndLine();
 
-                p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+                p.PrintLine(PRESERVE);
                 p.PrintLine("private Converter() { }");
                 p.PrintEndLine();
 
-                p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
+                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
                 p.PrintLine($"public {VARIANT_TYPE} ToVariant({typeName} value) => new {structName}(value);");
                 p.PrintEndLine();
 
-                p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
+                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(PRESERVE);
                 p.PrintLine($"public {variantName} ToVariantT({typeName} value) => new {structName}(value).Variant;");
                 p.PrintEndLine();
 
-                p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+                p.PrintLine(PRESERVE);
                 p.PrintLine($"public {typeName} GetValue(in {VARIANT_TYPE} variant)");
                 p.OpenScope();
                 {
@@ -334,7 +327,7 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+                p.PrintLine(PRESERVE);
                 p.PrintLine($"public bool TryGetValue(in {VARIANT_TYPE} variant, out {typeName} result)");
                 p.OpenScope();
                 {
@@ -354,7 +347,7 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+                p.PrintLine(PRESERVE);
                 p.PrintLine($"public bool TrySetValueTo(in {VARIANT_TYPE} variant, ref {typeName} result)");
                 p.OpenScope();
                 {
@@ -373,7 +366,7 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(PRESERVE);
+                p.PrintLine(PRESERVE);
                 p.PrintLine($"public string ToString(in {VARIANT_TYPE} variant)");
                 p.OpenScope();
                 {
@@ -391,7 +384,7 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(_generatedCodeAttribute).PrintLine(EXCLUDE_COVERAGE).PrintLine(DOES_NOT_RETURN);
+                p.PrintLine(DOES_NOT_RETURN);
                 p.PrintLine("private static void ThrowIfInvalidCast()");
                 p.OpenScope();
                 {

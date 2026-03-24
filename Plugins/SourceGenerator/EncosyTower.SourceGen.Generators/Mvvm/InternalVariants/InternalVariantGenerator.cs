@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -7,8 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 {
-    using TypeRef = Variants.InternalVariants.TypeRef;
-    using InternalVariantDeclaration = Variants.InternalVariants.InternalVariantDeclaration;
+    using InternalVariantDeclaration = Variants.InternalVariantDeclaration;
 
     [Generator]
     public class InternalVariantGenerator : IIncrementalGenerator
@@ -21,30 +21,37 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
         private const string INPUT_NS = $"{NAMESPACE}.Input";
         private const string IOBSERVABLE_OBJECT = $"global::{NAMESPACE}.ComponentModel.IObservableObject";
         private const string IVARIANT_T = "global::EncosyTower.Variants.IVariant<";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.InternalVariants.InternalVariantGenerator\", \"{SourceGenVersion.VALUE}\")]";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
-            var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: IsSyntaxMatch,
-                transform: GetSemanticMatch
-            ).Where(static t => t is { });
+            var compilationProvider = context.CompilationProvider
+                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
-            var candidateToIgnoreProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: IsStructSyntaxMatch,
-                transform: GetTypeInGenericVariantDeclaration
-            ).Where(static t => t is { });
+            var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
+                  predicate: IsSyntaxMatch
+                , transform: GetSemanticMatch
+            ).Where(static x => x.IsValid);
+
+            var typeNamesToIgnoreProvider = context.SyntaxProvider.CreateSyntaxProvider(
+                  predicate: IsStructSyntaxMatch
+                , transform: GetTypeNameInGenericVariantDeclaration
+            ).Where(static x => string.IsNullOrEmpty(x) == false);
 
             var combined = candidateProvider.Collect()
-                .Combine(candidateToIgnoreProvider.Collect())
-                .Combine(context.CompilationProvider)
+                .Combine(typeNamesToIgnoreProvider.Collect())
+                .Combine(compilationProvider)
                 .Combine(projectPathProvider);
 
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
+                if (source.Left.Right.isValid == false)
+                {
+                    return;
+                }
+
                 GenerateOutput(
-                    sourceProductionContext
+                      sourceProductionContext
                     , source.Left.Right
                     , source.Left.Left.Left
                     , source.Left.Left.Right
@@ -101,67 +108,70 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             return false;
         }
 
-        public static TypeRef GetSemanticMatch(
+        internal static InternalVariantDeclaration GetSemanticMatch(
               GeneratorSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false)
-            {
-                return null;
-            }
+            // Note: IsValidCompilation check deliberately omitted here.
+            // Checking compilation validity inside the transform step prevents incremental cache reuse
+            // when unrelated files change. Validity is deferred to GenerateOutput via CompilationCandidateSlim.isValid.
 
             var semanticModel = context.SemanticModel;
+            ITypeSymbol typeSymbol;
+            Location location;
 
             if (context.Node is FieldDeclarationSyntax field)
             {
-                return new TypeRef {
-                    Syntax = field.Declaration.Type,
-                    Symbol = semanticModel.GetTypeInfo(field.Declaration.Type, token).Type,
-                };
+                typeSymbol = semanticModel.GetTypeInfo(field.Declaration.Type, token).Type;
+                location = field.Declaration.Type.GetLocation();
             }
-
-            if (context.Node is MethodDeclarationSyntax method)
+            else if (context.Node is MethodDeclarationSyntax method)
             {
                 var typeSyntax = method.ParameterList.Parameters[0].Type;
-
-                return new TypeRef {
-                    Syntax = typeSyntax,
-                    Symbol = semanticModel.GetTypeInfo(typeSyntax, token).Type,
-                };
+                typeSymbol = semanticModel.GetTypeInfo(typeSyntax, token).Type;
+                location = typeSyntax.GetLocation();
             }
-
-            if (context.Node is PropertyDeclarationSyntax property
+            else if (context.Node is PropertyDeclarationSyntax property
                 && property.Parent is ClassDeclarationSyntax classSyntax
-                && classSyntax.DoesSemanticMatch(IOBSERVABLE_OBJECT, context.SemanticModel, token)
+                && classSyntax.DoesSemanticMatch(IOBSERVABLE_OBJECT, semanticModel, token)
                 && classSyntax.AnyFieldHasNotifyPropertyChangedForAttribute(property)
             )
             {
-                return new TypeRef {
-                    Syntax = property.Type,
-                    Symbol = semanticModel.GetTypeInfo(property.Type, token).Type,
-                };
+                typeSymbol = semanticModel.GetTypeInfo(property.Type, token).Type;
+                location = property.Type.GetLocation();
+            }
+            else
+            {
+                return default;
             }
 
-            return null;
+            if (typeSymbol is not INamedTypeSymbol namedType
+                || namedType.IsUnboundGenericType
+                || (namedType.IsGenericType && namedType.TypeParameters.Length != 0)
+            )
+            {
+                return default;
+            }
+
+            return Generators.Variants.InternalVariantGenerator.BuildDeclaration(namedType, location, token);
         }
 
-        public static ITypeSymbol GetTypeInGenericVariantDeclaration(
+        public static string GetTypeNameInGenericVariantDeclaration(
               GeneratorSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
-                || context.Node is not StructDeclarationSyntax structSyntax
+            if (context.Node is not StructDeclarationSyntax structSyntax
                 || structSyntax.BaseList == null
                 || structSyntax.BaseList.Types.Count < 1
             )
             {
-                return null;
+                return string.Empty;
             }
 
             var semanticModel = context.SemanticModel;
@@ -170,30 +180,33 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             {
                 var typeInfo = semanticModel.GetTypeInfo(baseType.Type, token);
 
-                if (typeInfo.Type is INamedTypeSymbol interfaceSymbol)
+                if (typeInfo.Type == null)
                 {
-                    if (interfaceSymbol.IsGenericType
-                       && interfaceSymbol.TypeParameters.Length == 1
-                       && interfaceSymbol.ToFullName().StartsWith(IVARIANT_T)
-                    )
-                    {
-                        return interfaceSymbol.TypeArguments[0];
-                    }
+                    continue;
                 }
 
-                if (TryGetMatchTypeArgument(typeInfo.Type.Interfaces, out var type)
-                    || TryGetMatchTypeArgument(typeInfo.Type.AllInterfaces, out type)
+                if (typeInfo.Type is INamedTypeSymbol interfaceSymbol
+                    && interfaceSymbol.IsGenericType
+                    && interfaceSymbol.TypeParameters.Length == 1
+                    && interfaceSymbol.ToFullName().StartsWith(IVARIANT_T)
                 )
                 {
-                    return type;
+                    return interfaceSymbol.TypeArguments[0].ToFullName();
+                }
+
+                if (TryGetMatchTypeArgument(typeInfo.Type.Interfaces, out var typeName)
+                    || TryGetMatchTypeArgument(typeInfo.Type.AllInterfaces, out typeName)
+                )
+                {
+                    return typeName;
                 }
             }
 
-            return null;
+            return string.Empty;
 
             static bool TryGetMatchTypeArgument(
                   ImmutableArray<INamedTypeSymbol> interfaces
-                , out ITypeSymbol result
+                , out string result
             )
             {
                 foreach (var interfaceSymbol in interfaces)
@@ -203,21 +216,21 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                         && interfaceSymbol.ToFullName().StartsWith(IVARIANT_T)
                     )
                     {
-                        result = interfaceSymbol.TypeArguments[0];
+                        result = interfaceSymbol.TypeArguments[0].ToFullName();
                         return true;
                     }
                 }
 
-                result = default;
+                result = string.Empty;
                 return false;
             }
         }
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , Compilation compilation
-            , ImmutableArray<TypeRef> candidates
-            , ImmutableArray<ITypeSymbol> candidatesToIgnore
+            , CompilationCandidateSlim compilationCandidate
+            , ImmutableArray<InternalVariantDeclaration> candidates
+            , ImmutableArray<string> typeNamesToIgnore
             , string projectPath
             , bool outputSourceGenFiles
         )
@@ -233,34 +246,54 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             {
                 SourceGenHelpers.ProjectPath = projectPath;
 
-                var declaration = new InternalVariantDeclaration(candidates, candidatesToIgnore) {
-                    InternalVariantsNamespace = "EncosyTower.Mvvm.__InternalVariants__",
-                    GeneratedCodeAttribute = GENERATED_CODE,
-                };
+                // Pre-seed the set with ignored names so a single Add() covers both the ignore-list
+                // check and deduplication in one pass.
+                var seenTypeNames = new HashSet<string>(typeNamesToIgnore, StringComparer.Ordinal);
+                using var valueTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
+                using var refTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
+                var assemblyName = compilationCandidate.assemblyName;
 
-                declaration.GenerateVariantForValueTypes(
-                      context
-                    , compilation
-                    , outputSourceGenFiles
-                    , s_errorDescriptor
-                );
+                foreach (var candidate in candidates)
+                {
+                    if (seenTypeNames.Add(candidate.fullTypeName) == false)
+                    {
+                        continue;
+                    }
 
-                declaration.GenerateVariantForRefTypes(
-                      context
-                    , compilation
-                    , outputSourceGenFiles
-                    , s_errorDescriptor
-                );
+                    MvvmInternalVariantWriteCode.WriteVariantCode(
+                          ref context
+                        , in candidate
+                        , assemblyName
+                        , outputSourceGenFiles
+                        , s_errorDescriptor
+                    );
 
-                declaration.GenerateStaticClass(
-                      context
-                    , compilation
+                    if (candidate.isValueType)
+                    {
+                        valueTypeBuilder.Add(candidate);
+                    }
+                    else
+                    {
+                        refTypeBuilder.Add(candidate);
+                    }
+                }
+
+                MvvmInternalVariantWriteCode.WriteStaticClass(
+                      ref context
+                    , valueTypeBuilder.ToImmutable()
+                    , refTypeBuilder.ToImmutable()
+                    , assemblyName
                     , outputSourceGenFiles
                     , s_errorDescriptor
                 );
             }
             catch (Exception e)
             {
+                if (e is OperationCanceledException)
+                {
+                    throw;
+                }
+
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
                     , null

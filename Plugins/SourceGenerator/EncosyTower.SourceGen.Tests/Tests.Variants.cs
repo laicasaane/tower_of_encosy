@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace EncosyTower.Tests.VariantTests
 {
-    public readonly partial struct Vector3Variant : IVariant<Vector3> { }
+    [Variant(typeof(Vector3))]
+    public readonly partial struct Vector3Variant { }
 
     public struct StructWithRefs
     {
@@ -11,7 +12,13 @@ namespace EncosyTower.Tests.VariantTests
         public object objValue;
     }
 
-    public readonly partial struct StructWithRefsVariant : IVariant<StructWithRefs> { }
+    [Variant(typeof(StructWithRefs))]
+    public readonly partial struct StructWithRefsVariant { }
+
+    public class Person { }
+
+    [Variant(typeof(Person))]
+    public readonly partial struct PersonVariant { }
 
     public class VariantTest
     {

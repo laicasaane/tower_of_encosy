@@ -1,13 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace EncosyTower.SourceGen.Generators.Variants.InternalVariants
+namespace EncosyTower.SourceGen.Generators.Variants
 {
     [Generator]
     internal class InternalVariantGenerator : IIncrementalGenerator
@@ -24,18 +23,18 @@ namespace EncosyTower.SourceGen.Generators.Variants.InternalVariants
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(CompilationCandidate.GetCompilation);
+                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var typeProvider = context.SyntaxProvider.CreateSyntaxProvider(
                   predicate: IsSyntaxMatched
-                , transform: GetMatchedType
-            ).Where(ValidateCandiate);
+                , transform: GetSemanticMatch
+            ).Where(static x => x.IsValid);
 
             var combined = typeProvider.Collect()
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider);
 
-            context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
+            context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
                     , source.Left.Right
@@ -44,14 +43,6 @@ namespace EncosyTower.SourceGen.Generators.Variants.InternalVariants
                     , source.Right.outputSourceGenFiles
                 );
             });
-
-            static bool ValidateCandiate(TypeRef candidate)
-            {
-                return candidate is not null
-                    && candidate.Syntax is not null
-                    && candidate.Symbol is not null
-                    ;
-            }
         }
 
         private static bool IsSyntaxMatched(SyntaxNode syntaxNode, CancellationToken token)
@@ -75,17 +66,17 @@ namespace EncosyTower.SourceGen.Generators.Variants.InternalVariants
                 || (typeName is "CachedVariantConverter" && memberName is "Default");
         }
 
-        private static TypeRef GetMatchedType(
+        private static InternalVariantDeclaration GetSemanticMatch(
               GeneratorSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false)
-            {
-                return default;
-            }
+            // Note: IsValidCompilation check deliberately omitted here.
+            // Checking compilation validity requires accessing the full Compilation object inside
+            // the transform step, which prevents incremental cache reuse when unrelated files change.
+            // Validity is deferred to GenerateOutput via CompilationCandidateSlim.isValid.
 
             var semanticModel = context.SemanticModel;
             var syntax = context.Node as MemberAccessExpressionSyntax;
@@ -116,25 +107,60 @@ namespace EncosyTower.SourceGen.Generators.Variants.InternalVariants
                 return default;
             }
 
-            var candidate = new TypeRef {
-                Syntax = typeSyntax.TypeArgumentList.Arguments[0],
-                Symbol = typeArg,
-            };
+            return BuildDeclaration(typeArg, context.Node.GetLocation(), token);
+        }
 
-            return candidate;
+        internal static InternalVariantDeclaration BuildDeclaration(
+              INamedTypeSymbol typeArg
+            , Location location
+            , CancellationToken token
+        )
+        {
+            token.ThrowIfCancellationRequested();
+
+            var fullTypeName = typeArg.ToFullName();
+
+            if (fullTypeName.ToUnionType().IsNativeUnionType())
+            {
+                return default;
+            }
+
+            var identifier = typeArg.ToValidIdentifier();
+            var isValueType = typeArg.IsUnmanagedType;
+            int? unmanagedSize = null;
+
+            if (isValueType)
+            {
+                var size = 0;
+                typeArg.GetUnmanagedSize(ref size);
+                unmanagedSize = size;
+            }
+
+            return new InternalVariantDeclaration {
+                location = location,
+                fullTypeName = fullTypeName,
+                simpleTypeName = typeArg.ToSimpleName(),
+                structName = $"Variant__{identifier}",
+                converterDefault = $"Variant__{identifier}.Converter.Default",
+                fileHintName = typeArg.ToFileName(),
+                unmanagedSize = unmanagedSize,
+                isValueType = isValueType,
+                hasImplicitFromStructToType = isValueType || typeArg.TypeKind != TypeKind.Interface,
+                isValid = true,
+            };
         }
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidate compilationCandidate
-            , ImmutableArray<TypeRef> candidates
+            , CompilationCandidateSlim compilationCandidate
+            , ImmutableArray<InternalVariantDeclaration> candidates
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            if (candidates.Length < 1)
+            if (candidates.Length < 1 || compilationCandidate.isValid == false)
             {
                 return;
             }
@@ -143,36 +169,52 @@ namespace EncosyTower.SourceGen.Generators.Variants.InternalVariants
             {
                 SourceGenHelpers.ProjectPath = projectPath;
 
-                var compilation = compilationCandidate.compilation;
+                using var valueTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
+                using var refTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
+                var seenTypeNames = new HashSet<string>(StringComparer.Ordinal);
+                var assemblyName = compilationCandidate.assemblyName;
 
-                var declaration = new InternalVariantDeclaration(
-                      FilterByTypeArgument(candidates)
-                    , ImmutableArray<ITypeSymbol>.Empty
-                );
+                foreach (var candidate in candidates)
+                {
+                    if (seenTypeNames.Add(candidate.fullTypeName) == false)
+                    {
+                        continue;
+                    }
 
-                declaration.GenerateVariantForValueTypes(
-                      context
-                    , compilation
-                    , outputSourceGenFiles
-                    , s_errorDescriptor
-                );
+                    InternalVariantWriteCode.WriteVariantCode(
+                          ref context
+                        , in candidate
+                        , assemblyName
+                        , outputSourceGenFiles
+                        , s_errorDescriptor
+                    );
 
-                declaration.GenerateVariantForRefTypes(
-                      context
-                    , compilation
-                    , outputSourceGenFiles
-                    , s_errorDescriptor
-                );
+                    if (candidate.isValueType)
+                    {
+                        valueTypeBuilder.Add(candidate);
+                    }
+                    else
+                    {
+                        refTypeBuilder.Add(candidate);
+                    }
+                }
 
-                declaration.GenerateStaticClass(
-                      context
-                    , compilation
+                InternalVariantWriteCode.WriteStaticClass(
+                      ref context
+                    , valueTypeBuilder.ToImmutable()
+                    , refTypeBuilder.ToImmutable()
+                    , assemblyName
                     , outputSourceGenFiles
                     , s_errorDescriptor
                 );
             }
             catch (Exception e)
             {
+                if (e is OperationCanceledException)
+                {
+                    throw;
+                }
+
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
                     , null
@@ -182,34 +224,13 @@ namespace EncosyTower.SourceGen.Generators.Variants.InternalVariants
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_INTERNAL_VARIANTS_01"
+            = new("SG_VARIANT_INTERNAL_01"
                 , "Internal Variant Generator Error"
-                , "This error indicates a bug in the Internal Variant source generators. Error message: '{0}'."
+                , "This error indicates a bug in the internal variant source generators. Error message: '{0}'."
                 , "EncosyTower.Variants.Variant<T>"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""
             );
-
-        private static ImmutableArray<TypeRef> FilterByTypeArgument(ImmutableArray<TypeRef> candidates)
-        {
-            var unique = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
-            using var resultBuilder = ImmutableArrayBuilder<TypeRef>.Rent();
-
-            foreach (var candidate in candidates)
-            {
-                var symbol = candidate.Symbol;
-
-                if (unique.Contains(symbol))
-                {
-                    continue;
-                }
-
-                unique.Add(symbol);
-                resultBuilder.Add(candidate);
-            }
-
-            return resultBuilder.ToImmutable();
-        }
     }
 }

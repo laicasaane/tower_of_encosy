@@ -36,7 +36,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 .Combine(projectPathProvider)
                 .Where(static t => t.Left.Right.isValid);
 
-            context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
+            context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                     sourceProductionContext
                     , source.Left.Right
