@@ -1,22 +1,23 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using EncosyTower.SourceGen.Generators.EnumExtensions;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.EnumTemplates
 {
     internal partial class EnumTemplateDeclaration
     {
-        private const string MEMBERS_FROM_ENUM_ATTRIBUTE = "global::EncosyTower.EnumExtensions.EnumTemplateMembersFromEnumAttribute";
-        private const string MEMBER_FROM_TYPE_ATTRIBUTE = "global::EncosyTower.EnumExtensions.EnumTemplateMemberFromTypeAttribute";
-
-        public StructDeclarationSyntax Syntax { get; }
+        /// <summary>Simple identifier text of the template struct (e.g. <c>"MyEnum_EnumTemplate"</c>).</summary>
+        public string TemplateSimpleName { get; }
 
         public string TemplateFullName { get; }
+
+        public string NamespaceName { get; }
+
+        public EquatableArray<string> ContainingTypes { get; }
 
         public string EnumName { get; }
 
@@ -26,85 +27,76 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
         public List<EnumMemberRef> MemberRefs { get; }
 
-        public Dictionary<INamedTypeSymbol, IndexOrIndices> MemberIndexMap { get; }
+        public Dictionary<string, IndexOrIndices> MemberIndexMap { get; }
 
         public References References { get; }
 
         public EnumExtensionsDeclaration ExtensionsRef { get; }
 
-        public EnumTemplateDeclaration(
-              SourceProductionContext context
-            , TemplateCandidate templateCandidate
-            , ImmutableArray<KindCandidate> kindCandidates
+        internal EnumTemplateDeclaration(
+              in EnumTemplateCandidate templateCandidate
+            , ImmutableArray<TemplateMemberCandidate> externalMembers
             , References references
         )
         {
-            Syntax = templateCandidate.syntax;
             References = references;
 
-            var templateSymbol = templateCandidate.symbol;
-            TemplateFullName = templateSymbol.ToFullName();
-            Accessibility = templateSymbol.DeclaredAccessibility;
+            TemplateSimpleName = templateCandidate.templateSimpleName;
+            TemplateFullName = templateCandidate.templateFullName;
+            NamespaceName = templateCandidate.namespaceName;
+            ContainingTypes = templateCandidate.containingTypes;
+            Accessibility = templateCandidate.accessibility;
 
-            if (TryGetEnumName(templateSymbol.Name, out var enumName) == false)
-            {
-                context.ReportDiagnostic(NotEndWithTemplateSuffix, Syntax);
-            }
-
+            // Silently fall back to the struct name when the naming convention is not followed.
+            // EnumTemplateAnalyzer reports the proper diagnostic.
+            TryGetEnumName(templateCandidate.templateSimpleName, out var enumName);
             EnumName = enumName;
 
-            var sortedKindCandidates = new List<KindCandidate>(kindCandidates);
-            TryGetCandidates(context, templateSymbol, sortedKindCandidates);
-            sortedKindCandidates.Sort(Compare);
+            // Merge source-1 inline members (pre-extracted in EnumTemplateCandidate.Extract)
+            // with source-2 external members from the kind provider, filtered to this template.
+            var mergedCandidates = new List<TemplateMemberCandidate>(
+                templateCandidate.inlineMembers.Count + externalMembers.Length
+            );
 
-            var symbolComparer = SymbolEqualityComparer.Default;
-            var memberRefs = MemberRefs = new(sortedKindCandidates.Count);
-            var types = new HashSet<INamedTypeSymbol>(symbolComparer);
-            var tempMemberRefs = new List<EnumMemberRef>(sortedKindCandidates.Count);
-            var uniqueMembers = new Dictionary<string, INamedTypeSymbol>(sortedKindCandidates.Count);
+            foreach (var m in templateCandidate.inlineMembers)
+            {
+                mergedCandidates.Add(m);
+            }
+
+            foreach (var m in externalMembers)
+            {
+                if (string.Equals(m.templateFullName, templateCandidate.templateFullName, StringComparison.Ordinal))
+                {
+                    mergedCandidates.Add(m);
+                }
+            }
+
+            mergedCandidates.Sort(static (a, b) => a.order.CompareTo(b.order));
+
+            var memberRefs = MemberRefs = new(mergedCandidates.Count);
+            var types = new HashSet<string>(StringComparer.Ordinal);
+            var tempMemberRefs = new List<EnumMemberRef>(mergedCandidates.Count);
+            var uniqueMembers = new HashSet<string>(StringComparer.Ordinal);
             ulong currentBaseOrder = 0;
             var maxByteCount = 0;
             var isDisplayAttributeUsed = false;
 
-            foreach (var candidate in sortedKindCandidates)
+            foreach (var candidate in mergedCandidates)
             {
-                if (symbolComparer.Equals(templateSymbol, candidate.templateSymbol) == false)
+                if (candidate.IsValid == false)
                 {
                     continue;
                 }
 
-                var typeSymbol = candidate.typeSymbol;
-
-                if (candidate.enumMembers)
+                // Silently skip invalid underlying type — EnumTemplateAnalyzer reports it.
+                if (candidate.enumMembers && IsSupportEnum(candidate.underlyingType) == false)
                 {
-                    if (typeSymbol.EnumUnderlyingType is not INamedTypeSymbol underlyingType
-                        || IsSupportEnum(underlyingType.SpecialType) == false
-                    )
-                    {
-                        context.ReportDiagnostic(
-                              NotSupportUnderlyingType
-                            , candidate.attributeData.ApplicationSyntaxReference.GetSyntax()
-                        );
-                        continue;
-                    }
-                }
-                else if (typeSymbol.IsUnboundGenericType)
-                {
-                    context.ReportDiagnostic(
-                          NotSupportUnboundGenericType
-                        , candidate.attributeData.ApplicationSyntaxReference.GetSyntax()
-                        , typeSymbol.ToSimpleName()
-                    );
                     continue;
                 }
 
-                if (types.Contains(typeSymbol))
+                // Silently skip duplicates — EnumTemplateAnalyzer reports them.
+                if (types.Contains(candidate.typeFullName))
                 {
-                    context.ReportDiagnostic(
-                          TypeAlreadyDeclared
-                        , candidate.attributeData.ApplicationSyntaxReference.GetSyntax()
-                        , typeSymbol.ToSimpleName()
-                    );
                     continue;
                 }
 
@@ -114,21 +106,23 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 }
 
                 memberRefs.Add(new EnumMemberRef {
-                    typeSymbol = typeSymbol,
+                    typeFullName = candidate.typeFullName,
                     isComment = true,
                     member = new EnumMemberDeclaration {
-                        name = typeSymbol.ToFullName(),
+                        name = candidate.typeFullName,
                     },
                 });
 
                 if (candidate.enumMembers == false)
                 {
-                    var typeName = typeSymbol.ToSimpleValidIdentifier();
-                    var name = string.IsNullOrEmpty(candidate.alternateName) ? typeName : candidate.alternateName.ToValidIdentifier();
-                    var displayName =  string.IsNullOrEmpty(candidate.displayName) ? name : candidate.displayName;
+                    var name = string.IsNullOrEmpty(candidate.alternateName)
+                        ? candidate.typeSimpleName
+                        : candidate.alternateName.ToValidIdentifier();
+
+                    var displayName = string.IsNullOrEmpty(candidate.displayName) ? name : candidate.displayName;
 
                     memberRefs.Add(new EnumMemberRef {
-                        typeSymbol = typeSymbol,
+                        typeFullName = candidate.typeFullName,
                         baseOrder = currentBaseOrder,
                         attributes = ImmutableArray<AttributeInfo>.Empty,
                         member = new EnumMemberDeclaration {
@@ -138,57 +132,45 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                         },
                     });
 
-                    types.Add(typeSymbol);
+                    types.Add(candidate.typeFullName);
                     currentBaseOrder += 1;
                     continue;
                 }
 
-                var members = typeSymbol.GetMembers();
                 var baseOrder = currentBaseOrder;
 
-                foreach (var member in members)
+                foreach (var entry in candidate.enumEntries)
                 {
-                    if (member is not IFieldSymbol field || field.ConstantValue is null)
+                    var memberName = entry.name;
+
+                    // Silently skip duplicate member names — EnumTemplateAnalyzer reports them.
+                    if (uniqueMembers.Add(memberName) == false)
                     {
                         continue;
                     }
 
-                    var memberName = field.Name;
+                    var entryDisplayName = string.IsNullOrEmpty(entry.displayName) ? null : entry.displayName;
 
-                    if (uniqueMembers.TryGetValue(memberName, out var otherEnum))
+                    if (entryDisplayName != null && isDisplayAttributeUsed == false)
                     {
-                        context.ReportDiagnostic(
-                              SameMemberIsIgnored
-                            , candidate.attributeData.ApplicationSyntaxReference.GetSyntax()
-                            , memberName
-                            , otherEnum.ToSimpleName()
-                        );
-                        continue;
+                        isDisplayAttributeUsed = true;
                     }
 
-                    uniqueMembers.Add(memberName, typeSymbol);
-
-                    var displayName = GetDisplayName(field);
-                    isDisplayAttributeUsed = string.IsNullOrEmpty(displayName) == false;
-
-                    var value = field.ConstantValue is object constValue
-                        ? Convert.ToUInt64(constValue) : 0;
-
-                    var order = currentBaseOrder + value;
+                    var order = currentBaseOrder + entry.value;
                     var nameByteCount = GetByteCount(memberName);
                     maxByteCount = Math.Max(nameByteCount, maxByteCount);
 
                     tempMemberRefs.Add(new EnumMemberRef {
-                        typeSymbol = typeSymbol,
+                        typeFullName = candidate.typeFullName,
                         baseOrder = currentBaseOrder,
-                        value = value,
+                        value = entry.value,
                         fromEnumType = true,
-                        underlyingType = typeSymbol.EnumUnderlyingType.SpecialType,
-                        attributes = field.GatherAttributes(),
+                        underlyingType = candidate.underlyingType,
+                        attributes = entry.attributes.AsImmutableArray(),
                         member = new EnumMemberDeclaration {
                             name = memberName,
                             order = order,
-                            displayName = displayName,
+                            displayName = entryDisplayName,
                         },
                     });
 
@@ -200,11 +182,11 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
                 if (tempMemberRefs.Count > 0)
                 {
-                    types.Add(typeSymbol);
+                    types.Add(candidate.typeFullName);
                 }
 
                 currentBaseOrder = baseOrder + 1;
-                tempMemberRefs.Sort(Compare);
+                tempMemberRefs.Sort(static (a, b) => a.member.order.CompareTo(b.member.order));
                 memberRefs.AddRange(tempMemberRefs);
                 tempMemberRefs.Clear();
             }
@@ -218,7 +200,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 Name = EnumName,
                 ExtensionsName = EnumExtensionsDeclaration.GetNameExtensionsClass(EnumName),
                 StructName = EnumExtensionsDeclaration.GetNameExtendedStruct(EnumName),
-                ParentIsNamespace = templateCandidate.syntax.Parent is BaseNamespaceDeclarationSyntax,
+                ParentIsNamespace = templateCandidate.parentIsNamespace,
                 FullyQualifiedName = fullyQualifiedEnumName,
                 UnderlyingTypeName = UnderlyingTypeName,
                 Accessibility = Accessibility,
@@ -230,7 +212,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             };
 
             var count = memberRefs.Count;
-            var memberIndexMap = MemberIndexMap = new(count, symbolComparer);
+            var memberIndexMap = MemberIndexMap = new Dictionary<string, IndexOrIndices>(count, StringComparer.Ordinal);
 
             for (var i = 0; i < count; i++)
             {
@@ -241,101 +223,17 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     continue;
                 }
 
-                var typeSymbol = memberRef.typeSymbol;
+                var typeFullName = memberRef.typeFullName;
 
-                if (memberIndexMap.TryGetValue(typeSymbol, out var indices) == false)
+                if (memberIndexMap.TryGetValue(typeFullName, out var indices) == false)
                 {
-                    memberIndexMap[typeSymbol] = indices = memberRef.fromEnumType ? new(new List<int>()) : new(i);
+                    memberIndexMap[typeFullName] = indices = memberRef.fromEnumType ? new(new List<int>()) : new(i);
                 }
 
                 indices.Indices?.Add(i);
             }
         }
 
-        private static void TryGetCandidates(
-              SourceProductionContext context
-            , INamedTypeSymbol symbol
-            , List<KindCandidate> output
-        )
-        {
-            var attributes = symbol.GetAttributes(MEMBERS_FROM_ENUM_ATTRIBUTE, MEMBER_FROM_TYPE_ATTRIBUTE);
-
-            foreach (var attrib in attributes)
-            {
-                if (attrib == null)
-                {
-                    continue;
-                }
-
-                if (attrib.ConstructorArguments.Length < 2)
-                {
-                    context.ReportDiagnostic(
-                          MustSpecifyTypeAndOrder
-                        , attrib.ApplicationSyntaxReference.GetSyntax()
-                    );
-                    continue;
-                }
-
-                var args = attrib.ConstructorArguments;
-                var typeArg = args[0];
-
-                if (typeArg.Kind != TypedConstantKind.Type
-                    || typeArg.Value is not INamedTypeSymbol typeSymbol
-                )
-                {
-                    context.ReportDiagnostic(
-                          MustBeTypeOfExpression
-                        , attrib.ApplicationSyntaxReference.GetSyntax()
-                    );
-                    continue;
-                }
-
-                var candidate = new KindCandidate {
-                    typeSymbol = typeSymbol,
-                    templateSymbol = symbol,
-                    attributeData = attrib,
-                    enumMembers = typeSymbol.TypeKind == TypeKind.Enum,
-                };
-
-                if (args.Length > 1)
-                {
-                    var arg = args[1];
-
-                    if (arg.Kind == TypedConstantKind.Primitive
-                        && arg.Value is ulong value
-                    )
-                    {
-                        candidate.order = value;
-                    }
-                }
-
-                if (args.Length > 2)
-                {
-                    var arg = args[2];
-
-                    if (arg.Kind == TypedConstantKind.Primitive
-                        && arg.Value is string value
-                    )
-                    {
-                        candidate.displayName = value;
-                    }
-                }
-
-                if (args.Length > 3)
-                {
-                    var arg = args[3];
-
-                    if (arg.Kind == TypedConstantKind.Primitive
-                        && arg.Value is string value
-                    )
-                    {
-                        candidate.alternateName = value;
-                    }
-                }
-
-                output.Add(candidate);
-            }
-        }
 
         private static bool TryGetEnumName(string templateName, out string enumName)
         {
@@ -359,17 +257,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             return false;
         }
 
-        private static int Compare(KindCandidate a, KindCandidate b)
-        {
-            return a.order.CompareTo(b.order);
-        }
-
-        private static int Compare(EnumMemberRef a, EnumMemberRef b)
-        {
-            return a.member.order.CompareTo(b.member.order);
-        }
-
-        private static bool IsSupportEnum(SpecialType type)
+        internal static bool IsSupportEnum(SpecialType type)
         {
             return type switch {
                 SpecialType.System_Byte => true,
@@ -380,7 +268,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             };
         }
 
-        private static string ToTypeName(SpecialType type)
+        internal static string ToTypeName(SpecialType type)
         {
             return type switch {
                 SpecialType.System_Byte => "byte",
@@ -399,134 +287,14 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             return Encoding.UTF8.GetByteCount(value);
         }
 
-        private static string GetDisplayName(IFieldSymbol field)
-        {
-            string displayName = null;
-
-            foreach (var attribute in field.GetAttributes())
-            {
-                var attributeName = attribute.AttributeClass?.Name ?? string.Empty;
-
-                switch (attributeName)
-                {
-                    case nameof(System.ObsoleteAttribute):
-                    {
-                        goto RETURN;
-                    }
-
-                    case "LabelAttribute":
-                    case "DescriptionAttribute":
-                    case "DisplayAttribute":
-                    case "DisplayNameAttribute":
-                    case "InspectorNameAttribute":
-                    {
-                        if (attribute.ConstructorArguments.Length > 0)
-                        {
-                            var arg = attribute.ConstructorArguments[0];
-
-                            if (arg.Kind == TypedConstantKind.Primitive && arg.Value?.ToString() is string dn)
-                            {
-                                displayName = dn;
-                                goto RETURN;
-                            }
-                        }
-                        else if (attribute.NamedArguments.Length > 0)
-                        {
-                            foreach (var arg in attribute.NamedArguments)
-                            {
-                                if (arg.Key is "Name" or "DisplayName"
-                                    && arg.Value.Kind == TypedConstantKind.Primitive
-                                    && arg.Value.Value?.ToString() is string dn
-                                )
-                                {
-                                    displayName = dn;
-                                    goto RETURN;
-                                }
-                            }
-                        }
-
-                        break;
-                    }
-                }
-            }
-
-            RETURN:
-            return displayName;
-        }
-
-        public static readonly DiagnosticDescriptor NotEndWithTemplateSuffix = new(
-              id: "ENUM_TEMPLATE_0001"
-            , title: "Not end with template suffix"
-            , messageFormat: "The name of a union enum template must end with either \"_EnumTemplate\" or \"_Template\" suffix"
-            , category: "EnumTemplateGenerator"
-            , defaultSeverity: DiagnosticSeverity.Warning
-            , isEnabledByDefault: true
-            , description: "The name of a union enum template must end with either \"_EnumTemplate\" or \"_Template\" suffix"
-        );
-
-        public static readonly DiagnosticDescriptor NotSupportUnderlyingType = new(
-              id: "ENUM_TEMPLATE_0002"
-            , title: "Not support underlying type"
-            , messageFormat: "Only enums whose underlying type is either byte, ushort, uint or ulong are supported"
-            , category: "EnumTemplateGenerator"
-            , defaultSeverity: DiagnosticSeverity.Warning
-            , isEnabledByDefault: true
-            , description: "Only enums whose underlying type is either byte, ushort, uint or ulong are supported"
-        );
-
-        public static readonly DiagnosticDescriptor TypeAlreadyDeclared = new(
-              id: "ENUM_TEMPLATE_0003"
-            , title: "Type has already be declared"
-            , messageFormat: "Type \"{0}\" has already be declared"
-            , category: "EnumTemplateGenerator"
-            , defaultSeverity: DiagnosticSeverity.Warning
-            , isEnabledByDefault: true
-            , description: "Type has already be declared"
-        );
-
-        public static readonly DiagnosticDescriptor MustSpecifyTypeAndOrder = new(
-              id: "ENUM_TEMPLATE_0004"
-            , title: "Must specify type and order"
-            , messageFormat: "Must specify type and order"
-            , category: "EnumTemplateGenerator"
-            , defaultSeverity: DiagnosticSeverity.Error
-            , isEnabledByDefault: true
-            , description: "Must specify type and order"
-        );
-
-        public static readonly DiagnosticDescriptor MustBeTypeOfExpression = new(
-              id: "ENUM_TEMPLATE_0005"
-            , title: "First argument must be type of expression"
-            , messageFormat: "First argument must be type of expression"
-            , category: "EnumTemplateGenerator"
-            , defaultSeverity: DiagnosticSeverity.Error
-            , isEnabledByDefault: true
-            , description: "First argument must be type of expression"
-        );
-
-        public static readonly DiagnosticDescriptor SameMemberIsIgnored = new(
-              id: "ENUM_TEMPLATE_0006"
-            , title: "A member of the same name will be ignored"
-            , messageFormat: "Member \"{0}\" is ignored because it exists in another enum \"{1}\""
-            , category: "EnumTemplateGenerator"
-            , defaultSeverity: DiagnosticSeverity.Warning
-            , isEnabledByDefault: true
-            , description: "A member of the same name will be ignored"
-        );
-
-        public static readonly DiagnosticDescriptor NotSupportUnboundGenericType = new(
-              id: "ENUM_TEMPLATE_0007"
-            , title: "Not support unbound generic type"
-            , messageFormat: "\"{0}\" must be a non-generic type or a closed generic type"
-            , category: "EnumTemplateGenerator"
-            , defaultSeverity: DiagnosticSeverity.Warning
-            , isEnabledByDefault: true
-            , description: "Only non-generic types or fully closed generic types are supported"
-        );
-
+        /// <summary>
+        /// Working struct used during code generation. Not a pipeline model — not required to
+        /// be cache-friendly.
+        /// </summary>
         public struct EnumMemberRef
         {
-            public INamedTypeSymbol typeSymbol;
+            /// <summary>Fully qualified name of the type contributing this member.</summary>
+            public string typeFullName;
             public ulong baseOrder;
             public ulong value;
             public SpecialType underlyingType;

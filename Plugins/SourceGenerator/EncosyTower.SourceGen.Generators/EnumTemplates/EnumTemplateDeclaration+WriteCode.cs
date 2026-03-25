@@ -14,9 +14,23 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
         public string WriteCode()
         {
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, Syntax.Parent);
-            var p = scopePrinter.printer;
-            p = p.IncreasedIndent();
+            var p = Printer.DefaultLarge;
+
+            var hasNamespace = string.IsNullOrEmpty(NamespaceName) == false;
+
+            if (hasNamespace)
+            {
+                p.PrintLine($"namespace {NamespaceName}");
+                p.OpenScope();
+            }
+
+            var numContainingTypes = ContainingTypes.Count;
+
+            for (var i = 0; i < numContainingTypes; i++)
+            {
+                p.PrintLine(ContainingTypes[i]);
+                p.OpenScope();
+            }
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
@@ -42,15 +56,22 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             WriteAdditionalWrapper(ref p);
             WriteAdditionalExtensions(ref p);
 
-            p = p.DecreasedIndent();
+            for (var i = 0; i < numContainingTypes; i++)
+            {
+                p.CloseScope();
+            }
+
+            if (hasNamespace)
+            {
+                p.CloseScope();
+            }
+
             return p.Result;
         }
 
         private void WritePartialStruct(ref Printer p)
         {
-            var structName = Syntax.Identifier.Text;
-
-            p.PrintBeginLine("partial struct ").Print(structName).Print(" ")
+            p.PrintBeginLine("partial struct ").Print(TemplateSimpleName).Print(" ")
                 .Print(": ").Print(string.Format(IENUM_TEMPLATE, EnumName))
                 .PrintEndLine(" { }");
             p.PrintEndLine();
@@ -103,8 +124,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
                 foreach (var kvp in map)
                 {
-                    var typeSymbol = kvp.Key;
-                    var otherName = typeSymbol.ToFullName();
+                    var otherName = kvp.Key;
                     var indexOrIndices = kvp.Value;
 
                     if (indexOrIndices.Indices is { })
@@ -124,8 +144,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
                 foreach (var kvp in map)
                 {
-                    var typeSymbol = kvp.Key;
-                    var otherName = typeSymbol.ToFullName();
+                    var otherName = kvp.Key;
                     var indexOrIndices = kvp.Value;
 
                     if (indexOrIndices.Indices is { } indices)
@@ -224,8 +243,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             {
                 foreach (var kvp in map)
                 {
-                    var typeSymbol = kvp.Key;
-                    var otherName = typeSymbol.ToFullName();
+                    var otherName = kvp.Key;
                     var indexOrIndices = kvp.Value;
 
                     if (indexOrIndices.Indices is { } indices)

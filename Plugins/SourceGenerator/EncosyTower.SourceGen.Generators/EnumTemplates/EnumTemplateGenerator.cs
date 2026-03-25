@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.IO;
+using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 
 namespace EncosyTower.SourceGen.Generators.EnumTemplates
 {
@@ -11,10 +13,13 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
     internal class EnumTemplateGenerator : IIncrementalGenerator
     {
         public const string NAMESPACE = "EncosyTower.EnumExtensions";
+        private const string ENUM_TEMPLATE_ATTRIBUTE_METADATA = $"{NAMESPACE}.EnumTemplateAttribute";
         public const string ENUM_TEMPLATE_ATTRIBUTE = $"global::{NAMESPACE}.EnumTemplateAttribute";
         public const string ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE = $"global::{NAMESPACE}.EnumMembersForTemplateAttribute";
         public const string TYPE_AS_MEMBER_ATTRIBUTE = $"global::{NAMESPACE}.TypeAsEnumMemberForTemplateAttribute";
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
+        private const string ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE_METADATA = $"{NAMESPACE}.EnumMembersForTemplateAttribute";
+        private const string TYPE_AS_MEMBER_ATTRIBUTE_METADATA = $"{NAMESPACE}.TypeAsEnumMemberForTemplateAttribute";
         public const string GENERATOR_NAME = nameof(EnumTemplateGenerator);
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -22,25 +27,45 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(CompilationCandidate.GetCompilation);
+                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
-            var idProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                  predicate: IsSyntaxMatchTemplate
-                , transform: GetTemplateCandidate
-            ).Where(static t => t.syntax is { } && t.symbol is { });
+            var templateProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      ENUM_TEMPLATE_ATTRIBUTE_METADATA
+                    , static (node, _) => node is StructDeclarationSyntax
+                    , EnumTemplateCandidate.Extract
+                )
+                .Where(static t => t.IsValid);
 
-            var kindProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                  predicate: IsSyntaxMatchKind
-                , transform: GetKindCandidate
-            ).Where(static t => t.typeSymbol is { } && t.templateSymbol is { });
+            var enumMembersProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE_METADATA
+                    , static (node, _) => node is BaseTypeDeclarationSyntax t
+                        && (t is not TypeDeclarationSyntax td || td.TypeParameterList is null)
+                    , ExtractEnumMembersCandidate
+                )
+                .Where(static t => t.IsValid);
 
-            var combined = idProvider
-                .Combine(kindProvider.Collect())
+            var typeAsMemberProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      TYPE_AS_MEMBER_ATTRIBUTE_METADATA
+                    , static (node, _) => node is BaseTypeDeclarationSyntax t
+                        && (t is not TypeDeclarationSyntax td || td.TypeParameterList is null)
+                    , ExtractTypeAsMemberCandidate
+                )
+                .Where(static t => t.IsValid);
+
+            var memberProvider = enumMembersProvider.Collect()
+                .Combine(typeAsMemberProvider.Collect())
+                .Select(static (t, _) => t.Left.AddRange(t.Right));
+
+            var combined = templateProvider
+                .Combine(memberProvider)
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.isValid);
 
-            context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
+            context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
                     , source.Left.Right
@@ -52,103 +77,48 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             });
         }
 
-        private static bool IsSyntaxMatchTemplate(SyntaxNode syntaxNode, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            return syntaxNode is StructDeclarationSyntax structSyntax
-                && structSyntax.HasAttributeCandidate(NAMESPACE, "EnumTemplate");
-        }
-
-        private static bool IsSyntaxMatchKind(SyntaxNode syntaxNode, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            if (syntaxNode is not BaseTypeDeclarationSyntax baseTypeSyntax)
-            {
-                return false;
-            }
-
-            if (baseTypeSyntax is TypeDeclarationSyntax typeSyntax && typeSyntax.TypeParameterList is not null)
-            {
-                return false;
-            }
-
-            var attribSyntax = baseTypeSyntax.GetAttribute(NAMESPACE, "EnumMembersForTemplate");
-            attribSyntax ??= baseTypeSyntax.GetAttribute(NAMESPACE, "TypeAsEnumMemberForTemplate");
-
-            if (attribSyntax is null)
-            {
-                return false;
-            }
-
-            return attribSyntax.ArgumentList is { Arguments: { Count: > 1 } args }
-                && args[0].Expression is TypeOfExpressionSyntax
-                && args[1].Expression is LiteralExpressionSyntax
-                ;
-        }
-
-        private static TemplateCandidate GetTemplateCandidate(
-              GeneratorSyntaxContext context
+        private static TemplateMemberCandidate ExtractEnumMembersCandidate(
+              GeneratorAttributeSyntaxContext context
             , CancellationToken token
+        )
+        {
+            return ExtractMemberFromAttributeContext(context, token, isEnumMembers: true);
+        }
+
+        private static TemplateMemberCandidate ExtractTypeAsMemberCandidate(
+              GeneratorAttributeSyntaxContext context
+            , CancellationToken token
+        )
+        {
+            return ExtractMemberFromAttributeContext(context, token, isEnumMembers: false);
+        }
+
+        private static TemplateMemberCandidate ExtractMemberFromAttributeContext(
+              GeneratorAttributeSyntaxContext context
+            , CancellationToken token
+            , bool isEnumMembers
         )
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.Node is not StructDeclarationSyntax syntax)
+            if (context.TargetSymbol is not INamedTypeSymbol typeSymbol)
             {
                 return default;
             }
 
-            var semanticModel = context.SemanticModel;
-            var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
-
-            if (symbol == null
-                || symbol.IsUnmanagedType == false
-                || symbol.IsUnboundGenericType
-                || symbol.GetAttribute(ENUM_TEMPLATE_ATTRIBUTE) is null
-            )
+            if (context.Attributes.Length < 1)
             {
                 return default;
             }
 
-            return new TemplateCandidate {
-                syntax = syntax,
-                symbol = symbol,
-            };
-        }
+            var attrib = context.Attributes[0];
 
-        private static KindCandidate GetKindCandidate(
-              GeneratorSyntaxContext context
-            , CancellationToken token
-        )
-        {
-            token.ThrowIfCancellationRequested();
-
-            if (context.Node is not BaseTypeDeclarationSyntax syntax)
+            if (attrib.ConstructorArguments.Length < 2)
             {
                 return default;
             }
 
-            var semanticModel = context.SemanticModel;
-            var typeSymbol = semanticModel.GetDeclaredSymbol(syntax, token);
-
-            if (typeSymbol == null)
-            {
-                return default;
-            }
-
-            var attrib = typeSymbol.GetAttribute(ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE);
-            var isEnum = attrib is not null;
-            attrib ??= typeSymbol.GetAttribute(TYPE_AS_MEMBER_ATTRIBUTE);
-
-            if (attrib is not { ConstructorArguments.Length: > 1 })
-            {
-                return default;
-            }
-
-            var args = attrib.ConstructorArguments;
-            var typeArg = args[0];
+            var typeArg = attrib.ConstructorArguments[0];
 
             if (typeArg.Kind != TypedConstantKind.Type
                 || typeArg.Value is not INamedTypeSymbol templateSymbol
@@ -160,62 +130,31 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 return default;
             }
 
-            var candidate = new KindCandidate {
-                typeSymbol = typeSymbol,
-                templateSymbol = templateSymbol,
-                attributeData = attrib,
-                enumMembers = isEnum,
-            };
+            var attribLocation = LocationInfo.From(
+                attrib.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation()
+                ?? Location.None
+            );
 
-            if (args.Length > 1)
-            {
-                var arg = args[1];
-
-                if (arg.Kind == TypedConstantKind.Primitive
-                    && arg.Value is ulong value
-                )
-                {
-                    candidate.order = value;
-                }
-            }
-
-            if (isEnum == false && args.Length > 2)
-            {
-                var arg = args[2];
-
-                if (arg.Kind == TypedConstantKind.Primitive
-                    && arg.Value is string value
-                )
-                {
-                    candidate.displayName = value;
-                }
-            }
-
-            if (isEnum == false && args.Length > 3)
-            {
-                var arg = args[3];
-
-                if (arg.Kind == TypedConstantKind.Primitive
-                    && arg.Value is string value
-                )
-                {
-                    candidate.alternateName = value;
-                }
-            }
-
-            return candidate;
+            return TemplateMemberCandidate.Extract(
+                  typeSymbol
+                , templateSymbol.ToFullName()
+                , attrib
+                , isEnumMembers
+                , attribLocation
+                , token
+            );
         }
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidate compilationCandidate
-            , TemplateCandidate templateCandidate
-            , ImmutableArray<KindCandidate> kindCandidates
+            , CompilationCandidateSlim compilation
+            , EnumTemplateCandidate templateCandidate
+            , ImmutableArray<TemplateMemberCandidate> memberCandidates
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
-            if (templateCandidate.syntax == null || templateCandidate.symbol == null)
+            if (templateCandidate.IsValid == false)
             {
                 return;
             }
@@ -226,28 +165,32 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             {
                 SourceGenHelpers.ProjectPath = projectPath;
 
-                var syntax = templateCandidate.syntax;
-                var symbol = templateCandidate.symbol;
-                var syntaxTree = syntax.SyntaxTree;
-                var compilation = compilationCandidate.compilation;
-                var assemblyName = compilation.Assembly.Name;
-
                 var declaration = new EnumTemplateDeclaration(
-                      context
-                    , templateCandidate
-                    , kindCandidates
-                    , compilationCandidate.references
+                      templateCandidate
+                    , memberCandidates
+                    , compilation.references
                 );
 
-                var fileTypeName = symbol.ToFileName();
+                var hintName = $"{GENERATOR_NAME}__{templateCandidate.fileHintName}.g.cs";
+                var sourceFilePath = BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
+                var source = declaration.WriteCode();
 
-                context.OutputSource(
-                      outputSourceGenFiles
-                    , syntax
-                    , declaration.WriteCode()
-                    , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, fileTypeName)
-                    , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName)
-                );
+                var sourceText = SourceText.From(source, Encoding.UTF8)
+                    .WithIgnoreUnassignedVariableWarning()
+                    .WithInitialLineDirectiveToGeneratedSource(sourceFilePath);
+
+                context.AddSource(hintName, sourceText);
+
+                if (outputSourceGenFiles)
+                {
+                    SourceGenHelpers.OutputSourceToFile(
+                          context
+                        , templateCandidate.location.ToLocation()
+                        , sourceFilePath
+                        , sourceText
+                        , projectPath
+                    );
+                }
             }
             catch (Exception e)
             {
@@ -256,22 +199,28 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     throw;
                 }
 
-                context.ReportDiagnostic(Diagnostic.Create(
-                      s_errorDescriptor
-                    , templateCandidate.syntax.GetLocation()
-                    , e.ToUnityPrintableString()
-                ));
+                // Generator bugs are silently swallowed — do not emit diagnostics from the
+                // generator. User-facing validation is handled by EnumTemplateAnalyzer.
             }
         }
 
-        private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_ENUM_TEMPLATE_01"
-                , "Enum Template Generator Error"
-                , "This error indicates a bug in the Enum Template source generators. Error message: '{0}'."
-                , "EncosyTower.EnumTemplateAttribute"
-                , DiagnosticSeverity.Error
-                , isEnabledByDefault: true
-                , description: ""
-            );
+        private static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath)
+        {
+            if (projectPath is not null)
+            {
+                var dir = $"{projectPath}/Temp/GeneratedCode/{assemblyName}/";
+                Directory.CreateDirectory(dir);
+                return $"{dir}{hintName}";
+            }
+
+            if (SourceGenHelpers.CanWriteToProjectPath)
+            {
+                var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
+                Directory.CreateDirectory(dir);
+                return $"{dir}{hintName}";
+            }
+
+            return $"Temp/GeneratedCode/{assemblyName}/{hintName}";
+        }
     }
 }
