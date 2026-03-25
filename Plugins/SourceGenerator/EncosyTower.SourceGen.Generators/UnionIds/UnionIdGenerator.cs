@@ -163,25 +163,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             // Determine if parent is a namespace (for EnumExtensionsDeclaration)
             info.parentIsNamespace = context.TargetNode.Parent is BaseNamespaceDeclarationSyntax;
 
-            // Build containing-type chain (outer → inner)
-            using var innerToOuter = ImmutableArrayBuilder<string>.Rent();
-            var containingType = symbol.ContainingType;
-
-            while (containingType != null)
-            {
-                var kw = containingType.TypeKind == TypeKind.Struct ? "struct" : "class";
-                var accessibility = containingType.DeclaredAccessibility.ToKeyword();
-                innerToOuter.Add($"{accessibility} partial {kw} {containingType.Name}");
-                containingType = containingType.ContainingType;
-            }
-
-            var ito = innerToOuter.ToImmutable();
-            var outerToInner = new string[ito.Length];
-
-            for (int i = 0; i < ito.Length; i++)
-                outerToInner[i] = ito[ito.Length - 1 - i];
-
-            info.containingTypes = outerToInner.ToImmutableArray().AsEquatableArray();
+            info.containingTypes = symbol.GetContainingTypes();
 
             // Inline kinds via [UnionIdKind] attributes on this struct
             info.inlineKinds = GetInlineKinds(symbol, info.fullName, token);

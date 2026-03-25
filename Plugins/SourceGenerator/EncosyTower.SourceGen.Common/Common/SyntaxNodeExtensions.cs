@@ -32,6 +32,8 @@ namespace EncosyTower.SourceGen
                 && (current.Parent is BaseNamespaceDeclarationSyntax
                 || current.Parent is ClassDeclarationSyntax
                 || current.Parent is StructDeclarationSyntax
+                || current.Parent is InterfaceDeclarationSyntax
+                || current.Parent is RecordDeclarationSyntax
             ))
             {
                 yield return current.Parent as MemberDeclarationSyntax;

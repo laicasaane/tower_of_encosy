@@ -1464,6 +1464,54 @@ namespace EncosyTower.SourceGen
 
             return rawValue.ToString();
         }
+
+        /// <summary>
+        /// Returns the correct C# partial-type keyword for this symbol:
+        /// one of <c>class</c>, <c>struct</c>, <c>record class</c>, <c>record struct</c>, or <c>interface</c>.
+        /// </summary>
+        public static string ToPartialTypeKeyword(this INamedTypeSymbol symbol)
+        {
+            return symbol.TypeKind switch {
+                TypeKind.Interface => "interface",
+                TypeKind.Struct    => symbol.IsRecord ? "record struct" : "struct",
+                TypeKind.Class     => symbol.IsRecord ? "record class" : "class",
+                _                  => "class",
+            };
+        }
+
+        /// <summary>
+        /// Builds the outer-to-inner ordered chain of containing type declaration headers,
+        /// each formatted as <c>"&lt;accessibility&gt; partial &lt;keyword&gt; &lt;Name&gt;"</c>.
+        /// Returns a default (empty) <see cref="EquatableArray{T}"/> when <paramref name="symbol"/>
+        /// is not nested inside another type.
+        /// </summary>
+        public static EquatableArray<string> GetContainingTypes(this INamedTypeSymbol symbol)
+        {
+            using var builder = ImmutableArrayBuilder<string>.Rent();
+            var containingType = symbol.ContainingType;
+
+            while (containingType != null)
+            {
+                builder.Add($"{containingType.DeclaredAccessibility.ToKeyword()} partial {containingType.ToPartialTypeKeyword()} {containingType.Name}");
+                containingType = containingType.ContainingType;
+            }
+
+            var innerToOuter = builder.ToImmutable();
+
+            if (innerToOuter.Length == 0)
+            {
+                return default;
+            }
+
+            var outerToInner = new string[innerToOuter.Length];
+
+            for (int i = 0; i < innerToOuter.Length; i++)
+            {
+                outerToInner[i] = innerToOuter[innerToOuter.Length - 1 - i];
+            }
+
+            return outerToInner.ToImmutableArray().AsEquatableArray();
+        }
     }
 }
 

@@ -103,26 +103,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 ? structNs.ToDisplayString()
                 : string.Empty;
 
-            // Walk ContainingType chain inner→outer, then reverse to outer→inner order.
-            using var innerToOuterBuilder = ImmutableArrayBuilder<string>.Rent();
-            var containingType = structSymbol.ContainingType;
-
-            while (containingType != null)
-            {
-                var keyword = containingType.TypeKind == TypeKind.Struct ? "struct" : "class";
-                var accessibility = containingType.DeclaredAccessibility.ToKeyword();
-                innerToOuterBuilder.Add($"{accessibility} partial {keyword} {containingType.Name}");
-                containingType = containingType.ContainingType;
-            }
-
-            var innerToOuter = innerToOuterBuilder.ToImmutable();
-            var outerToInner = new string[innerToOuter.Length];
-
-            for (int i = 0; i < innerToOuter.Length; i++)
-            {
-                outerToInner[i] = innerToOuter[innerToOuter.Length - 1 - i];
-            }
-
             return new VariantDeclaration {
                 location = location,
                 fullTypeName = fullTypeName,
@@ -136,7 +116,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 structFullName = structFullName,
                 fileHintName = fileHintName,
                 namespaceName = namespaceName,
-                containingTypes = outerToInner.ToImmutableArray().AsEquatableArray(),
+                containingTypes = structSymbol.GetContainingTypes(),
                 isValid = true,
             };
         }

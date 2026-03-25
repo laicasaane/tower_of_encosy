@@ -1035,11 +1035,7 @@ namespace EncosyTower.SourceGen
                 }
 
                 printer.PrintBeginLine().Print("partial ");
-
-                if (symbol.TypeKind == TypeKind.Struct)
-                    printer.Print("struct ");
-                else
-                    printer.Print("class ");
+                printer.Print($"{symbol.ToPartialTypeKeyword()} ");
 
                 printer = printer.PrintEndLine(symbol.Name).PrintLine("{").WithIncreasedIndent();
             }
