@@ -472,6 +472,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             structDef.properties = propertiesBuilder.ToImmutable();
             structDef.indexers = indexersBuilder.ToImmutable();
             structDef.methods = methodsBuilder.ToImmutable();
+            structDef.size = structSize;
         }
 
         private static bool TryGetInterfaceMember(
