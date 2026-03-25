@@ -1,35 +1,50 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
 {
-    internal partial struct HelperDeclaration
+    internal struct HelperDeclaration
     {
         private const string AOT_HELPER = "global::Newtonsoft.Json.Utilities.AotHelper";
 
-        public string WriteCode(
-              HelperCandidate helper
-            , IEnumerable<INamedTypeSymbol> types
+        /// <summary>
+        /// Generates the complete source text for the partial class/struct annotated
+        /// with <c>[NewtonsoftJsonAotHelper]</c>, including the namespace and any
+        /// containing-type wrappers derived from <paramref name="helper"/>.
+        /// No Roslyn symbols are accessed; all data is pre-extracted in the pipeline.
+        /// </summary>
+        public static string WriteCode(
+              NewtonsoftAotHelperInfo helper
+            , IEnumerable<AotTypeCandidate> types
         )
         {
-            var syntax = helper.syntax;
-            var symbol = helper.symbol;
-
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, syntax.Parent);
-            var p = scopePrinter.printer;
-            p = p.IncreasedIndent();
-
-            var staticKeyword = symbol.IsStatic ? "static " : "";
-            var recordKeyword = symbol.IsRecord ? "record " : "";
-            var typeKeyword = symbol.TypeKind == TypeKind.Class ? "class " : "struct ";
+            var p = Printer.DefaultLarge;
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
+            var hasNamespace = string.IsNullOrEmpty(helper.namespaceName) == false;
+            var numContainingTypes = helper.containingTypes.Count;
+
+            if (hasNamespace)
+            {
+                p.PrintLine($"namespace {helper.namespaceName}");
+                p.OpenScope();
+            }
+
+            for (var i = 0; i < numContainingTypes; i++)
+            {
+                p.PrintLine(helper.containingTypes[i]);
+                p.OpenScope();
+            }
+
+            var staticKeyword = helper.isStatic ? "static " : "";
+            var recordKeyword = helper.isRecord ? "record " : "";
+            var typeKeyword = helper.typeKind == TypeKind.Class ? "class " : "struct ";
+
             p.PrintBeginLine(staticKeyword).Print("partial ").Print(recordKeyword).Print(typeKeyword)
-                .PrintEndLine(syntax.Identifier.Text);
+                .PrintEndLine(helper.typeName);
             p.OpenScope();
             {
                 p.PrintLine("[global::UnityEngine.Scripting.Preserve]");
@@ -39,55 +54,15 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
                     foreach (var type in types)
                     {
                         p.PrintBeginLine(AOT_HELPER).Print(".EnsureType<")
-                            .Print(type.ToFullName()).PrintEndLine(">();");
+                            .Print(type.fullName).PrintEndLine(">();");
                         p.OpenScope();
                         {
-                            var baseType = type;
+                            var fields = type.fields;
+                            var count = fields.Count;
 
-                            while (baseType != null)
+                            for (var i = 0; i < count; i++)
                             {
-                                var members = baseType.GetMembers();
-
-                                foreach (var member in members)
-                                {
-                                    if (member is not IFieldSymbol field
-                                        || field.Type is not INamedTypeSymbol fieldType
-                                    )
-                                    {
-                                        continue;
-                                    }
-
-                                    WriteType(ref p, fieldType);
-
-                                    if (fieldType.IsGenericType == false || fieldType.IsUnboundGenericType)
-                                    {
-                                        continue;
-                                    }
-
-                                    if (TryGetDictionaryTypeArgs(fieldType, out var keyTypeArg, out var valueTypeArg))
-                                    {
-                                        WriteType(ref p, keyTypeArg);
-                                        WriteType(ref p, valueTypeArg);
-                                        p.PrintBeginLine(AOT_HELPER).Print(".EnsureDictionary<")
-                                            .Print(keyTypeArg.ToFullName())
-                                            .Print(", ")
-                                            .Print(valueTypeArg.ToFullName())
-                                            .PrintEndLine(">();");
-                                        continue;
-                                    }
-
-                                    if (TryGetListSetTypeArg(fieldType, out var typeArg))
-                                    {
-                                        WriteType(ref p, typeArg);
-                                        p.PrintBeginLine(AOT_HELPER).Print(".EnsureList<")
-                                            .Print(typeArg.ToFullName()).PrintEndLine(">();");
-                                        continue;
-                                    }
-
-                                    WriteTypeArgs(ref p, fieldType.TypeArguments);
-                                }
-
-                                baseType = baseType.BaseType;
+                                WriteFieldInfo(ref p, fields[i]);
                             }
                         }
                         p.CloseScope();
@@ -99,112 +74,81 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
             p.CloseScope();
             p.PrintEndLine();
 
-            p = p.DecreasedIndent();
+            for (var i = 0; i < numContainingTypes; i++)
+            {
+                p.CloseScope();
+            }
+
+            if (hasNamespace)
+            {
+                p.CloseScope();
+            }
+
             return p.Result;
         }
 
-        private static void WriteType(ref Printer p, INamedTypeSymbol type)
+        /// <summary>
+        /// Emits the AOT registration calls for a single pre-extracted field entry.
+        /// Mirrors the logic that was previously spread across
+        /// <c>WriteType</c>, <c>WriteTypeArgs</c>, <c>TryGetDictionaryTypeArgs</c>,
+        /// and <c>TryGetListSetTypeArg</c>, but operates entirely on primitive data.
+        /// </summary>
+        private static void WriteFieldInfo(ref Printer p, in AotFieldInfo field)
         {
-            if (type.IsAbstract
-                || type.SpecialType.IsSystemType()
-                || type.TypeKind is not (TypeKind.Struct or TypeKind.Class)
-            )
+            // Always try to emit EnsureType for the field type itself.
+            if (field.fieldTypeCanEnsure)
             {
-                return;
+                p.PrintBeginLine(AOT_HELPER).Print(".EnsureType<")
+                    .Print(field.fieldTypeFullName).PrintEndLine(">();");
             }
 
-            if (type.TypeKind == TypeKind.Class)
+            switch (field.collectionKind)
             {
-                var constructors = type.Constructors;
-                var hasDefault = false;
-
-                foreach (var constructor in constructors)
+                case AotCollectionKind.Dictionary:
                 {
-                    if (constructor.Parameters.Length == 0)
+                    WriteTypeArgEnsure(ref p, field.elementOrKey);
+                    WriteTypeArgEnsure(ref p, field.dictionaryValue);
+                    p.PrintBeginLine(AOT_HELPER).Print(".EnsureDictionary<")
+                        .Print(field.elementOrKey.fullName)
+                        .Print(", ")
+                        .Print(field.dictionaryValue.fullName)
+                        .PrintEndLine(">();");
+                    break;
+                }
+
+                case AotCollectionKind.List:
+                case AotCollectionKind.HashSet:
+                {
+                    WriteTypeArgEnsure(ref p, field.elementOrKey);
+                    p.PrintBeginLine(AOT_HELPER).Print(".EnsureList<")
+                        .Print(field.elementOrKey.fullName).PrintEndLine(">();");
+                    break;
+                }
+
+                case AotCollectionKind.None:
+                {
+                    // Emit EnsureType for each named type argument of other generics.
+                    var otherTypeArgs = field.otherTypeArgs;
+                    var count = otherTypeArgs.Count;
+
+                    for (var i = 0; i < count; i++)
                     {
-                        hasDefault = true;
-                        break;
+                        WriteTypeArgEnsure(ref p, otherTypeArgs[i]);
                     }
-                }
 
-                if (hasDefault == false)
-                {
-                    return;
-                }
-            }
-
-            p.PrintBeginLine(AOT_HELPER).Print(".EnsureType<")
-                .Print(type.ToFullName()).PrintEndLine(">();");
-        }
-
-        private static void WriteTypeArgs(ref Printer p, ImmutableArray<ITypeSymbol> types)
-        {
-            if (types.IsDefaultOrEmpty)
-            {
-                return;
-            }
-
-            for (var i = 0; i < types.Length; i++)
-            {
-                if (types[i] is INamedTypeSymbol type)
-                {
-                    WriteType(ref p, type);
+                    break;
                 }
             }
         }
 
-        private static bool TryGetListSetTypeArg(
-              INamedTypeSymbol type
-            , out INamedTypeSymbol typeArg
-        )
+        private static void WriteTypeArgEnsure(ref Printer p, in AotTypeArgInfo typeArg)
         {
-            if (type.IsGenericType
-                && type.TypeArguments.IsDefaultOrEmpty == false
-                && type.TypeArguments.Length == 1
-                && type.TypeArguments[0] is INamedTypeSymbol typeArgCandidate
-            )
+            if (typeArg.canEnsure)
             {
-                var name = type.ToFullName();
-
-                if (name.StartsWith("global::System.Collections.Generic.List<")
-                    || name.StartsWith("global::System.Collections.Generic.HashSet<")
-                )
-                {
-                    typeArg = typeArgCandidate;
-                    return true;
-                }
+                p.PrintBeginLine(AOT_HELPER).Print(".EnsureType<")
+                    .Print(typeArg.fullName).PrintEndLine(">();");
             }
-
-            typeArg = default;
-            return false;
-        }
-
-        private static bool TryGetDictionaryTypeArgs(
-              INamedTypeSymbol type
-            , out INamedTypeSymbol keyTypeArg
-            , out INamedTypeSymbol valueTypeArg
-        )
-        {
-            if (type.IsGenericType
-                && type.TypeArguments.IsDefaultOrEmpty == false
-                && type.TypeArguments.Length == 2
-                && type.TypeArguments[0] is INamedTypeSymbol keyTypeArgCandidate
-                && type.TypeArguments[1] is INamedTypeSymbol valueTypeArgCandidate
-            )
-            {
-                var name = type.ToFullName();
-
-                if (name.StartsWith("global::System.Collections.Generic.Dictionary<"))
-                {
-                    keyTypeArg = keyTypeArgCandidate;
-                    valueTypeArg = valueTypeArgCandidate;
-                    return true;
-                }
-            }
-
-            keyTypeArg = default;
-            valueTypeArg = default;
-            return false;
         }
     }
 }
+
