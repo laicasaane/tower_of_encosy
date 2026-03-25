@@ -6,6 +6,8 @@
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
         public const string VAULT_ATTRIBUTE = $"global::{NAMESPACE}.UserDataVaultAttribute";
         public const string ACCESSOR_ATTRIBUTE = $"global::{NAMESPACE}.UserDataAccessorAttribute";
+        public const string VAULT_ATTRIBUTE_METADATA = $"{NAMESPACE}.UserDataVaultAttribute";
+        public const string ACCESSOR_ATTRIBUTE_METADATA = $"{NAMESPACE}.UserDataAccessorAttribute";
         public const string IUSER_DATA = $"global::{NAMESPACE}.IUserData";
         public const string IUSER_DATA_ACCESSOR = $"global::{NAMESPACE}.IUserDataAccessor";
         public const string USER_DATA_STORE_BASE = $"global::{NAMESPACE}.UserDataStoreBase<";

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.UserDataVaults
 {
@@ -11,21 +10,51 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
     {
         public bool IsValid { get; }
 
-        public INamedTypeSymbol Symbol { get; }
+        /// <summary>Simple (unqualified) class name. Used in generated constructor-assignment code.</summary>
+        public string SymbolName { get; }
 
         public string FullTypeName { get; }
 
         public string FieldName { get; }
 
+        public bool IsInitializable { get; }
+
+        public bool IsDeinitializable { get; }
+
         public List<ParamDefinition> Args { get; }
 
-        public UserDataAccessorDefinition(
-              SourceProductionContext context
-            , ClassDeclarationSyntax providerSyntax
-            , INamedTypeSymbol symbol
-        )
+        /// <summary>
+        /// Cache-friendly constructor: builds the definition purely from pre-extracted
+        /// <see cref="UserDataAccessorInfo"/> data — no symbol or syntax access.
+        /// </summary>
+        public UserDataAccessorDefinition(UserDataAccessorInfo info)
         {
-            Symbol = symbol;
+            SymbolName = info.symbolName;
+            FullTypeName = "global::" + info.metadataName;
+            FieldName = info.fieldName;
+            IsInitializable = info.isInitializable;
+            IsDeinitializable = info.isDeinitializable;
+
+            var infoArgs = info.args;
+            var args = Args = new(infoArgs.Count);
+            var validCount = 0;
+
+            foreach (var arg in infoArgs)
+            {
+                args.Add(new ParamDefinition(arg));
+                validCount += 1;
+            }
+
+            IsValid = info.isValid && validCount == infoArgs.Count;
+        }
+
+        /// <summary>
+        /// Symbol-based constructor retained for use by <see cref="UserDataVaultDiagnosticAnalyzer"/>
+        /// (which operates at analysis time and has live symbol access).
+        /// </summary>
+        public UserDataAccessorDefinition(INamedTypeSymbol symbol)
+        {
+            SymbolName = symbol.Name;
             FullTypeName = symbol.ToFullName();
 
             foreach (var attribute in symbol.GetAttributes())
@@ -70,6 +99,9 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 FieldName = symbol.Name;
             }
 
+            IsInitializable = symbol.InheritsFromInterface("global::EncosyTower.Initialization.IInitializable");
+            IsDeinitializable = symbol.InheritsFromInterface("global::EncosyTower.Initialization.IDeinitializable");
+
             var constructors = symbol.Constructors;
             var constructorIndex = -1;
             var max = 0;
@@ -87,11 +119,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             if (constructorIndex != 0)
             {
-                context.ReportDiagnostic(
-                      DiagnosticDescriptors.MustHaveOnlyOneConstructor
-                    , providerSyntax
-                    , symbol.Name
-                );
+                // Invalid — no constructor or best constructor is not at index 0.
+                // Diagnostics are reported by UserDataVaultDiagnosticAnalyzer.
             }
             else
             {
@@ -109,12 +138,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     }
                     else
                     {
-                        context.ReportDiagnostic(
-                              DiagnosticDescriptors.ConstructorContainsUnsupportedType
-                            , providerSyntax
-                            , symbol.Name
-                            , param.Name
-                        );
+                        // Unsupported param type — reported by UserDataVaultDiagnosticAnalyzer.
                     }
                 }
 
@@ -126,19 +150,45 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
     internal readonly struct ParamDefinition
     {
         public readonly StoreDefinition StoreDef;
-        public readonly ITypeSymbol Type;
 
+        /// <summary>
+        /// Simple (unqualified) name of the <c>IUserDataAccessor</c> parameter type.
+        /// Empty when this parameter is a <c>UserDataStoreBase&lt;T&gt;</c> store.
+        /// </summary>
+        public readonly string AccessorTypeName;
+
+        /// <summary>Cache-friendly constructor from pre-extracted <see cref="AccessorArgInfo"/>.</summary>
+        public ParamDefinition(AccessorArgInfo info)
+        {
+            if (info.IsStore)
+            {
+                StoreDef = new StoreDefinition(
+                      info.FullTypeName
+                    , info.FullDataTypeName
+                    , info.TypeName
+                    , info.DataTypeHasDefaultConstructor
+                );
+                AccessorTypeName = string.Empty;
+            }
+            else
+            {
+                StoreDef = default;
+                AccessorTypeName = info.TypeName;
+            }
+        }
+
+        /// <summary>Symbol-based constructor for the legacy analysis-time path.</summary>
         public ParamDefinition(ITypeSymbol type, ITypeSymbol argType)
         {
             if (argType != null)
             {
                 StoreDef = new StoreDefinition(type, argType);
-                Type = default;
+                AccessorTypeName = string.Empty;
             }
             else
             {
                 StoreDef = default;
-                Type = type;
+                AccessorTypeName = type.Name;
             }
         }
 
@@ -168,32 +218,71 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
     internal readonly struct StoreDefinition : IEquatable<StoreDefinition>
     {
-        public readonly ITypeSymbol StoreType;
-        public readonly ITypeSymbol DataType;
         public readonly string FullStoreTypeName;
         public readonly string FullDataTypeName;
+        public readonly string DataTypeName;
         public readonly string DataFieldName;
         public readonly string DataArgName;
 
-        public bool IsValid => StoreType != null && DataType != null;
+        public bool IsValid => string.IsNullOrEmpty(FullStoreTypeName) == false
+            && string.IsNullOrEmpty(DataTypeName) == false;
 
+        public readonly bool DataTypeHasDefaultConstructor;
+
+        /// <summary>Cache-friendly constructor from pre-extracted string data.</summary>
+        public StoreDefinition(
+              string fullStoreTypeName
+            , string fullDataTypeName
+            , string dataTypeName
+            , bool dataTypeHasDefaultConstructor
+        )
+        {
+            FullStoreTypeName = fullStoreTypeName;
+            FullDataTypeName = fullDataTypeName;
+            DataTypeName = dataTypeName;
+            DataFieldName = dataTypeName.ToPrivateFieldName();
+            DataArgName = dataTypeName.ToArgumentName();
+            DataTypeHasDefaultConstructor = dataTypeHasDefaultConstructor;
+        }
+
+        /// <summary>Symbol-based constructor for the legacy analysis-time path.</summary>
         public StoreDefinition(ITypeSymbol storeType, ITypeSymbol dataType)
         {
-            StoreType = storeType;
-            DataType = dataType;
             FullStoreTypeName = storeType.ToFullName();
             FullDataTypeName = dataType.ToFullName();
+            DataTypeName = dataType.Name;
             DataFieldName = dataType.Name.ToPrivateFieldName();
             DataArgName = dataType.Name.ToArgumentName();
+            DataTypeHasDefaultConstructor = ComputeHasDefaultConstructor(dataType);
+        }
+
+        private static bool ComputeHasDefaultConstructor(ITypeSymbol dataType)
+        {
+            var nonDefaultCount = 0;
+            var defaultCount = 0;
+
+            foreach (var member in dataType.GetMembers())
+            {
+                if (member is Microsoft.CodeAnalysis.IMethodSymbol method
+                    && method.MethodKind == Microsoft.CodeAnalysis.MethodKind.Constructor)
+                {
+                    if (method.Parameters.Length > 0)
+                        nonDefaultCount++;
+                    else
+                        defaultCount++;
+                }
+            }
+
+            return defaultCount > 0 || nonDefaultCount < 1;
         }
 
         public bool Equals(StoreDefinition other)
-            => SymbolEqualityComparer.Default.Equals(StoreType, other.StoreType);
+            => string.Equals(FullStoreTypeName, other.FullStoreTypeName, StringComparison.Ordinal);
 
         public override bool Equals(object obj)
             => obj is StoreDefinition other && Equals(other);
 
         public override int GetHashCode()
-            => SymbolEqualityComparer.Default.GetHashCode(StoreType);
+            => FullStoreTypeName is null ? 0 : FullStoreTypeName.GetHashCode();
     }
 }

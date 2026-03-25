@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,25 +20,31 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(CompilationCandidate.GetCompilation);
+                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
-            var providerClassProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                  predicate: IsSyntaxMatchVaultClass
-                , transform: GetVaultCandidate
-            ).Where(static t => t.syntax is { } && t.symbol is { });
+            var providerClassProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
+                  VAULT_ATTRIBUTE_METADATA
+                , static (node, _) => node is ClassDeclarationSyntax syntax
+                      && syntax.HasModifier(SyntaxKind.AbstractKeyword) == false
+                      && syntax.TypeParameterList is null
+                , GetVaultInfo
+            ).Where(static t => t.IsValid);
 
-            var accessProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                  predicate: IsSyntaxMatchDataAccessClass
-                , transform: GetDataAccessClass
-            ).Where(static t => t is { });
+            var accessProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
+                  ACCESSOR_ATTRIBUTE_METADATA
+                , static (node, _) => node is ClassDeclarationSyntax syntax
+                      && syntax.HasModifier(SyntaxKind.AbstractKeyword) == false
+                      && syntax.TypeParameterList is null
+                , GetAccessorInfo
+            ).Where(static t => t.isValid);
 
             var combined = providerClassProvider
                 .Combine(accessProvider.Collect())
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.isValid);
 
-            context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
+            context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
                     , source.Left.Right
@@ -52,198 +56,300 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             });
         }
 
-        private static bool IsSyntaxMatchVaultClass(SyntaxNode syntaxNode, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            return syntaxNode is ClassDeclarationSyntax syntax
-                && syntax.HasAttributeCandidate(NAMESPACE, "UserDataVault")
-                && syntax.HasModifier(SyntaxKind.AbstractKeyword) == false
-                && syntax.TypeParameterList is null
-                ;
-        }
-
-        private static UserDataVaultCandidate GetVaultCandidate(
-              GeneratorSyntaxContext context
+        private static UserDataVaultInfo GetVaultInfo(
+              GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
-                || context.Node is not ClassDeclarationSyntax syntax
-            )
-            {
-                return default;
-            }
-
-            var semanticModel = context.SemanticModel;
-            var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
-
-            if (symbol == null
+            if (context.TargetSymbol is not INamedTypeSymbol symbol
                 || symbol.IsAbstract
                 || symbol.IsUnboundGenericType
-                || symbol.GetAttribute(VAULT_ATTRIBUTE) is null
             )
             {
                 return default;
             }
 
-            return new UserDataVaultCandidate {
-                syntax = syntax,
-                symbol = symbol,
+            var fileHintName = symbol.ToFileName();
+            var syntaxTree = context.TargetNode.SyntaxTree;
+            var containingNs = symbol.ContainingNamespace;
+
+            return new UserDataVaultInfo {
+                location = LocationInfo.From(context.TargetNode.GetLocation()),
+                metadataName = symbol.ToSimpleName(),
+                className = symbol.Name,
+                isStatic = symbol.IsStatic,
+                namespaceName = containingNs is { IsGlobalNamespace: false }
+                    ? containingNs.ToDisplayString()
+                    : string.Empty,
+                containingTypeDeclarations = symbol.GetContainingTypes(),
+                fileHintName = fileHintName,
+                sourceHintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, context.TargetNode, fileHintName),
             };
         }
 
-        public static bool IsSyntaxMatchDataAccessClass(SyntaxNode syntaxNode, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            return syntaxNode is ClassDeclarationSyntax syntax
-                && syntax.HasAttributeCandidate(NAMESPACE, "UserDataAccessor")
-                && syntax.HasModifier(SyntaxKind.AbstractKeyword) == false
-                && syntax.TypeParameterList is null
-                ;
-        }
-
-        public static INamedTypeSymbol GetDataAccessClass(
-              GeneratorSyntaxContext context
+        private static UserDataAccessorInfo GetAccessorInfo(
+              GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
         {
-            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
-                || context.Node is not ClassDeclarationSyntax syntax
-            )
-            {
-                return default;
-            }
+            token.ThrowIfCancellationRequested();
 
-            var semanticModel = context.SemanticModel;
-            var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
-
-            if (symbol == null
+            if (context.TargetSymbol is not INamedTypeSymbol symbol
                 || symbol.IsAbstract
                 || symbol.IsUnboundGenericType
-                || symbol.GetAttribute(ACCESSOR_ATTRIBUTE) is null
             )
             {
                 return default;
             }
 
-            return symbol;
+            // Extract target vault from the attribute's first constructor argument (if any)
+            var vaultMetadataName = string.Empty;
+            var attribute = context.Attributes[0];
+
+            if (attribute.ConstructorArguments.Length > 0
+                && attribute.ConstructorArguments[0].Value is INamedTypeSymbol vaultType
+            )
+            {
+                vaultMetadataName = vaultType.ToSimpleName();
+            }
+
+            // Extract field name from [Label] or [DisplayName] attribute, fallback to class name
+            var fieldName = string.Empty;
+
+            foreach (var attrib in symbol.GetAttributes())
+            {
+                var attribName = attrib.AttributeClass?.Name ?? string.Empty;
+
+                if (attribName is not ("LabelAttribute" or "DisplayNameAttribute"))
+                {
+                    continue;
+                }
+
+                if (attrib.ConstructorArguments.Length > 0)
+                {
+                    var arg = attrib.ConstructorArguments[0];
+
+                    if (arg.Kind == TypedConstantKind.Primitive && arg.Value?.ToString() is string dn)
+                    {
+                        fieldName = dn;
+                        goto NEXT;
+                    }
+                }
+                else if (attrib.NamedArguments.Length > 0)
+                {
+                    foreach (var arg in attrib.NamedArguments)
+                    {
+                        if (arg.Key is "Name" or "DisplayName"
+                            && arg.Value.Kind == TypedConstantKind.Primitive
+                            && arg.Value.Value?.ToString() is string dn
+                        )
+                        {
+                            fieldName = dn;
+                            goto NEXT;
+                        }
+                    }
+                }
+            }
+
+            NEXT:
+
+            if (string.IsNullOrEmpty(fieldName))
+            {
+                fieldName = symbol.Name;
+            }
+
+            // Find constructor with the most parameters
+            var constructors = symbol.Constructors;
+            var constructorIndex = -1;
+            var max = 0;
+
+            for (var i = 0; i < constructors.Length; i++)
+            {
+                if (constructors[i].Parameters.Length > max)
+                {
+                    max = constructors[i].Parameters.Length;
+                    constructorIndex = i;
+                }
+            }
+
+            if (constructorIndex != 0)
+            {
+                return default;
+            }
+
+            var constructor = constructors[constructorIndex];
+            var parameters = constructor.Parameters;
+            using var builder = ImmutableArrayBuilder<AccessorArgInfo>.Rent();
+            var isValid = true;
+
+            foreach (var param in parameters)
+            {
+                if (ParamDefinition.TryGetParam(param.Type, out var argType))
+                {
+                    var dataTypeHasDefaultConstructor = false;
+
+                    if (argType != null)
+                    {
+                        var nonDefaultCount = 0;
+                        var defaultCount = 0;
+
+                        foreach (var member in argType.GetMembers())
+                        {
+                            if (member is IMethodSymbol method
+                                && method.MethodKind == MethodKind.Constructor
+                            )
+                            {
+                                if (method.Parameters.Length > 0)
+                                    nonDefaultCount++;
+                                else
+                                    defaultCount++;
+                            }
+                        }
+
+                        dataTypeHasDefaultConstructor = defaultCount > 0 || nonDefaultCount < 1;
+                    }
+
+                    builder.Add(new AccessorArgInfo(
+                          isStore: argType != null
+                        , fullTypeName: param.Type.ToFullName()
+                        , fullDataTypeName: argType?.ToFullName() ?? string.Empty
+                        , typeName: argType?.Name ?? param.Type.Name
+                        , dataTypeHasDefaultConstructor: dataTypeHasDefaultConstructor
+                    ));
+                }
+                else
+                {
+                    isValid = false;
+                }
+            }
+
+            return new UserDataAccessorInfo {
+                location = LocationInfo.From(context.TargetNode.GetLocation()),
+                metadataName = symbol.ToSimpleName(),
+                vaultMetadataName = vaultMetadataName,
+                fieldName = fieldName,
+                symbolName = symbol.Name,
+                args = builder.ToImmutable().AsEquatableArray(),
+                isInitializable = symbol.InheritsFromInterface("global::EncosyTower.Initialization.IInitializable"),
+                isDeinitializable = symbol.InheritsFromInterface("global::EncosyTower.Initialization.IDeinitializable"),
+                isValid = isValid,
+            };
         }
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidate compilationCandidate
-            , UserDataVaultCandidate vaultCandidate
-            , ImmutableArray<INamedTypeSymbol> accessorCandidates
+            , CompilationCandidateSlim compilationCandidate
+            , UserDataVaultInfo vaultInfo
+            , ImmutableArray<UserDataAccessorInfo> accessorInfos
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
-            if (compilationCandidate.compilation == null
-                || vaultCandidate.syntax == null
-                || vaultCandidate.symbol == null
-                || accessorCandidates.Length < 1
-            )
+            if (vaultInfo.IsValid == false || accessorInfos.Length < 1)
             {
                 return;
             }
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            try
+            var accessDeclarations = new List<UserDataAccessorDefinition>(accessorInfos.Length);
+
+            for (var i = 0; i < accessorInfos.Length; i++)
             {
-                var providerSyntax = vaultCandidate.syntax;
-                var accessDeclarations = new List<UserDataAccessorDefinition>(accessorCandidates.Length);
-                var sb = new StringBuilder();
-                var equalityComparer = SymbolEqualityComparer.Default;
+                var aInfo = accessorInfos[i];
 
-                for (var i = 0; i < accessorCandidates.Length; i++)
+                if (string.IsNullOrEmpty(aInfo.vaultMetadataName) == false
+                    && string.Equals(aInfo.vaultMetadataName, vaultInfo.metadataName, StringComparison.Ordinal) == false
+                )
                 {
-                    var symbol = accessorCandidates[i];
-                    var attrib = symbol.GetAttribute(ACCESSOR_ATTRIBUTE);
-
-                    if (attrib is null)
-                    {
-                        continue;
-                    }
-
-                    if (attrib.ConstructorArguments.Length > 0
-                        && attrib.ConstructorArguments[0].Value is ITypeSymbol vaultType
-                        && equalityComparer.Equals(vaultType, vaultCandidate.symbol) == false
-                    )
-                    {
-                        continue;
-                    }
-
-                    var accessDeclaration = new UserDataAccessorDefinition(
-                        context, providerSyntax, symbol
-                    );
-
-                    if (accessDeclaration.IsValid)
-                    {
-                        accessDeclarations.Add(accessDeclaration);
-                    }
+                    continue;
                 }
 
-                if (accessDeclarations.Count < 1)
+                var accessDeclaration = new UserDataAccessorDefinition(aInfo);
+
+                if (accessDeclaration.IsValid)
                 {
-                    return;
+                    accessDeclarations.Add(accessDeclaration);
                 }
-
-                accessDeclarations.Sort(static (x, y) => {
-                    return string.Compare(x.Symbol.Name, y.Symbol.Name, StringComparison.Ordinal);
-                });
-
-                var syntaxTree = providerSyntax.SyntaxTree;
-                var vaultSymbol = vaultCandidate.symbol;
-                var compilation = compilationCandidate.compilation;
-                var assemblyName = compilation.Assembly.Name;
-
-                var declaration = new UserDataVaultDeclaration(
-                      providerSyntax
-                    , vaultSymbol
-                    , accessDeclarations
-                );
-
-                SourceGenHelpers.ProjectPath = projectPath;
-
-                TypeCreationHelpers.GenerateOpeningAndClosingSource(
-                      providerSyntax
-                    , context.CancellationToken
-                    , out var openingSource
-                    , out var closingSource
-                    , printAdditionalUsings: compilationCandidate.references.unitask
-                        ? PrintUsingUniTask : PrintUsingAwaitable
-                );
-
-                var fileTypeName = vaultSymbol.ToFileName();
-
-                context.OutputSource(
-                      outputSourceGenFiles
-                    , openingSource
-                    , declaration.WriteCode()
-                    , closingSource
-                    , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, providerSyntax, fileTypeName)
-                    , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName)
-                    , providerSyntax.GetLocation()
-                );
             }
-            catch (Exception e)
+
+            if (accessDeclarations.Count < 1)
             {
-                if (e is OperationCanceledException)
-                {
-                    throw;
-                }
-
-                context.ReportDiagnostic(Diagnostic.Create(
-                      s_errorDescriptor
-                    , vaultCandidate.syntax.GetLocation()
-                    , e.ToUnityPrintableString()
-                ));
+                return;
             }
+
+            accessDeclarations.Sort(static (x, y) => {
+                return string.Compare(x.SymbolName, y.SymbolName, StringComparison.Ordinal);
+            });
+
+            var declaration = new UserDataVaultDeclaration(
+                  vaultInfo.className
+                , vaultInfo.isStatic
+                , accessDeclarations
+            );
+
+            SourceGenHelpers.ProjectPath = projectPath;
+
+            // Build the opening source from pre-extracted namespace / containing type declarations
+            // (replaces TypeCreationHelpers.GenerateOpeningAndClosingSource which requires a SyntaxNode).
+            var openingPrinter = Printer.DefaultLarge;
+            var printUsings = compilationCandidate.references.unitask
+                ? (PrinterAction)PrintUsingUniTask : PrintUsingAwaitable;
+            printUsings(ref openingPrinter);
+
+            var hasNamespace = string.IsNullOrEmpty(vaultInfo.namespaceName) == false;
+
+            if (hasNamespace)
+            {
+                openingPrinter.PrintLine($"namespace {vaultInfo.namespaceName}");
+                openingPrinter.OpenScope();
+            }
+
+            var containingTypes = vaultInfo.containingTypeDeclarations;
+
+            for (var i = 0; i < containingTypes.Count; i++)
+            {
+                openingPrinter.PrintLine(containingTypes[i]);
+                openingPrinter.OpenScope();
+            }
+
+            var openingSource = openingPrinter.Result;
+
+            // Build the closing source with matching closing braces.
+            var closingPrinter = Printer.DefaultLarge;
+            closingPrinter.PrintEndLine();
+
+            var closingDepth = containingTypes.Count + (hasNamespace ? 1 : 0);
+
+            for (var i = 0; i < closingDepth; i++)
+            {
+                closingPrinter = closingPrinter.DecreasedIndent();
+                closingPrinter.PrintLine("}");
+            }
+
+            var closingSource = closingPrinter.Result;
+
+            // Compute source file path without accessing SyntaxTree
+            // (mirrors SyntaxNodeExtensions.GetGeneratedSourceFilePath logic).
+            var stableHashCode = SourceGenHelpers.GetStableHashCode(vaultInfo.location.filePath) & 0x7fffffff;
+            var fileHintName = vaultInfo.fileHintName;
+            var sourceFileName = $"{fileHintName}__{GENERATOR_NAME}_{stableHashCode}_0.g.cs";
+            var sourceFilePath = SourceGenHelpers.CanWriteToProjectPath
+                ? $"{projectPath}/Temp/GeneratedCode/{compilationCandidate.assemblyName}/{sourceFileName}"
+                : $"Temp/GeneratedCode/{compilationCandidate.assemblyName}/{sourceFileName}";
+
+            context.OutputSource(
+                  outputSourceGenFiles
+                , openingSource
+                , declaration.WriteCode()
+                , closingSource
+                , vaultInfo.sourceHintName
+                , sourceFilePath
+                , vaultInfo.location.ToLocation()
+                , projectPath
+            );
 
             return;
 
@@ -306,19 +412,12 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("using IUserData = global::EncosyTower.UserDataVaults.IUserData;");
                 p.PrintLine("using IUserDataAccessor = global::EncosyTower.UserDataVaults.IUserDataAccessor;");
                 p.PrintLine("using IUserDataAccessorCollection = global::EncosyTower.UserDataVaults.IUserDataAccessorCollection;");
+                p.PrintLine("using IUserDataAccessorReadOnlyCollection = global::EncosyTower.UserDataVaults.IUserDataAccessorReadOnlyCollection;");
                 p.PrintLine("using IUserDataCollection = global::EncosyTower.UserDataVaults.IUserDataCollection;");
                 p.PrintLine("using IUserDataDirectory = global::EncosyTower.UserDataVaults.IUserDataDirectory;");
+                p.PrintLine("using IUserDataIdCollection = global::EncosyTower.UserDataVaults.IUserDataIdCollection;");
             }
         }
 
-        private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_USER_DATA_VAULT_01"
-                , "UserDataVault Generator Error"
-                , "This error indicates a bug in the UserDataVault source generators. Error message: '{0}'."
-                , $"{NAMESPACE}.UserDataVaultAttribute"
-                , DiagnosticSeverity.Error
-                , isEnabledByDefault: true
-                , description: ""
-            );
     }
 }

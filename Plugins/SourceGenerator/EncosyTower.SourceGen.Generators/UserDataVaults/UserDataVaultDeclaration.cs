@@ -1,25 +1,23 @@
 ﻿using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.UserDataVaults
 {
     internal partial class UserDataVaultDeclaration
     {
-        public ClassDeclarationSyntax Syntax { get; }
+        public string ClassName { get; }
 
-        public INamedTypeSymbol Symbol { get; }
+        public bool IsStatic { get; }
 
         public List<UserDataAccessorDefinition> AccessorDefs { get; }
 
         public UserDataVaultDeclaration(
-              ClassDeclarationSyntax syntax
-            , INamedTypeSymbol symbol
+              string className
+            , bool isStatic
             , List<UserDataAccessorDefinition> accessorDefs
         )
         {
-            Syntax = syntax;
-            Symbol = symbol;
+            ClassName = className;
+            IsStatic = isStatic;
             AccessorDefs = accessorDefs;
         }
     }
