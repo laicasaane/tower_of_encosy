@@ -17,6 +17,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             => ImmutableArray.Create(
                   DiagnosticDescriptors.MustHaveOnlyOneConstructor
                 , DiagnosticDescriptors.ConstructorContainsUnsupportedType
+                , DiagnosticDescriptors.MustNotBeAbstract
+                , DiagnosticDescriptors.MustNotBeUnboundGenericType
             );
 
         public override void Initialize(AnalysisContext context)
@@ -29,11 +31,33 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         private static void AnalyzeSymbol(SymbolAnalysisContext context)
         {
             if (context.Symbol is not INamedTypeSymbol symbol
-                || symbol.IsAbstract
-                || symbol.IsUnboundGenericType
                 || symbol.GetAttribute(ACCESSOR_ATTRIBUTE) is null
             )
             {
+                return;
+            }
+
+            var symbolLocation = symbol.Locations.Length > 0
+                ? symbol.Locations[0]
+                : Location.None;
+
+            if (symbol.IsAbstract)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                      DiagnosticDescriptors.MustNotBeAbstract
+                    , symbolLocation
+                    , symbol.Name
+                ));
+                return;
+            }
+
+            if (symbol.IsUnboundGenericType)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                      DiagnosticDescriptors.MustNotBeUnboundGenericType
+                    , symbolLocation
+                    , symbol.Name
+                ));
                 return;
             }
 
@@ -52,13 +76,9 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             if (constructorIndex != 0)
             {
-                var location = symbol.Locations.Length > 0
-                    ? symbol.Locations[0]
-                    : Location.None;
-
                 context.ReportDiagnostic(Diagnostic.Create(
                       DiagnosticDescriptors.MustHaveOnlyOneConstructor
-                    , location
+                    , symbolLocation
                     , symbol.Name
                 ));
 

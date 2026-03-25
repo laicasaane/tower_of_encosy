@@ -23,5 +23,25 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             , isEnabledByDefault: true
             , description: "Constructor parameter must be either UserDataStoreBase<T> or IUserDataAccessor"
         );
+
+        public static readonly DiagnosticDescriptor MustNotBeAbstract = new(
+              id: "USER_DATA_VAULT_0003"
+            , title: "[UserDataAccessor] type must not be abstract"
+            , messageFormat: "Type \"{0}\" is marked [UserDataAccessor] but is abstract and cannot be processed by the source generator"
+            , category: "UserDataVault"
+            , defaultSeverity: DiagnosticSeverity.Warning
+            , isEnabledByDefault: true
+            , description: "A type marked with [UserDataAccessor] must not be abstract"
+        );
+
+        public static readonly DiagnosticDescriptor MustNotBeUnboundGenericType = new(
+              id: "USER_DATA_VAULT_0004"
+            , title: "[UserDataAccessor] type must not be an unbound generic type"
+            , messageFormat: "Type \"{0}\" is marked [UserDataAccessor] but is an unbound generic type and cannot be processed by the source generator"
+            , category: "UserDataVault"
+            , defaultSeverity: DiagnosticSeverity.Warning
+            , isEnabledByDefault: true
+            , description: "A type marked with [UserDataAccessor] must not be an unbound generic type"
+        );
     }
 }
