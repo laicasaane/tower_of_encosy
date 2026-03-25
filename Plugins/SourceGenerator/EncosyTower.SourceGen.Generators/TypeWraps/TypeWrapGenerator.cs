@@ -18,6 +18,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         public const string WRAP_RECORD_ATTRIBUTE = $"global::{NAMESPACE}.WrapRecordAttribute";
         public const string GENERATOR_NAME = nameof(TypeWrapGenerator);
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
+        private const string WRAP_TYPE_ATTRIBUTE_METADATA = $"{NAMESPACE}.WrapTypeAttribute";
+        private const string WRAP_RECORD_ATTRIBUTE_METADATA = $"{NAMESPACE}.WrapRecordAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -26,19 +28,43 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             var compilationProvider = context.CompilationProvider
                 .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
-            var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: IsValidTypeSyntax,
-                transform: GetSemanticSymbolMatch
+            var wrapTypeProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
+                  WRAP_TYPE_ATTRIBUTE_METADATA
+                , static (node, _) => node is StructDeclarationSyntax or ClassDeclarationSyntax
+                , GetSemanticSymbolMatchForWrapType
             ).Where(static t => t.IsValid);
 
-            var combined = candidateProvider
+            var wrapRecordProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
+                  WRAP_RECORD_ATTRIBUTE_METADATA
+                , static (node, _) => node is RecordDeclarationSyntax recordSyntax
+                    && recordSyntax.ParameterList != null
+                    && recordSyntax.ParameterList.Parameters.Count > 0
+                , GetSemanticSymbolMatchForWrapRecord
+            ).Where(static t => t.IsValid);
+
+            var combinedWrapType = wrapTypeProvider
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider)
                 .Where(static t => t.Left.Right.isValid);
 
-            context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
+            var combinedWrapRecord = wrapRecordProvider
+                .Combine(compilationProvider)
+                .Combine(projectPathProvider)
+                .Where(static t => t.Left.Right.isValid);
+
+            context.RegisterSourceOutput(combinedWrapType, static (sourceProductionContext, source) => {
                 GenerateOutput(
-                    sourceProductionContext
+                      sourceProductionContext
+                    , source.Left.Right
+                    , source.Left.Left
+                    , source.Right.projectPath
+                    , source.Right.outputSourceGenFiles
+                );
+            });
+
+            context.RegisterSourceOutput(combinedWrapRecord, static (sourceProductionContext, source) => {
+                GenerateOutput(
+                      sourceProductionContext
                     , source.Left.Right
                     , source.Left.Left
                     , source.Right.projectPath
@@ -47,115 +73,26 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             });
         }
 
-        private static bool IsValidTypeSyntax(SyntaxNode node, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            if (node is not TypeDeclarationSyntax type)
-            {
-                return false;
-            }
-
-            if (type.AttributeLists.Count < 1)
-            {
-                return false;
-            }
-
-            if (type is RecordDeclarationSyntax recordSyntax)
-            {
-                return type.HasAttributeCandidate(NAMESPACE, WRAP_RECORD)
-                    && recordSyntax.ParameterList != null
-                    && recordSyntax.ParameterList.Parameters.Count > 0;
-            }
-
-            if (type is StructDeclarationSyntax or ClassDeclarationSyntax)
-            {
-                return type.HasAttributeCandidate(NAMESPACE, WRAP_TYPE);
-            }
-
-            return false;
-        }
-
-        public static TypeWrapDeclaration GetSemanticSymbolMatch(
-              GeneratorSyntaxContext context
+        public static TypeWrapDeclaration GetSemanticSymbolMatchForWrapType(
+              GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
 
+            if (context.TargetSymbol is not INamedTypeSymbol symbol)
+            {
+                return default;
+            }
+
             var semanticModel = context.SemanticModel;
             var enableNullable = semanticModel.Compilation.Options.NullableContextOptions != NullableContextOptions.Disable;
 
-            switch (context.Node)
+            switch (context.TargetNode)
             {
-                case RecordDeclarationSyntax recordSyntax:
-                {
-                    if (recordSyntax.ParameterList is ParameterListSyntax { Parameters.Count: 1 }
-                        && TryGetWrapRecordInfo(recordSyntax, out var candidate)
-                        && semanticModel.GetDeclaredSymbol(recordSyntax, token) is INamedTypeSymbol symbol
-                        && symbol.HasAttribute(WRAP_RECORD_ATTRIBUTE)
-                    )
-                    {
-                        if (recordSyntax.ClassOrStructKeyword.IsKind(SyntaxKind.ClassKeyword) == false
-                            || InheritBaseClass(semanticModel, symbol, token) == false
-                        )
-                        {
-                            GetTypeName(recordSyntax, ref candidate);
-                            SetOtherFields(ref candidate, recordSyntax, symbol, semanticModel, token);
-                            candidate.isStruct = recordSyntax.ClassOrStructKeyword.IsKind(SyntaxKind.StructKeyword);
-                            candidate.isRecord = true;
-
-                            var syntaxTree = recordSyntax.SyntaxTree;
-                            var fileTypeName = symbol.ToFileName();
-                            var hintName = syntaxTree.GetGeneratedSourceFileName(
-                                  GENERATOR_NAME
-                                , recordSyntax
-                                , fileTypeName
-                            );
-
-                            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                                  semanticModel.Compilation.AssemblyName
-                                , GENERATOR_NAME
-                                , fileTypeName
-                            );
-
-                            TypeCreationHelpers.GenerateOpeningAndClosingSource(
-                                  recordSyntax
-                                , token
-                                , out var openingSource
-                                , out var closingSource
-                                , printAdditionalUsings: PrintAdditionalUsings
-                            );
-
-                            return new TypeWrapDeclaration(
-                                  LocationInfo.From(candidate.syntax.GetLocation())
-                                , hintName
-                                , sourceFilePath
-                                , openingSource
-                                , closingSource
-                                , candidate.symbol
-                                , candidate.typeName
-                                , candidate.typeNameWithTypeParams
-                                , candidate.isStruct
-                                , candidate.isRefStruct
-                                , candidate.isRecord
-                                , candidate.fieldTypeSymbol
-                                , candidate.fieldName
-                                , candidate.excludeConverter || candidate.isGeneric
-                                , enableNullable
-                            );
-                        }
-                    }
-
-                    break;
-                }
-
                 case StructDeclarationSyntax structSyntax:
                 {
-                    if (TryGetWrapTypeInfo(structSyntax, out var candidate)
-                        && semanticModel.GetDeclaredSymbol(structSyntax, token) is INamedTypeSymbol symbol
-                        && symbol.HasAttribute(WRAP_TYPE_ATTRIBUTE)
-                    )
+                    if (TryGetWrapTypeInfo(structSyntax, out var candidate))
                     {
                         GetTypeName(structSyntax, ref candidate);
                         SetOtherFields(ref candidate, structSyntax, symbol, semanticModel, token);
@@ -165,16 +102,16 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         var syntaxTree = structSyntax.SyntaxTree;
                         var fileTypeName = symbol.ToFileName();
                         var hintName = syntaxTree.GetGeneratedSourceFileName(
-                                  GENERATOR_NAME
-                                , structSyntax
-                                , fileTypeName
-                            );
+                              GENERATOR_NAME
+                            , structSyntax
+                            , fileTypeName
+                        );
 
                         var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                                  semanticModel.Compilation.AssemblyName
-                                , GENERATOR_NAME
-                                , fileTypeName
-                            );
+                              semanticModel.Compilation.AssemblyName
+                            , GENERATOR_NAME
+                            , fileTypeName
+                        );
 
                         TypeCreationHelpers.GenerateOpeningAndClosingSource(
                               structSyntax
@@ -209,195 +146,262 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 case ClassDeclarationSyntax classSyntax:
                 {
                     if (TryGetWrapTypeInfo(classSyntax, out var candidate)
-                        && semanticModel.GetDeclaredSymbol(classSyntax, token) is INamedTypeSymbol symbol
-                        && symbol.HasAttribute(WRAP_TYPE_ATTRIBUTE)
+                        && InheritBaseClass(semanticModel, symbol, token) == false
                     )
                     {
-                        if (InheritBaseClass(semanticModel, symbol, token) == false)
-                        {
-                            GetTypeName(classSyntax, ref candidate);
-                            SetOtherFields(ref candidate, classSyntax, symbol, semanticModel, token);
+                        GetTypeName(classSyntax, ref candidate);
+                        SetOtherFields(ref candidate, classSyntax, symbol, semanticModel, token);
 
-                            var syntaxTree = classSyntax.SyntaxTree;
-                            var fileTypeName = symbol.ToFileName();
-                            var hintName = syntaxTree.GetGeneratedSourceFileName(
-                                  GENERATOR_NAME
-                                , classSyntax
-                                , fileTypeName
-                            );
+                        var syntaxTree = classSyntax.SyntaxTree;
+                        var fileTypeName = symbol.ToFileName();
+                        var hintName = syntaxTree.GetGeneratedSourceFileName(
+                              GENERATOR_NAME
+                            , classSyntax
+                            , fileTypeName
+                        );
 
-                            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                                  semanticModel.Compilation.AssemblyName
-                                , GENERATOR_NAME
-                                , fileTypeName
-                            );
+                        var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                              semanticModel.Compilation.AssemblyName
+                            , GENERATOR_NAME
+                            , fileTypeName
+                        );
 
-                            TypeCreationHelpers.GenerateOpeningAndClosingSource(
-                                  classSyntax
-                                , token
-                                , out var openingSource
-                                , out var closingSource
-                                , printAdditionalUsings: PrintAdditionalUsings
-                            );
+                        TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                              classSyntax
+                            , token
+                            , out var openingSource
+                            , out var closingSource
+                            , printAdditionalUsings: PrintAdditionalUsings
+                        );
 
-                            return new TypeWrapDeclaration(
-                                  LocationInfo.From(candidate.syntax.GetLocation())
-                                , hintName
-                                , sourceFilePath
-                                , openingSource
-                                , closingSource
-                                , candidate.symbol
-                                , candidate.typeName
-                                , candidate.typeNameWithTypeParams
-                                , candidate.isStruct
-                                , candidate.isRefStruct
-                                , candidate.isRecord
-                                , candidate.fieldTypeSymbol
-                                , candidate.fieldName
-                                , candidate.excludeConverter || candidate.isGeneric
-                                , enableNullable
-                            );
-                        }
+                        return new TypeWrapDeclaration(
+                              LocationInfo.From(candidate.syntax.GetLocation())
+                            , hintName
+                            , sourceFilePath
+                            , openingSource
+                            , closingSource
+                            , candidate.symbol
+                            , candidate.typeName
+                            , candidate.typeNameWithTypeParams
+                            , candidate.isStruct
+                            , candidate.isRefStruct
+                            , candidate.isRecord
+                            , candidate.fieldTypeSymbol
+                            , candidate.fieldName
+                            , candidate.excludeConverter || candidate.isGeneric
+                            , enableNullable
+                        );
                     }
 
                     break;
                 }
-
-                static void PrintAdditionalUsings(ref Printer p)
-                {
-                    p.PrintEndLine();
-                    p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
-                    p.PrintEndLine();
-                    p.PrintLine("using System;");
-                    p.PrintLine("using System.ComponentModel;");
-                    p.PrintLine("using System.CodeDom.Compiler;");
-                    p.PrintLine("using System.Diagnostics;");
-                    p.PrintLine("using System.Diagnostics.CodeAnalysis;");
-                    p.PrintLine("using System.Globalization;");
-                    p.PrintLine("using System.Runtime.CompilerServices;");
-                    p.PrintLine("using System.Runtime.InteropServices;");
-                    p.PrintLine("using EncosyTower.Common;");
-                    p.PrintLine("using EncosyTower.TypeWraps;");
-                    p.PrintEndLine();
-                    p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
-                    p.PrintEndLine();
-                }
             }
 
             return default;
+        }
 
-            static bool InheritBaseClass(
-                  SemanticModel semanticModel
-                , INamedTypeSymbol classSymbol
-                , CancellationToken token
+        public static TypeWrapDeclaration GetSemanticSymbolMatchForWrapRecord(
+              GeneratorAttributeSyntaxContext context
+            , CancellationToken token
+        )
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (context.TargetNode is not RecordDeclarationSyntax recordSyntax
+                || context.TargetSymbol is not INamedTypeSymbol symbol
             )
             {
-                foreach (var syntax in classSymbol.DeclaringSyntaxReferences)
-                {
-                    if (semanticModel.GetDeclaredSymbol(syntax.GetSyntax(token), token) is INamedTypeSymbol symbol
-                        && symbol.BaseType is INamedTypeSymbol baseType
-                        && baseType.TypeKind == TypeKind.Class
-                        && baseType.SpecialType != SpecialType.System_Object
-                    )
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
+                return default;
             }
 
-            static bool TryGetWrapTypeInfo(TypeDeclarationSyntax syntax, out Candidate result)
+            if (recordSyntax.ParameterList is not ParameterListSyntax { Parameters.Count: 1 })
             {
-                result = new Candidate {
-                    fieldName = string.Empty,
-                };
+                return default;
+            }
 
-                TypeSyntax fieldTypeSyntax = null;
+            var semanticModel = context.SemanticModel;
+            var enableNullable = semanticModel.Compilation.Options.NullableContextOptions != NullableContextOptions.Disable;
 
-                foreach (var attribList in syntax.AttributeLists)
+            if (TryGetWrapRecordInfo(recordSyntax, out var candidate)
+                && (recordSyntax.ClassOrStructKeyword.IsKind(SyntaxKind.ClassKeyword) == false
+                    || InheritBaseClass(semanticModel, symbol, token) == false)
+            )
+            {
+                GetTypeName(recordSyntax, ref candidate);
+                SetOtherFields(ref candidate, recordSyntax, symbol, semanticModel, token);
+                candidate.isStruct = recordSyntax.ClassOrStructKeyword.IsKind(SyntaxKind.StructKeyword);
+                candidate.isRecord = true;
+
+                var syntaxTree = recordSyntax.SyntaxTree;
+                var fileTypeName = symbol.ToFileName();
+                var hintName = syntaxTree.GetGeneratedSourceFileName(
+                      GENERATOR_NAME
+                    , recordSyntax
+                    , fileTypeName
+                );
+
+                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                      semanticModel.Compilation.AssemblyName
+                    , GENERATOR_NAME
+                    , fileTypeName
+                );
+
+                TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                      recordSyntax
+                    , token
+                    , out var openingSource
+                    , out var closingSource
+                    , printAdditionalUsings: PrintAdditionalUsings
+                );
+
+                return new TypeWrapDeclaration(
+                      LocationInfo.From(candidate.syntax.GetLocation())
+                    , hintName
+                    , sourceFilePath
+                    , openingSource
+                    , closingSource
+                    , candidate.symbol
+                    , candidate.typeName
+                    , candidate.typeNameWithTypeParams
+                    , candidate.isStruct
+                    , candidate.isRefStruct
+                    , candidate.isRecord
+                    , candidate.fieldTypeSymbol
+                    , candidate.fieldName
+                    , candidate.excludeConverter || candidate.isGeneric
+                    , enableNullable
+                );
+            }
+
+            return default;
+        }
+
+        private static void PrintAdditionalUsings(ref Printer p)
+        {
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using System;");
+            p.PrintLine("using System.ComponentModel;");
+            p.PrintLine("using System.CodeDom.Compiler;");
+            p.PrintLine("using System.Diagnostics;");
+            p.PrintLine("using System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using System.Globalization;");
+            p.PrintLine("using System.Runtime.CompilerServices;");
+            p.PrintLine("using System.Runtime.InteropServices;");
+            p.PrintLine("using EncosyTower.Common;");
+            p.PrintLine("using EncosyTower.TypeWraps;");
+            p.PrintEndLine();
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+        }
+
+        private static bool InheritBaseClass(
+              SemanticModel semanticModel
+            , INamedTypeSymbol classSymbol
+            , CancellationToken token
+        )
+        {
+            foreach (var syntax in classSymbol.DeclaringSyntaxReferences)
+            {
+                if (semanticModel.GetDeclaredSymbol(syntax.GetSyntax(token), token) is INamedTypeSymbol symbol
+                    && symbol.BaseType is INamedTypeSymbol baseType
+                    && baseType.TypeKind == TypeKind.Class
+                    && baseType.SpecialType != SpecialType.System_Object
+                )
                 {
-                    foreach (var attrib in attribList.Attributes)
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool TryGetWrapTypeInfo(TypeDeclarationSyntax syntax, out Candidate result)
+        {
+            result = new Candidate {
+                fieldName = string.Empty,
+            };
+
+            TypeSyntax fieldTypeSyntax = null;
+
+            foreach (var attribList in syntax.AttributeLists)
+            {
+                foreach (var attrib in attribList.Attributes)
+                {
+                    var argumentList = attrib.ArgumentList;
+
+                    if (argumentList == null)
                     {
-                        var argumentList = attrib.ArgumentList;
+                        continue;
+                    }
 
-                        if (argumentList == null)
+                    var arguments = argumentList.Arguments;
+
+                    if (arguments.Count < 1)
+                    {
+                        continue;
+                    }
+
+                    if (attrib.Name.IsTypeNameCandidate(NAMESPACE, WRAP_TYPE) == false)
+                    {
+                        continue;
+                    }
+
+                    foreach (var arg in arguments)
+                    {
+                        if (arg.NameEquals != null)
                         {
-                            continue;
-                        }
-
-                        var arguments = argumentList.Arguments;
-
-                        if (arguments.Count < 1)
-                        {
-                            continue;
-                        }
-
-                        if (attrib.Name.IsTypeNameCandidate(NAMESPACE, WRAP_TYPE) == false)
-                        {
-                            continue;
-                        }
-
-                        foreach (var arg in arguments)
-                        {
-                            if (arg.NameEquals != null)
+                            switch (arg.NameEquals.Name.Identifier.Text)
                             {
-                                switch (arg.NameEquals.Name.Identifier.Text)
+                                case "ExcludeConverter":
                                 {
-                                    case "ExcludeConverter":
+                                    if (arg.Expression is LiteralExpressionSyntax literal)
                                     {
-                                        if (arg.Expression is LiteralExpressionSyntax literal)
-                                        {
-                                            result.excludeConverter = (bool)literal.Token.Value;
-                                        }
-
-                                        break;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                switch (arg.Expression)
-                                {
-                                    case TypeOfExpressionSyntax typeOf:
-                                    {
-                                        fieldTypeSyntax = typeOf.Type;
-                                        break;
+                                        result.excludeConverter = (bool)literal.Token.Value;
                                     }
 
-                                    case LiteralExpressionSyntax literal:
-                                    {
-                                        result.fieldName = literal.Token.ValueText;
-                                        break;
-                                    }
-
-                                    case InvocationExpressionSyntax invocation:
-                                    {
-                                        if (invocation.Expression is IdentifierNameSyntax identifierName
-                                            && identifierName.Identifier.ValueText == "nameof"
-                                            && invocation.ArgumentList.Arguments.Count == 1
-                                        )
-                                        {
-                                            var nameofArg = invocation.ArgumentList.Arguments[0];
-
-                                            if (nameofArg.Expression is IdentifierNameSyntax idName)
-                                            {
-                                                result.fieldName = idName.Identifier.ValueText;
-                                            }
-                                            else if (nameofArg.Expression is MemberAccessExpressionSyntax memberAccess)
-                                            {
-                                                result.fieldName = memberAccess.Name.Identifier.ValueText;
-                                            }
-                                        }
-                                        break;
-                                    }
+                                    break;
                                 }
                             }
                         }
-
-                        if (fieldTypeSyntax != null)
+                        else
                         {
-                            break;
+                            switch (arg.Expression)
+                            {
+                                case TypeOfExpressionSyntax typeOf:
+                                {
+                                    fieldTypeSyntax = typeOf.Type;
+                                    break;
+                                }
+
+                                case LiteralExpressionSyntax literal:
+                                {
+                                    result.fieldName = literal.Token.ValueText;
+                                    break;
+                                }
+
+                                case InvocationExpressionSyntax invocation:
+                                {
+                                    if (invocation.Expression is IdentifierNameSyntax identifierName
+                                        && identifierName.Identifier.ValueText == "nameof"
+                                        && invocation.ArgumentList.Arguments.Count == 1
+                                    )
+                                    {
+                                        var nameofArg = invocation.ArgumentList.Arguments[0];
+
+                                        if (nameofArg.Expression is IdentifierNameSyntax idName)
+                                        {
+                                            result.fieldName = idName.Identifier.ValueText;
+                                        }
+                                        else if (nameofArg.Expression is MemberAccessExpressionSyntax memberAccess)
+                                        {
+                                            result.fieldName = memberAccess.Name.Identifier.ValueText;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
                         }
                     }
 
@@ -409,121 +413,126 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 if (fieldTypeSyntax != null)
                 {
-                    result.fieldTypeSyntax = fieldTypeSyntax;
+                    break;
                 }
-
-                return result.fieldTypeSyntax != null;
             }
 
-            static bool TryGetWrapRecordInfo(RecordDeclarationSyntax syntax, out Candidate result)
+            if (fieldTypeSyntax != null)
             {
-                result = new Candidate();
+                result.fieldTypeSyntax = fieldTypeSyntax;
+            }
 
-                foreach (var attribList in syntax.AttributeLists)
+            return result.fieldTypeSyntax != null;
+        }
+
+        private static bool TryGetWrapRecordInfo(RecordDeclarationSyntax syntax, out Candidate result)
+        {
+            result = new Candidate();
+
+            foreach (var attribList in syntax.AttributeLists)
+            {
+                var alreadProcessed = false;
+
+                foreach (var attrib in attribList.Attributes)
                 {
-                    var alreadProcessed = false;
-
-                    foreach (var attrib in attribList.Attributes)
+                    if (attrib.Name.IsTypeNameCandidate(NAMESPACE, WRAP_RECORD) == false)
                     {
-                        if (attrib.Name.IsTypeNameCandidate(NAMESPACE, WRAP_RECORD) == false)
+                        continue;
+                    }
+
+                    var argumentList = attrib.ArgumentList;
+
+                    if (argumentList != null)
+                    {
+                        var arguments = argumentList.Arguments;
+
+                        foreach (var arg in arguments)
                         {
-                            continue;
-                        }
-
-                        var argumentList = attrib.ArgumentList;
-
-                        if (argumentList != null)
-                        {
-                            var arguments = argumentList.Arguments;
-
-                            foreach (var arg in arguments)
+                            if (arg.NameEquals == null)
                             {
-                                if (arg.NameEquals == null)
-                                {
-                                    continue;
-                                }
+                                continue;
+                            }
 
-                                switch (arg.NameEquals.Name.Identifier.Text)
+                            switch (arg.NameEquals.Name.Identifier.Text)
+                            {
+                                case "ExcludeConverter":
                                 {
-                                    case "ExcludeConverter":
+                                    if (arg.Expression is LiteralExpressionSyntax literal)
                                     {
-                                        if (arg.Expression is LiteralExpressionSyntax literal)
-                                        {
-                                            result.excludeConverter = (bool)literal.Token.Value;
-                                        }
-
-                                        break;
+                                        result.excludeConverter = (bool)literal.Token.Value;
                                     }
+
+                                    break;
                                 }
                             }
                         }
-
-                        alreadProcessed = true;
-                        break;
                     }
 
-                    if (alreadProcessed)
-                    {
-                        break;
-                    }
+                    alreadProcessed = true;
+                    break;
                 }
 
-                if (syntax.ParameterList != null
-                    && syntax.ParameterList.Parameters.Count > 0
-                    && syntax.ParameterList.Parameters[0].Type is TypeSyntax targetTypeSyntax
-                )
+                if (alreadProcessed)
                 {
-                    result.fieldTypeSyntax = targetTypeSyntax;
-                    result.fieldName = syntax.ParameterList.Parameters[0].Identifier.ValueText;
+                    break;
                 }
-
-                return result.fieldTypeSyntax != null;
             }
 
-            static void GetTypeName(TypeDeclarationSyntax syntax, ref Candidate candidate)
-            {
-                var typeNameWithTypeParamsBuilder = new StringBuilder(syntax.Identifier.ValueText);
-
-                if (syntax.TypeParameterList is TypeParameterListSyntax typeParamList
-                    && typeParamList.Parameters.Count > 0
-                )
-                {
-                    candidate.isGeneric = true;
-
-                    typeNameWithTypeParamsBuilder.Append("<");
-
-                    var typeParams = typeParamList.Parameters;
-                    var last = typeParams.Count - 1;
-
-                    for (var i = 0; i <= last; i++)
-                    {
-                        typeNameWithTypeParamsBuilder.Append(typeParams[i].Identifier.Text);
-
-                        if (i < last)
-                        {
-                            typeNameWithTypeParamsBuilder.Append(", ");
-                        }
-                    }
-
-                    typeNameWithTypeParamsBuilder.Append(">");
-                }
-
-                candidate.typeName = syntax.Identifier.ValueText;
-                candidate.typeNameWithTypeParams = typeNameWithTypeParamsBuilder.ToString();
-            }
-
-            static void SetOtherFields(
-                  ref Candidate candidate
-                , TypeDeclarationSyntax syntax
-                , INamedTypeSymbol symbol
-                , SemanticModel semanticModel
-                , CancellationToken token
+            if (syntax.ParameterList != null
+                && syntax.ParameterList.Parameters.Count > 0
+                && syntax.ParameterList.Parameters[0].Type is TypeSyntax targetTypeSyntax
             )
             {
-                candidate.fieldTypeSymbol = semanticModel.GetSymbolInfo(candidate.fieldTypeSyntax, token).Symbol as INamedTypeSymbol;
-                candidate.syntax = syntax;
-                candidate.symbol = symbol;
+                result.fieldTypeSyntax = targetTypeSyntax;
+                result.fieldName = syntax.ParameterList.Parameters[0].Identifier.ValueText;
             }
+
+            return result.fieldTypeSyntax != null;
+        }
+
+        private static void GetTypeName(TypeDeclarationSyntax syntax, ref Candidate candidate)
+        {
+            var typeNameWithTypeParamsBuilder = new StringBuilder(syntax.Identifier.ValueText);
+
+            if (syntax.TypeParameterList is TypeParameterListSyntax typeParamList
+                && typeParamList.Parameters.Count > 0
+            )
+            {
+                candidate.isGeneric = true;
+
+                typeNameWithTypeParamsBuilder.Append("<");
+
+                var typeParams = typeParamList.Parameters;
+                var last = typeParams.Count - 1;
+
+                for (var i = 0; i <= last; i++)
+                {
+                    typeNameWithTypeParamsBuilder.Append(typeParams[i].Identifier.Text);
+
+                    if (i < last)
+                    {
+                        typeNameWithTypeParamsBuilder.Append(", ");
+                    }
+                }
+
+                typeNameWithTypeParamsBuilder.Append(">");
+            }
+
+            candidate.typeName = syntax.Identifier.ValueText;
+            candidate.typeNameWithTypeParams = typeNameWithTypeParamsBuilder.ToString();
+        }
+
+        private static void SetOtherFields(
+              ref Candidate candidate
+            , TypeDeclarationSyntax syntax
+            , INamedTypeSymbol symbol
+            , SemanticModel semanticModel
+            , CancellationToken token
+        )
+        {
+            candidate.fieldTypeSymbol = semanticModel.GetSymbolInfo(candidate.fieldTypeSyntax, token).Symbol as INamedTypeSymbol;
+            candidate.syntax = syntax;
+            candidate.symbol = symbol;
         }
 
         private static void GenerateOutput(
