@@ -24,11 +24,23 @@
 
         public string WriteCode()
         {
-            var typeName = Syntax.Identifier.Text;
+            var typeName = SimpleName;
 
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, Syntax.Parent);
-            var p = scopePrinter.printer;
-            p = p.IncreasedIndent();
+            var p = Printer.DefaultLarge;
+            var hasNamespace = string.IsNullOrEmpty(NamespaceName) == false;
+            var numContainingTypes = ContainingTypes.Count;
+
+            if (hasNamespace)
+            {
+                p.PrintLine($"namespace {NamespaceName}");
+                p.OpenScope();
+            }
+
+            for (int i = 0; i < numContainingTypes; i++)
+            {
+                p.PrintLine(ContainingTypes[i]);
+                p.OpenScope();
+            }
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
@@ -109,7 +121,12 @@
 
             WriteEnumeration(ref p);
 
-            p = p.DecreasedIndent();
+            for (int i = 0; i < numContainingTypes; i++)
+                p.CloseScope();
+
+            if (hasNamespace)
+                p.CloseScope();
+
             return p.Result;
         }
 
@@ -2591,7 +2608,7 @@
         /// <param name="p"></param>
         private void WriteEnumeration(ref Printer p)
         {
-            var typeName = Syntax.Identifier.Text;
+            var typeName = SimpleName;
             var idEnums = IdEnumExtensionsRefs;
             var idEnumsCount = idEnums.Count;
 
@@ -2635,7 +2652,7 @@
 
         private void WriteEnumerationCopyTo(ref Printer p)
         {
-            var typeName = Syntax.Identifier.Text;
+            var typeName = SimpleName;
             var idEnums = IdEnumExtensionsRefs;
             var idEnumsCount = idEnums.Count;
 
@@ -2679,7 +2696,7 @@
 
         private void WriteEnumerationTryCopyTo(ref Printer p)
         {
-            var typeName = Syntax.Identifier.Text;
+            var typeName = SimpleName;
             var idEnums = IdEnumExtensionsRefs;
             var idEnumsCount = idEnums.Count;
 
@@ -2725,7 +2742,7 @@
 
         private void WriteEnumerationAddTo(ref Printer p)
         {
-            var typeName = Syntax.Identifier.Text;
+            var typeName = SimpleName;
             var idEnums = IdEnumExtensionsRefs;
             var idEnumsCount = idEnums.Count;
 

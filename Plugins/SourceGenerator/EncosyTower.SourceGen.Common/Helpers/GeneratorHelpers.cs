@@ -334,7 +334,7 @@ namespace EncosyTower.SourceGen
             };
 
         public static string GetFixedStringTypeName(int maxByteCount)
-            => (maxByteCount + 3) switch {
+            => maxByteCount switch {
                 <= 32 - 3 => "FixedString32Bytes",
                 <= 64 - 3 => "FixedString64Bytes",
                 <= 128 - 3 => "FixedString128Bytes",
@@ -343,7 +343,7 @@ namespace EncosyTower.SourceGen
             };
 
         public static string GetFixedStringFullyQualifiedTypeName(int maxByteCount)
-            => (maxByteCount + 3) switch {
+            => maxByteCount switch {
                 <= 32 - 3 => "global::Unity.Collections.FixedString32Bytes",
                 <= 64 - 3 => "global::Unity.Collections.FixedString64Bytes",
                 <= 128 - 3 => "global::Unity.Collections.FixedString128Bytes",

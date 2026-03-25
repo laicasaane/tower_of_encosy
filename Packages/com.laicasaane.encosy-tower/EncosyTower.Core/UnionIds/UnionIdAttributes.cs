@@ -49,6 +49,22 @@ namespace EncosyTower.UnionIds
         /// Settings that control the behavior of the parsable struct converter.
         /// </summary>
         public ParsableStructConverterSettings ConverterSettings { get; set; } = ParsableStructConverterSettings.None;
+
+        /// <summary>
+        /// The number of bytes used to store the fixed string value.
+        /// Possible values are 0, 32, 64, 128, 512, and 4096.
+        /// </summary>
+        /// <remarks>
+        /// <list type="bullet">
+        /// <item>
+        /// If the value is 0, the generated code will calculate the required size based on a couple of factors.
+        /// </item>
+        /// <item>
+        /// If the value is greater than 0, the generated code will use the specified size for the fixed string.
+        /// </item>
+        /// </list>
+        /// </remarks>
+        public ushort FixedStringBytes { get; set; }
     }
 
     /// <summary>

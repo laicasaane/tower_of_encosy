@@ -6,7 +6,7 @@
     using EncosyTower.UnionIds;
     using Unity.Collections;
 
-    [UnionId(Size = UnionIdSize.ULong2)]
+    [UnionId(Size = UnionIdSize.ULong2, FixedStringBytes = 32)]
     [UnionIdKind(typeof(MusicType), 0, "Music")]
     [UnionIdKind(typeof(SpecialId), 4)]
     [UnionIdKind(typeof(ComplexId), 5)]
@@ -32,7 +32,7 @@
             throw new NotImplementedException();
         }
 
-        private static partial void Append_ComplexId(ref FixedString64Bytes fs, ComplexId value, bool isDisplay)
+        private static partial void Append_ComplexId(ref FixedString32Bytes fs, ComplexId value, bool isDisplay)
         {
             throw new NotImplementedException();
         }

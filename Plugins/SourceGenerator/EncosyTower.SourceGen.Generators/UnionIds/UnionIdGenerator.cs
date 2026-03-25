@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.IO;
+using System.Text;
 using System.Threading;
+using EncosyTower.SourceGen.Generators.EnumExtensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 
 namespace EncosyTower.SourceGen.Generators.UnionIds
 {
@@ -12,9 +16,14 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
     {
         public const string NAMESPACE = "EncosyTower.UnionIds";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
-        public const string UNION_ID_ATTRIBUTE = $"global::{NAMESPACE}.UnionIdAttribute";
-        public const string UNION_ID_KIND_ATTRIBUTE = $"global::{NAMESPACE}.KindForUnionIdAttribute";
+        public const string UNION_ID_ATTRIBUTE_METADATA = $"{NAMESPACE}.UnionIdAttribute";
+        public const string KIND_FOR_UNION_ID_ATTRIBUTE_METADATA = $"{NAMESPACE}.KindForUnionIdAttribute";
         public const string GENERATOR_NAME = nameof(UnionIdGenerator);
+
+        private const string UNION_ID_ATTRIBUTE_FULL = $"global::{UNION_ID_ATTRIBUTE_METADATA}";
+        private const string UNION_ID_KIND_ATTRIBUTE_FULL = $"global::{NAMESPACE}.UnionIdKindAttribute";
+        private const string ENUM_EXTENSIONS_ATTRIBUTE_FULL = "global::EncosyTower.EnumExtensions.EnumExtensionsAttribute";
+        private const string FLAGS_ATTRIBUTE_FULL = "global::System.FlagsAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -23,15 +32,21 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             var compilationProvider = context.CompilationProvider
                 .Select(CompilationCandidate.GetCompilation);
 
-            var idProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                  predicate: IsSyntaxMatchId
-                , transform: GetIdCandidate
-            ).Where(static t => t.syntax is { } && t.symbol is { });
+            var idProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
+                  UNION_ID_ATTRIBUTE_METADATA
+                , static (node, _) => node is StructDeclarationSyntax
+                , GetUnionIdInfo
+            ).Where(static x => x.IsValid);
 
-            var kindProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                  predicate: IsSyntaxMatchKind
-                , transform: GetKindCandidate
-            ).Where(static t => t.kindSymbol is { } && t.idSymbol is { });
+            var kindProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
+                  KIND_FOR_UNION_ID_ATTRIBUTE_METADATA
+                , static (node, _) => node is BaseTypeDeclarationSyntax typeSyntax
+                    && typeSyntax.Kind() is SyntaxKind.EnumDeclaration
+                        or SyntaxKind.StructDeclaration
+                        or SyntaxKind.RecordStructDeclaration
+                , GetKindForUnionIdInfo
+            ).Where(static x => string.IsNullOrEmpty(x.kindFullName) == false
+                             && string.IsNullOrEmpty(x.idFullName) == false);
 
             var combined = idProvider
                 .Combine(kindProvider.Collect())
@@ -39,7 +54,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 .Combine(projectPathProvider)
                 .Where(static t => t.Left.Right.compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
 
-            context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
+            context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
                     , source.Left.Right
@@ -51,53 +66,24 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             });
         }
 
-        private static bool IsSyntaxMatchId(SyntaxNode syntaxNode, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            return syntaxNode is StructDeclarationSyntax structSyntax
-                && structSyntax.HasAttributeCandidate("EncosyTower.UnionIds", "UnionId");
-        }
-
-        private static bool IsSyntaxMatchKind(SyntaxNode syntaxNode, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            return syntaxNode is BaseTypeDeclarationSyntax typeSyntax
-                && typeSyntax.Kind() is SyntaxKind.EnumDeclaration or SyntaxKind.StructDeclaration or SyntaxKind.RecordStructDeclaration
-                && typeSyntax.GetAttribute("EncosyTower.UnionIds", "KindForUnionId") is AttributeSyntax attribSyntax
-                && attribSyntax.ArgumentList != null
-                && attribSyntax.ArgumentList.Arguments.Count > 0
-                && attribSyntax.ArgumentList.Arguments[0].Expression is TypeOfExpressionSyntax;
-        }
-
-        private static IdCandidate GetIdCandidate(
-              GeneratorSyntaxContext context
+        private static IdDeclaration GetUnionIdInfo(
+              GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.Node is not StructDeclarationSyntax syntax)
-            {
-                return default;
-            }
-
-            var semanticModel = context.SemanticModel;
-            var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
-
-            if (symbol == null
+            if (context.TargetSymbol is not INamedTypeSymbol symbol
                 || symbol.IsUnmanagedType == false
                 || symbol.IsUnboundGenericType
-                || symbol.GetAttribute(UNION_ID_ATTRIBUTE) is not AttributeData attrib
+                || context.Attributes.Length < 1
             )
             {
                 return default;
             }
 
-            var candidate = new IdCandidate {
-                syntax = syntax,
-                symbol = symbol,
+            var attrib = context.Attributes[0];
+            var info = new IdDeclaration {
                 separator = '-',
             };
 
@@ -109,152 +95,448 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 {
                     case "Size":
                     {
-                        if (arg.Value.Value is byte byteVal)
-                        {
-                            candidate.size = (UnionIdSize)byteVal;
-                        }
+                        if (arg.Value.Value is byte val)
+                            info.size = (UnionIdSize)val;
                         break;
                     }
 
                     case "DisplayNameForId":
                     {
-                        if (arg.Value.Value is string stringVal)
-                        {
-                            candidate.displayNameForId = stringVal;
-                        }
+                        if (arg.Value.Value is string val)
+                            info.displayNameForId = val;
                         break;
                     }
 
                     case "DisplayNameForKind":
                     {
-                        if (arg.Value.Value is string stringVal)
-                        {
-                            candidate.displayNameForKind = stringVal;
-                        }
+                        if (arg.Value.Value is string val)
+                            info.displayNameForKind = val;
                         break;
                     }
 
                     case "Separator":
                     {
-                        if (arg.Value.Value is char charVal)
-                        {
-                            candidate.separator = charVal;
-                        }
+                        if (arg.Value.Value is char val)
+                            info.separator = val;
                         break;
                     }
 
                     case "KindSettings":
                     {
-                        if (arg.Value.Value is byte byteVal)
-                        {
-                            candidate.kindSettings = (UnionIdKindSettings)byteVal;
-                        }
+                        if (arg.Value.Value is byte val)
+                            info.kindSettings = (UnionIdKindSettings)val;
                         break;
                     }
 
                     case "ConverterSettings":
                     {
-                        if (arg.Value.Value is byte byteVal)
+                        if (arg.Value.Value is byte val)
+                            info.converterSettings = (ParsableStructConverterSettings)val;
+                        break;
+                    }
+
+                    case "FixedStringBytes":
+                    {
+                        if (arg.Value.Value is ushort val && val > 0)
                         {
-                            candidate.converterSettings = (ParsableStructConverterSettings)byteVal;
+                            info.fixedStringBytes = val switch {
+                                <= 32 => 32 - 3,
+                                <= 64 => 64 - 3,
+                                <= 128 => 128 - 3,
+                                <= 512 => 512 - 3,
+                                _ => 4096 - 3,
+                            };
                         }
                         break;
                     }
                 }
             }
 
-            return candidate;
+            var ns = symbol.ContainingNamespace;
+            info.fullName = symbol.ToFullName();
+            info.simpleName = symbol.Name;
+            info.fileHintName = symbol.ToFileName();
+            info.namespaceName = ns is { IsGlobalNamespace: false } ? ns.ToDisplayString() : string.Empty;
+            info.accessibility = symbol.DeclaredAccessibility;
+            info.location = LocationInfo.From(context.TargetNode.GetLocation());
+
+            // Determine if parent is a namespace (for EnumExtensionsDeclaration)
+            info.parentIsNamespace = context.TargetNode.Parent is BaseNamespaceDeclarationSyntax;
+
+            // Build containing-type chain (outer → inner)
+            using var innerToOuter = ImmutableArrayBuilder<string>.Rent();
+            var containingType = symbol.ContainingType;
+
+            while (containingType != null)
+            {
+                var kw = containingType.TypeKind == TypeKind.Struct ? "struct" : "class";
+                var accessibility = containingType.DeclaredAccessibility.ToKeyword();
+                innerToOuter.Add($"{accessibility} partial {kw} {containingType.Name}");
+                containingType = containingType.ContainingType;
+            }
+
+            var ito = innerToOuter.ToImmutable();
+            var outerToInner = new string[ito.Length];
+
+            for (int i = 0; i < ito.Length; i++)
+                outerToInner[i] = ito[ito.Length - 1 - i];
+
+            info.containingTypes = outerToInner.ToImmutableArray().AsEquatableArray();
+
+            // Inline kinds via [UnionIdKind] attributes on this struct
+            info.inlineKinds = GetInlineKinds(symbol, info.fullName, token);
+
+            return info;
         }
 
-        private static KindCandidate GetKindCandidate(
-              GeneratorSyntaxContext context
+        private static KindDeclaration GetKindForUnionIdInfo(
+              GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.Node is not BaseTypeDeclarationSyntax syntax)
-            {
-                return default;
-            }
-
-            var semanticModel = context.SemanticModel;
-            var kindSymbol = semanticModel.GetDeclaredSymbol(syntax, token);
-
-            if (kindSymbol == null
+            if (context.TargetSymbol is not INamedTypeSymbol kindSymbol
                 || kindSymbol.IsUnmanagedType == false
-                || kindSymbol.GetAttribute(UNION_ID_KIND_ATTRIBUTE) is not AttributeData attrib
-                || attrib.ConstructorArguments.Length < 1
+                || context.Attributes.Length < 1
             )
             {
                 return default;
             }
 
-            var args = attrib.ConstructorArguments;
-            var typeArg = args[0];
+            var attrib = context.Attributes[0];
+
+            if (attrib.ConstructorArguments.Length < 1)
+                return default;
+
+            var typeArg = attrib.ConstructorArguments[0];
 
             if (typeArg.Kind != TypedConstantKind.Type
                 || typeArg.Value is not INamedTypeSymbol idSymbol
                 || idSymbol.IsUnmanagedType == false
                 || idSymbol.IsUnboundGenericType
-                || idSymbol.HasAttribute(UNION_ID_ATTRIBUTE) == false
+                || idSymbol.HasAttribute(UNION_ID_ATTRIBUTE_FULL) == false
             )
             {
                 return default;
             }
 
-            var candidate = new KindCandidate {
-                kindSymbol = kindSymbol,
-                idSymbol = idSymbol,
-                attributeData = attrib,
+            var ctorArgs = attrib.ConstructorArguments;
+            ulong order = 0;
+            string name = null;
+            string displayName = null;
+            bool signed = false;
+            var toStringMethods = ToStringMethods.Default;
+            var tryParseMethodType = TryParseMethodType.None;
+
+            for (var i = 1; i < ctorArgs.Length; i++)
+            {
+                var arg = ctorArgs[i];
+
+                if (i == 1 && arg.Value is ulong ulongVal) order = ulongVal;
+                else if (i == 2 && arg.Value is string stringVal1) name = stringVal1;
+                else if (i == 3 && arg.Value is string stringVal2) displayName = stringVal2;
+                else if (i == 4 && arg.Value is bool boolVal) signed = boolVal;
+                else if (i == 5 && arg.Value is byte byteVal1) toStringMethods = (ToStringMethods)byteVal1;
+                else if (i == 6 && arg.Value is byte byteVal2) tryParseMethodType = (TryParseMethodType)byteVal2;
+            }
+
+            return BuildKindInfo(kindSymbol, idSymbol.ToFullName(), order, name, displayName, signed, toStringMethods, tryParseMethodType,
+                LocationInfo.From(context.TargetNode.GetLocation()), token);
+        }
+
+        private static EquatableArray<KindDeclaration> GetInlineKinds(
+              INamedTypeSymbol idSymbol
+            , string idFullName
+            , CancellationToken token
+        )
+        {
+            var attributes = idSymbol.GetAttributes(UNION_ID_KIND_ATTRIBUTE_FULL);
+            using var builder = ImmutableArrayBuilder<KindDeclaration>.Rent();
+
+            foreach (var attrib in attributes)
+            {
+                if (attrib == null)
+                    continue;
+
+                var args = attrib.ConstructorArguments;
+
+                if (args.Length < 1)
+                    continue;
+
+                var typeArg = args[0];
+
+                if (typeArg.Kind != TypedConstantKind.Type
+                    || typeArg.Value is not INamedTypeSymbol kindSymbol
+                    || kindSymbol.IsUnmanagedType == false
+                )
+                {
+                    continue;
+                }
+
+                ulong order = 0;
+                string name = null;
+                string displayName = null;
+                bool signed = false;
+                var toStringMethods = ToStringMethods.Default;
+                var tryParseMethodType = TryParseMethodType.None;
+
+                for (var i = 1; i < args.Length; i++)
+                {
+                    var arg = args[i];
+
+                    if (i == 1 && arg.Value is ulong ulongVal) order = ulongVal;
+                    else if (i == 2 && arg.Value is string stringVal1) name = stringVal1;
+                    else if (i == 3 && arg.Value is string stringVal2) displayName = stringVal2;
+                    else if (i == 4 && arg.Value is bool boolVal) signed = boolVal;
+                    else if (i == 5 && arg.Value is byte byteVal1) toStringMethods = (ToStringMethods)byteVal1;
+                    else if (i == 6 && arg.Value is byte byteVal2) tryParseMethodType = (TryParseMethodType)byteVal2;
+                }
+
+                var kindInfo = BuildKindInfo(kindSymbol, idFullName, order, name, displayName, signed, toStringMethods, tryParseMethodType,
+                    default, token);
+
+                if (string.IsNullOrEmpty(kindInfo.kindFullName) == false)
+                    builder.Add(kindInfo);
+            }
+
+            return builder.ToImmutable().AsEquatableArray();
+        }
+
+        private static KindDeclaration BuildKindInfo(
+              INamedTypeSymbol kindSymbol
+            , string idFullName
+            , ulong order
+            , string name
+            , string displayName
+            , bool signed
+            , ToStringMethods toStringMethods
+            , TryParseMethodType tryParseMethodType
+            , LocationInfo location
+            , CancellationToken token
+        )
+        {
+            token.ThrowIfCancellationRequested();
+
+            var info = new KindDeclaration {
+                kindFullName = kindSymbol.ToFullName(),
+                kindSimpleName = kindSymbol.Name,
+                idFullName = idFullName,
+                order = order,
+                name = name ?? string.Empty,
+                displayName = displayName ?? string.Empty,
+                signed = signed,
+                toStringMethods = toStringMethods,
+                location = location,
             };
 
-            for (var i = 1; i < args.Length; i++)
-            {
-                var arg = args[i];
+            var size = 0;
+            kindSymbol.GetUnmanagedSize(ref size);
+            info.kindUnmanagedSize = size;
 
-                if (i == 1 && arg.Value is ulong ulongVal1)
+            var isEnum = kindSymbol.TypeKind == TypeKind.Enum;
+            info.isEnum = isEnum;
+            info.isKindAlsoUnionId = kindSymbol.HasAttribute(UNION_ID_ATTRIBUTE_FULL);
+
+            if (isEnum)
+            {
+                info.kindEnumHasFlags = kindSymbol.HasAttribute(FLAGS_ATTRIBUTE_FULL);
+                info.kindEnumUnderlyingTypeName = kindSymbol.EnumUnderlyingType?.ToDisplayString() ?? "int";
+                info.hasExternalEnumExtensions = kindSymbol.TryGetAttribute(ENUM_EXTENSIONS_ATTRIBUTE_FULL, out _);
+
+                if (info.hasExternalEnumExtensions)
                 {
-                    candidate.order = ulongVal1;
+                    info.externalEnumExtensionsFullName = $"{kindSymbol.ToFullName()}Extensions";
                 }
-                else if (i == 2 && arg.Value is string stringVal1)
+
+                // Collect enum members
+                var enumMembers = kindSymbol.GetMembers();
+                using var memberBuilder = ImmutableArrayBuilder<EnumMemberDeclaration>.Rent();
+                var maxBytes = 0;
+                var hasDisplayAttr = false;
+
+                foreach (var member in enumMembers)
                 {
-                    candidate.name = stringVal1;
+                    if (member is not IFieldSymbol field || field.ConstantValue is null)
+                        continue;
+
+                    string memberDisplayName = null;
+
+                    foreach (var attr in field.GetAttributes())
+                    {
+                        var attrName = attr.AttributeClass?.Name ?? string.Empty;
+
+                        switch (attrName)
+                        {
+                            case nameof(ObsoleteAttribute):
+                                goto CONTINUE;
+
+                            case "LabelAttribute":
+                            case "DescriptionAttribute":
+                            case "DisplayAttribute":
+                            case "DisplayNameAttribute":
+                            case "InspectorNameAttribute":
+                            {
+                                if (attr.ConstructorArguments.Length > 0)
+                                {
+                                    var a = attr.ConstructorArguments[0];
+
+                                    if (a.Kind == TypedConstantKind.Primitive && a.Value?.ToString() is string dn)
+                                    {
+                                        memberDisplayName = dn;
+                                        goto ADD;
+                                    }
+                                }
+                                else if (attr.NamedArguments.Length > 0)
+                                {
+                                    foreach (var na in attr.NamedArguments)
+                                    {
+                                        if (na.Key is "Name" or "DisplayName"
+                                            && na.Value.Kind == TypedConstantKind.Primitive
+                                            && na.Value.Value?.ToString() is string dn
+                                        )
+                                        {
+                                            memberDisplayName = dn;
+                                            goto ADD;
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    ADD:
+                    {
+                        if (string.IsNullOrEmpty(memberDisplayName) == false) hasDisplayAttr = true;
+
+                        var nb = member.Name.GetByteCount();
+                        var db = memberDisplayName.GetByteCount();
+                        maxBytes = Math.Max(maxBytes, Math.Max(nb, db));
+                        memberBuilder.Add(new EnumMemberDeclaration { name = member.Name, displayName = memberDisplayName });
+                        continue;
+                    }
+
+                    CONTINUE:
+                    {
+                        continue;
+                    }
                 }
-                else if (i == 3 && arg.Value is string stringVal2)
+
+                info.kindEnumValues = memberBuilder.ToImmutable().AsEquatableArray();
+                info.kindEnumFixedStringBytes = maxBytes;
+                info.kindEnumIsDisplayAttributeUsed = hasDisplayAttr;
+
+                info.toStringMethods |= ToStringMethods.ToDisplayString;
+            }
+            else if (info.isKindAlsoUnionId)
+            {
+                info.tryParseSpan = new MemberExistence(true, false, false, 4);
+                info.equality = new Equality(EqualityStrategy.Equals, false, false);
+                info.toStringMethods |= ToStringMethods.All;
+            }
+            else
+            {
+                info.tryParseSpan = tryParseMethodType switch {
+                    TryParseMethodType.Instance => new MemberExistence(true, false, false, 4),
+                    TryParseMethodType.Static => new MemberExistence(true, true, false, 4),
+                    _ => kindSymbol.FindTryParseSpan().DefaultIfNullableIs(true),
+                };
+
+                info.equality = kindSymbol.DetermineEquality();
+
+                if (info.equality.IsNullable)
+                    info.kindFullNameFromNullable = kindSymbol.GetTypeFromNullable().ToFullName();
+
+                if (CheckToDisplayFixedString(kindSymbol))
                 {
-                    candidate.displayName = stringVal2;
+                    info.hasToDisplayString = true;
+                    info.toStringMethods |= ToStringMethods.ToDisplayString;
                 }
-                else if (i == 4 && arg.Value is bool boolVal1)
+
+                if (CheckToFixedString(kindSymbol, "ToFixedString", out var fixedBytes))
                 {
-                    candidate.signed = boolVal1;
+                    info.hasToFixedString = true;
+                    info.toFixedStringBytes = fixedBytes;
                 }
-                else if (i == 5 && arg.Value is byte byteVal1)
+
+                if (CheckToFixedString(kindSymbol, "ToDisplayFixedString", out var displayFixedBytes))
                 {
-                    candidate.toStringMethods = (ToStringMethods)byteVal1;
-                }
-                else if (i == 6 && arg.Value is byte byteVal2)
-                {
-                    candidate.tryParseSpan = (TryParseMethodType)byteVal2;
+                    info.hasToDisplayFixedString = true;
+                    info.toDisplayFixedStringBytes = displayFixedBytes;
                 }
             }
 
-            return candidate;
+            return info;
+        }
+
+        private static bool CheckToFixedString(INamedTypeSymbol symbol, string name, out int byteCount)
+        {
+            var members = symbol.GetMembers(name);
+
+            foreach (var member in members)
+            {
+                if (member is not IMethodSymbol method
+                    || method.DeclaredAccessibility != Accessibility.Public
+                    || method.IsStatic
+                    || method.Parameters.Length != 0
+                    || method.ReturnsVoid
+                )
+                {
+                    continue;
+                }
+
+                var returnTypeName = method.ReturnType.ToFullName();
+
+                if (returnTypeName.StartsWith("global::Unity.Collections.FixedString", StringComparison.Ordinal) == false)
+                    continue;
+
+                var indexOfBytes = returnTypeName.IndexOf("Bytes", 36);
+
+                if (indexOfBytes < 39)
+                    continue;
+
+                if (int.TryParse(returnTypeName.Substring(37, indexOfBytes - 37), out byteCount))
+                    return true;
+            }
+
+            byteCount = 0;
+            return false;
+        }
+
+        private static bool CheckToDisplayFixedString(INamedTypeSymbol symbol)
+        {
+            var members = symbol.GetMembers("ToDisplayString");
+
+            foreach (var member in members)
+            {
+                if (member is not IMethodSymbol method
+                    || method.DeclaredAccessibility != Accessibility.Public
+                    || method.IsStatic
+                    || method.Parameters.Length != 0
+                    || method.ReturnType.SpecialType != SpecialType.System_String
+                )
+                {
+                    continue;
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationCandidate compilationCandidate
-            , IdCandidate idCandidate
-            , ImmutableArray<KindCandidate> kindCandidates
+            , IdDeclaration idInfo
+            , ImmutableArray<KindDeclaration> kindInfos
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
-            if (idCandidate.syntax == null || idCandidate.symbol == null)
-            {
+            if (idInfo.IsValid == false)
                 return;
-            }
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
@@ -262,47 +544,69 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             {
                 SourceGenHelpers.ProjectPath = projectPath;
 
-                var syntax = idCandidate.syntax;
-                var symbol = idCandidate.symbol;
-                var syntaxTree = syntax.SyntaxTree;
                 var compilation = compilationCandidate.compilation;
-                var assemblyName = compilation.Assembly.Name;
+                var assemblyName = compilationCandidate.assemblyName;
 
                 var declaration = new UnionIdDeclaration(
-                      context
-                    , idCandidate
-                    , kindCandidates
+                      idInfo
+                    , kindInfos
                     , compilationCandidate.references
                 );
 
                 if (declaration.IsInvalid)
-                {
                     return;
+
+                var hintName = $"{GENERATOR_NAME}__{idInfo.fileHintName}.g.cs";
+                var sourceFilePath = BuildSourceFilePath(assemblyName, hintName, projectPath);
+                var source = declaration.WriteCode();
+
+                var sourceText = SourceText.From(source, Encoding.UTF8)
+                    .WithIgnoreUnassignedVariableWarning()
+                    .WithInitialLineDirectiveToGeneratedSource(sourceFilePath);
+
+                context.AddSource(hintName, sourceText);
+
+                if (outputSourceGenFiles)
+                {
+                    SourceGenHelpers.OutputSourceToFile(
+                          context
+                        , idInfo.location.ToLocation()
+                        , sourceFilePath
+                        , sourceText
+                        , projectPath
+                    );
                 }
-
-                var fileTypeName = symbol.ToFileName();
-
-                context.OutputSource(
-                      outputSourceGenFiles
-                    , syntax
-                    , declaration.WriteCode()
-                    , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, fileTypeName)
-                    , syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName)
-                );
             }
             catch (Exception e)
             {
                 if (e is OperationCanceledException)
-                {
                     throw;
-                }
 
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
-                    , idCandidate.syntax.GetLocation()
+                    , idInfo.location.ToLocation()
                     , e.ToUnityPrintableString()
                 ));
             }
+        }
+
+        private static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath = null)
+        {
+            if (projectPath is not null)
+            {
+                var dir = $"{projectPath}/Temp/GeneratedCode/{assemblyName}/";
+                Directory.CreateDirectory(dir);
+                return $"{dir}{hintName}";
+            }
+
+            if (SourceGenHelpers.CanWriteToProjectPath)
+            {
+                var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
+                Directory.CreateDirectory(dir);
+                return $"{dir}{hintName}";
+            }
+
+            return $"Temp/GeneratedCode/{assemblyName}/{hintName}";
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
