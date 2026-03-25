@@ -11,8 +11,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         private const string NAMESPACE = StatGeneratorAPI.NAMESPACE;
         private const string SKIP_ATTRIBUTE = StatGeneratorAPI.SKIP_ATTRIBUTE;
         private const string STAT_DATA = $"StatData";
-        private const string STAT_COLLECTION = $"StatCollection";
         private const string STAT_COLLECTION_ATTRIBUTE = $"global::{NAMESPACE}.StatCollectionAttribute";
+        private const string STAT_COLLECTION_ATTRIBUTE_METADATA = $"{NAMESPACE}.StatCollectionAttribute";
         private const string STAT_SYSTEM_ATTRIBUTE = $"global::{NAMESPACE}.StatSystemAttribute";
         private const string GENERATOR_NAME = nameof(StatCollectionGenerator);
 
@@ -20,84 +20,66 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
-            var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+            // Only propagate the assembly-validity flag — not the full CompilationCandidateSlim.
+            // This prevents the combined pipeline from re-running whenever unrelated compilation
+            // details (referenced assemblies, nullable context, etc.) change.
+            var isValidProvider = context.CompilationProvider
+                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE).isValid);
 
-            var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: IsValidStructSyntax,
-                transform: GetSemanticSymbolMatch
+            var candidateProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
+                  STAT_COLLECTION_ATTRIBUTE_METADATA
+                , static (node, _) => node is StructDeclarationSyntax { TypeParameterList: null }
+                , GetSemanticSymbolMatch
             ).Where(static t => t.IsValid);
 
             var combined = candidateProvider
-                .Combine(compilationProvider)
-                .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.isValid);
+                .Combine(isValidProvider)
+                .Where(static t => t.Right)
+                .Select(static (t, _) => t.Left)
+                .Combine(projectPathProvider);
 
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
-                    , source.Left.Right
-                    , source.Left.Left
+                    , source.Left
                     , source.Right.projectPath
                     , source.Right.outputSourceGenFiles
                 );
             });
         }
 
-        private static bool IsValidStructSyntax(SyntaxNode node, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            return node is StructDeclarationSyntax syntax
-                && syntax.TypeParameterList is null
-                && syntax.AttributeLists.Count > 0
-                && syntax.GetAttribute(NAMESPACE, STAT_COLLECTION) is AttributeSyntax attributeSyntax
-                && attributeSyntax.ArgumentList is AttributeArgumentListSyntax argumentList
-                && argumentList.Arguments.Count > 0
-                && argumentList.Arguments[0].Expression is TypeOfExpressionSyntax
-                ;
-        }
-
         private static StatCollectionDefinition GetSemanticSymbolMatch(
-              GeneratorSyntaxContext context
+              GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.Node is not StructDeclarationSyntax syntax
-                || syntax.TypeParameterList is not null
-                || syntax.GetAttribute(NAMESPACE, STAT_COLLECTION) is not AttributeSyntax attributeSyntax
-                || attributeSyntax.ArgumentList is not AttributeArgumentListSyntax argumentList
-                || argumentList.Arguments.Count < 1
-                || argumentList.Arguments[0].Expression is not TypeOfExpressionSyntax typeOfExpr
-            )
+            if (context.TargetNode is not StructDeclarationSyntax syntax)
+            {
+                return default;
+            }
+
+            if (context.TargetSymbol is not INamedTypeSymbol structSymbol)
+            {
+                return default;
+            }
+
+            var attribute = context.Attributes[0];
+
+            if (attribute.ConstructorArguments.Length < 1)
+            {
+                return default;
+            }
+
+            var statSystemTypeSymbol = attribute.ConstructorArguments[0].Value as INamedTypeSymbol;
+
+            if (statSystemTypeSymbol is null || statSystemTypeSymbol.HasAttribute(STAT_SYSTEM_ATTRIBUTE) == false)
             {
                 return default;
             }
 
             var semanticModel = context.SemanticModel;
-            var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
-
-            if (symbol is not INamedTypeSymbol structSymbol)
-            {
-                return default;
-            }
-
-            var attribute = symbol.GetAttribute(STAT_COLLECTION_ATTRIBUTE);
-
-            if (attribute == null || attribute.ConstructorArguments.Length < 1)
-            {
-                return default;
-            }
-
-            var statSystemTypeSymbol = semanticModel.GetSymbolInfo(typeOfExpr.Type, token).Symbol as INamedTypeSymbol;
-
-            if (statSystemTypeSymbol.HasAttribute(STAT_SYSTEM_ATTRIBUTE) == false)
-            {
-                return default;
-            }
-
             var assemblyName = semanticModel.Compilation.AssemblyName;
             var syntaxTree = syntax.SyntaxTree;
             var typeIdentifier = structSymbol.ToValidIdentifier();
@@ -270,7 +252,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidateSlim _
             , StatCollectionDefinition candidate
             , string projectPath
             , bool outputSourceGenFiles

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.Entities.Stats
@@ -12,7 +11,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         private const string NAMESPACE = StatGeneratorAPI.NAMESPACE;
         private const string SKIP_ATTRIBUTE = StatGeneratorAPI.SKIP_ATTRIBUTE;
         private const string STAT_SYSTEM_ATTRIBUTE = $"global::{NAMESPACE}.StatSystemAttribute";
-        private const string GENERATOR_NAME = nameof(StatDataGenerator);
+        private const string STAT_SYSTEM_ATTRIBUTE_METADATA_NAME = $"{NAMESPACE}.StatSystemAttribute";
+        private const string GENERATOR_NAME = nameof(StatSystemGenerator);
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -21,10 +21,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             var compilationProvider = context.CompilationProvider
                 .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
-            var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: IsValidStructSyntax,
-                transform: GetSemanticSymbolMatch
-            ).Where(static t => t.IsValid);
+            var candidateProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      STAT_SYSTEM_ATTRIBUTE_METADATA_NAME
+                    , static (node, _) => node is TypeDeclarationSyntax syntax
+                        && syntax.TypeParameterList is null
+                    , GetSemanticSymbolMatch
+                )
+                .Where(static t => t.IsValid);
 
             var combined = candidateProvider
                 .Combine(compilationProvider)
@@ -42,47 +46,29 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             });
         }
 
-        private static bool IsValidStructSyntax(SyntaxNode node, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            return node is TypeDeclarationSyntax syntax
-                && syntax.TypeParameterList is null
-                && syntax.AttributeLists.Count > 0
-                && syntax.GetAttribute(NAMESPACE, "StatSystem") is AttributeSyntax attributeSyntax
-                && attributeSyntax.ArgumentList is AttributeArgumentListSyntax argumentList
-                && argumentList.Arguments.Count > 0
-                ;
-        }
-
         private static StatSystemDefinition GetSemanticSymbolMatch(
-              GeneratorSyntaxContext context
+              GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.Node is not TypeDeclarationSyntax syntax
+            if (context.TargetNode is not TypeDeclarationSyntax syntax
                 || syntax.TypeParameterList is not null
-                || syntax.GetAttribute(NAMESPACE, "StatSystem") is not AttributeSyntax attributeSyntax
-                || attributeSyntax.ArgumentList is not AttributeArgumentListSyntax argumentList
-                || argumentList.Arguments.Count < 1
             )
             {
                 return default;
             }
 
-            var semanticModel = context.SemanticModel;
-            var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
-
-            if (symbol is not INamedTypeSymbol typeSymbol)
+            if (context.TargetSymbol is not INamedTypeSymbol typeSymbol)
             {
                 return default;
             }
 
-            var attribute = symbol.GetAttribute(STAT_SYSTEM_ATTRIBUTE);
+            // ForAttributeWithMetadataName guarantees at least one matching attribute
+            var attribute = context.Attributes[0];
 
-            if (attribute == null || attribute.ConstructorArguments.Length < 1)
+            if (attribute.ConstructorArguments.Length < 1)
             {
                 return default;
             }
@@ -116,6 +102,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 maxUserDataSize = 1;
             }
 
+            var semanticModel = context.SemanticModel;
             var assemblyName = semanticModel.Compilation.AssemblyName;
             var syntaxTree = syntax.SyntaxTree;
             var typeIdentifier = typeSymbol.ToValidIdentifier();

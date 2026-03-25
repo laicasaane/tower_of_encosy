@@ -10,8 +10,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
     {
         private const string NAMESPACE = StatGeneratorAPI.NAMESPACE;
         private const string SKIP_ATTRIBUTE = StatGeneratorAPI.SKIP_ATTRIBUTE;
-        private const string STAT_DATA = "StatData";
         private const string STAT_DATA_ATTRIBUTE = $"global::{NAMESPACE}.StatDataAttribute";
+        private const string STAT_DATA_ATTRIBUTE_METADATA_NAME = $"{NAMESPACE}.StatDataAttribute";
         private const string GENERATOR_NAME = nameof(StatDataGenerator);
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -21,10 +21,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             var compilationProvider = context.CompilationProvider
                 .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
-            var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: IsValidStructSyntax,
-                transform: GetSemanticSymbolMatch
-            ).Where(static t => t.IsValid);
+            var candidateProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      STAT_DATA_ATTRIBUTE_METADATA_NAME
+                    , static (node, _) => node is StructDeclarationSyntax syntax
+                        && syntax.TypeParameterList is null
+                    , GetSemanticSymbolMatch
+                )
+                .Where(static t => t.IsValid);
 
             var combined = candidateProvider
                 .Combine(compilationProvider)
@@ -42,51 +46,34 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             });
         }
 
-        private static bool IsValidStructSyntax(SyntaxNode node, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            return node is StructDeclarationSyntax syntax
-                && syntax.TypeParameterList is null
-                && syntax.AttributeLists.Count > 0
-                && syntax.GetAttribute(NAMESPACE, STAT_DATA) is AttributeSyntax attributeSyntax
-                && attributeSyntax.ArgumentList is AttributeArgumentListSyntax argumentList
-                && argumentList.Arguments.Count > 0
-                ;
-        }
-
         private static StatDataDefinition GetSemanticSymbolMatch(
-              GeneratorSyntaxContext context
+              GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.Node is not StructDeclarationSyntax syntax
+            if (context.TargetNode is not StructDeclarationSyntax syntax
                 || syntax.TypeParameterList is not null
-                || syntax.GetAttribute(NAMESPACE, STAT_DATA) is not AttributeSyntax attributeSyntax
-                || attributeSyntax.ArgumentList is not AttributeArgumentListSyntax argumentList
-                || argumentList.Arguments.Count < 1
             )
             {
                 return default;
             }
 
+            if (context.TargetSymbol is not INamedTypeSymbol structSymbol)
+            {
+                return default;
+            }
+
+            // ForAttributeWithMetadataName guarantees at least one matching attribute
+            var attribute = context.Attributes[0];
+
+            if (attribute.ConstructorArguments.Length < 1)
+            {
+                return default;
+            }
+
             var semanticModel = context.SemanticModel;
-            var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
-
-            if (symbol is not INamedTypeSymbol structSymbol)
-            {
-                return default;
-            }
-
-            var attribute = symbol.GetAttribute(STAT_DATA_ATTRIBUTE);
-
-            if (attribute == null || attribute.ConstructorArguments.Length < 1)
-            {
-                return default;
-            }
-
             var assemblyName = semanticModel.Compilation.AssemblyName;
             var syntaxTree = syntax.SyntaxTree;
             var typeIdentifier = structSymbol.ToValidIdentifier();
@@ -102,7 +89,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            var args = argumentList.Arguments;
             var result = new StatDataDefinition {
                 typeName = structSymbol.Name,
                 typeNamespace = structSymbol.ContainingNamespace.ToDisplayString(),
@@ -115,18 +101,11 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 singleValue = false,
             };
 
-            if (args[0].Expression is MemberAccessExpressionSyntax memberAccessExpr
-                && memberAccessExpr.Expression is IdentifierNameSyntax identifierSyntax
-                && string.Equals(identifierSyntax.Identifier.ValueText, "StatVariantType")
-            )
+            var firstArg = attribute.ConstructorArguments[0];
+
+            if (firstArg.Kind == TypedConstantKind.Enum && firstArg.Value is byte enumByte)
             {
-                if (Enum.TryParse(memberAccessExpr.Name.Identifier.Text, false, out StatVariantType variantType) == false)
-                {
-                    return default;
-
-                }
-
-                var index = (int)variantType;
+                var index = (int)enumByte;
                 var types = StatGeneratorAPI.Types.AsSpan();
 
                 if ((uint)index >= (uint)types.Length)
@@ -137,23 +116,19 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 var typeNames = StatGeneratorAPI.TypeNames.AsSpan();
                 var sizes = StatGeneratorAPI.Sizes.AsSpan();
 
-                var type = types[index];
-                var typeName = typeNames[index];
-
                 result.size = sizes[index];
-                result.valueTypeName = typeName;
-                result.valueFullTypeName = type;
+                result.valueTypeName = typeNames[index];
+                result.valueFullTypeName = types[index];
             }
-            else if (args[0].Expression is TypeOfExpressionSyntax typeOfExpr)
+            else if (firstArg.Kind == TypedConstantKind.Type
+                && firstArg.Value is INamedTypeSymbol enumType)
             {
-                var candidate = semanticModel.GetSymbolInfo(typeOfExpr.Type, token).Symbol as INamedTypeSymbol;
-
-                if (candidate.TypeKind != TypeKind.Enum)
+                if (enumType.TypeKind != TypeKind.Enum)
                 {
                     return default;
                 }
 
-                var underlyingType = candidate.EnumUnderlyingType.ToSimpleName();
+                var underlyingType = enumType.EnumUnderlyingType.ToSimpleName();
 
                 if (StatGeneratorAPI.EnumTypeMap.TryGetValue(underlyingType, out var valueTypeName) == false)
                 {
@@ -162,34 +137,22 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 result.isEnum = true;
                 result.valueTypeName = valueTypeName;
-                result.valueFullTypeName = candidate.ToFullName();
+                result.valueFullTypeName = enumType.ToFullName();
                 result.underlyingTypeName = underlyingType;
 
-                candidate.EnumUnderlyingType.GetUnmanagedSize(ref result.size);
+                enumType.EnumUnderlyingType.GetUnmanagedSize(ref result.size);
             }
             else
             {
                 return default;
             }
 
-            for (var i = 1; i < args.Count; i++)
+            foreach (var namedArg in attribute.NamedArguments)
             {
-                var arg = args[i];
-
-                if (arg.NameEquals is not NameEqualsSyntax nameEquals
-                    || arg.Expression is not LiteralExpressionSyntax literalExpr2
-                )
+                if (string.Equals(namedArg.Key, "SingleValue", StringComparison.Ordinal)
+                    && namedArg.Value.Value is bool singleValue)
                 {
-                    continue;
-                }
-
-                switch (nameEquals.Name.Identifier.ValueText)
-                {
-                    case "SingleValue":
-                    {
-                        result.singleValue = (bool)literalExpr2.Token.Value;
-                        break;
-                    }
+                    result.singleValue = singleValue;
                 }
             }
 
