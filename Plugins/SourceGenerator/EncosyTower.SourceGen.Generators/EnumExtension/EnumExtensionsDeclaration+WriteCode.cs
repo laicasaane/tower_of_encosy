@@ -29,18 +29,36 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         {
             var p = Printer.DefaultLarge;
 
-            p = p.IncreasedIndent();
+            p.PrintEndLine();
+
+            var hasNamespace = string.IsNullOrEmpty(NamespaceName) == false;
+
+            if (hasNamespace)
             {
-                p.PrintEndLine();
-                WriteCode(ref p);
+                p.PrintLine($"namespace {NamespaceName}");
+                p.OpenScope();
             }
-            p = p.DecreasedIndent();
+
+            WriteCode(ref p);
+
+            if (hasNamespace)
+            {
+                p.CloseScope();
+            }
 
             return p.Result;
         }
 
         public void WriteCode(ref Printer p)
         {
+            var numContainingTypes = ContainingTypes.Count;
+
+            for (var i = 0; i < numContainingTypes; i++)
+            {
+                p.PrintLine(ContainingTypes[i]);
+                p.OpenScope();
+            }
+
             if (OnlyClass == false)
             {
                 WriteInterface(ref p);
@@ -53,6 +71,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             }
 
             WriteClass(ref p);
+
+            for (var i = 0; i < numContainingTypes; i++)
+            {
+                p.CloseScope();
+            }
         }
 
         private void WriteInterface(ref Printer p)

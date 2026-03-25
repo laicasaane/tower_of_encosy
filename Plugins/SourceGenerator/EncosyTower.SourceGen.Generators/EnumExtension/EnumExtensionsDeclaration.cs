@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.EnumExtensions
@@ -46,118 +45,45 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         public bool WithoutIsDefined { get; set; }
 
-        public EnumExtensionsDeclaration(
-              INamedTypeSymbol symbol
-            , bool parentIsNamespace
-            , string extensionsName
-            , Accessibility accessibility
+        public string NamespaceName { get; set; }
+
+        public EquatableArray<string> ContainingTypes { get; set; }
+
+        /// <summary>
+        /// Constructs an <see cref="EnumExtensionsDeclaration"/> from a pre-extracted,
+        /// cache-friendly <see cref="EnumExtensionCandidate"/>. All symbol data has already
+        /// been converted to primitives in the incremental generator transform phase.
+        /// </summary>
+        internal EnumExtensionsDeclaration(
+              in EnumExtensionCandidate candidate
             , bool referencesUnityCollections
         )
         {
-            ExtensionsName = extensionsName;
-            StructName = GetNameExtendedStruct(symbol.Name);
-            ParentIsNamespace = parentIsNamespace;
-            Name = symbol.Name;
-            FullyQualifiedName = symbol.ToFullName();
-            UnderlyingTypeName = symbol.EnumUnderlyingType.ToString();
-            Accessibility = accessibility;
-            HasFlags = symbol.HasAttribute(FLAGS_ATTRIBUTE);
+            ExtensionsName = candidate.extensionsName;
+            StructName = candidate.structName;
+            ParentIsNamespace = candidate.parentIsNamespace;
+            Name = candidate.enumName;
+            FullyQualifiedName = candidate.fullyQualifiedName;
+            UnderlyingTypeName = candidate.underlyingTypeName;
+            Accessibility = candidate.accessibility;
+            HasFlags = candidate.hasFlags;
             ReferenceUnityCollections = referencesUnityCollections;
+            IsDisplayAttributeUsed = candidate.isDisplayAttributeUsed;
+            FixedStringBytes = candidate.fixedStringBytes;
 
-            var enumMembers = symbol.GetMembers();
-            var members = Members = new List<EnumMemberDeclaration>(enumMembers.Length);
-            var fixedStringBytes = 0;
-            var isDisplayAttributeUsed = false;
+            var members = Members = new List<EnumMemberDeclaration>(candidate.members.Count);
 
-            foreach (var member in enumMembers)
+            foreach (var m in candidate.members)
             {
-                if (member is not IFieldSymbol field
-                    || field.ConstantValue is null
-                )
-                {
-                    continue;
-                }
-
-                string displayName = null;
-
-                foreach (var attribute in field.GetAttributes())
-                {
-                    var attributeName = attribute.AttributeClass?.Name ?? string.Empty;
-
-                    switch (attributeName)
-                    {
-                        case nameof(System.ObsoleteAttribute):
-                        {
-                            goto CONTINUE;
-                        }
-
-                        case "LabelAttribute":
-                        case "DescriptionAttribute":
-                        case "DisplayAttribute":
-                        case "DisplayNameAttribute":
-                        case "InspectorNameAttribute":
-                        {
-                            if (attribute.ConstructorArguments.Length > 0)
-                            {
-                                var arg = attribute.ConstructorArguments[0];
-
-                                if (arg.Kind == TypedConstantKind.Primitive && arg.Value?.ToString() is string dn)
-                                {
-                                    displayName = dn;
-                                    goto ADD_DISPLAY_NAME;
-                                }
-                            }
-                            else if (attribute.NamedArguments.Length > 0)
-                            {
-                                foreach (var arg in attribute.NamedArguments)
-                                {
-                                    if (arg.Key is "Name" or "DisplayName"
-                                        && arg.Value.Kind == TypedConstantKind.Primitive
-                                        && arg.Value.Value?.ToString() is string dn
-                                    )
-                                    {
-                                        displayName = dn;
-                                        goto ADD_DISPLAY_NAME;
-                                    }
-                                }
-                            }
-
-                            break;
-                        }
-                    }
-                }
-
-                ADD_DISPLAY_NAME:
-                {
-                    if (string.IsNullOrEmpty(displayName) == false && isDisplayAttributeUsed == false)
-                    {
-                        isDisplayAttributeUsed = true;
-                    }
-
-                    var nameByteCount = member.Name.GetByteCount();
-                    var displayNameByteCount = displayName.GetByteCount();
-                    var byteCount = Math.Max(nameByteCount, displayNameByteCount);
-                    fixedStringBytes = Math.Max(fixedStringBytes, byteCount);
-
-                    members.Add(new EnumMemberDeclaration {
-                        name = member.Name,
-                        displayName = displayName,
-                    });
-                    continue;
-                }
-
-                CONTINUE:
-                {
-                    continue;
-                }
+                members.Add(m);
             }
 
-            IsDisplayAttributeUsed = isDisplayAttributeUsed;
-            FixedStringBytes = fixedStringBytes;
+            ContainingTypes = candidate.containingTypes;
+            NamespaceName = candidate.namespaceName;
 
-            if (ReferenceUnityCollections)
+            if (referencesUnityCollections)
             {
-                FixedStringTypeName = GeneratorHelpers.GetFixedStringTypeName(fixedStringBytes);
+                FixedStringTypeName = GeneratorHelpers.GetFixedStringTypeName(candidate.fixedStringBytes);
                 FixedStringTypeFullyQualifiedName = $"global::Unity.Collections.{FixedStringTypeName}";
             }
         }

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 
 namespace EncosyTower.SourceGen.Generators.EnumExtensions
 {
@@ -12,6 +14,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         private const string NAMESPACE = "EncosyTower.EnumExtensions";
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
         public const string ENUM_EXTENSIONS_ATTRIBUTE = $"global::{NAMESPACE}.EnumExtensionsAttribute";
+        private const string ENUM_EXTENSIONS_ATTRIBUTE_METADATA = $"{NAMESPACE}.EnumExtensionsAttribute";
         public const string FLAGS_ATTRIBUTE = "global::System.FlagsAttribute";
         public const string GENERATOR_NAME = nameof(EnumExtensionsGenerator);
 
@@ -22,10 +25,13 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             var compilationProvider = context.CompilationProvider
                 .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
-            var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: IsValidEnumSyntax,
-                transform: GetSemanticSymbolMatch
-            ).Where(static t => t.syntax is { } && t.symbol is { });
+            var candidateProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      ENUM_EXTENSIONS_ATTRIBUTE_METADATA
+                    , static (node, _) => node is EnumDeclarationSyntax
+                    , ExtractCandidate
+                )
+                .Where(static t => t.IsValid);
 
             var combined = candidateProvider
                 .Combine(compilationProvider)
@@ -34,7 +40,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
             context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
                 GenerateOutput(
-                    sourceProductionContext
+                      sourceProductionContext
                     , source.Left.Right
                     , source.Left.Left
                     , source.Right.projectPath
@@ -43,51 +49,47 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             });
         }
 
-        private static bool IsValidEnumSyntax(SyntaxNode node, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            return node is EnumDeclarationSyntax syntax
-                && syntax.AttributeLists.Count > 0
-                && syntax.HasAttributeCandidate(NAMESPACE, "EnumExtensions")
-                ;
-        }
-
-        private static MatchedSemantic GetSemanticSymbolMatch(
-              GeneratorSyntaxContext context
+        private static EnumExtensionCandidate ExtractCandidate(
+              GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.Node is not EnumDeclarationSyntax syntax)
+            if (context.TargetSymbol is not INamedTypeSymbol enumSymbol)
             {
                 return default;
             }
 
-            var semanticModel = context.SemanticModel;
-            var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
+            var syntax = context.TargetNode;
+            var location = LocationInfo.From(syntax.GetLocation());
 
-            if (symbol == null || symbol.HasAttribute(ENUM_EXTENSIONS_ATTRIBUTE) == false)
-            {
-                return default;
-            }
+            var containingTypes = enumSymbol.GetContainingTypes();
 
-            return new MatchedSemantic {
-                syntax = syntax,
-                symbol = symbol,
-            };
+            var ns = enumSymbol.ContainingNamespace;
+            var namespaceName = ns is { IsGlobalNamespace: false } ? ns.ToDisplayString() : string.Empty;
+
+            return EnumExtensionCandidate.Extract(
+                  enumSymbol
+                , syntax.Parent is BaseNamespaceDeclarationSyntax
+                , EnumExtensionsDeclaration.GetNameExtensionsClass(enumSymbol.Name)
+                , enumSymbol.DeclaredAccessibility
+                , location
+                , namespaceName
+                , containingTypes
+                , token
+            );
         }
 
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationCandidateSlim compilation
-            , MatchedSemantic candidate
+            , EnumExtensionCandidate candidate
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
-            if (candidate.syntax == null || candidate.symbol == null)
+            if (candidate.IsValid == false)
             {
                 return;
             }
@@ -98,27 +100,28 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             {
                 SourceGenHelpers.ProjectPath = projectPath;
 
-                var syntax = candidate.syntax;
-                var symbol = candidate.symbol;
-                var syntaxTree = syntax.SyntaxTree;
+                var declaration = new EnumExtensionsDeclaration(candidate, compilation.references.unityCollections);
 
-                var declaration = new EnumExtensionsDeclaration(
-                      candidate.symbol
-                    , candidate.syntax.Parent is BaseNamespaceDeclarationSyntax
-                    , EnumExtensionsDeclaration.GetNameExtensionsClass(candidate.symbol.Name)
-                    , candidate.symbol.DeclaredAccessibility
-                    , compilation.references.unityCollections
-                );
+                var hintName = $"{GENERATOR_NAME}__{candidate.fileHintName}.g.cs";
+                var sourceFilePath = BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
+                var source = declaration.WriteCode();
 
-                var fileTypeName = symbol.ToFileName();
+                var sourceText = SourceText.From(source, Encoding.UTF8)
+                    .WithIgnoreUnassignedVariableWarning()
+                    .WithInitialLineDirectiveToGeneratedSource(sourceFilePath);
 
-                context.OutputSource(
-                      outputSourceGenFiles
-                    , syntax
-                    , declaration.WriteCode()
-                    , syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, fileTypeName)
-                    , syntaxTree.GetGeneratedSourceFilePath(compilation.assemblyName, GENERATOR_NAME, fileTypeName)
-                );
+                context.AddSource(hintName, sourceText);
+
+                if (outputSourceGenFiles)
+                {
+                    SourceGenHelpers.OutputSourceToFile(
+                          context
+                        , candidate.location.ToLocation()
+                        , sourceFilePath
+                        , sourceText
+                        , projectPath
+                    );
+                }
             }
             catch (Exception e)
             {
@@ -127,28 +130,28 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     throw;
                 }
 
-                context.ReportDiagnostic(Diagnostic.Create(
-                      s_errorDescriptor
-                    , candidate.syntax.GetLocation()
-                    , e.ToUnityPrintableString()
-                ));
+                // Generator bugs are silently swallowed — do not emit diagnostics from the
+                // generator. User-facing validation is handled by EnumExtensionsAnalyzer.
             }
         }
 
-        private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_ENUM_EXTENSIONS_01"
-                , "Enum Extensions Generator Error"
-                , "This error indicates a bug in the Enum Extensions source generators. Error message: '{0}'."
-                , $"{NAMESPACE}.EnumExtensionsAttribute"
-                , DiagnosticSeverity.Error
-                , isEnabledByDefault: true
-                , description: ""
-            );
-
-        private struct MatchedSemantic
+        private static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath)
         {
-            public EnumDeclarationSyntax syntax;
-            public INamedTypeSymbol symbol;
+            if (projectPath is not null)
+            {
+                var dir = $"{projectPath}/Temp/GeneratedCode/{assemblyName}/";
+                Directory.CreateDirectory(dir);
+                return $"{dir}{hintName}";
+            }
+
+            if (SourceGenHelpers.CanWriteToProjectPath)
+            {
+                var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
+                Directory.CreateDirectory(dir);
+                return $"{dir}{hintName}";
+            }
+
+            return $"Temp/GeneratedCode/{assemblyName}/{hintName}";
         }
     }
 }
