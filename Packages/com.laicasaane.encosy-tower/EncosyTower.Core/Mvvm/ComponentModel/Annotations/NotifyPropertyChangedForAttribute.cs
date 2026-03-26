@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 namespace EncosyTower.Mvvm.ComponentModel
@@ -11,12 +11,14 @@ namespace EncosyTower.Mvvm.ComponentModel
     /// that should also be reported as updated when the value of the annotated observable property is changed.
     /// If this attribute is used in a field without <see cref="ObservablePropertyAttribute"/>, it is ignored.
     /// <para>
-    /// In order to use this attribute, the containing type has to implement the <see cref="IObservableObject"/> interface.
+    /// In order to use this attribute, the containing type has to implement
+    /// the <see cref="IObservableObject"/> interface.
     /// </para>
     /// <para>
     /// This attribute can be used as follows:
     /// <code>
-    /// partial class MyViewModel : IObservableObject
+    /// [ObservableObject]
+    /// partial class MyViewModel
     /// {
     ///     [ObservableProperty]
     ///     [NotifyPropertyChangedFor(nameof(FullName))]
