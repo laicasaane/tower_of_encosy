@@ -12,8 +12,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
     [Generator]
     public class InternalVariantGenerator : IIncrementalGenerator
     {
-        public const string NAMESPACE = MvvmGeneratorHelpers.NAMESPACE;
-        public const string SKIP_ATTRIBUTE = MvvmGeneratorHelpers.SKIP_ATTRIBUTE;
+        public const string NAMESPACE = "EncosyTower.Mvvm";
+        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
 
         private const string OBSERVABLE_PROPERTY_ATTRIBUTE = $"{NAMESPACE}.ComponentModel.ObservablePropertyAttribute";
         private const string NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE = $"{NAMESPACE}.ComponentModel.NotifyPropertyChangedForAttribute";

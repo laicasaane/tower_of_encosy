@@ -8,8 +8,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
     public class BinderGenerator : IIncrementalGenerator
     {
         public const string GENERATOR_NAME = nameof(BinderGenerator);
-        public const string NAMESPACE = MvvmGeneratorHelpers.NAMESPACE;
-        public const string SKIP_ATTRIBUTE = MvvmGeneratorHelpers.SKIP_ATTRIBUTE;
+        public const string NAMESPACE = "EncosyTower.Mvvm";
+        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
 
         private const string BINDER_ATTRIBUTE_METADATA = "EncosyTower.Mvvm.ViewBinding.BinderAttribute";
 

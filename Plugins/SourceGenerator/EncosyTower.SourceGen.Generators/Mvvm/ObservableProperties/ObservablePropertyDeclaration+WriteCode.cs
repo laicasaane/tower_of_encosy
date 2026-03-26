@@ -1,32 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 {
-    partial class ObservablePropertyDeclaration
+    partial struct ObservablePropertyDeclaration
     {
-        private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties.ObservablePropertyGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
+        private const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
+        private const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties.ObservablePropertyGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
         private const string NAMESPACE = "EncosyTower.Mvvm.ComponentModel";
-        private const string GENERATED_OBSERVABLE_PROPERTY = $"[global::{NAMESPACE}.SourceGen.GeneratedObservableProperty]";
-        private const string GENERATED_PROPERTY_CHANGING_HANDLER = $"[global::{NAMESPACE}.SourceGen.GeneratedPropertyChangingEventHandler]";
-        private const string GENERATED_PROPERTY_CHANGED_HANDLER = $"[global::{NAMESPACE}.SourceGen.GeneratedPropertyChangedEventHandler]";
-        private const string GENERATED_PROPERTY_NAME_CONSTANT = $"[global::{NAMESPACE}.SourceGen.GeneratedPropertyNameConstant]";
-        private const string IS_OBSERVABLE_OBJECT = $"[global::{NAMESPACE}.SourceGen.IsObservableObject(typeof({{0}}))]";
-        private const string VARIANT = "global::EncosyTower.Variants.Variant";
-        private const string CACHED_VARIANT_CONVERTER = "global::EncosyTower.Variants.Converters.CachedVariantConverter";
-        private const string INOTIFY_PROPERTY_CHANGING_INTERFACE = $"global::{NAMESPACE}.INotifyPropertyChanging";
-        private const string INOTIFY_PROPERTY_CHANGED_INTERFACE = $"global::{NAMESPACE}.INotifyPropertyChanged";
-        private const string PROPERTY_CHANGE_EVENT_LISTENER = $"global::{NAMESPACE}.PropertyChangeEventListener";
-        private const string PROPERTY_CHANGE_EVENT_ARGS = $"global::{NAMESPACE}.PropertyChangeEventArgs";
-        private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
+        private const string GENERATED_OBSERVABLE_PROPERTY = "[GeneratedObservableProperty]";
+        private const string GENERATED_PROPERTY_CHANGING_HANDLER = "[GeneratedPropertyChangingEventHandler]";
+        private const string GENERATED_PROPERTY_CHANGED_HANDLER = "[GeneratedPropertyChangedEventHandler]";
+        private const string GENERATED_PROPERTY_NAME_CONSTANT = "[GeneratedPropertyNameConstant]";
+        private const string IS_OBSERVABLE_OBJECT = "[IsObservableObject(typeof({0}))]";
+        private const string VARIANT = "Variant";
+        private const string CACHED_VARIANT_CONVERTER = "CachedVariantConverter";
+        private const string INOTIFY_PROPERTY_CHANGING_INTERFACE = "INotifyPropertyChanging";
+        private const string INOTIFY_PROPERTY_CHANGED_INTERFACE = "INotifyPropertyChanged";
+        private const string IOBSERVABLE_OBJECT_INTERFACE_SHORT = "IObservableObject";
+        private const string PROPERTY_CHANGE_EVENT_LISTENER = "PropertyChangeEventListener";
+        private const string PROPERTY_CHANGE_EVENT_ARGS = "PropertyChangeEventArgs";
+        private const string EDITOR_BROWSABLE_NEVER = "[EditorBrowsable(EditorBrowsableState.Never)]";
 
-        public string WriteCodeWithoutMember()
+
+        public readonly string WriteCodeWithoutMember()
         {
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, Syntax.Parent);
-            var p = scopePrinter.printer;
+            var p = Printer.DefaultLarge;
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
@@ -38,23 +38,16 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             p.OpenScope();
             {
-                if (IsBaseObservableObject == false)
+                if (isBaseObservableObject == false)
                 {
-                    var keyword = Symbol.IsSealed ? "" : "virtual ";
+                    var keyword = isSealed ? "" : "virtual ";
 
                     p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGING_INTERFACE}.AttachPropertyChangingListener{{TInstance}}(string, {PROPERTY_CHANGE_EVENT_LISTENER}{{TInstance}})\" />");
                     p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintLine($"public {keyword}bool AttachPropertyChangingListener<TInstance>(string propertyName, {PROPERTY_CHANGE_EVENT_LISTENER}<TInstance> listener) where TInstance : class");
                     p.OpenScope();
                     {
-                        if (IsBaseObservableObject)
-                        {
-                            p.PrintLine("return base.AttachPropertyChangingListener<TInstance>(propertyName, listener);");
-                        }
-                        else
-                        {
-                            p.PrintLine("return false;");
-                        }
+                        p.PrintLine("return false;");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
@@ -64,14 +57,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     p.PrintLine($"public {keyword}bool AttachPropertyChangedListener<TInstance>(string propertyName, {PROPERTY_CHANGE_EVENT_LISTENER}<TInstance> listener) where TInstance : class");
                     p.OpenScope();
                     {
-                        if (IsBaseObservableObject)
-                        {
-                            p.PrintLine("return base.AttachPropertyChangedListener<TInstance>(propertyName, listener);");
-                        }
-                        else
-                        {
-                            p.PrintLine("return false;");
-                        }
+                        p.PrintLine("return false;");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
@@ -81,14 +67,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     p.PrintLine($"public {keyword}bool NotifyPropertyChanged<TInstance>(string propertyName, {PROPERTY_CHANGE_EVENT_LISTENER}<TInstance> listener) where TInstance : class");
                     p.OpenScope();
                     {
-                        if (IsBaseObservableObject)
-                        {
-                            p.PrintLine("return base.NotifyPropertyChanged<TInstance>(propertyName, listener);");
-                        }
-                        else
-                        {
-                            p.PrintLine("return false;");
-                        }
+                        p.PrintLine("return false;");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
@@ -98,14 +77,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     p.PrintLine($"public {keyword}bool NotifyPropertyChanged(string propertyName)");
                     p.OpenScope();
                     {
-                        if (IsBaseObservableObject)
-                        {
-                            p.PrintLine("return base.NotifyPropertyChanged(propertyName);");
-                        }
-                        else
-                        {
-                            p.PrintLine("return false;");
-                        }
+                        p.PrintLine("return false;");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
@@ -114,12 +86,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintLine($"public {keyword}void NotifyPropertyChanged()");
                     p.OpenScope();
-                    {
-                        if (IsBaseObservableObject)
-                        {
-                            p.PrintLine("base.NotifyPropertyChanged();");
-                        }
-                    }
                     p.CloseScope();
                     p.PrintEndLine();
 
@@ -132,10 +98,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             return p.Result;
         }
 
-        public string WriteCode()
+        public readonly string WriteCode()
         {
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, Syntax.Parent);
-            var p = scopePrinter.printer;
+            var p = Printer.DefaultLarge;
             p = p.IncreasedIndent();
 
             p.PrintEndLine();
@@ -167,208 +132,219 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             return p.Result;
         }
 
-        private void WriteClassDeclaration(ref Printer p)
+        private readonly void WriteClassDeclaration(ref Printer p)
         {
-            p.PrintBeginLine("partial class ").Print(ClassName);
-
-            if (IsBaseObservableObject)
+            p.PrintBeginLine("partial class ").Print(className)
+                .PrintEndLine($" : {IOBSERVABLE_OBJECT_INTERFACE_SHORT}");
+            p = p.IncreasedIndent();
             {
-                p.PrintEndLine($" : {IOBSERVABLE_OBJECT_INTERFACE}");
-
-                p = p.IncreasedIndent();
-                p.Print($", {INOTIFY_PROPERTY_CHANGING_INTERFACE}");
+                p.PrintLine($", {INOTIFY_PROPERTY_CHANGING_INTERFACE}");
+                p.PrintLine($", {INOTIFY_PROPERTY_CHANGED_INTERFACE}");
             }
-            else
-            {
-                p.PrintEndLine($" : {INOTIFY_PROPERTY_CHANGING_INTERFACE}");
-
-                p = p.IncreasedIndent();
-            }
-
-            p.PrintBeginLine($", {INOTIFY_PROPERTY_CHANGED_INTERFACE}");
             p.PrintEndLine();
             p = p.DecreasedIndent();
         }
 
-        private void WriteConstantFields(ref Printer p)
+        // Builds a lookup of memberKey -> list-of-NotifyForEntry for methods that need it.
+        private readonly Dictionary<string, List<NotifyForEntry>> BuildNotifyForMap()
         {
-            var additionalProperties = new Dictionary<string, IPropertySymbol>();
+            var map = new Dictionary<string, List<NotifyForEntry>>();
 
-            foreach (var member in FieldRefs)
+            foreach (var entry in notifyForEntries)
             {
-                var fieldName = member.Field.Name;
-                var typeName = member.Field.Type.ToFullName();
-                var name = member.PropertyName;
+                if (map.TryGetValue(entry.memberKey, out var list) == false)
+                {
+                    map[entry.memberKey] = list = new List<NotifyForEntry>();
+                }
+
+                list.Add(entry);
+            }
+
+            return map;
+        }
+
+        // Builds a set of unique target property names from the notifyForEntries for methods that
+        // need to enumerate all additional properties (e.g. writing events/partial methods/converters).
+        private readonly Dictionary<string, NotifyForEntry> BuildUniqueNotifyForTargets()
+        {
+            var dict = new Dictionary<string, NotifyForEntry>();
+
+            foreach (var entry in notifyForEntries)
+            {
+                if (dict.ContainsKey(entry.propName) == false)
+                {
+                    dict[entry.propName] = entry;
+                }
+            }
+
+            return dict;
+        }
+
+        private readonly void WriteConstantFields(ref Printer p)
+        {
+            var notifyForMap = BuildNotifyForMap();
+            var additionalProps = new Dictionary<string, NotifyForEntry>();
+
+            foreach (var member in fieldRefs)
+            {
+                var typeName = member.fieldTypeName;
+                var name = member.propertyName;
 
                 p.PrintLine($"/// <summary>The name of <see cref=\"{name}\"/></summary>");
                 p.PrintLine(GENERATED_PROPERTY_NAME_CONSTANT);
 
-                if (member.IsObservableObject)
+                if (member.isObservableObject)
                 {
                     p.PrintLine(string.Format(IS_OBSERVABLE_OBJECT, typeName));
                 }
 
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"public const string {ConstName(member)} = nameof({ClassName}.{name});");
+                p.PrintLine($"public const string {ConstName(name)} = nameof({className}.{name});");
                 p.PrintEndLine();
 
-                if (NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties))
+                if (notifyForMap.TryGetValue(member.fieldName, out var entries))
                 {
-                    foreach (var property in properties)
+                    foreach (var entry in entries)
                     {
-                        if (additionalProperties.ContainsKey(property.Name) == false)
+                        if (additionalProps.ContainsKey(entry.propName) == false)
                         {
-                            additionalProperties[property.Name] = property;
+                            additionalProps[entry.propName] = entry;
                         }
                     }
                 }
             }
 
-            foreach (var member in PropRefs)
+            foreach (var member in propRefs)
             {
-                var fieldName = member.Property.ToPrivateFieldName();
-                var typeName = member.Property.Type.ToFullName();
-                var name = member.Property.Name;
+                var typeName = member.propertyTypeName;
+                var name = member.propertyName;
 
                 p.PrintLine($"/// <summary>The name of <see cref=\"{name}\"/></summary>");
                 p.PrintLine(GENERATED_PROPERTY_NAME_CONSTANT);
 
-                if (member.IsObservableObject)
+                if (member.isObservableObject)
                 {
                     p.PrintLine(string.Format(IS_OBSERVABLE_OBJECT, typeName));
                 }
 
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"public const string {ConstName(member)} = nameof({ClassName}.{name});");
+                p.PrintLine($"public const string {ConstName(name)} = nameof({className}.{name});");
                 p.PrintEndLine();
 
-                if (NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties))
+                if (notifyForMap.TryGetValue(member.fieldName, out var entries))
                 {
-                    foreach (var property in properties)
+                    foreach (var entry in entries)
                     {
-                        if (additionalProperties.ContainsKey(property.Name) == false)
+                        if (additionalProps.ContainsKey(entry.propName) == false)
                         {
-                            additionalProperties[property.Name] = property;
+                            additionalProps[entry.propName] = entry;
                         }
                     }
                 }
             }
 
-            foreach (var property in additionalProperties.Values)
+            foreach (var entry in additionalProps.Values)
             {
-                var name = property.Name;
+                var name = entry.propName;
 
                 p.PrintLine($"/// <summary>The name of <see cref=\"{name}\"/></summary>");
                 p.PrintLine(GENERATED_PROPERTY_NAME_CONSTANT);
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"public const string {ConstName(property)} = nameof({ClassName}.{name});");
+                p.PrintLine($"public const string {ConstName(name)} = nameof({className}.{name});");
                 p.PrintEndLine();
             }
 
             p.PrintEndLine();
         }
 
-        private void WriteEvents(ref Printer p)
+        private readonly void WriteEvents(ref Printer p)
         {
-            foreach (var member in FieldRefs)
+            foreach (var member in fieldRefs)
             {
                 p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGING_HANDLER).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private event global::{NAMESPACE}.PropertyChangingEventHandler {OnChangingEventName(member)};");
+                p.PrintLine($"private event PropertyChangingEventHandler {OnChangingEventName(member.propertyName)};");
                 p.PrintEndLine();
 
                 p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGED_HANDLER).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private event global::{NAMESPACE}.PropertyChangedEventHandler {OnChangedEventName(member)};");
+                p.PrintLine($"private event PropertyChangedEventHandler {OnChangedEventName(member.propertyName)};");
                 p.PrintEndLine();
             }
 
-            foreach (var member in PropRefs)
+            foreach (var member in propRefs)
             {
                 p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGING_HANDLER).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private event global::{NAMESPACE}.PropertyChangingEventHandler {OnChangingEventName(member)};");
+                p.PrintLine($"private event PropertyChangingEventHandler {OnChangingEventName(member.propertyName)};");
                 p.PrintEndLine();
 
                 p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGED_HANDLER).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private event global::{NAMESPACE}.PropertyChangedEventHandler {OnChangedEventName(member)};");
+                p.PrintLine($"private event PropertyChangedEventHandler {OnChangedEventName(member.propertyName)};");
                 p.PrintEndLine();
             }
 
-            var properties = new Dictionary<string, IPropertySymbol>();
-
-            foreach (var propertyList in NotifyPropertyChangedForMap.Values)
-            {
-                foreach (var property in propertyList)
-                {
-                    if (properties.ContainsKey(property.Name) == false)
-                    {
-                        properties[property.Name] = property;
-                    }
-                }
-            }
-
-            foreach (var property in properties.Values)
+            foreach (var entry in BuildUniqueNotifyForTargets().Values)
             {
                 p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGED_HANDLER);
-                p.PrintLine($"private event global::{NAMESPACE}.PropertyChangedEventHandler {OnChangedEventName(property)};");
+                p.PrintLine($"private event PropertyChangedEventHandler {OnChangedEventName(entry.propName)};");
                 p.PrintEndLine();
             }
         }
 
-        private void WriteVariantConverters(ref Printer p)
+        private readonly void WriteVariantConverters(ref Printer p)
         {
-            var types = new Dictionary<string, ITypeSymbol>();
+            var types = new Dictionary<string, string>();
 
-            foreach (var member in FieldRefs)
+            foreach (var member in fieldRefs)
             {
-                var fieldName = member.Field.Name;
-                var typeName = member.Field.Type.ToFullName();
+                var typeName = member.fieldTypeName;
+                var validIdent = member.fieldTypeValidIdent;
 
                 if (types.ContainsKey(typeName) == false)
                 {
-                    types.Add(typeName, member.Field.Type);
+                    types.Add(typeName, validIdent);
                 }
 
-                if (NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties))
+                foreach (var entry in notifyForEntries)
                 {
-                    foreach (var property in properties)
+                    if (entry.memberKey != member.fieldName)
                     {
-                        typeName = property.Type.ToFullName();
+                        continue;
+                    }
 
-                        if (types.ContainsKey(typeName) == false)
-                        {
-                            types.Add(typeName, property.Type);
-                        }
+                    if (types.ContainsKey(entry.propTypeName) == false)
+                    {
+                        types.Add(entry.propTypeName, entry.propTypeValidIdent);
                     }
                 }
             }
 
-            foreach (var member in PropRefs)
+            foreach (var member in propRefs)
             {
-                var fieldName = member.Property.ToPrivateFieldName();
-                var typeName = member.Property.Type.ToFullName();
+                var typeName = member.propertyTypeName;
+                var validIdent = member.propertyTypeValidIdent;
 
                 if (types.ContainsKey(typeName) == false)
                 {
-                    types.Add(typeName, member.Property.Type);
+                    types.Add(typeName, validIdent);
                 }
 
-                if (NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties))
+                foreach (var entry in notifyForEntries)
                 {
-                    foreach (var property in properties)
+                    if (entry.memberKey != member.fieldName)
                     {
-                        typeName = property.Type.ToFullName();
+                        continue;
+                    }
 
-                        if (types.ContainsKey(typeName) == false)
-                        {
-                            types.Add(typeName, property.Type);
-                        }
+                    if (types.ContainsKey(entry.propTypeName) == false)
+                    {
+                        types.Add(entry.propTypeName, entry.propTypeValidIdent);
                     }
                 }
             }
 
-            foreach (var type in types.Values)
+            foreach (var kv in types)
             {
-                var typeName = type.ToFullName();
-                var propertyName = type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                var typeName = kv.Key;
+                var propertyName = kv.Value.AsSpan().MakeFirstCharUpperCase();
 
                 p.PrintLine(GENERATED_CODE).PrintLine(EDITOR_BROWSABLE_NEVER);
                 p.PrintLine($"private readonly {CACHED_VARIANT_CONVERTER}<{typeName}> _variantConverter{propertyName} = {CACHED_VARIANT_CONVERTER}<{typeName}>.Default;");
@@ -376,50 +352,51 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             }
         }
 
-        private void WriteObservableForProperties(ref Printer p)
+        private readonly void WriteObservableForProperties(ref Printer p)
         {
-            var hasSerializableAttribute = HasSerializableAttribute;
-            var canGeneratePropertyBagAttribute = HasSerializableAttribute && HasGeneratePropertyBagAttribute;
+            var hasSerializableAttr = hasSerializableAttribute;
+            var canGeneratePropertyBagAttr = hasSerializableAttribute && hasGeneratePropertyBagAttribute;
+            var notifyForMap = BuildNotifyForMap();
 
-            foreach (var member in PropRefs)
+            foreach (var member in propRefs)
             {
-                var fieldName = member.FieldName;
-                var propertyName = member.Property.Name;
-                var typeName = member.Property.Type.ToFullName();
-                var argsName = OnChangedArgsName(member);
-                var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                var fieldName = member.fieldName;
+                var propertyName = member.propertyName;
+                var typeName = member.propertyTypeName;
+                var argsName = OnChangedArgsName(propertyName);
+                var converterForField = member.propertyTypeValidIdent.AsSpan().MakeFirstCharUpperCase();
                 var converterForFieldVariable = $"variantConverter{converterForField}";
-                var willNotifyPropertyChanged = NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties);
-                var constName = ConstName(member);
+                var willNotifyPropertyChanged = notifyForMap.TryGetValue(fieldName, out var notifyEntries);
+                var constName = ConstName(propertyName);
                 var withSerializeField = false;
                 var withDontCreateProperty = false;
 
-                foreach (var (fullTypeName, attribute) in member.ForwardedFieldAttributes)
+                foreach (var ffa in member.forwardedFieldAttributes)
                 {
-                    if (hasSerializableAttribute && fullTypeName == SERIALIZE_FIELD_ATTRIBUTE)
+                    if (hasSerializableAttr && ffa.typeName == SERIALIZE_FIELD_ATTRIBUTE)
                     {
                         withSerializeField = true;
                     }
-                    else if (canGeneratePropertyBagAttribute && fullTypeName == DONT_CREATE_PROPERTY_ATTRIBUTE)
+                    else if (canGeneratePropertyBagAttr && ffa.typeName == DONT_CREATE_PROPERTY_ATTRIBUTE)
                     {
                         withDontCreateProperty = true;
                     }
 
-                    p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
+                    p.PrintLine($"[{ffa.attributeInfo.GetSyntax().ToFullString()}]");
                 }
 
-                if (member.IsObservableObject)
+                if (member.isObservableObject)
                 {
                     p.PrintLine(string.Format(IS_OBSERVABLE_OBJECT, typeName));
                 }
 
-                if (hasSerializableAttribute && withSerializeField == false)
+                if (hasSerializableAttr && withSerializeField == false)
                 {
                     p.PrintLine($"[{SERIALIZE_FIELD_ATTRIBUTE}]");
                 }
 
-                if (canGeneratePropertyBagAttribute
-                    && member.DoesCreateProperty
+                if (canGeneratePropertyBagAttr
+                    && member.doesCreateProperty
                     && withDontCreateProperty == false
                 )
                 {
@@ -443,7 +420,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 p.PrintLine($"private void Set_{propertyName}({typeName} value)");
                 p.OpenScope();
                 {
-                    p.PrintLine($"if (global::System.Collections.Generic.EqualityComparer<{typeName}>.Default.Equals(this.{fieldName}, value)) return;");
+                    p.PrintLine($"if (EqualityComparer<{typeName}>.Default.Equals(this.{fieldName}, value)) return;");
                     p.PrintEndLine();
 
                     p.OpenScope();
@@ -452,54 +429,52 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
                         p.PrintEndLine();
 
-                        p.PrintLine($"{OnChangingMethodName(member)}(oldValue, value);");
+                        p.PrintLine($"{OnChangingMethodName(propertyName)}(oldValue, value);");
                         p.PrintEndLine();
 
                         p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
                         p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, {converterForFieldVariable}.ToVariant(oldValue), {converterForFieldVariable}.ToVariant(value));");
-                        p.PrintLine($"this.{OnChangingEventName(member)}?.Invoke({argsName});");
+                        p.PrintLine($"this.{OnChangingEventName(propertyName)}?.Invoke({argsName});");
                         p.PrintEndLine();
 
                         p.PrintLine($"this.{fieldName} = value;");
                         p.PrintEndLine();
 
-                        p.PrintLine($"{OnChangedMethodName(member)}(oldValue, value);");
-                        p.PrintLine($"this.{OnChangedEventName(member)}?.Invoke({argsName});");
+                        p.PrintLine($"{OnChangedMethodName(propertyName)}(oldValue, value);");
+                        p.PrintLine($"this.{OnChangedEventName(propertyName)}?.Invoke({argsName});");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    if (willNotifyPropertyChanged)
+                    if (willNotifyPropertyChanged && notifyEntries != null)
                     {
-                        foreach (var property in properties)
+                        foreach (var entry in notifyEntries)
                         {
                             var oldValueName = "oldValueProperty";
-                            var otherArgsName = OnChangedArgsName(property);
-                            var converterForProperty = property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                            var otherArgsName = OnChangedArgsName(entry.propName);
+                            var converterForProperty = entry.propTypeValidIdent.AsSpan().MakeFirstCharUpperCase();
                             var converterForPropertyVariable = $"converter{converterForProperty}";
 
                             p.OpenScope();
                             {
-                                p.PrintLine($"var {oldValueName} = this.{property.Name};");
+                                p.PrintLine($"var {oldValueName} = this.{entry.propName};");
                                 p.PrintEndLine();
 
-                                p.PrintLine($"{OnChangedMethodName(property)}({oldValueName}, this.{property.Name});");
+                                p.PrintLine($"{OnChangedMethodName(entry.propName)}({oldValueName}, this.{entry.propName});");
                                 p.PrintEndLine();
 
                                 p.PrintLine($"var {converterForPropertyVariable} = this._variantConverter{converterForProperty};");
-                                p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(property)}, {converterForPropertyVariable}.ToVariant({oldValueName}), {converterForPropertyVariable}.ToVariant(this.{property.Name}));");
-                                p.PrintLine($"this.{OnChangedEventName(property)}?.Invoke({otherArgsName});");
+                                p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(entry.propName)}, {converterForPropertyVariable}.ToVariant({oldValueName}), {converterForPropertyVariable}.ToVariant(this.{entry.propName}));");
+                                p.PrintLine($"this.{OnChangedEventName(entry.propName)}?.Invoke({otherArgsName});");
                             }
                             p.CloseScope();
                             p.PrintEndLine();
                         }
                     }
 
-                    p.PrintEndLine();
-
-                    foreach (var commandName in member.CommandNames)
+                    foreach (var commandName in member.commandNames)
                     {
-                        if (NotifyCanExecuteChangedForSet.Contains(commandName))
+                        if (notifyCanExecuteChangedFor.AsImmutableArray().Contains(commandName))
                         {
                             p.PrintLine($"{commandName}.NotifyCanExecuteChanged();");
                         }
@@ -510,27 +485,29 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             }
         }
 
-        private void WriteProperties(ref Printer p)
+        private readonly void WriteProperties(ref Printer p)
         {
-            foreach (var member in FieldRefs)
+            var notifyForMap = BuildNotifyForMap();
+
+            foreach (var member in fieldRefs)
             {
-                var fieldName = member.Field.Name;
-                var propertyName = member.PropertyName;
-                var typeName = member.Field.Type.ToFullName();
-                var argsName = OnChangedArgsName(member);
-                var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                var fieldName = member.fieldName;
+                var propertyName = member.propertyName;
+                var typeName = member.fieldTypeName;
+                var argsName = OnChangedArgsName(propertyName);
+                var converterForField = member.fieldTypeValidIdent.AsSpan().MakeFirstCharUpperCase();
                 var converterForFieldVariable = $"variantConverter{converterForField}";
-                var willNotifyPropertyChanged = NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties);
-                var constName = ConstName(member);
+                var willNotifyPropertyChanged = notifyForMap.TryGetValue(fieldName, out var notifyEntries);
+                var constName = ConstName(propertyName);
 
                 p.PrintLine($"/// <inheritdoc cref=\"{fieldName}\"/>");
 
-                foreach (var attribute in member.ForwardedPropertyAttributes)
+                foreach (var attribute in member.forwardedPropertyAttributes)
                 {
                     p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
                 }
 
-                if (member.IsObservableObject)
+                if (member.isObservableObject)
                 {
                     p.PrintLine(string.Format(IS_OBSERVABLE_OBJECT, typeName));
                 }
@@ -544,7 +521,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     p.PrintLine("set");
                     p.OpenScope();
                     {
-                        p.PrintLine($"if (global::System.Collections.Generic.EqualityComparer<{typeName}>.Default.Equals(this.{fieldName}, value)) return;");
+                        p.PrintLine($"if (EqualityComparer<{typeName}>.Default.Equals(this.{fieldName}, value)) return;");
                         p.PrintEndLine();
 
                         p.OpenScope();
@@ -553,54 +530,52 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
                             p.PrintEndLine();
 
-                            p.PrintLine($"{OnChangingMethodName(member)}(oldValue, value);");
+                            p.PrintLine($"{OnChangingMethodName(propertyName)}(oldValue, value);");
                             p.PrintEndLine();
 
                             p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
                             p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, {converterForFieldVariable}.ToVariant(oldValue), {converterForFieldVariable}.ToVariant(value));");
-                            p.PrintLine($"this.{OnChangingEventName(member)}?.Invoke({argsName});");
+                            p.PrintLine($"this.{OnChangingEventName(propertyName)}?.Invoke({argsName});");
                             p.PrintEndLine();
 
                             p.PrintLine($"this.{fieldName} = value;");
                             p.PrintEndLine();
 
-                            p.PrintLine($"{OnChangedMethodName(member)}(oldValue, value);");
-                            p.PrintLine($"this.{OnChangedEventName(member)}?.Invoke({argsName});");
+                            p.PrintLine($"{OnChangedMethodName(propertyName)}(oldValue, value);");
+                            p.PrintLine($"this.{OnChangedEventName(propertyName)}?.Invoke({argsName});");
                         }
                         p.CloseScope();
                         p.PrintEndLine();
 
-                        if (willNotifyPropertyChanged)
+                        if (willNotifyPropertyChanged && notifyEntries != null)
                         {
-                            foreach (var property in properties)
+                            foreach (var entry in notifyEntries)
                             {
                                 var oldValueName = "oldValueProperty";
-                                var otherArgsName = OnChangedArgsName(property);
-                                var converterForProperty = property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                                var otherArgsName = OnChangedArgsName(entry.propName);
+                                var converterForProperty = entry.propTypeValidIdent.AsSpan().MakeFirstCharUpperCase();
                                 var converterForPropertyVariable = $"converter{converterForProperty}";
 
                                 p.OpenScope();
                                 {
-                                    p.PrintLine($"var {oldValueName} = this.{property.Name};");
+                                    p.PrintLine($"var {oldValueName} = this.{entry.propName};");
                                     p.PrintEndLine();
 
-                                    p.PrintLine($"{OnChangedMethodName(property)}({oldValueName}, this.{property.Name});");
+                                    p.PrintLine($"{OnChangedMethodName(entry.propName)}({oldValueName}, this.{entry.propName});");
                                     p.PrintEndLine();
 
                                     p.PrintLine($"var {converterForPropertyVariable} = this._variantConverter{converterForProperty};");
-                                    p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(property)}, {converterForPropertyVariable}.ToVariant({oldValueName}), {converterForPropertyVariable}.ToVariant(this.{property.Name}));");
-                                    p.PrintLine($"this.{OnChangedEventName(property)}?.Invoke({otherArgsName});");
+                                    p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(entry.propName)}, {converterForPropertyVariable}.ToVariant({oldValueName}), {converterForPropertyVariable}.ToVariant(this.{entry.propName}));");
+                                    p.PrintLine($"this.{OnChangedEventName(entry.propName)}?.Invoke({otherArgsName});");
                                 }
                                 p.CloseScope();
                                 p.PrintEndLine();
                             }
                         }
 
-                        p.PrintEndLine();
-
-                        foreach (var commandName in member.CommandNames)
+                        foreach (var commandName in member.commandNames)
                         {
-                            if (NotifyCanExecuteChangedForSet.Contains(commandName))
+                            if (notifyCanExecuteChangedFor.AsImmutableArray().Contains(commandName))
                             {
                                 p.PrintLine($"{commandName}.NotifyCanExecuteChanged();");
                             }
@@ -613,19 +588,19 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             }
         }
 
-        private void WritePartialMethods(ref Printer p)
+        private readonly void WritePartialMethods(ref Printer p)
         {
-            foreach (var member in FieldRefs)
+            foreach (var member in fieldRefs)
             {
-                var typeName = member.Field.Type.ToFullName();
-                var propName = member.PropertyName;
+                var typeName = member.fieldTypeName;
+                var propName = member.propertyName;
 
                 p.PrintLine($"/// <summary>Executes the logic for when <see cref=\"{propName}\"/> is changing.</summary>");
                 p.PrintLine("/// <param name=\"oldValue\">The previous property value that is being replaced.</param>");
                 p.PrintLine("/// <param name=\"newValue\">The new property value being set.</param>");
                 p.PrintLine($"/// <remarks>This method is invoked right before the value of <see cref=\"{propName}\"/> is changed.</remarks>");
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"partial void {OnChangingMethodName(member)}({typeName} oldValue, {typeName} newValue);");
+                p.PrintLine($"partial void {OnChangingMethodName(propName)}({typeName} oldValue, {typeName} newValue);");
                 p.PrintEndLine();
 
                 p.PrintLine($"/// <summary>Executes the logic for when <see cref=\"{propName}\"/> just changed.</summary>");
@@ -633,21 +608,21 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 p.PrintLine("/// <param name=\"newValue\">The new property value that was set.</param>");
                 p.PrintLine($"/// <remarks>This method is invoked right after the value of <see cref=\"{propName}\"/> is changed.</remarks>");
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"partial void {OnChangedMethodName(member)}({typeName} oldValue, {typeName} newValue);");
+                p.PrintLine($"partial void {OnChangedMethodName(propName)}({typeName} oldValue, {typeName} newValue);");
                 p.PrintEndLine();
             }
 
-            foreach (var member in PropRefs)
+            foreach (var member in propRefs)
             {
-                var typeName = member.Property.Type.ToFullName();
-                var propName = member.Property.Name;
+                var typeName = member.propertyTypeName;
+                var propName = member.propertyName;
 
                 p.PrintLine($"/// <summary>Executes the logic for when <see cref=\"{propName}\"/> is changing.</summary>");
                 p.PrintLine("/// <param name=\"oldValue\">The previous property value that is being replaced.</param>");
                 p.PrintLine("/// <param name=\"newValue\">The new property value being set.</param>");
                 p.PrintLine($"/// <remarks>This method is invoked right before the value of <see cref=\"{propName}\"/> is changed.</remarks>");
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"partial void {OnChangingMethodName(member)}({typeName} oldValue, {typeName} newValue);");
+                p.PrintLine($"partial void {OnChangingMethodName(propName)}({typeName} oldValue, {typeName} newValue);");
                 p.PrintEndLine();
 
                 p.PrintLine($"/// <summary>Executes the logic for when <see cref=\"{propName}\"/> just changed.</summary>");
@@ -655,53 +630,40 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 p.PrintLine("/// <param name=\"newValue\">The new property value that was set.</param>");
                 p.PrintLine($"/// <remarks>This method is invoked right after the value of <see cref=\"{propName}\"/> is changed.</remarks>");
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"partial void {OnChangedMethodName(member)}({typeName} oldValue, {typeName} newValue);");
+                p.PrintLine($"partial void {OnChangedMethodName(propName)}({typeName} oldValue, {typeName} newValue);");
                 p.PrintEndLine();
             }
 
-            var properties = new Dictionary<string, IPropertySymbol>();
-
-            foreach (var propertyList in NotifyPropertyChangedForMap.Values)
+            foreach (var entry in BuildUniqueNotifyForTargets().Values)
             {
-                foreach (var property in propertyList)
-                {
-                    if (properties.ContainsKey(property.Name) == false)
-                    {
-                        properties[property.Name] = property;
-                    }
-                }
-            }
-
-            foreach (var property in properties.Values)
-            {
-                var propName = property.Name;
-                var typeName = property.Type.ToFullName();
+                var propName = entry.propName;
+                var typeName = entry.propTypeName;
 
                 p.PrintLine($"/// <summary>Executes the logic for when <see cref=\"{propName}\"/> just changed.</summary>");
                 p.PrintLine("/// <param name=\"value\">The new property value that was set.</param>");
                 p.PrintLine($"/// <remarks>This method is invoked right after the value of <see cref=\"{propName}\"/> is changed.</remarks>");
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"partial void {OnChangedMethodName(property)}({typeName} oldValue, {typeName} newValue);");
+                p.PrintLine($"partial void {OnChangedMethodName(propName)}({typeName} oldValue, {typeName} newValue);");
                 p.PrintEndLine();
             }
         }
 
-        private void WriteAttachPropertyChangingListenerMethod(ref Printer p)
+        private readonly void WriteAttachPropertyChangingListenerMethod(ref Printer p)
         {
-            var keyword = IsBaseObservableObject ? "override " : Symbol.IsSealed ? "" : "virtual ";
+            var keyword = isBaseObservableObject ? "override " : isSealed ? "" : "virtual ";
 
             p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGING_INTERFACE}.AttachPropertyChangingListener{{TInstance}}(string, {PROPERTY_CHANGE_EVENT_LISTENER}{{TInstance}})\" />");
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine($"public {keyword}bool AttachPropertyChangingListener<TInstance>(string propertyName, {PROPERTY_CHANGE_EVENT_LISTENER}<TInstance> listener) where TInstance : class");
             p.OpenScope();
             {
-                if (IsBaseObservableObject)
+                if (isBaseObservableObject)
                 {
                     p.PrintLine("if (base.AttachPropertyChangingListener<TInstance>(propertyName, listener)) return true;");
                 }
                 else
                 {
-                    p.PrintLine("if (listener == null) throw new global::System.ArgumentNullException(nameof(listener));");
+                    p.PrintLine("if (listener == null) throw new ArgumentNullException(nameof(listener));");
                 }
 
                 p.PrintEndLine();
@@ -709,10 +671,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 p.PrintLine("switch (propertyName)");
                 p.OpenScope();
                 {
-                    foreach (var member in FieldRefs)
+                    foreach (var member in fieldRefs)
                     {
-                        var eventName = OnChangingEventName(member);
-                        var constName = ConstName(member);
+                        var eventName = OnChangingEventName(member.propertyName);
+                        var constName = ConstName(member.propertyName);
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
@@ -725,10 +687,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         p.PrintEndLine();
                     }
 
-                    foreach (var member in PropRefs)
+                    foreach (var member in propRefs)
                     {
-                        var eventName = OnChangingEventName(member);
-                        var constName = ConstName(member);
+                        var eventName = OnChangingEventName(member.propertyName);
+                        var constName = ConstName(member.propertyName);
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
@@ -750,22 +712,22 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             p.PrintEndLine();
         }
 
-        private void WriteAttachPropertyChangedListenerMethod(ref Printer p)
+        private readonly void WriteAttachPropertyChangedListenerMethod(ref Printer p)
         {
-            var keyword = IsBaseObservableObject ? "override " : Symbol.IsSealed ? "" : "virtual ";
+            var keyword = isBaseObservableObject ? "override " : isSealed ? "" : "virtual ";
 
             p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGED_INTERFACE}.AttachPropertyChangedListener{{TInstance}}(string, {PROPERTY_CHANGE_EVENT_LISTENER}{{TInstance}})\" />");
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine($"public {keyword}bool AttachPropertyChangedListener<TInstance>(string propertyName, {PROPERTY_CHANGE_EVENT_LISTENER}<TInstance> listener) where TInstance : class");
             p.OpenScope();
             {
-                if (IsBaseObservableObject)
+                if (isBaseObservableObject)
                 {
                     p.PrintLine("if (base.AttachPropertyChangedListener<TInstance>(propertyName, listener)) return true;");
                 }
                 else
                 {
-                    p.PrintLine("if (listener == null) throw new global::System.ArgumentNullException(nameof(listener));");
+                    p.PrintLine("if (listener == null) throw new ArgumentNullException(nameof(listener));");
                 }
 
                 p.PrintEndLine();
@@ -773,10 +735,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 p.PrintLine("switch (propertyName)");
                 p.OpenScope();
                 {
-                    foreach (var member in FieldRefs)
+                    foreach (var member in fieldRefs)
                     {
-                        var eventName = OnChangedEventName(member);
-                        var constName = ConstName(member);
+                        var eventName = OnChangedEventName(member.propertyName);
+                        var constName = ConstName(member.propertyName);
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
@@ -789,10 +751,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         p.PrintEndLine();
                     }
 
-                    foreach (var member in PropRefs)
+                    foreach (var member in propRefs)
                     {
-                        var eventName = OnChangedEventName(member);
-                        var constName = ConstName(member);
+                        var eventName = OnChangedEventName(member.propertyName);
+                        var constName = ConstName(member.propertyName);
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
@@ -805,23 +767,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         p.PrintEndLine();
                     }
 
-                    var properties = new Dictionary<string, IPropertySymbol>();
-
-                    foreach (var propertyList in NotifyPropertyChangedForMap.Values)
+                    foreach (var entry in BuildUniqueNotifyForTargets().Values)
                     {
-                        foreach (var property in propertyList)
-                        {
-                            if (properties.ContainsKey(property.Name) == false)
-                            {
-                                properties[property.Name] = property;
-                            }
-                        }
-                    }
-
-                    foreach (var property in properties.Values)
-                    {
-                        var constName = ConstName(property);
-                        var eventName = OnChangedEventName(property);
+                        var constName = ConstName(entry.propName);
+                        var eventName = OnChangedEventName(entry.propName);
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
@@ -843,22 +792,22 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             p.PrintEndLine();
         }
 
-        private void WriteNotifyPropertyChangedWithTwoArgumentsMethod(ref Printer p)
+        private readonly void WriteNotifyPropertyChangedWithTwoArgumentsMethod(ref Printer p)
         {
-            var keyword = IsBaseObservableObject ? "override " : Symbol.IsSealed ? "" : "virtual ";
+            var keyword = isBaseObservableObject ? "override " : isSealed ? "" : "virtual ";
 
             p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGED_INTERFACE}.NotifyPropertyChanged{{TInstance}}(string, {PROPERTY_CHANGE_EVENT_LISTENER}{{TInstance}})\" />");
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine($"public {keyword}bool NotifyPropertyChanged<TInstance>(string propertyName, {PROPERTY_CHANGE_EVENT_LISTENER}<TInstance> listener) where TInstance : class");
             p.OpenScope();
             {
-                if (IsBaseObservableObject)
+                if (isBaseObservableObject)
                 {
                     p.PrintLine("if (base.NotifyPropertyChanged<TInstance>(propertyName, listener)) return true;");
                 }
                 else
                 {
-                    p.PrintLine("if (listener == null) throw new global::System.ArgumentNullException(nameof(listener));");
+                    p.PrintLine("if (listener == null) throw new ArgumentNullException(nameof(listener));");
                 }
 
                 p.PrintEndLine();
@@ -866,13 +815,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 p.PrintLine("switch (propertyName)");
                 p.OpenScope();
                 {
-                    foreach (var member in FieldRefs)
+                    foreach (var member in fieldRefs)
                     {
-                        var fieldName = member.Field.Name;
-                        var argsName = OnChangedArgsName(member);
-                        var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                        var fieldName = member.fieldName;
+                        var argsName = OnChangedArgsName(member.propertyName);
+                        var converterForField = member.fieldTypeValidIdent.AsSpan().MakeFirstCharUpperCase();
                         var converterForFieldVariable = $"variantConverter{converterForField}";
-                        var constName = ConstName(member);
+                        var constName = ConstName(member.propertyName);
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
@@ -887,13 +836,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         p.PrintEndLine();
                     }
 
-                    foreach (var member in PropRefs)
+                    foreach (var member in propRefs)
                     {
-                        var fieldName = member.FieldName;
-                        var argsName = OnChangedArgsName(member);
-                        var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                        var fieldName = member.fieldName;
+                        var argsName = OnChangedArgsName(member.propertyName);
+                        var converterForField = member.propertyTypeValidIdent.AsSpan().MakeFirstCharUpperCase();
                         var converterForFieldVariable = $"variantConverter{converterForField}";
-                        var constName = ConstName(member);
+                        var constName = ConstName(member.propertyName);
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
@@ -908,32 +857,19 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         p.PrintEndLine();
                     }
 
-                    var properties = new Dictionary<string, IPropertySymbol>();
-
-                    foreach (var propertyList in NotifyPropertyChangedForMap.Values)
+                    foreach (var entry in BuildUniqueNotifyForTargets().Values)
                     {
-                        foreach (var property in propertyList)
-                        {
-                            if (properties.ContainsKey(property.Name) == false)
-                            {
-                                properties[property.Name] = property;
-                            }
-                        }
-                    }
-
-                    foreach (var property in properties.Values)
-                    {
-                        var constName = ConstName(property);
-                        var otherArgsName = OnChangedArgsName(property);
-                        var converterForProperty = property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                        var constName = ConstName(entry.propName);
+                        var otherArgsName = OnChangedArgsName(entry.propName);
+                        var converterForProperty = entry.propTypeValidIdent.AsSpan().MakeFirstCharUpperCase();
                         var converterForPropertyVariable = $"converter{converterForProperty}";
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
                         {
                             p.PrintLine($"var {converterForPropertyVariable} = this._variantConverter{converterForProperty};");
-                            p.PrintLine($"var variant = {converterForPropertyVariable}.ToVariant(this.{property.Name});");
-                            p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(property)}, variant, variant);");
+                            p.PrintLine($"var variant = {converterForPropertyVariable}.ToVariant(this.{entry.propName});");
+                            p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
                             p.PrintLine($"listener.OnEvent({otherArgsName});");
                             p.PrintLine("return true;");
                         }
@@ -950,16 +886,16 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             p.PrintEndLine();
         }
 
-        private void WriteNotifyPropertyChangedWithOneArgumentMethod(ref Printer p)
+        private readonly void WriteNotifyPropertyChangedWithOneArgumentMethod(ref Printer p)
         {
-            var keyword = IsBaseObservableObject ? "override " : Symbol.IsSealed ? "" : "virtual ";
+            var keyword = isBaseObservableObject ? "override " : isSealed ? "" : "virtual ";
 
             p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGED_INTERFACE}.NotifyPropertyChanged(string)\" />");
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine($"public {keyword}bool NotifyPropertyChanged(string propertyName)");
             p.OpenScope();
             {
-                if (IsBaseObservableObject)
+                if (isBaseObservableObject)
                 {
                     p.PrintLine("if (base.NotifyPropertyChanged(propertyName)) return true;");
                 }
@@ -969,13 +905,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 p.PrintLine("switch (propertyName)");
                 p.OpenScope();
                 {
-                    foreach (var member in FieldRefs)
+                    foreach (var member in fieldRefs)
                     {
-                        var fieldName = member.Field.Name;
-                        var argsName = OnChangedArgsName(member);
-                        var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                        var fieldName = member.fieldName;
+                        var argsName = OnChangedArgsName(member.propertyName);
+                        var converterForField = member.fieldTypeValidIdent.AsSpan().MakeFirstCharUpperCase();
                         var converterForFieldVariable = $"variantConverter{converterForField}";
-                        var constName = ConstName(member);
+                        var constName = ConstName(member.propertyName);
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
@@ -983,20 +919,20 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
                             p.PrintLine($"var variant = {converterForFieldVariable}.ToVariant(this.{fieldName});");
                             p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
-                            p.PrintLine($"this.{OnChangedEventName(member)}?.Invoke({argsName});");
+                            p.PrintLine($"this.{OnChangedEventName(member.propertyName)}?.Invoke({argsName});");
                             p.PrintLine("return true;");
                         }
                         p.CloseScope();
                         p.PrintEndLine();
                     }
 
-                    foreach (var member in PropRefs)
+                    foreach (var member in propRefs)
                     {
-                        var fieldName = member.FieldName;
-                        var argsName = OnChangedArgsName(member);
-                        var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                        var fieldName = member.fieldName;
+                        var argsName = OnChangedArgsName(member.propertyName);
+                        var converterForField = member.propertyTypeValidIdent.AsSpan().MakeFirstCharUpperCase();
                         var converterForFieldVariable = $"variantConverter{converterForField}";
-                        var constName = ConstName(member);
+                        var constName = ConstName(member.propertyName);
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
@@ -1004,40 +940,27 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
                             p.PrintLine($"var variant = {converterForFieldVariable}.ToVariant(this.{fieldName});");
                             p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
-                            p.PrintLine($"this.{OnChangedEventName(member)}?.Invoke({argsName});");
+                            p.PrintLine($"this.{OnChangedEventName(member.propertyName)}?.Invoke({argsName});");
                             p.PrintLine("return true;");
                         }
                         p.CloseScope();
                         p.PrintEndLine();
                     }
 
-                    var properties = new Dictionary<string, IPropertySymbol>();
-
-                    foreach (var propertyList in NotifyPropertyChangedForMap.Values)
+                    foreach (var entry in BuildUniqueNotifyForTargets().Values)
                     {
-                        foreach (var property in propertyList)
-                        {
-                            if (properties.ContainsKey(property.Name) == false)
-                            {
-                                properties[property.Name] = property;
-                            }
-                        }
-                    }
-
-                    foreach (var property in properties.Values)
-                    {
-                        var constName = ConstName(property);
-                        var otherArgsName = OnChangedArgsName(property);
-                        var converterForProperty = property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                        var constName = ConstName(entry.propName);
+                        var otherArgsName = OnChangedArgsName(entry.propName);
+                        var converterForProperty = entry.propTypeValidIdent.AsSpan().MakeFirstCharUpperCase();
                         var converterForPropertyVariable = $"converter{converterForProperty}";
 
                         p.PrintLine($"case {constName}:");
                         p.OpenScope();
                         {
                             p.PrintLine($"var {converterForPropertyVariable} = this._variantConverter{converterForProperty};");
-                            p.PrintLine($"var variant = {converterForPropertyVariable}.ToVariant(this.{property.Name});");
-                            p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {ConstName(property)}, variant, variant);");
-                            p.PrintLine($"this.{OnChangedEventName(property)}?.Invoke({otherArgsName});");
+                            p.PrintLine($"var variant = {converterForPropertyVariable}.ToVariant(this.{entry.propName});");
+                            p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
+                            p.PrintLine($"this.{OnChangedEventName(entry.propName)}?.Invoke({otherArgsName});");
                             p.PrintLine("return true;");
                         }
                         p.CloseScope();
@@ -1053,86 +976,73 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             p.PrintEndLine();
         }
 
-        private void WriteNotifyPropertyChangedNoArgumentMethod(ref Printer p)
+        private readonly void WriteNotifyPropertyChangedNoArgumentMethod(ref Printer p)
         {
-            var keyword = IsBaseObservableObject ? "override " : Symbol.IsSealed ? "" : "virtual ";
+            var keyword = isBaseObservableObject ? "override " : isSealed ? "" : "virtual ";
 
             p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGED_INTERFACE}.NotifyPropertyChanged()\" />");
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine($"public {keyword}void NotifyPropertyChanged()");
             p.OpenScope();
             {
-                if (IsBaseObservableObject)
+                if (isBaseObservableObject)
                 {
                     p.PrintLine("base.NotifyPropertyChanged();");
                 }
 
                 p.PrintEndLine();
 
-                foreach (var member in FieldRefs)
+                foreach (var member in fieldRefs)
                 {
-                    var fieldName = member.Field.Name;
-                    var argsName = OnChangedArgsName(member);
-                    var converterForField = member.Field.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                    var fieldName = member.fieldName;
+                    var argsName = OnChangedArgsName(member.propertyName);
+                    var converterForField = member.fieldTypeValidIdent.AsSpan().MakeFirstCharUpperCase();
                     var converterForFieldVariable = $"variantConverter{converterForField}";
-                    var constName = ConstName(member);
+                    var constName = ConstName(member.propertyName);
 
                     p.OpenScope();
                     {
                         p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
                         p.PrintLine($"var variant = {converterForFieldVariable}.ToVariant(this.{fieldName});");
                         p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
-                        p.PrintLine($"this.{OnChangedEventName(member)}?.Invoke({argsName});");
+                        p.PrintLine($"this.{OnChangedEventName(member.propertyName)}?.Invoke({argsName});");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
                 }
 
-                foreach (var member in PropRefs)
+                foreach (var member in propRefs)
                 {
-                    var fieldName = member.FieldName;
-                    var argsName = OnChangedArgsName(member);
-                    var converterForField = member.Property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                    var fieldName = member.fieldName;
+                    var argsName = OnChangedArgsName(member.propertyName);
+                    var converterForField = member.propertyTypeValidIdent.AsSpan().MakeFirstCharUpperCase();
                     var converterForFieldVariable = $"variantConverter{converterForField}";
-                    var constName = ConstName(member);
+                    var constName = ConstName(member.propertyName);
 
                     p.OpenScope();
                     {
                         p.PrintLine($"var {converterForFieldVariable} = this._variantConverter{converterForField};");
                         p.PrintLine($"var variant = {converterForFieldVariable}.ToVariant(this.{fieldName});");
                         p.PrintLine($"var {argsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
-                        p.PrintLine($"this.{OnChangedEventName(member)}?.Invoke({argsName});");
+                        p.PrintLine($"this.{OnChangedEventName(member.propertyName)}?.Invoke({argsName});");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
                 }
 
-                var properties = new Dictionary<string, IPropertySymbol>();
-
-                foreach (var propertyList in NotifyPropertyChangedForMap.Values)
+                foreach (var entry in BuildUniqueNotifyForTargets().Values)
                 {
-                    foreach (var property in propertyList)
-                    {
-                        if (properties.ContainsKey(property.Name) == false)
-                        {
-                            properties[property.Name] = property;
-                        }
-                    }
-                }
-
-                foreach (var property in properties.Values)
-                {
-                    var constName = ConstName(property);
-                    var otherArgsName = OnChangedArgsName(property);
-                    var converterForProperty = property.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                    var constName = ConstName(entry.propName);
+                    var otherArgsName = OnChangedArgsName(entry.propName);
+                    var converterForProperty = entry.propTypeValidIdent.AsSpan().MakeFirstCharUpperCase();
                     var converterForPropertyVariable = $"converter{converterForProperty}";
 
                     p.OpenScope();
                     {
                         p.PrintLine($"var {converterForPropertyVariable} = this._variantConverter{converterForProperty};");
-                        p.PrintLine($"var variant = {converterForPropertyVariable}.ToVariant(this.{property.Name});");
+                        p.PrintLine($"var variant = {converterForPropertyVariable}.ToVariant(this.{entry.propName});");
                         p.PrintLine($"var {otherArgsName} = new {PROPERTY_CHANGE_EVENT_ARGS}(this, {constName}, variant, variant);");
-                        p.PrintLine($"this.{OnChangedEventName(property)}?.Invoke({otherArgsName});");
+                        p.PrintLine($"this.{OnChangedEventName(entry.propName)}?.Invoke({otherArgsName});");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
@@ -1142,84 +1052,71 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             p.PrintEndLine();
         }
 
-        private void WriteNotifyPropertyChangingInfoAttributes(ref Printer p)
+        private readonly void WriteNotifyPropertyChangingInfoAttributes(ref Printer p)
         {
-            const string ATTRIBUTE = $"[global::{NAMESPACE}.SourceGen.NotifyPropertyChangingInfo(\"{{0}}\", typeof({{1}}))]";
+            const string ATTRIBUTE = "[NotifyPropertyChangingInfo(\"{0}\", typeof({1}))]";
 
-            foreach (var member in FieldRefs)
+            foreach (var member in fieldRefs)
             {
-                var propName = member.GetPropertyName();
-                var typeName = member.Field.Type.ToFullName();
-
-                p.PrintLine(string.Format(ATTRIBUTE, propName, typeName));
+                p.PrintLine(string.Format(ATTRIBUTE, member.propertyName, member.fieldTypeName));
             }
 
-            foreach (var member in PropRefs)
+            foreach (var member in propRefs)
             {
-                var propName = member.GetPropertyName();
-                var typeName = member.Property.Type.ToFullName();
-
-                p.PrintLine(string.Format(ATTRIBUTE, propName, typeName));
+                p.PrintLine(string.Format(ATTRIBUTE, member.propertyName, member.propertyTypeName));
             }
         }
 
-        private void WriteNotifyPropertyChangedInfoAttributes(ref Printer p)
+        private readonly void WriteNotifyPropertyChangedInfoAttributes(ref Printer p)
         {
-            const string ATTRIBUTE = $"[global::{NAMESPACE}.SourceGen.NotifyPropertyChangedInfo(\"{{0}}\", typeof({{1}}))]";
+            const string ATTRIBUTE = "[NotifyPropertyChangedInfo(\"{0}\", typeof({1}))]";
 
-            var additionalProperties = new Dictionary<string, IPropertySymbol>();
+            var additionalProps = new Dictionary<string, NotifyForEntry>();
+            var notifyForMap = BuildNotifyForMap();
 
-            foreach (var member in FieldRefs)
+            foreach (var member in fieldRefs)
             {
-                var fieldName = member.Field.Name;
-                var propName = member.GetPropertyName();
-                var typeName = member.Field.Type.ToFullName();
+                p.PrintLine(string.Format(ATTRIBUTE, member.propertyName, member.fieldTypeName));
 
-                p.PrintLine(string.Format(ATTRIBUTE, propName, typeName));
-
-                if (NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties))
+                if (notifyForMap.TryGetValue(member.fieldName, out var entries))
                 {
-                    foreach (var property in properties)
+                    foreach (var entry in entries)
                     {
-                        if (additionalProperties.ContainsKey(property.Name) == false)
+                        if (additionalProps.ContainsKey(entry.propName) == false)
                         {
-                            additionalProperties[property.Name] = property;
+                            additionalProps[entry.propName] = entry;
                         }
                     }
                 }
             }
 
-            foreach (var member in PropRefs)
+            foreach (var member in propRefs)
             {
-                var fieldName = member.Property.ToPrivateFieldName();
-                var propName = member.GetPropertyName();
-                var typeName = member.Property.Type.ToFullName();
+                p.PrintLine(string.Format(ATTRIBUTE, member.propertyName, member.propertyTypeName));
 
-                p.PrintLine(string.Format(ATTRIBUTE, propName, typeName));
-
-                if (NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties))
+                if (notifyForMap.TryGetValue(member.fieldName, out var entries))
                 {
-                    foreach (var property in properties)
+                    foreach (var entry in entries)
                     {
-                        if (additionalProperties.ContainsKey(property.Name) == false)
+                        if (additionalProps.ContainsKey(entry.propName) == false)
                         {
-                            additionalProperties[property.Name] = property;
+                            additionalProps[entry.propName] = entry;
                         }
                     }
                 }
             }
 
-            foreach (var property in additionalProperties.Values)
+            foreach (var entry in additionalProps.Values)
             {
-                p.PrintLine(string.Format(ATTRIBUTE, property.Name, property.Type.ToFullName()));
+                p.PrintLine(string.Format(ATTRIBUTE, entry.propName, entry.propTypeName));
             }
         }
 
         private static void WriteTryGetMemberObservableObject_Empty(ref Printer p)
         {
-            p.PrintLine($"/// <inheritdoc cref=\"{IOBSERVABLE_OBJECT_INTERFACE}.TryGetMemberObservableObject(global::System.Collections.Generic.Queue{{string}}, out {IOBSERVABLE_OBJECT_INTERFACE})\"/>");
+            p.PrintLine($"/// <inheritdoc cref=\"{IOBSERVABLE_OBJECT_INTERFACE_SHORT}.TryGetMemberObservableObject(Queue{{string}}, out {IOBSERVABLE_OBJECT_INTERFACE_SHORT})\"/>");
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine($"public bool TryGetMemberObservableObject(global::System.Collections.Generic.Queue<string> propertyNames, out {IOBSERVABLE_OBJECT_INTERFACE} result)");
+            p.PrintLine($"public bool TryGetMemberObservableObject(Queue<string> propertyNames, out {IOBSERVABLE_OBJECT_INTERFACE_SHORT} result)");
             p.OpenScope();
             {
                 p.PrintLine("result = default;");
@@ -1229,17 +1126,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             p.PrintEndLine();
         }
 
-        private void WriteTryGetMemberObservableObject(ref Printer p)
+        private readonly void WriteTryGetMemberObservableObject(ref Printer p)
         {
-            if (HasMemberObservableObject == false)
+            if (hasMemberObservableObject == false)
             {
                 WriteTryGetMemberObservableObject_Empty(ref p);
                 return;
             }
 
-            p.PrintLine($"/// <inheritdoc cref=\"{IOBSERVABLE_OBJECT_INTERFACE}.TryGetMemberObservableObject(global::System.Collections.Generic.Queue{{string}}, out {IOBSERVABLE_OBJECT_INTERFACE})\"/>");
+            p.PrintLine($"/// <inheritdoc cref=\"{IOBSERVABLE_OBJECT_INTERFACE_SHORT}.TryGetMemberObservableObject(Queue{{string}}, out {IOBSERVABLE_OBJECT_INTERFACE_SHORT})\"/>");
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine($"public bool TryGetMemberObservableObject(global::System.Collections.Generic.Queue<string> propertyNames, out {IOBSERVABLE_OBJECT_INTERFACE} result)");
+            p.PrintLine($"public bool TryGetMemberObservableObject(Queue<string> propertyNames, out {IOBSERVABLE_OBJECT_INTERFACE_SHORT} result)");
             p.OpenScope();
             {
                 p.PrintLine("if (propertyNames.Count > 0)");
@@ -1251,16 +1148,16 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     p.PrintLine("switch (propertyName)");
                     p.OpenScope();
                     {
-                        foreach (var member in FieldRefs)
+                        foreach (var member in fieldRefs)
                         {
-                            if (member.IsObservableObject == false)
+                            if (member.isObservableObject == false)
                             {
                                 continue;
                             }
 
-                            var fieldName = member.Field.Name;
-                            var typeName = member.Field.Type.ToFullName();
-                            var constName = ConstName(member);
+                            var fieldName = member.fieldName;
+                            var typeName = member.fieldTypeName;
+                            var constName = ConstName(member.propertyName);
 
                             p.PrintLine($"case {constName}:");
                             p.OpenScope();
@@ -1298,16 +1195,16 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             p.CloseScope();
                         }
 
-                        foreach (var member in PropRefs)
+                        foreach (var member in propRefs)
                         {
-                            if (member.IsObservableObject == false)
+                            if (member.isObservableObject == false)
                             {
                                 continue;
                             }
 
-                            var propName = member.Property.Name;
-                            var typeName = member.Property.Type.ToFullName();
-                            var constName = ConstName(member);
+                            var propName = member.propertyName;
+                            var typeName = member.propertyTypeName;
+                            var constName = ConstName(propName);
 
                             p.PrintLine($"case {constName}:");
                             p.OpenScope();
@@ -1358,34 +1255,23 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             p.PrintEndLine();
         }
 
-        private static string ConstName(MemberRef member)
-            => $"PropertyName_{member.GetPropertyName()}";
+        private static string ConstName(string propertyName)
+            => $"PropertyName_{propertyName}";
 
-        private static string ConstName(IPropertySymbol member)
-            => $"PropertyName_{member.Name}";
+        private static string OnChangingEventName(string propertyName)
+            => $"_onChanging{propertyName}";
 
-        private static string OnChangingEventName(MemberRef member)
-            => $"_onChanging{member.GetPropertyName()}";
+        private static string OnChangedEventName(string name)
+            => $"_onChanged{name}";
 
-        private static string OnChangedEventName(MemberRef member)
-            => $"_onChanged{member.GetPropertyName()}";
+        private static string OnChangedArgsName(string name)
+            => $"args{name}";
 
-        private static string OnChangedEventName(ISymbol member)
-            => $"_onChanged{member.Name}";
+        private static string OnChangingMethodName(string propertyName)
+            => $"On{propertyName}Changing";
 
-        private static string OnChangedArgsName(ISymbol member)
-            => $"args{member.Name}";
-
-        private static string OnChangedArgsName(MemberRef member)
-            => $"args{member.GetPropertyName()}";
-
-        private static string OnChangingMethodName(MemberRef member)
-            => $"On{member.GetPropertyName()}Changing";
-
-        private static string OnChangedMethodName(MemberRef member)
-            => $"On{member.GetPropertyName()}Changed";
-
-        private static string OnChangedMethodName(IPropertySymbol member)
-            => $"On{member.Name}Changed";
+        private static string OnChangedMethodName(string propertyName)
+            => $"On{propertyName}Changed";
     }
 }
+

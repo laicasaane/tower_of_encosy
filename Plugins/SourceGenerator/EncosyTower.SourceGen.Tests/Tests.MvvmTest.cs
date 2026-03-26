@@ -6,6 +6,7 @@ using EncosyTower.Mvvm.ViewBinding;
 
 namespace EncosyTower.Tests.MvvmTests
 {
+    [ObservableObject]
     public partial class Model : IObservableObject
     {
         [ObservableProperty]
@@ -75,6 +76,7 @@ namespace EncosyTower.Tests.MvvmTests
         }
     }
 
+    [ObservableObject]
     public partial class GenericModel<T> : IObservableObject
     {
         [ObservableProperty]

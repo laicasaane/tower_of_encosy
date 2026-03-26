@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -10,27 +8,32 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
     public class ObservablePropertyGenerator : IIncrementalGenerator
     {
         public const string GENERATOR_NAME = nameof(ObservablePropertyGenerator);
-        public const string NAMESPACE = MvvmGeneratorHelpers.NAMESPACE;
-        public const string SKIP_ATTRIBUTE = MvvmGeneratorHelpers.SKIP_ATTRIBUTE;
+        public const string NAMESPACE = "EncosyTower.Mvvm";
+        public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
-            var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: IsClassSyntaxMatch,
-                transform: GetClassSemanticMatch
-            ).Where(static t => t is { });
+            var compilationProvider = context.CompilationProvider
+                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+
+            var candidateProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      ObservablePropertyDeclaration.OBSERVABLE_OBJECT_ATTRIBUTE_METADATA
+                    , static (node, _) => node is ClassDeclarationSyntax
+                    , ObservablePropertyDeclaration.Extract
+                )
+                .Where(static t => t.IsValid);
 
             var combined = candidateProvider
-                .Combine(context.CompilationProvider)
+                .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.isValid);
 
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
-                    sourceProductionContext
-                    , source.Left.Right
+                      sourceProductionContext
                     , source.Left.Left
                     , source.Right.projectPath
                     , source.Right.outputSourceGenFiles
@@ -38,89 +41,32 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             });
         }
 
-        public static bool IsClassSyntaxMatch(SyntaxNode syntaxNode, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            return syntaxNode is ClassDeclarationSyntax classSyntax
-                && classSyntax.BaseList != null
-                && classSyntax.BaseList.Types.Count > 0
-                && classSyntax.BaseList.Types.Any(
-                    static x => x.Type.IsTypeNameCandidate("EncosyTower.Mvvm.ComponentModel", "IObservableObject")
-                );
-        }
-
-        public static ClassDeclarationSyntax GetClassSemanticMatch(
-              GeneratorSyntaxContext context
-            , CancellationToken token
-        )
-        {
-            token.ThrowIfCancellationRequested();
-
-            if (context.Node is not ClassDeclarationSyntax classSyntax
-                || classSyntax.BaseList == null
-                || classSyntax.BaseList.Types.Count < 1
-            )
-            {
-                return null;
-            }
-
-            return classSyntax;
-        }
-
         private static void GenerateOutput(
               SourceProductionContext context
-            , Compilation compilation
-            , ClassDeclarationSyntax candidate
+            , ObservablePropertyDeclaration declaration
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
-            if (candidate == null)
-            {
-                return;
-            }
-
             context.CancellationToken.ThrowIfCancellationRequested();
 
             try
             {
                 SourceGenHelpers.ProjectPath = projectPath;
 
-                var syntaxTree = candidate.SyntaxTree;
-                var semanticModel = compilation.GetSemanticModel(syntaxTree);
-                var declaration = new ObservablePropertyDeclaration(candidate, semanticModel, context.CancellationToken);
-
-                string source;
-
-                if (declaration.FieldRefs.Length > 0 || declaration.PropRefs.Length > 0)
-                {
-                    source = declaration.WriteCode();
-                }
-                else
-                {
-                    source = declaration.WriteCodeWithoutMember();
-                }
-
-                var fileTypeName = declaration.Symbol.ToFileName();
-                var hintName = syntaxTree.GetGeneratedSourceFileName(
-                      GENERATOR_NAME
-                    , candidate
-                    , fileTypeName
-                );
-
-                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                      compilation.Assembly.Name
-                    , GENERATOR_NAME
-                    , fileTypeName
-                );
+                var source = (declaration.fieldRefs.Count > 0 || declaration.propRefs.Count > 0)
+                    ? declaration.WriteCode()
+                    : declaration.WriteCodeWithoutMember();
 
                 context.OutputSource(
                       outputSourceGenFiles
-                    , candidate
+                    , declaration.openingSource
                     , source
-                    , hintName
-                    , sourceFilePath
+                    , declaration.closingSource
+                    , declaration.hintName
+                    , declaration.sourceFilePath
+                    , declaration.location.ToLocation()
+                    , projectPath
                 );
             }
             catch (Exception e)
@@ -132,7 +78,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
-                    , candidate.GetLocation()
+                    , declaration.location.ToLocation()
                     , e.ToUnityPrintableString()
                 ));
             }

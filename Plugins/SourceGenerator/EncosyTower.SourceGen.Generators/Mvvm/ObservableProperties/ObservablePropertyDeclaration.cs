@@ -1,16 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 {
-    public partial class ObservablePropertyDeclaration
+    /// <summary>
+    /// Cache-friendly, equatable pipeline model for the ObservableProperty source generator.
+    /// Holds only primitive values and equatable collections — no <see cref="SyntaxNode"/>
+    /// or <see cref="ISymbol"/> references — so that Roslyn's incremental generator engine
+    /// can cache and compare instances cheaply across multiple compilations.
+    /// </summary>
+    public partial struct ObservablePropertyDeclaration : IEquatable<ObservablePropertyDeclaration>
     {
         public const string IOBSERVABLE_OBJECT_INTERFACE = "global::EncosyTower.Mvvm.ComponentModel.IObservableObject";
+        public const string OBSERVABLE_OBJECT_ATTRIBUTE_METADATA = "EncosyTower.Mvvm.ComponentModel.ObservableObjectAttribute";
         public const string OBSERVABLE_PROPERTY_ATTRIBUTE = "global::EncosyTower.Mvvm.ComponentModel.ObservablePropertyAttribute";
         public const string NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE = "global::EncosyTower.Mvvm.ComponentModel.NotifyPropertyChangedForAttribute";
         public const string NOTIFY_CAN_EXECUTE_CHANGED_FOR_ATTRIBUTE = "global::EncosyTower.Mvvm.ComponentModel.NotifyCanExecuteChangedForAttribute";
@@ -25,54 +32,97 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         public const string DONT_CREATE_PROPERTY_ATTRIBUTE = "global::Unity.Properties.DontCreatePropertyAttribute";
         public const string DONT_CREATE_PROPERTY = "global::Unity.Properties.DontCreateProperty";
 
-        public ClassDeclarationSyntax Syntax { get; }
+        /// <summary>Excluded from <see cref="Equals(ObservablePropertyDeclaration)"/> and
+        /// <see cref="GetHashCode"/> — location data is not stable across incremental runs.</summary>
+        public LocationInfo location;
 
-        public INamedTypeSymbol Symbol { get; }
+        public string className;
+        public string hintName;
+        public string sourceFilePath;
+        public string openingSource;
+        public string closingSource;
+        public bool isBaseObservableObject;
+        public bool isSealed;
+        public bool hasMemberObservableObject;
+        public bool hasSerializableAttribute;
+        public bool hasGeneratePropertyBagAttribute;
+        public EquatableArray<FieldMemberDeclaration> fieldRefs;
+        public EquatableArray<PropMemberDeclaration> propRefs;
 
-        public string ClassName { get; }
+        /// <summary>Flattened entries of the NotifyPropertyChangedFor map.
+        /// Each entry records which observable member (by key) should also fire
+        /// change notifications for the target property (by name/type).</summary>
+        public EquatableArray<NotifyForEntry> notifyForEntries;
 
-        public string FullyQualifiedName { get; private set; }
+        /// <summary>Set of command names (e.g. "SaveCommand") that should receive
+        /// <c>NotifyCanExecuteChanged</c> when an observable member changes.</summary>
+        public EquatableArray<string> notifyCanExecuteChangedFor;
 
-        public bool IsBaseObservableObject { get; }
+        public readonly bool IsValid
+            => string.IsNullOrEmpty(className) == false
+            && string.IsNullOrEmpty(hintName) == false;
 
-        public ImmutableArray<FieldRef> FieldRefs { get; }
+        public readonly bool Equals(ObservablePropertyDeclaration other)
+            => string.Equals(className, other.className, StringComparison.Ordinal)
+            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
+            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
+            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
+            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
+            && isBaseObservableObject == other.isBaseObservableObject
+            && isSealed == other.isSealed
+            && hasMemberObservableObject == other.hasMemberObservableObject
+            && hasSerializableAttribute == other.hasSerializableAttribute
+            && hasGeneratePropertyBagAttribute == other.hasGeneratePropertyBagAttribute
+            && fieldRefs.Equals(other.fieldRefs)
+            && propRefs.Equals(other.propRefs)
+            && notifyForEntries.Equals(other.notifyForEntries)
+            && notifyCanExecuteChangedFor.Equals(other.notifyCanExecuteChangedFor);
 
-        public ImmutableArray<PropertyRef> PropRefs { get; }
+        public readonly override bool Equals(object obj)
+            => obj is ObservablePropertyDeclaration other && Equals(other);
 
-        public bool HasMemberObservableObject { get; }
-
-        public bool HasSerializableAttribute { get; }
-
-        public bool HasGeneratePropertyBagAttribute { get; }
+        public readonly override int GetHashCode()
+        {
+            var hash = new HashValue();
+            hash.Add(className);
+            hash.Add(hintName);
+            hash.Add(sourceFilePath);
+            hash.Add(openingSource);
+            hash.Add(closingSource);
+            hash.Add(isBaseObservableObject);
+            hash.Add(isSealed);
+            hash.Add(hasMemberObservableObject);
+            hash.Add(hasSerializableAttribute);
+            hash.Add(hasGeneratePropertyBagAttribute);
+            hash.Add(fieldRefs);
+            hash.Add(propRefs);
+            hash.Add(notifyForEntries);
+            hash.Add(notifyCanExecuteChangedFor);
+            return hash.ToHashCode();
+        }
 
         /// <summary>
-        /// Key is <c>Field.Name</c>
+        /// Extracts all observable-property metadata from the annotated class symbol into a fully
+        /// populated, cache-friendly <see cref="ObservablePropertyDeclaration"/>.
+        /// Called once per class inside the <c>ForAttributeWithMetadataName</c> transform.
         /// </summary>
-        public Dictionary<string, List<IPropertySymbol>> NotifyPropertyChangedForMap { get; }
-
-        /// <summary>
-        /// Key is the command name (<c>Method.Name + "Command"</c>)
-        /// </summary>
-        public HashSet<string> NotifyCanExecuteChangedForSet { get; }
-
-        public ObservablePropertyDeclaration(
-              ClassDeclarationSyntax candidate
-            , SemanticModel semanticModel
+        public static ObservablePropertyDeclaration Extract(
+              GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
         {
-            using var fieldRefs = ImmutableArrayBuilder<FieldRef>.Rent();
-            using var propRefs = ImmutableArrayBuilder<PropertyRef>.Rent();
-            using var diagnosticBuilder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
+            token.ThrowIfCancellationRequested();
 
-            Syntax = candidate;
-            Symbol = semanticModel.GetDeclaredSymbol(candidate, token);
-            HasSerializableAttribute = Symbol.HasAttribute(SERIALIZABLE_ATTRIBUTE);
-            HasGeneratePropertyBagAttribute = Symbol.HasAttribute(GENERATE_PROPERTY_BAG_ATTRIBUTE);
+            if (context.TargetNode is not ClassDeclarationSyntax classSyntax
+                || context.TargetSymbol is not INamedTypeSymbol classSymbol
+            )
+            {
+                return default;
+            }
 
-            var classNameSb = new StringBuilder(Syntax.Identifier.Text);
+            var classNameSb = new StringBuilder(classSyntax.Identifier.Text);
 
-            if (candidate.TypeParameterList is TypeParameterListSyntax typeParamList
+            if (classSyntax.TypeParameterList is TypeParameterListSyntax typeParamList
                 && typeParamList.Parameters.Count > 0
             )
             {
@@ -94,23 +144,53 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 classNameSb.Append(">");
             }
 
-            ClassName = classNameSb.ToString();
-            FullyQualifiedName = Symbol.ToFullName();
-            NotifyPropertyChangedForMap = new Dictionary<string, List<IPropertySymbol>>();
-            NotifyCanExecuteChangedForSet = new HashSet<string>();
+            var className = classNameSb.ToString();
+            var semanticModel = context.SemanticModel;
+            var syntaxTree = classSyntax.SyntaxTree;
+            var fileTypeName = classSymbol.ToFileName();
 
-            if (Symbol.BaseType != null && Symbol.BaseType.TypeKind == TypeKind.Class)
+            var hintName = syntaxTree.GetGeneratedSourceFileName(
+                  ObservablePropertyGenerator.GENERATOR_NAME
+                , classSyntax
+                , fileTypeName
+            );
+
+            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
+                  semanticModel.Compilation.AssemblyName
+                , ObservablePropertyGenerator.GENERATOR_NAME
+                , fileTypeName
+            );
+
+            TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                  classSyntax
+                , token
+                , out var openingSource
+                , out var closingSource
+                , printAdditionalUsings: PrintAdditionalUsings
+            );
+
+            var isBaseObservableObject = false;
+
+            if (classSymbol.BaseType != null && classSymbol.BaseType.TypeKind == TypeKind.Class)
             {
-                if (Symbol.BaseType.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE))
+                if (classSymbol.BaseType.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE))
                 {
-                    IsBaseObservableObject = true;
+                    isBaseObservableObject = true;
                 }
             }
 
-            var members = Symbol.GetMembers();
+            using var fieldRefsBuilder = ImmutableArrayBuilder<FieldMemberDeclaration>.Rent();
+            using var propRefsBuilder = ImmutableArrayBuilder<PropMemberDeclaration>.Rent();
+            using var diagnosticBuilder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
+
+            var hasSerializableAttribute = classSymbol.HasAttribute(SERIALIZABLE_ATTRIBUTE);
+            var hasGeneratePropertyBagAttribute = classSymbol.HasAttribute(GENERATE_PROPERTY_BAG_ATTRIBUTE);
+            var hasMemberObservableObject = false;
+
+            var members = classSymbol.GetMembers();
             var propertyChangedMap = new Dictionary<string, List<string>>();
             var commandSet = new HashSet<string>();
-            var propertyMap = new Dictionary<string, IPropertySymbol>();
+            var propertyMap = new Dictionary<string, (string propTypeName, string propTypeValidIdent)>();
             var methods = new List<IMethodSymbol>();
 
             foreach (var member in members)
@@ -119,16 +199,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 {
                     if (field.HasAttribute(OBSERVABLE_PROPERTY_ATTRIBUTE))
                     {
-                        var fieldRef = new FieldRef {
-                            Field = field,
-                            PropertyName = field.ToPropertyName(),
-                            IsObservableObject = field.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE),
-                            HasSerializeFieldAttribute = field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE),
-                        };
+                        var fieldTypeName = field.Type.ToFullName();
+                        var isObservableObject = field.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE);
 
-                        if (fieldRef.IsObservableObject)
+                        if (isObservableObject)
                         {
-                            HasMemberObservableObject = true;
+                            hasMemberObservableObject = true;
                         }
 
                         var uniqueCommandNames = new HashSet<string>();
@@ -175,7 +251,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             commandNames.AddRange(uniqueCommandNames);
                         }
 
-                        fieldRef.Field.GatherForwardedAttributes(
+                        field.GatherForwardedAttributes(
                               semanticModel
                             , token
                             , diagnosticBuilder
@@ -183,9 +259,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             , DiagnosticDescriptors.InvalidPropertyTargetedAttributeOnObservableProperty
                         );
 
-                        fieldRef.ForwardedPropertyAttributes = propertyAttributes;
-                        fieldRef.CommandNames = commandNames.ToImmutable();
-                        fieldRefs.Add(fieldRef);
+                        fieldRefsBuilder.Add(new FieldMemberDeclaration {
+                            location = LocationInfo.From(field.Locations.Length > 0 ? field.Locations[0] : Location.None),
+                            fieldName = field.Name,
+                            propertyName = field.ToPropertyName(),
+                            fieldTypeName = fieldTypeName,
+                            fieldTypeValidIdent = field.Type.ToValidIdentifier(),
+                            isObservableObject = isObservableObject,
+                            hasSerializeFieldAttribute = field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE),
+                            commandNames = commandNames.ToImmutable().AsEquatableArray(),
+                            forwardedPropertyAttributes = propertyAttributes.AsEquatableArray(),
+                        });
                     }
 
                     continue;
@@ -195,21 +279,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 {
                     if (property.HasAttribute(OBSERVABLE_PROPERTY_ATTRIBUTE) == false)
                     {
-                        propertyMap[property.Name] = property;
+                        propertyMap[property.Name] = (property.Type.ToFullName(), property.Type.ToValidIdentifier());
                     }
                     else
                     {
+                        var propertyTypeName = property.Type.ToFullName();
                         var fieldName = property.ToPrivateFieldName();
-                        var propRef = new PropertyRef {
-                            Property = property,
-                            FieldName = fieldName,
-                            IsObservableObject = property.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE),
-                            DoesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE),
-                        };
+                        var isObservableObject = property.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE);
 
-                        if (propRef.IsObservableObject)
+                        if (isObservableObject)
                         {
-                            HasMemberObservableObject = true;
+                            hasMemberObservableObject = true;
                         }
 
                         var uniqueCommandNames = new HashSet<string>();
@@ -256,7 +336,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             commandNames.AddRange(uniqueCommandNames);
                         }
 
-                        propRef.Property.GatherForwardedAttributes(
+                        property.GatherForwardedAttributes(
                               semanticModel
                             , token
                             , diagnosticBuilder
@@ -264,9 +344,24 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             , DiagnosticDescriptors.InvalidFieldMethodTargetedAttributeOnObservableProperty
                         );
 
-                        propRef.ForwardedFieldAttributes = fieldAttributes;
-                        propRef.CommandNames = commandNames.ToImmutable();
-                        propRefs.Add(propRef);
+                        using var forwardedFieldAttribsBuilder = ImmutableArrayBuilder<ForwardedFieldAttribute>.Rent();
+
+                        foreach (var (typeName, attribInfo) in fieldAttributes)
+                        {
+                            forwardedFieldAttribsBuilder.Add(new ForwardedFieldAttribute { typeName = typeName, attributeInfo = attribInfo });
+                        }
+
+                        propRefsBuilder.Add(new PropMemberDeclaration {
+                            location = LocationInfo.From(property.Locations.Length > 0 ? property.Locations[0] : Location.None),
+                            propertyName = property.Name,
+                            fieldName = fieldName,
+                            propertyTypeName = propertyTypeName,
+                            propertyTypeValidIdent = property.Type.ToValidIdentifier(),
+                            isObservableObject = isObservableObject,
+                            doesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE),
+                            commandNames = commandNames.ToImmutable().AsEquatableArray(),
+                            forwardedFieldAttributes = forwardedFieldAttribsBuilder.ToImmutable().AsEquatableArray(),
+                        });
                     }
 
                     continue;
@@ -283,26 +378,31 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 }
             }
 
+            // Build flattened NotifyForEntry array from propertyChangedMap + propertyMap
+            using var notifyForBuilder = ImmutableArrayBuilder<NotifyForEntry>.Rent();
+
             foreach (var kv in propertyChangedMap)
             {
-                var fieldName = kv.Key;
-                var propNames = kv.Value;
+                var memberKey = kv.Key;
 
-                foreach (var propName in propNames)
+                foreach (var propName in kv.Value)
                 {
-                    if (propertyMap.TryGetValue(propName, out var property) == false)
+                    if (propertyMap.TryGetValue(propName, out var propInfo) == false)
                     {
                         continue;
                     }
 
-                    if (NotifyPropertyChangedForMap.TryGetValue(fieldName, out var properties) == false)
-                    {
-                        NotifyPropertyChangedForMap[fieldName] = properties = new List<IPropertySymbol>();
-                    }
-
-                    properties.Add(property);
+                    notifyForBuilder.Add(new NotifyForEntry {
+                        memberKey = memberKey,
+                        propName = propName,
+                        propTypeName = propInfo.propTypeName,
+                        propTypeValidIdent = propInfo.propTypeValidIdent,
+                    });
                 }
             }
+
+            // Build notifyCanExecuteChangedFor array
+            using var notifyCanExecBuilder = ImmutableArrayBuilder<string>.Rent();
 
             foreach (var method in methods)
             {
@@ -310,49 +410,202 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
                 if (commandSet.Contains(commandName))
                 {
-                    NotifyCanExecuteChangedForSet.Add(commandName);
+                    notifyCanExecBuilder.Add(commandName);
                 }
             }
 
-            FieldRefs = fieldRefs.ToImmutable();
-            PropRefs = propRefs.ToImmutable();
+            return new ObservablePropertyDeclaration {
+                location = LocationInfo.From(classSyntax.GetLocation()),
+                className = className,
+                hintName = hintName,
+                sourceFilePath = sourceFilePath,
+                openingSource = openingSource,
+                closingSource = closingSource,
+                isBaseObservableObject = isBaseObservableObject,
+                isSealed = classSymbol.IsSealed,
+                hasMemberObservableObject = hasMemberObservableObject,
+                hasSerializableAttribute = hasSerializableAttribute,
+                hasGeneratePropertyBagAttribute = hasGeneratePropertyBagAttribute,
+                fieldRefs = fieldRefsBuilder.ToImmutable().AsEquatableArray(),
+                propRefs = propRefsBuilder.ToImmutable().AsEquatableArray(),
+                notifyForEntries = notifyForBuilder.ToImmutable().AsEquatableArray(),
+                notifyCanExecuteChangedFor = notifyCanExecBuilder.ToImmutable().AsEquatableArray(),
+            };
         }
 
-        public abstract class MemberRef
+        private static void PrintAdditionalUsings(ref Printer p)
         {
-            public bool IsObservableObject { get; set; }
-
-            public ImmutableArray<string> CommandNames { get; set; }
-
-            public abstract string GetPropertyName();
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using System;");
+            p.PrintLine("using System.CodeDom.Compiler;");
+            p.PrintLine("using System.Collections.Generic;");
+            p.PrintLine("using System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using System.Runtime.CompilerServices;");
+            p.PrintLine("using EncosyTower.Mvvm.ComponentModel;");
+            p.PrintLine("using EncosyTower.Mvvm.ComponentModel.SourceGen;");
+            p.PrintLine("using EncosyTower.Variants;");
+            p.PrintLine("using EncosyTower.Variants.Converters;");
+            p.PrintEndLine();
+            p.PrintLine("using EditorBrowsableAttribute = global::System.ComponentModel.EditorBrowsableAttribute;");
+            p.PrintLine("using EditorBrowsableState = global::System.ComponentModel.EditorBrowsableState;");
+            p.PrintLine("using INotifyPropertyChanging = global::EncosyTower.Mvvm.ComponentModel.INotifyPropertyChanging;");
+            p.PrintLine("using INotifyPropertyChanged = global::EncosyTower.Mvvm.ComponentModel.INotifyPropertyChanged;");
+            p.PrintLine("using PropertyChangeEventArgs = global::EncosyTower.Mvvm.ComponentModel.PropertyChangeEventArgs;");
+            p.PrintLine("using PropertyChangingEventHandler = global::EncosyTower.Mvvm.ComponentModel.PropertyChangingEventHandler;");
+            p.PrintLine("using PropertyChangedEventHandler = global::EncosyTower.Mvvm.ComponentModel.PropertyChangedEventHandler;");
+            p.PrintEndLine();
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
         }
 
-        public class FieldRef : MemberRef
+        /// <summary>
+        /// Cache-friendly, equatable model for a single <c>[ObservableProperty]</c>-decorated field.
+        /// All symbol-derived data is pre-computed as strings — no <see cref="ISymbol"/> or
+        /// <see cref="SyntaxNode"/> references are retained.
+        /// </summary>
+        public struct FieldMemberDeclaration : IEquatable<FieldMemberDeclaration>
         {
-            public IFieldSymbol Field { get; set; }
+            /// <summary>Excluded from <see cref="Equals(FieldMemberDeclaration)"/> and
+            /// <see cref="GetHashCode"/> — not stable across incremental runs.</summary>
+            public LocationInfo location;
 
-            public string PropertyName { get; set; }
+            public string fieldName;
+            public string propertyName;
+            public string fieldTypeName;
+            public string fieldTypeValidIdent;
+            public bool isObservableObject;
+            public bool hasSerializeFieldAttribute;
+            public EquatableArray<string> commandNames;
+            public EquatableArray<AttributeInfo> forwardedPropertyAttributes;
 
-            public ImmutableArray<AttributeInfo> ForwardedPropertyAttributes { get; set; }
+            public readonly bool Equals(FieldMemberDeclaration other)
+                => string.Equals(fieldName, other.fieldName, StringComparison.Ordinal)
+                && string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)
+                && string.Equals(fieldTypeName, other.fieldTypeName, StringComparison.Ordinal)
+                && string.Equals(fieldTypeValidIdent, other.fieldTypeValidIdent, StringComparison.Ordinal)
+                && isObservableObject == other.isObservableObject
+                && hasSerializeFieldAttribute == other.hasSerializeFieldAttribute
+                && commandNames.Equals(other.commandNames)
+                && forwardedPropertyAttributes.Equals(other.forwardedPropertyAttributes);
 
-            public bool HasSerializeFieldAttribute { get; set; }
+            public readonly override bool Equals(object obj)
+                => obj is FieldMemberDeclaration other && Equals(other);
 
-            public override string GetPropertyName()
-                => PropertyName;
+            public readonly override int GetHashCode()
+            {
+                var hash = new HashValue();
+                hash.Add(fieldName);
+                hash.Add(propertyName);
+                hash.Add(fieldTypeName);
+                hash.Add(fieldTypeValidIdent);
+                hash.Add(isObservableObject);
+                hash.Add(hasSerializeFieldAttribute);
+                hash.Add(commandNames);
+                hash.Add(forwardedPropertyAttributes);
+                return hash.ToHashCode();
+            }
         }
 
-        public class PropertyRef : MemberRef
+        /// <summary>
+        /// Cache-friendly, equatable model for a single <c>[ObservableProperty]</c>-decorated property.
+        /// All symbol-derived data is pre-computed as strings — no <see cref="ISymbol"/> or
+        /// <see cref="SyntaxNode"/> references are retained.
+        /// </summary>
+        public struct PropMemberDeclaration : IEquatable<PropMemberDeclaration>
         {
-            public IPropertySymbol Property { get; set; }
+            /// <summary>Excluded from <see cref="Equals(PropMemberDeclaration)"/> and
+            /// <see cref="GetHashCode"/> — not stable across incremental runs.</summary>
+            public LocationInfo location;
 
-            public string FieldName { get; set; }
+            public string propertyName;
+            public string fieldName;
+            public string propertyTypeName;
+            public string propertyTypeValidIdent;
+            public bool isObservableObject;
+            public bool doesCreateProperty;
+            public EquatableArray<string> commandNames;
+            public EquatableArray<ForwardedFieldAttribute> forwardedFieldAttributes;
 
-            public ImmutableArray<(string, AttributeInfo)> ForwardedFieldAttributes { get; set; }
+            public readonly bool Equals(PropMemberDeclaration other)
+                => string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)
+                && string.Equals(fieldName, other.fieldName, StringComparison.Ordinal)
+                && string.Equals(propertyTypeName, other.propertyTypeName, StringComparison.Ordinal)
+                && string.Equals(propertyTypeValidIdent, other.propertyTypeValidIdent, StringComparison.Ordinal)
+                && isObservableObject == other.isObservableObject
+                && doesCreateProperty == other.doesCreateProperty
+                && commandNames.Equals(other.commandNames)
+                && forwardedFieldAttributes.Equals(other.forwardedFieldAttributes);
 
-            public bool DoesCreateProperty { get; set; }
+            public readonly override bool Equals(object obj)
+                => obj is PropMemberDeclaration other && Equals(other);
 
-            public override string GetPropertyName()
-                => Property.Name;
+            public readonly override int GetHashCode()
+            {
+                var hash = new HashValue();
+                hash.Add(propertyName);
+                hash.Add(fieldName);
+                hash.Add(propertyTypeName);
+                hash.Add(propertyTypeValidIdent);
+                hash.Add(isObservableObject);
+                hash.Add(doesCreateProperty);
+                hash.Add(commandNames);
+                hash.Add(forwardedFieldAttributes);
+                return hash.ToHashCode();
+            }
+        }
+
+        /// <summary>
+        /// Cache-friendly, equatable wrapper for a field-targeted forwarded attribute on a property member.
+        /// Stores the attribute's fully-qualified type name alongside its <see cref="AttributeInfo"/> data.
+        /// </summary>
+        public struct ForwardedFieldAttribute : IEquatable<ForwardedFieldAttribute>
+        {
+            public string typeName;
+            public AttributeInfo attributeInfo;
+
+            public readonly bool Equals(ForwardedFieldAttribute other)
+                => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
+                && (attributeInfo?.Equals(other.attributeInfo) ?? other.attributeInfo is null);
+
+            public readonly override bool Equals(object obj)
+                => obj is ForwardedFieldAttribute other && Equals(other);
+
+            public readonly override int GetHashCode()
+            {
+                var hash = new HashValue();
+                hash.Add(typeName);
+                hash.Add(attributeInfo);
+                return hash.ToHashCode();
+            }
+        }
+
+        /// <summary>
+        /// A single flattened entry of the <c>NotifyPropertyChangedFor</c> map.
+        /// Records that when the observable member identified by <see cref="memberKey"/> changes,
+        /// change notifications must also fire for the property identified by <see cref="propName"/>.
+        /// </summary>
+        public struct NotifyForEntry : IEquatable<NotifyForEntry>
+        {
+            /// <summary>The field name (for field members) or private-field name (for property members)
+            /// used as the map key.</summary>
+            public string memberKey;
+            public string propName;
+            public string propTypeName;
+            public string propTypeValidIdent;
+
+            public readonly bool Equals(NotifyForEntry other)
+                => string.Equals(memberKey, other.memberKey, StringComparison.Ordinal)
+                && string.Equals(propName, other.propName, StringComparison.Ordinal)
+                && string.Equals(propTypeName, other.propTypeName, StringComparison.Ordinal)
+                && string.Equals(propTypeValidIdent, other.propTypeValidIdent, StringComparison.Ordinal);
+
+            public readonly override bool Equals(object obj)
+                => obj is NotifyForEntry other && Equals(other);
+
+            public readonly override int GetHashCode()
+                => HashValue.Combine(memberKey, propName, propTypeName, propTypeValidIdent);
         }
     }
 }

@@ -1,18 +1,15 @@
-﻿using Microsoft.CodeAnalysis;
-
-namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
+﻿namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 {
-    partial class RelayCommandDeclaration
+    partial struct RelayCommandDeclaration
     {
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.RelayCommands.RelayCommandGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
-        private const string GENERATED_RELAY_COMMAND = "[global::EncosyTower.Mvvm.Input.SourceGen.GeneratedRelayCommand({0})]";
-        private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
+        private const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.RelayCommands.RelayCommandGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
+        private const string GENERATED_RELAY_COMMAND = "[GeneratedRelayCommand({0})]";
+        private const string EDITOR_BROWSABLE_NEVER = "[EditorBrowsable(EditorBrowsableState.Never)]";
 
-        public string WriteCode()
+        public readonly string WriteCode()
         {
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, Syntax.Parent);
-            var p = scopePrinter.printer;
+            var p = Printer.DefaultLarge;
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
@@ -22,9 +19,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 
             WriteRelayCommandInfoAttributes(ref p);
 
-            p.PrintBeginLine("partial class ").Print(ClassName)
-                .PrintEndLine(" : global::EncosyTower.Mvvm.Input.ICommandListener");
-
+            p.PrintBeginLine("partial class ").Print(className).PrintEndLine(" : ICommandListener");
             p.OpenScope();
             {
                 WriteConstantFields(ref p);
@@ -38,21 +33,18 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             return p.Result;
         }
 
-        private void WriteRelayCommandInfoAttributes(ref Printer p)
+        private readonly void WriteRelayCommandInfoAttributes(ref Printer p)
         {
-            foreach (var member in MemberRefs)
+            foreach (var member in memberRefs)
             {
                 var propName = CommandPropertyName(member);
 
                 p.PrintBeginLine()
-                    .Print($"[global::EncosyTower.Mvvm.Input.SourceGen.RelayCommandInfo(\"{propName}\", ");
+                    .Print($"[RelayCommandInfo(\"{propName}\", ");
 
-                if (member.Member.Parameters.Length > 0)
+                if (string.IsNullOrEmpty(member.paramTypeName) == false)
                 {
-                    var param = member.Member.Parameters[0];
-                    var paramType = param.Type.ToFullName();
-
-                    p.Print($"typeof({paramType})");
+                    p.Print($"typeof({member.paramTypeName})");
                 }
                 else
                 {
@@ -63,24 +55,24 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             }
         }
 
-        private void WriteConstantFields(ref Printer p)
+        private readonly void WriteConstantFields(ref Printer p)
         {
-            foreach (var member in MemberRefs)
+            foreach (var member in memberRefs)
             {
                 var name = CommandPropertyName(member);
 
                 p.PrintLine($"/// <summary>The name of <see cref=\"{name}\"/></summary>");
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"public const string {ConstName(member)} = nameof({ClassName}.{name});");
+                p.PrintLine($"public const string {ConstName(member)} = nameof({className}.{name});");
                 p.PrintEndLine();
             }
 
             p.PrintEndLine();
         }
 
-        private void WriteFields(ref Printer p)
+        private readonly void WriteFields(ref Printer p)
         {
-            foreach (var member in MemberRefs)
+            foreach (var member in memberRefs)
             {
                 var propertyName = CommandPropertyName(member);
                 var fieldName = CommandFieldName(member);
@@ -88,7 +80,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 
                 p.PrintLine($"/// <summary>The backing field for <see cref=\"{propertyName}\"/>.</summary>");
 
-                foreach (var attribute in member.ForwardedFieldAttributes)
+                foreach (var attribute in member.forwardedFieldAttributes)
                 {
                     p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
                 }
@@ -101,21 +93,20 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             p.PrintEndLine();
         }
 
-        private void WriteProperties(ref Printer p)
+        private readonly void WriteProperties(ref Printer p)
         {
-            foreach (var member in MemberRefs)
+            foreach (var member in memberRefs)
             {
-                var method = member.Member;
                 var propertyName = CommandPropertyName(member);
                 var fieldName = CommandFieldName(member);
                 var typeName = CommandTypeName(member);
                 var interfaceName = CommandInterfaceName(member);
                 var interfaceNameComment = CommandInterfaceNameComment(member);
-                var canExecuteArg = CanExecuteMethodArg(member.CanExecuteMethod);
+                var canExecuteArg = CanExecuteMethodArg(member);
 
-                p.PrintLine($"/// <summary>Gets an <see cref=\"{interfaceNameComment}\"/> instance wrapping <see cref=\"{method.Name}\"/>.</summary>");
+                p.PrintLine($"/// <summary>Gets an <see cref=\"{interfaceNameComment}\"/> instance wrapping <see cref=\"{member.methodName}\"/>.</summary>");
 
-                foreach (var attribute in member.ForwardedPropertyAttributes)
+                foreach (var attribute in member.forwardedPropertyAttributes)
                 {
                     p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
                 }
@@ -130,7 +121,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                     {
                         p.PrintLine($"if (this.{fieldName} == null)");
                         p = p.IncreasedIndent();
-                        p.PrintLine($"this.{fieldName} = new {typeName}({method.Name}{canExecuteArg});");
+                        p.PrintLine($"this.{fieldName} = new {typeName}({member.methodName}{canExecuteArg});");
                         p = p.DecreasedIndent();
                         p.PrintEndLine();
 
@@ -145,16 +136,16 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             p.PrintEndLine();
         }
 
-        private void WriteTryGetCommand(ref Printer p)
+        private readonly void WriteTryGetCommand(ref Printer p)
         {
             p.PrintLine("/// <inheritdoc/>");
-            p.PrintLine("public bool TryGetCommand<TCommand>(string commandName, out TCommand command) where TCommand : global::EncosyTower.Mvvm.Input.ICommand");
+            p.PrintLine("public bool TryGetCommand<TCommand>(string commandName, out TCommand command) where TCommand : ICommand");
             p.OpenScope();
             {
                 p.PrintLine("switch (commandName)");
                 p.OpenScope();
                 {
-                    foreach (var member in MemberRefs)
+                    foreach (var member in memberRefs)
                     {
                         var constName = ConstName(member);
                         var propertyName = CommandPropertyName(member);
@@ -192,57 +183,55 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             p.PrintEndLine();
         }
 
-        private static string ConstName(MemberRef member)
+        private static string ConstName(MemberDeclaration member)
             => $"CommandName_{CommandPropertyName(member)}";
 
-        private static string CommandFieldName(MemberRef method)
-            => $"_command{method.Member.Name}";
+        private static string CommandFieldName(MemberDeclaration member)
+            => $"_command{member.methodName}";
 
-        private static string CommandPropertyName(MemberRef method)
-            => $"{method.Member.Name}Command";
+        private static string CommandPropertyName(MemberDeclaration member)
+            => $"{member.methodName}Command";
 
-        private static string CommandTypeName(MemberRef method)
+        private static string CommandTypeName(MemberDeclaration member)
         {
-            if (method.Member.Parameters.Length < 1)
+            if (string.IsNullOrEmpty(member.paramTypeName))
             {
-                return "global::EncosyTower.Mvvm.Input.RelayCommand";
+                return "RelayCommand";
             }
 
-            var param = method.Member.Parameters[0];
-            return $"global::EncosyTower.Mvvm.Input.RelayCommand<{param.Type.ToFullName()}>";
+            return $"RelayCommand<{member.paramTypeName}>";
         }
 
-        private static string CommandInterfaceName(MemberRef method)
+        private static string CommandInterfaceName(MemberDeclaration member)
         {
-            if (method.Member.Parameters.Length < 1)
+            if (string.IsNullOrEmpty(member.paramTypeName))
             {
-                return "global::EncosyTower.Mvvm.Input.IRelayCommand";
+                return "IRelayCommand";
             }
 
-            var param = method.Member.Parameters[0];
-            return $"global::EncosyTower.Mvvm.Input.IRelayCommand<{param.Type.ToFullName()}>";
+            return $"IRelayCommand<{member.paramTypeName}>";
         }
 
-        private static string CommandInterfaceNameComment(MemberRef method)
+        private static string CommandInterfaceNameComment(MemberDeclaration member)
         {
-            if (method.Member.Parameters.Length < 1)
+            if (string.IsNullOrEmpty(member.paramTypeName))
             {
-                return "global::EncosyTower.Mvvm.Input.IRelayCommand";
+                return "IRelayCommand";
             }
 
-            var param = method.Member.Parameters[0];
-            return $"global::EncosyTower.Mvvm.Input.IRelayCommand{{{param.Type.ToFullName()}}}";
+            return $"IRelayCommand{{{member.paramTypeName}}}";
         }
 
-        private static string CanExecuteMethodArg(IMethodSymbol method)
+        private static string CanExecuteMethodArg(MemberDeclaration member)
         {
-            if (method == null)
+            if (string.IsNullOrEmpty(member.canExecuteMethodName))
                 return string.Empty;
 
-            if (method.Parameters.Length < 1)
-                return $", _ => {method.Name}()";
+            if (member.canExecuteHasParam == false)
+                return $", _ => {member.canExecuteMethodName}()";
 
-            return $", {method.Name}";
+            return $", {member.canExecuteMethodName}";
         }
     }
 }
+
