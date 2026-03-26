@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 {
-    using static EncosyTower.SourceGen.Generators.Mvvm.SuppressionDescriptors;
+    using static EncosyTower.SourceGen.Common.Mvvm.Common.SuppressionDescriptors;
 
     /// <summary>
     /// <para>

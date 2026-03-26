@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 {
-    using static EncosyTower.SourceGen.Generators.Mvvm.SuppressionDescriptors;
+    using static EncosyTower.SourceGen.Common.Mvvm.Common.SuppressionDescriptors;
 
     /// <summary>
     /// <para>

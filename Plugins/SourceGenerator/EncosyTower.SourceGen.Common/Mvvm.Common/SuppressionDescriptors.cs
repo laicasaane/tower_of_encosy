@@ -4,7 +4,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace EncosyTower.SourceGen.Generators.Mvvm
+namespace EncosyTower.SourceGen.Common.Mvvm.Common
 {
     /// <summary>
     /// A container for all <see cref="SuppressionDescriptors"/> instances for suppressed diagnostics by analyzers in this project.
