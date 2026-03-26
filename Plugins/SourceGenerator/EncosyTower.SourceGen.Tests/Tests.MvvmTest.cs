@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using EncosyTower.Mvvm.ComponentModel;
 using EncosyTower.Mvvm.Input;
 using EncosyTower.Mvvm.ViewBinding;
@@ -33,6 +34,11 @@ namespace EncosyTower.Tests.MvvmTests
 
         [BindingProperty]
         private void SetAValue(A value)
+        {
+        }
+
+        [BindingProperty]
+        private void SetListIntValue(List<int> value)
         {
         }
 
