@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace EncosyTower.Mvvm.ComponentModel
 {
@@ -8,7 +8,8 @@ namespace EncosyTower.Mvvm.ComponentModel
     /// <para>
     /// This attribute can be used as follows:
     /// <code>
-    /// partial class MyViewModel : IObservableObject
+    /// [ObservableProperty]
+    /// partial class MyViewModel
     /// {
     ///     [ObservableProperty]
     ///     private string _name;
