@@ -1,12 +1,11 @@
 using System.Collections.Immutable;
+using EncosyTower.SourceGen.Common.Types.Caches;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-#pragma warning disable RS2008 // Enable analyzer release tracking
-
-namespace EncosyTower.SourceGen.Generators.Types.Caches
+namespace EncosyTower.SourceGen.Analyzers.Types.Caches
 {
     /// <summary>
     /// Analyzer that reports all validation diagnostics for <c>RuntimeTypeCache.GetXxx&lt;T&gt;()</c>
@@ -17,14 +16,78 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal class RuntimeTypeCachesAnalyzer : DiagnosticAnalyzer
     {
+        private const string NAMESPACE = "EncosyTower.Types.Caches";
+        private const string NAMESPACE_PREFIX = $"global::{NAMESPACE}";
+        private const string RUNTIME_TYPE_CACHE = "global::EncosyTower.Types.RuntimeTypeCache";
+
+        public static readonly DiagnosticDescriptor TypeParameterIsNotApplicable = new(
+              id: "RUNTIME_TYPE_CACHES_0001"
+            , title: "Type parameter is not applicable"
+            , messageFormat: "\"{0}\" is a type parameter thus it is not applicable for the \"{1}\" method"
+            , category: "RuntimeTypeCachesGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: "Type parameter is not applicable."
+        );
+
+        public static readonly DiagnosticDescriptor OnlyClassOrInterfaceIsApplicable = new(
+              id: "RUNTIME_TYPE_CACHES_0002"
+            , title: "Only class or interface is applicable"
+            , messageFormat: "\"{0}\" is not applicable because it is not class nor interface"
+            , category: "RuntimeTypeCachesGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: "Only class or interface is applicable."
+        );
+
+        public static readonly DiagnosticDescriptor StaticClassIsNotApplicable = new(
+              id: "RUNTIME_TYPE_CACHES_0003"
+            , title: "Static class is not applicable"
+            , messageFormat: "\"{0}\" is not applicable because it is static"
+            , category: "RuntimeTypeCachesGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: "Static class is not applicable."
+        );
+
+        public static readonly DiagnosticDescriptor SealedClassIsNotApplicable = new(
+              id: "RUNTIME_TYPE_CACHES_0004"
+            , title: "Sealed class is not applicable"
+            , messageFormat: "\"{0}\" is not applicable because it is sealed"
+            , category: "RuntimeTypeCachesGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: "Sealed class is not applicable."
+        );
+
+        public static readonly DiagnosticDescriptor AssemblyNameMustBeStringLiteralOrConstant = new(
+              id: "RUNTIME_TYPE_CACHES_0005"
+            , title: "Assembly name must be a string literal or constant"
+            , messageFormat: "Assembly name must be a string literal or constant"
+            , category: "RuntimeTypeCachesGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: "Assembly name must be a string literal or constant."
+        );
+
+        public static readonly DiagnosticDescriptor TypesFromCachesAreProhibited = new(
+              id: "RUNTIME_TYPE_CACHES_0006"
+            , title: "Types from \"EncosyTower.Types.Caches\" are prohibited"
+            , messageFormat: "\"{0}\" is prohibited"
+            , category: "RuntimeTypeCachesGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: "Types from \"EncosyTower.Types.Caches\" are prohibited."
+        );
+
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => ImmutableArray.Create(
-                  DiagnosticDescriptors.TypeParameterIsNotApplicable
-                , DiagnosticDescriptors.OnlyClassOrInterfaceIsApplicable
-                , DiagnosticDescriptors.StaticClassIsNotApplicable
-                , DiagnosticDescriptors.SealedClassIsNotApplicable
-                , DiagnosticDescriptors.AssemblyNameMustBeStringLiteralOrConstant
-                , DiagnosticDescriptors.TypesFromCachesAreProhibited
+                  TypeParameterIsNotApplicable
+                , OnlyClassOrInterfaceIsApplicable
+                , StaticClassIsNotApplicable
+                , SealedClassIsNotApplicable
+                , AssemblyNameMustBeStringLiteralOrConstant
+                , TypesFromCachesAreProhibited
             );
 
         public override void Initialize(AnalysisContext context)
@@ -57,11 +120,11 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             var methodName = genericName.Identifier.ValueText;
 
             if (methodName is not (
-                    RuntimeTypeCachesGenerator.METHOD_GET_INFO
-                 or RuntimeTypeCachesGenerator.METHOD_GET_TYPES_DERIVED_FROM
-                 or RuntimeTypeCachesGenerator.METHOD_GET_TYPES_WITH_ATTRIBUTE
-                 or RuntimeTypeCachesGenerator.METHOD_GET_FIELDS_WITH_ATTRIBUTE
-                 or RuntimeTypeCachesGenerator.METHOD_GET_METHODS_WITH_ATTRIBUTE))
+                    RuntimeTypeCacheMethods.GET_INFO
+                 or RuntimeTypeCacheMethods.GET_TYPES_DERIVED_FROM
+                 or RuntimeTypeCacheMethods.GET_TYPES_WITH_ATTRIBUTE
+                 or RuntimeTypeCacheMethods.GET_FIELDS_WITH_ATTRIBUTE
+                 or RuntimeTypeCacheMethods.GET_METHODS_WITH_ATTRIBUTE))
             {
                 return;
             }
@@ -70,7 +133,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             var semanticModel = context.SemanticModel;
             var identifierType = semanticModel.GetTypeInfo(memberAccess.Expression, context.CancellationToken).Type;
 
-            if (identifierType?.ToFullName() is not RuntimeTypeCachesGenerator.RUNTIME_TYPE_CACHE)
+            if (identifierType?.ToFullName() is not RUNTIME_TYPE_CACHE)
             {
                 return;
             }
@@ -89,7 +152,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             {
                 var paramName = (typeArgSyntax as IdentifierNameSyntax)?.Identifier.ValueText ?? "T";
                 context.ReportDiagnostic(Diagnostic.Create(
-                      DiagnosticDescriptors.TypeParameterIsNotApplicable
+                      TypeParameterIsNotApplicable
                     , typeArgSyntax.GetLocation()
                     , paramName
                     , methodName));
@@ -103,22 +166,22 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
 
             var typeFullName = namedType.ToFullName();
 
-            if (methodName == RuntimeTypeCachesGenerator.METHOD_GET_INFO)
+            if (methodName == RuntimeTypeCacheMethods.GET_INFO)
             {
                 if (namedType.IsStatic)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
-                          DiagnosticDescriptors.StaticClassIsNotApplicable
+                          StaticClassIsNotApplicable
                         , typeArgSyntax.GetLocation()
                         , typeFullName));
                 }
             }
-            else if (methodName == RuntimeTypeCachesGenerator.METHOD_GET_TYPES_DERIVED_FROM)
+            else if (methodName == RuntimeTypeCacheMethods.GET_TYPES_DERIVED_FROM)
             {
                 if (namedType.TypeKind is not (TypeKind.Class or TypeKind.Interface))
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
-                          DiagnosticDescriptors.OnlyClassOrInterfaceIsApplicable
+                          OnlyClassOrInterfaceIsApplicable
                         , typeArgSyntax.GetLocation()
                         , typeFullName));
                     return;
@@ -127,7 +190,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 if (namedType.IsStatic)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
-                          DiagnosticDescriptors.StaticClassIsNotApplicable
+                          StaticClassIsNotApplicable
                         , typeArgSyntax.GetLocation()
                         , typeFullName));
                     return;
@@ -136,7 +199,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 if (namedType.IsSealed)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
-                          DiagnosticDescriptors.SealedClassIsNotApplicable
+                          SealedClassIsNotApplicable
                         , typeArgSyntax.GetLocation()
                         , typeFullName));
                 }
@@ -144,10 +207,10 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             else
             {
                 // GetTypesWithAttribute, GetFieldsWithAttribute, GetMethodsWithAttribute
-                if (typeFullName.StartsWith(RuntimeTypeCachesGenerator.NAMESPACE_PREFIX))
+                if (typeFullName.StartsWith(NAMESPACE_PREFIX))
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
-                          DiagnosticDescriptors.TypesFromCachesAreProhibited
+                          TypesFromCachesAreProhibited
                         , typeArgSyntax.GetLocation()
                         , typeFullName));
                 }
@@ -162,7 +225,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 if (constValue is not { HasValue: true, Value: string })
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
-                          DiagnosticDescriptors.AssemblyNameMustBeStringLiteralOrConstant
+                          AssemblyNameMustBeStringLiteralOrConstant
                         , argExpr.GetLocation()));
                 }
             }

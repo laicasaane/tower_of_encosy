@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace EncosyTower.SourceGen.Generators.Mvvm.CodeRefactors
+namespace EncosyTower.SourceGen.Analyzers.Mvvm.InternalStringAdapters
 {
     /// <summary>
     /// Reports a warning when a method decorated with <c>[RelayCommand]</c> or

@@ -2,9 +2,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-#pragma warning disable RS2008 // Enable analyzer release tracking
-
-namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
+namespace EncosyTower.SourceGen.Analyzers.NewtonsoftJsonHelpers
 {
     /// <summary>
     /// Validates types annotated with <c>[NewtonsoftJsonAotHelper]</c> and reports

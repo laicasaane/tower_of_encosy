@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Text;
 using System.Threading;
+using EncosyTower.SourceGen.Common.UnionIds;
 using EncosyTower.SourceGen.Generators.EnumExtensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

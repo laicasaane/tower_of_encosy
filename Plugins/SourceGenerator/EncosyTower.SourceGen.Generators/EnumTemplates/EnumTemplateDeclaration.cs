@@ -89,7 +89,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 }
 
                 // Silently skip invalid underlying type — EnumTemplateAnalyzer reports it.
-                if (candidate.enumMembers && IsSupportEnum(candidate.underlyingType) == false)
+                if (candidate.enumMembers && IsSupportedEnum(candidate.underlyingType) == false)
                 {
                     continue;
                 }
@@ -257,7 +257,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             return false;
         }
 
-        internal static bool IsSupportEnum(SpecialType type)
+        internal static bool IsSupportedEnum(SpecialType type)
         {
             return type switch {
                 SpecialType.System_Byte => true,

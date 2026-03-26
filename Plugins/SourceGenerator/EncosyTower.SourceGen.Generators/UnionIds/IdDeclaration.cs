@@ -1,4 +1,5 @@
 using System;
+using EncosyTower.SourceGen.Common.UnionIds;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.UnionIds

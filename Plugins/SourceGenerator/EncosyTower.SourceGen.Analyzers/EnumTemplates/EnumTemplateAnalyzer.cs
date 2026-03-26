@@ -257,11 +257,22 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         )
         {
             if (enumSymbol.EnumUnderlyingType is not INamedTypeSymbol underlyingType
-                || EnumTemplateDeclaration.IsSupportedEnum(underlyingType.SpecialType) == false
+                || IsSupportedEnum(underlyingType.SpecialType) == false
             )
             {
                 context.ReportDiagnostic(Diagnostic.Create(NotSupportUnderlyingType, location));
             }
+        }
+
+        internal static bool IsSupportedEnum(SpecialType type)
+        {
+            return type switch {
+                SpecialType.System_Byte => true,
+                SpecialType.System_UInt16 => true,
+                SpecialType.System_UInt32 => true,
+                SpecialType.System_UInt64 => true,
+                _ => false,
+            };
         }
     }
 }

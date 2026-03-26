@@ -1,4 +1,4 @@
-﻿namespace EncosyTower.SourceGen.Generators.UnionIds
+﻿namespace EncosyTower.SourceGen.Common.UnionIds
 {
     public enum UnionIdSize : byte
     {

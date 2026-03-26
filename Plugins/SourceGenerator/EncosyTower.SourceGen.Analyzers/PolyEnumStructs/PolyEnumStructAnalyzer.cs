@@ -3,9 +3,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-#pragma warning disable RS2008 // Enable analyzer release tracking
-
-namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
+namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
 {
     /// <summary>
     /// Analyzer that reports validation diagnostics for types annotated with

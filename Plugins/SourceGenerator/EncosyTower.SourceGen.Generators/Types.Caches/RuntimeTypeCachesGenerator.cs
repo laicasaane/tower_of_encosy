@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Threading;
+using EncosyTower.SourceGen.Common.Types.Caches;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,12 +26,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         private const string GENERATED_RUNTIME_TYPE_CACHES = $"[{NAMESPACE_PREFIX}.SourceGen.GeneratedRuntimeTypeCaches]";
         private const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
         private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
-
-        public const string METHOD_GET_INFO = "GetInfo";
-        public const string METHOD_GET_TYPES_DERIVED_FROM = "GetTypesDerivedFrom";
-        public const string METHOD_GET_TYPES_WITH_ATTRIBUTE = "GetTypesWithAttribute";
-        public const string METHOD_GET_FIELDS_WITH_ATTRIBUTE = "GetFieldsWithAttribute";
-        public const string METHOD_GET_METHODS_WITH_ATTRIBUTE = "GetMethodsWithAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -88,11 +83,11 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         private static bool IsMemberSupported(string memberName)
         {
             return memberName switch {
-                METHOD_GET_INFO => true,
-                METHOD_GET_TYPES_DERIVED_FROM => true,
-                METHOD_GET_TYPES_WITH_ATTRIBUTE => true,
-                METHOD_GET_FIELDS_WITH_ATTRIBUTE => true,
-                METHOD_GET_METHODS_WITH_ATTRIBUTE => true,
+                RuntimeTypeCacheMethods.GET_INFO => true,
+                RuntimeTypeCacheMethods.GET_TYPES_DERIVED_FROM => true,
+                RuntimeTypeCacheMethods.GET_TYPES_WITH_ATTRIBUTE => true,
+                RuntimeTypeCacheMethods.GET_FIELDS_WITH_ATTRIBUTE => true,
+                RuntimeTypeCacheMethods.GET_METHODS_WITH_ATTRIBUTE => true,
                 _ => false,
             };
         }
@@ -138,11 +133,11 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             }
 
             var cacheAttributeType = member.Identifier.ValueText switch {
-                METHOD_GET_INFO => CacheAttributeType.CacheType,
-                METHOD_GET_TYPES_DERIVED_FROM => CacheAttributeType.CacheTypesDerivedFrom,
-                METHOD_GET_TYPES_WITH_ATTRIBUTE => CacheAttributeType.CacheTypesWithAttribute,
-                METHOD_GET_FIELDS_WITH_ATTRIBUTE => CacheAttributeType.CacheFieldsWithAttribute,
-                METHOD_GET_METHODS_WITH_ATTRIBUTE => CacheAttributeType.CacheMethodsWithAttribute,
+                RuntimeTypeCacheMethods.GET_INFO => CacheAttributeType.CacheType,
+                RuntimeTypeCacheMethods.GET_TYPES_DERIVED_FROM => CacheAttributeType.CacheTypesDerivedFrom,
+                RuntimeTypeCacheMethods.GET_TYPES_WITH_ATTRIBUTE => CacheAttributeType.CacheTypesWithAttribute,
+                RuntimeTypeCacheMethods.GET_FIELDS_WITH_ATTRIBUTE => CacheAttributeType.CacheFieldsWithAttribute,
+                RuntimeTypeCacheMethods.GET_METHODS_WITH_ATTRIBUTE => CacheAttributeType.CacheMethodsWithAttribute,
                 _ => CacheAttributeType.None,
             };
 
@@ -204,9 +199,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 return default;
             }
 
-            var containingType = semanticModel.GetDeclaredSymbol(containingSyntax, token) as INamedTypeSymbol;
-
-            if (containingType is null)
+            if (semanticModel.GetDeclaredSymbol(containingSyntax, token) is not INamedTypeSymbol containingType)
             {
                 return default;
             }
@@ -374,7 +367,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new DiagnosticDescriptor(
+            = new(
                   "SG_RUNTIME_TYPE_CACHE_01"
                 , "Runtime Type Cache Generator Error"
                 , "This error indicates a bug in the Runtime Type Caches source generators. Error message: '{0}'."

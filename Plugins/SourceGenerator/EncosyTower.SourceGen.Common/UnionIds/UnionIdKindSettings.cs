@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EncosyTower.SourceGen.Generators.UnionIds
+namespace EncosyTower.SourceGen.Common.UnionIds
 {
     [Flags]
     public enum UnionIdKindSettings : byte

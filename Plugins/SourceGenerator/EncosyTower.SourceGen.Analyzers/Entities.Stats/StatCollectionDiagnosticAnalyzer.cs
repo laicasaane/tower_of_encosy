@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using EncosyTower.SourceGen.Common.Entities.Stats;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
