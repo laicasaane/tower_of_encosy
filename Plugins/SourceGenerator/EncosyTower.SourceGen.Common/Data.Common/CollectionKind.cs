@@ -1,4 +1,4 @@
-﻿namespace EncosyTower.SourceGen.Generators.Data
+﻿namespace EncosyTower.SourceGen.Common.Data.Common
 {
     public enum CollectionKind
     {

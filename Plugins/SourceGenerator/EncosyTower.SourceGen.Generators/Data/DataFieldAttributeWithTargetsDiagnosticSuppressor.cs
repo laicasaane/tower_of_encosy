@@ -8,10 +8,10 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace EncosyTower.SourceGen.Generators.Data.Suppressors
+namespace EncosyTower.SourceGen.Generators.Data
 {
-    using static EncosyTower.SourceGen.Generators.Data.Helpers;
-    using static EncosyTower.SourceGen.Generators.Data.SuppressionDescriptors;
+    using static EncosyTower.SourceGen.Common.Data.Common.Helpers;
+    using static EncosyTower.SourceGen.Common.Data.Common.SuppressionDescriptors;
 
     /// <summary>
     /// <para>

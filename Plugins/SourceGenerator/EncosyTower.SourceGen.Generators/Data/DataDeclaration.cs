@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
+using EncosyTower.SourceGen.Common.Data.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace EncosyTower.SourceGen.Generators.Data.Data
+namespace EncosyTower.SourceGen.Generators.Data
 {
-    using static EncosyTower.SourceGen.Generators.Data.Helpers;
+    using static EncosyTower.SourceGen.Common.Data.Common.Helpers;
 
     public partial class DataDeclaration
     {

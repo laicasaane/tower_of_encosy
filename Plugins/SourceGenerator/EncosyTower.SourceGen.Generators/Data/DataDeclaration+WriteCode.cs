@@ -1,8 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using EncosyTower.SourceGen.Common.Data.Common;
+using Microsoft.CodeAnalysis;
 
-namespace EncosyTower.SourceGen.Generators.Data.Data
+namespace EncosyTower.SourceGen.Generators.Data
 {
-    using static EncosyTower.SourceGen.Generators.Data.Helpers;
+    using static EncosyTower.SourceGen.Common.Data.Common.Helpers;
 
     partial class DataDeclaration
     {

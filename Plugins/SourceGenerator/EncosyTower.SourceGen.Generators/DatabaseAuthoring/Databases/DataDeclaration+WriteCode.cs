@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using EncosyTower.SourceGen.Generators.Data;
+using EncosyTower.SourceGen.Common.Data.Common;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring

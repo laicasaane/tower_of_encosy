@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
 {
-    using static EncosyTower.SourceGen.Generators.Data.Helpers;
+    using static EncosyTower.SourceGen.Common.Data.Common.Helpers;
 
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal class DataDiagnosticAnalyzer : DiagnosticAnalyzer
