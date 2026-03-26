@@ -67,7 +67,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 
         /// <summary>
         /// Simple (unqualified) display name of the candidate type (e.g. <c>Int32</c>).
-        /// Used for naming and label generation.
+        /// For non-generic types this equals <see cref="identifierName"/>.
         /// </summary>
         public string simpleName;
 
@@ -77,21 +77,38 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         /// </summary>
         public string namespaceName;
 
+        /// <summary>
+        /// Valid C# identifier that encodes generic type arguments using look-alike bracket
+        /// characters (e.g. <c>List&lt;int&gt;</c> → <c>Listᐸintᐳ</c>).
+        /// Used as the base for the generated adapter class name so that different
+        /// instantiations of the same open generic type produce distinct class names.
+        /// </summary>
+        public string identifierName;
+
+        /// <summary>
+        /// Human-readable display name of the type including generic notation
+        /// (e.g. <c>List&lt;int&gt;</c>). Used in the first argument of the
+        /// <c>[Label(...)]</c> attribute.
+        /// </summary>
+        public string labelName;
+
         public readonly bool IsValid
             => string.IsNullOrEmpty(fullTypeName) == false
-            && string.IsNullOrEmpty(simpleName) == false;
+            && string.IsNullOrEmpty(identifierName) == false;
 
         public readonly bool Equals(StringAdapterCandidateInfo other)
             => string.Equals(fullTypeName, other.fullTypeName, StringComparison.Ordinal)
             && string.Equals(simpleName, other.simpleName, StringComparison.Ordinal)
             && string.Equals(namespaceName, other.namespaceName, StringComparison.Ordinal)
+            && string.Equals(identifierName, other.identifierName, StringComparison.Ordinal)
+            && string.Equals(labelName, other.labelName, StringComparison.Ordinal)
             ;
 
         public readonly override bool Equals(object obj)
             => obj is StringAdapterCandidateInfo other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(fullTypeName, simpleName, namespaceName);
+            => HashValue.Combine(fullTypeName, simpleName, namespaceName, identifierName, labelName);
 
         public static bool operator ==(StringAdapterCandidateInfo left, StringAdapterCandidateInfo right)
             => left.Equals(right);

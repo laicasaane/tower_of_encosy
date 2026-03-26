@@ -288,6 +288,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 fullTypeName = typeSymbol.ToFullName(),
                 simpleName = typeSymbol.Name,
                 namespaceName = ns is { IsGlobalNamespace: false } ? ns.ToDisplayString() : string.Empty,
+                identifierName = typeSymbol.ToSimpleValidIdentifier(),
+                labelName = typeSymbol.ToSimpleName(),
             };
         }
 

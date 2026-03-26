@@ -54,7 +54,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 {
                     var adapterTypeName = AdapterTypeName(type);
                     var typeName = type.fullTypeName;
-                    var label = $"{type.simpleName} ⇒ String";
+                    var label = $"{type.labelName} ⇒ String";
 
                     p.PrintLine(string.Format(ADAPTER_ATTRIBUTE, typeName));
                     p.PrintLine(string.Format(LABEL_ATTRIBUTE, label, $"Generated/{type.namespaceName}"));
@@ -84,6 +84,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         }
 
         private static string AdapterTypeName(StringAdapterCandidateInfo typeRef)
-            => $"{typeRef.simpleName.ToValidIdentifier()}ToStringAdapter";
+            => $"{typeRef.identifierName}ToStringAdapter";
     }
 }
