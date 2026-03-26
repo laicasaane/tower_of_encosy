@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -22,27 +21,34 @@ namespace EncosyTower.SourceGen
     {
         public override bool Equals(object obj)
         {
-            if (obj is TypedConstantInfo other)
-                return EqualityComparer<TypedConstantInfo>.Default.Equals(this, other);
-
-            return false;
+            return obj is TypedConstantInfo other && Equals(other);
         }
 
-        public override int GetHashCode()
-        {
-            return EqualityComparer<TypedConstantInfo>.Default.GetHashCode(this);
-        }
+        public abstract override int GetHashCode();
 
-        public bool Equals(TypedConstantInfo other)
-        {
-            return EqualityComparer<TypedConstantInfo>.Default.Equals(this, other);
-        }
+        public abstract bool Equals(TypedConstantInfo other);
 
         /// <summary>
         /// Gets an <see cref="ExpressionSyntax"/> instance representing the current constant.
         /// </summary>
         /// <returns>The <see cref="ExpressionSyntax"/> instance representing the current constant.</returns>
         public abstract ExpressionSyntax GetSyntax();
+
+        /// <summary>
+        /// A <see cref="TypedConstantInfo"/> type representing a <see langword="null"/> value.
+        /// </summary>
+        public sealed class Null : TypedConstantInfo
+        {
+            /// <inheritdoc/>
+            public override ExpressionSyntax GetSyntax()
+            {
+                return LiteralExpression(SyntaxKind.NullLiteralExpression);
+            }
+
+            public override bool Equals(TypedConstantInfo other) => other is Null;
+
+            public override int GetHashCode() => HashValue.Combine(3);
+        }
 
         /// <summary>
         /// A <see cref="TypedConstantInfo"/> type representing an array.
@@ -71,6 +77,13 @@ namespace EncosyTower.SourceGen
                     .WithInitializer(InitializerExpression(SyntaxKind.ArrayInitializerExpression)
                     .AddExpressions(Items.Select(static c => c.GetSyntax()).ToArray()));
             }
+
+            public override bool Equals(TypedConstantInfo other)
+                => other is Array arr
+                    && ElementTypeName == arr.ElementTypeName
+                    && Items.Equals(arr.Items);
+
+            public override int GetHashCode() => HashValue.Combine(5, ElementTypeName, Items);
         }
 
         /// <summary>
@@ -96,6 +109,10 @@ namespace EncosyTower.SourceGen
                 {
                     return LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(Value));
                 }
+
+                public override bool Equals(TypedConstantInfo other) => other is String s && Value == s.Value;
+
+                public override int GetHashCode() => HashValue.Combine(7, Value);
             }
 
             /// <summary>
@@ -116,6 +133,10 @@ namespace EncosyTower.SourceGen
                 {
                     return LiteralExpression(Value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression);
                 }
+
+                public override bool Equals(TypedConstantInfo other) => other is Boolean b && Value == b.Value;
+
+                public override int GetHashCode() => HashValue.Combine(11, Value);
             }
 
             /// <summary>
@@ -157,6 +178,10 @@ namespace EncosyTower.SourceGen
                         _ => throw new ArgumentException("Invalid primitive type")
                     });
                 }
+
+                public override bool Equals(TypedConstantInfo other) => other is Of<T> o && Value.Equals(o.Value);
+
+                public override int GetHashCode() => HashValue.Combine(13, Value);
             }
         }
 
@@ -178,6 +203,10 @@ namespace EncosyTower.SourceGen
             {
                 return TypeOfExpression(IdentifierName(TypeName));
             }
+
+            public override bool Equals(TypedConstantInfo other) => other is Type t && TypeName == t.TypeName;
+
+            public override int GetHashCode() => HashValue.Combine(17, TypeName);
         }
 
         /// <summary>
@@ -205,18 +234,11 @@ namespace EncosyTower.SourceGen
                         IdentifierName(TypeName),
                         LiteralExpression(SyntaxKind.NumericLiteralExpression, ParseToken(Value.ToString())));
             }
-        }
 
-        /// <summary>
-        /// A <see cref="TypedConstantInfo"/> type representing a <see langword="null"/> value.
-        /// </summary>
-        public sealed class Null : TypedConstantInfo
-        {
-            /// <inheritdoc/>
-            public override ExpressionSyntax GetSyntax()
-            {
-                return LiteralExpression(SyntaxKind.NullLiteralExpression);
-            }
+            public override bool Equals(TypedConstantInfo other)
+                => other is Enum e && TypeName == e.TypeName && object.Equals(Value, e.Value);
+
+            public override int GetHashCode() => HashValue.Combine(19, TypeName, Value);
         }
     }
 }

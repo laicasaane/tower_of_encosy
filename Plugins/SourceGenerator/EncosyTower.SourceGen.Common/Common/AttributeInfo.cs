@@ -107,20 +107,20 @@ namespace EncosyTower.SourceGen
 
         public override bool Equals(object obj)
         {
-            if (obj is AttributeInfo other)
-                return EqualityComparer<AttributeInfo>.Default.Equals(this, other);
-
-            return false;
+            return obj is AttributeInfo other && Equals(other);
         }
 
         public override int GetHashCode()
         {
-            return EqualityComparer<AttributeInfo>.Default.GetHashCode(this);
+            return HashValue.Combine(TypeName, ConstructorArgumentInfo, NamedArgumentInfo);
         }
 
         public bool Equals(AttributeInfo other)
         {
-            return EqualityComparer<AttributeInfo>.Default.Equals(this, other);
+            if (other is null) return false;
+            return TypeName == other.TypeName
+                && ConstructorArgumentInfo.Equals(other.ConstructorArgumentInfo)
+                && NamedArgumentInfo.Equals(other.NamedArgumentInfo);
         }
 
         /// <summary>
