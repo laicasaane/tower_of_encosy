@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -13,24 +11,31 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         public const string NAMESPACE = MvvmGeneratorHelpers.NAMESPACE;
         public const string SKIP_ATTRIBUTE = MvvmGeneratorHelpers.SKIP_ATTRIBUTE;
 
+        private const string BINDER_ATTRIBUTE_METADATA = "EncosyTower.Mvvm.ViewBinding.BinderAttribute";
+
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
-            var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: IsClassSyntaxMatch,
-                transform: GetClassSemanticMatch
-            ).Where(static t => t is { });
+            var compilationProvider = context.CompilationProvider
+                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+
+            var candidateProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      BINDER_ATTRIBUTE_METADATA
+                    , static (node, _) => node is ClassDeclarationSyntax
+                    , BinderDeclaration.Extract
+                )
+                .Where(static t => t.IsValid);
 
             var combined = candidateProvider
-                .Combine(context.CompilationProvider)
+                .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.isValid);
 
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
-                    sourceProductionContext
-                    , source.Left.Right
+                      sourceProductionContext
                     , source.Left.Left
                     , source.Right.projectPath
                     , source.Right.outputSourceGenFiles
@@ -38,67 +43,28 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             });
         }
 
-        public static bool IsClassSyntaxMatch(SyntaxNode syntaxNode, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            return syntaxNode is ClassDeclarationSyntax classSyntax
-                && classSyntax.BaseList != null
-                && classSyntax.BaseList.Types.Count > 0
-                && classSyntax.BaseList.Types.Any(
-                    static x => x.Type.IsTypeNameCandidate($"{NAMESPACE}.ViewBinding", "IBinder")
-                );
-        }
-
-        public static ClassDeclarationSyntax GetClassSemanticMatch(
-              GeneratorSyntaxContext context
-            , CancellationToken token
-        )
-        {
-            token.ThrowIfCancellationRequested();
-
-            if (context.Node is not ClassDeclarationSyntax classSyntax
-                || classSyntax.BaseList == null
-                || classSyntax.BaseList.Types.Count < 1
-            )
-            {
-                return null;
-            }
-
-            return classSyntax;
-        }
-
         private static void GenerateOutput(
               SourceProductionContext context
-            , Compilation compilation
-            , ClassDeclarationSyntax candidate
+            , BinderDeclaration declaration
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
-            if (candidate == null)
-            {
-                return;
-            }
-
             context.CancellationToken.ThrowIfCancellationRequested();
 
             try
             {
                 SourceGenHelpers.ProjectPath = projectPath;
 
-                var syntaxTree = candidate.SyntaxTree;
-                var semanticModel = compilation.GetSemanticModel(syntaxTree);
-                var declaration = new BinderDeclaration(candidate, semanticModel, context.CancellationToken);
-                var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, candidate, candidate.Identifier.Text);
-                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(compilation.Assembly.Name, GENERATOR_NAME, candidate.Identifier.Text);
-
                 context.OutputSource(
                       outputSourceGenFiles
-                    , candidate
+                    , declaration.openingSource
                     , declaration.WriteCode()
-                    , hintName
-                    , sourceFilePath
+                    , declaration.closingSource
+                    , declaration.hintName
+                    , declaration.sourceFilePath
+                    , declaration.location.ToLocation()
+                    , projectPath
                 );
             }
             catch (Exception e)
@@ -107,23 +73,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 {
                     throw;
                 }
-
-                context.ReportDiagnostic(Diagnostic.Create(
-                      s_errorDescriptor
-                    , candidate.GetLocation()
-                    , e.ToUnityPrintableString()
-                ));
             }
         }
-
-        private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_BINDER_01"
-                , "Binder Generator Error"
-                , "This error indicates a bug in the Binder source generators. Error message: '{0}'."
-                , $"{NAMESPACE}.ViewBinding.IBinder"
-                , DiagnosticSeverity.Error
-                , isEnabledByDefault: true
-                , description: ""
-            );
     }
 }
+

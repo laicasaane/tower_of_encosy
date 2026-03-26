@@ -24,7 +24,8 @@ namespace EncosyTower.Tests.MvvmTests
 
     public struct A { }
 
-    public partial class Binder : IBinder
+    [Binder]
+    public partial class Binder
     {
         [BindingProperty]
         [field: UnityEngine.HideInInspector]
@@ -65,6 +66,15 @@ namespace EncosyTower.Tests.MvvmTests
         partial void OnBoolValueChanged(ref bool value);
     }
 
+    [Binder]
+    public partial class ExtendedBinder : Binder
+    {
+        [BindingProperty]
+        private void SetExtendedIntValue(int value)
+        {
+        }
+    }
+
     public partial class GenericModel<T> : IObservableObject
     {
         [ObservableProperty]
@@ -76,6 +86,7 @@ namespace EncosyTower.Tests.MvvmTests
         }
     }
 
+    [Binder]
     public partial class GenericBinder<T> : IBinder
     {
         [BindingProperty]

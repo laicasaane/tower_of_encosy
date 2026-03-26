@@ -1,28 +1,23 @@
-﻿using System;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 {
-    partial class BinderDeclaration
+    partial struct BinderDeclaration
     {
-        private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.Binders.BinderGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
-        private const string NAMESPACE_BINDING = "EncosyTower.Mvvm.ViewBinding";
-        private const string NAMESPACE_MODEL = "EncosyTower.Mvvm.ComponentModel";
-        private const string NAMESPACE_INPUT = "EncosyTower.Mvvm.Input";
-        private const string OBSOLETE_METHOD = "[global::System.Obsolete(\"This method is not intended to be used directly by user code.\")]";
-        private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
-        private const string GENERATED_BINDING_PROPERTY = $"[global::{NAMESPACE_BINDING}.SourceGen.GeneratedBindingProperty({{0}}, typeof({{1}}))]";
-        private const string GENERATED_BINDING_COMMAND = $"[global::{NAMESPACE_BINDING}.SourceGen.GeneratedBindingCommand(";
-        private const string GENERATED_CONVERTER = $"[global::{NAMESPACE_BINDING}.SourceGen.GeneratedConverter({{0}}, typeof({{1}}))]";
-        private const string IADAPTER = $"global::{NAMESPACE_BINDING}.IAdapter";
-        private const string CACHED_VARIANT_CONVERTER = "global::EncosyTower.Variants.Converters.CachedVariantConverter";
+        private const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
+        private const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.Binders.BinderGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
+        private const string OBSOLETE_METHOD = "[Obsolete(\"This method is not intended to be used directly by user code.\")]";
+        private const string EDITOR_BROWSABLE_NEVER = "[EditorBrowsable(EditorBrowsableState.Never)]";
+        private const string GENERATED_BINDING_PROPERTY = $"[GeneratedBindingProperty({{0}}, typeof({{1}}))]";
+        private const string GENERATED_BINDING_COMMAND = $"[GeneratedBindingCommand(";
+        private const string GENERATED_CONVERTER = $"[GeneratedConverter({{0}}, typeof({{1}}))]";
+        private const string IADAPTER = "IAdapter";
+        private const string CACHED_VARIANT_CONVERTER = "CachedVariantConverter";
 
-        public string WriteCode()
+        public readonly string WriteCode()
         {
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, Syntax.Parent);
-            var p = scopePrinter.printer;
+            var p = Printer.DefaultLarge;
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
@@ -33,14 +28,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             WriteBindingPropertyMethodInfoAttributes(ref p);
             WriteBindingCommandMethodInfoAttributes(ref p);
 
-            p.PrintBeginLine("partial class ").Print(ClassName);
-
-            if (HasBaseBinder)
-            {
-                p.Print($" : global::{NAMESPACE_BINDING}.IBinder");
-            }
-
-            p.PrintEndLine();
+            p.PrintBeginLine("partial class ").Print(className).PrintEndLine(" : IBinder");
             p.OpenScope();
             {
                 WriteConstantBindingProperties(ref p);
@@ -49,7 +37,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 WriteConverters(ref p);
                 WriteBindingCommands(ref p);
 
-                if (NonVariantTypes.Length > 0)
+                if (nonVariantTypes.Count > 0)
                 {
                     WriteVariantConverters(ref p);
                 }
@@ -65,7 +53,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 WriteSetTargetPropertyNameMethod(ref p);
                 WriteSetAdapterMethod(ref p);
 
-                if (NonVariantTypes.Length > 0)
+                if (nonVariantTypes.Count > 0)
                 {
                     WriteVariantOverloads(ref p);
                 }
@@ -80,168 +68,170 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             return p.Result;
         }
 
-        private void WriteBindingPropertyMethodInfoAttributes(ref Printer p)
+        private readonly void WriteBindingPropertyMethodInfoAttributes(ref Printer p)
         {
-            foreach (var member in BindingPropertyRefs)
+            foreach (var member in bindingPropertyRefs)
             {
-                var param = member.Parameter;
-                var paramType = param != null ? param.Type.ToFullName() : "void";
+                var paramType = string.IsNullOrEmpty(member.paramFullTypeName)
+                    ? "void"
+                    : member.paramFullTypeName;
 
                 p.PrintBeginLine()
-                    .Print($"[global::{NAMESPACE_BINDING}.SourceGen.BindingPropertyMethodInfo(")
-                    .Print($"\"{member.Symbol.Name}\", typeof(")
+                    .Print($"[BindingPropertyMethodInfo(")
+                    .Print($"\"{member.methodName}\", typeof(")
                     .Print(paramType)
                     .PrintEndLine("))]");
             }
         }
 
-        private void WriteBindingCommandMethodInfoAttributes(ref Printer p)
+        private readonly void WriteBindingCommandMethodInfoAttributes(ref Printer p)
         {
-            foreach (var member in BindingCommandRefs)
+            foreach (var member in bindingCommandRefs)
             {
                 p.PrintBeginLine()
-                    .Print($"[global::{NAMESPACE_BINDING}.SourceGen.BindingCommandMethodInfo(")
-                    .Print($"\"{member.Symbol.Name}\", ");
+                    .Print($"[BindingCommandMethodInfo(")
+                    .Print($"\"{member.methodName}\", ");
 
-                if (member.Parameter == null)
+                if (string.IsNullOrEmpty(member.paramFullTypeName))
                 {
                     p.Print("typeof(void)");
                 }
                 else
                 {
-                    p.Print("typeof(").Print(member.Symbol.Parameters[0].Type.ToFullName()).Print(")");
+                    p.Print("typeof(").Print(member.paramFullTypeName).Print(")");
                 }
 
                 p.Print(")]").PrintEndLine();
             }
         }
 
-        private void WriteConstantBindingProperties(ref Printer p)
+        private readonly void WriteConstantBindingProperties(ref Printer p)
         {
-            if (BindingPropertyRefs.Length < 1)
+            if (bindingPropertyRefs.Count < 1)
             {
                 return;
             }
 
-            foreach (var member in BindingPropertyRefs)
+            foreach (var member in bindingPropertyRefs)
             {
-                var name = member.Symbol.Name;
+                var name = member.methodName;
 
                 p.PrintLine($"/// <summary>The name of <see cref=\"{name}\"/></summary>");
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"public const string {ConstName(member)} = nameof({ClassName}.{name});");
+                p.PrintLine($"public const string {ConstName(member)} = nameof({className}.{name});");
                 p.PrintEndLine();
             }
 
             p.PrintEndLine();
         }
 
-        private void WriteConstantBindingCommands(ref Printer p)
+        private readonly void WriteConstantBindingCommands(ref Printer p)
         {
-            if (BindingCommandRefs.Length < 1)
+            if (bindingCommandRefs.Count < 1)
             {
                 return;
             }
 
-            foreach (var member in BindingCommandRefs)
+            foreach (var member in bindingCommandRefs)
             {
-                var name = member.Symbol.Name;
+                var name = member.methodName;
 
                 p.PrintLine($"/// <summary>The name of <see cref=\"{name}\"/></summary>");
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"public const string {ConstName(member)} = nameof({ClassName}.{name});");
+                p.PrintLine($"public const string {ConstName(member)} = nameof({className}.{name});");
                 p.PrintEndLine();
             }
 
             p.PrintEndLine();
         }
 
-        private void WriteBindingProperties(ref Printer p)
+        private readonly void WriteBindingProperties(ref Printer p)
         {
-            if (BindingPropertyRefs.Length < 1)
+            if (bindingPropertyRefs.Count < 1)
             {
                 return;
             }
 
-            foreach (var member in BindingPropertyRefs)
+            foreach (var member in bindingPropertyRefs)
             {
-                if (member.SkipBindingProperty)
+                if (member.skipBindingProperty)
                 {
                     continue;
                 }
 
-                p.PrintLine($"/// <summary>The binding property for <see cref=\"{member.Symbol.Name}\"/></summary>");
+                p.PrintLine($"/// <summary>The binding property for <see cref=\"{member.methodName}\"/></summary>");
                 p.PrintLine("[global::UnityEngine.SerializeField]");
 
-                foreach (var attribute in member.ForwardedFieldAttributes)
+                foreach (var attribute in member.forwardedFieldAttributes)
                 {
                     p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
                 }
 
                 p.PrintLine(GENERATED_CODE);
 
-                var param = member.Parameter;
-                var paramType = param != null ? param.Type.ToFullName() : "void";
+                var paramType = string.IsNullOrEmpty(member.paramFullTypeName)
+                    ? "void"
+                    : member.paramFullTypeName;
 
                 p.PrintLine(string.Format(GENERATED_BINDING_PROPERTY, ConstName(member), paramType));
-                p.PrintLine($"private global::{NAMESPACE_BINDING}.BindingProperty {BindingPropertyName(member)} =  new global::{NAMESPACE_BINDING}.BindingProperty();");
+                p.PrintLine($"private BindingProperty {BindingPropertyName(member)} =  new BindingProperty();");
                 p.PrintEndLine();
             }
 
             p.PrintEndLine();
         }
 
-        private void WriteConverters(ref Printer p)
+        private readonly void WriteConverters(ref Printer p)
         {
-            if (BindingPropertyRefs.Length < 1)
+            if (bindingPropertyRefs.Count < 1)
             {
                 return;
             }
 
-            foreach (var member in BindingPropertyRefs)
+            foreach (var member in bindingPropertyRefs)
             {
-                if (member.SkipConverter || member.Parameter == null)
+                if (member.skipConverter || string.IsNullOrEmpty(member.paramFullTypeName))
                 {
                     continue;
                 }
 
-                var typeName = member.Parameter.Type.ToFullName();
+                var typeName = member.paramFullTypeName;
 
-                p.PrintLine($"/// <summary>The converter for the parameter of <see cref=\"{member.Symbol.Name}\"/></summary>");
+                p.PrintLine($"/// <summary>The converter for the parameter of <see cref=\"{member.methodName}\"/></summary>");
                 p.PrintLine("[global::UnityEngine.SerializeField]");
 
-                foreach (var attribute in member.ForwardedFieldAttributes)
+                foreach (var attribute in member.forwardedFieldAttributes)
                 {
                     p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
                 }
 
                 p.PrintLine(GENERATED_CODE);
                 p.PrintLine(string.Format(GENERATED_CONVERTER, ConstName(member), typeName));
-                p.PrintLine($"private global::{NAMESPACE_BINDING}.Converter {ConverterName(member)} = new global::{NAMESPACE_BINDING}.Converter();");
+                p.PrintLine($"private Converter {ConverterName(member)} = new Converter();");
                 p.PrintEndLine();
             }
 
             p.PrintEndLine();
         }
 
-        private void WriteBindingCommands(ref Printer p)
+        private readonly void WriteBindingCommands(ref Printer p)
         {
-            if (BindingCommandRefs.Length < 1)
+            if (bindingCommandRefs.Count < 1)
             {
                 return;
             }
 
-            foreach (var member in BindingCommandRefs)
+            foreach (var member in bindingCommandRefs)
             {
-                if (member.SkipBindingCommand)
+                if (member.skipBindingCommand)
                 {
                     continue;
                 }
 
-                p.PrintLine($"/// <summary>The binding command for <see cref=\"{member.Symbol.Name}\"/></summary>");
+                p.PrintLine($"/// <summary>The binding command for <see cref=\"{member.methodName}\"/></summary>");
                 p.PrintLine("[global::UnityEngine.SerializeField]");
 
-                foreach (var attribute in member.ForwardedFieldAttributes)
+                foreach (var attribute in member.forwardedFieldAttributes)
                 {
                     p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
                 }
@@ -251,9 +241,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                     .Print(GENERATED_BINDING_COMMAND)
                     .Print(ConstName(member));
 
-                if (member.Parameter != null)
+                if (string.IsNullOrEmpty(member.paramFullTypeName) == false)
                 {
-                    p.Print($", typeof({member.Parameter.Type.ToFullName()})");
+                    p.Print($", typeof({member.paramFullTypeName})");
                 }
                 else
                 {
@@ -262,76 +252,73 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
                 p.Print(")]").PrintEndLine();
 
-                p.PrintLine($"private global::{NAMESPACE_BINDING}.BindingCommand {BindingCommandName(member)} =  new global::{NAMESPACE_BINDING}.BindingCommand();");
+                p.PrintLine($"private BindingCommand {BindingCommandName(member)} =  new BindingCommand();");
                 p.PrintEndLine();
             }
 
             p.PrintEndLine();
         }
 
-        private void WriteVariantConverters(ref Printer p)
+        private readonly void WriteVariantConverters(ref Printer p)
         {
-            if (NonVariantTypes.Length < 1)
+            if (nonVariantTypes.Count < 1)
             {
                 return;
             }
 
-            foreach (var type in NonVariantTypes)
+            foreach (var type in nonVariantTypes)
             {
-                var typeName = type.ToFullName();
-                var propertyName = type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
-
                 p.PrintLine(GENERATED_CODE);
-                p.PrintLine($"private readonly {CACHED_VARIANT_CONVERTER}<{typeName}> _variantConverter{propertyName} = {CACHED_VARIANT_CONVERTER}<{typeName}>.Default;");
+                p.PrintLine($"private readonly {CACHED_VARIANT_CONVERTER}<{type.fullTypeName}> _variantConverter{type.converterPropertyName} = {CACHED_VARIANT_CONVERTER}<{type.fullTypeName}>.Default;");
                 p.PrintEndLine();
             }
 
             p.PrintEndLine();
         }
 
-        private void WriteListeners(ref Printer p)
+        private readonly void WriteListeners(ref Printer p)
         {
-            if (BindingPropertyRefs.Length < 1)
+            if (bindingPropertyRefs.Count < 1)
             {
                 return;
             }
 
-            foreach (var member in BindingPropertyRefs)
+            foreach (var member in bindingPropertyRefs)
             {
                 p.PrintLine($"/// <summary>");
-                p.PrintLine($"/// The listener that binds <see cref=\"{member.Symbol.Name}\"/>");
+                p.PrintLine($"/// The listener that binds <see cref=\"{member.methodName}\"/>");
                 p.PrintLine($"/// to the property chosen by <see cref=\"{BindingPropertyName(member)}\"/>.");
                 p.PrintLine($"/// </summary>");
                 p.PrintLine(GENERATED_CODE).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private readonly global::{NAMESPACE_MODEL}.PropertyChangeEventListener<{ClassName}> {ListenerName(member)};");
+                p.PrintLine($"private readonly PropertyChangeEventListener<{className}> {ListenerName(member)};");
                 p.PrintEndLine();
             }
 
             p.PrintEndLine();
         }
 
-        private void WriteRelayCommands(ref Printer p)
+        private readonly void WriteRelayCommands(ref Printer p)
         {
-            if (BindingCommandRefs.Length < 1)
+            if (bindingCommandRefs.Count < 1)
             {
                 return;
             }
 
-            foreach (var member in BindingCommandRefs)
+            foreach (var member in bindingCommandRefs)
             {
                 p.PrintLine($"/// <summary>");
-                p.PrintLine($"/// The relay command that binds <see cref=\"{member.Symbol.Name}\"/>");
+                p.PrintLine($"/// The relay command that binds <see cref=\"{member.methodName}\"/>");
                 p.PrintLine($"/// to the command chosen by <see cref=\"{BindingCommandName(member)}\"/>.");
                 p.PrintLine($"/// </summary>");
                 p.PrintLine(GENERATED_CODE).PrintLine(EDITOR_BROWSABLE_NEVER);
 
-                if (member.Parameter == null)
+                if (string.IsNullOrEmpty(member.paramFullTypeName))
                 {
-                    p.PrintLine($"private global::{NAMESPACE_INPUT}.IRelayCommand {RelayCommandName(member)};");
+                    p.PrintLine($"private IRelayCommand {RelayCommandName(member)};");
                 }
                 else
                 {
-                    p.PrintLine($"private global::{NAMESPACE_INPUT}.IRelayCommand<{member.Parameter.Type.ToFullName()}> {RelayCommandName(member)};");
+                    p.PrintLine($"private IRelayCommand<{member.paramFullTypeName}> {RelayCommandName(member)};");
                 }
 
                 p.PrintEndLine();
@@ -340,9 +327,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        private void WriteFlags(ref Printer p)
+        private readonly void WriteFlags(ref Printer p)
         {
-            if (BindingPropertyRefs.Length < 1 && BindingCommandRefs.Length < 1)
+            if (bindingPropertyRefs.Count < 1 && bindingCommandRefs.Count < 1)
             {
                 return;
             }
@@ -353,17 +340,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        private void WriteConstructor(ref Printer p)
+        private readonly void WriteConstructor(ref Printer p)
         {
-            if (BindingPropertyRefs.Length < 1)
+            if (bindingPropertyRefs.Count < 1)
             {
                 return;
             }
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine().Print($"public {Syntax.Identifier.Text}()");
+            p.PrintBeginLine().Print($"public {simpleTypeName}()");
 
-            if (HasBaseBinder)
+            if (hasBaseBinder)
             {
                 p.Print(" : base()");
             }
@@ -374,21 +361,20 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             {
                 p.PrintLine($"OnBeforeConstructor();").PrintEndLine();
 
-                foreach (var member in BindingPropertyRefs)
+                foreach (var member in bindingPropertyRefs)
                 {
-                    var methodName = MethodName(member);
-                    var param = member.Parameter;
+                    var listenerMethodName = MethodName(member);
 
-                    p.PrintLine($"this.{ListenerName(member)} = new global::{NAMESPACE_MODEL}.PropertyChangeEventListener<{ClassName}>(this)");
+                    p.PrintLine($"this.{ListenerName(member)} = new PropertyChangeEventListener<{className}>(this)");
                     p.OpenScope();
 
-                    if (param == null)
+                    if (string.IsNullOrEmpty(member.paramFullTypeName))
                     {
-                        p.PrintLine($"OnEventAction = static (instance, args) => instance.{methodName}()");
+                        p.PrintLine($"OnEventAction = static (instance, args) => instance.{listenerMethodName}()");
                     }
                     else
                     {
-                        p.PrintLine($"OnEventAction = static (instance, args) => instance.{methodName}(instance.{ConverterName(member)}.Convert(args.NewValue))");
+                        p.PrintLine($"OnEventAction = static (instance, args) => instance.{listenerMethodName}(instance.{ConverterName(member)}.Convert(args.NewValue))");
                     }
 
                     p.CloseScope("};");
@@ -413,30 +399,30 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        private void WriteContextProperty(ref Printer p)
+        private readonly void WriteContextProperty(ref Printer p)
         {
-            if (HasBaseBinder)
+            if (hasBaseBinder)
             {
                 return;
             }
 
-            var keyword = Symbol.IsSealed ? "" : "virtual ";
+            var keyword = isSealed ? "" : "virtual ";
 
             p.PrintLine("/// <inheritdoc/>");
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public ").Print(keyword)
-                .Print($"global::{NAMESPACE_MODEL}.IObservableObject Context")
+                .Print($"IObservableObject Context")
                 .PrintEndLine(" { get; private set; }");
             p.PrintEndLine();
         }
 
-        private void WriteStartListeningMethod(ref Printer p)
+        private readonly void WriteStartListeningMethod(ref Printer p)
         {
-            var keyword = HasBaseBinder ? "override " : Symbol.IsSealed ? "" : "virtual ";
+            var keyword = hasBaseBinder ? "override " : (isSealed ? "" : "virtual ");
 
-            if (BindingPropertyRefs.Length < 1 && BindingCommandRefs.Length < 1)
+            if (bindingPropertyRefs.Count < 1 && bindingCommandRefs.Count < 1)
             {
-                if (HasBaseBinder == false)
+                if (hasBaseBinder == false)
                 {
                     p.PrintLine("/// <inheritdoc/>");
                     p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
@@ -452,7 +438,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintLine($"public {keyword}void StartListening()");
             p.OpenScope();
             {
-                if (HasBaseBinder)
+                if (hasBaseBinder)
                 {
                     p.PrintLine("base.StartListening();");
                     p.PrintEndLine();
@@ -464,12 +450,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 p.PrintLine($"this.{IsListeningName(this)} = true;");
                 p.PrintEndLine();
 
-                if (BindingPropertyRefs.Length > 0)
+                if (bindingPropertyRefs.Count > 0)
                 {
-                    p.PrintLine($"if (this.Context is global::{NAMESPACE_MODEL}.INotifyPropertyChanged inpc)");
+                    p.PrintLine($"if (this.Context is INotifyPropertyChanged inpc)");
                     p.OpenScope();
                     {
-                        foreach (var member in BindingPropertyRefs)
+                        foreach (var member in bindingPropertyRefs)
                         {
                             p.PrintLine($"if (inpc.AttachPropertyChangedListener(this.{BindingPropertyName(member)}.TargetPropertyName, this.{ListenerName(member)}) == false)");
                             p.OpenScope();
@@ -484,12 +470,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                     p.PrintEndLine();
                 }
 
-                if (BindingCommandRefs.Length > 0)
+                if (bindingCommandRefs.Count > 0)
                 {
-                    p.PrintLine($"if (this.Context is global::{NAMESPACE_INPUT}.ICommandListener cl)");
+                    p.PrintLine($"if (this.Context is ICommandListener cl)");
                     p.OpenScope();
                     {
-                        foreach (var member in BindingCommandRefs)
+                        foreach (var member in bindingCommandRefs)
                         {
                             p.PrintLine($"if (cl.TryGetCommand(this.{BindingCommandName(member)}.TargetCommandName, out this.{RelayCommandName(member)}) == false)");
                             p.OpenScope();
@@ -508,28 +494,28 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        private void WritePartialOnBindFailedMethods(ref Printer p)
+        private readonly void WritePartialOnBindFailedMethods(ref Printer p)
         {
-            if (BindingPropertyRefs.Length > 0 && HasOnBindPropertyFailedMethod == false)
+            if (bindingPropertyRefs.Count > 0 && hasOnBindPropertyFailedMethod == false)
             {
-                p.PrintLine($"partial void OnBindPropertyFailed(global::{NAMESPACE_BINDING}.BindingProperty bindingProperty);");
+                p.PrintLine($"partial void OnBindPropertyFailed(BindingProperty bindingProperty);");
                 p.PrintEndLine();
             }
 
-            if (BindingCommandRefs.Length > 0 && HasOnBindCommandFailedMethod == false)
+            if (bindingCommandRefs.Count > 0 && hasOnBindCommandFailedMethod == false)
             {
-                p.PrintLine($"partial void OnBindCommandFailed(global::{NAMESPACE_BINDING}.BindingCommand bindingCommand);");
+                p.PrintLine($"partial void OnBindCommandFailed(BindingCommand bindingCommand);");
                 p.PrintEndLine();
             }
         }
 
-        private void WriteStopListeningMethod(ref Printer p)
+        private readonly void WriteStopListeningMethod(ref Printer p)
         {
-            var keyword = HasBaseBinder ? "override " : Symbol.IsSealed ? "" : "virtual ";
+            var keyword = hasBaseBinder ? "override " : (isSealed ? "" : "virtual ");
 
-            if (BindingPropertyRefs.Length < 1 && BindingCommandRefs.Length < 1)
+            if (bindingPropertyRefs.Count < 1 && bindingCommandRefs.Count < 1)
             {
-                if (HasBaseBinder == false)
+                if (hasBaseBinder == false)
                 {
                     p.PrintLine("/// <inheritdoc/>");
                     p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
@@ -545,7 +531,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintLine($"public {keyword}void StopListening()");
             p.OpenScope();
             {
-                if (HasBaseBinder)
+                if (hasBaseBinder)
                 {
                     p.PrintLine("base.StopListening();");
                     p.PrintEndLine();
@@ -557,9 +543,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 p.PrintLine($"this.{IsListeningName(this)} = false;");
                 p.PrintEndLine();
 
-                if (BindingPropertyRefs.Length > 0)
+                if (bindingPropertyRefs.Count > 0)
                 {
-                    foreach (var member in BindingPropertyRefs)
+                    foreach (var member in bindingPropertyRefs)
                     {
                         p.PrintLine($"this.{ListenerName(member)}.Detach();");
                     }
@@ -567,9 +553,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                     p.PrintEndLine();
                 }
 
-                if (BindingCommandRefs.Length > 0)
+                if (bindingCommandRefs.Count > 0)
                 {
-                    foreach (var member in BindingCommandRefs)
+                    foreach (var member in bindingCommandRefs)
                     {
                         p.PrintLine($"this.{RelayCommandName(member)} = null;");
                     }
@@ -580,13 +566,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        private void WriteSetTargetPropertyNameMethod(ref Printer p)
+        private readonly void WriteSetTargetPropertyNameMethod(ref Printer p)
         {
-            var keyword = HasBaseBinder ? "override " : Symbol.IsSealed ? "" : "virtual ";
+            var keyword = hasBaseBinder ? "override " : (isSealed ? "" : "virtual ");
 
-            if (BindingPropertyRefs.Length < 1)
+            if (bindingPropertyRefs.Count < 1)
             {
-                if (HasBaseBinder == false)
+                if (hasBaseBinder == false)
                 {
                     p.PrintLine("/// <inheritdoc/>");
                     p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
@@ -607,7 +593,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintLine($"public {keyword}bool SetTargetPropertyName(string bindingPropertyName, string targetPropertyName)");
             p.OpenScope();
             {
-                if (HasBaseBinder)
+                if (hasBaseBinder)
                 {
                     p.PrintLine("if (base.SetTargetPropertyName(bindingPropertyName, targetPropertyName)) return true;");
                     p.PrintEndLine();
@@ -616,7 +602,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 p.PrintLine("switch (bindingPropertyName)");
                 p.OpenScope();
                 {
-                    foreach (var member in BindingPropertyRefs)
+                    foreach (var member in bindingPropertyRefs)
                     {
                         p.PrintLine($"case {ConstName(member)}:");
                         p.OpenScope();
@@ -638,13 +624,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        private void WriteSetAdapterMethod(ref Printer p)
+        private readonly void WriteSetAdapterMethod(ref Printer p)
         {
-            var keyword = HasBaseBinder ? "override " : Symbol.IsSealed ? "" : "virtual ";
+            var keyword = hasBaseBinder ? "override " : (isSealed ? "" : "virtual ");
 
-            if (BindingPropertyRefs.Length < 1)
+            if (bindingPropertyRefs.Count < 1)
             {
-                if (HasBaseBinder == false)
+                if (hasBaseBinder == false)
                 {
                     p.PrintLine("/// <inheritdoc/>");
                     p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
@@ -665,7 +651,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintLine($"public {keyword}bool SetAdapter(string bindingPropertyName, {IADAPTER} adapter)");
             p.OpenScope();
             {
-                if (HasBaseBinder)
+                if (hasBaseBinder)
                 {
                     p.PrintLine("if (base.SetAdapter(bindingPropertyName, adapter)) return true;");
                     p.PrintEndLine();
@@ -674,9 +660,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 p.PrintLine("switch (bindingPropertyName)");
                 p.OpenScope();
                 {
-                    foreach (var member in BindingPropertyRefs)
+                    foreach (var member in bindingPropertyRefs)
                     {
-                        if (member.Parameter == null)
+                        if (string.IsNullOrEmpty(member.paramFullTypeName))
                         {
                             continue;
                         }
@@ -701,25 +687,23 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        private void WriteVariantOverloads(ref Printer p)
+        private readonly void WriteVariantOverloads(ref Printer p)
         {
-            if (BindingPropertyRefs.Length < 1)
+            if (bindingPropertyRefs.Count < 1)
             {
                 return;
             }
 
-            foreach (var member in BindingPropertyRefs)
+            foreach (var member in bindingPropertyRefs)
             {
-                if (member.IsParameterTypeVariant || member.Parameter == null)
+                if (member.isParameterTypeVariant || string.IsNullOrEmpty(member.paramFullTypeName))
                 {
                     continue;
                 }
 
-                var originalMethodName = member.Symbol.Name;
-                var param = member.Parameter;
-                var paramTypeName = param.Type.ToFullName();
-                var methodName = MethodName(member);
-                var converter = param.Type.ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
+                var originalMethodName = member.methodName;
+                var paramTypeName = member.paramFullTypeName;
+                var variantMethodName = $"{member.methodName}__Variant";
 
                 p.PrintLine($"/// <summary>");
                 p.PrintLine($"/// This overload will try to get the value of type <see cref=\"{paramTypeName}\"/>");
@@ -728,15 +712,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 p.PrintLine($"/// </summary>");
                 p.PrintLine($"/// <remarks>This method is not intended to be used directly by user code.</remarks>");
                 p.PrintLine(EDITOR_BROWSABLE_NEVER).PrintLine(OBSOLETE_METHOD).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintLine($"private void {methodName}(in global::EncosyTower.Variants.Variant variant)");
+                p.PrintLine($"private void {variantMethodName}(in global::EncosyTower.Variants.Variant variant)");
                 p.OpenScope();
                 {
-                    p.PrintLine($"if (this._variantConverter{converter}.TryGetValue(variant, out {paramTypeName} value))");
+                    p.PrintLine($"if (this._variantConverter{member.variantConverterPropertyName}.TryGetValue(variant, out {paramTypeName} value))");
                     p.OpenScope();
                     {
                         p.PrintBeginLine().Print($"{originalMethodName}(");
 
-                        if (param.RefKind == RefKind.Ref)
+                        if (member.paramRefKind == RefKind.Ref)
                         {
                             p.Print("ref ");
                         }
@@ -752,20 +736,20 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        private void WritePartialBindingCommandMethods(ref Printer p)
+        private readonly void WritePartialBindingCommandMethods(ref Printer p)
         {
-            if (BindingCommandRefs.Length < 1)
+            if (bindingCommandRefs.Count < 1)
             {
                 return;
             }
 
-            foreach (var member in BindingCommandRefs)
+            foreach (var member in bindingCommandRefs)
             {
                 p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
 
-                if (member.Parameter == null)
+                if (string.IsNullOrEmpty(member.paramFullTypeName))
                 {
-                    p.PrintLine($"partial void {member.Symbol.Name}()");
+                    p.PrintLine($"partial void {member.methodName}()");
                     p.OpenScope();
                     {
                         p.PrintLine($"this.{RelayCommandName(member)}?.Execute();");
@@ -774,19 +758,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 }
                 else
                 {
-                    p.PrintBeginLine().Print($"partial void {member.Symbol.Name}(");
+                    p.PrintBeginLine().Print($"partial void {member.methodName}(");
 
-                    var param = member.Parameter;
-
-                    if (param.RefKind == RefKind.Ref)
+                    if (member.paramRefKind == RefKind.Ref)
                     {
                         p.Print("ref ");
                     }
 
-                    p.Print($"{param.Type.ToFullName()} {param.Name})").PrintEndLine();
+                    p.Print($"{member.paramFullTypeName} {member.paramName})").PrintEndLine();
                     p.OpenScope();
                     {
-                        p.PrintLine($"this.{RelayCommandName(member)}?.Execute({param.Name});");
+                        p.PrintLine($"this.{RelayCommandName(member)}?.Execute({member.paramName});");
                     }
                     p.CloseScope();
                 }
@@ -797,13 +779,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        private void WriteSetTargetCommandNameMethod(ref Printer p)
+        private readonly void WriteSetTargetCommandNameMethod(ref Printer p)
         {
-            var keyword = HasBaseBinder ? "override " : Symbol.IsSealed ? "" : "virtual ";
+            var keyword = hasBaseBinder ? "override " : (isSealed ? "" : "virtual ");
 
-            if (BindingCommandRefs.Length < 1)
+            if (bindingCommandRefs.Count < 1)
             {
-                if (HasBaseBinder == false)
+                if (hasBaseBinder == false)
                 {
                     p.PrintLine("/// <inheritdoc/>");
                     p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
@@ -824,7 +806,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintLine($"public {keyword}bool SetTargetCommandName(string bindingCommandName, string targetCommandName)");
             p.OpenScope();
             {
-                if (HasBaseBinder)
+                if (hasBaseBinder)
                 {
                     p.PrintLine("if (base.SetTargetCommandName(bindingCommandName, targetCommandName)) return true;");
                     p.PrintEndLine();
@@ -833,7 +815,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 p.PrintLine("switch (bindingCommandName)");
                 p.OpenScope();
                 {
-                    foreach (var member in BindingCommandRefs)
+                    foreach (var member in bindingCommandRefs)
                     {
                         p.PrintLine($"case {ConstName(member)}:");
                         p.OpenScope();
@@ -855,13 +837,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        private void WriteRefreshContextMethod(ref Printer p)
+        private readonly void WriteRefreshContextMethod(ref Printer p)
         {
-            var keyword = HasBaseBinder ? "override " : Symbol.IsSealed ? "" : "virtual ";
+            var keyword = hasBaseBinder ? "override " : (isSealed ? "" : "virtual ");
 
-            if (BindingPropertyRefs.Length < 1 && BindingCommandRefs.Length < 1)
+            if (bindingPropertyRefs.Count < 1 && bindingCommandRefs.Count < 1)
             {
-                if (HasBaseBinder == false)
+                if (hasBaseBinder == false)
                 {
                     p.PrintLine("/// <inheritdoc/>");
                     p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
@@ -877,18 +859,18 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintLine($"public {keyword}void RefreshContext()");
             p.OpenScope();
             {
-                if (HasBaseBinder)
+                if (hasBaseBinder)
                 {
                     p.PrintLine("base.RefreshContext();");
                     p.PrintEndLine();
                 }
 
-                if (BindingPropertyRefs.Length > 0)
+                if (bindingPropertyRefs.Count > 0)
                 {
-                    p.PrintLine($"if (this.Context is global::{NAMESPACE_MODEL}.INotifyPropertyChanged inpc)");
+                    p.PrintLine($"if (this.Context is INotifyPropertyChanged inpc)");
                     p.OpenScope();
                     {
-                        foreach (var member in BindingPropertyRefs)
+                        foreach (var member in bindingPropertyRefs)
                         {
                             p.PrintLine($"if (inpc.NotifyPropertyChanged(this.{BindingPropertyName(member)}.TargetPropertyName, this.{ListenerName(member)}) == false)");
                             p.OpenScope();
@@ -908,40 +890,38 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        private static string IsListeningName(BinderDeclaration dec)
-            => $"_isListening_{dec.Symbol.ToValidIdentifier()}";
+        // ── Private naming helpers ────────────────────────────────────────────────
 
-        private static string ConstName(BindingPropertyRef member)
-            => $"BindingProperty_{member.Symbol.Name}";
+        private static string IsListeningName(in BinderDeclaration dec)
+            => $"_isListening_{dec.typeIdentifier}";
 
-        private static string ConstName(BindingCommandRef member)
-            => $"BindingCommand_{member.Symbol.Name}";
+        private static string ConstName(in BindingPropertyInfo member)
+            => $"BindingProperty_{member.methodName}";
 
-        private static string BindingPropertyName(BindingPropertyRef member)
-            => $"_bindingFieldFor{member.Symbol.Name}";
+        private static string ConstName(in BindingCommandInfo member)
+            => $"BindingCommand_{member.methodName}";
 
-        private static string ConverterName(BindingPropertyRef member)
-            => $"_converterFor{member.Symbol.Name}";
+        private static string BindingPropertyName(in BindingPropertyInfo member)
+            => $"_bindingFieldFor{member.methodName}";
 
-        private static string ListenerName(BindingPropertyRef member)
-            => $"_listenerFor{member.Symbol.Name}";
+        private static string ConverterName(in BindingPropertyInfo member)
+            => $"_converterFor{member.methodName}";
 
-        private static string MethodName(BindingPropertyRef member)
-        {
-            var name = member.Symbol.Name;
+        private static string ListenerName(in BindingPropertyInfo member)
+            => $"_listenerFor{member.methodName}";
 
-            if (member.IsParameterTypeVariant == false)
-            {
-                return $"{name}__Variant";
-            }
+        /// <summary>
+        /// Returns the method name used in the constructor listener action.
+        /// For non-Variant parameter types, a private <c>__Variant</c> proxy is called instead
+        /// of the user's original method.
+        /// </summary>
+        private static string MethodName(in BindingPropertyInfo member)
+            => member.isParameterTypeVariant ? member.methodName : $"{member.methodName}__Variant";
 
-            return name;
-        }
+        private static string BindingCommandName(in BindingCommandInfo member)
+            => $"_bindingCommandFor{member.methodName}";
 
-        private static string BindingCommandName(BindingCommandRef member)
-            => $"_bindingCommandFor{member.Symbol.Name}";
-
-        private static string RelayCommandName(BindingCommandRef member)
-            => $"_relayCommandFor{member.Symbol.Name}";
+        private static string RelayCommandName(in BindingCommandInfo member)
+            => $"_relayCommandFor{member.methodName}";
     }
 }
