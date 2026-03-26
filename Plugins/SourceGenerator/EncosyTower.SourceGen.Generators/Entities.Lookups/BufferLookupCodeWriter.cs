@@ -1,70 +1,25 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
-namespace EncosyTower.SourceGen.Generators.Entities
+namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 {
-    [Generator]
-    internal sealed class BufferLookupGenerator : LookupGenerator
-    {
-        protected override string Interface => "global::EncosyTower.Entities.IBufferLookups";
-
-        protected override LookupCodeWriter CodeWriter => new BufferLookupCodeWriter();
-
-        protected override LookupDeclaration GetDeclaration(
-              SourceProductionContext context
-            , StructDeclarationSyntax candidate
-            , SemanticModel semanticModel
-        )
-        {
-            return new BufferLookupDeclaration(context, candidate, semanticModel);
-        }
-
-        protected override DiagnosticDescriptor ErrorDescriptor
-            => new("SG_BUFFER_LOOKUPS_01"
-                , "Buffer Lookups Generator Error"
-                , "This error indicates a bug in the Buffer Lookups source generators. Error message: '{0}'."
-                , "EncosyTower.Entities.IBufferLookups"
-                , DiagnosticSeverity.Error
-                , isEnabledByDefault: true
-                , description: ""
-            );
-    }
-
-    internal sealed class BufferLookupDeclaration : LookupDeclaration
-    {
-        protected override string Interface => "global::Unity.Entities.IBufferElementData";
-
-        public override string InterfaceLookupRO => "global::EncosyTower.Entities.Lookups.IBufferLookupRO";
-
-        public override string InterfaceLookupRW => "global::EncosyTower.Entities.Lookups.IBufferLookupRW";
-
-        public BufferLookupDeclaration(
-              SourceProductionContext context
-            , StructDeclarationSyntax candidate
-            , SemanticModel semanticModel
-        ) : base(context, candidate, semanticModel) { }
-    }
-
     internal sealed class BufferLookupCodeWriter : LookupCodeWriter
     {
-        private const string LOOKUP = "global::Unity.Entities.BufferLookup<";
-        private const string BUFFER = "global::Unity.Entities.DynamicBuffer<";
+        private const string LOOKUP = "BufferLookup<";
+        private const string BUFFER = "DynamicBuffer<";
 
-        protected override void WriteStructBody(ref Printer p, LookupDeclaration declaration)
+        protected override void WriteStructBody(ref Printer p, LookupDefinition definition)
         {
-            WriteFields(ref p, declaration, LOOKUP);
-            WriteConstructor(ref p, declaration, "GetBufferLookup");
-            WriteUpdateMethods(ref p, declaration);
-            WriteConcreteMethods(ref p, declaration);
+            WriteFields(ref p, definition, LOOKUP);
+            WriteConstructor(ref p, definition, "GetBufferLookup");
+            WriteUpdateMethods(ref p, definition);
+            WriteConcreteMethods(ref p, definition);
         }
 
-        private static void WriteConcreteMethods(ref Printer p, LookupDeclaration declaration)
+        private static void WriteConcreteMethods(ref Printer p, LookupDefinition definition)
         {
             var writeLookupCommon = false;
 
-            foreach (var typeRef in declaration.TypeRefs)
+            foreach (var typeRef in definition.typeRefs)
             {
-                var typeName = typeRef.Symbol.ToFullName();
+                var typeName = typeRef.typeName;
                 var lookupField = GetLookupFieldName(typeRef);
 
                 if (writeLookupCommon == false)
@@ -79,7 +34,7 @@ namespace EncosyTower.SourceGen.Generators.Entities
                     p.PrintEndLine();
                 }
 
-                WriteBeginRegion(ref p, typeRef.Symbol.Name);
+                WriteBeginRegion(ref p, typeRef.typeShortName);
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public void HasBuffer(")
@@ -143,11 +98,11 @@ namespace EncosyTower.SourceGen.Generators.Entities
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public static implicit operator ").Print(LOOKUP)
-                    .Print(typeName).Print(">(in ").Print(declaration.Syntax.Identifier.Text).Print(" value)")
+                    .Print(typeName).Print(">(in ").Print(definition.structName).Print(" value)")
                     .Print(" => value.").Print(lookupField).PrintEndLine(";");
                 p.PrintEndLine();
 
-                WriteEndRegion(ref p, typeRef.Symbol.Name);
+                WriteEndRegion(ref p, typeRef.typeShortName);
             }
 
             static void WriteAttributes(ref Printer p)

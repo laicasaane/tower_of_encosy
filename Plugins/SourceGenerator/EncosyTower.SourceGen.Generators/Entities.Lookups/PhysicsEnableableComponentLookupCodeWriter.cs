@@ -1,74 +1,27 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
-namespace EncosyTower.SourceGen.Generators.Entities
+namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 {
-    [Generator]
-    internal sealed class PhysicsEnableableComponentLookupGenerator : LookupGenerator
-    {
-        protected override string Interface => "global::EncosyTower.Entities.IPhysicsEnableableComponentLookups";
-
-        protected override LookupCodeWriter CodeWriter => new PhysicsEnableableComponentLookupCodeWriter();
-
-        protected override LookupDeclaration GetDeclaration(
-              SourceProductionContext context
-            , StructDeclarationSyntax candidate
-            , SemanticModel semanticModel
-        )
-        {
-            return new PhysicsEnableableComponentLookupDeclaration(context, candidate, semanticModel);
-        }
-
-        protected override DiagnosticDescriptor ErrorDescriptor
-            => new("SG_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS_01"
-                , "Physics Enableable Component Lookups Generator Error"
-                , "This error indicates a bug in the Physics Enableable Component Lookups source generators. Error message: '{0}'."
-                , "EncosyTower.Entities.IPhysicsEnableableComponentLookups"
-                , DiagnosticSeverity.Error
-                , isEnabledByDefault: true
-                , description: ""
-            );
-    }
-
-    internal sealed class PhysicsEnableableComponentLookupDeclaration : LookupDeclaration
-    {
-        protected override string Interface => "global::Unity.Entities.IComponentData";
-
-        protected override string Interface2 => "global::Unity.Entities.IEnableableComponent";
-
-        public override string InterfaceLookupRO => "global::EncosyTower.Entities.Lookups.IPhysicsEnableableComponentLookupRO";
-
-        public override string InterfaceLookupRW => "global::EncosyTower.Entities.Lookups.IPhysicsEnableableComponentLookupRW";
-
-        public PhysicsEnableableComponentLookupDeclaration(
-              SourceProductionContext context
-            , StructDeclarationSyntax candidate
-            , SemanticModel semanticModel
-        ) : base(context, candidate, semanticModel) { }
-    }
-
     internal sealed class PhysicsEnableableComponentLookupCodeWriter : LookupCodeWriter
     {
-        private const string LOOKUP = "global::Latios.Psyshock.PhysicsComponentLookup<";
-        private const string SAFE_ENTITY = "global::Latios.Psyshock.SafeEntity";
-        private const string REFRW = "global::Unity.Entities.RefRW<";
+        private const string LOOKUP = "PhysicsComponentLookup<";
+        private const string SAFE_ENTITY = "SafeEntity";
+        private const string REFRW = "RefRW<";
 
-        protected override void WriteStructBody(ref Printer p, LookupDeclaration declaration)
+        protected override void WriteStructBody(ref Printer p, LookupDefinition definition)
         {
-            WriteFields(ref p, declaration, LOOKUP);
-            WriteConstructor(ref p, declaration, "GetComponentLookup");
-            WriteUpdateMethods(ref p, declaration);
-            WriteConcreteMethods(ref p, declaration);
+            WriteFields(ref p, definition, LOOKUP);
+            WriteConstructor(ref p, definition, "GetComponentLookup");
+            WriteUpdateMethods(ref p, definition);
+            WriteConcreteMethods(ref p, definition);
         }
 
-        private static void WriteConcreteMethods(ref Printer p, LookupDeclaration declaration)
+        private static void WriteConcreteMethods(ref Printer p, LookupDefinition definition)
         {
-            foreach (var typeRef in declaration.TypeRefs)
+            foreach (var typeRef in definition.typeRefs)
             {
-                var typeName = typeRef.Symbol.ToFullName();
+                var typeName = typeRef.typeName;
                 var lookupField = GetLookupFieldName(typeRef);
 
-                WriteBeginRegion(ref p, typeRef.Symbol.Name);
+                WriteBeginRegion(ref p, typeRef.typeShortName);
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public void HasComponent(")
@@ -120,7 +73,7 @@ namespace EncosyTower.SourceGen.Generators.Entities
                     .PrintEndLine("[entity] = componentData;");
                 p.PrintEndLine();
 
-                if (typeRef.IsReadOnly == false)
+                if (typeRef.isReadOnly == false)
                 {
                     WriteAttributes(ref p);
                     p.PrintBeginLine("public void GetRefRW(")
@@ -191,7 +144,7 @@ namespace EncosyTower.SourceGen.Generators.Entities
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public static implicit operator ").Print(LOOKUP)
-                    .Print(typeName).Print(">(in ").Print(declaration.Syntax.Identifier.Text).Print(" value)")
+                    .Print(typeName).Print(">(in ").Print(definition.structName).Print(" value)")
                     .Print(" => value.").Print(lookupField).PrintEndLine(";");
                 p.PrintEndLine();
 
@@ -208,7 +161,7 @@ namespace EncosyTower.SourceGen.Generators.Entities
                     .PrintEndLine(".IsEnabled(entity);");
                 p.PrintEndLine();
 
-                if (typeRef.IsReadOnly == false)
+                if (typeRef.isReadOnly == false)
                 {
                     WriteAttributes(ref p);
                     p.PrintBeginLine("public void SetComponentEnabled(")
@@ -238,7 +191,7 @@ namespace EncosyTower.SourceGen.Generators.Entities
                     p.PrintEndLine();
                 }
 
-                WriteEndRegion(ref p, typeRef.Symbol.Name);
+                WriteEndRegion(ref p, typeRef.typeShortName);
             }
 
             static void WriteAttributes(ref Printer p)

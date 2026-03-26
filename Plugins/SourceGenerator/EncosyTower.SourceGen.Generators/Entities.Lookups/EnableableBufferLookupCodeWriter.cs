@@ -1,74 +1,27 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
-namespace EncosyTower.SourceGen.Generators.Entities
+namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 {
-    [Generator]
-    internal sealed class EnableableBufferLookupGenerator : LookupGenerator
-    {
-        protected override string Interface => "global::EncosyTower.Entities.IEnableableBufferLookups";
-
-        protected override LookupCodeWriter CodeWriter => new EnableableBufferLookupCodeWriter();
-
-        protected override LookupDeclaration GetDeclaration(
-              SourceProductionContext context
-            , StructDeclarationSyntax candidate
-            , SemanticModel semanticModel
-        )
-        {
-            return new BufferLookupDeclaration(context, candidate, semanticModel);
-        }
-
-        protected override DiagnosticDescriptor ErrorDescriptor
-            => new("SG_ENABLEABLE_BUFFER_LOOKUPS_01"
-                , "Enableable Buffer Lookups Generator Error"
-                , "This error indicates a bug in the Enableable Buffer Lookups source generators. Error message: '{0}'."
-                , "EncosyTower.Entities.IEnableableBufferLookups"
-                , DiagnosticSeverity.Error
-                , isEnabledByDefault: true
-                , description: ""
-            );
-    }
-
-    internal sealed class EnableableBufferLookupDeclaration : LookupDeclaration
-    {
-        protected override string Interface => "global::Unity.Entities.IBufferElementData";
-
-        protected override string Interface2 => "global::Unity.Entities.IEnableableComponent";
-
-        public override string InterfaceLookupRO => "global::EncosyTower.Entities.Lookups.IEnableableBufferLookupRO";
-
-        public override string InterfaceLookupRW => "global::EncosyTower.Entities.Lookups.IEnableableBufferLookupRW";
-
-        public EnableableBufferLookupDeclaration(
-              SourceProductionContext context
-            , StructDeclarationSyntax candidate
-            , SemanticModel semanticModel
-        ) : base(context, candidate, semanticModel) { }
-    }
-
     internal sealed class EnableableBufferLookupCodeWriter : LookupCodeWriter
     {
-        private const string LOOKUP = "global::Unity.Entities.BufferLookup<";
-        private const string BUFFER = "global::Unity.Entities.DynamicBuffer<";
-        private const string ENABLED_REFRW = "global::Unity.Entities.EnabledRefRW<";
-        private const string ENABLED_REFRO = "global::Unity.Entities.EnabledRefRO<";
+        private const string LOOKUP = "BufferLookup<";
+        private const string BUFFER = "DynamicBuffer<";
+        private const string ENABLED_REFRW = "EnabledRefRW<";
+        private const string ENABLED_REFRO = "EnabledRefRO<";
 
-        protected override void WriteStructBody(ref Printer p, LookupDeclaration declaration)
+        protected override void WriteStructBody(ref Printer p, LookupDefinition definition)
         {
-            WriteFields(ref p, declaration, LOOKUP);
-            WriteConstructor(ref p, declaration, "GetBufferLookup");
-            WriteUpdateMethods(ref p, declaration);
-            WriteConcreteMethods(ref p, declaration);
+            WriteFields(ref p, definition, LOOKUP);
+            WriteConstructor(ref p, definition, "GetBufferLookup");
+            WriteUpdateMethods(ref p, definition);
+            WriteConcreteMethods(ref p, definition);
         }
 
-        private static void WriteConcreteMethods(ref Printer p, LookupDeclaration declaration)
+        private static void WriteConcreteMethods(ref Printer p, LookupDefinition definition)
         {
             var writeLookupCommon = false;
 
-            foreach (var typeRef in declaration.TypeRefs)
+            foreach (var typeRef in definition.typeRefs)
             {
-                var typeName = typeRef.Symbol.ToFullName();
+                var typeName = typeRef.typeName;
                 var lookupField = GetLookupFieldName(typeRef);
 
                 if (writeLookupCommon == false)
@@ -83,7 +36,7 @@ namespace EncosyTower.SourceGen.Generators.Entities
                     p.PrintEndLine();
                 }
 
-                WriteBeginRegion(ref p, typeRef.Symbol.Name);
+                WriteBeginRegion(ref p, typeRef.typeShortName);
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public void HasBuffer(")
@@ -158,7 +111,7 @@ namespace EncosyTower.SourceGen.Generators.Entities
                     .PrintEndLine(".IsBufferEnabled(entity);");
                 p.PrintEndLine();
 
-                if (typeRef.IsReadOnly == false)
+                if (typeRef.isReadOnly == false)
                 {
                     WriteAttributes(ref p);
                     p.PrintBeginLine("public void SetBufferEnabled(")
@@ -243,11 +196,11 @@ namespace EncosyTower.SourceGen.Generators.Entities
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public static implicit operator ").Print(LOOKUP)
-                    .Print(typeName).Print(">(in ").Print(declaration.Syntax.Identifier.Text).Print(" value)")
+                    .Print(typeName).Print(">(in ").Print(definition.structName).Print(" value)")
                     .Print(" => value.").Print(lookupField).PrintEndLine(";");
                 p.PrintEndLine();
 
-                WriteEndRegion(ref p, typeRef.Symbol.Name);
+                WriteEndRegion(ref p, typeRef.typeShortName);
             }
 
             static void WriteAttributes(ref Printer p)

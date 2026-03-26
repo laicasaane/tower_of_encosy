@@ -1,72 +1,27 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
-namespace EncosyTower.SourceGen.Generators.Entities
+namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 {
-    [Generator]
-    internal sealed class PhysicsBufferLookupGenerator : LookupGenerator
-    {
-        protected override string Interface => "global::EncosyTower.Entities.IPhysicsBufferLookups";
-
-        protected override LookupCodeWriter CodeWriter => new PhysicsBufferLookupCodeWriter();
-
-        protected override LookupDeclaration GetDeclaration(
-              SourceProductionContext context
-            , StructDeclarationSyntax candidate
-            , SemanticModel semanticModel
-        )
-        {
-            return new PhysicsBufferLookupDeclaration(context, candidate, semanticModel);
-        }
-
-        protected override DiagnosticDescriptor ErrorDescriptor
-            => new("SG_PHYSICS_BUFFER_LOOKUPS_01"
-                , "Physics Buffer Lookups Generator Error"
-                , "This error indicates a bug in the Physics Buffer Lookups source generators. Error message: '{0}'."
-                , "EncosyTower.Entities.IPhysicsBufferLookups"
-                , DiagnosticSeverity.Error
-                , isEnabledByDefault: true
-                , description: ""
-            );
-    }
-
-    internal sealed class PhysicsBufferLookupDeclaration : LookupDeclaration
-    {
-        protected override string Interface => "global::Unity.Entities.IBufferElementData";
-
-        public override string InterfaceLookupRO => "global::EncosyTower.Entities.Lookups.IPhysicsBufferLookupRO";
-
-        public override string InterfaceLookupRW => "global::EncosyTower.Entities.Lookups.IPhysicsBufferLookupRW";
-
-        public PhysicsBufferLookupDeclaration(
-              SourceProductionContext context
-            , StructDeclarationSyntax candidate
-            , SemanticModel semanticModel
-        ) : base(context, candidate, semanticModel) { }
-    }
-
     internal sealed class PhysicsBufferLookupCodeWriter : LookupCodeWriter
     {
-        private const string LOOKUP = "global::Latios.Psyshock.PhysicsBufferLookup<";
-        private const string SAFE_ENTITY = "global::Latios.Psyshock.SafeEntity";
-        private const string BUFFER = "global::Unity.Entities.DynamicBuffer<";
+        private const string LOOKUP = "PhysicsBufferLookup<";
+        private const string SAFE_ENTITY = "SafeEntity";
+        private const string BUFFER = "DynamicBuffer<";
 
-        protected override void WriteStructBody(ref Printer p, LookupDeclaration declaration)
+        protected override void WriteStructBody(ref Printer p, LookupDefinition definition)
         {
-            WriteFields(ref p, declaration, LOOKUP);
-            WriteConstructor(ref p, declaration, "GetBufferLookup");
-            WriteUpdateMethods(ref p, declaration);
-            WriteConcreteMethods(ref p, declaration);
+            WriteFields(ref p, definition, LOOKUP);
+            WriteConstructor(ref p, definition, "GetBufferLookup");
+            WriteUpdateMethods(ref p, definition);
+            WriteConcreteMethods(ref p, definition);
         }
 
-        private static void WriteConcreteMethods(ref Printer p, LookupDeclaration declaration)
+        private static void WriteConcreteMethods(ref Printer p, LookupDefinition definition)
         {
-            foreach (var typeRef in declaration.TypeRefs)
+            foreach (var typeRef in definition.typeRefs)
             {
-                var typeName = typeRef.Symbol.ToFullName();
+                var typeName = typeRef.typeName;
                 var lookupField = GetLookupFieldName(typeRef);
 
-                WriteBeginRegion(ref p, typeRef.Symbol.Name);
+                WriteBeginRegion(ref p, typeRef.typeShortName);
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public void HasBuffer(")
@@ -120,7 +75,7 @@ namespace EncosyTower.SourceGen.Generators.Entities
                     .PrintEndLine(".IsEnabled(entity);");
                 p.PrintEndLine();
 
-                if (typeRef.IsReadOnly == false)
+                if (typeRef.isReadOnly == false)
                 {
                     WriteAttributes(ref p);
                     p.PrintBeginLine("public void SetBufferEnabled(")
@@ -133,11 +88,11 @@ namespace EncosyTower.SourceGen.Generators.Entities
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public static implicit operator ").Print(LOOKUP)
-                    .Print(typeName).Print(">(in ").Print(declaration.Syntax.Identifier.Text).Print(" value)")
+                    .Print(typeName).Print(">(in ").Print(definition.structName).Print(" value)")
                     .Print(" => value.").Print(lookupField).PrintEndLine(";");
                 p.PrintEndLine();
 
-                WriteEndRegion(ref p, typeRef.Symbol.Name);
+                WriteEndRegion(ref p, typeRef.typeShortName);
             }
 
             static void WriteAttributes(ref Printer p)
