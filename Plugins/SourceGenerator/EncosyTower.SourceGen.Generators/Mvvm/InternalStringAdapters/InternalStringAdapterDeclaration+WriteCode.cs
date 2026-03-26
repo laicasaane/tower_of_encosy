@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
@@ -22,38 +21,25 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
               SourceProductionContext context
             , Compilation compilation
             , bool outputSourceGenFiles
-            , DiagnosticDescriptor errorDescriptor
         )
         {
             var syntax = CompilationUnit().NormalizeWhitespace(eol: "\n");
+            var syntaxTree = syntax.SyntaxTree;
+            var assemblyName = compilation.Assembly.Name;
+            var fileName = $"InternalStringAdapters_{assemblyName}";
+            var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, fileName, syntax);
+            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileName);
 
-            try
-            {
-                var syntaxTree = syntax.SyntaxTree;
-                var assemblyName = compilation.Assembly.Name;
-                var fileName = $"InternalStringAdapters_{assemblyName}";
-                var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, fileName, syntax);
-                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileName);
-
-                context.OutputSource(
-                      outputSourceGenFiles
-                    , syntax
-                    , WriteAdapter(TypeRefs, assemblyName)
-                    , hintName
-                    , sourceFilePath
-                );
-            }
-            catch (Exception e)
-            {
-                context.ReportDiagnostic(Diagnostic.Create(
-                      errorDescriptor
-                    , syntax.GetLocation()
-                    , e.ToUnityPrintableString()
-                ));
-            }
+            context.OutputSource(
+                  outputSourceGenFiles
+                , syntax
+                , WriteAdapter(Candidates, assemblyName)
+                , hintName
+                , sourceFilePath
+            );
         }
 
-        private static string WriteAdapter(ImmutableArray<TypeRef> types, string assemblyName)
+        private static string WriteAdapter(ImmutableArray<StringAdapterCandidateInfo> types, string assemblyName)
         {
             var p = Printer.DefaultLarge;
 
@@ -67,20 +53,19 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 foreach (var type in types)
                 {
                     var adapterTypeName = AdapterTypeName(type);
-                    var typeName = type.Symbol.ToFullName();
-                    var label = $"{type.Symbol.Name} ⇒ String";
+                    var typeName = type.fullTypeName;
+                    var label = $"{type.simpleName} ⇒ String";
 
                     p.PrintLine(string.Format(ADAPTER_ATTRIBUTE, typeName));
-                    p.PrintLine(string.Format(LABEL_ATTRIBUTE, label, $"Generated/{type.Symbol.ContainingNamespace}"));
+                    p.PrintLine(string.Format(LABEL_ATTRIBUTE, label, $"Generated/{type.namespaceName}"));
                     p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                     p.PrintLine($"public sealed class {adapterTypeName} : {IADAPTER}");
                     p.OpenScope();
                     {
-                        p.PrintLine(GENERATED_CODE);
                         p.PrintLine($"private readonly {CACHED_VARIANT_CONVERTER}<{typeName}> _converter = {CACHED_VARIANT_CONVERTER}<{typeName}>.Default;");
                         p.PrintEndLine();
 
-                        p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                        p.PrintLine(AGGRESSIVE_INLINING);
                         p.PrintLine($"public {VARIANT} Convert(in {VARIANT} variant)");
                         p.OpenScope();
                         {
@@ -98,7 +83,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
             return p.Result;
         }
 
-        private static string AdapterTypeName(TypeRef typeRef)
-            => $"{typeRef.Symbol.ToValidIdentifier()}ToStringAdapter";
+        private static string AdapterTypeName(StringAdapterCandidateInfo typeRef)
+            => $"{typeRef.simpleName.ToValidIdentifier()}ToStringAdapter";
     }
 }

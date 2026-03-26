@@ -21,11 +21,18 @@ namespace EncosyTower.Tests.MvvmTests
         private void OnProcess(int value) { }
     }
 
+    public struct A { }
+
     public partial class Binder : IBinder
     {
         [BindingProperty]
         [field: UnityEngine.HideInInspector]
         private void SetIntValue(int value)
+        {
+        }
+
+        [BindingProperty]
+        private void SetAValue(A value)
         {
         }
 

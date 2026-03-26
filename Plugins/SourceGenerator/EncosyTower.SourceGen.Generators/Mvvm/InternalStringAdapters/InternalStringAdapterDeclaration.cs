@@ -1,31 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 {
     public partial class InternalStringAdapterDeclaration
     {
-        public ImmutableArray<TypeRef> TypeRefs { get; }
+        public ImmutableArray<StringAdapterCandidateInfo> Candidates { get; }
 
         public InternalStringAdapterDeclaration(
-              ImmutableArray<TypeRef> candidates
-            , ImmutableArray<INamedTypeSymbol> candidatesToIgnore
+              ImmutableArray<StringAdapterCandidateInfo> candidates
+            , ImmutableArray<string> existingAdapterTypeNames
         )
         {
-            var typeFiltered = new Dictionary<string, TypeRef>();
-            var typesToIgnore = new HashSet<string>();
-
-            foreach (var candidate in candidatesToIgnore)
-            {
-                typesToIgnore.Add(candidate.ToFullName());
-            }
+            var typeFiltered = new Dictionary<string, StringAdapterCandidateInfo>();
+            var typesToIgnore = new HashSet<string>(existingAdapterTypeNames, StringComparer.Ordinal);
 
             foreach (var candidate in candidates)
             {
-                var symbol = candidate.Symbol;
-                var typeName = symbol.ToFullName();
+                if (candidate.IsValid == false)
+                {
+                    continue;
+                }
+
+                var typeName = candidate.fullTypeName;
 
                 if (typeName.ToUnionType().IsNativeUnionType()
                     || typesToIgnore.Contains(typeName)
@@ -40,16 +38,65 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 }
             }
 
-            using var typeRefs = ImmutableArrayBuilder<TypeRef>.Rent();
-            typeRefs.AddRange(typeFiltered.Values);
-            TypeRefs = typeRefs.ToImmutable();
+            using var builder = ImmutableArrayBuilder<StringAdapterCandidateInfo>.Rent();
+            builder.AddRange(typeFiltered.Values);
+            Candidates = builder.ToImmutable();
         }
     }
 
-    public class TypeRef
+    /// <summary>
+    /// Cache-friendly, equatable pipeline model for a candidate type that needs
+    /// an internal string adapter. Stores only primitive data extracted from the
+    /// symbol — no <see cref="Microsoft.CodeAnalysis.ISymbol"/> or
+    /// <see cref="Microsoft.CodeAnalysis.SyntaxNode"/> references that would root
+    /// the compilation graph and prevent GC.
+    /// </summary>
+    public struct StringAdapterCandidateInfo : IEquatable<StringAdapterCandidateInfo>
     {
-        public TypeSyntax Syntax { get; set; }
+        /// <summary>
+        /// Excluded from <see cref="Equals(StringAdapterCandidateInfo)"/> and
+        /// <see cref="GetHashCode"/> — location data is not stable across incremental runs.
+        /// </summary>
+        public LocationInfo location;
 
-        public ITypeSymbol Symbol { get; set; }
+        /// <summary>
+        /// Fully-qualified name of the candidate type (e.g. <c>global::System.Int32</c>).
+        /// Used as the deduplication key.
+        /// </summary>
+        public string fullTypeName;
+
+        /// <summary>
+        /// Simple (unqualified) display name of the candidate type (e.g. <c>Int32</c>).
+        /// Used for naming and label generation.
+        /// </summary>
+        public string simpleName;
+
+        /// <summary>
+        /// The namespace of the candidate type (e.g. <c>System</c>).
+        /// Used for the second argument of the <c>[Label(...)]</c> attribute.
+        /// </summary>
+        public string namespaceName;
+
+        public readonly bool IsValid
+            => string.IsNullOrEmpty(fullTypeName) == false
+            && string.IsNullOrEmpty(simpleName) == false;
+
+        public readonly bool Equals(StringAdapterCandidateInfo other)
+            => string.Equals(fullTypeName, other.fullTypeName, StringComparison.Ordinal)
+            && string.Equals(simpleName, other.simpleName, StringComparison.Ordinal)
+            && string.Equals(namespaceName, other.namespaceName, StringComparison.Ordinal)
+            ;
+
+        public readonly override bool Equals(object obj)
+            => obj is StringAdapterCandidateInfo other && Equals(other);
+
+        public readonly override int GetHashCode()
+            => HashValue.Combine(fullTypeName, simpleName, namespaceName);
+
+        public static bool operator ==(StringAdapterCandidateInfo left, StringAdapterCandidateInfo right)
+            => left.Equals(right);
+
+        public static bool operator !=(StringAdapterCandidateInfo left, StringAdapterCandidateInfo right)
+            => !left.Equals(right);
     }
 }
