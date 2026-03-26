@@ -2,7 +2,10 @@ using System;
 
 namespace EncosyTower.Mvvm.ViewBinding
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
+    /// <summary>
+    /// Specifies that a class provides an adapter between a source type and a destination type.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public sealed class AdapterAttribute : Attribute
     {
         public const int DEFAULT_ORDER = 1000;
