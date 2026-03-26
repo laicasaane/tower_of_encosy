@@ -120,7 +120,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             = new("SG_BINDER_01"
                 , "Binder Generator Error"
                 , "This error indicates a bug in the Binder source generators. Error message: '{0}'."
-                , $"{NAMESPACE}.BindingAttribute"
+                , $"{NAMESPACE}.ViewBinding.IBinder"
                 , DiagnosticSeverity.Error
                 , isEnabledByDefault: true
                 , description: ""
