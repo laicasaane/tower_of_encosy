@@ -11,15 +11,15 @@ using UnityEngine.UI;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Slider", "UI")]
     public sealed partial class SliderBinder : MonoBinder<Slider>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Value", "Slider")]
-    public sealed partial class SliderBindingValue : MonoBindingProperty<Slider>, IBinder
+    public sealed partial class SliderBindingValue : MonoBindingProperty<Slider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -35,9 +35,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Interactable", "Slider")]
-    public sealed partial class SliderBindingInteractable : MonoBindingProperty<Slider>, IBinder
+    public sealed partial class SliderBindingInteractable : MonoBindingProperty<Slider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -53,9 +53,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("On Value Changed", "Slider")]
-    public sealed partial class SliderBindingOnValueChanged : MonoBindingCommand<Slider>, IBinder
+    public sealed partial class SliderBindingOnValueChanged : MonoBindingCommand<Slider>
     {
         private readonly UnityAction<float> _command;
 
@@ -93,9 +93,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         partial void OnValueChanged(float value);
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Min Value", "Slider")]
-    public sealed partial class SliderBindingMinValue : MonoBindingProperty<Slider>, IBinder
+    public sealed partial class SliderBindingMinValue : MonoBindingProperty<Slider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -111,9 +111,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Max Value", "Slider")]
-    public sealed partial class SliderBindingMaxValue : MonoBindingProperty<Slider>, IBinder
+    public sealed partial class SliderBindingMaxValue : MonoBindingProperty<Slider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -129,9 +129,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Whole Numbers", "Slider")]
-    public sealed partial class SliderBindingWholeNumbers : MonoBindingProperty<Slider>, IBinder
+    public sealed partial class SliderBindingWholeNumbers : MonoBindingProperty<Slider>
     {
         [BindingProperty]
         [field: HideInInspector]

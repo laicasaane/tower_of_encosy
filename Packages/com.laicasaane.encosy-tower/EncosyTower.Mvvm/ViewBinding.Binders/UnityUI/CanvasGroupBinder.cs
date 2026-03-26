@@ -7,15 +7,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Canvas Group", "UI")]
     public sealed partial class CanvasGroupBinder : MonoBinder<CanvasGroup>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Alpha", "Canvas Group")]
-    public sealed partial class CanvasGroupBindingAlpha : MonoBindingProperty<CanvasGroup>, IBinder
+    public sealed partial class CanvasGroupBindingAlpha : MonoBindingProperty<CanvasGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -31,9 +31,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Blocks Raycasts", "Canvas Group")]
-    public sealed partial class CanvasGroupBindingBlocksRaycasts : MonoBindingProperty<CanvasGroup>, IBinder
+    public sealed partial class CanvasGroupBindingBlocksRaycasts : MonoBindingProperty<CanvasGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -49,9 +49,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Interactable", "Canvas Group")]
-    public sealed partial class CanvasGroupBindingInteractable : MonoBindingProperty<CanvasGroup>, IBinder
+    public sealed partial class CanvasGroupBindingInteractable : MonoBindingProperty<CanvasGroup>
     {
         [BindingProperty]
         [field: HideInInspector]

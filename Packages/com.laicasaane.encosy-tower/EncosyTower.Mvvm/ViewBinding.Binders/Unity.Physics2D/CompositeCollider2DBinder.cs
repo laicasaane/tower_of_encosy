@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Composite Collider 2D", "Physics 2D")]
     public sealed partial class CompositeCollider2DBinder : MonoBinder<CompositeCollider2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Edge Radius", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingEdgeRadius : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingEdgeRadius : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Generation Type", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingGenerationType : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingGenerationType : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Geometry Type", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingGeometryType : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingGeometryType : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Offset Distance", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingOffsetDistance : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingOffsetDistance : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Delaunay Mesh", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingUseDelaunayMesh : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingUseDelaunayMesh : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Vertex Distance", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingVertexDistance : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingVertexDistance : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enabled", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingEnabled : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingEnabled : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,9 +141,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Callback Layers", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingCallbackLayers : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingCallbackLayers : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,9 +159,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Contact Capture Layers", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingContactCaptureLayers : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingContactCaptureLayers : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -177,9 +177,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Density", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingDensity : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingDensity : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -195,9 +195,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Exclude Layers", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingExcludeLayers : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingExcludeLayers : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -213,9 +213,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Receive Layers", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingForceReceiveLayers : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingForceReceiveLayers : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -231,9 +231,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Send Layers", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingForceSendLayers : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingForceSendLayers : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -249,9 +249,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Include Layers", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingIncludeLayers : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingIncludeLayers : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -267,9 +267,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Is Trigger", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingIsTrigger : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingIsTrigger : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -285,9 +285,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Layer Override Priority", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingLayerOverridePriority : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingLayerOverridePriority : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -303,9 +303,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Offset", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingOffset : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingOffset : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -321,9 +321,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Shared Material", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingSharedMaterial : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingSharedMaterial : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -339,13 +339,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
 #if UNITY_6000_0_OR_NEWER
     [Obsolete("Use CompositeCollider2DBindingCompositeOperation instead")]
 #else
     [Label("Used By Composite", "Composite Collider 2D")]
 #endif
-    public sealed partial class CompositeCollider2DBindingUsedByComposite : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingUsedByComposite : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -362,9 +362,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
 #if UNITY_6000_0_OR_NEWER
-    [Serializable]
+    [Serializable, Binder]
     [Label("Composite Operation", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingCompositeOperation : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingCompositeOperation : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -381,9 +381,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 #endif
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Used By Effector", "Composite Collider 2D")]
-    public sealed partial class CompositeCollider2DBindingUsedByEffector : MonoBindingProperty<CompositeCollider2D>, IBinder
+    public sealed partial class CompositeCollider2DBindingUsedByEffector : MonoBindingProperty<CompositeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]

@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Edge Collider 2D", "Physics 2D")]
     public sealed partial class EdgeCollider2DBinder : MonoBinder<EdgeCollider2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Adjacent End Point", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingAdjacentEndPoint : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingAdjacentEndPoint : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Adjacent Start Point", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingAdjacentStartPoint : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingAdjacentStartPoint : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Edge Radius", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingEdgeRadius : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingEdgeRadius : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Points", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingPoints : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingPoints : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Adjacent End Point", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingUseAdjacentEndPoint : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingUseAdjacentEndPoint : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enabled", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingEnabled : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingEnabled : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Callback Layers", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingCallbackLayers : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingCallbackLayers : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,9 +141,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Contact Capture Layers", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingContactCaptureLayers : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingContactCaptureLayers : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,9 +159,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Density", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingDensity : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingDensity : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -177,9 +177,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Exclude Layers", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingExcludeLayers : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingExcludeLayers : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -195,9 +195,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Receive Layers", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingForceReceiveLayers : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingForceReceiveLayers : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -213,9 +213,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Send Layers", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingForceSendLayers : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingForceSendLayers : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -231,9 +231,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Include Layers", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingIncludeLayers : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingIncludeLayers : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -249,9 +249,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Is Trigger", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingIsTrigger : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingIsTrigger : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -267,9 +267,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Layer Override Priority", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingLayerOverridePriority : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingLayerOverridePriority : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -285,9 +285,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Offset", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingOffset : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingOffset : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -303,9 +303,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Shared Material", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingSharedMaterial : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingSharedMaterial : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -321,13 +321,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
 #if UNITY_6000_0_OR_NEWER
     [Obsolete("Use EdgeCollider2DBindingCompositeOperation instead")]
 #else
     [Label("Used By Composite", "Edge Collider 2D")]
 #endif
-    public sealed partial class EdgeCollider2DBindingUsedByComposite : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingUsedByComposite : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -344,9 +344,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
 #if UNITY_6000_0_OR_NEWER
-    [Serializable]
+    [Serializable, Binder]
     [Label("Composite Operation", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingCompositeOperation : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingCompositeOperation : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -363,9 +363,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 #endif
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Used By Effector", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingUsedByEffector : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingUsedByEffector : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -381,9 +381,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Adjacent Start Point", "Edge Collider 2D")]
-    public sealed partial class EdgeCollider2DBindingUseAdjacentStartPoint : MonoBindingProperty<EdgeCollider2D>, IBinder
+    public sealed partial class EdgeCollider2DBindingUseAdjacentStartPoint : MonoBindingProperty<EdgeCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]

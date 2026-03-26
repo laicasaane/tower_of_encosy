@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Relative Joint 2D", "Physics 2D")]
     public sealed partial class RelativeJoint2DBinder : MonoBinder<RelativeJoint2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Angular Offset", "Relative Joint 2D")]
-    public sealed partial class RelativeJoint2DBindingAngularOffset : MonoBindingProperty<RelativeJoint2D>, IBinder
+    public sealed partial class RelativeJoint2DBindingAngularOffset : MonoBindingProperty<RelativeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Auto Configure Offset", "Relative Joint 2D")]
-    public sealed partial class RelativeJoint2DBindingAutoConfigureOffset : MonoBindingProperty<RelativeJoint2D>, IBinder
+    public sealed partial class RelativeJoint2DBindingAutoConfigureOffset : MonoBindingProperty<RelativeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Correction Scale", "Relative Joint 2D")]
-    public sealed partial class RelativeJoint2DBindingCorrectionScale : MonoBindingProperty<RelativeJoint2D>, IBinder
+    public sealed partial class RelativeJoint2DBindingCorrectionScale : MonoBindingProperty<RelativeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Linear Offset", "Relative Joint 2D")]
-    public sealed partial class RelativeJoint2DBindingLinearOffset : MonoBindingProperty<RelativeJoint2D>, IBinder
+    public sealed partial class RelativeJoint2DBindingLinearOffset : MonoBindingProperty<RelativeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Max Force", "Relative Joint 2D")]
-    public sealed partial class RelativeJoint2DBindingMaxForce : MonoBindingProperty<RelativeJoint2D>, IBinder
+    public sealed partial class RelativeJoint2DBindingMaxForce : MonoBindingProperty<RelativeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Max Torque", "Relative Joint 2D")]
-    public sealed partial class RelativeJoint2DBindingMaxTorque : MonoBindingProperty<RelativeJoint2D>, IBinder
+    public sealed partial class RelativeJoint2DBindingMaxTorque : MonoBindingProperty<RelativeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Action", "Relative Joint 2D")]
-    public sealed partial class RelativeJoint2DBindingBreakAction : MonoBindingProperty<RelativeJoint2D>, IBinder
+    public sealed partial class RelativeJoint2DBindingBreakAction : MonoBindingProperty<RelativeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,9 +141,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Force", "Relative Joint 2D")]
-    public sealed partial class RelativeJoint2DBindingBreakForce : MonoBindingProperty<RelativeJoint2D>, IBinder
+    public sealed partial class RelativeJoint2DBindingBreakForce : MonoBindingProperty<RelativeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,9 +159,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Torque", "Relative Joint 2D")]
-    public sealed partial class RelativeJoint2DBindingBreakTorque : MonoBindingProperty<RelativeJoint2D>, IBinder
+    public sealed partial class RelativeJoint2DBindingBreakTorque : MonoBindingProperty<RelativeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -177,9 +177,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Body", "Relative Joint 2D")]
-    public sealed partial class RelativeJoint2DBindingConnectedBody : MonoBindingProperty<RelativeJoint2D>, IBinder
+    public sealed partial class RelativeJoint2DBindingConnectedBody : MonoBindingProperty<RelativeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -195,9 +195,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enable Collision", "Relative Joint 2D")]
-    public sealed partial class RelativeJoint2DBindingEnableCollision : MonoBindingProperty<RelativeJoint2D>, IBinder
+    public sealed partial class RelativeJoint2DBindingEnableCollision : MonoBindingProperty<RelativeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]

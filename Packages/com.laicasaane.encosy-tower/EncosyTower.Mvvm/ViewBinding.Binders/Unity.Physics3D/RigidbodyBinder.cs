@@ -9,19 +9,19 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Rigidbody", "Physics 3D")]
     public sealed partial class RigidbodyBinder : MonoBinder<Rigidbody>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
 #if UNITY_6000_0_OR_NEWER
     [Obsolete("Use RigidbodyBindingAngularDamping instead")]
 #else
     [Label("Angular Drag", "Rigidbody")]
 #endif
-    public sealed partial class RigidbodyBindingAngularDrag : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingAngularDrag : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -38,14 +38,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
     }
 
 #if UNITY_6000_0_OR_NEWER
-    [Serializable]
+    [Serializable, Binder]
     [Label("Angular Damping", "Rigidbody")]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true
         , "EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D"
         , "EncosyTower.Mvvm"
         , "RigidbodyBindingAngularDrag"
     )]
-    public sealed partial class RigidbodyBindingAngularDamping : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingAngularDamping : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -62,9 +62,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
     }
 #endif
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Angular Velocity", "Rigidbody")]
-    public sealed partial class RigidbodyBindingAngularVelocity : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingAngularVelocity : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -80,9 +80,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Automatic Center Of Mass", "Rigidbody")]
-    public sealed partial class RigidbodyBindingAutomaticCenterOfMass : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingAutomaticCenterOfMass : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -98,9 +98,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Automatic Inertia Tensor", "Rigidbody")]
-    public sealed partial class RigidbodyBindingAutomaticInertiaTensor : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingAutomaticInertiaTensor : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -116,9 +116,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Center Of Mass", "Rigidbody")]
-    public sealed partial class RigidbodyBindingCenterOfMass : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingCenterOfMass : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -134,9 +134,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Collision Detection Mode", "Rigidbody")]
-    public sealed partial class RigidbodyBindingCollisionDetectionMode : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingCollisionDetectionMode : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -152,9 +152,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Constraints", "Rigidbody")]
-    public sealed partial class RigidbodyBindingConstraints : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingConstraints : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -170,9 +170,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Detect Collisions", "Rigidbody")]
-    public sealed partial class RigidbodyBindingDetectCollisions : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingDetectCollisions : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -188,13 +188,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
 #if UNITY_6000_0_OR_NEWER
     [Obsolete("Use RigidbodyBindingLinearDamping instead")]
 #else
     [Label("Drag", "Rigidbody")]
 #endif
-    public sealed partial class RigidbodyBindingDrag : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingDrag : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -211,14 +211,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
     }
 
 #if UNITY_6000_0_OR_NEWER
-    [Serializable]
+    [Serializable, Binder]
     [Label("Linear Damping", "Rigidbody")]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true
         , "EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D"
         , "EncosyTower.Mvvm"
         , "RigidbodyBindingDrag"
     )]
-    public sealed partial class RigidbodyBindingLinearDamping : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingLinearDamping : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -235,9 +235,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
     }
 #endif
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Exclude Layers", "Rigidbody")]
-    public sealed partial class RigidbodyBindingExcludeLayers : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingExcludeLayers : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -253,9 +253,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Freeze Rotation", "Rigidbody")]
-    public sealed partial class RigidbodyBindingFreezeRotation : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingFreezeRotation : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -271,9 +271,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Include Layers", "Rigidbody")]
-    public sealed partial class RigidbodyBindingIncludeLayers : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingIncludeLayers : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -289,9 +289,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Inertia Tensor", "Rigidbody")]
-    public sealed partial class RigidbodyBindingInertiaTensor : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingInertiaTensor : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -307,9 +307,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Inertia Tensor Rotation", "Rigidbody")]
-    public sealed partial class RigidbodyBindingInertiaTensorRotation : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingInertiaTensorRotation : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -325,9 +325,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Interpolation", "Rigidbody")]
-    public sealed partial class RigidbodyBindingInterpolation : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingInterpolation : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -343,9 +343,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Is Kinematic", "Rigidbody")]
-    public sealed partial class RigidbodyBindingIsKinematic : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingIsKinematic : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -361,9 +361,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Mass", "Rigidbody")]
-    public sealed partial class RigidbodyBindingMass : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingMass : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -379,9 +379,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Max Angular Velocity", "Rigidbody")]
-    public sealed partial class RigidbodyBindingMaxAngularVelocity : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingMaxAngularVelocity : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -397,9 +397,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Max Depenetration Velocity", "Rigidbody")]
-    public sealed partial class RigidbodyBindingMaxDepenetrationVelocity : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingMaxDepenetrationVelocity : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -415,9 +415,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Max Linear Velocity", "Rigidbody")]
-    public sealed partial class RigidbodyBindingMaxLinearVelocity : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingMaxLinearVelocity : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -433,9 +433,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Position", "Rigidbody")]
-    public sealed partial class RigidbodyBindingPosition : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingPosition : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -451,9 +451,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Rotation", "Rigidbody")]
-    public sealed partial class RigidbodyBindingRotation : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingRotation : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -469,9 +469,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Sleep Threshold", "Rigidbody")]
-    public sealed partial class RigidbodyBindingSleepThreshold : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingSleepThreshold : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -487,9 +487,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Solver Iterations", "Rigidbody")]
-    public sealed partial class RigidbodyBindingSolverIterations : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingSolverIterations : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -505,9 +505,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Solver Velocity Iterations", "Rigidbody")]
-    public sealed partial class RigidbodyBindingSolverVelocityIterations : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingSolverVelocityIterations : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -523,9 +523,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Gravity", "Rigidbody")]
-    public sealed partial class RigidbodyBindingUseGravity : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingUseGravity : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -541,13 +541,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
 #if UNITY_6000_0_OR_NEWER
     [Obsolete("Use RigidbodyBindingLinearVelocity instead")]
 #else
     [Label("Velocity", "Rigidbody")]
 #endif
-    public sealed partial class RigidbodyBindingVelocity : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingVelocity : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -564,14 +564,14 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
     }
 
 #if UNITY_6000_0_OR_NEWER
-    [Serializable]
+    [Serializable, Binder]
     [Label("Linear Velocity", "Rigidbody")]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true
         , "EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D"
         , "EncosyTower.Mvvm"
         , "RigidbodyBindingVelocity"
     )]
-    public sealed partial class RigidbodyBindingLinearVelocity : MonoBindingProperty<Rigidbody>, IBinder
+    public sealed partial class RigidbodyBindingLinearVelocity : MonoBindingProperty<Rigidbody>
     {
         [BindingProperty]
         [field: HideInInspector]

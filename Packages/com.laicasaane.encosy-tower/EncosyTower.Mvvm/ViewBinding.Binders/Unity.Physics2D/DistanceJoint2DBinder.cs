@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Distance Joint 2D", "Physics 2D")]
     public sealed partial class DistanceJoint2DBinder : MonoBinder<DistanceJoint2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Auto Configure Distance", "Distance Joint 2D")]
-    public sealed partial class DistanceJoint2DBindingAutoConfigureDistance : MonoBindingProperty<DistanceJoint2D>, IBinder
+    public sealed partial class DistanceJoint2DBindingAutoConfigureDistance : MonoBindingProperty<DistanceJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Distance", "Distance Joint 2D")]
-    public sealed partial class DistanceJoint2DBindingDistance : MonoBindingProperty<DistanceJoint2D>, IBinder
+    public sealed partial class DistanceJoint2DBindingDistance : MonoBindingProperty<DistanceJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Max Distance Only", "Distance Joint 2D")]
-    public sealed partial class DistanceJoint2DBindingMaxDistanceOnly : MonoBindingProperty<DistanceJoint2D>, IBinder
+    public sealed partial class DistanceJoint2DBindingMaxDistanceOnly : MonoBindingProperty<DistanceJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Anchor", "Distance Joint 2D")]
-    public sealed partial class DistanceJoint2DBindingAnchor : MonoBindingProperty<DistanceJoint2D>, IBinder
+    public sealed partial class DistanceJoint2DBindingAnchor : MonoBindingProperty<DistanceJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Auto Configure Connected Anchor", "Distance Joint 2D")]
-    public sealed partial class DistanceJoint2DBindingAutoConfigureConnectedAnchor : MonoBindingProperty<DistanceJoint2D>, IBinder
+    public sealed partial class DistanceJoint2DBindingAutoConfigureConnectedAnchor : MonoBindingProperty<DistanceJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Anchor", "Distance Joint 2D")]
-    public sealed partial class DistanceJoint2DBindingConnectedAnchor : MonoBindingProperty<DistanceJoint2D>, IBinder
+    public sealed partial class DistanceJoint2DBindingConnectedAnchor : MonoBindingProperty<DistanceJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Action", "Distance Joint 2D")]
-    public sealed partial class DistanceJoint2DBindingBreakAction : MonoBindingProperty<DistanceJoint2D>, IBinder
+    public sealed partial class DistanceJoint2DBindingBreakAction : MonoBindingProperty<DistanceJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,9 +141,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Force", "Distance Joint 2D")]
-    public sealed partial class DistanceJoint2DBindingBreakForce : MonoBindingProperty<DistanceJoint2D>, IBinder
+    public sealed partial class DistanceJoint2DBindingBreakForce : MonoBindingProperty<DistanceJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,9 +159,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Torque", "Distance Joint 2D")]
-    public sealed partial class DistanceJoint2DBindingBreakTorque : MonoBindingProperty<DistanceJoint2D>, IBinder
+    public sealed partial class DistanceJoint2DBindingBreakTorque : MonoBindingProperty<DistanceJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -177,9 +177,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Body", "Distance Joint 2D")]
-    public sealed partial class DistanceJoint2DBindingConnectedBody : MonoBindingProperty<DistanceJoint2D>, IBinder
+    public sealed partial class DistanceJoint2DBindingConnectedBody : MonoBindingProperty<DistanceJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -195,9 +195,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enable Collision", "Distance Joint 2D")]
-    public sealed partial class DistanceJoint2DBindingEnableCollision : MonoBindingProperty<DistanceJoint2D>, IBinder
+    public sealed partial class DistanceJoint2DBindingEnableCollision : MonoBindingProperty<DistanceJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]

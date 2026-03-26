@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Constant Force 2D", "Physics 2D")]
     public sealed partial class ConstantForce2DBinder : MonoBinder<ConstantForce2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force", "Constant Force 2D")]
-    public sealed partial class ConstantForce2DBindingForce : MonoBindingProperty<ConstantForce2D>, IBinder
+    public sealed partial class ConstantForce2DBindingForce : MonoBindingProperty<ConstantForce2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Relative Force", "Constant Force 2D")]
-    public sealed partial class ConstantForce2DBindingRelativeForce : MonoBindingProperty<ConstantForce2D>, IBinder
+    public sealed partial class ConstantForce2DBindingRelativeForce : MonoBindingProperty<ConstantForce2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Torque", "Constant Force 2D")]
-    public sealed partial class ConstantForce2DBindingTorque : MonoBindingProperty<ConstantForce2D>, IBinder
+    public sealed partial class ConstantForce2DBindingTorque : MonoBindingProperty<ConstantForce2D>
     {
         [BindingProperty]
         [field: HideInInspector]

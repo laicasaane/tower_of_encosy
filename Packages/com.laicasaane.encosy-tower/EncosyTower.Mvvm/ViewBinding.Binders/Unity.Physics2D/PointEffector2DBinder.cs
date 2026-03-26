@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Point Effector 2D", "Physics 2D")]
     public sealed partial class PointEffector2DBinder : MonoBinder<PointEffector2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Angular Drag", "Point Effector 2D")]
-    public sealed partial class PointEffector2DBindingAngularDrag : MonoBindingProperty<PointEffector2D>, IBinder
+    public sealed partial class PointEffector2DBindingAngularDrag : MonoBindingProperty<PointEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Distance Scale", "Point Effector 2D")]
-    public sealed partial class PointEffector2DBindingDistanceScale : MonoBindingProperty<PointEffector2D>, IBinder
+    public sealed partial class PointEffector2DBindingDistanceScale : MonoBindingProperty<PointEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Drag", "Point Effector 2D")]
-    public sealed partial class PointEffector2DBindingDrag : MonoBindingProperty<PointEffector2D>, IBinder
+    public sealed partial class PointEffector2DBindingDrag : MonoBindingProperty<PointEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Magnitude", "Point Effector 2D")]
-    public sealed partial class PointEffector2DBindingForceMagnitude : MonoBindingProperty<PointEffector2D>, IBinder
+    public sealed partial class PointEffector2DBindingForceMagnitude : MonoBindingProperty<PointEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Mode", "Point Effector 2D")]
-    public sealed partial class PointEffector2DBindingForceMode : MonoBindingProperty<PointEffector2D>, IBinder
+    public sealed partial class PointEffector2DBindingForceMode : MonoBindingProperty<PointEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Source", "Point Effector 2D")]
-    public sealed partial class PointEffector2DBindingForceSource : MonoBindingProperty<PointEffector2D>, IBinder
+    public sealed partial class PointEffector2DBindingForceSource : MonoBindingProperty<PointEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Target", "Point Effector 2D")]
-    public sealed partial class PointEffector2DBindingForceTarget : MonoBindingProperty<PointEffector2D>, IBinder
+    public sealed partial class PointEffector2DBindingForceTarget : MonoBindingProperty<PointEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,9 +141,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Variation", "Point Effector 2D")]
-    public sealed partial class PointEffector2DBindingForceVariation : MonoBindingProperty<PointEffector2D>, IBinder
+    public sealed partial class PointEffector2DBindingForceVariation : MonoBindingProperty<PointEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]

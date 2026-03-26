@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Platform Effector 2D", "Physics 2D")]
     public sealed partial class PlatformEffector2DBinder : MonoBinder<PlatformEffector2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Rotational Offset", "Platform Effector 2D")]
-    public sealed partial class PlatformEffector2DBindingRotationalOffset : MonoBindingProperty<PlatformEffector2D>, IBinder
+    public sealed partial class PlatformEffector2DBindingRotationalOffset : MonoBindingProperty<PlatformEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Side Arc", "Platform Effector 2D")]
-    public sealed partial class PlatformEffector2DBindingSideArc : MonoBindingProperty<PlatformEffector2D>, IBinder
+    public sealed partial class PlatformEffector2DBindingSideArc : MonoBindingProperty<PlatformEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Surface Arc", "Platform Effector 2D")]
-    public sealed partial class PlatformEffector2DBindingSurfaceArc : MonoBindingProperty<PlatformEffector2D>, IBinder
+    public sealed partial class PlatformEffector2DBindingSurfaceArc : MonoBindingProperty<PlatformEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use One Way", "Platform Effector 2D")]
-    public sealed partial class PlatformEffector2DBindingUseOneWay : MonoBindingProperty<PlatformEffector2D>, IBinder
+    public sealed partial class PlatformEffector2DBindingUseOneWay : MonoBindingProperty<PlatformEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use One Way Grouping", "Platform Effector 2D")]
-    public sealed partial class PlatformEffector2DBindingUseOneWayGrouping : MonoBindingProperty<PlatformEffector2D>, IBinder
+    public sealed partial class PlatformEffector2DBindingUseOneWayGrouping : MonoBindingProperty<PlatformEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Side Bounce", "Platform Effector 2D")]
-    public sealed partial class PlatformEffector2DBindingUseSideBounce : MonoBindingProperty<PlatformEffector2D>, IBinder
+    public sealed partial class PlatformEffector2DBindingUseSideBounce : MonoBindingProperty<PlatformEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Side Friction", "Platform Effector 2D")]
-    public sealed partial class PlatformEffector2DBindingUseSideFriction : MonoBindingProperty<PlatformEffector2D>, IBinder
+    public sealed partial class PlatformEffector2DBindingUseSideFriction : MonoBindingProperty<PlatformEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]

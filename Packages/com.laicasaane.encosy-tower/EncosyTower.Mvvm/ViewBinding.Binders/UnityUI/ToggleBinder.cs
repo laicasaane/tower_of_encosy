@@ -11,15 +11,15 @@ using UnityEngine.UI;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Toggle", "UI")]
     public sealed partial class ToggleBinder : MonoBinder<Toggle>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Is On", "Toggle")]
-    public sealed partial class ToggleBindingIsOn : MonoBindingProperty<Toggle>, IBinder
+    public sealed partial class ToggleBindingIsOn : MonoBindingProperty<Toggle>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -35,9 +35,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Interactable", "Toggle")]
-    public sealed partial class ToggleBindingInteractable : MonoBindingProperty<Toggle>, IBinder
+    public sealed partial class ToggleBindingInteractable : MonoBindingProperty<Toggle>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -53,9 +53,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("On Value Changed", "Toggle")]
-    public sealed partial class ToggleBindingOnValueChanged : MonoBindingCommand<Toggle>, IBinder
+    public sealed partial class ToggleBindingOnValueChanged : MonoBindingCommand<Toggle>
     {
         private readonly UnityAction<bool> _command;
 

@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Audio
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Audio Source")]
     public sealed partial class AudioSourceBinder : MonoBinder<AudioSource>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Loop", "Audio Source")]
-    public sealed partial class AudioSourceBindingLoop : MonoBindingProperty<AudioSource>, IBinder
+    public sealed partial class AudioSourceBindingLoop : MonoBindingProperty<AudioSource>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Audio
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Mute", "Audio Source")]
-    public sealed partial class AudioSourceBindingMute : MonoBindingProperty<AudioSource>, IBinder
+    public sealed partial class AudioSourceBindingMute : MonoBindingProperty<AudioSource>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Audio
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Volume", "Audio Source")]
-    public sealed partial class AudioSourceBindingVolume : MonoBindingProperty<AudioSource>, IBinder
+    public sealed partial class AudioSourceBindingVolume : MonoBindingProperty<AudioSource>
     {
         [BindingProperty]
         [field: HideInInspector]

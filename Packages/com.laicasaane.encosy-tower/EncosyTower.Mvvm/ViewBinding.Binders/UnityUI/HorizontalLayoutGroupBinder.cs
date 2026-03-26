@@ -10,15 +10,15 @@ using UnityEngine.UI;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Horizontal Layout Group", "UI")]
     public sealed partial class HorizontalLayoutGroupBinder : MonoBinder<HorizontalLayoutGroup>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Spacing", "Horizontal Layout Group")]
-    public sealed partial class HorizontalLayoutGroupBindingSpacing : MonoBindingProperty<HorizontalLayoutGroup>, IBinder
+    public sealed partial class HorizontalLayoutGroupBindingSpacing : MonoBindingProperty<HorizontalLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -34,9 +34,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Child Alignment", "Horizontal Layout Group")]
-    public sealed partial class HorizontalLayoutGroupBindingChildAlignment : MonoBindingProperty<HorizontalLayoutGroup>, IBinder
+    public sealed partial class HorizontalLayoutGroupBindingChildAlignment : MonoBindingProperty<HorizontalLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -52,9 +52,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Reverse Arrangement", "Horizontal Layout Group")]
-    public sealed partial class HorizontalLayoutGroupBindingReverseArrangement : MonoBindingProperty<HorizontalLayoutGroup>, IBinder
+    public sealed partial class HorizontalLayoutGroupBindingReverseArrangement : MonoBindingProperty<HorizontalLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -70,9 +70,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Control Child Width", "Horizontal Layout Group")]
-    public sealed partial class HorizontalLayoutGroupBindingControlChildWidth : MonoBindingProperty<HorizontalLayoutGroup>, IBinder
+    public sealed partial class HorizontalLayoutGroupBindingControlChildWidth : MonoBindingProperty<HorizontalLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -88,9 +88,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Control Child Height", "Horizontal Layout Group")]
-    public sealed partial class HorizontalLayoutGroupBindingControlChildHeight : MonoBindingProperty<HorizontalLayoutGroup>, IBinder
+    public sealed partial class HorizontalLayoutGroupBindingControlChildHeight : MonoBindingProperty<HorizontalLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -106,9 +106,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Child Scale Width", "Horizontal Layout Group")]
-    public sealed partial class HorizontalLayoutGroupBindingUseChildScaleWidth : MonoBindingProperty<HorizontalLayoutGroup>, IBinder
+    public sealed partial class HorizontalLayoutGroupBindingUseChildScaleWidth : MonoBindingProperty<HorizontalLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -124,9 +124,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Child Scale Height", "Horizontal Layout Group")]
-    public sealed partial class HorizontalLayoutGroupBindingUseChildScaleHeight : MonoBindingProperty<HorizontalLayoutGroup>, IBinder
+    public sealed partial class HorizontalLayoutGroupBindingUseChildScaleHeight : MonoBindingProperty<HorizontalLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -142,9 +142,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Child Force Expand Width", "Horizontal Layout Group")]
-    public sealed partial class HorizontalLayoutGroupBindingChildForceExpandWidth : MonoBindingProperty<HorizontalLayoutGroup>, IBinder
+    public sealed partial class HorizontalLayoutGroupBindingChildForceExpandWidth : MonoBindingProperty<HorizontalLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -160,9 +160,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Child Force Expand Height", "Horizontal Layout Group")]
-    public sealed partial class HorizontalLayoutGroupBindingChildForceExpandHeight : MonoBindingProperty<HorizontalLayoutGroup>, IBinder
+    public sealed partial class HorizontalLayoutGroupBindingChildForceExpandHeight : MonoBindingProperty<HorizontalLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]

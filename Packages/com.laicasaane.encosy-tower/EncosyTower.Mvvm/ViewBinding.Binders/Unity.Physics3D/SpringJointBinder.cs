@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Spring Joint", "Physics 3D")]
     public sealed partial class SpringJointBinder : MonoBinder<SpringJoint>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Damper", "Spring Joint")]
-    public sealed partial class SpringJointBindingDamper : MonoBindingProperty<SpringJoint>, IBinder
+    public sealed partial class SpringJointBindingDamper : MonoBindingProperty<SpringJoint>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Max Distance", "Spring Joint")]
-    public sealed partial class SpringJointBindingMaxDistance : MonoBindingProperty<SpringJoint>, IBinder
+    public sealed partial class SpringJointBindingMaxDistance : MonoBindingProperty<SpringJoint>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Min Distance", "Spring Joint")]
-    public sealed partial class SpringJointBindingMinDistance : MonoBindingProperty<SpringJoint>, IBinder
+    public sealed partial class SpringJointBindingMinDistance : MonoBindingProperty<SpringJoint>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Spring", "Spring Joint")]
-    public sealed partial class SpringJointBindingSpring : MonoBindingProperty<SpringJoint>, IBinder
+    public sealed partial class SpringJointBindingSpring : MonoBindingProperty<SpringJoint>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Tolerance", "Spring Joint")]
-    public sealed partial class SpringJointBindingTolerance : MonoBindingProperty<SpringJoint>, IBinder
+    public sealed partial class SpringJointBindingTolerance : MonoBindingProperty<SpringJoint>
     {
         [BindingProperty]
         [field: HideInInspector]

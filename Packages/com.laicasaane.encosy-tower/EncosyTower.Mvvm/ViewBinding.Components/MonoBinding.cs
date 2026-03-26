@@ -8,8 +8,8 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
     /// <summary>
     /// Represents a binding mechanism between a view and a view model.
     /// </summary>
-    [Serializable]
-    public abstract partial class MonoBinding : IBinder
+    [Serializable, Binder]
+    public abstract partial class MonoBinding
     {
         public abstract bool IsCommand { get; }
 
@@ -33,8 +33,8 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
     /// of type <typeparamref name="T"/> and a view model.
     /// </summary>
     /// <typeparam name="T">Must inherit from <see cref="UnityEngine.Object"/>.</typeparam>
-    [Serializable]
-    public abstract partial class MonoBinding<T> : MonoBinding, IBinder
+    [Serializable, Binder]
+    public abstract partial class MonoBinding<T> : MonoBinding
         where T : UnityEngine.Object
     {
         private IAsReadOnlySpan<T> _targets;
@@ -67,8 +67,8 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
     /// By design, any class inheriting from this class
     /// should not have more than 1 binding property.
     /// </remarks>
-    [Serializable]
-    public abstract partial class MonoBindingProperty<T> : MonoBinding<T>, IBinder
+    [Serializable, Binder]
+    public abstract partial class MonoBindingProperty<T> : MonoBinding<T>
         where T : UnityEngine.Object
     {
         public sealed override bool IsCommand => false;
@@ -82,8 +82,8 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
     /// By design, any class inheriting from this class
     /// should not have more than 1 binding command.
     /// </remarks>
-    [Serializable]
-    public abstract partial class MonoBindingCommand<T> : MonoBinding<T>, IBinder
+    [Serializable, Binder]
+    public abstract partial class MonoBindingCommand<T> : MonoBinding<T>
         where T : UnityEngine.Object
     {
         public sealed override bool IsCommand => true;

@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Sphere Collider", "Physics 3D")]
     public sealed partial class SphereColliderBinder : MonoBinder<SphereCollider>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Center", "Sphere Collider")]
-    public sealed partial class SphereColliderBindingCenter : MonoBindingProperty<SphereCollider>, IBinder
+    public sealed partial class SphereColliderBindingCenter : MonoBindingProperty<SphereCollider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Radius", "Sphere Collider")]
-    public sealed partial class SphereColliderBindingRadius : MonoBindingProperty<SphereCollider>, IBinder
+    public sealed partial class SphereColliderBindingRadius : MonoBindingProperty<SphereCollider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Is Trigger", "Sphere Collider")]
-    public sealed partial class SphereColliderBindingIsTrigger : MonoBindingProperty<SphereCollider>, IBinder
+    public sealed partial class SphereColliderBindingIsTrigger : MonoBindingProperty<SphereCollider>
     {
         [BindingProperty]
         [field: HideInInspector]

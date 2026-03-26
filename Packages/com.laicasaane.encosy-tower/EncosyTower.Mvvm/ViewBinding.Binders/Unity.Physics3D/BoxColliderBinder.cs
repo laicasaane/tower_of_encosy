@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Box Collider", "Physics 3D")]
     public sealed partial class BoxColliderBinder : MonoBinder<BoxCollider>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Center", "Box Collider")]
-    public sealed partial class BoxColliderBindingCenter : MonoBindingProperty<BoxCollider>, IBinder
+    public sealed partial class BoxColliderBindingCenter : MonoBindingProperty<BoxCollider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Size", "Box Collider")]
-    public sealed partial class BoxColliderBindingSize : MonoBindingProperty<BoxCollider>, IBinder
+    public sealed partial class BoxColliderBindingSize : MonoBindingProperty<BoxCollider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Is Trigger", "Box Collider")]
-    public sealed partial class BoxColliderBindingIsTrigger : MonoBindingProperty<BoxCollider>, IBinder
+    public sealed partial class BoxColliderBindingIsTrigger : MonoBindingProperty<BoxCollider>
     {
         [BindingProperty]
         [field: HideInInspector]

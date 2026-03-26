@@ -11,15 +11,15 @@ using UnityEngine.UI;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Scroll Bar", "UI")]
     public sealed partial class ScrollbarBinder : MonoBinder<Scrollbar>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Interactable", "Scroll Bar")]
-    public sealed partial class ScrollbarBindingInteractable : MonoBindingProperty<Scrollbar>, IBinder
+    public sealed partial class ScrollbarBindingInteractable : MonoBindingProperty<Scrollbar>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -35,9 +35,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Value", "Scroll Bar")]
-    public sealed partial class ScrollbarBindingValue : MonoBindingProperty<Scrollbar>, IBinder
+    public sealed partial class ScrollbarBindingValue : MonoBindingProperty<Scrollbar>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -53,9 +53,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("On Value Changed", "Scroll Bar")]
-    public sealed partial class ScrollbarBindingOnValueChanged : MonoBindingCommand<Scrollbar>, IBinder
+    public sealed partial class ScrollbarBindingOnValueChanged : MonoBindingCommand<Scrollbar>
     {
         private readonly UnityAction<float> _command;
 
@@ -93,9 +93,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         partial void OnValueChanged(float value);
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Size", "Scroll Bar")]
-    public sealed partial class ScrollbarBindingSize : MonoBindingProperty<Scrollbar>, IBinder
+    public sealed partial class ScrollbarBindingSize : MonoBindingProperty<Scrollbar>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -111,9 +111,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Number Of Steps", "Scroll Bar")]
-    public sealed partial class ScrollbarBindingNumberOfSteps : MonoBindingProperty<Scrollbar>, IBinder
+    public sealed partial class ScrollbarBindingNumberOfSteps : MonoBindingProperty<Scrollbar>
     {
         [BindingProperty]
         [field: HideInInspector]

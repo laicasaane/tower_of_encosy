@@ -10,15 +10,15 @@ using UnityEngine.UI;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Selectable", "UI")]
     public sealed partial class SelectableBinder : MonoBinder<Selectable>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Interactable", "Selectable")]
-    public sealed partial class SelectableBindingInteractable : MonoBindingProperty<Selectable>, IBinder
+    public sealed partial class SelectableBindingInteractable : MonoBindingProperty<Selectable>
     {
         [BindingProperty]
         [field: HideInInspector]

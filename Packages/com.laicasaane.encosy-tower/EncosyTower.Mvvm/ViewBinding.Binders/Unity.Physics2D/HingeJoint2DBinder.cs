@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Hinge Joint 2D", "Physics 2D")]
     public sealed partial class HingeJoint2DBinder : MonoBinder<HingeJoint2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Limits", "Hinge Joint 2D")]
-    public sealed partial class HingeJoint2DBindingLimits : MonoBindingProperty<HingeJoint2D>, IBinder
+    public sealed partial class HingeJoint2DBindingLimits : MonoBindingProperty<HingeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Motor", "Hinge Joint 2D")]
-    public sealed partial class HingeJoint2DBindingMotor : MonoBindingProperty<HingeJoint2D>, IBinder
+    public sealed partial class HingeJoint2DBindingMotor : MonoBindingProperty<HingeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Limits", "Hinge Joint 2D")]
-    public sealed partial class HingeJoint2DBindingUseLimits : MonoBindingProperty<HingeJoint2D>, IBinder
+    public sealed partial class HingeJoint2DBindingUseLimits : MonoBindingProperty<HingeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Motor", "Hinge Joint 2D")]
-    public sealed partial class HingeJoint2DBindingUseMotor : MonoBindingProperty<HingeJoint2D>, IBinder
+    public sealed partial class HingeJoint2DBindingUseMotor : MonoBindingProperty<HingeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Anchor", "Hinge Joint 2D")]
-    public sealed partial class HingeJoint2DBindingAnchor : MonoBindingProperty<HingeJoint2D>, IBinder
+    public sealed partial class HingeJoint2DBindingAnchor : MonoBindingProperty<HingeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Auto Configure Connected Anchor", "Hinge Joint 2D")]
-    public sealed partial class HingeJoint2DBindingAutoConfigureConnectedAnchor : MonoBindingProperty<HingeJoint2D>, IBinder
+    public sealed partial class HingeJoint2DBindingAutoConfigureConnectedAnchor : MonoBindingProperty<HingeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Anchor", "Hinge Joint 2D")]
-    public sealed partial class HingeJoint2DBindingConnectedAnchor : MonoBindingProperty<HingeJoint2D>, IBinder
+    public sealed partial class HingeJoint2DBindingConnectedAnchor : MonoBindingProperty<HingeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,9 +141,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Action", "Hinge Joint 2D")]
-    public sealed partial class HingeJoint2DBindingBreakAction : MonoBindingProperty<HingeJoint2D>, IBinder
+    public sealed partial class HingeJoint2DBindingBreakAction : MonoBindingProperty<HingeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,9 +159,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Force", "Hinge Joint 2D")]
-    public sealed partial class HingeJoint2DBindingBreakForce : MonoBindingProperty<HingeJoint2D>, IBinder
+    public sealed partial class HingeJoint2DBindingBreakForce : MonoBindingProperty<HingeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -177,9 +177,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Torque", "Hinge Joint 2D")]
-    public sealed partial class HingeJoint2DBindingBreakTorque : MonoBindingProperty<HingeJoint2D>, IBinder
+    public sealed partial class HingeJoint2DBindingBreakTorque : MonoBindingProperty<HingeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -195,9 +195,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Body", "Hinge Joint 2D")]
-    public sealed partial class HingeJoint2DBindingConnectedBody : MonoBindingProperty<HingeJoint2D>, IBinder
+    public sealed partial class HingeJoint2DBindingConnectedBody : MonoBindingProperty<HingeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -213,9 +213,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enable Collision", "Hinge Joint 2D")]
-    public sealed partial class HingeJoint2DBindingEnableCollision : MonoBindingProperty<HingeJoint2D>, IBinder
+    public sealed partial class HingeJoint2DBindingEnableCollision : MonoBindingProperty<HingeJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]

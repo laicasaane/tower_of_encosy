@@ -10,15 +10,15 @@ using UnityEngine.Tilemaps;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Tilemap Collider 2D", "Tilemap")]
     public sealed partial class TilemapCollider2DBinder : MonoBinder<TilemapCollider2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Extrusion Factor", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingExtrusionFactor : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingExtrusionFactor : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -34,9 +34,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Maximum Tile Change Count", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingMaximumTileChangeCount : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingMaximumTileChangeCount : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -52,9 +52,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Delaunay Mesh", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingUseDelaunayMesh : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingUseDelaunayMesh : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -70,9 +70,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Callback Layers", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingCallbackLayers : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingCallbackLayers : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -88,9 +88,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Contact Capture Layers", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingContactCaptureLayers : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingContactCaptureLayers : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -106,9 +106,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Density", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingDensity : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingDensity : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -124,9 +124,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Exclude Layers", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingExcludeLayers : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingExcludeLayers : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -142,9 +142,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Receive Layers", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingForceReceiveLayers : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingForceReceiveLayers : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -160,9 +160,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Send Layers", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingForceSendLayers : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingForceSendLayers : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -178,9 +178,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Include Layers", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingIncludeLayers : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingIncludeLayers : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -196,9 +196,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Is Trigger", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingIsTrigger : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingIsTrigger : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -214,9 +214,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Layer Override Priority", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingLayerOverridePriority : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingLayerOverridePriority : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -232,9 +232,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Offset", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingOffset : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingOffset : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -250,9 +250,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Shared Material", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingSharedMaterial : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingSharedMaterial : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -268,13 +268,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
 #if UNITY_6000_0_OR_NEWER
     [Obsolete("Use TilemapCollider2DBindingCompositeOperation instead")]
 #else
     [Label("Used By Composite", "Tilemap Collider 2D")]
 #endif
-    public sealed partial class TilemapCollider2DBindingUsedByComposite : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingUsedByComposite : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -291,9 +291,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
     }
 
 #if UNITY_6000_0_OR_NEWER
-    [Serializable]
+    [Serializable, Binder]
     [Label("Composite Operation", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingCompositeOperation : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingCompositeOperation : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -310,9 +310,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
     }
 #endif
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Used By Effector", "Tilemap Collider 2D")]
-    public sealed partial class TilemapCollider2DBindingUsedByEffector : MonoBindingProperty<TilemapCollider2D>, IBinder
+    public sealed partial class TilemapCollider2DBindingUsedByEffector : MonoBindingProperty<TilemapCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]

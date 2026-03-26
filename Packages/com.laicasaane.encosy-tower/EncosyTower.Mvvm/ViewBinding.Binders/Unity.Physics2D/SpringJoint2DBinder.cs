@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Spring Joint 2D", "Physics 2D")]
     public sealed partial class SpringJoint2DBinder : MonoBinder<SpringJoint2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Auto Configure Distance", "Spring Joint 2D")]
-    public sealed partial class SpringJoint2DBindingAutoConfigureDistance : MonoBindingProperty<SpringJoint2D>, IBinder
+    public sealed partial class SpringJoint2DBindingAutoConfigureDistance : MonoBindingProperty<SpringJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Damping Ratio", "Spring Joint 2D")]
-    public sealed partial class SpringJoint2DBindingDampingRatio : MonoBindingProperty<SpringJoint2D>, IBinder
+    public sealed partial class SpringJoint2DBindingDampingRatio : MonoBindingProperty<SpringJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Distance", "Spring Joint 2D")]
-    public sealed partial class SpringJoint2DBindingDistance : MonoBindingProperty<SpringJoint2D>, IBinder
+    public sealed partial class SpringJoint2DBindingDistance : MonoBindingProperty<SpringJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Frequency", "Spring Joint 2D")]
-    public sealed partial class SpringJoint2DBindingFrequency : MonoBindingProperty<SpringJoint2D>, IBinder
+    public sealed partial class SpringJoint2DBindingFrequency : MonoBindingProperty<SpringJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Anchor", "Spring Joint 2D")]
-    public sealed partial class SpringJoint2DBindingAnchor : MonoBindingProperty<SpringJoint2D>, IBinder
+    public sealed partial class SpringJoint2DBindingAnchor : MonoBindingProperty<SpringJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Auto Configure Connected Anchor", "Spring Joint 2D")]
-    public sealed partial class SpringJoint2DBindingAutoConfigureConnectedAnchor : MonoBindingProperty<SpringJoint2D>, IBinder
+    public sealed partial class SpringJoint2DBindingAutoConfigureConnectedAnchor : MonoBindingProperty<SpringJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Anchor", "Spring Joint 2D")]
-    public sealed partial class SpringJoint2DBindingConnectedAnchor : MonoBindingProperty<SpringJoint2D>, IBinder
+    public sealed partial class SpringJoint2DBindingConnectedAnchor : MonoBindingProperty<SpringJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,9 +141,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Action", "Spring Joint 2D")]
-    public sealed partial class SpringJoint2DBindingBreakAction : MonoBindingProperty<SpringJoint2D>, IBinder
+    public sealed partial class SpringJoint2DBindingBreakAction : MonoBindingProperty<SpringJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,9 +159,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Force", "Spring Joint 2D")]
-    public sealed partial class SpringJoint2DBindingBreakForce : MonoBindingProperty<SpringJoint2D>, IBinder
+    public sealed partial class SpringJoint2DBindingBreakForce : MonoBindingProperty<SpringJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -177,9 +177,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Torque", "Spring Joint 2D")]
-    public sealed partial class SpringJoint2DBindingBreakTorque : MonoBindingProperty<SpringJoint2D>, IBinder
+    public sealed partial class SpringJoint2DBindingBreakTorque : MonoBindingProperty<SpringJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -195,9 +195,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Body", "Spring Joint 2D")]
-    public sealed partial class SpringJoint2DBindingConnectedBody : MonoBindingProperty<SpringJoint2D>, IBinder
+    public sealed partial class SpringJoint2DBindingConnectedBody : MonoBindingProperty<SpringJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -213,9 +213,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enable Collision", "Spring Joint 2D")]
-    public sealed partial class SpringJoint2DBindingEnableCollision : MonoBindingProperty<SpringJoint2D>, IBinder
+    public sealed partial class SpringJoint2DBindingEnableCollision : MonoBindingProperty<SpringJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]

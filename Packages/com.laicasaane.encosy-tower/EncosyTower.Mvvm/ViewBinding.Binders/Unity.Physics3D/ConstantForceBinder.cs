@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Constant Force", "Physics 3D")]
     public sealed partial class ConstantForceBinder : MonoBinder<ConstantForce>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force", "Constant Force")]
-    public sealed partial class ConstantForceBindingForce : MonoBindingProperty<ConstantForce>, IBinder
+    public sealed partial class ConstantForceBindingForce : MonoBindingProperty<ConstantForce>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Relative Force", "Constant Force")]
-    public sealed partial class ConstantForceBindingRelativeForce : MonoBindingProperty<ConstantForce>, IBinder
+    public sealed partial class ConstantForceBindingRelativeForce : MonoBindingProperty<ConstantForce>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Relative Torque", "Constant Force")]
-    public sealed partial class ConstantForceBindingRelativeTorque : MonoBindingProperty<ConstantForce>, IBinder
+    public sealed partial class ConstantForceBindingRelativeTorque : MonoBindingProperty<ConstantForce>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Torque", "Constant Force")]
-    public sealed partial class ConstantForceBindingTorque : MonoBindingProperty<ConstantForce>, IBinder
+    public sealed partial class ConstantForceBindingTorque : MonoBindingProperty<ConstantForce>
     {
         [BindingProperty]
         [field: HideInInspector]

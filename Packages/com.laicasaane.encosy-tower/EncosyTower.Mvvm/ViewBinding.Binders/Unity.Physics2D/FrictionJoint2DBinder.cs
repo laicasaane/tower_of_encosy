@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Friction Joint 2D", "Physics 2D")]
     public sealed partial class FrictionJoint2DBinder : MonoBinder<FrictionJoint2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Max Force", "Friction Joint 2D")]
-    public sealed partial class FrictionJoint2DBindingMaxForce : MonoBindingProperty<FrictionJoint2D>, IBinder
+    public sealed partial class FrictionJoint2DBindingMaxForce : MonoBindingProperty<FrictionJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Max Torque", "Friction Joint 2D")]
-    public sealed partial class FrictionJoint2DBindingMaxTorque : MonoBindingProperty<FrictionJoint2D>, IBinder
+    public sealed partial class FrictionJoint2DBindingMaxTorque : MonoBindingProperty<FrictionJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Anchor", "Friction Joint 2D")]
-    public sealed partial class FrictionJoint2DBindingAnchor : MonoBindingProperty<FrictionJoint2D>, IBinder
+    public sealed partial class FrictionJoint2DBindingAnchor : MonoBindingProperty<FrictionJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Auto Configure Connected Anchor", "Friction Joint 2D")]
-    public sealed partial class FrictionJoint2DBindingAutoConfigureConnectedAnchor : MonoBindingProperty<FrictionJoint2D>, IBinder
+    public sealed partial class FrictionJoint2DBindingAutoConfigureConnectedAnchor : MonoBindingProperty<FrictionJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Anchor", "Friction Joint 2D")]
-    public sealed partial class FrictionJoint2DBindingConnectedAnchor : MonoBindingProperty<FrictionJoint2D>, IBinder
+    public sealed partial class FrictionJoint2DBindingConnectedAnchor : MonoBindingProperty<FrictionJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Action", "Friction Joint 2D")]
-    public sealed partial class FrictionJoint2DBindingBreakAction : MonoBindingProperty<FrictionJoint2D>, IBinder
+    public sealed partial class FrictionJoint2DBindingBreakAction : MonoBindingProperty<FrictionJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Force", "Friction Joint 2D")]
-    public sealed partial class FrictionJoint2DBindingBreakForce : MonoBindingProperty<FrictionJoint2D>, IBinder
+    public sealed partial class FrictionJoint2DBindingBreakForce : MonoBindingProperty<FrictionJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,9 +141,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Torque", "Friction Joint 2D")]
-    public sealed partial class FrictionJoint2DBindingBreakTorque : MonoBindingProperty<FrictionJoint2D>, IBinder
+    public sealed partial class FrictionJoint2DBindingBreakTorque : MonoBindingProperty<FrictionJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,9 +159,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Body", "Friction Joint 2D")]
-    public sealed partial class FrictionJoint2DBindingConnectedBody : MonoBindingProperty<FrictionJoint2D>, IBinder
+    public sealed partial class FrictionJoint2DBindingConnectedBody : MonoBindingProperty<FrictionJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -177,9 +177,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enable Collision", "Friction Joint 2D")]
-    public sealed partial class FrictionJoint2DBindingEnableCollision : MonoBindingProperty<FrictionJoint2D>, IBinder
+    public sealed partial class FrictionJoint2DBindingEnableCollision : MonoBindingProperty<FrictionJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]

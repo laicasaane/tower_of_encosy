@@ -12,15 +12,15 @@ using UnityEngine.Events;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("TMP Dropdown", "TextMeshPro")]
     public sealed partial class TMP_DropdownBinder : MonoBinder<TMP_Dropdown>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Value", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingValue : MonoBindingProperty<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingValue : MonoBindingProperty<TMP_Dropdown>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -36,9 +36,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Caption Text", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingCaptionText : MonoBindingProperty<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingCaptionText : MonoBindingProperty<TMP_Dropdown>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -61,9 +61,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Interactable", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingInteractable : MonoBindingProperty<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingInteractable : MonoBindingProperty<TMP_Dropdown>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -79,9 +79,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("On Value Changed", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingOnValueChanged : MonoBindingCommand<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingOnValueChanged : MonoBindingCommand<TMP_Dropdown>
     {
         private readonly UnityAction<int> _command;
 
@@ -119,9 +119,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
         partial void OnValueChanged(int value);
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Set Options", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingSetOptions : MonoBindingProperty<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingSetOptions : MonoBindingProperty<TMP_Dropdown>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -139,9 +139,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Set String Options", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingSetStringOptions : MonoBindingProperty<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingSetStringOptions : MonoBindingProperty<TMP_Dropdown>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,9 +159,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Set Sprite Options", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingSetSpriteOptions : MonoBindingProperty<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingSetSpriteOptions : MonoBindingProperty<TMP_Dropdown>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -179,9 +179,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Add Options", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingAddOptions : MonoBindingProperty<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingAddOptions : MonoBindingProperty<TMP_Dropdown>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -197,9 +197,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Add String Options", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingAddStringOptions : MonoBindingProperty<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingAddStringOptions : MonoBindingProperty<TMP_Dropdown>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -215,9 +215,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Add Sprite Options", "TMP Dropdown")]
-    public sealed partial class TMP_DropdownBindingAddSpriteOptions : MonoBindingProperty<TMP_Dropdown>, IBinder
+    public sealed partial class TMP_DropdownBindingAddSpriteOptions : MonoBindingProperty<TMP_Dropdown>
     {
         [BindingProperty]
         [field: HideInInspector]

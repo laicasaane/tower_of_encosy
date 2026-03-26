@@ -10,15 +10,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Hinge Joint", "Physics 3D")]
     public sealed partial class HingeJointBinder : MonoBinder<HingeJoint>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Extended Limits", "Hinge Joint")]
-    public sealed partial class HingeJointBindingExtendedLimits : MonoBindingProperty<HingeJoint>, IBinder
+    public sealed partial class HingeJointBindingExtendedLimits : MonoBindingProperty<HingeJoint>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -34,9 +34,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Limits", "Hinge Joint")]
-    public sealed partial class HingeJointBindingLimits : MonoBindingProperty<HingeJoint>, IBinder
+    public sealed partial class HingeJointBindingLimits : MonoBindingProperty<HingeJoint>
     {
         partial void OnBeforeConstructor()
         {
@@ -71,9 +71,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Motor", "Hinge Joint")]
-    public sealed partial class HingeJointBindingMotor : MonoBindingProperty<HingeJoint>, IBinder
+    public sealed partial class HingeJointBindingMotor : MonoBindingProperty<HingeJoint>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -89,9 +89,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Spring", "Hinge Joint")]
-    public sealed partial class HingeJointBindingSpring : MonoBindingProperty<HingeJoint>, IBinder
+    public sealed partial class HingeJointBindingSpring : MonoBindingProperty<HingeJoint>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -107,9 +107,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Acceleration", "Hinge Joint")]
-    public sealed partial class HingeJointBindingUseAcceleration : MonoBindingProperty<HingeJoint>, IBinder
+    public sealed partial class HingeJointBindingUseAcceleration : MonoBindingProperty<HingeJoint>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -125,9 +125,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Limits", "Hinge Joint")]
-    public sealed partial class HingeJointBindingUseLimits : MonoBindingProperty<HingeJoint>, IBinder
+    public sealed partial class HingeJointBindingUseLimits : MonoBindingProperty<HingeJoint>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -143,9 +143,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Motor", "Hinge Joint")]
-    public sealed partial class HingeJointBindingUseMotor : MonoBindingProperty<HingeJoint>, IBinder
+    public sealed partial class HingeJointBindingUseMotor : MonoBindingProperty<HingeJoint>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -161,9 +161,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Spring", "Hinge Joint")]
-    public sealed partial class HingeJointBindingUseSpring : MonoBindingProperty<HingeJoint>, IBinder
+    public sealed partial class HingeJointBindingUseSpring : MonoBindingProperty<HingeJoint>
     {
         [BindingProperty]
         [field: HideInInspector]

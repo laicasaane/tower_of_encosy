@@ -6,7 +6,8 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.VisualDebugging.Commands.Bindings
 {
-    internal abstract partial class VisualPropertyBinding : IBinder
+    [Binder]
+    internal abstract partial class VisualPropertyBinding
     {
         public void SetContext(IObservableObject context)
         {
@@ -15,7 +16,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
         }
     }
 
-    internal abstract partial class VisualPropertyBinding<T> : VisualPropertyBinding, IBinder
+    [Binder]
+    internal abstract partial class VisualPropertyBinding<T> : VisualPropertyBinding
         where T : VisualElement
     {
         protected T target;
@@ -34,7 +36,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
         protected virtual void OnAfterSetTarget() { }
     }
 
-    internal partial class VisualPropertyBindingToggle : VisualPropertyBinding<Toggle>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingToggle : VisualPropertyBinding<Toggle>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -58,7 +61,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingBounds : VisualPropertyBinding<BoundsField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingBounds : VisualPropertyBinding<BoundsField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -82,7 +86,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingBoundsInt : VisualPropertyBinding<BoundsIntField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingBoundsInt : VisualPropertyBinding<BoundsIntField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -106,7 +111,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingDateTime : VisualPropertyBinding<TextField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingDateTime : VisualPropertyBinding<TextField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -135,7 +141,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
         }
     }
 
-    internal partial class VisualPropertyBindingDouble : VisualPropertyBinding<DoubleField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingDouble : VisualPropertyBinding<DoubleField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -159,7 +166,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingEnum : VisualPropertyBinding<EnumField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingEnum : VisualPropertyBinding<EnumField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -183,7 +191,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingFloat : VisualPropertyBinding<FloatField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingFloat : VisualPropertyBinding<FloatField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -207,7 +216,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingInteger : VisualPropertyBinding<IntegerField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingInteger : VisualPropertyBinding<IntegerField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -231,7 +241,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingLong : VisualPropertyBinding<LongField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingLong : VisualPropertyBinding<LongField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -255,7 +266,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingRect : VisualPropertyBinding<RectField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingRect : VisualPropertyBinding<RectField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -279,7 +291,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingRectInt : VisualPropertyBinding<RectIntField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingRectInt : VisualPropertyBinding<RectIntField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -303,7 +316,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingString : VisualPropertyBinding<TextField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingString : VisualPropertyBinding<TextField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -327,7 +341,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingUnsignedInteger : VisualPropertyBinding<UnsignedIntegerField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingUnsignedInteger : VisualPropertyBinding<UnsignedIntegerField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -351,7 +366,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingUnsignedLong : VisualPropertyBinding<UnsignedLongField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingUnsignedLong : VisualPropertyBinding<UnsignedLongField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -375,7 +391,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingVector2 : VisualPropertyBinding<Vector2Field>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingVector2 : VisualPropertyBinding<Vector2Field>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -399,7 +416,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingVector2Int : VisualPropertyBinding<Vector2IntField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingVector2Int : VisualPropertyBinding<Vector2IntField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -423,7 +441,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingVector3 : VisualPropertyBinding<Vector3Field>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingVector3 : VisualPropertyBinding<Vector3Field>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -447,7 +466,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingVector3Int : VisualPropertyBinding<Vector3IntField>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingVector3Int : VisualPropertyBinding<Vector3IntField>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);
@@ -471,7 +491,8 @@ namespace EncosyTower.VisualDebugging.Commands.Bindings
             => OnValueChanged(evt.newValue);
     }
 
-    internal partial class VisualPropertyBindingVector4 : VisualPropertyBinding<Vector4Field>, IBinder
+    [Binder]
+    internal partial class VisualPropertyBindingVector4 : VisualPropertyBinding<Vector4Field>
     {
         protected override void OnBeforeSetTarget()
             => target?.UnregisterValueChangedCallback(OnValueChanged);

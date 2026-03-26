@@ -7,15 +7,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Sprite Renderer")]
     public sealed partial class SpriteRendererBinder : MonoBinder<SpriteRenderer>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Adaptive Mode Threshold", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingAdaptiveModeThreshold : MonoBindingProperty<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingAdaptiveModeThreshold : MonoBindingProperty<SpriteRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -31,9 +31,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Color", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingColor : MonoBindingProperty<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingColor : MonoBindingProperty<SpriteRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -49,9 +49,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Draw Mode", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingDrawMode : MonoBindingProperty<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingDrawMode : MonoBindingProperty<SpriteRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -67,9 +67,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Flip X", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingFlipX : MonoBindingProperty<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingFlipX : MonoBindingProperty<SpriteRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -85,9 +85,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Flip Y", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingFlipY : MonoBindingProperty<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingFlipY : MonoBindingProperty<SpriteRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -103,9 +103,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Mask Interaction", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingMaskInteraction : MonoBindingProperty<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingMaskInteraction : MonoBindingProperty<SpriteRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -121,9 +121,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Size", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingSize : MonoBindingProperty<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingSize : MonoBindingProperty<SpriteRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -139,9 +139,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Sprite", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingSprite : MonoBindingProperty<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingSprite : MonoBindingProperty<SpriteRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -157,9 +157,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Sprite Sort Point", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingSpriteSortPoint : MonoBindingProperty<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingSpriteSortPoint : MonoBindingProperty<SpriteRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -175,9 +175,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Tile Mode", "Sprite Renderer")]
-    public sealed partial class SpriteRendererBindingTileMode : MonoBindingProperty<SpriteRenderer>, IBinder
+    public sealed partial class SpriteRendererBindingTileMode : MonoBindingProperty<SpriteRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]

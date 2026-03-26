@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Capsule Collider", "Physics 3D")]
     public sealed partial class CapsuleColliderBinder : MonoBinder<CapsuleCollider>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Center", "Capsule Collider")]
-    public sealed partial class CapsuleColliderBindingCenter : MonoBindingProperty<CapsuleCollider>, IBinder
+    public sealed partial class CapsuleColliderBindingCenter : MonoBindingProperty<CapsuleCollider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Direction", "Capsule Collider")]
-    public sealed partial class CapsuleColliderBindingDirection : MonoBindingProperty<CapsuleCollider>, IBinder
+    public sealed partial class CapsuleColliderBindingDirection : MonoBindingProperty<CapsuleCollider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Height", "Capsule Collider")]
-    public sealed partial class CapsuleColliderBindingHeight : MonoBindingProperty<CapsuleCollider>, IBinder
+    public sealed partial class CapsuleColliderBindingHeight : MonoBindingProperty<CapsuleCollider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Radius", "Capsule Collider")]
-    public sealed partial class CapsuleColliderBindingRadius : MonoBindingProperty<CapsuleCollider>, IBinder
+    public sealed partial class CapsuleColliderBindingRadius : MonoBindingProperty<CapsuleCollider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Is Trigger", "Capsule Collider")]
-    public sealed partial class CapsuleColliderBindingIsTrigger : MonoBindingProperty<CapsuleCollider>, IBinder
+    public sealed partial class CapsuleColliderBindingIsTrigger : MonoBindingProperty<CapsuleCollider>
     {
         [BindingProperty]
         [field: HideInInspector]

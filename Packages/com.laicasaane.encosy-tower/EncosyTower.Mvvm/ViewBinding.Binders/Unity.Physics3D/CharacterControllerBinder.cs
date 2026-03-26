@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Character Controller", "Physics 3D")]
     public sealed partial class CharacterControllerBinder : MonoBinder<CharacterController>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Center", "Character Controller")]
-    public sealed partial class CharacterControllerBindingCenter : MonoBindingProperty<CharacterController>, IBinder
+    public sealed partial class CharacterControllerBindingCenter : MonoBindingProperty<CharacterController>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Detect Collisions", "Character Controller")]
-    public sealed partial class CharacterControllerBindingDetectCollisions : MonoBindingProperty<CharacterController>, IBinder
+    public sealed partial class CharacterControllerBindingDetectCollisions : MonoBindingProperty<CharacterController>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enable Overlap Recovery", "Character Controller")]
-    public sealed partial class CharacterControllerBindingEnableOverlapRecovery : MonoBindingProperty<CharacterController>, IBinder
+    public sealed partial class CharacterControllerBindingEnableOverlapRecovery : MonoBindingProperty<CharacterController>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Height", "Character Controller")]
-    public sealed partial class CharacterControllerBindingHeight : MonoBindingProperty<CharacterController>, IBinder
+    public sealed partial class CharacterControllerBindingHeight : MonoBindingProperty<CharacterController>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Min Move Distance", "Character Controller")]
-    public sealed partial class CharacterControllerBindingMinMoveDistance : MonoBindingProperty<CharacterController>, IBinder
+    public sealed partial class CharacterControllerBindingMinMoveDistance : MonoBindingProperty<CharacterController>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Radius", "Character Controller")]
-    public sealed partial class CharacterControllerBindingRadius : MonoBindingProperty<CharacterController>, IBinder
+    public sealed partial class CharacterControllerBindingRadius : MonoBindingProperty<CharacterController>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Skin Width", "Character Controller")]
-    public sealed partial class CharacterControllerBindingSkinWidth : MonoBindingProperty<CharacterController>, IBinder
+    public sealed partial class CharacterControllerBindingSkinWidth : MonoBindingProperty<CharacterController>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,9 +141,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Slope Limit", "Character Controller")]
-    public sealed partial class CharacterControllerBindingSlopeLimit : MonoBindingProperty<CharacterController>, IBinder
+    public sealed partial class CharacterControllerBindingSlopeLimit : MonoBindingProperty<CharacterController>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,9 +159,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Step Offset", "Character Controller")]
-    public sealed partial class CharacterControllerBindingStepOffset : MonoBindingProperty<CharacterController>, IBinder
+    public sealed partial class CharacterControllerBindingStepOffset : MonoBindingProperty<CharacterController>
     {
         [BindingProperty]
         [field: HideInInspector]

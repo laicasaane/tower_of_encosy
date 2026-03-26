@@ -7,15 +7,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("GameObject")]
     public sealed partial class GameObjectBinder : MonoBinder<GameObject>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Active Self", "GameObject")]
-    public sealed partial class GameObjectBindingActiveSelf : MonoBindingProperty<GameObject>, IBinder
+    public sealed partial class GameObjectBindingActiveSelf : MonoBindingProperty<GameObject>
     {
         [BindingProperty]
         [field: HideInInspector]

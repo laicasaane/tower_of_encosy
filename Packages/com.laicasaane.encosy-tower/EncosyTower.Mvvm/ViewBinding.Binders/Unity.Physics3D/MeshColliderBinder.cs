@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Box Collider", "Physics 3D")]
     public sealed partial class MeshColliderBinder : MonoBinder<MeshCollider>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Convex", "Mesh Collider")]
-    public sealed partial class MeshColliderBindingConvex : MonoBindingProperty<MeshCollider>, IBinder
+    public sealed partial class MeshColliderBindingConvex : MonoBindingProperty<MeshCollider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Cooking Options", "Mesh Collider")]
-    public sealed partial class MeshColliderBindingCookingOptions : MonoBindingProperty<MeshCollider>, IBinder
+    public sealed partial class MeshColliderBindingCookingOptions : MonoBindingProperty<MeshCollider>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics3D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Shared Mesh", "Mesh Collider")]
-    public sealed partial class MeshColliderBindingSharedMesh : MonoBindingProperty<MeshCollider>, IBinder
+    public sealed partial class MeshColliderBindingSharedMesh : MonoBindingProperty<MeshCollider>
     {
         [BindingProperty]
         [field: HideInInspector]

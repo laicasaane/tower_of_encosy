@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Target Joint 2D", "Physics 2D")]
     public sealed partial class TargetJoint2DBinder : MonoBinder<TargetJoint2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Anchor", "Target Joint 2D")]
-    public sealed partial class TargetJoint2DBindingAnchor : MonoBindingProperty<TargetJoint2D>, IBinder
+    public sealed partial class TargetJoint2DBindingAnchor : MonoBindingProperty<TargetJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Auto Configure Target", "Target Joint 2D")]
-    public sealed partial class TargetJoint2DBindingAutoConfigureTarget : MonoBindingProperty<TargetJoint2D>, IBinder
+    public sealed partial class TargetJoint2DBindingAutoConfigureTarget : MonoBindingProperty<TargetJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Damping Ratio", "Target Joint 2D")]
-    public sealed partial class TargetJoint2DBindingDampingRatio : MonoBindingProperty<TargetJoint2D>, IBinder
+    public sealed partial class TargetJoint2DBindingDampingRatio : MonoBindingProperty<TargetJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Frequency", "Target Joint 2D")]
-    public sealed partial class TargetJoint2DBindingFrequency : MonoBindingProperty<TargetJoint2D>, IBinder
+    public sealed partial class TargetJoint2DBindingFrequency : MonoBindingProperty<TargetJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Max Force", "Target Joint 2D")]
-    public sealed partial class TargetJoint2DBindingMaxForce : MonoBindingProperty<TargetJoint2D>, IBinder
+    public sealed partial class TargetJoint2DBindingMaxForce : MonoBindingProperty<TargetJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Target", "Target Joint 2D")]
-    public sealed partial class TargetJoint2DBindingTarget : MonoBindingProperty<TargetJoint2D>, IBinder
+    public sealed partial class TargetJoint2DBindingTarget : MonoBindingProperty<TargetJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Action", "Target Joint 2D")]
-    public sealed partial class TargetJoint2DBindingBreakAction : MonoBindingProperty<TargetJoint2D>, IBinder
+    public sealed partial class TargetJoint2DBindingBreakAction : MonoBindingProperty<TargetJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,9 +141,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Force", "Target Joint 2D")]
-    public sealed partial class TargetJoint2DBindingBreakForce : MonoBindingProperty<TargetJoint2D>, IBinder
+    public sealed partial class TargetJoint2DBindingBreakForce : MonoBindingProperty<TargetJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,9 +159,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Torque", "Target Joint 2D")]
-    public sealed partial class TargetJoint2DBindingBreakTorque : MonoBindingProperty<TargetJoint2D>, IBinder
+    public sealed partial class TargetJoint2DBindingBreakTorque : MonoBindingProperty<TargetJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -177,9 +177,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Body", "Target Joint 2D")]
-    public sealed partial class TargetJoint2DBindingConnectedBody : MonoBindingProperty<TargetJoint2D>, IBinder
+    public sealed partial class TargetJoint2DBindingConnectedBody : MonoBindingProperty<TargetJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -195,9 +195,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enable Collision", "Target Joint 2D")]
-    public sealed partial class TargetJoint2DBindingEnableCollision : MonoBindingProperty<TargetJoint2D>, IBinder
+    public sealed partial class TargetJoint2DBindingEnableCollision : MonoBindingProperty<TargetJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]

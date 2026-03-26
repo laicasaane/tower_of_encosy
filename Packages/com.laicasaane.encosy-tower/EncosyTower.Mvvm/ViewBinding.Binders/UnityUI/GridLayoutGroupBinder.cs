@@ -10,15 +10,15 @@ using UnityEngine.UI;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Grid Layout Group", "UI")]
     public sealed partial class GridLayoutGroupBinder : MonoBinder<GridLayoutGroup>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Cell Size", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingCellSize : MonoBindingProperty<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingCellSize : MonoBindingProperty<GridLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -34,9 +34,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Cell Width", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingCellWidth : MonoBindingProperty<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingCellWidth : MonoBindingProperty<GridLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -53,9 +53,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Cell Height", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingCellHeight : MonoBindingProperty<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingCellHeight : MonoBindingProperty<GridLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -72,9 +72,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Spacing Width", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingSpacingWidth : MonoBindingProperty<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingSpacingWidth : MonoBindingProperty<GridLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -91,9 +91,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Spacing Height", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingSpacingHeight : MonoBindingProperty<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingSpacingHeight : MonoBindingProperty<GridLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -110,9 +110,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Start Corner", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingStartCorner : MonoBindingProperty<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingStartCorner : MonoBindingProperty<GridLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -128,9 +128,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Start Axis", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingStartAxis : MonoBindingProperty<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingStartAxis : MonoBindingProperty<GridLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -146,9 +146,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Child Alignment", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingChildAlignment : MonoBindingProperty<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingChildAlignment : MonoBindingProperty<GridLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -164,9 +164,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Constraint", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingConstraint : MonoBindingProperty<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingConstraint : MonoBindingProperty<GridLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -182,9 +182,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Constraint Count", "Grid Layout Group")]
-    public sealed partial class GridLayoutGroupBindingConstraintCount : MonoBindingProperty<GridLayoutGroup>, IBinder
+    public sealed partial class GridLayoutGroupBindingConstraintCount : MonoBindingProperty<GridLayoutGroup>
     {
         [BindingProperty]
         [field: HideInInspector]

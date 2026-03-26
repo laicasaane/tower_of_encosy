@@ -7,15 +7,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Rect Transform")]
     public sealed partial class RectTransformBinder : MonoBinder<RectTransform>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Anchored Position", "Rect Transform")]
-    public sealed partial class RectTransformBindingAnchorPosition : MonoBindingProperty<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingAnchorPosition : MonoBindingProperty<RectTransform>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -31,9 +31,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Anchored Position 3D", "Rect Transform")]
-    public sealed partial class RectTransformBindingAnchorPosition3D : MonoBindingProperty<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingAnchorPosition3D : MonoBindingProperty<RectTransform>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -49,9 +49,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Anchor Min", "Rect Transform")]
-    public sealed partial class RectTransformBindingAnchorMin : MonoBindingProperty<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingAnchorMin : MonoBindingProperty<RectTransform>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -67,9 +67,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Anchor Max", "Rect Transform")]
-    public sealed partial class RectTransformBindingAnchorMax : MonoBindingProperty<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingAnchorMax : MonoBindingProperty<RectTransform>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -85,9 +85,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Offset Min", "Rect Transform")]
-    public sealed partial class RectTransformBindingOffsetMin : MonoBindingProperty<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingOffsetMin : MonoBindingProperty<RectTransform>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -103,9 +103,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Offset Max", "Rect Transform")]
-    public sealed partial class RectTransformBindingOffsetMax : MonoBindingProperty<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingOffsetMax : MonoBindingProperty<RectTransform>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -121,9 +121,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Size Delta", "Rect Transform")]
-    public sealed partial class RectTransformBindingSizeDelta : MonoBindingProperty<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingSizeDelta : MonoBindingProperty<RectTransform>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -139,9 +139,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Pivot", "Rect Transform")]
-    public sealed partial class RectTransformBindingPivot : MonoBindingProperty<RectTransform>, IBinder
+    public sealed partial class RectTransformBindingPivot : MonoBindingProperty<RectTransform>
     {
         [BindingProperty]
         [field: HideInInspector]

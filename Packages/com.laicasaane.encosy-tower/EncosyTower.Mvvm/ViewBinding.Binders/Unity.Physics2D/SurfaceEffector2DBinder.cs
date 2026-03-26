@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Surface Effector 2D", "Physics 2D")]
     public sealed partial class SurfaceEffector2DBinder : MonoBinder<SurfaceEffector2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Scale", "Surface Effector 2D")]
-    public sealed partial class SurfaceEffector2DBindingForceScale : MonoBindingProperty<SurfaceEffector2D>, IBinder
+    public sealed partial class SurfaceEffector2DBindingForceScale : MonoBindingProperty<SurfaceEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Speed", "Surface Effector 2D")]
-    public sealed partial class SurfaceEffector2DBindingSpeed : MonoBindingProperty<SurfaceEffector2D>, IBinder
+    public sealed partial class SurfaceEffector2DBindingSpeed : MonoBindingProperty<SurfaceEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Speed Variation", "Surface Effector 2D")]
-    public sealed partial class SurfaceEffector2DBindingSpeedVariation : MonoBindingProperty<SurfaceEffector2D>, IBinder
+    public sealed partial class SurfaceEffector2DBindingSpeedVariation : MonoBindingProperty<SurfaceEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Bounce", "Surface Effector 2D")]
-    public sealed partial class SurfaceEffector2DBindingUseBounce : MonoBindingProperty<SurfaceEffector2D>, IBinder
+    public sealed partial class SurfaceEffector2DBindingUseBounce : MonoBindingProperty<SurfaceEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Contact Force", "Surface Effector 2D")]
-    public sealed partial class SurfaceEffector2DBindingUseContactForce : MonoBindingProperty<SurfaceEffector2D>, IBinder
+    public sealed partial class SurfaceEffector2DBindingUseContactForce : MonoBindingProperty<SurfaceEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Friction", "Surface Effector 2D")]
-    public sealed partial class SurfaceEffector2DBindingUseFriction : MonoBindingProperty<SurfaceEffector2D>, IBinder
+    public sealed partial class SurfaceEffector2DBindingUseFriction : MonoBindingProperty<SurfaceEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]

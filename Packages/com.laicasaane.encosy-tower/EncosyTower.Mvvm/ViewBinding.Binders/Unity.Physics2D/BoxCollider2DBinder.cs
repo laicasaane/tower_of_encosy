@@ -10,15 +10,15 @@ using UnityEngine;
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Box Collider 2D", "Physics 2D")]
     public sealed partial class BoxCollider2DBinder : MonoBinder<BoxCollider2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Auto Tiling", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingAutoTiling : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingAutoTiling : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -34,9 +34,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Edge Radius", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingEdgeRadius : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingEdgeRadius : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -52,9 +52,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enabled", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingEnabled : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingEnabled : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -70,9 +70,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Size", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingSize : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingSize : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -88,9 +88,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Callback Layers", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingCallbackLayers : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingCallbackLayers : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -106,9 +106,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Contact Capture Layers", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingContactCaptureLayers : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingContactCaptureLayers : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -124,9 +124,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Density", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingDensity : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingDensity : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -142,9 +142,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Exclude Layers", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingExcludeLayers : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingExcludeLayers : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -160,9 +160,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Receive Layers", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingForceReceiveLayers : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingForceReceiveLayers : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -178,9 +178,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Send Layers", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingForceSendLayers : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingForceSendLayers : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -196,9 +196,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Include Layers", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingIncludeLayers : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingIncludeLayers : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -214,9 +214,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Is Trigger", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingIsTrigger : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingIsTrigger : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -232,9 +232,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Layer Override Priority", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingLayerOverridePriority : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingLayerOverridePriority : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -250,9 +250,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Offset", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingOffset : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingOffset : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -268,9 +268,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Shared Material", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingSharedMaterial : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingSharedMaterial : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -286,13 +286,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
 #if UNITY_6000_0_OR_NEWER
     [Obsolete("Use BoxCollider2DBindingCompositeOperation instead")]
 #else
     [Label("Used By Composite", "Box Collider 2D")]
 #endif
-    public sealed partial class BoxCollider2DBindingUsedByComposite : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingUsedByComposite : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -309,9 +309,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
 #if UNITY_6000_0_OR_NEWER
-    [Serializable]
+    [Serializable, Binder]
     [Label("Composite Operation", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingCompositeOperation : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingCompositeOperation : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -328,9 +328,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 #endif
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Used By Effector", "Box Collider 2D")]
-    public sealed partial class BoxCollider2DBindingUsedByEffector : MonoBindingProperty<BoxCollider2D>, IBinder
+    public sealed partial class BoxCollider2DBindingUsedByEffector : MonoBindingProperty<BoxCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]

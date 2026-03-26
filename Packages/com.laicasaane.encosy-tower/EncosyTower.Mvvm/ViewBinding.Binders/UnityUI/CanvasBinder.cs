@@ -7,15 +7,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Canvas", "UI")]
     public sealed partial class CanvasBinder : MonoBinder<Canvas>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Camera", "Canvas")]
-    public sealed partial class CanvasBindingCamera : MonoBindingProperty<Canvas>, IBinder
+    public sealed partial class CanvasBindingCamera : MonoBindingProperty<Canvas>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -31,9 +31,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Override Sorting", "Canvas")]
-    public sealed partial class CanvasBindingOverrideSorting : MonoBindingProperty<Canvas>, IBinder
+    public sealed partial class CanvasBindingOverrideSorting : MonoBindingProperty<Canvas>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -49,9 +49,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Sorting Layer Id", "Canvas")]
-    public sealed partial class CanvasBindingSortingLayerId : MonoBindingProperty<Canvas>, IBinder
+    public sealed partial class CanvasBindingSortingLayerId : MonoBindingProperty<Canvas>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -67,9 +67,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Sorting Layer Name", "Canvas")]
-    public sealed partial class CanvasBindingSortingLayerName : MonoBindingProperty<Canvas>, IBinder
+    public sealed partial class CanvasBindingSortingLayerName : MonoBindingProperty<Canvas>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -85,9 +85,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Sorting Order In Layer", "Canvas")]
-    public sealed partial class CanvasBindingSortingOrderInLayer : MonoBindingProperty<Canvas>, IBinder
+    public sealed partial class CanvasBindingSortingOrderInLayer : MonoBindingProperty<Canvas>
     {
         [BindingProperty]
         [field: HideInInspector]

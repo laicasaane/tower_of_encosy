@@ -115,7 +115,8 @@ namespace EncosyTower.VisualDebugging.Commands
         private record StateOption(VisualOptionMenu State, VisualOption Option);
     }
 
-    internal partial class VisualOptionsViewBinding : VisualPropertyBinding, IBinder
+    [Binder]
+    internal partial class VisualOptionsViewBinding : VisualPropertyBinding
     {
         private readonly VisualOptionsView _view;
 

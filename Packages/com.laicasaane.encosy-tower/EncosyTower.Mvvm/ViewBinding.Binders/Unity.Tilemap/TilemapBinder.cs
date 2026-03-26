@@ -11,15 +11,15 @@ using UnityEngine.Tilemaps;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Tilemap", "Tilemap")]
     public sealed partial class TilemapBinder : MonoBinder<Tilemap>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Animation Frame Rate", "Tilemap")]
-    public sealed partial class TilemapBindingAnimationFrameRate : MonoBindingProperty<Tilemap>, IBinder
+    public sealed partial class TilemapBindingAnimationFrameRate : MonoBindingProperty<Tilemap>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -35,9 +35,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Color", "Tilemap")]
-    public sealed partial class TilemapBindingColor : MonoBindingProperty<Tilemap>, IBinder
+    public sealed partial class TilemapBindingColor : MonoBindingProperty<Tilemap>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -53,9 +53,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Orientation", "Tilemap")]
-    public sealed partial class TilemapBindingOrientation : MonoBindingProperty<Tilemap>, IBinder
+    public sealed partial class TilemapBindingOrientation : MonoBindingProperty<Tilemap>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -71,9 +71,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Orientation Matrix", "Tilemap")]
-    public sealed partial class TilemapBindingOrientationMatrix : MonoBindingProperty<Tilemap>, IBinder
+    public sealed partial class TilemapBindingOrientationMatrix : MonoBindingProperty<Tilemap>
     {
         partial void OnBeforeConstructor()
         {
@@ -108,9 +108,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Origin", "Tilemap")]
-    public sealed partial class TilemapBindingOrigin : MonoBindingProperty<Tilemap>, IBinder
+    public sealed partial class TilemapBindingOrigin : MonoBindingProperty<Tilemap>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -126,9 +126,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Size", "Tilemap")]
-    public sealed partial class TilemapBindingSize : MonoBindingProperty<Tilemap>, IBinder
+    public sealed partial class TilemapBindingSize : MonoBindingProperty<Tilemap>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -144,9 +144,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Tile Anchor", "Tilemap")]
-    public sealed partial class TilemapBindingTileAnchor : MonoBindingProperty<Tilemap>, IBinder
+    public sealed partial class TilemapBindingTileAnchor : MonoBindingProperty<Tilemap>
     {
         [BindingProperty]
         [field: HideInInspector]

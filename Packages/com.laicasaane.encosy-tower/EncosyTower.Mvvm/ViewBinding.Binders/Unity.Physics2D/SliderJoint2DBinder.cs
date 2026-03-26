@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Slider Joint 2D", "Physics 2D")]
     public sealed partial class SliderJoint2DBinder : MonoBinder<SliderJoint2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Angle", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingAngle : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingAngle : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Auto Configure Angle", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingAutoConfigureAngle : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingAutoConfigureAngle : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Limits", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingLimits : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingLimits : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Motor", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingMotor : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingMotor : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Limits", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingUseLimits : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingUseLimits : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Motor", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingUseMotor : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingUseMotor : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Anchor", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingAnchor : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingAnchor : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,9 +141,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Auto Configure Connected Anchor", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingAutoConfigureConnectedAnchor : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingAutoConfigureConnectedAnchor : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,9 +159,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Anchor", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingConnectedAnchor : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingConnectedAnchor : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -177,9 +177,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Action", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingBreakAction : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingBreakAction : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -195,9 +195,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Force", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingBreakForce : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingBreakForce : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -213,9 +213,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Torque", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingBreakTorque : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingBreakTorque : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -231,9 +231,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Body", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingConnectedBody : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingConnectedBody : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -249,9 +249,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enable Collision", "Slider Joint 2D")]
-    public sealed partial class SliderJoint2DBindingEnableCollision : MonoBindingProperty<SliderJoint2D>, IBinder
+    public sealed partial class SliderJoint2DBindingEnableCollision : MonoBindingProperty<SliderJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]

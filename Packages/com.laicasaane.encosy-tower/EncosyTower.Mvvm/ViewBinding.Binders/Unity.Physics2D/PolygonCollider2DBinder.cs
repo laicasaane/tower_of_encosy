@@ -10,15 +10,15 @@ using UnityEngine;
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Polygon Collider 2D", "Physics 2D")]
     public sealed partial class PolygonCollider2DBinder : MonoBinder<PolygonCollider2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Points", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingPoints : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingPoints : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -34,9 +34,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Path Count", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingPathCount : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingPathCount : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -52,9 +52,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Delaunay Mesh", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingUseDelaunayMesh : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingUseDelaunayMesh : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -70,9 +70,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enabled", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingEnabled : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingEnabled : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -88,9 +88,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Auto Tiling", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingAutoTiling : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingAutoTiling : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -106,9 +106,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Callback Layers", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingCallbackLayers : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingCallbackLayers : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -124,9 +124,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Contact Capture Layers", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingContactCaptureLayers : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingContactCaptureLayers : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -142,9 +142,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Density", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingDensity : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingDensity : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -160,9 +160,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Exclude Layers", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingExcludeLayers : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingExcludeLayers : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -178,9 +178,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Receive Layers", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingForceReceiveLayers : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingForceReceiveLayers : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -196,9 +196,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Send Layers", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingForceSendLayers : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingForceSendLayers : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -214,9 +214,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Include Layers", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingIncludeLayers : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingIncludeLayers : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -232,9 +232,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Is Trigger", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingIsTrigger : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingIsTrigger : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -250,9 +250,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Layer Override Priority", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingLayerOverridePriority : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingLayerOverridePriority : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -268,9 +268,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Offset", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingOffset : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingOffset : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -286,9 +286,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Shared Material", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingSharedMaterial : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingSharedMaterial : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -304,13 +304,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
 #if UNITY_6000_0_OR_NEWER
     [Obsolete("Use PolygonCollider2DBindingCompositeOperation instead")]
 #else
     [Label("Used By Composite", "Polygon Collider 2D")]
 #endif
-    public sealed partial class PolygonCollider2DBindingUsedByComposite : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingUsedByComposite : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -327,9 +327,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
 #if UNITY_6000_0_OR_NEWER
-    [Serializable]
+    [Serializable, Binder]
     [Label("Composite Operation", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingCompositeOperation : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingCompositeOperation : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -346,9 +346,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 #endif
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Used By Effector", "Polygon Collider 2D")]
-    public sealed partial class PolygonCollider2DBindingUsedByEffector : MonoBindingProperty<PolygonCollider2D>, IBinder
+    public sealed partial class PolygonCollider2DBindingUsedByEffector : MonoBindingProperty<PolygonCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]

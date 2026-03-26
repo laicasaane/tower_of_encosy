@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Wheel Joint 2D", "Physics 2D")]
     public sealed partial class WheelJoint2DBinder : MonoBinder<WheelJoint2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Motor", "Wheel Joint 2D")]
-    public sealed partial class WheelJoint2DBindingMotor : MonoBindingProperty<WheelJoint2D>, IBinder
+    public sealed partial class WheelJoint2DBindingMotor : MonoBindingProperty<WheelJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Suspension", "Wheel Joint 2D")]
-    public sealed partial class WheelJoint2DBindingSuspension : MonoBindingProperty<WheelJoint2D>, IBinder
+    public sealed partial class WheelJoint2DBindingSuspension : MonoBindingProperty<WheelJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Motor", "Wheel Joint 2D")]
-    public sealed partial class WheelJoint2DBindingUseMotor : MonoBindingProperty<WheelJoint2D>, IBinder
+    public sealed partial class WheelJoint2DBindingUseMotor : MonoBindingProperty<WheelJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Anchor", "Wheel Joint 2D")]
-    public sealed partial class WheelJoint2DBindingAnchor : MonoBindingProperty<WheelJoint2D>, IBinder
+    public sealed partial class WheelJoint2DBindingAnchor : MonoBindingProperty<WheelJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Auto Configure Connected Anchor", "Wheel Joint 2D")]
-    public sealed partial class WheelJoint2DBindingAutoConfigureConnectedAnchor : MonoBindingProperty<WheelJoint2D>, IBinder
+    public sealed partial class WheelJoint2DBindingAutoConfigureConnectedAnchor : MonoBindingProperty<WheelJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Anchor", "Wheel Joint 2D")]
-    public sealed partial class WheelJoint2DBindingConnectedAnchor : MonoBindingProperty<WheelJoint2D>, IBinder
+    public sealed partial class WheelJoint2DBindingConnectedAnchor : MonoBindingProperty<WheelJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Action", "Wheel Joint 2D")]
-    public sealed partial class WheelJoint2DBindingBreakAction : MonoBindingProperty<WheelJoint2D>, IBinder
+    public sealed partial class WheelJoint2DBindingBreakAction : MonoBindingProperty<WheelJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,9 +141,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Force", "Wheel Joint 2D")]
-    public sealed partial class WheelJoint2DBindingBreakForce : MonoBindingProperty<WheelJoint2D>, IBinder
+    public sealed partial class WheelJoint2DBindingBreakForce : MonoBindingProperty<WheelJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,9 +159,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Break Torque", "Wheel Joint 2D")]
-    public sealed partial class WheelJoint2DBindingBreakTorque : MonoBindingProperty<WheelJoint2D>, IBinder
+    public sealed partial class WheelJoint2DBindingBreakTorque : MonoBindingProperty<WheelJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -177,9 +177,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Connected Body", "Wheel Joint 2D")]
-    public sealed partial class WheelJoint2DBindingConnectedBody : MonoBindingProperty<WheelJoint2D>, IBinder
+    public sealed partial class WheelJoint2DBindingConnectedBody : MonoBindingProperty<WheelJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -195,9 +195,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enable Collision", "Wheel Joint 2D")]
-    public sealed partial class WheelJoint2DBindingEnableCollision : MonoBindingProperty<WheelJoint2D>, IBinder
+    public sealed partial class WheelJoint2DBindingEnableCollision : MonoBindingProperty<WheelJoint2D>
     {
         [BindingProperty]
         [field: HideInInspector]

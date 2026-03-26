@@ -11,15 +11,15 @@ using UnityEngine.UI;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Button", "UI")]
     public sealed partial class ButtonBinder : MonoBinder<Button>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Interactable", "Button")]
-    public sealed partial class ButtonBindingInteractable : MonoBindingProperty<Button>, IBinder
+    public sealed partial class ButtonBindingInteractable : MonoBindingProperty<Button>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -35,9 +35,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("On Click", "Button")]
-    public sealed partial class ButtonBindingOnClick : MonoBindingCommand<Button>, IBinder
+    public sealed partial class ButtonBindingOnClick : MonoBindingCommand<Button>
     {
         private readonly UnityAction _command;
 

@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Circle Collider 2D", "Physics 2D")]
     public sealed partial class CircleCollider2DBinder : MonoBinder<CircleCollider2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Radius", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingRadius : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingRadius : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enabled", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingEnabled : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingEnabled : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Callback Layers", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingCallbackLayers : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingCallbackLayers : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Contact Capture Layers", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingContactCaptureLayers : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingContactCaptureLayers : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Density", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingDensity : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingDensity : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Exclude Layers", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingExcludeLayers : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingExcludeLayers : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Receive Layers", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingForceReceiveLayers : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingForceReceiveLayers : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -141,9 +141,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Send Layers", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingForceSendLayers : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingForceSendLayers : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -159,9 +159,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Include Layers", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingIncludeLayers : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingIncludeLayers : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -177,9 +177,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Is Trigger", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingIsTrigger : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingIsTrigger : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -195,9 +195,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Layer Override Priority", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingLayerOverridePriority : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingLayerOverridePriority : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -213,9 +213,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Offset", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingOffset : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingOffset : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -231,9 +231,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Shared Material", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingSharedMaterial : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingSharedMaterial : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -249,13 +249,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
 #if UNITY_6000_0_OR_NEWER
     [Obsolete("Use CircleCollider2DBindingCompositeOperation instead")]
 #else
     [Label("Used By Composite", "Circle Collider 2D")]
 #endif
-    public sealed partial class CircleCollider2DBindingUsedByComposite : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingUsedByComposite : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -272,9 +272,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 
 #if UNITY_6000_0_OR_NEWER
-    [Serializable]
+    [Serializable, Binder]
     [Label("Composite Operation", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingCompositeOperation : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingCompositeOperation : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -291,9 +291,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
     }
 #endif
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Used By Effector", "Circle Collider 2D")]
-    public sealed partial class CircleCollider2DBindingUsedByEffector : MonoBindingProperty<CircleCollider2D>, IBinder
+    public sealed partial class CircleCollider2DBindingUsedByEffector : MonoBindingProperty<CircleCollider2D>
     {
         [BindingProperty]
         [field: HideInInspector]

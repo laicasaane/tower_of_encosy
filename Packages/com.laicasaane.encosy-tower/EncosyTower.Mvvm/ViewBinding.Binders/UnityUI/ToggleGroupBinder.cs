@@ -10,15 +10,15 @@ using UnityEngine.UI;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Toggle Group", "UI")]
     public sealed partial class ToggleGroupBinder : MonoBinder<ToggleGroup>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Allow Switch Off", "Toggle Group")]
-    public sealed partial class ToggleGroupBindingAllowSwitchOff : MonoBindingProperty<ToggleGroup>, IBinder
+    public sealed partial class ToggleGroupBindingAllowSwitchOff : MonoBindingProperty<ToggleGroup>
     {
         [BindingProperty]
         [field: HideInInspector]

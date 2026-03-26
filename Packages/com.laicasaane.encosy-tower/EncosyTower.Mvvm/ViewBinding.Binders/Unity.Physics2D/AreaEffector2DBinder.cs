@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Area Effector 2D", "Physics 2D")]
     public sealed partial class AreaEffector2DBinder : MonoBinder<AreaEffector2D>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Angular Drag", "Area Effector 2D")]
-    public sealed partial class AreaEffector2DBindingAngularDrag : MonoBindingProperty<AreaEffector2D>, IBinder
+    public sealed partial class AreaEffector2DBindingAngularDrag : MonoBindingProperty<AreaEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -33,9 +33,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Drag", "Area Effector 2D")]
-    public sealed partial class AreaEffector2DBindingDrag : MonoBindingProperty<AreaEffector2D>, IBinder
+    public sealed partial class AreaEffector2DBindingDrag : MonoBindingProperty<AreaEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -51,9 +51,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Angle", "Area Effector 2D")]
-    public sealed partial class AreaEffector2DBindingForceAngle : MonoBindingProperty<AreaEffector2D>, IBinder
+    public sealed partial class AreaEffector2DBindingForceAngle : MonoBindingProperty<AreaEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -69,9 +69,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Magnitude", "Area Effector 2D")]
-    public sealed partial class AreaEffector2DBindingForceMagnitude : MonoBindingProperty<AreaEffector2D>, IBinder
+    public sealed partial class AreaEffector2DBindingForceMagnitude : MonoBindingProperty<AreaEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -87,9 +87,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Target", "Area Effector 2D")]
-    public sealed partial class AreaEffector2DBindingForceTarget : MonoBindingProperty<AreaEffector2D>, IBinder
+    public sealed partial class AreaEffector2DBindingForceTarget : MonoBindingProperty<AreaEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -105,9 +105,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Force Variation", "Area Effector 2D")]
-    public sealed partial class AreaEffector2DBindingForceVariation : MonoBindingProperty<AreaEffector2D>, IBinder
+    public sealed partial class AreaEffector2DBindingForceVariation : MonoBindingProperty<AreaEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -123,9 +123,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Physics2D
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Global Angle", "Area Effector 2D")]
-    public sealed partial class AreaEffector2DBindingUseGlobalAngle : MonoBindingProperty<AreaEffector2D>, IBinder
+    public sealed partial class AreaEffector2DBindingUseGlobalAngle : MonoBindingProperty<AreaEffector2D>
     {
         [BindingProperty]
         [field: HideInInspector]

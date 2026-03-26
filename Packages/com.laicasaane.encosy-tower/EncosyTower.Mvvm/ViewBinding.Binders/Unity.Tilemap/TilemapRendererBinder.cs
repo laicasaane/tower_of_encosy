@@ -10,15 +10,15 @@ using UnityEngine.Tilemaps;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Tilemap Renderer", "Tilemap")]
     public sealed partial class TilemapRendererBinder : MonoBinder<TilemapRenderer>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Chunk Culling Bounds", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererBindingChunkCullingBounds : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingChunkCullingBounds : MonoBindingProperty<TilemapRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -34,9 +34,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Chunk Size", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererBindingChunkSize : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingChunkSize : MonoBindingProperty<TilemapRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -52,9 +52,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Detect Chunk Culling Bounds", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererBindingDetectChunkCullingBounds : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingDetectChunkCullingBounds : MonoBindingProperty<TilemapRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -70,9 +70,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Mask Interaction", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererBindingMaskInteraction : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingMaskInteraction : MonoBindingProperty<TilemapRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -88,9 +88,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Max Chunk Count", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererBindingMaxChunkCount : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingMaxChunkCount : MonoBindingProperty<TilemapRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -106,9 +106,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Max Frame Age", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererBindingMaxFrameAge : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingMaxFrameAge : MonoBindingProperty<TilemapRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -124,9 +124,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Mode", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererBindingMode : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingMode : MonoBindingProperty<TilemapRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -142,9 +142,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity.Tilemaps
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Sort Order", "Tilemap Renderer")]
-    public sealed partial class TilemapRendererBindingSortOrder : MonoBindingProperty<TilemapRenderer>, IBinder
+    public sealed partial class TilemapRendererBindingSortOrder : MonoBindingProperty<TilemapRenderer>
     {
         [BindingProperty]
         [field: HideInInspector]

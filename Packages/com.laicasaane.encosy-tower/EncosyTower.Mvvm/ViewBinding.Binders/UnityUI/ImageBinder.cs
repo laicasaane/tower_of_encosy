@@ -10,15 +10,15 @@ using UnityEngine.UI;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Image", "UI")]
     public sealed partial class ImageBinder : MonoBinder<Image>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Color", "Image")]
-    public sealed partial class ImageBindingColor : MonoBindingProperty<Image>, IBinder
+    public sealed partial class ImageBindingColor : MonoBindingProperty<Image>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -34,9 +34,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Sprite", "Image")]
-    public sealed partial class ImageBindingSprite : MonoBindingProperty<Image>, IBinder
+    public sealed partial class ImageBindingSprite : MonoBindingProperty<Image>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -52,9 +52,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Sprite (Native Size)", "Image")]
-    public sealed partial class ImageBindingSpriteNativeSize : MonoBindingProperty<Image>, IBinder
+    public sealed partial class ImageBindingSpriteNativeSize : MonoBindingProperty<Image>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -72,9 +72,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Material", "Image")]
-    public sealed partial class ImageBindingMaterial : MonoBindingProperty<Image>, IBinder
+    public sealed partial class ImageBindingMaterial : MonoBindingProperty<Image>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -90,9 +90,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Raycast Target", "Image")]
-    public sealed partial class ImageBindingRaycastTarget : MonoBindingProperty<Image>, IBinder
+    public sealed partial class ImageBindingRaycastTarget : MonoBindingProperty<Image>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -108,9 +108,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Maskable", "Image")]
-    public sealed partial class ImageBindingMaskable : MonoBindingProperty<Image>, IBinder
+    public sealed partial class ImageBindingMaskable : MonoBindingProperty<Image>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -126,9 +126,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("ImageType", "Image")]
-    public sealed partial class ImageBindingImageType : MonoBindingProperty<Image>, IBinder
+    public sealed partial class ImageBindingImageType : MonoBindingProperty<Image>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -144,9 +144,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Use Sprite Mesh", "Image")]
-    public sealed partial class ImageBindingUseSpriteMesh : MonoBindingProperty<Image>, IBinder
+    public sealed partial class ImageBindingUseSpriteMesh : MonoBindingProperty<Image>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -162,9 +162,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Preserve Aspect", "Image")]
-    public sealed partial class ImageBindingPreserveAspect : MonoBindingProperty<Image>, IBinder
+    public sealed partial class ImageBindingPreserveAspect : MonoBindingProperty<Image>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -180,9 +180,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Pixels Per Unit Multiplier", "Image")]
-    public sealed partial class ImageBindingPixelsPerUnitMultiplier : MonoBindingProperty<Image>, IBinder
+    public sealed partial class ImageBindingPixelsPerUnitMultiplier : MonoBindingProperty<Image>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -198,9 +198,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Fill Method", "Image")]
-    public sealed partial class ImageBindingFillMethod : MonoBindingProperty<Image>, IBinder
+    public sealed partial class ImageBindingFillMethod : MonoBindingProperty<Image>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -216,9 +216,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Fill Origin", "Image")]
-    public sealed partial class ImageBindingFillOrigin : MonoBindingProperty<Image>, IBinder
+    public sealed partial class ImageBindingFillOrigin : MonoBindingProperty<Image>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -234,9 +234,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Fill Amount", "Image")]
-    public sealed partial class ImageBindingFillAmount : MonoBindingProperty<Image>, IBinder
+    public sealed partial class ImageBindingFillAmount : MonoBindingProperty<Image>
     {
         [BindingProperty]
         [field: HideInInspector]

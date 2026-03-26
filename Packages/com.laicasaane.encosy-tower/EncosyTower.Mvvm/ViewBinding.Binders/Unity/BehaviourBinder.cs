@@ -7,15 +7,15 @@ using UnityEngine;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.Unity
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Behaviour")]
     public sealed partial class BehaviourBinder : MonoBinder<Behaviour>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Enabled", "Behaviour")]
-    public sealed partial class BehaviourBindingEnabled : MonoBindingProperty<Behaviour>, IBinder
+    public sealed partial class BehaviourBindingEnabled : MonoBindingProperty<Behaviour>
     {
         [BindingProperty]
         [field: HideInInspector]

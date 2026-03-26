@@ -11,15 +11,15 @@ using UnityEngine.UI;
 
 namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
 {
-    [Serializable]
+    [Serializable, Binder]
     [Label("Scroll Rect", "UI")]
     public sealed partial class ScrollRectBinder : MonoBinder<ScrollRect>
     {
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("On Value Changed", "Scroll Rect")]
-    public sealed partial class ScrollRectBindingOnValueChanged : MonoBindingCommand<ScrollRect>, IBinder
+    public sealed partial class ScrollRectBindingOnValueChanged : MonoBindingCommand<ScrollRect>
     {
         private readonly UnityAction<Vector2> _command;
 
@@ -57,9 +57,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         partial void OnValueChanged(Vector2 value);
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Elasticity", "Scroll Rect")]
-    public sealed partial class ScrollRectBindingElasticity : MonoBindingProperty<ScrollRect>, IBinder
+    public sealed partial class ScrollRectBindingElasticity : MonoBindingProperty<ScrollRect>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -75,9 +75,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Inertia", "Scroll Rect")]
-    public sealed partial class ScrollRectBindingInertia : MonoBindingProperty<ScrollRect>, IBinder
+    public sealed partial class ScrollRectBindingInertia : MonoBindingProperty<ScrollRect>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -93,9 +93,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Deceleration Rate", "Scroll Rect")]
-    public sealed partial class ScrollRectBindingDecelerationRate : MonoBindingProperty<ScrollRect>, IBinder
+    public sealed partial class ScrollRectBindingDecelerationRate : MonoBindingProperty<ScrollRect>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -111,9 +111,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Scroll Sensitivity", "Scroll Rect")]
-    public sealed partial class ScrollRectBindingScrollSensitivity : MonoBindingProperty<ScrollRect>, IBinder
+    public sealed partial class ScrollRectBindingScrollSensitivity : MonoBindingProperty<ScrollRect>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -129,9 +129,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Movement Type", "Scroll Rect")]
-    public sealed partial class ScrollRectBindingMovementType : MonoBindingProperty<ScrollRect>, IBinder
+    public sealed partial class ScrollRectBindingMovementType : MonoBindingProperty<ScrollRect>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -147,9 +147,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Vertical", "Scroll Rect")]
-    public sealed partial class ScrollRectBindingVertical : MonoBindingProperty<ScrollRect>, IBinder
+    public sealed partial class ScrollRectBindingVertical : MonoBindingProperty<ScrollRect>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -165,9 +165,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Vertical Scrollbar Visibility", "Scroll Rect")]
-    public sealed partial class ScrollRectBindingVerticalScrollbarVisibility : MonoBindingProperty<ScrollRect>, IBinder
+    public sealed partial class ScrollRectBindingVerticalScrollbarVisibility : MonoBindingProperty<ScrollRect>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -183,9 +183,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Vertical Normalized Position", "Scroll Rect")]
-    public sealed partial class ScrollRectBindingVerticalNormalizedPosition : MonoBindingProperty<ScrollRect>, IBinder
+    public sealed partial class ScrollRectBindingVerticalNormalizedPosition : MonoBindingProperty<ScrollRect>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -201,9 +201,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Horizontal", "Scroll Rect")]
-    public sealed partial class ScrollRectBindingHorizontal : MonoBindingProperty<ScrollRect>, IBinder
+    public sealed partial class ScrollRectBindingHorizontal : MonoBindingProperty<ScrollRect>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -219,9 +219,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Horizontal Scrollbar Visibility", "Scroll Rect")]
-    public sealed partial class ScrollRectBindingHorizontalScrollbarVisibility : MonoBindingProperty<ScrollRect>, IBinder
+    public sealed partial class ScrollRectBindingHorizontalScrollbarVisibility : MonoBindingProperty<ScrollRect>
     {
         [BindingProperty]
         [field: HideInInspector]
@@ -237,9 +237,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Binders.UnityUI
         }
     }
 
-    [Serializable]
+    [Serializable, Binder]
     [Label("Horizontal Normalized Position", "Scroll Rect")]
-    public sealed partial class ScrollRectBindingHorizontalNormalizedPosition : MonoBindingProperty<ScrollRect>, IBinder
+    public sealed partial class ScrollRectBindingHorizontalNormalizedPosition : MonoBindingProperty<ScrollRect>
     {
         [BindingProperty]
         [field: HideInInspector]
