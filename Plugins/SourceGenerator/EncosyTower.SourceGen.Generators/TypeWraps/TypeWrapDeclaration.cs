@@ -76,7 +76,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         public EquatableArray<MethodDeclaration> methods;
 
-        public Dictionary<OperatorKind, HashSet<Operator>> operatorMap;
+        public EquatableArray<OperatorEntry> operatorEntries;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(fullTypeName) == false
@@ -282,6 +282,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             using var propertyArrayBuilder = ImmutableArrayBuilder<PropertyDeclaration>.Rent();
             using var eventArrayBuilder = ImmutableArrayBuilder<EventDeclaration>.Rent();
             using var methodArrayBuilder = ImmutableArrayBuilder<MethodDeclaration>.Rent();
+            using var operatorEntryBuilder = ImmutableArrayBuilder<OperatorEntry>.Rent();
 
             var fullTypeName = this.fullTypeName;
             var fieldTypeMembers = fieldTypeSymbol.GetMembers();
@@ -291,7 +292,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             var format = SymbolExtensions.QualifiedMemberFormatWithType;
             var implementOperators = this.implementOperators;
             var hasBuiltInOperators = implementOperators != OperatorKind.None;
-            var operatorMap = this.operatorMap = new(OperatorKinds.All.Length);
+            var operatorMap = new Dictionary<OperatorKind, HashSet<Operator>>(OperatorKinds.All.Length);
 
             foreach (var member in fieldTypeMembers)
             {
@@ -451,6 +452,16 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             properties = propertyArrayBuilder.ToImmutable();
             events = eventArrayBuilder.ToImmutable();
             methods = methodArrayBuilder.ToImmutable();
+
+            foreach (var kvp in operatorMap)
+            {
+                foreach (var op in kvp.Value)
+                {
+                    operatorEntryBuilder.Add(new OperatorEntry(kvp.Key, op));
+                }
+            }
+
+            operatorEntries = operatorEntryBuilder.ToImmutable();
         }
 
         private static bool ValidateSpecial(
@@ -900,6 +911,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             && properties.Equals(other.properties)
             && events.Equals(other.events)
             && methods.Equals(other.methods)
+            && operatorEntries.Equals(other.operatorEntries)
             ;
 
         public readonly override int GetHashCode()
@@ -918,7 +930,29 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             hash.Add(properties);
             hash.Add(events);
             hash.Add(methods);
+            hash.Add(operatorEntries);
             return hash.ToHashCode();
+        }
+
+        public readonly struct OperatorEntry : IEquatable<OperatorEntry>
+        {
+            public readonly OperatorKind Kind;
+            public readonly Operator Op;
+
+            public OperatorEntry(OperatorKind kind, Operator op)
+            {
+                Kind = kind;
+                Op = op;
+            }
+
+            public bool Equals(OperatorEntry other)
+                => Kind == other.Kind && Op.Equals(other.Op);
+
+            public override bool Equals(object obj)
+                => obj is OperatorEntry other && Equals(other);
+
+            public override int GetHashCode()
+                => HashValue.Combine(Kind, Op);
         }
 
         public readonly struct Operator : IEquatable<Operator>
@@ -946,6 +980,23 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             public override int GetHashCode()
                 => HashValue.Combine(ReturnType, ArgTypes);
+        }
+
+        private readonly Dictionary<OperatorKind, HashSet<Operator>> GetOperatorMap()
+        {
+            var map = new Dictionary<OperatorKind, HashSet<Operator>>();
+
+            foreach (var entry in operatorEntries)
+            {
+                if (map.TryGetValue(entry.Kind, out var ops) == false)
+                {
+                    map[entry.Kind] = ops = new HashSet<Operator>();
+                }
+
+                ops.Add(entry.Op);
+            }
+
+            return map;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.TypeWraps
 {
@@ -57,12 +58,14 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         WritePrimaryConstructor(ref p);
                     }
 
+                    var operatorMap = GetOperatorMap();
+
                     WriteFields(ref p);
                     WriteProperties(ref p);
                     WriteEvents(ref p);
                     WriteMethods(ref p);
                     WriteConversionOperators(ref p);
-                    WriteOperators(ref p);
+                    WriteOperators(ref p, operatorMap);
                     WriteTypeConverter(ref p);
                 }
                 p.CloseScope();
@@ -840,12 +843,11 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p.PrintEndLine();
         }
 
-        private readonly void WriteOperators(ref Printer p)
+        private readonly void WriteOperators(ref Printer p, Dictionary<OperatorKind, HashSet<Operator>> operatorMap)
         {
             var operatorKinds = OperatorKinds.All;
             var ignoreOperators = this.ignoreOperators;
             var implementOperators = this.implementOperators;
-            var operatorMap = this.operatorMap;
             var fullTypeName = this.fullTypeName;
             var fieldTypeName = this.fieldTypeName;
             var fieldSpecialType = this.fieldSpecialType;
@@ -897,7 +899,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             if (fieldSpecialType == SpecialType.System_Enum)
             {
-                WriteEnumOperators(ref p, fullTypeName, fieldUnderlyingSpecialType, fieldName);
+                WriteEnumOperators(ref p, fullTypeName, fieldUnderlyingSpecialType, fieldName, operatorMap);
             }
         }
 
@@ -1137,9 +1139,9 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             , string fullTypeName
             , SpecialType fieldUnderlyingSpecialType
             , string fieldName
+            , Dictionary<OperatorKind, HashSet<Operator>> map
         )
         {
-            var map = operatorMap;
 
             {
                 var kind = OperatorKind.Substraction;

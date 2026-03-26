@@ -68,6 +68,8 @@ namespace EncosyTower.Tests.TypeWraps
 
         public readonly override int GetHashCode()
             => value.GetHashCode();
+
+        public static V1 operator +(V1 a, V1 b) => new V1 { value = a.value + b.value };
     }
 
     [WrapRecord]
@@ -86,7 +88,12 @@ namespace EncosyTower.Tests.TypeWraps
     [WrapType(typeof(V1))]
     public partial struct V1z
     {
-
+        public static void Test()
+        {
+            var v1 = new V1z();
+            var v2 = new V1z();
+            var sum = v1 + v2;
+        }
     }
 
     public record struct A(int[] X)
