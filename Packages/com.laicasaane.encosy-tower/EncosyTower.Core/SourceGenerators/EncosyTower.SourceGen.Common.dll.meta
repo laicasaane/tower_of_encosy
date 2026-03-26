@@ -3,7 +3,6 @@ guid: 48487e411cb04d858a10bea46017de92
 labels:
 - RunOnlyOnAssembliesWithReference
 - RoslynAnalyzer
-- SourceGenerator
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
