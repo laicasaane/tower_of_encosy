@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,11 +15,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
         public const string NAMESPACE = MvvmGeneratorHelpers.NAMESPACE;
         public const string SKIP_ATTRIBUTE = MvvmGeneratorHelpers.SKIP_ATTRIBUTE;
 
-        private const string COMPONENT_MODEL_NS = $"global::{NAMESPACE}.ComponentModel";
-        private const string VIEW_BINDING_NS = $"{NAMESPACE}.ViewBinding";
-        private const string INPUT_NS = $"{NAMESPACE}.Input";
-        private const string IOBSERVABLE_OBJECT = $"global::{NAMESPACE}.ComponentModel.IObservableObject";
-        private const string IVARIANT_T = "global::EncosyTower.Variants.IVariant<";
+        private const string OBSERVABLE_PROPERTY_ATTRIBUTE = $"{NAMESPACE}.ComponentModel.ObservablePropertyAttribute";
+        private const string NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE = $"{NAMESPACE}.ComponentModel.NotifyPropertyChangedForAttribute";
+        private const string RELAY_COMMAND_ATTRIBUTE = $"{NAMESPACE}.Input.RelayCommandAttribute";
+        private const string BINDING_PROPERTY_ATTRIBUTE = $"{NAMESPACE}.ViewBinding.BindingPropertyAttribute";
+        private const string BINDING_COMMAND_ATTRIBUTE = $"{NAMESPACE}.ViewBinding.BindingCommandAttribute";
+        private const string VARIANT_ATTRIBUTE = "EncosyTower.Variants.VariantAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -29,17 +29,84 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             var compilationProvider = context.CompilationProvider
                 .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
-            var candidateProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                  predicate: IsSyntaxMatch
-                , transform: GetSemanticMatch
-            ).Where(static x => x.IsValid);
+            // Fields or properties annotated with [ObservableProperty].
+            var obsProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      OBSERVABLE_PROPERTY_ATTRIBUTE
+                    , static (node, _) => node is VariableDeclaratorSyntax
+                        or FieldDeclarationSyntax
+                        or PropertyDeclarationSyntax
+                    , static (ctx, token) => GetSemanticMatch_ObservableProperty(ctx, token)
+                )
+                .Where(static x => x.IsValid);
 
-            var typeNamesToIgnoreProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                  predicate: IsStructSyntaxMatch
-                , transform: GetTypeNameInGenericVariantDeclaration
-            ).Where(static x => string.IsNullOrEmpty(x) == false);
+            // Methods annotated with [RelayCommand] that have exactly one parameter.
+            var relayCommandProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      RELAY_COMMAND_ATTRIBUTE
+                    , static (node, _) => node is MethodDeclarationSyntax m
+                        && m.ParameterList.Parameters.Count == 1
+                    , static (ctx, token) => GetSemanticMatch_Method(ctx, token)
+                )
+                .Where(static x => x.IsValid);
 
-            var combined = candidateProvider.Collect()
+            // Methods annotated with [BindingProperty] that have exactly one parameter.
+            var bindingPropertyProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      BINDING_PROPERTY_ATTRIBUTE
+                    , static (node, _) => node is MethodDeclarationSyntax m
+                        && m.ParameterList.Parameters.Count == 1
+                    , static (ctx, token) => GetSemanticMatch_Method(ctx, token)
+                )
+                .Where(static x => x.IsValid);
+
+            // Methods annotated with [BindingCommand] that have exactly one parameter.
+            var bindingCommandProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      BINDING_COMMAND_ATTRIBUTE
+                    , static (node, _) => node is MethodDeclarationSyntax m
+                        && m.ParameterList.Parameters.Count == 1
+                    , static (ctx, token) => GetSemanticMatch_Method(ctx, token)
+                )
+                .Where(static x => x.IsValid);
+
+            // Fields or properties annotated with [NotifyPropertyChangedFor].
+            var npcfProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE
+                    , static (node, _) => node is VariableDeclaratorSyntax
+                        or FieldDeclarationSyntax
+                        or PropertyDeclarationSyntax
+                    , static (ctx, token) => GetSemanticMatch_NotifyPropertyChangedFor(ctx, token)
+                )
+                .Where(static x => x.IsValid);
+
+            // Structs annotated with [Variant] — used to suppress duplicate generation.
+            var typeNamesToIgnoreProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      VARIANT_ATTRIBUTE
+                    , static (node, _) => node is StructDeclarationSyntax
+                    , static (ctx, token) => GetTypeNameFromVariantAttribute(ctx, token)
+                )
+                .Where(static x => string.IsNullOrEmpty(x) == false);
+
+            // Merge all five candidate providers into one flat array.
+            var allCandidatesFlat = obsProvider.Collect()
+                .Combine(relayCommandProvider.Collect())
+                .Combine(bindingPropertyProvider.Collect())
+                .Combine(bindingCommandProvider.Collect())
+                .Combine(npcfProvider.Collect())
+                .Select(static (data, _) => {
+                    using var b = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
+                    foreach (var x in data.Left.Left.Left.Left)  b.Add(x); // [ObservableProperty]
+                    foreach (var x in data.Left.Left.Left.Right) b.Add(x); // [RelayCommand]
+                    foreach (var x in data.Left.Left.Right)      b.Add(x); // [BindingProperty]
+                    foreach (var x in data.Left.Right)           b.Add(x); // [BindingCommand]
+                    foreach (var x in data.Right)                b.Add(x); // [NotifyPropertyChangedFor]
+                    return b.ToImmutable();
+                });
+
+            var combined = allCandidatesFlat
                 .Combine(typeNamesToIgnoreProvider.Collect())
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider);
@@ -61,55 +128,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             });
         }
 
-        public static bool IsStructSyntaxMatch(SyntaxNode syntaxNode, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
+        // -------------------------------------------------------------------------
+        // Candidate transforms
+        // -------------------------------------------------------------------------
 
-            return syntaxNode is StructDeclarationSyntax structSyntax
-                && structSyntax.BaseList != null
-                && structSyntax.BaseList.Types.Count > 0
-                && structSyntax.BaseList.Types.Any(
-                    static x => x.Type.IsTypeNameGenericCandidate("EncosyTower.Variants", "IVariant", out _)
-                );
-        }
-
-        public static bool IsSyntaxMatch(SyntaxNode syntaxNode, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            if (syntaxNode is FieldDeclarationSyntax field)
-            {
-                if (field.HasAttributeCandidate(COMPONENT_MODEL_NS, "ObservableProperty"))
-                {
-                    return true;
-                }
-            }
-
-            if (syntaxNode is MethodDeclarationSyntax method && method.ParameterList.Parameters.Count == 1)
-            {
-                if (method.HasAttributeCandidate(INPUT_NS, "RelayCommand")
-                    || method.HasAttributeCandidate(VIEW_BINDING_NS, "BindingProperty")
-                    || method.HasAttributeCandidate(VIEW_BINDING_NS, "BindingCommand")
-                )
-                {
-                    return true;
-                }
-            }
-
-            if (syntaxNode is PropertyDeclarationSyntax property
-                && property.Parent is ClassDeclarationSyntax classSyntax
-                && classSyntax.BaseList != null
-                && classSyntax.BaseList.Types.Count > 0
-            )
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        internal static InternalVariantDeclaration GetSemanticMatch(
-              GeneratorSyntaxContext context
+        private static InternalVariantDeclaration GetSemanticMatch_ObservableProperty(
+              GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
         {
@@ -119,35 +143,153 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             // Checking compilation validity inside the transform step prevents incremental cache reuse
             // when unrelated files change. Validity is deferred to GenerateOutput via CompilationCandidateSlim.isValid.
 
-            var semanticModel = context.SemanticModel;
             ITypeSymbol typeSymbol;
-            LocationInfo location;
 
-            if (context.Node is FieldDeclarationSyntax field)
+            if (context.TargetSymbol is IFieldSymbol fieldSymbol)
             {
-                typeSymbol = semanticModel.GetTypeInfo(field.Declaration.Type, token).Type;
-                location = LocationInfo.From(field.Declaration.Type.GetLocation());
+                typeSymbol = fieldSymbol.Type;
             }
-            else if (context.Node is MethodDeclarationSyntax method)
+            else if (context.TargetSymbol is IPropertySymbol propertySymbol)
             {
-                var typeSyntax = method.ParameterList.Parameters[0].Type;
-                typeSymbol = semanticModel.GetTypeInfo(typeSyntax, token).Type;
-                location = LocationInfo.From(typeSyntax.GetLocation());
-            }
-            else if (context.Node is PropertyDeclarationSyntax property
-                && property.Parent is ClassDeclarationSyntax classSyntax
-                && classSyntax.DoesSemanticMatch(IOBSERVABLE_OBJECT, semanticModel, token)
-                && classSyntax.AnyFieldHasNotifyPropertyChangedForAttribute(property)
-            )
-            {
-                typeSymbol = semanticModel.GetTypeInfo(property.Type, token).Type;
-                location = LocationInfo.From(property.Type.GetLocation());
+                typeSymbol = propertySymbol.Type;
             }
             else
             {
                 return default;
             }
 
+            return BuildDeclaration(typeSymbol, context.TargetNode.GetLocation(), token);
+        }
+
+        private static InternalVariantDeclaration GetSemanticMatch_Method(
+              GeneratorAttributeSyntaxContext context
+            , CancellationToken token
+        )
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (context.TargetSymbol is not IMethodSymbol methodSymbol
+                || methodSymbol.Parameters.Length != 1
+            )
+            {
+                return default;
+            }
+
+            return BuildDeclaration(methodSymbol.Parameters[0].Type, context.TargetNode.GetLocation(), token);
+        }
+
+        private static InternalVariantDeclaration GetSemanticMatch_NotifyPropertyChangedFor(
+              GeneratorAttributeSyntaxContext context
+            , CancellationToken token
+        )
+        {
+            token.ThrowIfCancellationRequested();
+
+            INamedTypeSymbol containingType;
+
+            if (context.TargetSymbol is IFieldSymbol fieldSymbol
+                && fieldSymbol.ContainingType is INamedTypeSymbol fieldContainingType
+            )
+            {
+                containingType = fieldContainingType;
+            }
+            else if (context.TargetSymbol is IPropertySymbol propertySymbol
+                && propertySymbol.ContainingType is INamedTypeSymbol propContainingType
+            )
+            {
+                containingType = propContainingType;
+            }
+            else
+            {
+                return default;
+            }
+
+            // Only process members on types that implement IObservableObject.
+            var implementsIObservableObject = false;
+
+            foreach (var iface in containingType.AllInterfaces)
+            {
+                if (iface.Name == "IObservableObject"
+                    && iface.ContainingNamespace is { Name: "ComponentModel" } ns1
+                    && ns1.ContainingNamespace is { Name: "Mvvm" } ns2
+                    && ns2.ContainingNamespace is { Name: "EncosyTower" } ns3
+                    && ns3.ContainingNamespace.IsGlobalNamespace
+                )
+                {
+                    implementsIObservableObject = true;
+                    break;
+                }
+            }
+
+            if (implementsIObservableObject == false)
+            {
+                return default;
+            }
+
+            // Each [NotifyPropertyChangedFor] attribute names the property whose type to observe.
+            // Only the first valid attribute is processed.
+            foreach (var attribute in context.Attributes)
+            {
+                if (attribute.ConstructorArguments.Length < 1
+                    || attribute.ConstructorArguments[0].Value is not string propertyName
+                    || string.IsNullOrEmpty(propertyName)
+                )
+                {
+                    continue;
+                }
+
+                foreach (var member in containingType.GetMembers(propertyName))
+                {
+                    if (member is not IPropertySymbol targetProperty)
+                    {
+                        continue;
+                    }
+
+                    return BuildDeclaration(targetProperty.Type, context.TargetNode.GetLocation(), token);
+                }
+            }
+
+            return default;
+        }
+
+        // -------------------------------------------------------------------------
+        // [Variant] exclusion-list transform
+        // -------------------------------------------------------------------------
+
+        private static string GetTypeNameFromVariantAttribute(
+              GeneratorAttributeSyntaxContext context
+            , CancellationToken token
+        )
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (context.Attributes.Length < 1)
+            {
+                return string.Empty;
+            }
+
+            var attributeData = context.Attributes[0];
+
+            if (attributeData.ConstructorArguments.Length < 1
+                || attributeData.ConstructorArguments[0].Value is not ITypeSymbol typeArg
+            )
+            {
+                return string.Empty;
+            }
+
+            return typeArg.ToFullName();
+        }
+
+        // -------------------------------------------------------------------------
+        // Shared helper
+        // -------------------------------------------------------------------------
+
+        private static InternalVariantDeclaration BuildDeclaration(
+              ITypeSymbol typeSymbol
+            , Location location
+            , CancellationToken token
+        )
+        {
             if (typeSymbol is not INamedTypeSymbol namedType
                 || namedType.IsUnboundGenericType
                 || (namedType.IsGenericType && namedType.TypeParameters.Length != 0)
@@ -156,74 +298,11 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                 return default;
             }
 
-            return Generators.Variants.InternalVariantGenerator.BuildDeclaration(namedType, location, token);
-        }
-
-        public static string GetTypeNameInGenericVariantDeclaration(
-              GeneratorSyntaxContext context
-            , CancellationToken token
-        )
-        {
-            token.ThrowIfCancellationRequested();
-
-            if (context.Node is not StructDeclarationSyntax structSyntax
-                || structSyntax.BaseList == null
-                || structSyntax.BaseList.Types.Count < 1
-            )
-            {
-                return string.Empty;
-            }
-
-            var semanticModel = context.SemanticModel;
-
-            foreach (var baseType in structSyntax.BaseList.Types)
-            {
-                var typeInfo = semanticModel.GetTypeInfo(baseType.Type, token);
-
-                if (typeInfo.Type == null)
-                {
-                    continue;
-                }
-
-                if (typeInfo.Type is INamedTypeSymbol interfaceSymbol
-                    && interfaceSymbol.IsGenericType
-                    && interfaceSymbol.TypeParameters.Length == 1
-                    && interfaceSymbol.ToFullName().StartsWith(IVARIANT_T)
-                )
-                {
-                    return interfaceSymbol.TypeArguments[0].ToFullName();
-                }
-
-                if (TryGetMatchTypeArgument(typeInfo.Type.Interfaces, out var typeName)
-                    || TryGetMatchTypeArgument(typeInfo.Type.AllInterfaces, out typeName)
-                )
-                {
-                    return typeName;
-                }
-            }
-
-            return string.Empty;
-
-            static bool TryGetMatchTypeArgument(
-                  ImmutableArray<INamedTypeSymbol> interfaces
-                , out string result
-            )
-            {
-                foreach (var interfaceSymbol in interfaces)
-                {
-                    if (interfaceSymbol.IsGenericType
-                        && interfaceSymbol.TypeParameters.Length == 1
-                        && interfaceSymbol.ToFullName().StartsWith(IVARIANT_T)
-                    )
-                    {
-                        result = interfaceSymbol.TypeArguments[0].ToFullName();
-                        return true;
-                    }
-                }
-
-                result = string.Empty;
-                return false;
-            }
+            return Generators.Variants.InternalVariantGenerator.BuildDeclaration(
+                  namedType
+                , LocationInfo.From(location)
+                , token
+            );
         }
 
         private static void GenerateOutput(
