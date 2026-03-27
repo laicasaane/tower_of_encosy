@@ -5,6 +5,7 @@
         public const string GENERATOR_NAME = "DataGenerator";
 
         public const string NAMESPACE = "EncosyTower.Data";
+        public const string DATA_ATTRIBUTE_METADATA = $"{NAMESPACE}.DataAttribute";
         public const string IDATA = $"global::{NAMESPACE}.IData";
         public const string IREADONLY_DATA = $"global::{NAMESPACE}.IReadOnlyData";
         public const string IDATA_TABLE_ASSET = $"global::{NAMESPACE}.IDataTableAsset";

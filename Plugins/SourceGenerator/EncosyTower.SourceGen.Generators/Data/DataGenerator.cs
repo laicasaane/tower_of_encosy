@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.Data
@@ -16,20 +14,25 @@ namespace EncosyTower.SourceGen.Generators.Data
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
-            var dataRefProvider = context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: IsStructOrClassSyntaxMatch,
-                transform: GetSemanticMatch
-            ).Where(static t => t.syntax is { } && t.symbol is { });
+            var candidateProvider = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                      DATA_ATTRIBUTE_METADATA
+                    , static (node, _) => node is ClassDeclarationSyntax or StructDeclarationSyntax
+                    , DataDeclaration.Extract
+                )
+                .Where(static t => t.IsValid);
 
-            var combined = dataRefProvider
-                .Combine(context.CompilationProvider)
+            var compilationProvider = context.CompilationProvider
+                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+
+            var combined = candidateProvider
+                .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.isValid);
 
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
-                    sourceProductionContext
-                    , source.Left.Right
+                      sourceProductionContext
                     , source.Left.Left
                     , source.Right.projectPath
                     , source.Right.outputSourceGenFiles
@@ -37,113 +40,40 @@ namespace EncosyTower.SourceGen.Generators.Data
             });
         }
 
-        public static bool IsStructOrClassSyntaxMatch(SyntaxNode syntaxNode, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            return syntaxNode is TypeDeclarationSyntax typeSyntax
-                && typeSyntax.Kind() is (SyntaxKind.ClassDeclaration or SyntaxKind.StructDeclaration)
-                && typeSyntax.BaseList != null
-                && typeSyntax.BaseList.Types.Count > 0
-                && typeSyntax.BaseList.Types.Any(
-                    static x => x.Type.IsTypeNameCandidate("EncosyTower.Data", "IData")
-                );
-        }
-
-        public static (TypeDeclarationSyntax syntax, INamedTypeSymbol symbol) GetSemanticMatch(
-              GeneratorSyntaxContext context
-            , CancellationToken token
-        )
-        {
-            token.ThrowIfCancellationRequested();
-
-            if (context.Node is not TypeDeclarationSyntax syntax
-                || syntax.Modifiers.Any(SyntaxKind.ReadOnlyKeyword)
-                || syntax.Kind() is not (SyntaxKind.ClassDeclaration or SyntaxKind.StructDeclaration)
-                || syntax.BaseList == null
-            )
-            {
-                return default;
-            }
-
-            var semanticModel = context.SemanticModel;
-            var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
-
-            if (symbol is null)
-            {
-                return default;
-            }
-
-            return (syntax, symbol);
-        }
-
         private static void GenerateOutput(
               SourceProductionContext context
-            , Compilation compilation
-            , (TypeDeclarationSyntax syntax, INamedTypeSymbol symbol) candidate
+            , DataDeclaration declaration
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
-            var (syntax, symbol) = candidate;
+            context.CancellationToken.ThrowIfCancellationRequested();
 
-            if (syntax == null || symbol == null)
+            if (declaration.fieldRefs.Count == 0 && declaration.propRefs.Count == 0)
             {
                 return;
             }
-
-            context.CancellationToken.ThrowIfCancellationRequested();
 
             try
             {
                 SourceGenHelpers.ProjectPath = projectPath;
 
-                var syntaxTree = syntax.SyntaxTree;
-                var semanticModel = compilation.GetSemanticModel(syntaxTree);
-                var declaration = new DataDeclaration(context, syntax, symbol, semanticModel);
-
-                if (declaration.IsValid == false)
-                {
-                    return;
-                }
-
-                if (declaration.FieldRefs.Length > 0 || declaration.PropRefs.Length > 0)
-                {
-                    var typeIdentifier = declaration.Symbol.ToValidIdentifier();
-                    var hintName = syntaxTree.GetGeneratedSourceFileName(
-                          GENERATOR_NAME
-                        , declaration.Syntax
-                        , typeIdentifier
-                    );
-
-                    var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                          compilation.Assembly.Name
-                        , GENERATOR_NAME
-                        , typeIdentifier
-                    );
-
-                    context.OutputSource(
-                          outputSourceGenFiles
-                        , declaration.Syntax
-                        , declaration.WriteCode()
-                        , hintName
-                        , sourceFilePath
-                    );
-                }
-
-                if (declaration.Diagnostics.Length > 0)
-                {
-                    foreach (var diagnostic in declaration.Diagnostics)
-                    {
-                        context.ReportDiagnostic(diagnostic.ToDiagnostic());
-                    }
-                }
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , declaration.openingSource
+                    , declaration.WriteCode()
+                    , declaration.closingSource
+                    , declaration.hintName
+                    , declaration.sourceFilePath
+                    , declaration.location.ToLocation()
+                    , projectPath
+                );
             }
             catch (Exception e)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
-                    , syntax.GetLocation()
+                    , declaration.location.ToLocation()
                     , e.ToUnityPrintableString()
                 ));
             }
@@ -158,6 +88,5 @@ namespace EncosyTower.SourceGen.Generators.Data
                 , isEnabledByDefault: true
                 , description: ""
             );
-
     }
 }

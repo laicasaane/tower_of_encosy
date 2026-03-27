@@ -54,6 +54,7 @@ namespace EncosyTower.Tests.Data
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public class FieldAttribute : Attribute { }
 
+    [Data]
     public partial class IdData : IData
     {
         [DataProperty]
@@ -64,6 +65,7 @@ namespace EncosyTower.Tests.Data
         public int Id => Get_Id();
     }
 
+    [Data]
     public partial class StatData : IData
     {
         [DataConverter(typeof(WrapperConverter<float, FloatWrapper>))]
@@ -73,6 +75,7 @@ namespace EncosyTower.Tests.Data
         [JsonProperty] private FloatWrapper _atk;
     }
 
+    [Data]
     [DataMutable(DataMutableOptions.WithReadOnlyView)]
     public partial class GenericData<T> : IData
     {
@@ -87,6 +90,7 @@ namespace EncosyTower.Tests.Data
         }
     }
 
+    [Data]
     [DataMutable(DataMutableOptions.WithReadOnlyView)]
     public partial struct StatMultiplierData : IData
     {
@@ -111,6 +115,7 @@ namespace EncosyTower.Tests.Data.Heroes
     using Unity.Properties;
     using UnityEngine;
 
+    [Data]
     [GeneratePropertyBag]
     [DataMutable(DataMutableOptions.WithoutPropertySetters | DataMutableOptions.WithReadOnlyView)]
     public partial class MutableData : IData
@@ -125,6 +130,7 @@ namespace EncosyTower.Tests.Data.Heroes
         public ReadOnlyMemory<float> Multipliers => Get_Multipliers();
     }
 
+    [Data]
     public partial class HeroData : IData
     {
         [SerializeField] private IdData _id;
@@ -169,6 +175,7 @@ namespace EncosyTower.Tests.Data.Heroes
     {
     }
 
+    [Data]
     public partial class NewHeroData : HeroData, IData
     {
         [DataProperty]
@@ -192,6 +199,7 @@ namespace EncosyTower.Tests.Data.Enemies
     using EncosyTower.Initialization;
     using UnityEngine;
 
+    [Data]
     public partial class EnemyData : IData, IInitializable
     {
         [SerializeField] private IdData _id;
@@ -282,6 +290,7 @@ namespace EncosyTower.Tests.Data.ConvertibleIds
     using EncosyTower.Data;
     using EncosyTower.Databases;
 
+    [Data]
     public partial struct IdData : IData
     {
         [DataProperty] public readonly int Value => Get_Value();
@@ -298,6 +307,7 @@ namespace EncosyTower.Tests.Data.ConvertibleIds
         public static bool Equals<T, U>(T a, T b) => false;
     }
 
+    [Data]
     [DataMutable(DataMutableOptions.WithReadOnlyView)]
     public partial struct ItemData : IData
     {

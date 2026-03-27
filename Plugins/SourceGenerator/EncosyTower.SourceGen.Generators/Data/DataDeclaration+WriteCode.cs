@@ -1,71 +1,69 @@
 ﻿using EncosyTower.SourceGen.Common.Data.Common;
-using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Data
 {
     using static EncosyTower.SourceGen.Common.Data.Common.Helpers;
 
-    partial class DataDeclaration
+    partial struct DataDeclaration
     {
-        public string WriteCode()
+        public readonly string WriteCode()
         {
-            var keyword = IsValueType ? "struct" : "class";
+            var keyword = isValueType ? "struct" : "class";
 
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, Syntax.Parent);
-            var p = scopePrinter.printer;
+            var p = Printer.DefaultLarge;
             p = p.IncreasedIndent();
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            if (HasSerializableAttribute == false)
+            if (hasSerializableAttribute == false)
             {
                 p.PrintLine("[global::System.Serializable]");
             }
 
             p.PrintBeginLine()
-                .Print($"partial {keyword} ").Print(TypeName)
+                .Print($"partial {keyword} ").Print(typeName)
                 .Print(" : ")
-                .PrintIf(HasBaseType, $"{BaseTypeName}");
+                .PrintIf(HasBaseType, baseTypeName);
 
             var secondInterface = HasBaseType;
 
-            if (IsMutable == false)
+            if (isMutable == false)
             {
                 p.PrintIf(secondInterface, ", ")
-                    .Print(IREADONLY_DATA).Print("<").Print(TypeName).Print(">");
+                    .Print(IREADONLY_DATA).Print("<").Print(typeName).Print(">");
 
                 secondInterface = true;
             }
 
-            if (IdPropertyType != null)
+            if (HasIdProperty)
             {
                 p.PrintIf(secondInterface, ", ")
                     .Print("global::EncosyTower.Data.IDataWithId<")
-                    .Print(IdPropertyType.ToFullName()).Print(">");
+                    .Print(idPropertyTypeName).Print(">");
 
                 secondInterface = true;
             }
 
-            if (WithReadOnlyView)
+            if (withReadOnlyView)
             {
                 p.PrintIf(secondInterface, ", ")
                     .Print("global::EncosyTower.Data.IDataWithReadOnlyView<")
-                    .Print(ReadOnlyTypeName).Print(">");
+                    .Print(readOnlyTypeName).Print(">");
 
                 secondInterface = true;
             }
-            else if (IsMutable == false)
+            else if (isMutable == false)
             {
                 p.PrintIf(secondInterface, ", ")
                     .Print("global::EncosyTower.Data.IDataWithReadOnlyView<")
-                    .Print(TypeName).Print(">");
+                    .Print(typeName).Print(">");
 
                 secondInterface = true;
             }
 
-            p.PrintIf(secondInterface, ", ").Print($"global::System.IEquatable<{TypeName}>");
+            p.PrintIf(secondInterface, ", ").Print($"global::System.IEquatable<{typeName}>");
 
             p.PrintEndLine();
             p.OpenScope();
@@ -76,7 +74,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 WriteEqualsMethod(ref p);
                 WriteIEquatableMethod(ref p);
 
-                if (IsValueType == false)
+                if (isValueType == false)
                 {
                     WriteEqualsInternalMethod(ref p);
                     WriteOverrideIEquatableMethod(ref p);
@@ -95,61 +93,61 @@ namespace EncosyTower.SourceGen.Generators.Data
             return p.Result;
         }
 
-        private void WriteFieldOrPropertyByOrders(ref Printer p)
+        private readonly void WriteFieldOrPropertyByOrders(ref Printer p)
         {
-            var orders = Orders;
-            var propRefs = PropRefs;
-            var fieldRefs = FieldRefs;
-            var readonlyKeyword = IsValueType ? "readonly " : "";
-            var accessKeyword = FieldPolicy switch {
+            var ordersArr = orders;
+            var propRefsArr = propRefs;
+            var fieldRefsArr = fieldRefs;
+            var readonlyKeyword = isValueType ? "readonly " : "";
+            var accessKeyword = fieldPolicy switch {
                 DataFieldPolicy.Public => "public",
                 DataFieldPolicy.Internal => "internal",
                 _ => "private",
             };
 
-            foreach (var order in orders)
+            foreach (var order in ordersArr)
             {
                 var index = order.index;
 
                 if (order.isPropRef)
                 {
-                    WriteField(ref p, propRefs[index], accessKeyword, readonlyKeyword);
+                    WriteField(ref p, propRefsArr[index], accessKeyword, readonlyKeyword);
                 }
                 else
                 {
-                    WriteProperty(ref p, fieldRefs[index]);
+                    WriteProperty(ref p, fieldRefsArr[index]);
                 }
             }
         }
 
-        private void WriteField(ref Printer p, PropertyRef prop, string accessKeyword, string readonlyKeyword)
+        private readonly void WriteField(ref Printer p, in PropRefData prop, string accessKeyword, string readonlyKeyword)
         {
-            if (prop.FieldIsImplemented)
+            if (prop.fieldIsImplemented)
             {
                 return;
             }
 
-            var fieldName = prop.FieldName;
+            var fieldName = prop.fieldName;
 
-            p.PrintLine(string.Format(GENERATED_FIELD_FROM_PROPERTY_ATTRIBUTE, prop.Property.Name));
+            p.PrintLine(string.Format(GENERATED_FIELD_FROM_PROPERTY_ATTRIBUTE, prop.propertyName));
             p.PrintLine(GENERATED_CODE);
 
             var withSerializeField = false;
-            var hasGeneratePropertyBagAttribute = HasGeneratePropertyBagAttribute;
+            var hasGenPropertyBagAttrib = hasGeneratePropertyBagAttribute;
             var withDontCreateProperty = false;
 
-            foreach (var (fullTypeName, attribute) in prop.ForwardedFieldAttributes)
+            foreach (var attr in prop.forwardedFieldAttributes)
             {
-                if (fullTypeName == SERIALIZE_FIELD_ATTRIBUTE)
+                if (attr.fullTypeName == SERIALIZE_FIELD_ATTRIBUTE)
                 {
                     withSerializeField = true;
                 }
-                else if (hasGeneratePropertyBagAttribute && fullTypeName == DONT_CREATE_PROPERTY_ATTRIBUTE)
+                else if (hasGenPropertyBagAttrib && attr.fullTypeName == DONT_CREATE_PROPERTY_ATTRIBUTE)
                 {
                     withDontCreateProperty = true;
                 }
 
-                p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
+                p.PrintLine($"[{attr.attributeSyntax}]");
             }
 
             if (withSerializeField == false)
@@ -157,38 +155,32 @@ namespace EncosyTower.SourceGen.Generators.Data
                 p.PrintLine($"[{SERIALIZE_FIELD_ATTRIBUTE}]");
             }
 
-            if (hasGeneratePropertyBagAttribute
-                && prop.DoesCreateProperty
+            if (hasGenPropertyBagAttrib
+                && prop.doesCreateProperty
                 && withDontCreateProperty == false
             )
             {
                 p.PrintLine($"[{DONT_CREATE_PROPERTY}]");
             }
 
-            var fieldTypeName = GetFieldTypeName(prop.FieldType, prop.FieldCollection);
-            var propTypeName = prop.PropertyType.ToFullName();
-            var mustCast = SymbolEqualityComparer.Default.Equals(prop.FieldType, prop.PropertyType) == false;
+            var fieldTypeName = prop.fieldTypeName;
+            var propTypeName = prop.propertyTypeName;
+            var mustCast = prop.typesAreDifferent;
+            var mutableTypeName = prop.mutablePropertyTypeName;
+            var sameType = prop.samePropertyType;
 
-            GetTypeNames(
-                  prop.PropertyType
-                , prop.FieldCollection
-                , out var mutableTypeName
-                , out _
-                , out var sameType
-            );
-
-            p.PrintLine($"{accessKeyword} {fieldTypeName} {prop.FieldName};");
+            p.PrintLine($"{accessKeyword} {fieldTypeName} {fieldName};");
             p.PrintEndLine();
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
-            p.PrintLine($"private {readonlyKeyword}{propTypeName} Get_{prop.Property.Name}()");
+            p.PrintLine($"private {readonlyKeyword}{propTypeName} Get_{prop.propertyName}()");
             p.OpenScope();
             {
                 string casting;
 
-                if (string.IsNullOrEmpty(prop.PropertyConverter) == false)
+                if (string.IsNullOrEmpty(prop.propertyConverter) == false)
                 {
-                    casting = prop.PropertyConverter;
+                    casting = prop.propertyConverter;
                     mustCast = true;
                 }
                 else
@@ -209,21 +201,21 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
-            p.PrintBeginLine($"private void Set_{prop.Property.Name}(")
-                .PrintIf(prop.ImplicitlyConvertible, propTypeName, fieldTypeName)
+            p.PrintBeginLine($"private void Set_{prop.propertyName}(")
+                .PrintIf(prop.implicitlyConvertible, propTypeName, fieldTypeName)
                 .PrintEndLine(" value)");
             p.OpenScope();
             {
                 string casting;
 
-                if (string.IsNullOrEmpty(prop.FieldConverter) == false)
+                if (string.IsNullOrEmpty(prop.fieldConverter) == false)
                 {
-                    casting = prop.FieldConverter;
+                    casting = prop.fieldConverter;
                     mustCast = true;
                 }
                 else
                 {
-                    casting = $"({prop.FieldType.ToFullName()})";
+                    casting = $"({fieldTypeName})";
                 }
 
                 if (mustCast == false)
@@ -233,8 +225,8 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                 p.PrintBeginLine($"this.{fieldName} = ");
 
-                if ((IsMutable && WithoutPropertySetters == false)
-                    || (IsMutable && prop.FieldCollection.Kind == CollectionKind.Array)
+                if ((isMutable && withoutPropertySetters == false)
+                    || (isMutable && prop.fieldCollection.kind == CollectionKind.Array)
                     || sameType
                 )
                 {
@@ -253,44 +245,39 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
         }
 
-        private void WriteProperty(ref Printer p, FieldRef field)
+        private readonly void WriteProperty(ref Printer p, in FieldRefData field)
         {
-            if (field.ImplementedProperty is not null)
+            if (field.hasImplementedProperty)
             {
                 return;
             }
 
-            var fieldName = field.Field.Name;
+            var fieldName = field.fieldName;
+            var mutableTypeName = field.mutablePropertyTypeName;
+            var immutableTypeName = field.immutablePropertyTypeName;
+            var sameType = field.samePropertyType;
 
-            GetTypeNames(
-                  field.PropertyType
-                , field.FieldCollection
-                , out var mutableTypeName
-                , out var immutableTypeName
-                , out var sameType
-            );
-
-            p.PrintLine(string.Format(GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE, fieldName, field.FieldType.ToFullName()));
+            p.PrintLine(string.Format(GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE, fieldName, field.fieldTypeOriginalFullName));
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
 
-            foreach (var attribute in field.ForwardedPropertyAttributes)
+            foreach (var attributeSyntax in field.forwardedPropertyAttributeSyntaxes)
             {
-                p.PrintLine($"[{attribute.GetSyntax().ToFullString()}]");
+                p.PrintLine($"[{attributeSyntax}]");
             }
 
-            var mustCast = SymbolEqualityComparer.Default.Equals(field.FieldType, field.PropertyType) == false;
-            var propTypeName = IsMutable ? mutableTypeName : immutableTypeName;
+            var mustCast = field.typesAreDifferent;
+            var propTypeName = isMutable ? mutableTypeName : immutableTypeName;
 
-            p.PrintLine($"public {propTypeName} {field.PropertyName}");
+            p.PrintLine($"public {propTypeName} {field.propertyName}");
             p.OpenScope();
             {
                 // getter
                 {
                     string casting;
 
-                    if (string.IsNullOrEmpty(field.PropertyConverter) == false)
+                    if (string.IsNullOrEmpty(field.propertyConverter) == false)
                     {
-                        casting = field.PropertyConverter;
+                        casting = field.propertyConverter;
                         mustCast = true;
                     }
                     else
@@ -304,7 +291,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                     }
 
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintBeginLineIf(IsValueType, "readonly get => ", "get => ")
+                    p.PrintBeginLineIf(isValueType, "readonly get => ", "get => ")
                         .PrintIf(mustCast, $"{casting}")
                         .PrintEndLine($"(this.{fieldName});");
 
@@ -316,19 +303,19 @@ namespace EncosyTower.SourceGen.Generators.Data
                 {
                     string casting;
 
-                    if (field.FieldCollection.Kind == CollectionKind.List && IsMutable == false)
+                    if (field.fieldCollection.kind == CollectionKind.List && isMutable == false)
                     {
                         casting = $"{LIST_FAST_EXTENSIONS_UNSAFE}.GetListUnsafe";
                         mustCast = true;
                     }
-                    else if (string.IsNullOrEmpty(field.FieldConverter) == false)
+                    else if (string.IsNullOrEmpty(field.fieldConverter) == false)
                     {
-                        casting = field.FieldConverter;
+                        casting = field.fieldConverter;
                         mustCast = true;
                     }
                     else
                     {
-                        casting = $"({field.FieldType.ToFullName()})";
+                        casting = $"({field.fieldTypeName})";
                     }
 
                     if (mustCast == false)
@@ -336,19 +323,19 @@ namespace EncosyTower.SourceGen.Generators.Data
                         casting = string.Empty;
                     }
 
-                    if (IsMutable && WithoutPropertySetters == false)
+                    if (isMutable && withoutPropertySetters == false)
                     {
                         p.PrintBeginLine($"set => this.{fieldName} = ")
                             .PrintIf(mustCast, casting)
                             .PrintEndLine("(value);");
                     }
-                    else if ((IsMutable && field.FieldCollection.Kind == CollectionKind.Array) || sameType)
+                    else if ((isMutable && field.fieldCollection.kind == CollectionKind.Array) || sameType)
                     {
                         p.PrintBeginLine($"init => this.{fieldName} = ")
                             .PrintIf(mustCast, casting)
                             .PrintEndLine("(value);");
                     }
-                    else if (field.FieldCollection.Kind == CollectionKind.Array)
+                    else if (field.fieldCollection.kind == CollectionKind.Array)
                     {
                         p.PrintBeginLine($"init => this.{fieldName} = ")
                             .PrintIf(mustCast, casting)
@@ -368,16 +355,16 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
         }
 
-        private void WriteGetHashCodeMethod(ref Printer p)
+        private readonly void WriteGetHashCodeMethod(ref Printer p)
         {
-            if (HasGetHashCodeMethod)
+            if (hasGetHashCodeMethod)
             {
                 return;
             }
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public override ")
-                .PrintIf(IsValueType, "readonly ")
+                .PrintIf(isValueType, "readonly ")
                 .PrintEndLine("int GetHashCode()");
             p.OpenScope();
             {
@@ -388,17 +375,17 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
         }
 
-        private void WriteGetHashCodeInternalMethod(ref Printer p)
+        private readonly void WriteGetHashCodeInternalMethod(ref Printer p)
         {
             var fromBase = false;
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
 
-            if (HasBaseType == false && IsSealed == false)
+            if (HasBaseType == false && isSealed == false)
             {
                 p.PrintBeginLine("protected virtual ");
             }
-            else if (HasBaseType == true)
+            else if (HasBaseType)
             {
                 fromBase = true;
                 p.PrintBeginLine("protected override ");
@@ -408,7 +395,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 p.PrintBeginLine("private ");
             }
 
-            p.PrintIf(IsValueType, "readonly ")
+            p.PrintIf(isValueType, "readonly ")
                 .PrintEndLine("global::EncosyTower.Common.HashValue GetHashCodeInternal()");
             p.OpenScope();
             {
@@ -416,9 +403,9 @@ namespace EncosyTower.SourceGen.Generators.Data
                     .PrintIf(fromBase, "base.GetHashCodeInternal()", "new global::EncosyTower.Common.HashValue()")
                     .PrintEndLine(";");
 
-                foreach (var field in FieldRefs)
+                foreach (var field in fieldRefs)
                 {
-                    var collectionKind = field.FieldCollection.Kind;
+                    var collectionKind = field.fieldCollection.kind;
 
                     p.PrintBeginLineIf(
                           collectionKind == CollectionKind.NotCollection
@@ -435,16 +422,16 @@ namespace EncosyTower.SourceGen.Generators.Data
                         p.Print(LIST_EXTENSIONS).Print(".AsReadOnlySpan");
                     }
 
-                    p.Print("(").Print(field.Field.Name)
+                    p.Print("(").Print(field.fieldName)
                         .PrintEndLine("));");
                 }
 
-                foreach (var prop in PropRefs)
+                foreach (var prop in propRefs)
                 {
-                    var collectionKind = prop.FieldCollection.Kind;
+                    var collectionKind = prop.fieldCollection.kind;
 
                     p.PrintBeginLineIf(
-                          prop.FieldCollection.Kind == CollectionKind.NotCollection
+                          collectionKind == CollectionKind.NotCollection
                         , "hash.Add("
                         , "hash.AddEach("
                     );
@@ -458,7 +445,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         p.Print(LIST_EXTENSIONS).Print(".AsReadOnlySpan");
                     }
 
-                    p.Print("(").Print(prop.FieldName)
+                    p.Print("(").Print(prop.fieldName)
                         .PrintEndLine("));");
                 }
 
@@ -468,36 +455,36 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
         }
 
-        private void WriteEqualsMethod(ref Printer p)
+        private readonly void WriteEqualsMethod(ref Printer p)
         {
-            if (HasEqualsMethod)
+            if (hasEqualsMethod)
             {
                 return;
             }
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public override ")
-                .PrintIf(IsValueType, "readonly ")
+                .PrintIf(isValueType, "readonly ")
                 .PrintEndLine("bool Equals(object obj)");
             p.OpenScope();
             {
-                p.PrintLine($"return obj is {TypeName} other && Equals(other);");
+                p.PrintLine($"return obj is {typeName} other && Equals(other);");
             }
             p.CloseScope();
             p.PrintEndLine();
         }
 
-        private void WriteOverrideIEquatableMethod(ref Printer p)
+        private readonly void WriteOverrideIEquatableMethod(ref Printer p)
         {
-            foreach (var typeName in OverrideEquals)
+            foreach (var baseTypeName in overrideEquals)
             {
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public override ")
-                    .PrintIf(IsValueType, "readonly ")
-                    .PrintEndLine($"bool Equals({typeName} other)");
+                    .PrintIf(isValueType, "readonly ")
+                    .PrintEndLine($"bool Equals({baseTypeName} other)");
                 p.OpenScope();
                 {
-                    p.PrintLine($"if (other is not {TypeName} otherDerived) return false;");
+                    p.PrintLine($"if (other is not {typeName} otherDerived) return false;");
                     p.PrintLine("if (ReferenceEquals(this, otherDerived)) return true;");
                     p.PrintEndLine();
 
@@ -508,20 +495,20 @@ namespace EncosyTower.SourceGen.Generators.Data
             }
         }
 
-        private void WriteIEquatableMethod(ref Printer p)
+        private readonly void WriteIEquatableMethod(ref Printer p)
         {
-            if (HasIEquatableMethod)
+            if (hasIEquatableMethod)
             {
                 return;
             }
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLineIf(IsSealed, "public ", "public virtual ")
-                .PrintIf(IsValueType, "readonly ")
-                .PrintEndLine($"bool Equals({TypeName} other)");
+            p.PrintBeginLineIf(isSealed, "public ", "public virtual ")
+                .PrintIf(isValueType, "readonly ")
+                .PrintEndLine($"bool Equals({typeName} other)");
             p.OpenScope();
             {
-                if (IsValueType)
+                if (isValueType)
                 {
                     p.PrintLine("return");
                     WriteEqualComparerLines(ref p, false);
@@ -538,11 +525,11 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
         }
 
-        private void WriteEqualsInternalMethod(ref Printer p)
+        private readonly void WriteEqualsInternalMethod(ref Printer p)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLineIf(IsSealed, "private ", "protected ")
-                .PrintEndLine($"bool EqualsInternal({TypeName} other)");
+            p.PrintBeginLineIf(isSealed, "private ", "protected ")
+                .PrintEndLine($"bool EqualsInternal({typeName} other)");
             p.OpenScope();
             {
                 p.PrintBeginLine("return")
@@ -554,64 +541,66 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
         }
 
-        private void WriteEqualComparerLines(ref Printer p, bool previous)
+        private readonly void WriteEqualComparerLines(ref Printer p, bool previous)
         {
             p = p.IncreasedIndent();
             {
-                for (var i = 0; i < FieldRefs.Length; i++)
+                for (var i = 0; i < fieldRefs.Count; i++)
                 {
-                    var fieldRef = FieldRefs[i];
-                    var fieldName = fieldRef.Field.Name;
+                    var fieldRef = fieldRefs[i];
+                    var fieldName = fieldRef.fieldName;
                     var and = i == 0 && previous == false ? "  " : "&&";
 
-                    if (string.IsNullOrEmpty(fieldRef.FieldEqualityComparer))
+                    if (string.IsNullOrEmpty(fieldRef.fieldEqualityComparer))
                     {
-                        if (TryWriteCollectionEquality(ref p, fieldName, fieldRef.FieldCollection, and) == false)
+                        if (TryWriteCollectionEquality(ref p, fieldName, fieldRef.fieldCollection, and) == false)
                         {
-                            var equality = fieldRef.FieldEquality;
-                            var fieldType = equality.IsNullable
-                                ? fieldRef.FieldType.GetTypeFromNullable()
-                                : fieldRef.FieldType;
-
-                            var fieldTypeName = fieldType.ToFullName();
-                            previous = true;
-
-                            WriteEquality(ref p, fieldName, fieldTypeName, equality, and, "&&", fieldType.IsReferenceType);
+                            WriteEquality(
+                                  ref p
+                                , fieldName
+                                , fieldRef.fieldTypeFullNameForEquality
+                                , fieldRef.fieldEquality
+                                , and
+                                , "&&"
+                                , fieldRef.fieldTypeIsReferenceType
+                            );
                         }
                     }
                     else
                     {
-                        p.PrintBeginLine(and).Print(" ").Print(fieldRef.FieldEqualityComparer)
+                        p.PrintBeginLine(and).Print(" ").Print(fieldRef.fieldEqualityComparer)
                             .Print("(this.").Print(fieldName)
                             .Print(", other.").Print(fieldName)
                             .PrintEndLine(")");
                     }
+
+                    previous = true;
                 }
 
-                for (var i = 0; i < PropRefs.Length; i++)
+                for (var i = 0; i < propRefs.Count; i++)
                 {
-                    var propRef = PropRefs[i];
-                    var fieldName = propRef.FieldName;
+                    var propRef = propRefs[i];
+                    var fieldName = propRef.fieldName;
                     var and = i == 0 && previous == false ? "  " : "&&";
 
-                    if (string.IsNullOrEmpty(propRef.FieldEqualityComparer))
+                    if (string.IsNullOrEmpty(propRef.fieldEqualityComparer))
                     {
-                        if (TryWriteCollectionEquality(ref p, fieldName, propRef.FieldCollection, and) == false)
+                        if (TryWriteCollectionEquality(ref p, fieldName, propRef.fieldCollection, and) == false)
                         {
-                            var equality = propRef.FieldEquality;
-                            var fieldType = equality.IsNullable
-                                ? propRef.FieldType.GetTypeFromNullable()
-                                : propRef.FieldType;
-
-                            var fieldTypeName = GetFieldTypeName(fieldType, propRef.FieldCollection);
-                            previous = true;
-
-                            WriteEquality(ref p, fieldName, fieldTypeName, equality, and, "&&", fieldType.IsReferenceType);
+                            WriteEquality(
+                                  ref p
+                                , fieldName
+                                , propRef.fieldTypeDeclNameForEquality
+                                , propRef.fieldEquality
+                                , and
+                                , "&&"
+                                , propRef.fieldTypeIsReferenceType
+                            );
                         }
                     }
                     else
                     {
-                        p.PrintBeginLine(and).Print(" ").Print(propRef.FieldEqualityComparer)
+                        p.PrintBeginLine(and).Print(" ").Print(propRef.fieldEqualityComparer)
                             .Print("(this.").Print(fieldName)
                             .Print(", other.").Print(fieldName)
                             .PrintEndLine(")");
@@ -621,10 +610,12 @@ namespace EncosyTower.SourceGen.Generators.Data
             p = p.DecreasedIndent();
             p.PrintLine(";");
 
+            return;
+
             static bool TryWriteCollectionEquality(
                   ref Printer p
                 , string fieldName
-                , in CollectionRef collection
+                , in FieldCollectionData collection
                 , string and
             )
             {
@@ -633,22 +624,22 @@ namespace EncosyTower.SourceGen.Generators.Data
                     return false;
                 }
 
-                if (collection.Kind is CollectionKind.Array or CollectionKind.List)
+                if (collection.kind is CollectionKind.Array or CollectionKind.List)
                 {
                     p.PrintBeginLine(and).Print(" ").Print(MEMORY_EXTENSIONS).Print(".SequenceEqual(")
-                        .PrintIf(collection.Kind is CollectionKind.Array, ARRAY_EXTENSIONS, LIST_EXTENSIONS)
+                        .PrintIf(collection.kind is CollectionKind.Array, ARRAY_EXTENSIONS, LIST_EXTENSIONS)
                         .Print(".AsReadOnlySpan")
                         .Print("(this.").Print(fieldName).Print("), ")
-                        .PrintIf(collection.Kind is CollectionKind.Array, ARRAY_EXTENSIONS, LIST_EXTENSIONS)
+                        .PrintIf(collection.kind is CollectionKind.Array, ARRAY_EXTENSIONS, LIST_EXTENSIONS)
                         .Print(".AsReadOnlySpan")
                         .Print("(other.").Print(fieldName).PrintEndLine("))");
                     return true;
                 }
 
-                if (collection.Kind is CollectionKind.HashSet or CollectionKind.Dictionary)
+                if (collection.kind is CollectionKind.HashSet or CollectionKind.Dictionary)
                 {
                     p.PrintBeginLine(and).Print(" ")
-                        .PrintIf(collection.Kind is CollectionKind.HashSet, HASH_SET_API, DICTIONARY_EXTENSIONS)
+                        .PrintIf(collection.kind is CollectionKind.HashSet, HASH_SET_API, DICTIONARY_EXTENSIONS)
                         .Print(".Overlaps(")
                         .Print("this.").Print(fieldName)
                         .Print(", other.").Print(fieldName).PrintEndLine(")");
@@ -658,13 +649,13 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return false;
             }
 
-            static bool IsSupported(in CollectionRef collection)
+            static bool IsSupported(in FieldCollectionData collection)
             {
-                return collection.Kind switch {
+                return collection.kind switch {
                     CollectionKind.Array
                     or CollectionKind.List
-                    or CollectionKind.HashSet => collection.IsElementEquatable,
-                    CollectionKind.Dictionary => collection.IsKeyEquatable && collection.IsElementEquatable,
+                    or CollectionKind.HashSet => collection.isElementEquatable,
+                    CollectionKind.Dictionary => collection.isKeyEquatable && collection.isElementEquatable,
                     _ => false,
                 };
             }
@@ -733,61 +724,61 @@ namespace EncosyTower.SourceGen.Generators.Data
             }
         }
 
-        private void WriteSetValues_TypeMethod(ref Printer p)
+        private readonly void WriteSetValues_TypeMethod(ref Printer p)
         {
             p.PrintLine("[global::System.Obsolete(\"This method is not intended to be used directly by user code.\")]");
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine($"internal void SetValues_{Symbol.ToValidIdentifier()}(");
+            p.PrintLine($"internal void SetValues_{typeValidIdentifier}(");
             p = p.IncreasedIndent();
             {
                 var previous = false;
 
-                for (var i = 0; i < FieldRefs.Length; i++)
+                for (var i = 0; i < fieldRefs.Count; i++)
                 {
                     previous = true;
-                    var fieldRef = FieldRefs[i];
+                    var fieldRef = fieldRefs[i];
                     var comma = i == 0 ? " " : ",";
-                    p.PrintLine($"{comma} {fieldRef.FieldType.ToFullName()} {fieldRef.Field.Name}");
+                    p.PrintLine($"{comma} {fieldRef.fieldTypeName} {fieldRef.fieldName}");
                 }
 
-                for (var i = 0; i < PropRefs.Length; i++)
+                for (var i = 0; i < propRefs.Count; i++)
                 {
-                    var propRef = PropRefs[i];
+                    var propRef = propRefs[i];
                     var comma = i == 0 && previous == false ? " " : ",";
-                    p.PrintLine($"{comma} {GetFieldTypeName(propRef.FieldType, propRef.FieldCollection)} {propRef.FieldName}");
+                    p.PrintLine($"{comma} {propRef.fieldTypeName} {propRef.fieldName}");
                 }
             }
             p = p.DecreasedIndent();
             p.PrintLine(")");
             p.OpenScope();
             {
-                foreach (var field in FieldRefs)
+                foreach (var field in fieldRefs)
                 {
-                    var fieldName = field.Field.Name;
-                    p.PrintLine($"this.{fieldName} = {fieldName};");
+                    var fn = field.fieldName;
+                    p.PrintLine($"this.{fn} = {fn};");
                 }
 
-                foreach (var prop in PropRefs)
+                foreach (var prop in propRefs)
                 {
-                    var fieldName = prop.FieldName;
-                    p.PrintLine($"this.{fieldName} = {fieldName};");
+                    var fn = prop.fieldName;
+                    p.PrintLine($"this.{fn} = {fn};");
                 }
             }
             p.CloseScope();
             p.PrintEndLine();
         }
 
-        private void WriteEqualityOperators(ref Printer p)
+        private readonly void WriteEqualityOperators(ref Printer p)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool operator ==(")
-                .PrintIf(IsValueType, "in ")
-                .Print($"{TypeName} left, ")
-                .PrintIf(IsValueType, "in ")
-                .PrintEndLine($"{TypeName} right)");
+                .PrintIf(isValueType, "in ")
+                .Print($"{typeName} left, ")
+                .PrintIf(isValueType, "in ")
+                .PrintEndLine($"{typeName} right)");
             p.OpenScope();
             {
-                if (IsValueType == false)
+                if (isValueType == false)
                 {
                     p.PrintLine("if (ReferenceEquals(left, null))");
                     p.OpenScope();
@@ -805,13 +796,13 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool operator !=(")
-                .PrintIf(IsValueType, "in ")
-                .Print($"{TypeName} left, ")
-                .PrintIf(IsValueType, "in ")
-                .PrintEndLine($"{TypeName} right)");
+                .PrintIf(isValueType, "in ")
+                .Print($"{typeName} left, ")
+                .PrintIf(isValueType, "in ")
+                .PrintEndLine($"{typeName} right)");
             p.OpenScope();
             {
-                if (IsValueType == false)
+                if (isValueType == false)
                 {
                     p.PrintLine("if (ReferenceEquals(left, null))");
                     p.OpenScope();
@@ -828,17 +819,17 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
         }
 
-        private void WriteAsReadOnlyMethod(ref Printer p)
+        private readonly void WriteAsReadOnlyMethod(ref Printer p)
         {
-            if (IsMutable && WithReadOnlyView == false)
+            if (isMutable && withReadOnlyView == false)
             {
                 return;
             }
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine($"public ")
-                .PrintIf(IsValueType, "readonly ")
-                .PrintIf(IsMutable, ReadOnlyTypeName, TypeName)
+                .PrintIf(isValueType, "readonly ")
+                .PrintIf(isMutable, readOnlyTypeName, typeName)
                 .PrintEndLine(" AsReadOnly()");
             p.OpenScope();
             {
@@ -848,33 +839,31 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
         }
 
-        private void WriteReadOnlyViewStruct(ref Printer p)
+        private readonly void WriteReadOnlyViewStruct(ref Printer p)
         {
-            if (WithReadOnlyView == false)
+            if (withReadOnlyView == false)
             {
                 return;
             }
 
-            var accessibility = Symbol.DeclaredAccessibility.ToKeyword();
-
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintBeginLine(accessibility).Print(" readonly partial struct ").Print(ReadOnlyTypeName)
+            p.PrintBeginLine(accessibilityKeyword).Print(" readonly partial struct ").Print(readOnlyTypeName)
                 .Print(" : ")
-                .Print(IREADONLY_DATA).Print("<").Print(TypeName).Print(">")
+                .Print(IREADONLY_DATA).Print("<").Print(typeName).Print(">")
                 .Print(", ")
-                .Print($"global::System.IEquatable<{ReadOnlyTypeName}>")
+                .Print($"global::System.IEquatable<{readOnlyTypeName}>")
                 .PrintEndLine();
             p.OpenScope();
             {
                 p.PrintLine(GENERATED_CODE);
-                p.PrintBeginLine("private readonly ").Print(TypeName).PrintEndLine(" _data;");
+                p.PrintBeginLine("private readonly ").Print(typeName).PrintEndLine(" _data;");
                 p.PrintEndLine();
 
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
-                p.PrintBeginLine(accessibility)
-                    .Print(" ReadOnly").Print(TypeIdentifier).Print("(")
-                    .PrintIf(IsValueType, "in ")
-                    .Print(TypeName)
+                p.PrintBeginLine(accessibilityKeyword)
+                    .Print(" ReadOnly").Print(typeIdentifier).Print("(")
+                    .PrintIf(isValueType, "in ")
+                    .Print(typeName)
                     .PrintEndLine(" data)");
                 p.OpenScope();
                 {
@@ -893,72 +882,50 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
         }
 
-        private void WriteReadOnlyViewStruct_Properties(ref Printer p)
+        private readonly void WriteReadOnlyViewStruct_Properties(ref Printer p)
         {
-            var orders = Orders;
-            var propRefs = PropRefs;
-            var fieldRefs = FieldRefs;
+            var ordersArr = orders;
+            var propRefsArr = propRefs;
+            var fieldRefsArr = fieldRefs;
 
-            foreach (var order in orders)
+            foreach (var order in ordersArr)
             {
                 var index = order.index;
 
                 if (order.isPropRef)
                 {
-                    var propRef = propRefs[index];
+                    var propRef = propRefsArr[index];
 
-                    if (propRef.Property.DeclaredAccessibility != Accessibility.Public)
+                    if (propRef.isPropertyPublic == false)
                     {
                         continue;
                     }
 
-                    var propName = propRef.Property.Name;
-
-                    GetTypeNames(
-                          propRef.PropertyType
-                        , propRef.FieldCollection
-                        , out var _
-                        , out var immutableTypeName
-                        , out var _
-                    );
-
-                    p.PrintBeginLine("public readonly ").Print(immutableTypeName)
-                        .Print(" ").PrintEndLine(propName);
+                    p.PrintBeginLine("public readonly ").Print(propRef.immutablePropertyTypeName)
+                        .Print(" ").PrintEndLine(propRef.propertyName);
                     p.OpenScope();
                     {
                         p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintBeginLine("get => _data.").Print(propName).PrintEndLine(";");
+                        p.PrintBeginLine("get => _data.").Print(propRef.propertyName).PrintEndLine(";");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
                 }
                 else
                 {
-                    var fieldRef = fieldRefs[index];
+                    var fieldRef = fieldRefsArr[index];
 
-                    if (fieldRef.ImplementedProperty is IPropertySymbol prop
-                        && prop.DeclaredAccessibility != Accessibility.Public
-                    )
+                    if (fieldRef.hasImplementedProperty && fieldRef.isImplementedPropertyPublic == false)
                     {
                         continue;
                     }
 
-                    var propName = fieldRef.PropertyName;
-
-                    GetTypeNames(
-                          fieldRef.PropertyType
-                        , fieldRef.FieldCollection
-                        , out var _
-                        , out var immutableTypeName
-                        , out var _
-                    );
-
-                    p.PrintBeginLine("public readonly ").Print(immutableTypeName)
-                        .Print(" ").PrintEndLine(propName);
+                    p.PrintBeginLine("public readonly ").Print(fieldRef.immutablePropertyTypeName)
+                        .Print(" ").PrintEndLine(fieldRef.propertyName);
                     p.OpenScope();
                     {
                         p.PrintLine(AGGRESSIVE_INLINING);
-                        p.PrintBeginLine("get => _data.").Print(propName).PrintEndLine(";");
+                        p.PrintBeginLine("get => _data.").Print(fieldRef.propertyName).PrintEndLine(";");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
@@ -966,14 +933,14 @@ namespace EncosyTower.SourceGen.Generators.Data
             }
         }
 
-        private void WriteReadOnlyViewStruct_Equality(ref Printer p)
+        private readonly void WriteReadOnlyViewStruct_Equality(ref Printer p)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLineIf(IsValueType, AGGRESSIVE_INLINING);
-            p.PrintLine($"public bool Equals({ReadOnlyTypeName} other)");
+            p.PrintLineIf(isValueType, AGGRESSIVE_INLINING);
+            p.PrintLine($"public bool Equals({readOnlyTypeName} other)");
             p.OpenScope();
             {
-                if (IsValueType == false)
+                if (isValueType == false)
                 {
                     p.PrintLine("if (ReferenceEquals(other._data, null)) return false;");
                     p.PrintLine("if (ReferenceEquals(this, other._data)) return true;");
@@ -989,13 +956,13 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintLine("public override bool Equals(object obj)");
             p.OpenScope();
             {
-                p.PrintLine($"return obj is {ReadOnlyTypeName} other && Equals(other);");
+                p.PrintLine($"return obj is {readOnlyTypeName} other && Equals(other);");
             }
             p.CloseScope();
             p.PrintEndLine();
         }
 
-        private void WriteReadOnlyViewStruct_GetHashCodeMethod(ref Printer p)
+        private readonly void WriteReadOnlyViewStruct_GetHashCodeMethod(ref Printer p)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public override int GetHashCode()");
@@ -1009,28 +976,28 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
         }
 
-        private void WriteReadOnlyViewStruct_ImplicitOperator(ref Printer p)
+        private readonly void WriteReadOnlyViewStruct_ImplicitOperator(ref Printer p)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static implicit operator ")
-                .Print(ReadOnlyTypeName)
+                .Print(readOnlyTypeName)
                 .Print("(")
-                .PrintIf(IsValueType, "in ")
-                .PrintEndLine($"{TypeName} data)");
+                .PrintIf(isValueType, "in ")
+                .PrintEndLine($"{typeName} data)");
             p.OpenScope();
             {
                 p.PrintBeginLine("return ")
-                    .PrintIf(IsMutable, "new(data)", "data")
+                    .PrintIf(isMutable, "new(data)", "data")
                     .PrintEndLine(";");
             }
             p.CloseScope();
             p.PrintEndLine();
         }
 
-        private void WriteReadOnlyViewStruct_EqualityOperators(ref Printer p)
+        private readonly void WriteReadOnlyViewStruct_EqualityOperators(ref Printer p)
         {
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
-            p.PrintLine($"public static bool operator ==(in {ReadOnlyTypeName} left, in {ReadOnlyTypeName} right)");
+            p.PrintLine($"public static bool operator ==(in {readOnlyTypeName} left, in {readOnlyTypeName} right)");
             p.OpenScope();
             {
                 p.PrintLine("return left.Equals(right);");
@@ -1039,147 +1006,13 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
 
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
-            p.PrintLine($"public static bool operator !=(in {ReadOnlyTypeName} left, in {ReadOnlyTypeName} right)");
+            p.PrintLine($"public static bool operator !=(in {readOnlyTypeName} left, in {readOnlyTypeName} right)");
             p.OpenScope();
             {
                 p.PrintLine("return !left.Equals(right);");
             }
             p.CloseScope();
             p.PrintEndLine();
-        }
-
-        private static string GetFieldTypeName(ITypeSymbol typeSymbol, in CollectionRef collection)
-        {
-            if (TryGetFieldTypeName(collection, out var result) == false)
-            {
-                result = typeSymbol.ToFullName();
-            }
-
-            return result;
-        }
-
-        private static bool TryGetFieldTypeName(in CollectionRef collection, out string result)
-        {
-            var (kind, keyType, elementType, _, _) = collection;
-
-            switch (kind)
-            {
-                case CollectionKind.ReadOnlyMemory:
-                case CollectionKind.Memory:
-                case CollectionKind.ReadOnlySpan:
-                case CollectionKind.Span:
-                case CollectionKind.Array:
-                {
-                    result = $"{elementType.ToFullName()}[]";
-                    return true;
-                }
-
-                case CollectionKind.ReadOnlyList:
-                case CollectionKind.List:
-                {
-                    result = $"{LIST_TYPE_T}{elementType.ToFullName()}>";
-                    return true;
-                }
-
-                case CollectionKind.HashSet:
-                {
-                    result = $"{HASH_SET_TYPE_T}{elementType.ToFullName()}>";
-                    return true;
-                }
-
-                case CollectionKind.Stack:
-                {
-                    result = $"{STACK_TYPE_T}{elementType.ToFullName()}>";
-                    return true;
-                }
-
-                case CollectionKind.Queue:
-                {
-                    result = $"{QUEUE_TYPE_T}{elementType.ToFullName()}>";
-                    return true;
-                }
-
-                case CollectionKind.ReadOnlyDictionary:
-                case CollectionKind.Dictionary:
-                {
-                    var keyTypeFullName = keyType.ToFullName();
-                    var valueTypeFullName = elementType.ToFullName();
-                    result = $"{DICTIONARY_TYPE_T}{keyTypeFullName}, {valueTypeFullName}>";
-                    return true;
-                }
-
-                default:
-                {
-                    result = string.Empty;
-                    return false;
-                }
-            }
-        }
-
-        private static void GetTypeNames(
-              ITypeSymbol typeSymbol
-            , in CollectionRef collection
-            , out string mutableTypeName
-            , out string immutableTypeName
-            , out bool sameType
-        )
-        {
-            sameType = false;
-
-            var (kind, keyType, elementType, _, _) = collection;
-
-            switch (kind)
-            {
-                case CollectionKind.Array:
-                {
-                    mutableTypeName = $"{elementType.ToFullName()}[]";
-                    immutableTypeName = $"global::System.ReadOnlyMemory<{elementType.ToFullName()}>";
-                    break;
-                }
-
-                case CollectionKind.List:
-                {
-                    mutableTypeName = $"global::System.Collections.Generic.List<{elementType.ToFullName()}>";
-                    immutableTypeName = $"global::EncosyTower.Collections.ListFast<{elementType.ToFullName()}>.ReadOnly";
-                    break;
-                }
-
-                case CollectionKind.Dictionary:
-                {
-                    mutableTypeName = $"global::System.Collections.Generic.Dictionary<{keyType.ToFullName()}, {elementType.ToFullName()}>";
-                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyDictionary<{keyType.ToFullName()}, {elementType.ToFullName()}>";
-                    break;
-                }
-
-                case CollectionKind.HashSet:
-                {
-                    mutableTypeName = $"global::System.Collections.Generic.HashSet<{elementType.ToFullName()}>";
-                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyCollection<{elementType.ToFullName()}>";
-                    break;
-                }
-
-                case CollectionKind.Queue:
-                {
-                    mutableTypeName = $"global::System.Collections.Generic.Queue<{elementType.ToFullName()}>";
-                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyCollection<{elementType.ToFullName()}>";
-                    break;
-                }
-
-                case CollectionKind.Stack:
-                {
-                    mutableTypeName = $"global::System.Collections.Generic.Stack<{elementType.ToFullName()}>";
-                    immutableTypeName = $"global::System.Collections.Generic.IReadOnlyCollection<{elementType.ToFullName()}>";
-                    break;
-                }
-
-                default:
-                {
-                    mutableTypeName = typeSymbol.ToFullName();
-                    immutableTypeName = typeSymbol.ToFullName();
-                    sameType = true;
-                    break;
-                }
-            }
         }
     }
 }
