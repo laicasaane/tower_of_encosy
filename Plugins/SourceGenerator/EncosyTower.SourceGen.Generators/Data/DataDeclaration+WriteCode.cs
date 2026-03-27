@@ -19,51 +19,34 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             if (hasSerializableAttribute == false)
             {
-                p.PrintLine("[global::System.Serializable]");
+                p.PrintLine("[Serializable]");
             }
 
             p.PrintBeginLine()
                 .Print($"partial {keyword} ").Print(typeName)
-                .Print(" : ")
-                .PrintIf(HasBaseType, baseTypeName);
-
-            var secondInterface = HasBaseType;
+                .Print(" : IData, ")
+                .PrintIf(HasBaseType, ", ").PrintIf(HasBaseType, baseTypeName);
 
             if (isMutable == false)
             {
-                p.PrintIf(secondInterface, ", ")
-                    .Print(IREADONLY_DATA).Print("<").Print(typeName).Print(">");
-
-                secondInterface = true;
+                p.Print(", ").Print(IREADONLY_DATA).Print("<").Print(typeName).Print(">");
             }
 
             if (HasIdProperty)
             {
-                p.PrintIf(secondInterface, ", ")
-                    .Print("global::EncosyTower.Data.IDataWithId<")
-                    .Print(idPropertyTypeName).Print(">");
-
-                secondInterface = true;
+                p.Print(", ").Print("IDataWithId<").Print(idPropertyTypeName).Print(">");
             }
 
             if (withReadOnlyView)
             {
-                p.PrintIf(secondInterface, ", ")
-                    .Print("global::EncosyTower.Data.IDataWithReadOnlyView<")
-                    .Print(readOnlyTypeName).Print(">");
-
-                secondInterface = true;
+                p.Print(", ").Print("IDataWithReadOnlyView<").Print(readOnlyTypeName).Print(">");
             }
             else if (isMutable == false)
             {
-                p.PrintIf(secondInterface, ", ")
-                    .Print("global::EncosyTower.Data.IDataWithReadOnlyView<")
-                    .Print(typeName).Print(">");
-
-                secondInterface = true;
+                p.Print(", ").Print("IDataWithReadOnlyView<").Print(typeName).Print(">");
             }
 
-            p.PrintIf(secondInterface, ", ").Print($"global::System.IEquatable<{typeName}>");
+            p.Print(", ").Print($"IEquatable<{typeName}>");
 
             p.PrintEndLine();
             p.OpenScope();
@@ -396,11 +379,11 @@ namespace EncosyTower.SourceGen.Generators.Data
             }
 
             p.PrintIf(isValueType, "readonly ")
-                .PrintEndLine("global::EncosyTower.Common.HashValue GetHashCodeInternal()");
+                .PrintEndLine("HashValue GetHashCodeInternal()");
             p.OpenScope();
             {
                 p.PrintBeginLine("var hash = ")
-                    .PrintIf(fromBase, "base.GetHashCodeInternal()", "new global::EncosyTower.Common.HashValue()")
+                    .PrintIf(fromBase, "base.GetHashCodeInternal()", "new HashValue()")
                     .PrintEndLine(";");
 
                 foreach (var field in fieldRefs)
@@ -715,7 +698,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     default:
                     {
-                        p.PrintBeginLine(and).Print(" global::System.Collections.Generic.EqualityComparer<")
+                        p.PrintBeginLine(and).Print(" EqualityComparer<")
                             .Print(fieldTypeName).Print(">.Default.Equals(this.").Print(fieldName).Print(", other.")
                             .Print(fieldName).PrintEndLine(")");
                         break;
@@ -726,7 +709,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteSetValues_TypeMethod(ref Printer p)
         {
-            p.PrintLine("[global::System.Obsolete(\"This method is not intended to be used directly by user code.\")]");
+            p.PrintLine("[Obsolete(\"This method is not intended to be used directly by user code.\")]");
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine($"internal void SetValues_{typeValidIdentifier}(");
             p = p.IncreasedIndent();
@@ -851,7 +834,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 .Print(" : ")
                 .Print(IREADONLY_DATA).Print("<").Print(typeName).Print(">")
                 .Print(", ")
-                .Print($"global::System.IEquatable<{readOnlyTypeName}>")
+                .Print($"IEquatable<{readOnlyTypeName}>")
                 .PrintEndLine();
             p.OpenScope();
             {
@@ -968,7 +951,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintLine("public override int GetHashCode()");
             p.OpenScope();
             {
-                p.PrintLine("var hash = new global::EncosyTower.Common.HashValue();");
+                p.PrintLine("var hash = new HashValue();");
                 p.PrintLine("hash.Add(_data);");
                 p.PrintLine("return hash.ToHashCode();");
             }
@@ -1012,6 +995,20 @@ namespace EncosyTower.SourceGen.Generators.Data
                 p.PrintLine("return !left.Equals(right);");
             }
             p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private static void PrintAdditionalUsings(ref Printer p)
+        {
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using System;");
+            p.PrintLine("using System.Collections.Generic;");
+            p.PrintLine("using EncosyTower.Common;");
+            p.PrintLine("using EncosyTower.Data;");
+            p.PrintEndLine();
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();
         }
     }

@@ -78,6 +78,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 , token
                 , out var openingSource
                 , out var closingSource
+                , printAdditionalUsings: PrintAdditionalUsings
             );
 
             // ── hint / sourceFilePath ───────────────────────────────────────────────────────

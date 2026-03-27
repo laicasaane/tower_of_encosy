@@ -19,7 +19,8 @@ namespace EncosyTower.Databases.Settings
 
     internal sealed partial class FileTableAsset : DataTableAsset<int, FileData>, IDataTableAsset { }
 
-    internal partial struct FileData : IData
+    [Data]
+    internal partial struct FileData
     {
         [DataProperty]
         public readonly int Id => Get_Id();
