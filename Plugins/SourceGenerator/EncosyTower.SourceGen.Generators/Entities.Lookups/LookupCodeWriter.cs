@@ -170,6 +170,18 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         protected static string GetLookupVarName(TypeRefModel typeRef)
             => $"lookup_{typeRef.typeIdentifier}";
 
+        protected static void WriteAttributes(ref Printer p)
+        {
+            p.PrintLine("/// <inheritdoc/>");
+            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+        }
+
+        protected static void WriteAttributesNoInline(ref Printer p)
+        {
+            p.PrintLine("/// <inheritdoc/>");
+            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+        }
+
         protected abstract void WriteStructBody(ref Printer p, LookupDefinition definition);
     }
 }

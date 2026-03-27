@@ -104,12 +104,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                 WriteEndRegion(ref p, typeRef.typeShortName);
             }
-
-            static void WriteAttributes(ref Printer p)
-            {
-                p.PrintLine("/// <inheritdoc/>");
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            }
         }
     }
 }
