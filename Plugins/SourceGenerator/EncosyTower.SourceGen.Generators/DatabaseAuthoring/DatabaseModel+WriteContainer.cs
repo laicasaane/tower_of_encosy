@@ -1,27 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
-using Newtonsoft.Json.Utilities;
-
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
     using static EncosyTower.SourceGen.Generators.DatabaseAuthoring.Helpers;
 
-    partial class DatabaseDeclaration
+    partial struct DatabaseModel
     {
-        public string WriteContainer(
-              Dictionary<INamedTypeSymbol, DataTableAssetRefList> assetRefListMap
-            , int maxFieldOfSameTable
-            , List<string> typeNames
-        )
+        public readonly string WriteContainer()
         {
-            var syntax = DatabaseRef.Syntax;
-            var tables = DatabaseRef.Tables;
-            var databaseTypeName = syntax.Identifier.Text;
-            var databaseTypeKeyword = DatabaseRef.Symbol.IsValueType ? "struct" : "class";
-
-            var scopePrinter = new SyntaxNodeScopePrinter(Printer.DefaultLarge, syntax.Parent);
-            var p = scopePrinter.printer;
+            var p = Printer.DefaultLarge;
             p = p.IncreasedIndent();
 
             p.PrintEndLine();
@@ -29,7 +14,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             p.PrintEndLine();
 
             p.PrintBeginLine()
-                .Print($"partial ").Print(databaseTypeKeyword).Print(" ").Print(databaseTypeName)
+                .Print("partial ").Print(databaseTypeKeyword).Print(" ").Print(databaseTypeName)
                 .Print($" : {ICONTAINS}<{databaseTypeName}.SheetContainer>")
                 .PrintEndLine();
             p.OpenScope();
@@ -39,23 +24,22 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 p.PrintLine(SERIALIZABLE).PrintLine(GENERATED_SHEET_CONTAINER);
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine($"public partial class SheetContainer")
+                p.PrintBeginLine("public partial class SheetContainer")
                     .Print(" : ").PrintEndLine(DATA_SHEET_CONTAINER_BASE);
                 p.OpenScope();
                 {
                     foreach (var typeName in typeNames)
                     {
-                        p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                         p.PrintBeginLine("public ").Print(typeName).Print(" ")
                             .Print(typeName).PrintEndLine(" { get; set; }");
                         p.PrintEndLine();
                     }
 
-                    foreach (var item in assetRefListMap)
+                    foreach (var assetRefList in assetRefLists)
                     {
-                        var tableType = item.Key;
-                        var dataType = item.Value.DataType;
-                        var baseTypeName = GetSheetName(tableType, dataType);
+                        var baseTypeName = $"{assetRefList.tableTypeSimpleName}_{assetRefList.dataTypeSimpleName}Sheet";
+                        var fieldNames = assetRefList.fieldNames;
+                        var count = fieldNames.Count;
 
                         p.PrintBeginLine("public RefList<").Print(baseTypeName).Print("> ")
                             .Print(baseTypeName).PrintEndLine("s");
@@ -64,14 +48,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                             p.PrintBeginLine("get => new RefList<").Print(baseTypeName).PrintEndLine(">(");
                             p = p.IncreasedIndent();
                             {
-                                var fieldNames = item.Value.FieldNames;
-                                var count = fieldNames.Count;
                                 var lastIndex = count - 1;
-
                                 for (var i = 0; i < count; i++)
                                 {
-                                    var typeName = GetUniqueSheetName(tableType, dataType, fieldNames[i]);
-                                    p.PrintBeginLine("this.").Print(typeName);
+                                    var uniqueSheet = $"{baseTypeName}__{fieldNames[i]}";
+                                    p.PrintBeginLine("this.").Print(uniqueSheet);
 
                                     if (i < lastIndex)
                                     {
@@ -89,15 +70,13 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         p.CloseScope();
                         p.PrintEndLine();
                     }
-
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+;
                     p.PrintBeginLine("public SheetContainer()")
-                        .PrintEndLine(" : this(global::Cathei.BakingSheet.Unity.UnityLogger.Default)");
+                        .PrintEndLine(" : this(UnityLogger.Default)");
                     p.PrintLine("{ }");
                     p.PrintEndLine();
 
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                    p.PrintBeginLine("public SheetContainer(global::Microsoft.Extensions.Logging.ILogger logger)")
+                    p.PrintBeginLine("public SheetContainer(MELogging.ILogger logger)")
                         .PrintEndLine(" : base(logger)");
                     p.OpenScope();
                     {
@@ -123,7 +102,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 p.Print("#endif").PrintEndLine().PrintEndLine();
 
-                WriteDerivedSheetClasses(ref p, tables);
+                WriteDerivedSheetClasses(ref p);
             }
             p.CloseScope();
 
@@ -131,24 +110,23 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             return p.Result;
         }
 
-        private static void WriteDerivedSheetClasses(ref Printer p, ImmutableArray<TableRef> tables)
+        private readonly void WriteDerivedSheetClasses(ref Printer p)
         {
             foreach (var table in tables)
             {
-                var typeName = GetUniqueSheetName(table);
-                var baseTypeName = GetSheetName(table);
-                var idTypeFullName = table.IdType.ToFullName();
-                var dataTypeFullName = table.DataType.ToFullName();
-                var tableTypeName = table.Type.ToFullName();
-                var propertyName = table.PropertyName;
-                var assetName = $"{table.Type.Name}_{propertyName}".ToNamingCase(table.NamingStrategy);
+                var uniqueSheetName = table.uniqueSheetName;
+                var baseSheetName = table.baseSheetName;
+                var idTypeFullName = table.idTypeFullName;
+                var dataTypeFullName = table.dataTypeFullName;
+                var tableTypeFullName = table.typeFullName;
+                var assetName = table.assetName;
 
                 p.PrintLine(SERIALIZABLE);
-                p.PrintLine(string.Format(TABLE_NAMING, table.PropertyName, table.NamingStrategy));
-                p.PrintLine(string.Format(GENERATED_SHEET_ATTRIBUTE, idTypeFullName, dataTypeFullName, tableTypeName, assetName));
+                p.PrintLine(string.Format(TABLE_NAMING, table.propertyName, table.namingStrategy));
+                p.PrintLine(string.Format(GENERATED_SHEET_ATTRIBUTE, idTypeFullName, dataTypeFullName, tableTypeFullName, assetName));
                 p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public partial class ").Print(typeName)
-                    .Print(" : ").Print(baseTypeName).PrintEndLine(" { }");
+                p.PrintBeginLine("public partial class ").Print(uniqueSheetName)
+                    .Print(" : ").Print(baseSheetName).PrintEndLine(" { }");
                 p.PrintEndLine();
             }
         }
@@ -160,38 +138,30 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return;
             }
 
-            const string STRUCT_LAYOUT = "global::System.Runtime.InteropServices.StructLayout";
-            const string EXPLICIT = "global::System.Runtime.InteropServices.LayoutKind.Explicit";
-            const string FIXED_ARRAY = "global::EncosyTower.Collections.FixedArray";
-            const string GC_HANDLE = "global::System.Runtime.InteropServices.GCHandle";
-            const string WEAK = "global::System.Runtime.InteropServices.GCHandleType.Weak";
+            const string STRUCT_LAYOUT = "StructLayout";
+            const string EXPLICIT = "LayoutKind.Explicit";
+            const string FIXED_ARRAY = "FixedArray";
+            const string GC_HANDLE = "GCHandle";
+            const string WEAK = "GCHandleType.Weak";
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly struct RefList<T> where T : class");
             p.OpenScope();
             {
-                p.PrintLine(GENERATED_CODE);
                 p.PrintBeginLine("private readonly ").Print(FIXED_ARRAY)
                     .Print("<").Print(GC_HANDLE).PrintEndLine(", RefListCapacity> _array;");
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE);
                 p.PrintLine("private readonly int _length;");
                 p.PrintEndLine();
 
                 for (var c = 1; c <= count; c++)
                 {
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public RefList(");
 
                     for (var i = 0; i < c; i++)
                     {
-                        if (i > 0)
-                        {
-                            p.Print(", ");
-                        }
-
-                        p.Print($"T p{i}");
+                        p.PrintIf(i > 0, ", ").Print($"T p{i}");
                     }
 
                     p.PrintEndLine(")");
@@ -207,14 +177,13 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         for (var i = 0; i < c; i++)
                         {
                             p.PrintBeginLine($"_array[{i}] = ").Print(GC_HANDLE)
-                                .Print($".Alloc(p{0}, ").Print(WEAK).PrintEndLine(");");
+                                .Print($".Alloc(p{i}, ").Print(WEAK).PrintEndLine(");");
                         }
                     }
                     p.CloseScope();
                     p.PrintEndLine();
                 }
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public readonly int Length");
                 p.OpenScope();
                 {
@@ -224,7 +193,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintLine("public readonly T this[int index]");
                 p.OpenScope();
                 {
