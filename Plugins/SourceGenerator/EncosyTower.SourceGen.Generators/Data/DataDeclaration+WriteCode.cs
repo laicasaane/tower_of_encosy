@@ -24,12 +24,12 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             p.PrintBeginLine()
                 .Print($"partial {keyword} ").Print(typeName)
-                .Print(" : IData, ")
+                .Print(" : IData")
                 .PrintIf(HasBaseType, ", ").PrintIf(HasBaseType, baseTypeName);
 
             if (isMutable == false)
             {
-                p.Print(", ").Print(IREADONLY_DATA).Print("<").Print(typeName).Print(">");
+                p.Print(", ").Print("IReadOnlyData").Print("<").Print(typeName).Print(">");
             }
 
             if (HasIdProperty)
@@ -63,7 +63,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                     WriteOverrideIEquatableMethod(ref p);
                 }
 
-                WriteSetValues_TypeMethod(ref p);
+                WriteSetValue_TypeMethods(ref p);
                 WriteAsReadOnlyMethod(ref p);
                 WriteEqualityOperators(ref p);
             }
@@ -111,13 +111,11 @@ namespace EncosyTower.SourceGen.Generators.Data
             }
 
             var fieldName = prop.fieldName;
-
-            p.PrintLine(string.Format(GENERATED_FIELD_FROM_PROPERTY_ATTRIBUTE, prop.propertyName));
-            p.PrintLine(GENERATED_CODE);
-
             var withSerializeField = false;
             var hasGenPropertyBagAttrib = hasGeneratePropertyBagAttribute;
             var withDontCreateProperty = false;
+
+            p.PrintBeginLine();
 
             foreach (var attr in prop.forwardedFieldAttributes)
             {
@@ -130,12 +128,12 @@ namespace EncosyTower.SourceGen.Generators.Data
                     withDontCreateProperty = true;
                 }
 
-                p.PrintLine($"[{attr.attributeSyntax}]");
+                p.Print($"[{attr.attributeSyntax}]");
             }
 
             if (withSerializeField == false)
             {
-                p.PrintLine($"[{SERIALIZE_FIELD_ATTRIBUTE}]");
+                p.Print("[SerializeField]");
             }
 
             if (hasGenPropertyBagAttrib
@@ -143,8 +141,12 @@ namespace EncosyTower.SourceGen.Generators.Data
                 && withDontCreateProperty == false
             )
             {
-                p.PrintLine($"[{DONT_CREATE_PROPERTY}]");
+                p.Print($"[{DONT_CREATE_PROPERTY_ATTRIBUTE}]");
             }
+
+            p.Print(string.Format(GENERATED_FIELD_FROM_PROPERTY_ATTRIBUTE, prop.propertyName));
+            p.Print(GENERATED_CODE);
+            p.PrintEndLine();
 
             var fieldTypeName = prop.fieldTypeName;
             var propTypeName = prop.propertyTypeName;
@@ -155,7 +157,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintLine($"{accessKeyword} {fieldTypeName} {fieldName};");
             p.PrintEndLine();
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintLine($"private {readonlyKeyword}{propTypeName} Get_{prop.propertyName}()");
             p.OpenScope();
             {
@@ -183,7 +185,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintBeginLine($"private void Set_{prop.propertyName}(")
                 .PrintIf(prop.implicitlyConvertible, propTypeName, fieldTypeName)
                 .PrintEndLine(" value)");
@@ -241,7 +243,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             var sameType = field.samePropertyType;
 
             p.PrintLine(string.Format(GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE, fieldName, field.fieldTypeOriginalFullName));
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
 
             foreach (var attributeSyntax in field.forwardedPropertyAttributeSyntaxes)
             {
@@ -345,7 +347,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return;
             }
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintBeginLine("public override ")
                 .PrintIf(isValueType, "readonly ")
                 .PrintEndLine("int GetHashCode()");
@@ -362,7 +364,7 @@ namespace EncosyTower.SourceGen.Generators.Data
         {
             var fromBase = false;
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
 
             if (HasBaseType == false && isSealed == false)
             {
@@ -445,7 +447,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return;
             }
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintBeginLine("public override ")
                 .PrintIf(isValueType, "readonly ")
                 .PrintEndLine("bool Equals(object obj)");
@@ -461,7 +463,7 @@ namespace EncosyTower.SourceGen.Generators.Data
         {
             foreach (var baseTypeName in overrideEquals)
             {
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
                 p.PrintBeginLine("public override ")
                     .PrintIf(isValueType, "readonly ")
                     .PrintEndLine($"bool Equals({baseTypeName} other)");
@@ -485,7 +487,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return;
             }
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintBeginLineIf(isSealed, "public ", "public virtual ")
                 .PrintIf(isValueType, "readonly ")
                 .PrintEndLine($"bool Equals({typeName} other)");
@@ -510,7 +512,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteEqualsInternalMethod(ref Printer p)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintBeginLineIf(isSealed, "private ", "protected ")
                 .PrintEndLine($"bool EqualsInternal({typeName} other)");
             p.OpenScope();
@@ -707,53 +709,40 @@ namespace EncosyTower.SourceGen.Generators.Data
             }
         }
 
-        private readonly void WriteSetValues_TypeMethod(ref Printer p)
+        private readonly void WriteSetValue_TypeMethods(ref Printer p)
         {
-            p.PrintLine("[Obsolete(\"This method is not intended to be used directly by user code.\")]");
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine($"internal void SetValues_{typeValidIdentifier}(");
-            p = p.IncreasedIndent();
+            foreach (var fieldRef in fieldRefs)
             {
-                var previous = false;
+                var fn = fieldRef.fieldName;
+                var pn = fieldRef.propertyName;
 
-                for (var i = 0; i < fieldRefs.Count; i++)
-                {
-                    previous = true;
-                    var fieldRef = fieldRefs[i];
-                    var comma = i == 0 ? " " : ",";
-                    p.PrintLine($"{comma} {fieldRef.fieldTypeName} {fieldRef.fieldName}");
-                }
-
-                for (var i = 0; i < propRefs.Count; i++)
-                {
-                    var propRef = propRefs[i];
-                    var comma = i == 0 && previous == false ? " " : ",";
-                    p.PrintLine($"{comma} {propRef.fieldTypeName} {propRef.fieldName}");
-                }
+                p.PrintLine("[Obsolete(\"This method is not intended to be used directly by user code.\")]");
+            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+                p.PrintLine($"internal void SetValue_{typeValidIdentifier}_{pn}({fieldRef.fieldTypeName} value_{pn})");
+                p = p.IncreasedIndent();
+                p.PrintLine($"=> this.{fn} = value_{pn};");
+                p = p.DecreasedIndent();
+                p.PrintEndLine();
             }
-            p = p.DecreasedIndent();
-            p.PrintLine(")");
-            p.OpenScope();
+
+            foreach (var propRef in propRefs)
             {
-                foreach (var field in fieldRefs)
-                {
-                    var fn = field.fieldName;
-                    p.PrintLine($"this.{fn} = {fn};");
-                }
+                var fn = propRef.fieldName;
+                var pn = propRef.propertyName;
 
-                foreach (var prop in propRefs)
-                {
-                    var fn = prop.fieldName;
-                    p.PrintLine($"this.{fn} = {fn};");
-                }
+                p.PrintLine("[Obsolete(\"This method is not intended to be used directly by user code.\")]");
+            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+                p.PrintLine($"internal void SetValue_{typeValidIdentifier}_{pn}({propRef.fieldTypeName} value_{pn})");
+                p = p.IncreasedIndent();
+                p.PrintLine($"=> this.{fn} = value_{pn};");
+                p = p.DecreasedIndent();
+                p.PrintEndLine();
             }
-            p.CloseScope();
-            p.PrintEndLine();
         }
 
         private readonly void WriteEqualityOperators(ref Printer p)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintBeginLine("public static bool operator ==(")
                 .PrintIf(isValueType, "in ")
                 .Print($"{typeName} left, ")
@@ -777,7 +766,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintBeginLine("public static bool operator !=(")
                 .PrintIf(isValueType, "in ")
                 .Print($"{typeName} left, ")
@@ -809,7 +798,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return;
             }
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintBeginLine($"public ")
                 .PrintIf(isValueType, "readonly ")
                 .PrintIf(isMutable, readOnlyTypeName, typeName)
@@ -829,10 +818,10 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return;
             }
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintBeginLine(accessibilityKeyword).Print(" readonly partial struct ").Print(readOnlyTypeName)
                 .Print(" : ")
-                .Print(IREADONLY_DATA).Print("<").Print(typeName).Print(">")
+                .Print("IReadOnlyData").Print("<").Print(typeName).Print(">")
                 .Print(", ")
                 .Print($"IEquatable<{readOnlyTypeName}>")
                 .PrintEndLine();
@@ -842,7 +831,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 p.PrintBeginLine("private readonly ").Print(typeName).PrintEndLine(" _data;");
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
                 p.PrintBeginLine(accessibilityKeyword)
                     .Print(" ReadOnly").Print(typeIdentifier).Print("(")
                     .PrintIf(isValueType, "in ")
@@ -918,8 +907,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteReadOnlyViewStruct_Equality(ref Printer p)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLineIf(isValueType, AGGRESSIVE_INLINING);
+            p.PrintBeginLineIf(isValueType, AGGRESSIVE_INLINING, "").Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintLine($"public bool Equals({readOnlyTypeName} other)");
             p.OpenScope();
             {
@@ -935,7 +923,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintLine("public override bool Equals(object obj)");
             p.OpenScope();
             {
@@ -947,7 +935,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteReadOnlyViewStruct_GetHashCodeMethod(ref Printer p)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintLine("public override int GetHashCode()");
             p.OpenScope();
             {
@@ -961,7 +949,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteReadOnlyViewStruct_ImplicitOperator(ref Printer p)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine(GENERATED_CODE).Print(EXCLUDE_COVERAGE).PrintEndLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static implicit operator ")
                 .Print(readOnlyTypeName)
                 .Print("(")
@@ -979,7 +967,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteReadOnlyViewStruct_EqualityOperators(ref Printer p)
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintLine($"public static bool operator ==(in {readOnlyTypeName} left, in {readOnlyTypeName} right)");
             p.OpenScope();
             {
@@ -988,7 +976,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintLine($"public static bool operator !=(in {readOnlyTypeName} left, in {readOnlyTypeName} right)");
             p.OpenScope();
             {
@@ -1005,8 +993,14 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
             p.PrintLine("using System;");
             p.PrintLine("using System.Collections.Generic;");
+            p.PrintLine("using System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using System.CodeDom.Compiler;");
+            p.PrintLine("using System.Runtime.CompilerServices;");
+            p.PrintLine("using System.Runtime.InteropServices;");
             p.PrintLine("using EncosyTower.Common;");
             p.PrintLine("using EncosyTower.Data;");
+            p.PrintLine("using EncosyTower.Data.SourceGen;");
+            p.PrintLine("using UnityEngine;");
             p.PrintEndLine();
             p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();

@@ -1,4 +1,6 @@
-﻿namespace EncosyTower.SourceGen.Common.Data.Common
+﻿using Microsoft.CodeAnalysis;
+
+namespace EncosyTower.SourceGen.Common.Data.Common
 {
     public static class Helpers
     {
@@ -7,9 +9,6 @@
         public const string NAMESPACE = "EncosyTower.Data";
         public const string DATA_ATTRIBUTE_METADATA = $"{NAMESPACE}.DataAttribute";
         public const string IDATA = $"global::{NAMESPACE}.IData";
-        public const string IREADONLY_DATA = $"global::{NAMESPACE}.IReadOnlyData";
-        public const string IDATA_TABLE_ASSET = $"global::{NAMESPACE}.IDataTableAsset";
-        public const string DATA_TABLE_ASSET = $"global::{NAMESPACE}.DataTableAsset";
         public const string DATA_PROPERTY_ATTRIBUTE = $"global::{NAMESPACE}.DataPropertyAttribute";
         public const string DATA_CONVERTER_ATTRIBUTE = $"global::{NAMESPACE}.DataConverterAttribute";
         public const string DATA_COMPARER_ATTRIBUTE = $"global::{NAMESPACE}.DataComparerAttribute";
@@ -29,9 +28,10 @@
 
         public const string UNION_ID_ATTRIBUTE = "global::EncosyTower.UnionIds.UnionIdAttribute";
 
-        public const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Data.DataGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        public const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
+        public const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
+        public const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.Data.DataGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        public const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
+        private const string EDITOR_BROWSABLE_NEVER = "[EditorBrowsable(EditorBrowsableState.Never)]";
 
         public const string LIST_FAST_TYPE_T = "global::EncosyTower.Collections.ListFast<";
         public const string LIST_TYPE_T = "global::System.Collections.Generic.List<";
@@ -58,7 +58,10 @@
         public const string HASH_SET_API = "global::EncosyTower.Collections.Extensions.HashSetAPI";
         public const string REFERENCE_EXTENSIONS = "global::EncosyTower.SystemExtensions.EncosyReferenceExtensions";
 
-        public const string GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE = $"[global::{NAMESPACE}.SourceGen.GeneratedPropertyFromField(nameof({{0}}), typeof({{1}}))]";
-        public const string GENERATED_FIELD_FROM_PROPERTY_ATTRIBUTE = $"[global::{NAMESPACE}.SourceGen.GeneratedFieldFromProperty(nameof({{0}}))]";
+        public const string GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE = $"[GeneratedPropertyFromField(nameof({{0}}), typeof({{1}}))]";
+        public const string GENERATED_FIELD_FROM_PROPERTY_ATTRIBUTE = $"[GeneratedFieldFromProperty(nameof({{0}}))]";
+
+        public static bool IsIData(ITypeSymbol type)
+            => type.HasAttribute(DATA_ATTRIBUTE_METADATA) || type.InheritsFromInterface(IDATA);
     }
 }

@@ -598,7 +598,7 @@ namespace EncosyTower.SourceGen.Generators.Data
         {
             var fieldEquality = type.DetermineEquality();
 
-            if (type.InheritsFromInterface(IDATA))
+            if (IsIData(type))
             {
                 fieldEquality = new Equality(EqualityStrategy.Equals, false, false);
             }
@@ -612,7 +612,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private static bool GetEquatable(ITypeSymbol type)
         {
-            return type.InheritsFromInterface(IDATA)
+            return IsIData(type)
                 || type.HasAttribute(UNION_ID_ATTRIBUTE)
                 || type.DetermineIEquatable()
                 ;
