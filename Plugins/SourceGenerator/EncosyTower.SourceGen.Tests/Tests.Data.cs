@@ -55,7 +55,7 @@ namespace EncosyTower.Tests.Data
     public class FieldAttribute : Attribute { }
 
     [Data]
-    public partial class IdData : IData
+    public partial class IdData
     {
         [DataProperty]
         [field: Field]
@@ -66,7 +66,7 @@ namespace EncosyTower.Tests.Data
     }
 
     [Data]
-    public partial class StatData : IData
+    public partial class StatData
     {
         [DataConverter(typeof(WrapperConverter<float, FloatWrapper>))]
         [DataProperty] public FloatWrapper Hp => Get_Hp();
@@ -77,7 +77,7 @@ namespace EncosyTower.Tests.Data
 
     [Data]
     [DataMutable(DataMutableOptions.WithReadOnlyView)]
-    public partial class GenericData<T> : IData
+    public partial class GenericData<T>
     {
         [DataProperty]
         public int Id { get => Get_Id(); init => Set_Id(value); }
@@ -92,7 +92,7 @@ namespace EncosyTower.Tests.Data
 
     [Data]
     [DataMutable(DataMutableOptions.WithReadOnlyView)]
-    public partial struct StatMultiplierData : IData
+    public partial struct StatMultiplierData
     {
         [SerializeField] private IntWrapper _level;
         [SerializeField] private FloatWrapper _hp;
@@ -118,7 +118,7 @@ namespace EncosyTower.Tests.Data.Heroes
     [Data]
     [GeneratePropertyBag]
     [DataMutable(DataMutableOptions.WithoutPropertySetters | DataMutableOptions.WithReadOnlyView)]
-    public partial class MutableData : IData
+    public partial class MutableData
     {
         [SerializeField, DontCreateProperty]
         private int _intValue;
@@ -131,7 +131,7 @@ namespace EncosyTower.Tests.Data.Heroes
     }
 
     [Data]
-    public partial class HeroData : IData
+    public partial class HeroData
     {
         [SerializeField] private IdData _id;
         [SerializeField] private string _name;
@@ -176,7 +176,7 @@ namespace EncosyTower.Tests.Data.Heroes
     }
 
     [Data]
-    public partial class NewHeroData : HeroData, IData
+    public partial class NewHeroData : HeroData
     {
         [DataProperty]
         [field: SerializeField]
@@ -200,7 +200,7 @@ namespace EncosyTower.Tests.Data.Enemies
     using UnityEngine;
 
     [Data]
-    public partial class EnemyData : IData, IInitializable
+    public partial class EnemyData : IInitializable
     {
         [SerializeField] private IdData _id;
         [SerializeField] private string _name;
@@ -291,7 +291,7 @@ namespace EncosyTower.Tests.Data.ConvertibleIds
     using EncosyTower.Databases;
 
     [Data]
-    public partial struct IdData : IData
+    public partial struct IdData
     {
         [DataProperty] public readonly int Value => Get_Value();
 
@@ -309,7 +309,7 @@ namespace EncosyTower.Tests.Data.ConvertibleIds
 
     [Data]
     [DataMutable(DataMutableOptions.WithReadOnlyView)]
-    public partial struct ItemData : IData
+    public partial struct ItemData
     {
         [DataProperty] public readonly IdData Id => Get_Id();
 
@@ -318,5 +318,46 @@ namespace EncosyTower.Tests.Data.ConvertibleIds
 
     public sealed partial class ItemTableAsset : DataTableAsset<IdData, ItemData, int>, IDataTableAsset
     {
+    }
+}
+
+namespace EncosyTower.Databases.Settings
+{
+    using EncosyTower.Data;
+    using EncosyTower.Databases.Authoring;
+    using EncosyTower.Naming;
+    using UnityEngine;
+
+    [Database(NamingStrategy.SnakeCase)]
+    internal readonly partial struct FileDatabase
+    {
+        [Table] public readonly FileTableAsset FileList => Get_FileList();
+    }
+
+    [HideInInspector]
+    [AuthorDatabase(typeof(FileDatabase))]
+    internal readonly partial struct FileDatabaseAuthoring
+    {
+    }
+
+    internal sealed partial class FileTableAsset : DataTableAsset<int, FileData>, IDataTableAsset { }
+
+    [Data]
+    internal partial struct FileData
+    {
+        [DataProperty]
+        public readonly int Id => Get_Id();
+
+        [DataProperty]
+        public readonly string FileName => Get_FileName();
+
+        [DataProperty]
+        public readonly string FileId => Get_FileId();
+
+        [DataProperty]
+        public readonly string MimeType => Get_MimeType();
+
+        [DataProperty]
+        public readonly string Url => Get_Url();
     }
 }
