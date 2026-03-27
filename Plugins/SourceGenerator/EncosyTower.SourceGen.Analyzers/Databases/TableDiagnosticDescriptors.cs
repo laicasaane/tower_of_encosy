@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -7,12 +7,12 @@ using Microsoft.CodeAnalysis;
 #pragma warning disable IDE0090 // Use 'new DiagnosticDescriptor(...)'
 #pragma warning disable RS2008 // Enable analyzer release tracking
 
-namespace EncosyTower.SourceGen.Generators.Databases
+namespace EncosyTower.SourceGen.Analyzers.Databases
 {
-    internal static class HorizontalDiagnosticDescriptors
+    internal static class TableDiagnosticDescriptors
     {
         public static readonly DiagnosticDescriptor NotTypeOfExpression = new DiagnosticDescriptor(
-              id: "DATABASE_HORIZONTAL_0001"
+              id: "DATABASE_TABLE_0001"
             , title: "Not a typeof expression"
             , messageFormat: "The first argument must be a 'typeof' expression"
             , category: "DatabaseGenerator"
@@ -22,33 +22,33 @@ namespace EncosyTower.SourceGen.Generators.Databases
         );
 
         public static readonly DiagnosticDescriptor AbstractTypeNotSupported = new DiagnosticDescriptor(
-              id: "DATABASE_HORIZONTAL_0003"
+              id: "DATABASE_TABLE_0003"
             , title: "Abstract type is not supported"
             , messageFormat: "The type \"{0}\" must not be abstract"
             , category: "DatabaseGenerator"
             , defaultSeverity: DiagnosticSeverity.Error
             , isEnabledByDefault: true
-            , description: "The type must not be abstract to be considered a valid target type."
+            , description: "The type must not be abstract to be considered a valid table."
         );
 
-        public static readonly DiagnosticDescriptor NotImplementIData = new DiagnosticDescriptor(
-              id: "DATABASE_HORIZONTAL_0004"
-            , title: "Target type does not implement IData"
-            , messageFormat: "The type \"{0}\" must implement IData interface"
+        public static readonly DiagnosticDescriptor GenericTypeNotSupported = new DiagnosticDescriptor(
+              id: "DATABASE_TABLE_0004"
+            , title: "Generic type is not supported"
+            , messageFormat: "The type \"{0}\" must not be generic"
             , category: "DatabaseGenerator"
             , defaultSeverity: DiagnosticSeverity.Error
             , isEnabledByDefault: true
-            , description: "The type must implement IData interface to be considered a valid target type."
+            , description: "The type must not be generic to be considered a valid table."
         );
 
-        public static readonly DiagnosticDescriptor InvalidPropertyName = new DiagnosticDescriptor(
-              id: "DATABASE_HORIZONTAL_0005"
-            , title: "Invalid property name"
-            , messageFormat: "The property name must be a valid identifier"
+        public static readonly DiagnosticDescriptor MustBeDerivedFromDataTableAsset = new DiagnosticDescriptor(
+              id: "DATABASE_TABLE_0005"
+            , title: "Type must be derived from either DataTableAsset<TDataId, TData> or DataTableAsset<TDataId, TData, TConvertedId>"
+            , messageFormat: "The type \"{0}\" must be derived from either DataTableAsset<TDataId, TData> or DataTableAsset<TDataId, TData, TConvertedId>"
             , category: "DatabaseGenerator"
             , defaultSeverity: DiagnosticSeverity.Error
             , isEnabledByDefault: true
-            , description: "The property name must be a valid identifier."
+            , description: "The type must be derived from either DataTableAsset<TDataId, TData> or DataTableAsset<TDataId, TData, TConvertedId>."
         );
     }
 }

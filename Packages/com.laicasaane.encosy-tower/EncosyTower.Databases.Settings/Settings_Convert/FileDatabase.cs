@@ -17,7 +17,8 @@ namespace EncosyTower.Databases.Settings
     {
     }
 
-    internal sealed partial class FileTableAsset : DataTableAsset<int, FileData>, IDataTableAsset { }
+    [DataTableAsset]
+    internal sealed partial class FileTableAsset : DataTableAsset<int, FileData> { }
 
     [Data]
     internal partial struct FileData
