@@ -4,7 +4,8 @@ using UnityEngine;
 
 namespace EncosyTower.Samples.Mvvm
 {
-    public sealed partial class SampleMvvm : MonoBehaviour, IObservableObject
+    [ObservableObject]
+    public sealed partial class SampleMvvm : MonoBehaviour
     {
         [SerializeField] private float _scrollSpeed = 2f;
         [SerializeField] private float _scrollInterval = 0.05f;

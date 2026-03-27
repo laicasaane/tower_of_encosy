@@ -15,8 +15,9 @@ namespace EncosyTower.Samples.VisualDebugging
         Crystal,
     }
 
+    [ObservableObject]
     [Label("Resource", "Resources"), VisualOrder(0)]
-    internal sealed partial class VisualCommand_Resource : IVisualCommand, IObservableObject
+    internal sealed partial class VisualCommand_Resource : IVisualCommand
     {
         [ObservableProperty]
         private ResourceType Type
@@ -50,8 +51,9 @@ namespace EncosyTower.Samples.VisualDebugging
         }
     }
 
+    [ObservableObject]
     [Label("Gold", "Resources"), VisualOrder(1)]
-    internal sealed partial class VisualCommand_Gold : IVisualCommand, IObservableObject
+    internal sealed partial class VisualCommand_Gold : IVisualCommand
     {
         [ObservableProperty]
         private int Amount
@@ -72,8 +74,9 @@ namespace EncosyTower.Samples.VisualDebugging
         }
     }
 
+    [ObservableObject]
     [Label("Crystal", "Resources"), VisualOrder(2)]
-    internal sealed partial class VisualCommand_Crystal : IVisualCommand, IObservableObject
+    internal sealed partial class VisualCommand_Crystal : IVisualCommand
     {
         [ObservableProperty]
         private int Amount
@@ -94,8 +97,9 @@ namespace EncosyTower.Samples.VisualDebugging
         }
     }
 
+    [ObservableObject]
     [Label("Level", "Levels")]
-    internal sealed partial class VisualCommand_Level : IVisualCommand, IObservableObject
+    internal sealed partial class VisualCommand_Level : IVisualCommand
     {
         public VisualCommand_Level()
         {
@@ -137,8 +141,9 @@ namespace EncosyTower.Samples.VisualDebugging
         }
     }
 
+    [ObservableObject]
     [Label("Name", "Player")]
-    internal sealed partial class VisualCommand_PlayerName : IVisualCommand, IObservableObject, IInitializable
+    internal sealed partial class VisualCommand_PlayerName : IVisualCommand, IInitializable
     {
         [ObservableProperty]
         [VisualOptions(nameof(NameOptions), true)]

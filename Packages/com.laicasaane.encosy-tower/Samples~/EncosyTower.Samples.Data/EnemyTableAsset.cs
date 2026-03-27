@@ -3,12 +3,11 @@ using EncosyTower.Databases;
 
 namespace EncosyTower.Samples.Data
 {
-    public sealed partial class EnemyTableAsset
-        : DataTableAsset<EntityUidData, EnemyData, EntityUid>
-        , IDataTableAsset
-    { }
+    [DataTableAsset]
+    public sealed partial class EnemyTableAsset : DataTableAsset<EntityUidData, EnemyData, EntityUid> { }
 
-    public partial struct EnemyData : IData
+    [Data]
+    public partial struct EnemyData
     {
         [DataProperty] public readonly EntityUidData Id => Get_Id();
 

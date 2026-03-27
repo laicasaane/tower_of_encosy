@@ -3,9 +3,12 @@ using UnityEngine;
 
 namespace EncosyTower.Samples.Mvvm
 {
-    public readonly partial struct ColorVariant : IVariant<Color> { }
+    [Variant(typeof(Color))]
+    public readonly partial struct ColorVariant { }
 
-    public readonly partial struct Vector3Variant : IVariant<Vector3> { }
+    [Variant(typeof(Vector3))]
+    public readonly partial struct Vector3Variant { }
 
-    public readonly partial struct QuaternionVariant : IVariant<Quaternion> { }
+    [Variant(typeof(Quaternion))]
+    public readonly partial struct QuaternionVariant { }
 }

@@ -73,8 +73,8 @@ namespace EncosyTower.Samples.Data
             => _raw.GetHashCode();
     }
 
-    [DataWithoutId]
-    public partial struct EntityIdData : IData
+    [Data, DataWithoutId]
+    public partial struct EntityIdData
     {
         [DataProperty] public readonly string Kind => Get_Kind();
 
@@ -93,8 +93,8 @@ namespace EncosyTower.Samples.Data
         }
     }
 
-    [DataWithoutId]
-    public partial struct EntityUidData : IData
+    [Data, DataWithoutId]
+    public partial struct EntityUidData
     {
         [DataProperty] public readonly EntityIdData EntityId => Get_EntityId();
 
@@ -105,7 +105,8 @@ namespace EncosyTower.Samples.Data
             => new((EntityId)data._entityId, data._rarity);
     }
 
-    public partial struct EntityStatData : IData
+    [Data]
+    public partial struct EntityStatData
     {
         [DataProperty] public readonly float Hp => Get_Hp();
 
@@ -115,8 +116,8 @@ namespace EncosyTower.Samples.Data
             => $"HP:{_hp} | ATK:{_atk}";
     }
 
-    [DataMutable(DataMutableOptions.WithReadOnlyView)]
-    public partial struct EntityStatMultiplierData : IData
+    [Data, DataMutable(DataMutableOptions.WithReadOnlyView)]
+    public partial struct EntityStatMultiplierData
     {
         [DataProperty] public readonly int Level => Get_Level();
 

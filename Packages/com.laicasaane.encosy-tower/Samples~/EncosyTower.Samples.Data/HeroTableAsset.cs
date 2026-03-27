@@ -4,13 +4,11 @@ using EncosyTower.Databases;
 
 namespace EncosyTower.Samples.Data
 {
-    public sealed partial class HeroTableAsset
-        : DataTableAsset<EntityIdData, HeroData, EntityId>
-        , IDataTableAsset
-    { }
+    [DataTableAsset]
+    public sealed partial class HeroTableAsset : DataTableAsset<EntityIdData, HeroData, EntityId> { }
 
-    [DataMutable(DataMutableOptions.WithReadOnlyView)]
-    public partial struct HeroData : IData
+    [Data, DataMutable(DataMutableOptions.WithReadOnlyView)]
+    public partial struct HeroData
     {
         [DataProperty] public readonly EntityIdData Id => Get_Id();
 
