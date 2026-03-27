@@ -4,13 +4,19 @@ using EncosyTower.Naming;
 namespace EncosyTower.Databases
 {
     /// <summary>
-    /// Defines a database which utilizes BakingSheet mechanism to import data from sources.
+    /// Marks a class or struct as a database definition that uses the BakingSheet pipeline
+    /// to import data from external sources.
     /// </summary>
     /// <remarks>
-    /// By default, collections are automatically typed <see cref="Cathei.BakingSheet.VerticalList{T}"/>.
-    /// <br/>
-    /// In case this behavior is not desired, use <see cref="Authoring.HorizontalAttribute"/>
-    /// to signify that the property should be a horizontal list.
+    /// <para>
+    /// For source generation to work, the annotated type must declare one or more properties
+    /// annotated with <see cref="TableAttribute"/>.
+    /// </para>
+    /// <para>
+    /// By default, generated table collections use <see cref="Cathei.BakingSheet.VerticalList{T}"/>.
+    /// To override this behavior, apply <see cref="Authoring.HorizontalAttribute"/> to indicate
+    /// that the target property should use a horizontal list.
+    /// </para>
     /// </remarks>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
     public sealed class DatabaseAttribute : Attribute
