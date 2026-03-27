@@ -68,10 +68,14 @@ namespace EncosyTower.SourceGen
         public bool IsEmpty
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => AsImmutableArray().IsEmpty;
+            get => Count < 1;
         }
 
-        public int Count => _array?.Length ?? 0;
+        public int Count
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _array?.Length ?? 0;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ReadOnlySpan<T>(EquatableArray<T> array)
@@ -116,7 +120,9 @@ namespace EncosyTower.SourceGen
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ImmutableArray<T> AsImmutableArray()
         {
-            return Unsafe.As<T[], ImmutableArray<T>>(ref Unsafe.AsRef(in this._array));
+            return IsEmpty
+                ? ImmutableArray<T>.Empty
+                : Unsafe.As<T[], ImmutableArray<T>>(ref Unsafe.AsRef(in this._array));
         }
 
         /// <summary>
