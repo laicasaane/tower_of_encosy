@@ -94,7 +94,7 @@
       "hash": "de773d83add4627d07bb295f78b72372c78449b4"
     },
     "com.needle.compilation-visualizer": {
-      "version": "1.8.8",
+      "version": "1.8.9",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -364,7 +364,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.localization": {
-      "version": "1.5.10",
+      "version": "1.5.11",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -545,7 +545,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.timeline": {
-      "version": "1.8.11",
+      "version": "1.8.12",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -632,7 +632,7 @@
       "url": "https://package.openupm.com"
     },
     "today.comes.saintsfield": {
-      "version": "5.12.0-preview.0",
+      "version": "5.12.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
