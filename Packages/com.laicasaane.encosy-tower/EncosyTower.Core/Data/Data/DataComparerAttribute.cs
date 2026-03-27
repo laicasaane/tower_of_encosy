@@ -4,12 +4,12 @@ namespace EncosyTower.Data
 {
     /// <summary>
     /// Instructs the source generator to use a custom comparer for the annotated property or field
-    /// in the authoring mechanism.
+    /// in the authoring pipeline.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// <see cref="Type"/> must include a public <c>Equals</c> method that accepts 2 parameters of the same type
-    /// and must return a boolean.
+    /// <see cref="Type"/> must define a public <c>Equals</c> method that takes two parameters of the same type
+    /// and returns a <see cref="bool"/>.
     /// </para>
     /// </remarks>
     /// <example>
@@ -19,7 +19,8 @@ namespace EncosyTower.Data
     ///     public static bool Equals(int[] a, int[] b) => a.AsSpan().SequenceEqual(b.AsSpan());
     /// }
     ///
-    /// public class MyData : IData
+    /// [Data]
+    /// public partial class MyData
     /// {
     ///     [DataProperty, DataComparer(typeof(IntArrayComparer))]
     ///     public int[] Values { get; set; }
