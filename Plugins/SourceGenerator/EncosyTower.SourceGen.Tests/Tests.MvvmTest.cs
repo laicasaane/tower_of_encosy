@@ -89,7 +89,7 @@ namespace EncosyTower.Tests.MvvmTests
     }
 
     [Binder]
-    public partial class GenericBinder<T> : IBinder
+    public partial class GenericBinder<T>
     {
         [BindingProperty]
         private void SetIntValue(int value)
