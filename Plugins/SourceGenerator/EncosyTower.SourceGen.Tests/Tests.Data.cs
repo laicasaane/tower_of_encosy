@@ -171,7 +171,8 @@ namespace EncosyTower.Tests.Data.Heroes
             => readDictionary._dictionary;
     }
 
-    public partial class HeroDataTableAsset : DataTableAsset<IdData, HeroData>, IDataTableAsset
+    [DataTableAsset]
+    public partial class HeroDataTableAsset : DataTableAsset<IdData, HeroData>
     {
     }
 
@@ -186,7 +187,8 @@ namespace EncosyTower.Tests.Data.Heroes
         public IReadOnlyCollection<int> ValueSet => Get_ValueSet();
     }
 
-    public partial class NewHeroDataTableAsset : DataTableAsset<IdData, NewHeroData>, IDataTableAsset
+    [DataTableAsset]
+    public partial class NewHeroDataTableAsset : DataTableAsset<IdData, NewHeroData>
     {
     }
 }
@@ -214,23 +216,26 @@ namespace EncosyTower.Tests.Data.Enemies
         }
     }
 
-    public abstract class EnemyDataTableAsset<T> : DataTableAsset<IdData, T>, IDataTableAsset where T : IDataWithId<IdData>
+    public abstract class EnemyDataTableAsset<T> : DataTableAsset<IdData, T> where T : IDataWithId<IdData>
     {
     }
 
-    public partial class EnemyDataTableAsset : EnemyDataTableAsset<EnemyData>, IDataTableAsset
+    [DataTableAsset]
+    public partial class EnemyDataTableAsset : EnemyDataTableAsset<EnemyData>
     {
     }
 
-    public partial class NewEnemyDataTableAsset : EnemyDataTableAsset<EnemyData>, IDataTableAsset
+    [DataTableAsset]
+    public partial class NewEnemyDataTableAsset : EnemyDataTableAsset<EnemyData>
     {
     }
 
-    public abstract class GenericDataTableAsset<T> : DataTableAsset<int, GenericData<T>>, IDataTableAsset
+    public abstract class GenericDataTableAsset<T> : DataTableAsset<int, GenericData<T>>
     {
     }
 
-    public partial class GenericDataTableAsset : GenericDataTableAsset<int>, IDataTableAsset { }
+    [DataTableAsset]
+    public partial class GenericDataTableAsset : GenericDataTableAsset<int> { }
 }
 
 namespace EncosyTower.Tests.DataConverters
@@ -316,7 +321,8 @@ namespace EncosyTower.Tests.Data.ConvertibleIds
         [DataProperty] public readonly float Amount => Get_Amount();
     }
 
-    public sealed partial class ItemTableAsset : DataTableAsset<IdData, ItemData, int>, IDataTableAsset
+    [DataTableAsset]
+    public sealed partial class ItemTableAsset : DataTableAsset<IdData, ItemData, int>
     {
     }
 }
@@ -340,7 +346,8 @@ namespace EncosyTower.Databases.Settings
     {
     }
 
-    internal sealed partial class FileTableAsset : DataTableAsset<int, FileData>, IDataTableAsset { }
+    [DataTableAsset]
+    internal sealed partial class FileTableAsset : DataTableAsset<int, FileData> { }
 
     [Data]
     internal partial struct FileData

@@ -7,7 +7,7 @@ namespace EncosyTower.Databases
 {
     public interface IDataTableAsset { }
 
-    public interface IDataTableAsset<TData>
+    public interface IDataTableAsset<TData> : IDataTableAsset
         where TData : IData
     {
         ReadOnlyMemory<TData> Entries { get; }

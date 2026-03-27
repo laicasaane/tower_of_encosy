@@ -7,13 +7,16 @@
         public const string NAMESPACE = "EncosyTower.Databases";
         public const string IDATA = $"global::{NAMESPACE}.IData";
         public const string DATA_TABLE_ASSET = $"global::{NAMESPACE}.DataTableAsset";
+        public const string DATA_TABLE_ASSET_ATTRIBUTE = $"{NAMESPACE}.DataTableAssetAttribute";
         public const string DATABASE_ATTRIBUTE = $"global::{NAMESPACE}.DatabaseAttribute";
         public const string TABLE_ATTRIBUTE = $"global::{NAMESPACE}.TableAttribute";
         public const string HORIZONTAL_LIST_ATTRIBUTE = $"global::{NAMESPACE}.HorizontalAttribute";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
 
-        public const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        public const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.DataTableAssets.DataTableAssetGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        public const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
+        public const string IINITIALIZABLE = "global::EncosyTower.Common.IInitializable";
+
+        public const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
+        public const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.DataTableAssets.DataTableAssetGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        public const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
     }
 }

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 #pragma warning disable IDE0090 // Use 'new DiagnosticDescriptor(...)'
 #pragma warning disable RS2008 // Enable analyzer release tracking
 
-namespace EncosyTower.SourceGen.Generators.DataTableAssets
+namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
 {
     internal static class DiagnosticDescriptors
     {
