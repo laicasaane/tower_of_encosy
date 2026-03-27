@@ -177,7 +177,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     continue;
                 }
 
-                if (targetType.InheritsFromInterface(IDATA, true) == false)
+                if (IsIData(targetType) == false)
                 {
                     context.ReportDiagnostic(
                           HorizontalDiagnosticDescriptors.NotImplementIData

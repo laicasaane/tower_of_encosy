@@ -1,4 +1,6 @@
-﻿namespace EncosyTower.SourceGen.Generators.Databases
+﻿using Microsoft.CodeAnalysis;
+
+namespace EncosyTower.SourceGen.Generators.Databases
 {
     public static class Helpers
     {
@@ -18,9 +20,13 @@
         public const string STRUCT_LAYOUT_AUTO = "[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Auto)]";
 
         public const string DATA_NAMESPACE = "EncosyTower.Data";
+        public const string DATA_ATTRIBUTE = $"global::{DATA_NAMESPACE}.DataAttribute";
         public const string IDATA = $"global::{DATA_NAMESPACE}.IData";
 
         public const string DATABASES_AUTHORING_NAMESPACE = $"{DATABASES_NAMESPACE}.Authoring";
         public const string HORIZONTAL_LIST_ATTRIBUTE = $"global::{DATABASES_AUTHORING_NAMESPACE}.HorizontalAttribute";
+
+        public static bool IsIData(ITypeSymbol type)
+            => type.HasAttribute(DATA_ATTRIBUTE) || type.InheritsFromInterface(IDATA);
     }
 }
