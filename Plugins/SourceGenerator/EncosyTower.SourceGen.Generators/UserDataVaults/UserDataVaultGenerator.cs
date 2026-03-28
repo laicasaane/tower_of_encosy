@@ -20,7 +20,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var providerClassProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   VAULT_ATTRIBUTE_METADATA
@@ -240,7 +240,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidateSlim compilationCandidate
+            , CompilationInfo compilation
             , UserDataVaultInfo vaultInfo
             , ImmutableArray<UserDataAccessorInfo> accessorInfos
             , string projectPath
@@ -295,7 +295,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             // Build the opening source from pre-extracted namespace / containing type declarations
             // (replaces TypeCreationHelpers.GenerateOpeningAndClosingSource which requires a SyntaxNode).
             var openingPrinter = Printer.DefaultLarge;
-            var printUsings = compilationCandidate.references.unitask
+            var printUsings = compilation.references.unitask
                 ? (PrinterAction)PrintUsingUniTask : PrintUsingAwaitable;
             printUsings(ref openingPrinter);
 
@@ -337,8 +337,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             var fileHintName = vaultInfo.fileHintName;
             var sourceFileName = $"{fileHintName}__{GENERATOR_NAME}_{stableHashCode}_0.g.cs";
             var sourceFilePath = SourceGenHelpers.CanWriteToProjectPath
-                ? $"{projectPath}/Temp/GeneratedCode/{compilationCandidate.assemblyName}/{sourceFileName}"
-                : $"Temp/GeneratedCode/{compilationCandidate.assemblyName}/{sourceFileName}";
+                ? $"{projectPath}/Temp/GeneratedCode/{compilation.assemblyName}/{sourceFileName}"
+                : $"Temp/GeneratedCode/{compilation.assemblyName}/{sourceFileName}";
 
             context.OutputSource(
                   outputSourceGenFiles

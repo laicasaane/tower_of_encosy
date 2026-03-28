@@ -22,7 +22,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 .Where(static t => t.IsValid);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var combined = candidateProvider
                 .Combine(compilationProvider)

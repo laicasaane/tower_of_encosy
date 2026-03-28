@@ -18,7 +18,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(

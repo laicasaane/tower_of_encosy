@@ -23,7 +23,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var typeProvider = context.SyntaxProvider.CreateSyntaxProvider(
                   predicate: IsSyntaxMatched
@@ -152,7 +152,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidateSlim compilationCandidate
+            , CompilationInfo compilation
             , ImmutableArray<InternalVariantDeclaration> candidates
             , string projectPath
             , bool outputSourceGenFiles
@@ -160,7 +160,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            if (candidates.Length < 1 || compilationCandidate.isValid == false)
+            if (candidates.Length < 1 || compilation.isValid == false)
             {
                 return;
             }
@@ -170,7 +170,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 using var valueTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
                 using var refTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
                 var seenTypeNames = new HashSet<string>(StringComparer.Ordinal);
-                var assemblyName = compilationCandidate.assemblyName;
+                var assemblyName = compilation.assemblyName;
 
                 foreach (var candidate in candidates)
                 {

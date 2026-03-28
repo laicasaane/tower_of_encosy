@@ -31,7 +31,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(CompilationCandidate.GetCompilation);
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var idProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   UNION_ID_ATTRIBUTE_METADATA
@@ -53,7 +53,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 .Combine(kindProvider.Collect())
                 .Combine(compilationProvider)
                 .Combine(projectPathProvider)
-                .Where(static t => t.Left.Right.compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE));
+                .Where(static t => t.Left.Right.isValid);
 
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
@@ -511,7 +511,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidate compilationCandidate
+            , CompilationInfo compilation
             , IdDeclaration idInfo
             , ImmutableArray<KindDeclaration> kindInfos
             , string projectPath
@@ -526,14 +526,12 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             try
             {
                 SourceGenHelpers.ProjectPath = projectPath;
-
-                var compilation = compilationCandidate.compilation;
-                var assemblyName = compilationCandidate.assemblyName;
-
+;
+                var assemblyName = compilation.assemblyName;
                 var declaration = new UnionIdDeclaration(
                       idInfo
                     , kindInfos
-                    , compilationCandidate.references
+                    , compilation.references
                 );
 
                 if (declaration.IsInvalid)

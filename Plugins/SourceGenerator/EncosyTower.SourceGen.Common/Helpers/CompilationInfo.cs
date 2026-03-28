@@ -1,42 +1,9 @@
 ﻿using System;
-using System.Threading;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen
 {
-    public struct CompilationCandidate : IEquatable<CompilationCandidate>
-    {
-        public Compilation compilation;
-        public string assemblyName;
-        public References references;
-        public bool enableNullable;
-        public bool isValid;
-
-        public static CompilationCandidate GetCompilation(Compilation compilation, CancellationToken _)
-        {
-            return new CompilationCandidate {
-                compilation = compilation,
-                assemblyName = compilation.Assembly.Name,
-                references = References.Create(compilation),
-                enableNullable = compilation.Options.NullableContextOptions != NullableContextOptions.Disable,
-            };
-        }
-
-        public readonly override bool Equals(object obj)
-            => obj is CompilationCandidate other && Equals(other);
-
-        public readonly bool Equals(CompilationCandidate other)
-            => string.Equals(assemblyName, other.assemblyName, StringComparison.Ordinal)
-            && references.Equals(other.references)
-            && enableNullable == other.enableNullable
-            && isValid == other.isValid
-            ;
-
-        public readonly override int GetHashCode()
-            => HashValue.Combine(assemblyName, references, enableNullable, isValid);
-    }
-
-    public struct CompilationCandidateSlim : IEquatable<CompilationCandidateSlim>
+    public struct CompilationInfo : IEquatable<CompilationInfo>
     {
         public string assemblyName;
         public References references;
@@ -46,13 +13,13 @@ namespace EncosyTower.SourceGen
         /// <summary>
         /// Do not store <paramref name="compilation"/>.
         /// </summary>
-        public static CompilationCandidateSlim GetCompilation(
+        public static CompilationInfo GetCompilation(
               Compilation compilation
             , string generatorNamespace
             , string skipAttribute
         )
         {
-            return new CompilationCandidateSlim {
+            return new CompilationInfo {
                 assemblyName = compilation.Assembly.Name,
                 references = References.Create(compilation),
                 enableNullable = compilation.Options.NullableContextOptions != NullableContextOptions.Disable,
@@ -61,9 +28,9 @@ namespace EncosyTower.SourceGen
         }
 
         public readonly override bool Equals(object obj)
-            => obj is CompilationCandidateSlim other && Equals(other);
+            => obj is CompilationInfo other && Equals(other);
 
-        public readonly bool Equals(CompilationCandidateSlim other)
+        public readonly bool Equals(CompilationInfo other)
             => string.Equals(assemblyName, other.assemblyName, StringComparison.Ordinal)
             && references.Equals(other.references)
             && enableNullable == other.enableNullable

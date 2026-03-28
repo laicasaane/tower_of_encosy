@@ -21,7 +21,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
         public readonly void WriteVariantCode(
               ref SourceProductionContext context
-            , CompilationCandidateSlim compilation
+            , CompilationInfo compilation
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
             , string projectPath = null
@@ -130,7 +130,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
         public static void WriteStaticRegistrationClass(
               ref SourceProductionContext context
             , ImmutableArray<VariantDeclaration> declarations
-            , CompilationCandidateSlim compilation
+            , CompilationInfo compilation
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
             , string projectPath = null
@@ -263,7 +263,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
         public static void WriteRedundantTypeMarker(
               ref SourceProductionContext context
             , in VariantDeclaration declaration
-            , CompilationCandidateSlim compilation
+            , CompilationInfo compilation
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
             , string projectPath = null

@@ -23,7 +23,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
@@ -83,7 +83,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidateSlim compilation
+            , CompilationInfo compilation
             , EnumExtensionCandidate candidate
             , string projectPath
             , bool outputSourceGenFiles

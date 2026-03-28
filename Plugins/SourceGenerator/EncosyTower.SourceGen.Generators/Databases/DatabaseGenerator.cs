@@ -24,7 +24,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 .Where(static t => t.IsValid);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, DATABASES_NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, DATABASES_NAMESPACE, SKIP_ATTRIBUTE));
 
             var combined = candidateProvider
                 .Combine(compilationProvider)

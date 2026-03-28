@@ -27,7 +27,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             // Fields or properties annotated with [ObservableProperty].
             var obsProvider = context.SyntaxProvider
@@ -307,7 +307,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidateSlim compilationCandidate
+            , CompilationInfo compilation
             , ImmutableArray<InternalVariantDeclaration> candidates
             , ImmutableArray<string> typeNamesToIgnore
             , string projectPath
@@ -328,7 +328,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                 var seenTypeNames = new HashSet<string>(typeNamesToIgnore, StringComparer.Ordinal);
                 using var valueTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
                 using var refTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
-                var assemblyName = compilationCandidate.assemblyName;
+                var assemblyName = compilation.assemblyName;
 
                 foreach (var candidate in candidates)
                 {

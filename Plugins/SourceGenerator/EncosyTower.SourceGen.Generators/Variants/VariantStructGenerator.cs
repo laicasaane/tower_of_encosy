@@ -17,7 +17,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   VARIANT_ATTRIBUTE
@@ -122,7 +122,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidateSlim compilation
+            , CompilationInfo compilation
             , VariantDeclaration declaration
             , string projectPath
             , bool outputSourceGenFiles

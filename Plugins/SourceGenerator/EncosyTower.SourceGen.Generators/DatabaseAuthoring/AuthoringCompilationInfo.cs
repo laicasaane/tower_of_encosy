@@ -7,7 +7,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
     {
         public bool databaseAuthoring;
         public bool bakingSheet;
-        public CompilationCandidateSlim compilation;
+        public CompilationInfo compilation;
 
         public readonly bool IsValid => compilation.isValid;
 
@@ -18,7 +18,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return default;
             }
 
-            var compilationSlim = CompilationCandidateSlim.GetCompilation(
+            var compilationSlim = CompilationInfo.GetCompilation(
                   compilation
                 , Helpers.DATABASES_NAMESPACE
                 , Helpers.SKIP_ATTRIBUTE

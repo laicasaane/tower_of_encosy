@@ -26,7 +26,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var wrapTypeProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   WRAP_TYPE_ATTRIBUTE_METADATA
@@ -537,7 +537,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidateSlim compilation
+            , CompilationInfo compilation
             , TypeWrapDeclaration declaration
             , string projectPath
             , bool outputSourceGenFiles

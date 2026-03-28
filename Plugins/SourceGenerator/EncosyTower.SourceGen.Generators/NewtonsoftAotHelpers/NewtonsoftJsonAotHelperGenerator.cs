@@ -27,7 +27,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var helperProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
@@ -310,13 +310,13 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidateSlim compilationCandidate
+            , CompilationInfo compilation
             , NewtonsoftAotHelperInfo helperInfo
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
-            if (compilationCandidate.isValid == false
+            if (compilation.isValid == false
                 || helperInfo.IsValid == false
                 || helperInfo.typeCandidates.Count < 1
             )
@@ -337,7 +337,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
                 var hintName = $"{fileBaseName}__{helperInfo.fileHintName}_{stableHashCode}_{lineNumber}.g.cs";
 
                 SourceGenHelpers.ProjectPath = projectPath;
-                var sourceFilePath = BuildSourceFilePath(compilationCandidate.assemblyName, hintName, projectPath);
+                var sourceFilePath = BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
 
                 var source = HelperDeclaration.WriteCode(helperInfo, helperInfo.typeCandidates.AsImmutableArray());
 

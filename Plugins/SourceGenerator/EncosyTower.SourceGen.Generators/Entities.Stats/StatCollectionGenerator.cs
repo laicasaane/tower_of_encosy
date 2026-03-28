@@ -25,7 +25,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             // This prevents the combined pipeline from re-running whenever unrelated compilation
             // details (referenced assemblies, nullable context, etc.) change.
             var isValidProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE).isValid);
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE).isValid);
 
             var candidateProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   STAT_COLLECTION_ATTRIBUTE_METADATA

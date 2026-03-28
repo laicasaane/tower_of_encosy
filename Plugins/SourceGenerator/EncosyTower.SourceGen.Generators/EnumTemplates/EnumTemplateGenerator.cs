@@ -27,7 +27,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationCandidateSlim.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var templateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
@@ -147,7 +147,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationCandidateSlim compilation
+            , CompilationInfo compilation
             , EnumTemplateCandidate templateCandidate
             , ImmutableArray<TemplateMemberCandidate> memberCandidates
             , string projectPath
