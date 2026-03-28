@@ -526,7 +526,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         {
             foreach (var attrib in symbol.GetAttributes())
             {
-                if (attrib.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == fullMetadataName)
+                if (attrib.AttributeClass?.HasFullName(fullMetadataName) == true)
                     return attrib;
             }
 
@@ -537,7 +537,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         {
             foreach (var iface in symbol.AllInterfaces)
             {
-                if (iface.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == IDATA)
+                if (iface.HasFullName(IDATA))
                     return true;
             }
 

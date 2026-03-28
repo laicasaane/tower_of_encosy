@@ -133,7 +133,7 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
             var semanticModel = context.SemanticModel;
             var identifierType = semanticModel.GetTypeInfo(memberAccess.Expression, context.CancellationToken).Type;
 
-            if (identifierType?.ToFullName() is not RUNTIME_TYPE_CACHE)
+            if (identifierType is null || !identifierType.HasFullName(RUNTIME_TYPE_CACHE))
             {
                 return;
             }

@@ -238,7 +238,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                                         }
                                     }
                                 }
-                                else if (paramType.ToFullName() == "object")
+                                else if (paramType.SpecialType == SpecialType.System_Object)
                                 {
                                     switch (method.Name)
                                     {
@@ -494,7 +494,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         }
                     }
                 }
-                else if (paramType.ToFullName() == "object")
+                else if (paramType.SpecialType == SpecialType.System_Object)
                 {
                     switch (method.Name)
                     {
@@ -553,7 +553,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             if (method.DeclaredAccessibility == Accessibility.Public
                 && method.Name is ("Equals" or "CompareTo")
                 && method.Parameters.Length == 1
-                && method.Parameters[0].Type.ToFullName() == "object"
+                && method.Parameters[0].Type.SpecialType == SpecialType.System_Object
             )
             {
                 return true;
@@ -891,7 +891,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool DoesReturnBool(IMethodSymbol method)
         {
-            return method.ReturnType.ToFullName() == "bool";
+            return method.ReturnType.SpecialType == SpecialType.System_Boolean;
         }
 
         public readonly override bool Equals(object obj)

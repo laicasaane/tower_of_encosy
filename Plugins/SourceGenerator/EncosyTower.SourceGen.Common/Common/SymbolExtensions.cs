@@ -143,7 +143,7 @@ namespace EncosyTower.SourceGen
             if (symbol is null)
                 return false;
 
-            if (symbol.ToDisplayString(QualifiedFormat) == fullyQualifiedName)
+            if (symbol.HasFullName(fullyQualifiedName))
                 return true;
 
             return checkBaseType && symbol.BaseType.Is(fullyQualifiedName);
@@ -153,9 +153,8 @@ namespace EncosyTower.SourceGen
         {
             if (symbol.BaseType != null)
             {
-                var baseTypeName = symbol.BaseType.ToDisplayString(QualifiedFormat);
-                if (baseTypeName != "global::System.ValueType")
-                    yield return baseTypeName;
+                if (symbol.BaseType.SpecialType != SpecialType.System_ValueType)
+                    yield return symbol.BaseType.ToDisplayString(QualifiedFormat);
             }
 
             foreach (var @interface in symbol.Interfaces)
@@ -301,7 +300,7 @@ namespace EncosyTower.SourceGen
             interfaceName = PrependGlobalIfMissing(interfaceName);
 
             return symbol is ITypeSymbol typeSymbol
-                && typeSymbol.AllInterfaces.Any(i => i.ToFullName() == interfaceName || i.InheritsFromInterface(interfaceName));
+                && typeSymbol.AllInterfaces.Any(i => i.HasFullName(interfaceName) || i.InheritsFromInterface(interfaceName));
         }
 
         public static bool Is(this ITypeSymbol symbol, string nameSpace, string typeName, bool checkBaseType = true)
@@ -336,14 +335,14 @@ namespace EncosyTower.SourceGen
 
             foreach (var @interface in symbol.Interfaces)
             {
-                if (@interface.ToDisplayString(QualifiedFormat) == interfaceName)
+                if (@interface.HasFullName(interfaceName))
                     return true;
 
                 if (checkBaseType)
                 {
                     foreach (var baseInterface in @interface.AllInterfaces)
                     {
-                        if (baseInterface.ToDisplayString(QualifiedFormat) == interfaceName)
+                        if (baseInterface.HasFullName(interfaceName))
                             return true;
 
                         if (baseInterface.InheritsFromInterface(interfaceName))
@@ -368,7 +367,7 @@ namespace EncosyTower.SourceGen
             if (symbol is null)
                 return false;
 
-            if (symbol.ToDisplayString(QualifiedFormat) == typeName)
+            if (symbol.HasFullName(typeName))
                 return true;
 
             if (checkBaseType && symbol.BaseType != null)
@@ -391,7 +390,7 @@ namespace EncosyTower.SourceGen
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
             return typeSymbol.GetAttributes()
-                .Any(attribute => attribute.AttributeClass.ToFullName() == fullyQualifiedAttributeName);
+                .Any(attribute => attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName));
         }
 
         public static bool TryGetAttribute(this ISymbol typeSymbol, string fullyQualifiedAttributeName, out AttributeData result)
@@ -405,7 +404,7 @@ namespace EncosyTower.SourceGen
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
             return typeSymbol.GetAttributes()
-                .Where(attribute => attribute.AttributeClass.ToFullName() == fullyQualifiedAttributeName)
+                .Where(attribute => attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName))
                 .FirstOrDefault();
         }
 
@@ -414,7 +413,7 @@ namespace EncosyTower.SourceGen
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
             return typeSymbol.GetAttributes()
-                .Where(attribute => attribute.AttributeClass.ToFullName() == fullyQualifiedAttributeName);
+                .Where(attribute => attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName));
         }
 
         public static IEnumerable<AttributeData> GetAttributes(this ISymbol typeSymbol
@@ -427,8 +426,8 @@ namespace EncosyTower.SourceGen
 
             return typeSymbol.GetAttributes()
                 .Where(attribute => {
-                    var fullName = attribute.AttributeClass.ToFullName();
-                    return fullName == fullyQualifiedAttributeName1 || fullName == fullyQualifiedAttributeName2;
+                    var attrClass = attribute.AttributeClass;
+                    return attrClass.HasFullName(fullyQualifiedAttributeName1) || attrClass.HasFullName(fullyQualifiedAttributeName2);
                 });
         }
 
@@ -494,7 +493,7 @@ namespace EncosyTower.SourceGen
 
             while (baseType != null)
             {
-                if (baseType.ToFullName().StartsWith(startWith)
+                if (baseType.HasFullNamePrefix(startWith)
                     && baseType.TypeArguments.Length == genericArgumentCount
                 )
                 {
@@ -521,14 +520,12 @@ namespace EncosyTower.SourceGen
 
             while (baseType != null)
             {
-                var fullName = baseType.ToFullName();
-
-                if (fullName.StartsWith(startWith)
+                if (baseType.HasFullNamePrefix(startWith)
                     && baseType.TypeArguments.Length == genericArgumentCount
                 )
                 {
                     result = baseType;
-                    fullTypeName = fullName;
+                    fullTypeName = baseType.ToFullName();
                     return true;
                 }
 
@@ -551,9 +548,7 @@ namespace EncosyTower.SourceGen
 
             while (baseType != null)
             {
-                var fullName = baseType.ToFullName();
-
-                if (fullName.StartsWith(startWith)
+                if (baseType.HasFullNamePrefix(startWith)
                     && baseType.TypeArguments.Length == genericArgumentCount
                 )
                 {
@@ -586,7 +581,7 @@ namespace EncosyTower.SourceGen
                     || typeArguments.Length == genericArgumentCount2
                 )
                 {
-                    if (baseType.ToFullName().StartsWith(startWith))
+                    if (baseType.HasFullNamePrefix(startWith))
                     {
                         result = baseType;
                         return true;
@@ -1202,9 +1197,12 @@ namespace EncosyTower.SourceGen
 
                 var parameters = method.Parameters;
 
-                if (parameters.Length < 2
-                    || parameters[0].Type.Is("global::System.ReadOnlySpan<char>", false) == false
-                )
+                if (parameters.Length < 2)
+                {
+                    continue;
+                }
+
+                if (parameters[0].Type.Is("global::System.ReadOnlySpan<char>", false) == false)
                 {
                     continue;
                 }
@@ -1511,6 +1509,168 @@ namespace EncosyTower.SourceGen
             }
 
             return outerToInner.ToImmutableArray().AsEquatableArray();
+        }
+
+        /// <summary>
+        /// Checks whether the type symbol has the given fully qualified name without allocating an intermediate string.
+        /// For names containing generic arguments (e.g. <c>List&lt;int&gt;</c>), falls back to <see cref="ToFullName"/>.
+        /// </summary>
+        public static bool HasFullName(this ITypeSymbol symbol, string fullyQualifiedName)
+        {
+            if (symbol is null || fullyQualifiedName is null)
+            {
+                return false;
+            }
+
+            var span = fullyQualifiedName.AsSpan();
+            var indexOfAngle = span.IndexOf('<');
+
+            if (indexOfAngle >= 0)
+            {
+                return indexOfAngle == span.Length - 1
+                    ? HasFullNamePrefix(symbol, fullyQualifiedName)
+                    : string.Equals(symbol.ToFullName(), fullyQualifiedName);
+            }
+
+            if (span.StartsWith("global::".AsSpan(), StringComparison.Ordinal))
+            {
+                span = span.Slice(8);
+            }
+
+            return MatchesQualifiedSpan(symbol, span);
+        }
+
+        /// <summary>
+        /// Checks whether the fully qualified name of the type symbol starts with <paramref name="prefix"/>
+        /// without allocating an intermediate string.
+        /// <para>
+        /// When the prefix ends with <c>&lt;</c> (e.g. <c>"global::System.Collections.Generic.List&lt;"</c>),
+        /// the type name is matched exactly and the presence of type arguments is verified.
+        /// Otherwise, the last dot-segment of the prefix is treated as a type-name prefix and
+        /// the preceding segments are matched as the containing namespace.
+        /// </para>
+        /// </summary>
+        public static bool HasFullNamePrefix(this ITypeSymbol symbol, string prefix)
+        {
+            if (symbol is null || prefix is null)
+            {
+                return false;
+            }
+
+            var span = prefix.AsSpan();
+
+            if (span.StartsWith("global::".AsSpan(), StringComparison.Ordinal))
+            {
+                span = span.Slice(8);
+            }
+
+            if (span.IsEmpty)
+            {
+                return false;
+            }
+
+            int indexOfAngle = span.IndexOf('<');
+
+            if (indexOfAngle >= 0)
+            {
+                // e.g. "System.Collections.Generic.Dictionary<" — match the base type name exactly
+                // and verify the symbol has at least one type argument.
+                var namePart = span.Slice(0, indexOfAngle);
+                return MatchesQualifiedSpan(symbol, namePart)
+                    && symbol is INamedTypeSymbol named
+                    && named.TypeArguments.Length > 0;
+            }
+
+            // No angle bracket: split into containing-namespace part and type-name prefix.
+            int lastDot = span.LastIndexOf('.');
+            var typePart = lastDot >= 0 ? span.Slice(lastDot + 1) : span;
+            var nsPart = lastDot >= 0 ? span.Slice(0, lastDot) : default;
+
+            if (symbol.Name.AsSpan().StartsWith(typePart, StringComparison.Ordinal) == false)
+            {
+                return false;
+            }
+
+            if (nsPart.IsEmpty)
+            {
+                return symbol.ContainingType == null && (symbol.ContainingNamespace?.IsGlobalNamespace == true);
+            }
+
+            return symbol.ContainingType != null
+                ? MatchesQualifiedSpan(symbol.ContainingType, nsPart)
+                : MatchesNamespaceSpan(symbol.ContainingNamespace, nsPart);
+        }
+
+        private static bool MatchesQualifiedSpan(ITypeSymbol symbol, ReadOnlySpan<char> remaining)
+        {
+            if (symbol is null)
+            {
+                return false;
+            }
+
+            // Find the last '.' that is not inside angle brackets so we can split
+            // containing-context from type-name even when the name has generic args.
+            int lastDot = -1;
+            int depth = 0;
+
+            for (int i = remaining.Length - 1; i >= 0; i--)
+            {
+                char c = remaining[i];
+                if (c == '>') depth++;
+                else if (c == '<') depth--;
+                else if (c == '.' && depth == 0) { lastDot = i; break; }
+            }
+
+            var typePart = lastDot >= 0 ? remaining.Slice(lastDot + 1) : remaining;
+            var prefixPart = lastDot >= 0 ? remaining.Slice(0, lastDot) : default;
+
+            // Strip generic args from the type-name portion for the name equality check.
+            int angleIdx = typePart.IndexOf('<');
+            var typeName = angleIdx >= 0 ? typePart.Slice(0, angleIdx) : typePart;
+
+            if (typeName.Equals(symbol.Name.AsSpan(), StringComparison.Ordinal) == false)
+            {
+                return false;
+            }
+
+            if (prefixPart.IsEmpty)
+            {
+                // There must be no containing type, and the namespace must be global.
+                return symbol.ContainingType == null && symbol.ContainingNamespace?.IsGlobalNamespace == true;
+            }
+
+            return symbol.ContainingType != null
+                ? MatchesQualifiedSpan(symbol.ContainingType, prefixPart)
+                : MatchesNamespaceSpan(symbol.ContainingNamespace, prefixPart);
+        }
+
+        private static bool MatchesNamespaceSpan(INamespaceSymbol ns, ReadOnlySpan<char> remaining)
+        {
+            if (ns == null || ns.IsGlobalNamespace)
+            {
+                return remaining.IsEmpty;
+            }
+
+            if (remaining.IsEmpty)
+            {
+                return false;
+            }
+
+            int lastDot = remaining.LastIndexOf('.');
+            var nsPart = lastDot >= 0 ? remaining.Slice(lastDot + 1) : remaining;
+            var prefixPart = lastDot >= 0 ? remaining.Slice(0, lastDot) : default;
+
+            if (nsPart.Equals(ns.Name.AsSpan(), StringComparison.Ordinal) == false)
+            {
+                return false;
+            }
+
+            if (prefixPart.IsEmpty)
+            {
+                return ns.ContainingNamespace?.IsGlobalNamespace == true;
+            }
+
+            return MatchesNamespaceSpan(ns.ContainingNamespace, prefixPart);
         }
     }
 }

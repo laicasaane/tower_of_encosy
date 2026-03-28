@@ -179,7 +179,7 @@ namespace EncosyTower.SourceGen
                 {
                     var typeInfo = semanticModel.GetTypeInfo(baseType.Type, token);
 
-                    if (typeInfo.Type.ToFullName() == interfaceName)
+                    if (typeInfo.Type.HasFullName(interfaceName))
                     {
                         return true;
                     }
@@ -204,7 +204,7 @@ namespace EncosyTower.SourceGen
             {
                 foreach (var interfaceSymbol in interfaces)
                 {
-                    if (interfaceSymbol.ToFullName() == interfaceName)
+                    if (interfaceSymbol.HasFullName(interfaceName))
                     {
                         return true;
                     }
@@ -227,7 +227,7 @@ namespace EncosyTower.SourceGen
                 {
                     var typeInfo = semanticModel.GetTypeInfo(baseType.Type, token);
 
-                    if (typeInfo.Type.ToFullName() == interfaceName)
+                    if (typeInfo.Type.HasFullName(interfaceName))
                     {
                         return true;
                     }
@@ -252,7 +252,7 @@ namespace EncosyTower.SourceGen
             {
                 foreach (var interfaceSymbol in interfaces)
                 {
-                    if (interfaceSymbol.ToFullName() == interfaceName)
+                    if (interfaceSymbol.HasFullName(interfaceName))
                     {
                         return true;
                     }

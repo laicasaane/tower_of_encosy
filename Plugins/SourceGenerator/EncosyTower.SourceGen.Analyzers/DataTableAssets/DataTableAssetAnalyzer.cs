@@ -44,11 +44,7 @@ namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
                     continue;
                 }
 
-                var fullName = attrClass.ToDisplayString();
-
-                if (fullName == DATA_TABLE_ASSET_ATTRIBUTE
-                    || fullName == $"global::{DATA_TABLE_ASSET_ATTRIBUTE}"
-                )
+                if (attrClass.HasFullName(DATA_TABLE_ASSET_ATTRIBUTE))
                 {
                     hasAttribute = true;
                     break;
@@ -69,9 +65,7 @@ namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
 
                 if (typeArguments.Length >= 2)
                 {
-                    var fullName = baseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-
-                    if (fullName.StartsWith(DATA_TABLE_ASSET))
+                    if (baseType.HasFullNamePrefix(DATA_TABLE_ASSET))
                     {
                         var idType = typeArguments[0];
                         var dataType = typeArguments[1];

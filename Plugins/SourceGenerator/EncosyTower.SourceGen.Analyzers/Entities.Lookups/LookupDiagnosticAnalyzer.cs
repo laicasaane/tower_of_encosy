@@ -210,15 +210,13 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
 
             foreach (var iface in typeSymbol.AllInterfaces)
             {
-                var name = iface.ToDisplayString();
-
-                if (name == I_BUFFER_LOOKUPS
-                    || name == I_COMPONENT_LOOKUPS
-                    || name == I_ENABLEABLE_BUFFER_LOOKUPS
-                    || name == I_ENABLEABLE_COMPONENT_LOOKUPS
-                    || name == I_PHYSICS_BUFFER_LOOKUPS
-                    || name == I_PHYSICS_COMPONENT_LOOKUPS
-                    || name == I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS
+                if (iface.HasFullName(I_BUFFER_LOOKUPS)
+                    || iface.HasFullName(I_COMPONENT_LOOKUPS)
+                    || iface.HasFullName(I_ENABLEABLE_BUFFER_LOOKUPS)
+                    || iface.HasFullName(I_ENABLEABLE_COMPONENT_LOOKUPS)
+                    || iface.HasFullName(I_PHYSICS_BUFFER_LOOKUPS)
+                    || iface.HasFullName(I_PHYSICS_COMPONENT_LOOKUPS)
+                    || iface.HasFullName(I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS)
                 )
                 {
                     count++;
@@ -239,33 +237,31 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
 
             foreach (var iface in typeSymbol.AllInterfaces)
             {
-                var name = iface.ToDisplayString();
-
-                if (name == I_BUFFER_LOOKUPS
-                    || name == I_PHYSICS_BUFFER_LOOKUPS
+                if (iface.HasFullName(I_BUFFER_LOOKUPS)
+                    || iface.HasFullName(I_PHYSICS_BUFFER_LOOKUPS)
                 )
                 {
                     interface1 = I_BUFFER_ELEMENT_DATA;
                     return;
                 }
 
-                if (name == I_COMPONENT_LOOKUPS
-                    || name == I_PHYSICS_COMPONENT_LOOKUPS
+                if (iface.HasFullName(I_COMPONENT_LOOKUPS)
+                    || iface.HasFullName(I_PHYSICS_COMPONENT_LOOKUPS)
                 )
                 {
                     interface1 = I_COMPONENT_DATA;
                     return;
                 }
 
-                if (name == I_ENABLEABLE_BUFFER_LOOKUPS)
+                if (iface.HasFullName(I_ENABLEABLE_BUFFER_LOOKUPS))
                 {
                     interface1 = I_BUFFER_ELEMENT_DATA;
                     interface2 = I_ENABLEABLE_COMPONENT;
                     return;
                 }
 
-                if (name == I_ENABLEABLE_COMPONENT_LOOKUPS
-                    || name == I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS
+                if (iface.HasFullName(I_ENABLEABLE_COMPONENT_LOOKUPS)
+                    || iface.HasFullName(I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS)
                 )
                 {
                     interface1 = I_COMPONENT_DATA;

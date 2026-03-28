@@ -199,28 +199,25 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         {
             foreach (var iface in structSymbol.AllInterfaces)
             {
-                var full = iface.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
-                    .Replace("global::", string.Empty);
-
-                if (string.Equals(full, I_BUFFER_LOOKUPS, StringComparison.Ordinal))
+                if (iface.HasFullName(I_BUFFER_LOOKUPS))
                     return LookupKind.Buffer;
 
-                if (string.Equals(full, I_COMPONENT_LOOKUPS, StringComparison.Ordinal))
+                if (iface.HasFullName(I_COMPONENT_LOOKUPS))
                     return LookupKind.Component;
 
-                if (string.Equals(full, I_ENABLEABLE_BUFFER_LOOKUPS, StringComparison.Ordinal))
+                if (iface.HasFullName(I_ENABLEABLE_BUFFER_LOOKUPS))
                     return LookupKind.EnableableBuffer;
 
-                if (string.Equals(full, I_ENABLEABLE_COMPONENT_LOOKUPS, StringComparison.Ordinal))
+                if (iface.HasFullName(I_ENABLEABLE_COMPONENT_LOOKUPS))
                     return LookupKind.EnableableComponent;
 
-                if (string.Equals(full, I_PHYSICS_BUFFER_LOOKUPS, StringComparison.Ordinal))
+                if (iface.HasFullName(I_PHYSICS_BUFFER_LOOKUPS))
                     return LookupKind.PhysicsBuffer;
 
-                if (string.Equals(full, I_PHYSICS_COMPONENT_LOOKUPS, StringComparison.Ordinal))
+                if (iface.HasFullName(I_PHYSICS_COMPONENT_LOOKUPS))
                     return LookupKind.PhysicsComponent;
 
-                if (string.Equals(full, I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS, StringComparison.Ordinal))
+                if (iface.HasFullName(I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS))
                     return LookupKind.PhysicsEnableableComponent;
             }
 

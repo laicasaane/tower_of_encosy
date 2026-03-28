@@ -69,9 +69,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
 
                 if (typeArguments.Length >= 2)
                 {
-                    var fullName = baseType.ToFullName();
-
-                    if (fullName.StartsWith(DATA_TABLE_ASSET))
+                    if (baseType.HasFullNamePrefix(DATA_TABLE_ASSET))
                     {
                         idType = typeArguments[0];
                         dataType = typeArguments[1];

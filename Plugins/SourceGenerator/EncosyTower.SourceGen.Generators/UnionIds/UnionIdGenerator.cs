@@ -224,8 +224,18 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 else if (i == 6 && arg.Value is byte byteVal2) tryParseMethodType = (TryParseMethodType)byteVal2;
             }
 
-            return BuildKindInfo(kindSymbol, idSymbol.ToFullName(), order, name, displayName, signed, toStringMethods, tryParseMethodType,
-                LocationInfo.From(context.TargetNode.GetLocation()), token);
+            return BuildKindInfo(
+                  kindSymbol
+                , idSymbol.ToFullName()
+                , order
+                , name
+                , displayName
+                , signed
+                , toStringMethods
+                , tryParseMethodType
+                , LocationInfo.From(context.TargetNode.GetLocation())
+                , token
+            );
         }
 
         private static EquatableArray<KindDeclaration> GetInlineKinds(

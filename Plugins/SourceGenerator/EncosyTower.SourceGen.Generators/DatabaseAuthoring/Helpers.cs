@@ -34,7 +34,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public const string HASH_SET_TYPE_T = "global::System.Collections.Generic.HashSet<";
         public const string QUEUE_TYPE_T = "global::System.Collections.Generic.Queue<";
         public const string STACK_TYPE_T = "global::System.Collections.Generic.Stack<";
-        public const string VERTICAL_LIST_TYPE = "global::Cathei.BakingSheet.VerticalList<";
+        public const string VERTICAL_LIST_TYPE = "VerticalList<";
 
         public const string IREADONLY_LIST_TYPE_T = "global::System.Collections.Generic.IReadOnlyList<";
         public const string ILIST_TYPE_T = "global::System.Collections.Generic.IList<";

@@ -117,7 +117,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             var identifier = syntax.Expression as IdentifierNameSyntax;
             var identifierType = semanticModel.GetTypeInfo(identifier, token).Type;
 
-            if (identifierType.ToFullName() is not RUNTIME_TYPE_CACHE)
+            if (identifierType.HasFullName(RUNTIME_TYPE_CACHE) == false)
             {
                 return default;
             }

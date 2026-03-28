@@ -47,9 +47,9 @@ namespace EncosyTower.SourceGen.Analyzers.Data
 
                 foreach (var attr in typeSymbol.GetAttributes())
                 {
-                    if (attr.AttributeClass?.ToDisplayString() is { } fullName
-                        && (fullName == "EncosyTower.Data.DataAttribute"
-                            || fullName == "EncosyTower.Data.Data")
+                    if (attr.AttributeClass is { } attrClass
+                        && (attrClass.HasFullName("EncosyTower.Data.DataAttribute")
+                            || attrClass.HasFullName("EncosyTower.Data.Data"))
                     )
                     {
                         hasAttr = true;
@@ -210,24 +210,23 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                     return false;
                 }
 
-                var fullName = namedType.OriginalDefinition.ToDisplayString();
+                var origDef = namedType.OriginalDefinition;
 
-                return fullName is
-                    "System.Collections.Generic.List<T>"
-                    or "System.Collections.Generic.Dictionary<TKey, TValue>"
-                    or "System.Collections.Generic.HashSet<T>"
-                    or "System.Collections.Generic.Queue<T>"
-                    or "System.Collections.Generic.Stack<T>"
-                    or "System.Collections.Generic.IList<T>"
-                    or "System.Collections.Generic.ISet<T>"
-                    or "System.Collections.Generic.IReadOnlyList<T>"
-                    or "System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>"
-                    or "System.Collections.Generic.IDictionary<TKey, TValue>"
-                    or "System.ReadOnlyMemory<T>"
-                    or "System.Memory<T>"
-                    or "System.ReadOnlySpan<T>"
-                    or "System.Span<T>"
-                    or "EncosyTower.Collections.ListFast<T>"
+                return origDef.HasFullName("System.Collections.Generic.List<T>")
+                    || origDef.HasFullName("System.Collections.Generic.Dictionary<TKey, TValue>")
+                    || origDef.HasFullName("System.Collections.Generic.HashSet<T>")
+                    || origDef.HasFullName("System.Collections.Generic.Queue<T>")
+                    || origDef.HasFullName("System.Collections.Generic.Stack<T>")
+                    || origDef.HasFullName("System.Collections.Generic.IList<T>")
+                    || origDef.HasFullName("System.Collections.Generic.ISet<T>")
+                    || origDef.HasFullName("System.Collections.Generic.IReadOnlyList<T>")
+                    || origDef.HasFullName("System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>")
+                    || origDef.HasFullName("System.Collections.Generic.IDictionary<TKey, TValue>")
+                    || origDef.HasFullName("System.ReadOnlyMemory<T>")
+                    || origDef.HasFullName("System.Memory<T>")
+                    || origDef.HasFullName("System.ReadOnlySpan<T>")
+                    || origDef.HasFullName("System.Span<T>")
+                    || origDef.HasFullName("EncosyTower.Collections.ListFast<T>")
                     ;
             }
 

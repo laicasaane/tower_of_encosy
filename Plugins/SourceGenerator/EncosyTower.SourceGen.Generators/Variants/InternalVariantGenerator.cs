@@ -98,10 +98,8 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 return default;
             }
 
-            var typeFullName = type.ToFullName();
-
-            if (typeFullName.StartsWith(VARIANT_T) == false
-                && typeFullName.StartsWith(CONVERTER_T) == false
+            if (type.HasFullNamePrefix(VARIANT_T) == false
+                && type.HasFullNamePrefix(CONVERTER_T) == false
             )
             {
                 return default;

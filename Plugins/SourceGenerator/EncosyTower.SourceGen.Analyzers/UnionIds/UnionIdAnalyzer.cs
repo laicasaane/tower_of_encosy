@@ -170,7 +170,7 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
 
             foreach (var attrib in idSymbol.GetAttributes())
             {
-                if (attrib.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) != UNION_ID_KIND_ATTRIBUTE)
+                if (attrib.AttributeClass?.HasFullName(UNION_ID_KIND_ATTRIBUTE) != true)
                     continue;
 
                 if (attrib.ConstructorArguments.Length < 1)

@@ -142,7 +142,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                         && isCurrentType == false
                         && checkMethod.DeclaredAccessibility is (Accessibility.Public or Accessibility.Protected)
                         && checkMethod.Parameters.Length == 1
-                        && checkMethod.Parameters[0].Type.ToFullName() == BINDING_PROPERTY
+                        && checkMethod.Parameters[0].Type.HasFullName(BINDING_PROPERTY)
                     )
                     {
                         hasOnBindPropertyFailedMethod = true;
@@ -156,7 +156,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                         && isCurrentType == false
                         && checkMethod.DeclaredAccessibility is (Accessibility.Public or Accessibility.Protected)
                         && checkMethod.Parameters.Length == 1
-                        && checkMethod.Parameters[0].Type.ToFullName() == BINDING_COMMAND
+                        && checkMethod.Parameters[0].Type.HasFullName(BINDING_COMMAND)
                     )
                     {
                         hasOnBindCommandFailedMethod = true;
