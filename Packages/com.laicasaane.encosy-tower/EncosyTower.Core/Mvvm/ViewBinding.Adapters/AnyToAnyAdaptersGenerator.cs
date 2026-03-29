@@ -40,7 +40,7 @@ namespace EncosyTower.Editor.Mvvm.Variants.Converters
 
         protected abstract string ToTypeName { get; }
 
-        protected abstract string ReturnStatement { get; }
+        protected abstract string ReturnExpression { get; }
 
         protected abstract string FileName { get; }
 
@@ -75,7 +75,7 @@ using EncosyTower.Variants;
                 var toTypeName = ToTypeName;
                 var toTypeNameLabel = ToTypeNameLabel ?? toTypeName;
                 var order = Order.ToString();
-                var returnStatement = ReturnStatement;
+                var returnExpression = ReturnExpression;
 
                 for (var i = 0; i < variantTypes.Length; i++)
                 {
@@ -99,7 +99,7 @@ using EncosyTower.Variants;
                             p.PrintBeginLine("if (variant.TryGetValue(out ").Print(type).PrintEndLine(" result))");
                             p.OpenScope();
                             {
-                                p.PrintBeginLine("return ").Print(returnStatement).PrintEndLine(";");
+                                p.PrintBeginLine("return ").Print(returnExpression).PrintEndLine(";");
                             }
                             p.CloseScope();
                             p.PrintEndLine();
@@ -127,7 +127,7 @@ using EncosyTower.Variants;
 
         protected override string ToTypeName => "Bool";
 
-        protected override string ReturnStatement => "result > 0";
+        protected override string ReturnExpression => "result > 0";
 
         protected override string FileName => "AnyToBoolAdapters";
     }
@@ -143,9 +143,21 @@ using EncosyTower.Variants;
 
         protected override int Order => 1;
 
-        protected override string ReturnStatement => "result <= 0";
+        protected override string ReturnExpression => "result <= 0";
 
         protected override string FileName => "AnyToNotBoolAdapters";
+    }
+
+    [Generator]
+    internal sealed class AnyToDoubleAdaptersGenerator : AnyToAnyAdaptersGenerator
+    {
+        protected override string ToType => "double";
+
+        protected override string ToTypeName => "Double";
+
+        protected override string ReturnExpression => "(double)result";
+
+        protected override string FileName => "AnyToDoubleAdapters";
     }
 
     [Generator]
@@ -155,7 +167,7 @@ using EncosyTower.Variants;
 
         protected override string ToTypeName => "Float";
 
-        protected override string ReturnStatement => "(float)result";
+        protected override string ReturnExpression => "(float)result";
 
         protected override string FileName => "AnyToFloatAdapters";
     }
@@ -167,9 +179,45 @@ using EncosyTower.Variants;
 
         protected override string ToTypeName => "Int";
 
-        protected override string ReturnStatement => "(int)result";
+        protected override string ReturnExpression => "(int)result";
 
         protected override string FileName => "AnyToIntAdapters";
+    }
+
+    [Generator]
+    internal sealed class AnyToUIntAdaptersGenerator : AnyToAnyAdaptersGenerator
+    {
+        protected override string ToType => "uint";
+
+        protected override string ToTypeName => "UInt";
+
+        protected override string ReturnExpression => "(uint)result";
+
+        protected override string FileName => "AnyToUIntAdapters";
+    }
+
+    [Generator]
+    internal sealed class AnyToLongAdaptersGenerator : AnyToAnyAdaptersGenerator
+    {
+        protected override string ToType => "long";
+
+        protected override string ToTypeName => "Long";
+
+        protected override string ReturnExpression => "(long)result";
+
+        protected override string FileName => "AnyToLongAdapters";
+    }
+
+    [Generator]
+    internal sealed class AnyToULongAdaptersGenerator : AnyToAnyAdaptersGenerator
+    {
+        protected override string ToType => "ulong";
+
+        protected override string ToTypeName => "ULong";
+
+        protected override string ReturnExpression => "(ulong)result";
+
+        protected override string FileName => "AnyToULongAdapters";
     }
 
     [Generator]
@@ -179,7 +227,7 @@ using EncosyTower.Variants;
 
         protected override string ToTypeName => "String";
 
-        protected override string ReturnStatement => "result.ToString()";
+        protected override string ReturnExpression => "result.ToString()";
 
         protected override string FileName => "AnyToStringAdapters";
     }
