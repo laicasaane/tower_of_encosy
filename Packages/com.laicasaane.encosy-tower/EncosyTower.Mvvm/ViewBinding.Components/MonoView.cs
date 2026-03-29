@@ -6,6 +6,7 @@ using EncosyTower.Collections;
 using EncosyTower.Logging;
 using EncosyTower.Mvvm.ComponentModel;
 using EncosyTower.Mvvm.ViewBinding.Contexts;
+using EncosyTower.Tasks;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -13,10 +14,10 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
 {
 #if UNITASK
     using UnityTask = Cysharp.Threading.Tasks.UniTask;
+    using UnityTaskObservable = Cysharp.Threading.Tasks.UniTask<IObservableObject>;
 #elif UNITY_6000_0_OR_NEWER
     using UnityTask = UnityEngine.Awaitable;
-#else
-    using UnityTask = System.Threading.Tasks.ValueTask;
+    using UnityTaskObservable = UnityEngine.Awaitable<IObservableObject>;
 #endif
 
     /// <summary>
@@ -128,6 +129,22 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
             {
                 binders[i].StartListening(this);
             }
+        }
+
+        private async UnityTaskObservable GetContextAsync(CancellationToken token)
+        {
+            await UnityTasks.WaitUntil(
+                  this
+                , static state => state._context != null && state._context.TryGetContext(out _)
+                , token
+            );
+
+            if (token.IsCancellationRequested)
+            {
+                return null;
+            }
+
+            return _context.TryGetContext(out var context) ? context : null;
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
