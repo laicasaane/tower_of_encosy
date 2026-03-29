@@ -14,7 +14,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
     /// Represents a collection of <see cref="MonoBinding"/>.
     /// </summary>
     [Serializable]
-    public abstract partial class MonoBinder
+    public abstract partial class MonoBinder : IBinder
     {
         [SerializeField]
         [HideInInspector]
@@ -23,6 +23,8 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         [SerializeField, SerializeReference, HideInInspector]
         [FormerlySerializedAs("_presetBindings")]
         internal List<MonoBinding> _bindings = new();
+
+        public IObservableObject Context { get; protected set; }
 
         protected ListFast<MonoBinding>.ReadOnly Bindings
         {
@@ -63,6 +65,8 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
             , UnityEngine.Object loggingContext
         )
         {
+            Context = context;
+
             var targets = this.Targets;
             var bindings = this.Bindings.AsReadOnlySpan();
             var bindingsLength = bindings.Length;

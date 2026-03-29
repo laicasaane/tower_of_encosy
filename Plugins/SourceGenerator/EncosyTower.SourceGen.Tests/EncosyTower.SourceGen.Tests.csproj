@@ -32,6 +32,8 @@
         <Reference Include="$(UnityScriptAssembliesPath)/Unity.Entities.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/Unity.Entities.Hybrid.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/Unity.Mathematics.dll" Private="false" />
+        <Reference Include="$(UnityScriptAssembliesPath)/UnityEngine.UI.dll" Private="false" />
+        <Reference Include="$(UnityScriptAssembliesPath)/Unity.TextMeshPro.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/Latios.Core.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/Latios.Psyshock.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/Latios.Transforms.dll" Private="false" />
@@ -39,6 +41,7 @@
         <Reference Include="$(UnityScriptAssembliesPath)/EncosyTower.Core.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/EncosyTower.Databases.Authoring.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/EncosyTower.Entities.Stats.dll" Private="false" />
+        <Reference Include="$(UnityScriptAssembliesPath)/EncosyTower.Mvvm.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/BakingSheet.dll" Private="false" />
         <ProjectReference Include="..\EncosyTower.SourceGen.Common\EncosyTower.SourceGen.Common.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\EncosyTower.SourceGen.Analyzers\EncosyTower.SourceGen.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
