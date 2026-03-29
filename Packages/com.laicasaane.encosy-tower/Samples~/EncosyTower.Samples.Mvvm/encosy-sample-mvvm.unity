@@ -350,6 +350,7 @@ MonoBehaviour:
   m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
+  m_Version: 2
   m_TaaSettings:
     m_Quality: 3
     m_FrameInfluence: 0.1
@@ -357,7 +358,6 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
-  m_Version: 2
 --- !u!1 &209879521
 GameObject:
   m_ObjectHideFlags: 0
@@ -517,6 +517,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -684,61 +685,51 @@ MonoBehaviour:
     initializeAsync: 1
     startAfterInitialization: 1
   _context:
-    rid: 8109321786255212778
+    rid: 2964348882385109093
   _binders:
-  - rid: 8109321786255212780
-  - rid: 8109321786255212786
+  - rid: 2964348882385109094
   references:
     version: 2
     RefIds:
-    - rid: 8109321786255212778
+    - rid: 2964348882385109093
       type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Contexts,
         asm: EncosyTower.Mvvm}
       data:
         _object: {fileID: 1603940289}
-    - rid: 8109321786255212780
-      type: {class: TransformBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Mvvm}
+    - rid: 2964348882385109094
+      type: {class: TransformBinder, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _subtitle: 
         _bindings:
-        - rid: 8109321786255212784
+        - rid: 2964348882385109095
+        - rid: 2964348882385109096
         _targets:
-        - {fileID: 343873117}
-    - rid: 8109321786255212784
-      type: {class: TransformBindingLocalRotation, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Mvvm}
+        - {fileID: 402938463}
+    - rid: 2964348882385109095
+      type: {class: TransformBinder/BindingLocalRotation, ns: EncosyTower.Samples.Mvvm,
+        asm: EncosyTower.Samples.Mvvm}
       data:
         _bindingFieldForSetLocalRotation:
           <TargetPropertyName>k__BackingField: ScrollPosition
         _converterForSetLocalRotation:
           <Adapter>k__BackingField:
-            rid: 8109321786255212785
-    - rid: 8109321786255212785
-      type: {class: LerpQuaternionAdapter, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
-      data:
-        _fromEuler: {x: 0, y: 0, z: 0}
-        _toEuler: {x: 180, y: 180, z: 0}
-        _reversed: 1
-    - rid: 8109321786255212786
-      type: {class: TransformBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Mvvm}
-      data:
-        _subtitle: 
-        _bindings:
-        - rid: 8109321786255212787
-        _targets:
-        - {fileID: 402938463}
-    - rid: 8109321786255212787
-      type: {class: TransformBindingLocalScale, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Mvvm}
+            rid: 2964348882385109097
+    - rid: 2964348882385109096
+      type: {class: TransformBinder/BindingLocalScale, ns: EncosyTower.Samples.Mvvm,
+        asm: EncosyTower.Samples.Mvvm}
       data:
         _bindingFieldForSetLocalScale:
           <TargetPropertyName>k__BackingField: ScrollPosition
         _converterForSetLocalScale:
           <Adapter>k__BackingField:
-            rid: 8109321786255212788
-    - rid: 8109321786255212788
+            rid: 2964348882385109098
+    - rid: 2964348882385109097
+      type: {class: LerpQuaternionAdapter, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
+      data:
+        _fromEuler: {x: 0, y: 0, z: 0}
+        _toEuler: {x: 180, y: 180, z: 0}
+        _reversed: 0
+    - rid: 2964348882385109098
       type: {class: LerpVector3Adapter, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _from: {x: 2, y: 2, z: 2}
@@ -797,8 +788,6 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -820,7 +809,6 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -1004,6 +992,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1181,14 +1170,15 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 7562154210548776971
       type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Contexts,
         asm: EncosyTower.Mvvm}
       data:
         _object: {fileID: 1603940289}
     - rid: 7562154620754329610
-      type: {class: ScrollRectBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Mvvm}
+      type: {class: ScrollRectBinder, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _subtitle: 
         _bindings:
@@ -1196,8 +1186,8 @@ MonoBehaviour:
         _targets:
         - {fileID: 1529285863}
     - rid: 7562154620754329612
-      type: {class: ScrollRectBindingVerticalNormalizedPosition, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Mvvm}
+      type: {class: ScrollRectBinder/BindingVerticalNormalizedPosition, ns: EncosyTower.Samples.Mvvm,
+        asm: EncosyTower.Samples.Mvvm}
       data:
         _bindingFieldForSetVerticalNormalizedPosition:
           <TargetPropertyName>k__BackingField: ScrollPosition
@@ -1209,8 +1199,7 @@ MonoBehaviour:
         asm: EncosyTower.Core}
       data: 
     - rid: 7562154620754329616
-      type: {class: TMP_TextBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
-        asm: EncosyTower.Mvvm}
+      type: {class: TMP_TextBinder, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _subtitle: scroll position
         _bindings:
@@ -1218,8 +1207,7 @@ MonoBehaviour:
         _targets:
         - {fileID: 555238475}
     - rid: 7562154620754329617
-      type: {class: TMP_TextBindingText, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
-        asm: EncosyTower.Mvvm}
+      type: {class: TMP_TextBinder/BindingText, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _bindingFieldForSetText:
           <TargetPropertyName>k__BackingField: ScrollPosition
@@ -1230,8 +1218,7 @@ MonoBehaviour:
       type: {class: ScrollPositionTextAdapter, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data: 
     - rid: 7562154620754329620
-      type: {class: ImageBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Mvvm}
+      type: {class: ImageBinder, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _subtitle: 
         _bindings:
@@ -1239,8 +1226,7 @@ MonoBehaviour:
         _targets:
         - {fileID: 860427089}
     - rid: 7562154620754329621
-      type: {class: ImageBindingColor, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Mvvm}
+      type: {class: ImageBinder/BindingColor, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _bindingFieldForSetColor:
           <TargetPropertyName>k__BackingField: ScrollPosition
@@ -1248,8 +1234,7 @@ MonoBehaviour:
           <Adapter>k__BackingField:
             rid: 8482649283664543744
     - rid: 7562154631834632208
-      type: {class: ButtonBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Mvvm}
+      type: {class: ButtonBinder, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _subtitle: 
         _bindings:
@@ -1257,14 +1242,12 @@ MonoBehaviour:
         _targets:
         - {fileID: 1289389104}
     - rid: 7562154631834632209
-      type: {class: ButtonBindingOnClick, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Mvvm}
+      type: {class: ButtonBinder/BindingOnClick, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _bindingCommandForOnClick:
           <TargetCommandName>k__BackingField: OnStopCommand
     - rid: 7562154631834632210
-      type: {class: TMP_TextBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
-        asm: EncosyTower.Mvvm}
+      type: {class: TMP_TextBinder, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _subtitle: status
         _bindings:
@@ -1272,8 +1255,7 @@ MonoBehaviour:
         _targets:
         - {fileID: 743286631}
     - rid: 7562154631834632211
-      type: {class: TMP_TextBindingText, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI.TextMeshPro,
-        asm: EncosyTower.Mvvm}
+      type: {class: TMP_TextBinder/BindingText, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _bindingFieldForSetText:
           <TargetPropertyName>k__BackingField: Status
@@ -1385,6 +1367,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1537,23 +1520,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Version: 4
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
+  m_LightLayerMask: 1
+  m_RenderingLayers: 1
   m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_ShadowRenderingLayers: 1
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
-  m_RenderingLayersMask:
-    serializedVersion: 0
-    m_Bits: 1
-  m_ShadowRenderingLayersMask:
-    serializedVersion: 0
-    m_Bits: 1
-  m_Version: 4
-  m_LightLayerMask: 1
-  m_ShadowLayerMask: 1
-  m_RenderingLayers: 1
-  m_ShadowRenderingLayers: 1
 --- !u!114 &752059395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1577,14 +1554,15 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 1154242496108167262
       type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Contexts,
         asm: EncosyTower.Mvvm}
       data:
         _object: {fileID: 1603940289}
     - rid: 8109321786255212790
-      type: {class: TransformBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Mvvm}
+      type: {class: TransformBinder, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _subtitle: 
         _bindings:
@@ -1592,8 +1570,7 @@ MonoBehaviour:
         _targets:
         - {fileID: 752059393}
     - rid: 8109321786255212791
-      type: {class: TransformBindingLocalEulerAngles, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Mvvm}
+      type: {class: TransformBinder/BindingLocalEulerAngles, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _bindingFieldForSetLocalEulerAngles:
           <TargetPropertyName>k__BackingField: ScrollPosition
@@ -2113,6 +2090,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -2476,14 +2454,15 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 7562154620754329622
       type: {class: UnityObjectBindingContext, ns: EncosyTower.Mvvm.ViewBinding.Contexts,
         asm: EncosyTower.Mvvm}
       data:
         _object: {fileID: 1289389108}
     - rid: 7562154620754329623
-      type: {class: ButtonBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Mvvm}
+      type: {class: ButtonBinder, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _subtitle: 
         _bindings:
@@ -2491,14 +2470,12 @@ MonoBehaviour:
         _targets:
         - {fileID: 1289389104}
     - rid: 7562154620754329624
-      type: {class: ButtonBindingOnClick, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Mvvm}
+      type: {class: ButtonBinder/BindingOnClick, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _bindingCommandForOnClick:
           <TargetCommandName>k__BackingField: OnClickCommand
     - rid: 7562154620754329625
-      type: {class: GameObjectBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Mvvm}
+      type: {class: GameObjectBinder, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _subtitle: Stopped
         _bindings:
@@ -2506,8 +2483,7 @@ MonoBehaviour:
         _targets:
         - {fileID: 296471785}
     - rid: 7562154620754329626
-      type: {class: GameObjectBindingActiveSelf, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Mvvm}
+      type: {class: GameObjectBinder/BindingSetActive, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _bindingFieldForSetActive:
           <TargetPropertyName>k__BackingField: Stopped
@@ -2515,8 +2491,7 @@ MonoBehaviour:
           <Adapter>k__BackingField:
             rid: 7562154631834632206
     - rid: 7562154620754329653
-      type: {class: GameObjectBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Mvvm}
+      type: {class: GameObjectBinder, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _subtitle: Started
         _bindings:
@@ -2524,8 +2499,7 @@ MonoBehaviour:
         _targets:
         - {fileID: 964636075}
     - rid: 7562154620754329654
-      type: {class: GameObjectBindingActiveSelf, ns: EncosyTower.Mvvm.ViewBinding.Binders.Unity,
-        asm: EncosyTower.Mvvm}
+      type: {class: GameObjectBinder/BindingSetActive, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _bindingFieldForSetActive:
           <TargetPropertyName>k__BackingField: Stopped
@@ -2533,8 +2507,7 @@ MonoBehaviour:
           <Adapter>k__BackingField:
             rid: 7562154631834632207
     - rid: 7562154620754329656
-      type: {class: ImageBinder, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Mvvm}
+      type: {class: ImageBinder, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _subtitle: 
         _bindings:
@@ -2542,8 +2515,7 @@ MonoBehaviour:
         _targets:
         - {fileID: 1289389105}
     - rid: 7562154620754329657
-      type: {class: ImageBindingColor, ns: EncosyTower.Mvvm.ViewBinding.Binders.UnityUI,
-        asm: EncosyTower.Mvvm}
+      type: {class: ImageBinder/BindingColor, ns: EncosyTower.Samples.Mvvm, asm: EncosyTower.Samples.Mvvm}
       data:
         _bindingFieldForSetColor:
           <TargetPropertyName>k__BackingField: Stopped
@@ -3158,6 +3130,7 @@ MonoBehaviour:
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
