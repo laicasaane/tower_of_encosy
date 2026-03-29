@@ -3,6 +3,7 @@
 using System;
 using System.Globalization;
 using EncosyTower.CodeGen;
+using EncosyTower.Common;
 using UnityCodeGen;
 
 namespace EncosyTower.Editor.Mvvm.ViewBinding.Adapters.AddressableKeys
@@ -34,27 +35,54 @@ using EncosyTower.Variants.Converters;
 
                 for (var i = 0; i < unityTypes.Length; i++)
                 {
-                    var type = unityTypes[i];
-                    var name = type.Name;
-                    var typeName = type.FullName;
+                    var group = unityTypes[i];
+                    var condition = group.Condition ?? string.Empty;
+                    var types = group.Types.AsSpan();
 
-                    p.PrintBeginLine("#region    ").PrintEndLine(typeName.ToUpper(CultureInfo.InvariantCulture));
-                    p.PrintBeginLine("#endregion ").Print('=', typeName.Length).PrintEndLine();
-                    p.PrintEndLine();
-
-                    foreach (var serializable in serializables)
+                    if (condition.IsNotEmpty())
                     {
-                        var subType = serializable ? ".Serializable" : "";
-                        var affix = serializable ? "Serializable" : "";
+                        p.Print("#if ").PrintEndLine(condition);
+                    }
+
+                    for (var k = 0; k < types.Length; k++)
+                    {
+                        var type = types[k];
+                        var name = type.Name;
+                        var typeName = type.FullName;
+
+                        p.PrintBeginLine("#region    ").PrintEndLine(typeName.ToUpper(CultureInfo.InvariantCulture));
+                        p.PrintBeginLine("#endregion ").Print('=', typeName.Length).PrintEndLine();
+                        p.PrintEndLine();
+
+                        foreach (var serializable in serializables)
+                        {
+                            var subType = serializable ? ".Serializable" : "";
+                            var affix = serializable ? "Serializable" : "";
+
+                            p.PrintLine($"[Serializable]");
+                            p.PrintLine($"[Label(\"AddressableKey{subType}<{typeName}>.Load()\", \"Default\")]");
+                            p.PrintLine($"[Adapter(sourceType: typeof(AddressableKey{subType}<{typeName}>), destType: typeof({typeName}), order: 0)]");
+                            p.PrintLine($"public sealed class AddressableKey{affix}To{name}Adapter : AddressableKey{affix}Adapter<{typeName}>");
+                            p.OpenScope();
+                            {
+                                p.PrintBeginLine($"public ")
+                                    .Print($"AddressableKey{affix}To{name}Adapter")
+                                    .Print("() : base(CachedVariantConverter<")
+                                    .Print(typeName)
+                                    .PrintEndLine(">.Default) { }");
+                            }
+                            p.CloseScope();
+                            p.PrintEndLine();
+                        }
 
                         p.PrintLine($"[Serializable]");
-                        p.PrintLine($"[Label(\"AddressableKey{subType}<{typeName}>.Load()\", \"Default\")]");
-                        p.PrintLine($"[Adapter(sourceType: typeof(AddressableKey{subType}<{typeName}>), destType: typeof({typeName}), order: 0)]");
-                        p.PrintLine($"public sealed class AddressableKey{affix}To{name}Adapter : AddressableKey{affix}Adapter<{typeName}>");
+                        p.PrintLine($"[Label(\"Addressables.Load<{typeName}>(string)\", \"Default\")]");
+                        p.PrintLine($"[Adapter(sourceType: typeof(string), destType: typeof({typeName}), order: 2)]");
+                        p.PrintLine($"public sealed class AddressableStringTo{name}Adapter : AddressableStringAdapter<{typeName}>");
                         p.OpenScope();
                         {
                             p.PrintBeginLine($"public ")
-                                .Print($"AddressableKey{affix}To{name}Adapter")
+                                .Print($"AddressableStringTo{name}Adapter")
                                 .Print("() : base(CachedVariantConverter<")
                                 .Print(typeName)
                                 .PrintEndLine(">.Default) { }");
@@ -63,20 +91,10 @@ using EncosyTower.Variants.Converters;
                         p.PrintEndLine();
                     }
 
-                    p.PrintLine($"[Serializable]");
-                    p.PrintLine($"[Label(\"Addressables.Load<{typeName}>(string)\", \"Default\")]");
-                    p.PrintLine($"[Adapter(sourceType: typeof(string), destType: typeof({typeName}), order: 2)]");
-                    p.PrintLine($"public sealed class AddressableStringTo{name}Adapter : AddressableStringAdapter<{typeName}>");
-                    p.OpenScope();
+                    if (condition.IsNotEmpty())
                     {
-                        p.PrintBeginLine($"public ")
-                            .Print($"AddressableStringTo{name}Adapter")
-                            .Print("() : base(CachedVariantConverter<")
-                            .Print(typeName)
-                            .PrintEndLine(">.Default) { }");
+                        p.Print("#endif").PrintEndLine().PrintEndLine();
                     }
-                    p.CloseScope();
-                    p.PrintEndLine();
                 }
             }
             p.CloseScope();

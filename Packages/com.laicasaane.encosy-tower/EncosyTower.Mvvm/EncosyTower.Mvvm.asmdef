@@ -127,6 +127,16 @@
             "name": "com.unity.2d.tilemap",
             "expression": "",
             "define": "UNITY_TILEMAP"
+        },
+        {
+            "name": "com.unity.modules.uielements",
+            "expression": "",
+            "define": "UNITY_UI_ELEMENTS"
+        },
+        {
+            "name": "com.unity.modules.animation",
+            "expression": "",
+            "define": "UNITY_ANIMATION"
         }
     ],
     "noEngineReferences": false

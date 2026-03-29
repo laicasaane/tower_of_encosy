@@ -19,6 +19,7 @@ using EncosyTower.Variants.Converters;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
 {
+#if UNITY_ANIMATION
     #region    UNITYENGINE.ANIMATIONCLIP
     #endregion =========================
 
@@ -38,6 +39,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
         public AddressableStringToAnimationClipAdapter() : base(CachedVariantConverter<UnityEngine.AnimationClip>.Default) { }
     }
 
+#endif
+
+#if UNITY_AUDIO
     #region    UNITYENGINE.AUDIOCLIP
     #endregion =====================
 
@@ -76,6 +80,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
         public AddressableStringToAudioMixerAdapter() : base(CachedVariantConverter<UnityEngine.Audio.AudioMixer>.Default) { }
     }
 
+#endif
+
+#if UNITY_6000_0_OR_NEWER
     #region    UNITYENGINE.TEXTCORE.TEXT.FONTASSET
     #endregion ===================================
 
@@ -94,6 +101,8 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
     {
         public AddressableStringToFontAssetAdapter() : base(CachedVariantConverter<UnityEngine.TextCore.Text.FontAsset>.Default) { }
     }
+
+#endif
 
     #region    UNITYENGINE.GAMEOBJECT
     #endregion ======================
@@ -131,25 +140,6 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
     public sealed class AddressableStringToMaterialAdapter : AddressableStringAdapter<UnityEngine.Material>
     {
         public AddressableStringToMaterialAdapter() : base(CachedVariantConverter<UnityEngine.Material>.Default) { }
-    }
-
-    #region    UNITYENGINE.UIELEMENTS.PANELSETTINGS
-    #endregion ====================================
-
-    [Serializable]
-    [Label("AddressableKey<UnityEngine.UIElements.PanelSettings>.Load()", "Default")]
-    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.UIElements.PanelSettings>), destType: typeof(UnityEngine.UIElements.PanelSettings), order: 0)]
-    public sealed class AddressableKeyToPanelSettingsAdapter : AddressableKeyAdapter<UnityEngine.UIElements.PanelSettings>
-    {
-        public AddressableKeyToPanelSettingsAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.PanelSettings>.Default) { }
-    }
-
-    [Serializable]
-    [Label("Addressables.Load<UnityEngine.UIElements.PanelSettings>(string)", "Default")]
-    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.PanelSettings), order: 2)]
-    public sealed class AddressableStringToPanelSettingsAdapter : AddressableStringAdapter<UnityEngine.UIElements.PanelSettings>
-    {
-        public AddressableStringToPanelSettingsAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.PanelSettings>.Default) { }
     }
 
     #region    UNITYENGINE.PLAYABLES.PLAYABLEASSET
@@ -228,25 +218,6 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
         public AddressableStringToSpriteAtlasAdapter() : base(CachedVariantConverter<UnityEngine.U2D.SpriteAtlas>.Default) { }
     }
 
-    #region    UNITYENGINE.UIELEMENTS.STYLESHEET
-    #endregion =================================
-
-    [Serializable]
-    [Label("AddressableKey<UnityEngine.UIElements.StyleSheet>.Load()", "Default")]
-    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.UIElements.StyleSheet>), destType: typeof(UnityEngine.UIElements.StyleSheet), order: 0)]
-    public sealed class AddressableKeyToStyleSheetAdapter : AddressableKeyAdapter<UnityEngine.UIElements.StyleSheet>
-    {
-        public AddressableKeyToStyleSheetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.StyleSheet>.Default) { }
-    }
-
-    [Serializable]
-    [Label("Addressables.Load<UnityEngine.UIElements.StyleSheet>(string)", "Default")]
-    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.StyleSheet), order: 2)]
-    public sealed class AddressableStringToStyleSheetAdapter : AddressableStringAdapter<UnityEngine.UIElements.StyleSheet>
-    {
-        public AddressableStringToStyleSheetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.StyleSheet>.Default) { }
-    }
-
     #region    UNITYENGINE.TEXTURE
     #endregion ===================
 
@@ -264,6 +235,45 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
     public sealed class AddressableStringToTextureAdapter : AddressableStringAdapter<UnityEngine.Texture>
     {
         public AddressableStringToTextureAdapter() : base(CachedVariantConverter<UnityEngine.Texture>.Default) { }
+    }
+
+#if UNITY_UI_ELEMENTS
+    #region    UNITYENGINE.UIELEMENTS.PANELSETTINGS
+    #endregion ====================================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.UIElements.PanelSettings>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.UIElements.PanelSettings>), destType: typeof(UnityEngine.UIElements.PanelSettings), order: 0)]
+    public sealed class AddressableKeyToPanelSettingsAdapter : AddressableKeyAdapter<UnityEngine.UIElements.PanelSettings>
+    {
+        public AddressableKeyToPanelSettingsAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.PanelSettings>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.UIElements.PanelSettings>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.PanelSettings), order: 2)]
+    public sealed class AddressableStringToPanelSettingsAdapter : AddressableStringAdapter<UnityEngine.UIElements.PanelSettings>
+    {
+        public AddressableStringToPanelSettingsAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.PanelSettings>.Default) { }
+    }
+
+    #region    UNITYENGINE.UIELEMENTS.STYLESHEET
+    #endregion =================================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.UIElements.StyleSheet>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.UIElements.StyleSheet>), destType: typeof(UnityEngine.UIElements.StyleSheet), order: 0)]
+    public sealed class AddressableKeyToStyleSheetAdapter : AddressableKeyAdapter<UnityEngine.UIElements.StyleSheet>
+    {
+        public AddressableKeyToStyleSheetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.StyleSheet>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.UIElements.StyleSheet>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.StyleSheet), order: 2)]
+    public sealed class AddressableStringToStyleSheetAdapter : AddressableStringAdapter<UnityEngine.UIElements.StyleSheet>
+    {
+        public AddressableStringToStyleSheetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.StyleSheet>.Default) { }
     }
 
     #region    UNITYENGINE.UIELEMENTS.THEMESTYLESHEET
@@ -285,6 +295,28 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
         public AddressableStringToThemeStyleSheetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.ThemeStyleSheet>.Default) { }
     }
 
+    #region    UNITYENGINE.UIELEMENTS.VISUALTREEASSET
+    #endregion ======================================
+
+    [Serializable]
+    [Label("AddressableKey<UnityEngine.UIElements.VisualTreeAsset>.Load()", "Default")]
+    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.UIElements.VisualTreeAsset>), destType: typeof(UnityEngine.UIElements.VisualTreeAsset), order: 0)]
+    public sealed class AddressableKeyToVisualTreeAssetAdapter : AddressableKeyAdapter<UnityEngine.UIElements.VisualTreeAsset>
+    {
+        public AddressableKeyToVisualTreeAssetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.VisualTreeAsset>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Addressables.Load<UnityEngine.UIElements.VisualTreeAsset>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.VisualTreeAsset), order: 2)]
+    public sealed class AddressableStringToVisualTreeAssetAdapter : AddressableStringAdapter<UnityEngine.UIElements.VisualTreeAsset>
+    {
+        public AddressableStringToVisualTreeAssetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.VisualTreeAsset>.Default) { }
+    }
+
+#endif
+
+#if UNITY_TEXTMESHPRO
     #region    TMPRO.TMP_FONTASSET
     #endregion ===================
 
@@ -304,24 +336,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.AddressableKeys
         public AddressableStringToTMP_FontAssetAdapter() : base(CachedVariantConverter<TMPro.TMP_FontAsset>.Default) { }
     }
 
-    #region    UNITYENGINE.UIELEMENTS.VISUALTREEASSET
-    #endregion ======================================
-
-    [Serializable]
-    [Label("AddressableKey<UnityEngine.UIElements.VisualTreeAsset>.Load()", "Default")]
-    [Adapter(sourceType: typeof(AddressableKey<UnityEngine.UIElements.VisualTreeAsset>), destType: typeof(UnityEngine.UIElements.VisualTreeAsset), order: 0)]
-    public sealed class AddressableKeyToVisualTreeAssetAdapter : AddressableKeyAdapter<UnityEngine.UIElements.VisualTreeAsset>
-    {
-        public AddressableKeyToVisualTreeAssetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.VisualTreeAsset>.Default) { }
-    }
-
-    [Serializable]
-    [Label("Addressables.Load<UnityEngine.UIElements.VisualTreeAsset>(string)", "Default")]
-    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.VisualTreeAsset), order: 2)]
-    public sealed class AddressableStringToVisualTreeAssetAdapter : AddressableStringAdapter<UnityEngine.UIElements.VisualTreeAsset>
-    {
-        public AddressableStringToVisualTreeAssetAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.VisualTreeAsset>.Default) { }
-    }
+#endif
 
 }
 
