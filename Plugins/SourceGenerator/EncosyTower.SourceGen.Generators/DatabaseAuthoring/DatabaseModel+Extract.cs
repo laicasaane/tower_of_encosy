@@ -132,7 +132,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
                     else if (arg.Kind == TypedConstantKind.Array)
                     {
-                        BuildConverterMap(arg.Values, tableConverterMap, offset: 2);
+                        BuildConverterMap(arg.Values, tableConverterMap);
                     }
                 }
 
@@ -449,6 +449,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         )
         {
             var map = new Dictionary<string, DataModel>(StringComparer.Ordinal);
+            var set = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
             var queue = new Queue<ITypeSymbol>();
 
             foreach (var tableInfo in tableInfoList)
@@ -465,18 +466,18 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         continue;
                     }
 
-                    var typeFullName = type.ToFullName();
-
-                    if (map.ContainsKey(typeFullName))
+                    if (set.Contains(type))
                     {
                         continue;
                     }
+
+                    set.Add(type);
 
                     var dataModel = ExtractDataModel(
                           type
                         , dbConverterMap
                         , tableInfo.tableConverterMap
-                        , buildBaseTypeLayers: true
+                        , queue
                     );
 
                     if (dataModel.propRefs.Count < 1
@@ -487,7 +488,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         continue;
                     }
 
-                    map[typeFullName] = dataModel;
+                    map[dataModel.fullName] = dataModel;
                 }
             }
 
@@ -495,39 +496,50 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         }
 
         private static DataModel ExtractDataModel(
-              ITypeSymbol symbol
+              ITypeSymbol type
             , Dictionary<string, ConverterModel> dbConverterMap
             , Dictionary<string, ConverterModel> tableConverterMap
-            , bool buildBaseTypeLayers
+            , Queue<ITypeSymbol> queue
         )
         {
-            var (propRefs, fieldRefs) = ExtractMemberModels(symbol, dbConverterMap, tableConverterMap);
+            ExtractMemberModels(
+                  type
+                , dbConverterMap
+                , tableConverterMap
+                , queue
+                , out var propRefs
+                , out var fieldRefs
+            );
 
             using var baseLayerBuilder = ImmutableArrayBuilder<DataModelLayer>.Rent();
 
-            if (buildBaseTypeLayers)
+            var baseType = (type as INamedTypeSymbol)?.BaseType;
+
+            while (baseType != null)
             {
-                var baseSymbol = (symbol as INamedTypeSymbol)?.BaseType;
-
-                while (baseSymbol != null)
+                if (baseType.TypeKind != TypeKind.Class || IsIData(baseType) == false)
                 {
-                    if (baseSymbol.TypeKind != TypeKind.Class || IsIData(baseSymbol) == false)
-                    {
-                        break;
-                    }
-
-                    var baseMembers = ExtractMemberModels(baseSymbol, dbConverterMap, tableConverterMap);
-
-                    baseLayerBuilder.Add(new DataModelLayer {
-                        fullName       = baseSymbol.ToFullName(),
-                        simpleName     = baseSymbol.Name,
-                        validIdentifier = baseSymbol.ToValidIdentifier(),
-                        propRefs       = baseMembers.propRefs,
-                        fieldRefs      = baseMembers.fieldRefs,
-                    });
-
-                    baseSymbol = baseSymbol.BaseType;
+                    break;
                 }
+
+                ExtractMemberModels(
+                      baseType
+                    , dbConverterMap
+                    , tableConverterMap
+                    , queue
+                    , out var basePropRefs
+                    , out var baseFieldRefs
+                );
+
+                baseLayerBuilder.Add(new DataModelLayer {
+                    fullName = baseType.ToFullName(),
+                    simpleName = baseType.Name,
+                    validIdentifier = baseType.ToValidIdentifier(),
+                    propRefs = basePropRefs,
+                    fieldRefs = baseFieldRefs,
+                });
+
+                baseType = baseType.BaseType;
             }
 
             // Reverse so outermost base is first (matching original BaseTypeRefs order)
@@ -540,25 +552,28 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
 
             return new DataModel {
-                fullName        = symbol.ToFullName(),
-                simpleName      = symbol.Name,
-                validIdentifier = symbol.ToValidIdentifier(),
+                fullName        = type.ToFullName(),
+                simpleName      = type.Name,
+                validIdentifier = type.ToValidIdentifier(),
                 propRefs        = propRefs,
                 fieldRefs       = fieldRefs,
                 baseTypeLayers  = reversedLayers.ToImmutable().AsEquatableArray(),
             };
         }
 
-        private static (EquatableArray<MemberModel> propRefs, EquatableArray<MemberModel> fieldRefs) ExtractMemberModels(
-              ITypeSymbol symbol
+        private static void ExtractMemberModels(
+              ITypeSymbol type
             , Dictionary<string, ConverterModel> dbConverterMap
             , Dictionary<string, ConverterModel> tableConverterMap
+            , Queue<ITypeSymbol> queue
+            , out EquatableArray<MemberModel> propRefs
+            , out EquatableArray<MemberModel> fieldRefs
         )
         {
             var properties = new List<(string propertyName, string fieldName, ISymbol member, ITypeSymbol fieldType)>();
             var fields = new List<(string propertyName, string fieldName, ISymbol member, ITypeSymbol fieldType)>();
 
-            var members = symbol.GetMembers();
+            var members = type.GetMembers();
 
             foreach (var member in members)
             {
@@ -566,6 +581,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 {
                     // For types in another assembly
                     var genPropAttr = property.GetAttribute(GENERATED_PROPERTY_FROM_FIELD);
+
                     if (genPropAttr != null
                         && genPropAttr.ConstructorArguments.Length > 1
                         && genPropAttr.ConstructorArguments[0].Value is string fieldName
@@ -578,11 +594,14 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                     // For types in the same assembly
                     var dataPropAttr = property.GetAttribute(DATA_PROPERTY_ATTRIBUTE);
+
                     if (dataPropAttr != null)
                     {
                         ITypeSymbol fieldType;
+
                         if (dataPropAttr.ConstructorArguments.Length < 1
-                            || dataPropAttr.ConstructorArguments[0].Value is not ITypeSymbol ft)
+                            || dataPropAttr.ConstructorArguments[0].Value is not ITypeSymbol ft
+                        )
                         {
                             fieldType = property.Type;
                         }
@@ -599,6 +618,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 {
                     // For types in another assembly
                     var genFieldAttr = field.GetAttribute(GENERATED_FIELD_FROM_PROPERTY);
+
                     if (genFieldAttr != null
                         && genFieldAttr.ConstructorArguments.Length > 0
                         && genFieldAttr.ConstructorArguments[0].Value is string propName
@@ -630,7 +650,14 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
 
                 uniqueFieldNames.Add(fieldName);
-                propBuilder.Add(BuildMemberModel(propertyName, member, fieldType, dbConverterMap, tableConverterMap));
+                propBuilder.Add(BuildMemberModel(
+                      propertyName
+                    , member
+                    , fieldType
+                    , dbConverterMap
+                    , tableConverterMap
+                    , queue
+                ));
             }
 
             foreach (var (propertyName, fieldName, member, fieldType) in fields)
@@ -641,13 +668,18 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
 
                 uniqueFieldNames.Add(fieldName);
-                fieldBuilder.Add(BuildMemberModel(propertyName, member, fieldType, dbConverterMap, tableConverterMap));
+                fieldBuilder.Add(BuildMemberModel(
+                      propertyName
+                    , member
+                    , fieldType
+                    , dbConverterMap
+                    , tableConverterMap
+                    , queue
+                ));
             }
 
-            return (
-                propBuilder.ToImmutable().AsEquatableArray(),
-                fieldBuilder.ToImmutable().AsEquatableArray()
-            );
+            propRefs = propBuilder.ToImmutable().AsEquatableArray();
+            fieldRefs = fieldBuilder.ToImmutable().AsEquatableArray();
         }
 
         private static MemberModel BuildMemberModel(
@@ -656,13 +688,24 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , ITypeSymbol fieldType
             , Dictionary<string, ConverterModel> dbConverterMap
             , Dictionary<string, ConverterModel> tableConverterMap
+            , Queue<ITypeSymbol> queue
         )
         {
-            var collection = MakeCollectionModel(fieldType);
+            var collection = MakeCollectionModel(fieldType, out var keyType, out var elemType);
+            EnqueueTypes(queue, fieldType, keyType, elemType);
+
             var typeHasParameterlessCtor = CheckParameterlessConstructor(fieldType);
 
             // Try [DataConverter] attribute on the member
-            var converter = TryMakeConverterModel(memberSymbol, fieldType);
+            var converter = TryMakeConverterModel(
+                  memberSymbol
+                , fieldType
+                , out var convType
+                , out var convKeyType
+                , out var convElemType
+            );
+
+            EnqueueTypes(queue, convType, convKeyType, convElemType);
 
             // Fall back to table-level then database-level converter map
             if (converter.kind == ConverterKind.None)
@@ -682,18 +725,45 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             // Fall back to the type's own Convert method
             if (converter.kind == ConverterKind.None)
             {
-                converter = TryFallbackConverterModel(fieldType);
+                converter = TryFallbackConverterModel(
+                      fieldType
+                    , out var convFbType
+                    , out var convFbKeyType
+                    , out var convFbElemType
+                );
+
+                EnqueueTypes(queue, convFbType, convFbKeyType, convFbElemType);
             }
 
             return new MemberModel {
-                propertyName                   = propertyName,
-                typeFullName                   = fieldType.ToFullName(),
-                typeSimpleName                 = fieldType.Name,
-                typeIsValueType                = fieldType.IsValueType,
+                propertyName = propertyName,
+                typeFullName = fieldType.ToFullName(),
+                typeSimpleName = fieldType.Name,
+                typeIsValueType = fieldType.IsValueType,
                 typeHasParameterlessConstructor = typeHasParameterlessCtor,
-                collection                     = collection,
-                converter                      = converter,
+                collection = collection,
+                converter = converter,
             };
+        }
+
+        private static void EnqueueTypes(Queue<ITypeSymbol> queue, ITypeSymbol type, ITypeSymbol keyType, ITypeSymbol elemType)
+        {
+            if (keyType == null && elemType == null)
+            {
+                queue.Enqueue(type);
+            }
+            else
+            {
+                if (keyType != null)
+                {
+                    queue.Enqueue(keyType);
+                }
+
+                if (elemType != null)
+                {
+                    queue.Enqueue(elemType);
+                }
+            }
         }
 
         private static bool CheckParameterlessConstructor(ITypeSymbol type)
@@ -740,10 +810,19 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             return paramCtorCount == 0;
         }
 
-        private static CollectionModel MakeCollectionModel(ITypeSymbol type)
+        private static CollectionModel MakeCollectionModel(
+              ITypeSymbol type
+            , out ITypeSymbol keyType
+            , out ITypeSymbol elemType
+        )
         {
+            keyType = null;
+            elemType = null;
+
             if (type is IArrayTypeSymbol arrayType)
             {
+                elemType = arrayType.ElementType;
+
                 return new CollectionModel {
                     kind = CollectionKind.Array,
                     elementTypeName = arrayType.ElementType.ToFullName(),
@@ -755,77 +834,77 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             {
                 if (namedType.TryGetGenericType(LIST_FAST_TYPE_T, 1, out var listFastType))
                 {
-                    return MakeListModel(listFastType.TypeArguments[0]);
+                    return MakeListModel(elemType = listFastType.TypeArguments[0]);
                 }
 
                 if (namedType.TryGetGenericType(LIST_TYPE_T, 1, out var listType))
                 {
-                    return MakeListModel(listType.TypeArguments[0]);
+                    return MakeListModel(elemType = listType.TypeArguments[0]);
                 }
 
                 if (namedType.TryGetGenericType(DICTIONARY_TYPE_T, 2, out var dictType))
                 {
-                    return MakeDictModel(dictType.TypeArguments[0], dictType.TypeArguments[1]);
+                    return MakeDictModel(keyType = dictType.TypeArguments[0], elemType = dictType.TypeArguments[1]);
                 }
 
                 if (namedType.TryGetGenericType(HASH_SET_TYPE_T, 1, out var hashSetType))
                 {
-                    return MakeKindModel(CollectionKind.HashSet, hashSetType.TypeArguments[0]);
+                    return MakeKindModel(CollectionKind.HashSet, elemType = hashSetType.TypeArguments[0]);
                 }
 
                 if (namedType.TryGetGenericType(QUEUE_TYPE_T, 1, out var queueType))
                 {
-                    return MakeKindModel(CollectionKind.Queue, queueType.TypeArguments[0]);
+                    return MakeKindModel(CollectionKind.Queue, elemType = queueType.TypeArguments[0]);
                 }
 
                 if (namedType.TryGetGenericType(STACK_TYPE_T, 1, out var stackType))
                 {
-                    return MakeKindModel(CollectionKind.Stack, stackType.TypeArguments[0]);
+                    return MakeKindModel(CollectionKind.Stack, elemType = stackType.TypeArguments[0]);
                 }
 
                 if (namedType.TryGetGenericType(READONLY_MEMORY_TYPE_T, 1, out var readMemType))
                 {
-                    return MakeKindModel(CollectionKind.Array, readMemType.TypeArguments[0]);
+                    return MakeKindModel(CollectionKind.Array, elemType = readMemType.TypeArguments[0]);
                 }
 
                 if (namedType.TryGetGenericType(MEMORY_TYPE_T, 1, out var memType))
                 {
-                    return MakeKindModel(CollectionKind.Array, memType.TypeArguments[0]);
+                    return MakeKindModel(CollectionKind.Array, elemType = memType.TypeArguments[0]);
                 }
 
                 if (namedType.TryGetGenericType(READONLY_SPAN_TYPE_T, 1, out var readSpanType))
                 {
-                    return MakeKindModel(CollectionKind.Array, readSpanType.TypeArguments[0]);
+                    return MakeKindModel(CollectionKind.Array, elemType = readSpanType.TypeArguments[0]);
                 }
 
                 if (namedType.TryGetGenericType(SPAN_TYPE_T, 1, out var spanType))
                 {
-                    return MakeKindModel(CollectionKind.Array, spanType.TypeArguments[0]);
+                    return MakeKindModel(CollectionKind.Array, elemType = spanType.TypeArguments[0]);
                 }
 
                 if (namedType.TryGetGenericType(IREADONLY_LIST_TYPE_T, 1, out var roListType))
                 {
-                    return MakeListModel(roListType.TypeArguments[0]);
+                    return MakeListModel(elemType = roListType.TypeArguments[0]);
                 }
 
                 if (namedType.TryGetGenericType(ILIST_TYPE_T, 1, out var ilistType))
                 {
-                    return MakeListModel(ilistType.TypeArguments[0]);
+                    return MakeListModel(elemType = ilistType.TypeArguments[0]);
                 }
 
                 if (namedType.TryGetGenericType(ISET_TYPE_T, 1, out var isetType))
                 {
-                    return MakeKindModel(CollectionKind.HashSet, isetType.TypeArguments[0]);
+                    return MakeKindModel(CollectionKind.HashSet, elemType = isetType.TypeArguments[0]);
                 }
 
                 if (namedType.TryGetGenericType(IREADONLY_DICTIONARY_TYPE_T, 2, out var roDictType))
                 {
-                    return MakeDictModel(roDictType.TypeArguments[0], roDictType.TypeArguments[1]);
+                    return MakeDictModel(keyType = roDictType.TypeArguments[0], elemType = roDictType.TypeArguments[1]);
                 }
 
                 if (namedType.TryGetGenericType(IDICTIONARY_TYPE_T, 2, out var idictType))
                 {
-                    return MakeDictModel(idictType.TypeArguments[0], idictType.TypeArguments[1]);
+                    return MakeDictModel(keyType = idictType.TypeArguments[0], elemType = idictType.TypeArguments[1]);
                 }
             }
 
@@ -845,59 +924,84 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 };
         }
 
-        private static ConverterModel TryMakeConverterModel(ISymbol memberSymbol, ITypeSymbol targetType)
+        private static ConverterModel TryMakeConverterModel(
+              ISymbol memberSymbol
+            , ITypeSymbol targetType
+            , out ITypeSymbol type
+            , out ITypeSymbol keyType
+            , out ITypeSymbol elemType
+        )
         {
             var attrib = memberSymbol.GetAttribute(DATA_CONVERTER_ATTRIBUTE);
 
             if (attrib == null || attrib.ConstructorArguments.Length != 1)
             {
+                type = targetType;
+                keyType = elemType = null;
                 return default;
             }
 
             if (attrib.ConstructorArguments[0].Value is not INamedTypeSymbol converterType)
             {
+                type = targetType;
+                keyType = elemType = null;
                 return default;
             }
 
             if (TryGetConvertMethod(converterType, out var convertMethod, targetType) == false)
             {
+                type = targetType;
+                keyType = elemType = null;
                 return default;
             }
 
-            return MakeConverterModelFromMethod(converterType, convertMethod);
+            return MakeConverterModelFromMethod(converterType, convertMethod, out type, out keyType, out elemType);
         }
 
-        private static ConverterModel TryFallbackConverterModel(ITypeSymbol fieldType)
+        private static ConverterModel TryFallbackConverterModel(
+              ITypeSymbol fieldType
+            , out ITypeSymbol type
+            , out ITypeSymbol keyType
+            , out ITypeSymbol elemType
+        )
         {
             if (fieldType is not INamedTypeSymbol namedReturn)
             {
+                type = fieldType;
+                keyType = elemType = null;
                 return default;
             }
 
             if (TryGetConvertMethod(namedReturn, out var convertMethod, namedReturn) == false)
             {
+                type = fieldType;
+                keyType = elemType = null;
                 return default;
             }
 
-            return MakeConverterModelFromMethod(namedReturn, convertMethod);
+            return MakeConverterModelFromMethod(namedReturn, convertMethod, out type, out keyType, out elemType);
         }
 
         private static ConverterModel MakeConverterModelFromMethod(
               INamedTypeSymbol converterType
             , IMethodSymbol convertMethod
+            , out ITypeSymbol type
+            , out ITypeSymbol keyType
+            , out ITypeSymbol elemType
         )
         {
             var sourceType = convertMethod.Parameters[0].Type;
-            var sourceCollection = MakeCollectionModel(sourceType);
             var sourceHasParameterlessCtor = CheckParameterlessConstructor(sourceType);
+            var sourceCollection = MakeCollectionModel(sourceType, out keyType, out elemType);
+            type = keyType == null && elemType == null ? sourceType : null;
 
             return new ConverterModel {
-                kind                              = convertMethod.IsStatic ? ConverterKind.Static : ConverterKind.Instance,
-                converterTypeFullName             = converterType.ToFullName(),
-                sourceCollection                  = sourceCollection,
-                sourceTypeFullName                = sourceType.ToFullName(),
-                sourceTypeSimpleName              = sourceType.Name,
-                sourceTypeIsValueType             = sourceType.IsValueType,
+                kind                  = convertMethod.IsStatic ? ConverterKind.Static : ConverterKind.Instance,
+                converterTypeFullName = converterType.ToFullName(),
+                sourceCollection      = sourceCollection,
+                sourceTypeFullName    = sourceType.ToFullName(),
+                sourceTypeSimpleName  = sourceType.Name,
+                sourceTypeIsValueType = sourceType.IsValueType,
                 sourceTypeHasParameterlessConstructor = sourceHasParameterlessCtor,
             };
         }
@@ -1009,7 +1113,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         private static void BuildConverterMap(
               ImmutableArray<TypedConstant> values
             , Dictionary<string, ConverterModel> converterMap
-            , int offset = 0
         )
         {
             if (values.IsDefaultOrEmpty)
@@ -1033,7 +1136,13 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 if (converterMap.ContainsKey(targetTypeFullName) == false)
                 {
-                    converterMap[targetTypeFullName] = MakeConverterModelFromMethod(type, convertMethod);
+                    converterMap[targetTypeFullName] = MakeConverterModelFromMethod(
+                          type
+                        , convertMethod
+                        , out _
+                        , out _
+                        , out _
+                    );
                 }
             }
         }
