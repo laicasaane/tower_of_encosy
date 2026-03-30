@@ -2,10 +2,10 @@
 {
     partial struct RelayCommandDeclaration
     {
-        private const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.RelayCommands.RelayCommandGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        private const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
-        private const string GENERATED_RELAY_COMMAND = "[GeneratedRelayCommand({0})]";
-        private const string EDITOR_BROWSABLE_NEVER = "[EditorBrowsable(EditorBrowsableState.Never)]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.RelayCommands.RelayCommandGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string GENERATED_RELAY_COMMAND = "[ETMISG.GeneratedRelayCommand({0})]";
+        private const string EDITOR_BROWSABLE_NEVER = "[SCM.EditorBrowsable(SCM.EditorBrowsableState.Never)]";
 
         public readonly string WriteCode()
         {
@@ -19,7 +19,7 @@
 
             WriteRelayCommandInfoAttributes(ref p);
 
-            p.PrintBeginLine("partial class ").Print(className).PrintEndLine(" : ICommandListener");
+            p.PrintBeginLine("partial class ").Print(className).PrintEndLine(" : ETMI.ICommandListener");
             p.OpenScope();
             {
                 WriteConstantFields(ref p);
@@ -40,7 +40,7 @@
                 var propName = CommandPropertyName(member);
 
                 p.PrintBeginLine()
-                    .Print($"[RelayCommandInfo(\"{propName}\", ");
+                    .Print($"[ETMISG.RelayCommandInfo(\"{propName}\", ");
 
                 if (string.IsNullOrEmpty(member.paramTypeName) == false)
                 {
@@ -139,7 +139,8 @@
         private readonly void WriteTryGetCommand(ref Printer p)
         {
             p.PrintLine("/// <inheritdoc/>");
-            p.PrintLine("public bool TryGetCommand<TCommand>(string commandName, out TCommand command) where TCommand : ICommand");
+            p.PrintLine("public bool TryGetCommand<TCommand>(string commandName, out TCommand command)");
+            p.WithIncreasedIndent().PrintLine("where TCommand : ETMI.ICommand");
             p.OpenScope();
             {
                 p.PrintLine("switch (commandName)");
@@ -196,30 +197,30 @@
         {
             if (string.IsNullOrEmpty(member.paramTypeName))
             {
-                return "RelayCommand";
+                return "ETMI.RelayCommand";
             }
 
-            return $"RelayCommand<{member.paramTypeName}>";
+            return $"ETMI.RelayCommand<{member.paramTypeName}>";
         }
 
         private static string CommandInterfaceName(MemberDeclaration member)
         {
             if (string.IsNullOrEmpty(member.paramTypeName))
             {
-                return "IRelayCommand";
+                return "ETMI.IRelayCommand";
             }
 
-            return $"IRelayCommand<{member.paramTypeName}>";
+            return $"ETMI.IRelayCommand<{member.paramTypeName}>";
         }
 
         private static string CommandInterfaceNameComment(MemberDeclaration member)
         {
             if (string.IsNullOrEmpty(member.paramTypeName))
             {
-                return "IRelayCommand";
+                return "ETMI.IRelayCommand";
             }
 
-            return $"IRelayCommand{{{member.paramTypeName}}}";
+            return $"ETMI.IRelayCommand{{{member.paramTypeName}}}";
         }
 
         private static string CanExecuteMethodArg(MemberDeclaration member)

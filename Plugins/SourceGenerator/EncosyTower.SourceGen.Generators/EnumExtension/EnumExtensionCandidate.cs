@@ -23,6 +23,20 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         /// </summary>
         public LocationInfo location;
 
+        /// <summary>
+        /// Pre-computed namespace / containing-type scope opener, produced by
+        /// <c>TypeCreationHelpers.GenerateOpeningAndClosingSource</c> in the
+        /// incremental transform phase. Excluded from <see cref="Equals(EnumExtensionCandidate)"/>
+        /// and <see cref="GetHashCode"/> for the same reason as <see cref="location"/>.
+        /// </summary>
+        public string openingSource;
+
+        /// <summary>
+        /// Matching closing braces for <see cref="openingSource"/>. Excluded from
+        /// equality / hash for the same reason as <see cref="location"/>.
+        /// </summary>
+        public string closingSource;
+
         public string enumName;
         public string extensionsName;
         public string structName;

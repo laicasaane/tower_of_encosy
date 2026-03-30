@@ -2,19 +2,18 @@
 {
     public readonly struct VariantPrinter
     {
-        public const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        public const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
+        public const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        public const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
         public const string LOG_REGISTRIES = "ENCOSY_LOG_VARIANTS_REGISTRIES";
-        public const string NAMESPACE = "EncosyTower.Variants";
-        public const string STRUCT_LAYOUT = "[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit)]";
-        public const string META_OFFSET = $"[global::System.Runtime.InteropServices.FieldOffset(global::{NAMESPACE}.VariantBase.META_OFFSET)]";
-        public const string DATA_OFFSET = $"[global::System.Runtime.InteropServices.FieldOffset(global::{NAMESPACE}.VariantBase.DATA_OFFSET)]";
-        public const string VARIANT_TYPE = $"global::{NAMESPACE}.Variant";
-        public const string VARIANT_DATA_TYPE = $"global::{NAMESPACE}.VariantData";
-        public const string VARIANT_TYPE_KIND = $"global::{NAMESPACE}.VariantTypeKind";
-        public const string DOES_NOT_RETURN = "[global::System.Diagnostics.CodeAnalysis.DoesNotReturn]";
-        public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.BeforeSceneLoad)]";
-        public const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
+        public const string STRUCT_LAYOUT = "[SRIS.StructLayout(SRIS.InteropServices.LayoutKind.Explicit)]";
+        public const string META_OFFSET = "[SRIS.FieldOffset(ETV.VariantBase.META_OFFSET)]";
+        public const string DATA_OFFSET = "[SRIS.FieldOffset(ETV.VariantBase.DATA_OFFSET)]";
+        public const string VARIANT_TYPE = "ETV.Variant";
+        public const string VARIANT_DATA_TYPE = "ETV.VariantData";
+        public const string VARIANT_TYPE_KIND = "ETV.VariantTypeKind";
+        public const string DOES_NOT_RETURN = "[SDCA.DoesNotReturn]";
+        public const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[UE.RuntimeInitializeOnLoadMethod(UE.RuntimeInitializeLoadType.BeforeSceneLoad)]";
+        public const string PRESERVE = "[UES.Preserve]";
 
         public void WriteRegister(
               ref Printer p
@@ -56,7 +55,7 @@
             p.PrintLine(PRESERVE);
             p.OpenScope("private static void Register<T>(");
             {
-                p.PrintLine($"  global::{NAMESPACE}.Converters.IVariantConverter<T> converter");
+                p.PrintLine($"  ETVC.IVariantConverter<T> converter");
                 p.Print("#if UNITY_EDITOR && ").Print(LOG_REGISTRIES).PrintEndLine();
                 p.PrintLine(", string typeName");
                 p.Print("#endif").PrintEndLine();
@@ -68,7 +67,7 @@
                 p.PrintLine("var result =");
                 p.Print("#endif").PrintEndLine();
 
-                p.PrintLine($"global::{NAMESPACE}.Converters.VariantConverter.TryRegister<T>(converter);");
+                p.PrintLine("ETVC.VariantConverter.TryRegister<T>(converter);");
                 p.PrintEndLine();
 
                 p.Print("#if UNITY_EDITOR && ").Print(LOG_REGISTRIES).PrintEndLine();
@@ -76,14 +75,14 @@
                 p.PrintLine("if (result)");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine("global::UnityEngine.Debug.Log(\"Register variant for ")
+                    p.PrintBeginLine("UE.Debug.Log(\"Register variant for ")
                         .Print("{typeName}").PrintEndLine("\");");
                 }
                 p.CloseScope();
                 p.PrintLine("else");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine("global::UnityEngine.Debug.LogError(\"Cannot register variant for ")
+                    p.PrintBeginLine("UE.Debug.LogError(\"Cannot register variant for ")
                         .Print("{typeName}").PrintEndLine("\");");
                 }
                 p.CloseScope();
@@ -242,10 +241,10 @@
             p.PrintLine($"private static void ThrowIfInvalidCast(in {VARIANT_TYPE} variant)");
             p.OpenScope();
             {
-                p.PrintLine("var type = global::EncosyTower.Types.TypeIdExtensions.ToType(variant.TypeId);");
+                p.PrintLine("var type = ETT.TypeIdExtensions.ToType(variant.TypeId);");
                 p.PrintEndLine();
 
-                p.PrintLine("throw new global::System.InvalidCastException");
+                p.PrintLine("throw new S.InvalidCastException");
                 p.OpenScope("(");
                 {
                     p.PrintLine($"$\"Cannot cast {{type}} to {{typeof({typeName})}}\"");
@@ -289,7 +288,7 @@
             p.PrintLine(PRESERVE);
             p.PrintBeginLine()
                 .Print("public sealed class Converter")
-                .Print($" : global::EncosyTower.Variants.Converters.IVariantConverter<{typeName}>")
+                .Print($" : ETVC.IVariantConverter<{typeName}>")
                 .PrintEndLine();
             p.OpenScope();
             {
@@ -379,7 +378,7 @@
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintLine("return global::EncosyTower.Types.TypeIdExtensions.ToType(variant.TypeId).ToString();");
+                    p.PrintLine("return ETT.TypeIdExtensions.ToType(variant.TypeId).ToString();");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -388,7 +387,7 @@
                 p.PrintLine("private static void ThrowIfInvalidCast()");
                 p.OpenScope();
                 {
-                    p.PrintLine("throw new global::System.InvalidCastException");
+                    p.PrintLine("throw new S.InvalidCastException");
                     p.OpenScope("(");
                     {
                         p.PrintLine($"$\"Cannot get value of {{typeof({typeName})}} from the input variant.\"");

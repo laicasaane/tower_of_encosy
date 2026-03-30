@@ -292,13 +292,11 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             p.PrintEndLine();
             p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();
-            p.PrintLine("using System.CodeDom.Compiler;");
-            p.PrintLine("using System.Diagnostics.CodeAnalysis;");
-            p.PrintLine("using EncosyTower.Mvvm.Input;");
-            p.PrintLine("using EncosyTower.Mvvm.Input.SourceGen;");
-            p.PrintEndLine();
-            p.PrintLine("using EditorBrowsableAttribute = global::System.ComponentModel.EditorBrowsableAttribute;");
-            p.PrintLine("using EditorBrowsableState = global::System.ComponentModel.EditorBrowsableState;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SCM = global::System.ComponentModel;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using ETMI = global::EncosyTower.Mvvm.Input;");
+            p.PrintLine("using ETMISG = global::EncosyTower.Mvvm.Input.SourceGen;");
             p.PrintEndLine();
             p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();

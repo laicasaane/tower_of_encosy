@@ -15,17 +15,17 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             p.PrintBeginLine()
                 .Print("partial ").Print(databaseTypeKeyword).Print(" ").Print(databaseTypeName)
-                .Print($" : {ICONTAINS}<{databaseTypeName}.SheetContainer>")
+                .Print(" : ").Print(PR_ICONTAINS).Print("<").Print(databaseTypeName).Print(".SheetContainer>")
                 .PrintEndLine();
             p.OpenScope();
             {
                 p.Print(DIRECTIVE).PrintEndLine();
                 p.PrintEndLine();
 
-                p.PrintLine(SERIALIZABLE).PrintLine(GENERATED_SHEET_CONTAINER);
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(PR_SERIALIZABLE).PrintLine(PR_GENERATED_SHEET_CONTAINER);
+                p.PrintLine(PR_GENERATED_CODE).PrintLine(PR_EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public partial class SheetContainer")
-                    .Print(" : ").PrintEndLine(DATA_SHEET_CONTAINER_BASE);
+                    .Print(" : ").PrintEndLine(PR_DATA_SHEET_CONTAINER_BASE);
                 p.OpenScope();
                 {
                     foreach (var typeName in typeNames)
@@ -72,17 +72,17 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
 ;
                     p.PrintBeginLine("public SheetContainer()")
-                        .PrintEndLine(" : this(UnityLogger.Default)");
+                        .PrintEndLine(" : this(CBSU.UnityLogger.Default)");
                     p.PrintLine("{ }");
                     p.PrintEndLine();
 
-                    p.PrintBeginLine("public SheetContainer(MELogging.ILogger logger)")
+                    p.PrintBeginLine("public SheetContainer(MEL.ILogger logger)")
                         .PrintEndLine(" : base(logger)");
                     p.OpenScope();
                     {
                         foreach (var typeName in typeNames)
                         {
-                            p.PrintLine($"this.{typeName} = new {typeName}();");
+                            p.PrintBeginLine("this.").Print(typeName).Print(" = new ").Print(typeName).PrintEndLine("();");
                         }
                     }
                     p.CloseScope();
@@ -95,8 +95,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 p.Print("#else").PrintEndLine().PrintEndLine();
 
-                p.PrintLine(SERIALIZABLE).PrintLine(GENERATED_SHEET_CONTAINER);
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(PR_SERIALIZABLE).PrintLine(PR_GENERATED_SHEET_CONTAINER);
+                p.PrintLine(PR_GENERATED_CODE).PrintLine(PR_EXCLUDE_COVERAGE);
                 p.PrintLine("public partial class SheetContainer { }");
                 p.PrintEndLine();
 
@@ -121,10 +121,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 var tableTypeFullName = table.typeFullName;
                 var assetName = table.assetName;
 
-                p.PrintLine(SERIALIZABLE);
-                p.PrintLine(string.Format(TABLE_NAMING, table.propertyName, table.namingStrategy));
-                p.PrintLine(string.Format(GENERATED_SHEET_ATTRIBUTE, idTypeFullName, dataTypeFullName, tableTypeFullName, assetName));
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(PR_SERIALIZABLE);
+                p.PrintLine(string.Format(PR_TABLE_NAMING, table.propertyName, table.namingStrategy));
+                p.PrintLine(string.Format(PR_GENERATED_SHEET_ATTRIBUTE, idTypeFullName, dataTypeFullName, tableTypeFullName, assetName));
+                p.PrintLine(PR_GENERATED_CODE).PrintLine(PR_EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public partial class ").Print(uniqueSheetName)
                     .Print(" : ").Print(baseSheetName).PrintEndLine(" { }");
                 p.PrintEndLine();
@@ -138,17 +138,17 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return;
             }
 
-            const string STRUCT_LAYOUT = "StructLayout";
-            const string EXPLICIT = "LayoutKind.Explicit";
-            const string FIXED_ARRAY = "FixedArray";
-            const string GC_HANDLE = "GCHandle";
-            const string WEAK = "GCHandleType.Weak";
+            const string PR_STRUCT_LAYOUT = "SRIS.StructLayout";
+            const string PR_EXPLICIT = "SRIS.LayoutKind.Explicit";
+            const string PR_FIXED_ARRAY = "ETC.FixedArray";
+            const string PR_GC_HANDLE = "SRIS.GCHandle";
+            const string PR_GC_HANDLE_WEAK = "SRIS.GCHandleType.Weak";
 
             p.PrintLine("public readonly struct RefList<T> where T : class");
             p.OpenScope();
             {
-                p.PrintBeginLine("private readonly ").Print(FIXED_ARRAY)
-                    .Print("<").Print(GC_HANDLE).PrintEndLine(", RefListCapacity> _array;");
+                p.PrintBeginLine("private readonly ").Print(PR_FIXED_ARRAY)
+                    .Print("<").Print(PR_GC_HANDLE).PrintEndLine(", RefListCapacity> _array;");
                 p.PrintEndLine();
 
                 p.PrintLine("private readonly int _length;");
@@ -156,28 +156,28 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 for (var c = 1; c <= count; c++)
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine(PR_AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public RefList(");
 
                     for (var i = 0; i < c; i++)
                     {
-                        p.PrintIf(i > 0, ", ").Print($"T p{i}");
+                        p.PrintIf(i > 0, ", ").Print("T p").Print(i);
                     }
 
                     p.PrintEndLine(")");
                     p.OpenScope();
                     {
-                        p.PrintBeginLine("_array = new ").Print(FIXED_ARRAY)
-                            .Print("<").Print(GC_HANDLE).PrintEndLine(", RefListCapacity>(default);");
+                        p.PrintBeginLine("_array = new ").Print(PR_FIXED_ARRAY)
+                            .Print("<").Print(PR_GC_HANDLE).PrintEndLine(", RefListCapacity>(default);");
                         p.PrintEndLine();
 
-                        p.PrintLine($"_length = {c};");
+                        p.PrintBeginLine("_length = ").Print(c).PrintEndLine(";");
                         p.PrintEndLine();
 
                         for (var i = 0; i < c; i++)
                         {
-                            p.PrintBeginLine($"_array[{i}] = ").Print(GC_HANDLE)
-                                .Print($".Alloc(p{i}, ").Print(WEAK).PrintEndLine(");");
+                            p.PrintBeginLine("_array[").Print(i).Print("] = ").Print(PR_GC_HANDLE)
+                                .Print(".Alloc(p").Print(i).Print(", ").Print(PR_GC_HANDLE_WEAK).PrintEndLine(");");
                         }
                     }
                     p.CloseScope();
@@ -187,7 +187,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 p.PrintLine("public readonly int Length");
                 p.OpenScope();
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine(PR_AGGRESSIVE_INLINING);
                     p.PrintLine("get => _length;");
                 }
                 p.CloseScope();
@@ -196,11 +196,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 p.PrintLine("public readonly T this[int index]");
                 p.OpenScope();
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine(PR_AGGRESSIVE_INLINING);
                     p.PrintLine("get");
                     p.OpenScope();
                     {
-                        p.PrintBeginLine(GC_HANDLE).PrintEndLine(" item = _array[index];");
+                        p.PrintBeginLine(PR_GC_HANDLE).PrintEndLine(" item = _array[index];");
                         p.PrintLine("return item.IsAllocated ? (T)item.Target : default;");
                     }
                     p.CloseScope();
@@ -208,8 +208,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintBeginLine("[").Print(STRUCT_LAYOUT).Print("(")
-                    .Print(EXPLICIT).PrintEndLine($", Size = {count} * 8)]");
+                p.PrintBeginLine("[").Print(PR_STRUCT_LAYOUT).Print("(")
+                    .Print(PR_EXPLICIT).Print(", Size = ").Print(count).PrintEndLine(" * 8)]");
                 p.PrintLine("private readonly struct RefListCapacity { }");
             }
             p.CloseScope();

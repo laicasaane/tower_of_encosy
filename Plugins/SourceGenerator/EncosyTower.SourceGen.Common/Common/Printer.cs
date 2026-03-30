@@ -291,6 +291,17 @@ namespace EncosyTower.SourceGen
         /// <summary>
         /// Print a string
         /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public Printer Print(StringBuilder text)
+        {
+            _builder.Append(text);
+            return this;
+        }
+
+        /// <summary>
+        /// Print a string
+        /// </summary>
         /// <param name="ch"></param>
         /// <returns></returns>
         public Printer PrintRepeat(char ch, int repeatCount)

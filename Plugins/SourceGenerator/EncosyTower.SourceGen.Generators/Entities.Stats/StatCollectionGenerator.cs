@@ -73,9 +73,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 return default;
             }
 
-            var statSystemTypeSymbol = attribute.ConstructorArguments[0].Value as INamedTypeSymbol;
 
-            if (statSystemTypeSymbol is null || statSystemTypeSymbol.HasAttribute(STAT_SYSTEM_ATTRIBUTE) == false)
+            if (attribute.ConstructorArguments[0].Value is not INamedTypeSymbol statSystemTypeSymbol
+                || statSystemTypeSymbol.HasAttribute(STAT_SYSTEM_ATTRIBUTE) == false
+            )
             {
                 return default;
             }
@@ -130,26 +131,27 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
                 p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
                 p.PrintEndLine();
-                p.PrintLine("using System;");
-                p.PrintLine("using System.CodeDom.Compiler;");
-                p.PrintLine("using System.Diagnostics;");
-                p.PrintLine("using System.Diagnostics.CodeAnalysis;");
-                p.PrintLine("using System.Runtime.CompilerServices;");
-                p.PrintLine("using System.Runtime.InteropServices;");
-                p.PrintLine("using EncosyTower.Common;");
-                p.PrintLine("using EncosyTower.Collections;");
-                p.PrintLine("using EncosyTower.Conversion;");
-                p.PrintLine("using EncosyTower.Logging;");
-                p.PrintLine("using Unity.Collections;");
-                p.PrintLine("using Unity.Collections.LowLevel.Unsafe;");
-                p.PrintLine("using Unity.Entities;");
-                p.PrintLine("using Unity.Mathematics;");
-                p.PrintLine("using UnityEngine;");
-                p.PrintLine($"using {StatGeneratorAPI.NAMESPACE};");
+                p.PrintLine("using S = global::System;");
+                p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+                p.PrintLine("using SD = global::System.Diagnostics;");
+                p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+                p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+                p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+                p.PrintLine("using ET = global::EncosyTower.Common;");
+                p.PrintLine("using ETCol = global::EncosyTower.Collections;");
+                p.PrintLine("using ETCon = global::EncosyTower.Conversion;");
+                p.PrintLine("using ETES = global::EncosyTower.Entities.Stats;");
+                p.PrintLine("using ETL = global::EncosyTower.Logging;");
+                p.PrintLine("using UC = global::Unity.Collections;");
+                p.PrintLine("using UCLU = global::Unity.Collections.LowLevel.Unsafe;");
+                p.PrintLine("using UECS = global::Unity.Entities;");
+                p.PrintLine("using UM = global::Unity.Mathematics;");
+                p.PrintLine("using UE = global::UnityEngine;");
+                p.PrintEndLine();
+                p.PrintBeginLine("using StatSystem = ").Print(statSystemFullTypeName).PrintEndLine(";");
                 p.PrintEndLine();
                 p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
                 p.PrintEndLine();
-                p.PrintBeginLine("using StatSystem = ").Print(statSystemFullTypeName).PrintEndLine(";");
             }
 
             static void GetStatDataDefintions(
@@ -209,17 +211,19 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                     var index = (int)variantType;
                     var types = StatGeneratorAPI.Types.AsSpan();
+                    var namespaces = StatGeneratorAPI.Namespaces.AsSpan();
 
                     if ((uint)index >= (uint)types.Length)
                     {
                         return default;
                     }
 
-                    result.valueTypeName = types[index];
+                    result.valueTypeNamespace = namespaces[index];
+                    result.valueType = types[index];
                 }
                 else if (args[0].Expression is TypeOfExpressionSyntax typeOfExpr)
                 {
-                    result.valueTypeName = typeOfExpr.Type.ToFullString();
+                    result.valueType = typeOfExpr.Type.ToFullString();
                 }
                 else
                 {

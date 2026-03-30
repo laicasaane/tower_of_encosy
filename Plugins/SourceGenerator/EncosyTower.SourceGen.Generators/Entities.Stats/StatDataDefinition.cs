@@ -8,7 +8,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public string typeNamespace;
         public string typeIdentifier;
         public string valueTypeName;
-        public string valueFullTypeName;
+        public string valueTypeNs;
+        public string valueType;
         public string underlyingTypeName;
         public string hintName;
         public string sourceFilePath;
@@ -24,12 +25,15 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             && string.IsNullOrEmpty(typeName) == false
             && string.IsNullOrEmpty(typeNamespace) == false
             && string.IsNullOrEmpty(valueTypeName) == false
-            && string.IsNullOrEmpty(valueFullTypeName) == false
+            && string.IsNullOrEmpty(valueType) == false
             && string.IsNullOrEmpty(hintName) == false
             && string.IsNullOrEmpty(sourceFilePath) == false
             && string.IsNullOrEmpty(openingSource) == false
             && string.IsNullOrEmpty(closingSource) == false
             ;
+
+        public readonly bool HasCustomNs
+            => string.IsNullOrEmpty(valueTypeNs) == false;
 
         public readonly override bool Equals(object obj)
             => obj is StatDataDefinition other && Equals(other);
@@ -38,7 +42,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(typeNamespace, other.typeNamespace, StringComparison.Ordinal)
             && string.Equals(valueTypeName, other.valueTypeName, StringComparison.Ordinal)
-            && string.Equals(valueFullTypeName, other.valueFullTypeName, StringComparison.Ordinal)
+            && string.Equals(valueTypeNs, other.valueTypeNs, StringComparison.Ordinal)
+            && string.Equals(valueType, other.valueType, StringComparison.Ordinal)
             && string.Equals(underlyingTypeName, other.underlyingTypeName, StringComparison.Ordinal)
             && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
             && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
@@ -54,12 +59,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                   typeName
                 , typeNamespace
                 , valueTypeName
-                , valueFullTypeName
+                , valueTypeNs
+                , valueType
                 , underlyingTypeName
                 , hintName
                 , sourceFilePath
-                , openingSource
             )
+            .Add(openingSource)
             .Add(closingSource)
             .Add(size)
             .Add(singleValue)

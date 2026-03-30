@@ -114,12 +114,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     return default;
                 }
 
+                var namespaces = StatGeneratorAPI.Namespaces.AsSpan();
                 var typeNames = StatGeneratorAPI.TypeNames.AsSpan();
                 var sizes = StatGeneratorAPI.Sizes.AsSpan();
 
                 result.size = sizes[index];
+                result.valueTypeNs = namespaces[index];
+                result.valueType = types[index];
                 result.valueTypeName = typeNames[index];
-                result.valueFullTypeName = types[index];
             }
             else if (firstArg.Kind == TypedConstantKind.Type
                 && firstArg.Value is INamedTypeSymbol enumType)
@@ -138,7 +140,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 result.isEnum = true;
                 result.valueTypeName = valueTypeName;
-                result.valueFullTypeName = enumType.ToFullName();
+                result.valueType = enumType.ToFullName();
                 result.underlyingTypeName = underlyingType;
 
                 enumType.EnumUnderlyingType.GetUnmanagedSize(ref result.size);
@@ -164,18 +166,19 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
                 p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
                 p.PrintEndLine();
-                p.PrintLine("using System;");
-                p.PrintLine("using System.CodeDom.Compiler;");
-                p.PrintLine("using System.Diagnostics.CodeAnalysis;");
-                p.PrintLine("using System.Runtime.CompilerServices;");
-                p.PrintLine("using System.Runtime.InteropServices;");
-                p.PrintLine("using EncosyTower.Logging;");
-                p.PrintLine("using Unity.Mathematics;");
-                p.PrintLine($"using {StatGeneratorAPI.NAMESPACE};");
+                p.PrintLine("using S = global::System;");
+                p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+                p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+                p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+                p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+                p.PrintLine("using ETES = global::EncosyTower.Entities.Stats;");
+                p.PrintLine("using ETL = global::EncosyTower.Logging;");
+                p.PrintLine("using UM = global::Unity.Mathematics;");
+                p.PrintEndLine();
+                p.PrintLine("using UnityDebug = global::UnityEngine.Debug;");
                 p.PrintEndLine();
                 p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
                 p.PrintEndLine();
-                p.PrintLine("using UnityDebug = global::UnityEngine.Debug;");
             }
         }
 

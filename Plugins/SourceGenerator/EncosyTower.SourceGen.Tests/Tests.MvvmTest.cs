@@ -4,8 +4,6 @@ using EncosyTower.Mvvm.ComponentModel;
 using EncosyTower.Mvvm.Input;
 using EncosyTower.Mvvm.ViewBinding;
 using EncosyTower.Mvvm.ViewBinding.Components;
-using TMPro;
-using UnityEngine;
 
 namespace EncosyTower.Tests.MvvmTests
 {
@@ -105,7 +103,7 @@ namespace EncosyTower.Tests.MvvmTests
     [MonoBindingProperty(nameof(UnityEngine.GameObject.SetActive), UseCustomSetter = true)]
     public partial class GameObjectBinder
     {
-        private static partial void Set_Active(GameObject target, bool value)
+        private static partial void Set_Active(UnityEngine.GameObject target, bool value)
         {
             target.SetActive(value);
         }
@@ -118,11 +116,13 @@ namespace EncosyTower.Tests.MvvmTests
     [MonoBinder(typeof(UnityEngine.BoxCollider2D), ExcludeObsolete = true)]
     public partial class UnityBoxCollider2DBinder { }
 
+    public readonly record struct TMP_TextSelectionData(string Text, int StringPosition, int StringSelectPosition);
+
     [MonoBinder(typeof(TMPro.TMP_InputField))]
     [MonoBinderExcludeParent(typeof(UnityEngine.UI.Selectable))]
     [MonoBindingCommand(
           nameof(TMPro.TMP_InputField.onTextSelection)
-        , WrapperType = typeof(TMPro.TMP_TextSelectionData)
+        , WrapperType = typeof(TMP_TextSelectionData)
         , Label = "On Text Selection"
     )]
     public partial class TMP_InputFieldBinder

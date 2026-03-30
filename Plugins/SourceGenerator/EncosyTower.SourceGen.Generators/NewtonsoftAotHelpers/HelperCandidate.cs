@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.CodeAnalysis;
 
-namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
+namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 {
     /// <summary>
     /// Cache-friendly pipeline model for the NewtonsoftJsonAotHelper source generator.
@@ -21,6 +21,20 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
         /// cache invalidation.
         /// </summary>
         public LocationInfo location;
+
+        /// <summary>
+        /// Pre-generated namespace/outer-type opening source text.
+        /// Intentionally excluded from <see cref="Equals(NewtonsoftAotHelperInfo)"/>
+        /// and <see cref="GetHashCode"/>: derived from syntax, not a stable cache key.
+        /// </summary>
+        public string openingSource;
+
+        /// <summary>
+        /// Pre-generated closing braces that match <see cref="openingSource"/>.
+        /// Intentionally excluded from <see cref="Equals(NewtonsoftAotHelperInfo)"/>
+        /// and <see cref="GetHashCode"/>: derived from syntax, not a stable cache key.
+        /// </summary>
+        public string closingSource;
 
         /// <summary><c>symbol.Name</c> — the simple type name.</summary>
         public string typeName;

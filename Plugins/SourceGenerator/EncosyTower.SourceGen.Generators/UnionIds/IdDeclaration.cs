@@ -15,6 +15,20 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         /// <summary>Excluded from equality/hash — location is not stable across incremental runs.</summary>
         public LocationInfo location;
 
+        /// <summary>
+        /// Pre-computed namespace / containing-type scope opener, produced by
+        /// <c>TypeCreationHelpers.GenerateOpeningAndClosingSource</c> in the
+        /// incremental transform phase. Excluded from <see cref="Equals(IdDeclaration)"/>
+        /// and <see cref="GetHashCode"/> for the same reason as <see cref="location"/>.
+        /// </summary>
+        public string openingSource;
+
+        /// <summary>
+        /// Matching closing braces for <see cref="openingSource"/>. Excluded from
+        /// equality / hash for the same reason as <see cref="location"/>.
+        /// </summary>
+        public string closingSource;
+
         /// <summary>Fully-qualified name, e.g. <c>global::MyNS.MyUnionId</c>.</summary>
         public string fullName;
 

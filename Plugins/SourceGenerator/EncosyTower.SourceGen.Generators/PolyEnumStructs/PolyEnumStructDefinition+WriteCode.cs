@@ -7,15 +7,15 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 {
     partial struct PolyEnumStructDefinition
     {
-        private const string METHOD_IMPL_OPTIONS = "MethodImplOptions";
+        private const string METHOD_IMPL_OPTIONS = "SRCS.MethodImplOptions";
         private const string INLINING = $"{METHOD_IMPL_OPTIONS}.AggressiveInlining";
         private const string GENERATOR = "\"EncosyTower.SourceGen.Generators.PolyEnumStructs.PolyEnumStructGenerator\"";
 
-        private const string AGGRESSIVE_INLINING = "[MethodImpl(INLINING)]";
-        private const string GENERATED_CODE = $"[GeneratedCode(GENERATOR, \"{SourceGenVersion.VALUE}\")]";
-        private const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
-        private const string VALIDATION_ATTRIBUTES = "[HideInCallstack, StackTraceHidden, " +
-            "Conditional(\"UNITY_EDITOR\"), Conditional(\"DEVELOPMENT_BUILD\")]";
+        private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(INLINING)]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string GENERATED_CODE = $"[SCDC.GeneratedCode(GENERATOR, \"{SourceGenVersion.VALUE}\")]";
+        private const string VALIDATION_ATTRIBUTES = "[UE.HideInCallstack, SD.StackTraceHidden, " +
+            "SD.Conditional(\"UNITY_EDITOR\"), SD.Conditional(\"DEVELOPMENT_BUILD\")]";
         private const string UNDEFINED_NAME = "Undefined";
         private const string ENUM_CASE_NAME = "EnumCase";
 
@@ -86,7 +86,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                 if (autoEquatable)
                 {
-                    p.Print(", IEquatable<").Print(typeName).Print(">");
+                    p.Print(", S.IEquatable<").Print(typeName).Print(">");
                 }
 
                 p.PrintEndLine(" // Enum Struct");
@@ -292,7 +292,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             if (autoEquatable)
             {
-                p.Print(", IEquatable<").Print(structName).Print(">");
+                p.Print(", S.IEquatable<").Print(structName).Print(">");
             }
 
             p.PrintEndLine();
@@ -389,7 +389,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                         if (isRefReturn)
                         {
-                            p.PrintBeginLine("throw new InvalidOperationException(\"")
+                            p.PrintBeginLine("throw new S.InvalidOperationException(\"")
                                 .Print("Cannot return by reference from case 'Undefined'.")
                                 .PrintEndLine("\");");
                         }
@@ -433,7 +433,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                         if (isRefReturn)
                         {
-                            p.PrintBeginLine("throw new InvalidOperationException(\"")
+                            p.PrintBeginLine("throw new S.InvalidOperationException(\"")
                                 .Print("Cannot return any reference from the default case.")
                                 .PrintEndLine("\");");
                         }
@@ -484,7 +484,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     }
                     else if (isRefReturn)
                     {
-                        p.PrintBeginLine("throw new InvalidOperationException(\"")
+                        p.PrintBeginLine("throw new S.InvalidOperationException(\"")
                             .Print("Cannot return any reference from the default case.")
                             .PrintEndLine("\");");
                     }
@@ -1242,7 +1242,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             p.PrintLine("public readonly override int GetHashCode()");
             p.OpenScope();
             {
-                p.PrintLine("var hash = new HashValue();");
+                p.PrintLine("var hash = new ET.HashValue();");
 
                 var fieldRefs = mergedStructRef.FieldRefs;
                 var count = fieldRefs.Count;
@@ -1281,7 +1281,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.PrintLine("if (CanCastFromEnumStruct(enumStruct, caseStruct) == false)");
                 p.OpenScope();
                 {
-                    p.PrintLine("throw new InvalidCastException(");
+                    p.PrintLine("throw new S.InvalidCastException(");
                     p.WithIncreasedIndent().PrintBeginLine("$\"")
                         .Print("Cannot cast '").Print(typeName).Print("' into '{caseStruct}' ")
                         .Print("because it currently stores a '{enumStruct}'.")
@@ -1572,7 +1572,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                         p.PrintLine("public readonly override int GetHashCode()");
                         p.OpenScope();
                         {
-                            p.PrintLine("var hash = new HashValue();");
+                            p.PrintLine("var hash = new ET.HashValue();");
 
                             var fieldDefs = def.fields.AsReadOnlySpan();
                             var fieldDefLength = fieldDefs.Length;

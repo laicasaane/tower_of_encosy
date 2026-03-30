@@ -356,17 +356,25 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             static void PrintUsingUniTask(ref Printer p)
             {
                 p.PrintEndLine();
+                p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+                p.PrintEndLine();
                 p.PrintLine("using UnityTask = global::Cysharp.Threading.Tasks.UniTask;");
                 p.PrintLine("using UnityTaskᐸboolᐳ = global::Cysharp.Threading.Tasks.UniTask<bool>;");
                 PrintAdditionalUsings(ref p);
+                p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+                p.PrintEndLine();
             }
 
             static void PrintUsingAwaitable(ref Printer p)
             {
                 p.PrintEndLine();
+                p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+                p.PrintEndLine();
                 p.PrintLine("using UnityTask = global::UnityEngine.Awaitable;");
                 p.PrintLine("using UnityTaskᐸboolᐳ = global::UnityEngine.Awaitable<bool>;");
                 PrintAdditionalUsings(ref p);
+                p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+                p.PrintEndLine();
             }
 
             static void PrintAdditionalUsings(ref Printer p)
@@ -416,6 +424,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("using IUserDataCollection = global::EncosyTower.UserDataVaults.IUserDataCollection;");
                 p.PrintLine("using IUserDataDirectory = global::EncosyTower.UserDataVaults.IUserDataDirectory;");
                 p.PrintLine("using IUserDataIdCollection = global::EncosyTower.UserDataVaults.IUserDataIdCollection;");
+                p.PrintEndLine();
             }
         }
 

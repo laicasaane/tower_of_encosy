@@ -2,21 +2,21 @@
 {
     partial class UnionIdDeclaration
     {
-        private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.UnionIds.UnionIdGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
-        private const string STRUCT_LAYOUT_SIZE = "[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = {0})]";
-        private const string STRUCT_LAYOUT = "[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit)]";
-        private const string FIELD_OFFSET = "[global::System.Runtime.InteropServices.FieldOffset({0})]";
+        private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.UnionIds.UnionIdGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string STRUCT_LAYOUT_SIZE = "[SRIS.StructLayout(SRIS.LayoutKind.Explicit, Size = {0})]";
+        private const string STRUCT_LAYOUT = "[SRIS.StructLayout(SRIS.LayoutKind.Explicit)]";
+        private const string FIELD_OFFSET = "[SRIS.FieldOffset({0})]";
         private const string ODIN_PROPERTY_ORDER = "[global::Sirenix.OdinInspector.PropertyOrder({0})]";
         private const string ODIN_SHOW_IN_INSPECTOR = "[global::Sirenix.OdinInspector.ShowInInspector]";
         private const string ODIN_SHOW_IF = "[global::Sirenix.OdinInspector.ShowIf(nameof(Kind), IdKind.{0})]";
         private const string ODIN_LABEL = "[global::Sirenix.OdinInspector.LabelText(\"{0}\")]";
-        private const string INSPECTOR_NAME = "[global::UnityEngine.InspectorName(\"{0}\")]";
-        private const string DESCRIPTION = "[global::System.ComponentModel.Description(\"{0}\")]";
-        private const string SERIALIZABLE = "[global::System.Serializable]";
-        private const string NON_SERIALIZED = "[field: global::System.NonSerialized]";
-        private const string SERIALIZE_FIELD = "[global::UnityEngine.SerializeField]";
+        private const string INSPECTOR_NAME = "[UE.InspectorName(\"{0}\")]";
+        private const string DESCRIPTION = "[SCM.Description(\"{0}\")]";
+        private const string SERIALIZABLE = "[S.Serializable]";
+        private const string NON_SERIALIZED = "[field: S.NonSerialized]";
+        private const string SERIALIZE_FIELD = "[UE.SerializeField]";
 
         private readonly static string[] s_operators = new[] { "==", "!=", "<", "<=", ">", ">=" };
         private readonly static string[] s_comparerOps = new[] { "<", "<=", ">", ">=" };
@@ -27,20 +27,6 @@
             var typeName = SimpleName;
 
             var p = Printer.DefaultLarge;
-            var hasNamespace = string.IsNullOrEmpty(NamespaceName) == false;
-            var numContainingTypes = ContainingTypes.Count;
-
-            if (hasNamespace)
-            {
-                p.PrintLine($"namespace {NamespaceName}");
-                p.OpenScope();
-            }
-
-            for (int i = 0; i < numContainingTypes; i++)
-            {
-                p.PrintLine(ContainingTypes[i]);
-                p.OpenScope();
-            }
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
@@ -48,24 +34,24 @@
 
             p.PrintLine(string.Format(STRUCT_LAYOUT_SIZE, TypeSize));
             p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine("[global::System.ComponentModel.TypeConverter(typeof(TypeConverter))]");
+            p.PrintLine("[SCM.TypeConverter(typeof(TypeConverter))]");
             p.PrintBeginLine("partial struct ").Print(typeName).Print(" : ")
-                .Print("global::EncosyTower.UnionIds.IUnionId<")
+                .Print("ETUI.IUnionId<")
                 .Print(RawTypeName).Print(", ").Print(typeName)
                 .PrintEndLine(">");
             p = p.IncreasedIndent();
             {
                 if (References.unityCollections && string.IsNullOrEmpty(FixedStringType) == false)
                 {
-                    p.PrintBeginLine(", global::EncosyTower.Conversion.IToFixedString<").Print(FixedStringType).PrintEndLine(">");
-                    p.PrintBeginLine(", global::EncosyTower.Conversion.IToDisplayFixedString<").Print(FixedStringType).PrintEndLine(">");
+                    p.PrintBeginLine(", ETCon.IToFixedString<").Print(FixedStringType).PrintEndLine(">");
+                    p.PrintBeginLine(", ETCon.IToDisplayFixedString<").Print(FixedStringType).PrintEndLine(">");
                 }
 
                 foreach (var kind in KindRefs)
                 {
                     if (kind.equality.Strategy != EqualityStrategy.Default)
                     {
-                        p.PrintBeginLine(", global::System.IEquatable<").Print(kind.fullName).PrintEndLine(">");
+                        p.PrintBeginLine(", S.IEquatable<").Print(kind.fullName).PrintEndLine(">");
                     }
                 }
             }
@@ -120,12 +106,6 @@
             KindExtensionsRef.WriteCode(ref p);
 
             WriteEnumeration(ref p);
-
-            for (int i = 0; i < numContainingTypes; i++)
-                p.CloseScope();
-
-            if (hasNamespace)
-                p.CloseScope();
 
             return p.Result;
         }
@@ -264,7 +244,7 @@
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public ").Print(typeName)
                 .Print("(IdKind kind, string id, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)")
-                .PrintEndLine(" : this(kind, global::System.MemoryExtensions.AsSpan(id), ignoreCase, allowMatchingMetadataAttribute)");
+                .PrintEndLine(" : this(kind, S.MemoryExtensions.AsSpan(id), ignoreCase, allowMatchingMetadataAttribute)");
             p.OpenScope();
             {
             }
@@ -277,7 +257,7 @@
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public ").Print(typeName)
                 .Print("(string kind, string id, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)")
-                .PrintEndLine(" : this(global::System.MemoryExtensions.AsSpan(kind), global::System.MemoryExtensions.AsSpan(id), ignoreCase, allowMatchingMetadataAttribute)");
+                .PrintEndLine(" : this(S.MemoryExtensions.AsSpan(kind), S.MemoryExtensions.AsSpan(id), ignoreCase, allowMatchingMetadataAttribute)");
             p.OpenScope();
             {
             }
@@ -290,7 +270,7 @@
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public ").Print(typeName)
                 .Print("(string kind, long id, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)")
-                .PrintEndLine(" : this(global::System.MemoryExtensions.AsSpan(kind), id, ignoreCase, allowMatchingMetadataAttribute)");
+                .PrintEndLine(" : this(S.MemoryExtensions.AsSpan(kind), id, ignoreCase, allowMatchingMetadataAttribute)");
             p.OpenScope();
             {
             }
@@ -305,7 +285,7 @@
                 .Print(IdRawUnsignedTypeName).Print(" id")
                 .Print(", bool ignoreCase = true")
                 .Print(", bool allowMatchingMetadataAttribute = true)")
-                .PrintEndLine(" : this(global::System.MemoryExtensions.AsSpan(kind), id, ignoreCase, allowMatchingMetadataAttribute)");
+                .PrintEndLine(" : this(S.MemoryExtensions.AsSpan(kind), id, ignoreCase, allowMatchingMetadataAttribute)");
             p.OpenScope();
             {
             }
@@ -320,7 +300,7 @@
                 .Print(IdRawSignedTypeName).Print(" id")
                 .Print(", bool ignoreCase = true")
                 .Print(", bool allowMatchingMetadataAttribute = true)")
-                .PrintEndLine(" : this(global::System.MemoryExtensions.AsSpan(kind), id, ignoreCase, allowMatchingMetadataAttribute)");
+                .PrintEndLine(" : this(S.MemoryExtensions.AsSpan(kind), id, ignoreCase, allowMatchingMetadataAttribute)");
             p.OpenScope();
             {
             }
@@ -331,7 +311,7 @@
         private void WriteConstructor_IdKind_IdSpan(ref Printer p, string typeName, bool isSerializableStruct)
         {
             p.PrintBeginLine("public ").Print(typeName).Print("(IdKind kind")
-                .Print(", global::System.ReadOnlySpan<char> id")
+                .Print(", S.ReadOnlySpan<char> id")
                 .Print(", bool ignoreCase = true")
                 .Print(", bool allowMatchingMetadataAttribute = true")
                 .PrintEndLine(") : this()");
@@ -435,8 +415,8 @@
 
         private void WriteConstructor_IdKindSpan_IdSpan(ref Printer p, string typeName, bool isSerializableStruct)
         {
-            p.PrintBeginLine("public ").Print(typeName).Print("(global::System.ReadOnlySpan<char> kind")
-                .Print(", global::System.ReadOnlySpan<char> id")
+            p.PrintBeginLine("public ").Print(typeName).Print("(S.ReadOnlySpan<char> kind")
+                .Print(", S.ReadOnlySpan<char> id")
                 .Print(", bool ignoreCase = true")
                 .Print(", bool allowMatchingMetadataAttribute = true")
                 .PrintEndLine(") : this()");
@@ -558,7 +538,7 @@
 
         private void WriteConstructor_IdKindSpan_IdLong(ref Printer p, string typeName)
         {
-            p.PrintBeginLine("public ").Print(typeName).Print("(global::System.ReadOnlySpan<char> kind")
+            p.PrintBeginLine("public ").Print(typeName).Print("(S.ReadOnlySpan<char> kind")
                 .Print(", long id")
                 .Print(", bool ignoreCase = true")
                 .Print(", bool allowMatchingMetadataAttribute = true")
@@ -599,7 +579,7 @@
 
         private void WriteConstructor_IdKindSpan_IdUnsigned(ref Printer p, string typeName)
         {
-            p.PrintBeginLine("public ").Print(typeName).Print("(global::System.ReadOnlySpan<char> kind, ")
+            p.PrintBeginLine("public ").Print(typeName).Print("(S.ReadOnlySpan<char> kind, ")
                 .Print(IdRawUnsignedTypeName).Print(" id")
                 .Print(", bool ignoreCase = true")
                 .Print(", bool allowMatchingMetadataAttribute = true")
@@ -640,7 +620,7 @@
 
         private void WriteConstructor_IdKindSpan_IdSigned(ref Printer p, string typeName)
         {
-            p.PrintBeginLine("public ").Print(typeName).Print("(global::System.ReadOnlySpan<char> kind, ")
+            p.PrintBeginLine("public ").Print(typeName).Print("(S.ReadOnlySpan<char> kind, ")
                 .Print(IdRawSignedTypeName).Print(" id")
                 .Print(", bool ignoreCase = true")
                 .Print(", bool allowMatchingMetadataAttribute = true")
@@ -697,7 +677,7 @@
 
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("private static partial bool TryParse_").Print(kind.name)
-                    .Print("(global::System.ReadOnlySpan<char> str, out ").Print(kind.fullName)
+                    .Print("(S.ReadOnlySpan<char> str, out ").Print(kind.fullName)
                     .PrintEndLine(" value, bool ignoreCase, bool allowMatchingMetadataAttribute);");
                 p.PrintEndLine();
             }
@@ -711,7 +691,7 @@
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
             p.OpenScope();
             {
-                p.PrintLine("return TryParse(global::System.MemoryExtensions.AsSpan(str), out result, ignoreCase, allowMatchingMetadataAttribute);");
+                p.PrintLine("return TryParse(S.MemoryExtensions.AsSpan(str), out result, ignoreCase, allowMatchingMetadataAttribute);");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -719,7 +699,7 @@
 
         private void WriteTryParse_Span(ref Printer p, string typeName)
         {
-            p.PrintBeginLine("public bool TryParse(global::System.ReadOnlySpan<char> str, out ")
+            p.PrintBeginLine("public bool TryParse(S.ReadOnlySpan<char> str, out ")
                 .Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
             p.OpenScope();
@@ -733,11 +713,11 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("var ranges = global::EncosyTower.SystemExtensions.SpanAPI.Split(str, SEPARATOR, 2);");
+                p.PrintLine("var ranges = ETSE.SpanAPI.Split(str, SEPARATOR, 2);");
                 p.PrintEndLine();
 
-                p.PrintLine("global::System.Range? kindRange = default;");
-                p.PrintLine("global::System.Range? idRange = default;");
+                p.PrintLine("S.Range? kindRange = default;");
+                p.PrintLine("S.Range? idRange = default;");
                 p.PrintEndLine();
 
                 p.PrintLine("foreach (var range in ranges)");
@@ -798,7 +778,7 @@
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
             p.OpenScope();
             {
-                p.PrintLine("return TryParse(kind, global::System.MemoryExtensions.AsSpan(id), out result, ignoreCase, allowMatchingMetadataAttribute);");
+                p.PrintLine("return TryParse(kind, S.MemoryExtensions.AsSpan(id), out result, ignoreCase, allowMatchingMetadataAttribute);");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -812,7 +792,7 @@
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
             p.OpenScope();
             {
-                p.PrintLine("return TryParse(global::System.MemoryExtensions.AsSpan(kind), global::System.MemoryExtensions.AsSpan(id), out result, ignoreCase, allowMatchingMetadataAttribute);");
+                p.PrintLine("return TryParse(S.MemoryExtensions.AsSpan(kind), S.MemoryExtensions.AsSpan(id), out result, ignoreCase, allowMatchingMetadataAttribute);");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -826,7 +806,7 @@
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
             p.OpenScope();
             {
-                p.PrintLine("return TryParse(global::System.MemoryExtensions.AsSpan(kind), id, out result, ignoreCase, allowMatchingMetadataAttribute);");
+                p.PrintLine("return TryParse(S.MemoryExtensions.AsSpan(kind), id, out result, ignoreCase, allowMatchingMetadataAttribute);");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -840,7 +820,7 @@
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
             p.OpenScope();
             {
-                p.PrintLine("return TryParse(global::System.MemoryExtensions.AsSpan(kind), id, out result, ignoreCase, allowMatchingMetadataAttribute);");
+                p.PrintLine("return TryParse(S.MemoryExtensions.AsSpan(kind), id, out result, ignoreCase, allowMatchingMetadataAttribute);");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -848,7 +828,7 @@
 
         private void WriteTryParse_IdKind_IdSpan(ref Printer p, string typeName)
         {
-            p.PrintBeginLine("public bool TryParse(IdKind kind, global::System.ReadOnlySpan<char> id, out ")
+            p.PrintBeginLine("public bool TryParse(IdKind kind, S.ReadOnlySpan<char> id, out ")
                 .Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
             p.OpenScope();
@@ -953,7 +933,7 @@
 
         private void WriteTryParse_IdKindSpan_IdSpan(ref Printer p, string typeName)
         {
-            p.PrintBeginLine("public bool TryParse(global::System.ReadOnlySpan<char> kind, global::System.ReadOnlySpan<char> id, out ")
+            p.PrintBeginLine("public bool TryParse(S.ReadOnlySpan<char> kind, S.ReadOnlySpan<char> id, out ")
                 .Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
             p.OpenScope();
@@ -1077,7 +1057,7 @@
 
         private void WriteTryParse_IdKindSpan_IdUnsigned(ref Printer p, string typeName)
         {
-            p.PrintBeginLine("public bool TryParse(global::System.ReadOnlySpan<char> kind, ")
+            p.PrintBeginLine("public bool TryParse(S.ReadOnlySpan<char> kind, ")
                 .Print(IdRawUnsignedTypeName).Print(" id, out ").Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
             p.OpenScope();
@@ -1118,7 +1098,7 @@
 
         private void WriteTryParse_IdKindSpan_IdSigned(ref Printer p, string typeName)
         {
-            p.PrintBeginLine("public bool TryParse(global::System.ReadOnlySpan<char> kind, ")
+            p.PrintBeginLine("public bool TryParse(S.ReadOnlySpan<char> kind, ")
                 .Print(IdRawSignedTypeName).Print(" id, out ").Print(typeName)
                 .PrintEndLine(" result, bool ignoreCase = true, bool allowMatchingMetadataAttribute = true)");
             p.OpenScope();
@@ -1297,13 +1277,13 @@
                         p.PrintBeginLine("return (Kind == IdKind.").Print(kindName).Print(")")
                             .Print(" && (Id_").Print(kindName).Print(".HasValue == other.HasValue)")
                             .Print(" && other.HasValue ")
-                            .Print(" && global::System.Collections.Generic.EqualityComparer<").Print(kindFullNameFromNullable)
+                            .Print(" && SCG.EqualityComparer<").Print(kindFullNameFromNullable)
                             .Print(">.Default.Equals(Id_").Print(kindName).PrintEndLine(".Value, other.Value);");
                     }
                     else
                     {
                         p.PrintBeginLine("return Kind == IdKind.").Print(kindName)
-                            .Print(" && global::System.Collections.Generic.EqualityComparer<").Print(kindFullName)
+                            .Print(" && SCG.EqualityComparer<").Print(kindFullName)
                             .Print(">.Default.Equals(Id_").Print(kindName).PrintEndLine(", other);");
                     }
                 }
@@ -1520,14 +1500,14 @@
                 {
                     p.PrintLineIf(
                           isSerializableStruct
-                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
-                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                        , "UC.FixedStringMethods.Append(ref fs, Id);"
+                        , "UC.FixedStringMethods.Append(ref fs, IdUnsigned);"
                     );
                 }
                 else
                 {
-                    p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Kind.ToFixedString(false));");
-                    p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, '")
+                    p.PrintLine("UC.FixedStringMethods.Append(ref fs, Kind.ToFixedString(false));");
+                    p.PrintBeginLine("UC.FixedStringMethods.Append(ref fs, '")
                         .Print(Separator).PrintEndLine("');");
                     p.PrintEndLine();
 
@@ -1543,14 +1523,14 @@
                             {
                                 if (kind.isEnum)
                                 {
-                                    p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, ")
+                                    p.PrintBeginLine("UC.FixedStringMethods.Append(ref fs, ")
                                         .Print(kind.enumExtensionsName).Print(".ToFixedString(Id_")
                                         .Print(kindName)
                                         .PrintEndLine(", false));");
                                 }
                                 else if (kind.toStringMethods.HasFlag(ToStringMethods.ToFixedString))
                                 {
-                                    p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id_")
+                                    p.PrintBeginLine("UC.FixedStringMethods.Append(ref fs, Id_")
                                         .Print(kindName).PrintEndLine(".ToFixedString());");
                                 }
                                 else
@@ -1570,8 +1550,8 @@
                         {
                             p.PrintLineIf(
                                   isSerializableStruct
-                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
-                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                                , "UC.FixedStringMethods.Append(ref fs, Id);"
+                                , "UC.FixedStringMethods.Append(ref fs, IdUnsigned);"
                             );
 
                             p.PrintLine("break;");
@@ -1604,14 +1584,14 @@
                 {
                     p.PrintLineIf(
                           isSerializableStruct
-                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
-                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                        , "UC.FixedStringMethods.Append(ref fs, Id);"
+                        , "UC.FixedStringMethods.Append(ref fs, IdUnsigned);"
                     );
                 }
                 else
                 {
-                    p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Kind.ToDisplayFixedString(false));");
-                    p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, '")
+                    p.PrintLine("UC.FixedStringMethods.Append(ref fs, Kind.ToDisplayFixedString(false));");
+                    p.PrintBeginLine("UC.FixedStringMethods.Append(ref fs, '")
                         .Print(Separator).PrintEndLine("');");
                     p.PrintEndLine();
 
@@ -1627,14 +1607,14 @@
                             {
                                 if (kind.isEnum)
                                 {
-                                    p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, ")
+                                    p.PrintBeginLine("UC.FixedStringMethods.Append(ref fs, ")
                                         .Print(kind.enumExtensionsName).Print(".ToDisplayFixedString(Id_")
                                         .Print(kindName)
                                         .PrintEndLine(", false));");
                                 }
                                 else if (kind.toStringMethods.HasFlag(ToStringMethods.ToDisplayFixedString))
                                 {
-                                    p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id_")
+                                    p.PrintBeginLine("UC.FixedStringMethods.Append(ref fs, Id_")
                                         .Print(kindName).PrintEndLine(".ToDisplayFixedString());");
                                 }
                                 else
@@ -1654,8 +1634,8 @@
                         {
                             p.PrintLineIf(
                                   isSerializableStruct
-                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
-                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                                , "UC.FixedStringMethods.Append(ref fs, Id);"
+                                , "UC.FixedStringMethods.Append(ref fs, IdUnsigned);"
                             );
 
                             p.PrintLine("break;");
@@ -1778,8 +1758,8 @@
                 {
                     p.PrintLineIf(
                           isSerializableStruct
-                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
-                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                        , "UC.FixedStringMethods.Append(ref fs, Id);"
+                        , "UC.FixedStringMethods.Append(ref fs, IdUnsigned);"
                     );
                 }
                 else
@@ -1798,14 +1778,14 @@
                             {
                                 if (kind.isEnum)
                                 {
-                                    p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, ")
+                                    p.PrintBeginLine("UC.FixedStringMethods.Append(ref fs, ")
                                         .Print(kind.enumExtensionsName).Print(".ToFixedString(Id_")
                                         .Print(kindName)
                                         .PrintEndLine(", false));");
                                 }
                                 else if (kind.toStringMethods.HasFlag(ToStringMethods.ToFixedString))
                                 {
-                                    p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id_")
+                                    p.PrintBeginLine("UC.FixedStringMethods.Append(ref fs, Id_")
                                         .Print(kindName).PrintEndLine(".ToFixedString());");
                                 }
                                 else
@@ -1825,8 +1805,8 @@
                         {
                             p.PrintLineIf(
                                   isSerializableStruct
-                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
-                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                                , "UC.FixedStringMethods.Append(ref fs, Id);"
+                                , "UC.FixedStringMethods.Append(ref fs, IdUnsigned);"
                             );
 
                             p.PrintLine("break;");
@@ -1859,8 +1839,8 @@
                 {
                     p.PrintLineIf(
                           isSerializableStruct
-                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
-                        , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                        , "UC.FixedStringMethods.Append(ref fs, Id);"
+                        , "UC.FixedStringMethods.Append(ref fs, IdUnsigned);"
                     );
                 }
                 else
@@ -1879,14 +1859,14 @@
                             {
                                 if (kind.isEnum)
                                 {
-                                    p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, ")
+                                    p.PrintBeginLine("UC.FixedStringMethods.Append(ref fs, ")
                                         .Print(kind.enumExtensionsName).Print(".ToDisplayFixedString(Id_")
                                         .Print(kindName)
                                         .PrintEndLine(", false));");
                                 }
                                 else if (kind.toStringMethods.HasFlag(ToStringMethods.ToDisplayFixedString))
                                 {
-                                    p.PrintBeginLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, Id_")
+                                    p.PrintBeginLine("UC.FixedStringMethods.Append(ref fs, Id_")
                                         .Print(kindName).PrintEndLine(".ToDisplayFixedString());");
                                 }
                                 else
@@ -1906,8 +1886,8 @@
                         {
                             p.PrintLineIf(
                                   isSerializableStruct
-                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, Id);"
-                                , "global::Unity.Collections.FixedStringMethods.Append(ref fs, IdUnsigned);"
+                                , "UC.FixedStringMethods.Append(ref fs, Id);"
+                                , "UC.FixedStringMethods.Append(ref fs, IdUnsigned);"
                             );
 
                             p.PrintLine("break;");
@@ -1928,7 +1908,7 @@
         {
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetNames(")
-                .PrintEndLine("IdKind kind, global::System.Collections.Generic.ICollection<string> result)");
+                .PrintEndLine("IdKind kind, SCG.ICollection<string> result)");
             p.OpenScope();
             {
                 p.PrintLine("switch (kind)");
@@ -1943,7 +1923,7 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintBeginLine("global::EncosyTower.Collections.Extensions.")
+                            p.PrintBeginLine("ETColE.")
                                 .Print("EncosyICollectionExtensions.AddRange(result, ")
                                 .Print(kind.enumExtensionsName)
                                 .PrintEndLine(".Names.AsSpan());");
@@ -1977,7 +1957,7 @@
         {
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetDisplayNames(")
-                .PrintEndLine("IdKind kind, global::System.Collections.Generic.ICollection<string> result)");
+                .PrintEndLine("IdKind kind, SCG.ICollection<string> result)");
             p.OpenScope();
             {
                 p.PrintLine("switch (kind)");
@@ -1992,8 +1972,7 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintBeginLine("global::EncosyTower.Collections.Extensions.")
-                                .Print("EncosyICollectionExtensions.AddRange(result, ")
+                            p.PrintBeginLine("ETColE.EncosyICollectionExtensions.AddRange(result, ")
                                 .Print(kind.enumExtensionsName)
                                 .PrintEndLine(".DisplayNames.AsSpan());");
 
@@ -2011,7 +1990,7 @@
                     p.PrintLine("default:");
                     p.OpenScope();
                     {
-                        p.PrintLine("result = global::System.Array.Empty<string>();");
+                        p.PrintLine("result = S.Array.Empty<string>();");
                         p.PrintLine("return false;");
                     }
                     p.CloseScope();
@@ -2027,7 +2006,7 @@
         {
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetNames(")
-                .PrintEndLine("IdKind kind, out global::System.ReadOnlyMemory<string> result)");
+                .PrintEndLine("IdKind kind, out S.ReadOnlyMemory<string> result)");
             p.OpenScope();
             {
                 p.PrintLine("switch (kind)");
@@ -2058,7 +2037,7 @@
                     p.PrintLine("default:");
                     p.OpenScope();
                     {
-                        p.PrintLine("result = global::System.Array.Empty<string>();");
+                        p.PrintLine("result = S.Array.Empty<string>();");
                         p.PrintLine("return false;");
                     }
                     p.CloseScope();
@@ -2074,7 +2053,7 @@
         {
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetDisplayNames(")
-                .PrintEndLine("IdKind kind, out global::System.ReadOnlyMemory<string> result)");
+                .PrintEndLine("IdKind kind, out S.ReadOnlyMemory<string> result)");
             p.OpenScope();
             {
                 p.PrintLine("switch (kind)");
@@ -2105,7 +2084,7 @@
                     p.PrintLine("default:");
                     p.OpenScope();
                     {
-                        p.PrintLine("result = global::System.Array.Empty<string>();");
+                        p.PrintLine("result = S.Array.Empty<string>();");
                         p.PrintLine("return false;");
                     }
                     p.CloseScope();
@@ -2126,8 +2105,8 @@
 
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetFixedNames(")
-                .Print("IdKind kind, global::Unity.Collections.AllocatorManager.AllocatorHandle allocator, ")
-                .Print("out global::Unity.Collections.NativeArray<").Print(FixedStringType)
+                .Print("IdKind kind, UC.AllocatorManager.AllocatorHandle allocator, ")
+                .Print("out UC.NativeArray<").Print(FixedStringType)
                 .PrintEndLine("> result)");
             p.OpenScope();
             {
@@ -2159,9 +2138,9 @@
                     p.PrintLine("default:");
                     p.OpenScope();
                     {
-                        p.PrintBeginLine("result = global::Unity.Collections.CollectionHelper.CreateNativeArray<")
+                        p.PrintBeginLine("result = UC.CollectionHelper.CreateNativeArray<")
                             .Print(FixedStringType)
-                            .PrintEndLine(">(0, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+                            .PrintEndLine(">(0, allocator, UC.NativeArrayOptions.UninitializedMemory);");
                         p.PrintLine("return false;");
                     }
                     p.CloseScope();
@@ -2182,8 +2161,8 @@
 
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static bool TryGetFixedDisplayNames(")
-                .Print("IdKind kind, global::Unity.Collections.AllocatorManager.AllocatorHandle allocator, ")
-                .Print("out global::Unity.Collections.NativeArray<").Print(FixedStringType)
+                .Print("IdKind kind, UC.AllocatorManager.AllocatorHandle allocator, ")
+                .Print("out UC.NativeArray<").Print(FixedStringType)
                 .PrintEndLine("> result)");
             p.OpenScope();
             {
@@ -2215,9 +2194,9 @@
                     p.PrintLine("default:");
                     p.OpenScope();
                     {
-                        p.PrintBeginLine("result = global::Unity.Collections.CollectionHelper.CreateNativeArray<")
+                        p.PrintBeginLine("result = UC.CollectionHelper.CreateNativeArray<")
                             .Print(FixedStringType)
-                            .PrintEndLine(">(0, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+                            .PrintEndLine(">(0, allocator, UC.NativeArrayOptions.UninitializedMemory);");
                         p.PrintLine("return false;");
                     }
                     p.CloseScope();
@@ -2297,7 +2276,7 @@
         private void WriteTypeConverter(ref Printer p, string typeName)
         {
             p.PrintBeginLine("public sealed class TypeConverter : ")
-                .Print("global::EncosyTower.Serialization.ParsableStructConverter<")
+                .Print("ETS.ParsableStructConverter<")
                 .Print(typeName).PrintEndLine(">");
             p.OpenScope();
             {
@@ -2319,14 +2298,14 @@
         {
             p.PrintLine(SERIALIZABLE).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public partial struct Serializable ")
-                .Print(": global::EncosyTower.UnionIds.ISerializableUnionId<")
+                .Print(": ETUI.ISerializableUnionId<")
                 .Print(RawTypeName).Print(", ").Print(typeName).Print(", Serializable")
                 .PrintEndLine(">");
 
             if (References.unityCollections && string.IsNullOrEmpty(FixedStringType) == false)
             {
-                p.PrintBeginLine(", global::EncosyTower.Conversion.IToFixedString<").Print(FixedStringType).PrintEndLine(">");
-                p.PrintBeginLine(", global::EncosyTower.Conversion.IToDisplayFixedString<").Print(FixedStringType).PrintEndLine(">");
+                p.PrintBeginLine(", ETCon.IToFixedString<").Print(FixedStringType).PrintEndLine(">");
+                p.PrintBeginLine(", ETCon.IToDisplayFixedString<").Print(FixedStringType).PrintEndLine(">");
             }
 
             p.OpenScope();
@@ -2656,13 +2635,13 @@
             var idEnums = IdEnumExtensionsRefs;
             var idEnumsCount = idEnums.Count;
 
-            p.PrintBeginLine("public static void CopyTo(global::System.Span<")
+            p.PrintBeginLine("public static void CopyTo(S.Span<")
                 .Print(typeName)
                 .PrintEndLine("> dest)");
             p.OpenScope();
             {
                 p.PrintBeginLine("if (dest.Length < Length) ")
-                    .PrintEndLine("throw new global::System.ArgumentOutOfRangeException(nameof(dest));");
+                    .PrintEndLine("throw new S.ArgumentOutOfRangeException(nameof(dest));");
                 p.PrintEndLine();
 
                 var index = 0;
@@ -2700,7 +2679,7 @@
             var idEnums = IdEnumExtensionsRefs;
             var idEnumsCount = idEnums.Count;
 
-            p.PrintBeginLine("public static bool TryCopyTo(global::System.Span<")
+            p.PrintBeginLine("public static bool TryCopyTo(S.Span<")
                 .Print(typeName)
                 .PrintEndLine("> dest)");
             p.OpenScope();
@@ -2746,11 +2725,11 @@
             var idEnums = IdEnumExtensionsRefs;
             var idEnumsCount = idEnums.Count;
 
-            p.PrintBeginLine("public static void AddTo<TCollection>([global::System.Diagnostics.CodeAnalysis.NotNull] ")
+            p.PrintBeginLine("public static void AddTo<TCollection>([SDCA.NotNull] ")
                 .PrintEndLine("TCollection dest)");
             p = p.IncreasedIndent();
             {
-                p.PrintBeginLine("where TCollection : global::System.Collections.Generic.ICollection<")
+                p.PrintBeginLine("where TCollection : SCG.ICollection<")
                     .Print(typeName).PrintEndLine(">");
             }
             p = p.DecreasedIndent();

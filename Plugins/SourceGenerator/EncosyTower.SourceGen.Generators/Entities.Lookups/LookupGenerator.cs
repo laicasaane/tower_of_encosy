@@ -29,20 +29,20 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         private const string I_ENABLEABLE_COMPONENT = "global::Unity.Entities.IEnableableComponent";
 
         // Lookup RO/RW interfaces (short names — EncosyTower.Entities.Lookups is imported via PrintAdditionalUsings)
-        private const string I_BUFFER_LOOKUP_RO                       = "IBufferLookupRO";
-        private const string I_BUFFER_LOOKUP_RW                       = "IBufferLookupRW";
-        private const string I_COMPONENT_LOOKUP_RO                    = "IComponentLookupRO";
-        private const string I_COMPONENT_LOOKUP_RW                    = "IComponentLookupRW";
-        private const string I_ENABLEABLE_BUFFER_LOOKUP_RO            = "IEnableableBufferLookupRO";
-        private const string I_ENABLEABLE_BUFFER_LOOKUP_RW            = "IEnableableBufferLookupRW";
-        private const string I_ENABLEABLE_COMPONENT_LOOKUP_RO         = "IEnableableComponentLookupRO";
-        private const string I_ENABLEABLE_COMPONENT_LOOKUP_RW         = "IEnableableComponentLookupRW";
-        private const string I_PHYSICS_BUFFER_LOOKUP_RO               = "IPhysicsBufferLookupRO";
-        private const string I_PHYSICS_BUFFER_LOOKUP_RW               = "IPhysicsBufferLookupRW";
-        private const string I_PHYSICS_COMPONENT_LOOKUP_RO            = "IPhysicsComponentLookupRO";
-        private const string I_PHYSICS_COMPONENT_LOOKUP_RW            = "IPhysicsComponentLookupRW";
-        private const string I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUP_RO = "IPhysicsEnableableComponentLookupRO";
-        private const string I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUP_RW = "IPhysicsEnableableComponentLookupRW";
+        private const string I_BUFFER_LOOKUP_RO                       = "ETEL.IBufferLookupRO";
+        private const string I_BUFFER_LOOKUP_RW                       = "ETEL.IBufferLookupRW";
+        private const string I_COMPONENT_LOOKUP_RO                    = "ETEL.IComponentLookupRO";
+        private const string I_COMPONENT_LOOKUP_RW                    = "ETEL.IComponentLookupRW";
+        private const string I_ENABLEABLE_BUFFER_LOOKUP_RO            = "ETEL.IEnableableBufferLookupRO";
+        private const string I_ENABLEABLE_BUFFER_LOOKUP_RW            = "ETEL.IEnableableBufferLookupRW";
+        private const string I_ENABLEABLE_COMPONENT_LOOKUP_RO         = "ETEL.IEnableableComponentLookupRO";
+        private const string I_ENABLEABLE_COMPONENT_LOOKUP_RW         = "ETEL.IEnableableComponentLookupRW";
+        private const string I_PHYSICS_BUFFER_LOOKUP_RO               = "ETEL.IPhysicsBufferLookupRO";
+        private const string I_PHYSICS_BUFFER_LOOKUP_RW               = "ETEL.IPhysicsBufferLookupRW";
+        private const string I_PHYSICS_COMPONENT_LOOKUP_RO            = "ETEL.IPhysicsComponentLookupRO";
+        private const string I_PHYSICS_COMPONENT_LOOKUP_RW            = "ETEL.IPhysicsComponentLookupRW";
+        private const string I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUP_RO = "ETEL.IPhysicsEnableableComponentLookupRO";
+        private const string I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUP_RW = "ETEL.IPhysicsEnableableComponentLookupRW";
 
         private static readonly DiagnosticDescriptor s_errorDescriptor = new(
               id: "SG_LOOKUPS_01"
@@ -356,13 +356,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             p.PrintEndLine();
             p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();
-            p.PrintLine("using System.CodeDom.Compiler;");
-            p.PrintLine("using System.Diagnostics.CodeAnalysis;");
-            p.PrintLine("using System.Runtime.CompilerServices;");
-            p.PrintLine("using EncosyTower.Common;");
-            p.PrintLine("using EncosyTower.Entities.Lookups;");
-            p.PrintLine("using Unity.Collections;");
-            p.PrintLine("using Unity.Entities;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using ET = global::EncosyTower.Common;");
+            p.PrintLine("using ETEL = global::EncosyTower.Entities.Lookups;");
+            p.PrintLine("using UC = global::Unity.Collections;");
+            p.PrintLine("using UE = global::Unity.Entities;");
             p.PrintEndLine();
             p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();
@@ -372,14 +372,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             p.PrintEndLine();
             p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();
-            p.PrintLine("using System.CodeDom.Compiler;");
-            p.PrintLine("using System.Diagnostics.CodeAnalysis;");
-            p.PrintLine("using System.Runtime.CompilerServices;");
-            p.PrintLine("using EncosyTower.Common;");
-            p.PrintLine("using EncosyTower.Entities.Lookups;");
-            p.PrintLine("using Latios.Psyshock;");
-            p.PrintLine("using Unity.Collections;");
-            p.PrintLine("using Unity.Entities;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using ET = global::EncosyTower.Common;");
+            p.PrintLine("using ETEL = global::EncosyTower.Entities.Lookups;");
+            p.PrintLine("using LP = global::Latios.Psyshock;");
+            p.PrintLine("using UC = global::Unity.Collections;");
+            p.PrintLine("using UE = global::Unity.Entities;");
             p.PrintEndLine();
             p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();

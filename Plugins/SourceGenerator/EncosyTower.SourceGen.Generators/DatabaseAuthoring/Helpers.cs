@@ -48,22 +48,31 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         public const string GENERATED_PROPERTY_FROM_FIELD = $"global::{DATA_NAMESPACE}.SourceGen.GeneratedPropertyFromFieldAttribute";
         public const string GENERATED_FIELD_FROM_PROPERTY = $"global::{DATA_NAMESPACE}.SourceGen.GeneratedFieldFromPropertyAttribute";
-        public const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
-        public const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.Databases.DatabaseGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        public const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
-        public const string SERIALIZABLE = "[Serializable]";
-        public const string STRUCT_LAYOUT_AUTO = "[StructLayout(LayoutKind.Auto)]";
 
         public const string DATABASES_AUTHORING_NAMESPACE = $"{DATABASES_NAMESPACE}.Authoring";
-        public const string ICONTAINS = $"EDASourceGen.IContains";
-        public const string AUTHOR_DATABASE_ATTRIBUTE = $"EDAuthoring.AuthorDatabaseAttribute";
-        public const string HORIZONTAL_LIST_ATTRIBUTE = $"EDAuthoring.HorizontalAttribute";
-        public const string DATA_SHEET_CONTAINER_BASE = $"EDAuthoring.DataSheetContainerBase";
-        public const string TABLE_NAMING = $"[EDASourceGen.TableNaming(\"{{0}}\", ENaming.NamingStrategy.{{1}})]";
-        public const string GENERATED_SHEET_CONTAINER = $"[EDASourceGen.GeneratedSheetContainer]";
-        public const string GENERATED_SHEET_ATTRIBUTE = $"[EDASourceGen.GeneratedSheet(typeof({{0}}), typeof({{1}}), typeof({{2}}), \"{{3}}\")]";
-        public const string GENERATED_SHEET_ROW = $"[EDASourceGen.GeneratedSheetRow(typeof({{0}}), typeof({{1}}))]";
-        public const string GENERATED_DATA_ROW = $"[EDASourceGen.GeneratedDataRow(typeof({{0}}))]";
+
+        public const string PR_AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        public const string PR_EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        public const string PR_GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.Databases.DatabaseGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        public const string PR_SERIALIZABLE = "[S.Serializable]";
+        public const string PR_STRUCT_LAYOUT_AUTO = "[SRIS.StructLayout(SRIS.LayoutKind.Auto)]";
+
+        public const string PR_LIST_T = "SCG.List";
+        public const string PR_HASH_SET_T = "SCG.HashSet";
+        public const string PR_QUEUE_T = "SCG.Queue";
+        public const string PR_STACK_T = "SCG.Stack";
+        public const string PR_DICTIONARY_T = "SCG.Dictionary";
+        public const string PR_VERTICAL_LIST_T = "CBS.VerticalList";
+
+        public const string PR_ICONTAINS = $"ETDBASG.IContains";
+        public const string PR_AUTHOR_DATABASE_ATTRIBUTE = $"ETDBA.AuthorDatabaseAttribute";
+        public const string PR_HORIZONTAL_LIST_ATTRIBUTE = $"ETDBA.HorizontalAttribute";
+        public const string PR_DATA_SHEET_CONTAINER_BASE = $"ETDBA.DataSheetContainerBase";
+        public const string PR_TABLE_NAMING = $"[ETDBASG.TableNaming(\"{{0}}\", ETN.NamingStrategy.{{1}})]";
+        public const string PR_GENERATED_SHEET_CONTAINER = $"[ETDBASG.GeneratedSheetContainer]";
+        public const string PR_GENERATED_SHEET_ATTRIBUTE = $"[ETDBASG.GeneratedSheet(typeof({{0}}), typeof({{1}}), typeof({{2}}), \"{{3}}\")]";
+        public const string PR_GENERATED_SHEET_ROW = $"[ETDBASG.GeneratedSheetRow(typeof({{0}}), typeof({{1}}))]";
+        public const string PR_GENERATED_DATA_ROW = $"[ETDBASG.GeneratedDataRow(typeof({{0}}))]";
 
         public static bool IsIData(ITypeSymbol type)
             => type.HasAttribute(DATA_ATTRIBUTE) || type.InheritsFromInterface(IDATA);

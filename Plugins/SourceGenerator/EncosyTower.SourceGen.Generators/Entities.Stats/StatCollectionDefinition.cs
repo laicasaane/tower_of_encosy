@@ -60,13 +60,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         {
             public string typeName;
             public string fieldName;
-            public string valueTypeName;
+            public string valueTypeNamespace;
+            public string valueType;
             public bool singleValue;
 
             public readonly bool IsValid
                 => string.IsNullOrEmpty(typeName) == false
                 && string.IsNullOrEmpty(fieldName) == false
-                && string.IsNullOrEmpty(valueTypeName) == false
+                && string.IsNullOrEmpty(valueType) == false
                 ;
 
             public readonly override bool Equals(object obj)
@@ -75,7 +76,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             public readonly bool Equals(StatDataDefinition other)
                 => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
                 && string.Equals(fieldName, other.fieldName, StringComparison.Ordinal)
-                && string.Equals(valueTypeName, other.valueTypeName, StringComparison.Ordinal)
+                && string.Equals(valueTypeNamespace, other.valueTypeNamespace, StringComparison.Ordinal)
+                && string.Equals(valueType, other.valueType, StringComparison.Ordinal)
                 && singleValue == other.singleValue
                 ;
 
@@ -83,7 +85,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 => HashValue.Combine(
                       typeName
                     , fieldName
-                    , valueTypeName
+                    , valueTypeNamespace
+                    , valueType
                     , singleValue
                 );
         }

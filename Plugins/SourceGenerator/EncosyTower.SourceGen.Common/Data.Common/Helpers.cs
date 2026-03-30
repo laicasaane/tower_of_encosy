@@ -28,11 +28,6 @@ namespace EncosyTower.SourceGen.Common.Data.Common
 
         public const string UNION_ID_ATTRIBUTE = "global::EncosyTower.UnionIds.UnionIdAttribute";
 
-        public const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
-        public const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.Data.DataGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        public const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
-        private const string EDITOR_BROWSABLE_NEVER = "[EditorBrowsable(EditorBrowsableState.Never)]";
-
         public const string LIST_FAST_TYPE_T = "global::EncosyTower.Collections.ListFast<";
         public const string LIST_TYPE_T = "global::System.Collections.Generic.List<";
         public const string DICTIONARY_TYPE_T = "global::System.Collections.Generic.Dictionary<";
@@ -58,8 +53,20 @@ namespace EncosyTower.SourceGen.Common.Data.Common
         public const string HASH_SET_API = "global::EncosyTower.Collections.Extensions.HashSetAPI";
         public const string REFERENCE_EXTENSIONS = "global::EncosyTower.SystemExtensions.EncosyReferenceExtensions";
 
-        public const string GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE = $"[GeneratedPropertyFromField(nameof({{0}}), typeof({{1}}))]";
-        public const string GENERATED_FIELD_FROM_PROPERTY_ATTRIBUTE = $"[GeneratedFieldFromProperty(nameof({{0}}))]";
+        public const string PR_DONT_CREATE_PROPERTY = "UP.DontCreatePropertyAttribute";
+
+        public const string PR_AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        public const string PR_GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.Data.DataGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        public const string PR_EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+
+        public const string PR_MEMORY_EXTENSIONS = "S.MemoryExtensions";
+        public const string PR_ARRAY_EXTENSIONS = "ETCE.EncosyArrayExtensions";
+        public const string PR_LIST_EXTENSIONS = "ETCE.EncosyListExtensions";
+        public const string PR_HASH_SET_API = "ETCE.HashSetAPI";
+        public const string PR_DICTIONARY_EXTENSIONS = "ETCE.EncosyDictionaryExtensions";
+
+        public const string PR_GENERATED_PROPERTY_FROM_FIELD = $"[ETDSG.GeneratedPropertyFromField(nameof({{0}}), typeof({{1}}))]";
+        public const string PR_GENERATED_FIELD_FROM_PROPERTY = $"[ETDSG.GeneratedFieldFromProperty(nameof({{0}}))]";
 
         public static bool IsIData(ITypeSymbol type)
             => type.HasAttribute(DATA_ATTRIBUTE_METADATA) || type.InheritsFromInterface(IDATA);

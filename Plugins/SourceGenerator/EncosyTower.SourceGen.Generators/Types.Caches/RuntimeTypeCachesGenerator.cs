@@ -8,8 +8,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-#pragma warning disable RS2008 // Enable analyzer release tracking
-
 namespace EncosyTower.SourceGen.Generators.Types.Caches
 {
     [Generator]
@@ -21,11 +19,11 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         public const string GENERATOR_NAME = nameof(RuntimeTypeCachesGenerator);
         public const string RUNTIME_TYPE_CACHE = "global::EncosyTower.Types.RuntimeTypeCache";
 
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Types.Caches.RuntimeTypeCachesGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
-        private const string GENERATED_RUNTIME_TYPE_CACHES = $"[{NAMESPACE_PREFIX}.SourceGen.GeneratedRuntimeTypeCaches]";
-        private const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
-        private const string EDITOR_BROWSABLE_NEVER = "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
+        private const string GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.Types.Caches.RuntimeTypeCachesGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string GENERATED_RUNTIME_TYPE_CACHES = "[ETTCSG.GeneratedRuntimeTypeCaches]";
+        private const string PRESERVE = "[UES.Preserve]";
+        private const string EDITOR_BROWSABLE_NEVER = "[SCM.EditorBrowsable(SCM.EditorBrowsableState.Never)]";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -211,6 +209,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 , token
                 , out var scopeOpening
                 , out var scopeClosing
+                , printAdditionalUsings: PrintAdditionalUsings
             );
 
             return new TypeCacheCallSite {
@@ -230,6 +229,25 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 , cacheAttributeType = cacheAttributeType
                 , assemblyName = assemblyName
             };
+        }
+
+        private static void PrintAdditionalUsings(ref Printer p)
+        {
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using S = global::System;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SCM = global::System.ComponentModel;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+            p.PrintLine("using ETTC = global::EncosyTower.Types.Caches;");
+            p.PrintLine("using ETTCSG = global::EncosyTower.Types.Caches.SourceGen;");
+            p.PrintLine("using UES = global::UnityEngine.Scripting;");
+            p.PrintEndLine();
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
         }
 
         private static TypeDeclarationSyntax GetContainingType(SyntaxNode node)
@@ -396,7 +414,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                     .PrintEndLine();
                 p.OpenScope();
                 {
-                    p.PrintBeginLine("[").Print(NAMESPACE_PREFIX).Print(".");
+                    p.PrintBeginLine("[ETTC.");
 
                     switch (cdd.cacheAttributeType)
                     {

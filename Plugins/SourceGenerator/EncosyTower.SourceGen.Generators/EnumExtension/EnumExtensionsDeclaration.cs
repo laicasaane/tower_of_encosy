@@ -19,7 +19,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         public string FixedStringTypeName { get; }
 
-        public string FixedStringTypeFullyQualifiedName { get; }
+        public string PrintFixedStringTypeName { get; }
 
         public List<EnumMemberDeclaration> Members { get; set; }
 
@@ -84,7 +84,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             if (referencesUnityCollections)
             {
                 FixedStringTypeName = GeneratorHelpers.GetFixedStringTypeName(candidate.fixedStringBytes);
-                FixedStringTypeFullyQualifiedName = $"global::Unity.Collections.{FixedStringTypeName}";
+                PrintFixedStringTypeName = $"UC.{FixedStringTypeName}";
             }
         }
 
@@ -99,7 +99,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             if (referencesUnityCollections)
             {
                 FixedStringTypeName = GeneratorHelpers.GetFixedStringTypeName(fixedStringBytes);
-                FixedStringTypeFullyQualifiedName = $"global::Unity.Collections.{FixedStringTypeName}";
+                PrintFixedStringTypeName = $"UC.{FixedStringTypeName}";
             }
         }
 

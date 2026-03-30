@@ -139,23 +139,24 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
                 p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
                 p.PrintEndLine();
-                p.PrintLine("using System;");
-                p.PrintLine("using System.CodeDom.Compiler;");
-                p.PrintLine("using System.Diagnostics;");
-                p.PrintLine("using System.Diagnostics.CodeAnalysis;");
-                p.PrintLine("using System.Runtime.CompilerServices;");
-                p.PrintLine("using System.Runtime.InteropServices;");
-                p.PrintLine("using EncosyTower.Common;");
-                p.PrintLine("using UnityEngine;");
-                p.PrintLine("using Unity.Burst;");
-                p.PrintLine("using Unity.Collections;");
-                p.PrintLine("using Unity.Collections.LowLevel.Unsafe;");
-                p.PrintLine("using Unity.Entities;");
-                p.PrintLine("using Unity.Mathematics;");
-                p.PrintLine("using Unity.Jobs;");
-                p.PrintLine($"using {StatGeneratorAPI.NAMESPACE};");
+                p.PrintLine("using S = global::System;");
+                p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+                p.PrintLine("using SD = global::System.Diagnostics;");
+                p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+                p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+                p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+                p.PrintLine("using ET = global::EncosyTower.Common;");
+                p.PrintLine("using ETES = global::EncosyTower.Entities.Stats;");
+                p.PrintLine("using UE = UnityEngine;");
+                p.PrintLine("using UB = Unity.Burst;");
+                p.PrintLine("using UC = global::Unity.Collections;");
+                p.PrintLine("using UCLU = global::Unity.Collections.LowLevel.Unsafe;");
+                p.PrintLine("using UECS = global::Unity.Entities;");
+                p.PrintLine("using UM = global::Unity.Mathematics;");
+                p.PrintLine("using UJ = Unity.Jobs;");
                 p.PrintEndLine();
                 p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+                p.PrintEndLine();
             }
         }
 

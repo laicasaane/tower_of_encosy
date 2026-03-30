@@ -2,12 +2,12 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 {
     internal sealed class BufferLookupCodeWriter : LookupCodeWriter
     {
-        private const string LOOKUP = "BufferLookup<";
-        private const string BUFFER = "DynamicBuffer<";
+        private const string PR_LOOKUP = "UE.BufferLookup<";
+        private const string PR_BUFFER = "UE.DynamicBuffer<";
 
         protected override void WriteStructBody(ref Printer p, LookupDefinition definition)
         {
-            WriteFields(ref p, definition, LOOKUP);
+            WriteFields(ref p, definition, PR_LOOKUP);
             WriteConstructor(ref p, definition, "GetBufferLookup");
             WriteUpdateMethods(ref p, definition);
             WriteConcreteMethods(ref p, definition);
@@ -28,7 +28,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                     WriteAttributes(ref p);
                     p.PrintBeginLine("public bool EntityExists(")
-                        .Print(ENTITY).Print(" entity)")
+                        .Print(PR_ENTITY).Print(" entity)")
                         .Print(" => ").Print(lookupField)
                         .PrintEndLine(".EntityExists(entity);");
                     p.PrintEndLine();
@@ -38,34 +38,34 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public void HasBuffer(")
-                    .Print(ENTITY).Print(" entity, out ").Print(BOOL)
+                    .Print(PR_ENTITY).Print(" entity, out ").Print(PR_BOOL)
                     .Print(typeName).Print("> result)")
-                    .Print(" => result = (").Print(BOOL).Print(typeName)
+                    .Print(" => result = (").Print(PR_BOOL).Print(typeName)
                     .Print(">)").Print(lookupField)
                     .PrintEndLine(".HasBuffer(entity);");
                 p.PrintEndLine();
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public void HasBuffer(")
-                    .Print(ENTITY).Print(" entity, out ").Print(BOOL)
+                    .Print(PR_ENTITY).Print(" entity, out ").Print(PR_BOOL)
                     .Print(typeName).Print("> result, out bool entityExists)")
-                    .Print(" => result = (").Print(BOOL).Print(typeName)
+                    .Print(" => result = (").Print(PR_BOOL).Print(typeName)
                     .Print(">)").Print(lookupField)
                     .PrintEndLine(".HasBuffer(entity, out entityExists);");
                 p.PrintEndLine();
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public void DidChange(")
-                    .Print(ENTITY).Print(" entity, uint version, out ").Print(BOOL)
+                    .Print(PR_ENTITY).Print(" entity, uint version, out ").Print(PR_BOOL)
                     .Print(typeName).Print("> result)")
-                    .Print(" => result = (").Print(BOOL).Print(typeName)
+                    .Print(" => result = (").Print(PR_BOOL).Print(typeName)
                     .Print(">)").Print(lookupField)
                     .PrintEndLine(".DidChange(entity, version);");
                 p.PrintEndLine();
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public bool TryGetBuffer(")
-                    .Print(ENTITY).Print(" entity, out ").Print(BUFFER)
+                    .Print(PR_ENTITY).Print(" entity, out ").Print(PR_BUFFER)
                     .Print(typeName).Print("> bufferData)")
                     .Print(" => ").Print(lookupField)
                     .PrintEndLine(".TryGetBuffer(entity, out bufferData);");
@@ -73,16 +73,16 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public bool TryGetBuffer(")
-                    .Print(ENTITY).Print(" entity, out ").Print(BUFFER)
+                    .Print(PR_ENTITY).Print(" entity, out ").Print(PR_BUFFER)
                     .Print(typeName).Print("> bufferData, out bool entityExists)")
                     .Print(" => ").Print(lookupField)
                     .PrintEndLine(".TryGetBuffer(entity, out bufferData, out entityExists);");
                 p.PrintEndLine();
 
                 WriteAttributes(ref p);
-                p.PrintBeginLine("public ").Print(BUFFER)
+                p.PrintBeginLine("public ").Print(PR_BUFFER)
                     .Print(typeName).Print("> GetBuffer(")
-                    .Print(ENTITY).Print(" entity, ")
+                    .Print(PR_ENTITY).Print(" entity, ")
                     .Print(typeName).Print(" _)")
                     .Print(" => ").Print(lookupField)
                     .PrintEndLine("[entity];");
@@ -90,14 +90,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public void GetBuffer(")
-                    .Print(ENTITY).Print(" entity, out ").Print(BUFFER)
+                    .Print(PR_ENTITY).Print(" entity, out ").Print(PR_BUFFER)
                     .Print(typeName).Print("> bufferData)")
                     .Print(" => bufferData = ").Print(lookupField)
                     .PrintEndLine("[entity];");
                 p.PrintEndLine();
 
                 WriteAttributes(ref p);
-                p.PrintBeginLine("public static implicit operator ").Print(LOOKUP)
+                p.PrintBeginLine("public static implicit operator ").Print(PR_LOOKUP)
                     .Print(typeName).Print(">(in ").Print(definition.structName).Print(" value)")
                     .Print(" => value.").Print(lookupField).PrintEndLine(";");
                 p.PrintEndLine();

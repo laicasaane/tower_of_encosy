@@ -61,39 +61,41 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             p.PrintBeginLine()
                 .Print("partial ").Print(databaseTypeKeyword).Print(" ").Print(databaseTypeName)
-                .Print($" : {ICONTAINS}<{databaseTypeName}.{sheetName}>")
+                .Print(" : ").Print(PR_ICONTAINS).Print("<").Print(databaseTypeName).Print(".").Print(sheetName).Print(">")
                 .PrintEndLine();
             p.OpenScope();
             {
                 p.Print(DIRECTIVE).PrintEndLine();
                 p.PrintEndLine();
 
-                p.PrintLine(SERIALIZABLE);
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(PR_SERIALIZABLE);
+                p.PrintLine(PR_GENERATED_CODE).PrintLine(PR_EXCLUDE_COVERAGE);
                 p.PrintBeginLine()
-                    .Print($"public abstract partial class {sheetName}")
-                    .Print($" : Sheet<{sheetIdTypeName}, {sheetDataTypeName}>")
+                    .Print("public abstract partial class ").Print(sheetName)
+                    .Print(" : CBS.Sheet<").Print(sheetIdTypeName).Print(", ").Print(sheetDataTypeName).Print(">")
                     .PrintEndLine();
                 p.OpenScope();
                 {
-                    p.PrintLine($"public {dataTypeFullName}[] To{dataTypeSimpleName}Array()");
+                    p.PrintBeginLine("public ").Print(dataTypeFullName).Print("[] To")
+                        .Print(dataTypeSimpleName).PrintEndLine("Array()");
                     p.OpenScope();
                     {
-                        p.PrintLine($"if (this.Items == null || this.Count == 0)");
-                        p = p.IncreasedIndent();
-                        p.PrintLine($"return new {dataTypeFullName}[0];");
-                        p = p.DecreasedIndent();
+                        p.PrintLine("if (this.Items == null || this.Count == 0)");
+                        p.WithIncreasedIndent()
+                            .PrintBeginLine("return new ").Print(dataTypeFullName).PrintEndLine("[0];");
                         p.PrintEndLine();
 
                         p.PrintLine("var rows = this.Items;");
                         p.PrintLine("var count = this.Count;");
-                        p.PrintLine($"var result = new {dataTypeFullName}[count];");
+                        p.PrintBeginLine("var result = new ").Print(dataTypeFullName).PrintEndLine("[count];");
                         p.PrintEndLine();
 
                         p.PrintLine("for (var i = 0; i < count; i++)");
                         p.OpenScope();
                         {
-                            p.PrintLine($"result[i] = (rows[i] ?? __{dataTypeSimpleName}.Default).To{dataTypeSimpleName}();");
+                            p.PrintBeginLine("result[i] = (rows[i] ?? __")
+                                .Print(dataTypeSimpleName).Print(".Default).To")
+                                .Print(dataTypeSimpleName).PrintEndLine("();");
                         }
                         p.CloseScope();
 
@@ -142,8 +144,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 p.Print("#else").PrintEndLine().PrintEndLine();
 
-                p.PrintLine(SERIALIZABLE);
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(PR_SERIALIZABLE);
+                p.PrintLine(PR_GENERATED_CODE).PrintLine(PR_EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public abstract partial class ").Print(sheetName).PrintEndLine(" { }");
                 p.PrintEndLine();
 

@@ -17,13 +17,13 @@
             p.PrintEndLine();
             p.OpenScope();
             {
-                p.PrintLine(GENERATED_CODE);
+                p.PrintLine(PR_GENERATED_CODE);
                 p.PrintLine($"public const string NAME = nameof({className});");
                 p.PrintEndLine();
 
                 if (getIdMethodIsImplemented == false)
                 {
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+                    p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
                     p.PrintLine($"protected override {idTypeName} GetId(in {dataTypeName} entry)");
                     p.OpenScope();
                     {
@@ -35,7 +35,7 @@
 
                 if (initializeMethodIsImplemented == false && dataTypeImplementsIInitializable)
                 {
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+                    p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
                     p.PrintLine($"protected override void Initialize(ref {dataTypeName} entry)");
                     p.OpenScope();
                     {
@@ -50,7 +50,7 @@
                     && convertExpression != null
                 )
                 {
-                    p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+                    p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
                     p.PrintLine($"protected override {convertedIdTypeName} ConvertId({idTypeName} value)");
                     p.OpenScope();
                     {

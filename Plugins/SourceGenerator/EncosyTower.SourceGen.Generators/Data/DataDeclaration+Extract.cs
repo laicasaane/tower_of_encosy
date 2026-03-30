@@ -1226,6 +1226,28 @@ namespace EncosyTower.SourceGen.Generators.Data
             return false;
         }
 
+        private static void PrintAdditionalUsings(ref Printer p)
+        {
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using S = global::System;");
+            p.PrintLine("using SCG = global::System.Collections.Generic;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+            p.PrintLine("using ET = global::EncosyTower.Common;");
+            p.PrintLine("using ETCE = global::EncosyTower.Collections.Extensions;");
+            p.PrintLine("using ETD = global::EncosyTower.Data;");
+            p.PrintLine("using ETDSG = global::EncosyTower.Data.SourceGen;");
+            p.PrintLine("using UE = global::UnityEngine;");
+            p.PrintLine("using UP = global::Unity.Properties;");
+            p.PrintEndLine();
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+        }
+
         // Temporary record used only during extraction — not stored in cache model
         private record struct CollectionRef(
               CollectionKind Kind

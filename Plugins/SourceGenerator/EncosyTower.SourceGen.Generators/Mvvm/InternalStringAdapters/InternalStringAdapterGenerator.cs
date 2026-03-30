@@ -92,13 +92,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 
             var combined = allCandidatesFlat
                 .Combine(existingAdaptersProvider.Collect())
-                .Combine(context.CompilationProvider)
+                .Combine(context.CompilationProvider.Select(static (c, _) => c.Assembly.Name))
                 .Combine(projectPathProvider);
 
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
-                    , source.Left.Right         // compilation
+                    , source.Left.Right         // assemblyName
                     , source.Left.Left.Left     // merged candidates
                     , source.Left.Left.Right    // existingAdapterTypeNames
                     , source.Right.projectPath
@@ -299,7 +299,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , Compilation compilation
+            , string assemblyName
             , ImmutableArray<StringAdapterCandidateInfo> candidates
             , ImmutableArray<string> existingAdapterTypeNames
             , string projectPath
@@ -317,7 +317,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 
             var declaration = new InternalStringAdapterDeclaration(candidates, existingAdapterTypeNames);
 
-            declaration.GenerateAdapters(context, compilation, outputSourceGenFiles);
+            declaration.GenerateAdapters(context, assemblyName, outputSourceGenFiles);
         }
     }
 }

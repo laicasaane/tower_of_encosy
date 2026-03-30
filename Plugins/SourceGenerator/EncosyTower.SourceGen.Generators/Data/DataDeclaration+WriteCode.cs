@@ -19,34 +19,34 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             if (hasSerializableAttribute == false)
             {
-                p.PrintLine("[Serializable]");
+                p.PrintLine("[S.Serializable]");
             }
 
             p.PrintBeginLine()
                 .Print($"partial {keyword} ").Print(typeName)
-                .Print(" : IData")
+                .Print(" : ETD.IData")
                 .PrintIf(HasBaseType, ", ").PrintIf(HasBaseType, baseTypeName);
 
             if (isMutable == false)
             {
-                p.Print(", ").Print("IReadOnlyData").Print("<").Print(typeName).Print(">");
+                p.Print(", ").Print("ETD.IReadOnlyData").Print("<").Print(typeName).Print(">");
             }
 
             if (HasIdProperty)
             {
-                p.Print(", ").Print("IDataWithId<").Print(idPropertyTypeName).Print(">");
+                p.Print(", ").Print("ETD.IDataWithId<").Print(idPropertyTypeName).Print(">");
             }
 
             if (withReadOnlyView)
             {
-                p.Print(", ").Print("IDataWithReadOnlyView<").Print(readOnlyTypeName).Print(">");
+                p.Print(", ").Print("ETD.IDataWithReadOnlyView<").Print(readOnlyTypeName).Print(">");
             }
             else if (isMutable == false)
             {
-                p.Print(", ").Print("IDataWithReadOnlyView<").Print(typeName).Print(">");
+                p.Print(", ").Print("ETD.IDataWithReadOnlyView<").Print(typeName).Print(">");
             }
 
-            p.Print(", ").Print($"IEquatable<{typeName}>");
+            p.Print(", ").Print($"S.IEquatable<{typeName}>");
 
             p.PrintEndLine();
             p.OpenScope();
@@ -128,12 +128,12 @@ namespace EncosyTower.SourceGen.Generators.Data
                     withDontCreateProperty = true;
                 }
 
-                p.Print($"[{attr.attributeSyntax}]");
+                p.Print("[").Print(attr.attributeSyntax).Print("]");
             }
 
             if (withSerializeField == false)
             {
-                p.Print("[SerializeField]");
+                p.Print("[UE.SerializeField]");
             }
 
             if (hasGenPropertyBagAttrib
@@ -141,11 +141,11 @@ namespace EncosyTower.SourceGen.Generators.Data
                 && withDontCreateProperty == false
             )
             {
-                p.Print($"[{DONT_CREATE_PROPERTY_ATTRIBUTE}]");
+                p.Print("[").Print(DONT_CREATE_PROPERTY_ATTRIBUTE).Print("]");
             }
 
-            p.Print(string.Format(GENERATED_FIELD_FROM_PROPERTY_ATTRIBUTE, prop.propertyName));
-            p.Print(GENERATED_CODE);
+            p.Print(string.Format(PR_GENERATED_FIELD_FROM_PROPERTY, prop.propertyName));
+            p.Print(PR_GENERATED_CODE);
             p.PrintEndLine();
 
             var fieldTypeName = prop.fieldTypeName;
@@ -154,11 +154,13 @@ namespace EncosyTower.SourceGen.Generators.Data
             var mutableTypeName = prop.mutablePropertyTypeName;
             var sameType = prop.samePropertyType;
 
-            p.PrintLine($"{accessKeyword} {fieldTypeName} {fieldName};");
+            p.PrintBeginLine(accessKeyword).Print(" ").Print(fieldTypeName)
+                .Print(" ").Print(fieldName).PrintEndLine(";");
             p.PrintEndLine();
 
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
-            p.PrintLine($"private {readonlyKeyword}{propTypeName} Get_{prop.propertyName}()");
+            p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
+            p.PrintBeginLine("private ").Print(readonlyKeyword).Print(propTypeName)
+                .Print(" Get_").Print(prop.propertyName).PrintEndLine("()");
             p.OpenScope();
             {
                 string casting;
@@ -178,15 +180,16 @@ namespace EncosyTower.SourceGen.Generators.Data
                     casting = string.Empty;
                 }
 
-                p.PrintBeginLine($"return ")
-                    .PrintIf(mustCast, $"{casting}")
-                    .PrintEndLine($"(this.{fieldName});");
+                p.PrintBeginLine("return ")
+                    .PrintIf(mustCast, casting)
+                    .Print("(this.").Print(fieldName)
+                    .PrintEndLine(");");
             }
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
-            p.PrintBeginLine($"private void Set_{prop.propertyName}(")
+            p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
+            p.PrintBeginLine("private void Set_").Print(prop.propertyName).Print("(")
                 .PrintIf(prop.implicitlyConvertible, propTypeName, fieldTypeName)
                 .PrintEndLine(" value)");
             p.OpenScope();
@@ -208,7 +211,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                     casting = string.Empty;
                 }
 
-                p.PrintBeginLine($"this.{fieldName} = ");
+                p.PrintBeginLine("this.").Print(fieldName).Print(" = ");
 
                 if ((isMutable && withoutPropertySetters == false)
                     || (isMutable && prop.fieldCollection.kind == CollectionKind.Array)
@@ -223,7 +226,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 }
                 else
                 {
-                    p.PrintEndLine($"({mutableTypeName})(value);");
+                    p.Print($"(").Print(mutableTypeName).PrintEndLine(")(value);");
                 }
             }
             p.CloseScope();
@@ -242,18 +245,18 @@ namespace EncosyTower.SourceGen.Generators.Data
             var immutableTypeName = field.immutablePropertyTypeName;
             var sameType = field.samePropertyType;
 
-            p.PrintLine(string.Format(GENERATED_PROPERTY_FROM_FIELD_ATTRIBUTE, fieldName, field.fieldTypeOriginalFullName));
-            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintLine(string.Format(PR_GENERATED_PROPERTY_FROM_FIELD, fieldName, field.fieldTypeOriginalFullName));
+            p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
 
             foreach (var attributeSyntax in field.forwardedPropertyAttributeSyntaxes)
             {
-                p.PrintLine($"[{attributeSyntax}]");
+                p.PrintBeginLine("[").Print(attributeSyntax).PrintEndLine("]");
             }
 
             var mustCast = field.typesAreDifferent;
             var propTypeName = isMutable ? mutableTypeName : immutableTypeName;
 
-            p.PrintLine($"public {propTypeName} {field.propertyName}");
+            p.PrintBeginLine("public ").Print(propTypeName).Print(" ").Print(field.propertyName);
             p.OpenScope();
             {
                 // getter
@@ -275,13 +278,13 @@ namespace EncosyTower.SourceGen.Generators.Data
                         casting = string.Empty;
                     }
 
-                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine(PR_AGGRESSIVE_INLINING);
                     p.PrintBeginLineIf(isValueType, "readonly get => ", "get => ")
-                        .PrintIf(mustCast, $"{casting}")
-                        .PrintEndLine($"(this.{fieldName});");
+                        .PrintIf(mustCast, casting)
+                        .Print("(this.").Print(fieldName).PrintEndLine(");");
 
                     p.PrintEndLine();
-                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine(PR_AGGRESSIVE_INLINING);
                 }
 
                 // setter
@@ -310,29 +313,31 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     if (isMutable && withoutPropertySetters == false)
                     {
-                        p.PrintBeginLine($"set => this.{fieldName} = ")
+                        p.PrintBeginLine("set => this.").Print(fieldName).Print(" = ")
                             .PrintIf(mustCast, casting)
                             .PrintEndLine("(value);");
                     }
                     else if ((isMutable && field.fieldCollection.kind == CollectionKind.Array) || sameType)
                     {
-                        p.PrintBeginLine($"init => this.{fieldName} = ")
+                        p.PrintBeginLine("init => this.").Print(fieldName).Print(" = ")
                             .PrintIf(mustCast, casting)
                             .PrintEndLine("(value);");
                     }
                     else if (field.fieldCollection.kind == CollectionKind.Array)
                     {
-                        p.PrintBeginLine($"init => this.{fieldName} = ")
+                        p.PrintBeginLine("init => this.").Print(fieldName).Print(" = ")
                             .PrintIf(mustCast, casting)
                             .PrintEndLine("(value.ToArray());");
                     }
                     else if (mustCast)
                     {
-                        p.PrintLine($"init => this.{fieldName} = {casting}(value);");
+                        p.PrintBeginLine("init => this.").Print(fieldName)
+                            .Print(" = ").Print(casting).Print("(value);");
                     }
                     else
                     {
-                        p.PrintLine($"init => this.{fieldName} = ({mutableTypeName})(value);");
+                        p.PrintBeginLine("init => this.").Print(fieldName)
+                            .Print(" = (").Print(mutableTypeName).Print(")(value);");
                     }
                 }
             }
@@ -347,7 +352,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return;
             }
 
-            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLine("public override ")
                 .PrintIf(isValueType, "readonly ")
                 .PrintEndLine("int GetHashCode()");
@@ -364,7 +369,7 @@ namespace EncosyTower.SourceGen.Generators.Data
         {
             var fromBase = false;
 
-            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
 
             if (HasBaseType == false && isSealed == false)
             {
@@ -381,11 +386,11 @@ namespace EncosyTower.SourceGen.Generators.Data
             }
 
             p.PrintIf(isValueType, "readonly ")
-                .PrintEndLine("HashValue GetHashCodeInternal()");
+                .PrintEndLine("ET.HashValue GetHashCodeInternal()");
             p.OpenScope();
             {
                 p.PrintBeginLine("var hash = ")
-                    .PrintIf(fromBase, "base.GetHashCodeInternal()", "new HashValue()")
+                    .PrintIf(fromBase, "base.GetHashCodeInternal()", "new ET.HashValue()")
                     .PrintEndLine(";");
 
                 foreach (var field in fieldRefs)
@@ -400,11 +405,11 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     if (collectionKind == CollectionKind.Array)
                     {
-                        p.Print(ARRAY_EXTENSIONS).Print(".AsReadOnlySpan");
+                        p.Print(PR_ARRAY_EXTENSIONS).Print(".AsReadOnlySpan");
                     }
                     else if (collectionKind == CollectionKind.List)
                     {
-                        p.Print(LIST_EXTENSIONS).Print(".AsReadOnlySpan");
+                        p.Print(PR_LIST_EXTENSIONS).Print(".AsReadOnlySpan");
                     }
 
                     p.Print("(").Print(field.fieldName)
@@ -423,11 +428,11 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     if (collectionKind == CollectionKind.Array)
                     {
-                        p.Print(ARRAY_EXTENSIONS).Print(".AsReadOnlySpan");
+                        p.Print(PR_ARRAY_EXTENSIONS).Print(".AsReadOnlySpan");
                     }
                     else if (collectionKind == CollectionKind.List)
                     {
-                        p.Print(LIST_EXTENSIONS).Print(".AsReadOnlySpan");
+                        p.Print(PR_LIST_EXTENSIONS).Print(".AsReadOnlySpan");
                     }
 
                     p.Print("(").Print(prop.fieldName)
@@ -447,13 +452,13 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return;
             }
 
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLine("public override ")
                 .PrintIf(isValueType, "readonly ")
                 .PrintEndLine("bool Equals(object obj)");
             p.OpenScope();
             {
-                p.PrintLine($"return obj is {typeName} other && Equals(other);");
+                p.PrintBeginLine("return obj is ").Print(typeName).PrintEndLine(" other && Equals(other);");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -463,13 +468,15 @@ namespace EncosyTower.SourceGen.Generators.Data
         {
             foreach (var baseTypeName in overrideEquals)
             {
-            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
                 p.PrintBeginLine("public override ")
                     .PrintIf(isValueType, "readonly ")
                     .PrintEndLine($"bool Equals({baseTypeName} other)");
                 p.OpenScope();
                 {
-                    p.PrintLine($"if (other is not {typeName} otherDerived) return false;");
+                    p.PrintBeginLine("if (other is not ").Print(typeName).PrintEndLine(" otherDerived) return false;");
+                    p.PrintEndLine();
+
                     p.PrintLine("if (ReferenceEquals(this, otherDerived)) return true;");
                     p.PrintEndLine();
 
@@ -487,7 +494,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return;
             }
 
-            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLineIf(isSealed, "public ", "public virtual ")
                 .PrintIf(isValueType, "readonly ")
                 .PrintEndLine($"bool Equals({typeName} other)");
@@ -501,8 +508,11 @@ namespace EncosyTower.SourceGen.Generators.Data
                 else
                 {
                     p.PrintLine("if (ReferenceEquals(other, null)) return false;");
+                    p.PrintEndLine();
+
                     p.PrintLine("if (ReferenceEquals(this, other)) return true;");
                     p.PrintEndLine();
+
                     p.PrintLine("return EqualsInternal(other);");
                 }
             }
@@ -512,14 +522,13 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteEqualsInternalMethod(ref Printer p)
         {
-            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLineIf(isSealed, "private ", "protected ")
                 .PrintEndLine($"bool EqualsInternal({typeName} other)");
             p.OpenScope();
             {
                 p.PrintBeginLine("return")
                     .PrintEndLineIf(HasBaseType, " base.EqualsInternal(other)", "");
-
                 WriteEqualComparerLines(ref p, HasBaseType);
             }
             p.CloseScope();
@@ -611,11 +620,11 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                 if (collection.kind is CollectionKind.Array or CollectionKind.List)
                 {
-                    p.PrintBeginLine(and).Print(" ").Print(MEMORY_EXTENSIONS).Print(".SequenceEqual(")
-                        .PrintIf(collection.kind is CollectionKind.Array, ARRAY_EXTENSIONS, LIST_EXTENSIONS)
+                    p.PrintBeginLine(and).Print(" ").Print(PR_MEMORY_EXTENSIONS).Print(".SequenceEqual(")
+                        .PrintIf(collection.kind is CollectionKind.Array, PR_ARRAY_EXTENSIONS, PR_LIST_EXTENSIONS)
                         .Print(".AsReadOnlySpan")
                         .Print("(this.").Print(fieldName).Print("), ")
-                        .PrintIf(collection.kind is CollectionKind.Array, ARRAY_EXTENSIONS, LIST_EXTENSIONS)
+                        .PrintIf(collection.kind is CollectionKind.Array, PR_ARRAY_EXTENSIONS, PR_LIST_EXTENSIONS)
                         .Print(".AsReadOnlySpan")
                         .Print("(other.").Print(fieldName).PrintEndLine("))");
                     return true;
@@ -624,7 +633,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 if (collection.kind is CollectionKind.HashSet or CollectionKind.Dictionary)
                 {
                     p.PrintBeginLine(and).Print(" ")
-                        .PrintIf(collection.kind is CollectionKind.HashSet, HASH_SET_API, DICTIONARY_EXTENSIONS)
+                        .PrintIf(collection.kind is CollectionKind.HashSet, PR_HASH_SET_API, PR_DICTIONARY_EXTENSIONS)
                         .Print(".Overlaps(")
                         .Print("this.").Print(fieldName)
                         .Print(", other.").Print(fieldName).PrintEndLine(")");
@@ -700,7 +709,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     default:
                     {
-                        p.PrintBeginLine(and).Print(" EqualityComparer<")
+                        p.PrintBeginLine(and).Print(" SCG.EqualityComparer<")
                             .Print(fieldTypeName).Print(">.Default.Equals(this.").Print(fieldName).Print(", other.")
                             .Print(fieldName).PrintEndLine(")");
                         break;
@@ -716,12 +725,11 @@ namespace EncosyTower.SourceGen.Generators.Data
                 var fn = fieldRef.fieldName;
                 var pn = fieldRef.propertyName;
 
-                p.PrintLine("[Obsolete(\"This method is not intended to be used directly by user code.\")]");
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+                p.PrintLine("[S.Obsolete(\"This method is not intended to be used directly by user code.\")]");
+                p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
                 p.PrintLine($"internal void SetValue_{typeValidIdentifier}_{pn}({fieldRef.fieldTypeName} value_{pn})");
-                p = p.IncreasedIndent();
-                p.PrintLine($"=> this.{fn} = value_{pn};");
-                p = p.DecreasedIndent();
+                p.WithIncreasedIndent()
+                    .PrintBeginLine("=> this.").Print(fn).Print(" = value_").Print(pn).PrintEndLine(";");
                 p.PrintEndLine();
             }
 
@@ -730,24 +738,23 @@ namespace EncosyTower.SourceGen.Generators.Data
                 var fn = propRef.fieldName;
                 var pn = propRef.propertyName;
 
-                p.PrintLine("[Obsolete(\"This method is not intended to be used directly by user code.\")]");
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+                p.PrintLine("[S.Obsolete(\"This method is not intended to be used directly by user code.\")]");
+                p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
                 p.PrintLine($"internal void SetValue_{typeValidIdentifier}_{pn}({propRef.fieldTypeName} value_{pn})");
-                p = p.IncreasedIndent();
-                p.PrintLine($"=> this.{fn} = value_{pn};");
-                p = p.DecreasedIndent();
+                p.WithIncreasedIndent()
+                    .PrintBeginLine("=> this.").Print(fn).Print(" = value_").Print(pn).PrintEndLine(";");
                 p.PrintEndLine();
             }
         }
 
         private readonly void WriteEqualityOperators(ref Printer p)
         {
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLine("public static bool operator ==(")
                 .PrintIf(isValueType, "in ")
-                .Print($"{typeName} left, ")
+                .Print(typeName).Print(" left, ")
                 .PrintIf(isValueType, "in ")
-                .PrintEndLine($"{typeName} right)");
+                .Print(typeName).PrintEndLine(" right)");
             p.OpenScope();
             {
                 if (isValueType == false)
@@ -766,12 +773,12 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLine("public static bool operator !=(")
                 .PrintIf(isValueType, "in ")
-                .Print($"{typeName} left, ")
+                .Print(typeName).Print(" left, ")
                 .PrintIf(isValueType, "in ")
-                .PrintEndLine($"{typeName} right)");
+                .Print(typeName).PrintEndLine(" right)");
             p.OpenScope();
             {
                 if (isValueType == false)
@@ -798,7 +805,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return;
             }
 
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLine($"public ")
                 .PrintIf(isValueType, "readonly ")
                 .PrintIf(isMutable, readOnlyTypeName, typeName)
@@ -818,20 +825,20 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return;
             }
 
-            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLine(accessibilityKeyword).Print(" readonly partial struct ").Print(readOnlyTypeName)
                 .Print(" : ")
-                .Print("IReadOnlyData").Print("<").Print(typeName).Print(">")
+                .Print("ETD.IReadOnlyData").Print("<").Print(typeName).Print(">")
                 .Print(", ")
-                .Print($"IEquatable<{readOnlyTypeName}>")
+                .Print($"S.IEquatable<{readOnlyTypeName}>")
                 .PrintEndLine();
             p.OpenScope();
             {
-                p.PrintLine(GENERATED_CODE);
+                p.PrintLine(PR_GENERATED_CODE);
                 p.PrintBeginLine("private readonly ").Print(typeName).PrintEndLine(" _data;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+                p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
                 p.PrintBeginLine(accessibilityKeyword)
                     .Print(" ReadOnly").Print(typeIdentifier).Print("(")
                     .PrintIf(isValueType, "in ")
@@ -877,7 +884,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         .Print(" ").PrintEndLine(propRef.propertyName);
                     p.OpenScope();
                     {
-                        p.PrintLine(AGGRESSIVE_INLINING);
+                        p.PrintLine(PR_AGGRESSIVE_INLINING);
                         p.PrintBeginLine("get => _data.").Print(propRef.propertyName).PrintEndLine(";");
                     }
                     p.CloseScope();
@@ -896,7 +903,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         .Print(" ").PrintEndLine(fieldRef.propertyName);
                     p.OpenScope();
                     {
-                        p.PrintLine(AGGRESSIVE_INLINING);
+                        p.PrintLine(PR_AGGRESSIVE_INLINING);
                         p.PrintBeginLine("get => _data.").Print(fieldRef.propertyName).PrintEndLine(";");
                     }
                     p.CloseScope();
@@ -907,7 +914,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteReadOnlyViewStruct_Equality(ref Printer p)
         {
-            p.PrintBeginLineIf(isValueType, AGGRESSIVE_INLINING, "").Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLineIf(isValueType, PR_AGGRESSIVE_INLINING, "").Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintLine($"public bool Equals({readOnlyTypeName} other)");
             p.OpenScope();
             {
@@ -923,7 +930,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintLine("public override bool Equals(object obj)");
             p.OpenScope();
             {
@@ -935,11 +942,11 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteReadOnlyViewStruct_GetHashCodeMethod(ref Printer p)
         {
-            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintLine("public override int GetHashCode()");
             p.OpenScope();
             {
-                p.PrintLine("var hash = new HashValue();");
+                p.PrintLine("var hash = new ET.HashValue();");
                 p.PrintLine("hash.Add(_data);");
                 p.PrintLine("return hash.ToHashCode();");
             }
@@ -949,7 +956,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteReadOnlyViewStruct_ImplicitOperator(ref Printer p)
         {
-            p.PrintBeginLine(GENERATED_CODE).Print(EXCLUDE_COVERAGE).PrintEndLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine(PR_GENERATED_CODE).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static implicit operator ")
                 .Print(readOnlyTypeName)
                 .Print("(")
@@ -967,7 +974,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteReadOnlyViewStruct_EqualityOperators(ref Printer p)
         {
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintLine($"public static bool operator ==(in {readOnlyTypeName} left, in {readOnlyTypeName} right)");
             p.OpenScope();
             {
@@ -976,33 +983,13 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintLine($"public static bool operator !=(in {readOnlyTypeName} left, in {readOnlyTypeName} right)");
             p.OpenScope();
             {
                 p.PrintLine("return !left.Equals(right);");
             }
             p.CloseScope();
-            p.PrintEndLine();
-        }
-
-        private static void PrintAdditionalUsings(ref Printer p)
-        {
-            p.PrintEndLine();
-            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
-            p.PrintEndLine();
-            p.PrintLine("using System;");
-            p.PrintLine("using System.Collections.Generic;");
-            p.PrintLine("using System.Diagnostics.CodeAnalysis;");
-            p.PrintLine("using System.CodeDom.Compiler;");
-            p.PrintLine("using System.Runtime.CompilerServices;");
-            p.PrintLine("using System.Runtime.InteropServices;");
-            p.PrintLine("using EncosyTower.Common;");
-            p.PrintLine("using EncosyTower.Data;");
-            p.PrintLine("using EncosyTower.Data.SourceGen;");
-            p.PrintLine("using UnityEngine;");
-            p.PrintEndLine();
-            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();
         }
     }

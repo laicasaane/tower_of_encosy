@@ -1,6 +1,6 @@
 using System;
 
-namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
+namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 {
     internal enum AotCollectionKind
     {

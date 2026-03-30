@@ -1,11 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 
 namespace EncosyTower.SourceGen.Generators.EnumExtensions
 {
@@ -79,9 +77,10 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
             // The type argument is the enum type passed via typeof(X).
             // If it is null or not an enum the analyzer (EnumExtensionsAnalyzer) will report it.
-            var enumSymbol = attribData.ConstructorArguments[0].Value as INamedTypeSymbol;
 
-            if (enumSymbol is null || enumSymbol.TypeKind != TypeKind.Enum)
+            if (attribData.ConstructorArguments[0].Value is not INamedTypeSymbol enumSymbol
+                || enumSymbol.TypeKind != TypeKind.Enum
+            )
             {
                 return default;
             }
@@ -89,13 +88,21 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             var syntax = context.TargetNode;
             var location = LocationInfo.From(syntax.GetLocation());
 
+            TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                  syntax
+                , token
+                , out var openingSource
+                , out var closingSource
+                , printAdditionalUsings: PrintAdditionalUsings
+            );
+
             var containingTypes = classSymbol.GetContainingTypes();
 
             var ns = classSymbol.ContainingNamespace;
             var namespaceName = ns is { IsGlobalNamespace: false } ? ns.ToDisplayString() : string.Empty;
 
             // extensionsName: the name of the decorated static class (not auto-derived from the enum name)
-            return EnumExtensionCandidate.Extract(
+            var candidate = EnumExtensionCandidate.Extract(
                   enumSymbol
                 , syntax.Parent is BaseNamespaceDeclarationSyntax
                 , classSymbol.Name
@@ -105,6 +112,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 , containingTypes
                 , token
             );
+
+            candidate.openingSource = openingSource;
+            candidate.closingSource = closingSource;
+
+            return candidate;
         }
 
         private static void GenerateOutput(
@@ -130,24 +142,17 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
                 var hintName = $"{GENERATOR_NAME}__{candidate.fileHintName}.g.cs";
                 var sourceFilePath = BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
-                var source = declaration.WriteCode();
 
-                var sourceText = SourceText.From(source, Encoding.UTF8)
-                    .WithIgnoreUnassignedVariableWarning()
-                    .WithInitialLineDirectiveToGeneratedSource(sourceFilePath);
-
-                context.AddSource(hintName, sourceText);
-
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(
-                          context
-                        , candidate.location.ToLocation()
-                        , sourceFilePath
-                        , sourceText
-                        , projectPath
-                    );
-                }
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , candidate.openingSource
+                    , declaration.WriteCode()
+                    , candidate.closingSource
+                    , hintName
+                    , sourceFilePath
+                    , candidate.location.ToLocation()
+                    , projectPath
+                );
             }
             catch (Exception e)
             {
@@ -159,6 +164,27 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 // Generator bugs are silently swallowed — do not emit diagnostics from the
                 // generator. User-facing validation is handled by EnumExtensionsAnalyzer.
             }
+        }
+
+        private static void PrintAdditionalUsings(ref Printer p)
+        {
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using S = global::System;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SC = global::System.Collections;");
+            p.PrintLine("using SCG = global::System.Collections.Generic;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+            p.PrintLine("using ETCon = global::EncosyTower.Conversion;");
+            p.PrintLine("using ETEE = global::EncosyTower.EnumExtensions;");
+            p.PrintLine("using ETEESG = global::EncosyTower.EnumExtensions.SourceGen;");
+            p.PrintLine("using UC = global::Unity.Collections;");
+            p.PrintEndLine();
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
         }
 
         private static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath)

@@ -164,6 +164,14 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             // Determine if parent is a namespace (for EnumExtensionsDeclaration)
             info.parentIsNamespace = context.TargetNode.Parent is BaseNamespaceDeclarationSyntax;
 
+            TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                  context.TargetNode
+                , token
+                , out info.openingSource
+                , out info.closingSource
+                , printAdditionalUsings: PrintAdditionalUsings
+            );
+
             info.containingTypes = symbol.GetContainingTypes();
 
             // Inline kinds via [UnionIdKind] attributes on this struct
@@ -549,24 +557,17 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
                 var hintName = $"{GENERATOR_NAME}__{idInfo.fileHintName}.g.cs";
                 var sourceFilePath = BuildSourceFilePath(assemblyName, hintName, projectPath);
-                var source = declaration.WriteCode();
 
-                var sourceText = SourceText.From(source, Encoding.UTF8)
-                    .WithIgnoreUnassignedVariableWarning()
-                    .WithInitialLineDirectiveToGeneratedSource(sourceFilePath);
-
-                context.AddSource(hintName, sourceText);
-
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(
-                          context
-                        , idInfo.location.ToLocation()
-                        , sourceFilePath
-                        , sourceText
-                        , projectPath
-                    );
-                }
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , idInfo.openingSource
+                    , declaration.WriteCode()
+                    , idInfo.closingSource
+                    , hintName
+                    , sourceFilePath
+                    , idInfo.location.ToLocation()
+                    , projectPath
+                );
             }
             catch (Exception e)
             {
@@ -579,6 +580,35 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     , e.ToUnityPrintableString()
                 ));
             }
+        }
+
+        private static void PrintAdditionalUsings(ref Printer p)
+        {
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using S = global::System;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SC = global::System.Collections;");
+            p.PrintLine("using SCG = global::System.Collections.Generic;");
+            p.PrintLine("using SCM = global::System.ComponentModel;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+            p.PrintLine("using ETCol = global::EncosyTower.Collections;");
+            p.PrintLine("using ETColE = global::EncosyTower.Collections.Extensions;");
+            p.PrintLine("using ETCon = global::EncosyTower.Conversion;");
+            p.PrintLine("using ETEE = global::EncosyTower.EnumExtensions;");
+            p.PrintLine("using ETEESG = global::EncosyTower.EnumExtensions.SourceGen;");
+            p.PrintLine("using ETUI = global::EncosyTower.UnionIds;");
+            p.PrintLine("using ETUIT = global::EncosyTower.UnionIds.Types;");
+            p.PrintLine("using ETS = global::EncosyTower.Serialization;");
+            p.PrintLine("using ETSE = global::EncosyTower.SystemExtensions;");
+            p.PrintLine("using UE = global::UnityEngine;");
+            p.PrintLine("using UC = global::Unity.Collections;");
+            p.PrintEndLine();
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
         }
 
         private static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath = null)

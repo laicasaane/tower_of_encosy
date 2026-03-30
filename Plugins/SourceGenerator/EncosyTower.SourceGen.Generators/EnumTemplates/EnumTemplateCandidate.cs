@@ -24,6 +24,20 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         /// </summary>
         public LocationInfo location;
 
+        /// <summary>
+        /// Pre-computed namespace / containing-type scope opener, produced by
+        /// <c>TypeCreationHelpers.GenerateOpeningAndClosingSource</c> in the
+        /// incremental transform phase. Excluded from <see cref="Equals(EnumTemplateCandidate)"/>
+        /// and <see cref="GetHashCode"/> for the same reason as <see cref="location"/>.
+        /// </summary>
+        public string openingSource;
+
+        /// <summary>
+        /// Matching closing braces for <see cref="openingSource"/>. Excluded from
+        /// equality / hash for the same reason as <see cref="location"/>.
+        /// </summary>
+        public string closingSource;
+
         /// <summary>Fully qualified name of the template struct.</summary>
         public string templateFullName;
 
@@ -82,6 +96,14 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             var syntax = context.TargetNode;
             var location = LocationInfo.From(syntax.GetLocation());
 
+            TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                  syntax
+                , token
+                , out var openingSource
+                , out var closingSource
+                , printAdditionalUsings: PrintAdditionalUsings
+            );
+
             var containingTypes = templateSymbol.GetContainingTypes();
 
             var ns = templateSymbol.ContainingNamespace;
@@ -134,6 +156,8 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
             return new EnumTemplateCandidate {
                 location = location,
+                openingSource = openingSource,
+                closingSource = closingSource,
                 templateFullName = templateFullName,
                 templateSimpleName = templateSymbol.Name,
                 fileHintName = templateSymbol.ToFileName(),
@@ -165,5 +189,26 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             .Add(parentIsNamespace)
             .Add(containingTypes.GetHashCode())
             .Add(inlineMembers.GetHashCode());
+
+        private static void PrintAdditionalUsings(ref Printer p)
+        {
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using S = global::System;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SC = global::System.Collections;");
+            p.PrintLine("using SCG = global::System.Collections.Generic;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+            p.PrintLine("using ETCon = global::EncosyTower.Conversion;");
+            p.PrintLine("using ETEE = global::EncosyTower.EnumExtensions;");
+            p.PrintLine("using ETEESG = global::EncosyTower.EnumExtensions.SourceGen;");
+            p.PrintLine("using UC = global::Unity.Collections;");
+            p.PrintEndLine();
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+        }
     }
 }

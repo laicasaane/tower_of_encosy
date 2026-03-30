@@ -1,41 +1,52 @@
 ﻿using System.Collections.Immutable;
+using System.IO;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 {
-    using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-
     partial class InternalStringAdapterDeclaration
     {
-        private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters.InternalStringAdapterGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
-        private const string IADAPTER = "global::EncosyTower.Mvvm.ViewBinding.IAdapter";
-        private const string ADAPTER_ATTRIBUTE = "[global::EncosyTower.Mvvm.ViewBinding.Adapter(sourceType: typeof({0}), destType: typeof(string), order: 1)]";
-        private const string LABEL_ATTRIBUTE = "[global::EncosyTower.Annotations.Label(\"{0}\", \"{1}\")]";
-        private const string VARIANT = "global::EncosyTower.Variants.Variant";
-        private const string CACHED_VARIANT_CONVERTER = "global::EncosyTower.Variants.Converters.CachedVariantConverter";
+        private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters.InternalStringAdapterGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string IADAPTER = "ETMVB.IAdapter";
+        private const string ADAPTER_ATTRIBUTE = "[ETMVB.Adapter(sourceType: typeof({0}), destType: typeof(string), order: 1)]";
+        private const string LABEL_ATTRIBUTE = "[ETA.Label(\"{0}\", \"{1}\")]";
+        private const string VARIANT = "ETV.Variant";
+        private const string CACHED_VARIANT_CONVERTER = "ETVC.CachedVariantConverter";
         private const string GENERATOR_NAME = nameof(InternalStringAdapterGenerator);
 
         public void GenerateAdapters(
               SourceProductionContext context
-            , Compilation compilation
+            , string assemblyName
             , bool outputSourceGenFiles
         )
         {
-            var syntax = CompilationUnit().NormalizeWhitespace(eol: "\n");
-            var syntaxTree = syntax.SyntaxTree;
-            var assemblyName = compilation.Assembly.Name;
             var fileName = $"InternalStringAdapters_{assemblyName}";
-            var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, fileName, syntax);
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileName);
+            var stableHashCode = SourceGenHelpers.GetStableHashCode(string.Empty) & 0x7fffffff;
+            var hintName = $"{fileName}__{GENERATOR_NAME}_{stableHashCode}_0.g.cs";
+
+            string sourceFilePath;
+
+            if (SourceGenHelpers.CanWriteToProjectPath)
+            {
+                var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
+                Directory.CreateDirectory(dir);
+                sourceFilePath = $"{dir}{hintName}";
+            }
+            else
+            {
+                sourceFilePath = $"Temp/GeneratedCode/{assemblyName}/{hintName}";
+            }
 
             context.OutputSource(
                   outputSourceGenFiles
-                , syntax
+                , PrintAdditionalUsings()
                 , WriteAdapter(Candidates, assemblyName)
+                , string.Empty
                 , hintName
                 , sourceFilePath
+                , Location.None
             );
         }
 
@@ -85,5 +96,27 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 
         private static string AdapterTypeName(StringAdapterCandidateInfo typeRef)
             => $"{typeRef.identifierName}ToStringAdapter";
+
+        private static string PrintAdditionalUsings()
+        {
+            var p = Printer.Default;
+
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using S = global::System;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using ETA = global::EncosyTower.Annotations;");
+            p.PrintLine("using ETMVB = global::EncosyTower.Mvvm.ViewBinding;");
+            p.PrintLine("using ETV = global::EncosyTower.Variants;");
+            p.PrintLine("using ETVC = global::EncosyTower.Variants.Converters;");
+            p.PrintEndLine();
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+
+            return p.Result;
+        }
     }
 }

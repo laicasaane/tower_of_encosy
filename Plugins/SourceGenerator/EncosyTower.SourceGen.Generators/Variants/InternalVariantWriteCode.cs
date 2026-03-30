@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.IO;
-using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 
 namespace EncosyTower.SourceGen.Generators.Variants
 {
@@ -12,15 +10,13 @@ namespace EncosyTower.SourceGen.Generators.Variants
         public const string GENERATOR_NAME = "InternalVariantDeclaration";
 
         private const string INTERNAL_VARIANTS_NAMESPACE = "EncosyTower.Variants.__InternalVariants__";
-        private const string VARIANTS_NAMESPACE = "EncosyTower.Variants";
 
-        private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
-        private const string STRUCT_LAYOUT = "[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit)]";
-        private const string PRESERVE = "[global::UnityEngine.Scripting.Preserve]";
-        private const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.BeforeSceneLoad)]";
-        private const string GENERATED_INTERNAL_VARIANTS = $"[global::{VARIANTS_NAMESPACE}.SourceGen.GeneratedInternalVariants]";
-
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.Variants.InternalVariantGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.Variants.InternalVariantGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string STRUCT_LAYOUT = "[SRIS.StructLayout(SRIS.LayoutKind.Explicit)]";
+        private const string PRESERVE = "[UES.Preserve]";
+        private const string RUNTIME_INITIALIZE_ON_LOAD_METHOD = "[UE.RuntimeInitializeOnLoadMethod(UE.RuntimeInitializeLoadType.BeforeSceneLoad)]";
+        private const string GENERATED_INTERNAL_VARIANTS = "[ETVSG.GeneratedInternalVariants]";
 
         public static void WriteVariantCode(
               ref SourceProductionContext context
@@ -38,18 +34,16 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
             try
             {
-                var source = BuildVariantSource(in decl, assemblyName);
-
-                var sourceText = SourceText.From(source, Encoding.UTF8)
-                    .WithIgnoreUnassignedVariableWarning()
-                    .WithInitialLineDirectiveToGeneratedSource(sourceFilePath);
-
-                context.AddSource(hintName, sourceText);
-
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(context, decl.location.ToLocation(), sourceFilePath, sourceText, projectPath);
-                }
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , PrintAdditionalUsings()
+                    , BuildVariantSource(in decl, assemblyName)
+                    , string.Empty
+                    , hintName
+                    , sourceFilePath
+                    , decl.location.ToLocation()
+                    , projectPath
+                );
             }
             catch (Exception e)
             {
@@ -67,7 +61,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             var typeName = decl.fullTypeName;
             var structName = decl.structName;
             var isValueType = decl.isValueType;
-            var variantName = $"global::{VARIANTS_NAMESPACE}.Variant<{typeName}>";
+            var variantName = $"ETV.Variant<{typeName}>";
 
             var p = Printer.DefaultLarge;
             var variantPrinter = new VariantPrinter();
@@ -87,7 +81,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                     p.PrintLineIf(isValueType, STRUCT_LAYOUT);
                     p.PrintBeginLine()
                         .Print("private partial struct ").Print(structName)
-                        .Print($" : global::{VARIANTS_NAMESPACE}.IVariant<{typeName}>")
+                        .Print($" : ETV.IVariant<{typeName}>")
                         .PrintEndLine();
 
                     variantPrinter.WriteVariantBody(
@@ -123,18 +117,16 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
             try
             {
-                var source = BuildStaticClassSource(valueTypes, refTypes, assemblyName);
-
-                var sourceText = SourceText.From(source, Encoding.UTF8)
-                    .WithIgnoreUnassignedVariableWarning()
-                    .WithInitialLineDirectiveToGeneratedSource(sourceFilePath);
-
-                context.AddSource(hintName, sourceText);
-
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(context, Location.None, sourceFilePath, sourceText, projectPath);
-                }
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , PrintAdditionalUsings()
+                    , BuildStaticClassSource(valueTypes, refTypes, assemblyName)
+                    , string.Empty
+                    , hintName
+                    , sourceFilePath
+                    , Location.None
+                    , projectPath
+                );
             }
             catch (Exception e)
             {
@@ -168,7 +160,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 p.PrintLine("/// Contains auto-generated variants for types detected from usage of either");
                 p.PrintLine($"/// <c>Variant&lt;T&gt;.GetConverter()</c> or <c>CachedVariantConverter&lt;T&gt;.Default</c>.");
                 p.PrintLine("/// <br/>");
-                p.PrintLine($"/// Automatically register these variants to <see cref=\"{VARIANTS_NAMESPACE}.Converters.VariantConverter\"/>");
+                p.PrintLine($"/// Automatically register these variants to <see cref=\"ETVC.VariantConverter\"/>");
                 p.PrintLine("/// on Unity3D platform.");
                 p.PrintLine("/// <br/>");
                 p.PrintLine("/// These variants are not intended to be used directly by user-code");
@@ -190,7 +182,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
                     p.PrintLine("/// <summary>");
                     p.PrintLine("/// Register all variants inside this class");
-                    p.PrintLine($"/// to <see cref=\"{VARIANTS_NAMESPACE}.Converters.VariantConverter\"/>.");
+                    p.PrintLine($"/// to <see cref=\"ETVC.VariantConverter\"/>.");
                     p.PrintLine("/// </summary>");
                     p.PrintLine(PRESERVE);
                     p.PrintLine("public static void Register() => Init();");
@@ -254,6 +246,31 @@ namespace EncosyTower.SourceGen.Generators.Variants
             }
 
             return $"Temp/GeneratedCode/{assemblyName}/{hintName}";
+        }
+
+        private static string PrintAdditionalUsings()
+        {
+            var p = Printer.Default;
+
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using S = global::System;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+            p.PrintLine("using ETT = global::EncosyTower.Types;");
+            p.PrintLine("using ETV = global::EncosyTower.Variants;");
+            p.PrintLine("using ETVC = global::EncosyTower.Variants.Converters;");
+            p.PrintLine("using ETVSG = global::EncosyTower.Variants.SourceGen;");
+            p.PrintLine("using UE = global::UnityEngine;");
+            p.PrintLine("using UES = global::UnityEngine.Scripting;");
+            p.PrintEndLine();
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+
+            return p.Result;
         }
     }
 }

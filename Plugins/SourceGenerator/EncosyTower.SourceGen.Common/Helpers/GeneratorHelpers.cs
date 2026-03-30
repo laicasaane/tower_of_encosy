@@ -25,6 +25,14 @@ namespace EncosyTower.SourceGen
             "global::Unity.Collections.FixedString4096Bytes",
         };
 
+        public readonly static string[] Print_FixedStringTypeNames = new string[] {
+            "UC.FixedString32Bytes",
+            "UC.FixedString64Bytes",
+            "UC.FixedString128Bytes",
+            "UC.FixedString512Bytes",
+            "UC.FixedString4096Bytes",
+        };
+
         public static bool IsValidCompilation(
               this Compilation compilation
             , string generatorNamespace
@@ -351,33 +359,14 @@ namespace EncosyTower.SourceGen
                 _ => "global::Unity.Collections.FixedString4096Bytes",
             };
 
-        public static Printer WritePreserveAttributeClass(this ref Printer p, string generatedCode = null)
-        {
-            p.PrintLine(generatedCode ?? GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine("[global::System.AttributeUsage(");
-            p = p.IncreasedIndent();
-            {
-                p.PrintLine("  global::System.AttributeTargets.Assembly");
-                p.PrintLine("| global::System.AttributeTargets.Class");
-                p.PrintLine("| global::System.AttributeTargets.Struct");
-                p.PrintLine("| global::System.AttributeTargets.Enum");
-                p.PrintLine("| global::System.AttributeTargets.Constructor");
-                p.PrintLine("| global::System.AttributeTargets.Method");
-                p.PrintLine("| global::System.AttributeTargets.Property");
-                p.PrintLine("| global::System.AttributeTargets.Field");
-                p.PrintLine("| global::System.AttributeTargets.Event");
-                p.PrintLine("| global::System.AttributeTargets.Interface");
-                p.PrintLine("| global::System.AttributeTargets.Delegate");
-                p.PrintLine(", Inherited = false");
-            }
-            p = p.DecreasedIndent();
-            p.PrintLine(")]");
-            p.PrintLine("public sealed class PreserveAttribute : global::System.Attribute { }");
-            return p;
-        }
-
-        public static string GetEnumUnderlyingTypeFromMemberCount(long memberCount)
-            => GetEnumUnderlyingTypeFromSize(DetermineEnumSizeFromMemberCount(memberCount));
+        public static string GetPrintFixedStringTypeName(int maxByteCount)
+            => maxByteCount switch {
+                <= 32 - 3 => "UC.FixedString32Bytes",
+                <= 64 - 3 => "UC.FixedString64Bytes",
+                <= 128 - 3 => "UC.FixedString128Bytes",
+                <= 512 - 3 => "UC.FixedString512Bytes",
+                _ => "UC.FixedString4096Bytes",
+            };
 
         public static string GetEnumUnderlyingTypeFromMemberCount(ulong memberCount)
             => GetEnumUnderlyingTypeFromSize(DetermineEnumSizeFromMemberCount(memberCount));

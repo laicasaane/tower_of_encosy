@@ -173,24 +173,17 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
                 var hintName = $"{GENERATOR_NAME}__{templateCandidate.fileHintName}.g.cs";
                 var sourceFilePath = BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
-                var source = declaration.WriteCode();
 
-                var sourceText = SourceText.From(source, Encoding.UTF8)
-                    .WithIgnoreUnassignedVariableWarning()
-                    .WithInitialLineDirectiveToGeneratedSource(sourceFilePath);
-
-                context.AddSource(hintName, sourceText);
-
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(
-                          context
-                        , templateCandidate.location.ToLocation()
-                        , sourceFilePath
-                        , sourceText
-                        , projectPath
-                    );
-                }
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , templateCandidate.openingSource
+                    , declaration.WriteCode()
+                    , templateCandidate.closingSource
+                    , hintName
+                    , sourceFilePath
+                    , templateCandidate.location.ToLocation()
+                    , projectPath
+                );
             }
             catch (Exception e)
             {

@@ -8,6 +8,20 @@ namespace EncosyTower.SourceGen.Generators.Variants
         public LocationInfo location;
 
         /// <summary>
+        /// Pre-generated namespace/outer-type opening source text.
+        /// Intentionally excluded from <see cref="Equals(VariantDeclaration)"/>
+        /// and <see cref="GetHashCode"/>: derived from syntax, not a stable cache key.
+        /// </summary>
+        public string openingSource;
+
+        /// <summary>
+        /// Pre-generated closing braces that match <see cref="openingSource"/>.
+        /// Intentionally excluded from <see cref="Equals(VariantDeclaration)"/>
+        /// and <see cref="GetHashCode"/>: derived from syntax, not a stable cache key.
+        /// </summary>
+        public string closingSource;
+
+        /// <summary>
         /// Fully-qualified name of the wrapped type <c>T</c> (e.g. <c>global::System.Int32</c>).
         /// Used as the deduplication key across candidates.
         /// </summary>

@@ -1,13 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 
-namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
+namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 {
     [Generator]
     internal class NewtonsoftJsonAotHelperGenerator : IIncrementalGenerator
@@ -94,8 +92,18 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
                 , token
             );
 
+            TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                  context.TargetNode
+                , token
+                , out var openingSource
+                , out var closingSource
+                , printAdditionalUsings: PrintAdditionalUsings
+            );
+
             return new NewtonsoftAotHelperInfo {
                 location = LocationInfo.From(context.TargetNode.GetLocation()),
+                openingSource = openingSource,
+                closingSource = closingSource,
                 typeName = symbol.Name,
                 fileHintName = symbol.ToFileName(),
                 baseTypeFullName = baseType.ToFullName(),
@@ -339,24 +347,16 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
                 SourceGenHelpers.ProjectPath = projectPath;
                 var sourceFilePath = BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
 
-                var source = HelperDeclaration.WriteCode(helperInfo, helperInfo.typeCandidates.AsImmutableArray());
-
-                var sourceText = SourceText.From(source, Encoding.UTF8)
-                    .WithIgnoreUnassignedVariableWarning()
-                    .WithInitialLineDirectiveToGeneratedSource(sourceFilePath);
-
-                context.AddSource(hintName, sourceText);
-
-                if (outputSourceGenFiles)
-                {
-                    SourceGenHelpers.OutputSourceToFile(
-                          context
-                        , helperInfo.location.ToLocation()
-                        , sourceFilePath
-                        , sourceText
-                        , projectPath
-                    );
-                }
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , helperInfo.openingSource
+                    , HelperDeclaration.WriteCode(helperInfo, helperInfo.typeCandidates.AsImmutableArray())
+                    , helperInfo.closingSource
+                    , hintName
+                    , sourceFilePath
+                    , helperInfo.location.ToLocation()
+                    , projectPath
+                );
             }
             catch (Exception e)
             {
@@ -365,6 +365,18 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
                     throw;
                 }
             }
+        }
+
+        private static void PrintAdditionalUsings(ref Printer p)
+        {
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using NSJU = global::Newtonsoft.Json.Utilities;");
+            p.PrintLine("using UES = global::UnityEngine.Scripting;");
+            p.PrintEndLine();
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
         }
 
         private static string BuildSourceFilePath(

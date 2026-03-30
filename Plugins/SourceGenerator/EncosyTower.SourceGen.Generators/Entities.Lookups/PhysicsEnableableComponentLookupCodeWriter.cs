@@ -2,13 +2,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 {
     internal sealed class PhysicsEnableableComponentLookupCodeWriter : LookupCodeWriter
     {
-        private const string LOOKUP = "PhysicsComponentLookup<";
-        private const string SAFE_ENTITY = "SafeEntity";
-        private const string REFRW = "RefRW<";
+        private const string PR_LOOKUP = "LP.PhysicsComponentLookup<";
+        private const string PR_SAFE_ENTITY = "LP.SafeEntity";
+        private const string PR_REFRW = "UE.RefRW<";
 
         protected override void WriteStructBody(ref Printer p, LookupDefinition definition)
         {
-            WriteFields(ref p, definition, LOOKUP);
+            WriteFields(ref p, definition, PR_LOOKUP);
             WriteConstructor(ref p, definition, "GetComponentLookup");
             WriteUpdateMethods(ref p, definition);
             WriteConcreteMethods(ref p, definition);
@@ -25,25 +25,25 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public void HasComponent(")
-                    .Print(SAFE_ENTITY).Print(" entity, out ").Print(BOOL)
+                    .Print(PR_SAFE_ENTITY).Print(" entity, out ").Print(PR_BOOL)
                     .Print(typeName).Print("> result)")
-                    .Print(" => result = (").Print(BOOL).Print(typeName)
+                    .Print(" => result = (").Print(PR_BOOL).Print(typeName)
                     .Print(">)").Print(lookupField)
                     .PrintEndLine(".HasComponent(entity);");
                 p.PrintEndLine();
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public void DidChange(")
-                    .Print(SAFE_ENTITY).Print(" entity, uint version, out ").Print(BOOL)
+                    .Print(PR_SAFE_ENTITY).Print(" entity, uint version, out ").Print(PR_BOOL)
                     .Print(typeName).Print("> result)")
-                    .Print(" => result = (").Print(BOOL).Print(typeName)
+                    .Print(" => result = (").Print(PR_BOOL).Print(typeName)
                     .Print(">)").Print(lookupField)
                     .PrintEndLine(".DidChange(entity, version);");
                 p.PrintEndLine();
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public bool TryGetComponent(")
-                    .Print(SAFE_ENTITY).Print(" entity, out ")
+                    .Print(PR_SAFE_ENTITY).Print(" entity, out ")
                     .Print(typeName).Print(" componentData)")
                     .Print(" => ").Print(lookupField)
                     .PrintEndLine(".TryGetComponent(entity, out componentData);");
@@ -51,7 +51,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public ").Print(typeName).Print(" GetComponentData(")
-                    .Print(SAFE_ENTITY).Print(" entity, ")
+                    .Print(PR_SAFE_ENTITY).Print(" entity, ")
                     .Print(typeName).Print(" _)")
                     .Print(" => ").Print(lookupField)
                     .PrintEndLine("[entity];");
@@ -59,7 +59,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public void GetComponentData(")
-                    .Print(SAFE_ENTITY).Print(" entity, out ")
+                    .Print(PR_SAFE_ENTITY).Print(" entity, out ")
                     .Print(typeName).Print(" componentData)")
                     .Print(" => componentData = ").Print(lookupField)
                     .PrintEndLine("[entity];");
@@ -67,7 +67,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public void SetComponentData(")
-                    .Print(SAFE_ENTITY).Print(" entity, ")
+                    .Print(PR_SAFE_ENTITY).Print(" entity, ")
                     .Print(typeName).Print(" componentData)")
                     .Print(" => ").Print(lookupField)
                     .PrintEndLine("[entity] = componentData;");
@@ -77,7 +77,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
                 {
                     WriteAttributes(ref p);
                     p.PrintBeginLine("public void GetRefRW(")
-                        .Print(SAFE_ENTITY).Print(" entity, out ").Print(REFRW)
+                        .Print(PR_SAFE_ENTITY).Print(" entity, out ").Print(PR_REFRW)
                         .Print(typeName).Print("> result)")
                         .Print(" => result = ").Print(lookupField)
                         .PrintEndLine(".GetRW(entity);");
@@ -85,15 +85,15 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                     WriteAttributes(ref p);
                     p.PrintBeginLine("public void GetRefRW(")
-                        .Print(SAFE_ENTITY).Print(" entity, ").Print(typeName)
-                        .Print(" _, out ").Print(REFRW).Print(typeName).Print("> result)")
+                        .Print(PR_SAFE_ENTITY).Print(" entity, ").Print(typeName)
+                        .Print(" _, out ").Print(PR_REFRW).Print(typeName).Print("> result)")
                         .Print(" => result = ").Print(lookupField)
                         .PrintEndLine(".GetRW(entity);");
                     p.PrintEndLine();
 
                     WriteAttributesNoInline(ref p);
                     p.PrintBeginLine("public void GetRefRWOptional(")
-                        .Print(SAFE_ENTITY).Print(" entity, out ").Print(REFRW)
+                        .Print(PR_SAFE_ENTITY).Print(" entity, out ").Print(PR_REFRW)
                         .Print(typeName).PrintEndLine("> result)");
                     p.OpenScope();
                     {
@@ -103,7 +103,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
                         p.PrintLine("if (lookup.HasComponent(entity) == false)");
                         p.OpenScope();
                         {
-                            p.PrintBeginLine("result = new ").Print(REFRW).Print(typeName).PrintEndLine(">();");
+                            p.PrintBeginLine("result = new ").Print(PR_REFRW).Print(typeName).PrintEndLine(">();");
                         }
                         p.CloseScope();
                         p.PrintLine("else");
@@ -118,8 +118,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                     WriteAttributesNoInline(ref p);
                     p.PrintBeginLine("public void GetRefRWOptional(")
-                        .Print(SAFE_ENTITY).Print(" entity, ").Print(typeName)
-                        .Print(" _, out ").Print(REFRW).Print(typeName).PrintEndLine("> result)");
+                        .Print(PR_SAFE_ENTITY).Print(" entity, ").Print(typeName)
+                        .Print(" _, out ").Print(PR_REFRW).Print(typeName).PrintEndLine("> result)");
                     p.OpenScope();
                     {
                         p.PrintBeginLine("var lookup = ").Print(lookupField).PrintEndLine(";");
@@ -128,7 +128,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
                         p.PrintLine("if (lookup.HasComponent(entity) == false)");
                         p.OpenScope();
                         {
-                            p.PrintBeginLine("result = new ").Print(REFRW).Print(typeName).PrintEndLine(">();");
+                            p.PrintBeginLine("result = new ").Print(PR_REFRW).Print(typeName).PrintEndLine(">();");
                         }
                         p.CloseScope();
                         p.PrintLine("else");
@@ -143,7 +143,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
                 }
 
                 WriteAttributes(ref p);
-                p.PrintBeginLine("public static implicit operator ").Print(LOOKUP)
+                p.PrintBeginLine("public static implicit operator ").Print(PR_LOOKUP)
                     .Print(typeName).Print(">(in ").Print(definition.structName).Print(" value)")
                     .Print(" => value.").Print(lookupField).PrintEndLine(";");
                 p.PrintEndLine();
@@ -154,9 +154,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                 WriteAttributes(ref p);
                 p.PrintBeginLine("public void IsComponentEnabled(")
-                    .Print(SAFE_ENTITY).Print(" entity, out ").Print(BOOL)
+                    .Print(PR_SAFE_ENTITY).Print(" entity, out ").Print(PR_BOOL)
                     .Print(typeName).Print("> result)")
-                    .Print(" => result = (").Print(BOOL).Print(typeName)
+                    .Print(" => result = (").Print(PR_BOOL).Print(typeName)
                     .Print(">)").Print(lookupField)
                     .PrintEndLine(".IsEnabled(entity);");
                 p.PrintEndLine();
@@ -165,7 +165,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
                 {
                     WriteAttributes(ref p);
                     p.PrintBeginLine("public void SetComponentEnabled(")
-                        .Print(SAFE_ENTITY).Print(" entity, ").Print(BOOL)
+                        .Print(PR_SAFE_ENTITY).Print(" entity, ").Print(PR_BOOL)
                         .Print(typeName).Print("> value)")
                         .Print(" => ").Print(lookupField)
                         .PrintEndLine(".SetEnabled(entity, value);");
@@ -173,7 +173,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                     WriteAttributesNoInline(ref p);
                     p.PrintBeginLine("public void SetComponentEnabledOptional(")
-                        .Print(SAFE_ENTITY).Print(" entity, ").Print(BOOL)
+                        .Print(PR_SAFE_ENTITY).Print(" entity, ").Print(PR_BOOL)
                         .Print(typeName).PrintEndLine("> value)");
                     p.OpenScope();
                     {

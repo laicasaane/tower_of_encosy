@@ -299,7 +299,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 fixedStringBytes = kindFixedStringBytes + idFixedStringBytes;
             }
 
-            FixedStringType = GeneratorHelpers.GetFixedStringFullyQualifiedTypeName(fixedStringBytes);
+            FixedStringType = GeneratorHelpers.GetPrintFixedStringTypeName(fixedStringBytes);
         }
 
         private static string RemoveTypeKindSuffix(string name)
@@ -317,8 +317,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 <= 2 => "ushort",
                 <= 4 => "uint",
                 <= 8 => "ulong",
-                <= 12 => "global::EncosyTower.UnionIds.Types.UnionId_UInt3",
-                <= 16 => "global::EncosyTower.UnionIds.Types.UnionId_ULong2",
+                <= 12 => "ETUIT.UnionId_UInt3",
+                <= 16 => "ETUIT.UnionId_ULong2",
                 _ => "ulong",
             };
 
@@ -329,8 +329,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 <= 2 => "short",
                 <= 4 => "int",
                 <= 8 => "ulong",
-                <= 12 => "global::EncosyTower.UnionIds.Types.UnionId_UInt3",
-                <= 16 => "global::EncosyTower.UnionIds.Types.UnionId_ULong2",
+                <= 12 => "ETUIT.UnionId_UInt3",
+                <= 16 => "ETUIT.UnionId_ULong2",
                 _ => "long",
             };
 

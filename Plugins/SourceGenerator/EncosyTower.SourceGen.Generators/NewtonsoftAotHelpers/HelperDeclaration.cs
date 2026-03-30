@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
-namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
+namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 {
     internal struct HelperDeclaration
     {
-        private const string AOT_HELPER = "global::Newtonsoft.Json.Utilities.AotHelper";
+        private const string AOT_HELPER = "NSJU.AotHelper";
 
         /// <summary>
         /// Generates the complete source text for the partial class/struct annotated
@@ -24,21 +24,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            var hasNamespace = string.IsNullOrEmpty(helper.namespaceName) == false;
-            var numContainingTypes = helper.containingTypes.Count;
-
-            if (hasNamespace)
-            {
-                p.PrintLine($"namespace {helper.namespaceName}");
-                p.OpenScope();
-            }
-
-            for (var i = 0; i < numContainingTypes; i++)
-            {
-                p.PrintLine(helper.containingTypes[i]);
-                p.OpenScope();
-            }
-
             var staticKeyword = helper.isStatic ? "static " : "";
             var recordKeyword = helper.isRecord ? "record " : "";
             var typeKeyword = helper.typeKind == TypeKind.Class ? "class " : "struct ";
@@ -47,7 +32,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
                 .PrintEndLine(helper.typeName);
             p.OpenScope();
             {
-                p.PrintLine("[global::UnityEngine.Scripting.Preserve]");
+                p.PrintLine("[UES.Preserve]");
                 p.PrintBeginLine("public ").Print(staticKeyword).PrintEndLine("void EnsureNewtonsoftJson()");
                 p.OpenScope();
                 {
@@ -73,16 +58,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftJsonHelpers
             }
             p.CloseScope();
             p.PrintEndLine();
-
-            for (var i = 0; i < numContainingTypes; i++)
-            {
-                p.CloseScope();
-            }
-
-            if (hasNamespace)
-            {
-                p.CloseScope();
-            }
 
             return p.Result;
         }

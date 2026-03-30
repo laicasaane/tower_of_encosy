@@ -70,12 +70,25 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 return default;
             }
 
-            return VariantStructGenerator.BuildDeclaration(
+            var decl = VariantStructGenerator.BuildDeclaration(
                   structSymbol
                 , typeArg
                 , LocationInfo.From(context.TargetNode.GetLocation())
                 , token
             );
+
+            if (decl.IsValid)
+            {
+                TypeCreationHelpers.GenerateOpeningAndClosingSource(
+                      context.TargetNode
+                    , token
+                    , out decl.openingSource
+                    , out decl.closingSource
+                    , printAdditionalUsings: PrintAdditionalUsings
+                );
+            }
+
+            return decl;
         }
 
         private static void GenerateOutput(
@@ -145,6 +158,27 @@ namespace EncosyTower.SourceGen.Generators.Variants
                     , e.ToUnityPrintableString()
                 ));
             }
+        }
+
+        private static void PrintAdditionalUsings(ref Printer p)
+        {
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using S = global::System;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+            p.PrintLine("using ETT = global::EncosyTower.Types;");
+            p.PrintLine("using ETV = global::EncosyTower.Variants;");
+            p.PrintLine("using ETVC = global::EncosyTower.Variants.Converters;");
+            p.PrintLine("using ETVSG = global::EncosyTower.Variants.SourceGen;");
+            p.PrintLine("using UE = global::UnityEngine;");
+            p.PrintLine("using UES = global::UnityEngine.Scripting;");
+            p.PrintEndLine();
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor

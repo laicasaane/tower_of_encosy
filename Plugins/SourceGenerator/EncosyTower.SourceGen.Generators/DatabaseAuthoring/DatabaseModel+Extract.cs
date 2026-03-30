@@ -412,7 +412,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , Dictionary<string, Dictionary<string, HashSet<string>>> horizontalListMap
         )
         {
-            var attributes = member.GetAttributes(HORIZONTAL_LIST_ATTRIBUTE);
+            var attributes = member.GetAttributes(PR_HORIZONTAL_LIST_ATTRIBUTE);
 
             foreach (var attrib in attributes)
             {
@@ -1161,23 +1161,25 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             p.PrintEndLine();
             p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();
-            p.PrintLine("using System;");
-            p.PrintLine("using System.Collections.Generic;");
-            p.PrintLine("using System.Diagnostics.CodeAnalysis;");
-            p.PrintLine("using System.CodeDom.Compiler;");
-            p.PrintLine("using System.Runtime.CompilerServices;");
-            p.PrintLine("using System.Runtime.InteropServices;");
-            p.PrintLine("using Cathei.BakingSheet;");
-            p.PrintLine("using Cathei.BakingSheet.Unity;");
-            p.PrintLine("using EncosyTower.Common;");
-            p.PrintLine("using EncosyTower.Collections;");
-            p.PrintLine("using EncosyTower.Data;");
-            p.PrintLine("using EncosyTower.Databases.Authoring;");
-            p.PrintEndLine();
-            p.PrintLine("using ENaming = EncosyTower.Naming;");
-            p.PrintLine("using EDAuthoring = EncosyTower.Databases.Authoring;");
-            p.PrintLine("using EDASourceGen = EncosyTower.Databases.Authoring.SourceGen;");
-            p.PrintLine("using MELogging = Microsoft.Extensions.Logging;");
+            p.PrintLine("using S = global::System;");
+            p.PrintLine("using SCG = global::System.Collections.Generic;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+            p.PrintLine("using CBS = Cathei.BakingSheet;");
+            p.PrintLine("using CBSU = Cathei.BakingSheet.Unity;");
+            p.PrintLine("using ET = global::EncosyTower.Common;");
+            p.PrintLine("using ETC = EncosyTower.Collections;");
+            p.PrintLine("using ETCE = global::EncosyTower.Collections.Extensions;");
+            p.PrintLine("using ETD = global::EncosyTower.Data;");
+            p.PrintLine("using ETDBA = EncosyTower.Databases.Authoring;");
+            p.PrintLine("using ETDBASG = EncosyTower.Databases.Authoring.SourceGen;");
+            p.PrintLine("using ETDSG = global::EncosyTower.Data.SourceGen;");
+            p.PrintLine("using ETN = EncosyTower.Naming;");
+            p.PrintLine("using MEL = Microsoft.Extensions.Logging;");
+            p.PrintLine("using UE = global::UnityEngine;");
+            p.PrintLine("using UP = global::Unity.Properties;");
             p.PrintEndLine();
             p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();

@@ -6,27 +6,27 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 {
     partial struct MonoBinderDeclaration
     {
-        private const string BINDER_ATTR       = "[Binder]";
-        private const string SERIALIZABLE_ATTR = "[Serializable]";
-        private const string BINDING_PROP_ATTR = "[BindingProperty]";
-        private const string BINDING_CMD_ATTR  = "[BindingCommand]";
-        private const string HIDE_IN_INSPECTOR = "[field: global::UnityEngine.HideInInspector]";
-        private const string MONO_BINDER_BASE  = "MonoBinder";
-        private const string MONO_BINDING_PROP = "MonoBindingProperty";
-        private const string MONO_BINDING_CMD  = "MonoBindingCommand";
-        private const string UNITY_ACTION      = "UnityAction";
-        private const string LABEL_ATTR        = "Label";
+        private const string BINDER_ATTR       = "[ETMVB.Binder]";
+        private const string SERIALIZABLE_ATTR = "[S.Serializable]";
+        private const string BINDING_PROP_ATTR = "[ETMVB.BindingProperty]";
+        private const string BINDING_CMD_ATTR  = "[ETMVB.BindingCommand]";
+        private const string HIDE_IN_INSPECTOR = "[field: UE.HideInInspector]";
+        private const string MONO_BINDER_BASE  = "ETMVBC.MonoBinder";
+        private const string MONO_BINDING_PROP = "ETMVBC.MonoBindingProperty";
+        private const string MONO_BINDING_CMD  = "ETMVBC.MonoBindingCommand";
+        private const string UNITY_ACTION      = "UEE.UnityAction";
+        private const string LABEL_ATTR        = "ETA.Label";
 
-        private const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.MonoBinders.MonoBinderGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        private const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
-        private const string OBSOLETE_METHOD = "[Obsolete(\"This method is not intended to be used directly by user code.\")]";
-        private const string EDITOR_BROWSABLE_NEVER = "[EditorBrowsable(EditorBrowsableState.Never)]";
-        private const string GENERATED_BINDING_PROPERTY = "[GeneratedBindingProperty({0}, typeof({1}))]";
-        private const string GENERATED_BINDING_COMMAND = "[GeneratedBindingCommand(";
-        private const string GENERATED_CONVERTER = "[GeneratedConverter({0}, typeof({1}))]";
-        private const string IADAPTER = "IAdapter";
-        private const string CACHED_VARIANT_CONVERTER = "CachedVariantConverter";
+        private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.MonoBinders.MonoBinderGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string OBSOLETE_METHOD = "[S.Obsolete(\"This method is not intended to be used directly by user code.\")]";
+        private const string EDITOR_BROWSABLE_NEVER = "[SCM.EditorBrowsable(SCM.EditorBrowsableState.Never)]";
+        private const string GENERATED_BINDING_PROPERTY = "[ETMVBSG.GeneratedBindingProperty({0}, typeof({1}))]";
+        private const string GENERATED_BINDING_COMMAND = "[ETMVBSG.GeneratedBindingCommand(";
+        private const string GENERATED_CONVERTER = "[ETMVBSG.GeneratedConverter({0}, typeof({1}))]";
+        private const string IADAPTER = "ETMVB.IAdapter";
+        private const string CACHED_VARIANT_CONVERTER = "ETVC.CachedVariantConverter";
 
         /// <summary>
         /// Emits the body of the generated source file (everything between namespace braces).
@@ -107,7 +107,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             if (b.isObsolete)
             {
-                p.PrintBeginLine("[global::System.Obsolete(\"")
+                p.PrintBeginLine("[S.Obsolete(\"")
                     .Print(EscapeStringLiteral(b.obsoleteMessage))
                     .PrintEndLine("\")]");
             }
@@ -207,7 +207,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             if (b.isObsolete)
             {
-                p.PrintBeginLine("[global::System.Obsolete(\"")
+                p.PrintBeginLine("[S.Obsolete(\"")
                     .Print(EscapeStringLiteral(b.obsoleteMessage))
                     .PrintEndLine("\")]");
             }
@@ -317,8 +317,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 p.PrintEndLine();
 
                 // [BindingCommand] partial void method
-                p.PrintLine(BINDING_CMD_ATTR);
-                p.PrintLine(HIDE_IN_INSPECTOR);
+                p.PrintBeginLine(HIDE_IN_INSPECTOR).PrintEndLine(BINDING_CMD_ATTR);
 
                 if (hasWrapper && argCount > 1)
                 {
@@ -487,7 +486,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             WriteBpMethodInfoAttributes(ref p, userBindingPropertyRefs);
             WriteBcMethodInfoAttributes(ref p, userBindingCommandRefs);
 
-            p.PrintBeginLine("partial class ").Print(userClassName).PrintEndLine(" : IBinder");
+            p.PrintBeginLine("partial class ").Print(userClassName).PrintEndLine(" : ETMVB.IBinder");
             p.OpenScope();
             {
                 WriteBinderBody(
@@ -560,12 +559,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
 
             p.PrintBeginLine()
-                .Print("[BindingPropertyMethodInfo(")
+                .Print("[ETMVBSG.BindingPropertyMethodInfo(")
                 .Print("\"").Print(methodName).Print("\", typeof(")
                 .Print(paramType)
                 .PrintEndLine("))]");
 
-            p.PrintBeginLine("partial class ").Print(b.generatedClassName).PrintEndLine(" : IBinder");
+            p.PrintBeginLine("partial class ").Print(b.generatedClassName).PrintEndLine(" : ETMVB.IBinder");
             p.OpenScope();
             {
                 WriteBinderBody(
@@ -630,7 +629,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             var nvRefs   = ImmutableArray<BinderDeclaration.NonVariantTypeInfo>.Empty.AsEquatableArray();
 
             p.PrintBeginLine()
-                .Print("[BindingCommandMethodInfo(")
+                .Print("[ETMVBSG.BindingCommandMethodInfo(")
                 .Print("\"").Print(methodName).Print("\", ");
 
             if (string.IsNullOrEmpty(effectiveParamType))
@@ -640,7 +639,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             p.Print(")]").PrintEndLine();
 
-            p.PrintBeginLine("partial class ").Print(b.generatedClassName).PrintEndLine(" : IBinder");
+            p.PrintBeginLine("partial class ").Print(b.generatedClassName).PrintEndLine(" : ETMVB.IBinder");
             p.OpenScope();
             {
                 WriteBinderBody(
@@ -695,7 +694,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             WriteBinderSetAdapter(ref p, keyword, propRefs);
 
             if (nvTypes.Count > 0)
+            {
                 WriteBinderVariantOverloads(ref p, propRefs);
+            }
 
             WriteBinderPartialCommandMethods(ref p, cmdRefs);
             WriteBinderSetTargetCommandName(ref p, keyword, cmdRefs);
@@ -716,7 +717,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 var paramType = string.IsNullOrEmpty(m.paramFullTypeName) ? "void" : m.paramFullTypeName;
 
                 p.PrintBeginLine()
-                    .Print("[BindingPropertyMethodInfo(")
+                    .Print("[ETMVBSG.BindingPropertyMethodInfo(")
                     .Print("\"").Print(m.methodName).Print("\", typeof(")
                     .Print(paramType)
                     .PrintEndLine("))]");
@@ -731,7 +732,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             foreach (var m in cmdRefs)
             {
                 p.PrintBeginLine()
-                    .Print("[BindingCommandMethodInfo(")
+                    .Print("[ETMVBSG.BindingCommandMethodInfo(")
                     .Print("\"").Print(m.methodName).Print("\", ");
 
                 if (string.IsNullOrEmpty(m.paramFullTypeName))
@@ -791,7 +792,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 if (m.skipBindingProperty)
                     continue;
 
-                p.PrintLine("[global::UnityEngine.SerializeField]");
+                p.PrintLine("[UE.SerializeField]");
 
                 foreach (var attr in m.forwardedFieldAttributes)
                 {
@@ -800,8 +801,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
                 var paramType = string.IsNullOrEmpty(m.paramFullTypeName) ? "void" : m.paramFullTypeName;
                 p.PrintLine(string.Format(GENERATED_BINDING_PROPERTY, PropConstName(m.methodName), paramType));
-                p.PrintBeginLine("private BindingProperty ")
-                    .Print(PropFieldName(m.methodName)).PrintEndLine(" = new BindingProperty();");
+                p.PrintBeginLine("private ETMVB.BindingProperty ")
+                    .Print(PropFieldName(m.methodName)).PrintEndLine(" = new ETMVB.BindingProperty();");
                 p.PrintEndLine();
             }
 
@@ -818,7 +819,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 if (m.skipConverter || string.IsNullOrEmpty(m.paramFullTypeName))
                     continue;
 
-                p.PrintLine("[global::UnityEngine.SerializeField]");
+                p.PrintLine("[UE.SerializeField]");
 
                 foreach (var attr in m.forwardedFieldAttributes)
                 {
@@ -826,8 +827,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
 
                 p.PrintLine(string.Format(GENERATED_CONVERTER, PropConstName(m.methodName), m.paramFullTypeName));
-                p.PrintBeginLine("private Converter ")
-                    .Print(ConverterFieldName(m.methodName)).PrintEndLine(" = new Converter();");
+                p.PrintBeginLine("private ETMVB.Converter ")
+                    .Print(ConverterFieldName(m.methodName)).PrintEndLine(" = new ETMVB.Converter();");
                 p.PrintEndLine();
             }
 
@@ -844,7 +845,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 if (m.skipBindingCommand)
                     continue;
 
-                p.PrintLine("[global::UnityEngine.SerializeField]");
+                p.PrintLine("[UE.SerializeField]");
 
                 foreach (var attr in m.forwardedFieldAttributes)
                 {
@@ -861,8 +862,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                     p.Print(", typeof(").Print(m.paramFullTypeName).Print(")");
 
                 p.Print(")]").PrintEndLine();
-                p.PrintBeginLine("private BindingCommand ")
-                    .Print(CmdFieldName(m.methodName)).PrintEndLine(" = new BindingCommand();");
+                p.PrintBeginLine("private ETMVB.BindingCommand ")
+                    .Print(CmdFieldName(m.methodName)).PrintEndLine(" = new ETMVB.BindingCommand();");
                 p.PrintEndLine();
             }
 
@@ -896,7 +897,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             foreach (var m in propRefs)
             {
                 p.PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintBeginLine("private readonly PropertyChangeEventListener<")
+                p.PrintBeginLine("private readonly ETMCM.PropertyChangeEventListener<")
                     .Print(className).Print("> ").Print(ListenerFieldName(m.methodName)).PrintEndLine(";");
                 p.PrintEndLine();
             }
@@ -915,12 +916,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
                 if (string.IsNullOrEmpty(m.paramFullTypeName))
                 {
-                    p.PrintBeginLine("private IRelayCommand ")
+                    p.PrintBeginLine("private ETMI.IRelayCommand ")
                         .Print(RelayCommandFieldName(m.methodName)).PrintEndLine(";");
                 }
                 else
                 {
-                    p.PrintBeginLine("private IRelayCommand<")
+                    p.PrintBeginLine("private ETMI.IRelayCommand<")
                         .Print(m.paramFullTypeName).Print("> ")
                         .Print(RelayCommandFieldName(m.methodName)).PrintEndLine(";");
                 }
@@ -965,7 +966,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 foreach (var m in propRefs)
                 {
                     p.PrintBeginLine("this.").Print(ListenerFieldName(m.methodName))
-                        .Print(" = new PropertyChangeEventListener<").Print(className).PrintEndLine(">(this)");
+                        .Print(" = new ETMCM.PropertyChangeEventListener<").Print(className).PrintEndLine(">(this)");
                     p.OpenScope();
 
                     if (string.IsNullOrEmpty(m.paramFullTypeName))
@@ -1025,7 +1026,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
                 if (propRefs.Count > 0)
                 {
-                    p.PrintLine("if (this.Context is INotifyPropertyChanged inpc)");
+                    p.PrintLine("if (this.Context is ETMCM.INotifyPropertyChanged inpc)");
                     p.OpenScope();
                     {
                         foreach (var m in propRefs)
@@ -1048,7 +1049,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
                 if (cmdRefs.Count > 0)
                 {
-                    p.PrintLine("if (this.Context is ICommandListener cl)");
+                    p.PrintLine("if (this.Context is ETMI.ICommandListener cl)");
                     p.OpenScope();
                     {
                         foreach (var m in cmdRefs)
@@ -1082,13 +1083,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         {
             if (propRefs.Count > 0 && !hasOnBindPropertyFailedMethod)
             {
-                p.PrintLine("partial void OnBindPropertyFailed(BindingProperty bindingProperty);");
+                p.PrintLine("partial void OnBindPropertyFailed(ETMVB.BindingProperty bindingProperty);");
                 p.PrintEndLine();
             }
 
             if (cmdRefs.Count > 0 && !hasOnBindCommandFailedMethod)
             {
-                p.PrintLine("partial void OnBindCommandFailed(BindingCommand bindingCommand);");
+                p.PrintLine("partial void OnBindCommandFailed(ETMVB.BindingCommand bindingCommand);");
                 p.PrintEndLine();
             }
         }
@@ -1331,7 +1332,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                         p.PrintBeginLine("case ").Print(CmdConstName(m.methodName)).PrintEndLine(":");
                         p.OpenScope();
                         {
-                            p.PrintLine("this.").Print(CmdFieldName(m.methodName))
+                            p.PrintBeginLine("this.").Print(CmdFieldName(m.methodName))
                                 .PrintEndLine(".TargetCommandName = targetCommandName;");
                             p.PrintLine("return true;");
                         }
@@ -1365,7 +1366,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 p.PrintLine("base.RefreshContext();");
                 p.PrintEndLine();
 
-                p.PrintLine("if (this.Context is INotifyPropertyChanged inpc)");
+                p.PrintLine("if (this.Context is ETMCM.INotifyPropertyChanged inpc)");
                 p.OpenScope();
                 {
                     foreach (var m in propRefs)

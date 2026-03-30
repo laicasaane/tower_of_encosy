@@ -1,6 +1,7 @@
 ﻿using System;
 using EncosyTower.Entities.Stats;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace EncosyTower.Tests.Entities.Stats
@@ -10,12 +11,6 @@ namespace EncosyTower.Tests.Entities.Stats
     {
 
     }
-
-    [StatData(StatVariantType.Float)]
-    public partial struct Hp { }
-
-    [StatData(typeof(DirectionType), SingleValue = true)]
-    public partial struct Direction { }
 
     public enum DirectionType : byte
     {
@@ -42,6 +37,9 @@ namespace EncosyTower.Tests.Entities.Stats
 
         [StatData(typeof(DirectionType))]
         public partial struct Direction { }
+
+        [StatData(StatVariantType.Half2)]
+        public partial struct DirectionVector { }
 
         [StatData(typeof(MotionFlag))]
         public partial struct Motion { }
@@ -81,6 +79,7 @@ namespace EncosyTower.Tests.Entities.Stats
         public float hp;
         public float moveSpeed;
         public DirectionType direction;
+        public float2 directionVector;
         public MotionFlag motion;
 
         private class Baker : Baker<StatsAuthoring>
@@ -93,6 +92,7 @@ namespace EncosyTower.Tests.Entities.Stats
                     .CreateStat(Stats.Hp.Params.Create(authoring.hp))
                     .CreateStat(Stats.MoveSpeed.Params.Create(authoring.moveSpeed))
                     .CreateStat(Stats.Direction.Params.Create(authoring.direction))
+                    .CreateStat(Stats.DirectionVector.Params.Create((half2)authoring.directionVector))
                     .CreateStat(Stats.Motion.Params.Create(authoring.motion))
                     .CreateComponentData<Stats>()
                     .AddComponentToEntity();

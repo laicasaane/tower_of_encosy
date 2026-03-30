@@ -5,12 +5,12 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 {
     partial struct TypeWrapDeclaration
     {
-        public const string GENERATED_CODE = $"[GeneratedCode(GENERATOR, \"{SourceGenVersion.VALUE}\")]";
-        public const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
-        public const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
+        private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        public const string GENERATED_CODE = $"[SCDC.GeneratedCode(GENERATOR, \"{SourceGenVersion.VALUE}\")]";
         public const string GENERATOR = "\"EncosyTower.SourceGen.Generators.TypeWraps.TypeWrapGenerator\"";
-        private const string OBSOLETE_REF_STRUCT = "[Obsolete(\"Not supported for ref struct\")]";
-        private const string IWRAP = "IWrap<";
+        private const string OBSOLETE_REF_STRUCT = "[S.Obsolete(\"Not supported for ref struct\")]";
+        private const string IWRAP = "ETTW.IWrap<";
 
         public readonly string WriteCode()
         {
@@ -24,7 +24,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             {
                 if (excludeConverter == false && isRefStruct == false)
                 {
-                    p.PrintBeginLine("[TypeConverter(typeof(")
+                    p.PrintBeginLine("[SCM.TypeConverter(typeof(")
                         .Print(fullTypeName).Print(".")
                         .Print(typeNameWithTypeParams).PrintEndLine("TypeConverter))]");
                 }
@@ -97,8 +97,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             if (implementInterfaces.HasFlag(InterfaceKind.EquatableT))
             {
-                p.PrintBeginLine(", ").Print("IEquatable<").Print(fullTypeName).PrintEndLine(">");
-                p.PrintBeginLine(", ").Print("IEquatable<").Print(fieldTypeName).PrintEndLine(">");
+                p.PrintBeginLine(", ").Print("S.IEquatable<").Print(fullTypeName).PrintEndLine(">");
+                p.PrintBeginLine(", ").Print("S.IEquatable<").Print(fieldTypeName).PrintEndLine(">");
             }
 
             var hasCompareToT = implementInterfaces.HasFlag(InterfaceKind.ComparableT);
@@ -107,13 +107,13 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             if (hasCompareToT || hasCompareTo)
             {
-                p.PrintBeginLine(", ").PrintEndLine("IComparable");
+                p.PrintBeginLine(", ").PrintEndLine("S.IComparable");
             }
 
             if (implementInterfaces.HasFlag(InterfaceKind.ComparableT))
             {
-                p.PrintBeginLine(", ").Print("IComparable<").Print(fullTypeName).PrintEndLine(">");
-                p.PrintBeginLine(", ").Print("IComparable<").Print(fieldTypeName).PrintEndLine(">");
+                p.PrintBeginLine(", ").Print("S.IComparable<").Print(fullTypeName).PrintEndLine(">");
+                p.PrintBeginLine(", ").Print("S.IComparable<").Print(fieldTypeName).PrintEndLine(">");
             }
 
             p = p.DecreasedIndent();
@@ -1256,16 +1256,16 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
 
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine($"private sealed class {typeNameWithTypeParams}TypeConverter : TypeConverter");
+            p.PrintLine($"private sealed class {typeNameWithTypeParams}TypeConverter : SCM.TypeConverter");
             p.OpenScope();
             {
-                p.PrintLine($"private static readonly Type s_wrapperType = typeof({fullTypeName});");
-                p.PrintLine($"private static readonly Type s_underlyingType = typeof({fieldTypeName});");
+                p.PrintLine($"private static readonly S.Type s_wrapperType = typeof({fullTypeName});");
+                p.PrintLine($"private static readonly S.Type s_underlyingType = typeof({fieldTypeName});");
 
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintLine($"public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)");
+                p.PrintLine($"public override bool CanConvertFrom(SCM.ITypeDescriptorContext context, S.Type sourceType)");
                 p.OpenScope();
                 {
                     p.PrintLine("if (sourceType == s_wrapperType || sourceType == s_underlyingType) return true;");
@@ -1276,7 +1276,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintLine($"public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)");
+                p.PrintLine($"public override bool CanConvertTo(SCM.ITypeDescriptorContext context, S.Type destinationType)");
                 p.OpenScope();
                 {
                     p.PrintLine($"if (destinationType == s_wrapperType || destinationType == s_underlyingType) return true;");
@@ -1287,7 +1287,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintLine($"public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)");
+                p.PrintLine($"public override object ConvertFrom(SCM.ITypeDescriptorContext context, SG.CultureInfo culture, object value)");
                 p.OpenScope();
                 {
                     p.PrintLine("if (value != null)");
@@ -1306,7 +1306,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintLine($"public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)");
+                p.PrintLine($"public override object ConvertTo(SCM.ITypeDescriptorContext context, SG.CultureInfo culture, object value, S.Type destinationType)");
                 p.OpenScope();
                 {
                     p.PrintLine($"if (value is {fullTypeName} wrappedValue)");

@@ -5,24 +5,21 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 {
     partial struct ObservablePropertyDeclaration
     {
-        private const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties.ObservablePropertyGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        private const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
-        private const string NAMESPACE = "EncosyTower.Mvvm.ComponentModel";
-        private const string GENERATED_OBSERVABLE_PROPERTY = "[GeneratedObservableProperty]";
-        private const string GENERATED_PROPERTY_CHANGING_HANDLER = "[GeneratedPropertyChangingEventHandler]";
-        private const string GENERATED_PROPERTY_CHANGED_HANDLER = "[GeneratedPropertyChangedEventHandler]";
-        private const string GENERATED_PROPERTY_NAME_CONSTANT = "[GeneratedPropertyNameConstant]";
-        private const string IS_OBSERVABLE_OBJECT = "[IsObservableObject(typeof({0}))]";
-        private const string VARIANT = "Variant";
-        private const string CACHED_VARIANT_CONVERTER = "CachedVariantConverter";
-        private const string INOTIFY_PROPERTY_CHANGING_INTERFACE = "INotifyPropertyChanging";
-        private const string INOTIFY_PROPERTY_CHANGED_INTERFACE = "INotifyPropertyChanged";
-        private const string IOBSERVABLE_OBJECT_INTERFACE_SHORT = "IObservableObject";
-        private const string PROPERTY_CHANGE_EVENT_LISTENER = "PropertyChangeEventListener";
-        private const string PROPERTY_CHANGE_EVENT_ARGS = "PropertyChangeEventArgs";
-        private const string EDITOR_BROWSABLE_NEVER = "[EditorBrowsable(EditorBrowsableState.Never)]";
-
+        private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties.ObservablePropertyGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string GENERATED_OBSERVABLE_PROPERTY = "[ETMCMSG.GeneratedObservableProperty]";
+        private const string GENERATED_PROPERTY_CHANGING_HANDLER = "[ETMCMSG.GeneratedPropertyChangingEventHandler]";
+        private const string GENERATED_PROPERTY_CHANGED_HANDLER = "[ETMCMSG.GeneratedPropertyChangedEventHandler]";
+        private const string GENERATED_PROPERTY_NAME_CONSTANT = "[ETMCMSG.GeneratedPropertyNameConstant]";
+        private const string IS_OBSERVABLE_OBJECT = "[ETMCMSG.IsObservableObject(typeof({0}))]";
+        private const string CACHED_VARIANT_CONVERTER = "ETVC.CachedVariantConverter";
+        private const string INOTIFY_PROPERTY_CHANGING_INTERFACE = "ETMCM.INotifyPropertyChanging";
+        private const string INOTIFY_PROPERTY_CHANGED_INTERFACE = "ETMCM.INotifyPropertyChanged";
+        private const string IOBSERVABLE_OBJECT_INTERFACE_SHORT = "ETMCM.IObservableObject";
+        private const string PROPERTY_CHANGE_EVENT_LISTENER = "ETMCM.PropertyChangeEventListener";
+        private const string PROPERTY_CHANGE_EVENT_ARGS = "ETMCM.PropertyChangeEventArgs";
+        private const string EDITOR_BROWSABLE_NEVER = "[SCM.EditorBrowsable(SCM.EditorBrowsableState.Never)]";
 
         public readonly string WriteCodeWithoutMember()
         {
@@ -43,7 +40,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     var keyword = isSealed ? "" : "virtual ";
 
                     p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGING_INTERFACE}.AttachPropertyChangingListener{{TInstance}}(string, {PROPERTY_CHANGE_EVENT_LISTENER}{{TInstance}})\" />");
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
                     p.PrintLine($"public {keyword}bool AttachPropertyChangingListener<TInstance>(string propertyName, {PROPERTY_CHANGE_EVENT_LISTENER}<TInstance> listener) where TInstance : class");
                     p.OpenScope();
                     {
@@ -53,7 +50,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     p.PrintEndLine();
 
                     p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGED_INTERFACE}.AttachPropertyChangedListener{{TInstance}}(string, {PROPERTY_CHANGE_EVENT_LISTENER}{{TInstance}})\" />");
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
                     p.PrintLine($"public {keyword}bool AttachPropertyChangedListener<TInstance>(string propertyName, {PROPERTY_CHANGE_EVENT_LISTENER}<TInstance> listener) where TInstance : class");
                     p.OpenScope();
                     {
@@ -63,7 +60,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     p.PrintEndLine();
 
                     p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGED_INTERFACE}.NotifyPropertyChanged{{TInstance}}(string, {PROPERTY_CHANGE_EVENT_LISTENER}{{TInstance}})\" />");
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
                     p.PrintLine($"public {keyword}bool NotifyPropertyChanged<TInstance>(string propertyName, {PROPERTY_CHANGE_EVENT_LISTENER}<TInstance> listener) where TInstance : class");
                     p.OpenScope();
                     {
@@ -73,7 +70,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     p.PrintEndLine();
 
                     p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGED_INTERFACE}.NotifyPropertyChanged(string)\" />");
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
                     p.PrintLine($"public {keyword}bool NotifyPropertyChanged(string propertyName)");
                     p.OpenScope();
                     {
@@ -83,7 +80,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     p.PrintEndLine();
 
                     p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGED_INTERFACE}.NotifyPropertyChanged()\" />");
-                    p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
                     p.PrintLine($"public {keyword}void NotifyPropertyChanged()");
                     p.OpenScope();
                     p.CloseScope();
@@ -248,8 +245,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 var name = entry.propName;
 
                 p.PrintLine($"/// <summary>The name of <see cref=\"{name}\"/></summary>");
-                p.PrintLine(GENERATED_PROPERTY_NAME_CONSTANT);
-                p.PrintLine(GENERATED_CODE);
+                p.PrintBeginLine(GENERATED_PROPERTY_NAME_CONSTANT).PrintEndLine(GENERATED_CODE);
                 p.PrintLine($"public const string {ConstName(name)} = nameof({className}.{name});");
                 p.PrintEndLine();
             }
@@ -261,30 +257,30 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         {
             foreach (var member in fieldRefs)
             {
-                p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGING_HANDLER).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private event PropertyChangingEventHandler {OnChangingEventName(member.propertyName)};");
+                p.PrintBeginLine(GENERATED_PROPERTY_CHANGING_HANDLER).Print(EDITOR_BROWSABLE_NEVER).PrintEndLine(GENERATED_CODE);
+                p.PrintLine($"private event ETMCM.PropertyChangingEventHandler {OnChangingEventName(member.propertyName)};");
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGED_HANDLER).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private event PropertyChangedEventHandler {OnChangedEventName(member.propertyName)};");
+                p.PrintBeginLine(GENERATED_PROPERTY_CHANGED_HANDLER).Print(EDITOR_BROWSABLE_NEVER).PrintEndLine(GENERATED_CODE);
+                p.PrintLine($"private event ETMCM.PropertyChangedEventHandler {OnChangedEventName(member.propertyName)};");
                 p.PrintEndLine();
             }
 
             foreach (var member in propRefs)
             {
-                p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGING_HANDLER).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private event PropertyChangingEventHandler {OnChangingEventName(member.propertyName)};");
+                p.PrintBeginLine(GENERATED_PROPERTY_CHANGING_HANDLER).Print(EDITOR_BROWSABLE_NEVER).PrintEndLine(GENERATED_CODE);
+                p.PrintLine($"private event ETMCM.PropertyChangingEventHandler {OnChangingEventName(member.propertyName)};");
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGED_HANDLER).PrintLine(EDITOR_BROWSABLE_NEVER);
-                p.PrintLine($"private event PropertyChangedEventHandler {OnChangedEventName(member.propertyName)};");
+                p.PrintBeginLine(GENERATED_PROPERTY_CHANGED_HANDLER).Print(EDITOR_BROWSABLE_NEVER).PrintEndLine(GENERATED_CODE);
+                p.PrintLine($"private event ETMCM.PropertyChangedEventHandler {OnChangedEventName(member.propertyName)};");
                 p.PrintEndLine();
             }
 
             foreach (var entry in BuildUniqueNotifyForTargets().Values)
             {
-                p.PrintLine(GENERATED_CODE).PrintLine(GENERATED_PROPERTY_CHANGED_HANDLER);
-                p.PrintLine($"private event PropertyChangedEventHandler {OnChangedEventName(entry.propName)};");
+                p.PrintBeginLine(GENERATED_PROPERTY_CHANGED_HANDLER).PrintEndLine(GENERATED_CODE);
+                p.PrintLine($"private event ETMCM.PropertyChangedEventHandler {OnChangedEventName(entry.propName)};");
                 p.PrintEndLine();
             }
         }
@@ -346,7 +342,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 var typeName = kv.Key;
                 var propertyName = kv.Value.AsSpan().MakeFirstCharUpperCase();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EDITOR_BROWSABLE_NEVER);
+                p.PrintBeginLine(EDITOR_BROWSABLE_NEVER).PrintEndLine(GENERATED_CODE);
                 p.PrintLine($"private readonly {CACHED_VARIANT_CONVERTER}<{typeName}> _variantConverter{propertyName} = {CACHED_VARIANT_CONVERTER}<{typeName}>.Default;");
                 p.PrintEndLine();
             }
@@ -403,11 +399,11 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     p.PrintLine($"[{DONT_CREATE_PROPERTY}]");
                 }
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EDITOR_BROWSABLE_NEVER);
+                p.PrintBeginLine(EDITOR_BROWSABLE_NEVER).PrintEndLine(GENERATED_CODE);
                 p.PrintLine($"private {typeName} {fieldName};");
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
                 p.PrintLine($"private {typeName} Get_{propertyName}()");
                 p.OpenScope();
                 {
@@ -416,11 +412,11 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine(AGGRESSIVE_INLINING).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
                 p.PrintLine($"private void Set_{propertyName}({typeName} value)");
                 p.OpenScope();
                 {
-                    p.PrintLine($"if (EqualityComparer<{typeName}>.Default.Equals(this.{fieldName}, value)) return;");
+                    p.PrintLine($"if (SCG.EqualityComparer<{typeName}>.Default.Equals(this.{fieldName}, value)) return;");
                     p.PrintEndLine();
 
                     p.OpenScope();
@@ -512,7 +508,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     p.PrintLine(string.Format(IS_OBSERVABLE_OBJECT, typeName));
                 }
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE).PrintLine(GENERATED_OBSERVABLE_PROPERTY);
+                p.PrintBeginLine(GENERATED_OBSERVABLE_PROPERTY).Print(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
                 p.PrintLine($"public {typeName} {propertyName}");
                 p.OpenScope();
                 {
@@ -521,7 +517,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     p.PrintLine("set");
                     p.OpenScope();
                     {
-                        p.PrintLine($"if (EqualityComparer<{typeName}>.Default.Equals(this.{fieldName}, value)) return;");
+                        p.PrintLine($"if (SCG.EqualityComparer<{typeName}>.Default.Equals(this.{fieldName}, value)) return;");
                         p.PrintEndLine();
 
                         p.OpenScope();
@@ -653,7 +649,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             var keyword = isBaseObservableObject ? "override " : isSealed ? "" : "virtual ";
 
             p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGING_INTERFACE}.AttachPropertyChangingListener{{TInstance}}(string, {PROPERTY_CHANGE_EVENT_LISTENER}{{TInstance}})\" />");
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintLine($"public {keyword}bool AttachPropertyChangingListener<TInstance>(string propertyName, {PROPERTY_CHANGE_EVENT_LISTENER}<TInstance> listener) where TInstance : class");
             p.OpenScope();
             {
@@ -663,7 +659,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 }
                 else
                 {
-                    p.PrintLine("if (listener == null) throw new ArgumentNullException(nameof(listener));");
+                    p.PrintLine("if (listener == null) throw new S.ArgumentNullException(nameof(listener));");
                 }
 
                 p.PrintEndLine();
@@ -717,7 +713,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             var keyword = isBaseObservableObject ? "override " : isSealed ? "" : "virtual ";
 
             p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGED_INTERFACE}.AttachPropertyChangedListener{{TInstance}}(string, {PROPERTY_CHANGE_EVENT_LISTENER}{{TInstance}})\" />");
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintLine($"public {keyword}bool AttachPropertyChangedListener<TInstance>(string propertyName, {PROPERTY_CHANGE_EVENT_LISTENER}<TInstance> listener) where TInstance : class");
             p.OpenScope();
             {
@@ -727,7 +723,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 }
                 else
                 {
-                    p.PrintLine("if (listener == null) throw new ArgumentNullException(nameof(listener));");
+                    p.PrintLine("if (listener == null) throw new S.ArgumentNullException(nameof(listener));");
                 }
 
                 p.PrintEndLine();
@@ -797,7 +793,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             var keyword = isBaseObservableObject ? "override " : isSealed ? "" : "virtual ";
 
             p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGED_INTERFACE}.NotifyPropertyChanged{{TInstance}}(string, {PROPERTY_CHANGE_EVENT_LISTENER}{{TInstance}})\" />");
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintLine($"public {keyword}bool NotifyPropertyChanged<TInstance>(string propertyName, {PROPERTY_CHANGE_EVENT_LISTENER}<TInstance> listener) where TInstance : class");
             p.OpenScope();
             {
@@ -807,7 +803,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 }
                 else
                 {
-                    p.PrintLine("if (listener == null) throw new ArgumentNullException(nameof(listener));");
+                    p.PrintLine("if (listener == null) throw new S.ArgumentNullException(nameof(listener));");
                 }
 
                 p.PrintEndLine();
@@ -891,7 +887,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             var keyword = isBaseObservableObject ? "override " : isSealed ? "" : "virtual ";
 
             p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGED_INTERFACE}.NotifyPropertyChanged(string)\" />");
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintLine($"public {keyword}bool NotifyPropertyChanged(string propertyName)");
             p.OpenScope();
             {
@@ -981,7 +977,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             var keyword = isBaseObservableObject ? "override " : isSealed ? "" : "virtual ";
 
             p.PrintLine($"/// <inheritdoc cref=\"{INOTIFY_PROPERTY_CHANGED_INTERFACE}.NotifyPropertyChanged()\" />");
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintLine($"public {keyword}void NotifyPropertyChanged()");
             p.OpenScope();
             {
@@ -1054,7 +1050,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
         private readonly void WriteNotifyPropertyChangingInfoAttributes(ref Printer p)
         {
-            const string ATTRIBUTE = "[NotifyPropertyChangingInfo(\"{0}\", typeof({1}))]";
+            const string ATTRIBUTE = "[ETMCMSG.NotifyPropertyChangingInfo(\"{0}\", typeof({1}))]";
 
             foreach (var member in fieldRefs)
             {
@@ -1069,7 +1065,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
         private readonly void WriteNotifyPropertyChangedInfoAttributes(ref Printer p)
         {
-            const string ATTRIBUTE = "[NotifyPropertyChangedInfo(\"{0}\", typeof({1}))]";
+            const string ATTRIBUTE = "[ETMCMSG.NotifyPropertyChangedInfo(\"{0}\", typeof({1}))]";
 
             var additionalProps = new Dictionary<string, NotifyForEntry>();
             var notifyForMap = BuildNotifyForMap();
@@ -1114,9 +1110,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
         private static void WriteTryGetMemberObservableObject_Empty(ref Printer p)
         {
-            p.PrintLine($"/// <inheritdoc cref=\"{IOBSERVABLE_OBJECT_INTERFACE_SHORT}.TryGetMemberObservableObject(Queue{{string}}, out {IOBSERVABLE_OBJECT_INTERFACE_SHORT})\"/>");
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine($"public bool TryGetMemberObservableObject(Queue<string> propertyNames, out {IOBSERVABLE_OBJECT_INTERFACE_SHORT} result)");
+            p.PrintLine($"/// <inheritdoc cref=\"{IOBSERVABLE_OBJECT_INTERFACE_SHORT}.TryGetMemberObservableObject(SCG.Queue{{string}}, out {IOBSERVABLE_OBJECT_INTERFACE_SHORT})\"/>");
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintLine($"public bool TryGetMemberObservableObject(SCG.Queue<string> propertyNames, out {IOBSERVABLE_OBJECT_INTERFACE_SHORT} result)");
             p.OpenScope();
             {
                 p.PrintLine("result = default;");
@@ -1134,9 +1130,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 return;
             }
 
-            p.PrintLine($"/// <inheritdoc cref=\"{IOBSERVABLE_OBJECT_INTERFACE_SHORT}.TryGetMemberObservableObject(Queue{{string}}, out {IOBSERVABLE_OBJECT_INTERFACE_SHORT})\"/>");
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
-            p.PrintLine($"public bool TryGetMemberObservableObject(Queue<string> propertyNames, out {IOBSERVABLE_OBJECT_INTERFACE_SHORT} result)");
+            p.PrintLine($"/// <inheritdoc cref=\"{IOBSERVABLE_OBJECT_INTERFACE_SHORT}.TryGetMemberObservableObject(SCG.Queue{{string}}, out {IOBSERVABLE_OBJECT_INTERFACE_SHORT})\"/>");
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintLine($"public bool TryGetMemberObservableObject(SCG.Queue<string> propertyNames, out {IOBSERVABLE_OBJECT_INTERFACE_SHORT} result)");
             p.OpenScope();
             {
                 p.PrintLine("if (propertyNames.Count > 0)");

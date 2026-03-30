@@ -13,7 +13,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
     {
         private const string NAMESPACE = "EncosyTower.PolyEnumStructs";
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
-        private const string POLY_ENUM_STRUCT_ATTRIBUTE = $"global::{NAMESPACE}.PolyEnumStructAttribute";
         private const string POLY_ENUM_STRUCT_ATTRIBUTE_METADATA = $"{NAMESPACE}.PolyEnumStructAttribute";
         private const string CONSTRUCT_ENUM_CASE_FROM_ATTRIBUTE = $"global::{NAMESPACE}.ConstructEnumCaseFromAttribute";
         private const string GENERATOR_NAME = nameof(PolyEnumStructGenerator);
@@ -149,14 +148,21 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             p.PrintEndLine();
             p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();
-            p.PrintLine("using System;");
-            p.PrintLine("using System.CodeDom.Compiler;");
-            p.PrintLine("using System.Diagnostics;");
-            p.PrintLine("using System.Diagnostics.CodeAnalysis;");
-            p.PrintLine("using System.Runtime.CompilerServices;");
-            p.PrintLine("using System.Runtime.InteropServices;");
-            p.PrintLine("using EncosyTower.Common;");
-            p.PrintLine("using UnityEngine;");
+
+            p.PrintLine("using S = global::System;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SC = global::System.Collections;");
+            p.PrintLine("using SCG = global::System.Collections.Generic;");
+            p.PrintLine("using SD = global::System.Diagnostics;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+            p.PrintLine("using ET = global::EncosyTower.Common;");
+            p.PrintLine("using ETCon = global::EncosyTower.Conversion;");
+            p.PrintLine("using ETEE = global::EncosyTower.EnumExtensions;");
+            p.PrintLine("using ETEESG = global::EncosyTower.EnumExtensions.SourceGen;");
+            p.PrintLine("using UE = global::UnityEngine;");
+            p.PrintLine("using UC = global::Unity.Collections;");
             p.PrintEndLine();
             p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();

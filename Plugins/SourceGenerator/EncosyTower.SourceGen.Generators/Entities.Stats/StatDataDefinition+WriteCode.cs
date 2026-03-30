@@ -2,17 +2,17 @@
 {
     partial struct StatDataDefinition
     {
-        private const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.Entities.Stats.StatDataGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        private const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
+        private const string PR_AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        private const string PR_EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string PR_GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.Entities.Stats.StatDataGenerator\", \"{SourceGenVersion.VALUE}\")]";
 
-        private const string ISTAT_DATA = $"IStatData";
-        private const string STAT_VARIANT = $"StatVariant";
-        private const string STAT_VARIANT_TYPE = $"StatVariantType";
+        private const string PR_ISTAT_DATA = "ETES.IStatData";
+        private const string PR_STAT_VARIANT = "ETES.StatVariant";
+        private const string PR_STAT_VARIANT_TYPE = "ETES.StatVariantType";
 
-        private const string LOG_ERROR = "UnityDebug.LogError";
-        private const string IF_DEBUG = "#if UNITY_EDITOR || DEVELOPMENT_BUILD";
-        private const string ENDIF_DEBUG = "#endif";
+        private const string PR_LOG_ERROR = "UnityDebug.LogError";
+        private const string PR_IF_DEBUG = "#if UNITY_EDITOR || DEVELOPMENT_BUILD";
+        private const string PR_ENDIF_DEBUG = "#endif";
 
         public readonly string WriteCode()
         {
@@ -24,8 +24,8 @@
 
             p = p.IncreasedIndent();
             {
-                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-                p.PrintBeginLine("partial struct ").Print(typeName).Print(" : ").PrintEndLine(ISTAT_DATA);
+                p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
+                p.PrintBeginLine("partial struct ").Print(typeName).Print(" : ").PrintEndLine(PR_ISTAT_DATA);
                 p.OpenScope();
                 {
                     WriteFields(ref p);
@@ -44,15 +44,21 @@
         {
             if (singleValue)
             {
-                p.PrintBeginLine("public ").Print(valueFullTypeName).PrintEndLine(" value;");
+                p.PrintBeginLine("public ")
+                    .PrintIf(HasCustomNs, valueTypeNs).PrintIf(HasCustomNs, ".")
+                    .Print(valueType).PrintEndLine(" value;");
                 p.PrintEndLine();
             }
             else
             {
-                p.PrintBeginLine("public ").Print(valueFullTypeName).PrintEndLine(" baseValue;");
+                p.PrintBeginLine("public ")
+                    .PrintIf(HasCustomNs, valueTypeNs).PrintIf(HasCustomNs, ".")
+                    .Print(valueType).PrintEndLine(" baseValue;");
                 p.PrintEndLine();
 
-                p.PrintBeginLine("public ").Print(valueFullTypeName).PrintEndLine(" currentValue;");
+                p.PrintBeginLine("public ")
+                    .PrintIf(HasCustomNs, valueTypeNs).PrintIf(HasCustomNs, ".")
+                    .Print(valueType).PrintEndLine(" currentValue;");
                 p.PrintEndLine();
             }
         }
@@ -61,9 +67,10 @@
         {
             var @in = size > 8 ? "in " : "";
 
-            p.PrintLine(AGGRESSIVE_INLINING);
-            p.PrintBeginLine("public ").Print(typeName).Print("(")
-                .Print(@in).Print(valueFullTypeName).PrintEndLine(" value) : this()");
+            p.PrintLine(PR_AGGRESSIVE_INLINING);
+            p.PrintBeginLine("public ").Print(typeName).Print("(").Print(@in)
+                .PrintIf(HasCustomNs, valueTypeNs).PrintIf(HasCustomNs, ".")
+                .Print(valueType).PrintEndLine(" value) : this()");
             p.OpenScope();
             {
                 p.PrintLineIf(
@@ -80,10 +87,12 @@
                 return;
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING);
-            p.PrintBeginLine("public ").Print(typeName).Print("(")
-                .Print(@in).Print(valueFullTypeName).Print(" baseValue, ")
-                .Print(@in).Print(valueFullTypeName).PrintEndLine(" currentValue) : this()");
+            p.PrintLine(PR_AGGRESSIVE_INLINING);
+            p.PrintBeginLine("public ").Print(typeName).Print("(").Print(@in)
+                .PrintIf(HasCustomNs, valueTypeNs).PrintIf(HasCustomNs, ".")
+                .Print(valueType).Print(" baseValue, ").Print(@in)
+                .PrintIf(HasCustomNs, valueTypeNs).PrintIf(HasCustomNs, ".")
+                .Print(valueType).PrintEndLine(" currentValue) : this()");
             p.OpenScope();
             {
                 p.PrintLine("this.baseValue = baseValue;");
@@ -98,25 +107,25 @@
             p.PrintLine("public readonly bool IsValuePair");
             p.OpenScope();
             {
-                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine(PR_AGGRESSIVE_INLINING);
                 p.PrintBeginLine("get => ").PrintIf(singleValue, "false", "true").PrintEndLine(";");
             }
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintBeginLine("public readonly ").Print(STAT_VARIANT_TYPE).PrintEndLine(" ValueType");
+            p.PrintBeginLine("public readonly ").Print(PR_STAT_VARIANT_TYPE).PrintEndLine(" ValueType");
             p.OpenScope();
             {
-                p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintBeginLine("get => ").Print(STAT_VARIANT_TYPE).Print(".").Print(valueTypeName).PrintEndLine(";");
+                p.PrintLine(PR_AGGRESSIVE_INLINING);
+                p.PrintBeginLine("get => ").Print(PR_STAT_VARIANT_TYPE).Print(".").Print(valueTypeName).PrintEndLine(";");
             }
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintBeginLine("public ").Print(STAT_VARIANT).PrintEndLine(" BaseValue");
+            p.PrintBeginLine("public ").Print(PR_STAT_VARIANT).PrintEndLine(" BaseValue");
             p.OpenScope();
             {
-                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine(PR_AGGRESSIVE_INLINING);
                 p.PrintLine("readonly get");
                 p.OpenScope();
                 {
@@ -129,86 +138,95 @@
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine(PR_AGGRESSIVE_INLINING);
                 p.PrintLine("set");
                 p.OpenScope();
                 {
-                    p.Print(IF_DEBUG).PrintEndLine();
+                    p.Print(PR_IF_DEBUG).PrintEndLine();
                     p.PrintBeginLine("if (value.Type == ")
-                        .Print(STAT_VARIANT_TYPE).Print(".").Print(valueTypeName).PrintEndLine(")");
-                    p.Print(ENDIF_DEBUG).PrintEndLine();
+                        .Print(PR_STAT_VARIANT_TYPE).Print(".").Print(valueTypeName).PrintEndLine(")");
+                    p.Print(PR_ENDIF_DEBUG).PrintEndLine();
                     p.OpenScope();
                     {
                         p.PrintBeginLine("this.").PrintIf(singleValue, "value", "baseValue")
-                            .Print(" = ")
-                            .PrintIf(isEnum, "(")
-                            .PrintIf(isEnum, valueFullTypeName)
-                            .PrintIf(isEnum, ")")
-                            .Print("value.").Print(valueTypeName)
+                            .Print(" = ");
+
+                        if (isEnum)
+                        {
+                            p.Print("(").PrintIf(HasCustomNs, valueTypeNs).Print(valueType).Print(")");
+                        }
+
+                        p.Print("value.").Print(valueTypeName)
                             .PrintEndLine(";");
                     }
                     p.CloseScope();
-                    p.Print(IF_DEBUG).PrintEndLine();
+                    p.Print(PR_IF_DEBUG).PrintEndLine();
                     p.PrintLine("else");
                     p.OpenScope();
                     {
-                        p.PrintBeginLine(LOG_ERROR).Print("($\"The setter of '").Print(typeName).Print(".BaseValue' ")
-                            .Print("expects a value of type '").Print(STAT_VARIANT_TYPE).Print(".").Print(valueTypeName)
+                        p.PrintBeginLine(PR_LOG_ERROR).Print("($\"The setter of '").Print(typeName).Print(".BaseValue' ")
+                            .Print("expects a value of type '").Print(PR_STAT_VARIANT_TYPE).Print(".").Print(valueTypeName)
                             .Print("' but receives a value of type '{").Print("value.Type").PrintEndLine("}'\");");
                     }
                     p.CloseScope();
-                    p.Print(ENDIF_DEBUG).PrintEndLine();
+                    p.Print(PR_ENDIF_DEBUG).PrintEndLine();
                 }
                 p.CloseScope();
             }
             p.CloseScope();
             p.PrintEndLine();
 
-            p.PrintBeginLine("public ").Print(STAT_VARIANT).PrintEndLine(" CurrentValue");
+            p.PrintBeginLine("public ").Print(PR_STAT_VARIANT).PrintEndLine(" CurrentValue");
             p.OpenScope();
             {
-                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine(PR_AGGRESSIVE_INLINING);
                 p.PrintLine("readonly get");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine("return ")
-                        .PrintIf(isEnum, "(")
-                        .PrintIf(isEnum, underlyingTypeName)
-                        .PrintIf(isEnum, ")")
-                        .Print("this.").PrintIf(singleValue, "value", "currentValue").PrintEndLine(";");
+                    p.PrintBeginLine("return ");
+
+                    if (isEnum)
+                    {
+                        p.Print("(").Print(underlyingTypeName).Print(")");
+                    }
+
+                    p.Print("this.").PrintIf(singleValue, "value", "currentValue").PrintEndLine(";");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintLine(PR_AGGRESSIVE_INLINING);
                 p.PrintLine("set");
                 p.OpenScope();
                 {
-                    p.Print(IF_DEBUG).PrintEndLine();
+                    p.Print(PR_IF_DEBUG).PrintEndLine();
                     p.PrintBeginLine("if (value.Type == ")
-                        .Print(STAT_VARIANT_TYPE).Print(".").Print(valueTypeName).PrintEndLine(")");
-                    p.Print(ENDIF_DEBUG).PrintEndLine();
+                        .Print(PR_STAT_VARIANT_TYPE).Print(".").Print(valueTypeName).PrintEndLine(")");
+                    p.Print(PR_ENDIF_DEBUG).PrintEndLine();
                     p.OpenScope();
                     {
                         p.PrintBeginLine("this.").PrintIf(singleValue, "value", "currentValue")
-                            .Print(" = ")
-                            .PrintIf(isEnum, "(")
-                            .PrintIf(isEnum, valueFullTypeName)
-                            .PrintIf(isEnum, ")")
-                            .Print("value.").Print(valueTypeName)
+                            .Print(" = ");
+
+                        if (isEnum)
+                        {
+                            p.Print("(").PrintIf(HasCustomNs, valueTypeNs).Print(valueType).Print(")");
+                        }
+
+                        p.Print("value.").Print(valueTypeName)
                             .PrintEndLine(";");
                     }
                     p.CloseScope();
-                    p.Print(IF_DEBUG).PrintEndLine();
+                    p.Print(PR_IF_DEBUG).PrintEndLine();
                     p.PrintLine("else");
                     p.OpenScope();
                     {
-                        p.PrintBeginLine(LOG_ERROR).Print("($\"The setter of '").Print(typeName).Print(".CurrentValue' ")
-                            .Print("expects a value of type '").Print(STAT_VARIANT_TYPE).Print(".").Print(valueTypeName)
+                        p.PrintBeginLine(PR_LOG_ERROR).Print("($\"The setter of '").Print(typeName).Print(".CurrentValue' ")
+                            .Print("expects a value of type '").Print(PR_STAT_VARIANT_TYPE).Print(".").Print(valueTypeName)
                             .Print("' but receives a value of type '{").Print("value.Type").PrintEndLine("}'\");");
                     }
                     p.CloseScope();
-                    p.Print(ENDIF_DEBUG).PrintEndLine();
+                    p.Print(PR_ENDIF_DEBUG).PrintEndLine();
                 }
                 p.CloseScope();
                 p.PrintEndLine();

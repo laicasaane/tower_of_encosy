@@ -7,80 +7,80 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
     partial struct StatSystemDefinition
     {
-        private const string METHOD_IMPL_OPTIONS = "MethodImplOptions";
+        private const string METHOD_IMPL_OPTIONS = "SRCS.MethodImplOptions";
         private const string INLINING = $"{METHOD_IMPL_OPTIONS}.AggressiveInlining";
         private const string GENERATOR = "\"EncosyTower.SourceGen.Generators.Entities.Stats.StatSystemGenerator\"";
 
-        private const string AGGRESSIVE_INLINING = "[MethodImpl(INLINING)]";
-        private const string GENERATED_CODE = $"[GeneratedCode(GENERATOR, \"{SourceGenVersion.VALUE}\")]";
-        private const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
-        private const string SERIALIZABLE = "[Serializable]";
-        private const string SERIALIZED_FIELD = "[SerializeField]";
-        private const string BURST_COMPILE = "[BurstCompile]";
-        private const string STRUCT_LAYOUT_EXPLICIT = $"[StructLayout(LayoutKind.Explicit)]";
-        private const string FIELD_OFFSET_0 = "[FieldOffset(0)]";
-        private const string FIELD_OFFSET_X = "[FieldOffset({0})]";
-        private const string VALIDATION_ATTRIBUTES = "[HideInCallstack, StackTraceHidden, " +
-            "Conditional(\"UNITY_EDITOR\"), Conditional(\"DEVELOPMENT_BUILD\")]";
+        private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(INLINING)]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string GENERATED_CODE = $"[SCDC.GeneratedCode(GENERATOR, \"{SourceGenVersion.VALUE}\")]";
+        private const string SERIALIZABLE = "[S.Serializable]";
+        private const string SERIALIZED_FIELD = "[UE.SerializeField]";
+        private const string BURST_COMPILE = "[UB.BurstCompile]";
+        private const string STRUCT_LAYOUT_EXPLICIT = "[SRIS.StructLayout(SRIS.LayoutKind.Explicit)]";
+        private const string FIELD_OFFSET_0 = "[SRIS.FieldOffset(0)]";
+        private const string FIELD_OFFSET_X = "[SRIS.FieldOffset({0})]";
+        private const string VALIDATION_ATTRIBUTES = "[UE.HideInCallstack, SD.StackTraceHidden, " +
+            "SD.Conditional(\"UNITY_EDITOR\"), SD.Conditional(\"DEVELOPMENT_BUILD\")]";
 
-        private const string IEQUATABLE = "IEquatable";
-        private const string HASH_VALUE = "HashValue";
+        private const string IEQUATABLE = "S.IEquatable";
+        private const string HASH_VALUE = "ET.HashValue";
 
-        private const string IJOB = $"IJob";
-        private const string JOB_HANDLE = $"JobHandle";
+        private const string IJOB = $"UJ.IJob";
+        private const string JOB_HANDLE = $"UJ.JobHandle";
 
-        private const string IBUFFER_ELEMENT_DATA = $"IBufferElementData";
-        private const string IBAKER = $"IBaker";
-        private const string ENTITY = $"Entity";
-        private const string ENTITY_MANAGER = $"EntityManager";
-        private const string ECB = $"EntityCommandBuffer";
-        private const string ECB_WRITER = $"EntityCommandBuffer.ParallelWriter";
-        private const string STAT_BUFFER = $"DynamicBuffer<Stat>";
-        private const string LOOKUP_STAT = $"BufferLookup<Stat>";
-        private const string LOOKUP_OBSERVER = $"BufferLookup<StatObserver>";
-        private const string LOOKUP_MODIFIER = $"BufferLookup<StatModifier>";
-        private const string SYSTEM_STATE = $"SystemState";
-        private const string LOOKUP_STAT_XML = $"BufferLookup{{TStat}}";
-        private const string STAT_BUFFER_XML = $"DynamicBuffer{{TStat}}";
-        private const string LOOKUP_OBSERVER_XML = $"BufferLookup{{TStatObserver}}";
-        private const string LOOKUP_MODIFIER_XML = $"BufferLookup{{TStatModifier}}";
+        private const string IBUFFER_ELEMENT_DATA = $"UECS.IBufferElementData";
+        private const string IBAKER = $"UECS.IBaker";
+        private const string ENTITY = $"UECS.Entity";
+        private const string ENTITY_MANAGER = $"UECS.EntityManager";
+        private const string ECB = $"UECS.EntityCommandBuffer";
+        private const string ECB_WRITER = $"UECS.EntityCommandBuffer.ParallelWriter";
+        private const string STAT_BUFFER = $"UECS.DynamicBuffer<Stat>";
+        private const string LOOKUP_STAT = $"UECS.BufferLookup<Stat>";
+        private const string LOOKUP_OBSERVER = $"UECS.BufferLookup<StatObserver>";
+        private const string LOOKUP_MODIFIER = $"UECS.BufferLookup<StatModifier>";
+        private const string SYSTEM_STATE = $"UECS.SystemState";
+        private const string LOOKUP_STAT_XML = $"UECS.BufferLookup{{TStat}}";
+        private const string STAT_BUFFER_XML = $"UECS.DynamicBuffer{{TStat}}";
+        private const string LOOKUP_OBSERVER_XML = $"UECS.BufferLookup{{TStatObserver}}";
+        private const string LOOKUP_MODIFIER_XML = $"UECS.BufferLookup{{TStatModifier}}";
 
-        private const string RO_SPAN_OBSERVER = "ReadOnlySpan<StatObserver>";
-        private const string RO_SPAN_MODIFIER = "ReadOnlySpan<StatModifier>";
-        private const string RO_SPAN_STAT = "ReadOnlySpan<Stat>";
-        private const string RO_SPAN_OBSERVER_XML = "ReadOnlySpan{TStatObserver}";
-        private const string RO_SPAN_MODIFIER_XML = "ReadOnlySpan{TStatModifier}";
-        private const string RO_SPAN_STAT_XML = "ReadOnlySpan{TStat}";
+        private const string RO_SPAN_OBSERVER = "S.ReadOnlySpan<StatObserver>";
+        private const string RO_SPAN_MODIFIER = "S.ReadOnlySpan<StatModifier>";
+        private const string RO_SPAN_STAT = "S.ReadOnlySpan<Stat>";
+        private const string RO_SPAN_OBSERVER_XML = "S.ReadOnlySpan{TStatObserver}";
+        private const string RO_SPAN_MODIFIER_XML = "S.ReadOnlySpan{TStatModifier}";
+        private const string RO_SPAN_STAT_XML = "S.ReadOnlySpan{TStat}";
 
-        private const string STAT_SINGLE = $"StatSingle";
-        private const string MODIFIER_RANGE = $"ModifierRange";
-        private const string OBSERVER_RANGE = $"ObserverRange";
-        private const string ISTAT_DATA = $"IStatData";
-        private const string ISTAT_VALUE_PAIR = $"IStatValuePair";
-        private const string ISTAT_VALUE_PAIR_COMPOSER = $"IStatValuePairComposer<ValuePair>";
-        private const string ISTAT = $"IStat<ValuePair>";
-        private const string ISTAT_MODIFIER_STACK = $"IStatModifierStack<ValuePair, Stat>";
-        private const string ISTAT_MODIFIER = $"IStatModifier<ValuePair, Stat, StatModifier.Stack>";
-        private const string ISTAT_OBSERVER = $"IStatObserver";
-        private const string STAT_VARIANT_TYPE = $"StatVariantType";
-        private const string STAT_VARIANT = $"StatVariant";
-        private const string STAT_HANDLE = $"StatHandle";
-        private const string STAT_HANDLE_T = $"StatHandle<TStatData>";
-        private const string STAT_MODIFIER_HANDLE = $"StatModifierHandle";
-        private const string STAT_READER = $"StatReader<ValuePair, Stat>";
-        private const string STAT_VARIANT_TYPE_EXCEPTION = $"StatVariantTypeException";
-        private const string STAT_CHANGE_EVENT = $"StatChangeEvent<ValuePair>";
-        private const string MODIFIER_TRIGGER_EVENT = $"ModifierTriggerEvent<{TYPES_4}>";
-        private const string STAT_MODIFIER_RECORD = $"StatModifierRecord<{TYPES_4}>";
-        private const string STAT_DATA_PARAMS = $"StatDataParams<TStatData>";
-        private const string STAT_VALUE_PARAMS = $"StatValueParams<ValuePair>";
-        private const string STAT_DATA_PARAMS_XML = $"StatDataParams{{TStatData}}";
-        private const string STAT_VALUE_PARAMS_XML = $"StatValueParams{{TValuePair}}";
-        private const string STAT_READER_XML = $"StatReader{{TValuePair, TStat}}";
-        private const string STAT_HANDLE_T_XML = $"StatHandle{{TStatData}}";
-        private const string STAT_MODIFIER_RECORD_XML = $"StatModifierRecord{{{TYPES_4_T}}}";
-        private const string STAT_CHANGE_EVENT_XML = $"StatChangeEvent{{TValuePair}}";
-        private const string MODIFIER_TRIGGER_EVENT_XML = $"ModifierTriggerEvent{{{TYPES_4_T}}}";
+        private const string STAT_SINGLE = $"ETES.StatSingle";
+        private const string MODIFIER_RANGE = $"ETES.ModifierRange";
+        private const string OBSERVER_RANGE = $"ETES.ObserverRange";
+        private const string ISTAT_DATA = $"ETES.IStatData";
+        private const string ISTAT_VALUE_PAIR = $"ETES.IStatValuePair";
+        private const string ISTAT_VALUE_PAIR_COMPOSER = $"ETES.IStatValuePairComposer<ValuePair>";
+        private const string ISTAT = $"ETES.IStat<ValuePair>";
+        private const string ISTAT_MODIFIER_STACK = $"ETES.IStatModifierStack<ValuePair, Stat>";
+        private const string ISTAT_MODIFIER = $"ETES.IStatModifier<ValuePair, Stat, StatModifier.Stack>";
+        private const string ISTAT_OBSERVER = $"ETES.IStatObserver";
+        private const string STAT_VARIANT_TYPE = $"ETES.StatVariantType";
+        private const string STAT_VARIANT = $"ETES.StatVariant";
+        private const string STAT_HANDLE = $"ETES.StatHandle";
+        private const string STAT_HANDLE_T = $"ETES.StatHandle<TStatData>";
+        private const string STAT_MODIFIER_HANDLE = $"ETES.StatModifierHandle";
+        private const string STAT_READER = $"ETES.StatReader<ValuePair, Stat>";
+        private const string STAT_VARIANT_TYPE_EXCEPTION = $"ETES.StatVariantTypeException";
+        private const string STAT_CHANGE_EVENT = $"ETES.StatChangeEvent<ValuePair>";
+        private const string MODIFIER_TRIGGER_EVENT = $"ETES.ModifierTriggerEvent<{TYPES_4}>";
+        private const string STAT_MODIFIER_RECORD = $"ETES.StatModifierRecord<{TYPES_4}>";
+        private const string STAT_DATA_PARAMS = $"ETES.StatDataParams<TStatData>";
+        private const string STAT_VALUE_PARAMS = $"ETES.StatValueParams<ValuePair>";
+        private const string STAT_DATA_PARAMS_XML = $"ETES.StatDataParams{{TStatData}}";
+        private const string STAT_VALUE_PARAMS_XML = $"ETES.StatValueParams{{TValuePair}}";
+        private const string STAT_READER_XML = $"ETES.StatReader{{TValuePair, TStat}}";
+        private const string STAT_HANDLE_T_XML = $"ETES.StatHandle{{TStatData}}";
+        private const string STAT_MODIFIER_RECORD_XML = $"ETES.StatModifierRecord{{{TYPES_4_T}}}";
+        private const string STAT_CHANGE_EVENT_XML = $"ETES.StatChangeEvent{{TValuePair}}";
+        private const string MODIFIER_TRIGGER_EVENT_XML = $"ETES.ModifierTriggerEvent{{{TYPES_4_T}}}";
 
         private const string TYPES_6 = "ValuePair, Stat, StatModifier, StatModifier.Stack, StatObserver, ValuePair.Composer";
         private const string TYPES_5 = "ValuePair, Stat, StatModifier, StatModifier.Stack, StatObserver";
@@ -94,43 +94,43 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         private const string TYPES_2_T = "TValuePair, TStat";
         private const string TYPES_2_T_DATA = "TValuePair, TStatData";
 
-        private const string STAT_API = $"StatAPI";
-        private const string STAT_WORLD_DATA = $"StatWorldData<{TYPES_5}>";
-        private const string STAT_ACCESSOR = $"StatAccessor<{TYPES_6}>";
-        private const string STAT_ACCESSOR_READONLY = $"StatAccessor<{TYPES_6}>.ReadOnly";
-        private const string STAT_BAKER = $"StatBaker<{TYPES_6}>";
-        private const string DEFERRED_LIST_JOB = $"DeferredUpdateStatListJob<{TYPES_6}>";
-        private const string DEFERRED_QUEUE_JOB = $"DeferredUpdateStatQueueJob<{TYPES_6}>";
-        private const string DEFERRED_STREAM_JOB = $"DeferredUpdateStatStreamJob<{TYPES_6}>";
-        private const string DEFERRED_UNSAFE_BLOCK_LIST_JOB = $"DeferredUpdateStatUnsafeBlockListJob<{TYPES_6}>";
-        private const string STAT_WORLD_DATA_XML = $"StatWorldData{{{TYPES_5_T}}}";
-        private const string STAT_ACCESSOR_XML = $"StatAccessor{{{TYPES_6_T}}}";
-        private const string STAT_ACCESSOR_READONLY_XML = $"StatAccessor{{{TYPES_6_T}}}.ReadOnly";
-        private const string STAT_BAKER_XML = $"StatBaker{{{TYPES_6_T}}}";
+        private const string STAT_API = $"ETES.StatAPI";
+        private const string STAT_WORLD_DATA = $"ETES.StatWorldData<{TYPES_5}>";
+        private const string STAT_ACCESSOR = $"ETES.StatAccessor<{TYPES_6}>";
+        private const string STAT_ACCESSOR_READONLY = $"ETES.StatAccessor<{TYPES_6}>.ReadOnly";
+        private const string STAT_BAKER = $"ETES.StatBaker<{TYPES_6}>";
+        private const string DEFERRED_LIST_JOB = $"ETES.DeferredUpdateStatListJob<{TYPES_6}>";
+        private const string DEFERRED_QUEUE_JOB = $"ETES.DeferredUpdateStatQueueJob<{TYPES_6}>";
+        private const string DEFERRED_STREAM_JOB = $"ETES.DeferredUpdateStatStreamJob<{TYPES_6}>";
+        private const string DEFERRED_UNSAFE_BLOCK_LIST_JOB = $"ETES.DeferredUpdateStatUnsafeBlockListJob<{TYPES_6}>";
+        private const string STAT_WORLD_DATA_XML = $"ETES.StatWorldData{{{TYPES_5_T}}}";
+        private const string STAT_ACCESSOR_XML = $"ETES.StatAccessor{{{TYPES_6_T}}}";
+        private const string STAT_ACCESSOR_READONLY_XML = $"ETES.StatAccessor{{{TYPES_6_T}}}.ReadOnly";
+        private const string STAT_BAKER_XML = $"ETES.StatBaker{{{TYPES_6_T}}}";
 
-        private const string UNSAFE_UTILITY = $"UnsafeUtility";
-        private const string ALLOCATOR_HANDLE = $"AllocatorManager.AllocatorHandle";
-        private const string NATIVE_LIST_STAT_HANDLE = $"NativeList<{STAT_HANDLE}>";
-        private const string NATIVE_QUEUE_STAT_HANDLE = $"NativeQueue<{STAT_HANDLE}>";
-        private const string NATIVE_STREAM_READER = $"NativeStream.Reader";
-        private const string NATIVE_LIST_OBSERVER = $"NativeList<StatObserver>";
-        private const string NATIVE_LIST_OBSERVER_XML = $"NativeList{{TStatObserver}}";
-        private const string NATIVE_SET_ENTITY = $"NativeHashSet<{ENTITY}>";
-        private const string NATIVE_LIST_MODIFIER_HANDLE = $"NativeList<{STAT_MODIFIER_HANDLE}>";
-        private const string NATIVE_ARRAY_MODIFIER_EVENT = $"NativeArray<ModifierTriggerEvent>";
-        private const string NATIVE_LIST_MODIFIER_EVENT = $"NativeList<ModifierTriggerEvent>";
-        private const string NATIVE_LIST_MODIFIER_EVENT_GENERIC = $"NativeList<{MODIFIER_TRIGGER_EVENT}>";
-        private const string NATIVE_ARRAY_STAT_CHANGE_EVENT = $"NativeArray<{STAT_CHANGE_EVENT}>";
-        private const string NATIVE_LIST_STAT_CHANGE_EVENT = $"NativeList<{STAT_CHANGE_EVENT}>";
-        private const string NATIVE_LIST_MODIFIER_RECORD = $"NativeList<StatModifierRecord>";
-        private const string NATIVE_LIST_MODIFIER_RECORD_GENERIC = $"NativeList<{STAT_MODIFIER_RECORD}>";
-        private const string NATIVE_LIST_MODIFIER_RECORD_GENERIC_XML = $"NativeList{{{STAT_MODIFIER_RECORD_XML}}}";
-        private const string NATIVE_LIST_STAT_HANDLE_XML = $"NativeList{{{STAT_HANDLE}}}";
-        private const string NATIVE_SET_ENTITY_XML = $"NativeHashSet{{{ENTITY}}}";
-        private const string NATIVE_LIST_MODIFIER_HANDLE_XML = $"NativeList{{{STAT_MODIFIER_HANDLE}}}";
-        private const string NATIVE_LIST_MODIFIER_RECORD_XML = $"NativeList{{{STAT_MODIFIER_RECORD_XML}}}";
-        private const string NATIVE_LIST_MODIFIER_EVENT_XML = $"NativeList{{{MODIFIER_TRIGGER_EVENT_XML}}}";
-        private const string NATIVE_LIST_STAT_CHANGE_EVENT_XML = $"NativeList{{{STAT_CHANGE_EVENT_XML}}}";
+        private const string UNSAFE_UTILITY = $"UCLU.UnsafeUtility";
+        private const string ALLOCATOR_HANDLE = $"UC.AllocatorManager.AllocatorHandle";
+        private const string NATIVE_LIST_STAT_HANDLE = $"UC.NativeList<{STAT_HANDLE}>";
+        private const string NATIVE_QUEUE_STAT_HANDLE = $"UC.NativeQueue<{STAT_HANDLE}>";
+        private const string NATIVE_STREAM_READER = $"UC.NativeStream.Reader";
+        private const string NATIVE_LIST_OBSERVER = $"UC.NativeList<StatObserver>";
+        private const string NATIVE_LIST_OBSERVER_XML = $"UC.NativeList{{TStatObserver}}";
+        private const string NATIVE_SET_ENTITY = $"UC.NativeHashSet<{ENTITY}>";
+        private const string NATIVE_LIST_MODIFIER_HANDLE = $"UC.NativeList<{STAT_MODIFIER_HANDLE}>";
+        private const string NATIVE_ARRAY_MODIFIER_EVENT = $"UC.NativeArray<ModifierTriggerEvent>";
+        private const string NATIVE_LIST_MODIFIER_EVENT = $"UC.NativeList<ModifierTriggerEvent>";
+        private const string NATIVE_LIST_MODIFIER_EVENT_GENERIC = $"UC.NativeList<{MODIFIER_TRIGGER_EVENT}>";
+        private const string NATIVE_ARRAY_STAT_CHANGE_EVENT = $"UC.NativeArray<{STAT_CHANGE_EVENT}>";
+        private const string NATIVE_LIST_STAT_CHANGE_EVENT = $"UC.NativeList<{STAT_CHANGE_EVENT}>";
+        private const string NATIVE_LIST_MODIFIER_RECORD = $"UC.NativeList<StatModifierRecord>";
+        private const string NATIVE_LIST_MODIFIER_RECORD_GENERIC = $"UC.NativeList<{STAT_MODIFIER_RECORD}>";
+        private const string NATIVE_LIST_MODIFIER_RECORD_GENERIC_XML = $"UC.NativeList{{{STAT_MODIFIER_RECORD_XML}}}";
+        private const string NATIVE_LIST_STAT_HANDLE_XML = $"UC.NativeList{{{STAT_HANDLE}}}";
+        private const string NATIVE_SET_ENTITY_XML = $"UC.NativeHashSet{{{ENTITY}}}";
+        private const string NATIVE_LIST_MODIFIER_HANDLE_XML = $"UC.NativeList{{{STAT_MODIFIER_HANDLE}}}";
+        private const string NATIVE_LIST_MODIFIER_RECORD_XML = $"UC.NativeList{{{STAT_MODIFIER_RECORD_XML}}}";
+        private const string NATIVE_LIST_MODIFIER_EVENT_XML = $"UC.NativeList{{{MODIFIER_TRIGGER_EVENT_XML}}}";
+        private const string NATIVE_LIST_STAT_CHANGE_EVENT_XML = $"UC.NativeList{{{STAT_CHANGE_EVENT_XML}}}";
 
         private const string UNSAFE_BLOCK_LIST_HANDLE = $"global::Latios.Unsafe.UnsafeParallelBlockList<{STAT_HANDLE}>";
 
@@ -213,6 +213,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             var types = StatGeneratorAPI.Types.AsSpan();
             var typeNames = StatGeneratorAPI.TypeNames.AsSpan();
             var sizes = StatGeneratorAPI.Sizes.AsSpan();
+            var namespaces = StatGeneratorAPI.Namespaces.AsSpan();
             var maxSize = maxDataSize;
             var halfSize = maxSize / 2;
             singleTypes = new List<TypeRecord>(types.Length);
@@ -224,7 +225,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 var type = types[i];
                 var typeName = typeNames[i];
                 var size = sizes[i];
-                var record = new TypeRecord("", type, typeName, size, false);
+                var ns = namespaces[i];
+                var record = new TypeRecord(ns, type, typeName, size);
 
                 if (size > maxSize)
                 {
@@ -3156,7 +3158,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 for (var i = 0; i < singleTypes.Count; i++)
                 {
-                    var (ns, type, _, size, customNs) = singleTypes[i];
+                    var (ns, type, _, size) = singleTypes[i];
+                    var customNs = string.IsNullOrEmpty(ns) == false;
 
                     p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static implicit operator ValuePair(")
@@ -3172,7 +3175,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 for (var i = 0; i < pairTypes.Count; i++)
                 {
-                    var (ns, type, _, size, customNs) = pairTypes[i];
+                    var (ns, type, _, size) = pairTypes[i];
+                    var customNs = string.IsNullOrEmpty(ns) == false;
 
                     p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static implicit operator ValuePair(")
@@ -3207,7 +3211,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 for (var i = 0; i < singleTypes.Count; i++)
                 {
-                    var (ns, type, _, size, customNs) = singleTypes[i];
+                    var (ns, type, _, size) = singleTypes[i];
+                    var customNs = string.IsNullOrEmpty(ns) == false;
 
                     if (size <= halfDataSize)
                     {
@@ -3232,7 +3237,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 for (var i = 0; i < incompatTypes.Count; i++)
                 {
-                    var (ns, type, _, size, customNs) = incompatTypes[i];
+                    var (ns, type, _, size) = incompatTypes[i];
+                    var customNs = string.IsNullOrEmpty(ns) == false;
 
                     p.PrintBeginLine("[global::System.Obsolete(\"'")
                         .Print(systemTypeName).Print("' can only store up to ")
@@ -3252,7 +3258,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 for (var i = 0; i < incompatTypes.Count; i++)
                 {
-                    var (ns, type, _, size, customNs) = incompatTypes[i];
+                    var (ns, type, _, size) = incompatTypes[i];
+                    var customNs = string.IsNullOrEmpty(ns) == false;
 
                     p.PrintBeginLine("[global::System.Obsolete(\"'")
                         .Print(systemTypeName).Print("' can only store up to ")
@@ -3286,7 +3293,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             {
                 for (var i = 0; i < singleTypes.Count; i++)
                 {
-                    var (ns, type, typeName, _, customNs) = singleTypes[i];
+                    var (ns, type, typeName, _) = singleTypes[i];
+                    var customNs = string.IsNullOrEmpty(ns) == false;
 
                     p.PrintBeginLine(SERIALIZED_FIELD).PrintEndLine(FIELD_OFFSET_0);
                     p.PrintBeginLine("private ")
@@ -3321,7 +3329,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < singleTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = singleTypes[i];
+                                var (_, _, typeName, _) = singleTypes[i];
 
                                 p.PrintBeginLine(STAT_VARIANT_TYPE).Print(".").Print(typeName)
                                     .Print(" => new StatDataStore { _")
@@ -3346,7 +3354,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < pairTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = pairTypes[i];
+                                var (_, _, typeName, _) = pairTypes[i];
 
                                 p.PrintBeginLine(STAT_VARIANT_TYPE).Print(".").Print(typeName)
                                     .Print(" => new Pair").Print(typeName).Print("(baseValue.").Print(typeName)
@@ -3379,7 +3387,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < singleTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = singleTypes[i];
+                                var (_, _, typeName, _) = singleTypes[i];
 
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
@@ -3414,7 +3422,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < pairTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = pairTypes[i];
+                                var (_, _, typeName, _) = pairTypes[i];
 
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
@@ -3459,7 +3467,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < singleTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = singleTypes[i];
+                                var (_, _, typeName, _) = singleTypes[i];
 
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
@@ -3493,7 +3501,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < pairTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = pairTypes[i];
+                                var (_, _, typeName, _) = pairTypes[i];
 
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
@@ -3542,7 +3550,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < singleTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = singleTypes[i];
+                                var (_, _, typeName, _) = singleTypes[i];
 
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
@@ -3577,7 +3585,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < pairTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = pairTypes[i];
+                                var (_, _, typeName, _) = pairTypes[i];
 
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
@@ -3627,7 +3635,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < singleTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = singleTypes[i];
+                                var (_, _, typeName, _) = singleTypes[i];
 
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
@@ -3662,7 +3670,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < pairTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = pairTypes[i];
+                                var (_, _, typeName, _) = pairTypes[i];
 
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
@@ -3717,7 +3725,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < singleTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = singleTypes[i];
+                                var (_, _, typeName, _) = singleTypes[i];
 
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
@@ -3753,7 +3761,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < pairTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = pairTypes[i];
+                                var (_, _, typeName, _) = pairTypes[i];
 
                                 p.PrintBeginLine("case ").Print(STAT_VARIANT_TYPE).Print(".").Print(typeName).PrintEndLine(":");
                                 p.OpenScope();
@@ -3798,7 +3806,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < singleTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = singleTypes[i];
+                                var (_, _, typeName, _) = singleTypes[i];
 
                                 p.PrintBeginLine(STAT_VARIANT_TYPE).Print(".").Print(typeName)
                                     .Print(" => ").Print(HASH_VALUE)
@@ -3821,7 +3829,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < pairTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = pairTypes[i];
+                                var (_, _, typeName, _) = pairTypes[i];
 
                                 p.PrintBeginLine(STAT_VARIANT_TYPE).Print(".").Print(typeName)
                                     .Print(" => ").Print(HASH_VALUE).Print(".Combine(pair._type, new Pair")
@@ -3855,7 +3863,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < singleTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = singleTypes[i];
+                                var (_, _, typeName, _) = singleTypes[i];
 
                                 p.PrintBeginLine(STAT_VARIANT_TYPE).Print(".").Print(typeName)
                                     .Print(" => pairA._data._").Print(typeName)
@@ -3878,7 +3886,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                         {
                             for (var i = 0; i < pairTypes.Count; i++)
                             {
-                                var (_, _, typeName, _, _) = pairTypes[i];
+                                var (_, _, typeName, _) = pairTypes[i];
 
                                 p.PrintBeginLine(STAT_VARIANT_TYPE).Print(".").Print(typeName)
                                     .Print(" => new Pair").Print(typeName).Print("(pairA._data).Equals(new Pair")
@@ -3905,8 +3913,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.Print("#endregion =======").PrintEndLine();
             p.PrintEndLine();
 
-            foreach (var (ns, type, typeName, size, customNs) in pairTypes)
+            foreach (var (ns, type, typeName, size) in pairTypes)
             {
+                var customNs = string.IsNullOrEmpty(ns) == false;
+
                 p.PrintLine(STRUCT_LAYOUT_EXPLICIT);
                 p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("struct Pair").Print(typeName)
@@ -4018,7 +4028,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 {
                     for (var i = 0; i < singleTypes.Count; i++)
                     {
-                        var (_, _, typeName, _, _) = singleTypes[i];
+                        var (_, _, typeName, _) = singleTypes[i];
                         var or = i > 0 ? "or " : "   ";
 
                         p.PrintBeginLine(or).Print(STAT_VARIANT_TYPE).Print(".").PrintEndLine(typeName);
@@ -4043,7 +4053,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 {
                     for (var i = 0; i < pairTypes.Count; i++)
                     {
-                        var (_, _, typeName, _, _) = pairTypes[i];
+                        var (_, _, typeName, _) = pairTypes[i];
                         var or = i > 0 ? "or " : "   ";
 
                         p.PrintBeginLine(or).Print(STAT_VARIANT_TYPE).Print(".").PrintEndLine(typeName);
@@ -4070,7 +4080,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
                 for (var i = 0; i < pairTypes.Count; i++)
                 {
-                    var (ns, type, typeName, _, customNs) = pairTypes[i];
+                    var (ns, type, typeName, _) = pairTypes[i];
+                    var customNs = string.IsNullOrEmpty(ns) == false;
                     var padding = maxLength - typeName.Length;
 
                     p.PrintBeginLine("/// ").Print("<item><see cref=\"")
@@ -4168,7 +4179,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             , string Type
             , string TypeName
             , int Size
-            , bool CustomNs
         );
     }
 }

@@ -28,38 +28,39 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var typeFullName = fullName;
             var hasIdType = string.IsNullOrEmpty(idTypeFullName) == false;
 
-            p.PrintLine(SERIALIZABLE);
+            p.PrintLine(PR_SERIALIZABLE);
 
             if (hasIdType)
             {
-                p.PrintLine(string.Format(GENERATED_SHEET_ROW, idTypeFullName, typeFullName));
+                p.PrintLine(string.Format(PR_GENERATED_SHEET_ROW, idTypeFullName, typeFullName));
             }
             else
             {
-                p.PrintLine(string.Format(GENERATED_DATA_ROW, typeFullName));
+                p.PrintLine(string.Format(PR_GENERATED_DATA_ROW, typeFullName));
             }
 
-            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
+            p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLine("public partial class __").Print(typeName);
 
             if (hasIdType)
             {
-                p.Print(" : SheetRow");
+                p.Print(" : CBS.SheetRow");
 
                 if (dataMap.ContainsKey(idTypeFullName))
                 {
-                    p.Print($"<__{GetSimpleName(idTypeFullName)}>");
+                    p.Print("<__").Print(GetSimpleName(idTypeFullName)).Print(">");
                 }
                 else
                 {
-                    p.Print($"<{idTypeFullName}>");
+                    p.Print("<").Print(idTypeFullName).Print(">");
                 }
             }
 
             p.PrintEndLine();
             p.OpenScope();
             {
-                p.PrintLine($"public static readonly __{typeName} Default = new __{typeName}();");
+                p.PrintBeginLine("public static readonly __").Print(typeName)
+                    .Print(" Default = new __").Print(typeName).PrintEndLine("();");
                 p.PrintEndLine();
 
                 WriteConstructor(ref p, dataMap, horizontalListMap, typeName, containingTypeFullName);
@@ -99,7 +100,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , string containingTypeFullName
         )
         {
-            p.PrintLine($"public __{typeName}()");
+            p.PrintBeginLine("public __").Print(typeName).PrintEndLine("()");
             p.OpenScope();
             {
                 foreach (var layer in baseTypeLayers)
@@ -137,7 +138,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     case CollectionKind.Queue:
                     case CollectionKind.Stack:
                     {
-                        var collectionTypeName = VERTICAL_LIST_TYPE;
+                        var collectionTypeName = PR_VERTICAL_LIST_T;
 
                         if (coll.kind == CollectionKind.Array
                             && horizontalListMap.TryGetValue(targetTypeFullName, out var innerMap)
@@ -147,14 +148,14 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                                 && propertyNames.Contains(member.propertyName)
                             )
                             {
-                                collectionTypeName = LIST_TYPE_T;
+                                collectionTypeName = PR_LIST_T;
                             }
                         }
 
                         var elemTypeName = dataMap.ContainsKey(coll.elementTypeName)
                             ? $"__{coll.elementTypeSimpleName}" : coll.elementTypeName;
 
-                        newExpression = $"new {collectionTypeName}{elemTypeName}>()";
+                        newExpression = $"new {collectionTypeName}<{elemTypeName}>()";
                         break;
                     }
 
@@ -166,7 +167,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         var elemTypeName = dataMap.ContainsKey(coll.elementTypeName)
                             ? $"__{coll.elementTypeSimpleName}" : coll.elementTypeName;
 
-                        newExpression = $"new {DICTIONARY_TYPE_T}{keyTypeName}, {elemTypeName}>()";
+                        newExpression = $"new {PR_DICTIONARY_T}<{keyTypeName}, {elemTypeName}>()";
                         break;
                     }
 
@@ -199,7 +200,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
                 }
 
-                p.PrintLine($"this.{member.propertyName} = {newExpression};");
+                p.PrintBeginLine("this.").Print(member.propertyName)
+                    .Print(" = ").Print(newExpression).PrintEndLine(";");
             }
         }
 
@@ -234,7 +236,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     case CollectionKind.Queue:
                     case CollectionKind.Stack:
                     {
-                        var collectionTypeName = VERTICAL_LIST_TYPE;
+                        var collectionTypeName = PR_VERTICAL_LIST_T;
 
                         if (coll.kind == CollectionKind.Array
                             && horizontalListMap.TryGetValue(containingTypeFullName, out var innerMap)
@@ -244,14 +246,14 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                                 && propertyNames.Contains(member.propertyName)
                             )
                             {
-                                collectionTypeName = LIST_TYPE_T;
+                                collectionTypeName = PR_LIST_T;
                             }
                         }
 
                         var elemTypeName = dataMap.ContainsKey(coll.elementTypeName)
                             ? $"__{coll.elementTypeSimpleName}" : coll.elementTypeName;
 
-                        propTypeName = $"{collectionTypeName}{elemTypeName}>";
+                        propTypeName = $"{collectionTypeName}<{elemTypeName}>";
                         break;
                     }
 
@@ -263,7 +265,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         var elemTypeName = dataMap.ContainsKey(coll.elementTypeName)
                             ? $"__{coll.elementTypeSimpleName}" : coll.elementTypeName;
 
-                        propTypeName = $"{DICTIONARY_TYPE_T}{keyTypeName}, {elemTypeName}>";
+                        propTypeName = $"{PR_DICTIONARY_T}<{keyTypeName}, {elemTypeName}>";
                         break;
                     }
 
@@ -276,7 +278,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
                 }
 
-                p.PrintLine($"public {propTypeName} {member.propertyName} {{ get; private set; }}");
+                p.PrintBeginLine("public ").Print(propTypeName).Print(" ").Print(member.propertyName)
+                    .PrintEndLine(" { get; private set; }");
                 p.PrintEndLine();
             }
         }
@@ -291,10 +294,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var typeName = simpleName;
             var typeFullName = fullName;
 
-            p.PrintLine($"public {typeFullName} To{typeName}()");
+            p.PrintBeginLine("public ").Print(typeFullName).Print(" To").Print(typeName).PrintEndLine("()");
             p.OpenScope();
             {
-                p.PrintLine($"var result = new {typeFullName}();");
+                p.PrintBeginLine("var result = new ").Print(typeFullName).PrintEndLine("();");
                 p.PrintEndLine();
 
                 foreach (var layer in baseTypeLayers)
@@ -368,7 +371,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     else
                     {
                         var elemFull = coll.elementTypeName;
-                        expression = member.converter.Convert($"this.{member.propertyName} ?? new {LIST_TYPE_T}{elemFull}>()");
+                        expression = member.converter.Convert(
+                            $"this.{member.propertyName} ?? new {PR_LIST_T}<{elemFull}>()"
+                        );
                     }
                     break;
                 }
@@ -380,7 +385,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                     if (keyIsData == false && elemIsData == false)
                     {
-                        expression = member.converter.Convert($"this.{member.propertyName} ?? new {DICTIONARY_TYPE_T}{coll.keyTypeName}, {coll.elementTypeName}>()");
+                        expression = member.converter.Convert(
+                            $"this.{member.propertyName} ?? new {PR_DICTIONARY_T}<{coll.keyTypeName}, {coll.elementTypeName}>()"
+                        );
                     }
                     else
                     {
@@ -400,7 +407,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     else
                     {
                         var elemFull = coll.elementTypeName;
-                        expression = member.converter.Convert($"this.{member.propertyName} == null ? new {HASH_SET_TYPE_T}{elemFull}>() : new {HASH_SET_TYPE_T}{elemFull}>(this.{member.propertyName})");
+                        expression = member.converter.Convert(
+                            $"this.{member.propertyName} == null ? new {PR_HASH_SET_T}<{elemFull}>() : new {PR_HASH_SET_T}<{elemFull}>(this.{member.propertyName})"
+                        );
                     }
                     break;
                 }
@@ -415,7 +424,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     else
                     {
                         var elemFull = coll.elementTypeName;
-                        expression = member.converter.Convert($"this.{member.propertyName} == null ? new {QUEUE_TYPE_T}{elemFull}>() : new {QUEUE_TYPE_T}{elemFull}>(this.{member.propertyName})");
+                        expression = member.converter.Convert(
+                            $"this.{member.propertyName} == null ? new {PR_QUEUE_T}<{elemFull}>() : new {PR_QUEUE_T}<{elemFull}>(this.{member.propertyName})"
+                        );
                     }
                     break;
                 }
@@ -430,7 +441,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     else
                     {
                         var elemFull = coll.elementTypeName;
-                        expression = member.converter.Convert($"this.{member.propertyName} == null ? new {STACK_TYPE_T}{elemFull}>() : new {STACK_TYPE_T}{elemFull}>(this.{member.propertyName})");
+                        expression = member.converter.Convert(
+                            $"this.{member.propertyName} == null ? new {PR_STACK_T}<{elemFull}>() : new {PR_STACK_T}<{elemFull}>(this.{member.propertyName})"
+                        );
                     }
                     break;
                 }
@@ -442,7 +455,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                     if (dataMap.ContainsKey(fieldTypeFull))
                     {
-                        expression = member.converter.Convert($"(this.{member.propertyName} ?? __{fieldSimpleName}.Default).To{fieldSimpleName}()");
+                        expression = member.converter.Convert(
+                            $"(this.{member.propertyName} ?? __{fieldSimpleName}.Default).To{fieldSimpleName}()"
+                        );
                     }
                     else
                     {
@@ -456,7 +471,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
             }
 
-            p.PrintLine($"result.SetValue_{typeValidIdentifier}_{member.propertyName}({expression});");
+            p.PrintBeginLine("result.SetValue_").Print(typeValidIdentifier).Print("_")
+                .Print(member.propertyName).Print("(")
+                .Print(expression).PrintEndLine(");");
         }
 
         // ── ToCollection methods ────────────────────────────────────────────────────
@@ -499,23 +516,26 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var elemFullName = coll.elementTypeName;
             var methodName = GetToCollectionMethodName(member.propertyName, elemSimpleName, "Array");
 
-            p.PrintLine($"private {elemFullName}[] {methodName}()");
+            p.PrintBeginLine("private ").Print(elemFullName).Print("[] ").Print(methodName).PrintEndLine("()");
             p.OpenScope();
             {
-                p.PrintLine($"if (this.{member.propertyName} == null || this.{member.propertyName}.Count == 0)");
-                p = p.IncreasedIndent();
-                p.PrintLine($"return new {elemFullName}[0];");
-                p = p.DecreasedIndent();
+                p.PrintBeginLine("if (this.").Print(member.propertyName).Print(" == null || this.")
+                    .Print(member.propertyName).PrintEndLine(".Count == 0)");
+                p.WithIncreasedIndent()
+                    .PrintBeginLine("return new ").Print(elemFullName).PrintEndLine("[0];");
                 p.PrintEndLine();
 
-                p.PrintLine($"var rows = this.{member.propertyName};");
+                p.PrintBeginLine("var rows = this.").Print(member.propertyName).PrintEndLine(";");
                 p.PrintLine("var count = rows.Count;");
-                p.PrintLine($"var result = new {elemFullName}[count];");
+                p.PrintBeginLine("var result = new ").Print(elemFullName).PrintEndLine("[count];");
                 p.PrintEndLine();
 
                 p.PrintLine("for (var i = 0; i < count; i++)");
                 p.OpenScope();
-                p.PrintLine($"result[i] = (rows[i] ?? __{elemSimpleName}.Default).To{elemSimpleName}();");
+                {
+                    p.PrintBeginLine("result[i] = (rows[i] ?? __").Print(elemSimpleName).Print(".Default).To")
+                        .Print(elemSimpleName).PrintEndLine("();");
+                }
                 p.CloseScope();
 
                 p.PrintEndLine();
@@ -541,24 +561,29 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var elemFullName = coll.elementTypeName;
             var methodName = GetToCollectionMethodName(member.propertyName, elemSimpleName, "List");
 
-            p.PrintLine($"private {LIST_TYPE_T}{elemFullName}> {methodName}()");
+            p.PrintBeginLine("private ").Print(PR_LIST_T).Print("<").Print(elemFullName).Print("> ")
+                .Print(methodName).PrintEndLine("()");
             p.OpenScope();
             {
-                p.PrintLine($"if (this.{member.propertyName} == null || this.{member.propertyName}.Count == 0)");
-                p = p.IncreasedIndent();
-                p.PrintLine($"return new {LIST_TYPE_T}{elemFullName}>();");
-                p = p.DecreasedIndent();
+                p.PrintBeginLine("if (this.").Print(member.propertyName)
+                    .Print(" == null || this.").Print(member.propertyName).PrintEndLine(".Count == 0)");
+                p.WithIncreasedIndent()
+                    .PrintBeginLine("return new ").Print(PR_LIST_T).Print("<").Print(elemFullName).PrintEndLine(">();");
                 p.PrintEndLine();
 
-                p.PrintLine($"var rows = this.{member.propertyName};");
+                p.PrintBeginLine("var rows = this.").Print(member.propertyName).PrintEndLine(";");
                 p.PrintLine("var count = rows.Count;");
-                p.PrintLine($"var result = new {LIST_TYPE_T}{elemFullName}>(count);");
+                p.PrintBeginLine("var result = new ")
+                    .Print(PR_LIST_T).Print("<").Print(elemFullName).PrintEndLine(">(count);");
                 p.PrintEndLine();
 
                 p.PrintLine("for (var i = 0; i < count; i++)");
                 p.OpenScope();
-                p.PrintLine($"var item = (rows[i] ?? __{elemSimpleName}.Default).To{elemSimpleName}();");
-                p.PrintLine("result.Add(item);");
+                {
+                    p.PrintBeginLine("var item = (rows[i] ?? __")
+                        .Print(elemSimpleName).Print(".Default).To").Print(elemSimpleName).PrintEndLine("();");
+                    p.PrintLine("result.Add(item);");
+                }
                 p.CloseScope();
 
                 p.PrintEndLine();
@@ -589,18 +614,21 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var elemFull = coll.elementTypeName;
             var methodName = GetToCollectionMethodName(member.propertyName, elemSimple, "Dictionary");
 
-            p.PrintLine($"private {DICTIONARY_TYPE_T}{keyFull}, {elemFull}> {methodName}()");
+            p.PrintBeginLine("private ").Print(PR_DICTIONARY_T).Print("<").Print(keyFull)
+                .Print(", ").Print(elemFull).Print("> ").Print(methodName).PrintEndLine("()");
             p.OpenScope();
             {
-                p.PrintLine($"if (this.{member.propertyName} == null || this.{member.propertyName}.Count == 0)");
-                p = p.IncreasedIndent();
-                p.PrintLine($"return new {DICTIONARY_TYPE_T}{keyFull}, {elemFull}>();");
-                p = p.DecreasedIndent();
+                p.PrintBeginLine("if (this.").Print(member.propertyName).Print(" == null || this.")
+                    .Print(member.propertyName).PrintEndLine(".Count == 0)");
+                p.WithIncreasedIndent()
+                    .PrintBeginLine("return new ").Print(PR_DICTIONARY_T).Print("<").Print(keyFull)
+                    .Print(", ").Print(elemFull).PrintEndLine(">();");
                 p.PrintEndLine();
 
-                p.PrintLine($"var rows = this.{member.propertyName};");
+                p.PrintBeginLine("var rows = this.").Print(member.propertyName).PrintEndLine(";");
                 p.PrintLine("var count = rows.Count;");
-                p.PrintLine($"var result = new {DICTIONARY_TYPE_T}{keyFull}, {elemFull}>(count);");
+                p.PrintBeginLine("var result = new ").Print(PR_DICTIONARY_T).Print("<").Print(keyFull)
+                    .Print(", ").Print(elemFull).PrintEndLine(">(count);");
                 p.PrintEndLine();
 
                 p.PrintLine("foreach (var kv in rows)");
@@ -608,7 +636,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 {
                     if (keyIsData)
                     {
-                        p.PrintLine($"var key = (kv.Key ?? __{keySimple}.Default).To{keySimple}();");
+                        p.PrintBeginLine("var key = (kv.Key ?? __")
+                            .Print(keySimple).Print(".Default).To")
+                            .Print(keySimple).PrintEndLine("();");
                     }
                     else
                     {
@@ -617,7 +647,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                     if (elemIsData)
                     {
-                        p.PrintLine($"var value = (kv.Value ?? __{elemSimple}.Default).To{elemSimple}();");
+                        p.PrintBeginLine("var value = (kv.Value ?? __").Print(elemSimple).Print(".Default).To")
+                            .Print(elemSimple).PrintEndLine("();");
                     }
                     else
                     {
@@ -652,24 +683,30 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var elemFull = coll.elementTypeName;
             var methodName = GetToCollectionMethodName(member.propertyName, elemSimple, "HashSet");
 
-            p.PrintLine($"private {HASH_SET_TYPE_T}{elemFull}> {methodName}()");
+            p.PrintBeginLine("private ").Print(PR_HASH_SET_T).Print("<").Print(elemFull).Print("> ")
+                .Print(methodName).PrintEndLine("()");
             p.OpenScope();
             {
-                p.PrintLine($"if (this.{member.propertyName} == null || this.{member.propertyName}.Count == 0)");
-                p = p.IncreasedIndent();
-                p.PrintLine($"return new {HASH_SET_TYPE_T}{elemFull}>();");
-                p = p.DecreasedIndent();
+                p.PrintBeginLine("if (this.").Print(member.propertyName)
+                    .Print(" == null || this.").Print(member.propertyName).PrintEndLine(".Count == 0)");
+                p.WithIncreasedIndent()
+                    .PrintBeginLine("return new ")
+                    .Print(PR_HASH_SET_T).Print("<").Print(elemFull).PrintEndLine(">();");
                 p.PrintEndLine();
 
-                p.PrintLine($"var rows = this.{member.propertyName};");
+                p.PrintBeginLine("var rows = this.").Print(member.propertyName).PrintEndLine(";");
                 p.PrintLine("var count = rows.Count;");
-                p.PrintLine($"var result = new {HASH_SET_TYPE_T}{elemFull}>(count);");
+                p.PrintBeginLine("var result = new ")
+                    .Print(PR_HASH_SET_T).Print("<").Print(elemFull).PrintEndLine(">(count);");
                 p.PrintEndLine();
 
                 p.PrintLine("for (var i = 0; i < count; i++)");
                 p.OpenScope();
-                p.PrintLine($"var item = (rows[i] ?? __{elemSimple}.Default).To{elemSimple}();");
-                p.PrintLine("result.Add(item);");
+                {
+                    p.PrintBeginLine("var item = (rows[i] ?? __").Print(elemSimple).Print(".Default).To")
+                        .Print(elemSimple).PrintEndLine("();");
+                    p.PrintLine("result.Add(item);");
+                }
                 p.CloseScope();
 
                 p.PrintEndLine();
@@ -695,24 +732,30 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var elemFull = coll.elementTypeName;
             var methodName = GetToCollectionMethodName(member.propertyName, elemSimple, "Queue");
 
-            p.PrintLine($"private {QUEUE_TYPE_T}{elemFull}> {methodName}()");
+            p.PrintBeginLine("private ").Print(PR_QUEUE_T).Print("<").Print(elemFull).Print("> ")
+                .Print(methodName).PrintEndLine("()");
             p.OpenScope();
             {
-                p.PrintLine($"if (this.{member.propertyName} == null || this.{member.propertyName}.Count == 0)");
-                p = p.IncreasedIndent();
-                p.PrintLine($"return new {QUEUE_TYPE_T}{elemFull}>();");
-                p = p.DecreasedIndent();
+                p.PrintBeginLine("if (this.").Print(member.propertyName)
+                    .Print(" == null || this.").Print(member.propertyName).PrintEndLine(".Count == 0)");
+                p.WithIncreasedIndent()
+                    .PrintBeginLine("return new ")
+                    .Print(PR_QUEUE_T).Print("<").Print(elemFull).PrintEndLine(">();");
                 p.PrintEndLine();
 
-                p.PrintLine($"var rows = this.{member.propertyName};");
+                p.PrintBeginLine("var rows = this.").Print(member.propertyName).PrintEndLine(";");
                 p.PrintLine("var count = rows.Count;");
-                p.PrintLine($"var result = new {QUEUE_TYPE_T}{elemFull}>(count);");
+                p.PrintBeginLine("var result = new ")
+                    .Print(PR_QUEUE_T).Print("<").Print(elemFull).PrintEndLine(">(count);");
                 p.PrintEndLine();
 
                 p.PrintLine("for (var i = 0; i < count; i++)");
                 p.OpenScope();
-                p.PrintLine($"var item = (rows[i] ?? __{elemSimple}.Default).To{elemSimple}();");
-                p.PrintLine("result.Enqueue(item);");
+                {
+                    p.PrintBeginLine("var item = (rows[i] ?? __").Print(elemSimple).Print(".Default).To")
+                        .Print(elemSimple).PrintEndLine("();");
+                    p.PrintLine("result.Enqueue(item);");
+                }
                 p.CloseScope();
 
                 p.PrintEndLine();
@@ -738,24 +781,30 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var elemFull = coll.elementTypeName;
             var methodName = GetToCollectionMethodName(member.propertyName, elemSimple, "Stack");
 
-            p.PrintLine($"private {STACK_TYPE_T}{elemFull}> {methodName}()");
+            p.PrintBeginLine("private ").Print(PR_STACK_T).Print("<").Print(elemFull).Print("> ")
+                .Print(methodName).PrintEndLine("()");
             p.OpenScope();
             {
-                p.PrintLine($"if (this.{member.propertyName} == null || this.{member.propertyName}.Count == 0)");
-                p = p.IncreasedIndent();
-                p.PrintLine($"return new {STACK_TYPE_T}{elemFull}>();");
-                p = p.DecreasedIndent();
+                p.PrintBeginLine("if (this.").Print(member.propertyName)
+                    .Print(" == null || this.").Print(member.propertyName).PrintEndLine(".Count == 0)");
+                p.WithIncreasedIndent()
+                    .PrintBeginLine("return new ")
+                    .Print(PR_STACK_T).Print("<").Print(elemFull).PrintEndLine(">();");
                 p.PrintEndLine();
 
-                p.PrintLine($"var rows = this.{member.propertyName};");
+                p.PrintBeginLine("var rows = this.").Print(member.propertyName).PrintEndLine(";");
                 p.PrintLine("var count = rows.Count;");
-                p.PrintLine($"var result = new {STACK_TYPE_T}{elemFull}>(count);");
+                p.PrintBeginLine("var result = new ")
+                    .Print(PR_STACK_T).Print("<").Print(elemFull).PrintEndLine(">(count);");
                 p.PrintEndLine();
 
                 p.PrintLine("for (var i = 0; i < count; i++)");
                 p.OpenScope();
-                p.PrintLine($"var item = (rows[i] ?? __{elemSimple}.Default).To{elemSimple}();");
-                p.PrintLine("result.Push(item);");
+                {
+                    p.PrintBeginLine("var item = (rows[i] ?? __").Print(elemSimple).Print(".Default).To")
+                        .Print(elemSimple).PrintEndLine("();");
+                    p.PrintLine("result.Push(item);");
+                }
                 p.CloseScope();
 
                 p.PrintEndLine();

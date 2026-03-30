@@ -232,12 +232,12 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
             p.PrintEndLine();
             p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();
-            p.PrintLine("using System;");
-            p.PrintLine("using System.Diagnostics.CodeAnalysis;");
-            p.PrintLine("using System.CodeDom.Compiler;");
-            p.PrintLine("using System.Runtime.CompilerServices;");
-            p.PrintLine("using System.Runtime.InteropServices;");
-            p.PrintLine("using EncosyTower.Databases;");
+            p.PrintLine("using S = global::System;");
+            p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+            p.PrintLine("using ETDB = EncosyTower.Databases;");
             p.PrintEndLine();
             p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();

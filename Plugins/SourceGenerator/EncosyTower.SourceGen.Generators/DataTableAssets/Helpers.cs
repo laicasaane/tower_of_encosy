@@ -15,8 +15,8 @@
 
         public const string IINITIALIZABLE = "global::EncosyTower.Common.IInitializable";
 
-        public const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
-        public const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.DataTableAssets.DataTableAssetGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        public const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
+        public const string PR_AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        public const string PR_GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.DataTableAssets.DataTableAssetGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        public const string PR_EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
     }
 }

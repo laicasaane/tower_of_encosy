@@ -4,10 +4,10 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 {
     partial class EnumExtensionsDeclaration
     {
-        private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.EnumExtensions.EnumExtensionsGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
-        private const string UNITY_COLLECTIONS_ALLOCATOR = "global::Unity.Collections.AllocatorManager.AllocatorHandle";
+        private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.EnumExtensions.EnumExtensionsGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string ALLOCATOR_MANAGER = "UC.AllocatorManager.AllocatorHandle";
         private const string CLASS_VALUES = "Values";
         private const string CLASS_UNDERLYING_VALUES = "UnderlyingValues";
         private const string CLASS_NAMES = "Names";
@@ -29,36 +29,13 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         {
             var p = Printer.DefaultLarge;
 
-            p.PrintEndLine();
-
-            var hasNamespace = string.IsNullOrEmpty(NamespaceName) == false;
-
-            if (hasNamespace)
-            {
-                p.PrintLine($"namespace {NamespaceName}");
-                p.OpenScope();
-            }
-
             WriteCode(ref p);
-
-            if (hasNamespace)
-            {
-                p.CloseScope();
-            }
 
             return p.Result;
         }
 
         public void WriteCode(ref Printer p)
         {
-            var numContainingTypes = ContainingTypes.Count;
-
-            for (var i = 0; i < numContainingTypes; i++)
-            {
-                p.PrintLine(ContainingTypes[i]);
-                p.OpenScope();
-            }
-
             if (OnlyClass == false)
             {
                 WriteInterface(ref p);
@@ -71,11 +48,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             }
 
             WriteClass(ref p);
-
-            for (var i = 0; i < numContainingTypes; i++)
-            {
-                p.CloseScope();
-            }
         }
 
         private void WriteInterface(ref Printer p)
@@ -86,19 +58,19 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             p.PrintBeginLine(Accessibility.GetKeyword()).Print(" partial interface I").PrintEndLine(ExtensionsName);
             p = p.IncreasedIndent();
             {
-                p.PrintBeginLine(": global::EncosyTower.EnumExtensions.IEnumExtensions<")
+                p.PrintBeginLine(": ETEE.IEnumExtensions<")
                     .Print(FullyQualifiedName).Print(", ").Print(UnderlyingTypeName)
                     .PrintEndLine(">");
 
                 if (HasFlags)
                 {
-                    p.PrintBeginLine(", global::EncosyTower.EnumExtensions.IEnumBitField<").Print(FullyQualifiedName).PrintEndLine(">");
+                    p.PrintBeginLine(", ETEE.IEnumBitField<").Print(FullyQualifiedName).PrintEndLine(">");
                 }
 
                 if (ReferenceUnityCollections)
                 {
-                    p.PrintBeginLine(", global::EncosyTower.Conversion.IToFixedString<").Print(FixedStringTypeFullyQualifiedName).PrintEndLine(">");
-                    p.PrintBeginLine(", global::EncosyTower.Conversion.IToDisplayFixedString<").Print(FixedStringTypeFullyQualifiedName).PrintEndLine(">");
+                    p.PrintBeginLine(", ETCon.IToFixedString<").Print(PrintFixedStringTypeName).PrintEndLine(">");
+                    p.PrintBeginLine(", ETCon.IToDisplayFixedString<").Print(PrintFixedStringTypeName).PrintEndLine(">");
                 }
             }
             p = p.DecreasedIndent();
@@ -114,22 +86,22 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             WriteAttribute(ref p);
 
             p.PrintLine(GeneratedCode).PrintLine(ExcludeCoverage);
-            p.PrintLine("[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit)]");
+            p.PrintLine("[SRIS.StructLayout(SRIS.LayoutKind.Explicit)]");
             p.PrintBeginLine(Accessibility.GetKeyword()).Print(" readonly partial struct ").Print(StructName)
                 .Print(" : I").PrintEndLine(ExtensionsName);
             p = p.IncreasedIndent();
             {
-                p.PrintBeginLine(", global::System.IEquatable<").Print(StructName).PrintEndLine(">");
-                p.PrintBeginLine(", global::System.IComparable<").Print(StructName).PrintEndLine(">");
+                p.PrintBeginLine(", S.IEquatable<").Print(StructName).PrintEndLine(">");
+                p.PrintBeginLine(", S.IComparable<").Print(StructName).PrintEndLine(">");
             }
             p = p.DecreasedIndent();
             p.OpenScope();
             {
-                p.PrintLine("[global::System.Runtime.InteropServices.FieldOffset(0)]");
+                p.PrintLine("[SRIS.FieldOffset(0)]");
                 p.PrintBeginLine("public readonly ").Print(FullyQualifiedName).PrintEndLine(" Value;");
                 p.PrintEndLine();
 
-                p.PrintLine("[global::System.Runtime.InteropServices.FieldOffset(0)]");
+                p.PrintLine("[SRIS.FieldOffset(0)]");
                 p.PrintBeginLine("public readonly ").Print(UnderlyingTypeName).PrintEndLine(" UnderlyingValue;");
                 p.PrintEndLine();
 
@@ -191,23 +163,23 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 if (ReferenceUnityCollections)
                 {
                     p.PrintLine(AggressiveInlining);
-                    p.PrintBeginLine("public ").Print(FixedStringTypeFullyQualifiedName).Print(" ToFixedString() => ")
+                    p.PrintBeginLine("public ").Print(PrintFixedStringTypeName).Print(" ToFixedString() => ")
                         .PrintEndLine("ToFixedString(true);");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
-                    p.PrintBeginLine("public ").Print(FixedStringTypeFullyQualifiedName)
+                    p.PrintBeginLine("public ").Print(PrintFixedStringTypeName)
                         .Print(" ToFixedString(bool emptyIfUndefined) => ")
                         .Print(ExtensionsName).PrintEndLine(".ToFixedString(this.Value, emptyIfUndefined);");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
-                    p.PrintBeginLine("public ").Print(FixedStringTypeFullyQualifiedName).Print(" ToDisplayFixedString() => ")
+                    p.PrintBeginLine("public ").Print(PrintFixedStringTypeName).Print(" ToDisplayFixedString() => ")
                         .PrintEndLine("ToDisplayFixedString(true);");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
-                    p.PrintBeginLine("public ").Print(FixedStringTypeFullyQualifiedName)
+                    p.PrintBeginLine("public ").Print(PrintFixedStringTypeName)
                         .Print(" ToDisplayFixedString(bool emptyIfUndefined) => ")
                         .Print(ExtensionsName).PrintEndLine(".ToDisplayFixedString(this.Value, emptyIfUndefined);");
                     p.PrintEndLine();
@@ -222,10 +194,10 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("public bool TryFormat(");
                 p = p.IncreasedIndent();
                 {
-                    p.PrintLine("  global::System.Span<char> destination");
+                    p.PrintLine("  S.Span<char> destination");
                     p.PrintLine(", out int charsWritten");
-                    p.PrintLine(", global::System.ReadOnlySpan<char> format = default");
-                    p.PrintLine(", global::System.IFormatProvider provider = null");
+                    p.PrintLine(", S.ReadOnlySpan<char> format = default");
+                    p.PrintLine(", S.IFormatProvider provider = null");
                 }
                 p = p.DecreasedIndent();
                 p.PrintBeginLine(") => ").Print(ExtensionsName)
@@ -277,7 +249,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintBeginLine("public string ToString(string format, global::System.IFormatProvider formatProvider) => ")
+                p.PrintBeginLine("public string ToString(string format, S.IFormatProvider formatProvider) => ")
                     .PrintEndLine("ToStringFast(true);");
                 p.PrintEndLine();
 
@@ -381,7 +353,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         private void WriteExtendedStruct_BitFlagEnumerator(ref Printer p)
         {
             p.PrintBeginLine("partial struct ").Print(StructName)
-                .Print(" : global::System.Collections.Generic.IEnumerable<")
+                .Print(" : SCG.IEnumerable<")
                 .Print(FullyQualifiedName).PrintEndLine(">");
             p.OpenScope();
             {
@@ -395,8 +367,8 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintBeginLine("readonly global::System.Collections.Generic.IEnumerator<")
-                    .Print(FullyQualifiedName).Print("> global::System.Collections.Generic.IEnumerable<")
+                p.PrintBeginLine("readonly SCG.IEnumerator<")
+                    .Print(FullyQualifiedName).Print("> SCG.IEnumerable<")
                     .Print(FullyQualifiedName).PrintEndLine(">.GetEnumerator()");
                 p.OpenScope();
                 {
@@ -406,8 +378,8 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintBeginLine("readonly global::System.Collections.IEnumerator ")
-                    .PrintEndLine("global::System.Collections.IEnumerable.GetEnumerator()");
+                p.PrintBeginLine("readonly SC.IEnumerator ")
+                    .PrintEndLine("SC.IEnumerable.GetEnumerator()");
                 p.OpenScope();
                 {
                     p.PrintLine("return GetEnumerator();");
@@ -416,7 +388,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintBeginLine("public partial struct Enumerator")
-                    .Print(" : global::System.Collections.Generic.IEnumerator<")
+                    .Print(" : SCG.IEnumerator<")
                     .Print(FullyQualifiedName).PrintEndLine(">");
                 p.OpenScope();
                 {
@@ -443,7 +415,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintLine("readonly object global::System.Collections.IEnumerator.Current");
+                    p.PrintLine("readonly object SC.IEnumerator.Current");
                     p.OpenScope();
                     {
                         p.PrintLine(AggressiveInlining);
@@ -590,7 +562,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 return;
             }
 
-            p.PrintBeginLine("[global::EncosyTower.EnumExtensions.SourceGen.GeneratedEnumExtensionsFor(typeof(")
+            p.PrintBeginLine("[ETEESG.GeneratedEnumExtensionsFor(typeof(")
                 .Print(FullyQualifiedName).Print("), typeof(I")
                 .Print(ExtensionsName).Print("), typeof(")
                 .Print(ExtensionsName).Print("), typeof(")
@@ -611,20 +583,20 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             {
                 foreach (var member in Members)
                 {
-                    p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} {member.name}");
+                    p.PrintLine($"public static {PrintFixedStringTypeName} {member.name}");
                     p.OpenScope();
                     {
                         p.PrintLine(AggressiveInlining);
-                        p.PrintLine($"get => ({FixedStringTypeFullyQualifiedName}){CLASS_DISPLAY_NAMES}.{member.name};");
+                        p.PrintLine($"get => ({PrintFixedStringTypeName}){CLASS_DISPLAY_NAMES}.{member.name};");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
                 }
 
-                p.PrintLine($"public static global::Unity.Collections.NativeArray<{FixedStringTypeFullyQualifiedName}> AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
+                p.PrintLine($"public static UC.NativeArray<{PrintFixedStringTypeName}> AsNativeArray({ALLOCATOR_MANAGER} allocator)");
                 p.OpenScope();
                 {
-                    p.PrintLine($"var names = global::Unity.Collections.CollectionHelper.CreateNativeArray<{FixedStringTypeFullyQualifiedName}>({ExtensionsName}.Length, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+                    p.PrintLine($"var names = UC.CollectionHelper.CreateNativeArray<{PrintFixedStringTypeName}>({ExtensionsName}.Length, allocator, UC.NativeArrayOptions.UninitializedMemory);");
 
                     var index = 0;
 
@@ -644,12 +616,12 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.CloseScope();
                 p.PrintEndLine();
 
-                foreach (var fixedTypeName in GeneratorHelpers.FullyQualifiedFixedStringTypeNames)
+                foreach (var fixedTypeName in GeneratorHelpers.Print_FixedStringTypeNames)
                 {
-                    p.PrintLine($"public static void Get({UNITY_COLLECTIONS_ALLOCATOR} allocator, out global::Unity.Collections.NativeArray<{fixedTypeName}> names)");
+                    p.PrintLine($"public static void Get({ALLOCATOR_MANAGER} allocator, out UC.NativeArray<{fixedTypeName}> names)");
                     p.OpenScope();
                     {
-                        p.PrintLine($"names = global::Unity.Collections.CollectionHelper.CreateNativeArray<{fixedTypeName}>({ExtensionsName}.Length, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+                        p.PrintLine($"names = UC.CollectionHelper.CreateNativeArray<{fixedTypeName}>({ExtensionsName}.Length, allocator, UC.NativeArrayOptions.UninitializedMemory);");
 
                         var index = 0;
 
@@ -669,11 +641,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 }
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value)");
+                p.PrintLine($"public static {PrintFixedStringTypeName} Get({FullyQualifiedName} value)");
                 p.WithIncreasedIndent().PrintLine("=> Get(value, true);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value")
+                p.PrintBeginLine($"public static {PrintFixedStringTypeName} Get({FullyQualifiedName} value")
                     .PrintEndLine(", bool emptyIfUndefined)");
                 p = p.IncreasedIndent();
                 p.PrintLine($"=> value switch");
@@ -706,20 +678,20 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             {
                 foreach (var member in Members)
                 {
-                    p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} {member.name}");
+                    p.PrintLine($"public static {PrintFixedStringTypeName} {member.name}");
                     p.OpenScope();
                     {
                         p.PrintLine(AggressiveInlining);
-                        p.PrintLine($"get => ({FixedStringTypeFullyQualifiedName}){CLASS_NAMES}.{member.name};");
+                        p.PrintLine($"get => ({PrintFixedStringTypeName}){CLASS_NAMES}.{member.name};");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
                 }
 
-                p.PrintLine($"public static global::Unity.Collections.NativeArray<{FixedStringTypeFullyQualifiedName}> AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
+                p.PrintLine($"public static UC.NativeArray<{PrintFixedStringTypeName}> AsNativeArray({ALLOCATOR_MANAGER} allocator)");
                 p.OpenScope();
                 {
-                    p.PrintLine($"var names = global::Unity.Collections.CollectionHelper.CreateNativeArray<{FixedStringTypeFullyQualifiedName}>({ExtensionsName}.Length, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+                    p.PrintLine($"var names = UC.CollectionHelper.CreateNativeArray<{PrintFixedStringTypeName}>({ExtensionsName}.Length, allocator, UC.NativeArrayOptions.UninitializedMemory);");
 
                     var index = 0;
 
@@ -739,12 +711,12 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.CloseScope();
                 p.PrintEndLine();
 
-                foreach (var fixedTypeName in GeneratorHelpers.FullyQualifiedFixedStringTypeNames)
+                foreach (var fixedTypeName in GeneratorHelpers.Print_FixedStringTypeNames)
                 {
-                    p.PrintLine($"public static void Get({UNITY_COLLECTIONS_ALLOCATOR} allocator, out global::Unity.Collections.NativeArray<{fixedTypeName}> names)");
+                    p.PrintLine($"public static void Get({ALLOCATOR_MANAGER} allocator, out UC.NativeArray<{fixedTypeName}> names)");
                     p.OpenScope();
                     {
-                        p.PrintLine($"names = global::Unity.Collections.CollectionHelper.CreateNativeArray<{fixedTypeName}>({ExtensionsName}.Length, allocator, global::Unity.Collections.NativeArrayOptions.UninitializedMemory);");
+                        p.PrintLine($"names = UC.CollectionHelper.CreateNativeArray<{fixedTypeName}>({ExtensionsName}.Length, allocator, UC.NativeArrayOptions.UninitializedMemory);");
 
                         var index = 0;
 
@@ -764,11 +736,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 }
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value)");
+                p.PrintLine($"public static {PrintFixedStringTypeName} Get({FullyQualifiedName} value)");
                 p.WithIncreasedIndent().PrintLine("=> Get(value, true);");
                 p.PrintEndLine();
 
-                p.PrintBeginLine($"public static {FixedStringTypeFullyQualifiedName} Get({FullyQualifiedName} value")
+                p.PrintBeginLine($"public static {PrintFixedStringTypeName} Get({FullyQualifiedName} value")
                     .PrintEndLine(", bool emptyIfUndefined)");
                 p = p.IncreasedIndent();
                 p.PrintLine($"=> value switch");
@@ -820,11 +792,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintLine("public static global::System.ReadOnlyMemory<string> AsMemory() => s_names;");
+                p.PrintLine("public static S.ReadOnlyMemory<string> AsMemory() => s_names;");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintLine("public static global::System.ReadOnlySpan<string> AsSpan() => s_names;");
+                p.PrintLine("public static S.ReadOnlySpan<string> AsSpan() => s_names;");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
@@ -874,11 +846,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintLine("public static global::System.ReadOnlyMemory<string> AsMemory() => s_names;");
+                p.PrintLine("public static S.ReadOnlyMemory<string> AsMemory() => s_names;");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintLine("public static global::System.ReadOnlySpan<string> AsSpan() => s_names;");
+                p.PrintLine("public static S.ReadOnlySpan<string> AsSpan() => s_names;");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
@@ -922,20 +894,20 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintLine($"public static global::System.ReadOnlyMemory<{UnderlyingTypeName}> AsMemory() => s_values;");
+                p.PrintLine($"public static S.ReadOnlyMemory<{UnderlyingTypeName}> AsMemory() => s_values;");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintLine($"public static global::System.ReadOnlySpan<{UnderlyingTypeName}> AsSpan() => s_values;");
+                p.PrintLine($"public static S.ReadOnlySpan<{UnderlyingTypeName}> AsSpan() => s_values;");
 
                 if (ReferenceUnityCollections)
                 {
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
-                    p.PrintLine($"public static global::Unity.Collections.NativeArray<{UnderlyingTypeName}> AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
+                    p.PrintLine($"public static UC.NativeArray<{UnderlyingTypeName}> AsNativeArray({ALLOCATOR_MANAGER} allocator)");
                     p = p.IncreasedIndent();
-                    p.PrintLine($"=> global::Unity.Collections.CollectionHelper.CreateNativeArray<{UnderlyingTypeName}>(s_values, allocator);");
+                    p.PrintLine($"=> UC.CollectionHelper.CreateNativeArray<{UnderlyingTypeName}>(s_values, allocator);");
                     p = p.DecreasedIndent();
                 }
             }
@@ -961,20 +933,20 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintLine($"public static global::System.ReadOnlyMemory<{FullyQualifiedName}> AsMemory() => s_values;");
+                p.PrintLine($"public static S.ReadOnlyMemory<{FullyQualifiedName}> AsMemory() => s_values;");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintLine($"public static global::System.ReadOnlySpan<{FullyQualifiedName}> AsSpan() => s_values;");
+                p.PrintLine($"public static S.ReadOnlySpan<{FullyQualifiedName}> AsSpan() => s_values;");
 
                 if (ReferenceUnityCollections)
                 {
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
-                    p.PrintLine($"public static global::Unity.Collections.NativeArray<{FullyQualifiedName}> AsNativeArray({UNITY_COLLECTIONS_ALLOCATOR} allocator)");
+                    p.PrintLine($"public static UC.NativeArray<{FullyQualifiedName}> AsNativeArray({ALLOCATOR_MANAGER} allocator)");
                     p = p.IncreasedIndent();
-                    p.PrintLine($"=> global::Unity.Collections.CollectionHelper.CreateNativeArray<{FullyQualifiedName}>(s_values, allocator);");
+                    p.PrintLine($"=> UC.CollectionHelper.CreateNativeArray<{FullyQualifiedName}>(s_values, allocator);");
                     p = p.DecreasedIndent();
                 }
             }
@@ -1063,8 +1035,8 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintBeginLine("var stringComparison = ignoreCase ? ")
-                    .Print("global::System.StringComparison.OrdinalIgnoreCase : ")
-                    .PrintEndLine("global::System.StringComparison.Ordinal;");
+                    .Print("S.StringComparison.OrdinalIgnoreCase : ")
+                    .PrintEndLine("S.StringComparison.Ordinal;");
                 p.PrintEndLine();
 
                 if (IsDisplayAttributeUsed)
@@ -1134,7 +1106,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         private void WriteTryParseSpan(ref Printer p, string @this)
         {
-            const string SPAN = "global::System.ReadOnlySpan<char>";
+            const string SPAN = "S.ReadOnlySpan<char>";
 
             if (NoDocumentation == false)
             {
@@ -1215,8 +1187,8 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintBeginLine("var stringComparison = ignoreCase ? ")
-                    .Print("global::System.StringComparison.OrdinalIgnoreCase : ")
-                    .PrintEndLine("global::System.StringComparison.Ordinal;");
+                    .Print("S.StringComparison.OrdinalIgnoreCase : ")
+                    .PrintEndLine("S.StringComparison.Ordinal;");
                 p.PrintEndLine();
 
                 if (IsDisplayAttributeUsed)
@@ -1231,7 +1203,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                             {
                                 if (string.IsNullOrEmpty(member.displayName) == false)
                                 {
-                                    p.PrintLine($"case {SPAN} s when global::System.MemoryExtensions.Equals(s, global::System.MemoryExtensions.AsSpan({CLASS_DISPLAY_NAMES}.{member.name}), stringComparison):");
+                                    p.PrintLine($"case {SPAN} s when S.MemoryExtensions.Equals(s, S.MemoryExtensions.AsSpan({CLASS_DISPLAY_NAMES}.{member.name}), stringComparison):");
                                     p.OpenScope();
                                     {
                                         p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
@@ -1253,7 +1225,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 {
                     foreach (var member in Members)
                     {
-                        p.PrintLine($"case {SPAN} s when global::System.MemoryExtensions.Equals(s, global::System.MemoryExtensions.AsSpan({CLASS_NAMES}.{member.name}), stringComparison):");
+                        p.PrintLine($"case {SPAN} s when S.MemoryExtensions.Equals(s, S.MemoryExtensions.AsSpan({CLASS_NAMES}.{member.name}), stringComparison):");
                         p.OpenScope();
                         {
                             p.PrintLine($"value = {FullyQualifiedName}.{member.name};");
@@ -1500,10 +1472,10 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             p = p.IncreasedIndent();
             {
                 p.PrintLine($"  {@this}{FullyQualifiedName} value");
-                p.PrintLine(", global::System.Span<char> destination");
+                p.PrintLine(", S.Span<char> destination");
                 p.PrintLine(", out int charsWritten");
-                p.PrintLine(", global::System.ReadOnlySpan<char> format = default");
-                p.PrintLine(", global::System.IFormatProvider provider = null");
+                p.PrintLine(", S.ReadOnlySpan<char> format = default");
+                p.PrintLine(", S.IFormatProvider provider = null");
             }
             p = p.DecreasedIndent();
             p.PrintLine(")");
@@ -1512,7 +1484,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("if (IsDefined(value))");
                 p.OpenScope();
                 {
-                    p.PrintLine("var span = global::System.MemoryExtensions.AsSpan(ToStringFast(value));");
+                    p.PrintLine("var span = S.MemoryExtensions.AsSpan(ToStringFast(value));");
 
                     p.PrintLine("if (span.Length == 0 || span.TryCopyTo(destination) == false)");
                     p.OpenScope();
@@ -1629,7 +1601,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             }
 
             p.PrintLine(AggressiveInlining);
-            p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} ToFixedString({@this}{FullyQualifiedName} value)");
+            p.PrintLine($"public static {PrintFixedStringTypeName} ToFixedString({@this}{FullyQualifiedName} value)");
             p.WithIncreasedIndent().PrintLine("=> ToFixedString(value, true);");
             p.PrintEndLine();
 
@@ -1645,7 +1617,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             }
 
             p.PrintLine(AggressiveInlining);
-            p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} ToFixedString({@this}{FullyQualifiedName} value, bool emptyIfUndefined)");
+            p.PrintLine($"public static {PrintFixedStringTypeName} ToFixedString({@this}{FullyQualifiedName} value, bool emptyIfUndefined)");
             p = p.IncreasedIndent();
             p.PrintBeginLine("=> ").Print(CLASS_FIXED_NAMES).PrintEndLine(".Get(value, emptyIfUndefined);");
             p = p.DecreasedIndent();
@@ -1664,7 +1636,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             }
 
             p.PrintLine(AggressiveInlining);
-            p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} ToDisplayFixedString({@this}{FullyQualifiedName} value)");
+            p.PrintLine($"public static {PrintFixedStringTypeName} ToDisplayFixedString({@this}{FullyQualifiedName} value)");
             p.WithIncreasedIndent().PrintLine("=> ToDisplayFixedString(value, true);");
             p.PrintEndLine();
 
@@ -1683,17 +1655,17 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             }
 
             p.PrintLine(AggressiveInlining);
-            p.PrintLine($"public static {FixedStringTypeFullyQualifiedName} ToDisplayFixedString({@this}{FullyQualifiedName} value, bool emptyIfUndefined)");
+            p.PrintLine($"public static {PrintFixedStringTypeName} ToDisplayFixedString({@this}{FullyQualifiedName} value, bool emptyIfUndefined)");
             p = p.IncreasedIndent();
             p.PrintBeginLine("=> ").Print(CLASS_FIXED_DISPLAY_NAMES).PrintEndLine(".Get(value, emptyIfUndefined);");
             p = p.DecreasedIndent();
             p.PrintEndLine();
 
-            p.PrintLine($"private static {FixedStringTypeFullyQualifiedName} ToFixedString({UnderlyingTypeName} value)");
+            p.PrintLine($"private static {PrintFixedStringTypeName} ToFixedString({UnderlyingTypeName} value)");
             p.OpenScope();
             {
-                p.PrintLine($"var fs = new {FixedStringTypeFullyQualifiedName}();");
-                p.PrintLine("global::Unity.Collections.FixedStringMethods.Append(ref fs, value);");
+                p.PrintLine($"var fs = new {PrintFixedStringTypeName}();");
+                p.PrintLine("UC.FixedStringMethods.Append(ref fs, value);");
                 p.PrintLine("return fs;");
             }
             p.CloseScope();

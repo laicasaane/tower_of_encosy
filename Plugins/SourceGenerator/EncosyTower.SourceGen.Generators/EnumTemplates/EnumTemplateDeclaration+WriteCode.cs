@@ -5,32 +5,16 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 {
     partial class EnumTemplateDeclaration
     {
-        private const string AGGRESSIVE_INLINING = "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-        private const string GENERATED_CODE = $"[global::System.CodeDom.Compiler.GeneratedCode(\"EncosyTower.SourceGen.Generators.EnumTemplates.EnumTemplateGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        private const string IENUM_TEMPLATE = "global::EncosyTower.EnumExtensions.IEnumTemplate<{0}>";
-        private const string EXCLUDE_COVERAGE = "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
+        private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.EnumTemplates.EnumTemplateGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string IENUM_TEMPLATE = "ETEE.IEnumTemplate<{0}>";
 
         private readonly static (string, string)[] s_equalityOps = new[] { ("==", ""), ("!=", "!") };
 
         public string WriteCode()
         {
             var p = Printer.DefaultLarge;
-
-            var hasNamespace = string.IsNullOrEmpty(NamespaceName) == false;
-
-            if (hasNamespace)
-            {
-                p.PrintLine($"namespace {NamespaceName}");
-                p.OpenScope();
-            }
-
-            var numContainingTypes = ContainingTypes.Count;
-
-            for (var i = 0; i < numContainingTypes; i++)
-            {
-                p.PrintLine(ContainingTypes[i]);
-                p.OpenScope();
-            }
 
             p.PrintEndLine();
             p.Print("#pragma warning disable").PrintEndLine();
@@ -41,7 +25,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             var accessKeyword = Accessibility.ToKeyword();
 
             p.PrintLine(GENERATED_CODE);
-            p.PrintBeginLine("[global::EncosyTower.EnumExtensions.SourceGen.GeneratedFromEnumTemplate(typeof(")
+            p.PrintBeginLine("[ETEESG.GeneratedFromEnumTemplate(typeof(")
                 .Print(TemplateFullName).PrintEndLine("))]");
             p.PrintBeginLine(accessKeyword).Print(" enum ").Print(EnumName).Print(" : ").Print(UnderlyingTypeName)
                 .PrintEndLine();
@@ -56,21 +40,12 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             WriteAdditionalWrapper(ref p);
             WriteAdditionalExtensions(ref p);
 
-            for (var i = 0; i < numContainingTypes; i++)
-            {
-                p.CloseScope();
-            }
-
-            if (hasNamespace)
-            {
-                p.CloseScope();
-            }
-
             return p.Result;
         }
 
         private void WritePartialStruct(ref Printer p)
         {
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintBeginLine("partial struct ").Print(TemplateSimpleName).Print(" ")
                 .Print(": ").Print(string.Format(IENUM_TEMPLATE, EnumName))
                 .PrintEndLine(" { }");
@@ -95,7 +70,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
                     sb.Clear();
                     sb.Append(member.name).Replace("<", "&lt;").Replace(">", "&gt;");
-                    p.PrintBeginLine("/// <seealso cref=\"").Print(sb.ToString()).PrintEndLine("\"/>");
+                    p.PrintBeginLine("/// <seealso cref=\"").Print(sb).PrintEndLine("\"/>");
                 }
                 else
                 {
@@ -130,7 +105,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     if (indexOrIndices.Indices is { })
                     {
                         p.PrintBeginLineIf(isFirst, ":", ",")
-                            .Print(" global::System.IEquatable<").Print(otherName).PrintEndLine(">");
+                            .Print(" S.IEquatable<").Print(otherName).PrintEndLine(">");
 
                         isFirst = false;
                     }
@@ -162,7 +137,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
                 if (memberRefs.Count > 0)
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public readonly bool TryConvert(out ulong order, out ulong value)")
                         .Print(" => ").Print(extensionsName)
                         .PrintEndLine(".TryConvert(Value, out order, out value);");
@@ -191,7 +166,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     continue;
                 }
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool Equals(").Print(otherName).Print(" other)")
                     .Print(" => ").Print(extensionsName)
                     .PrintEndLine(".Equals(Value, other);");
@@ -199,14 +174,14 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
                 foreach (var (op1, op2) in s_equalityOps)
                 {
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static bool operator ").Print(op1)
                         .Print("(").Print(thisName).Print(" left, ").Print(otherName).Print(" right)")
                         .Print(" => ").Print(op2).Print(extensionsName)
                         .PrintEndLine(".Equals(left.Value, right);");
                     p.PrintEndLine();
 
-                    p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                    p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintBeginLine("public static bool operator ").Print(op1)
                         .Print("(").Print(otherName).Print(" left, ").Print(thisName).Print(" right)")
                         .Print(" => ").Print(op2).Print(extensionsName)
@@ -214,13 +189,13 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     p.PrintEndLine();
                 }
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly void Convert(out ").Print(otherName).Print(" result)")
                     .Print(" => ").Print(extensionsName)
                     .PrintEndLine(".Convert(Value, out result);");
                 p.PrintEndLine();
 
-                p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly bool TryConvert(out ").Print(otherName).Print(" result)")
                     .Print(" => ").Print(extensionsName)
                     .PrintEndLine(".TryConvert(Value, out result);");
@@ -277,7 +252,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             , int index
         )
         {
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("public static ").Print(thisName).Print(" To").Print(thisName)
                 .Print("(").Print(@this).Print(otherName).PrintEndLine(" self)");
             p.OpenScope();
@@ -310,7 +285,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     continue;
                 }
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public static bool Equals(")
                     .Print(@this).Print(thisName).Print(" self, ").Print(otherName).PrintEndLine(" other)");
                 p.OpenScope();
@@ -322,7 +296,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public static ").Print(thisName).Print(" To").Print(thisName)
                     .Print("(").Print(@this).Print(otherName).PrintEndLine(" self)");
                 p.OpenScope();
@@ -335,7 +308,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public static void Convert(")
                     .Print(@this).Print(thisName).Print(" self, out ").Print(otherName).PrintEndLine(" result)");
                 p.OpenScope();
@@ -360,7 +332,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             , List<int> indices
         )
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public static bool TryConvert(")
                 .Print(@this).Print(thisName).Print(" self, out ").Print(otherName).PrintEndLine(" result)");
             p.OpenScope();
@@ -406,7 +377,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             , string thisName
         )
         {
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public static bool TryConvert(")
                 .Print(@this).Print(thisName).PrintEndLine(" self, out ulong order, out ulong value)");
             p.OpenScope();

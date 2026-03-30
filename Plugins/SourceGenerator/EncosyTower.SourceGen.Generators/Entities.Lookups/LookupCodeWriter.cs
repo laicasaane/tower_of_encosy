@@ -2,23 +2,23 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 {
     internal abstract class LookupCodeWriter
     {
-        protected const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
-        protected const string GENERATED_CODE = $"[GeneratedCode(\"EncosyTower.SourceGen.Generators.Entities.LookupGenerator\", \"{SourceGenVersion.VALUE}\")]";
-        protected const string EXCLUDE_COVERAGE = "[ExcludeFromCodeCoverage]";
-        protected const string ENTITY = "Entity";
-        protected const string BOOL = "Bool<";
+        public const string PR_AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        public const string PR_EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        public const string PR_GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.Entities.LookupGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        public const string PR_ENTITY = "UE.Entity";
+        public const string PR_BOOL = "ET.Bool<";
 
         public static LookupCodeWriter GetWriter(LookupKind kind)
         {
             return kind switch {
-                LookupKind.Buffer                   => new BufferLookupCodeWriter(),
-                LookupKind.Component                => new ComponentLookupCodeWriter(),
-                LookupKind.EnableableBuffer         => new EnableableBufferLookupCodeWriter(),
-                LookupKind.EnableableComponent      => new EnableableComponentLookupCodeWriter(),
-                LookupKind.PhysicsBuffer            => new PhysicsBufferLookupCodeWriter(),
-                LookupKind.PhysicsComponent         => new PhysicsComponentLookupCodeWriter(),
+                LookupKind.Buffer                     => new BufferLookupCodeWriter(),
+                LookupKind.Component                  => new ComponentLookupCodeWriter(),
+                LookupKind.EnableableBuffer           => new EnableableBufferLookupCodeWriter(),
+                LookupKind.EnableableComponent        => new EnableableComponentLookupCodeWriter(),
+                LookupKind.PhysicsBuffer              => new PhysicsBufferLookupCodeWriter(),
+                LookupKind.PhysicsComponent           => new PhysicsComponentLookupCodeWriter(),
                 LookupKind.PhysicsEnableableComponent => new PhysicsEnableableComponentLookupCodeWriter(),
-                _                                   => new BufferLookupCodeWriter(),
+                _                                     => new BufferLookupCodeWriter(),
             };
         }
 
@@ -34,7 +34,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
             p.PrintBeginLine("partial struct ")
                 .Print(definition.structName)
-                .Print(" : ILookups")
+                .Print(" : ETEL.ILookups")
                 .PrintEndLine();
 
             WriteInterfaces(ref p, definition);
@@ -82,11 +82,11 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             {
                 if (typeRef.isReadOnly)
                 {
-                    p.PrintBeginLine("[ReadOnly] internal ");
+                    p.PrintBeginLine(" [UC.ReadOnly] internal ");
                 }
                 else
                 {
-                    p.PrintBeginLine("/*           Read-Write           */ internal ");
+                    p.PrintBeginLine("/*Read-Write*/ internal ");
                 }
 
                 p.Print(lookup)
@@ -100,12 +100,12 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
         protected static void WriteConstructor(ref Printer p, LookupDefinition definition, string getLookup)
         {
-            Write(ref p, definition, getLookup, "ref SystemState state", "state");
-            Write(ref p, definition, getLookup, "SystemBase system", "system");
+            Write(ref p, definition, getLookup, "ref UE.SystemState state", "state");
+            Write(ref p, definition, getLookup, "UE.SystemBase system", "system");
 
             static void Write(ref Printer p, LookupDefinition definition, string getLookup, string arg, string variable)
             {
-                p.PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(PR_EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ")
                     .Print(definition.structName)
                     .Print("(").Print(arg).PrintEndLine(")");
@@ -131,13 +131,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
         protected static void WriteUpdateMethods(ref Printer p, LookupDefinition definition)
         {
-            Write(ref p, definition, "ref SystemState state", "ref state");
-            Write(ref p, definition, "SystemBase system", "system");
+            Write(ref p, definition, "ref UE.SystemState state", "ref state");
+            Write(ref p, definition, "UE.SystemBase system", "system");
 
             static void Write(ref Printer p, LookupDefinition definition, string arg0, string arg1)
             {
-                p.PrintLineIf(definition.typeRefs.Count < 2, GENERATED_CODE);
-                p.PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLineIf(definition.typeRefs.Count < 2, PR_GENERATED_CODE);
+                p.PrintLine(PR_EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public void Update(").Print(arg0).PrintEndLine(")");
                 p.OpenScope();
                 {
@@ -173,13 +173,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         protected static void WriteAttributes(ref Printer p)
         {
             p.PrintLine("/// <inheritdoc/>");
-            p.PrintLine(AGGRESSIVE_INLINING).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(PR_AGGRESSIVE_INLINING).PrintLine(PR_GENERATED_CODE).PrintLine(PR_EXCLUDE_COVERAGE);
         }
 
         protected static void WriteAttributesNoInline(ref Printer p)
         {
             p.PrintLine("/// <inheritdoc/>");
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(PR_GENERATED_CODE).PrintLine(PR_EXCLUDE_COVERAGE);
         }
 
         protected abstract void WriteStructBody(ref Printer p, LookupDefinition definition);
