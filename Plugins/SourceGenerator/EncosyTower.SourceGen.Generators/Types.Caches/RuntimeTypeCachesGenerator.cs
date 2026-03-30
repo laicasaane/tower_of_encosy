@@ -277,18 +277,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             var fileTypeName = candidate.containingTypeFileName;
             var hintName = $"{candidate.sourceFileBaseName}__{fileTypeName}_{candidate.syntaxTreeStableHash}_{candidate.callSiteLineNumber}.g.cs";
             var filePathName = $"{candidate.sourceFileBaseName}__{fileTypeName}_{candidate.syntaxTreeStableHash}_{candidate.callSiteLineNumber}.g.cs";
-            string filePath;
-
-            if (SourceGenHelpers.CanWriteToProjectPath)
-            {
-                var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{compilationAssemblyName}/";
-                Directory.CreateDirectory(dir);
-                filePath = $"{dir}{filePathName}";
-            }
-            else
-            {
-                filePath = $"Temp/GeneratedCode/{compilationAssemblyName}/{filePathName}";
-            }
+            var filePath = GeneratorHelpers.BuildSourceFilePath(compilationAssemblyName, filePathName);
 
             try
             {
@@ -343,18 +332,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 var fileTypeName = key.containingTypeFileName;
                 var hintName = $"{key.sourceFileBaseName}__{fileTypeName}_{key.syntaxTreeStableHash}_header.g.cs";
                 var filePathName = $"{key.sourceFileBaseName}__{fileTypeName}_{key.syntaxTreeStableHash}_header.g.cs";
-                string filePath;
-
-                if (SourceGenHelpers.CanWriteToProjectPath)
-                {
-                    var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{compilationAssemblyName}/";
-                    Directory.CreateDirectory(dir);
-                    filePath = $"{dir}{filePathName}";
-                }
-                else
-                {
-                    filePath = $"Temp/GeneratedCode/{compilationAssemblyName}/{filePathName}";
-                }
+                var filePath = GeneratorHelpers.BuildSourceFilePath(compilationAssemblyName, filePathName);
 
                 try
                 {

@@ -345,7 +345,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                 var hintName = $"{fileBaseName}__{helperInfo.fileHintName}_{stableHashCode}_{lineNumber}.g.cs";
 
                 SourceGenHelpers.ProjectPath = projectPath;
-                var sourceFilePath = BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
+                var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
 
                 context.OutputSource(
                       outputSourceGenFiles
@@ -377,29 +377,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             p.PrintEndLine();
             p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();
-        }
-
-        private static string BuildSourceFilePath(
-              string assemblyName
-            , string hintName
-            , string projectPath = null
-        )
-        {
-            if (projectPath is not null)
-            {
-                var dir = $"{projectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(dir);
-                return $"{dir}{hintName}";
-            }
-
-            if (SourceGenHelpers.CanWriteToProjectPath)
-            {
-                var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(dir);
-                return $"{dir}{hintName}";
-            }
-
-            return $"Temp/GeneratedCode/{assemblyName}/{hintName}";
         }
     }
 }

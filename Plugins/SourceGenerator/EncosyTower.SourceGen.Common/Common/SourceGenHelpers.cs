@@ -137,7 +137,7 @@ namespace EncosyTower.SourceGen
 
         private static string GetTempGeneratedPathToFile(string fileNameWithExtension)
         {
-            if (!CanWriteToProjectPath)
+            if (CanWriteToProjectPath == false)
                 return Path.Combine("Temp", "GeneratedCode");
 
             var tempFileDirectory = Path.Combine(ProjectPath, "Temp", "GeneratedCode");
@@ -147,7 +147,7 @@ namespace EncosyTower.SourceGen
 
         public static void LogInfo(string message)
         {
-            if (!CanWriteToProjectPath)
+            if (CanWriteToProjectPath == false)
                 return;
 
             // Ignore IO exceptions in case there is already a lock, could use a named mutex but don't want to eat the performance cost

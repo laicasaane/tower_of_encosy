@@ -25,7 +25,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
         public string openingSource;
         public string closingSource;
         public string hintName;
-        public string sourceFilePath;
         public EquatableArray<TableModel> tables;
 
         public readonly bool IsValid
@@ -49,12 +48,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
             }
 
             var compilation = context.SemanticModel.Compilation;
-
-            if (compilation.IsValidCompilation(DATABASES_NAMESPACE, SKIP_ATTRIBUTE) == false)
-            {
-                return default;
-            }
-
             var typeName = typeSyntax.Identifier.Text;
             var isStruct = typeSymbol.IsValueType;
 
@@ -163,12 +156,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 , fileTypeName
             );
 
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                  compilation.Assembly.Name
-                , DatabaseGenerator.GENERATOR_NAME
-                , fileTypeName
-            );
-
             var location = LocationInfo.From(
                 typeSymbol.Locations.Length > 0
                     ? typeSymbol.Locations[0]
@@ -187,7 +174,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 openingSource = openingSource,
                 closingSource = closingSource,
                 hintName = hintName,
-                sourceFilePath = sourceFilePath,
                 tables = tables,
             };
         }
@@ -224,10 +210,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
             && namingStrategy == other.namingStrategy
             && string.Equals(assetName, other.assetName, StringComparison.Ordinal)
             && withInstanceAPI == other.withInstanceAPI
-            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
-            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
-            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
             && tables.Equals(other.tables)
             ;
 
@@ -238,7 +220,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 , namingStrategy
                 , assetName
                 , withInstanceAPI
-                , hintName
                 , tables
             );
     }

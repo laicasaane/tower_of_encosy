@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Immutable;
-using System.IO;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Variants
@@ -28,7 +27,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
             var assemblyName = compilation.assemblyName;
             var hintName = $"{GENERATOR_NAME_REG}__AttributeVariants__{assemblyName.ToValidIdentifier()}.g.cs";
-            var sourceFilePath = BuildSourceFilePath(assemblyName, hintName, projectPath);
+            var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
             try
             {
@@ -158,7 +157,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             context.CancellationToken.ThrowIfCancellationRequested();
 
             var hintName = $"{GENERATOR_NAME_REG}__Redundant__{declaration.fileHintName}.g.cs";
-            var sourceFilePath = BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
+            var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
 
             try
             {
@@ -202,25 +201,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
             p.PrintLine($"partial struct {declaration.structName} {{ }}");
 
             return p.Result;
-        }
-
-        internal static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath = null)
-        {
-            if (projectPath is not null)
-            {
-                var dir = $"{projectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(dir);
-                return $"{dir}{hintName}";
-            }
-
-            if (SourceGenHelpers.CanWriteToProjectPath)
-            {
-                var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(dir);
-                return $"{dir}{hintName}";
-            }
-
-            return $"Temp/GeneratedCode/{assemblyName}/{hintName}";
         }
 
         private static string PrintAdditionalUsings()

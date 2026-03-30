@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -68,7 +67,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     printer.PrintLineIf(databaseAuthoring, DEFINE_DATABASE_AUTHORING, DEFINE_NO_DATABASE_AUTHORING);
                     printer.PrintLineIf(bakingSheet, DEFINE_BAKING_SHEET, DEFINE_NO_BAKING_SHEET);
 
-                    var containerFilePath = GetSourceFilePath(model.containerHintName, assemblyName);
+                    var containerFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, model.containerHintName);
 
                     context.OutputSource(
                           outputSourceGenFiles
@@ -89,7 +88,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     printer.PrintLineIf(databaseAuthoring, DEFINE_DATABASE_AUTHORING, DEFINE_NO_DATABASE_AUTHORING);
                     printer.PrintLineIf(bakingSheet, DEFINE_BAKING_SHEET, DEFINE_NO_BAKING_SHEET);
 
-                    var sheetFilePath = GetSourceFilePath(sheet.hintName, assemblyName);
+                    var sheetFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, sheet.hintName);
 
                     context.OutputSource(
                           outputSourceGenFiles
@@ -112,18 +111,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     , ex.ToUnityPrintableString()
                 ));
             }
-        }
-
-        private static string GetSourceFilePath(string fileName, string assemblyName)
-        {
-            if (SourceGenHelpers.CanWriteToProjectPath)
-            {
-                var saveToDirectory = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(saveToDirectory);
-                return saveToDirectory + fileName;
-            }
-
-            return $"Temp/GeneratedCode/{assemblyName}/{fileName}";
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor

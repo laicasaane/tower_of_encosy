@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Immutable;
-using System.IO;
-using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 
 namespace EncosyTower.SourceGen.Generators.EnumTemplates
 {
@@ -172,7 +169,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 );
 
                 var hintName = $"{GENERATOR_NAME}__{templateCandidate.fileHintName}.g.cs";
-                var sourceFilePath = BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
+                var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
 
                 context.OutputSource(
                       outputSourceGenFiles
@@ -195,25 +192,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 // Generator bugs are silently swallowed — do not emit diagnostics from the
                 // generator. User-facing validation is handled by EnumTemplateAnalyzer.
             }
-        }
-
-        private static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath)
-        {
-            if (projectPath is not null)
-            {
-                var dir = $"{projectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(dir);
-                return $"{dir}{hintName}";
-            }
-
-            if (SourceGenHelpers.CanWriteToProjectPath)
-            {
-                var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(dir);
-                return $"{dir}{hintName}";
-            }
-
-            return $"Temp/GeneratedCode/{assemblyName}/{hintName}";
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.IO;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
@@ -25,19 +24,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
             var fileName = $"InternalStringAdapters_{assemblyName}";
             var stableHashCode = SourceGenHelpers.GetStableHashCode(string.Empty) & 0x7fffffff;
             var hintName = $"{fileName}__{GENERATOR_NAME}_{stableHashCode}_0.g.cs";
-
-            string sourceFilePath;
-
-            if (SourceGenHelpers.CanWriteToProjectPath)
-            {
-                var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(dir);
-                sourceFilePath = $"{dir}{hintName}";
-            }
-            else
-            {
-                sourceFilePath = $"Temp/GeneratedCode/{assemblyName}/{hintName}";
-            }
+            var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, hintName);
 
             context.OutputSource(
                   outputSourceGenFiles

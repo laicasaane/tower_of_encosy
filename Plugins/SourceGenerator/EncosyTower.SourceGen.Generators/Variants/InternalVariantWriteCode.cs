@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Immutable;
-using System.IO;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Variants
@@ -30,7 +29,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             context.CancellationToken.ThrowIfCancellationRequested();
 
             var hintName = $"{GENERATOR_NAME}__{decl.fileHintName}.g.cs";
-            var sourceFilePath = BuildSourceFilePath(assemblyName, hintName, projectPath);
+            var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
             try
             {
@@ -113,7 +112,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             context.CancellationToken.ThrowIfCancellationRequested();
 
             var hintName = $"{GENERATOR_NAME}__InternalVariants__{assemblyName.ToValidIdentifier()}.g.cs";
-            var sourceFilePath = BuildSourceFilePath(assemblyName, hintName, projectPath);
+            var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
             try
             {
@@ -227,25 +226,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
             p.CloseScope();
 
             return p.Result;
-        }
-
-        internal static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath = null)
-        {
-            if (projectPath is not null)
-            {
-                var dir = $"{projectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(dir);
-                return $"{dir}{hintName}";
-            }
-
-            if (SourceGenHelpers.CanWriteToProjectPath)
-            {
-                var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(dir);
-                return $"{dir}{hintName}";
-            }
-
-            return $"Temp/GeneratedCode/{assemblyName}/{hintName}";
         }
 
         private static string PrintAdditionalUsings()

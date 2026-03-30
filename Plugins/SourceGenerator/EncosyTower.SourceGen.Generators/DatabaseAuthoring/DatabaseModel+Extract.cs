@@ -27,13 +27,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return default;
             }
 
-            var compilation = context.SemanticModel.Compilation;
-
-            if (compilation.IsValidCompilation(DATABASES_NAMESPACE, SKIP_ATTRIBUTE) == false)
-            {
-                return default;
-            }
-
             // ForAttributeWithMetadataName guarantees at least one matching attribute
             var authorAttrib = context.Attributes[0];
 
@@ -381,7 +374,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         private static bool IsSupportedTypeSyntax(TypeDeclarationSyntax syntax)
             => syntax.IsKind(SyntaxKind.ClassDeclaration) || syntax.IsKind(SyntaxKind.StructDeclaration);
 
-        private static string GetHintName(SyntaxTree syntaxTree, string generatorName, SyntaxNode node, string typeName)
+        private static string GetHintName(SyntaxTree syntaxTree, string _, SyntaxNode node, string typeName)
         {
             var (isSuccess, fileName) = syntaxTree.TryGetFileNameWithoutExtension();
             var stableHashCode = SourceGenHelpers.GetStableHashCode(syntaxTree.FilePath) & 0x7fffffff;

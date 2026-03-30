@@ -15,6 +15,9 @@ namespace EncosyTower.SourceGen.Generators.Databases
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
+            var compilationProvider = context.CompilationProvider
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, DATABASES_NAMESPACE, SKIP_ATTRIBUTE));
+
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       "EncosyTower.Databases.DatabaseAttribute"
@@ -22,9 +25,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     , DatabaseModel.Extract
                 )
                 .Where(static t => t.IsValid);
-
-            var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, DATABASES_NAMESPACE, SKIP_ATTRIBUTE));
 
             var combined = candidateProvider
                 .Combine(compilationProvider)
@@ -34,6 +34,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
+                    , source.Left.Right
                     , source.Left.Left
                     , source.Right.projectPath
                     , source.Right.outputSourceGenFiles
@@ -43,6 +44,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
 
         private static void GenerateOutput(
               SourceProductionContext context
+            , CompilationInfo compilation
             , DatabaseModel model
             , string projectPath
             , bool outputSourceGenFiles
@@ -54,6 +56,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
 
             try
             {
+                var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, model.hintName, projectPath);
                 var printer = Printer.DefaultLarge;
 
                 {
@@ -72,7 +75,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     , model.WriteCode()
                     , model.closingSource
                     , model.hintName
-                    , model.sourceFilePath
+                    , sourceFilePath
                     , model.location.ToLocation()
                     , projectPath
                     , printer

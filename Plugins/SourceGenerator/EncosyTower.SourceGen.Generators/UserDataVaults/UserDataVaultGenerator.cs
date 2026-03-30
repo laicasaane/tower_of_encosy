@@ -336,9 +336,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             var stableHashCode = SourceGenHelpers.GetStableHashCode(vaultInfo.location.filePath) & 0x7fffffff;
             var fileHintName = vaultInfo.fileHintName;
             var sourceFileName = $"{fileHintName}__{GENERATOR_NAME}_{stableHashCode}_0.g.cs";
-            var sourceFilePath = SourceGenHelpers.CanWriteToProjectPath
-                ? $"{projectPath}/Temp/GeneratedCode/{compilation.assemblyName}/{sourceFileName}"
-                : $"Temp/GeneratedCode/{compilation.assemblyName}/{sourceFileName}";
+            var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, sourceFileName);
 
             context.OutputSource(
                   outputSourceGenFiles

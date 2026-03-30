@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Immutable;
-using System.IO;
-using System.Text;
 using System.Threading;
 using EncosyTower.SourceGen.Common.UnionIds;
 using EncosyTower.SourceGen.Generators.EnumExtensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 
 namespace EncosyTower.SourceGen.Generators.UnionIds
 {
@@ -556,7 +553,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     return;
 
                 var hintName = $"{GENERATOR_NAME}__{idInfo.fileHintName}.g.cs";
-                var sourceFilePath = BuildSourceFilePath(assemblyName, hintName, projectPath);
+                var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
                 context.OutputSource(
                       outputSourceGenFiles
@@ -609,25 +606,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             p.PrintEndLine();
             p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();
-        }
-
-        private static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath = null)
-        {
-            if (projectPath is not null)
-            {
-                var dir = $"{projectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(dir);
-                return $"{dir}{hintName}";
-            }
-
-            if (SourceGenHelpers.CanWriteToProjectPath)
-            {
-                var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(dir);
-                return $"{dir}{hintName}";
-            }
-
-            return $"Temp/GeneratedCode/{assemblyName}/{hintName}";
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
