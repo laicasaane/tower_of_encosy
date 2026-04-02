@@ -6,7 +6,7 @@ using EncosyTower.StringIds;
 
 namespace EncosyTower.UserDataVaults
 {
-    public interface IUserDataIdCollection : IReadOnlyList<StringId<string>>
+    public interface IUserDataStringIdCollection : IReadOnlyList<StringId<string>>
         , ICopyToSpan<StringId<string>>, ITryCopyToSpan<StringId<string>>
     {
     }

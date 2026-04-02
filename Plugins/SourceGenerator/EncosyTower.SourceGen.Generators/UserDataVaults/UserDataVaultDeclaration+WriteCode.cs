@@ -69,10 +69,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
 
             p.PrintBeginLine(staticKeyword).Print("partial class ").Print(ClassName)
-                .PrintEndLine(" // IdCollection");
+                .PrintEndLine(" // StringIdCollection");
             p.OpenScope();
             {
-                WriteIdCollection(ref p, orderedStoreDefs);
+                WriteStringIdCollection(ref p, orderedStoreDefs);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -161,13 +161,18 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private static void WriteVault(ref Printer p)
         {
+            p.PrintLine("/// <summary>");
+            p.PrintLine("/// Manages user data stores, accessors, and string ID mappings.");
+            p.PrintLine("/// Provides load, save, and lifecycle operations for all user data associated with a user ID.");
+            p.PrintLine("/// </summary>");
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("internal partial class Vault : UserDataVaultBase");
             p.OpenScope();
             {
                 p.PrintLine("internal readonly DataDirectory _directory;");
                 p.PrintLine("internal readonly AccessorCollection _accessors;");
-                p.PrintLine("internal readonly IdCollection _ids;");
+                p.PrintLine("internal readonly StringIdCollection _stringIds;");
+                p.PrintLine("internal readonly string _userId;");
                 p.PrintEndLine();
 
                 p.PrintLine("internal Vault(");
@@ -183,18 +188,19 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine(")");
                 p.OpenScope();
                 {
-                    p.PrintLine("_ids = new(stringVault);");
-                    p.PrintLine("_directory = new(stringVault, encryption, logger, taskArrayPool, _ids, userId);");
+                    p.PrintLine("_stringIds = new(stringVault);");
+                    p.PrintLine("_directory = new(stringVault, encryption, logger, taskArrayPool, _stringIds, userId);");
                     p.PrintLine("_accessors = new(_directory);");
+                    p.PrintLine("_userId = userId;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public IdCollection Ids");
+                p.PrintLine("public StringIdCollection StringIds");
                 p.OpenScope();
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintLine("get => _ids;");
+                    p.PrintLine("get => _stringIds;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -204,6 +210,15 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintLine("get => _accessors.AsReadOnly();");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public string UserId");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => _userId;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -273,6 +288,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private static void WriteReadOnlyVault(ref Printer p, string outerTypeName)
         {
+            p.PrintLine("/// <summary>");
+            p.PrintLine("/// A read-only view of <see cref=\"Vault\" /> that exposes safe, non-mutating access");
+            p.PrintLine("/// to string IDs, accessors, and save operations.");
+            p.PrintLine("/// </summary>");
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("public readonly partial struct ReadOnlyVault : IIsCreated");
             p.OpenScope();
@@ -298,11 +317,11 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public IdCollection Ids");
+                p.PrintLine("public StringIdCollection StringIds");
                 p.OpenScope();
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintLine("get => _vault.Ids;");
+                    p.PrintLine("get => _vault.StringIds;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -312,6 +331,15 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     p.PrintLine(AGGRESSIVE_INLINING);
                     p.PrintLine("get => _vault.Accessors;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("public string UserId");
+                p.OpenScope();
+                {
+                    p.PrintLine(AGGRESSIVE_INLINING);
+                    p.PrintLine("get => _vault.UserId;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -346,10 +374,14 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private static void WriteIdCollection(ref Printer p, ReadOnlySpan<StoreDefinition> defs)
+        private static void WriteStringIdCollection(ref Printer p, ReadOnlySpan<StoreDefinition> defs)
         {
+            p.PrintLine("/// <summary>");
+            p.PrintLine("/// An immutable collection of <see cref=\"StringId{T}\" /> values identifying");
+            p.PrintLine("/// each data type stored in the vault.");
+            p.PrintLine("/// </summary>");
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
-            p.PrintLine("public readonly partial struct IdCollection : IUserDataIdCollection, IIsCreated");
+            p.PrintLine("public readonly partial struct StringIdCollection : IUserDataStringIdCollection, IIsCreated");
             p.OpenScope();
             {
                 foreach (var def in defs)
@@ -360,7 +392,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 p.PrintEndLine();
 
-                p.PrintLine("internal IdCollection([NotNull] StringVault stringVault)");
+                p.PrintLine("internal StringIdCollection([NotNull] StringVault stringVault)");
                 p.OpenScope();
                 {
                     foreach (var def in defs)
@@ -525,12 +557,12 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("public struct Enumerator : IEnumeratorᐸStringIdᐸstringᐳᐳ");
                 p.OpenScope();
                 {
-                    p.PrintLine("private readonly IdCollection _source;");
+                    p.PrintLine("private readonly StringIdCollection _source;");
                     p.PrintLine("private int _index;");
                     p.PrintEndLine();
 
                     p.PrintLine(AGGRESSIVE_INLINING);
-                    p.PrintLine("public Enumerator(IdCollection source)");
+                    p.PrintLine("public Enumerator(StringIdCollection source)");
                     p.OpenScope();
                     {
                         p.PrintLine("if (source.IsCreated == false)");
@@ -590,6 +622,9 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 queue.Enqueue(def);
             }
 
+            p.PrintLine("/// <summary>");
+            p.PrintLine("/// Holds all typed user data accessors and manages their initialization and deinitialization lifecycle.");
+            p.PrintLine("/// </summary>");
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("internal partial class AccessorCollection : IUserDataAccessorCollection");
             p.OpenScope();
@@ -891,6 +926,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private void WriteReadOnlyAccessorCollection(ref Printer p, List<UserDataAccessorDefinition> defs)
         {
+            p.PrintLine("/// <summary>");
+            p.PrintLine("/// A read-only view of <see cref=\"AccessorCollection\" /> that provides immutable,");
+            p.PrintLine("/// enumerable access to all typed user data accessors.");
+            p.PrintLine("/// </summary>");
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintBeginLine("public readonly partial struct ReadOnlyAccessorCollection")
                 .PrintEndLine(" : IUserDataAccessorReadOnlyCollection, IIsCreated");
@@ -1015,6 +1054,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private void WriteAccessorEnumerator(ref Printer p)
         {
+            p.PrintLine("/// <summary>");
+            p.PrintLine("/// Provides forward-only iteration over the <see cref=\"IUserDataAccessor\" /> elements");
+            p.PrintLine("/// held in a <see cref=\"ReadOnlyAccessorCollection\" />.");
+            p.PrintLine("/// </summary>");
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("public partial struct AccessorEnumerator : IEnumeratorᐸIUserDataAccessorᐳ");
             p.OpenScope();
@@ -1074,6 +1117,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         {
             var generateCreateMethods = new List<StoreDefinition>(defs.Length);
 
+            p.PrintLine("/// <summary>");
+            p.PrintLine("/// Manages the underlying data stores for all user data types, coordinating");
+            p.PrintLine("/// load, save, and clone operations across the stores belonging to a single user.");
+            p.PrintLine("/// </summary>");
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("internal partial class DataDirectory : IUserDataDirectory, IDisposable");
             p.OpenScope();
@@ -1082,7 +1129,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintBeginLine("private readonly ").Print(ENCRYPTION_BASE).PrintEndLine(" _encryption;");
                 p.PrintBeginLine("private readonly ").Print(ILOGGER).PrintEndLine(" _logger;");
                 p.PrintBeginLine("private readonly ").Print(TASK_ARRAY_POOL).PrintEndLine(" _taskArrayPool;");
-                p.PrintLine("private readonly IdCollection _ids;");
+                p.PrintLine("private readonly StringIdCollection _stringIds;");
                 p.PrintEndLine();
 
                 p.PrintLine("private string _userId;");
@@ -1095,7 +1142,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ENCRYPTION_BASE).PrintEndLine(" encryption");
                     p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(ILOGGER).PrintEndLine(" logger");
                     p.PrintBeginLine(", ").Print(NOT_NULL).Print(" ").Print(TASK_ARRAY_POOL).PrintEndLine(" taskArrayPool");
-                    p.PrintLine(", IdCollection ids");
+                    p.PrintLine(", StringIdCollection stringIds");
                     p.PrintLine(", string userId");
                 }
                 p = p.DecreasedIndent();
@@ -1106,7 +1153,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     p.PrintLine("_encryption = encryption;");
                     p.PrintLine("_logger = logger;");
                     p.PrintLine("_taskArrayPool = taskArrayPool;");
-                    p.PrintLine("_ids = ids;");
+                    p.PrintLine("_stringIds = stringIds;");
                     p.PrintLine("_userId = userId;");
                     p.PrintEndLine();
 
@@ -1146,7 +1193,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                                 .PrintEndLine(">(createFunc);");
 
                             p.PrintBeginLine(def.DataTypeName).Print(" = new(")
-                                .Print("_ids.").Print(def.DataTypeName)
+                                .Print("_stringIds.").Print(def.DataTypeName)
                                 .Print(", stringVault, encryption, logger, ignoreEncryption, args")
                                 .PrintEndLine(") { UserId = userId };");
                         }
@@ -1479,6 +1526,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private void WriteDataCollection(ref Printer p, ReadOnlySpan<StoreDefinition> defs)
         {
+            p.PrintLine("/// <summary>");
+            p.PrintLine("/// A serializable, value-type snapshot of all user data instances belonging to a single user.");
+            p.PrintLine("/// Supports copying to and from the vault's <see cref=\"DataDirectory\" />.");
+            p.PrintLine("/// </summary>");
             p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
             p.PrintLine("[Serializable]");
             p.PrintLine("public partial struct DataCollection : IUserDataCollection, IIsCreated");

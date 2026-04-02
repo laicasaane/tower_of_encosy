@@ -421,7 +421,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("using IUserDataAccessorReadOnlyCollection = global::EncosyTower.UserDataVaults.IUserDataAccessorReadOnlyCollection;");
                 p.PrintLine("using IUserDataCollection = global::EncosyTower.UserDataVaults.IUserDataCollection;");
                 p.PrintLine("using IUserDataDirectory = global::EncosyTower.UserDataVaults.IUserDataDirectory;");
-                p.PrintLine("using IUserDataIdCollection = global::EncosyTower.UserDataVaults.IUserDataIdCollection;");
+                p.PrintLine("using IUserDataStringIdCollection = global::EncosyTower.UserDataVaults.IUserDataStringIdCollection;");
                 p.PrintEndLine();
             }
         }
