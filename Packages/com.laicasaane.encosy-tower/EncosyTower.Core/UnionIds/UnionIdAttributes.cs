@@ -14,7 +14,7 @@ namespace EncosyTower.UnionIds
         /// <summary>
         /// The size of the union id in the string representation.
         /// </summary>
-        public UnionIdSize Size { get; set; } = UnionIdSize.Auto;
+        public UnionIdSize Size { get; set; } = UnionIdSize.Default;
 
         /// <summary>
         /// The display name for the id part in the string representation.

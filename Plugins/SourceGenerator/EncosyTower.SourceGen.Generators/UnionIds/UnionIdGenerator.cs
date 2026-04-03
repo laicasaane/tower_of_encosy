@@ -334,7 +334,9 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
             var isEnum = kindSymbol.TypeKind == TypeKind.Enum;
             info.isEnum = isEnum;
-            info.isKindAlsoUnionId = kindSymbol.HasAttribute(UNION_ID_ATTRIBUTE_FULL);
+
+            var kindUnionIdAttr = kindSymbol.GetAttribute(UNION_ID_ATTRIBUTE_FULL);
+            info.isKindAlsoUnionId = kindUnionIdAttr != null;
 
             if (isEnum)
             {
@@ -432,6 +434,28 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 info.tryParseSpan = new MemberExistence(true, false, false, 4);
                 info.equality = new Equality(EqualityStrategy.Equals, false, false);
                 info.toStringMethods |= ToStringMethods.All;
+
+                var kindUnionIdSize = UnionIdSize.UInt;
+
+                foreach (var arg in kindUnionIdAttr.NamedArguments)
+                {
+                    if (arg.Key == "Size" && arg.Value.Value is byte szVal)
+                    {
+                        kindUnionIdSize = (UnionIdSize)szVal;
+                        break;
+                    }
+                }
+
+                var unionSize = kindUnionIdSize switch {
+                    UnionIdSize.UShort => 2,
+                    UnionIdSize.UInt => 4,
+                    UnionIdSize.ULong => 8,
+                    UnionIdSize.UInt3 => 12,
+                    UnionIdSize.ULong2 => 16,
+                    _ => 4,
+                };
+
+                info.kindUnmanagedSize = Math.Max(info.kindUnmanagedSize, unionSize);
             }
             else
             {
