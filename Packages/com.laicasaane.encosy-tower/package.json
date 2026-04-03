@@ -1,7 +1,7 @@
 {
   "name": "com.laicasaane.encosy-tower",
   "displayName": "Encosy Tower",
-  "version": "0.1.3-preview.6",
+  "version": "0.1.3-preview.7",
   "unity": "6000.0",
   "dependencies": {
     "com.unity.burst": "1.8.28",
@@ -46,6 +46,11 @@
       "displayName": "EncosyTower.Samples.Stats",
       "description": "Contains sample setup for Encosy Entities Stats",
       "path": "Samples~/EncosyTower.Samples.Stats"
+    },
+    {
+      "displayName": "EncosyTower.Samples.UserDataVault",
+      "description": "Contains sample setup for Encosy User Data Vault",
+      "path": "Samples~/EncosyTower.Samples.UserDataVault"
     },
     {
       "displayName": "EncosyTower.Samples.VisualDebugging",
