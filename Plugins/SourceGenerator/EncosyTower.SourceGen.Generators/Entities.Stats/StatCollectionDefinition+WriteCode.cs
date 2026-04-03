@@ -362,6 +362,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         {
             var count = statDataCollection.Count;
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").Print("Identifies a stat type within <see cref=\"").Print(typeName).PrintEndLine("\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("<remarks>");
+            p.PrintBeginLine("/// ").PrintEndLine("Wraps the <see cref=\"Type\"/> enum and provides methods for encoding and decoding stat user data,");
+            p.PrintBeginLine("/// ").PrintEndLine("validating types, and converting to array indices.");
+            p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public readonly partial struct TypeId : S.IEquatable<TypeId>");
             p.OpenScope();
@@ -521,6 +528,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.Print("#endregion ==").PrintEndLine();
             p.PrintEndLine();
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("A type-erased index into the stat buffer for a stat slot.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("<remarks>");
+            p.PrintBeginLine("/// ").Print("Use <see cref=\"Index{TStatData}\"/> when the stat data type is known at compile time. ");
+            p.PrintBeginLine("/// ").PrintEndLine("An index is valid when its <c>value</c> is greater than zero.");
+            p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("[S.Serializable]");
             p.PrintLine("public partial struct Index : S.IEquatable<Index>, ETCon.IToFixedString<UC.FixedString32Bytes>");
@@ -610,6 +624,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.Print("#endregion ==============").PrintEndLine();
             p.PrintEndLine();
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("A strongly-typed index into the stat buffer for a specific <typeparamref name=\"TStatData\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("<remarks>");
+            p.PrintBeginLine("/// ").Print("Implicitly converts to and from <see cref=\"Index\"/> and <see cref=\"ETES.StatIndex{TStatData}\"/>. ");
+            p.PrintBeginLine("/// ").PrintEndLine("An index is valid when its <c>value</c> is greater than zero.");
+            p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
+            p.PrintBeginLine("/// ").PrintEndLine("<typeparam name=\"TStatData\">The stat data type this index refers to.</typeparam>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("[S.Serializable]");
             p.PrintBeginLine("public partial struct Index<TStatData> : S.IEquatable<Index<TStatData>>")
@@ -719,6 +741,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.Print("#endregion =========").PrintEndLine();
             p.PrintEndLine();
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("An immutable record that pairs an <see cref=\"Index\"/> with its associated <see cref=\"Type\"/> and validity flag.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public readonly partial struct IndexRecord : S.IEquatable<IndexRecord>");
             p.OpenScope();
@@ -776,6 +801,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.Print("#endregion ==============").PrintEndLine();
             p.PrintEndLine();
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("An immutable record that pairs an <see cref=\"ETES.StatIndex\"/> with its associated <see cref=\"Type\"/> and validity flag.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public readonly partial struct StatIndexRecord : S.IEquatable<StatIndexRecord>");
             p.OpenScope();
@@ -833,6 +861,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.Print("#endregion ===============").PrintEndLine();
             p.PrintEndLine();
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("An immutable record that pairs an <see cref=\"ETES.StatHandle\"/> with its associated <see cref=\"Type\"/> and validity flag.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public readonly partial struct StatHandleRecord : S.IEquatable<StatHandleRecord>");
             p.OpenScope();
@@ -892,6 +923,12 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             var count = statDataCollection.Count;
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").Print("A fixed-size, blittable collection of <see cref=\"Index\"/> values, one per stat type in <see cref=\"").Print(typeName).PrintEndLine("\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("<remarks>");
+            p.PrintBeginLine("/// ").PrintEndLine("Each field corresponds to a stat type and stores the index of that stat in the stat buffer.");
+            p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public partial struct Indices : ETCol.IHasLength, ETCol.IAsSpan<Index>, ETCol.IAsReadOnlySpan<Index>");
             p.OpenScope();
@@ -1133,6 +1170,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             var count = statDataCollection.Count;
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").Print("A fixed-size, blittable collection of <see cref=\"ETES.StatIndex\"/> values, one per stat type in <see cref=\"").Print(typeName).PrintEndLine("\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("<remarks>");
+            p.PrintBeginLine("/// ").Print("Mirrors <see cref=\"Indices\"/> but stores raw <see cref=\"ETES.StatIndex\"/> values. ");
+            p.PrintBeginLine("/// ").PrintEndLine("Obtained via <see cref=\"Indices.ToStatIndices\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public partial struct StatIndices : ETCol.IHasLength, ETCol.IAsSpan<ETES.StatIndex>, ETCol.IAsReadOnlySpan<ETES.StatIndex>");
             p.OpenScope();
@@ -1377,6 +1421,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             var count = statDataCollection.Count;
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").Print("A fixed-size, blittable collection of <see cref=\"ETES.StatHandle\"/> values, one per stat type in <see cref=\"").Print(typeName).PrintEndLine("\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("<remarks>");
+            p.PrintBeginLine("/// ").PrintEndLine("Each handle encodes both an entity reference and a stat index, allowing direct stat access.");
+            p.PrintBeginLine("/// ").Print("Obtained via <see cref=\"Indices.ToStatHandles\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public partial struct StatHandles : ETCol.IHasLength, ETCol.IAsSpan<ETES.StatHandle>, ETCol.IAsReadOnlySpan<ETES.StatHandle>");
             p.OpenScope();
@@ -1703,6 +1754,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             var count = statDataCollection.Count;
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").Print("Contains optional stat data structures for <see cref=\"").Print(typeName).PrintEndLine("\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("<remarks>");
+            p.PrintBeginLine("/// ").PrintEndLine("Provides <see cref=\"Options.Data\"/> for per-stat stat data options and");
+            p.PrintBeginLine("/// ").PrintEndLine("<see cref=\"Options.ProduceChangeEvents\"/> for per-stat change-event flags.");
+            p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public static partial class Options");
             p.OpenScope();
@@ -1888,6 +1946,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             var count = statDataCollection.Count;
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").Print("Factory class for creating <see cref=\"Baker{T}\"/> instances for <see cref=\"").Print(typeName).PrintEndLine("\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public static partial class Baker");
             p.OpenScope();
@@ -1917,6 +1978,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.CloseScope();
             p.PrintEndLine();
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").Print("Provides functionality to create and configure stat components for <see cref=\"").Print(typeName).PrintEndLine("\"/> during entity baking.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("<remarks>");
+            p.PrintBeginLine("/// ").PrintEndLine("Create via <see cref=\"Baker.Create\"/> or <see cref=\"Baker.Bake\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
+            p.PrintBeginLine("/// ").PrintEndLine("<typeparam name=\"T\">The component data type to bake into. Must be layout-compatible with the stat collection type.</typeparam>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public partial struct Baker<T> where T : unmanaged");
             p.OpenScope();
@@ -2283,6 +2351,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             var count = statDataCollection.Count;
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").Print("Factory class for creating <see cref=\"Accessor{T}\"/> instances for <see cref=\"").Print(typeName).PrintEndLine("\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public static partial class Accessor");
             p.OpenScope();
@@ -2307,6 +2378,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.CloseScope();
             p.PrintEndLine();
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").Print("Provides read and write access to stat data for <see cref=\"").Print(typeName).PrintEndLine("\"/> on an entity.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("<remarks>");
+            p.PrintBeginLine("/// ").PrintEndLine("Create via <see cref=\"Accessor.Create\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
+            p.PrintBeginLine("/// ").PrintEndLine("<typeparam name=\"T\">The component data type to access. Must be layout-compatible with the stat collection type.</typeparam>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public partial struct Accessor<T> where T : unmanaged");
             p.OpenScope();
@@ -3161,6 +3239,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             var count = statDataCollection.Count;
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").Print("Factory class for creating <see cref=\"Reader{T}\"/> instances for <see cref=\"").Print(typeName).PrintEndLine("\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public static partial class Reader");
             p.OpenScope();
@@ -3186,6 +3267,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.CloseScope();
             p.PrintEndLine();
 
+            p.PrintBeginLine("/// ").PrintEndLine("<summary>");
+            p.PrintBeginLine("/// ").Print("Provides read-only access to stat data for <see cref=\"").Print(typeName).PrintEndLine("\"/> on an entity.");
+            p.PrintBeginLine("/// ").PrintEndLine("</summary>");
+            p.PrintBeginLine("/// ").PrintEndLine("<remarks>");
+            p.PrintBeginLine("/// ").PrintEndLine("Create via <see cref=\"Reader.Create\"/>.");
+            p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
+            p.PrintBeginLine("/// ").PrintEndLine("<typeparam name=\"T\">The component data type to read from. Must be layout-compatible with the stat collection type.</typeparam>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("public partial struct Reader<T> where T : unmanaged");
             p.OpenScope();
