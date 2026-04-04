@@ -7,14 +7,14 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 {
     partial struct PolyEnumStructDefinition
     {
-        public class StructRef
+        public struct StructRef
         {
             public StructDefinition Value { get; set; }
 
-            public Dictionary<string, string> FieldToMergedFieldMap { get; } = new(StringComparer.Ordinal);
+            public Dictionary<string, string> FieldToMergedFieldMap { get; set; }
         }
 
-        public class MergedFieldRef
+        public struct MergedFieldRef
         {
             public FieldDefinition Value { get; set; }
 
@@ -147,13 +147,17 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             for (var i = 0; i < structCount; i++)
             {
-                var structRef = new StructRef() { Value = structs[i] };
+                var structRef = new StructRef() {
+                    Value = structs[i],
+                    FieldToMergedFieldMap = new(),
+                };
+
                 var @struct = structRef.Value;
 
                 structRefs.Add(structRef);
 
                 Aggregator.AggregateMergedFieldRefs(
-                      structRef
+                      ref structRef
                     , mergedStructRef.FieldRefs
                     , usedIndexesInList
                     , fieldRefPool
@@ -201,7 +205,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         internal readonly struct Aggregator
         {
             public static void AggregateMergedFieldRefs(
-                  StructRef structRef
+                  ref StructRef structRef
                 , List<MergedFieldRef> mergedFieldRefs
                 , HashSet<int> usedIndexesInList
                 , Queue<MergedFieldRef> pool

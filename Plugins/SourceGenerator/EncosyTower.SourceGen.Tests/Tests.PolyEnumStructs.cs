@@ -316,12 +316,26 @@ namespace EncosyTower.Tests.PolyEnumStructs.Errors2
             }
         }
 
-        public readonly partial record struct ItemNotFound(int Id)
+        public readonly partial record struct ItemNotFound(EncosyTower.Common.SerializableGuid Id)
         {
             public FixedString512Bytes ToMessage(in FixedString32Bytes prefix)
             {
                 FixedString32Bytes t1 = "Item with ID ";
                 FixedString32Bytes t2 = " was not found.";
+                var fs = InitFixedString(prefix);
+                fs.Append(t1);
+                fs.Append(Id.ToFixedString());
+                fs.Append(t2);
+                return fs;
+            }
+        }
+
+        public readonly partial record struct ItemAlreadyExists(int Id)
+        {
+            public FixedString512Bytes ToMessage(in FixedString32Bytes prefix)
+            {
+                FixedString32Bytes t1 = "Item with ID ";
+                FixedString32Bytes t2 = " already exists.";
                 var fs = InitFixedString(prefix);
                 fs.Append(t1);
                 fs.Append(Id);

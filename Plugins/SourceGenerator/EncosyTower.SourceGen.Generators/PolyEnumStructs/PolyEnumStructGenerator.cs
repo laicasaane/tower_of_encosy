@@ -440,6 +440,10 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     {
                         typeName = idType.Identifier.Text;
                     }
+                    else if (parameter.Type is QualifiedNameSyntax qType)
+                    {
+                        typeName = qType.ToString();
+                    }
                     else
                     {
                         continue;
@@ -533,7 +537,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     }
 
                     int fieldSize = 0;
-                    fieldSymbol.Type.GetUnmanagedSize(ref fieldSize);
+                    fieldSymbol.GetUnmanagedSize(ref fieldSize);
                     structSize += fieldSize;
 
                     fieldsBuilder.Add(new PolyEnumStructDefinition.FieldDefinition {

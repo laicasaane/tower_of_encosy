@@ -162,39 +162,6 @@ namespace EncosyTower.SourceGen
                 yield return @interface.ToDisplayString(QualifiedFormat);
         }
 
-        public static bool IsZeroSizedComponent(this ITypeSymbol symbol, HashSet<ITypeSymbol> seenSymbols = null)
-        {
-            seenSymbols ??= new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default) { symbol };
-
-            foreach (var field in symbol.GetMembers().OfType<IFieldSymbol>())
-            {
-                switch (symbol.SpecialType)
-                {
-                    case SpecialType.System_Void:
-                        continue;
-
-                    case SpecialType.None:
-                        if (field.IsStatic || field.IsConst)
-                            continue;
-
-                        if (field.Type.TypeKind == TypeKind.Struct)
-                        {
-                            // Handle cycles in type (otherwise we will stack overflow)
-                            if (!seenSymbols.Add(field.Type))
-                                continue;
-
-                            if (IsZeroSizedComponent(field.Type))
-                                continue;
-                        }
-                        return false;
-
-                    default:
-                        return false;
-                }
-            }
-            return true;
-        }
-
         public static void GetUnmanagedSize(this ITypeSymbol symbol, ref int size)
         {
             if (symbol == null)
@@ -255,25 +222,115 @@ namespace EncosyTower.SourceGen
                     size += sizeof(decimal);
                     return;
                 }
+            }
 
-                default:
+            if (symbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.IsEnumType())
+            {
+                GetUnmanagedSize(namedTypeSymbol.EnumUnderlyingType, ref size);
+                return;
+            }
+
+            if (symbol.IsUnmanagedType == false)
+            {
+                return;
+            }
+
+            foreach (var field in symbol.GetMembers().OfType<IFieldSymbol>())
+            {
+                if (field.IsStatic == false && field.IsConst == false)
                 {
-                    if (symbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.IsEnumType())
-                    {
-                        GetUnmanagedSize(namedTypeSymbol.EnumUnderlyingType, ref size);
-                    }
-                    else if (symbol.IsUnmanagedType)
-                    {
-                        foreach (var field in symbol.GetMembers().OfType<IFieldSymbol>())
-                        {
-                            if (field.IsStatic == false && field.IsConst == false)
-                            {
-                                GetUnmanagedSize(field.Type, ref size);
-                            }
-                        }
-                    }
+                    GetUnmanagedSize(field, ref size);
+                }
+            }
+        }
 
+        public static void GetUnmanagedSize(this IFieldSymbol field, ref int size)
+        {
+            if (field == null || field.Type is not { } type)
+            {
+                return;
+            }
+
+            if (type.IsReferenceType || type.TypeKind == TypeKind.FunctionPointer)
+            {
+                size += sizeof(ulong);
+                return;
+            }
+
+            switch (type.SpecialType)
+            {
+                case SpecialType.System_Char:
+                {
+                    size += sizeof(char);
                     return;
+                }
+
+                case SpecialType.System_Boolean:
+                case SpecialType.System_SByte:
+                case SpecialType.System_Byte:
+                {
+                    size += sizeof(byte);
+                    return;
+                }
+
+                case SpecialType.System_Int16:
+                case SpecialType.System_UInt16:
+                {
+                    size += sizeof(ushort);
+                    return;
+                }
+
+                case SpecialType.System_Int32:
+                case SpecialType.System_UInt32:
+                case SpecialType.System_Single:
+                {
+                    size += sizeof(uint);
+                    return;
+                }
+
+                case SpecialType.System_Int64:
+                case SpecialType.System_UInt64:
+                case SpecialType.System_Double:
+                case SpecialType.System_DateTime:
+                case SpecialType.System_IntPtr:
+                case SpecialType.System_UIntPtr:
+                {
+                    size += sizeof(ulong);
+                    return;
+                }
+
+                case SpecialType.System_Decimal:
+                {
+                    size += sizeof(decimal);
+                    return;
+                }
+            }
+
+            if (type is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.IsEnumType())
+            {
+                GetUnmanagedSize(namedTypeSymbol.EnumUnderlyingType, ref size);
+                return;
+            }
+
+            if (type.IsUnmanagedType == false)
+            {
+                return;
+            }
+
+            if (field.IsFixedSizeBuffer && type is IPointerTypeSymbol pointerType)
+            {
+                var pointedAtTypeSize = 0;
+                GetUnmanagedSize(pointerType.PointedAtType, ref pointedAtTypeSize);
+                size += field.FixedSize * pointedAtTypeSize;
+
+                return;
+            }
+
+            foreach (var nestedField in type.GetMembers().OfType<IFieldSymbol>())
+            {
+                if (nestedField.IsStatic == false && nestedField.IsConst == false)
+                {
+                    GetUnmanagedSize(nestedField, ref size);
                 }
             }
         }
