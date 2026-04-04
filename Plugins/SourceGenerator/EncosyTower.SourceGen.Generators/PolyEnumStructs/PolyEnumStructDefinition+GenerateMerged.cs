@@ -123,9 +123,9 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             var indexerSignatures = new HashSet<IndexerSignature>();
             var methodSignatures = new HashSet<MethodSignature>();
 
-            Aggregator.AggregateDimMap(interfaceDef.properties, mergedStructRef.PropertyDimMap, propertySignatures);
-            Aggregator.AggregateDimMap(interfaceDef.indexers, mergedStructRef.IndexerDimMap, indexerSignatures);
-            Aggregator.AggregateDimMap(interfaceDef.methods, mergedStructRef.MethodDimMap, methodSignatures);
+            Aggregator.AggregateDimMap(interfaceDef.properties, mergedStructRef.PropertyDimMap, propertySignatures, true);
+            Aggregator.AggregateDimMap(interfaceDef.indexers, mergedStructRef.IndexerDimMap, indexerSignatures, true);
+            Aggregator.AggregateDimMap(interfaceDef.methods, mergedStructRef.MethodDimMap, methodSignatures, true);
 
             var usedIndexesInList = new HashSet<int>();
             var fieldRefPool = new Queue<MergedFieldRef>();
@@ -247,7 +247,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                         }
 
                         mergedField.Value = field;
-                        mergedField.Name = $"field_{field.returnType.name.ToValidIdentifier()}_{newListIndex}";
+                        mergedField.Name = $"field_{field.returnType.identifier.ToValidIdentifier()}_{newListIndex}";
 
                         structSize += field.size;
                         mergedFieldRefs.Add(mergedField);
@@ -295,6 +295,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                   EquatableArray<TDef> items
                 , Dictionary<TDef, bool> dimMap
                 , HashSet<TSig> signatures
+                , bool alwaysAddToSignature
             )
                 where TDef : struct, IEquatable<TDef>, ICloneWithDim<TDef>, ICast<TSig>
                 where TSig : struct, IEquatable<TSig>, ICloneWithDim<TSig>
@@ -312,7 +313,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                         dimMap[cloned] = isDim;
                     }
 
-                    if (isDim)
+                    if (isDim || alwaysAddToSignature)
                     {
                         signatures.Add(item.Cast());
                     }

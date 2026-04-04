@@ -22,6 +22,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         public bool sortFieldsBySize;
         public bool autoEquatable;
         public bool withEnumExtensions;
+        public bool isReadOnly;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(typeName) == false
@@ -46,6 +47,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             && sortFieldsBySize == other.sortFieldsBySize
             && autoEquatable == other.autoEquatable
             && withEnumExtensions == other.withEnumExtensions
+            && isReadOnly == other.isReadOnly
             ;
 
         public readonly override bool Equals(object obj)
@@ -67,6 +69,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             hash.Add(sortFieldsBySize);
             hash.Add(autoEquatable);
             hash.Add(withEnumExtensions);
+            hash.Add(isReadOnly);
             return hash.ToHashCode();
         }
 
@@ -95,10 +98,12 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         internal struct SlimTypeDefinition : IEquatable<SlimTypeDefinition>
         {
             public string name;
+            public string identifier;
             public bool isEnum;
 
             public readonly bool IsValid
                 => string.IsNullOrEmpty(name) == false
+                && string.IsNullOrEmpty(identifier) == false
                 ;
 
             public readonly bool HasFullName
@@ -117,6 +122,27 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                       name
                     , isEnum
                 );
+        }
+
+        internal struct SlimMethodDefinition : IEquatable<SlimMethodDefinition>
+        {
+            public string name;
+            public EquatableArray<ParameterDefinition> parameters;
+
+            public readonly bool IsValid
+                => string.IsNullOrEmpty(name) == false
+                ;
+
+            public readonly override bool Equals(object obj)
+                => obj is SlimMethodDefinition other && Equals(other);
+
+            public readonly bool Equals(SlimMethodDefinition other)
+                => string.Equals(name, other.name, StringComparison.Ordinal)
+                && parameters.Equals(other.parameters)
+                ;
+
+            public readonly override int GetHashCode()
+                => HashValue.Combine(name, parameters);
         }
 
         internal struct InterfaceDefinition : IEquatable<InterfaceDefinition>
@@ -178,9 +204,12 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             public EquatableArray<PropertyDefinition> properties;
             public EquatableArray<IndexerDefinition> indexers;
             public EquatableArray<MethodDefinition> methods;
+            public EquatableArray<ParameterDefinition> parameters;
             public int size;
             public bool isUndefined;
             public bool implicitlyDeclared;
+            public bool isReadOnly;
+            public bool isRecord;
 
             public readonly bool IsValid
                 => string.IsNullOrEmpty(name) == false
@@ -197,9 +226,12 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 && properties.Equals(other.properties)
                 && indexers.Equals(other.indexers)
                 && methods.Equals(other.methods)
+                && parameters.Equals(other.parameters)
                 && size == other.size
                 && isUndefined == other.isUndefined
                 && implicitlyDeclared == other.implicitlyDeclared
+                && isReadOnly == other.isReadOnly
+                && isRecord == other.isRecord
                 ;
 
             public readonly override int GetHashCode()
@@ -212,9 +244,12 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 hash.Add(properties);
                 hash.Add(indexers);
                 hash.Add(methods);
+                hash.Add(parameters);
                 hash.Add(size);
                 hash.Add(isUndefined);
                 hash.Add(implicitlyDeclared);
+                hash.Add(isReadOnly);
+                hash.Add(isRecord);
                 return hash.ToHashCode();
             }
         }
@@ -567,19 +602,10 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 => obj is PropertySignature other && Equals(other);
 
             public readonly bool Equals(PropertySignature other)
-                => string.Equals(name, other.name, StringComparison.Ordinal)
-                && refKind == other.refKind
-                && getter.Equals(other.getter)
-                && setter.Equals(other.setter)
-                ;
+                => string.Equals(name, other.name, StringComparison.Ordinal);
 
             public readonly override int GetHashCode()
-                => HashValue.Combine(
-                      name
-                    , refKind
-                    , getter
-                    , setter
-                );
+                => HashValue.Combine(name);
         }
 
         internal struct IndexerSignature
@@ -621,19 +647,10 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 => obj is IndexerSignature other && Equals(other);
 
             public readonly bool Equals(IndexerSignature other)
-                => parameters.Equals(other.parameters)
-                && getter.Equals(other.getter)
-                && setter.Equals(other.setter)
-                && refKind == other.refKind
-                ;
+                => parameters.Equals(other.parameters);
 
             public readonly override int GetHashCode()
-                => HashValue.Combine(
-                      parameters
-                    , getter
-                    , setter
-                    , refKind
-                );
+                => HashValue.Combine(parameters);
         }
 
         internal struct MethodSignature
@@ -671,21 +688,10 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             public readonly bool Equals(MethodSignature other)
                 => string.Equals(name, other.name, StringComparison.Ordinal)
                 && parameters.Equals(other.parameters)
-                && refKind == other.refKind
-                && returnsVoid == other.returnsVoid
-                && isReadOnly == other.isReadOnly
-                && isDim == other.isDim
                 ;
 
             public readonly override int GetHashCode()
-                => HashValue.Combine(
-                      name
-                    , parameters
-                    , refKind
-                    , returnsVoid
-                    , isReadOnly
-                    , isDim
-                );
+                => HashValue.Combine(name, parameters);
         }
     }
 }

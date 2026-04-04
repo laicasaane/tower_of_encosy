@@ -71,7 +71,8 @@ namespace EncosyTower.SourceGen
                 genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
                 miscellaneousOptions:
                 SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
-                SymbolDisplayMiscellaneousOptions.UseSpecialTypes
+                SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
+                SymbolDisplayMiscellaneousOptions.ExpandNullable
             );
 
         private static SymbolDisplayFormat QualifiedFormatWithoutSpecialTypeNames { get; }

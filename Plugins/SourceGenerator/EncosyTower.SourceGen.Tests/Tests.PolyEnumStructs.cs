@@ -1,7 +1,4 @@
-﻿using System;
-
-
-namespace EncosyTower.Tests.PolyEnumStructs
+﻿namespace EncosyTower.Tests.PolyEnumStructs
 {
     using EncosyTower.PolyEnumStructs;
 
@@ -19,6 +16,7 @@ namespace EncosyTower.Tests.PolyEnumStructs
 
 namespace EncosyTower.Tests.PolyEnumStructs
 {
+    using System;
     using System.ComponentModel;
     using EncosyTower.Annotations;
     using EncosyTower.PolyEnumStructs;
@@ -57,6 +55,8 @@ namespace EncosyTower.Tests.PolyEnumStructs
             public int value;
 
             public ref int Value => throw new NotImplementedException();
+
+            public string Value2 { get; set; }
 
             public readonly ref int this[int i, float f] => throw new NotImplementedException();
 
@@ -107,6 +107,7 @@ namespace EncosyTower.Tests.PolyEnumStructs
 
 namespace EncosyTower.Tests.PolyEnumStructs
 {
+    using System;
     using EncosyTower.PolyEnumStructs;
     using UnityEngine;
 
@@ -164,6 +165,7 @@ namespace EncosyTower.Tests.PolyEnumStructs
 
 namespace EncosyTower.Tests.PolyEnumStructs
 {
+    using System;
     using EncosyTower.PolyEnumStructs;
     using UnityEngine;
 
@@ -213,6 +215,118 @@ namespace EncosyTower.Tests.PolyEnumStructs
             public readonly ref readonly int GetValueByRefRO()
             {
                 return ref ColorAPI.Value;
+            }
+        }
+    }
+}
+
+namespace EncosyTower.Tests.PolyEnumStructs.Errors1
+{
+    using EncosyTower.PolyEnumStructs;
+    using Unity.Collections;
+
+    [PolyEnumStruct]
+    public readonly partial struct Error1
+    {
+        private static FixedString512Bytes InitFixedString(in FixedString32Bytes prefix)
+        {
+            FixedString512Bytes fs = default;
+
+            if (prefix.IsEmpty == false)
+            {
+                fs.Append('[');
+                fs.Append(prefix);
+                fs.Append(']');
+                fs.Append(' ');
+            }
+
+            return fs;
+        }
+
+        partial interface IEnumCase
+        {
+            FixedString512Bytes ToMessage(in FixedString32Bytes prefix);
+        }
+
+        public readonly partial struct Undefined
+        {
+            public FixedString512Bytes ToMessage(in FixedString32Bytes prefix)
+            {
+                FixedString128Bytes t = "An unknown error has occurred.";
+                var fs = InitFixedString(prefix);
+                fs.Append(t);
+                return fs;
+            }
+        }
+
+        public readonly partial struct ItemNotFound
+        {
+            public readonly int Id;
+
+            public FixedString512Bytes ToMessage(in FixedString32Bytes prefix)
+            {
+                FixedString32Bytes t1 = "Item with ID ";
+                FixedString32Bytes t2 = " was not found.";
+                var fs = InitFixedString(prefix);
+                fs.Append(t1);
+                fs.Append(Id);
+                fs.Append(t2);
+                return fs;
+            }
+        }
+    }
+}
+
+namespace EncosyTower.Tests.PolyEnumStructs.Errors2
+{
+    using EncosyTower.PolyEnumStructs;
+    using Unity.Collections;
+
+    [PolyEnumStruct]
+    public readonly partial struct Error2
+    {
+        private static FixedString512Bytes InitFixedString(in FixedString32Bytes prefix)
+        {
+            FixedString512Bytes fs = default;
+
+            if (prefix.IsEmpty == false)
+            {
+                fs.Append('[');
+                fs.Append(prefix);
+                fs.Append(']');
+                fs.Append(' ');
+            }
+
+            return fs;
+        }
+
+        partial interface IEnumCase
+        {
+            FixedString512Bytes ToMessage(in FixedString32Bytes prefix);
+        }
+
+        public readonly partial record struct Undefined
+        {
+            public FixedString512Bytes ToMessage(in FixedString32Bytes prefix)
+            {
+                FixedString128Bytes t = "An unknown error has occurred.";
+                var fs = InitFixedString(prefix);
+                fs.Append(t);
+                return fs;
+            }
+        }
+
+        public readonly partial record struct ItemNotFound(int Id)
+        {
+            public FixedString512Bytes ToMessage(in FixedString32Bytes prefix)
+            {
+                FixedString32Bytes t1 = "Item with ID ";
+                FixedString32Bytes t2 = " was not found.";
+                var fs = InitFixedString(prefix);
+                fs.Append(t1);
+                fs.Append(Id);
+                fs.Append(t2);
+                return fs;
             }
         }
     }
