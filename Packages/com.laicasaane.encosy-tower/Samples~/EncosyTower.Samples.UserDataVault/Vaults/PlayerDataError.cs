@@ -1,116 +1,138 @@
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
+using EncosyTower.PolyEnumStructs;
 using EncosyTower.Samples.UserDataVault.Shared;
 using Unity.Collections;
 
 namespace EncosyTower.Samples.UserDataVault.Vaults;
 
-public readonly struct PlayerDataError
+public readonly partial struct PlayerDataError
 {
-    private record struct Data(
-          FixedString32Bytes Prefix
-        , Option<ItemId> ItemId
-        , Option<int> Int
-    );
-
-    private enum Type : byte
-    {
-        Unknown = 0,
-        ItemNotYetAcquired,
-        ItemAlreadyAcquired,
-        AmountNegativeOrZero,
-    }
-
-    private readonly Type _type;
-    private readonly Data _data;
+    private readonly FixedString64Bytes _prefix;
+    private readonly Error _error;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private PlayerDataError(Type type, Data data)
+    private PlayerDataError(in Error error, in FixedString64Bytes prefix)
     {
-        _type = type;
-        _data = data;
+        _prefix = prefix;
+        _error = error;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static PlayerDataError ItemNotYetAcquired(ItemId id)
-        => new(Type.ItemNotYetAcquired, new Data() with { ItemId = id });
+        => new(new Error.ItemNotYetAcquired(id), default);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static PlayerDataError ItemAlreadyAcquired(ItemId id)
-        => new(Type.ItemAlreadyAcquired, new Data() with { ItemId = id });
+        => new(new Error.ItemAlreadyAcquired(id), default);
 
-    public static PlayerDataError AmountNegativeOrZero(int amount, Option<ItemId> id = default)
-        => new(Type.AmountNegativeOrZero, new Data() with { ItemId = id, Int = amount });
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static PlayerDataError ItemAmountNegativeOrZero(ItemId id, int amount)
+        => new(new Error.ItemAmountNegativeOrZero(id, amount), default);
 
-    public PlayerDataError Prefix(FixedString32Bytes prefix)
-        => new(_type, _data with { Prefix = prefix });
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static PlayerDataError AmountNegativeOrZero(int amount)
+        => new(new Error.AmountNegativeOrZero(amount), default);
 
-    public string ToMessage()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public PlayerDataError Prefix(in FixedString64Bytes prefix)
+        => new(_error, prefix);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public override string ToString()
+        => _error.ToMessage(_prefix).ToString();
+
+    [PolyEnumStruct]
+    readonly partial struct Error
     {
-        return _type switch
+        private static FixedString512Bytes InitFixedString(in FixedString64Bytes prefix)
         {
-            Type.ItemNotYetAcquired => ToMessage_ItemNotYetAcquired(),
-            Type.ItemAlreadyAcquired => ToMessage_ItemAlreadyAcquired(),
-            Type.AmountNegativeOrZero => ToMessage_AmountNegativeOrZero(),
-            _ => "An unknown error has occurred.",
-        };
-    }
+            FixedString512Bytes fs = default;
 
-    private string ToMessage_ItemNotYetAcquired()
-    {
-        var fs = InitFixedString(_data);
+            if (prefix.IsEmpty == false)
+            {
+                fs.Append('[');
+                fs.Append(prefix);
+                fs.Append(']');
+                fs.Append(' ');
+            }
 
-        fs.Append("The item '");
-        fs.Append(_data.ItemId.GetValueOrThrow().ToFixedString());
-        fs.Append("' has not been acquired yet.");
-
-        return fs.ToString();
-    }
-
-    private string ToMessage_ItemAlreadyAcquired()
-    {
-        var fs = InitFixedString(_data);
-
-        fs.Append("The item '");
-        fs.Append(_data.ItemId.GetValueOrThrow().ToFixedString());
-        fs.Append("' has already been acquired.");
-
-        return fs.ToString();
-    }
-
-    private string ToMessage_AmountNegativeOrZero()
-    {
-        var fs = InitFixedString(_data);
-        var amount = _data.Int.GetValueOrThrow();
-
-        if (_data.ItemId.TryGetValue(out var id))
-        {
-            fs.Append("The amount for item '");
-            fs.Append(id.ToFixedString());
-            fs.Append("' must be positive, but it is '");
-            fs.Append(amount);
-            fs.Append("'.");
-        }
-        else
-        {
-            fs.Append("The amount must be positive, but it is '");
-            fs.Append(amount);
-            fs.Append("'.");
+            return fs;
         }
 
-        return fs.ToString();
-    }
-
-    private static FixedString512Bytes InitFixedString(in Data data)
-    {
-        FixedString512Bytes fs = default;
-
-        if (data.Prefix.IsEmpty == false)
+        partial interface IEnumCase
         {
-            fs.Append('[');
-            fs.Append(data.Prefix);
-            fs.Append(']');
-            fs.Append(' ');
+            FixedString512Bytes ToMessage(in FixedString64Bytes prefix);
         }
 
-        return fs;
+        public readonly partial struct Undefined
+        {
+            public FixedString512Bytes ToMessage(in FixedString64Bytes prefix)
+            {
+                FixedString64Bytes m = "An unknown error has occurred.";
+                var fs = InitFixedString(prefix);
+                fs.Append(m);
+                return fs;
+            }
+        }
+
+        public readonly partial record struct ItemNotYetAcquired(ItemId Id)
+        {
+            public FixedString512Bytes ToMessage(in FixedString64Bytes prefix)
+            {
+                FixedString64Bytes m1 = "The item '";
+                FixedString64Bytes m2 = "' has not been acquired yet.";
+                var fs = InitFixedString(prefix);
+                fs.Append(m1);
+                fs.Append(Id.ToFixedString());
+                fs.Append(m2);
+                return fs;
+            }
+        }
+
+        public readonly partial record struct ItemAlreadyAcquired(ItemId Id)
+        {
+            public FixedString512Bytes ToMessage(in FixedString64Bytes prefix)
+            {
+                FixedString64Bytes m1 = "The item '";
+                FixedString64Bytes m2 = "' has already been acquired.";
+                var fs = InitFixedString(prefix);
+                fs.Append(m1);
+                fs.Append(Id.ToFixedString());
+                fs.Append(m2);
+                return fs;
+            }
+        }
+
+        public readonly partial record struct ItemAmountNegativeOrZero(ItemId Id, int Amount)
+        {
+            public FixedString512Bytes ToMessage(in FixedString64Bytes prefix)
+            {
+                FixedString64Bytes m1 = "The amount for item '";
+                FixedString64Bytes m2 = "' must be positive, but it is '";
+                FixedString64Bytes m3 = "'.";
+                var fs = InitFixedString(prefix);
+                fs.Append(m1);
+                fs.Append(Id.ToFixedString());
+                fs.Append(m2);
+                fs.Append(Amount.ToString());
+                fs.Append(m3);
+                return fs;
+            }
+        }
+
+        public readonly partial record struct AmountNegativeOrZero(int Amount)
+        {
+            public FixedString512Bytes ToMessage(in FixedString64Bytes prefix)
+            {
+                FixedString64Bytes m1 = "The amount must be positive, but it is '";
+                FixedString64Bytes m2 = "'.";
+                var fs = InitFixedString(prefix);
+                fs.Append(m1);
+                fs.Append(Amount.ToString());
+                fs.Append(m2);
+                return fs;
+            }
+        }
     }
 }

@@ -11,6 +11,8 @@ using UnityEngine;
 
 namespace EncosyTower.Samples.UserDataVault.Vaults;
 
+using Error = PlayerDataError;
+
 [Data, DataMutable, DataWithoutId]
 internal partial class PlayerData : IUserData
 {
@@ -62,9 +64,9 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
         _store.MarkDirty();
     }
 
-    public Result<OnItemAmountUpdatedMsg, PlayerDataError> AddSingletonItem(ItemId id)
+    public Result<OnItemAmountUpdatedMsg, Error> AddSingletonItem(ItemId id)
     {
-        var error = PlayerDataError.ItemAlreadyAcquired(id).Prefix(nameof(AddSingletonItem));
+        var error = Error.ItemAlreadyAcquired(id).Prefix(nameof(AddSingletonItem));
         var result = Add(Data._itemAmounts, id, true, error);
         MarkDirtyIfSuccess(result);
 
@@ -73,9 +75,9 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
             : result.GetErrorOrDefault();
     }
 
-    public Result<OnItemAmountUpdatedMsg, PlayerDataError> RemoveSingletonItem(ItemId id)
+    public Result<OnItemAmountUpdatedMsg, Error> RemoveSingletonItem(ItemId id)
     {
-        var error = PlayerDataError.ItemNotYetAcquired(id).Prefix(nameof(RemoveSingletonItem));
+        var error = Error.ItemNotYetAcquired(id).Prefix(nameof(RemoveSingletonItem));
         var result = Remove(Data._itemAmounts, id, true, error);
         MarkDirtyIfSuccess(result);
 
@@ -92,14 +94,14 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Result<int, PlayerDataError> GetItemAmount(ItemId id)
+    public Result<int, Error> GetItemAmount(ItemId id)
     {
         return Data._itemAmounts.TryGetValue(id, out var amount)
             ? amount
-            : PlayerDataError.ItemNotYetAcquired(id).Prefix(nameof(GetItemAmount));
+            : Error.ItemNotYetAcquired(id).Prefix(nameof(GetItemAmount));
     }
 
-    public Result<OnItemAmountUpdatedMsg, PlayerDataError> SetItemAmount(ItemId id, int amount)
+    public Result<OnItemAmountUpdatedMsg, Error> SetItemAmount(ItemId id, int amount)
     {
         var result = SetAmount(Data._itemAmounts, id, amount);
         MarkDirtyIfSuccess(result);
@@ -109,7 +111,7 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
             : result.GetErrorOrDefault().Prefix(nameof(SetItemAmount));
     }
 
-    public Result<OnItemAmountUpdatedMsg, PlayerDataError> AddItemAmount(ItemId id, int amount)
+    public Result<OnItemAmountUpdatedMsg, Error> AddItemAmount(ItemId id, int amount)
     {
         var result = AddAmount(Data._itemAmounts, id, amount);
         MarkDirtyIfSuccess(result);
@@ -119,9 +121,9 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
             : result.GetErrorOrDefault().Prefix(nameof(AddItemAmount));
     }
 
-    public Result<OnItemAmountUpdatedMsg, PlayerDataError> ReduceItemAmount(ItemId id, int amount)
+    public Result<OnItemAmountUpdatedMsg, Error> ReduceItemAmount(ItemId id, int amount)
     {
-        var result = ReduceAmount(Data._itemAmounts, id, amount, PlayerDataError.ItemNotYetAcquired(id));
+        var result = ReduceAmount(Data._itemAmounts, id, amount, Error.ItemNotYetAcquired(id));
         MarkDirtyIfSuccess(result);
 
         return result.TryGetValue(out var changed)
@@ -136,7 +138,7 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void MarkDirtyIfSuccess<T>(Result<T, PlayerDataError> result)
+    private void MarkDirtyIfSuccess<T>(Result<T, Error> result)
     {
         if (result.IsSuccess)
         {
@@ -144,11 +146,11 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
         }
     }
 
-    private static Result<Changed<int>, PlayerDataError> Add(
+    private static Result<Changed<int>, Error> Add(
           JsonArrayMap<ItemId, int> amountMap
         , ItemId id
         , bool singleton
-        , PlayerDataError errorAlreadyAcquired
+        , Error errorAlreadyAcquired
     )
     {
         if (singleton)
@@ -166,11 +168,11 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
         return AddAmount(amountMap, id, 1);
     }
 
-    private static Result<Changed<int>, PlayerDataError> Remove(
+    private static Result<Changed<int>, Error> Remove(
           JsonArrayMap<ItemId, int> amountMap
         , ItemId id
         , bool singleton
-        , PlayerDataError errorNotAcquired
+        , Error errorNotAcquired
     )
     {
         return singleton
@@ -178,7 +180,7 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
             : ReduceAmount(amountMap, id, 1, errorNotAcquired);
     }
 
-    private static Result<Changed<int>, PlayerDataError> SetAmount(
+    private static Result<Changed<int>, Error> SetAmount(
           JsonArrayMap<ItemId, int> amountMap
         , ItemId id
         , int amount
@@ -186,7 +188,7 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
     {
         if (amount < 1)
         {
-            return PlayerDataError.AmountNegativeOrZero(amount, id);
+            return Error.ItemAmountNegativeOrZero(id, amount);
         }
 
         ref var amountRef = ref amountMap.GetOrAdd(id);
@@ -196,7 +198,7 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
         return new Changed<int>(amountRef, previousAmount);
     }
 
-    private static Result<Changed<int>, PlayerDataError> AddAmount(
+    private static Result<Changed<int>, Error> AddAmount(
           JsonArrayMap<ItemId, int> amountMap
         , ItemId id
         , int amount
@@ -204,7 +206,7 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
     {
         if (amount < 1)
         {
-            return PlayerDataError.AmountNegativeOrZero(amount, id);
+            return Error.ItemAmountNegativeOrZero(id, amount);
         }
 
         ref var amountRef = ref amountMap.GetOrAdd(id);
@@ -214,16 +216,16 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
         return new Changed<int>(amountRef, previousAmount);
     }
 
-    private static Result<Changed<int>, PlayerDataError> ReduceAmount(
+    private static Result<Changed<int>, Error> ReduceAmount(
           JsonArrayMap<ItemId, int> amountMap
         , ItemId id
         , int amount
-        , PlayerDataError errorNotAcquired
+        , Error errorNotAcquired
     )
     {
         if (amount < 1)
         {
-            return PlayerDataError.AmountNegativeOrZero(amount, id);
+            return Error.ItemAmountNegativeOrZero(id, amount);
         }
 
         if (amountMap.TryFindIndex(id, out var index) == false)

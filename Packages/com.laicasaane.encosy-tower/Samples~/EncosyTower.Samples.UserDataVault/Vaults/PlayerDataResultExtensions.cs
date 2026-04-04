@@ -14,7 +14,7 @@ public static class PlayerDataResultExtensions
 
         if (log)
         {
-            StaticLogger.LogWarning(error.ToMessage());
+            StaticLogger.LogWarning(error);
         }
 
         return true;
