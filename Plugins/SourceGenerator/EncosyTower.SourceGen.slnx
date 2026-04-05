@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Samples/Directory.Build.props" />
+  </Folder>
   <Project Path="EncosyTower.SourceGen.Analyzers/EncosyTower.SourceGen.Analyzers.csproj" />
   <Project Path="EncosyTower.SourceGen.CodeRefactors/EncosyTower.SourceGen.CodeRefactors.csproj" />
   <Project Path="EncosyTower.SourceGen.Common/EncosyTower.SourceGen.Common.csproj" />

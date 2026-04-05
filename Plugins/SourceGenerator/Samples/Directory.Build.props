@@ -2,8 +2,8 @@
     <PropertyGroup>
         <UnityInstallRootPath>$([System.Environment]::GetEnvironmentVariable('UNITY_OS_INSTALL_ROOT'))</UnityInstallRootPath>
         <UnityProjectPath>$(MSBuildProjectDirectory)/../../../../</UnityProjectPath>
-        <BaseOutputPath>$(MSBuildThisFileDirectory)bin\$(MSBuildProjectName)\</BaseOutputPath>
-        <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+        <BaseOutputPath>$(MSBuildThisFileDirectory)..\Build\$(MSBuildProjectName)\bin\</BaseOutputPath>
+        <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)..\Build\$(MSBuildProjectName)\obj\</BaseIntermediateOutputPath>
     </PropertyGroup>
 
     <ItemGroup>
