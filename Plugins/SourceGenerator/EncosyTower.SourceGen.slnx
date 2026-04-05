@@ -4,6 +4,7 @@
   <Project Path="EncosyTower.SourceGen.Common/EncosyTower.SourceGen.Common.csproj" />
   <Project Path="EncosyTower.SourceGen.Generators/EncosyTower.SourceGen.Generators.csproj" />
   <Project Path="Samples/Samples.Data/Samples.Data.csproj" />
+  <Project Path="EncosyTower.SourceGen.Tests/EncosyTower.SourceGen.Tests.csproj" />
   <Project Path="Samples/Samples.DatabaseAuthoring/Samples.DatabaseAuthoring.csproj" />
   <Project Path="Samples/Samples.Entities.Stats/Samples.Entities.Stats.csproj" />
   <Project Path="Samples/Samples.EnumExtensions/Samples.EnumExtensions.csproj" />
