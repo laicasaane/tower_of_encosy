@@ -74,7 +74,7 @@ the target project on which source generators will run.
 ### NuGet Package
 
 ```xml
-<PackageReference Include="Unity3D" Version="3.0.0" />
+<PackageReference Include="Unity3D" Version="3.1.1" />
 ```
 
 - This [Unity3D][unity3d][^4] package allows a C# project to reference assemblies of the Unity game engine.
