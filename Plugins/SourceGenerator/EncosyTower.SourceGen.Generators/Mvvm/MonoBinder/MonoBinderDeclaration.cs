@@ -1054,14 +1054,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                         return ImmutableArray<ITypeSymbol>.Empty;
                     }
 
-                    var builder = ImmutableArray.CreateBuilder<ITypeSymbol>(count);
+                    using var builder = ImmutableArrayBuilder<ITypeSymbol>.Rent();
 
                     foreach (var param in invoke.Parameters)
                     {
                         builder.Add(param.Type);
                     }
 
-                    return builder.MoveToImmutable();
+                    return builder.ToImmutable();
                 }
             }
 
