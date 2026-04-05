@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Text;
 using System.Threading;
 using EncosyTower.SourceGen.Common.Data.Common;
+using EncosyTower.SourceGen.TypeModeling.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -38,12 +39,14 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return default;
             }
 
+            var typeModel = typeSymbol.ToModel(token, new ModelOptions(
+                  ModelParts.Attributes | ModelParts.Methods
+            ));
+
             var semanticModel = context.SemanticModel;
             var syntaxTree = typeSyntax.SyntaxTree;
             var typeIdent = typeSyntax.Identifier.Text;
             var typeValidIdent = typeSymbol.ToValidIdentifier();
-            var isValueType = typeSymbol.IsValueType;
-            var isSealed = typeSymbol.IsSealed || isValueType;
 
             // ── TypeName (with type params if generic) ──────────────────────────────────────
             var typeNameSb = new StringBuilder(typeIdent);
@@ -95,9 +98,22 @@ namespace EncosyTower.SourceGen.Generators.Data
             );
 
             // ── Attributes on the container type ───────────────────────────────────────────
-            var hasSerializableAttribute = typeSymbol.HasAttribute(SERIALIZABLE_ATTRIBUTE);
-            var hasGeneratePropertyBagAttribute = typeSymbol.HasAttribute(GENERATE_PROPERTY_BAG_ATTRIBUTE);
-            var withoutId = typeSymbol.GetAttribute(DATA_WITHOUT_ID_ATTRIBUTE) != null;
+            var typeModelAttrs = typeModel.Attributes;
+            var typeModelAttrCount = typeModelAttrs.Count;
+            var withoutId = false;
+
+            for (var i = 0; i < typeModelAttrCount; i++)
+            {
+                if (string.Equals(
+                      typeModelAttrs[i].FullName
+                    , DATA_WITHOUT_ID_ATTRIBUTE
+                    , StringComparison.Ordinal
+                ))
+                {
+                    withoutId = true;
+                }
+            }
+
             var withId = withoutId == false;
 
             // ── Mutability ──────────────────────────────────────────────────────────────────
@@ -138,9 +154,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                 baseTypeName = baseNamedTypeSymbol.ToFullName();
             }
 
-            // ── Accessibility keyword ───────────────────────────────────────────────────────
-            var accessibilityKeyword = typeSymbol.DeclaredAccessibility.ToKeyword();
-
             // ── Location ────────────────────────────────────────────────────────────────────
             var locationInfo = LocationInfo.From(typeSymbol.Locations.IsEmpty
                 ? Location.None
@@ -149,7 +162,6 @@ namespace EncosyTower.SourceGen.Generators.Data
             // ── Per-member analysis ─────────────────────────────────────────────────────────
             var existingFields = new HashSet<string>();
             var existingProperties = new Dictionary<string, bool>(); // name → isPublic
-            var existingOverrideEquals = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
             var allowOnlyPrivateOrInitSetter = isMutable == false || withoutPropertySetters;
             var equalityComparer = SymbolEqualityComparer.Default;
 
@@ -161,9 +173,43 @@ namespace EncosyTower.SourceGen.Generators.Data
             using var throwawayDiagnosticBuilder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
 
             var idPropertyTypeName = string.Empty;
-            var hasGetHashCodeMethod = false;
-            var hasEqualsMethod = false;
-            var hasIEquatableMethod = false;
+            var existingOverrideEqualsByName = new HashSet<string>(StringComparer.Ordinal);
+
+            var methodModels = typeModel.Methods;
+            var methodModelCount = methodModels.Count;
+
+            for (var i = 0; i < methodModelCount; i++)
+            {
+                var method = methodModels[i];
+
+                if (string.Equals(method.Name, "GetHashCode", StringComparison.Ordinal)
+                    && method.Parameters.Count == 0
+                    && method.ReturnsVoid == false
+                )
+                {
+                    continue;
+                }
+
+                if (string.Equals(method.Name, "Equals", StringComparison.Ordinal)
+                    && method.Parameters.Count == 1
+                    && string.Equals(method.ReturnTypeFullName, "bool", StringComparison.Ordinal)
+                )
+                {
+                    var paramFullName = method.Parameters[0].TypeFullName;
+
+                    if (string.Equals(paramFullName, "object", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    if (string.Equals(paramFullName, typeModel.FullName, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    existingOverrideEqualsByName.Add(paramFullName);
+                }
+            }
 
             var typeSb = new StringBuilder();
             var members = typeSymbol.GetMembers();
@@ -470,37 +516,6 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     continue;
                 }
-
-                if (member is IMethodSymbol method)
-                {
-                    if (method.Name == "GetHashCode" && method.Parameters.Length == 0)
-                    {
-                        hasGetHashCodeMethod = true;
-                        continue;
-                    }
-
-                    if (method.Name == "Equals"
-                        && method.Parameters.Length == 1
-                        && method.ReturnType.SpecialType == SpecialType.System_Boolean
-                    )
-                    {
-                        var param = method.Parameters[0];
-
-                        if (param.Type.SpecialType == SpecialType.System_Object)
-                        {
-                            hasEqualsMethod = true;
-                            continue;
-                        }
-
-                        if (equalityComparer.Equals(typeSymbol, param.Type))
-                        {
-                            hasIEquatableMethod = true;
-                            continue;
-                        }
-
-                        existingOverrideEquals.Add(param.Type);
-                    }
-                }
             }
 
             // ── Resolve ImplementedProperty / FieldIsImplemented post-scan ──────────────────
@@ -539,7 +554,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 while (baseType != null)
                 {
                     if (baseType.ImplementsInterface(IDATA)
-                        && existingOverrideEquals.Contains(baseType) == false
+                        && existingOverrideEqualsByName.Contains(baseType.ToFullName()) == false
                     )
                     {
                         overrideEqualsBuilder.Add(baseType.ToFullName());
@@ -556,23 +571,16 @@ namespace EncosyTower.SourceGen.Generators.Data
                 typeIdentifier = typeIdent,
                 typeValidIdentifier = typeValidIdent,
                 baseTypeName = baseTypeName,
-                accessibilityKeyword = accessibilityKeyword,
                 hintName = hintName,
                 sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
                 closingSource = closingSource,
+                typeModel = typeModel,
                 idPropertyTypeName = idPropertyTypeName,
                 fieldPolicy = fieldPolicy,
                 isMutable = isMutable,
-                isValueType = isValueType,
                 withoutPropertySetters = withoutPropertySetters,
                 withReadOnlyView = withReadOnlyView,
-                isSealed = isSealed,
-                hasSerializableAttribute = hasSerializableAttribute,
-                hasGeneratePropertyBagAttribute = hasGeneratePropertyBagAttribute,
-                hasGetHashCodeMethod = hasGetHashCodeMethod,
-                hasEqualsMethod = hasEqualsMethod,
-                hasIEquatableMethod = hasIEquatableMethod,
                 withoutId = withoutId,
                 orders = orderBuilder.ToImmutable().AsEquatableArray(),
                 fieldRefs = resolvedFieldRefs.AsEquatableArray(),
