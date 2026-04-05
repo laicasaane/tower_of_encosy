@@ -13,6 +13,12 @@ charset = utf-8
 # New line preferences
 end_of_line = lf
 
+# MSBuild project files
+[*.{csproj,props,targets}]
+indent_size = 4
+indent_style = space
+tab_width = 4
+
 # C# files
 [*.cs]
 
