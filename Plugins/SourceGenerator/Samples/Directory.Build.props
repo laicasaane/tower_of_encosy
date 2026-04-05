@@ -1,0 +1,10 @@
+<Project>
+    <PropertyGroup>
+        <UnityInstallRootPath>$([System.Environment]::GetEnvironmentVariable('UNITY_OS_INSTALL_ROOT'))</UnityInstallRootPath>
+        <UnityProjectPath>$(MSBuildProjectDirectory)/../../../../</UnityProjectPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Reference Include="$(UnityEditorPath)" Private="false" />
+    </ItemGroup>
+</Project>

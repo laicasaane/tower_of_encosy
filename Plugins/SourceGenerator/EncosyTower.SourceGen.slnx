@@ -3,5 +3,18 @@
   <Project Path="EncosyTower.SourceGen.CodeRefactors/EncosyTower.SourceGen.CodeRefactors.csproj" />
   <Project Path="EncosyTower.SourceGen.Common/EncosyTower.SourceGen.Common.csproj" />
   <Project Path="EncosyTower.SourceGen.Generators/EncosyTower.SourceGen.Generators.csproj" />
-  <Project Path="EncosyTower.SourceGen.Tests/EncosyTower.SourceGen.Tests.csproj" />
+  <Project Path="Samples/Samples.Data/Samples.Data.csproj" />
+  <Project Path="Samples/Samples.DatabaseAuthoring/Samples.DatabaseAuthoring.csproj" />
+  <Project Path="Samples/Samples.Entities.Stats/Samples.Entities.Stats.csproj" />
+  <Project Path="Samples/Samples.EnumExtensions/Samples.EnumExtensions.csproj" />
+  <Project Path="Samples/Samples.EnumTemplates/Samples.EnumTemplates.csproj" />
+  <Project Path="Samples/Samples.Lookups/Samples.Lookups.csproj" />
+  <Project Path="Samples/Samples.Mvvm/Samples.Mvvm.csproj" />
+  <Project Path="Samples/Samples.NewtonsoftJsonAotHelpers/Samples.NewtonsoftJsonAotHelpers.csproj" />
+  <Project Path="Samples/Samples.PolyEnumStructs/Samples.PolyEnumStructs.csproj" />
+  <Project Path="Samples/Samples.RuntimeTypeCaches/Samples.RuntimeTypeCaches.csproj" />
+  <Project Path="Samples/Samples.TypeWraps/Samples.TypeWraps.csproj" />
+  <Project Path="Samples/Samples.UnionIds/Samples.UnionIds.csproj" />
+  <Project Path="Samples/Samples.UserDataVaults/Samples.UserDataVaults.csproj" />
+  <Project Path="Samples/Samples.Variants/Samples.Variants.csproj" />
 </Solution>
