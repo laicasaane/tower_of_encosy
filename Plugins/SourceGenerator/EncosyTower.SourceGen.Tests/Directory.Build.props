@@ -1,0 +1,8 @@
+<Project>
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+    <PropertyGroup>
+        <UnityProjectPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)/../../..'))</UnityProjectPath>
+        <UnityInstallRootPath>$([System.Environment]::GetEnvironmentVariable('UNITY_OS_INSTALL_ROOT'))</UnityInstallRootPath>
+    </PropertyGroup>
+</Project>

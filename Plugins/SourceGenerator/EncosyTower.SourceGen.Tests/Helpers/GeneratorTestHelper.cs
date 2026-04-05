@@ -1,5 +1,4 @@
 #pragma warning disable IDE0300 // Simplify collection initialization
-#pragma warning disable IDE0301 // Simplify collection initialization
 #pragma warning disable IDE0303 // Simplify collection initialization
 
 using System.Collections.Immutable;
@@ -45,10 +44,21 @@ internal static class GeneratorTestHelper
             , CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp10)
         );
 
+        // Unity/EncosyTower DLL references — list and existence are verified at build time
+        // by the GenerateUnityDllPaths MSBuild target via UnityDllPaths.All.
+        IEnumerable<PortableExecutableReference> references = UnityDllPaths.All
+            .Select(p => MetadataReference.CreateFromFile(p))
+            .Concat(new[]
+            {
+                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.Logging.ILogger).Assembly.Location),
+            });
+
         var compilation = CSharpCompilation.Create(
               "TestAssembly"
             , new[] { syntaxTree }
-            , ImmutableArray<MetadataReference>.Empty
+            , references.ToImmutableArray()
             , new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
         );
 
@@ -64,7 +74,7 @@ internal static class GeneratorTestHelper
             , r => r.Exception is null ? r.Diagnostics : ImmutableArray.Create(
                 Diagnostic.Create(
                     new DiagnosticDescriptor(
-                        "GENTEST001"
+                          "GENTEST001"
                         , "Generator threw exception"
                         , r.Exception.ToString()
                         , "Test"
