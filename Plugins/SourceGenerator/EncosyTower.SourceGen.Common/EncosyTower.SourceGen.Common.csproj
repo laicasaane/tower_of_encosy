@@ -28,11 +28,4 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.1" PrivateAssets="all" />
     </ItemGroup>
 
-    <Target Name="CopyBuildArtifacts" AfterTargets="Build" Condition=" '$(Configuration)'=='Release' ">
-        <ItemGroup>
-            <DataFiles Include="$(ProjectDir)$(OutDir)*.dll" />
-        </ItemGroup>
-        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(ProjectDir)../../../Packages/com.laicasaane.encosy-tower/EncosyTower.Core/SourceGenerators/" SkipUnchangedFiles="true" />
-    </Target>
-
 </Project>
