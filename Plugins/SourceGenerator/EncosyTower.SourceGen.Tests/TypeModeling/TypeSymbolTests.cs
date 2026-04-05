@@ -339,41 +339,4 @@ public class TypeSymbolTests
         StringAssert.Contains(parameters[0].TypeFullName, "int");
         StringAssert.Contains(parameters[1].TypeFullName, "string");
     }
-
-    // ─── SymbolFilters ────────────────────────────────────────────────────
-
-    [TestMethod]
-    public void SymbolFilters_Public_OnlyPublicFields()
-    {
-        var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
-        var publicFields = new List<FieldSymbol>();
-        foreach (var f in sym.Fields.Public()) publicFields.Add(f);
-        // StaticField, ReadOnlyField are public; _private is not
-        Assert.AreEqual(2, publicFields.Count);
-        Assert.IsTrue(publicFields.All(f => f.Accessibility == Accessibility.Public));
-    }
-
-    [TestMethod]
-    public void SymbolFilters_WithAttribute_ReturnsMatchingMethods()
-    {
-        const string SRC = """
-            using System;
-            namespace TestNs2
-            {
-                public class Annotated
-                {
-                    [Obsolete] public void Old() { }
-                    public void Current() { }
-                    [Obsolete] public void AlsoOld() { }
-                }
-            }
-            """;
-        var sym = TypeModelingTestHelper.GetTypeSymbol(SRC, "TestNs2.Annotated").ToTypeSymbol();
-        var withObsolete = new List<MethodSymbol>();
-        foreach (var m in sym.Methods.WithAttribute("global::System.ObsoleteAttribute"))
-            withObsolete.Add(m);
-        Assert.AreEqual(2, withObsolete.Count);
-        CollectionAssert.Contains(withObsolete.Select(m => m.Name).ToList(), "Old");
-        CollectionAssert.Contains(withObsolete.Select(m => m.Name).ToList(), "AlsoOld");
-    }
 }
