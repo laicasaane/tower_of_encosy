@@ -285,14 +285,20 @@ namespace EncosyTower.StringIds
         }
 
         [HideInCallstack, StackTraceHidden]
-        private static void ThrowIfFailedRegistering([DoesNotReturnIf(false)] bool result, in UnmanagedString str, StringId id)
+        private static void ThrowIfFailedRegistering(
+              [DoesNotReturnIf(false)] bool check
+            , in UnmanagedString str
+            , StringId id
+        )
         {
-            if (result == false)
+            if (check == false)
             {
-                throw new InvalidOperationException(
-                    $"Cannot register a StringId by the same value \"{str}\" with different id \"{id}\"."
-                );
+                throw CreateException(str, id);
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException(in UnmanagedString str, StringId id)
+                => new($"Cannot register a StringId by the same value \"{str}\" with different id \"{id}\".");
         }
     }
 }

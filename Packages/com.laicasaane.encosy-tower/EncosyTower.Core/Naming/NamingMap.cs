@@ -115,6 +115,7 @@ namespace EncosyTower.Naming
             return name;
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void WarningNewtonsoftJson([CallerMemberName] string memberName = "")
         {
             StaticDevLogger.Warning(

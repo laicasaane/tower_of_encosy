@@ -576,42 +576,49 @@ namespace EncosyTower.PageFlows
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningNoActivePage()
         {
             _logger.LogWarning("The flow has no active page.");
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningNoPageToPop()
         {
             _logger.LogWarning("There is no page to pop.");
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningNoPageToRemove()
         {
             _logger.LogWarning("There is no page to remove.");
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningPageNotFound(IPage page)
         {
             _logger.LogWarning($"Cannot found this page '{page}' inside the flow.");
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningIndexOutOfRange(int index)
         {
             _logger.LogWarning($"Index '{index}' is out of range.");
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningCurrentPageIsIndex(int index)
         {
             _logger.LogWarning($"The page of index '{index}' is already showing.");
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [UnityEngine.HideInCallstack, StackTraceHidden]
         public void LogWarningCannotHideDefaultIndexPage(int index)
         {

@@ -111,12 +111,16 @@ namespace EncosyTower.Databases
 #pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfInvalid([DoesNotReturnIf(false)] bool isValid)
+        private static void ThrowIfInvalid([DoesNotReturnIf(false)] bool check)
         {
-            if (isValid == false)
+            if (check == false)
             {
-                throw new InvalidOperationException("DataRef is invalid");
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("DataRef is invalid");
         }
     }
 }

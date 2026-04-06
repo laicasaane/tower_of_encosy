@@ -2,12 +2,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Profile;
+using UnityEngine;
 
 namespace EncosyTower.Editor
 {
@@ -133,14 +136,17 @@ namespace EncosyTower.Editor
             }
         }
 
-        private static void ThrowIfInvalid([DoesNotReturnIf(false)] bool isValid)
+        [HideInCallstack, StackTraceHidden]
+        private static void ThrowIfInvalid([DoesNotReturnIf(false)] bool check)
         {
-            if (isValid == false)
+            if (check == false)
             {
-                throw new InvalidOperationException(
-                    "A valid BuildProfileOrTarget must be acquired from BuildAPI.ActiveProfileOrTarget."
-                );
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("A valid BuildProfileOrTarget must be acquired from BuildAPI.ActiveProfileOrTarget.");
         }
     }
 }

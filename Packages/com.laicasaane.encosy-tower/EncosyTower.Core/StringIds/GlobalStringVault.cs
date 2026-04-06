@@ -63,16 +63,20 @@ namespace EncosyTower.StringIds
             return result;
         }
 
-        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        internal static void ThrowIfNotDefined([DoesNotReturnIf(false)] bool isDefined, StringId key)
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        internal static void ThrowIfNotDefined([DoesNotReturnIf(false)] bool check, StringId key)
         {
-            if (isDefined == false)
+            if (check == false)
             {
-                throw new InvalidOperationException(
+                throw CreateException(key);
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException(StringId key)
+                => new(
                     $"No StringId has not been globally defined with id \"{key}\". " +
                     $"To define one, use StringToId.Get() API."
                 );
-            }
         }
     }
 }

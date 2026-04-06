@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Common;
 using EncosyTower.Logging;
@@ -186,6 +187,7 @@ namespace EncosyTower.PageFlows.MonoPages
                 ? options.ReturningStrategy
                 : ReturningStrategy.Default;
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfFoundNoPage(string key, UnityObjectLogger logger)
         {
@@ -194,6 +196,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfPageIsNotComponent(IMonoPage page, string key, UnityObjectLogger logger)
         {
@@ -202,6 +205,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void WarningIfAlreadyInActive(IMonoPage page, string assetKey, UnityObjectLogger logger)
         {

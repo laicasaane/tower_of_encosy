@@ -185,15 +185,17 @@ namespace EncosyTower.UnityExtensions
             }
         }
 
-        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("__ENCOSY_VALIDATION__")]
-        private static void ThrowIfNotCreated([DoesNotReturnIf(false)] bool value)
+        [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowIfNotCreated([DoesNotReturnIf(false)] bool check)
         {
-            if (value == false)
+            if (check == false)
             {
-                throw new InvalidOperationException(
-                    "UnityInstanceId must be created using the constructor that takes a UnityEngine.Object."
-                );
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("UnityInstanceId must be created using the constructor that takes a UnityEngine.Object.");
         }
     }
 }

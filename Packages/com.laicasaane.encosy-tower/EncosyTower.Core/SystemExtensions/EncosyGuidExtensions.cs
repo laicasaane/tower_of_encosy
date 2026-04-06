@@ -261,7 +261,7 @@ namespace EncosyTower.SystemExtensions
                 // it given that DateTimeOffset.MaxValue is December 31, 9999. However, we
                 // can't represent timestamps prior to the Unix Epoch since UUIDv7 explicitly
                 // stores a 48-bit unsigned value, so we do need to throw if one is passed in.
-                ThrowIfNegative(unixTimeMilliseconds, nameof(timestamp));
+                ThrowIfNegative(unixTimeMilliseconds < 0, unixTimeMilliseconds, nameof(timestamp));
 
                 return ToVersion7Core((ulong)unixTimeMilliseconds);
             }
@@ -501,25 +501,24 @@ namespace EncosyTower.SystemExtensions
                 return 9;
             }
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             [HideInCallstack, StackTraceHidden, DoesNotReturn]
             private static void ThrowBadGuidFormatSpecification()
                 => throw new FormatException(
                     "Format string can be only \"D\", \"d\", \"N\", \"n\", \"P\", \"p\", \"B\", \"b\", \"X\" or \"x\"."
                 );
 
-            [HideInCallstack, StackTraceHidden, DoesNotReturn]
-            private static void ThrowIfNegative(long value, string paramName)
+            [HideInCallstack, StackTraceHidden]
+            private static void ThrowIfNegative([DoesNotReturnIf(true)] bool check, long value, string paramName)
             {
-                if (value >= 0)
+                if (check)
                 {
-                    return;
+                    throw CreateException(paramName, value);
                 }
 
-                throw new ArgumentOutOfRangeException(
-                      paramName
-                    , value
-                    , $"{paramName} ('{value}') must be a non-negative value."
-                );
+                [MethodImpl(MethodImplOptions.NoInlining)]
+                static ArgumentOutOfRangeException CreateException(string paramName, long value)
+                    => new(paramName, value, $"{paramName} ('{value}') must be a non-negative value.");
             }
         }
     }

@@ -151,8 +151,12 @@ namespace EncosyTower.Common
         {
             if (check == false)
             {
-                throw new InvalidOperationException($"The instance of Option<{typeof(T)}> has no value");
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new($"The instance of Option<{typeof(T)}> has no value");
         }
     }
 

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Vaults;
 
@@ -227,15 +228,20 @@ namespace EncosyTower.PubSub.Internals
             return _brokers.TryGet(out broker);
         }
 
-        private static void ThrowIfFailedToRegisterBroker<TMessage>([DoesNotReturnIf(false)] bool canRegister)
+        [UnityEngine.HideInCallstack, System.Diagnostics.StackTraceHidden]
+        private static void ThrowIfFailedToRegisterBroker<TMessage>([DoesNotReturnIf(false)] bool check)
         {
-            if (canRegister == false)
+            if (check == false)
             {
-                throw new InvalidOperationException(
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new(
                     $"Failed to register interceptor broker for message type '{typeof(TMessage)}'. " +
                     $"This should never happen!"
                 );
-            }
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Common;
 using EncosyTower.Logging;
@@ -26,6 +27,7 @@ namespace EncosyTower.PageFlows.MonoPages
 
     using UnityObject = UnityEngine.Object;
 
+    [RequireComponent(typeof(RectTransform))]
     public class MonoPageCodex : MonoBehaviour
     {
         [SerializeField] internal FlowDefinition[] _flows;
@@ -316,6 +318,7 @@ namespace EncosyTower.PageFlows.MonoPages
             return true;
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfCannotInitializeWithoutInitializer(MonoPageCodex context)
         {
@@ -326,6 +329,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfDefinitionIdentifierIsEmpty(int index, MonoPageCodex context)
         {
@@ -334,6 +338,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfUnexpectedErrorWhenCreate(int index, MonoPageCodex context)
         {
@@ -342,6 +347,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfDuplicateIdentifier(int index, string identifier, MonoPageCodex context)
         {
@@ -350,6 +356,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfUnexpectedErrorWhenRegister(int index, string identifier, MonoPageCodex context)
         {
@@ -358,6 +365,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfInitializerComponentReturnsNullApplier(MonoPageCodex codex, UnityObject context)
         {
@@ -368,6 +376,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfApplierReturnsNullFlowScopeCollectionType(MonoPageCodex codex, UnityObject context)
         {
@@ -378,6 +387,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfFlowScopeCollectionTypeIsInvalid(Type type, MonoPageCodex codex, UnityObject context)
         {
@@ -387,6 +397,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfFlowScopeCollectionTypeHasNoValidProperty(Type type, MonoPageCodex codex, UnityObject context)
         {
@@ -400,6 +411,7 @@ namespace EncosyTower.PageFlows.MonoPages
             WarningAboutPreserveAttribute(type, codex);
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfFlowIdentifiersMismatch(
               Type type
@@ -431,6 +443,7 @@ namespace EncosyTower.PageFlows.MonoPages
             }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfCannotFindFlowScopeForProperty(Type type, string identifier, MonoPageCodex codex)
         {
@@ -441,6 +454,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfCannotSetFlowScopeCollection(Type type, Type applierType, MonoPageCodex codex)
         {
@@ -450,6 +464,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void WarningAboutPreserveAttribute(Type type, MonoPageCodex codex)
         {

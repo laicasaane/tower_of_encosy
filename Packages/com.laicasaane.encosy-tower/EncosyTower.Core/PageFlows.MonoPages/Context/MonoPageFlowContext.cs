@@ -182,6 +182,7 @@ namespace EncosyTower.PageFlows.MonoPages
         }
 
 #if !UNITY_ADDRESSABLES
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack]
         private static void ErrorIfAddressablesNotInstalled(
               MonoPageFlowContext context

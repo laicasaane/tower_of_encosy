@@ -37,7 +37,7 @@ namespace EncosyTower.Collections
 
         static FixedArray()
         {
-            ThrowIfInvalidSize();
+            ThrowIfInvalidSize(IsValidSize());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -222,15 +222,21 @@ namespace EncosyTower.Collections
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
 
-        [HideInCallstack, StackTraceHidden, DoesNotReturn]
-        private static void ThrowIfInvalidSize()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsValidSize()
+            => UnsafeUtility.SizeOf<TBuffer>() >= UnsafeUtility.SizeOf<T>();
+
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void ThrowIfInvalidSize([DoesNotReturnIf(false)] bool check)
         {
-            if (UnsafeUtility.SizeOf<TBuffer>() < UnsafeUtility.SizeOf<T>())
+            if (check == false)
             {
-                throw new InvalidOperationException(
-                    $"sizeof({typeof(TBuffer)}) must be greater than or equal to sizeof({typeof(T)})"
-                );
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new($"sizeof({typeof(TBuffer)}) must be greater than or equal to sizeof({typeof(T)})");
         }
 
         public struct Enumerator : IEnumerator<T>
@@ -300,7 +306,7 @@ namespace EncosyTower.Collections
 
             static ReadOnly()
             {
-                ThrowIfInvalidSize();
+                ThrowIfInvalidSize(IsValidSize());
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

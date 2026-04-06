@@ -247,7 +247,7 @@ namespace EncosyTower.Common
 
         static Result()
         {
-            ThrowIfSameType();
+            ThrowIfSameType(IsSameType());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -386,15 +386,21 @@ namespace EncosyTower.Common
         internal static bool DefaultEquals(in Result<TValue, TError> a, in Result<TValue, TError> b)
             => Option<TValue>.DefaultEquals(a.Value, b.Value) || Option<TError>.DefaultEquals(a.Error, b.Error);
 
-        [HideInCallstack, StackTraceHidden, DoesNotReturn]
-        private static void ThrowIfSameType()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsSameType()
+            => typeof(TValue) == typeof(TError);
+
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void ThrowIfSameType([DoesNotReturnIf(true)] bool check)
         {
-            if (typeof(TValue) == typeof(TError))
+            if (check)
             {
-                throw new InvalidOperationException(
-                    $"{typeof(Result<TValue, TError>)} is not allowed. Value type and error type must be different."
-                );
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new($"{typeof(Result<TValue, TError>)} is not allowed. Value type and error type must be different.");
         }
     }
 

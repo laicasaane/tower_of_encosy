@@ -226,6 +226,7 @@ namespace EncosyTower.PubSub
         }
 #endif
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void LogWarningNoSubscriber(TScope scope, PublishingContext context)
         {
             if (context.WarnNoSubscriber)
@@ -236,6 +237,7 @@ namespace EncosyTower.PubSub
             }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void LogErrorFailedWaitThenPublishAsync(TScope scope, PublishingContext context)
         {
             context.Logger.LogError(

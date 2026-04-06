@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using EncosyTower.IO;
@@ -102,12 +103,17 @@ namespace EncosyTower.Encryption
             GC.SuppressFinalize(this);
         }
 
-        private static void ThrowIfNotInitialized([DoesNotReturnIf(false)] bool isInitialized)
+        [UnityEngine.HideInCallstack, System.Diagnostics.StackTraceHidden]
+        private static void ThrowIfNotInitialized([DoesNotReturnIf(false)] bool check)
         {
-            if (isInitialized == false)
+            if (check == false)
             {
-                throw new InvalidOperationException("Encryption is not initialized.");
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("Encryption is not initialized.");
         }
     }
 }

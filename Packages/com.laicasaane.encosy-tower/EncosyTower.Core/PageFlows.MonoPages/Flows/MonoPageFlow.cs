@@ -430,13 +430,16 @@ namespace EncosyTower.PageFlows.MonoPages
         {
             if (context.IsInitialized == false)
             {
-                throw new InvalidOperationException(
-                    $"The page flow must be initialized via '{context.GetType()}.Initialize'. " +
-                    $"Or the property 'Auto Initialize On Awake' must be checked on the Inspector window."
-                );
+                throw CreateException(context);
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException(MonoPageFlow context)
+                => new($"The page flow must be initialized via '{context.GetType()}.Initialize'. " +
+                    $"Or the property 'Auto Initialize On Awake' must be checked on the Inspector window.");
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void WarningIfAmountLesserThanOne(MonoPageFlow context)
         {
@@ -445,6 +448,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfCannotReturnToPool(string key, MonoPageFlow context)
         {
@@ -454,6 +458,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfPageIsNotComponent(IMonoPage page, MonoPageFlow context)
         {
@@ -462,6 +467,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfPageMissingIdentifier(IMonoPage page, MonoPageFlow context)
         {
@@ -471,6 +477,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfPageIsDestroyedOrNotInited(IMonoPage page, MonoPageFlow context)
         {
@@ -480,6 +487,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void ErrorIfCannotLoadAsset(PageKey pageKey, MonoPageFlow context)
         {
@@ -488,6 +496,7 @@ namespace EncosyTower.PageFlows.MonoPages
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden]
         private static void WarningIfPageCreationFailed(PageKey pageKey, MonoPageFlow context)
         {

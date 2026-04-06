@@ -279,6 +279,7 @@ namespace EncosyTower.Common
         public readonly FixedString128Bytes ToFixedString(ReadOnlySpan<char> format)
             => this.AsGuid().ToFixedString(format);
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden, DoesNotReturn]
         private static void ThrowIfCannotParse(in FixedString128Bytes guidString)
         {

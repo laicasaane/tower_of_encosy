@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using EncosyTower.Annotations;
 using EncosyTower.Collections;
 using EncosyTower.Common;
@@ -297,6 +298,7 @@ namespace EncosyTower.VisualDebugging.Commands
             return VisualPropertyType.Undefined;
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void LogErrorNotApplicableCommandType(Type type)
         {
             StaticDevLogger.LogError(
@@ -306,6 +308,7 @@ namespace EncosyTower.VisualDebugging.Commands
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void LogWarningNotApplicablePropertyType(Type type, string propertyName)
         {
             StaticDevLogger.LogWarning(
@@ -316,6 +319,7 @@ namespace EncosyTower.VisualDebugging.Commands
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void LogWarningMissingRelayCommand(Type type, string propertyName, Type argType)
         {
             StaticDevLogger.LogWarning(
@@ -325,6 +329,7 @@ namespace EncosyTower.VisualDebugging.Commands
             );
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void LogWarningMissingSetOptionForCommand(Type type, string propertyName, Type argType)
         {
             StaticDevLogger.LogWarning(
