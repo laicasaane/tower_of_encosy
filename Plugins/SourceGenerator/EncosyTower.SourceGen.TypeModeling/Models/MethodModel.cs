@@ -74,7 +74,16 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             => obj is MethodModel other && Equals(other);
 
         public override int GetHashCode()
-            => HashValue.Combine(Name, ReturnTypeFullName, Accessibility, RefKind, IsStatic, MethodKind, Parameters, TypeParameters).ToHashCode();
+            => HashValue.Combine(
+                  Name
+                , ReturnTypeFullName
+                , Accessibility
+                , RefKind
+                , IsStatic
+                , MethodKind
+                , Parameters
+                , TypeParameters
+            ).ToHashCode();
 
         public static bool operator ==(MethodModel left, MethodModel right)
             => left.Equals(right);
