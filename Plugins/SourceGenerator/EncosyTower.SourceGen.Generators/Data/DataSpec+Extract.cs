@@ -13,14 +13,14 @@ namespace EncosyTower.SourceGen.Generators.Data
 {
     using static EncosyTower.SourceGen.Common.Data.Common.Helpers;
 
-    partial struct DataDeclaration
+    partial struct DataSpec
     {
         /// <summary>
         /// Extracts all data-type metadata from the annotated type symbol into a fully populated,
-        /// cache-friendly <see cref="DataDeclaration"/>.
+        /// cache-friendly <see cref="DataSpec"/>.
         /// Called once per type inside the <c>ForAttributeWithMetadataName</c> transform.
         /// </summary>
-        public static DataDeclaration Extract(
+        public static DataSpec Extract(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -564,7 +564,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 }
             }
 
-            return new DataDeclaration {
+            return new DataSpec {
                 location = locationInfo,
                 typeName = typeName,
                 readOnlyTypeName = readOnlyTypeName,

@@ -17,7 +17,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 .ForAttributeWithMetadataName(
                       DATA_ATTRIBUTE_METADATA
                     , static (node, _) => node is ClassDeclarationSyntax or StructDeclarationSyntax
-                    , DataDeclaration.Extract
+                    , DataSpec.Extract
                 )
                 .Where(static t => t.IsValid);
 
@@ -41,7 +41,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , DataDeclaration declaration
+            , DataSpec declaration
             , string projectPath
             , bool outputSourceGenFiles
         )

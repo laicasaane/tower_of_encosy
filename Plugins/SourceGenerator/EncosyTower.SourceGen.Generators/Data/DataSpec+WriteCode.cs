@@ -4,7 +4,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 {
     using static EncosyTower.SourceGen.Common.Data.Common.Helpers;
 
-    partial struct DataDeclaration
+    partial struct DataSpec
     {
         public readonly string WriteCode()
         {
@@ -468,7 +468,7 @@ namespace EncosyTower.SourceGen.Generators.Data
         {
             foreach (var baseTypeName in overrideEquals)
             {
-            p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
+                p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
                 p.PrintBeginLine("public override ")
                     .PrintIf(IsValueType, "readonly ")
                     .PrintEndLine($"bool Equals({baseTypeName} other)");

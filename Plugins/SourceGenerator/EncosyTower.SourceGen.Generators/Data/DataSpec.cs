@@ -6,9 +6,9 @@ using static EncosyTower.SourceGen.Common.Data.Common.Helpers;
 
 namespace EncosyTower.SourceGen.Generators.Data
 {
-    public partial struct DataDeclaration : IEquatable<DataDeclaration>
+    public partial struct DataSpec : IEquatable<DataSpec>
     {
-        /// <summary>Excluded from <see cref="Equals(DataDeclaration)"/> and <see cref="GetHashCode"/>
+        /// <summary>Excluded from <see cref="Equals(DataSpec)"/> and <see cref="GetHashCode"/>
         /// — location data is not stable across incremental runs.</summary>
         public LocationInfo location;
 
@@ -43,7 +43,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             => string.IsNullOrEmpty(typeName) == false
             && string.IsNullOrEmpty(hintName) == false;
 
-        public readonly bool Equals(DataDeclaration other)
+        public readonly bool Equals(DataSpec other)
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(readOnlyTypeName, other.readOnlyTypeName, StringComparison.Ordinal)
             && string.Equals(typeIdentifier, other.typeIdentifier, StringComparison.Ordinal)
@@ -66,7 +66,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             && overrideEquals.Equals(other.overrideEquals);
 
         public readonly override bool Equals(object obj)
-            => obj is DataDeclaration other && Equals(other);
+            => obj is DataSpec other && Equals(other);
 
         public readonly override int GetHashCode()
         {
