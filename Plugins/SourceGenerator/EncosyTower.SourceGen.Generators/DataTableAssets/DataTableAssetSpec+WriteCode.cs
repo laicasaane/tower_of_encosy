@@ -2,7 +2,7 @@
 {
     using static EncosyTower.SourceGen.Generators.DataTableAssets.Helpers;
 
-    partial struct DataTableAssetDeclaration
+    partial struct DataTableAssetSpec
     {
         public readonly string WriteCode()
         {

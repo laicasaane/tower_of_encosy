@@ -7,7 +7,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
 {
     using static EncosyTower.SourceGen.Generators.DataTableAssets.Helpers;
 
-    public partial struct DataTableAssetDeclaration : IEquatable<DataTableAssetDeclaration>
+    public partial struct DataTableAssetSpec : IEquatable<DataTableAssetSpec>
     {
         /// <summary>Excluded from equality — location is not stable across incremental runs.</summary>
         public LocationInfo location;
@@ -32,7 +32,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
             && string.IsNullOrEmpty(dataTypeName) == false
             ;
 
-        public static DataTableAssetDeclaration Extract(
+        public static DataTableAssetSpec Extract(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -209,7 +209,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                 , fileTypeName
             );
 
-            return new DataTableAssetDeclaration {
+            return new DataTableAssetSpec {
                 location = LocationInfo.From(classSyntax.GetLocation()),
                 className = classSyntax.Identifier.Text,
                 openingSource = openingSource,
@@ -286,7 +286,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
             return null;
         }
 
-        public readonly bool Equals(DataTableAssetDeclaration other)
+        public readonly bool Equals(DataTableAssetSpec other)
             => string.Equals(className, other.className, StringComparison.Ordinal)
             && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
             && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
@@ -303,7 +303,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is DataTableAssetDeclaration other && Equals(other);
+            => obj is DataTableAssetSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(

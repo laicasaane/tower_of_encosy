@@ -20,7 +20,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                 .ForAttributeWithMetadataName(
                       DATA_TABLE_ASSET_ATTRIBUTE
                     , static (node, _) => node is ClassDeclarationSyntax
-                    , DataTableAssetDeclaration.Extract
+                    , DataTableAssetSpec.Extract
                 )
                 .Where(static x => x.IsValid);
 
@@ -41,7 +41,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , DataTableAssetDeclaration declaration
+            , DataTableAssetSpec declaration
             , string projectPath
             , bool outputSourceGenFiles
         )
