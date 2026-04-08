@@ -14,7 +14,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
     /// Cache-friendly representation of a single type argument used in AOT
     /// helper code generation.
     /// </summary>
-    internal struct AotTypeArgInfo : IEquatable<AotTypeArgInfo>
+    internal struct AotTypeArgSpec : IEquatable<AotTypeArgSpec>
     {
         /// <summary>Fully-qualified name (e.g. <c>global::Foo.Bar</c>).</summary>
         public string fullName;
@@ -25,12 +25,12 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
         /// </summary>
         public bool canEnsure;
 
-        public readonly bool Equals(AotTypeArgInfo other)
+        public readonly bool Equals(AotTypeArgSpec other)
             => string.Equals(fullName, other.fullName, StringComparison.Ordinal)
             && canEnsure == other.canEnsure;
 
         public readonly override bool Equals(object obj)
-            => obj is AotTypeArgInfo other && Equals(other);
+            => obj is AotTypeArgSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(fullName).Add(canEnsure);
@@ -41,7 +41,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
     /// full inheritance hierarchy, capturing all data needed by
     /// <see cref="HelperDeclaration"/> to emit the AOT registration calls.
     /// </summary>
-    internal struct AotFieldInfo : IEquatable<AotFieldInfo>
+    internal struct AotFieldSpec : IEquatable<AotFieldSpec>
     {
         /// <summary>Fully-qualified name of the field's declared type.</summary>
         public string fieldTypeFullName;
@@ -65,13 +65,13 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
         /// For <see cref="AotCollectionKind.Dictionary"/>: the key type arg.
         /// Unused for <see cref="AotCollectionKind.None"/>.
         /// </summary>
-        public AotTypeArgInfo elementOrKey;
+        public AotTypeArgSpec elementOrKey;
 
         /// <summary>
         /// The value type argument for <see cref="AotCollectionKind.Dictionary"/>.
         /// Unused for all other collection kinds.
         /// </summary>
-        public AotTypeArgInfo dictionaryValue;
+        public AotTypeArgSpec dictionaryValue;
 
         /// <summary>
         /// Named type arguments for a generic type that is neither a
@@ -79,9 +79,9 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
         /// <see cref="collectionKind"/> is not <see cref="AotCollectionKind.None"/>
         /// or when the field type is non-generic / unbound-generic.
         /// </summary>
-        public EquatableArray<AotTypeArgInfo> otherTypeArgs;
+        public EquatableArray<AotTypeArgSpec> otherTypeArgs;
 
-        public readonly bool Equals(AotFieldInfo other)
+        public readonly bool Equals(AotFieldSpec other)
             => string.Equals(fieldTypeFullName, other.fieldTypeFullName, StringComparison.Ordinal)
             && fieldTypeCanEnsure == other.fieldTypeCanEnsure
             && collectionKind == other.collectionKind
@@ -91,7 +91,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is AotFieldInfo other && Equals(other);
+            => obj is AotFieldSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(fieldTypeFullName)
@@ -113,7 +113,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
     /// across multiple compilations.
     /// </para>
     /// </summary>
-    internal struct AotTypeCandidate : IEquatable<AotTypeCandidate>
+    internal struct AotTypeSpec : IEquatable<AotTypeSpec>
     {
         /// <summary>Fully-qualified name of the type (e.g. <c>global::Foo.MyType</c>).</summary>
         public string fullName;
@@ -122,17 +122,17 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
         /// All declared fields across the full type hierarchy (type + every
         /// non-system base type), pre-flattened for code generation.
         /// </summary>
-        public EquatableArray<AotFieldInfo> fields;
+        public EquatableArray<AotFieldSpec> fields;
 
         public readonly bool IsValid => fullName is not null;
 
-        public readonly bool Equals(AotTypeCandidate other)
+        public readonly bool Equals(AotTypeSpec other)
             => string.Equals(fullName, other.fullName, StringComparison.Ordinal)
             && fields.Equals(other.fields)
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is AotTypeCandidate other && Equals(other);
+            => obj is AotTypeSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(fullName)

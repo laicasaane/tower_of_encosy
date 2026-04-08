@@ -14,8 +14,8 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
         /// No Roslyn symbols are accessed; all data is pre-extracted in the pipeline.
         /// </summary>
         public static string WriteCode(
-              NewtonsoftAotHelperInfo helper
-            , IEnumerable<AotTypeCandidate> types
+              NewtonsoftAotHelperSpec helper
+            , IEnumerable<AotTypeSpec> types
         )
         {
             var p = Printer.DefaultLarge;
@@ -68,7 +68,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
         /// <c>WriteType</c>, <c>WriteTypeArgs</c>, <c>TryGetDictionaryTypeArgs</c>,
         /// and <c>TryGetListSetTypeArg</c>, but operates entirely on primitive data.
         /// </summary>
-        private static void WriteFieldInfo(ref Printer p, in AotFieldInfo field)
+        private static void WriteFieldInfo(ref Printer p, in AotFieldSpec field)
         {
             // Always try to emit EnsureType for the field type itself.
             if (field.fieldTypeCanEnsure)
@@ -116,7 +116,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             }
         }
 
-        private static void WriteTypeArgEnsure(ref Printer p, in AotTypeArgInfo typeArg)
+        private static void WriteTypeArgEnsure(ref Printer p, in AotTypeArgSpec typeArg)
         {
             if (typeArg.canEnsure)
             {

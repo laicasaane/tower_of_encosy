@@ -52,7 +52,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             });
         }
 
-        private static NewtonsoftAotHelperInfo GetHelperInfo(
+        private static NewtonsoftAotHelperSpec GetHelperInfo(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -84,7 +84,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                 ? ns.ToDisplayString()
                 : string.Empty;
 
-            using var typeCandidatesBuilder = ImmutableArrayBuilder<AotTypeCandidate>.Rent();
+            using var typeCandidatesBuilder = ImmutableArrayBuilder<AotTypeSpec>.Rent();
             CollectDerivedTypes(
                   context.SemanticModel.Compilation
                 , baseType
@@ -100,7 +100,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            return new NewtonsoftAotHelperInfo {
+            return new NewtonsoftAotHelperSpec {
                 location = LocationInfo.From(context.TargetNode.GetLocation()),
                 openingSource = openingSource,
                 closingSource = closingSource,
@@ -119,7 +119,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
         private static void CollectDerivedTypes(
               Compilation compilation
             , INamedTypeSymbol baseType
-            , ImmutableArrayBuilder<AotTypeCandidate> builder
+            , ImmutableArrayBuilder<AotTypeSpec> builder
             , CancellationToken token
         )
         {
@@ -174,7 +174,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                 }
 
                 // Flatten all fields from the full type hierarchy into one list.
-                using var fieldsBuilder = ImmutableArrayBuilder<AotFieldInfo>.Rent();
+                using var fieldsBuilder = ImmutableArrayBuilder<AotFieldSpec>.Rent();
                 {
                     var typeWalker = type;
 
@@ -197,7 +197,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                             // Non-generic or unbound-generic: only the field type itself matters.
                             if (fieldType.IsGenericType == false || fieldType.IsUnboundGenericType)
                             {
-                                fieldsBuilder.Add(new AotFieldInfo {
+                                fieldsBuilder.Add(new AotFieldSpec {
                                     fieldTypeFullName = fieldTypeFullName,
                                     fieldTypeCanEnsure = fieldTypeCanEnsure,
                                     collectionKind = AotCollectionKind.None,
@@ -212,7 +212,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                                 && fieldType.TypeArguments[1] is INamedTypeSymbol valueArg
                             )
                             {
-                                fieldsBuilder.Add(new AotFieldInfo {
+                                fieldsBuilder.Add(new AotFieldSpec {
                                     fieldTypeFullName = fieldTypeFullName,
                                     fieldTypeCanEnsure = fieldTypeCanEnsure,
                                     collectionKind = AotCollectionKind.Dictionary,
@@ -228,7 +228,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                                 && fieldType.TypeArguments[0] is INamedTypeSymbol listArg
                             )
                             {
-                                fieldsBuilder.Add(new AotFieldInfo {
+                                fieldsBuilder.Add(new AotFieldSpec {
                                     fieldTypeFullName = fieldTypeFullName,
                                     fieldTypeCanEnsure = fieldTypeCanEnsure,
                                     collectionKind = AotCollectionKind.List,
@@ -243,7 +243,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                                 && fieldType.TypeArguments[0] is INamedTypeSymbol hashSetArg
                             )
                             {
-                                fieldsBuilder.Add(new AotFieldInfo {
+                                fieldsBuilder.Add(new AotFieldSpec {
                                     fieldTypeFullName = fieldTypeFullName,
                                     fieldTypeCanEnsure = fieldTypeCanEnsure,
                                     collectionKind = AotCollectionKind.HashSet,
@@ -253,7 +253,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                             }
 
                             // Other generic: collect named type arguments.
-                            using var otherTypeArgsBuilder = ImmutableArrayBuilder<AotTypeArgInfo>.Rent();
+                            using var otherTypeArgsBuilder = ImmutableArrayBuilder<AotTypeArgSpec>.Rent();
 
                             foreach (var typeArg in fieldType.TypeArguments)
                             {
@@ -263,7 +263,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                                 }
                             }
 
-                            fieldsBuilder.Add(new AotFieldInfo {
+                            fieldsBuilder.Add(new AotFieldSpec {
                                 fieldTypeFullName = fieldTypeFullName,
                                 fieldTypeCanEnsure = fieldTypeCanEnsure,
                                 collectionKind = AotCollectionKind.None,
@@ -275,16 +275,16 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                     }
                 }
 
-                builder.Add(new AotTypeCandidate {
+                builder.Add(new AotTypeSpec {
                     fullName = type.ToFullName(),
                     fields = fieldsBuilder.ToImmutable().AsEquatableArray(),
                 });
             }
         }
 
-        private static AotTypeArgInfo MakeTypeArgInfo(INamedTypeSymbol typeArg)
+        private static AotTypeArgSpec MakeTypeArgInfo(INamedTypeSymbol typeArg)
         {
-            return new AotTypeArgInfo {
+            return new AotTypeArgSpec {
                 fullName = typeArg.ToFullName(),
                 canEnsure = CanEnsureType(typeArg),
             };
@@ -319,7 +319,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo compilation
-            , NewtonsoftAotHelperInfo helperInfo
+            , NewtonsoftAotHelperSpec helperInfo
             , string projectPath
             , bool outputSourceGenFiles
         )

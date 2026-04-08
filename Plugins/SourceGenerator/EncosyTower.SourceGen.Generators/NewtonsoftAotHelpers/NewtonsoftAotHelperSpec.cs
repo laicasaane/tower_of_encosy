@@ -12,11 +12,11 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
     /// engine can cache and compare instances cheaply across multiple compilations.
     /// </para>
     /// </summary>
-    internal struct NewtonsoftAotHelperInfo : IEquatable<NewtonsoftAotHelperInfo>
+    internal struct NewtonsoftAotHelperSpec : IEquatable<NewtonsoftAotHelperSpec>
     {
         /// <summary>
         /// Location of the declaration in source. Intentionally excluded from
-        /// <see cref="Equals(NewtonsoftAotHelperInfo)"/> and <see cref="GetHashCode"/>:
+        /// <see cref="Equals(NewtonsoftAotHelperSpec)"/> and <see cref="GetHashCode"/>:
         /// location data is not stable across incremental runs and must not drive
         /// cache invalidation.
         /// </summary>
@@ -24,14 +24,14 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
         /// <summary>
         /// Pre-generated namespace/outer-type opening source text.
-        /// Intentionally excluded from <see cref="Equals(NewtonsoftAotHelperInfo)"/>
+        /// Intentionally excluded from <see cref="Equals(NewtonsoftAotHelperSpec)"/>
         /// and <see cref="GetHashCode"/>: derived from syntax, not a stable cache key.
         /// </summary>
         public string openingSource;
 
         /// <summary>
         /// Pre-generated closing braces that match <see cref="openingSource"/>.
-        /// Intentionally excluded from <see cref="Equals(NewtonsoftAotHelperInfo)"/>
+        /// Intentionally excluded from <see cref="Equals(NewtonsoftAotHelperSpec)"/>
         /// and <see cref="GetHashCode"/>: derived from syntax, not a stable cache key.
         /// </summary>
         public string closingSource;
@@ -55,7 +55,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
         /// All types in the compilation that derive from <see cref="baseTypeFullName"/>,
         /// collected and extracted during the generator transform.
         /// </summary>
-        public EquatableArray<AotTypeCandidate> typeCandidates;
+        public EquatableArray<AotTypeSpec> typeCandidates;
 
         /// <summary>
         /// Ordered chain of containing type declaration headers (outer → inner),
@@ -75,7 +75,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
         public readonly bool IsValid => location.IsValid;
 
-        public readonly bool Equals(NewtonsoftAotHelperInfo other)
+        public readonly bool Equals(NewtonsoftAotHelperSpec other)
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(fileHintName, other.fileHintName, StringComparison.Ordinal)
             && string.Equals(baseTypeFullName, other.baseTypeFullName, StringComparison.Ordinal)
@@ -88,7 +88,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is NewtonsoftAotHelperInfo other && Equals(other);
+            => obj is NewtonsoftAotHelperSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(typeName, fileHintName, baseTypeFullName, namespaceName)
