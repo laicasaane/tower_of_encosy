@@ -21,6 +21,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\EncosyTower.SourceGen.Generators\EncosyTower.SourceGen.Generators.csproj" />
+        <ProjectReference Include="..\EncosyTower.SourceGen.TypeModeling\EncosyTower.SourceGen.TypeModeling.csproj" />
     </ItemGroup>
 
     <Import Project="UnityDllPaths.targets" />
