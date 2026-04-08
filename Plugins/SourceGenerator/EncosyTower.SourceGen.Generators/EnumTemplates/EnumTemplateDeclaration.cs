@@ -34,8 +34,8 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         public EnumExtensionsDeclaration ExtensionsRef { get; }
 
         internal EnumTemplateDeclaration(
-              in EnumTemplateCandidate templateCandidate
-            , ImmutableArray<TemplateMemberCandidate> externalMembers
+              in EnumTemplateSpec templateCandidate
+            , ImmutableArray<TemplateMemberSpec> externalMembers
             , References references
         )
         {
@@ -54,7 +54,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
             // Merge source-1 inline members (pre-extracted in EnumTemplateCandidate.Extract)
             // with source-2 external members from the kind provider, filtered to this template.
-            var mergedCandidates = new List<TemplateMemberCandidate>(
+            var mergedCandidates = new List<TemplateMemberSpec>(
                 templateCandidate.inlineMembers.Count + externalMembers.Length
             );
 
@@ -108,7 +108,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 memberRefs.Add(new EnumMemberRef {
                     typeFullName = candidate.typeFullName,
                     isComment = true,
-                    member = new EnumMemberDeclaration {
+                    member = new EnumMemberSpec {
                         name = candidate.typeFullName,
                     },
                 });
@@ -125,7 +125,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                         typeFullName = candidate.typeFullName,
                         baseOrder = currentBaseOrder,
                         attributes = ImmutableArray<AttributeInfo>.Empty,
-                        member = new EnumMemberDeclaration {
+                        member = new EnumMemberSpec {
                             name = name,
                             order = currentBaseOrder,
                             displayName = displayName,
@@ -167,7 +167,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                         fromEnumType = true,
                         underlyingType = candidate.underlyingType,
                         attributes = entry.attributes.AsImmutableArray(),
-                        member = new EnumMemberDeclaration {
+                        member = new EnumMemberSpec {
                             name = memberName,
                             order = order,
                             displayName = entryDisplayName,
@@ -300,7 +300,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             public SpecialType underlyingType;
             public bool isComment;
             public bool fromEnumType;
-            public EnumMemberDeclaration member;
+            public EnumMemberSpec member;
             public ImmutableArray<AttributeInfo> attributes;
         }
 

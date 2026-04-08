@@ -30,7 +30,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 .ForAttributeWithMetadataName(
                       ENUM_TEMPLATE_ATTRIBUTE_METADATA
                     , static (node, _) => node is StructDeclarationSyntax
-                    , EnumTemplateCandidate.Extract
+                    , EnumTemplateSpec.Extract
                 )
                 .Where(static t => t.IsValid);
 
@@ -74,7 +74,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             });
         }
 
-        private static TemplateMemberCandidate ExtractEnumMembersCandidate(
+        private static TemplateMemberSpec ExtractEnumMembersCandidate(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -82,7 +82,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             return ExtractMemberFromAttributeContext(context, token, isEnumMembers: true);
         }
 
-        private static TemplateMemberCandidate ExtractTypeAsMemberCandidate(
+        private static TemplateMemberSpec ExtractTypeAsMemberCandidate(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -90,7 +90,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             return ExtractMemberFromAttributeContext(context, token, isEnumMembers: false);
         }
 
-        private static TemplateMemberCandidate ExtractMemberFromAttributeContext(
+        private static TemplateMemberSpec ExtractMemberFromAttributeContext(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
             , bool isEnumMembers
@@ -132,7 +132,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 ?? Location.None
             );
 
-            return TemplateMemberCandidate.Extract(
+            return TemplateMemberSpec.Extract(
                   typeSymbol
                 , templateSymbol.ToFullName()
                 , attrib
@@ -145,8 +145,8 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo compilation
-            , EnumTemplateCandidate templateCandidate
-            , ImmutableArray<TemplateMemberCandidate> memberCandidates
+            , EnumTemplateSpec templateCandidate
+            , ImmutableArray<TemplateMemberSpec> memberCandidates
             , string projectPath
             , bool outputSourceGenFiles
         )

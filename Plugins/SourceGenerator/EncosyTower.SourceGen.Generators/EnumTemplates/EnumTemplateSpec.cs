@@ -11,14 +11,14 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
     /// or <see cref="ISymbol"/> references — so that Roslyn's incremental generator engine
     /// can cache and compare instances cheaply across multiple compilations.
     /// </summary>
-    internal struct EnumTemplateCandidate : IEquatable<EnumTemplateCandidate>
+    internal struct EnumTemplateSpec : IEquatable<EnumTemplateSpec>
     {
         private const string MEMBERS_FROM_ENUM_ATTRIBUTE = "global::EncosyTower.EnumExtensions.EnumTemplateMembersFromEnumAttribute";
         private const string MEMBER_FROM_TYPE_ATTRIBUTE = "global::EncosyTower.EnumExtensions.EnumTemplateMemberFromTypeAttribute";
 
         /// <summary>
         /// Location of the template struct declaration. Intentionally excluded from
-        /// <see cref="Equals(EnumTemplateCandidate)"/> and <see cref="GetHashCode"/>:
+        /// <see cref="Equals(EnumTemplateSpec)"/> and <see cref="GetHashCode"/>:
         /// location data is not stable across incremental runs and must not drive
         /// cache invalidation.
         /// </summary>
@@ -27,7 +27,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         /// <summary>
         /// Pre-computed namespace / containing-type scope opener, produced by
         /// <c>TypeCreationHelpers.GenerateOpeningAndClosingSource</c> in the
-        /// incremental transform phase. Excluded from <see cref="Equals(EnumTemplateCandidate)"/>
+        /// incremental transform phase. Excluded from <see cref="Equals(EnumTemplateSpec)"/>
         /// and <see cref="GetHashCode"/> for the same reason as <see cref="location"/>.
         /// </summary>
         public string openingSource;
@@ -67,16 +67,16 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         /// These are pre-extracted at transform time so they do not need to flow through
         /// <c>Collect()</c> alongside the source-2 external member provider.
         /// </summary>
-        public EquatableArray<TemplateMemberCandidate> inlineMembers;
+        public EquatableArray<TemplateMemberSpec> inlineMembers;
 
         public readonly bool IsValid => location.IsValid;
 
         /// <summary>
         /// Extracts all template metadata from the annotated struct symbol into a fully
-        /// populated, cache-friendly <see cref="EnumTemplateCandidate"/>.
+        /// populated, cache-friendly <see cref="EnumTemplateSpec"/>.
         /// Called once per struct inside the <c>ForAttributeWithMetadataName</c> transform.
         /// </summary>
-        public static EnumTemplateCandidate Extract(
+        public static EnumTemplateSpec Extract(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -114,7 +114,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             // Extract source-1 inline members from attributes directly on the template struct.
             var attributes = templateSymbol.GetAttributes(MEMBERS_FROM_ENUM_ATTRIBUTE, MEMBER_FROM_TYPE_ATTRIBUTE);
 
-            using var inlineMemberBuilder = ImmutableArrayBuilder<TemplateMemberCandidate>.Rent();
+            using var inlineMemberBuilder = ImmutableArrayBuilder<TemplateMemberSpec>.Rent();
 
             foreach (var attrib in attributes)
             {
@@ -139,7 +139,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     ?? Location.None
                 );
 
-                var candidate = TemplateMemberCandidate.Extract(
+                var candidate = TemplateMemberSpec.Extract(
                       typeSymbol
                     , templateFullName
                     , attrib
@@ -154,7 +154,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 }
             }
 
-            return new EnumTemplateCandidate {
+            return new EnumTemplateSpec {
                 location = location,
                 openingSource = openingSource,
                 closingSource = closingSource,
@@ -165,11 +165,11 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 parentIsNamespace = syntax.Parent is BaseNamespaceDeclarationSyntax,
                 namespaceName = namespaceName,
                 containingTypes = containingTypes,
-                inlineMembers = new EquatableArray<TemplateMemberCandidate>(inlineMemberBuilder.ToImmutable()),
+                inlineMembers = new EquatableArray<TemplateMemberSpec>(inlineMemberBuilder.ToImmutable()),
             };
         }
 
-        public readonly bool Equals(EnumTemplateCandidate other)
+        public readonly bool Equals(EnumTemplateSpec other)
             => string.Equals(templateFullName, other.templateFullName, StringComparison.Ordinal)
             && string.Equals(templateSimpleName, other.templateSimpleName, StringComparison.Ordinal)
             && string.Equals(fileHintName, other.fileHintName, StringComparison.Ordinal)
@@ -181,7 +181,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is EnumTemplateCandidate other && Equals(other);
+            => obj is EnumTemplateSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(templateFullName, templateSimpleName, fileHintName, namespaceName)

@@ -11,11 +11,11 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
     /// or <see cref="AttributeData"/> references.
     /// Replaces the non-cache-friendly <c>KindCandidate</c>.
     /// </summary>
-    internal struct TemplateMemberCandidate : IEquatable<TemplateMemberCandidate>
+    internal struct TemplateMemberSpec : IEquatable<TemplateMemberSpec>
     {
         /// <summary>
         /// Location of the attribute that declares this membership.
-        /// Intentionally excluded from <see cref="Equals(TemplateMemberCandidate)"/> and
+        /// Intentionally excluded from <see cref="Equals(TemplateMemberSpec)"/> and
         /// <see cref="GetHashCode"/>: location data is not stable across incremental runs
         /// and must not drive cache invalidation.
         /// </summary>
@@ -45,20 +45,20 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         /// Pre-extracted enum field entries.
         /// Only populated when <see cref="enumMembers"/> is <see langword="true"/>.
         /// </summary>
-        public EquatableArray<TemplateMemberEntry> enumEntries;
+        public EquatableArray<TemplateMemberEntrySpec> enumEntries;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(typeFullName) == false
             && string.IsNullOrEmpty(templateFullName) == false;
 
         /// <summary>
-        /// Extracts a <see cref="TemplateMemberCandidate"/> from a resolved type symbol
+        /// Extracts a <see cref="TemplateMemberSpec"/> from a resolved type symbol
         /// and its corresponding attribute data. Used for both inline members (attributes
         /// directly on the template struct, with <paramref name="templateFullName"/>
         /// passed from the template) and external members (attributes on the contributing
         /// type, with <paramref name="templateFullName"/> read from the attribute arg).
         /// </summary>
-        public static TemplateMemberCandidate Extract(
+        public static TemplateMemberSpec Extract(
               INamedTypeSymbol typeSymbol
             , string templateFullName
             , AttributeData attrib
@@ -109,13 +109,13 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             }
 
             var underlyingType = SpecialType.None;
-            var enumEntries = default(EquatableArray<TemplateMemberEntry>);
+            var enumEntries = default(EquatableArray<TemplateMemberEntrySpec>);
 
             if (enumMembers)
             {
                 underlyingType = typeSymbol.EnumUnderlyingType?.SpecialType ?? SpecialType.None;
 
-                using var entryBuilder = ImmutableArrayBuilder<TemplateMemberEntry>.Rent();
+                using var entryBuilder = ImmutableArrayBuilder<TemplateMemberEntrySpec>.Rent();
 
                 foreach (var member in typeSymbol.GetMembers())
                 {
@@ -126,7 +126,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                         continue;
                     }
 
-                    entryBuilder.Add(new TemplateMemberEntry {
+                    entryBuilder.Add(new TemplateMemberEntrySpec {
                         name = field.Name,
                         displayName = GetDisplayName(field) ?? string.Empty,
                         value = Convert.ToUInt64(field.ConstantValue),
@@ -134,10 +134,10 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     });
                 }
 
-                enumEntries = new EquatableArray<TemplateMemberEntry>(entryBuilder.ToImmutable());
+                enumEntries = new EquatableArray<TemplateMemberEntrySpec>(entryBuilder.ToImmutable());
             }
 
-            return new TemplateMemberCandidate {
+            return new TemplateMemberSpec {
                 attributeLocation = attributeLocation,
                 typeFullName = typeSymbol.ToFullName(),
                 typeSimpleName = typeSymbol.ToSimpleValidIdentifier(),
@@ -206,7 +206,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             return displayName;
         }
 
-        public readonly bool Equals(TemplateMemberCandidate other)
+        public readonly bool Equals(TemplateMemberSpec other)
             => string.Equals(typeFullName, other.typeFullName, StringComparison.Ordinal)
             && string.Equals(typeSimpleName, other.typeSimpleName, StringComparison.Ordinal)
             && string.Equals(templateFullName, other.templateFullName, StringComparison.Ordinal)
@@ -219,7 +219,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is TemplateMemberCandidate other && Equals(other);
+            => obj is TemplateMemberSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(typeFullName, typeSimpleName, templateFullName, displayName, alternateName)
@@ -230,17 +230,17 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
     }
 
     /// <summary>
-    /// A single pre-extracted enum field entry stored inside <see cref="TemplateMemberCandidate"/>.
+    /// A single pre-extracted enum field entry stored inside <see cref="TemplateMemberSpec"/>.
     /// Cache-friendly: holds only primitives and equatable collections.
     /// </summary>
-    internal struct TemplateMemberEntry : IEquatable<TemplateMemberEntry>
+    internal struct TemplateMemberEntrySpec : IEquatable<TemplateMemberEntrySpec>
     {
         public string name;
         public string displayName;
         public ulong value;
         public EquatableArray<AttributeInfo> attributes;
 
-        public readonly bool Equals(TemplateMemberEntry other)
+        public readonly bool Equals(TemplateMemberEntrySpec other)
             => string.Equals(name, other.name, StringComparison.Ordinal)
             && string.Equals(displayName, other.displayName, StringComparison.Ordinal)
             && value == other.value
@@ -248,7 +248,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is TemplateMemberEntry other && Equals(other);
+            => obj is TemplateMemberEntrySpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(name, displayName, value)
