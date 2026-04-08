@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using EncosyTower.SourceGen.Common.Mvvm.Common;
+using EncosyTower.SourceGen.TypeModeling.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -129,91 +130,147 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             using var memberRefsBuilder = ImmutableArrayBuilder<MemberSpec>.Rent();
             using var diagnosticBuilder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
 
-            var members = classSymbol.GetMembers();
-            var methodMap = new Dictionary<string, IMethodSymbol>();
-            var methodCandidates = new List<(IMethodSymbol method, string canExecuteName)>();
+            var methodModelMap = new Dictionary<string, MethodModel>();
+            var methodCandidates = new List<(string methodName, string canExecuteName)>();
 
-            foreach (var member in members)
+            var typeModel = classSymbol.ToModel(
+                  token
+                , new ModelOptions(ModelParts.Methods | ModelParts.Attributes)
+            );
+            var typeMethods = typeModel.Methods;
+            var typeMethodCount = typeMethods.Count;
+
+            for (var i = 0; i < typeMethodCount; i++)
             {
-                if (member is not IMethodSymbol method
-                    || method.Parameters.Length > 1
-                )
+                token.ThrowIfCancellationRequested();
+
+                var methodModel = typeMethods[i];
+                var paramCount = methodModel.Parameters.Count;
+                methodModelMap[methodModel.Name] = methodModel;
+
+                if (paramCount > 1)
                 {
                     continue;
                 }
 
-                if (method.Parameters.Length == 1)
+                if (paramCount == 1)
                 {
-                    var parameter = method.Parameters[0];
+                    var paramRefKind = methodModel.Parameters[0].RefKind;
 
-                    if (parameter.RefKind is not (RefKind.None or RefKind.In))
+                    if (paramRefKind is not (RefKind.None or RefKind.In))
                     {
                         continue;
                     }
                 }
 
-                var relayCommandAttrib = method.GetAttribute(RELAY_COMMAND_ATTRIBUTE);
+                var methodAttrs = methodModel.Attributes;
+                var methodAttrCount = methodAttrs.Count;
+                AttributeModel relayCommandAttr = default;
+                var hasRelayCommandAttr = false;
 
-                if (relayCommandAttrib != null)
+                for (var j = 0; j < methodAttrCount; j++)
                 {
-                    if (relayCommandAttrib.NamedArguments.Length > 0)
+                    if (string.Equals(methodAttrs[j].FullName, RELAY_COMMAND_ATTRIBUTE, StringComparison.Ordinal))
                     {
-                        foreach (var kv in relayCommandAttrib.NamedArguments)
-                        {
-                            if (kv.Key == "CanExecute"
-                                && kv.Value.Value is string canExecuteMethodName
-                                && canExecuteMethodName != method.Name
-                            )
-                            {
-                                methodCandidates.Add((method, canExecuteMethodName));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        memberRefsBuilder.Add(new MemberSpec {
-                            location = LocationInfo.From(method.Locations.Length > 0 ? method.Locations[0] : Location.None),
-                            methodName = method.Name,
-                            paramTypeName = method.Parameters.Length > 0
-                                ? method.Parameters[0].Type.ToFullName()
-                                : null,
-                        });
+                        relayCommandAttr = methodAttrs[j];
+                        hasRelayCommandAttr = true;
+                        break;
                     }
                 }
 
-                methodMap[method.Name] = method;
+                if (hasRelayCommandAttr == false)
+                {
+                    continue;
+                }
+
+                var namedArgs = relayCommandAttr.NamedArguments;
+                var namedArgCount = namedArgs.Count;
+
+                if (namedArgCount > 0)
+                {
+                    for (var j = 0; j < namedArgCount; j++)
+                    {
+                        var namedArg = namedArgs[j];
+
+                        if (string.Equals(namedArg.Name, "CanExecute", StringComparison.Ordinal)
+                            && string.Equals(namedArg.Value, methodModel.Name, StringComparison.Ordinal) == false
+                            && string.IsNullOrEmpty(namedArg.Value) == false
+                        )
+                        {
+                            methodCandidates.Add((methodModel.Name, namedArg.Value));
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    memberRefsBuilder.Add(new MemberSpec {
+                        location = default,
+                        methodName = methodModel.Name,
+                        paramTypeName = paramCount > 0
+                            ? methodModel.Parameters[0].TypeFullName
+                            : null,
+                    });
+                }
+            }
+
+            var methodMap = new Dictionary<string, IMethodSymbol>();
+            var allMembers = classSymbol.GetMembers();
+            var allMemberCount = allMembers.Length;
+
+            for (var i = 0; i < allMemberCount; i++)
+            {
+                if (allMembers[i] is IMethodSymbol sym && sym.Parameters.Length <= 1)
+                {
+                    methodMap[sym.Name] = sym;
+                }
             }
 
             var filtered = new HashSet<string>();
 
-            foreach (var (method, canExecuteName) in methodCandidates)
+            foreach (var (methodName, canExecuteName) in methodCandidates)
             {
                 filtered.Clear();
 
-                if (methodMap.TryGetValue(canExecuteName, out var canExecuteMethod) == false
-                    || canExecuteMethod.ReturnType.SpecialType != SpecialType.System_Boolean
-                )
+                if (methodModelMap.TryGetValue(canExecuteName, out var canExecuteMethodModel) == false)
+                {
+                    continue;
+                }
+
+                if (string.Equals(
+                      canExecuteMethodModel.ReturnTypeFullName
+                    , "global::System.Boolean"
+                    , StringComparison.Ordinal
+                ) == false)
                 {
                     continue;
                 }
 
                 var isValid = true;
 
-                if (canExecuteMethod.Parameters.Length != 0)
+                if (canExecuteMethodModel.Parameters.Count != 0)
                 {
-                    if (method.Parameters.Length != canExecuteMethod.Parameters.Length)
+                    if (methodModelMap.TryGetValue(methodName, out var commandMethodModel) == false
+                        || commandMethodModel.Parameters.Count != canExecuteMethodModel.Parameters.Count
+                    )
                     {
                         continue;
                     }
 
-                    foreach (var param in method.Parameters)
+                    var cmdParams = commandMethodModel.Parameters;
+                    var cmdParamCount = cmdParams.Count;
+
+                    for (var k = 0; k < cmdParamCount; k++)
                     {
-                        filtered.Add(param.Type.ToFullName());
+                        filtered.Add(cmdParams[k].TypeFullName);
                     }
 
-                    foreach (var param in canExecuteMethod.Parameters)
+                    var ceParams = canExecuteMethodModel.Parameters;
+                    var ceParamCount = ceParams.Count;
+
+                    for (var k = 0; k < ceParamCount; k++)
                     {
-                        if (filtered.Contains(param.Type.ToFullName()) == false)
+                        if (filtered.Contains(ceParams[k].TypeFullName) == false)
                         {
                             isValid = false;
                             break;
@@ -224,13 +281,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                 if (isValid)
                 {
                     memberRefsBuilder.Add(new MemberSpec {
-                        location = LocationInfo.From(method.Locations.Length > 0 ? method.Locations[0] : Location.None),
-                        methodName = method.Name,
-                        paramTypeName = method.Parameters.Length > 0
-                            ? method.Parameters[0].Type.ToFullName()
+                        location = default,
+                        methodName = methodName,
+                        paramTypeName = methodModelMap.TryGetValue(methodName, out var m) && m.Parameters.Count > 0
+                            ? m.Parameters[0].TypeFullName
                             : null,
-                        canExecuteMethodName = canExecuteMethod.Name,
-                        canExecuteHasParam = canExecuteMethod.Parameters.Length > 0,
+                        canExecuteMethodName = canExecuteMethodModel.Name,
+                        canExecuteHasParam = canExecuteMethodModel.Parameters.Count > 0,
                     });
                 }
             }
@@ -260,8 +317,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                     , DiagnosticDescriptors.InvalidFieldOrPropertyTargetedAttributeOnRelayCommandMethod
                 );
 
+                var loc = method.Locations.Length > 0
+                    ? LocationInfo.From(method.Locations[0])
+                    : default;
+
                 finalBuilder.Add(new MemberSpec {
-                    location = memberRef.location,
+                    location = loc,
                     methodName = memberRef.methodName,
                     paramTypeName = memberRef.paramTypeName,
                     canExecuteMethodName = memberRef.canExecuteMethodName,
