@@ -13,6 +13,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         Events        = 1 << 4,
         Attributes    = 1 << 5,
         Interfaces    = 1 << 6,
+        AllInterfaces = 1 << 7,
         All           = ~0,
     }
 }

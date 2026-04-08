@@ -17,13 +17,21 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
 
             var parts = options.Parts == 0 ? ModelParts.All : options.Parts;
 
+            var memberParts = ModelParts.Fields | ModelParts.Properties
+                | ModelParts.Methods | ModelParts.Constructors | ModelParts.Events;
+
+            var members = (parts & memberParts) != 0
+                ? symbol.GetMembers()
+                : ImmutableArray<ISymbol>.Empty;
+
             var interfaces = ExtractInterfaces(symbol, parts, token);
+            var allInterfaces = ExtractAllInterfaces(symbol, parts, token);
             var attributes = ExtractTypeAttributes(symbol, parts, token);
-            var fields = ExtractFields(symbol, parts, options, token);
-            var properties = ExtractProperties(symbol, parts, options, token);
-            var methods = ExtractMethods(symbol, parts, options, token);
-            var constructors = ExtractConstructors(symbol, parts, options, token);
-            var events = ExtractEvents(symbol, parts, options, token);
+            var fields = ExtractFields(members, parts, options, token);
+            var properties = ExtractProperties(members, parts, options, token);
+            var methods = ExtractMethods(members, parts, options, token);
+            var constructors = ExtractConstructors(members, parts, options, token);
+            var events = ExtractEvents(members, parts, options, token);
 
             return new TypeModel(
                   name: symbol.Name
@@ -38,6 +46,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                 , isRecord: symbol.IsRecord
                 , isGeneric: symbol.IsGenericType
                 , interfaces: interfaces
+                , allInterfaces: allInterfaces
                 , attributes: attributes
                 , fields: fields
                 , properties: properties
@@ -67,6 +76,31 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             for (var i = 0; i < ifaceCount; i++)
             {
                 builder.Add(interfaces[i].ToDisplayString(SymbolFormats.FullyQualified));
+            }
+
+            return builder.ToImmutable();
+        }
+
+        private static EquatableArray<string> ExtractAllInterfaces(
+              INamedTypeSymbol symbol
+            , ModelParts parts
+            , CancellationToken token
+        )
+        {
+            if ((parts & ModelParts.AllInterfaces) == 0)
+            {
+                return default;
+            }
+
+            token.ThrowIfCancellationRequested();
+
+            using var builder = ImmutableArrayBuilder<string>.Rent();
+            var allInterfaces = symbol.AllInterfaces;
+            var ifaceCount = allInterfaces.Length;
+
+            for (var i = 0; i < ifaceCount; i++)
+            {
+                builder.Add(allInterfaces[i].ToDisplayString(SymbolFormats.FullyQualified));
             }
 
             return builder.ToImmutable();
@@ -132,7 +166,11 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                 for (var k = 0; k < namedArgCount; k++)
                 {
                     var pair = namedArguments[k];
-                    namedArgs.Add(new AttributeNamedArgModel(pair.Key, pair.Value.Value?.ToString() ?? string.Empty));
+                    var argValue = pair.Value.Kind == TypedConstantKind.Type
+                                   && pair.Value.Value is ITypeSymbol namedTypeArg
+                        ? namedTypeArg.ToDisplayString(SymbolFormats.FullyQualified)
+                        : pair.Value.Value?.ToString() ?? string.Empty;
+                    namedArgs.Add(new AttributeNamedArgModel(pair.Key, argValue));
                 }
 
                 builder.Add(new AttributeModel(fullName, ctorArgs.ToImmutable(), namedArgs.ToImmutable()));
@@ -142,7 +180,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         }
 
         private static EquatableArray<FieldModel> ExtractFields(
-              INamedTypeSymbol symbol
+              ImmutableArray<ISymbol> members
             , ModelParts parts
             , ModelOptions options
             , CancellationToken token
@@ -156,7 +194,6 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             token.ThrowIfCancellationRequested();
 
             using var builder = ImmutableArrayBuilder<FieldModel>.Rent();
-            var members = symbol.GetMembers();
             var memberCount = members.Length;
 
             for (var i = 0; i < memberCount; i++)
@@ -202,7 +239,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         }
 
         private static EquatableArray<PropertyModel> ExtractProperties(
-              INamedTypeSymbol symbol
+              ImmutableArray<ISymbol> members
             , ModelParts parts
             , ModelOptions options
             , CancellationToken token
@@ -216,7 +253,6 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             token.ThrowIfCancellationRequested();
 
             using var builder = ImmutableArrayBuilder<PropertyModel>.Rent();
-            var members = symbol.GetMembers();
             var memberCount = members.Length;
 
             for (var i = 0; i < memberCount; i++)
@@ -272,7 +308,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         }
 
         private static EquatableArray<MethodModel> ExtractMethods(
-              INamedTypeSymbol symbol
+              ImmutableArray<ISymbol> members
             , ModelParts parts
             , ModelOptions options
             , CancellationToken token
@@ -286,7 +322,6 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             token.ThrowIfCancellationRequested();
 
             using var builder = ImmutableArrayBuilder<MethodModel>.Rent();
-            var members = symbol.GetMembers();
             var memberCount = members.Length;
 
             for (var i = 0; i < memberCount; i++)
@@ -359,7 +394,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         }
 
         private static EquatableArray<ConstructorModel> ExtractConstructors(
-              INamedTypeSymbol symbol
+              ImmutableArray<ISymbol> members
             , ModelParts parts
             , ModelOptions options
             , CancellationToken token
@@ -373,7 +408,6 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             token.ThrowIfCancellationRequested();
 
             using var builder = ImmutableArrayBuilder<ConstructorModel>.Rent();
-            var members = symbol.GetMembers();
             var memberCount = members.Length;
 
             for (var i = 0; i < memberCount; i++)
@@ -422,7 +456,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         }
 
         private static EquatableArray<EventModel> ExtractEvents(
-              INamedTypeSymbol symbol
+              ImmutableArray<ISymbol> members
             , ModelParts parts
             , ModelOptions options
             , CancellationToken token
@@ -436,7 +470,6 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             token.ThrowIfCancellationRequested();
 
             using var builder = ImmutableArrayBuilder<EventModel>.Rent();
-            var members = symbol.GetMembers();
             var memberCount = members.Length;
 
             for (var i = 0; i < memberCount; i++)

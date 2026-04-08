@@ -101,16 +101,26 @@ namespace EncosyTower.SourceGen.Generators.Data
             var typeModelAttrs = typeModel.Attributes;
             var typeModelAttrCount = typeModelAttrs.Count;
             var withoutId = false;
+            var fieldPolicyCtorArg = string.Empty;
+            var hasFieldPolicyAttr = false;
 
             for (var i = 0; i < typeModelAttrCount; i++)
             {
-                if (string.Equals(
-                      typeModelAttrs[i].FullName
-                    , DATA_WITHOUT_ID_ATTRIBUTE
-                    , StringComparison.Ordinal
-                ))
+                var attr = typeModelAttrs[i];
+
+                if (string.Equals(attr.FullName, DATA_WITHOUT_ID_ATTRIBUTE, StringComparison.Ordinal))
                 {
                     withoutId = true;
+                }
+
+                if (string.Equals(attr.FullName, DATA_FIELD_POLICY_ATTRIBUTE, StringComparison.Ordinal))
+                {
+                    hasFieldPolicyAttr = true;
+
+                    if (attr.ConstructorArguments.Count > 0)
+                    {
+                        fieldPolicyCtorArg = attr.ConstructorArguments[0];
+                    }
                 }
             }
 
@@ -125,22 +135,17 @@ namespace EncosyTower.SourceGen.Generators.Data
             );
 
             // ── DataFieldPolicy ─────────────────────────────────────────────────────────────
-            var fieldPolicyAttrib = typeSymbol.GetAttribute(DATA_FIELD_POLICY_ATTRIBUTE);
             var fieldPolicy = DataFieldPolicy.Private;
 
-            if (isMutable == false && fieldPolicyAttrib != null)
+            if (isMutable == false && hasFieldPolicyAttr)
             {
                 // Diagnostic emitted by DataDiagnosticAnalyzer — skip in generator, return invalid
                 return default;
             }
 
-            if (fieldPolicyAttrib != null)
+            if (hasFieldPolicyAttr && int.TryParse(fieldPolicyCtorArg, out var fieldPolicyInt))
             {
-                var args = fieldPolicyAttrib.ConstructorArguments;
-                if (args.Length > 0 && args[0].Kind == TypedConstantKind.Enum)
-                {
-                    fieldPolicy = (DataFieldPolicy)(int)args[0].Value;
-                }
+                fieldPolicy = (DataFieldPolicy)fieldPolicyInt;
             }
 
             // ── Base type ───────────────────────────────────────────────────────────────────

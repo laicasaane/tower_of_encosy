@@ -18,6 +18,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         public readonly bool IsRecord;
         public readonly bool IsGeneric;
         public readonly EquatableArray<string> Interfaces;
+        public readonly EquatableArray<string> AllInterfaces;
         public readonly EquatableArray<AttributeModel> Attributes;
         public readonly EquatableArray<FieldModel> Fields;
         public readonly EquatableArray<PropertyModel> Properties;
@@ -38,6 +39,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             , bool isRecord
             , bool isGeneric
             , EquatableArray<string> interfaces
+            , EquatableArray<string> allInterfaces
             , EquatableArray<AttributeModel> attributes
             , EquatableArray<FieldModel> fields
             , EquatableArray<PropertyModel> properties
@@ -58,6 +60,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             IsRecord = isRecord;
             IsGeneric = isGeneric;
             Interfaces = interfaces;
+            AllInterfaces = allInterfaces;
             Attributes = attributes;
             Fields = fields;
             Properties = properties;
@@ -77,6 +80,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             && IsRecord == other.IsRecord
             && IsGeneric == other.IsGeneric
             && Interfaces.Equals(other.Interfaces)
+            && AllInterfaces.Equals(other.AllInterfaces)
             && Attributes.Equals(other.Attributes)
             && Fields.Equals(other.Fields)
             && Properties.Equals(other.Properties)
