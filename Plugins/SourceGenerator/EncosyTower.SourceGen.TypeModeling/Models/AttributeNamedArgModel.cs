@@ -1,8 +1,9 @@
+using System;
 using EncosyTower.SourceGen.TypeModeling.Internal;
 
 namespace EncosyTower.SourceGen.TypeModeling
 {
-    public readonly struct AttributeNamedArgModel : System.IEquatable<AttributeNamedArgModel>
+    public readonly struct AttributeNamedArgModel : IEquatable<AttributeNamedArgModel>
     {
         public readonly string Name;
         public readonly string Value;
@@ -14,18 +15,20 @@ namespace EncosyTower.SourceGen.TypeModeling
         }
 
         public bool Equals(AttributeNamedArgModel other)
-            => Name == other.Name && Value == other.Value;
+            => string.Equals(Name, other.Name, StringComparison.Ordinal)
+            && string.Equals(Value, other.Value, StringComparison.Ordinal)
+            ;
 
         public override bool Equals(object obj)
             => obj is AttributeNamedArgModel other && Equals(other);
 
         public override int GetHashCode()
-            => (int)HashValue.Combine(Name, Value);
+            => HashValue.Combine(Name, Value).ToHashCode();
 
         public static bool operator ==(AttributeNamedArgModel left, AttributeNamedArgModel right)
             => left.Equals(right);
 
         public static bool operator !=(AttributeNamedArgModel left, AttributeNamedArgModel right)
-            => !left.Equals(right);
+            => left.Equals(right) == false;
     }
 }

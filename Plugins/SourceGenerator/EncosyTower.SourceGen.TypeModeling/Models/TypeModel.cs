@@ -1,9 +1,10 @@
+using System;
 using Microsoft.CodeAnalysis;
 using EncosyTower.SourceGen.TypeModeling.Internal;
 
 namespace EncosyTower.SourceGen.TypeModeling
 {
-    public readonly struct TypeModel : System.IEquatable<TypeModel>
+    public readonly struct TypeModel : IEquatable<TypeModel>
     {
         public readonly string Name;
         public readonly string FullName;
@@ -25,24 +26,25 @@ namespace EncosyTower.SourceGen.TypeModeling
         public readonly EquatableArray<EventModel> Events;
 
         public TypeModel(
-            string name,
-            string fullName,
-            string @namespace,
-            string accessibility,
-            TypeKind typeKind,
-            bool isStatic,
-            bool isSealed,
-            bool isAbstract,
-            bool isReadOnly,
-            bool isRecord,
-            bool isGeneric,
-            EquatableArray<string> interfaces,
-            EquatableArray<AttributeModel> attributes,
-            EquatableArray<FieldModel> fields,
-            EquatableArray<PropertyModel> properties,
-            EquatableArray<MethodModel> methods,
-            EquatableArray<ConstructorModel> constructors,
-            EquatableArray<EventModel> events)
+              string name
+            , string fullName
+            , string @namespace
+            , string accessibility
+            , TypeKind typeKind
+            , bool isStatic
+            , bool isSealed
+            , bool isAbstract
+            , bool isReadOnly
+            , bool isRecord
+            , bool isGeneric
+            , EquatableArray<string> interfaces
+            , EquatableArray<AttributeModel> attributes
+            , EquatableArray<FieldModel> fields
+            , EquatableArray<PropertyModel> properties
+            , EquatableArray<MethodModel> methods
+            , EquatableArray<ConstructorModel> constructors
+            , EquatableArray<EventModel> events
+        )
         {
             Name = name ?? string.Empty;
             FullName = fullName ?? string.Empty;
@@ -65,8 +67,8 @@ namespace EncosyTower.SourceGen.TypeModeling
         }
 
         public bool Equals(TypeModel other)
-            => FullName == other.FullName
-            && Accessibility == other.Accessibility
+            => string.Equals(FullName, other.FullName, StringComparison.Ordinal)
+            && string.Equals(Accessibility, other.Accessibility, StringComparison.Ordinal)
             && TypeKind == other.TypeKind
             && IsStatic == other.IsStatic
             && IsSealed == other.IsSealed
@@ -80,18 +82,19 @@ namespace EncosyTower.SourceGen.TypeModeling
             && Properties.Equals(other.Properties)
             && Methods.Equals(other.Methods)
             && Constructors.Equals(other.Constructors)
-            && Events.Equals(other.Events);
+            && Events.Equals(other.Events)
+            ;
 
         public override bool Equals(object obj)
             => obj is TypeModel other && Equals(other);
 
         public override int GetHashCode()
-            => (int)HashValue.Combine(FullName, Accessibility, TypeKind, IsStatic, Fields, Properties, Methods, Constructors);
+            => HashValue.Combine(FullName, Accessibility, TypeKind, IsStatic, Fields, Properties, Methods, Constructors).ToHashCode();
 
         public static bool operator ==(TypeModel left, TypeModel right)
             => left.Equals(right);
 
         public static bool operator !=(TypeModel left, TypeModel right)
-            => !left.Equals(right);
+            => left.Equals(right) == false;
     }
 }

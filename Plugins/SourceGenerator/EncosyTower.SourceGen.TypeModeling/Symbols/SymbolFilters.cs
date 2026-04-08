@@ -5,7 +5,10 @@ namespace EncosyTower.SourceGen.TypeModeling
 {
     public static class SymbolFilters
     {
-        public static IEnumerable<FieldSymbol> WithAttribute(this FieldSymbolEnumerable source, string fullyQualifiedName)
+        public static IEnumerable<FieldSymbol> WithAttribute(
+              this FieldSymbolEnumerable source
+            , string fullyQualifiedName
+        )
         {
             foreach (var model in source)
             {
@@ -14,7 +17,10 @@ namespace EncosyTower.SourceGen.TypeModeling
             }
         }
 
-        public static IEnumerable<PropertySymbol> WithAttribute(this PropertySymbolEnumerable source, string fullyQualifiedName)
+        public static IEnumerable<PropertySymbol> WithAttribute(
+              this PropertySymbolEnumerable source
+            , string fullyQualifiedName
+        )
         {
             foreach (var model in source)
             {
@@ -23,7 +29,10 @@ namespace EncosyTower.SourceGen.TypeModeling
             }
         }
 
-        public static IEnumerable<MethodSymbol> WithAttribute(this MethodSymbolEnumerable source, string fullyQualifiedName)
+        public static IEnumerable<MethodSymbol> WithAttribute(
+              this MethodSymbolEnumerable source
+            , string fullyQualifiedName
+        )
         {
             foreach (var model in source)
             {
@@ -32,7 +41,10 @@ namespace EncosyTower.SourceGen.TypeModeling
             }
         }
 
-        public static IEnumerable<EventSymbol> WithAttribute(this EventSymbolEnumerable source, string fullyQualifiedName)
+        public static IEnumerable<EventSymbol> WithAttribute(
+              this EventSymbolEnumerable source
+            , string fullyQualifiedName
+        )
         {
             foreach (var model in source)
             {

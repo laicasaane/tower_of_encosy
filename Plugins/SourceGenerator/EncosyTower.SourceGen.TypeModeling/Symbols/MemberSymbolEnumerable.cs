@@ -32,6 +32,7 @@ namespace EncosyTower.SourceGen.TypeModeling
             public bool MoveNext()
             {
                 _index++;
+
                 while (_index < _members.Length)
                 {
                     if (_members[_index] is IFieldSymbol field)
@@ -39,8 +40,10 @@ namespace EncosyTower.SourceGen.TypeModeling
                         _current = new FieldSymbol(field);
                         return true;
                     }
+
                     _index++;
                 }
+
                 return false;
             }
         }
@@ -75,6 +78,7 @@ namespace EncosyTower.SourceGen.TypeModeling
             public bool MoveNext()
             {
                 _index++;
+
                 while (_index < _members.Length)
                 {
                     if (_members[_index] is IPropertySymbol prop)
@@ -82,8 +86,10 @@ namespace EncosyTower.SourceGen.TypeModeling
                         _current = new PropertySymbol(prop);
                         return true;
                     }
+
                     _index++;
                 }
+
                 return false;
             }
         }
@@ -118,6 +124,7 @@ namespace EncosyTower.SourceGen.TypeModeling
             public bool MoveNext()
             {
                 _index++;
+
                 while (_index < _members.Length)
                 {
                     if (_members[_index] is IMethodSymbol method
@@ -126,8 +133,10 @@ namespace EncosyTower.SourceGen.TypeModeling
                         _current = new MethodSymbol(method);
                         return true;
                     }
+
                     _index++;
                 }
+
                 return false;
             }
         }
@@ -162,6 +171,7 @@ namespace EncosyTower.SourceGen.TypeModeling
             public bool MoveNext()
             {
                 _index++;
+
                 while (_index < _members.Length)
                 {
                     if (_members[_index] is IEventSymbol ev)
@@ -169,8 +179,10 @@ namespace EncosyTower.SourceGen.TypeModeling
                         _current = new EventSymbol(ev);
                         return true;
                     }
+
                     _index++;
                 }
+
                 return false;
             }
         }
@@ -205,6 +217,7 @@ namespace EncosyTower.SourceGen.TypeModeling
             public bool MoveNext()
             {
                 _index++;
+
                 while (_index < _members.Length)
                 {
                     if (_members[_index] is IMethodSymbol method
@@ -213,8 +226,10 @@ namespace EncosyTower.SourceGen.TypeModeling
                         _current = new ConstructorSymbol(method);
                         return true;
                     }
+
                     _index++;
                 }
+
                 return false;
             }
         }

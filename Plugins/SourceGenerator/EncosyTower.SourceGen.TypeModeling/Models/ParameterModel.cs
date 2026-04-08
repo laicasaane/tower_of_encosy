@@ -1,9 +1,10 @@
+using System;
 using Microsoft.CodeAnalysis;
 using EncosyTower.SourceGen.TypeModeling.Internal;
 
 namespace EncosyTower.SourceGen.TypeModeling
 {
-    public readonly struct ParameterModel : System.IEquatable<ParameterModel>
+    public readonly struct ParameterModel : IEquatable<ParameterModel>
     {
         public readonly string Name;
         public readonly string TypeName;
@@ -14,13 +15,14 @@ namespace EncosyTower.SourceGen.TypeModeling
         public readonly string DefaultValueText;
 
         public ParameterModel(
-            string name,
-            string typeName,
-            string typeFullName,
-            RefKind refKind,
-            int ordinal,
-            bool hasDefaultValue,
-            string defaultValueText)
+              string name
+            , string typeName
+            , string typeFullName
+            , RefKind refKind
+            , int ordinal
+            , bool hasDefaultValue
+            , string defaultValueText
+        )
         {
             Name = name ?? string.Empty;
             TypeName = typeName ?? string.Empty;
@@ -32,23 +34,24 @@ namespace EncosyTower.SourceGen.TypeModeling
         }
 
         public bool Equals(ParameterModel other)
-            => Name == other.Name
-            && TypeFullName == other.TypeFullName
+            => string.Equals(Name, other.Name, StringComparison.Ordinal)
+            && string.Equals(TypeFullName, other.TypeFullName, StringComparison.Ordinal)
             && RefKind == other.RefKind
             && Ordinal == other.Ordinal
             && HasDefaultValue == other.HasDefaultValue
-            && DefaultValueText == other.DefaultValueText;
+            && string.Equals(DefaultValueText, other.DefaultValueText, StringComparison.Ordinal)
+            ;
 
         public override bool Equals(object obj)
             => obj is ParameterModel other && Equals(other);
 
         public override int GetHashCode()
-            => (int)HashValue.Combine(Name, TypeFullName, RefKind, Ordinal, HasDefaultValue, DefaultValueText);
+            => HashValue.Combine(Name, TypeFullName, RefKind, Ordinal, HasDefaultValue, DefaultValueText).ToHashCode();
 
         public static bool operator ==(ParameterModel left, ParameterModel right)
             => left.Equals(right);
 
         public static bool operator !=(ParameterModel left, ParameterModel right)
-            => !left.Equals(right);
+            => left.Equals(right) == false;
     }
 }

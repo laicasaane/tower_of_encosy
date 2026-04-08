@@ -1,9 +1,10 @@
+using System;
 using Microsoft.CodeAnalysis;
 using EncosyTower.SourceGen.TypeModeling.Internal;
 
 namespace EncosyTower.SourceGen.TypeModeling
 {
-    public readonly struct AccessorModel : System.IEquatable<AccessorModel>
+    public readonly struct AccessorModel : IEquatable<AccessorModel>
     {
         public readonly bool Exists;
         public readonly string Accessibility;
@@ -12,11 +13,12 @@ namespace EncosyTower.SourceGen.TypeModeling
         public readonly RefKind RefKind;
 
         public AccessorModel(
-            bool exists,
-            string accessibility,
-            bool isReadOnly,
-            bool isInitOnly,
-            RefKind refKind)
+              bool exists
+            , string accessibility
+            , bool isReadOnly
+            , bool isInitOnly
+            , RefKind refKind
+        )
         {
             Exists = exists;
             Accessibility = accessibility ?? string.Empty;
@@ -27,21 +29,22 @@ namespace EncosyTower.SourceGen.TypeModeling
 
         public bool Equals(AccessorModel other)
             => Exists == other.Exists
-            && Accessibility == other.Accessibility
+            && string.Equals(Accessibility, other.Accessibility, StringComparison.Ordinal)
             && IsReadOnly == other.IsReadOnly
             && IsInitOnly == other.IsInitOnly
-            && RefKind == other.RefKind;
+            && RefKind == other.RefKind
+            ;
 
         public override bool Equals(object obj)
             => obj is AccessorModel other && Equals(other);
 
         public override int GetHashCode()
-            => (int)HashValue.Combine(Exists, Accessibility, IsReadOnly, IsInitOnly, RefKind);
+            => HashValue.Combine(Exists, Accessibility, IsReadOnly, IsInitOnly, RefKind).ToHashCode();
 
         public static bool operator ==(AccessorModel left, AccessorModel right)
             => left.Equals(right);
 
         public static bool operator !=(AccessorModel left, AccessorModel right)
-            => !left.Equals(right);
+            => left.Equals(right) == false;
     }
 }

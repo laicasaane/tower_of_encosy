@@ -1,8 +1,9 @@
+using System;
 using EncosyTower.SourceGen.TypeModeling.Internal;
 
 namespace EncosyTower.SourceGen.TypeModeling
 {
-    public readonly struct EventModel : System.IEquatable<EventModel>
+    public readonly struct EventModel : IEquatable<EventModel>
     {
         public readonly string Name;
         public readonly string TypeName;
@@ -12,12 +13,13 @@ namespace EncosyTower.SourceGen.TypeModeling
         public readonly EquatableArray<AttributeModel> Attributes;
 
         public EventModel(
-            string name,
-            string typeName,
-            string typeFullName,
-            string accessibility,
-            bool isStatic,
-            EquatableArray<AttributeModel> attributes)
+              string name
+            , string typeName
+            , string typeFullName
+            , string accessibility
+            , bool isStatic
+            , EquatableArray<AttributeModel> attributes
+        )
         {
             Name = name ?? string.Empty;
             TypeName = typeName ?? string.Empty;
@@ -28,22 +30,23 @@ namespace EncosyTower.SourceGen.TypeModeling
         }
 
         public bool Equals(EventModel other)
-            => Name == other.Name
-            && TypeFullName == other.TypeFullName
-            && Accessibility == other.Accessibility
+            => string.Equals(Name, other.Name, StringComparison.Ordinal)
+            && string.Equals(TypeFullName, other.TypeFullName, StringComparison.Ordinal)
+            && string.Equals(Accessibility, other.Accessibility, StringComparison.Ordinal)
             && IsStatic == other.IsStatic
-            && Attributes.Equals(other.Attributes);
+            && Attributes.Equals(other.Attributes)
+            ;
 
         public override bool Equals(object obj)
             => obj is EventModel other && Equals(other);
 
         public override int GetHashCode()
-            => (int)HashValue.Combine(Name, TypeFullName, Accessibility, IsStatic, Attributes);
+            => HashValue.Combine(Name, TypeFullName, Accessibility, IsStatic, Attributes).ToHashCode();
 
         public static bool operator ==(EventModel left, EventModel right)
             => left.Equals(right);
 
         public static bool operator !=(EventModel left, EventModel right)
-            => !left.Equals(right);
+            => left.Equals(right) == false;
     }
 }

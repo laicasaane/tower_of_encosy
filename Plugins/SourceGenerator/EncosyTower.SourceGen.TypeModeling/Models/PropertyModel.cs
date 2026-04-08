@@ -1,9 +1,10 @@
+using System;
 using Microsoft.CodeAnalysis;
 using EncosyTower.SourceGen.TypeModeling.Internal;
 
 namespace EncosyTower.SourceGen.TypeModeling
 {
-    public readonly struct PropertyModel : System.IEquatable<PropertyModel>
+    public readonly struct PropertyModel : IEquatable<PropertyModel>
     {
         public readonly string Name;
         public readonly string TypeName;
@@ -18,17 +19,18 @@ namespace EncosyTower.SourceGen.TypeModeling
         public readonly EquatableArray<AttributeModel> Attributes;
 
         public PropertyModel(
-            string name,
-            string typeName,
-            string typeFullName,
-            string accessibility,
-            RefKind refKind,
-            bool isStatic,
-            bool isIndexer,
-            AccessorModel getter,
-            AccessorModel setter,
-            EquatableArray<ParameterModel> parameters,
-            EquatableArray<AttributeModel> attributes)
+              string name
+            , string typeName
+            , string typeFullName
+            , string accessibility
+            , RefKind refKind
+            , bool isStatic
+            , bool isIndexer
+            , AccessorModel getter
+            , AccessorModel setter
+            , EquatableArray<ParameterModel> parameters
+            , EquatableArray<AttributeModel> attributes
+        )
         {
             Name = name ?? string.Empty;
             TypeName = typeName ?? string.Empty;
@@ -44,27 +46,28 @@ namespace EncosyTower.SourceGen.TypeModeling
         }
 
         public bool Equals(PropertyModel other)
-            => Name == other.Name
-            && TypeFullName == other.TypeFullName
-            && Accessibility == other.Accessibility
+            => string.Equals(Name, other.Name, StringComparison.Ordinal)
+            && string.Equals(TypeFullName, other.TypeFullName, StringComparison.Ordinal)
+            && string.Equals(Accessibility, other.Accessibility, StringComparison.Ordinal)
             && RefKind == other.RefKind
             && IsStatic == other.IsStatic
             && IsIndexer == other.IsIndexer
             && Getter.Equals(other.Getter)
             && Setter.Equals(other.Setter)
             && Parameters.Equals(other.Parameters)
-            && Attributes.Equals(other.Attributes);
+            && Attributes.Equals(other.Attributes)
+            ;
 
         public override bool Equals(object obj)
             => obj is PropertyModel other && Equals(other);
 
         public override int GetHashCode()
-            => (int)HashValue.Combine(Name, TypeFullName, Accessibility, RefKind, IsStatic, IsIndexer, Getter, Setter);
+            => HashValue.Combine(Name, TypeFullName, Accessibility, RefKind, IsStatic, IsIndexer, Getter, Setter).ToHashCode();
 
         public static bool operator ==(PropertyModel left, PropertyModel right)
             => left.Equals(right);
 
         public static bool operator !=(PropertyModel left, PropertyModel right)
-            => !left.Equals(right);
+            => left.Equals(right) == false;
     }
 }

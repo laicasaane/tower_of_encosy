@@ -1,9 +1,10 @@
+using System;
 using Microsoft.CodeAnalysis;
 using EncosyTower.SourceGen.TypeModeling.Internal;
 
 namespace EncosyTower.SourceGen.TypeModeling
 {
-    public readonly struct FieldModel : System.IEquatable<FieldModel>
+    public readonly struct FieldModel : IEquatable<FieldModel>
     {
         public readonly string Name;
         public readonly string TypeName;
@@ -17,16 +18,17 @@ namespace EncosyTower.SourceGen.TypeModeling
         public readonly EquatableArray<AttributeModel> Attributes;
 
         public FieldModel(
-            string name,
-            string typeName,
-            string typeFullName,
-            string accessibility,
-            bool isReadOnly,
-            bool isStatic,
-            bool isConst,
-            string constantValueText,
-            RefKind refKind,
-            EquatableArray<AttributeModel> attributes)
+              string name
+            , string typeName
+            , string typeFullName
+            , string accessibility
+            , bool isReadOnly
+            , bool isStatic
+            , bool isConst
+            , string constantValueText
+            , RefKind refKind
+            , EquatableArray<AttributeModel> attributes
+        )
         {
             Name = name ?? string.Empty;
             TypeName = typeName ?? string.Empty;
@@ -41,26 +43,27 @@ namespace EncosyTower.SourceGen.TypeModeling
         }
 
         public bool Equals(FieldModel other)
-            => Name == other.Name
-            && TypeFullName == other.TypeFullName
-            && Accessibility == other.Accessibility
+            => string.Equals(Name, other.Name, StringComparison.Ordinal)
+            && string.Equals(TypeFullName, other.TypeFullName, StringComparison.Ordinal)
+            && string.Equals(Accessibility, other.Accessibility, StringComparison.Ordinal)
             && IsReadOnly == other.IsReadOnly
             && IsStatic == other.IsStatic
             && IsConst == other.IsConst
-            && ConstantValueText == other.ConstantValueText
+            && string.Equals(ConstantValueText, other.ConstantValueText, StringComparison.Ordinal)
             && RefKind == other.RefKind
-            && Attributes.Equals(other.Attributes);
+            && Attributes.Equals(other.Attributes)
+            ;
 
         public override bool Equals(object obj)
             => obj is FieldModel other && Equals(other);
 
         public override int GetHashCode()
-            => (int)HashValue.Combine(Name, TypeFullName, Accessibility, IsReadOnly, IsStatic, IsConst, RefKind, Attributes);
+            => HashValue.Combine(Name, TypeFullName, Accessibility, IsReadOnly, IsStatic, IsConst, RefKind, Attributes).ToHashCode();
 
         public static bool operator ==(FieldModel left, FieldModel right)
             => left.Equals(right);
 
         public static bool operator !=(FieldModel left, FieldModel right)
-            => !left.Equals(right);
+            => left.Equals(right) == false;
     }
 }
