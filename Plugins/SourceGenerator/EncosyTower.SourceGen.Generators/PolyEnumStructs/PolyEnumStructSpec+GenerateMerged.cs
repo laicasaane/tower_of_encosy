@@ -5,18 +5,18 @@ using EncosyTower.SourceGen.Generators.EnumExtensions;
 
 namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 {
-    partial struct PolyEnumStructDefinition
+    partial struct PolyEnumStructSpec
     {
         public struct StructRef
         {
-            public StructDefinition Value { get; set; }
+            public StructSpec Value { get; set; }
 
             public Dictionary<string, string> FieldToMergedFieldMap { get; set; }
         }
 
         public struct MergedFieldRef
         {
-            public FieldDefinition Value { get; set; }
+            public FieldSpec Value { get; set; }
 
             public string Name { get; set; }
 
@@ -35,17 +35,17 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         {
             public List<MergedFieldRef> FieldRefs { get; } = new();
 
-            public Dictionary<PropertyDefinition, bool> PropertyDimMap { get; } = new();
+            public Dictionary<PropertyDeclaration, bool> PropertyDimMap { get; } = new();
 
-            public Dictionary<IndexerDefinition, bool> IndexerDimMap { get; } = new();
+            public Dictionary<IndexerDeclaration, bool> IndexerDimMap { get; } = new();
 
-            public Dictionary<MethodDefinition, bool> MethodDimMap { get; } = new();
+            public Dictionary<MethodDeclaration, bool> MethodDimMap { get; } = new();
 
-            public Dictionary<SlimTypeDefinition, Dictionary<ConstructionValue, StructId>> TypeValueToStructMap { get; } = new();
+            public Dictionary<SlimTypeSpec, Dictionary<ConstructionValue, StructId>> TypeValueToStructMap { get; } = new();
 
-            public Dictionary<SlimTypeDefinition, HashSet<StructId>> TypeToStructsMap { get; } = new();
+            public Dictionary<SlimTypeSpec, HashSet<StructId>> TypeToStructsMap { get; } = new();
 
-            public Dictionary<StructId, Dictionary<SlimTypeDefinition, List<ConstructionValue>>> StructToValuesMap { get; } = new();
+            public Dictionary<StructId, Dictionary<SlimTypeSpec, List<ConstructionValue>>> StructToValuesMap { get; } = new();
 
             public int Size { get; set; }
 
@@ -55,20 +55,20 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
         public class PartialInterfaceRef
         {
-            public List<PropertyDefinition> Properties { get; } = new();
+            public List<PropertyDeclaration> Properties { get; } = new();
 
-            public List<IndexerDefinition> Indexers { get; } = new();
+            public List<IndexerDeclaration> Indexers { get; } = new();
 
-            public List<MethodDefinition> Methods { get; } = new();
+            public List<MethodDeclaration> Methods { get; } = new();
         }
 
         public class TempCollections
         {
-            public List<PropertyDefinition> Properties { get; } = new();
+            public List<PropertyDeclaration> Properties { get; } = new();
 
-            public List<IndexerDefinition> Indexers { get; } = new();
+            public List<IndexerDeclaration> Indexers { get; } = new();
 
-            public List<MethodDefinition> Methods { get; } = new();
+            public List<MethodDeclaration> Methods { get; } = new();
         }
 
         public class EnumCaseType
@@ -77,7 +77,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             public int MaxByteCount { get; set; }
 
-            public List<EnumMemberDeclaration> Members { get; } = new();
+            public List<EnumMemberSpec> Members { get; } = new();
         }
 
         private readonly void GenerateMerged(
@@ -112,9 +112,9 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             mergedStructRef.FieldRefs.Add(new MergedFieldRef {
                 Name = "enumCase",
-                Value = new FieldDefinition {
+                Value = new FieldSpec {
                     name = "enumCase",
-                    returnType = new SlimTypeDefinition { name = "EnumCase", isEnum = true },
+                    returnType = new SlimTypeSpec { name = "EnumCase", isEnum = true },
                     size = enumCaseSize,
                 }
             });
@@ -130,14 +130,14 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             var usedIndexesInList = new HashSet<int>();
             var fieldRefPool = new Queue<MergedFieldRef>();
 
-            var propertyCountMap = new Dictionary<PropertyDefinition, int>(structCount);
-            var indexerCountMap = new Dictionary<IndexerDefinition, int>(structCount);
-            var methodCountMap = new Dictionary<MethodDefinition, int>(structCount);
+            var propertyCountMap = new Dictionary<PropertyDeclaration, int>(structCount);
+            var indexerCountMap = new Dictionary<IndexerDeclaration, int>(structCount);
+            var methodCountMap = new Dictionary<MethodDeclaration, int>(structCount);
             var enumCaseMembers = enumCaseType.Members;
             var mergedStructSize = 0;
             var structNameByteCountMax = 0;
 
-            enumCaseMembers.Add(new EnumMemberDeclaration {
+            enumCaseMembers.Add(new EnumMemberSpec {
                 name = UNDEFINED_NAME,
                 displayName = UNDEFINED_NAME,
                 order = 0,
@@ -172,7 +172,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 if (i < lastStructIndex)
                 {
                     structNameByteCountMax = Math.Max(structNameByteCountMax, Encoding.UTF8.GetByteCount(@struct.name));
-                    enumCaseMembers.Add(new EnumMemberDeclaration {
+                    enumCaseMembers.Add(new EnumMemberSpec {
                         name = @struct.name,
                         displayName = @struct.displayName,
                         order = (ulong)(i + 1),
@@ -348,7 +348,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 }
             }
 
-            public static void AggregateConstructionMaps(StructDefinition def, MergedStructRef mergedStructRef)
+            public static void AggregateConstructionMaps(StructSpec def, MergedStructRef mergedStructRef)
             {
                 var typeValueToStructMap = mergedStructRef.TypeValueToStructMap;
                 var typeToStructsMap = mergedStructRef.TypeToStructsMap;
