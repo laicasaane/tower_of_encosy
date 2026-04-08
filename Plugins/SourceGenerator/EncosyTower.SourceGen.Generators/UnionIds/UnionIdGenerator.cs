@@ -64,7 +64,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             });
         }
 
-        private static IdDeclaration GetUnionIdInfo(
+        private static IdSpec GetUnionIdInfo(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -81,7 +81,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             }
 
             var attrib = context.Attributes[0];
-            var info = new IdDeclaration {
+            var info = new IdSpec {
                 separator = '-',
             };
 
@@ -177,7 +177,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             return info;
         }
 
-        private static KindDeclaration GetKindForUnionIdInfo(
+        private static KindSpec GetKindForUnionIdInfo(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -243,14 +243,14 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             );
         }
 
-        private static EquatableArray<KindDeclaration> GetInlineKinds(
+        private static EquatableArray<KindSpec> GetInlineKinds(
               INamedTypeSymbol idSymbol
             , string idFullName
             , CancellationToken token
         )
         {
             var attributes = idSymbol.GetAttributes(UNION_ID_KIND_ATTRIBUTE_FULL);
-            using var builder = ImmutableArrayBuilder<KindDeclaration>.Rent();
+            using var builder = ImmutableArrayBuilder<KindSpec>.Rent();
 
             foreach (var attrib in attributes)
             {
@@ -301,7 +301,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             return builder.ToImmutable().AsEquatableArray();
         }
 
-        private static KindDeclaration BuildKindInfo(
+        private static KindSpec BuildKindInfo(
               INamedTypeSymbol kindSymbol
             , string idFullName
             , ulong order
@@ -316,7 +316,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         {
             token.ThrowIfCancellationRequested();
 
-            var info = new KindDeclaration {
+            var info = new KindSpec {
                 kindFullName = kindSymbol.ToFullName(),
                 kindSimpleName = kindSymbol.Name,
                 idFullName = idFullName,
@@ -351,7 +351,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
                 // Collect enum members
                 var enumMembers = kindSymbol.GetMembers();
-                using var memberBuilder = ImmutableArrayBuilder<EnumMemberDeclaration>.Rent();
+                using var memberBuilder = ImmutableArrayBuilder<EnumMemberSpec>.Rent();
                 var maxBytes = 0;
                 var hasDisplayAttr = false;
 
@@ -413,7 +413,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                         var nb = member.Name.GetByteCount();
                         var db = memberDisplayName.GetByteCount();
                         maxBytes = Math.Max(maxBytes, Math.Max(nb, db));
-                        memberBuilder.Add(new EnumMemberDeclaration { name = member.Name, displayName = memberDisplayName });
+                        memberBuilder.Add(new EnumMemberSpec { name = member.Name, displayName = memberDisplayName });
                         continue;
                     }
 
@@ -551,8 +551,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo compilation
-            , IdDeclaration idInfo
-            , ImmutableArray<KindDeclaration> kindInfos
+            , IdSpec idInfo
+            , ImmutableArray<KindSpec> kindInfos
             , string projectPath
             , bool outputSourceGenFiles
         )
@@ -565,7 +565,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             try
             {
                 SourceGenHelpers.ProjectPath = projectPath;
-;
+                ;
                 var assemblyName = compilation.assemblyName;
                 var declaration = new UnionIdDeclaration(
                       idInfo

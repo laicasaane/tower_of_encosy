@@ -10,7 +10,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
     /// <see cref="Microsoft.CodeAnalysis.ISymbol"/> or <see cref="Microsoft.CodeAnalysis.SyntaxNode"/>
     /// references that would root the compilation graph and prevent GC.
     /// </summary>
-    public struct IdDeclaration : IEquatable<IdDeclaration>
+    public struct IdSpec : IEquatable<IdSpec>
     {
         /// <summary>Excluded from equality/hash — location is not stable across incremental runs.</summary>
         public LocationInfo location;
@@ -18,7 +18,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         /// <summary>
         /// Pre-computed namespace / containing-type scope opener, produced by
         /// <c>TypeCreationHelpers.GenerateOpeningAndClosingSource</c> in the
-        /// incremental transform phase. Excluded from <see cref="Equals(IdDeclaration)"/>
+        /// incremental transform phase. Excluded from <see cref="Equals(IdSpec)"/>
         /// and <see cref="GetHashCode"/> for the same reason as <see cref="location"/>.
         /// </summary>
         public string openingSource;
@@ -62,7 +62,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         /// Inline kind hints declared via <c>[UnionIdKind(...)]</c> directly on this id struct.
         /// These are combined with the external <c>[KindForUnionId]</c> candidates at code-gen time.
         /// </summary>
-        public EquatableArray<KindDeclaration> inlineKinds;
+        public EquatableArray<KindSpec> inlineKinds;
 
         // ── Attribute settings ───────────────────────────────────────────────────────────
 
@@ -83,7 +83,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         // ── IEquatable<UnionIdInfo> ───────────────────────────────────────────────────────
         // NOTE: `location` is intentionally excluded — it is not stable between incremental passes.
 
-        public readonly bool Equals(IdDeclaration other)
+        public readonly bool Equals(IdSpec other)
             => string.Equals(fullName, other.fullName, StringComparison.Ordinal)
             && string.Equals(simpleName, other.simpleName, StringComparison.Ordinal)
             && string.Equals(fileHintName, other.fileHintName, StringComparison.Ordinal)
@@ -102,7 +102,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is IdDeclaration other && Equals(other);
+            => obj is IdSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(

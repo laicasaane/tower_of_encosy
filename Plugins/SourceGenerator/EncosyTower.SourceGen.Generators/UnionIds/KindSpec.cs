@@ -10,7 +10,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
     /// <see cref="Microsoft.CodeAnalysis.ISymbol"/> or <see cref="Microsoft.CodeAnalysis.SyntaxNode"/>
     /// references are retained.
     /// </summary>
-    public struct KindDeclaration : IEquatable<KindDeclaration>
+    public struct KindSpec : IEquatable<KindSpec>
     {
         /// <summary>Excluded from equality/hash — not stable across incremental runs.</summary>
         public LocationInfo location;
@@ -51,7 +51,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         /// Members of the enum kind type.  Used to construct nested
         /// <see cref="EnumExtensionsDeclaration"/> without needing the symbol at code-gen time.
         /// </summary>
-        public EquatableArray<EnumMemberDeclaration> kindEnumValues;
+        public EquatableArray<EnumMemberSpec> kindEnumValues;
 
         /// <summary>Max byte count across all enum member names/display names.</summary>
         public int kindEnumFixedStringBytes;
@@ -110,7 +110,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         // ── IEquatable<KindForUnionIdInfo> ────────────────────────────────────────────────
         // NOTE: `location` is intentionally excluded.
 
-        public readonly bool Equals(KindDeclaration other)
+        public readonly bool Equals(KindSpec other)
             => string.Equals(kindFullName, other.kindFullName, StringComparison.Ordinal)
             && string.Equals(kindSimpleName, other.kindSimpleName, StringComparison.Ordinal)
             && string.Equals(idFullName, other.idFullName, StringComparison.Ordinal)
@@ -140,7 +140,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is KindDeclaration other && Equals(other);
+            => obj is KindSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(

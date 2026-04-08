@@ -58,8 +58,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         public string FixedStringType { get; }
 
         public UnionIdDeclaration(
-              IdDeclaration id
-            , ImmutableArray<KindDeclaration> externalKinds
+              IdSpec id
+            , ImmutableArray<KindSpec> externalKinds
             , References references
         )
         {
@@ -77,7 +77,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             References = references;
 
             // Merge inline kinds + external kinds that target this id
-            var allKinds = new List<KindDeclaration>(id.inlineKinds.Count + externalKinds.Length);
+            var allKinds = new List<KindSpec>(id.inlineKinds.Count + externalKinds.Length);
 
             foreach (var k in id.inlineKinds)
             {
@@ -91,7 +91,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             }
 
             var kindRefs = KindRefs = new List<KindRef>(allKinds.Count);
-            var enumMembers = new List<EnumMemberDeclaration>(allKinds.Count);
+            var enumMembers = new List<EnumMemberSpec>(allKinds.Count);
             var seenFullNames = new HashSet<string>(StringComparer.Ordinal);
             var uniqueKindNames = new Dictionary<string, string>(allKinds.Count, StringComparer.Ordinal);
             var idExtensionsRefs = IdEnumExtensionsRefs = new List<EnumExtensionsDeclaration>(allKinds.Count);
@@ -139,7 +139,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 if (candidate.isEnum)
                 {
                     // Build nested EnumExtensionsDeclaration from precomputed data
-                    var memList = new List<EnumMemberDeclaration>(candidate.kindEnumValues.Count);
+                    var memList = new List<EnumMemberSpec>(candidate.kindEnumValues.Count);
 
                     foreach (var m in candidate.kindEnumValues)
                         memList.Add(m);
@@ -214,7 +214,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     nestedEnumExtensions = nestedEnumExtensions,
                 });
 
-                enumMembers.Add(new EnumMemberDeclaration {
+                enumMembers.Add(new EnumMemberSpec {
                     name = kindName,
                     order = order,
                     displayName = candidate.displayName,
