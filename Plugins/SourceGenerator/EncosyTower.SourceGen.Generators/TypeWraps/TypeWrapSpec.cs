@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.TypeWraps
 {
-    public partial struct TypeWrapDeclaration : IEquatable<TypeWrapDeclaration>
+    public partial struct TypeWrapSpec : IEquatable<TypeWrapSpec>
     {
         public const string OBSOLETE_ATTRIBUTE = "global::System.ObsoleteAttribute";
         public const string FIELD_NAME_FORMAT = "{0}Of{1}";
@@ -68,13 +68,13 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         public bool enableNullable;
 
-        public EquatableArray<FieldDeclaration> fields;
+        public EquatableArray<FieldSpec> fields;
 
-        public EquatableArray<PropertyDeclaration> properties;
+        public EquatableArray<PropertySpec> properties;
 
-        public EquatableArray<EventDeclaration> events;
+        public EquatableArray<EventSpec> events;
 
-        public EquatableArray<MethodDeclaration> methods;
+        public EquatableArray<MethodSpec> methods;
 
         public EquatableArray<OperatorEntry> operatorEntries;
 
@@ -83,7 +83,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             && string.IsNullOrEmpty(fieldTypeName) == false
             && string.IsNullOrEmpty(fieldName) == false;
 
-        public TypeWrapDeclaration(
+        public TypeWrapSpec(
               LocationInfo location
             , string hintName
             , string sourceFilePath
@@ -278,10 +278,10 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             definedMembers.Add("GetHashCode()");
             definedMembers.Add("ToString()");
 
-            using var fieldArrayBuilder = ImmutableArrayBuilder<FieldDeclaration>.Rent();
-            using var propertyArrayBuilder = ImmutableArrayBuilder<PropertyDeclaration>.Rent();
-            using var eventArrayBuilder = ImmutableArrayBuilder<EventDeclaration>.Rent();
-            using var methodArrayBuilder = ImmutableArrayBuilder<MethodDeclaration>.Rent();
+            using var fieldArrayBuilder = ImmutableArrayBuilder<FieldSpec>.Rent();
+            using var propertyArrayBuilder = ImmutableArrayBuilder<PropertySpec>.Rent();
+            using var eventArrayBuilder = ImmutableArrayBuilder<EventSpec>.Rent();
+            using var methodArrayBuilder = ImmutableArrayBuilder<MethodSpec>.Rent();
             using var operatorEntryBuilder = ImmutableArrayBuilder<OperatorEntry>.Rent();
 
             var fullTypeName = this.fullTypeName;
@@ -309,7 +309,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                             && definedMembers.Contains(field.ToDisplayString(globalFormat)) == false
                         )
                         {
-                            fieldArrayBuilder.Add(FieldDeclaration.Create(field, fieldTypeSymbol));
+                            fieldArrayBuilder.Add(FieldSpec.Create(field, fieldTypeSymbol));
                         }
                         break;
                     }
@@ -322,7 +322,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         {
                             if (definedMembers.Contains(property.ToDisplayString(globalFormat)) == false)
                             {
-                                propertyArrayBuilder.Add(PropertyDeclaration.Create(
+                                propertyArrayBuilder.Add(PropertySpec.Create(
                                       property
                                     , fieldTypeSymbol
                                     , this.isStruct
@@ -341,7 +341,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         {
                             if (definedMembers.Contains(@event.ToDisplayString(globalFormat)) == false)
                             {
-                                eventArrayBuilder.Add(EventDeclaration.Create(@event, fieldTypeSymbol));
+                                eventArrayBuilder.Add(EventSpec.Create(@event, fieldTypeSymbol));
                             }
                         }
                         break;
@@ -433,7 +433,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                             continue;
                         }
 
-                        methodArrayBuilder.Add(MethodDeclaration.Create(
+                        methodArrayBuilder.Add(MethodSpec.Create(
                               method
                             , fieldTypeSymbol
                             , enableNullable
@@ -895,9 +895,9 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         }
 
         public readonly override bool Equals(object obj)
-            => obj is TypeWrapDeclaration other && Equals(other);
+            => obj is TypeWrapSpec other && Equals(other);
 
-        public readonly bool Equals(TypeWrapDeclaration other)
+        public readonly bool Equals(TypeWrapSpec other)
             => string.Equals(hintName, other.hintName, StringComparison.Ordinal)
             && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
             && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)

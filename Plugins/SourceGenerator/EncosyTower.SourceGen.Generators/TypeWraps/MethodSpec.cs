@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.TypeWraps
 {
-    public struct MethodDeclaration : IEquatable<MethodDeclaration>
+    public struct MethodSpec : IEquatable<MethodSpec>
     {
         public string name;
         public string returnTypeName;
@@ -27,7 +27,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             => string.IsNullOrEmpty(name) == false
             && string.IsNullOrEmpty(returnTypeName) == false;
 
-        public static MethodDeclaration Create(
+        public static MethodSpec Create(
               IMethodSymbol method
             , INamedTypeSymbol fieldTypeSymbol
             , bool enableNullable
@@ -108,7 +108,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 arguments = p.Result;
             }
 
-            return new MethodDeclaration {
+            return new MethodSpec {
                 name = name,
                 returnTypeName = method.ReturnType.ToFullName(),
                 sameType = SymbolEqualityComparer.Default.Equals(method.ReturnType, fieldTypeSymbol),
@@ -342,7 +342,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
         }
 
-        public readonly bool Equals(MethodDeclaration other)
+        public readonly bool Equals(MethodSpec other)
             => string.Equals(name, other.name, StringComparison.Ordinal)
             && string.Equals(returnTypeName, other.returnTypeName, StringComparison.Ordinal)
             && string.Equals(typeParameters, other.typeParameters, StringComparison.Ordinal)
@@ -350,7 +350,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             && refKind == other.refKind;
 
         public readonly override bool Equals(object obj)
-            => obj is MethodDeclaration other && Equals(other);
+            => obj is MethodSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(name, returnTypeName, typeParameters, parameters, refKind);

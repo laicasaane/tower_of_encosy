@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.TypeWraps
 {
-    public struct PropertyDeclaration : IEquatable<PropertyDeclaration>
+    public struct PropertySpec : IEquatable<PropertySpec>
     {
         public string name;
         public string typeName;
@@ -31,7 +31,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             => string.IsNullOrEmpty(name) == false
             && string.IsNullOrEmpty(typeName) == false;
 
-        public static PropertyDeclaration Create(
+        public static PropertySpec Create(
               IPropertySymbol property
             , INamedTypeSymbol fieldTypeSymbol
             , bool wrapperIsStruct
@@ -108,7 +108,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 withoutSetter = true;
             }
 
-            return new PropertyDeclaration {
+            return new PropertySpec {
                 name = name,
                 typeName = property.Type.ToFullName(),
                 sameType = SymbolEqualityComparer.Default.Equals(property.Type, fieldTypeSymbol),
@@ -133,14 +133,14 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             };
         }
 
-        public readonly bool Equals(PropertyDeclaration other)
+        public readonly bool Equals(PropertySpec other)
             => string.Equals(name, other.name, StringComparison.Ordinal)
             && string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(parameters, other.parameters, StringComparison.Ordinal)
             && refKind == other.refKind;
 
         public readonly override bool Equals(object obj)
-            => obj is PropertyDeclaration other && Equals(other);
+            => obj is PropertySpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(name, typeName, parameters, refKind);

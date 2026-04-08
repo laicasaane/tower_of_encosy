@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.TypeWraps
 {
-    partial struct TypeWrapDeclaration
+    partial struct TypeWrapSpec
     {
         private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
         private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
@@ -156,7 +156,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
         }
 
-        readonly void WriteField(ref Printer p, in FieldDeclaration field)
+        readonly void WriteField(ref Printer p, in FieldSpec field)
         {
             var returnTypeName = field.typeName;
             var sameType = field.sameType;
@@ -282,7 +282,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
         }
 
-        private readonly void WriteProperty(ref Printer p, in PropertyDeclaration property)
+        private readonly void WriteProperty(ref Printer p, in PropertySpec property)
         {
             var name = property.name;
             var returnTypeName = property.typeName;
@@ -374,7 +374,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             static void WriteIndexerBody(
                   ref Printer p
-                , in PropertyDeclaration property
+                , in PropertySpec property
                 , string accessor
                 , bool isRef
                 , bool getterSetterCanBeReadOnly
@@ -421,7 +421,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             static void WritePropertyBody(
                   ref Printer p
-                , in PropertyDeclaration property
+                , in PropertySpec property
                 , string accessor
                 , string propName
                 , bool isRef
@@ -482,7 +482,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             }
         }
 
-        private readonly void WriteEvent(ref Printer p, in EventDeclaration evt)
+        private readonly void WriteEvent(ref Printer p, in EventSpec evt)
         {
             var name = evt.name;
             var returnTypeName = evt.typeName;
@@ -536,7 +536,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private readonly void WriteMethod(
               ref Printer p
-            , in MethodDeclaration method
+            , in MethodSpec method
             , ref SpecialMethodType writtenSpecialMethods
         )
         {

@@ -73,7 +73,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             });
         }
 
-        public static TypeWrapDeclaration GetSemanticSymbolMatchForWrapType(
+        public static TypeWrapSpec GetSemanticSymbolMatchForWrapType(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -121,7 +121,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                             , printAdditionalUsings: PrintAdditionalUsings
                         );
 
-                        return new TypeWrapDeclaration(
+                        return new TypeWrapSpec(
                               LocationInfo.From(candidate.syntax.GetLocation())
                             , hintName
                             , sourceFilePath
@@ -174,7 +174,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                             , printAdditionalUsings: PrintAdditionalUsings
                         );
 
-                        return new TypeWrapDeclaration(
+                        return new TypeWrapSpec(
                               LocationInfo.From(candidate.syntax.GetLocation())
                             , hintName
                             , sourceFilePath
@@ -200,7 +200,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             return default;
         }
 
-        public static TypeWrapDeclaration GetSemanticSymbolMatchForWrapRecord(
+        public static TypeWrapSpec GetSemanticSymbolMatchForWrapRecord(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -254,7 +254,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     , printAdditionalUsings: PrintAdditionalUsings
                 );
 
-                return new TypeWrapDeclaration(
+                return new TypeWrapSpec(
                       LocationInfo.From(candidate.syntax.GetLocation())
                     , hintName
                     , sourceFilePath
@@ -541,7 +541,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo compilation
-            , TypeWrapDeclaration declaration
+            , TypeWrapSpec declaration
             , string projectPath
             , bool outputSourceGenFiles
         )
