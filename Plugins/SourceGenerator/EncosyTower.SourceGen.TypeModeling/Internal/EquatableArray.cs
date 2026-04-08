@@ -14,7 +14,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Internal
     /// <summary>
     /// Extensions for <see cref="EquatableArray{T}"/>.
     /// </summary>
-    internal static class EquatableArray
+    public static class EquatableArray
     {
         /// <summary>
         /// Creates an <see cref="EquatableArray{T}"/> instance from a given <see cref="ImmutableArray{T}"/>.

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EncosyTower.SourceGen.TypeModeling;
+using EncosyTower.SourceGen.TypeModeling.Models;
 
 namespace EncosyTower.SourceGen.Tests.TypeModeling;
 

@@ -25,7 +25,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Internal
     /// </remarks>
     /// <seealso href="https://discussions.unity.com/t/hashcode-combine/1682736/10"/>
     /// <seealso href="https://docs.unity3d.com/Packages/com.unity.burst@1.8/manual/csharp-system-support.html#systemhashcode"/>
-    internal readonly partial struct HashValue : IEquatable<HashValue>
+    public readonly partial struct HashValue : IEquatable<HashValue>
     {
         /// <summary>
         /// The prime number used to compute the FNV hash 32 bits.

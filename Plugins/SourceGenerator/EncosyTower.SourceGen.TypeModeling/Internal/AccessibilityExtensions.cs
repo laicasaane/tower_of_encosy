@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.TypeModeling.Internal
 {
-    internal static class AccessibilityExtensions
+    public static class AccessibilityExtensions
     {
         public static string ToKeyword(this Accessibility self)
         {

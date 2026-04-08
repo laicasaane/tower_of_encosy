@@ -3,14 +3,15 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using EncosyTower.SourceGen.TypeModeling.Internal;
 
-namespace EncosyTower.SourceGen.TypeModeling
+namespace EncosyTower.SourceGen.TypeModeling.Models
 {
     public static class ModelExtractor
     {
         public static TypeModel ToModel(
-            this INamedTypeSymbol symbol,
-            CancellationToken token,
-            ModelOptions options = default)
+              this INamedTypeSymbol symbol
+            , CancellationToken token
+            , ModelOptions options = default
+        )
         {
             token.ThrowIfCancellationRequested();
 
@@ -47,12 +48,15 @@ namespace EncosyTower.SourceGen.TypeModeling
         }
 
         private static EquatableArray<string> ExtractInterfaces(
-            INamedTypeSymbol symbol,
-            ModelParts parts,
-            CancellationToken token)
+              INamedTypeSymbol symbol
+            , ModelParts parts
+            , CancellationToken token
+        )
         {
             if ((parts & ModelParts.Interfaces) == 0)
+            {
                 return default;
+            }
 
             token.ThrowIfCancellationRequested();
 
@@ -69,23 +73,29 @@ namespace EncosyTower.SourceGen.TypeModeling
         }
 
         private static EquatableArray<AttributeModel> ExtractTypeAttributes(
-            INamedTypeSymbol symbol,
-            ModelParts parts,
-            CancellationToken token)
+              INamedTypeSymbol symbol
+            , ModelParts parts
+            , CancellationToken token
+        )
         {
             if ((parts & ModelParts.Attributes) == 0)
+            {
                 return default;
+            }
 
             token.ThrowIfCancellationRequested();
             return ExtractAttributes(symbol.GetAttributes(), token);
         }
 
         private static EquatableArray<AttributeModel> ExtractAttributes(
-            ImmutableArray<AttributeData> attrData,
-            CancellationToken token)
+              ImmutableArray<AttributeData> attrData
+            , CancellationToken token
+        )
         {
             if (attrData.IsDefaultOrEmpty)
+            {
                 return default;
+            }
 
             using var builder = ImmutableArrayBuilder<AttributeModel>.Rent();
             var attrCount = attrData.Length;
@@ -123,13 +133,16 @@ namespace EncosyTower.SourceGen.TypeModeling
         }
 
         private static EquatableArray<FieldModel> ExtractFields(
-            INamedTypeSymbol symbol,
-            ModelParts parts,
-            ModelOptions options,
-            CancellationToken token)
+              INamedTypeSymbol symbol
+            , ModelParts parts
+            , ModelOptions options
+            , CancellationToken token
+        )
         {
             if ((parts & ModelParts.Fields) == 0)
+            {
                 return default;
+            }
 
             token.ThrowIfCancellationRequested();
 
@@ -143,9 +156,20 @@ namespace EncosyTower.SourceGen.TypeModeling
 
                 var member = members[i];
 
-                if (member is not IFieldSymbol field) continue;
-                if (options.IncludeCompilerGenerated == false && field.IsImplicitlyDeclared) continue;
-                if (options.IncludeNonPublic == false && field.DeclaredAccessibility != Accessibility.Public) continue;
+                if (member is not IFieldSymbol field)
+                {
+                    continue;
+                }
+
+                if (options.IncludeCompilerGenerated == false && field.IsImplicitlyDeclared)
+                {
+                    continue;
+                }
+
+                if (options.IncludeNonPublic == false && field.DeclaredAccessibility != Accessibility.Public)
+                {
+                    continue;
+                }
 
                 var attrs = (parts & ModelParts.Attributes) != 0
                     ? ExtractAttributes(field.GetAttributes(), token)
@@ -169,13 +193,16 @@ namespace EncosyTower.SourceGen.TypeModeling
         }
 
         private static EquatableArray<PropertyModel> ExtractProperties(
-            INamedTypeSymbol symbol,
-            ModelParts parts,
-            ModelOptions options,
-            CancellationToken token)
+              INamedTypeSymbol symbol
+            , ModelParts parts
+            , ModelOptions options
+            , CancellationToken token
+        )
         {
             if ((parts & ModelParts.Properties) == 0)
+            {
                 return default;
+            }
 
             token.ThrowIfCancellationRequested();
 
@@ -189,9 +216,20 @@ namespace EncosyTower.SourceGen.TypeModeling
 
                 var member = members[i];
 
-                if (member is not IPropertySymbol prop) continue;
-                if (options.IncludeCompilerGenerated == false && prop.IsImplicitlyDeclared) continue;
-                if (options.IncludeNonPublic == false && prop.DeclaredAccessibility != Accessibility.Public) continue;
+                if (member is not IPropertySymbol prop)
+                {
+                    continue;
+                }
+
+                if (options.IncludeCompilerGenerated == false && prop.IsImplicitlyDeclared)
+                {
+                    continue;
+                }
+
+                if (options.IncludeNonPublic == false && prop.DeclaredAccessibility != Accessibility.Public)
+                {
+                    continue;
+                }
 
                 var attrs = (parts & ModelParts.Attributes) != 0
                     ? ExtractAttributes(prop.GetAttributes(), token)
@@ -225,13 +263,16 @@ namespace EncosyTower.SourceGen.TypeModeling
         }
 
         private static EquatableArray<MethodModel> ExtractMethods(
-            INamedTypeSymbol symbol,
-            ModelParts parts,
-            ModelOptions options,
-            CancellationToken token)
+              INamedTypeSymbol symbol
+            , ModelParts parts
+            , ModelOptions options
+            , CancellationToken token
+        )
         {
             if ((parts & ModelParts.Methods) == 0)
+            {
                 return default;
+            }
 
             token.ThrowIfCancellationRequested();
 
@@ -245,10 +286,25 @@ namespace EncosyTower.SourceGen.TypeModeling
 
                 var member = members[i];
 
-                if (member is not IMethodSymbol method) continue;
-                if (method.MethodKind != MethodKind.Ordinary) continue;
-                if (options.IncludeCompilerGenerated == false && method.IsImplicitlyDeclared) continue;
-                if (options.IncludeNonPublic == false && method.DeclaredAccessibility != Accessibility.Public) continue;
+                if (member is not IMethodSymbol method)
+                {
+                    continue;
+                }
+
+                if (method.MethodKind != MethodKind.Ordinary)
+                {
+                    continue;
+                }
+
+                if (options.IncludeCompilerGenerated == false && method.IsImplicitlyDeclared)
+                {
+                    continue;
+                }
+
+                if (options.IncludeNonPublic == false && method.DeclaredAccessibility != Accessibility.Public)
+                {
+                    continue;
+                }
 
                 var attrs = (parts & ModelParts.Attributes) != 0
                     ? ExtractAttributes(method.GetAttributes(), token)
@@ -294,13 +350,16 @@ namespace EncosyTower.SourceGen.TypeModeling
         }
 
         private static EquatableArray<ConstructorModel> ExtractConstructors(
-            INamedTypeSymbol symbol,
-            ModelParts parts,
-            ModelOptions options,
-            CancellationToken token)
+              INamedTypeSymbol symbol
+            , ModelParts parts
+            , ModelOptions options
+            , CancellationToken token
+        )
         {
             if ((parts & ModelParts.Constructors) == 0)
+            {
                 return default;
+            }
 
             token.ThrowIfCancellationRequested();
 
@@ -314,10 +373,25 @@ namespace EncosyTower.SourceGen.TypeModeling
 
                 var member = members[i];
 
-                if (member is not IMethodSymbol method) continue;
-                if (method.MethodKind != MethodKind.Constructor) continue;
-                if (options.IncludeCompilerGenerated == false && method.IsImplicitlyDeclared) continue;
-                if (options.IncludeNonPublic == false && method.DeclaredAccessibility != Accessibility.Public) continue;
+                if (member is not IMethodSymbol method)
+                {
+                    continue;
+                }
+
+                if (method.MethodKind != MethodKind.Constructor)
+                {
+                    continue;
+                }
+
+                if (options.IncludeCompilerGenerated == false && method.IsImplicitlyDeclared)
+                {
+                    continue;
+                }
+
+                if (options.IncludeNonPublic == false && method.DeclaredAccessibility != Accessibility.Public)
+                {
+                    continue;
+                }
 
                 using var paramBuilder = ImmutableArrayBuilder<ParameterModel>.Rent();
                 var methodParams = method.Parameters;
@@ -339,13 +413,16 @@ namespace EncosyTower.SourceGen.TypeModeling
         }
 
         private static EquatableArray<EventModel> ExtractEvents(
-            INamedTypeSymbol symbol,
-            ModelParts parts,
-            ModelOptions options,
-            CancellationToken token)
+              INamedTypeSymbol symbol
+            , ModelParts parts
+            , ModelOptions options
+            , CancellationToken token
+        )
         {
             if ((parts & ModelParts.Events) == 0)
+            {
                 return default;
+            }
 
             token.ThrowIfCancellationRequested();
 
@@ -359,9 +436,20 @@ namespace EncosyTower.SourceGen.TypeModeling
 
                 var member = members[i];
 
-                if (member is not IEventSymbol ev) continue;
-                if (options.IncludeCompilerGenerated == false && ev.IsImplicitlyDeclared) continue;
-                if (options.IncludeNonPublic == false && ev.DeclaredAccessibility != Accessibility.Public) continue;
+                if (member is not IEventSymbol ev)
+                {
+                    continue;
+                }
+
+                if (options.IncludeCompilerGenerated == false && ev.IsImplicitlyDeclared)
+                {
+                    continue;
+                }
+
+                if (options.IncludeNonPublic == false && ev.DeclaredAccessibility != Accessibility.Public)
+                {
+                    continue;
+                }
 
                 var attrs = (parts & ModelParts.Attributes) != 0
                     ? ExtractAttributes(ev.GetAttributes(), token)
@@ -383,7 +471,9 @@ namespace EncosyTower.SourceGen.TypeModeling
         private static AccessorModel BuildAccessorModel(IMethodSymbol accessor)
         {
             if (accessor == null)
+            {
                 return new AccessorModel(false, string.Empty, false, false, RefKind.None);
+            }
 
             return new AccessorModel(
                   exists: true
@@ -403,7 +493,9 @@ namespace EncosyTower.SourceGen.TypeModeling
                 , refKind: p.RefKind
                 , ordinal: p.Ordinal
                 , hasDefaultValue: p.HasExplicitDefaultValue
-                , defaultValueText: p.HasExplicitDefaultValue ? (p.ExplicitDefaultValue?.ToString() ?? string.Empty) : string.Empty
+                , defaultValueText: p.HasExplicitDefaultValue
+                    ? (p.ExplicitDefaultValue?.ToString() ?? string.Empty)
+                    : string.Empty
             );
         }
     }

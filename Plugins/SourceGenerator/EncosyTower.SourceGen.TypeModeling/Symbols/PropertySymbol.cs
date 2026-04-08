@@ -1,7 +1,8 @@
 using System.Collections.Immutable;
+using EncosyTower.SourceGen.TypeModeling.Internal;
 using Microsoft.CodeAnalysis;
 
-namespace EncosyTower.SourceGen.TypeModeling
+namespace EncosyTower.SourceGen.TypeModeling.Symbols
 {
     public readonly struct PropertySymbol
     {
@@ -38,33 +39,64 @@ namespace EncosyTower.SourceGen.TypeModeling
         {
             get
             {
-                if (_symbol == null) return ImmutableArray<ParameterSymbol>.Empty;
-                var builder = ImmutableArray.CreateBuilder<ParameterSymbol>(_symbol.Parameters.Length);
-                foreach (var p in _symbol.Parameters)
-                    builder.Add(new ParameterSymbol(p));
+                if (_symbol == null)
+                {
+                    return ImmutableArray<ParameterSymbol>.Empty;
+                }
+
+                var rawParams = _symbol.Parameters;
+                var paramCount = rawParams.Length;
+
+                using var builder = ImmutableArrayBuilder<ParameterSymbol>.Rent();
+
+                for (var i = 0; i < paramCount; i++)
+                {
+                    builder.Add(new ParameterSymbol(rawParams[i]));
+                }
+
                 return builder.ToImmutable();
             }
         }
 
         public bool HasAttribute(string fullyQualifiedName)
         {
-            if (_symbol == null) return false;
-            foreach (var attr in _symbol.GetAttributes())
+            if (_symbol == null)
             {
-                if (attr.AttributeClass?.ToDisplayString(SymbolFormats.FullyQualified) == fullyQualifiedName)
-                    return true;
+                return false;
             }
+
+            var attrs = _symbol.GetAttributes();
+            var attrCount = attrs.Length;
+
+            for (var i = 0; i < attrCount; i++)
+            {
+                if (attrs[i].AttributeClass?.ToDisplayString(SymbolFormats.FullyQualified) == fullyQualifiedName)
+                {
+                    return true;
+                }
+            }
+
             return false;
         }
 
         public AttributeSymbol GetAttribute(string fullyQualifiedName)
         {
-            if (_symbol == null) return default;
-            foreach (var attr in _symbol.GetAttributes())
+            if (_symbol == null)
             {
-                if (attr.AttributeClass?.ToDisplayString(SymbolFormats.FullyQualified) == fullyQualifiedName)
-                    return new AttributeSymbol(attr);
+                return default;
             }
+
+            var attrs = _symbol.GetAttributes();
+            var attrCount = attrs.Length;
+
+            for (var i = 0; i < attrCount; i++)
+            {
+                if (attrs[i].AttributeClass?.ToDisplayString(SymbolFormats.FullyQualified) == fullyQualifiedName)
+                {
+                    return new AttributeSymbol(attrs[i]);
+                }
+            }
+
             return default;
         }
 

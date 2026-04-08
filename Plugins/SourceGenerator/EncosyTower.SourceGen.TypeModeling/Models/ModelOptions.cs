@@ -1,4 +1,4 @@
-namespace EncosyTower.SourceGen.TypeModeling
+namespace EncosyTower.SourceGen.TypeModeling.Models
 {
     public readonly struct ModelOptions
     {
@@ -7,9 +7,10 @@ namespace EncosyTower.SourceGen.TypeModeling
         public readonly bool IncludeCompilerGenerated;
 
         public ModelOptions(
-            ModelParts parts = ModelParts.All,
-            bool includeNonPublic = true,
-            bool includeCompilerGenerated = false)
+              ModelParts parts = ModelParts.All
+            , bool includeNonPublic = true
+            , bool includeCompilerGenerated = false
+        )
         {
             Parts = parts;
             IncludeNonPublic = includeNonPublic;

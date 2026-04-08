@@ -1,7 +1,7 @@
 using System;
 using EncosyTower.SourceGen.TypeModeling.Internal;
 
-namespace EncosyTower.SourceGen.TypeModeling
+namespace EncosyTower.SourceGen.TypeModeling.Models
 {
     public readonly struct ConstructorModel : IEquatable<ConstructorModel>
     {

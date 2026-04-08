@@ -1,6 +1,7 @@
+using EncosyTower.SourceGen.TypeModeling.Internal;
 using Microsoft.CodeAnalysis;
 
-namespace EncosyTower.SourceGen.TypeModeling
+namespace EncosyTower.SourceGen.TypeModeling.Symbols
 {
     public readonly struct ParameterSymbol
     {

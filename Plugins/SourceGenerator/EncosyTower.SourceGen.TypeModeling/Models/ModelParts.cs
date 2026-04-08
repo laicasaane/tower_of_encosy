@@ -1,6 +1,6 @@
 using System;
 
-namespace EncosyTower.SourceGen.TypeModeling
+namespace EncosyTower.SourceGen.TypeModeling.Models
 {
     [Flags]
     public enum ModelParts

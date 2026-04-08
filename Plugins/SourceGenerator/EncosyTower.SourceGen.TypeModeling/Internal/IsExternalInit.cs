@@ -1,4 +1,4 @@
-namespace System.Runtime.CompilerServices
+namespace EncosyTower.SourceGen.TypeModeling.Internal
 {
     internal sealed class IsExternalInit
     {
