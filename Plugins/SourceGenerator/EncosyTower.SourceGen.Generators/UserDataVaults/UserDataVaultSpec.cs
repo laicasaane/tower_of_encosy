@@ -6,7 +6,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
     /// Cache-friendly, equatable pipeline data extracted from a <c>[UserDataVault]</c>-attributed class.
     /// Replaces the former <c>UserDataVaultCandidate</c> struct as the incremental pipeline model.
     /// </summary>
-    internal struct UserDataVaultInfo : IEquatable<UserDataVaultInfo>
+    internal struct UserDataVaultSpec : IEquatable<UserDataVaultSpec>
     {
         /// <summary>Excluded from equality/hash — location is not stable across incremental runs.</summary>
         public LocationInfo location;
@@ -42,12 +42,12 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         public readonly bool IsValid
             => string.IsNullOrEmpty(metadataName) == false;
 
-        public readonly bool Equals(UserDataVaultInfo other)
+        public readonly bool Equals(UserDataVaultSpec other)
             => string.Equals(metadataName, other.metadataName, StringComparison.Ordinal)
             && isStatic == other.isStatic;
 
         public readonly override bool Equals(object obj)
-            => obj is UserDataVaultInfo other && Equals(other);
+            => obj is UserDataVaultSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(metadataName, isStatic);

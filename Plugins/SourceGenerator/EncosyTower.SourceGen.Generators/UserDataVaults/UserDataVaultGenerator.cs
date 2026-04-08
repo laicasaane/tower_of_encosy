@@ -56,7 +56,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             });
         }
 
-        private static UserDataVaultInfo GetVaultInfo(
+        private static UserDataVaultSpec GetVaultInfo(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -75,7 +75,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             var syntaxTree = context.TargetNode.SyntaxTree;
             var containingNs = symbol.ContainingNamespace;
 
-            return new UserDataVaultInfo {
+            return new UserDataVaultSpec {
                 location = LocationInfo.From(context.TargetNode.GetLocation()),
                 metadataName = symbol.ToSimpleName(),
                 className = symbol.Name,
@@ -89,7 +89,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             };
         }
 
-        private static UserDataAccessorInfo GetAccessorInfo(
+        private static UserDataAccessorSpec GetAccessorInfo(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -181,12 +181,12 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             var constructor = constructors[constructorIndex];
             var parameters = constructor.Parameters;
-            using var builder = ImmutableArrayBuilder<AccessorArgInfo>.Rent();
+            using var builder = ImmutableArrayBuilder<AccessorArgSpec>.Rent();
             var isValid = true;
 
             foreach (var param in parameters)
             {
-                if (ParamDefinition.TryGetParam(param.Type, out var argType))
+                if (ParamDeclaration.TryGetParam(param.Type, out var argType))
                 {
                     var dataTypeHasDefaultConstructor = false;
 
@@ -211,7 +211,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         dataTypeHasDefaultConstructor = defaultCount > 0 || nonDefaultCount < 1;
                     }
 
-                    builder.Add(new AccessorArgInfo(
+                    builder.Add(new AccessorArgSpec(
                           isStore: argType != null
                         , fullTypeName: param.Type.ToFullName()
                         , fullDataTypeName: argType?.ToFullName() ?? string.Empty
@@ -225,7 +225,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 }
             }
 
-            return new UserDataAccessorInfo {
+            return new UserDataAccessorSpec {
                 location = LocationInfo.From(context.TargetNode.GetLocation()),
                 metadataName = symbol.ToSimpleName(),
                 vaultMetadataName = vaultMetadataName,
@@ -241,8 +241,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo compilation
-            , UserDataVaultInfo vaultInfo
-            , ImmutableArray<UserDataAccessorInfo> accessorInfos
+            , UserDataVaultSpec vaultInfo
+            , ImmutableArray<UserDataAccessorSpec> accessorInfos
             , string projectPath
             , bool outputSourceGenFiles
         )
@@ -254,7 +254,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            var accessDeclarations = new List<UserDataAccessorDefinition>(accessorInfos.Length);
+            var accessDeclarations = new List<UserDataAccessorDeclaration>(accessorInfos.Length);
 
             for (var i = 0; i < accessorInfos.Length; i++)
             {
@@ -267,7 +267,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     continue;
                 }
 
-                var accessDeclaration = new UserDataAccessorDefinition(aInfo);
+                var accessDeclaration = new UserDataAccessorDeclaration(aInfo);
 
                 if (accessDeclaration.IsValid)
                 {

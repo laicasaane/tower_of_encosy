@@ -8,12 +8,12 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         public bool IsStatic { get; }
 
-        public List<UserDataAccessorDefinition> AccessorDefs { get; }
+        public List<UserDataAccessorDeclaration> AccessorDefs { get; }
 
         public UserDataVaultDeclaration(
               string className
             , bool isStatic
-            , List<UserDataAccessorDefinition> accessorDefs
+            , List<UserDataAccessorDeclaration> accessorDefs
         )
         {
             ClassName = className;

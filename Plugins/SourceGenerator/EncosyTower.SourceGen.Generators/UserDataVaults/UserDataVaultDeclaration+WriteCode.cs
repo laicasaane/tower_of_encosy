@@ -11,7 +11,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         public string WriteCode()
         {
             var accessorDefs = AccessorDefs;
-            var storeDefs = new HashSet<StoreDefinition>();
+            var storeDefs = new HashSet<StoreSpec>();
 
             foreach (var accessorDef in accessorDefs)
             {
@@ -374,7 +374,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private static void WriteStringIdCollection(ref Printer p, ReadOnlySpan<StoreDefinition> defs)
+        private static void WriteStringIdCollection(ref Printer p, ReadOnlySpan<StoreSpec> defs)
         {
             p.PrintLine("/// <summary>");
             p.PrintLine("/// An immutable collection of <see cref=\"StringId{T}\" /> values identifying");
@@ -611,10 +611,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private static void WriteAccessorCollection(ref Printer p, List<UserDataAccessorDefinition> defs)
+        private static void WriteAccessorCollection(ref Printer p, List<UserDataAccessorDeclaration> defs)
         {
             var typeSet = new HashSet<string>(StringComparer.Ordinal);
-            var queue = new Queue<UserDataAccessorDefinition>(defs.Count);
+            var queue = new Queue<UserDataAccessorDeclaration>(defs.Count);
             var loopMap = new Dictionary<string, int>(defs.Count, StringComparer.Ordinal);
 
             foreach (var def in defs)
@@ -872,7 +872,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             return;
 
-            static void Write(ref Printer p, UserDataAccessorDefinition def)
+            static void Write(ref Printer p, UserDataAccessorDeclaration def)
             {
                 if (def.Args.Count < 2)
                 {
@@ -924,7 +924,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
         }
 
-        private void WriteReadOnlyAccessorCollection(ref Printer p, List<UserDataAccessorDefinition> defs)
+        private void WriteReadOnlyAccessorCollection(ref Printer p, List<UserDataAccessorDeclaration> defs)
         {
             p.PrintLine("/// <summary>");
             p.PrintLine("/// A read-only view of <see cref=\"AccessorCollection\" /> that provides immutable,");
@@ -1113,9 +1113,9 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private void WriteDataDirectory(ref Printer p, ReadOnlySpan<StoreDefinition> defs)
+        private void WriteDataDirectory(ref Printer p, ReadOnlySpan<StoreSpec> defs)
         {
-            var generateCreateMethods = new List<StoreDefinition>(defs.Length);
+            var generateCreateMethods = new List<StoreSpec>(defs.Length);
 
             p.PrintLine("/// <summary>");
             p.PrintLine("/// Manages the underlying data stores for all user data types, coordinating");
@@ -1524,7 +1524,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private void WriteDataCollection(ref Printer p, ReadOnlySpan<StoreDefinition> defs)
+        private void WriteDataCollection(ref Printer p, ReadOnlySpan<StoreSpec> defs)
         {
             p.PrintLine("/// <summary>");
             p.PrintLine("/// A serializable, value-type snapshot of all user data instances belonging to a single user.");

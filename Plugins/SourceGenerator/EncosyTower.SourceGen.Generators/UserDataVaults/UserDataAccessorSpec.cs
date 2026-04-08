@@ -6,7 +6,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
     /// Cache-friendly, equatable representation of one constructor parameter of a
     /// <c>[UserDataAccessor]</c> class, extracted during the incremental pipeline transform.
     /// </summary>
-    internal readonly struct AccessorArgInfo : IEquatable<AccessorArgInfo>
+    internal readonly struct AccessorArgSpec : IEquatable<AccessorArgSpec>
     {
         /// <summary>
         /// <see langword="true"/> if this parameter is a concrete <c>UserDataStoreBase&lt;T&gt;</c>;
@@ -38,7 +38,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         /// </summary>
         public readonly bool DataTypeHasDefaultConstructor;
 
-        public AccessorArgInfo(
+        public AccessorArgSpec(
               bool isStore
             , string fullTypeName
             , string fullDataTypeName
@@ -53,7 +53,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             DataTypeHasDefaultConstructor = dataTypeHasDefaultConstructor;
         }
 
-        public readonly bool Equals(AccessorArgInfo other)
+        public readonly bool Equals(AccessorArgSpec other)
             => IsStore == other.IsStore
             && string.Equals(FullTypeName, other.FullTypeName, StringComparison.Ordinal)
             && string.Equals(FullDataTypeName, other.FullDataTypeName, StringComparison.Ordinal)
@@ -61,7 +61,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             && DataTypeHasDefaultConstructor == other.DataTypeHasDefaultConstructor;
 
         public readonly override bool Equals(object obj)
-            => obj is AccessorArgInfo other && Equals(other);
+            => obj is AccessorArgSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(IsStore, FullTypeName, FullDataTypeName, TypeName)
@@ -72,7 +72,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
     /// Cache-friendly, equatable data extracted from a <c>[UserDataAccessor]</c>-attributed class
     /// during the incremental source-generation pipeline.
     /// </summary>
-    internal struct UserDataAccessorInfo : IEquatable<UserDataAccessorInfo>
+    internal struct UserDataAccessorSpec : IEquatable<UserDataAccessorSpec>
     {
         /// <summary>Excluded from equality/hash — location is not stable across incremental runs.</summary>
         public LocationInfo location;
@@ -102,7 +102,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         /// <summary>
         /// Pre-extracted constructor argument data for cache equality and diagnostic pre-filtering.
         /// </summary>
-        public EquatableArray<AccessorArgInfo> args;
+        public EquatableArray<AccessorArgSpec> args;
 
         /// <summary>
         /// <see langword="true"/> when the accessor class implements
@@ -122,7 +122,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         /// </summary>
         public bool isValid;
 
-        public readonly bool Equals(UserDataAccessorInfo other)
+        public readonly bool Equals(UserDataAccessorSpec other)
             => string.Equals(metadataName, other.metadataName, StringComparison.Ordinal)
             && string.Equals(vaultMetadataName, other.vaultMetadataName, StringComparison.Ordinal)
             && string.Equals(fieldName, other.fieldName, StringComparison.Ordinal)
@@ -133,7 +133,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             && args.Equals(other.args);
 
         public readonly override bool Equals(object obj)
-            => obj is UserDataAccessorInfo other && Equals(other);
+            => obj is UserDataAccessorSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(metadataName, vaultMetadataName, fieldName, symbolName)

@@ -6,7 +6,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 {
     using static Helpers;
 
-    internal class UserDataAccessorDefinition
+    internal class UserDataAccessorDeclaration
     {
         public bool IsValid { get; }
 
@@ -21,13 +21,13 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         public bool IsDeinitializable { get; }
 
-        public List<ParamDefinition> Args { get; }
+        public List<ParamDeclaration> Args { get; }
 
         /// <summary>
         /// Cache-friendly constructor: builds the definition purely from pre-extracted
-        /// <see cref="UserDataAccessorInfo"/> data — no symbol or syntax access.
+        /// <see cref="UserDataAccessorSpec"/> data — no symbol or syntax access.
         /// </summary>
-        public UserDataAccessorDefinition(UserDataAccessorInfo info)
+        public UserDataAccessorDeclaration(UserDataAccessorSpec info)
         {
             SymbolName = info.symbolName;
             FullTypeName = "global::" + info.metadataName;
@@ -41,7 +41,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             foreach (var arg in infoArgs)
             {
-                args.Add(new ParamDefinition(arg));
+                args.Add(new ParamDeclaration(arg));
                 validCount += 1;
             }
 
@@ -52,7 +52,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         /// Symbol-based constructor retained for use by <see cref="UserDataVaultDiagnosticAnalyzer"/>
         /// (which operates at analysis time and has live symbol access).
         /// </summary>
-        public UserDataAccessorDefinition(INamedTypeSymbol symbol)
+        public UserDataAccessorDeclaration(INamedTypeSymbol symbol)
         {
             SymbolName = symbol.Name;
             FullTypeName = symbol.ToFullName();
@@ -131,9 +131,9 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 foreach (var param in parameters)
                 {
-                    if (ParamDefinition.TryGetParam(param.Type, out var argType))
+                    if (ParamDeclaration.TryGetParam(param.Type, out var argType))
                     {
-                        args.Add(new ParamDefinition(param.Type, argType));
+                        args.Add(new ParamDeclaration(param.Type, argType));
                         validCount += 1;
                     }
                     else
@@ -147,9 +147,9 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         }
     }
 
-    internal readonly struct ParamDefinition
+    internal readonly struct ParamDeclaration
     {
-        public readonly StoreDefinition StoreDef;
+        public readonly StoreSpec StoreDef;
 
         /// <summary>
         /// Simple (unqualified) name of the <c>IUserDataAccessor</c> parameter type.
@@ -157,12 +157,12 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         /// </summary>
         public readonly string AccessorTypeName;
 
-        /// <summary>Cache-friendly constructor from pre-extracted <see cref="AccessorArgInfo"/>.</summary>
-        public ParamDefinition(AccessorArgInfo info)
+        /// <summary>Cache-friendly constructor from pre-extracted <see cref="AccessorArgSpec"/>.</summary>
+        public ParamDeclaration(AccessorArgSpec info)
         {
             if (info.IsStore)
             {
-                StoreDef = new StoreDefinition(
+                StoreDef = new StoreSpec(
                       info.FullTypeName
                     , info.FullDataTypeName
                     , info.TypeName
@@ -178,11 +178,11 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         }
 
         /// <summary>Symbol-based constructor for the legacy analysis-time path.</summary>
-        public ParamDefinition(ITypeSymbol type, ITypeSymbol argType)
+        public ParamDeclaration(ITypeSymbol type, ITypeSymbol argType)
         {
             if (argType != null)
             {
-                StoreDef = new StoreDefinition(type, argType);
+                StoreDef = new StoreSpec(type, argType);
                 AccessorTypeName = string.Empty;
             }
             else
@@ -216,7 +216,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         }
     }
 
-    internal readonly struct StoreDefinition : IEquatable<StoreDefinition>
+    internal readonly struct StoreSpec : IEquatable<StoreSpec>
     {
         public readonly string FullStoreTypeName;
         public readonly string FullDataTypeName;
@@ -230,7 +230,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         public readonly bool DataTypeHasDefaultConstructor;
 
         /// <summary>Cache-friendly constructor from pre-extracted string data.</summary>
-        public StoreDefinition(
+        public StoreSpec(
               string fullStoreTypeName
             , string fullDataTypeName
             , string dataTypeName
@@ -246,7 +246,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         }
 
         /// <summary>Symbol-based constructor for the legacy analysis-time path.</summary>
-        public StoreDefinition(ITypeSymbol storeType, ITypeSymbol dataType)
+        public StoreSpec(ITypeSymbol storeType, ITypeSymbol dataType)
         {
             FullStoreTypeName = storeType.ToFullName();
             FullDataTypeName = dataType.ToFullName();
@@ -276,11 +276,11 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             return defaultCount > 0 || nonDefaultCount < 1;
         }
 
-        public bool Equals(StoreDefinition other)
+        public bool Equals(StoreSpec other)
             => string.Equals(FullStoreTypeName, other.FullStoreTypeName, StringComparison.Ordinal);
 
         public override bool Equals(object obj)
-            => obj is StoreDefinition other && Equals(other);
+            => obj is StoreSpec other && Equals(other);
 
         public override int GetHashCode()
             => FullStoreTypeName is null ? 0 : FullStoreTypeName.GetHashCode();
