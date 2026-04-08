@@ -86,7 +86,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             });
         }
 
-        private static LookupDefinition GetSemanticMatch(
+        private static LookupSpec GetSemanticMatch(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -115,7 +115,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             GetLookupInterfaces(kind, out var interfaceLookupRO, out var interfaceLookupRW);
             GetRequiredEcsInterfaces(kind, out var ecsInterface1, out var ecsInterface2);
 
-            using var typeRefsBuilder = ImmutableArrayBuilder<TypeRefModel>.Rent();
+            using var typeRefsBuilder = ImmutableArrayBuilder<TypeRefSpec>.Rent();
             var typeHash = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 
             foreach (var attribute in context.Attributes)
@@ -148,7 +148,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
                 if (typeHash.Add(type))
                 {
-                    typeRefsBuilder.Add(new TypeRefModel {
+                    typeRefsBuilder.Add(new TypeRefSpec {
                         typeName = type.ToFullName(),
                         typeIdentifier = type.ToValidIdentifier(),
                         typeShortName = type.Name,
@@ -181,7 +181,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
                     : PrintAdditionalUsings
             );
 
-            return new LookupDefinition {
+            return new LookupSpec {
                 structName = structSymbol.Name,
                 hintName = hintName,
                 sourceFilePath = sourceFilePath,
@@ -307,7 +307,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo _
-            , LookupDefinition candidate
+            , LookupSpec candidate
             , string projectPath
             , bool outputSourceGenFiles
         )

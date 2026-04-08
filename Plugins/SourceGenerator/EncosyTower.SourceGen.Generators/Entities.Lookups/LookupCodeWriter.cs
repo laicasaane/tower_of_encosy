@@ -11,18 +11,18 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         public static LookupCodeWriter GetWriter(LookupKind kind)
         {
             return kind switch {
-                LookupKind.Buffer                     => new BufferLookupCodeWriter(),
-                LookupKind.Component                  => new ComponentLookupCodeWriter(),
-                LookupKind.EnableableBuffer           => new EnableableBufferLookupCodeWriter(),
-                LookupKind.EnableableComponent        => new EnableableComponentLookupCodeWriter(),
-                LookupKind.PhysicsBuffer              => new PhysicsBufferLookupCodeWriter(),
-                LookupKind.PhysicsComponent           => new PhysicsComponentLookupCodeWriter(),
+                LookupKind.Buffer => new BufferLookupCodeWriter(),
+                LookupKind.Component => new ComponentLookupCodeWriter(),
+                LookupKind.EnableableBuffer => new EnableableBufferLookupCodeWriter(),
+                LookupKind.EnableableComponent => new EnableableComponentLookupCodeWriter(),
+                LookupKind.PhysicsBuffer => new PhysicsBufferLookupCodeWriter(),
+                LookupKind.PhysicsComponent => new PhysicsComponentLookupCodeWriter(),
                 LookupKind.PhysicsEnableableComponent => new PhysicsEnableableComponentLookupCodeWriter(),
-                _                                     => new BufferLookupCodeWriter(),
+                _ => new BufferLookupCodeWriter(),
             };
         }
 
-        public string Write(LookupDefinition definition)
+        public string Write(LookupSpec definition)
         {
             var p = Printer.DefaultLarge;
 
@@ -50,7 +50,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             return p.Result;
         }
 
-        private static void WriteInterfaces(ref Printer p, LookupDefinition definition)
+        private static void WriteInterfaces(ref Printer p, LookupSpec definition)
         {
             if (definition.typeRefs.Count < 1)
             {
@@ -76,7 +76,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             p = p.DecreasedIndent();
         }
 
-        protected static void WriteFields(ref Printer p, LookupDefinition definition, string lookup)
+        protected static void WriteFields(ref Printer p, LookupSpec definition, string lookup)
         {
             foreach (var typeRef in definition.typeRefs)
             {
@@ -98,12 +98,12 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             p.PrintEndLine();
         }
 
-        protected static void WriteConstructor(ref Printer p, LookupDefinition definition, string getLookup)
+        protected static void WriteConstructor(ref Printer p, LookupSpec definition, string getLookup)
         {
             Write(ref p, definition, getLookup, "ref UE.SystemState state", "state");
             Write(ref p, definition, getLookup, "UE.SystemBase system", "system");
 
-            static void Write(ref Printer p, LookupDefinition definition, string getLookup, string arg, string variable)
+            static void Write(ref Printer p, LookupSpec definition, string getLookup, string arg, string variable)
             {
                 p.PrintLine(PR_EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public ")
@@ -129,12 +129,12 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             }
         }
 
-        protected static void WriteUpdateMethods(ref Printer p, LookupDefinition definition)
+        protected static void WriteUpdateMethods(ref Printer p, LookupSpec definition)
         {
             Write(ref p, definition, "ref UE.SystemState state", "ref state");
             Write(ref p, definition, "UE.SystemBase system", "system");
 
-            static void Write(ref Printer p, LookupDefinition definition, string arg0, string arg1)
+            static void Write(ref Printer p, LookupSpec definition, string arg0, string arg1)
             {
                 p.PrintLineIf(definition.typeRefs.Count < 2, PR_GENERATED_CODE);
                 p.PrintLine(PR_EXCLUDE_COVERAGE);
@@ -164,10 +164,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             p.PrintEndLine();
         }
 
-        protected static string GetLookupFieldName(TypeRefModel typeRef)
+        protected static string GetLookupFieldName(TypeRefSpec typeRef)
             => $"_lookup_{typeRef.typeIdentifier}";
 
-        protected static string GetLookupVarName(TypeRefModel typeRef)
+        protected static string GetLookupVarName(TypeRefSpec typeRef)
             => $"lookup_{typeRef.typeIdentifier}";
 
         protected static void WriteAttributes(ref Printer p)
@@ -182,6 +182,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             p.PrintLine(PR_GENERATED_CODE).PrintLine(PR_EXCLUDE_COVERAGE);
         }
 
-        protected abstract void WriteStructBody(ref Printer p, LookupDefinition definition);
+        protected abstract void WriteStructBody(ref Printer p, LookupSpec definition);
     }
 }

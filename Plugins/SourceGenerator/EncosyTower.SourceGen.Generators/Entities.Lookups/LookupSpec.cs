@@ -14,7 +14,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         PhysicsEnableableComponent,
     }
 
-    internal struct TypeRefModel : IEquatable<TypeRefModel>
+    internal struct TypeRefSpec : IEquatable<TypeRefSpec>
     {
         /// <summary>Full qualified type name (e.g. global::My.Namespace.MyType)</summary>
         public string typeName;
@@ -33,9 +33,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is TypeRefModel other && Equals(other);
+            => obj is TypeRefSpec other && Equals(other);
 
-        public readonly bool Equals(TypeRefModel other)
+        public readonly bool Equals(TypeRefSpec other)
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(typeIdentifier, other.typeIdentifier, StringComparison.Ordinal)
             && string.Equals(typeShortName, other.typeShortName, StringComparison.Ordinal)
@@ -46,9 +46,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             => HashValue.Combine(typeName, typeIdentifier, typeShortName).Add(isReadOnly);
     }
 
-    internal struct LookupDefinition : IEquatable<LookupDefinition>
+    internal struct LookupSpec : IEquatable<LookupSpec>
     {
-        /// <summary>Excluded from <see cref="Equals(LookupDefinition)"/> and
+        /// <summary>Excluded from <see cref="Equals(LookupSpec)"/> and
         /// <see cref="GetHashCode"/> — location data is not stable across incremental runs.</summary>
         public LocationInfo location;
 
@@ -61,7 +61,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         public string interfaceLookupRO;
         public string interfaceLookupRW;
         public LookupKind kind;
-        public EquatableArray<TypeRefModel> typeRefs;
+        public EquatableArray<TypeRefSpec> typeRefs;
 
         public readonly bool IsValid
             => kind != LookupKind.None
@@ -74,9 +74,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is LookupDefinition other && Equals(other);
+            => obj is LookupSpec other && Equals(other);
 
-        public readonly bool Equals(LookupDefinition other)
+        public readonly bool Equals(LookupSpec other)
             => kind == other.kind
             && string.Equals(structName, other.structName, StringComparison.Ordinal)
             && string.Equals(hintName, other.hintName, StringComparison.Ordinal)

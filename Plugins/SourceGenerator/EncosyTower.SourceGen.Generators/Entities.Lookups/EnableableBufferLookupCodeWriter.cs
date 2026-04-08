@@ -7,7 +7,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         private const string PR_ENABLED_REFRW = "UE.EnabledRefRW<";
         private const string PR_ENABLED_REFRO = "UE.EnabledRefRO<";
 
-        protected override void WriteStructBody(ref Printer p, LookupDefinition definition)
+        protected override void WriteStructBody(ref Printer p, LookupSpec definition)
         {
             WriteFields(ref p, definition, PR_LOOKUP);
             WriteConstructor(ref p, definition, "GetBufferLookup");
@@ -15,7 +15,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             WriteConcreteMethods(ref p, definition);
         }
 
-        private static void WriteConcreteMethods(ref Printer p, LookupDefinition definition)
+        private static void WriteConcreteMethods(ref Printer p, LookupSpec definition)
         {
             var writeLookupCommon = false;
 
