@@ -47,7 +47,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             });
         }
 
-        public static VariantDeclaration GetSemanticMatch(
+        public static VariantSpec GetSemanticMatch(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -94,7 +94,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo compilation
-            , ImmutableArray<VariantDeclaration> candidates
+            , ImmutableArray<VariantSpec> candidates
             , string projectPath
             , bool outputSourceGenFiles
         )
@@ -108,8 +108,8 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
             try
             {
-                using var uniqueBuilder = ImmutableArrayBuilder<VariantDeclaration>.Rent();
-                using var redundants = ImmutableArrayBuilder<VariantDeclaration>.Rent();
+                using var uniqueBuilder = ImmutableArrayBuilder<VariantSpec>.Rent();
+                using var redundants = ImmutableArrayBuilder<VariantSpec>.Rent();
                 var seenTypeNames = new HashSet<string>(StringComparer.Ordinal);
 
                 foreach (var candidate in candidates)
@@ -124,7 +124,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                     }
                 }
 
-                VariantDeclarationWriteCode.WriteStaticRegistrationClass(
+                VariantSpecWriteCode.WriteStaticRegistrationClass(
                       ref context
                     , uniqueBuilder.ToImmutable()
                     , compilation
@@ -135,7 +135,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
                 foreach (var redundant in redundants.ToImmutable())
                 {
-                    VariantDeclarationWriteCode.WriteRedundantTypeMarker(
+                    VariantSpecWriteCode.WriteRedundantTypeMarker(
                           ref context
                         , in redundant
                         , compilation

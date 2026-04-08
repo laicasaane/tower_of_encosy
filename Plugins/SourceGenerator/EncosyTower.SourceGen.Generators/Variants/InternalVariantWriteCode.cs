@@ -19,7 +19,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
         public static void WriteVariantCode(
               ref SourceProductionContext context
-            , in InternalVariantDeclaration decl
+            , in InternalVariantSpec decl
             , string assemblyName
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
@@ -55,7 +55,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             }
         }
 
-        private static string BuildVariantSource(in InternalVariantDeclaration decl, string assemblyName)
+        private static string BuildVariantSource(in InternalVariantSpec decl, string assemblyName)
         {
             var typeName = decl.fullTypeName;
             var structName = decl.structName;
@@ -101,8 +101,8 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
         public static void WriteStaticClass(
               ref SourceProductionContext context
-            , ImmutableArray<InternalVariantDeclaration> valueTypes
-            , ImmutableArray<InternalVariantDeclaration> refTypes
+            , ImmutableArray<InternalVariantSpec> valueTypes
+            , ImmutableArray<InternalVariantSpec> refTypes
             , string assemblyName
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
@@ -139,8 +139,8 @@ namespace EncosyTower.SourceGen.Generators.Variants
         }
 
         private static string BuildStaticClassSource(
-              ImmutableArray<InternalVariantDeclaration> valueTypes
-            , ImmutableArray<InternalVariantDeclaration> refTypes
+              ImmutableArray<InternalVariantSpec> valueTypes
+            , ImmutableArray<InternalVariantSpec> refTypes
             , string assemblyName
         )
         {

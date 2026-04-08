@@ -2,21 +2,21 @@ using System;
 
 namespace EncosyTower.SourceGen.Generators.Variants
 {
-    public partial struct VariantDeclaration : IEquatable<VariantDeclaration>
+    public partial struct VariantSpec : IEquatable<VariantSpec>
     {
         /// <summary>Excluded from equality/hash — location is not stable across incremental runs.</summary>
         public LocationInfo location;
 
         /// <summary>
         /// Pre-generated namespace/outer-type opening source text.
-        /// Intentionally excluded from <see cref="Equals(VariantDeclaration)"/>
+        /// Intentionally excluded from <see cref="Equals(VariantSpec)"/>
         /// and <see cref="GetHashCode"/>: derived from syntax, not a stable cache key.
         /// </summary>
         public string openingSource;
 
         /// <summary>
         /// Pre-generated closing braces that match <see cref="openingSource"/>.
-        /// Intentionally excluded from <see cref="Equals(VariantDeclaration)"/>
+        /// Intentionally excluded from <see cref="Equals(VariantSpec)"/>
         /// and <see cref="GetHashCode"/>: derived from syntax, not a stable cache key.
         /// </summary>
         public string closingSource;
@@ -104,7 +104,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             && string.IsNullOrEmpty(converterDefault) == false
             ;
 
-        public readonly bool Equals(VariantDeclaration other)
+        public readonly bool Equals(VariantSpec other)
             => string.Equals(fullTypeName, other.fullTypeName, StringComparison.Ordinal)
             && string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(converterDefault, other.converterDefault, StringComparison.Ordinal)
@@ -120,7 +120,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is VariantDeclaration other && Equals(other);
+            => obj is VariantSpec other && Equals(other);
 
         public readonly override int GetHashCode()
         {

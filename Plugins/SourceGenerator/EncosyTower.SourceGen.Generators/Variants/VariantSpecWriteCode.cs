@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Variants
 {
-    internal static class VariantDeclarationWriteCode
+    internal static class VariantSpecWriteCode
     {
         private const string GENERATOR_NAME_REG = "VariantRegistrationDeclaration";
 
@@ -16,7 +16,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
         public static void WriteStaticRegistrationClass(
               ref SourceProductionContext context
-            , ImmutableArray<VariantDeclaration> declarations
+            , ImmutableArray<VariantSpec> declarations
             , CompilationInfo compilation
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
@@ -54,7 +54,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
         }
 
         private static string BuildRegistrationClassSource(
-              ImmutableArray<VariantDeclaration> declarations
+              ImmutableArray<VariantSpec> declarations
             , string assemblyName
         )
         {
@@ -147,7 +147,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
         public static void WriteRedundantTypeMarker(
               ref SourceProductionContext context
-            , in VariantDeclaration declaration
+            , in VariantSpec declaration
             , CompilationInfo compilation
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
@@ -183,7 +183,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             }
         }
 
-        private static string BuildRedundantTypeSource(in VariantDeclaration declaration)
+        private static string BuildRedundantTypeSource(in VariantSpec declaration)
         {
             var p = Printer.DefaultLarge;
 

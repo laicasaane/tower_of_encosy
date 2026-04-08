@@ -2,7 +2,7 @@ using System;
 
 namespace EncosyTower.SourceGen.Generators.Variants
 {
-    internal partial struct InternalVariantDeclaration : IEquatable<InternalVariantDeclaration>
+    internal partial struct InternalVariantSpec : IEquatable<InternalVariantSpec>
     {
         /// <summary>Excluded from equality/hash — location is not stable across incremental runs.</summary>
         public LocationInfo location;
@@ -71,7 +71,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             && string.IsNullOrEmpty(converterDefault) == false
             ;
 
-        public readonly bool Equals(InternalVariantDeclaration other)
+        public readonly bool Equals(InternalVariantSpec other)
             => string.Equals(fullTypeName, other.fullTypeName, StringComparison.Ordinal)
             && string.Equals(simpleTypeName, other.simpleTypeName, StringComparison.Ordinal)
             && string.Equals(structName, other.structName, StringComparison.Ordinal)
@@ -84,7 +84,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is InternalVariantDeclaration other && Equals(other);
+            => obj is InternalVariantSpec other && Equals(other);
 
         public readonly override int GetHashCode()
         {

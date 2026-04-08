@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Variants
 {
-    partial struct VariantDeclaration
+    partial struct VariantSpec
     {
         private const string GENERATOR_NAME_STRUCT = "VariantStructDeclaration";
 

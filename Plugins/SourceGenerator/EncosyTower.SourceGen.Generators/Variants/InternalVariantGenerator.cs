@@ -66,7 +66,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 || (typeName is "CachedVariantConverter" && memberName is "Default");
         }
 
-        private static InternalVariantDeclaration GetSemanticMatch(
+        private static InternalVariantSpec GetSemanticMatch(
               GeneratorSyntaxContext context
             , CancellationToken token
         )
@@ -108,7 +108,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             return BuildDeclaration(typeArg, LocationInfo.From(context.Node.GetLocation()), token);
         }
 
-        internal static InternalVariantDeclaration BuildDeclaration(
+        internal static InternalVariantSpec BuildDeclaration(
               INamedTypeSymbol typeArg
             , LocationInfo location
             , CancellationToken token
@@ -134,7 +134,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 unmanagedSize = size;
             }
 
-            return new InternalVariantDeclaration {
+            return new InternalVariantSpec {
                 location = location,
                 fullTypeName = fullTypeName,
                 simpleTypeName = typeArg.ToSimpleName(),
@@ -151,7 +151,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo compilation
-            , ImmutableArray<InternalVariantDeclaration> candidates
+            , ImmutableArray<InternalVariantSpec> candidates
             , string projectPath
             , bool outputSourceGenFiles
         )
@@ -165,8 +165,8 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
             try
             {
-                using var valueTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
-                using var refTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
+                using var valueTypeBuilder = ImmutableArrayBuilder<InternalVariantSpec>.Rent();
+                using var refTypeBuilder = ImmutableArrayBuilder<InternalVariantSpec>.Rent();
                 var seenTypeNames = new HashSet<string>(StringComparer.Ordinal);
                 var assemblyName = compilation.assemblyName;
 

@@ -41,7 +41,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             });
         }
 
-        public static VariantDeclaration GetSemanticMatch(
+        public static VariantSpec GetSemanticMatch(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -80,7 +80,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             return decl;
         }
 
-        internal static VariantDeclaration BuildDeclaration(
+        internal static VariantSpec BuildDeclaration(
               INamedTypeSymbol structSymbol
             , ITypeSymbol typeArg
             , LocationInfo location
@@ -115,7 +115,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 ? structNs.ToDisplayString()
                 : string.Empty;
 
-            return new VariantDeclaration {
+            return new VariantSpec {
                 location = location,
                 fullTypeName = fullTypeName,
                 typeName = typeArg.ToSimpleName(),
@@ -136,7 +136,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo compilation
-            , VariantDeclaration declaration
+            , VariantSpec declaration
             , string projectPath
             , bool outputSourceGenFiles
         )
