@@ -22,7 +22,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 .ForAttributeWithMetadataName(
                       "EncosyTower.Databases.DatabaseAttribute"
                     , static (node, _) => node is ClassDeclarationSyntax or StructDeclarationSyntax
-                    , DatabaseModel.Extract
+                    , DatabaseSpec.Extract
                 )
                 .Where(static t => t.IsValid);
 
@@ -45,7 +45,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo compilation
-            , DatabaseModel model
+            , DatabaseSpec model
             , string projectPath
             , bool outputSourceGenFiles
         )

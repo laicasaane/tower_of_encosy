@@ -4,7 +4,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
 {
     using static EncosyTower.SourceGen.Generators.Databases.Helpers;
 
-    partial struct DatabaseModel
+    partial struct DatabaseSpec
     {
         private const string PR_UNITY_EXTENSIONS = "ETUE.EncosyUnityObjectExtensions";
         private const string PR_UNITY_IS_VALID = $"{PR_UNITY_EXTENSIONS}.IsValid";
@@ -199,7 +199,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.PrintEndLine();
         }
 
-        private static void WriteGetMethods(ref Printer p, EquatableArray<TableModel> tables, bool isStruct)
+        private static void WriteGetMethods(ref Printer p, EquatableArray<TableSpec> tables, bool isStruct)
         {
             foreach (var table in tables)
             {
@@ -264,7 +264,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
               ref Printer p
             , string dbAssetName
             , NamingStrategy dbNamingStrategy
-            , EquatableArray<TableModel> tables
+            , EquatableArray<TableSpec> tables
             , string containerTypeName
         )
         {
@@ -303,7 +303,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.PrintEndLine();
         }
 
-        private static void WriteKeys(ref Printer p, EquatableArray<TableModel> tables)
+        private static void WriteKeys(ref Printer p, EquatableArray<TableSpec> tables)
         {
             p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintLine("public static partial class Keys");
@@ -334,7 +334,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.PrintEndLine();
         }
 
-        private static void WriteVault(ref Printer p, EquatableArray<TableModel> tables)
+        private static void WriteVault(ref Printer p, EquatableArray<TableSpec> tables)
         {
             p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintLine("private static partial class Vault");
@@ -348,7 +348,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.PrintEndLine();
         }
 
-        private static void WriteIds(ref Printer p, EquatableArray<TableModel> tables)
+        private static void WriteIds(ref Printer p, EquatableArray<TableSpec> tables)
         {
             p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintLine("public static partial class Ids");
@@ -413,7 +413,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             , bool withInstanceAPI
             , bool isStruct
             , string typeName
-            , EquatableArray<TableModel> tables
+            , EquatableArray<TableSpec> tables
         )
         {
             if (withInstanceAPI == false)
@@ -527,7 +527,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.PrintEndLine();
         }
 
-        public static string GetTableAssetName(TableModel table)
+        public static string GetTableAssetName(TableSpec table)
             => $"{table.typeName}_{table.propertyName}";
     }
 }

@@ -3,14 +3,14 @@ using Newtonsoft.Json.Utilities;
 
 namespace EncosyTower.SourceGen.Generators.Databases
 {
-    public readonly struct TableModel : IEquatable<TableModel>
+    public readonly struct TableSpec : IEquatable<TableSpec>
     {
         public readonly string typeFullName;
         public readonly string typeName;
         public readonly string propertyName;
         public readonly NamingStrategy namingStrategy;
 
-        public TableModel(
+        public TableSpec(
               string typeFullName
             , string typeName
             , string propertyName
@@ -28,9 +28,9 @@ namespace EncosyTower.SourceGen.Generators.Databases
             && string.IsNullOrEmpty(propertyName) == false;
 
         public readonly override bool Equals(object obj)
-            => obj is TableModel other && Equals(other);
+            => obj is TableSpec other && Equals(other);
 
-        public readonly bool Equals(TableModel other)
+        public readonly bool Equals(TableSpec other)
             => string.Equals(typeFullName, other.typeFullName, StringComparison.Ordinal)
             && string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)

@@ -11,7 +11,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
 {
     using static EncosyTower.SourceGen.Generators.Databases.Helpers;
 
-    public partial struct DatabaseModel : IEquatable<DatabaseModel>
+    public partial struct DatabaseSpec : IEquatable<DatabaseSpec>
     {
         // Excluded from equality — not part of cache key
         public LocationInfo location;
@@ -25,12 +25,12 @@ namespace EncosyTower.SourceGen.Generators.Databases
         public string openingSource;
         public string closingSource;
         public string hintName;
-        public EquatableArray<TableModel> tables;
+        public EquatableArray<TableSpec> tables;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(typeName) == false;
 
-        public static DatabaseModel Extract(
+        public static DatabaseSpec Extract(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -93,7 +93,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             }
 
             // Build tables — silently skip invalid ones; the analyzer handles diagnostics
-            var tableList = new List<TableModel>();
+            var tableList = new List<TableSpec>();
             var members = typeSymbol.GetMembers();
 
             foreach (var member in members)
@@ -124,7 +124,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     continue;
                 }
 
-                tableList.Add(new TableModel(
+                tableList.Add(new TableSpec(
                       typeFullName: propType.ToFullName()
                     , typeName: propType.Name
                     , propertyName: property.Name
@@ -162,9 +162,9 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     : Location.None
             );
 
-            EquatableArray<TableModel> tables = ImmutableArray.CreateRange(tableList);
+            EquatableArray<TableSpec> tables = ImmutableArray.CreateRange(tableList);
 
-            return new DatabaseModel {
+            return new DatabaseSpec {
                 location = location,
                 typeName = typeName,
                 isStruct = isStruct,
@@ -202,9 +202,9 @@ namespace EncosyTower.SourceGen.Generators.Databases
         }
 
         public readonly override bool Equals(object obj)
-            => obj is DatabaseModel other && Equals(other);
+            => obj is DatabaseSpec other && Equals(other);
 
-        public readonly bool Equals(DatabaseModel other)
+        public readonly bool Equals(DatabaseSpec other)
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && isStruct == other.isStruct
             && namingStrategy == other.namingStrategy
