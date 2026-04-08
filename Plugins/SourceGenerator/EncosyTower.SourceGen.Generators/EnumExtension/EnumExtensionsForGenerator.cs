@@ -48,7 +48,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             });
         }
 
-        private static EnumExtensionCandidate ExtractCandidate(
+        private static EnumExtensionSpec ExtractCandidate(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -101,7 +101,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             var namespaceName = ns is { IsGlobalNamespace: false } ? ns.ToDisplayString() : string.Empty;
 
             // extensionsName: the name of the decorated static class (not auto-derived from the enum name)
-            var candidate = EnumExtensionCandidate.Extract(
+            var candidate = EnumExtensionSpec.Extract(
                   enumSymbol
                 , syntax.Parent is BaseNamespaceDeclarationSyntax
                 , classSymbol.Name
@@ -121,7 +121,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo compilation
-            , EnumExtensionCandidate candidate
+            , EnumExtensionSpec candidate
             , string projectPath
             , bool outputSourceGenFiles
         )

@@ -11,13 +11,13 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
     /// can cache and compare instances cheaply across multiple compilations.
     /// Used by both <see cref="EnumExtensionsGenerator"/> and <see cref="EnumExtensionsForGenerator"/>.
     /// </summary>
-    internal struct EnumExtensionCandidate : IEquatable<EnumExtensionCandidate>
+    internal struct EnumExtensionSpec : IEquatable<EnumExtensionSpec>
     {
         private const string FLAGS_ATTRIBUTE = "global::System.FlagsAttribute";
 
         /// <summary>
         /// Location of the declaration in source. Intentionally excluded from
-        /// <see cref="Equals(EnumExtensionCandidate)"/> and <see cref="GetHashCode"/>:
+        /// <see cref="Equals(EnumExtensionSpec)"/> and <see cref="GetHashCode"/>:
         /// location data is not stable across incremental runs and must not drive
         /// cache invalidation.
         /// </summary>
@@ -26,7 +26,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         /// <summary>
         /// Pre-computed namespace / containing-type scope opener, produced by
         /// <c>TypeCreationHelpers.GenerateOpeningAndClosingSource</c> in the
-        /// incremental transform phase. Excluded from <see cref="Equals(EnumExtensionCandidate)"/>
+        /// incremental transform phase. Excluded from <see cref="Equals(EnumExtensionSpec)"/>
         /// and <see cref="GetHashCode"/> for the same reason as <see cref="location"/>.
         /// </summary>
         public string openingSource;
@@ -52,7 +52,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         public bool hasFlags;
         public bool isDisplayAttributeUsed;
         public int fixedStringBytes;
-        public EquatableArray<EnumMemberDeclaration> members;
+        public EquatableArray<EnumMemberSpec> members;
 
         /// <summary>
         /// Ordered chain of containing type declarations (outer → inner), each formatted as
@@ -65,10 +65,10 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         /// <summary>
         /// Extracts all enum metadata from <paramref name="enumSymbol"/> into a fully
-        /// populated, cache-friendly <see cref="EnumExtensionCandidate"/>.
+        /// populated, cache-friendly <see cref="EnumExtensionSpec"/>.
         /// Call this once per enum inside the incremental generator transform.
         /// </summary>
-        public static EnumExtensionCandidate Extract(
+        public static EnumExtensionSpec Extract(
               INamedTypeSymbol enumSymbol
             , bool parentIsNamespace
             , string extensionsName
@@ -85,7 +85,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             var fixedStringBytes = 0;
             var isDisplayAttributeUsed = false;
 
-            using var memberBuilder = ImmutableArrayBuilder<EnumMemberDeclaration>.Rent();
+            using var memberBuilder = ImmutableArrayBuilder<EnumMemberSpec>.Rent();
 
             foreach (var member in enumSymbol.GetMembers())
             {
@@ -164,13 +164,13 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 var byteCount = Math.Max(nameByteCount, displayNameByteCount);
                 fixedStringBytes = Math.Max(fixedStringBytes, byteCount);
 
-                memberBuilder.Add(new EnumMemberDeclaration {
+                memberBuilder.Add(new EnumMemberSpec {
                     name = member.Name,
                     displayName = displayName,
                 });
             }
 
-            return new EnumExtensionCandidate {
+            return new EnumExtensionSpec {
                 location = location,
                 enumName = enumName,
                 extensionsName = extensionsName,
@@ -184,12 +184,12 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 hasFlags = enumSymbol.HasAttribute(FLAGS_ATTRIBUTE),
                 isDisplayAttributeUsed = isDisplayAttributeUsed,
                 fixedStringBytes = fixedStringBytes,
-                members = new EquatableArray<EnumMemberDeclaration>(memberBuilder.ToImmutable()),
+                members = new EquatableArray<EnumMemberSpec>(memberBuilder.ToImmutable()),
                 containingTypes = containingTypes,
             };
         }
 
-        public readonly bool Equals(EnumExtensionCandidate other)
+        public readonly bool Equals(EnumExtensionSpec other)
             => string.Equals(enumName, other.enumName, StringComparison.Ordinal)
             && string.Equals(extensionsName, other.extensionsName, StringComparison.Ordinal)
             && string.Equals(structName, other.structName, StringComparison.Ordinal)
@@ -207,7 +207,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is EnumExtensionCandidate other && Equals(other);
+            => obj is EnumExtensionSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(enumName, extensionsName, structName, fullyQualifiedName, underlyingTypeName, namespaceName, fileHintName)

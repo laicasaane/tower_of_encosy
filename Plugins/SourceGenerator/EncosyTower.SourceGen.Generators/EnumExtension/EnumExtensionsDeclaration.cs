@@ -21,7 +21,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         public string PrintFixedStringTypeName { get; }
 
-        public List<EnumMemberDeclaration> Members { get; set; }
+        public List<EnumMemberSpec> Members { get; set; }
 
         public Accessibility Accessibility { get; set; }
 
@@ -51,11 +51,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         /// <summary>
         /// Constructs an <see cref="EnumExtensionsDeclaration"/> from a pre-extracted,
-        /// cache-friendly <see cref="EnumExtensionCandidate"/>. All symbol data has already
+        /// cache-friendly <see cref="EnumExtensionSpec"/>. All symbol data has already
         /// been converted to primitives in the incremental generator transform phase.
         /// </summary>
         internal EnumExtensionsDeclaration(
-              in EnumExtensionCandidate candidate
+              in EnumExtensionSpec candidate
             , bool referencesUnityCollections
         )
         {
@@ -71,7 +71,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             IsDisplayAttributeUsed = candidate.isDisplayAttributeUsed;
             FixedStringBytes = candidate.fixedStringBytes;
 
-            var members = Members = new List<EnumMemberDeclaration>(candidate.members.Count);
+            var members = Members = new List<EnumMemberSpec>(candidate.members.Count);
 
             foreach (var m in candidate.members)
             {
