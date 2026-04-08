@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Text;
 using System.Threading;
 using EncosyTower.SourceGen.Common.Mvvm.Common;
+using EncosyTower.SourceGen.TypeModeling.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -184,8 +185,27 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             using var propRefsBuilder = ImmutableArrayBuilder<PropMemberSpec>.Rent();
             using var diagnosticBuilder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
 
-            var hasSerializableAttribute = classSymbol.HasAttribute(SERIALIZABLE_ATTRIBUTE);
-            var hasGeneratePropertyBagAttribute = classSymbol.HasAttribute(GENERATE_PROPERTY_BAG_ATTRIBUTE);
+            var typeModel = classSymbol.ToModel(token, new ModelOptions(ModelParts.Attributes));
+            var typeModelAttrs = typeModel.Attributes;
+            var typeModelAttrCount = typeModelAttrs.Count;
+            var hasSerializableAttribute = false;
+            var hasGeneratePropertyBagAttribute = false;
+
+            for (var i = 0; i < typeModelAttrCount; i++)
+            {
+                var attrFullName = typeModelAttrs[i].FullName;
+
+                if (string.Equals(attrFullName, SERIALIZABLE_ATTRIBUTE, StringComparison.Ordinal))
+                {
+                    hasSerializableAttribute = true;
+                }
+
+                if (string.Equals(attrFullName, GENERATE_PROPERTY_BAG_ATTRIBUTE, StringComparison.Ordinal))
+                {
+                    hasGeneratePropertyBagAttribute = true;
+                }
+            }
+
             var hasMemberObservableObject = false;
 
             var members = classSymbol.GetMembers();
