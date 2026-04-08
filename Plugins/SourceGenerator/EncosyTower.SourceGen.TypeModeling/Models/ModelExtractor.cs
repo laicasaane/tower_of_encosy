@@ -197,8 +197,9 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                 token.ThrowIfCancellationRequested();
 
                 var fullName = attr.AttributeClass?.ToDisplayString(SymbolFormats.FullyQualified) ?? string.Empty;
+                var shortName = attr.AttributeClass?.Name ?? string.Empty;
 
-                using var ctorArgs = ImmutableArrayBuilder<string>.Rent();
+                using var ctorArgs = ImmutableArrayBuilder<AttributeCtorArgModel>.Rent();
                 var ctorArguments = attr.ConstructorArguments;
                 var ctorArgCount = ctorArguments.Length;
 
@@ -208,11 +209,45 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
 
                     if (ctorArg.Kind == TypedConstantKind.Type && ctorArg.Value is ITypeSymbol typeArg)
                     {
-                        ctorArgs.Add(typeArg.ToDisplayString(SymbolFormats.FullyQualified));
+                        ctorArgs.Add(new AttributeCtorArgModel(
+                              TypedConstantKind.Type
+                            , typeArg.ToDisplayString(SymbolFormats.FullyQualified)
+                            , default
+                        ));
+                    }
+                    else if (ctorArg.Kind == TypedConstantKind.Array)
+                    {
+                        var elems = ctorArg.Values;
+                        var elemCount = elems.Length;
+                        using var elemBuilder = ImmutableArrayBuilder<string>.Rent();
+
+                        for (var e = 0; e < elemCount; e++)
+                        {
+                            var elem = elems[e];
+
+                            if (elem.Kind == TypedConstantKind.Type && elem.Value is ITypeSymbol elemTypeArg)
+                            {
+                                elemBuilder.Add(elemTypeArg.ToDisplayString(SymbolFormats.FullyQualified));
+                            }
+                            else
+                            {
+                                elemBuilder.Add(elem.Value?.ToString() ?? string.Empty);
+                            }
+                        }
+
+                        ctorArgs.Add(new AttributeCtorArgModel(
+                              TypedConstantKind.Array
+                            , string.Empty
+                            , elemBuilder.ToImmutable()
+                        ));
                     }
                     else
                     {
-                        ctorArgs.Add(ctorArg.Value?.ToString() ?? string.Empty);
+                        ctorArgs.Add(new AttributeCtorArgModel(
+                              ctorArg.Kind
+                            , ctorArg.Value?.ToString() ?? string.Empty
+                            , default
+                        ));
                     }
                 }
 
@@ -227,10 +262,10 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                                    && pair.Value.Value is ITypeSymbol namedTypeArg
                         ? namedTypeArg.ToDisplayString(SymbolFormats.FullyQualified)
                         : pair.Value.Value?.ToString() ?? string.Empty;
-                    namedArgs.Add(new AttributeNamedArgModel(pair.Key, argValue));
+                    namedArgs.Add(new AttributeNamedArgModel(pair.Key, pair.Value.Kind, argValue));
                 }
 
-                builder.Add(new AttributeModel(fullName, ctorArgs.ToImmutable(), namedArgs.ToImmutable()));
+                builder.Add(new AttributeModel(fullName, shortName, ctorArgs.ToImmutable(), namedArgs.ToImmutable()));
             }
 
             return builder.ToImmutable();

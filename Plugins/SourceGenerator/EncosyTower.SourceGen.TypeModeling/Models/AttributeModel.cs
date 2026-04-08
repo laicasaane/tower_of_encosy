@@ -1,4 +1,5 @@
 using System;
+using Microsoft.CodeAnalysis;
 using EncosyTower.SourceGen.TypeModeling.Internal;
 
 namespace EncosyTower.SourceGen.TypeModeling.Models
@@ -6,22 +7,26 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
     public readonly struct AttributeModel : IEquatable<AttributeModel>
     {
         public readonly string FullName;
-        public readonly EquatableArray<string> ConstructorArguments;
+        public readonly string ShortName;
+        public readonly EquatableArray<AttributeCtorArgModel> ConstructorArguments;
         public readonly EquatableArray<AttributeNamedArgModel> NamedArguments;
 
         public AttributeModel(
               string fullName
-            , EquatableArray<string> constructorArguments
+            , string shortName
+            , EquatableArray<AttributeCtorArgModel> constructorArguments
             , EquatableArray<AttributeNamedArgModel> namedArguments
         )
         {
             FullName = fullName ?? string.Empty;
+            ShortName = shortName ?? string.Empty;
             ConstructorArguments = constructorArguments;
             NamedArguments = namedArguments;
         }
 
         public bool Equals(AttributeModel other)
             => string.Equals(FullName, other.FullName, StringComparison.Ordinal)
+            && string.Equals(ShortName, other.ShortName, StringComparison.Ordinal)
             && ConstructorArguments.Equals(other.ConstructorArguments)
             && NamedArguments.Equals(other.NamedArguments)
             ;
@@ -30,7 +35,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             => obj is AttributeModel other && Equals(other);
 
         public override int GetHashCode()
-            => HashValue.Combine(FullName, ConstructorArguments, NamedArguments).ToHashCode();
+            => HashValue.Combine(FullName, ShortName, ConstructorArguments, NamedArguments).ToHashCode();
 
         public static bool operator ==(AttributeModel left, AttributeModel right)
             => left.Equals(right);
