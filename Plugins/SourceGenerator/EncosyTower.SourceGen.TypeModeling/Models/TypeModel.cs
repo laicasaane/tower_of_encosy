@@ -17,8 +17,14 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         public readonly bool IsReadOnly;
         public readonly bool IsRecord;
         public readonly bool IsGeneric;
+        public readonly bool IsValueType;
+        public readonly bool IsEnum;
+        public readonly bool IsUnmanaged;
+        public readonly bool IsRefLikeType;
+        public readonly string BaseTypeName;
         public readonly EquatableArray<string> Interfaces;
         public readonly EquatableArray<string> AllInterfaces;
+        public readonly EquatableArray<string> ContainingTypes;
         public readonly EquatableArray<AttributeModel> Attributes;
         public readonly EquatableArray<FieldModel> Fields;
         public readonly EquatableArray<PropertyModel> Properties;
@@ -38,8 +44,14 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             , bool isReadOnly
             , bool isRecord
             , bool isGeneric
+            , bool isValueType
+            , bool isEnum
+            , bool isUnmanaged
+            , bool isRefLikeType
+            , string baseTypeName
             , EquatableArray<string> interfaces
             , EquatableArray<string> allInterfaces
+            , EquatableArray<string> containingTypes
             , EquatableArray<AttributeModel> attributes
             , EquatableArray<FieldModel> fields
             , EquatableArray<PropertyModel> properties
@@ -59,8 +71,14 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             IsReadOnly = isReadOnly;
             IsRecord = isRecord;
             IsGeneric = isGeneric;
+            IsValueType = isValueType;
+            IsEnum = isEnum;
+            IsUnmanaged = isUnmanaged;
+            IsRefLikeType = isRefLikeType;
+            BaseTypeName = baseTypeName ?? string.Empty;
             Interfaces = interfaces;
             AllInterfaces = allInterfaces;
+            ContainingTypes = containingTypes;
             Attributes = attributes;
             Fields = fields;
             Properties = properties;
@@ -79,8 +97,14 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             && IsReadOnly == other.IsReadOnly
             && IsRecord == other.IsRecord
             && IsGeneric == other.IsGeneric
+            && IsValueType == other.IsValueType
+            && IsEnum == other.IsEnum
+            && IsUnmanaged == other.IsUnmanaged
+            && IsRefLikeType == other.IsRefLikeType
+            && string.Equals(BaseTypeName, other.BaseTypeName, StringComparison.Ordinal)
             && Interfaces.Equals(other.Interfaces)
             && AllInterfaces.Equals(other.AllInterfaces)
+            && ContainingTypes.Equals(other.ContainingTypes)
             && Attributes.Equals(other.Attributes)
             && Fields.Equals(other.Fields)
             && Properties.Equals(other.Properties)

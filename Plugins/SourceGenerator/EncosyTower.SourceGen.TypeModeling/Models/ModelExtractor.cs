@@ -26,6 +26,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
 
             var interfaces = ExtractInterfaces(symbol, parts, token);
             var allInterfaces = ExtractAllInterfaces(symbol, parts, token);
+            var containingTypes = ExtractContainingTypes(symbol, parts, token);
             var attributes = ExtractTypeAttributes(symbol, parts, token);
             var fields = ExtractFields(members, parts, options, token);
             var properties = ExtractProperties(members, parts, options, token);
@@ -45,8 +46,15 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                 , isReadOnly: symbol.IsReadOnly
                 , isRecord: symbol.IsRecord
                 , isGeneric: symbol.IsGenericType
+                , isValueType: symbol.IsValueType
+                , isEnum: symbol.TypeKind == TypeKind.Enum
+                , isUnmanaged: symbol.IsUnmanagedType
+                , isRefLikeType: symbol.IsRefLikeType
+                , baseTypeName: symbol.BaseType?.ToDisplayString(SymbolFormats.FullyQualified)
+                              ?? string.Empty
                 , interfaces: interfaces
                 , allInterfaces: allInterfaces
+                , containingTypes: containingTypes
                 , attributes: attributes
                 , fields: fields
                 , properties: properties
@@ -104,6 +112,55 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             }
 
             return builder.ToImmutable();
+        }
+
+        private static EquatableArray<string> ExtractContainingTypes(
+              INamedTypeSymbol symbol
+            , ModelParts parts
+            , CancellationToken token
+        )
+        {
+            if ((parts & ModelParts.ContainingTypes) == 0)
+            {
+                return default;
+            }
+
+            token.ThrowIfCancellationRequested();
+
+            using var innerBuilder = ImmutableArrayBuilder<string>.Rent();
+            var containingType = symbol.ContainingType;
+
+            while (containingType != null)
+            {
+                token.ThrowIfCancellationRequested();
+
+                var keyword = containingType.TypeKind switch {
+                    TypeKind.Interface => "interface",
+                    TypeKind.Struct    => containingType.IsRecord ? "record struct" : "struct",
+                    TypeKind.Class     => containingType.IsRecord ? "record class" : "class",
+                    _                  => "class",
+                };
+
+                var accessibility = containingType.DeclaredAccessibility.ToKeyword();
+                innerBuilder.Add($"{accessibility} partial {keyword} {containingType.Name}");
+                containingType = containingType.ContainingType;
+            }
+
+            var innerToOuter = innerBuilder.ToImmutable();
+
+            if (innerToOuter.Length == 0)
+            {
+                return default;
+            }
+
+            var outerToInner = new string[innerToOuter.Length];
+
+            for (var i = 0; i < innerToOuter.Length; i++)
+            {
+                outerToInner[i] = innerToOuter[innerToOuter.Length - 1 - i];
+            }
+
+            return outerToInner.ToImmutableArray().AsEquatableArray();
         }
 
         private static EquatableArray<AttributeModel> ExtractTypeAttributes(
