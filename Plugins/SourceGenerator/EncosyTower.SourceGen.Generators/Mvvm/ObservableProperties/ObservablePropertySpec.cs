@@ -15,7 +15,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
     /// or <see cref="ISymbol"/> references — so that Roslyn's incremental generator engine
     /// can cache and compare instances cheaply across multiple compilations.
     /// </summary>
-    public partial struct ObservablePropertyDeclaration : IEquatable<ObservablePropertyDeclaration>
+    public partial struct ObservablePropertySpec : IEquatable<ObservablePropertySpec>
     {
         public const string IOBSERVABLE_OBJECT_INTERFACE = "global::EncosyTower.Mvvm.ComponentModel.IObservableObject";
         public const string OBSERVABLE_OBJECT_ATTRIBUTE_METADATA = "EncosyTower.Mvvm.ComponentModel.ObservableObjectAttribute";
@@ -33,7 +33,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         public const string DONT_CREATE_PROPERTY_ATTRIBUTE = "global::Unity.Properties.DontCreatePropertyAttribute";
         public const string DONT_CREATE_PROPERTY = "global::Unity.Properties.DontCreateProperty";
 
-        /// <summary>Excluded from <see cref="Equals(ObservablePropertyDeclaration)"/> and
+        /// <summary>Excluded from <see cref="Equals(ObservablePropertySpec)"/> and
         /// <see cref="GetHashCode"/> — location data is not stable across incremental runs.</summary>
         public LocationInfo location;
 
@@ -47,13 +47,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         public bool hasMemberObservableObject;
         public bool hasSerializableAttribute;
         public bool hasGeneratePropertyBagAttribute;
-        public EquatableArray<FieldMemberDeclaration> fieldRefs;
-        public EquatableArray<PropMemberDeclaration> propRefs;
+        public EquatableArray<FieldMemberSpec> fieldRefs;
+        public EquatableArray<PropMemberSpec> propRefs;
 
         /// <summary>Flattened entries of the NotifyPropertyChangedFor map.
         /// Each entry records which observable member (by key) should also fire
         /// change notifications for the target property (by name/type).</summary>
-        public EquatableArray<NotifyForEntry> notifyForEntries;
+        public EquatableArray<NotifyForEntrySpec> notifyForEntries;
 
         /// <summary>Set of command names (e.g. "SaveCommand") that should receive
         /// <c>NotifyCanExecuteChanged</c> when an observable member changes.</summary>
@@ -63,7 +63,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             => string.IsNullOrEmpty(className) == false
             && string.IsNullOrEmpty(hintName) == false;
 
-        public readonly bool Equals(ObservablePropertyDeclaration other)
+        public readonly bool Equals(ObservablePropertySpec other)
             => string.Equals(className, other.className, StringComparison.Ordinal)
             && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
             && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
@@ -80,7 +80,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             && notifyCanExecuteChangedFor.Equals(other.notifyCanExecuteChangedFor);
 
         public readonly override bool Equals(object obj)
-            => obj is ObservablePropertyDeclaration other && Equals(other);
+            => obj is ObservablePropertySpec other && Equals(other);
 
         public readonly override int GetHashCode()
         {
@@ -104,10 +104,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
         /// <summary>
         /// Extracts all observable-property metadata from the annotated class symbol into a fully
-        /// populated, cache-friendly <see cref="ObservablePropertyDeclaration"/>.
+        /// populated, cache-friendly <see cref="ObservablePropertySpec"/>.
         /// Called once per class inside the <c>ForAttributeWithMetadataName</c> transform.
         /// </summary>
-        public static ObservablePropertyDeclaration Extract(
+        public static ObservablePropertySpec Extract(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -180,8 +180,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 }
             }
 
-            using var fieldRefsBuilder = ImmutableArrayBuilder<FieldMemberDeclaration>.Rent();
-            using var propRefsBuilder = ImmutableArrayBuilder<PropMemberDeclaration>.Rent();
+            using var fieldRefsBuilder = ImmutableArrayBuilder<FieldMemberSpec>.Rent();
+            using var propRefsBuilder = ImmutableArrayBuilder<PropMemberSpec>.Rent();
             using var diagnosticBuilder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
 
             var hasSerializableAttribute = classSymbol.HasAttribute(SERIALIZABLE_ATTRIBUTE);
@@ -260,7 +260,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             , DiagnosticDescriptors.InvalidPropertyTargetedAttributeOnObservableProperty
                         );
 
-                        fieldRefsBuilder.Add(new FieldMemberDeclaration {
+                        fieldRefsBuilder.Add(new FieldMemberSpec {
                             location = LocationInfo.From(field.Locations.Length > 0 ? field.Locations[0] : Location.None),
                             fieldName = field.Name,
                             propertyName = field.ToPropertyName(),
@@ -345,14 +345,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             , DiagnosticDescriptors.InvalidFieldMethodTargetedAttributeOnObservableProperty
                         );
 
-                        using var forwardedFieldAttribsBuilder = ImmutableArrayBuilder<ForwardedFieldAttribute>.Rent();
+                        using var forwardedFieldAttribsBuilder = ImmutableArrayBuilder<ForwardedFieldAttributeSpec>.Rent();
 
                         foreach (var (typeName, attribInfo) in fieldAttributes)
                         {
-                            forwardedFieldAttribsBuilder.Add(new ForwardedFieldAttribute { typeName = typeName, attributeInfo = attribInfo });
+                            forwardedFieldAttribsBuilder.Add(new ForwardedFieldAttributeSpec { typeName = typeName, attributeInfo = attribInfo });
                         }
 
-                        propRefsBuilder.Add(new PropMemberDeclaration {
+                        propRefsBuilder.Add(new PropMemberSpec {
                             location = LocationInfo.From(property.Locations.Length > 0 ? property.Locations[0] : Location.None),
                             propertyName = property.Name,
                             fieldName = fieldName,
@@ -380,7 +380,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             }
 
             // Build flattened NotifyForEntry array from propertyChangedMap + propertyMap
-            using var notifyForBuilder = ImmutableArrayBuilder<NotifyForEntry>.Rent();
+            using var notifyForBuilder = ImmutableArrayBuilder<NotifyForEntrySpec>.Rent();
 
             foreach (var kv in propertyChangedMap)
             {
@@ -393,7 +393,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         continue;
                     }
 
-                    notifyForBuilder.Add(new NotifyForEntry {
+                    notifyForBuilder.Add(new NotifyForEntrySpec {
                         memberKey = memberKey,
                         propName = propName,
                         propTypeName = propInfo.propTypeName,
@@ -415,7 +415,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 }
             }
 
-            return new ObservablePropertyDeclaration {
+            return new ObservablePropertySpec {
                 location = LocationInfo.From(classSyntax.GetLocation()),
                 className = className,
                 hintName = hintName,
@@ -459,9 +459,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         /// All symbol-derived data is pre-computed as strings — no <see cref="ISymbol"/> or
         /// <see cref="SyntaxNode"/> references are retained.
         /// </summary>
-        public struct FieldMemberDeclaration : IEquatable<FieldMemberDeclaration>
+        public struct FieldMemberSpec : IEquatable<FieldMemberSpec>
         {
-            /// <summary>Excluded from <see cref="Equals(FieldMemberDeclaration)"/> and
+            /// <summary>Excluded from <see cref="Equals(FieldMemberSpec)"/> and
             /// <see cref="GetHashCode"/> — not stable across incremental runs.</summary>
             public LocationInfo location;
 
@@ -474,7 +474,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             public EquatableArray<string> commandNames;
             public EquatableArray<AttributeInfo> forwardedPropertyAttributes;
 
-            public readonly bool Equals(FieldMemberDeclaration other)
+            public readonly bool Equals(FieldMemberSpec other)
                 => string.Equals(fieldName, other.fieldName, StringComparison.Ordinal)
                 && string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)
                 && string.Equals(fieldTypeName, other.fieldTypeName, StringComparison.Ordinal)
@@ -485,7 +485,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 && forwardedPropertyAttributes.Equals(other.forwardedPropertyAttributes);
 
             public readonly override bool Equals(object obj)
-                => obj is FieldMemberDeclaration other && Equals(other);
+                => obj is FieldMemberSpec other && Equals(other);
 
             public readonly override int GetHashCode()
             {
@@ -507,9 +507,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         /// All symbol-derived data is pre-computed as strings — no <see cref="ISymbol"/> or
         /// <see cref="SyntaxNode"/> references are retained.
         /// </summary>
-        public struct PropMemberDeclaration : IEquatable<PropMemberDeclaration>
+        public struct PropMemberSpec : IEquatable<PropMemberSpec>
         {
-            /// <summary>Excluded from <see cref="Equals(PropMemberDeclaration)"/> and
+            /// <summary>Excluded from <see cref="Equals(PropMemberSpec)"/> and
             /// <see cref="GetHashCode"/> — not stable across incremental runs.</summary>
             public LocationInfo location;
 
@@ -520,9 +520,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             public bool isObservableObject;
             public bool doesCreateProperty;
             public EquatableArray<string> commandNames;
-            public EquatableArray<ForwardedFieldAttribute> forwardedFieldAttributes;
+            public EquatableArray<ForwardedFieldAttributeSpec> forwardedFieldAttributes;
 
-            public readonly bool Equals(PropMemberDeclaration other)
+            public readonly bool Equals(PropMemberSpec other)
                 => string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)
                 && string.Equals(fieldName, other.fieldName, StringComparison.Ordinal)
                 && string.Equals(propertyTypeName, other.propertyTypeName, StringComparison.Ordinal)
@@ -533,7 +533,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 && forwardedFieldAttributes.Equals(other.forwardedFieldAttributes);
 
             public readonly override bool Equals(object obj)
-                => obj is PropMemberDeclaration other && Equals(other);
+                => obj is PropMemberSpec other && Equals(other);
 
             public readonly override int GetHashCode()
             {
@@ -554,17 +554,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         /// Cache-friendly, equatable wrapper for a field-targeted forwarded attribute on a property member.
         /// Stores the attribute's fully-qualified type name alongside its <see cref="AttributeInfo"/> data.
         /// </summary>
-        public struct ForwardedFieldAttribute : IEquatable<ForwardedFieldAttribute>
+        public struct ForwardedFieldAttributeSpec : IEquatable<ForwardedFieldAttributeSpec>
         {
             public string typeName;
             public AttributeInfo attributeInfo;
 
-            public readonly bool Equals(ForwardedFieldAttribute other)
+            public readonly bool Equals(ForwardedFieldAttributeSpec other)
                 => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
                 && (attributeInfo?.Equals(other.attributeInfo) ?? other.attributeInfo is null);
 
             public readonly override bool Equals(object obj)
-                => obj is ForwardedFieldAttribute other && Equals(other);
+                => obj is ForwardedFieldAttributeSpec other && Equals(other);
 
             public readonly override int GetHashCode()
             {
@@ -580,7 +580,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         /// Records that when the observable member identified by <see cref="memberKey"/> changes,
         /// change notifications must also fire for the property identified by <see cref="propName"/>.
         /// </summary>
-        public struct NotifyForEntry : IEquatable<NotifyForEntry>
+        public struct NotifyForEntrySpec : IEquatable<NotifyForEntrySpec>
         {
             /// <summary>The field name (for field members) or private-field name (for property members)
             /// used as the map key.</summary>
@@ -589,14 +589,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             public string propTypeName;
             public string propTypeValidIdent;
 
-            public readonly bool Equals(NotifyForEntry other)
+            public readonly bool Equals(NotifyForEntrySpec other)
                 => string.Equals(memberKey, other.memberKey, StringComparison.Ordinal)
                 && string.Equals(propName, other.propName, StringComparison.Ordinal)
                 && string.Equals(propTypeName, other.propTypeName, StringComparison.Ordinal)
                 && string.Equals(propTypeValidIdent, other.propTypeValidIdent, StringComparison.Ordinal);
 
             public readonly override bool Equals(object obj)
-                => obj is NotifyForEntry other && Equals(other);
+                => obj is NotifyForEntrySpec other && Equals(other);
 
             public readonly override int GetHashCode()
                 => HashValue.Combine(memberKey, propName, propTypeName, propTypeValidIdent);

@@ -25,7 +25,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 .ForAttributeWithMetadataName(
                       MONO_BINDER_ATTRIBUTE_METADATA
                     , static (node, _) => node is ClassDeclarationSyntax
-                    , MonoBinderDeclaration.Extract
+                    , MonoBinderSpec.Extract
                 )
                 .Where(static t => t.IsValid);
 
@@ -46,7 +46,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , MonoBinderDeclaration declaration
+            , MonoBinderSpec declaration
             , string projectPath
             , bool outputSourceGenFiles
         )

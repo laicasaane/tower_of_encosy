@@ -2,7 +2,7 @@ using System;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 {
-    public struct CommandBindingInfo : IEquatable<CommandBindingInfo>
+    public struct CommandBindingSpec : IEquatable<CommandBindingSpec>
     {
         public string memberName;               // "onClick"
         public string memberPascalName;         // "OnClick"
@@ -23,7 +23,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         /// Empty when <see cref="isUnityEvent"/> is <see langword="true"/>.</summary>
         public string delegateFullTypeName;
 
-        public readonly bool Equals(CommandBindingInfo other)
+        public readonly bool Equals(CommandBindingSpec other)
             => string.Equals(memberName, other.memberName, StringComparison.Ordinal)
             && actionTypeArgs.Equals(other.actionTypeArgs)
             && string.Equals(wrapperTypeName, other.wrapperTypeName, StringComparison.Ordinal)
@@ -36,7 +36,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is CommandBindingInfo other && Equals(other);
+            => obj is CommandBindingSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(

@@ -82,7 +82,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 .Combine(methodBindingCandidatesProvider.Collect())
                 .Combine(npcfCandidatesProvider.Collect())
                 .Select(static (data, _) => {
-                    using var b = ImmutableArrayBuilder<StringAdapterCandidateInfo>.Rent();
+                    using var b = ImmutableArrayBuilder<StringAdapterSpec>.Rent();
                     foreach (var x in data.Left.Left.Left)  b.Add(x); // [ObservableProperty]
                     foreach (var x in data.Left.Left.Right) b.Add(x); // relay-command method
                     foreach (var x in data.Left.Right)      b.Add(x); // binding method
@@ -111,7 +111,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         // Candidate transforms
         // -------------------------------------------------------------------------
 
-        private static StringAdapterCandidateInfo GetCandidate_ObservableProperty(
+        private static StringAdapterSpec GetCandidate_ObservableProperty(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -141,7 +141,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
             return MakeCandidate(typeSymbol, context.TargetNode.GetLocation());
         }
 
-        private static StringAdapterCandidateInfo GetCandidate_Method(
+        private static StringAdapterSpec GetCandidate_Method(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -160,7 +160,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
             return MakeCandidate(typeSymbol, context.TargetNode.GetLocation());
         }
 
-        private static StringAdapterCandidateInfo GetCandidate_NotifyPropertyChangedFor(
+        private static StringAdapterSpec GetCandidate_NotifyPropertyChangedFor(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -279,11 +279,11 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         // Helpers
         // -------------------------------------------------------------------------
 
-        private static StringAdapterCandidateInfo MakeCandidate(ITypeSymbol typeSymbol, Location location)
+        private static StringAdapterSpec MakeCandidate(ITypeSymbol typeSymbol, Location location)
         {
             var ns = typeSymbol.ContainingNamespace;
 
-            return new StringAdapterCandidateInfo {
+            return new StringAdapterSpec {
                 location = LocationInfo.From(location),
                 fullTypeName = typeSymbol.ToFullName(),
                 simpleName = typeSymbol.Name,
@@ -300,7 +300,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         private static void GenerateOutput(
               SourceProductionContext context
             , string assemblyName
-            , ImmutableArray<StringAdapterCandidateInfo> candidates
+            , ImmutableArray<StringAdapterSpec> candidates
             , ImmutableArray<string> existingAdapterTypeNames
             , string projectPath
             , bool outputSourceGenFiles

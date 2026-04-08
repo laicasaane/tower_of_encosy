@@ -14,11 +14,11 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
     /// or <see cref="ISymbol"/> references — so that Roslyn's incremental generator engine
     /// can cache and compare instances cheaply across multiple compilations.
     /// </summary>
-    public partial struct RelayCommandDeclaration : IEquatable<RelayCommandDeclaration>
+    public partial struct RelayCommandSpec : IEquatable<RelayCommandSpec>
     {
         public const string RELAY_COMMAND_ATTRIBUTE = "global::EncosyTower.Mvvm.Input.RelayCommandAttribute";
 
-        /// <summary>Excluded from <see cref="Equals(RelayCommandDeclaration)"/> and
+        /// <summary>Excluded from <see cref="Equals(RelayCommandSpec)"/> and
         /// <see cref="GetHashCode"/> — location data is not stable across incremental runs.</summary>
         public LocationInfo location;
 
@@ -27,14 +27,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
         public string sourceFilePath;
         public string openingSource;
         public string closingSource;
-        public EquatableArray<MemberDeclaration> memberRefs;
+        public EquatableArray<MemberSpec> memberRefs;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(className) == false
             && string.IsNullOrEmpty(hintName) == false
             && memberRefs.Count > 0;
 
-        public readonly bool Equals(RelayCommandDeclaration other)
+        public readonly bool Equals(RelayCommandSpec other)
             => string.Equals(className, other.className, StringComparison.Ordinal)
             && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
             && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
@@ -43,7 +43,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             && memberRefs.Equals(other.memberRefs);
 
         public readonly override bool Equals(object obj)
-            => obj is RelayCommandDeclaration other && Equals(other);
+            => obj is RelayCommandSpec other && Equals(other);
 
         public readonly override int GetHashCode()
         {
@@ -59,10 +59,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 
         /// <summary>
         /// Extracts all relay-command metadata from the annotated class symbol into a fully
-        /// populated, cache-friendly <see cref="RelayCommandDeclaration"/>.
+        /// populated, cache-friendly <see cref="RelayCommandSpec"/>.
         /// Called once per class inside the <c>ForAttributeWithMetadataName</c> transform.
         /// </summary>
-        public static RelayCommandDeclaration Extract(
+        public static RelayCommandSpec Extract(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -126,7 +126,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            using var memberRefsBuilder = ImmutableArrayBuilder<MemberDeclaration>.Rent();
+            using var memberRefsBuilder = ImmutableArrayBuilder<MemberSpec>.Rent();
             using var diagnosticBuilder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
 
             var members = classSymbol.GetMembers();
@@ -171,7 +171,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                     }
                     else
                     {
-                        memberRefsBuilder.Add(new MemberDeclaration {
+                        memberRefsBuilder.Add(new MemberSpec {
                             location = LocationInfo.From(method.Locations.Length > 0 ? method.Locations[0] : Location.None),
                             methodName = method.Name,
                             paramTypeName = method.Parameters.Length > 0
@@ -223,7 +223,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 
                 if (isValid)
                 {
-                    memberRefsBuilder.Add(new MemberDeclaration {
+                    memberRefsBuilder.Add(new MemberSpec {
                         location = LocationInfo.From(method.Locations.Length > 0 ? method.Locations[0] : Location.None),
                         methodName = method.Name,
                         paramTypeName = method.Parameters.Length > 0
@@ -241,7 +241,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             }
 
             var pendingRefs = memberRefsBuilder.ToImmutable();
-            using var finalBuilder = ImmutableArrayBuilder<MemberDeclaration>.Rent();
+            using var finalBuilder = ImmutableArrayBuilder<MemberSpec>.Rent();
 
             foreach (var memberRef in pendingRefs)
             {
@@ -260,7 +260,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                     , DiagnosticDescriptors.InvalidFieldOrPropertyTargetedAttributeOnRelayCommandMethod
                 );
 
-                finalBuilder.Add(new MemberDeclaration {
+                finalBuilder.Add(new MemberSpec {
                     location = memberRef.location,
                     methodName = memberRef.methodName,
                     paramTypeName = memberRef.paramTypeName,
@@ -276,7 +276,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                 return default;
             }
 
-            return new RelayCommandDeclaration {
+            return new RelayCommandSpec {
                 location = LocationInfo.From(classSyntax.GetLocation()),
                 className = className,
                 hintName = hintName,
@@ -307,9 +307,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
         /// All symbol-derived data is pre-computed as strings — no <see cref="ISymbol"/> or
         /// <see cref="SyntaxNode"/> references are retained.
         /// </summary>
-        public struct MemberDeclaration : IEquatable<MemberDeclaration>
+        public struct MemberSpec : IEquatable<MemberSpec>
         {
-            /// <summary>Excluded from <see cref="Equals(MemberDeclaration)"/> and
+            /// <summary>Excluded from <see cref="Equals(MemberSpec)"/> and
             /// <see cref="GetHashCode"/> — location data is not stable across incremental runs.</summary>
             public LocationInfo location;
 
@@ -329,7 +329,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             public EquatableArray<AttributeInfo> forwardedFieldAttributes;
             public EquatableArray<AttributeInfo> forwardedPropertyAttributes;
 
-            public readonly bool Equals(MemberDeclaration other)
+            public readonly bool Equals(MemberSpec other)
                 => string.Equals(methodName, other.methodName, StringComparison.Ordinal)
                 && string.Equals(paramTypeName, other.paramTypeName, StringComparison.Ordinal)
                 && string.Equals(canExecuteMethodName, other.canExecuteMethodName, StringComparison.Ordinal)
@@ -338,7 +338,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                 && forwardedPropertyAttributes.Equals(other.forwardedPropertyAttributes);
 
             public readonly override bool Equals(object obj)
-                => obj is MemberDeclaration other && Equals(other);
+                => obj is MemberSpec other && Equals(other);
 
             public readonly override int GetHashCode()
             {

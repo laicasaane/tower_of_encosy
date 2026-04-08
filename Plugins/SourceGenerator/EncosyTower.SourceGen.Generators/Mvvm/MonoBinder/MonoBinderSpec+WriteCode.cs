@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 {
-    partial struct MonoBinderDeclaration
+    partial struct MonoBinderSpec
     {
         private const string BINDER_ATTR       = "[ETMVB.Binder]";
         private const string SERIALIZABLE_ATTR = "[S.Serializable]";
@@ -100,7 +100,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
         }
 
-        private readonly void WritePropertyBinding(ref Printer p, in PropertyBindingInfo b)
+        private readonly void WritePropertyBinding(ref Printer p, in PropertyBindingSpec b)
         {
             p.PrintLine(SERIALIZABLE_ATTR);
             p.PrintLine(BINDER_ATTR);
@@ -197,7 +197,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
         }
 
-        private readonly void WriteCommandBinding(ref Printer p, in CommandBindingInfo b)
+        private readonly void WriteCommandBinding(ref Printer p, in CommandBindingSpec b)
         {
             var hasWrapper = !string.IsNullOrEmpty(b.wrapperTypeName);
             var argCount = b.actionTypeArgs.Count;
@@ -399,7 +399,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         /// <item>C# delegate/event → the delegate's full type name verbatim</item>
         /// </list>
         /// </summary>
-        private static void PrintCommandFieldType(ref Printer p, in CommandBindingInfo b)
+        private static void PrintCommandFieldType(ref Printer p, in CommandBindingSpec b)
         {
             if (b.isUnityEvent == false)
             {
@@ -522,14 +522,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
         }
 
-        private readonly void WritePropertySubclassIBinder(ref Printer p, in PropertyBindingInfo b)
+        private readonly void WritePropertySubclassIBinder(ref Printer p, in PropertyBindingSpec b)
         {
             var methodName   = b.setterMethodName;
             var paramType    = b.propFullTypeName;
-            var isVariant    = paramType == BinderDeclaration.VARIANT_TYPE;
+            var isVariant    = paramType == BinderSpec.VARIANT_TYPE;
             var vcPropName   = b.variantConverterPropertyName;
 
-            var propInfo = new BinderDeclaration.BindingPropertyInfo {
+            var propInfo = new BinderSpec.BindingPropertySpec {
                 methodName                   = methodName,
                 paramFullTypeName             = paramType,
                 paramRefKind                 = b.needsInModifier ? RefKind.In : RefKind.None,
@@ -541,13 +541,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             };
 
             var propRefs = ImmutableArray.Create(propInfo).AsEquatableArray();
-            var cmdRefs  = ImmutableArray<BinderDeclaration.BindingCommandInfo>.Empty.AsEquatableArray();
+            var cmdRefs  = ImmutableArray<BinderSpec.BindingCommandSpec>.Empty.AsEquatableArray();
 
-            EquatableArray<BinderDeclaration.NonVariantTypeInfo> nvRefs;
+            EquatableArray<BinderSpec.NonVariantTypeSpec> nvRefs;
 
             if (!isVariant && !string.IsNullOrEmpty(paramType))
             {
-                var nvInfo = new BinderDeclaration.NonVariantTypeInfo {
+                var nvInfo = new BinderSpec.NonVariantTypeSpec {
                     fullTypeName          = paramType,
                     converterPropertyName = vcPropName,
                 };
@@ -555,7 +555,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
             else
             {
-                nvRefs = ImmutableArray<BinderDeclaration.NonVariantTypeInfo>.Empty.AsEquatableArray();
+                nvRefs = ImmutableArray<BinderSpec.NonVariantTypeSpec>.Empty.AsEquatableArray();
             }
 
             p.PrintBeginLine()
@@ -598,7 +598,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
         }
 
-        private readonly void WriteCommandSubclassIBinder(ref Printer p, in CommandBindingInfo b)
+        private readonly void WriteCommandSubclassIBinder(ref Printer p, in CommandBindingSpec b)
         {
             var methodName  = b.callbackMethodName;
             var argCount    = b.actionTypeArgs.Count;
@@ -615,7 +615,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             else
                 effectiveParamType = string.Empty;
 
-            var cmdInfo = new BinderDeclaration.BindingCommandInfo {
+            var cmdInfo = new BinderSpec.BindingCommandSpec {
                 methodName               = methodName,
                 paramFullTypeName        = effectiveParamType,
                 paramRefKind             = RefKind.None,
@@ -624,9 +624,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 forwardedFieldAttributes = default,
             };
 
-            var propRefs = ImmutableArray<BinderDeclaration.BindingPropertyInfo>.Empty.AsEquatableArray();
+            var propRefs = ImmutableArray<BinderSpec.BindingPropertySpec>.Empty.AsEquatableArray();
             var cmdRefs  = ImmutableArray.Create(cmdInfo).AsEquatableArray();
-            var nvRefs   = ImmutableArray<BinderDeclaration.NonVariantTypeInfo>.Empty.AsEquatableArray();
+            var nvRefs   = ImmutableArray<BinderSpec.NonVariantTypeSpec>.Empty.AsEquatableArray();
 
             p.PrintBeginLine()
                 .Print("[ETMVBSG.BindingCommandMethodInfo(")
@@ -669,9 +669,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             , string typeIdentifier
             , bool hasOnBindPropertyFailedMethod
             , bool hasOnBindCommandFailedMethod
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
-            , in EquatableArray<BinderDeclaration.BindingCommandInfo>  cmdRefs
-            , in EquatableArray<BinderDeclaration.NonVariantTypeInfo>  nvTypes
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
+            , in EquatableArray<BinderSpec.BindingCommandSpec> cmdRefs
+            , in EquatableArray<BinderSpec.NonVariantTypeSpec> nvTypes
         )
         {
             var keyword          = "override ";
@@ -709,7 +709,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static void WriteBpMethodInfoAttributes(
               ref Printer p
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
         )
         {
             foreach (var m in propRefs)
@@ -726,7 +726,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static void WriteBcMethodInfoAttributes(
               ref Printer p
-            , in EquatableArray<BinderDeclaration.BindingCommandInfo> cmdRefs
+            , in EquatableArray<BinderSpec.BindingCommandSpec> cmdRefs
         )
         {
             foreach (var m in cmdRefs)
@@ -751,7 +751,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private static void WriteBinderConstantProperties(
               ref Printer p
             , string className
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
         )
         {
             foreach (var m in propRefs)
@@ -768,7 +768,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private static void WriteBinderConstantCommands(
               ref Printer p
             , string className
-            , in EquatableArray<BinderDeclaration.BindingCommandInfo> cmdRefs
+            , in EquatableArray<BinderSpec.BindingCommandSpec> cmdRefs
         )
         {
             foreach (var m in cmdRefs)
@@ -784,7 +784,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static void WriteBinderPropertyFields(
               ref Printer p
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
         )
         {
             foreach (var m in propRefs)
@@ -811,7 +811,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static void WriteBinderConverterFields(
               ref Printer p
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
         )
         {
             foreach (var m in propRefs)
@@ -837,7 +837,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static void WriteBinderCommandFields(
               ref Printer p
-            , in EquatableArray<BinderDeclaration.BindingCommandInfo> cmdRefs
+            , in EquatableArray<BinderSpec.BindingCommandSpec> cmdRefs
         )
         {
             foreach (var m in cmdRefs)
@@ -872,7 +872,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static void WriteBinderVariantConverterFields(
               ref Printer p
-            , in EquatableArray<BinderDeclaration.NonVariantTypeInfo> nvTypes
+            , in EquatableArray<BinderSpec.NonVariantTypeSpec> nvTypes
         )
         {
             foreach (var t in nvTypes)
@@ -891,7 +891,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private static void WriteBinderListenerFields(
               ref Printer p
             , string className
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
         )
         {
             foreach (var m in propRefs)
@@ -907,7 +907,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static void WriteBinderRelayCommandFields(
               ref Printer p
-            , in EquatableArray<BinderDeclaration.BindingCommandInfo> cmdRefs
+            , in EquatableArray<BinderSpec.BindingCommandSpec> cmdRefs
         )
         {
             foreach (var m in cmdRefs)
@@ -935,8 +935,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private static void WriteBinderListeningFlag(
               ref Printer p
             , string isListeningField
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
-            , in EquatableArray<BinderDeclaration.BindingCommandInfo>  cmdRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
+            , in EquatableArray<BinderSpec.BindingCommandSpec> cmdRefs
         )
         {
             if (propRefs.Count < 1 && cmdRefs.Count < 1)
@@ -950,7 +950,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
               ref Printer p
             , string className
             , string simpleTypeName
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
         )
         {
             if (propRefs.Count < 1)
@@ -1003,8 +1003,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
               ref Printer p
             , string keyword
             , string isListeningField
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
-            , in EquatableArray<BinderDeclaration.BindingCommandInfo>  cmdRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
+            , in EquatableArray<BinderSpec.BindingCommandSpec> cmdRefs
         )
         {
             if (propRefs.Count < 1 && cmdRefs.Count < 1)
@@ -1077,8 +1077,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
               ref Printer p
             , bool hasOnBindPropertyFailedMethod
             , bool hasOnBindCommandFailedMethod
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
-            , in EquatableArray<BinderDeclaration.BindingCommandInfo>  cmdRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
+            , in EquatableArray<BinderSpec.BindingCommandSpec> cmdRefs
         )
         {
             if (propRefs.Count > 0 && !hasOnBindPropertyFailedMethod)
@@ -1098,8 +1098,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
               ref Printer p
             , string keyword
             , string isListeningField
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
-            , in EquatableArray<BinderDeclaration.BindingCommandInfo>  cmdRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
+            , in EquatableArray<BinderSpec.BindingCommandSpec> cmdRefs
         )
         {
             if (propRefs.Count < 1 && cmdRefs.Count < 1)
@@ -1144,7 +1144,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private static void WriteBinderSetTargetPropertyName(
               ref Printer p
             , string keyword
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
         )
         {
             if (propRefs.Count < 1)
@@ -1187,7 +1187,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private static void WriteBinderSetAdapter(
               ref Printer p
             , string keyword
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
         )
         {
             if (propRefs.Count < 1)
@@ -1234,7 +1234,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static void WriteBinderVariantOverloads(
               ref Printer p
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
         )
         {
             foreach (var m in propRefs)
@@ -1269,7 +1269,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static void WriteBinderPartialCommandMethods(
               ref Printer p
-            , in EquatableArray<BinderDeclaration.BindingCommandInfo> cmdRefs
+            , in EquatableArray<BinderSpec.BindingCommandSpec> cmdRefs
         )
         {
             foreach (var m in cmdRefs)
@@ -1308,7 +1308,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private static void WriteBinderSetTargetCommandName(
               ref Printer p
             , string keyword
-            , in EquatableArray<BinderDeclaration.BindingCommandInfo> cmdRefs
+            , in EquatableArray<BinderSpec.BindingCommandSpec> cmdRefs
         )
         {
             if (cmdRefs.Count < 1)
@@ -1351,7 +1351,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private static void WriteBinderRefreshContext(
               ref Printer p
             , string keyword
-            , in EquatableArray<BinderDeclaration.BindingPropertyInfo> propRefs
+            , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
         )
         {
             if (propRefs.Count < 1)

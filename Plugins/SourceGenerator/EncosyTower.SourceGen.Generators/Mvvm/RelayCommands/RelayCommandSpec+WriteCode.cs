@@ -1,6 +1,6 @@
 ﻿namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 {
-    partial struct RelayCommandDeclaration
+    partial struct RelayCommandSpec
     {
         private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
         private const string GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.Mvvm.RelayCommands.RelayCommandGenerator\", \"{SourceGenVersion.VALUE}\")]";
@@ -184,16 +184,16 @@
             p.PrintEndLine();
         }
 
-        private static string ConstName(MemberDeclaration member)
+        private static string ConstName(MemberSpec member)
             => $"CommandName_{CommandPropertyName(member)}";
 
-        private static string CommandFieldName(MemberDeclaration member)
+        private static string CommandFieldName(MemberSpec member)
             => $"_command{member.methodName}";
 
-        private static string CommandPropertyName(MemberDeclaration member)
+        private static string CommandPropertyName(MemberSpec member)
             => $"{member.methodName}Command";
 
-        private static string CommandTypeName(MemberDeclaration member)
+        private static string CommandTypeName(MemberSpec member)
         {
             if (string.IsNullOrEmpty(member.paramTypeName))
             {
@@ -203,7 +203,7 @@
             return $"ETMI.RelayCommand<{member.paramTypeName}>";
         }
 
-        private static string CommandInterfaceName(MemberDeclaration member)
+        private static string CommandInterfaceName(MemberSpec member)
         {
             if (string.IsNullOrEmpty(member.paramTypeName))
             {
@@ -213,7 +213,7 @@
             return $"ETMI.IRelayCommand<{member.paramTypeName}>";
         }
 
-        private static string CommandInterfaceNameComment(MemberDeclaration member)
+        private static string CommandInterfaceNameComment(MemberSpec member)
         {
             if (string.IsNullOrEmpty(member.paramTypeName))
             {
@@ -223,7 +223,7 @@
             return $"ETMI.IRelayCommand{{{member.paramTypeName}}}";
         }
 
-        private static string CanExecuteMethodArg(MemberDeclaration member)
+        private static string CanExecuteMethodArg(MemberSpec member)
         {
             if (string.IsNullOrEmpty(member.canExecuteMethodName))
                 return string.Empty;

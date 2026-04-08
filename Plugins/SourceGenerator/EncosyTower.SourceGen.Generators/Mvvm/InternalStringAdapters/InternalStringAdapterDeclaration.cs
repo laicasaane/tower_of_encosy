@@ -6,14 +6,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 {
     public partial class InternalStringAdapterDeclaration
     {
-        public ImmutableArray<StringAdapterCandidateInfo> Candidates { get; }
+        public ImmutableArray<StringAdapterSpec> Candidates { get; }
 
         public InternalStringAdapterDeclaration(
-              ImmutableArray<StringAdapterCandidateInfo> candidates
+              ImmutableArray<StringAdapterSpec> candidates
             , ImmutableArray<string> existingAdapterTypeNames
         )
         {
-            var typeFiltered = new Dictionary<string, StringAdapterCandidateInfo>();
+            var typeFiltered = new Dictionary<string, StringAdapterSpec>();
             var typesToIgnore = new HashSet<string>(existingAdapterTypeNames, StringComparer.Ordinal);
 
             foreach (var candidate in candidates)
@@ -38,7 +38,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 }
             }
 
-            using var builder = ImmutableArrayBuilder<StringAdapterCandidateInfo>.Rent();
+            using var builder = ImmutableArrayBuilder<StringAdapterSpec>.Rent();
             builder.AddRange(typeFiltered.Values);
             Candidates = builder.ToImmutable();
         }
@@ -51,10 +51,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
     /// <see cref="Microsoft.CodeAnalysis.SyntaxNode"/> references that would root
     /// the compilation graph and prevent GC.
     /// </summary>
-    public struct StringAdapterCandidateInfo : IEquatable<StringAdapterCandidateInfo>
+    public struct StringAdapterSpec : IEquatable<StringAdapterSpec>
     {
         /// <summary>
-        /// Excluded from <see cref="Equals(StringAdapterCandidateInfo)"/> and
+        /// Excluded from <see cref="Equals(StringAdapterSpec)"/> and
         /// <see cref="GetHashCode"/> — location data is not stable across incremental runs.
         /// </summary>
         public LocationInfo location;
@@ -96,7 +96,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
             => string.IsNullOrEmpty(fullTypeName) == false
             && string.IsNullOrEmpty(identifierName) == false;
 
-        public readonly bool Equals(StringAdapterCandidateInfo other)
+        public readonly bool Equals(StringAdapterSpec other)
             => string.Equals(fullTypeName, other.fullTypeName, StringComparison.Ordinal)
             && string.Equals(simpleName, other.simpleName, StringComparison.Ordinal)
             && string.Equals(namespaceName, other.namespaceName, StringComparison.Ordinal)
@@ -105,15 +105,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is StringAdapterCandidateInfo other && Equals(other);
+            => obj is StringAdapterSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(fullTypeName, simpleName, namespaceName, identifierName, labelName);
 
-        public static bool operator ==(StringAdapterCandidateInfo left, StringAdapterCandidateInfo right)
+        public static bool operator ==(StringAdapterSpec left, StringAdapterSpec right)
             => left.Equals(right);
 
-        public static bool operator !=(StringAdapterCandidateInfo left, StringAdapterCandidateInfo right)
+        public static bool operator !=(StringAdapterSpec left, StringAdapterSpec right)
             => !left.Equals(right);
     }
 }

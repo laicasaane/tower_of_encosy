@@ -27,7 +27,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                 .ForAttributeWithMetadataName(
                       OBSERVABLE_OBJECT_ATTRIBUTE_METADATA
                     , static (node, _) => node is ClassDeclarationSyntax cls && HasAnyRelayCommandMethod(cls)
-                    , RelayCommandDeclaration.Extract
+                    , RelayCommandSpec.Extract
                 )
                 .Where(static t => t.IsValid);
 
@@ -62,7 +62,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , RelayCommandDeclaration declaration
+            , RelayCommandSpec declaration
             , string projectPath
             , bool outputSourceGenFiles
         )

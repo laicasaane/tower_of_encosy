@@ -2,7 +2,7 @@
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 {
-    partial struct BinderDeclaration
+    partial struct BinderSpec
     {
         private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
         private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
@@ -892,22 +892,22 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
         // ── Private naming helpers ────────────────────────────────────────────────
 
-        private static string IsListeningName(in BinderDeclaration dec)
+        private static string IsListeningName(in BinderSpec dec)
             => $"_isListening_{dec.typeIdentifier}";
 
-        private static string ConstName(in BindingPropertyInfo member)
+        private static string ConstName(in BindingPropertySpec member)
             => $"BindingProperty_{member.methodName}";
 
-        private static string ConstName(in BindingCommandInfo member)
+        private static string ConstName(in BindingCommandSpec member)
             => $"BindingCommand_{member.methodName}";
 
-        private static string BindingPropertyName(in BindingPropertyInfo member)
+        private static string BindingPropertyName(in BindingPropertySpec member)
             => $"_bindingFieldFor{member.methodName}";
 
-        private static string ConverterName(in BindingPropertyInfo member)
+        private static string ConverterName(in BindingPropertySpec member)
             => $"_converterFor{member.methodName}";
 
-        private static string ListenerName(in BindingPropertyInfo member)
+        private static string ListenerName(in BindingPropertySpec member)
             => $"_listenerFor{member.methodName}";
 
         /// <summary>
@@ -915,13 +915,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         /// For non-Variant parameter types, a private <c>__Variant</c> proxy is called instead
         /// of the user's original method.
         /// </summary>
-        private static string MethodName(in BindingPropertyInfo member)
+        private static string MethodName(in BindingPropertySpec member)
             => member.isParameterTypeVariant ? member.methodName : $"{member.methodName}__Variant";
 
-        private static string BindingCommandName(in BindingCommandInfo member)
+        private static string BindingCommandName(in BindingCommandSpec member)
             => $"_bindingCommandFor{member.methodName}";
 
-        private static string RelayCommandName(in BindingCommandInfo member)
+        private static string RelayCommandName(in BindingCommandSpec member)
             => $"_relayCommandFor{member.methodName}";
     }
 }

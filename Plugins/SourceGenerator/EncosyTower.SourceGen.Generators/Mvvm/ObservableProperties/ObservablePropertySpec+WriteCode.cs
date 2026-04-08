@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 {
-    partial struct ObservablePropertyDeclaration
+    partial struct ObservablePropertySpec
     {
         private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
         private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
@@ -143,15 +143,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         }
 
         // Builds a lookup of memberKey -> list-of-NotifyForEntry for methods that need it.
-        private readonly Dictionary<string, List<NotifyForEntry>> BuildNotifyForMap()
+        private readonly Dictionary<string, List<NotifyForEntrySpec>> BuildNotifyForMap()
         {
-            var map = new Dictionary<string, List<NotifyForEntry>>();
+            var map = new Dictionary<string, List<NotifyForEntrySpec>>();
 
             foreach (var entry in notifyForEntries)
             {
                 if (map.TryGetValue(entry.memberKey, out var list) == false)
                 {
-                    map[entry.memberKey] = list = new List<NotifyForEntry>();
+                    map[entry.memberKey] = list = new List<NotifyForEntrySpec>();
                 }
 
                 list.Add(entry);
@@ -162,9 +162,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
         // Builds a set of unique target property names from the notifyForEntries for methods that
         // need to enumerate all additional properties (e.g. writing events/partial methods/converters).
-        private readonly Dictionary<string, NotifyForEntry> BuildUniqueNotifyForTargets()
+        private readonly Dictionary<string, NotifyForEntrySpec> BuildUniqueNotifyForTargets()
         {
-            var dict = new Dictionary<string, NotifyForEntry>();
+            var dict = new Dictionary<string, NotifyForEntrySpec>();
 
             foreach (var entry in notifyForEntries)
             {
@@ -180,7 +180,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         private readonly void WriteConstantFields(ref Printer p)
         {
             var notifyForMap = BuildNotifyForMap();
-            var additionalProps = new Dictionary<string, NotifyForEntry>();
+            var additionalProps = new Dictionary<string, NotifyForEntrySpec>();
 
             foreach (var member in fieldRefs)
             {
@@ -1067,7 +1067,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         {
             const string ATTRIBUTE = "[ETMCMSG.NotifyPropertyChangedInfo(\"{0}\", typeof({1}))]";
 
-            var additionalProps = new Dictionary<string, NotifyForEntry>();
+            var additionalProps = new Dictionary<string, NotifyForEntrySpec>();
             var notifyForMap = BuildNotifyForMap();
 
             foreach (var member in fieldRefs)

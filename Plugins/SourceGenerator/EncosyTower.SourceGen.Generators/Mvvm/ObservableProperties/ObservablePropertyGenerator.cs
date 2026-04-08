@@ -20,9 +20,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
-                      ObservablePropertyDeclaration.OBSERVABLE_OBJECT_ATTRIBUTE_METADATA
+                      ObservablePropertySpec.OBSERVABLE_OBJECT_ATTRIBUTE_METADATA
                     , static (node, _) => node is ClassDeclarationSyntax
-                    , ObservablePropertyDeclaration.Extract
+                    , ObservablePropertySpec.Extract
                 )
                 .Where(static t => t.IsValid);
 
@@ -43,7 +43,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , ObservablePropertyDeclaration declaration
+            , ObservablePropertySpec declaration
             , string projectPath
             , bool outputSourceGenFiles
         )

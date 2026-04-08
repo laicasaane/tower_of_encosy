@@ -24,7 +24,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 .ForAttributeWithMetadataName(
                       BINDER_ATTRIBUTE_METADATA
                     , static (node, _) => node is ClassDeclarationSyntax
-                    , BinderDeclaration.Extract
+                    , BinderSpec.Extract
                 )
                 .Where(static t => t.IsValid);
 
@@ -45,7 +45,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , BinderDeclaration declaration
+            , BinderSpec declaration
             , string projectPath
             , bool outputSourceGenFiles
         )

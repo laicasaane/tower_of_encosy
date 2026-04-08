@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 {
-    using InternalVariantDeclaration = Variants.InternalVariantDeclaration;
+    using InternalVariantSpec = Variants.InternalVariantSpec;
     using VariantPrinter = Variants.VariantPrinter;
 
     internal static class MvvmInternalVariantWriteCode
@@ -24,7 +24,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 
         public static void WriteVariantCode(
               ref SourceProductionContext context
-            , in InternalVariantDeclaration decl
+            , in InternalVariantSpec decl
             , string assemblyName
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
@@ -60,7 +60,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             }
         }
 
-        private static string BuildVariantSource(in InternalVariantDeclaration decl, string assemblyName)
+        private static string BuildVariantSource(in InternalVariantSpec decl, string assemblyName)
         {
             var typeName = decl.fullTypeName;
             var structName = decl.structName;
@@ -106,8 +106,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 
         public static void WriteStaticClass(
               ref SourceProductionContext context
-            , ImmutableArray<InternalVariantDeclaration> valueTypes
-            , ImmutableArray<InternalVariantDeclaration> refTypes
+            , ImmutableArray<InternalVariantSpec> valueTypes
+            , ImmutableArray<InternalVariantSpec> refTypes
             , string assemblyName
             , bool outputSourceGenFiles
             , DiagnosticDescriptor errorDescriptor
@@ -144,8 +144,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
         }
 
         private static string BuildStaticClassSource(
-              ImmutableArray<InternalVariantDeclaration> valueTypes
-            , ImmutableArray<InternalVariantDeclaration> refTypes
+              ImmutableArray<InternalVariantSpec> valueTypes
+            , ImmutableArray<InternalVariantSpec> refTypes
             , string assemblyName
         )
         {

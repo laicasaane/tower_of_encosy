@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 {
-    using InternalVariantDeclaration = Variants.InternalVariantDeclaration;
+    using InternalVariantSpec = Variants.InternalVariantSpec;
 
     [Generator]
     public class InternalVariantGenerator : IIncrementalGenerator
@@ -97,7 +97,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                 .Combine(bindingCommandProvider.Collect())
                 .Combine(npcfProvider.Collect())
                 .Select(static (data, _) => {
-                    using var b = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
+                    using var b = ImmutableArrayBuilder<InternalVariantSpec>.Rent();
                     foreach (var x in data.Left.Left.Left.Left)  b.Add(x); // [ObservableProperty]
                     foreach (var x in data.Left.Left.Left.Right) b.Add(x); // [RelayCommand]
                     foreach (var x in data.Left.Left.Right)      b.Add(x); // [BindingProperty]
@@ -132,7 +132,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
         // Candidate transforms
         // -------------------------------------------------------------------------
 
-        private static InternalVariantDeclaration GetSemanticMatch_ObservableProperty(
+        private static InternalVariantSpec GetSemanticMatch_ObservableProperty(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -161,7 +161,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             return BuildDeclaration(typeSymbol, context.TargetNode.GetLocation(), token);
         }
 
-        private static InternalVariantDeclaration GetSemanticMatch_Method(
+        private static InternalVariantSpec GetSemanticMatch_Method(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -178,7 +178,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             return BuildDeclaration(methodSymbol.Parameters[0].Type, context.TargetNode.GetLocation(), token);
         }
 
-        private static InternalVariantDeclaration GetSemanticMatch_NotifyPropertyChangedFor(
+        private static InternalVariantSpec GetSemanticMatch_NotifyPropertyChangedFor(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -284,7 +284,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
         // Shared helper
         // -------------------------------------------------------------------------
 
-        private static InternalVariantDeclaration BuildDeclaration(
+        private static InternalVariantSpec BuildDeclaration(
               ITypeSymbol typeSymbol
             , Location location
             , CancellationToken token
@@ -308,7 +308,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo compilation
-            , ImmutableArray<InternalVariantDeclaration> candidates
+            , ImmutableArray<InternalVariantSpec> candidates
             , ImmutableArray<string> typeNamesToIgnore
             , string projectPath
             , bool outputSourceGenFiles
@@ -326,8 +326,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                 // Pre-seed the set with ignored names so a single Add() covers both the ignore-list
                 // check and deduplication in one pass.
                 var seenTypeNames = new HashSet<string>(typeNamesToIgnore, StringComparer.Ordinal);
-                using var valueTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
-                using var refTypeBuilder = ImmutableArrayBuilder<InternalVariantDeclaration>.Rent();
+                using var valueTypeBuilder = ImmutableArrayBuilder<InternalVariantSpec>.Rent();
+                using var refTypeBuilder = ImmutableArrayBuilder<InternalVariantSpec>.Rent();
                 var assemblyName = compilation.assemblyName;
 
                 foreach (var candidate in candidates)

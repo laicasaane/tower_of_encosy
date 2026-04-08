@@ -2,7 +2,7 @@ using System;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 {
-    public struct PropertyBindingInfo : IEquatable<PropertyBindingInfo>
+    public struct PropertyBindingSpec : IEquatable<PropertyBindingSpec>
     {
         public string memberName;           // "interactable"
         public string memberPascalName;     // "Interactable"
@@ -31,7 +31,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         /// e.g. <c>Set_Active</c>. Non-empty only when <see cref="useCustomSetter"/> is <see langword="true"/>.</summary>
         public string customSetterPartialMethodName;
 
-        public readonly bool Equals(PropertyBindingInfo other)
+        public readonly bool Equals(PropertyBindingSpec other)
             => string.Equals(memberName, other.memberName, StringComparison.Ordinal)
             && string.Equals(propFullTypeName, other.propFullTypeName, StringComparison.Ordinal)
             && needsInModifier == other.needsInModifier
@@ -45,7 +45,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             && string.Equals(customSetterPartialMethodName, other.customSetterPartialMethodName, StringComparison.Ordinal);
 
         public readonly override bool Equals(object obj)
-            => obj is PropertyBindingInfo other && Equals(other);
+            => obj is PropertyBindingSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(

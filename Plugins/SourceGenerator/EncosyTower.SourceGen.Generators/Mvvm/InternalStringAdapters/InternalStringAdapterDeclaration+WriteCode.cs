@@ -37,7 +37,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
             );
         }
 
-        private static string WriteAdapter(ImmutableArray<StringAdapterCandidateInfo> types, string assemblyName)
+        private static string WriteAdapter(ImmutableArray<StringAdapterSpec> types, string assemblyName)
         {
             var p = Printer.DefaultLarge;
 
@@ -81,7 +81,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
             return p.Result;
         }
 
-        private static string AdapterTypeName(StringAdapterCandidateInfo typeRef)
+        private static string AdapterTypeName(StringAdapterSpec typeRef)
             => $"{typeRef.identifierName}ToStringAdapter";
 
         private static string PrintAdditionalUsings()
