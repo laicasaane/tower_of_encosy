@@ -47,7 +47,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             });
         }
 
-        private static StatDataDefinition GetSemanticSymbolMatch(
+        private static StatDataSpec GetSemanticSymbolMatch(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -90,7 +90,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            var result = new StatDataDefinition {
+            var result = new StatDataSpec {
                 typeName = structSymbol.Name,
                 typeNamespace = structSymbol.ContainingNamespace.ToDisplayString(),
                 typeIdentifier = typeIdentifier,
@@ -185,7 +185,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo _
-            , StatDataDefinition candidate
+            , StatDataSpec candidate
             , string projectPath
             , bool outputSourceGenFiles
         )

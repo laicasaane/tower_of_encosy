@@ -49,7 +49,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             });
         }
 
-        private static StatCollectionDefinition GetSemanticSymbolMatch(
+        private static StatCollectionSpec GetSemanticSymbolMatch(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -98,7 +98,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            var result = new StatCollectionDefinition {
+            var result = new StatCollectionSpec {
                 typeName = structSymbol.Name,
                 typeNamespace = structSymbol.ContainingNamespace.ToDisplayString(),
                 typeIdentifier = typeIdentifier,
@@ -157,10 +157,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             static void GetStatDataDefintions(
                   StructDeclarationSyntax parentSyntax
                 , CancellationToken token
-                , ref StatCollectionDefinition statCollection
+                , ref StatCollectionSpec statCollection
             )
             {
-                using var arrayBuilder = ImmutableArrayBuilder<StatCollectionDefinition.StatDataDefinition>.Rent();
+                using var arrayBuilder = ImmutableArrayBuilder<StatCollectionSpec.StatDataSpec>.Rent();
 
                 foreach (var childNode in parentSyntax.ChildNodes())
                 {
@@ -179,7 +179,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 statCollection.statDataCollection = arrayBuilder.ToImmutable();
             }
 
-            static StatCollectionDefinition.StatDataDefinition GetStatDataDefinition(SyntaxNode node)
+            static StatCollectionSpec.StatDataSpec GetStatDataDefinition(SyntaxNode node)
             {
                 if (node is not StructDeclarationSyntax syntax
                     || syntax.TypeParameterList is not null
@@ -192,7 +192,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 }
 
                 var args = argumentList.Arguments;
-                var result = new StatCollectionDefinition.StatDataDefinition {
+                var result = new StatCollectionSpec.StatDataSpec {
                     typeName = syntax.Identifier.ValueText,
                     fieldName = syntax.Identifier.ValueText.ToPublicFieldName(),
                     singleValue = false,
@@ -257,7 +257,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , StatCollectionDefinition candidate
+            , StatCollectionSpec candidate
             , string projectPath
             , bool outputSourceGenFiles
         )

@@ -2,7 +2,7 @@
 
 namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
-    internal partial struct StatSystemDefinition : IEquatable<StatSystemDefinition>
+    internal partial struct StatSystemSpec : IEquatable<StatSystemSpec>
     {
         public string typeName;
         public string typeNamespace;
@@ -31,9 +31,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is StatSystemDefinition other && Equals(other);
+            => obj is StatSystemSpec other && Equals(other);
 
-        public readonly bool Equals(StatSystemDefinition other)
+        public readonly bool Equals(StatSystemSpec other)
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(typeNamespace, other.typeNamespace, StringComparison.Ordinal)
             && string.Equals(syntaxKeyword, other.syntaxKeyword, StringComparison.Ordinal)

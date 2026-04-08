@@ -2,7 +2,7 @@
 
 namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
-    internal partial struct StatDataDefinition : IEquatable<StatDataDefinition>
+    internal partial struct StatDataSpec : IEquatable<StatDataSpec>
     {
         public string typeName;
         public string typeNamespace;
@@ -36,9 +36,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             => string.IsNullOrEmpty(valueTypeNs) == false;
 
         public readonly override bool Equals(object obj)
-            => obj is StatDataDefinition other && Equals(other);
+            => obj is StatDataSpec other && Equals(other);
 
-        public readonly bool Equals(StatDataDefinition other)
+        public readonly bool Equals(StatDataSpec other)
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(typeNamespace, other.typeNamespace, StringComparison.Ordinal)
             && string.Equals(valueTypeName, other.valueTypeName, StringComparison.Ordinal)

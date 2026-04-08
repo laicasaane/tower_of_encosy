@@ -2,7 +2,7 @@
 
 namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
-    partial struct StatCollectionDefinition
+    partial struct StatCollectionSpec
     {
         private const string PR_METHOD_IMPL_OPTIONS = "SRCS.MethodImplOptions";
         private const string PR_INLINING = $"{PR_METHOD_IMPL_OPTIONS}.AggressiveInlining";
@@ -1676,7 +1676,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             return;
 
-            static void WriteStatCreation(ref Printer p, StatDataDefinition statData)
+            static void WriteStatCreation(ref Printer p, StatDataSpec statData)
             {
                 var typeName = statData.typeName;
 
@@ -2045,7 +2045,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteCreateAllStatsMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
+            static void WriteCreateAllStatsMethod(ref Printer p, ReadOnlySpan<StatDataSpec> statDataCollection)
             {
                 var count = statDataCollection.Length;
 
@@ -2072,7 +2072,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteCreateStatsMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
+            static void WriteCreateStatsMethod(ref Printer p, ReadOnlySpan<StatDataSpec> statDataCollection)
             {
                 var count = statDataCollection.Length;
 
@@ -2121,7 +2121,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteCreateStatMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteCreateStatMethod(ref Printer p, StatDataSpec statData)
             {
                 p.PrintBeginLine("public Baker<T> CreateStat(ETES.StatDataParams<").Print(statData.typeName)
                     .PrintEndLine("> value)");
@@ -2145,7 +2145,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteSetStatsMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
+            static void WriteSetStatsMethod(ref Printer p, ReadOnlySpan<StatDataSpec> statDataCollection)
             {
                 var count = statDataCollection.Length;
 
@@ -2204,7 +2204,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteSetStatMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteSetStatMethod(ref Printer p, StatDataSpec statData)
             {
                 p.PrintBeginLine("public Baker<T> SetStat(ETES.StatDataParams<").Print(statData.typeName)
                     .PrintEndLine("> value)");
@@ -2239,7 +2239,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteSetOrCreateStatsMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
+            static void WriteSetOrCreateStatsMethod(ref Printer p, ReadOnlySpan<StatDataSpec> statDataCollection)
             {
                 var count = statDataCollection.Length;
 
@@ -2290,7 +2290,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteSetOrCreateStatMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteSetOrCreateStatMethod(ref Printer p, StatDataSpec statData)
             {
                 p.PrintBeginLine("public Baker<T> SetOrCreateStat(ETES.StatDataParams<").Print(statData.typeName)
                     .PrintEndLine("> value)");
@@ -2481,7 +2481,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             return;
 
-            static void WriteTryCreateAllStatsMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
+            static void WriteTryCreateAllStatsMethod(ref Printer p, ReadOnlySpan<StatDataSpec> statDataCollection)
             {
                 var count = statDataCollection.Length;
 
@@ -2523,7 +2523,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteTryCreateStatsMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
+            static void WriteTryCreateStatsMethod(ref Printer p, ReadOnlySpan<StatDataSpec> statDataCollection)
             {
                 var count = statDataCollection.Length;
 
@@ -2581,7 +2581,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteTryCreateStatMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteTryCreateStatMethod(ref Printer p, StatDataSpec statData)
             {
                 var typeName = statData.typeName;
                 var fieldName = statData.fieldName;
@@ -2628,7 +2628,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteTryCreateOrsSetStatMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteTryCreateOrsSetStatMethod(ref Printer p, StatDataSpec statData)
             {
                 var typeName = statData.typeName;
                 var fieldName = statData.fieldName;
@@ -2763,7 +2763,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteTryGetStatMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteTryGetStatMethod(ref Printer p, StatDataSpec statData)
             {
                 var typeName = statData.typeName;
                 var fieldName = statData.fieldName;
@@ -2785,7 +2785,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteTryGetStatDataMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteTryGetStatDataMethod(ref Printer p, StatDataSpec statData)
             {
                 var typeName = statData.typeName;
                 var fieldName = statData.fieldName;
@@ -2824,7 +2824,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteTrySetBaseValueToStatsMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
+            static void WriteTrySetBaseValueToStatsMethod(ref Printer p, ReadOnlySpan<StatDataSpec> statDataCollection)
             {
                 var count = statDataCollection.Length;
 
@@ -2900,7 +2900,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteTrySetStatBaseValueMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteTrySetStatBaseValueMethod(ref Printer p, StatDataSpec statData)
             {
                 var typeName = statData.typeName;
                 var fieldName = statData.fieldName;
@@ -2920,7 +2920,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteTrySetCurrentValueToStatsMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
+            static void WriteTrySetCurrentValueToStatsMethod(ref Printer p, ReadOnlySpan<StatDataSpec> statDataCollection)
             {
                 var count = statDataCollection.Length;
 
@@ -2996,7 +2996,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteTrySetStatCurrentValueMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteTrySetStatCurrentValueMethod(ref Printer p, StatDataSpec statData)
             {
                 var typeName = statData.typeName;
                 var fieldName = statData.fieldName;
@@ -3016,7 +3016,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteTrySetValuesToStatsMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
+            static void WriteTrySetValuesToStatsMethod(ref Printer p, ReadOnlySpan<StatDataSpec> statDataCollection)
             {
                 var count = statDataCollection.Length;
 
@@ -3085,7 +3085,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteTrySetStatValuesMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteTrySetStatValuesMethod(ref Printer p, StatDataSpec statData)
             {
                 var typeName = statData.typeName;
                 var fieldName = statData.fieldName;
@@ -3107,7 +3107,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             static void WriteTrySetProduceChangeEventsForAllStatsMethod(
                   ref Printer p
-                , ReadOnlySpan<StatDataDefinition> statDataCollection
+                , ReadOnlySpan<StatDataSpec> statDataCollection
             )
             {
                 var count = statDataCollection.Length;
@@ -3142,7 +3142,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             static void WriteTrySetProduceChangeEventsForStatsMethod(
                   ref Printer p
-                , ReadOnlySpan<StatDataDefinition> statDataCollection
+                , ReadOnlySpan<StatDataSpec> statDataCollection
             )
             {
                 var count = statDataCollection.Length;
@@ -3210,7 +3210,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             }
 
 
-            static void WriteTrySetStatProduceChangeEventsMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteTrySetStatProduceChangeEventsMethod(ref Printer p, StatDataSpec statData)
             {
                 var typeName = statData.typeName;
                 var fieldName = statData.fieldName;
@@ -3353,7 +3353,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteContainsTStatDataMethod(ref Printer p, ReadOnlySpan<StatDataDefinition> statDataCollection)
+            static void WriteContainsTStatDataMethod(ref Printer p, ReadOnlySpan<StatDataSpec> statDataCollection)
             {
                 var count = statDataCollection.Length;
 
@@ -3390,7 +3390,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteContainsMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteContainsMethod(ref Printer p, StatDataSpec statData)
             {
                 var typeName = statData.typeName;
 
@@ -3546,7 +3546,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteTryGetStatMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteTryGetStatMethod(ref Printer p, StatDataSpec statData)
             {
                 var typeName = statData.typeName;
                 var fieldName = statData.fieldName;
@@ -3569,7 +3569,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
             }
 
-            static void WriteTryGetStatDataMethod(ref Printer p, StatDataDefinition statData)
+            static void WriteTryGetStatDataMethod(ref Printer p, StatDataSpec statData)
             {
                 var typeName = statData.typeName;
                 var fieldName = statData.fieldName;

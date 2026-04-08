@@ -1,6 +1,6 @@
 ﻿namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
-    partial struct StatDataDefinition
+    partial struct StatDataSpec
     {
         private const string PR_AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
         private const string PR_EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";

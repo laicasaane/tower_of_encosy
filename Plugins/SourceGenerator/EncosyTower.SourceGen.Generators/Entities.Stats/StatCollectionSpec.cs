@@ -2,7 +2,7 @@
 
 namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
-    internal partial struct StatCollectionDefinition : IEquatable<StatCollectionDefinition>
+    internal partial struct StatCollectionSpec : IEquatable<StatCollectionSpec>
     {
         public string typeName;
         public string typeNamespace;
@@ -13,7 +13,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public string openingSource;
         public string closingSource;
         public LocationInfo location;
-        public EquatableArray<StatDataDefinition> statDataCollection;
+        public EquatableArray<StatDataSpec> statDataCollection;
         public uint typeIdOffset;
 
         public readonly bool IsValid
@@ -27,7 +27,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             && statDataCollection.IsEmpty == false
             ;
 
-        public readonly bool Equals(StatCollectionDefinition other)
+        public readonly bool Equals(StatCollectionSpec other)
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(typeNamespace, other.typeNamespace, StringComparison.Ordinal)
             && string.Equals(statSystemFullTypeName, other.statSystemFullTypeName, StringComparison.Ordinal)
@@ -40,7 +40,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is StatCollectionDefinition other && Equals(other);
+            => obj is StatCollectionSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(
@@ -56,7 +56,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             .Add(typeIdOffset)
             ;
 
-        internal partial struct StatDataDefinition : IEquatable<StatDataDefinition>
+        internal partial struct StatDataSpec : IEquatable<StatDataSpec>
         {
             public string typeName;
             public string fieldName;
@@ -71,9 +71,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 ;
 
             public readonly override bool Equals(object obj)
-                => obj is StatDataDefinition other && Equals(other);
+                => obj is StatDataSpec other && Equals(other);
 
-            public readonly bool Equals(StatDataDefinition other)
+            public readonly bool Equals(StatDataSpec other)
                 => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
                 && string.Equals(fieldName, other.fieldName, StringComparison.Ordinal)
                 && string.Equals(valueTypeNamespace, other.valueTypeNamespace, StringComparison.Ordinal)

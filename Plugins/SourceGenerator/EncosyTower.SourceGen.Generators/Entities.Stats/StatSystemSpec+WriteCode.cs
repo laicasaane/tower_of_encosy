@@ -5,7 +5,7 @@ using EncosyTower.SourceGen.Common.Entities.Stats;
 
 namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
-    partial struct StatSystemDefinition
+    partial struct StatSystemSpec
     {
         private const string METHOD_IMPL_OPTIONS = "SRCS.MethodImplOptions";
         private const string INLINING = $"{METHOD_IMPL_OPTIONS}.AggressiveInlining";
