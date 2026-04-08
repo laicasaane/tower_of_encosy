@@ -119,7 +119,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     if (attr.ConstructorArguments.Count > 0)
                     {
-                        fieldPolicyCtorArg = attr.ConstructorArguments[0];
+                        fieldPolicyCtorArg = attr.ConstructorArguments[0].Value;
                     }
                 }
             }
