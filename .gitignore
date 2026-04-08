@@ -118,3 +118,6 @@ crashlytics-build.properties
 [Pp]ackages/com.0x7c13.unityeditor-darkmode/
 
 [Ee]ncosy[Tt]ower.[Ss]amples.[Uu]ser[Dd]ata[Vv]ault.[Ss]ave[Ff]iles/
+
+# Other generated contents
+.gitnexus
