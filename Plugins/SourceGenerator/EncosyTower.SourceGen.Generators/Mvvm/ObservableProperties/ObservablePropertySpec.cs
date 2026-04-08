@@ -505,9 +505,11 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     );
 
                     using var forwardedFieldAttribsBuilder = ImmutableArrayBuilder<ForwardedFieldAttributeSpec>.Rent();
+                    var fieldAttrCount = fieldAttributes.Length;
 
-                    foreach (var (typeName, attribInfo) in fieldAttributes)
+                    for (var j = 0; j < fieldAttrCount; j++)
                     {
+                        var (typeName, attribInfo) = fieldAttributes[j];
                         forwardedFieldAttribsBuilder.Add(new ForwardedFieldAttributeSpec { typeName = typeName, attributeInfo = attribInfo });
                     }
 

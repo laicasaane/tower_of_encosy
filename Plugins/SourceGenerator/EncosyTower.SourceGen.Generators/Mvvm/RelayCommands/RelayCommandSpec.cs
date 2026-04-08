@@ -299,9 +299,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 
             var pendingRefs = memberRefsBuilder.ToImmutable();
             using var finalBuilder = ImmutableArrayBuilder<MemberSpec>.Rent();
+            var pendingRefCount = pendingRefs.Length;
 
-            foreach (var memberRef in pendingRefs)
+            for (var i = 0; i < pendingRefCount; i++)
             {
+                var memberRef = pendingRefs[i];
+
                 if (methodMap.TryGetValue(memberRef.methodName, out var method) == false)
                 {
                     continue;

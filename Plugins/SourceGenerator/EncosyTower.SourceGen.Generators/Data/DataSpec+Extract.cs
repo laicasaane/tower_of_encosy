@@ -467,9 +467,11 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     // Forwarded field attributes (fullTypeName + syntax)
                     using var attrBuilder = ImmutableArrayBuilder<ForwardedFieldAttributeData>.Rent();
+                    var forwardedAttrCount = fieldAttributes.Length;
 
-                    foreach (var (fullTypeName, attributeInfo) in fieldAttributes)
+                    for (var i = 0; i < forwardedAttrCount; i++)
                     {
+                        var (fullTypeName, attributeInfo) = fieldAttributes[i];
                         attrBuilder.Add(new ForwardedFieldAttributeData {
                             fullTypeName = fullTypeName,
                             attributeSyntax = attributeInfo.GetSyntax().ToFullString(),
