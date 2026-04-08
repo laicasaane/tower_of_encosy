@@ -4,15 +4,15 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
     using static EncosyTower.SourceGen.Generators.DatabaseAuthoring.Helpers;
 
-    partial struct DatabaseModel
+    partial struct DatabaseSpec
     {
-        public readonly string WriteSheet(in SheetModel sheet)
+        public readonly string WriteSheet(in SheetSpec sheet)
         {
             var databaseTypeName = this.databaseTypeName;
             var databaseTypeKeyword = this.databaseTypeKeyword;
 
             // Rebuild dataMap (string-keyed) from allDataModels
-            var dataMap = new Dictionary<string, DataModel>(allDataModels.Count, System.StringComparer.Ordinal);
+            var dataMap = new Dictionary<string, DataSpec>(allDataModels.Count, System.StringComparer.Ordinal);
 
             foreach (var dm in allDataModels)
             {

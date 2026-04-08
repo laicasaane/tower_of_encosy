@@ -16,13 +16,13 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(AuthoringCompilationInfo.GetCompilation);
+                .Select(AuthoringCompilationSpec.GetCompilation);
 
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       "EncosyTower.Databases.Authoring.AuthorDatabaseAttribute"
                     , static (node, _) => node is ClassDeclarationSyntax or StructDeclarationSyntax
-                    , DatabaseModel.Extract
+                    , DatabaseSpec.Extract
                 )
                 .Where(static t => t.IsValid);
 
@@ -34,8 +34,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) =>
                 GenerateOutput(
                       sourceProductionContext
-                    , source.Left.Right        // AuthoringCompilationInfo
-                    , source.Left.Left         // DatabaseModel
+                    , source.Left.Right        // AuthoringCompilationSpec
+                    , source.Left.Left         // DatabaseSpec
                     , source.Right.projectPath
                     , source.Right.outputSourceGenFiles
                 )
@@ -44,8 +44,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , AuthoringCompilationInfo compilation
-            , DatabaseModel model
+            , AuthoringCompilationSpec compilation
+            , DatabaseSpec model
             , string projectPath
             , bool outputSourceGenFiles
         )

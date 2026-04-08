@@ -3,7 +3,7 @@ using EncosyTower.SourceGen.Common.Data.Common;
 
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
-    public struct CollectionModel : IEquatable<CollectionModel>
+    public struct CollectionSpec : IEquatable<CollectionSpec>
     {
         public CollectionKind kind;
         public string elementTypeName;
@@ -11,7 +11,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public string keyTypeName;
         public string keyTypeSimpleName;
 
-        public readonly bool Equals(CollectionModel other)
+        public readonly bool Equals(CollectionSpec other)
             => kind == other.kind
             && string.Equals(elementTypeName, other.elementTypeName, StringComparison.Ordinal)
             && string.Equals(elementTypeSimpleName, other.elementTypeSimpleName, StringComparison.Ordinal)
@@ -20,7 +20,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is CollectionModel other && Equals(other);
+            => obj is CollectionSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(elementTypeName, elementTypeSimpleName, keyTypeName, keyTypeSimpleName)

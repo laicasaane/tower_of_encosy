@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
-    public struct AuthoringCompilationInfo : System.IEquatable<AuthoringCompilationInfo>
+    public struct AuthoringCompilationSpec : System.IEquatable<AuthoringCompilationSpec>
     {
         public bool databaseAuthoring;
         public bool bakingSheet;
@@ -11,7 +11,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         public readonly bool IsValid => compilation.isValid;
 
-        public static AuthoringCompilationInfo GetCompilation(Compilation compilation, CancellationToken _)
+        public static AuthoringCompilationSpec GetCompilation(Compilation compilation, CancellationToken _)
         {
             if (compilation == null)
             {
@@ -42,21 +42,21 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
             }
 
-            return new AuthoringCompilationInfo {
+            return new AuthoringCompilationSpec {
                 databaseAuthoring = databaseAuthoring,
-                bakingSheet       = bakingSheet,
-                compilation       = compilationSlim,
+                bakingSheet = bakingSheet,
+                compilation = compilationSlim,
             };
         }
 
-        public readonly bool Equals(AuthoringCompilationInfo other)
+        public readonly bool Equals(AuthoringCompilationSpec other)
             => databaseAuthoring == other.databaseAuthoring
             && bakingSheet == other.bakingSheet
             && compilation.Equals(other.compilation)
             ;
 
         public override readonly bool Equals(object obj)
-            => obj is AuthoringCompilationInfo other && Equals(other);
+            => obj is AuthoringCompilationSpec other && Equals(other);
 
         public override readonly int GetHashCode()
             => HashValue.Combine(

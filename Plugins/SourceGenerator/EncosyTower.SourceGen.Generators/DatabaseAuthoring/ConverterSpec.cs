@@ -2,13 +2,13 @@ using System;
 
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
-    public struct ConverterModel : IEquatable<ConverterModel>
+    public struct ConverterSpec : IEquatable<ConverterSpec>
     {
         public ConverterKind kind;
         public string converterTypeFullName;
 
         // The source type (what the converter reads FROM)
-        public CollectionModel sourceCollection;
+        public CollectionSpec sourceCollection;
         public string sourceTypeFullName;
         public string sourceTypeSimpleName;
         public bool sourceTypeIsValueType;
@@ -34,7 +34,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             return expression;
         }
 
-        public readonly bool Equals(ConverterModel other)
+        public readonly bool Equals(ConverterSpec other)
             => kind == other.kind
             && string.Equals(converterTypeFullName, other.converterTypeFullName, StringComparison.Ordinal)
             && sourceCollection.Equals(other.sourceCollection)
@@ -45,7 +45,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is ConverterModel other && Equals(other);
+            => obj is ConverterSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(converterTypeFullName, sourceTypeFullName, sourceTypeSimpleName)

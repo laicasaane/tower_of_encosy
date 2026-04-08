@@ -8,7 +8,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
     /// the derived sheet class declarations (<c>WriteDerivedSheetClasses</c>).
     /// Replaces the non-cacheable <c>TableRef</c> class.
     /// </summary>
-    public struct TableModel : IEquatable<TableModel>
+    public struct TableSpec : IEquatable<TableSpec>
     {
         /// <summary>Full name of the DataTableAsset subclass.</summary>
         public string typeFullName;
@@ -36,7 +36,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         /// <summary>Pre-computed base sheet class name, e.g. <c>"MyTable_MyDataSheet"</c>.</summary>
         public string baseSheetName;
 
-        public readonly bool Equals(TableModel other)
+        public readonly bool Equals(TableSpec other)
             => string.Equals(typeFullName, other.typeFullName, StringComparison.Ordinal)
             && string.Equals(typeSimpleName, other.typeSimpleName, StringComparison.Ordinal)
             && string.Equals(idTypeFullName, other.idTypeFullName, StringComparison.Ordinal)
@@ -49,7 +49,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is TableModel other && Equals(other);
+            => obj is TableSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(

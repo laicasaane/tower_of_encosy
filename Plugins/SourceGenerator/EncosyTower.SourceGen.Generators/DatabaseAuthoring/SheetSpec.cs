@@ -6,7 +6,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
     /// Cache-friendly model for a single generated sheet file.
     /// Replaces the non-cacheable <c>DataTableAssetRef</c> class.
     /// </summary>
-    public struct SheetModel : IEquatable<SheetModel>
+    public struct SheetSpec : IEquatable<SheetSpec>
     {
         /// <summary>Pre-computed hint name for this sheet's generated source file.</summary>
         public string hintName;
@@ -36,7 +36,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public readonly bool IsValid
             => string.IsNullOrEmpty(hintName) == false;
 
-        public readonly bool Equals(SheetModel other)
+        public readonly bool Equals(SheetSpec other)
             => string.Equals(hintName, other.hintName, StringComparison.Ordinal)
             && string.Equals(idTypeFullName, other.idTypeFullName, StringComparison.Ordinal)
             && string.Equals(idTypeSimpleName, other.idTypeSimpleName, StringComparison.Ordinal)
@@ -48,7 +48,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is SheetModel other && Equals(other);
+            => obj is SheetSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(

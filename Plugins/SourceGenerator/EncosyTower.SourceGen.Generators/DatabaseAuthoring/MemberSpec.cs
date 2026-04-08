@@ -2,7 +2,7 @@ using System;
 
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
-    public struct MemberModel : IEquatable<MemberModel>
+    public struct MemberSpec : IEquatable<MemberSpec>
     {
         public string propertyName;
 
@@ -21,13 +21,13 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public bool typeHasParameterlessConstructor;
 
         /// <summary>Collection info for the original (non-converted) type.</summary>
-        public CollectionModel collection;
+        public CollectionSpec collection;
 
-        /// <summary>Converter info. <see cref="ConverterModel.kind"/> == None when no converter.</summary>
-        public ConverterModel converter;
+        /// <summary>Converter info. <see cref="ConverterSpec.kind"/> == None when no converter.</summary>
+        public ConverterSpec converter;
 
         /// <summary>Returns the effective collection (converter source if converter is active, otherwise original).</summary>
-        public readonly CollectionModel SelectCollection()
+        public readonly CollectionSpec SelectCollection()
             => converter.kind == ConverterKind.None ? collection : converter.sourceCollection;
 
         /// <summary>Returns the effective type full name.</summary>
@@ -42,7 +42,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public readonly bool SelectTypeIsValueType()
             => converter.kind == ConverterKind.None ? typeIsValueType : converter.sourceTypeIsValueType;
 
-        public readonly bool Equals(MemberModel other)
+        public readonly bool Equals(MemberSpec other)
             => string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)
             && string.Equals(typeFullName, other.typeFullName, StringComparison.Ordinal)
             && string.Equals(typeSimpleName, other.typeSimpleName, StringComparison.Ordinal)
@@ -53,7 +53,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is MemberModel other && Equals(other);
+            => obj is MemberSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(propertyName, typeFullName, typeSimpleName)

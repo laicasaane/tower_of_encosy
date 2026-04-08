@@ -7,7 +7,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
     /// implementer) that is referenced by a database table.
     /// Replaces the non-cacheable <c>DataDeclaration</c> class.
     /// </summary>
-    public partial struct DataModel : IEquatable<DataModel>
+    public partial struct DataSpec : IEquatable<DataSpec>
     {
         /// <summary>Fully-qualified type name, e.g. <c>global::Foo.Bar.MyData</c>.</summary>
         public string fullName;
@@ -20,23 +20,23 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         /// <summary>Property-backed members declared on this type (includes <c>[DataProperty]</c> and
         /// <c>[GeneratedPropertyFromField]</c> members).</summary>
-        public EquatableArray<MemberModel> propRefs;
+        public EquatableArray<MemberSpec> propRefs;
 
         /// <summary>Field-backed members declared on this type (includes <c>[SerializeField]</c> and
         /// <c>[GeneratedFieldFromProperty]</c> members).</summary>
-        public EquatableArray<MemberModel> fieldRefs;
+        public EquatableArray<MemberSpec> fieldRefs;
 
         /// <summary>
         /// Base-type layers in bottom-up order (outermost first, i.e.
         /// the most-base implementing type first, direct base last).
         /// Replaces the recursive <c>DataDeclaration.BaseTypeRefs</c> list.
         /// </summary>
-        public EquatableArray<DataModelLayer> baseTypeLayers;
+        public EquatableArray<DataLayerSpec> baseTypeLayers;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(fullName) == false;
 
-        public readonly bool Equals(DataModel other)
+        public readonly bool Equals(DataSpec other)
             => string.Equals(fullName, other.fullName, StringComparison.Ordinal)
             && string.Equals(simpleName, other.simpleName, StringComparison.Ordinal)
             && string.Equals(validIdentifier, other.validIdentifier, StringComparison.Ordinal)
@@ -46,7 +46,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is DataModel other && Equals(other);
+            => obj is DataSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(fullName, simpleName, validIdentifier)

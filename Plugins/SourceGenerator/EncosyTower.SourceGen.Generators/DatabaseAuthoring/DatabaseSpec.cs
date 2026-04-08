@@ -8,7 +8,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
     /// All extraction from Roslyn symbols happens once in <see cref="Extract"/> and the result
     /// is fully stable across incremental runs as long as the source code is unchanged.
     /// </summary>
-    public partial struct DatabaseModel : IEquatable<DatabaseModel>
+    public partial struct DatabaseSpec : IEquatable<DatabaseSpec>
     {
         /// <summary>Excluded from equality/hash — location data is not stable across incremental runs.</summary>
         public LocationInfo location;
@@ -32,16 +32,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public string containerHintName;
 
         /// <summary>All data models involved in this database across all tables.</summary>
-        public EquatableArray<DataModel> allDataModels;
+        public EquatableArray<DataSpec> allDataModels;
 
         /// <summary>Horizontal-list mapping entries (one per unique target-type + containing-type pair).</summary>
-        public EquatableArray<HorizontalListEntry> horizontalListEntries;
+        public EquatableArray<HorizontalListSpec> horizontalListEntries;
 
         /// <summary>Per-table info for <c>WriteDerivedSheetClasses</c>.</summary>
-        public EquatableArray<TableModel> tables;
+        public EquatableArray<TableSpec> tables;
 
         /// <summary>Per-table-type asset-ref-list models for <c>WriteContainer</c>.</summary>
-        public EquatableArray<AssetRefListModel> assetRefLists;
+        public EquatableArray<AssetRefListSpec> assetRefLists;
 
         /// <summary>Ordered list of unique sheet class names for the SheetContainer property declarations.</summary>
         public EquatableArray<string> typeNames;
@@ -50,7 +50,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public int maxFieldOfSameTable;
 
         /// <summary>Per-sheet models for <c>WriteSheet</c>.</summary>
-        public EquatableArray<SheetModel> sheets;
+        public EquatableArray<SheetSpec> sheets;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(databaseTypeName) == false
@@ -58,7 +58,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             && string.IsNullOrEmpty(databaseIdentifier) == false
             ;
 
-        public readonly bool Equals(DatabaseModel other)
+        public readonly bool Equals(DatabaseSpec other)
             => string.Equals(databaseTypeName, other.databaseTypeName, StringComparison.Ordinal)
             && string.Equals(databaseTypeKeyword, other.databaseTypeKeyword, StringComparison.Ordinal)
             && string.Equals(databaseIdentifier, other.databaseIdentifier, StringComparison.Ordinal)
@@ -75,7 +75,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is DatabaseModel other && Equals(other);
+            => obj is DatabaseSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(

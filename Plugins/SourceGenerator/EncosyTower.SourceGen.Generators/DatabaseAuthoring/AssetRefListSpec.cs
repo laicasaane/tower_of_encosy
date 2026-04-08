@@ -8,7 +8,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
     /// Used to generate both <c>RefList&lt;T&gt;</c> members in SheetContainer and
     /// the <c>WriteDerivedSheetClasses</c> output.
     /// </summary>
-    public struct AssetRefListModel : IEquatable<AssetRefListModel>
+    public struct AssetRefListSpec : IEquatable<AssetRefListSpec>
     {
         /// <summary>Full name of the DataTableAsset subclass (the table type).</summary>
         public string tableTypeFullName;
@@ -25,7 +25,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         /// <summary>Property names on the database class that reference this table type.</summary>
         public EquatableArray<string> fieldNames;
 
-        public readonly bool Equals(AssetRefListModel other)
+        public readonly bool Equals(AssetRefListSpec other)
             => string.Equals(tableTypeFullName, other.tableTypeFullName, StringComparison.Ordinal)
             && string.Equals(tableTypeSimpleName, other.tableTypeSimpleName, StringComparison.Ordinal)
             && string.Equals(dataTypeFullName, other.dataTypeFullName, StringComparison.Ordinal)
@@ -34,7 +34,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             ;
 
         public readonly override bool Equals(object obj)
-            => obj is AssetRefListModel other && Equals(other);
+            => obj is AssetRefListSpec other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(tableTypeFullName, tableTypeSimpleName, dataTypeFullName, dataTypeSimpleName)

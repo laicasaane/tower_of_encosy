@@ -5,12 +5,12 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
     using static EncosyTower.SourceGen.Generators.DatabaseAuthoring.Helpers;
 
-    partial struct DataModel
+    partial struct DataSpec
     {
         /// <summary>
         /// Writes the <c>__TypeName</c> partial class body into <paramref name="p"/>.
         /// </summary>
-        /// <param name="dataMap">Full type name → DataModel for all IData types in scope.</param>
+        /// <param name="dataMap">Full type name → DataSpec for all IData types in scope.</param>
         /// <param name="horizontalListMap">
         /// targetTypeFullName → containingTypeFullName → property names.
         /// </param>
@@ -18,7 +18,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         /// <param name="idTypeFullName">Full name of the Id type, or <c>null</c> when this is not a sheet-row class.</param>
         public readonly void WriteCode(
               ref Printer p
-            , Dictionary<string, DataModel> dataMap
+            , Dictionary<string, DataSpec> dataMap
             , Dictionary<string, Dictionary<string, HashSet<string>>> horizontalListMap
             , string containingTypeFullName
             , string idTypeFullName = null
@@ -94,7 +94,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private readonly void WriteConstructor(
               ref Printer p
-            , Dictionary<string, DataModel> dataMap
+            , Dictionary<string, DataSpec> dataMap
             , Dictionary<string, Dictionary<string, HashSet<string>>> horizontalListMap
             , string typeName
             , string containingTypeFullName
@@ -118,9 +118,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void WriteCtorMembers(
               ref Printer p
-            , Dictionary<string, DataModel> dataMap
+            , Dictionary<string, DataSpec> dataMap
             , Dictionary<string, Dictionary<string, HashSet<string>>> horizontalListMap
-            , EquatableArray<MemberModel> memberModels
+            , EquatableArray<MemberSpec> memberModels
             , string targetTypeFullName
             , string containingTypeFullName
         )
@@ -209,11 +209,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void WriteProperties(
               ref Printer p
-            , Dictionary<string, DataModel> dataMap
+            , Dictionary<string, DataSpec> dataMap
             , Dictionary<string, Dictionary<string, HashSet<string>>> horizontalListMap
             , string containingTypeFullName
             , string idTypeFullName
-            , EquatableArray<MemberModel> memberModels
+            , EquatableArray<MemberSpec> memberModels
         )
         {
             var hasIdType = string.IsNullOrEmpty(idTypeFullName) == false;
@@ -288,7 +288,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private readonly void WriteConvertMethod(
               ref Printer p
-            , Dictionary<string, DataModel> dataMap
+            , Dictionary<string, DataSpec> dataMap
         )
         {
             var typeName = simpleName;
@@ -317,10 +317,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void WriteConvertType(
               ref Printer p
-            , Dictionary<string, DataModel> dataMap
+            , Dictionary<string, DataSpec> dataMap
             , string typeValidIdentifier
-            , EquatableArray<MemberModel> props
-            , EquatableArray<MemberModel> fields
+            , EquatableArray<MemberSpec> props
+            , EquatableArray<MemberSpec> fields
         )
         {
             foreach (var member in fields)
@@ -336,9 +336,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void WriteConvertMember(
               ref Printer p
-            , Dictionary<string, DataModel> dataMap
+            , Dictionary<string, DataSpec> dataMap
             , string typeValidIdentifier
-            , MemberModel member
+            , MemberSpec member
         )
         {
             var coll = member.SelectCollection();
@@ -480,8 +480,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void WriteToCollectionMethod(
               ref Printer p
-            , Dictionary<string, DataModel> dataMap
-            , EquatableArray<MemberModel> memberModels
+            , Dictionary<string, DataSpec> dataMap
+            , EquatableArray<MemberSpec> memberModels
         )
         {
             foreach (var member in memberModels)
@@ -490,21 +490,21 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 switch (coll.kind)
                 {
-                    case CollectionKind.Array:      WriteToArrayMethod(ref p, member, coll, dataMap);      break;
-                    case CollectionKind.List:       WriteToListMethod(ref p, member, coll, dataMap);       break;
+                    case CollectionKind.Array: WriteToArrayMethod(ref p, member, coll, dataMap); break;
+                    case CollectionKind.List: WriteToListMethod(ref p, member, coll, dataMap); break;
                     case CollectionKind.Dictionary: WriteToDictionaryMethod(ref p, member, coll, dataMap); break;
-                    case CollectionKind.HashSet:    WriteToHashSetMethod(ref p, member, coll, dataMap);    break;
-                    case CollectionKind.Queue:      WriteToQueueMethod(ref p, member, coll, dataMap);      break;
-                    case CollectionKind.Stack:      WriteToStackMethod(ref p, member, coll, dataMap);      break;
+                    case CollectionKind.HashSet: WriteToHashSetMethod(ref p, member, coll, dataMap); break;
+                    case CollectionKind.Queue: WriteToQueueMethod(ref p, member, coll, dataMap); break;
+                    case CollectionKind.Stack: WriteToStackMethod(ref p, member, coll, dataMap); break;
                 }
             }
         }
 
         private static void WriteToArrayMethod(
               ref Printer p
-            , MemberModel member
-            , CollectionModel coll
-            , Dictionary<string, DataModel> dataMap
+            , MemberSpec member
+            , CollectionSpec coll
+            , Dictionary<string, DataSpec> dataMap
         )
         {
             if (dataMap.ContainsKey(coll.elementTypeName) == false)
@@ -547,9 +547,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void WriteToListMethod(
               ref Printer p
-            , MemberModel member
-            , CollectionModel coll
-            , Dictionary<string, DataModel> dataMap
+            , MemberSpec member
+            , CollectionSpec coll
+            , Dictionary<string, DataSpec> dataMap
         )
         {
             if (dataMap.ContainsKey(coll.elementTypeName) == false)
@@ -595,9 +595,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void WriteToDictionaryMethod(
               ref Printer p
-            , MemberModel member
-            , CollectionModel coll
-            , Dictionary<string, DataModel> dataMap
+            , MemberSpec member
+            , CollectionSpec coll
+            , Dictionary<string, DataSpec> dataMap
         )
         {
             var keyIsData = dataMap.ContainsKey(coll.keyTypeName);
@@ -669,9 +669,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void WriteToHashSetMethod(
               ref Printer p
-            , MemberModel member
-            , CollectionModel coll
-            , Dictionary<string, DataModel> dataMap
+            , MemberSpec member
+            , CollectionSpec coll
+            , Dictionary<string, DataSpec> dataMap
         )
         {
             if (dataMap.ContainsKey(coll.elementTypeName) == false)
@@ -718,9 +718,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void WriteToQueueMethod(
               ref Printer p
-            , MemberModel member
-            , CollectionModel coll
-            , Dictionary<string, DataModel> dataMap
+            , MemberSpec member
+            , CollectionSpec coll
+            , Dictionary<string, DataSpec> dataMap
         )
         {
             if (dataMap.ContainsKey(coll.elementTypeName) == false)
@@ -767,9 +767,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void WriteToStackMethod(
               ref Printer p
-            , MemberModel member
-            , CollectionModel coll
-            , Dictionary<string, DataModel> dataMap
+            , MemberSpec member
+            , CollectionSpec coll
+            , Dictionary<string, DataSpec> dataMap
         )
         {
             if (dataMap.ContainsKey(coll.elementTypeName) == false)

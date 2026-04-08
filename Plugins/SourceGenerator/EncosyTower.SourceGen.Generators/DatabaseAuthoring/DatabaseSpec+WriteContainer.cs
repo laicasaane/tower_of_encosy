@@ -2,7 +2,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
     using static EncosyTower.SourceGen.Generators.DatabaseAuthoring.Helpers;
 
-    partial struct DatabaseModel
+    partial struct DatabaseSpec
     {
         public readonly string WriteContainer()
         {
