@@ -113,7 +113,16 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
 
                 for (var j = 0; j < ctorArgCount; j++)
                 {
-                    ctorArgs.Add(ctorArguments[j].Value?.ToString() ?? string.Empty);
+                    var ctorArg = ctorArguments[j];
+
+                    if (ctorArg.Kind == TypedConstantKind.Type && ctorArg.Value is ITypeSymbol typeArg)
+                    {
+                        ctorArgs.Add(typeArg.ToDisplayString(SymbolFormats.FullyQualified));
+                    }
+                    else
+                    {
+                        ctorArgs.Add(ctorArg.Value?.ToString() ?? string.Empty);
+                    }
                 }
 
                 using var namedArgs = ImmutableArrayBuilder<AttributeNamedArgModel>.Rent();
