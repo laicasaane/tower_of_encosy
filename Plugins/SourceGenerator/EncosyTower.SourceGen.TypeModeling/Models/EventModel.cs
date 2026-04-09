@@ -1,4 +1,5 @@
 using System;
+using Microsoft.CodeAnalysis;
 using EncosyTower.SourceGen.TypeModeling.Internal;
 
 namespace EncosyTower.SourceGen.TypeModeling.Models
@@ -8,7 +9,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         public readonly string Name;
         public readonly string TypeName;
         public readonly string TypeFullName;
-        public readonly string Accessibility;
+        public readonly Accessibility Accessibility;
         public readonly bool IsStatic;
         public readonly EquatableArray<AttributeModel> Attributes;
 
@@ -16,7 +17,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
               string name
             , string typeName
             , string typeFullName
-            , string accessibility
+            , Accessibility accessibility
             , bool isStatic
             , EquatableArray<AttributeModel> attributes
         )
@@ -24,7 +25,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             Name = name ?? string.Empty;
             TypeName = typeName ?? string.Empty;
             TypeFullName = typeFullName ?? string.Empty;
-            Accessibility = accessibility ?? string.Empty;
+            Accessibility = accessibility;
             IsStatic = isStatic;
             Attributes = attributes;
         }
@@ -32,7 +33,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         public bool Equals(EventModel other)
             => string.Equals(Name, other.Name, StringComparison.Ordinal)
             && string.Equals(TypeFullName, other.TypeFullName, StringComparison.Ordinal)
-            && string.Equals(Accessibility, other.Accessibility, StringComparison.Ordinal)
+            && Accessibility == other.Accessibility
             && IsStatic == other.IsStatic
             && Attributes.Equals(other.Attributes)
             ;

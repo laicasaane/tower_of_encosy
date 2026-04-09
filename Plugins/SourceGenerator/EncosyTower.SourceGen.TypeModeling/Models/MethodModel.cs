@@ -9,7 +9,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         public readonly string Name;
         public readonly string ReturnTypeName;
         public readonly string ReturnTypeFullName;
-        public readonly string Accessibility;
+        public readonly Accessibility Accessibility;
         public readonly RefKind RefKind;
         public readonly bool ReturnsVoid;
         public readonly bool IsStatic;
@@ -25,7 +25,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
               string name
             , string returnTypeName
             , string returnTypeFullName
-            , string accessibility
+            , Accessibility accessibility
             , RefKind refKind
             , bool returnsVoid
             , bool isStatic
@@ -41,7 +41,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             Name = name ?? string.Empty;
             ReturnTypeName = returnTypeName ?? string.Empty;
             ReturnTypeFullName = returnTypeFullName ?? string.Empty;
-            Accessibility = accessibility ?? string.Empty;
+            Accessibility = accessibility;
             RefKind = refKind;
             ReturnsVoid = returnsVoid;
             IsStatic = isStatic;
@@ -57,7 +57,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         public bool Equals(MethodModel other)
             => string.Equals(Name, other.Name, StringComparison.Ordinal)
             && string.Equals(ReturnTypeFullName, other.ReturnTypeFullName, StringComparison.Ordinal)
-            && string.Equals(Accessibility, other.Accessibility, StringComparison.Ordinal)
+            && Accessibility == other.Accessibility
             && RefKind == other.RefKind
             && ReturnsVoid == other.ReturnsVoid
             && IsStatic == other.IsStatic

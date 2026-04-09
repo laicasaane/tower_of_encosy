@@ -9,7 +9,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         public readonly string Name;
         public readonly string FullName;
         public readonly string Namespace;
-        public readonly string Accessibility;
+        public readonly Accessibility Accessibility;
         public readonly TypeKind TypeKind;
         public readonly bool IsStatic;
         public readonly bool IsSealed;
@@ -36,7 +36,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
               string name
             , string fullName
             , string @namespace
-            , string accessibility
+            , Accessibility accessibility
             , TypeKind typeKind
             , bool isStatic
             , bool isSealed
@@ -63,7 +63,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             Name = name ?? string.Empty;
             FullName = fullName ?? string.Empty;
             Namespace = @namespace ?? string.Empty;
-            Accessibility = accessibility ?? string.Empty;
+            Accessibility = accessibility;
             TypeKind = typeKind;
             IsStatic = isStatic;
             IsSealed = isSealed;
@@ -89,7 +89,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
 
         public bool Equals(TypeModel other)
             => string.Equals(FullName, other.FullName, StringComparison.Ordinal)
-            && string.Equals(Accessibility, other.Accessibility, StringComparison.Ordinal)
+            && Accessibility == other.Accessibility
             && TypeKind == other.TypeKind
             && IsStatic == other.IsStatic
             && IsSealed == other.IsSealed

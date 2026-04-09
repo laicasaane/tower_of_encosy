@@ -1,27 +1,28 @@
 using System;
+using Microsoft.CodeAnalysis;
 using EncosyTower.SourceGen.TypeModeling.Internal;
 
 namespace EncosyTower.SourceGen.TypeModeling.Models
 {
     public readonly struct ConstructorModel : IEquatable<ConstructorModel>
     {
-        public readonly string Accessibility;
+        public readonly Accessibility Accessibility;
         public readonly bool IsStatic;
         public readonly EquatableArray<ParameterModel> Parameters;
 
         public ConstructorModel(
-              string accessibility
+              Accessibility accessibility
             , bool isStatic
             , EquatableArray<ParameterModel> parameters
         )
         {
-            Accessibility = accessibility ?? string.Empty;
+            Accessibility = accessibility;
             IsStatic = isStatic;
             Parameters = parameters;
         }
 
         public bool Equals(ConstructorModel other)
-            => string.Equals(Accessibility, other.Accessibility, StringComparison.Ordinal)
+            => Accessibility == other.Accessibility
             && IsStatic == other.IsStatic
             && Parameters.Equals(other.Parameters)
             ;

@@ -9,7 +9,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         public readonly string Name;
         public readonly string TypeName;
         public readonly string TypeFullName;
-        public readonly string Accessibility;
+        public readonly Accessibility Accessibility;
         public readonly bool IsReadOnly;
         public readonly bool IsStatic;
         public readonly bool IsConst;
@@ -21,7 +21,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
               string name
             , string typeName
             , string typeFullName
-            , string accessibility
+            , Accessibility accessibility
             , bool isReadOnly
             , bool isStatic
             , bool isConst
@@ -33,7 +33,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             Name = name ?? string.Empty;
             TypeName = typeName ?? string.Empty;
             TypeFullName = typeFullName ?? string.Empty;
-            Accessibility = accessibility ?? string.Empty;
+            Accessibility = accessibility;
             IsReadOnly = isReadOnly;
             IsStatic = isStatic;
             IsConst = isConst;
@@ -45,7 +45,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         public bool Equals(FieldModel other)
             => string.Equals(Name, other.Name, StringComparison.Ordinal)
             && string.Equals(TypeFullName, other.TypeFullName, StringComparison.Ordinal)
-            && string.Equals(Accessibility, other.Accessibility, StringComparison.Ordinal)
+            && Accessibility == other.Accessibility
             && IsReadOnly == other.IsReadOnly
             && IsStatic == other.IsStatic
             && IsConst == other.IsConst

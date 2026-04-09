@@ -9,7 +9,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         public readonly string Name;
         public readonly string TypeName;
         public readonly string TypeFullName;
-        public readonly string Accessibility;
+        public readonly Accessibility Accessibility;
         public readonly RefKind RefKind;
         public readonly bool IsStatic;
         public readonly bool IsIndexer;
@@ -22,7 +22,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
               string name
             , string typeName
             , string typeFullName
-            , string accessibility
+            , Accessibility accessibility
             , RefKind refKind
             , bool isStatic
             , bool isIndexer
@@ -35,7 +35,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             Name = name ?? string.Empty;
             TypeName = typeName ?? string.Empty;
             TypeFullName = typeFullName ?? string.Empty;
-            Accessibility = accessibility ?? string.Empty;
+            Accessibility = accessibility;
             RefKind = refKind;
             IsStatic = isStatic;
             IsIndexer = isIndexer;
@@ -48,7 +48,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         public bool Equals(PropertyModel other)
             => string.Equals(Name, other.Name, StringComparison.Ordinal)
             && string.Equals(TypeFullName, other.TypeFullName, StringComparison.Ordinal)
-            && string.Equals(Accessibility, other.Accessibility, StringComparison.Ordinal)
+            && Accessibility == other.Accessibility
             && RefKind == other.RefKind
             && IsStatic == other.IsStatic
             && IsIndexer == other.IsIndexer

@@ -7,21 +7,21 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
     public readonly struct AccessorModel : IEquatable<AccessorModel>
     {
         public readonly bool Exists;
-        public readonly string Accessibility;
+        public readonly Accessibility Accessibility;
         public readonly bool IsReadOnly;
         public readonly bool IsInitOnly;
         public readonly RefKind RefKind;
 
         public AccessorModel(
               bool exists
-            , string accessibility
+            , Accessibility accessibility
             , bool isReadOnly
             , bool isInitOnly
             , RefKind refKind
         )
         {
             Exists = exists;
-            Accessibility = accessibility ?? string.Empty;
+            Accessibility = accessibility;
             IsReadOnly = isReadOnly;
             IsInitOnly = isInitOnly;
             RefKind = refKind;
@@ -29,7 +29,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
 
         public bool Equals(AccessorModel other)
             => Exists == other.Exists
-            && string.Equals(Accessibility, other.Accessibility, StringComparison.Ordinal)
+            && Accessibility == other.Accessibility
             && IsReadOnly == other.IsReadOnly
             && IsInitOnly == other.IsInitOnly
             && RefKind == other.RefKind

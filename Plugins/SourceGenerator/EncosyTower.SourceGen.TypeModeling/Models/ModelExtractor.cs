@@ -17,13 +17,13 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
 
             var parts = options.Parts == 0 ? ModelParts.All : options.Parts;
 
-            var memberParts = ModelParts.Fields | ModelParts.Properties
-                | ModelParts.Methods | ModelParts.Constructors | ModelParts.Events;
+            var memberParts = ModelParts.Fields
+                | ModelParts.Properties
+                | ModelParts.Methods
+                | ModelParts.Constructors
+                | ModelParts.Events;
 
-            var members = (parts & memberParts) != 0
-                ? symbol.GetMembers()
-                : ImmutableArray<ISymbol>.Empty;
-
+            var members = (parts & memberParts) != 0 ? symbol.GetMembers() : ImmutableArray<ISymbol>.Empty;
             var interfaces = ExtractInterfaces(symbol, parts, token);
             var allInterfaces = ExtractAllInterfaces(symbol, parts, token);
             var containingTypes = ExtractContainingTypes(symbol, parts, token);
@@ -38,7 +38,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                   name: symbol.Name
                 , fullName: symbol.ToDisplayString(SymbolFormats.FullyQualified)
                 , @namespace: symbol.ContainingNamespace?.ToDisplayString() ?? string.Empty
-                , accessibility: symbol.DeclaredAccessibility.ToKeyword()
+                , accessibility: symbol.DeclaredAccessibility
                 , typeKind: symbol.TypeKind
                 , isStatic: symbol.IsStatic
                 , isSealed: symbol.IsSealed
@@ -50,8 +50,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                 , isEnum: symbol.TypeKind == TypeKind.Enum
                 , isUnmanaged: symbol.IsUnmanagedType
                 , isRefLikeType: symbol.IsRefLikeType
-                , baseTypeName: symbol.BaseType?.ToDisplayString(SymbolFormats.FullyQualified)
-                              ?? string.Empty
+                , baseTypeName: symbol.BaseType?.ToDisplayString(SymbolFormats.FullyQualified) ?? string.Empty
                 , interfaces: interfaces
                 , allInterfaces: allInterfaces
                 , containingTypes: containingTypes
@@ -317,7 +316,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                       name: field.Name
                     , typeName: field.Type.ToDisplayString(SymbolFormats.SimpleNoGlobal)
                     , typeFullName: field.Type.ToDisplayString(SymbolFormats.FullyQualified)
-                    , accessibility: field.DeclaredAccessibility.ToKeyword()
+                    , accessibility: field.DeclaredAccessibility
                     , isReadOnly: field.IsReadOnly
                     , isStatic: field.IsStatic
                     , isConst: field.IsConst
@@ -385,7 +384,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                       name: prop.Name
                     , typeName: prop.Type.ToDisplayString(SymbolFormats.SimpleNoGlobal)
                     , typeFullName: prop.Type.ToDisplayString(SymbolFormats.FullyQualified)
-                    , accessibility: prop.DeclaredAccessibility.ToKeyword()
+                    , accessibility: prop.DeclaredAccessibility
                     , refKind: prop.RefKind
                     , isStatic: prop.IsStatic
                     , isIndexer: prop.IsIndexer
@@ -468,7 +467,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                       name: method.Name
                     , returnTypeName: method.ReturnType.ToDisplayString(SymbolFormats.SimpleNoGlobal)
                     , returnTypeFullName: method.ReturnType.ToDisplayString(SymbolFormats.FullyQualified)
-                    , accessibility: method.DeclaredAccessibility.ToKeyword()
+                    , accessibility: method.DeclaredAccessibility
                     , refKind: method.RefKind
                     , returnsVoid: method.ReturnsVoid
                     , isStatic: method.IsStatic
@@ -538,7 +537,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                 }
 
                 builder.Add(new ConstructorModel(
-                      accessibility: method.DeclaredAccessibility.ToKeyword()
+                      accessibility: method.DeclaredAccessibility
                     , isStatic: method.IsStatic
                     , parameters: paramBuilder.ToImmutable()
                 ));
@@ -593,7 +592,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                       name: ev.Name
                     , typeName: ev.Type.ToDisplayString(SymbolFormats.SimpleNoGlobal)
                     , typeFullName: ev.Type.ToDisplayString(SymbolFormats.FullyQualified)
-                    , accessibility: ev.DeclaredAccessibility.ToKeyword()
+                    , accessibility: ev.DeclaredAccessibility
                     , isStatic: ev.IsStatic
                     , attributes: attrs
                 ));
@@ -606,12 +605,12 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         {
             if (accessor == null)
             {
-                return new AccessorModel(false, string.Empty, false, false, RefKind.None);
+                return default;
             }
 
             return new AccessorModel(
                   exists: true
-                , accessibility: accessor.DeclaredAccessibility.ToKeyword()
+                , accessibility: accessor.DeclaredAccessibility
                 , isReadOnly: accessor.IsReadOnly
                 , isInitOnly: accessor.IsInitOnly
                 , refKind: accessor.RefKind
