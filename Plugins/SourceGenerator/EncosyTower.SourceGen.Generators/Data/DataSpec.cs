@@ -94,7 +94,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             return hash.ToHashCode();
         }
 
-        public readonly string AccessibilityKeyword => typeModel.Accessibility;
+        public readonly string AccessibilityKeyword => typeModel.Accessibility.ToKeyword();
 
         public readonly bool IsValueType => typeModel.TypeKind == TypeKind.Struct;
 
