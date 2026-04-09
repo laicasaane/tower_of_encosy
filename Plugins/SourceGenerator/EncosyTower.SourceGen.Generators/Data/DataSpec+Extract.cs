@@ -40,7 +40,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             }
 
             var typeModel = typeSymbol.ToModel(token, new ModelOptions(
-                  ModelParts.Attributes | ModelParts.Methods
+                  ModelParts.Attributes | ModelParts.Fields | ModelParts.Properties | ModelParts.Methods
             ));
 
             var semanticModel = context.SemanticModel;
@@ -216,18 +216,68 @@ namespace EncosyTower.SourceGen.Generators.Data
                 }
             }
 
+            // ── Pass 1: TypeModel scan ──────────────────────────────────────────────────────────────────
+            var serializedFieldNames = new HashSet<string>(StringComparer.Ordinal);
+            var dataPropertyNames = new HashSet<string>(StringComparer.Ordinal);
+            var propertiesWithCreateProp = new HashSet<string>(StringComparer.Ordinal);
+
+            var modelFields = typeModel.Fields;
+            var modelFieldCount = modelFields.Count;
+
+            for (var i = 0; i < modelFieldCount; i++)
+            {
+                var modelField = modelFields[i];
+                existingFields.Add(modelField.Name);
+
+                var fieldAttrs = modelField.Attributes;
+                var fieldAttrCount = fieldAttrs.Count;
+
+                for (var j = 0; j < fieldAttrCount; j++)
+                {
+                    if (string.Equals(fieldAttrs[j].FullName, SERIALIZE_FIELD_ATTRIBUTE, StringComparison.Ordinal))
+                    {
+                        serializedFieldNames.Add(modelField.Name);
+                        break;
+                    }
+                }
+            }
+
+            var modelProperties = typeModel.Properties;
+            var modelPropertyCount = modelProperties.Count;
+
+            for (var i = 0; i < modelPropertyCount; i++)
+            {
+                var modelProp = modelProperties[i];
+                var propAttrs = modelProp.Attributes;
+                var propAttrCount = propAttrs.Count;
+
+                for (var j = 0; j < propAttrCount; j++)
+                {
+                    var attr = propAttrs[j];
+
+                    if (string.Equals(attr.FullName, DATA_PROPERTY_ATTRIBUTE, StringComparison.Ordinal))
+                    {
+                        dataPropertyNames.Add(modelProp.Name);
+                    }
+                    else if (string.Equals(attr.FullName, CREATE_PROPERTY_ATTRIBUTE, StringComparison.Ordinal))
+                    {
+                        propertiesWithCreateProp.Add(modelProp.Name);
+                    }
+                }
+            }
+
             var typeSb = new StringBuilder();
             var members = typeSymbol.GetMembers();
+            var memberCount = members.Length;
 
-            foreach (var member in members)
+            for (var i = 0; i < memberCount; i++)
             {
+                var member = members[i];
                 token.ThrowIfCancellationRequested();
 
                 if (member is IFieldSymbol field)
                 {
-                    existingFields.Add(field.Name);
-
-                    if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE) == false)
+                    if (serializedFieldNames.Contains(field.Name) == false)
                     {
                         continue;
                     }
@@ -319,10 +369,11 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     // Forwarded property attribute syntaxes
                     using var attrSyntaxBuilder = ImmutableArrayBuilder<string>.Rent();
+                    var propAttrSyntaxCount = propertyAttributes.Length;
 
-                    foreach (var attr in propertyAttributes)
+                    for (var j = 0; j < propAttrSyntaxCount; j++)
                     {
-                        attrSyntaxBuilder.Add(attr.GetSyntax().ToFullString());
+                        attrSyntaxBuilder.Add(propertyAttributes[j].GetSyntax().ToFullString());
                     }
 
                     var fieldRefData = new FieldRefData {
@@ -379,12 +430,12 @@ namespace EncosyTower.SourceGen.Generators.Data
                         _ = setter.IsInitOnly || setter.DeclaredAccessibility == Accessibility.Private;
                     }
 
-                    var attribute = property.GetAttribute(DATA_PROPERTY_ATTRIBUTE);
-
-                    if (attribute == null)
+                    if (dataPropertyNames.Contains(property.Name) == false)
                     {
                         continue;
                     }
+
+                    var attribute = property.GetAttribute(DATA_PROPERTY_ATTRIBUTE);
 
                     ITypeSymbol fieldType;
                     bool implicitlyConvertible;
@@ -469,16 +520,16 @@ namespace EncosyTower.SourceGen.Generators.Data
                     using var attrBuilder = ImmutableArrayBuilder<ForwardedFieldAttributeData>.Rent();
                     var forwardedAttrCount = fieldAttributes.Length;
 
-                    for (var i = 0; i < forwardedAttrCount; i++)
+                    for (var j = 0; j < forwardedAttrCount; j++)
                     {
-                        var (fullTypeName, attributeInfo) = fieldAttributes[i];
+                        var (fullTypeName, attributeInfo) = fieldAttributes[j];
                         attrBuilder.Add(new ForwardedFieldAttributeData {
                             fullTypeName = fullTypeName,
                             attributeSyntax = attributeInfo.GetSyntax().ToFullString(),
                         });
                     }
 
-                    var doesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE);
+                    var doesCreateProperty = propertiesWithCreateProp.Contains(property.Name);
                     var fieldIsImplemented = existingFields.Contains(fieldName);
 
                     var propRefData = new PropRefData {
