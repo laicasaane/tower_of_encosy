@@ -34,7 +34,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
 
             for (var i = 0; i < attrCount; i++)
             {
-                if (attrs[i].AttributeClass?.ToDisplayString(SymbolFormats.FullyQualified) == fullyQualifiedName)
+                if (SymbolNameMatching.HasFullName(attrs[i].AttributeClass, fullyQualifiedName))
                 {
                     return true;
                 }
@@ -55,7 +55,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
 
             for (var i = 0; i < attrCount; i++)
             {
-                if (attrs[i].AttributeClass?.ToDisplayString(SymbolFormats.FullyQualified) == fullyQualifiedName)
+                if (SymbolNameMatching.HasFullName(attrs[i].AttributeClass, fullyQualifiedName))
                 {
                     return new AttributeSymbol(attrs[i]);
                 }

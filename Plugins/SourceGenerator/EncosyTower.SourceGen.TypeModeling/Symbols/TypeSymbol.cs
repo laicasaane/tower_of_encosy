@@ -65,7 +65,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
 
             for (var i = 0; i < attrCount; i++)
             {
-                if (attrs[i].AttributeClass?.ToDisplayString(SymbolFormats.FullyQualified) == fullyQualifiedName)
+                if (SymbolNameMatching.HasFullName(attrs[i].AttributeClass, fullyQualifiedName))
                 {
                     return true;
                 }
@@ -86,7 +86,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
 
             for (var i = 0; i < attrCount; i++)
             {
-                if (attrs[i].AttributeClass?.ToDisplayString(SymbolFormats.FullyQualified) == fullyQualifiedName)
+                if (SymbolNameMatching.HasFullName(attrs[i].AttributeClass, fullyQualifiedName))
                 {
                     return new AttributeSymbol(attrs[i]);
                 }
@@ -107,7 +107,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
 
             for (var i = 0; i < ifaceCount; i++)
             {
-                if (ifaces[i].ToDisplayString(SymbolFormats.FullyQualified) == fullyQualifiedName)
+                if (SymbolNameMatching.HasFullName(ifaces[i], fullyQualifiedName))
                 {
                     return true;
                 }
