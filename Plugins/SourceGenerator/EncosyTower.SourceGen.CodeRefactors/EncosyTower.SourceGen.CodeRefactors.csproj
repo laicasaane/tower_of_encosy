@@ -30,7 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\EncosyTower.SourceGen.Common\EncosyTower.SourceGen.Common.csproj" />
+      <ProjectReference Include="../EncosyTower.SourceGen.Common/EncosyTower.SourceGen.Common.csproj" />
     </ItemGroup>
 
 </Project>

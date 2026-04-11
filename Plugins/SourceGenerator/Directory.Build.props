@@ -1,8 +1,8 @@
 <Project>
     <PropertyGroup>
-        <BaseOutputPath>$(MSBuildThisFileDirectory)Build\$(MSBuildProjectName)\bin\</BaseOutputPath>
-        <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)Build\$(MSBuildProjectName)\obj\</BaseIntermediateOutputPath>
-        <ResultsDirectory>$(MSBuildThisFileDirectory)Build\$(MSBuildProjectName)\TestResults\</ResultsDirectory>
+        <BaseOutputPath>$(MSBuildThisFileDirectory)Build/$(MSBuildProjectName)/bin/</BaseOutputPath>
+        <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)Build/$(MSBuildProjectName)/obj/</BaseIntermediateOutputPath>
+        <ResultsDirectory>$(MSBuildThisFileDirectory)Build/$(MSBuildProjectName)/TestResults/</ResultsDirectory>
     </PropertyGroup>
 
     <Target Name="CopyBuildArtifacts" AfterTargets="Build"
@@ -11,7 +11,7 @@
             <DataFiles Include="$(OutDir)*.dll" />
         </ItemGroup>
         <Copy SourceFiles="@(DataFiles)"
-              DestinationFolder="$(MSBuildThisFileDirectory)..\..\Packages\com.laicasaane.encosy-tower\EncosyTower.Core\SourceGenerators\"
+              DestinationFolder="$(MSBuildThisFileDirectory)../../Packages/com.laicasaane.encosy-tower/EncosyTower.Core/SourceGenerators/"
               SkipUnchangedFiles="true" />
     </Target>
 
