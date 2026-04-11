@@ -83,7 +83,7 @@
         <WriteLinesToFile File="$(_UnityDllPathsFile)" Lines="@(_UnityDllPathsLines)" Overwrite="true" Encoding="UTF-8" />
     </Target>
 
-    <Target Name="DeleteUnityDllPaths" AfterTargets="Build;VSTest;RunTests">
+    <Target Name="DeleteUnityDllPaths" AfterTargets="AfterBuild">
         <Delete Files="$(MSBuildProjectDirectory)/Helpers/UnityDllPaths.g.cs" />
     </Target>
 
