@@ -50,6 +50,8 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                 , isEnum: symbol.TypeKind == TypeKind.Enum
                 , isUnmanaged: symbol.IsUnmanagedType
                 , isRefLikeType: symbol.IsRefLikeType
+                , isUnboundGenericType: symbol.IsUnboundGenericType
+                , enumUnderlyingSpecialType: symbol.EnumUnderlyingType?.SpecialType ?? SpecialType.None
                 , baseTypeName: symbol.BaseType?.ToDisplayString(SymbolFormats.FullyQualified) ?? string.Empty
                 , interfaces: interfaces
                 , allInterfaces: allInterfaces
@@ -258,7 +260,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                 {
                     var pair = namedArguments[k];
                     var argValue = pair.Value.Kind == TypedConstantKind.Type
-                                   && pair.Value.Value is ITypeSymbol namedTypeArg
+                        && pair.Value.Value is ITypeSymbol namedTypeArg
                         ? namedTypeArg.ToDisplayString(SymbolFormats.FullyQualified)
                         : pair.Value.Value?.ToString() ?? string.Empty;
                     namedArgs.Add(new AttributeNamedArgModel(pair.Key, pair.Value.Kind, argValue));
@@ -321,6 +323,8 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                     , isStatic: field.IsStatic
                     , isConst: field.IsConst
                     , constantValueText: field.ConstantValue?.ToString() ?? string.Empty
+                    , hasConstantValue: field.ConstantValue != null
+                    , constantValueNumeric: ConvertConstantToUInt64(field.ConstantValue)
                     , refKind: field.RefKind
                     , attributes: attrs
                 ));
@@ -630,6 +634,31 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
                     ? (p.ExplicitDefaultValue?.ToString() ?? string.Empty)
                     : string.Empty
             );
+        }
+
+        private static ulong ConvertConstantToUInt64(object constantValue)
+        {
+            if (constantValue == null)
+            {
+                return 0;
+            }
+
+            try
+            {
+                return System.Convert.ToUInt64(constantValue);
+            }
+            catch
+            {
+                // Negative enum values — store two's complement bit pattern
+                try
+                {
+                    return unchecked((ulong)System.Convert.ToInt64(constantValue));
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
         }
     }
 }

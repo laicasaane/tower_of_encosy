@@ -21,6 +21,8 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         public readonly bool IsEnum;
         public readonly bool IsUnmanaged;
         public readonly bool IsRefLikeType;
+        public readonly bool IsUnboundGenericType;
+        public readonly SpecialType EnumUnderlyingSpecialType;
         public readonly string BaseTypeName;
         public readonly EquatableArray<string> Interfaces;
         public readonly EquatableArray<string> AllInterfaces;
@@ -48,6 +50,8 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             , bool isEnum
             , bool isUnmanaged
             , bool isRefLikeType
+            , bool isUnboundGenericType
+            , SpecialType enumUnderlyingSpecialType
             , string baseTypeName
             , EquatableArray<string> interfaces
             , EquatableArray<string> allInterfaces
@@ -75,6 +79,8 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             IsEnum = isEnum;
             IsUnmanaged = isUnmanaged;
             IsRefLikeType = isRefLikeType;
+            IsUnboundGenericType = isUnboundGenericType;
+            EnumUnderlyingSpecialType = enumUnderlyingSpecialType;
             BaseTypeName = baseTypeName ?? string.Empty;
             Interfaces = interfaces;
             AllInterfaces = allInterfaces;
@@ -101,6 +107,8 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             && IsEnum == other.IsEnum
             && IsUnmanaged == other.IsUnmanaged
             && IsRefLikeType == other.IsRefLikeType
+            && IsUnboundGenericType == other.IsUnboundGenericType
+            && EnumUnderlyingSpecialType == other.EnumUnderlyingSpecialType
             && string.Equals(BaseTypeName, other.BaseTypeName, StringComparison.Ordinal)
             && Interfaces.Equals(other.Interfaces)
             && AllInterfaces.Equals(other.AllInterfaces)

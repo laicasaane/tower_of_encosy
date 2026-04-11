@@ -14,6 +14,8 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
         public readonly bool IsStatic;
         public readonly bool IsConst;
         public readonly string ConstantValueText;
+        public readonly bool HasConstantValue;
+        public readonly ulong ConstantValueNumeric;
         public readonly RefKind RefKind;
         public readonly EquatableArray<AttributeModel> Attributes;
 
@@ -26,6 +28,8 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             , bool isStatic
             , bool isConst
             , string constantValueText
+            , bool hasConstantValue
+            , ulong constantValueNumeric
             , RefKind refKind
             , EquatableArray<AttributeModel> attributes
         )
@@ -38,6 +42,8 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             IsStatic = isStatic;
             IsConst = isConst;
             ConstantValueText = constantValueText ?? string.Empty;
+            HasConstantValue = hasConstantValue;
+            ConstantValueNumeric = constantValueNumeric;
             RefKind = refKind;
             Attributes = attributes;
         }
@@ -50,6 +56,8 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             && IsStatic == other.IsStatic
             && IsConst == other.IsConst
             && string.Equals(ConstantValueText, other.ConstantValueText, StringComparison.Ordinal)
+            && HasConstantValue == other.HasConstantValue
+            && ConstantValueNumeric == other.ConstantValueNumeric
             && RefKind == other.RefKind
             && Attributes.Equals(other.Attributes)
             ;
@@ -58,7 +66,10 @@ namespace EncosyTower.SourceGen.TypeModeling.Models
             => obj is FieldModel other && Equals(other);
 
         public override int GetHashCode()
-            => HashValue.Combine(Name, TypeFullName, Accessibility, IsReadOnly, IsStatic, IsConst, RefKind, Attributes).ToHashCode();
+            => HashValue.Combine(Name, TypeFullName, Accessibility, IsReadOnly, IsStatic, IsConst, RefKind, Attributes)
+            .Add(HasConstantValue)
+            .Add(ConstantValueNumeric)
+            .ToHashCode();
 
         public static bool operator ==(FieldModel left, FieldModel right)
             => left.Equals(right);

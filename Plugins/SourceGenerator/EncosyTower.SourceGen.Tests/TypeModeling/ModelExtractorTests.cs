@@ -1,8 +1,4 @@
-using System;
-using System.Linq;
-using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EncosyTower.SourceGen.TypeModeling;
 using EncosyTower.SourceGen.TypeModeling.Models;
 
 namespace EncosyTower.SourceGen.Tests.TypeModeling;
@@ -10,14 +6,6 @@ namespace EncosyTower.SourceGen.Tests.TypeModeling;
 [TestClass]
 public class ModelExtractorTests
 {
-    // Shared source used by most tests.
-    // The type has:
-    //   - [Obsolete] attribute
-    //   - 1 public field  (PublicField)
-    //   - 1 private field (_privateField)
-    //   - 1 auto-property (Name) whose compiler-generated backing field must be excluded by default
-    //   - 2 ordinary methods (DoWork, Helper)
-    //   - 1 interface implementation (IDisposable)
     private const string SHARED_SOURCE = """
         using System;
         namespace TestNs {
@@ -32,10 +20,6 @@ public class ModelExtractorTests
             }
         }
         """;
-
-    // -------------------------------------------------------------------------
-    // Equality
-    // -------------------------------------------------------------------------
 
     [TestMethod]
     public void TypeModel_EqualsSelf_WhenSameSource()
@@ -79,10 +63,6 @@ public class ModelExtractorTests
 
         Assert.AreNotEqual(m1, m2);
     }
-
-    // -------------------------------------------------------------------------
-    // Fields
-    // -------------------------------------------------------------------------
 
     [TestMethod]
     public void TypeModel_Fields_Count_IncludesNonPublic()
@@ -132,10 +112,6 @@ public class ModelExtractorTests
             "Backing fields should be excluded when IncludeCompilerGenerated=false.");
     }
 
-    // -------------------------------------------------------------------------
-    // Methods
-    // -------------------------------------------------------------------------
-
     [TestMethod]
     public void TypeModel_Methods_Count()
     {
@@ -146,10 +122,6 @@ public class ModelExtractorTests
 
         Assert.AreEqual(3, model.Methods.Count);
     }
-
-    // -------------------------------------------------------------------------
-    // Attributes
-    // -------------------------------------------------------------------------
 
     [TestMethod]
     public void TypeModel_Attributes_Populated()
@@ -163,10 +135,6 @@ public class ModelExtractorTests
         var attr = model.Attributes[0];
         StringAssert.Contains(attr.FullName, "ObsoleteAttribute");
     }
-
-    // -------------------------------------------------------------------------
-    // ModelParts filtering
-    // -------------------------------------------------------------------------
 
     [TestMethod]
     public void TypeModel_ModelParts_Fields_OnlyFieldsPopulated()
@@ -184,10 +152,6 @@ public class ModelExtractorTests
         Assert.AreEqual(0, model.Interfaces.Count, "Interfaces should be empty when ModelParts.Fields only.");
     }
 
-    // -------------------------------------------------------------------------
-    // Cancellation
-    // -------------------------------------------------------------------------
-
     [TestMethod]
     [ExpectedException(typeof(OperationCanceledException))]
     public void TypeModel_Cancellation_Throws()
@@ -200,10 +164,6 @@ public class ModelExtractorTests
         symbol.ToModel(cts.Token);
     }
 
-    // -------------------------------------------------------------------------
-    // TypeModel identity fields
-    // -------------------------------------------------------------------------
-
     [TestMethod]
     public void TypeModel_Name_And_FullName_And_Namespace()
     {
@@ -214,5 +174,94 @@ public class ModelExtractorTests
         Assert.AreEqual("TestNs", model.Namespace);
         Assert.IsTrue(model.FullName.Contains("Target"),
             $"FullName expected to contain 'Target', was '{model.FullName}'.");
+    }
+
+    [TestMethod]
+    public void TypeModel_IsUnboundGenericType_False_ForNonGenericType()
+    {
+        const string SOURCE = """
+            namespace TestNs {
+                public struct TestStruct { }
+            }
+            """;
+
+        var symbol = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.TestStruct");
+        var model = symbol.ToModel(CancellationToken.None);
+
+        Assert.IsFalse(model.IsUnboundGenericType);
+        Assert.IsFalse(model.IsGeneric);
+    }
+
+    [TestMethod]
+    public void TypeModel_IsUnboundGenericType_True_ForUnboundGeneric()
+    {
+        const string SOURCE = """
+            namespace TestNs {
+                public class Generic<T> { }
+            }
+            """;
+
+        var symbol = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.Generic`1");
+        // Construct the unbound generic form: Generic<>
+        var unbound = symbol.ConstructUnboundGenericType();
+        var model = unbound.ToModel(CancellationToken.None);
+
+        Assert.IsTrue(model.IsUnboundGenericType);
+        Assert.IsTrue(model.IsGeneric);
+    }
+
+    [TestMethod]
+    public void TypeModel_EnumUnderlyingSpecialType_Correct_ForByteEnum()
+    {
+        const string SOURCE = """
+            namespace TestNs {
+                public enum TestEnum : byte { A, B, C }
+            }
+            """;
+
+        var symbol = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.TestEnum");
+        var model = symbol.ToModel(CancellationToken.None);
+
+        Assert.IsTrue(model.IsEnum);
+        Assert.AreEqual(Microsoft.CodeAnalysis.SpecialType.System_Byte, model.EnumUnderlyingSpecialType);
+    }
+
+    [TestMethod]
+    public void TypeModel_EnumUnderlyingSpecialType_None_ForNonEnum()
+    {
+        const string SOURCE = """
+            namespace TestNs {
+                public struct TestStruct { }
+            }
+            """;
+
+        var symbol = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.TestStruct");
+        var model = symbol.ToModel(CancellationToken.None);
+
+        Assert.IsFalse(model.IsEnum);
+        Assert.AreEqual(Microsoft.CodeAnalysis.SpecialType.None, model.EnumUnderlyingSpecialType);
+    }
+
+    [TestMethod]
+    public void FieldModel_ConstantValueNumeric_Correct_ForEnumFields()
+    {
+        const string SOURCE = """
+            namespace TestNs {
+                public enum TestEnum { A = 0, B = 5, C = 10 }
+            }
+            """;
+
+        var symbol = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.TestEnum");
+        var opts = new ModelOptions(ModelParts.Fields, includeNonPublic: true);
+        var model = symbol.ToModel(CancellationToken.None, opts);
+
+        // Enum fields: A=0, B=5, C=10 (plus compiler-generated "value__" field — excluded by default)
+        var fieldB = model.Fields.FirstOrDefault(f => f.Name == "B");
+        Assert.IsTrue(fieldB.HasConstantValue, "Field B should have HasConstantValue=true.");
+        Assert.AreEqual(5UL, fieldB.ConstantValueNumeric, "Field B should have ConstantValueNumeric=5.");
+
+        var fieldC = model.Fields.FirstOrDefault(f => f.Name == "C");
+        Assert.IsTrue(fieldC.HasConstantValue);
+        Assert.AreEqual(10UL, fieldC.ConstantValueNumeric);
     }
 }
