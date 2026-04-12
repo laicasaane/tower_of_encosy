@@ -6,19 +6,11 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
 {
-    /// <summary>
-    /// Analyzer that reports validation diagnostics for structs annotated with
-    /// <c>[Lookup]</c>, covering conditions that would cause the source generator
-    /// to silently produce no output or invalid output.
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal class LookupDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         private const string NAMESPACE = "EncosyTower.Entities";
         private const string LOOKUP_ATTRIBUTE = $"global::{NAMESPACE}.LookupAttribute";
-
-        // Marker interfaces — used to determine required ECS interfaces per lookup kind.
-        // Compared against iface.ToDisplayString() (which omits the "global::" prefix).
         private const string I_BUFFER_LOOKUPS                       = $"{NAMESPACE}.IBufferLookups";
         private const string I_COMPONENT_LOOKUPS                    = $"{NAMESPACE}.IComponentLookups";
         private const string I_ENABLEABLE_BUFFER_LOOKUPS            = $"{NAMESPACE}.IEnableableBufferLookups";
@@ -26,8 +18,6 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
         private const string I_PHYSICS_BUFFER_LOOKUPS               = $"{NAMESPACE}.IPhysicsBufferLookups";
         private const string I_PHYSICS_COMPONENT_LOOKUPS            = $"{NAMESPACE}.IPhysicsComponentLookups";
         private const string I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS = $"{NAMESPACE}.IPhysicsEnableableComponentLookups";
-
-        // ECS interfaces (with "global::" prefix — as expected by InheritsFromInterface)
         private const string I_BUFFER_ELEMENT_DATA  = "global::Unity.Entities.IBufferElementData";
         private const string I_COMPONENT_DATA       = "global::Unity.Entities.IComponentData";
         private const string I_ENABLEABLE_COMPONENT = "global::Unity.Entities.IEnableableComponent";

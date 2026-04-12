@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -29,7 +29,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return default;
             }
 
-            // ForAttributeWithMetadataName guarantees at least one matching attribute
             var authorAttrib = context.Attributes[0];
 
             if (authorAttrib.ConstructorArguments.Length != 1
@@ -45,7 +44,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var databaseTypeKeyword = authoringSymbol.IsValueType ? "struct" : "class";
             var databaseIdentifier = authoringSymbol.ToValidIdentifier();
 
-            // Pre-compute opening/closing source (namespace/outer-type scope wrapper)
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   typeSyntax
                 , token
@@ -55,8 +53,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             );
 
             var syntaxTree = typeSyntax.SyntaxTree;
-
-            // Hint name for SheetContainer
             var containerHintName = GetHintName(
                   syntaxTree
                 , GENERATOR_NAME
@@ -64,7 +60,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , $"{databaseIdentifier}__SheetContainer"
             );
 
-            // --- NamingStrategy ---
             var namingStrategy = NamingStrategy.PascalCase;
 
             foreach (var arg in databaseAttrib.ConstructorArguments)
@@ -76,7 +71,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
             }
 
-            // --- Database-level converter map (keyed by target type full name) ---
             var dbConverterMap = new Dictionary<string, ConverterSpec>(StringComparer.Ordinal);
 
             foreach (var arg in databaseAttrib.ConstructorArguments)
@@ -88,9 +82,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
             }
 
-            // --- Tables ---
             var tableModelList = new List<TableSpec>();
-            // Also need intermediate structs to carry IdType/DataType for BFS
             var tableInfoList = new List<TableInfo>();
             // HorizontalListMap: targetTypeFullName -> containingTypeFullName -> HashSet<propertyName>
             var horizontalListMap = new Dictionary<string, Dictionary<string, HashSet<string>>>(StringComparer.Ordinal);
@@ -174,7 +166,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     tableConverterMap = tableConverterMap,
                 });
 
-                // Horizontal list entries
                 CollectHorizontalLists(member, tableType, horizontalListMap);
             }
 
@@ -183,10 +174,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return default;
             }
 
-            // --- DataMap (BFS over all IData types) ---
             var dataMap = BuildDataMap(tableInfoList, dbConverterMap, token);
-
-            // --- Asset ref lists & type names (BuildDataContainers equivalent) ---
             var assetRefListDict = new Dictionary<string, AssetRefListSpec>(StringComparer.Ordinal);
             var assetRefListOrder = new List<string>();
             var typeNameList = new List<string>();
@@ -221,7 +209,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     existing = newRef;
                 }
 
-                // Build a temporary list then convert
                 var currentFieldNames = new List<string>();
 
                 if (existing.fieldNames.Count > 0)
@@ -240,7 +227,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 maxFieldOfSameTable = Math.Max(maxFieldOfSameTable, currentFieldNames.Count);
             }
 
-            // Convert horizontal list map to EquatableArray<HorizontalListEntry>
             using var hlBuilder = ImmutableArrayBuilder<HorizontalListSpec>.Rent();
 
             foreach (var targetKv in horizontalListMap)
@@ -262,8 +248,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
             }
 
-            // --- Sheets ---
-            // Build set of unique table types (per tableType, only first table is used for the sheet)
             var processedTableTypes = new HashSet<string>(StringComparer.Ordinal);
             var sheetList = new List<SheetSpec>();
 
@@ -293,7 +277,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     , $"{databaseIdentifier}__{tableInfo.tableTypeSimpleName}__{tableInfo.dataTypeSimpleName}Sheet"
                 );
 
-                // Nested data type full names
                 var nestedFullNames = BuildNestedDataTypeFullNames(tableInfo, dataMap);
 
                 sheetList.Add(new SheetSpec {
@@ -313,7 +296,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return default;
             }
 
-            // Convert dataMap to EquatableArray<DataSpec>
             using var dataModelsBuilder = ImmutableArrayBuilder<DataSpec>.Rent();
 
             foreach (var dm in dataMap.Values)
@@ -321,7 +303,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 dataModelsBuilder.Add(dm);
             }
 
-            // Convert tableModels
             using var tableModelsBuilder = ImmutableArrayBuilder<TableSpec>.Rent();
 
             foreach (var tm in tableModelList)
@@ -329,7 +310,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 tableModelsBuilder.Add(tm);
             }
 
-            // Convert assetRefLists (preserve insertion order)
             using var assetRefListBuilder = ImmutableArrayBuilder<AssetRefListSpec>.Rent();
 
             foreach (var key in assetRefListOrder)
@@ -337,7 +317,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 assetRefListBuilder.Add(assetRefListDict[key]);
             }
 
-            // Convert typeNames
             using var typeNamesBuilder = ImmutableArrayBuilder<string>.Rent();
 
             foreach (var tn in typeNameList)
@@ -345,7 +324,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 typeNamesBuilder.Add(tn);
             }
 
-            // Convert sheets
             using var sheetsBuilder = ImmutableArrayBuilder<SheetSpec>.Rent();
 
             foreach (var s in sheetList)
@@ -371,7 +349,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             };
         }
 
-        // ── Internal extraction helpers ────────────────────────────────────────────
 
         private static bool IsSupportedTypeSyntax(TypeDeclarationSyntax syntax)
             => syntax.IsKind(SyntaxKind.ClassDeclaration) || syntax.IsKind(SyntaxKind.StructDeclaration);
@@ -563,7 +540,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 baseType = baseType.BaseType;
             }
 
-            // Reverse so outermost base is first (matching original BaseTypeRefs order)
             var rawLayers = baseLayerBuilder.ToImmutable();
             using var reversedLayers = ImmutableArrayBuilder<DataLayerSpec>.Rent();
 
@@ -601,7 +577,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             {
                 if (member is IPropertySymbol property)
                 {
-                    // For types in another assembly
                     var genPropAttr = property.GetAttribute(GENERATED_PROPERTY_FROM_FIELD);
 
                     if (genPropAttr != null
@@ -614,7 +589,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         continue;
                     }
 
-                    // For types in the same assembly
                     var dataPropAttr = property.GetAttribute(DATA_PROPERTY_ATTRIBUTE);
 
                     if (dataPropAttr != null)
@@ -638,7 +612,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
                 else if (member is IFieldSymbol field)
                 {
-                    // For types in another assembly
                     var genFieldAttr = field.GetAttribute(GENERATED_FIELD_FROM_PROPERTY);
 
                     if (genFieldAttr != null
@@ -650,7 +623,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         continue;
                     }
 
-                    // For types in the same assembly
                     if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE))
                     {
                         fields.Add((field.ToPropertyName(), field.Name, field, field.Type));
@@ -721,7 +693,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             var typeHasParameterlessCtor = CheckParameterlessConstructor(fieldType, token);
 
-            // Try [DataConverter] attribute on the member
             var converter = TryMakeConverterModel(
                   memberSymbol
                 , fieldType
@@ -733,7 +704,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             EnqueueTypes(queue, convType, convKeyType, convElemType);
 
-            // Fall back to table-level then database-level converter map
             if (converter.kind == ConverterKind.None)
             {
                 var fieldTypeFull = fieldType.ToFullName();
@@ -748,7 +718,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
             }
 
-            // Fall back to the type's own Convert method
             if (converter.kind == ConverterKind.None)
             {
                 converter = TryFallbackConverterModel(
@@ -1322,7 +1291,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             p.PrintEndLine();
         }
 
-        // Internal helper struct used only during extraction (not cached)
         private struct TableInfo
         {
             public INamedTypeSymbol tableType;

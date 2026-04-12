@@ -85,12 +85,9 @@ namespace EncosyTower.SourceGen
             IncrementalGeneratorInitializationContext context
         )
         {
-            // Generate provider that lazily provides options based off of context's parse options
             var parseOptionConfigProvider = context.ParseOptionsProvider.Select((options, token) =>
             {
                 var parseOptionsConfig = new ParseOptionConfig();
-
-                // Is Unity 2021.1+ and not dots runtime
                 var inUnity2021OrNewer = false;
 
                 foreach (var symbolName in options.PreprocessorSymbolNames)
@@ -104,7 +101,6 @@ namespace EncosyTower.SourceGen
                 return parseOptionsConfig;
             });
 
-            // Combine the AdditionalTextsProvider with the provider constructed above to provide all SourceGenConfig options lazily
             var sourceGenConfigProvider = context.AdditionalTextsProvider.Collect()
                 .Combine(parseOptionConfigProvider)
                 .Select((lTextsRIsInsideText, token) =>
@@ -205,7 +201,6 @@ namespace EncosyTower.SourceGen
             }
         }
 
-        // Output as generated source file for debugging/inspection
         public static void OutputSourceToFile(
               SourceProductionContext context
             , Location locationToErrorAt

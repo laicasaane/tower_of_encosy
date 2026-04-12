@@ -7,12 +7,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
     {
         private const string AOT_HELPER = "NSJU.AotHelper";
 
-        /// <summary>
-        /// Generates the complete source text for the partial class/struct annotated
-        /// with <c>[NewtonsoftJsonAotHelper]</c>, including the namespace and any
-        /// containing-type wrappers derived from <paramref name="helper"/>.
-        /// No Roslyn symbols are accessed; all data is pre-extracted in the pipeline.
-        /// </summary>
         public static string WriteCode(
               NewtonsoftAotHelperSpec helper
             , IEnumerable<AotTypeSpec> types
@@ -62,15 +56,8 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             return p.Result;
         }
 
-        /// <summary>
-        /// Emits the AOT registration calls for a single pre-extracted field entry.
-        /// Mirrors the logic that was previously spread across
-        /// <c>WriteType</c>, <c>WriteTypeArgs</c>, <c>TryGetDictionaryTypeArgs</c>,
-        /// and <c>TryGetListSetTypeArg</c>, but operates entirely on primitive data.
-        /// </summary>
         private static void WriteFieldInfo(ref Printer p, in AotFieldSpec field)
         {
-            // Always try to emit EnsureType for the field type itself.
             if (field.fieldTypeCanEnsure)
             {
                 p.PrintBeginLine(AOT_HELPER).Print(".EnsureType<")
@@ -102,7 +89,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
                 case AotCollectionKind.None:
                 {
-                    // Emit EnsureType for each named type argument of other generics.
                     var otherTypeArgs = field.otherTypeArgs;
                     var count = otherTypeArgs.Count;
 

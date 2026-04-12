@@ -104,7 +104,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 return default;
             }
 
-            // Extract target vault from the attribute's first constructor argument (if any)
             var vaultMetadataName = string.Empty;
             var attribute = context.Attributes[0];
 
@@ -115,7 +114,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 vaultMetadataName = vaultType.ToSimpleName();
             }
 
-            // Extract field name from [Label] or [DisplayName] attribute, fallback to class name
             var fieldName = string.Empty;
 
             foreach (var attrib in symbol.GetAttributes())
@@ -160,7 +158,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 fieldName = symbol.Name;
             }
 
-            // Find constructor with the most parameters
             var constructors = symbol.Constructors;
             var constructorIndex = -1;
             var max = 0;
@@ -292,8 +289,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             SourceGenHelpers.ProjectPath = projectPath;
 
-            // Build the opening source from pre-extracted namespace / containing type declarations
-            // (replaces TypeCreationHelpers.GenerateOpeningAndClosingSource which requires a SyntaxNode).
             var openingPrinter = Printer.DefaultLarge;
             var printUsings = compilation.references.unitask
                 ? (PrinterAction)PrintUsingUniTask : PrintUsingAwaitable;
@@ -316,8 +311,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
 
             var openingSource = openingPrinter.Result;
-
-            // Build the closing source with matching closing braces.
             var closingPrinter = Printer.DefaultLarge;
             closingPrinter.PrintEndLine();
 
@@ -330,9 +323,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
 
             var closingSource = closingPrinter.Result;
-
-            // Compute source file path without accessing SyntaxTree
-            // (mirrors SyntaxNodeExtensions.GetGeneratedSourceFilePath logic).
             var stableHashCode = SourceGenHelpers.GetStableHashCode(vaultInfo.location.filePath) & 0x7fffffff;
             var fileHintName = vaultInfo.fileHintName;
             var sourceFileName = $"{fileHintName}__{GENERATOR_NAME}_{stableHashCode}_0.g.cs";

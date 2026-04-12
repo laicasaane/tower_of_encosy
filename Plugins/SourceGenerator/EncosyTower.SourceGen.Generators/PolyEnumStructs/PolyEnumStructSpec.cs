@@ -5,7 +5,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 {
     internal partial struct PolyEnumStructSpec : IEquatable<PolyEnumStructSpec>
     {
-        /// <summary>Excluded from equality/hash — location is not stable across incremental runs.</summary>
         public LocationInfo location;
 
         public string typeName;

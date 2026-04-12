@@ -4,60 +4,23 @@ using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.EnumTemplates
 {
-    /// <summary>
-    /// Cache-friendly pipeline model representing a single type that contributes members
-    /// to an enum template (the source-2 external member candidates flowing through the pipeline).
-    /// Holds only primitive values and equatable collections — no <see cref="ISymbol"/>
-    /// or <see cref="AttributeData"/> references.
-    /// Replaces the non-cache-friendly <c>KindCandidate</c>.
-    /// </summary>
     internal struct TemplateMemberSpec : IEquatable<TemplateMemberSpec>
     {
-        /// <summary>
-        /// Location of the attribute that declares this membership.
-        /// Intentionally excluded from <see cref="Equals(TemplateMemberSpec)"/> and
-        /// <see cref="GetHashCode"/>: location data is not stable across incremental runs
-        /// and must not drive cache invalidation.
-        /// </summary>
         public LocationInfo attributeLocation;
-
-        /// <summary>Fully qualified name of the type contributing members.</summary>
         public string typeFullName;
-
-        /// <summary>Simple, valid C# identifier derived from the type name.</summary>
         public string typeSimpleName;
-
-        /// <summary>Fully qualified name of the template struct this candidate targets.</summary>
         public string templateFullName;
-
         public string displayName;
         public string alternateName;
         public ulong order;
         public bool enumMembers;
-
-        /// <summary>
-        /// Special type of the enum's underlying numeric type.
-        /// Only meaningful when <see cref="enumMembers"/> is <see langword="true"/>.
-        /// </summary>
         public SpecialType underlyingType;
-
-        /// <summary>
-        /// Pre-extracted enum field entries.
-        /// Only populated when <see cref="enumMembers"/> is <see langword="true"/>.
-        /// </summary>
         public EquatableArray<TemplateMemberEntrySpec> enumEntries;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(typeFullName) == false
             && string.IsNullOrEmpty(templateFullName) == false;
 
-        /// <summary>
-        /// Extracts a <see cref="TemplateMemberSpec"/> from a resolved type symbol
-        /// and its corresponding attribute data. Used for both inline members (attributes
-        /// directly on the template struct, with <paramref name="templateFullName"/>
-        /// passed from the template) and external members (attributes on the contributing
-        /// type, with <paramref name="templateFullName"/> read from the attribute arg).
-        /// </summary>
         public static TemplateMemberSpec Extract(
               INamedTypeSymbol typeSymbol
             , string templateFullName
@@ -229,10 +192,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             .Add(enumEntries.GetHashCode());
     }
 
-    /// <summary>
-    /// A single pre-extracted enum field entry stored inside <see cref="TemplateMemberSpec"/>.
-    /// Cache-friendly: holds only primitives and equatable collections.
-    /// </summary>
     internal struct TemplateMemberEntrySpec : IEquatable<TemplateMemberEntrySpec>
     {
         public string name;

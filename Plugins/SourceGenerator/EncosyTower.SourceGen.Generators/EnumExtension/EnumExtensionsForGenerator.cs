@@ -74,8 +74,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 return default;
             }
 
-            // The type argument is the enum type passed via typeof(X).
-            // If it is null or not an enum the analyzer (EnumExtensionsAnalyzer) will report it.
 
             if (attribData.ConstructorArguments[0].Value is not INamedTypeSymbol enumSymbol
                 || enumSymbol.TypeKind != TypeKind.Enum
@@ -99,8 +97,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
             var ns = classSymbol.ContainingNamespace;
             var namespaceName = ns is { IsGlobalNamespace: false } ? ns.ToDisplayString() : string.Empty;
-
-            // extensionsName: the name of the decorated static class (not auto-derived from the enum name)
             var candidate = EnumExtensionSpec.Extract(
                   enumSymbol
                 , syntax.Parent is BaseNamespaceDeclarationSyntax
@@ -159,9 +155,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 {
                     throw;
                 }
-
-                // Generator bugs are silently swallowed — do not emit diagnostics from the
-                // generator. User-facing validation is handled by EnumExtensionsAnalyzer.
             }
         }
 

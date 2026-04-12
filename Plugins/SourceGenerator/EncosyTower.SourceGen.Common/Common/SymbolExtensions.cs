@@ -864,7 +864,6 @@ namespace EncosyTower.SourceGen
                             , token
                         );
 
-                        // Add the new attribute info to the right builder
                         if (attributeList.Target != null)
                         {
                             if (attributeList.Target.Identifier.IsKind(SyntaxKind.PropertyKeyword))
@@ -956,7 +955,6 @@ namespace EncosyTower.SourceGen
                             , token
                         );
 
-                        // Add the new attribute info to the right builder
                         if (attributeList.Target != null)
                         {
                             if (attributeList.Target.Identifier.IsKind(SyntaxKind.FieldKeyword))
@@ -1048,7 +1046,6 @@ namespace EncosyTower.SourceGen
                             , token
                         );
 
-                        // Add the new attribute info to the right builder
                         if (attributeList.Target != null)
                         {
                             if (attributeList.Target.Identifier.IsKind(SyntaxKind.PropertyKeyword))
@@ -1141,7 +1138,6 @@ namespace EncosyTower.SourceGen
                             , token
                         );
 
-                        // Add the new attribute info to the right builder
                         if (attributeList.Target != null)
                         {
                             if (attributeList.Target.Identifier.IsKind(SyntaxKind.FieldKeyword))
@@ -1693,7 +1689,6 @@ namespace EncosyTower.SourceGen
 
             if (prefixPart.IsEmpty)
             {
-                // There must be no containing type, and the namespace must be global.
                 return symbol.ContainingType == null && symbol.ContainingNamespace?.IsGlobalNamespace == true;
             }
 

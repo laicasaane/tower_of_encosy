@@ -6,16 +6,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Generators.EnumTemplates
 {
-    /// <summary>
-    /// Analyzer that reports validation diagnostics for types involved in the
-    /// <c>[EnumTemplate]</c> / <c>[EnumMembersForTemplate]</c> / <c>[TypeAsEnumMemberForTemplate]</c>
-    /// attribute system.
-    /// <para>
-    /// Keeping diagnostics in a <see cref="DiagnosticAnalyzer"/> rather than inside the
-    /// source generator itself prevents unnecessary regeneration of source files when only
-    /// an error (and not the surrounding valid code) has changed.
-    /// </para>
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal class EnumTemplateAnalyzer : DiagnosticAnalyzer
     {
@@ -121,14 +111,12 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 return;
             }
 
-            // Validate template structs annotated with [EnumTemplate].
             if (typeSymbol.HasAttribute(ENUM_TEMPLATE_ATTRIBUTE))
             {
                 AnalyzeTemplateStruct(context, typeSymbol);
                 return;
             }
 
-            // Validate types annotated with external membership attributes.
             var attrib = typeSymbol.GetAttribute(ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE);
 
             if (attrib != null)
@@ -147,7 +135,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
         private static void AnalyzeTemplateStruct(SymbolAnalysisContext context, INamedTypeSymbol templateSymbol)
         {
-            // Rule 0001: naming convention.
             var name = templateSymbol.Name;
 
             if (name.IndexOf("_EnumTemplate", System.StringComparison.Ordinal) <= 0
@@ -160,7 +147,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 ));
             }
 
-            // Validate inline membership attributes on the template struct.
             var attributes = templateSymbol.GetAttributes(MEMBERS_FROM_ENUM_ATTRIBUTE, MEMBER_FROM_TYPE_ATTRIBUTE);
 
             foreach (var attrib in attributes)
@@ -230,7 +216,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 return;
             }
 
-            // Validate the template target has the required attribute.
             if (templateSymbol.HasAttribute(ENUM_TEMPLATE_ATTRIBUTE) == false)
             {
                 return;

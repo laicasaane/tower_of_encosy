@@ -3,7 +3,6 @@ using Unity.Entities;
 
 namespace Samples.Lookups
 {
-    // Components / Buffers
     public struct ComponentA : IComponentData { }
     public struct ComponentB : IComponentData { }
     public struct BufferA : IBufferElementData { }

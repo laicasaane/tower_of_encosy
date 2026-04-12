@@ -49,11 +49,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         public EquatableArray<string> ContainingTypes { get; set; }
 
-        /// <summary>
-        /// Constructs an <see cref="EnumExtensionsDeclaration"/> from a pre-extracted,
-        /// cache-friendly <see cref="EnumExtensionSpec"/>. All symbol data has already
-        /// been converted to primitives in the incremental generator transform phase.
-        /// </summary>
         internal EnumExtensionsDeclaration(
               in EnumExtensionSpec candidate
             , bool referencesUnityCollections

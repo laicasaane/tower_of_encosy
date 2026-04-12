@@ -188,9 +188,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 {
                     throw;
                 }
-
-                // Generator bugs are silently swallowed — do not emit diagnostics from the
-                // generator. User-facing validation is handled by EnumTemplateAnalyzer.
             }
         }
     }

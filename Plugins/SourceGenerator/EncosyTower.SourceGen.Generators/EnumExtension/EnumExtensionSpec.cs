@@ -4,70 +4,30 @@ using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.EnumExtensions
 {
-    /// <summary>
-    /// Cache-friendly pipeline model for the enum-extensions source generators.
-    /// Holds only primitive values and equatable collections — no <see cref="SyntaxNode"/>
-    /// or <see cref="ISymbol"/> references — so that Roslyn's incremental generator engine
-    /// can cache and compare instances cheaply across multiple compilations.
-    /// Used by both <see cref="EnumExtensionsGenerator"/> and <see cref="EnumExtensionsForGenerator"/>.
-    /// </summary>
     internal struct EnumExtensionSpec : IEquatable<EnumExtensionSpec>
     {
         private const string FLAGS_ATTRIBUTE = "global::System.FlagsAttribute";
 
-        /// <summary>
-        /// Location of the declaration in source. Intentionally excluded from
-        /// <see cref="Equals(EnumExtensionSpec)"/> and <see cref="GetHashCode"/>:
-        /// location data is not stable across incremental runs and must not drive
-        /// cache invalidation.
-        /// </summary>
         public LocationInfo location;
-
-        /// <summary>
-        /// Pre-computed namespace / containing-type scope opener, produced by
-        /// <c>TypeCreationHelpers.GenerateOpeningAndClosingSource</c> in the
-        /// incremental transform phase. Excluded from <see cref="Equals(EnumExtensionSpec)"/>
-        /// and <see cref="GetHashCode"/> for the same reason as <see cref="location"/>.
-        /// </summary>
         public string openingSource;
-
-        /// <summary>
-        /// Matching closing braces for <see cref="openingSource"/>. Excluded from
-        /// equality / hash for the same reason as <see cref="location"/>.
-        /// </summary>
         public string closingSource;
-
         public string enumName;
         public string extensionsName;
         public string structName;
         public string fullyQualifiedName;
         public string underlyingTypeName;
         public string namespaceName;
-
-        /// <summary>Hint name fragment, derived from <c>symbol.ToFileName()</c>.</summary>
         public string fileHintName;
-
         public Accessibility accessibility;
         public bool parentIsNamespace;
         public bool hasFlags;
         public bool isDisplayAttributeUsed;
         public int fixedStringBytes;
         public EquatableArray<EnumMemberSpec> members;
-
-        /// <summary>
-        /// Ordered chain of containing type declarations (outer → inner), each formatted as
-        /// <c>&quot;&lt;accessibility&gt; partial &lt;keyword&gt; &lt;Name&gt;&quot;</c>.
-        /// Empty when the enum/class is not nested inside another type.
-        /// </summary>
         public EquatableArray<string> containingTypes;
 
         public readonly bool IsValid => location.IsValid;
 
-        /// <summary>
-        /// Extracts all enum metadata from <paramref name="enumSymbol"/> into a fully
-        /// populated, cache-friendly <see cref="EnumExtensionSpec"/>.
-        /// Call this once per enum inside the incremental generator transform.
-        /// </summary>
         public static EnumExtensionSpec Extract(
               INamedTypeSymbol enumSymbol
             , bool parentIsNamespace

@@ -16,13 +16,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
     internal struct TypeRefSpec : IEquatable<TypeRefSpec>
     {
-        /// <summary>Full qualified type name (e.g. global::My.Namespace.MyType)</summary>
         public string typeName;
-
-        /// <summary>Valid C# identifier used to build field names (e.g. My_Namespace_MyType)</summary>
         public string typeIdentifier;
-
-        /// <summary>Simple type name used for region labels (e.g. MyType)</summary>
         public string typeShortName;
 
         public bool isReadOnly;
@@ -48,8 +43,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
     internal struct LookupSpec : IEquatable<LookupSpec>
     {
-        /// <summary>Excluded from <see cref="Equals(LookupSpec)"/> and
-        /// <see cref="GetHashCode"/> — location data is not stable across incremental runs.</summary>
         public LocationInfo location;
 
         public string structName;
@@ -57,7 +50,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         public string sourceFilePath;
         public string openingSource;
         public string closingSource;
-
         public string interfaceLookupRO;
         public string interfaceLookupRW;
         public LookupKind kind;

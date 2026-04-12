@@ -13,10 +13,8 @@ namespace EncosyTower.SourceGen.Generators.Databases
 
     public partial struct DatabaseSpec : IEquatable<DatabaseSpec>
     {
-        // Excluded from equality — not part of cache key
         public LocationInfo location;
 
-        // Code-generation data
         public string typeName;
         public bool isStruct;
         public NamingStrategy namingStrategy;
@@ -50,11 +48,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             var compilation = context.SemanticModel.Compilation;
             var typeName = typeSyntax.Identifier.Text;
             var isStruct = typeSymbol.IsValueType;
-
-            // ForAttributeWithMetadataName guarantees at least one matching attribute
             var attribute = context.Attributes[0];
-
-            // constructor arguments: NamingStrategy
             var namingStrategy = default(NamingStrategy);
 
             foreach (var arg in attribute.ConstructorArguments)
@@ -66,7 +60,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 }
             }
 
-            // named arguments: AssetName, WithInstanceAPI
             var assetName = $"DatabaseAsset_{typeName}";
             var withInstanceAPI = false;
 
@@ -92,7 +85,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 }
             }
 
-            // Build tables — silently skip invalid ones; the analyzer handles diagnostics
             var tableList = new List<TableSpec>();
             var members = typeSymbol.GetMembers();
 
@@ -137,7 +129,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 return default;
             }
 
-            // Pre-compute opening/closing source so WriteCode never touches the syntax tree
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   typeSyntax
                 , token
@@ -146,7 +137,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            // Pre-compute hint name and source file path
             var syntaxTree = typeSyntax.SyntaxTree;
             var fileTypeName = typeSymbol.ToFileName();
 

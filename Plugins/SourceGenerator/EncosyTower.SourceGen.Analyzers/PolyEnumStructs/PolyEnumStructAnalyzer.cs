@@ -5,15 +5,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
 {
-    /// <summary>
-    /// Analyzer that reports validation diagnostics for types annotated with
-    /// <c>[PolyEnumStruct]</c>.
-    /// <para>
-    /// Keeping diagnostics in a <see cref="DiagnosticAnalyzer"/> rather than inside the
-    /// source generator itself prevents unnecessary regeneration of source files when only
-    /// an error (and not the surrounding valid code) has changed.
-    /// </para>
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal class PolyEnumStructAnalyzer : DiagnosticAnalyzer
     {
@@ -90,7 +81,6 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
             var location = attrib?.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
                 ?? typeSymbol.Locations[0];
 
-            // POLY_ENUM_STRUCT_0001 — generic structs are not supported
             if (typeSymbol.TypeParameters.Length > 0)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
@@ -107,7 +97,6 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
 
             foreach (var nested in typeSymbol.GetTypeMembers())
             {
-                // POLY_ENUM_STRUCT_0003 — generic methods on IEnumCase interface
                 if (nested.TypeKind == TypeKind.Interface
                     && string.Equals(nested.Name, INTERFACE_NAME, StringComparison.Ordinal)
                 )
@@ -130,13 +119,11 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
                     continue;
                 }
 
-                // Only process non-generic nested structs as case structs
                 if (nested.TypeKind != TypeKind.Struct || nested.TypeParameters.Length > 0)
                 {
                     continue;
                 }
 
-                // Skip the implicitly understood undefined case struct names
                 if (string.Equals(nested.Name, UNDEFINED_NAME, StringComparison.Ordinal)
                     || string.Equals(nested.Name, verboseUndefinedName, StringComparison.Ordinal)
                 )
@@ -146,7 +133,6 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
 
                 validCaseCount++;
 
-                // POLY_ENUM_STRUCT_0004 — generic methods on case structs
                 foreach (var member in nested.GetMembers())
                 {
                     if (member is IMethodSymbol method
@@ -165,7 +151,6 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
                 }
             }
 
-            // POLY_ENUM_STRUCT_0002 — no valid case structs declared
             if (validCaseCount == 0)
             {
                 context.ReportDiagnostic(Diagnostic.Create(

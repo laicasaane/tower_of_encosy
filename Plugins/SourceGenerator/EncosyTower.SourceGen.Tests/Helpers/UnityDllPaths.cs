@@ -8,13 +8,19 @@ namespace EncosyTower.SourceGen.Tests;
 /// </summary>
 internal static partial class UnityDllPaths
 {
-    /// <summary>Full paths of all required Unity DLLs, verified to exist at build time.</summary>
+    /// <summary>
+    /// Full paths of all required Unity DLLs, verified to exist at build time.
+    /// </summary>
     public static readonly string[] All;
 
-    /// <summary>Absolute path to the Unity Engine modules folder (contains UnityEngine.CoreModule.dll, etc.).</summary>
+    /// <summary>
+    /// Absolute path to the Unity Engine modules folder (contains UnityEngine.CoreModule.dll, etc.).
+    /// </summary>
     public static readonly string UnityModulesPath;
 
-    /// <summary>Absolute path to the Unity project's ScriptAssemblies folder (contains compiled package/asset DLLs).</summary>
+    /// <summary>
+    /// Absolute path to the Unity project's ScriptAssemblies folder (contains compiled package/asset DLLs).
+    /// </summary>
     public static readonly string UnityScriptAssembliesPath;
 
     static UnityDllPaths()
@@ -32,12 +38,18 @@ internal static partial class UnityDllPaths
         UnityScriptAssembliesPath = unityScriptAssembliesPath;
     }
 
-    /// <summary>Implemented by the generated <c>UnityDllPaths.g.cs</c> to supply all DLL paths.</summary>
+    /// <summary>I
+    /// mplemented by the generated <c>UnityDllPaths.g.cs</c> to supply all DLL paths.
+    /// </summary>
     static partial void InitAll(ref string[] value);
 
-    /// <summary>Implemented by the generated <c>UnityDllPaths.g.cs</c> to supply the real path.</summary>
+    /// <summary>
+    /// Implemented by the generated <c>UnityDllPaths.g.cs</c> to supply the real path.
+    /// </summary>
     static partial void InitUnityModulesPath(ref string value);
 
-    /// <summary>Implemented by the generated <c>UnityDllPaths.g.cs</c> to supply the real path.</summary>
+    /// <summary>
+    /// Implemented by the generated <c>UnityDllPaths.g.cs</c> to supply the real path.
+    /// </summary>
     static partial void InitUnityScriptAssembliesPath(ref string value);
 }

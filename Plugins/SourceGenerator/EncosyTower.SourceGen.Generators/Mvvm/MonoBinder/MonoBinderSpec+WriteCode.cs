@@ -28,11 +28,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private const string IADAPTER = "ETMVB.IAdapter";
         private const string CACHED_VARIANT_CONVERTER = "ETVC.CachedVariantConverter";
 
-        /// <summary>
-        /// Emits the body of the generated source file (everything between namespace braces).
-        /// The output is later sandwiched between <see cref="openingSource"/> and
-        /// <see cref="closingSource"/> by <see cref="SourceProductionContextExtensions.OutputSource"/>.
-        /// </summary>
         public readonly string WriteCode()
         {
             var p = Printer.DefaultLarge;
@@ -63,10 +58,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             return p.Result;
         }
 
-        // -----------------------------------------------------------------------
-        //  MonoBinder<T> container — the user's partial class extended
-        // -----------------------------------------------------------------------
-
         private readonly void WriteMonoBinderContainer(ref Printer p)
         {
             p.PrintLine(SERIALIZABLE_ATTR);
@@ -84,10 +75,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             p.CloseScope();
             p.PrintEndLine();
         }
-
-        // -----------------------------------------------------------------------
-        //  MonoBindingProperty<T> — one per settable property
-        // -----------------------------------------------------------------------
 
         private readonly void WritePropertyBindings(ref Printer p)
         {
@@ -158,10 +145,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             p.PrintEndLine();
         }
 
-        // -----------------------------------------------------------------------
-        //  MonoBindingCommand<T> — one per UnityEvent field/property
-        // -----------------------------------------------------------------------
-
         private readonly void WriteCommandBindings(ref Printer p)
         {
             foreach (var binding in commandBindings)
@@ -172,10 +155,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 WriteCommandBinding(ref p, binding);
             }
         }
-
-        // -----------------------------------------------------------------------
-        //  Custom-setter partial stubs — one per [MonoBindingProperty(UseCustomSetter = true)]
-        // -----------------------------------------------------------------------
 
         private readonly void WriteCustomSetterPartials(ref Printer p)
         {
@@ -222,19 +201,16 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 .Print(" : ").Print(MONO_BINDING_CMD).Print("<").Print(componentFullTypeName).PrintEndLine(">");
             p.OpenScope();
             {
-                // _command field
                 p.PrintBeginLine("private readonly ");
                 PrintCommandFieldType(ref p, b);
                 p.PrintEndLine(" _command;");
                 p.PrintEndLine();
 
-                // Constructor
                 p.PrintBeginLine("public ").Print(b.generatedClassName).PrintEndLine("()");
                 p.OpenScope();
                 {
                     if (hasWrapper && argCount > 1)
                     {
-                        // (p0, p1, ...) => Callback(Wrap_X(p0, p1, ...))  lambda adapter
                         p.PrintBeginLine("_command = (");
 
                         for (var i = 0; i < argCount; i++)
@@ -255,14 +231,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                     }
                     else
                     {
-                        // Direct method reference
                         p.PrintBeginLine("_command = ").Print(b.callbackMethodName).PrintEndLine(";");
                     }
                 }
                 p.CloseScope();
                 p.PrintEndLine();
 
-                // OnBeforeSetTargets
                 p.PrintLine("protected override void OnBeforeSetTargets()");
                 p.OpenScope();
                 {
@@ -289,7 +263,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 p.CloseScope();
                 p.PrintEndLine();
 
-                // OnAfterSetTargets
                 p.PrintLine("protected override void OnAfterSetTargets()");
                 p.OpenScope();
                 {
@@ -316,12 +289,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 p.CloseScope();
                 p.PrintEndLine();
 
-                // [BindingCommand] partial void method
                 p.PrintBeginLine(HIDE_IN_INSPECTOR).PrintEndLine(BINDING_CMD_ATTR);
 
                 if (hasWrapper && argCount > 1)
                 {
-                    // Single wrapper-type parameter
                     p.PrintBeginLine("partial void ").Print(b.callbackMethodName)
                         .Print("(").Print(b.wrapperTypeName).PrintEndLine(" value);");
                 }
@@ -336,7 +307,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
                 else
                 {
-                    // Multiple args without wrapper — generate individual params
                     p.PrintBeginLine("partial void ").Print(b.callbackMethodName).Print("(");
                     PrintMethodParamList(ref p, b.actionTypeArgs);
                     p.PrintEndLine(");");
@@ -345,11 +315,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             p.CloseScope();
             p.PrintEndLine();
         }
-
-        // -----------------------------------------------------------------------
-        //  Wrapper construct/destruct partial stubs — one pair per Command with
-        //  a wrapper type and more than one action arg
-        // -----------------------------------------------------------------------
 
         private readonly void WriteWrapperPartials(ref Printer p)
         {
@@ -361,7 +326,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 if (b.skipGeneration || hasWrapper == false || argCount <= 1)
                     continue;
 
-                // private static partial WrapperType Wrap_X(T0 p0, T1 p1, ...);
                 p.PrintBeginLine("private static partial ")
                     .Print(b.wrapperTypeName)
                     .Print(" Wrap_")
@@ -371,7 +335,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 p.PrintEndLine(");");
                 p.PrintEndLine();
 
-                // private static partial void Unwrap_X(WrapperType value, out T0 p0, out T1 p1, ...);
                 p.PrintBeginLine("private static partial void Unwrap_")
                     .Print(b.memberPascalName)
                     .Print("(")
@@ -388,27 +351,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
         }
 
-        // -----------------------------------------------------------------------
-        //  Helpers for code generation
-        // -----------------------------------------------------------------------
-
-        /// <summary>
-        /// Emits the <c>_command</c> field's type.
-        /// <list type="bullet">
-        /// <item>UnityEvent → <c>UnityAction</c> / <c>UnityAction&lt;T…&gt;</c></item>
-        /// <item>C# delegate/event → the delegate's full type name verbatim</item>
-        /// </list>
-        /// </summary>
         private static void PrintCommandFieldType(ref Printer p, in CommandBindingSpec b)
         {
             if (b.isUnityEvent == false)
             {
-                // Emit the concrete delegate type directly (e.g. global::System.EventHandler<Foo>)
                 p.Print(b.delegateFullTypeName);
                 return;
             }
 
-            // UnityEvent branch — emit UnityAction / UnityAction<T…>
             var typeArgs = b.actionTypeArgs;
 
             if (typeArgs.Count == 0)
@@ -434,10 +384,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 p.PrintIf(i > 0, ", ").Print(typeArgs[i]).Print(" p").Print(i);
             }
         }
-
-        // -----------------------------------------------------------------------
-        //  IBinder generation — naming helpers
-        // -----------------------------------------------------------------------
 
         private static string EscapeStringLiteral(string value)
         {
@@ -477,10 +423,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private static string RelayCommandFieldName(string methodName)
             => $"_relayCommandFor{methodName}";
 
-        // -----------------------------------------------------------------------
-        //  IBinder generation — outer user class
-        // -----------------------------------------------------------------------
-
         private readonly void WriteOuterClassIBinder(ref Printer p)
         {
             WriteBpMethodInfoAttributes(ref p, userBindingPropertyRefs);
@@ -506,10 +448,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             p.CloseScope();
             p.PrintEndLine();
         }
-
-        // -----------------------------------------------------------------------
-        //  IBinder generation — MonoBindingProperty<T> subclasses
-        // -----------------------------------------------------------------------
 
         private readonly void WritePropertySubclassIBinders(ref Printer p)
         {
@@ -583,10 +521,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             p.PrintEndLine();
         }
 
-        // -----------------------------------------------------------------------
-        //  IBinder generation — MonoBindingCommand<T> subclasses
-        // -----------------------------------------------------------------------
-
         private readonly void WriteCommandSubclassIBinders(ref Printer p)
         {
             foreach (var b in commandBindings)
@@ -658,10 +592,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             p.PrintEndLine();
         }
 
-        // -----------------------------------------------------------------------
-        //  IBinder generation — body (shared by all three public entry points)
-        // -----------------------------------------------------------------------
-
         private static void WriteBinderBody(
               ref Printer p
             , string className
@@ -703,10 +633,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             WriteBinderRefreshContext(ref p, keyword, propRefs);
         }
 
-        // -----------------------------------------------------------------------
-        //  IBinder generation — attribute helpers
-        // -----------------------------------------------------------------------
-
         private static void WriteBpMethodInfoAttributes(
               ref Printer p
             , in EquatableArray<BinderSpec.BindingPropertySpec> propRefs
@@ -743,10 +669,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 p.Print(")]").PrintEndLine();
             }
         }
-
-        // -----------------------------------------------------------------------
-        //  IBinder generation — field / constant writers
-        // -----------------------------------------------------------------------
 
         private static void WriteBinderConstantProperties(
               ref Printer p

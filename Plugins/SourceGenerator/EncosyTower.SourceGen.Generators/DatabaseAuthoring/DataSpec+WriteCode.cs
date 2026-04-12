@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using EncosyTower.SourceGen.Common.Data.Common;
 
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
@@ -7,15 +7,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
     partial struct DataSpec
     {
-        /// <summary>
-        /// Writes the <c>__TypeName</c> partial class body into <paramref name="p"/>.
-        /// </summary>
-        /// <param name="dataMap">Full type name → DataSpec for all IData types in scope.</param>
-        /// <param name="horizontalListMap">
-        /// targetTypeFullName → containingTypeFullName → property names.
-        /// </param>
-        /// <param name="containingTypeFullName">Full name of the table asset type (ITableAsset).</param>
-        /// <param name="idTypeFullName">Full name of the Id type, or <c>null</c> when this is not a sheet-row class.</param>
         public readonly void WriteCode(
               ref Printer p
             , Dictionary<string, DataSpec> dataMap
@@ -65,7 +56,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 WriteConstructor(ref p, dataMap, horizontalListMap, typeName, containingTypeFullName);
 
-                // Base type layers (outermost first = reversed order = ascending index)
                 foreach (var layer in baseTypeLayers)
                 {
                     WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, idTypeFullName, layer.propRefs);
@@ -89,8 +79,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             p.CloseScope();
             p.PrintEndLine();
         }
-
-        // ── Constructor ────────────────────────────────────────────────────────────
 
         private readonly void WriteConstructor(
               ref Printer p
@@ -205,8 +193,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
         }
 
-        // ── Properties ─────────────────────────────────────────────────────────────
-
         private static void WriteProperties(
               ref Printer p
             , Dictionary<string, DataSpec> dataMap
@@ -283,8 +269,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 p.PrintEndLine();
             }
         }
-
-        // ── Convert method ─────────────────────────────────────────────────────────
 
         private readonly void WriteConvertMethod(
               ref Printer p
@@ -475,8 +459,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 .Print(member.propertyName).Print("(")
                 .Print(expression).PrintEndLine(");");
         }
-
-        // ── ToCollection methods ────────────────────────────────────────────────────
 
         private static void WriteToCollectionMethod(
               ref Printer p
@@ -813,8 +795,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             p.CloseScope();
             p.PrintEndLine();
         }
-
-        // ── Helpers ────────────────────────────────────────────────────────────────
 
         private static string GetToCollectionMethodName(string propertyName, string elemSimpleName, string collectionName)
             => $"To{elemSimpleName}{collectionName}For{propertyName}";

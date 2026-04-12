@@ -10,12 +10,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 {
-    /// <summary>
-    /// Cache-friendly, equatable pipeline model for the ObservableProperty source generator.
-    /// Holds only primitive values and equatable collections — no <see cref="SyntaxNode"/>
-    /// or <see cref="ISymbol"/> references — so that Roslyn's incremental generator engine
-    /// can cache and compare instances cheaply across multiple compilations.
-    /// </summary>
     public partial struct ObservablePropertySpec : IEquatable<ObservablePropertySpec>
     {
         public const string IOBSERVABLE_OBJECT_INTERFACE = "global::EncosyTower.Mvvm.ComponentModel.IObservableObject";
@@ -34,8 +28,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         public const string DONT_CREATE_PROPERTY_ATTRIBUTE = "global::Unity.Properties.DontCreatePropertyAttribute";
         public const string DONT_CREATE_PROPERTY = "global::Unity.Properties.DontCreateProperty";
 
-        /// <summary>Excluded from <see cref="Equals(ObservablePropertySpec)"/> and
-        /// <see cref="GetHashCode"/> — location data is not stable across incremental runs.</summary>
         public LocationInfo location;
 
         public string className;
@@ -50,14 +42,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         public bool hasGeneratePropertyBagAttribute;
         public EquatableArray<FieldMemberSpec> fieldRefs;
         public EquatableArray<PropMemberSpec> propRefs;
-
-        /// <summary>Flattened entries of the NotifyPropertyChangedFor map.
-        /// Each entry records which observable member (by key) should also fire
-        /// change notifications for the target property (by name/type).</summary>
         public EquatableArray<NotifyForEntrySpec> notifyForEntries;
-
-        /// <summary>Set of command names (e.g. "SaveCommand") that should receive
-        /// <c>NotifyCanExecuteChanged</c> when an observable member changes.</summary>
         public EquatableArray<string> notifyCanExecuteChangedFor;
 
         public readonly bool IsValid
@@ -103,11 +88,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             return hash.ToHashCode();
         }
 
-        /// <summary>
-        /// Extracts all observable-property metadata from the annotated class symbol into a fully
-        /// populated, cache-friendly <see cref="ObservablePropertySpec"/>.
-        /// Called once per class inside the <c>ForAttributeWithMetadataName</c> transform.
-        /// </summary>
         public static ObservablePropertySpec Extract(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
@@ -233,8 +213,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             var commandSet = new HashSet<string>();
             var propertyMap = new Dictionary<string, (string propTypeName, string propTypeValidIdent)>();
             var methodNames = new List<string>();
-
-            // Pass 1 — TypeModel scan: replaces HasAttribute / GetAttributes / Type.ToFullName calls
             var typeFields = typeModel.Fields;
             var typeFieldCount = typeFields.Count;
 
@@ -427,7 +405,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 }
             }
 
-            // Pass 2 — Layer 1 tight loop: ISymbol-required operations only
             var allMembers = classSymbol.GetMembers();
             var allMemberCount = allMembers.Length;
 
@@ -529,7 +506,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 }
             }
 
-            // Build flattened NotifyForEntry array from propertyChangedMap + propertyMap
             using var notifyForBuilder = ImmutableArrayBuilder<NotifyForEntrySpec>.Rent();
 
             foreach (var kv in propertyChangedMap)
@@ -552,7 +528,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 }
             }
 
-            // Build notifyCanExecuteChangedFor array
             using var notifyCanExecBuilder = ImmutableArrayBuilder<string>.Rent();
 
             var methodNameCount = methodNames.Count;
@@ -606,15 +581,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             p.PrintEndLine();
         }
 
-        /// <summary>
-        /// Cache-friendly, equatable model for a single <c>[ObservableProperty]</c>-decorated field.
-        /// All symbol-derived data is pre-computed as strings — no <see cref="ISymbol"/> or
-        /// <see cref="SyntaxNode"/> references are retained.
-        /// </summary>
         public struct FieldMemberSpec : IEquatable<FieldMemberSpec>
         {
-            /// <summary>Excluded from <see cref="Equals(FieldMemberSpec)"/> and
-            /// <see cref="GetHashCode"/> — not stable across incremental runs.</summary>
             public LocationInfo location;
 
             public string fieldName;
@@ -654,15 +622,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             }
         }
 
-        /// <summary>
-        /// Cache-friendly, equatable model for a single <c>[ObservableProperty]</c>-decorated property.
-        /// All symbol-derived data is pre-computed as strings — no <see cref="ISymbol"/> or
-        /// <see cref="SyntaxNode"/> references are retained.
-        /// </summary>
         public struct PropMemberSpec : IEquatable<PropMemberSpec>
         {
-            /// <summary>Excluded from <see cref="Equals(PropMemberSpec)"/> and
-            /// <see cref="GetHashCode"/> — not stable across incremental runs.</summary>
             public LocationInfo location;
 
             public string propertyName;
@@ -702,10 +663,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             }
         }
 
-        /// <summary>
-        /// Cache-friendly, equatable wrapper for a field-targeted forwarded attribute on a property member.
-        /// Stores the attribute's fully-qualified type name alongside its <see cref="AttributeInfo"/> data.
-        /// </summary>
         public struct ForwardedFieldAttributeSpec : IEquatable<ForwardedFieldAttributeSpec>
         {
             public string typeName;
@@ -727,15 +684,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             }
         }
 
-        /// <summary>
-        /// A single flattened entry of the <c>NotifyPropertyChangedFor</c> map.
-        /// Records that when the observable member identified by <see cref="memberKey"/> changes,
-        /// change notifications must also fire for the property identified by <see cref="propName"/>.
-        /// </summary>
         public struct NotifyForEntrySpec : IEquatable<NotifyForEntrySpec>
         {
-            /// <summary>The field name (for field members) or private-field name (for property members)
-            /// used as the map key.</summary>
             public string memberKey;
             public string propName;
             public string propTypeName;

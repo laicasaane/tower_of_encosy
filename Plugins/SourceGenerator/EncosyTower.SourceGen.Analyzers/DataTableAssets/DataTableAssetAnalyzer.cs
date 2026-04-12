@@ -4,11 +4,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
 {
-    /// <summary>
-    /// Roslyn diagnostic analyzer that validates types attributed with <c>[DataTableAsset]</c>
-    /// and reports issues that are intentionally excluded from the source generator itself to
-    /// keep the incremental pipeline cache-friendly.
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal sealed class DataTableAssetAnalyzer : DiagnosticAnalyzer
     {
@@ -32,7 +27,6 @@ namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
                 return;
             }
 
-            // Gate on [DataTableAssetAttribute] presence
             var hasAttribute = false;
 
             foreach (var attr in typeSymbol.GetAttributes())
@@ -56,7 +50,6 @@ namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
                 return;
             }
 
-            // Walk base type chain to find DataTableAsset<TId, TData[, TConv]>
             var baseType = typeSymbol.BaseType;
 
             while (baseType != null)

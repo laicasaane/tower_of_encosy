@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using EncosyTower.SourceGen.Common.Types.Caches;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -7,12 +7,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Analyzers.Types.Caches
 {
-    /// <summary>
-    /// Analyzer that reports all validation diagnostics for <c>RuntimeTypeCache.GetXxx&lt;T&gt;()</c>
-    /// call sites. Keeping diagnostics in a <see cref="DiagnosticAnalyzer"/> rather than inside the
-    /// source generator itself prevents unnecessary regeneration of source files when only an error
-    /// (and not the surrounding valid code) has changed.
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal class RuntimeTypeCachesAnalyzer : DiagnosticAnalyzer
     {
@@ -106,7 +100,6 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
                 return;
             }
 
-            // Quick syntax filter: must look like RuntimeTypeCache.GetXxx<T>
             if (memberAccess.Expression is not IdentifierNameSyntax { Identifier.ValueText: "RuntimeTypeCache" })
             {
                 return;
@@ -129,7 +122,6 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
                 return;
             }
 
-            // Semantic verification: the LHS must actually be EncosyTower.Types.RuntimeTypeCache.
             var semanticModel = context.SemanticModel;
             var identifierType = semanticModel.GetTypeInfo(memberAccess.Expression, context.CancellationToken).Type;
 
@@ -138,7 +130,6 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
                 return;
             }
 
-            // ── Validate the type argument ──────────────────────────────────────────────
             var typeArgSyntax = genericName.TypeArgumentList.Arguments[0];
             var typeInfo = semanticModel.GetTypeInfo(typeArgSyntax, context.CancellationToken);
             var type = typeInfo.Type;
@@ -206,7 +197,6 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
             }
             else
             {
-                // GetTypesWithAttribute, GetFieldsWithAttribute, GetMethodsWithAttribute
                 if (typeFullName.StartsWith(NAMESPACE_PREFIX))
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
@@ -216,7 +206,6 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
                 }
             }
 
-            // ── Validate the optional assembly-name argument ────────────────────────────
             if (invocation.ArgumentList.Arguments.Count >= 1)
             {
                 var argExpr = invocation.ArgumentList.Arguments[0].Expression;

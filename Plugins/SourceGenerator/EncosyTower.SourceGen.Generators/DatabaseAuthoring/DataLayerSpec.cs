@@ -2,11 +2,6 @@ using System;
 
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
-    /// <summary>
-    /// Stores the member info for a single base-type layer of a data type.
-    /// Flat by design — no recursive <see cref="DataSpec"/> references — to avoid
-    /// value-type recursion issues in C# structs.
-    /// </summary>
     public struct DataLayerSpec : IEquatable<DataLayerSpec>
     {
         public string fullName;

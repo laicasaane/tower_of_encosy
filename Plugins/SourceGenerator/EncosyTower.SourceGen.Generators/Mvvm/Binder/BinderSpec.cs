@@ -20,23 +20,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         public const string VARIANT_TYPE = "global::EncosyTower.Variants.Variant";
         public const string MONO_BEHAVIOUR_TYPE = "global::UnityEngine.MonoBehaviour";
 
-        /// <summary>Excluded from <see cref="Equals"/> and <see cref="GetHashCode"/> —
-        /// location is not stable across incremental runs.</summary>
         public LocationInfo location;
 
         public string openingSource;
         public string closingSource;
         public string hintName;
         public string sourceFilePath;
-
-        /// <summary>Class name including generic type parameters, e.g. <c>MyBinder&lt;T&gt;</c>.</summary>
         public string className;
-
-        /// <summary>Simple class identifier only (no generic params), e.g. <c>MyBinder</c>.
-        /// Used for the generated constructor name.</summary>
         public string simpleTypeName;
-
-        /// <summary>Pre-computed <c>symbol.ToValidIdentifier()</c> — used for the listening flag field name.</summary>
         public string typeIdentifier;
 
         public bool hasBaseBinder;
@@ -52,11 +43,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             => string.IsNullOrEmpty(hintName) == false
             && string.IsNullOrEmpty(simpleTypeName) == false;
 
-        /// <summary>
-        /// Extracts all binder metadata from the annotated class symbol and syntax into a
-        /// fully populated, cache-friendly <see cref="BinderSpec"/>.
-        /// Called once per class inside the <c>ForAttributeWithMetadataName</c> transform.
-        /// </summary>
         public static BinderSpec Extract(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
@@ -72,8 +58,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             }
 
             using var diagnosticBuilder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
-
-            // Collect existing field names to detect user-declared backing fields/converters/commands.
             var bindingPropertyNames = new HashSet<string>(StringComparer.Ordinal);
             var converterNames = new HashSet<string>(StringComparer.Ordinal);
             var bindingCommandNames = new HashSet<string>(StringComparer.Ordinal);
@@ -88,7 +72,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            // Build className (with generic type parameters if present).
             var classNameSb = new StringBuilder(classSyntax.Identifier.Text);
 
             if (classSyntax.TypeParameterList is TypeParameterListSyntax typeParamList
@@ -113,8 +96,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             }
 
             var className = classNameSb.ToString();
-
-            // Determine whether a base class already implements IBinder.
             var hasBaseBinder = false;
 
             if (symbol.BaseType != null && symbol.BaseType.TypeKind == TypeKind.Class)
@@ -127,8 +108,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 }
             }
 
-            // Walk the inheritance chain checking for user-defined OnBindPropertyFailed /
-            // OnBindCommandFailed overrides.
             var hasOnBindPropertyFailedMethod = false;
             var hasOnBindCommandFailedMethod = false;
             var baseType = symbol;
@@ -168,11 +147,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 baseType = baseType.BaseType;
             }
 
-            // First pass: scan all members to build field-name sets and collect method symbols.
             var members = symbol.GetMembers();
-
-            // Temporary lists that retain the IMethodSymbol so that GatherForwardedAttributes
-            // can be called (it requires the symbol for syntax-tree lookup).
             using var tempPropMethods = ImmutableArrayBuilder<BinderPropertyScanEntry>.Rent();
             using var tempCmdMethods = ImmutableArrayBuilder<BinderCommandScanEntry>.Rent();
             var nonVariantTypeFilter = new Dictionary<string, NonVariantTypeSpec>(members.Length, StringComparer.Ordinal);
@@ -279,8 +254,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 }
             }
 
-            // Second pass: compute skip flags and gather forwarded attributes now that field
-            // name sets are complete and we still hold the IMethodSymbol references.
             using var propRefBuilder = ImmutableArrayBuilder<BindingPropertySpec>.Rent();
 
             foreach (var entry in tempPropMethods.WrittenSpan)
@@ -338,7 +311,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             using var nonVariantTypesBuilder = ImmutableArrayBuilder<NonVariantTypeSpec>.Rent();
             nonVariantTypesBuilder.AddRange(nonVariantTypeFilter.Values);
 
-            // Pre-compute the hint name and source file path while we have the compilation.
             var syntaxTree = classSyntax.SyntaxTree;
             var fileTypeName = symbol.ToFileName();
             var hintName = syntaxTree.GetGeneratedSourceFileName(
@@ -397,11 +369,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        // ── IEquatable<BinderDeclaration> ─────────────────────────────────────────
-        // NOTE: `location` is intentionally excluded — not stable across incremental passes.
-        // NOTE: `forwardedFieldAttributes` within each ref is intentionally excluded to
-        //       avoid potential recursion issues with AttributeInfo.Equals.
-
         public readonly bool Equals(BinderSpec other)
             => string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
             && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
@@ -441,36 +408,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             .Add(nonVariantTypes.GetHashCode())
             ;
 
-        // ── Nested cache-friendly data ────────────────────────────────────────────
 
-        /// <summary>
-        /// Cache-friendly representation of a method decorated with
-        /// <c>[BindingProperty]</c>.
-        /// </summary>
         public struct BindingPropertySpec : IEquatable<BindingPropertySpec>
         {
             public string methodName;
-
-            /// <summary>Fully-qualified parameter type name, or empty string when no parameter.</summary>
             public string paramFullTypeName;
-
-            /// <summary>
-            /// Pre-computed <c>paramType.ToValidIdentifier().MakeFirstCharUpperCase()</c>
-            /// used for the <c>_variantConverter{X}</c> field name.
-            /// Empty when the parameter is a <c>Variant</c> type or when there is no parameter.
-            /// </summary>
             public string variantConverterPropertyName;
-
             public RefKind paramRefKind;
             public bool isParameterTypeVariant;
             public bool skipBindingProperty;
             public bool skipConverter;
 
-            /// <summary>
-            /// Forwarded <c>[field:]</c>-targeted attribute data.
-            /// Intentionally excluded from <see cref="Equals"/> and <see cref="GetHashCode"/>
-            /// to avoid potential recursion through <see cref="AttributeInfo.Equals"/>.
-            /// </summary>
             public EquatableArray<AttributeInfo> forwardedFieldAttributes;
 
             public readonly bool Equals(BindingPropertySpec other)
@@ -495,28 +443,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 ;
         }
 
-        /// <summary>
-        /// Cache-friendly representation of a method decorated with
-        /// <c>[BindingCommand]</c>.
-        /// </summary>
         public struct BindingCommandSpec : IEquatable<BindingCommandSpec>
         {
             public string methodName;
-
-            /// <summary>Fully-qualified parameter type name, or empty string when no parameter.</summary>
             public string paramFullTypeName;
-
-            /// <summary>Parameter variable name, or empty string when no parameter.</summary>
             public string paramName;
-
             public RefKind paramRefKind;
             public bool skipBindingCommand;
 
-            /// <summary>
-            /// Forwarded <c>[field:]</c>-targeted attribute data.
-            /// Intentionally excluded from <see cref="Equals"/> and <see cref="GetHashCode"/>
-            /// to avoid potential recursion through <see cref="AttributeInfo.Equals"/>.
-            /// </summary>
             public EquatableArray<AttributeInfo> forwardedFieldAttributes;
 
             public readonly bool Equals(BindingCommandSpec other)
@@ -537,16 +471,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 ;
         }
 
-        /// <summary>
-        /// Cache-friendly representation of a non-<c>Variant</c> parameter type that
-        /// requires a <c>CachedVariantConverter</c> field to be generated.
-        /// </summary>
         public struct NonVariantTypeSpec : IEquatable<NonVariantTypeSpec>
         {
             public string fullTypeName;
-
-            /// <summary>Pre-computed <c>type.ToValidIdentifier().MakeFirstCharUpperCase()</c>
-            /// used for the converter field name suffix.</summary>
             public string converterPropertyName;
 
             public readonly bool Equals(NonVariantTypeSpec other)
@@ -561,7 +488,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 => HashValue.Combine(fullTypeName, converterPropertyName);
         }
 
-        // ── Private scan-entry helpers (used only during Extract) ─────────────────
 
         private struct BinderPropertyScanEntry
         {
@@ -581,3 +507,4 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         }
     }
 }
+

@@ -14,9 +14,7 @@ namespace EncosyTower.SourceGen
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the index is out of bounds.</exception>
         public static void RemoveAtSwapBack<T>(this List<T> list, int index)
         {
-            // swap to end
             (list[index], list[list.Count - 1]) = (list[list.Count - 1], list[index]);
-            // RemoveAt is O(1) at end
             list.RemoveAt(list.Count - 1);
         }
 

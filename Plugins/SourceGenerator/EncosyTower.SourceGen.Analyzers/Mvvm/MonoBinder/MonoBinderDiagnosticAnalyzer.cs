@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -7,12 +7,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
 {
-    /// <summary>
-    /// Reports validation diagnostics for types annotated with <c>[MonoBinder]</c>,
-    /// <c>[MonoBindingProperty]</c>, <c>[MonoBindingCommand]</c>, and <c>[MonoBindingExclude]</c>.
-    /// Kept in a <see cref="DiagnosticAnalyzer"/> rather than the generator to avoid
-    /// invalidating the incremental source-gen cache on every edit.
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal sealed class MonoBinderDiagnosticAnalyzer : DiagnosticAnalyzer
     {
@@ -183,7 +177,6 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 }
             }
 
-            // ── Diagnostic 2: binding/exclude attrs without [MonoBinder] ─────────────
             if (monoBinderAttr == null
                 && (hasMonoBindingProp || hasMonoBindingCmd || hasMonoBindingExclude || hasMonoBinderExcludeParent)
                 && firstOrphanAttr != null
@@ -199,7 +192,6 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                     , firstOrphanAttrName
                 ));
 
-                // No [MonoBinder] → remaining checks are meaningless
                 return;
             }
 
@@ -227,7 +219,6 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 }
             }
 
-            // ── Diagnostic 1: component type must inherit UnityEngine.Object ──────────
             if (InheritsFromUnityObject(componentType) == false)
             {
                 var location = monoBinderAttr.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
@@ -240,7 +231,6 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 ));
             }
 
-            // ── Diagnostic 6 & 7: ExcludeObsolete validation ─────────────────────────
             if (excludeObsolete)
             {
                 foreach (var attr in typeSymbol.GetAttributes())
@@ -307,7 +297,6 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 }
             }
 
-            // ── Diagnostic 4 & 5: [MonoBinderExcludeParent] type validation ─────────
             if (hasMonoBinderExcludeParent)
             {
                 foreach (var attr in typeSymbol.GetAttributes())
@@ -352,7 +341,6 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 }
             }
 
-            // ── Diagnostic 3: [MonoBindingExclude] member not found on component ──────
             if (hasMonoBindingExclude == false)
             {
                 return;
@@ -407,11 +395,6 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             return false;
         }
 
-        /// <summary>
-        /// Returns <see langword="true"/> when <paramref name="componentType"/> has
-        /// <paramref name="candidate"/> anywhere in its base-type chain, stopping before
-        /// <c>UnityEngine.Object</c>.
-        /// </summary>
         private static bool IsInBaseTypeChain(INamedTypeSymbol componentType, INamedTypeSymbol candidate)
         {
             var walk = componentType.BaseType;
@@ -434,11 +417,6 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             return false;
         }
 
-        /// <summary>
-        /// Returns <see langword="true"/> when <paramref name="componentType"/> or any of its
-        /// base types exposes a public non-static property, field, or event named
-        /// <paramref name="memberName"/>.
-        /// </summary>
         private static bool ComponentHasMember(INamedTypeSymbol componentType, string memberName)
         {
             var current = componentType as ITypeSymbol;
@@ -462,11 +440,6 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             return false;
         }
 
-        /// <summary>
-        /// Returns <see langword="true"/> when <paramref name="componentType"/> or any of its
-        /// base types exposes a public non-static property, field, or event named
-        /// <paramref name="memberName"/> that carries <c>[System.Obsolete]</c>.
-        /// </summary>
         private static bool IsObsoleteMember(INamedTypeSymbol componentType, string memberName)
         {
             var current = componentType as ITypeSymbol;

@@ -142,7 +142,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             p = p.DecreasedIndent();
         }
 
-        // Builds a lookup of memberKey -> list-of-NotifyForEntry for methods that need it.
         private readonly Dictionary<string, List<NotifyForEntrySpec>> BuildNotifyForMap()
         {
             var map = new Dictionary<string, List<NotifyForEntrySpec>>();
@@ -160,8 +159,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             return map;
         }
 
-        // Builds a set of unique target property names from the notifyForEntries for methods that
-        // need to enumerate all additional properties (e.g. writing events/partial methods/converters).
         private readonly Dictionary<string, NotifyForEntrySpec> BuildUniqueNotifyForTargets()
         {
             var dict = new Dictionary<string, NotifyForEntrySpec>();

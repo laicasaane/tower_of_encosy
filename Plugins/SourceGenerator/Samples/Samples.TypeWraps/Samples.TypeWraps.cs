@@ -75,8 +75,6 @@ namespace Samples.TypeWraps
     [WrapRecord]
     public readonly partial record struct V1x(V1 _)
     {
-        // readonly cannot set
-        // record property cannot set
     }
 
     [WrapType(typeof(V1))]

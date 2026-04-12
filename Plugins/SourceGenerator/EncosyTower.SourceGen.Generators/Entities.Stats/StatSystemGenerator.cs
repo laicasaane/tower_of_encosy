@@ -66,7 +66,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 return default;
             }
 
-            // ForAttributeWithMetadataName guarantees at least one matching attribute
             var attribute = context.Attributes[0];
 
             if (attribute.ConstructorArguments.Length < 1)

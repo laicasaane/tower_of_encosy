@@ -7,13 +7,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Analyzers.UnionIds
 {
-    /// <summary>
-    /// Analyzer that reports all validation diagnostics for types annotated with
-    /// <c>[UnionId]</c> and <c>[KindForUnionId]</c> / <c>[UnionIdKind]</c>.
-    /// Keeping diagnostics in a <see cref="DiagnosticAnalyzer"/> rather than inside the
-    /// source generator itself prevents unnecessary regeneration of source files when only
-    /// an error (and not the surrounding valid code) has changed.
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal class UnionIdAnalyzer : DiagnosticAnalyzer
     {
@@ -85,7 +78,6 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
             context.EnableConcurrentExecution();
 
-            // Per-symbol checks: MustBeUnmanagedType (0002), KindTypeCannotBeIdType (0003)
             context.RegisterSymbolAction(AnalyzeIdSymbol, SymbolKind.NamedType);
         }
 
@@ -94,7 +86,6 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
             if (context.Symbol is not INamedTypeSymbol typeSymbol)
                 return;
 
-            // --- Validate [UnionId] structs ---
             if (typeSymbol.TypeKind == TypeKind.Struct
                 && typeSymbol.HasAttribute(UNION_ID_ATTRIBUTE))
             {
@@ -107,12 +98,10 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
                     return;
                 }
 
-                // Check [UnionIdKind] inline attributes for per-kind validation
                 ValidateInlineKindAttributes(context, typeSymbol);
                 return;
             }
 
-            // --- Validate [KindForUnionId] types ---
             if (typeSymbol.HasAttribute(KIND_FOR_UNION_ID_ATTRIBUTE) == false)
                 return;
 
@@ -129,7 +118,6 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
             if (typeArg.Value is not INamedTypeSymbol idSymbol)
                 return;
 
-            // Inline-kind must be unmanaged
             if (typeSymbol.IsUnmanagedType == false)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
@@ -139,7 +127,6 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
                 return;
             }
 
-            // Kind cannot be the same type as the id
             if (SymbolEqualityComparer.Default.Equals(typeSymbol, idSymbol))
             {
                 context.ReportDiagnostic(Diagnostic.Create(
@@ -149,7 +136,6 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
                 ));
             }
 
-            // Validate unmanaged size
             var size = 0;
             typeSymbol.GetUnmanagedSize(ref size);
 
@@ -206,7 +192,6 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
 
                 seenNames.Add(kindSymbol);
 
-                // Custom name de-dup
                 string customName = null;
 
                 if (attrib.ConstructorArguments.Length >= 3

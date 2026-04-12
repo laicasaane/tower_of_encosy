@@ -6,11 +6,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Analyzers.Databases
 {
-    /// <summary>
-    /// Analyzes types marked with <c>[Database]</c> and reports validation errors that are
-    /// intentionally excluded from the source generator to keep the incremental pipeline
-    /// cache-friendly.
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class DatabaseDiagnosticAnalyzer : DiagnosticAnalyzer
     {
@@ -51,7 +46,6 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
                 return;
             }
 
-            // Gate on [Database] attribute presence
             if (typeSymbol.HasAttribute(DATABASE_ATTRIBUTE) == false)
             {
                 return;
@@ -113,7 +107,6 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
                     continue;
                 }
 
-                // Also validate [Horizontal] attributes on the same property
                 ValidateHorizontalAttributes(context, member);
             }
         }

@@ -3,37 +3,16 @@ using Newtonsoft.Json.Utilities;
 
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
-    /// <summary>
-    /// Cache-friendly model for a single database table entry, used to generate
-    /// the derived sheet class declarations (<c>WriteDerivedSheetClasses</c>).
-    /// Replaces the non-cacheable <c>TableRef</c> class.
-    /// </summary>
     public struct TableSpec : IEquatable<TableSpec>
     {
-        /// <summary>Full name of the DataTableAsset subclass.</summary>
         public string typeFullName;
-
-        /// <summary>Simple name of the DataTableAsset subclass.</summary>
         public string typeSimpleName;
-
-        /// <summary>Full name of the Id type.</summary>
         public string idTypeFullName;
-
-        /// <summary>Full name of the data type.</summary>
         public string dataTypeFullName;
-
-        /// <summary>Property name on the database class.</summary>
         public string propertyName;
-
         public NamingStrategy namingStrategy;
-
-        /// <summary>Pre-computed asset name, e.g. <c>"MyTable_MyProperty"</c> in the chosen naming strategy.</summary>
         public string assetName;
-
-        /// <summary>Pre-computed unique sheet class name, e.g. <c>"MyTable_MyDataSheet__MyProperty"</c>.</summary>
         public string uniqueSheetName;
-
-        /// <summary>Pre-computed base sheet class name, e.g. <c>"MyTable_MyDataSheet"</c>.</summary>
         public string baseSheetName;
 
         public readonly bool Equals(TableSpec other)

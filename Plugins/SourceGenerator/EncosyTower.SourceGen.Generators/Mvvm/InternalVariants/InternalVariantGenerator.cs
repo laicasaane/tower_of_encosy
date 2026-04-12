@@ -25,11 +25,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
-
             var compilationProvider = context.CompilationProvider
                 .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
-            // Fields or properties annotated with [ObservableProperty].
             var obsProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       OBSERVABLE_PROPERTY_ATTRIBUTE
@@ -40,7 +38,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                 )
                 .Where(static x => x.IsValid);
 
-            // Methods annotated with [RelayCommand] that have exactly one parameter.
             var relayCommandProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       RELAY_COMMAND_ATTRIBUTE
@@ -50,7 +47,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                 )
                 .Where(static x => x.IsValid);
 
-            // Methods annotated with [BindingProperty] that have exactly one parameter.
             var bindingPropertyProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       BINDING_PROPERTY_ATTRIBUTE
@@ -60,7 +56,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                 )
                 .Where(static x => x.IsValid);
 
-            // Methods annotated with [BindingCommand] that have exactly one parameter.
             var bindingCommandProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       BINDING_COMMAND_ATTRIBUTE
@@ -70,7 +65,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                 )
                 .Where(static x => x.IsValid);
 
-            // Fields or properties annotated with [NotifyPropertyChangedFor].
             var npcfProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE
@@ -81,7 +75,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                 )
                 .Where(static x => x.IsValid);
 
-            // Structs annotated with [Variant] — used to suppress duplicate generation.
             var typeNamesToIgnoreProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       VARIANT_ATTRIBUTE
@@ -90,7 +83,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                 )
                 .Where(static x => string.IsNullOrEmpty(x) == false);
 
-            // Merge all five candidate providers into one flat array.
             var allCandidatesFlat = obsProvider.Collect()
                 .Combine(relayCommandProvider.Collect())
                 .Combine(bindingPropertyProvider.Collect())
@@ -128,20 +120,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             });
         }
 
-        // -------------------------------------------------------------------------
-        // Candidate transforms
-        // -------------------------------------------------------------------------
-
         private static InternalVariantSpec GetSemanticMatch_ObservableProperty(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
-
-            // Note: IsValidCompilation check deliberately omitted here.
-            // Checking compilation validity inside the transform step prevents incremental cache reuse
-            // when unrelated files change. Validity is deferred to GenerateOutput via CompilationCandidateSlim.isValid.
 
             ITypeSymbol typeSymbol;
 
@@ -204,7 +188,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                 return default;
             }
 
-            // Only process members on types that implement IObservableObject.
             var implementsIObservableObject = false;
 
             foreach (var iface in containingType.AllInterfaces)
@@ -226,8 +209,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
                 return default;
             }
 
-            // Each [NotifyPropertyChangedFor] attribute names the property whose type to observe.
-            // Only the first valid attribute is processed.
             foreach (var attribute in context.Attributes)
             {
                 if (attribute.ConstructorArguments.Length < 1
@@ -252,10 +233,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             return default;
         }
 
-        // -------------------------------------------------------------------------
-        // [Variant] exclusion-list transform
-        // -------------------------------------------------------------------------
-
         private static string GetTypeNameFromVariantAttribute(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
@@ -279,10 +256,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 
             return typeArg.ToFullName();
         }
-
-        // -------------------------------------------------------------------------
-        // Shared helper
-        // -------------------------------------------------------------------------
 
         private static InternalVariantSpec BuildDeclaration(
               ITypeSymbol typeSymbol
@@ -323,8 +296,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 
             try
             {
-                // Pre-seed the set with ignored names so a single Add() covers both the ignore-list
-                // check and deduplication in one pass.
                 var seenTypeNames = new HashSet<string>(typeNamesToIgnore, StringComparer.Ordinal);
                 using var valueTypeBuilder = ImmutableArrayBuilder<InternalVariantSpec>.Rent();
                 using var refTypeBuilder = ImmutableArrayBuilder<InternalVariantSpec>.Rent();

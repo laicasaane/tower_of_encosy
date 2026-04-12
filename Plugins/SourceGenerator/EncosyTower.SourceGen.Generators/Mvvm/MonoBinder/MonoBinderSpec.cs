@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
@@ -20,8 +20,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private const string UNITY_EVENT_BASE_TYPE = "global::UnityEngine.Events.UnityEventBase";
         private const string UNITY_OBJECT_TYPE = "global::UnityEngine.Object";
 
-        /// <summary>Excluded from <see cref="Equals"/> and <see cref="GetHashCode"/> —
-        /// location is not stable across incremental runs.</summary>
         public LocationInfo location;
 
         public string openingSource;
@@ -38,7 +36,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         public EquatableArray<PropertyBindingSpec> propertyBindings;
         public EquatableArray<CommandBindingSpec> commandBindings;
 
-        // IBinder: outer user class
         public bool isOuterClassSealed;
         public string outerTypeIdentifier;
         public bool hasOnBindPropertyFailedMethod;
@@ -66,7 +63,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 return default;
             }
 
-            // --- Extract MonoBinderAttribute data ---
             var monoBinderAttr = userClassSymbol.GetAttribute(MONO_BINDER_ATTRIBUTE);
 
             if (monoBinderAttr is null
@@ -93,7 +89,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
             }
 
-            // --- Compute opening/closing namespace source ---
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   classSyntax
                 , token
@@ -112,7 +107,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             var compilation = context.SemanticModel.Compilation;
 
-            // --- Collect [ExcludeMonoBinding] member names ---
             var excludedMembers = new HashSet<string>(StringComparer.Ordinal);
 
             foreach (var attrData in userClassSymbol.GetAttributes(MONO_BINDING_EXCLUDE_ATTRIBUTE))
@@ -128,7 +122,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 excludedMembers.Add(excludedName);
             }
 
-            // --- Collect [MonoBinderExcludeParent] parent type to stop the walk at ---
             INamedTypeSymbol excludedParentType = null;
             {
                 var excludeParentAttr = userClassSymbol.GetAttribute(MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE);
@@ -142,7 +135,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
             }
 
-            // --- Collect explicit [MonoBindingProperty] / [MonoBindingCommand] overrides ---
             var explicitProps = new Dictionary<string, (bool useCustomSetter, string label)>(StringComparer.Ordinal);
             var explicitCmds = new Dictionary<string, (string wrapperTypeName, string label)>(StringComparer.Ordinal);
 
@@ -206,14 +198,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 explicitCmds[memberName] = (wrapperTypeName, labelOverride);
             }
 
-            // --- Walk component inheritance chain and collect members ---
             using var propBuilder = ImmutableArrayBuilder<PropertyBindingSpec>.Rent();
             using var cmdBuilder  = ImmutableArrayBuilder<CommandBindingSpec>.Rent();
-
-            // Track members already seen to avoid duplicates from inherited re-declarations
             var seenPropMembers = new HashSet<string>(StringComparer.Ordinal);
             var seenCmdMembers  = new HashSet<string>(StringComparer.Ordinal);
-
             var current = componentType as ITypeSymbol;
 
             while (current != null && current.HasFullName(UNITY_OBJECT_TYPE) == false)
@@ -309,7 +297,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 current = current.BaseType;
             }
 
-            // --- Also add any explicit commands that weren't auto-discovered ---
             foreach (var kvp in explicitCmds)
             {
                 if (seenCmdMembers.Contains(kvp.Key))
@@ -322,7 +309,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                     continue;
                 }
 
-                // Find the member type on the component to build the action type args
                 var memberSymbol = FindMember(componentType, kvp.Key);
 
                 if (memberSymbol == null)
@@ -358,7 +344,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 );
             }
 
-            // --- Also add any explicit properties that weren't auto-discovered (e.g. from excluded parent types) ---
             foreach (var kvp in explicitProps)
             {
                 if (seenPropMembers.Contains(kvp.Key))
@@ -384,7 +369,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
                 else
                 {
-                    // The key may be a 1-parameter void method (e.g. SetActive) rather than a property.
                     var methodSymbol = FindOneParamVoidMethod(componentType, kvp.Key);
 
                     if (methodSymbol != null)
@@ -408,10 +392,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             var monoBindingCmdBaseSymbol  = compilation.GetTypeByMetadataName("EncosyTower.Mvvm.ViewBinding.Components.MonoBindingCommand`1");
             var isOuterClassSealed  = userClassSymbol.IsSealed;
             var outerTypeIdentifier = userClassSymbol.ToValidIdentifier();
-
-            // --- IBinder extraction: detect inherited OnBindPropertyFailed / OnBindCommandFailed ---
             var hasOnBindPropertyFailedMethod = false;
             var hasOnBindCommandFailedMethod  = false;
+
             {
                 var walkType      = userClassSymbol;
                 var isCurrentType = true;
@@ -451,12 +434,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
             }
 
-            // --- IBinder extraction: scan user class for [BindingProperty] / [BindingCommand] methods ---
             var outerBindingPropertyNames = new HashSet<string>(StringComparer.Ordinal);
             var outerConverterNames       = new HashSet<string>(StringComparer.Ordinal);
             var outerBindingCommandNames  = new HashSet<string>(StringComparer.Ordinal);
             var outerNonVariantTypeFilter = new Dictionary<string, BinderSpec.NonVariantTypeSpec>(StringComparer.Ordinal);
-
             var semanticModel = context.SemanticModel;
 
             using var tempOuterPropMethods = ImmutableArrayBuilder<OuterBinderPropertyScanEntry>.Rent();
@@ -565,7 +546,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
             }
 
-            // Second pass: gather forwarded attributes for outer class binding methods
             using var outerPropRefBuilder      = ImmutableArrayBuilder<BinderSpec.BindingPropertySpec>.Rent();
             using var outerCmdRefBuilder       = ImmutableArrayBuilder<BinderSpec.BindingCommandSpec>.Rent();
             using var outerDiagnostics         = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
@@ -621,7 +601,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             foreach (var nvt in outerNonVariantTypeFilter.Values)
                 outerNonVariantTypesBuilder.Add(nvt);
 
-            // --- Hint name and source file path ---
             var syntaxTree  = classSyntax.SyntaxTree;
             var fileTypeName = userClassSymbol.ToFileName();
 
@@ -660,10 +639,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             };
         }
 
-        // -----------------------------------------------------------------------
-        //  Private helpers
-        // -----------------------------------------------------------------------
-
         private static bool TryCollectProperty(
               IPropertySymbol prop
             , string userClassName
@@ -694,8 +669,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             var isUnityEvent = prop.Type.InheritsFromType(UNITY_EVENT_BASE_TYPE);
             var isDelegate   = isUnityEvent == false && prop.Type.TypeKind == TypeKind.Delegate;
 
-            // Skip properties whose type is or derives from UnityEventBase or is a C# delegate
-            // (those should go through MonoBindingCommand, not MonoBindingProperty)
             if (isUnityEvent || isDelegate)
             {
                 return false;
@@ -803,8 +776,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 return false;
             }
 
-            // Walk up to find the direct UnityEvent<...> base to get type args;
-            // for C# delegates/events, extract parameter types from the Invoke method.
             ImmutableArray<ITypeSymbol> typeArgs;
 
             if (isUnityEvent)
@@ -817,7 +788,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 typeArgs = GetDelegateInvokeParameters(memberType);
             }
 
-            // For auto-discovery, skip multi-param events without an explicit wrapper type
             explicitCmds.TryGetValue(memberName, out var explicitInfo);
 
             if (forceExplicit == false
@@ -867,10 +837,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             return true;
         }
 
-        /// <summary>
-        /// Handles an explicit <c>[MonoBindingProperty("MethodName")]</c> where the key resolves to
-        /// a public void method with exactly one parameter instead of a settable property.
-        /// </summary>
         private static bool TryCollectPropertyFromMethod(
               IMethodSymbol method
             , string memberName
@@ -891,7 +857,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             var isUnityEvent = paramType.InheritsFromType(UNITY_EVENT_BASE_TYPE);
             var isDelegate   = isUnityEvent == false && paramType.TypeKind == TypeKind.Delegate;
 
-            // Delegate/event parameters belong in TryCollectCommand, not here.
             if (isUnityEvent || isDelegate)
             {
                 return false;
@@ -908,8 +873,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             var memberPascalName   = MakeFirstCharUpper(memberName);
             var generatedClassName = $"Binding{memberPascalName}";
-
-            // Use memberPascalName directly to avoid "SetSetActive" when the method already starts with "Set".
             var setterMethodName = memberPascalName;
 
             var propFullTypeName = paramType.ToFullName();
@@ -930,8 +893,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 memberPascalName = memberPascalName,
                 propFullTypeName = propFullTypeName,
                 needsInModifier = needsIn,
-                // When useCustomSetter==false the binding body calls targets[i].MethodName(value).
-                // When useCustomSetter==true  the binding body calls OuterClass.Set_X(targets[i], value).
                 setterMethod = explicitInfo.useCustomSetter ? string.Empty : memberName,
                 label = label,
                 setterMethodName = setterMethodName,
@@ -949,10 +910,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             return true;
         }
 
-        /// <summary>
-        /// Finds the first public instance void method named <paramref name="memberName"/> with
-        /// exactly one parameter declared on <paramref name="type"/> or any of its base types.
-        /// </summary>
         private static IMethodSymbol FindOneParamVoidMethod(INamedTypeSymbol type, string memberName)
         {
             var current = type as ITypeSymbol;
@@ -977,18 +934,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             return null;
         }
 
-        /// <summary>
-        /// Derives the name of the generated <c>private static partial void</c> setter method
-        /// from a member name.
-        /// <list type="bullet">
-        ///   <item><c>"SetActive"</c>  → <c>"Set_Active"</c></item>
-        ///   <item><c>"Activate"</c>   → <c>"Set_Activate"</c></item>
-        ///   <item><c>"active"</c>     → <c>"Set_Active"</c></item>
-        /// </list>
-        /// </summary>
         private static string DeriveCustomSetterPartialName(string memberName)
         {
-            // Strip a leading "Set" prefix when followed directly by an uppercase letter.
             if (memberName.Length > 3
                 && memberName.StartsWith("Set", StringComparison.Ordinal)
                 && char.IsUpper(memberName[3])
@@ -1119,11 +1066,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             return sb.ToString();
         }
 
-        /// <summary>
-        /// Returns <see langword="true"/> when the value-type parameter is large enough
-        /// (>= 8 bytes) that passing it via <c>in</c> avoids a meaningful copy.
-        /// Reference types are already 8-byte pointers and never need <c>in</c>.
-        /// </summary>
         private static bool NeedsInModifier(ITypeSymbol type)
         {
             if (type == null || type.IsReferenceType || type.TypeKind == TypeKind.Pointer)
@@ -1134,11 +1076,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             return EstimateTypeSize(type) >= 8;
         }
 
-        /// <summary>
-        /// Estimates the in-memory byte size of a type.
-        /// Reference-type fields inside a struct are counted as 8 bytes (64-bit pointer).
-        /// Returns 0 for unknown / unresolvable types.
-        /// </summary>
         private static int EstimateTypeSize(ITypeSymbol type)
         {
             if (type == null)
@@ -1237,10 +1174,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             p.PrintEndLine();
         }
 
-        // -----------------------------------------------------------------------
-        //  IEquatable
-        // -----------------------------------------------------------------------
-
         public readonly bool Equals(MonoBinderSpec other)
             => string.Equals(userClassName, other.userClassName, StringComparison.Ordinal)
             && string.Equals(userNamespace, other.userNamespace, StringComparison.Ordinal)
@@ -1279,8 +1212,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             .Add(hasOnBindPropertyFailedMethod)
             .Add(hasOnBindCommandFailedMethod)
             ;
-
-        // ── Private scan-entry helpers (used only during Extract for outer class IBinder) ──
 
         private struct OuterBinderPropertyScanEntry
         {

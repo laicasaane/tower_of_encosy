@@ -4,10 +4,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Analyzers.UserDataVaults
 {
-    /// <summary>
-    /// Roslyn diagnostic analyzer that validates <c>[UserDataAccessor]</c>-attributed classes,
-    /// reporting issues that were previously reported inside the source generator itself.
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal class UserDataVaultDiagnosticAnalyzer : DiagnosticAnalyzer
     {

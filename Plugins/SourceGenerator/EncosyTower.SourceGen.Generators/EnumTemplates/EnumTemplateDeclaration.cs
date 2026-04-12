@@ -10,7 +10,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 {
     internal partial class EnumTemplateDeclaration
     {
-        /// <summary>Simple identifier text of the template struct (e.g. <c>"MyEnum_EnumTemplate"</c>).</summary>
         public string TemplateSimpleName { get; }
 
         public string TemplateFullName { get; }
@@ -47,13 +46,9 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             ContainingTypes = templateCandidate.containingTypes;
             Accessibility = templateCandidate.accessibility;
 
-            // Silently fall back to the struct name when the naming convention is not followed.
-            // EnumTemplateAnalyzer reports the proper diagnostic.
             TryGetEnumName(templateCandidate.templateSimpleName, out var enumName);
             EnumName = enumName;
 
-            // Merge source-1 inline members (pre-extracted in EnumTemplateCandidate.Extract)
-            // with source-2 external members from the kind provider, filtered to this template.
             var mergedCandidates = new List<TemplateMemberSpec>(
                 templateCandidate.inlineMembers.Count + externalMembers.Length
             );
@@ -88,13 +83,11 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     continue;
                 }
 
-                // Silently skip invalid underlying type — EnumTemplateAnalyzer reports it.
                 if (candidate.enumMembers && IsSupportedEnum(candidate.underlyingType) == false)
                 {
                     continue;
                 }
 
-                // Silently skip duplicates — EnumTemplateAnalyzer reports them.
                 if (types.Contains(candidate.typeFullName))
                 {
                     continue;
@@ -143,7 +136,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 {
                     var memberName = entry.name;
 
-                    // Silently skip duplicate member names — EnumTemplateAnalyzer reports them.
                     if (uniqueMembers.Add(memberName) == false)
                     {
                         continue;
@@ -287,13 +279,8 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             return Encoding.UTF8.GetByteCount(value);
         }
 
-        /// <summary>
-        /// Working struct used during code generation. Not a pipeline model — not required to
-        /// be cache-friendly.
-        /// </summary>
         public struct EnumMemberRef
         {
-            /// <summary>Fully qualified name of the type contributing this member.</summary>
             public string typeFullName;
             public ulong baseOrder;
             public ulong value;

@@ -76,7 +76,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             DisplayNameForKind = string.IsNullOrWhiteSpace(id.displayNameForKind) ? string.Empty : id.displayNameForKind;
             References = references;
 
-            // Merge inline kinds + external kinds that target this id
             var allKinds = new List<KindSpec>(id.inlineKinds.Count + externalKinds.Length);
 
             foreach (var k in id.inlineKinds)
@@ -104,11 +103,9 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
             foreach (var candidate in allKinds)
             {
-                // Skip if kind is the id itself
                 if (string.Equals(candidate.kindFullName, id.fullName, StringComparison.Ordinal))
                     continue;
 
-                // Skip duplicates (same kind type)
                 if (seenFullNames.Contains(candidate.kindFullName))
                     continue;
 
@@ -138,7 +135,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
                 if (candidate.isEnum)
                 {
-                    // Build nested EnumExtensionsDeclaration from precomputed data
                     var memList = new List<EnumMemberSpec>(candidate.kindEnumValues.Count);
 
                     foreach (var m in candidate.kindEnumValues)

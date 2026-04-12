@@ -132,9 +132,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 {
                     throw;
                 }
-
-                // Generator bugs are silently swallowed — do not emit diagnostics from the
-                // generator. User-facing validation is handled by EnumExtensionsAnalyzer.
             }
         }
 

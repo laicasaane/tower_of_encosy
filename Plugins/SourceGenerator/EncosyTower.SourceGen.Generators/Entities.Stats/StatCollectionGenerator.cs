@@ -20,10 +20,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
-
-            // Only propagate the assembly-validity flag — not the full CompilationCandidateSlim.
-            // This prevents the combined pipeline from re-running whenever unrelated compilation
-            // details (referenced assemblies, nullable context, etc.) change.
             var isValidProvider = context.CompilationProvider
                 .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE).isValid);
 

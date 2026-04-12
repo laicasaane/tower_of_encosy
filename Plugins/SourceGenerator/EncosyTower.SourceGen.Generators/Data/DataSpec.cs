@@ -8,8 +8,6 @@ namespace EncosyTower.SourceGen.Generators.Data
 {
     public partial struct DataSpec : IEquatable<DataSpec>
     {
-        /// <summary>Excluded from <see cref="Equals(DataSpec)"/> and <see cref="GetHashCode"/>
-        /// — location data is not stable across incremental runs.</summary>
         public LocationInfo location;
 
         public string typeName;

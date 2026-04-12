@@ -133,7 +133,6 @@ namespace EncosyTower.SourceGen
                 printer.PrintLine("}");
             }
 
-            // Output as source
             return SourceText.From(printer.Result, Encoding.UTF8)
                 .WithIgnoreUnassignedVariableWarning()
                 .WithInitialLineDirectiveToGeneratedSource(generatedSourceFilePath)

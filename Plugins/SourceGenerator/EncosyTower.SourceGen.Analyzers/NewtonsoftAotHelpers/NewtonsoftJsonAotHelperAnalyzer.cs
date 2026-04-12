@@ -4,15 +4,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Analyzers.NewtonsoftJsonHelpers
 {
-    /// <summary>
-    /// Validates types annotated with <c>[NewtonsoftJsonAotHelper]</c> and reports
-    /// actionable diagnostics.
-    /// <para>
-    /// Diagnostics are deliberately kept in a <see cref="DiagnosticAnalyzer"/> rather
-    /// than emitted from the source generator itself.  This prevents unnecessary
-    /// source-file regeneration when only an invalid attribute usage changes.
-    /// </para>
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal class NewtonsoftJsonAotHelperAnalyzer : DiagnosticAnalyzer
     {

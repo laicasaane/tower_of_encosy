@@ -2,40 +2,12 @@ using System;
 
 namespace EncosyTower.SourceGen.Generators.UserDataVaults
 {
-    /// <summary>
-    /// Cache-friendly, equatable representation of one constructor parameter of a
-    /// <c>[UserDataAccessor]</c> class, extracted during the incremental pipeline transform.
-    /// </summary>
     internal readonly struct AccessorArgSpec : IEquatable<AccessorArgSpec>
     {
-        /// <summary>
-        /// <see langword="true"/> if this parameter is a concrete <c>UserDataStoreBase&lt;T&gt;</c>;
-        /// <see langword="false"/> if it is an <c>IUserDataAccessor</c> implementer.
-        /// </summary>
         public readonly bool IsStore;
-
-        /// <summary>Fully-qualified name of the store or accessor type (includes <c>global::</c>).</summary>
         public readonly string FullTypeName;
-
-        /// <summary>
-        /// Fully-qualified name of the data type <c>T</c> when <see cref="IsStore"/> is
-        /// <see langword="true"/>; empty string otherwise.
-        /// </summary>
         public readonly string FullDataTypeName;
-
-        /// <summary>
-        /// Simple (unqualified) name used in generated code:
-        /// when <see cref="IsStore"/> is <see langword="true"/>, the data type <c>T</c> simple name
-        /// (used for store field ordering and naming); otherwise, the accessor type simple name
-        /// (used as the constructor argument in scaffolded initialization code).
-        /// </summary>
         public readonly string TypeName;
-
-        /// <summary>
-        /// When <see cref="IsStore"/> is <see langword="true"/>, whether the data type <c>T</c> has
-        /// a default (parameterless) constructor. Controls whether a <c>Create{T}()</c> partial
-        /// method must be generated instead of <c>new T()</c>.
-        /// </summary>
         public readonly bool DataTypeHasDefaultConstructor;
 
         public AccessorArgSpec(
@@ -68,58 +40,16 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .Add(DataTypeHasDefaultConstructor);
     }
 
-    /// <summary>
-    /// Cache-friendly, equatable data extracted from a <c>[UserDataAccessor]</c>-attributed class
-    /// during the incremental source-generation pipeline.
-    /// </summary>
     internal struct UserDataAccessorSpec : IEquatable<UserDataAccessorSpec>
     {
-        /// <summary>Excluded from equality/hash — location is not stable across incremental runs.</summary>
         public LocationInfo location;
-
-        /// <summary>
-        /// CLR metadata name of the accessor class, used as the equality key.
-        /// </summary>
         public string metadataName;
-
-        /// <summary>
-        /// CLR metadata name of the target vault type from the attribute's first constructor argument;
-        /// <see langword="null"/> or empty when the accessor applies to all vaults.
-        /// </summary>
         public string vaultMetadataName;
-
-        /// <summary>
-        /// Display name derived from a <c>[Label]</c> or <c>[DisplayName]</c> attribute on the
-        /// accessor class, or the class's own <c>Name</c> as a fallback.
-        /// </summary>
         public string fieldName;
-
-        /// <summary>
-        /// Simple (unqualified) class name, used in generated constructor-assignment code.
-        /// </summary>
         public string symbolName;
-
-        /// <summary>
-        /// Pre-extracted constructor argument data for cache equality and diagnostic pre-filtering.
-        /// </summary>
         public EquatableArray<AccessorArgSpec> args;
-
-        /// <summary>
-        /// <see langword="true"/> when the accessor class implements
-        /// <c>global::EncosyTower.Initialization.IInitializable</c>.
-        /// </summary>
         public bool isInitializable;
-
-        /// <summary>
-        /// <see langword="true"/> when the accessor class implements
-        /// <c>global::EncosyTower.Initialization.IDeinitializable</c>.
-        /// </summary>
         public bool isDeinitializable;
-
-        /// <summary>
-        /// <see langword="false"/> when validation found no usable constructor or unsupported
-        /// parameter types; such items are filtered out before code generation.
-        /// </summary>
         public bool isValid;
 
         public readonly bool Equals(UserDataAccessorSpec other)

@@ -20,10 +20,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
-
-            // --- candidate providers ---
-
-            // Fields or properties annotated with [ObservableProperty].
             var obsCandidatesProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       OBSERVABLE_PROPERTY_ATTRIBUTE_FULL
@@ -34,7 +30,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 )
                 .Where(static x => x.IsValid);
 
-            // Methods annotated with [RelayCommand] that have exactly one parameter.
             var methodRelayCommandCandidatesProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       RELAY_COMMAND_ATTRIBUTE_FULL
@@ -44,7 +39,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 )
                 .Where(static x => x.IsValid);
 
-            // Methods annotated with [Binding] that have exactly one parameter.
             var methodBindingCandidatesProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       BINDING_PROPERTY_ATTRIBUTE_FULL
@@ -54,7 +48,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 )
                 .Where(static x => x.IsValid);
 
-            // Fields or properties on IObservableObject classes annotated with [NotifyPropertyChangedFor].
             var npcfCandidatesProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE_FULL
@@ -65,8 +58,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 )
                 .Where(static x => x.IsValid);
 
-            // --- existing adapters (exclusion list) ---
-            // Types for which a [Adapter(from, typeof(string))] adapter already exists in user code.
             var existingAdaptersProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       ADAPTER_ATTRIBUTE_FULL
@@ -75,8 +66,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 )
                 .Where(static t => t is not null);
 
-            // Merge all four candidate arrays into one before the final combine,
-            // so the RegisterSourceOutput lambda sees a simple flat structure.
             var allCandidatesFlat = obsCandidatesProvider.Collect()
                 .Combine(methodRelayCommandCandidatesProvider.Collect())
                 .Combine(methodBindingCandidatesProvider.Collect())
@@ -106,10 +95,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 );
             });
         }
-
-        // -------------------------------------------------------------------------
-        // Candidate transforms
-        // -------------------------------------------------------------------------
 
         private static StringAdapterSpec GetCandidate_ObservableProperty(
               GeneratorAttributeSyntaxContext context
@@ -194,7 +179,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 return default;
             }
 
-            // Only generate adapters for members on types that implement IObservableObject.
             foreach (var iface in containingType.AllInterfaces)
             {
                 if (iface.Name == "IObservableObject"
@@ -211,10 +195,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
             return default;
         }
 
-        // -------------------------------------------------------------------------
-        // Existing adapter transform
-        // -------------------------------------------------------------------------
-
         private static string GetExistingAdapterSourceTypeName(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
@@ -229,7 +209,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 return null;
             }
 
-            // Check the type directly implements IAdapter.
             var implementsIAdapter = false;
 
             foreach (var iface in declaredSymbol.AllInterfaces)
@@ -251,7 +230,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 return null;
             }
 
-            // Walk the [Adapter(...)] attributes already resolved by ForAttributeWithMetadataName.
             foreach (var attribute in context.Attributes)
             {
                 if (attribute.ConstructorArguments.Length != 2)
@@ -275,10 +253,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
             return null;
         }
 
-        // -------------------------------------------------------------------------
-        // Helpers
-        // -------------------------------------------------------------------------
-
         private static StringAdapterSpec MakeCandidate(ITypeSymbol typeSymbol, Location location)
         {
             var ns = typeSymbol.ContainingNamespace;
@@ -292,10 +266,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 labelName = typeSymbol.ToSimpleName(),
             };
         }
-
-        // -------------------------------------------------------------------------
-        // Output
-        // -------------------------------------------------------------------------
 
         private static void GenerateOutput(
               SourceProductionContext context

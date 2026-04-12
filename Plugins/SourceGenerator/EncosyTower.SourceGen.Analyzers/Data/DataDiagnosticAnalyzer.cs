@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using EncosyTower.SourceGen.Common.Data.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -7,11 +7,6 @@ namespace EncosyTower.SourceGen.Analyzers.Data
 {
     using static Helpers;
 
-    /// <summary>
-    /// Roslyn diagnostic analyzer that validates <c>[Data]</c>-attributed types and reports
-    /// issues that are intentionally excluded from the source generator itself to keep the
-    /// incremental pipeline cache-friendly.
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal sealed class DataDiagnosticAnalyzer : DiagnosticAnalyzer
     {
@@ -37,12 +32,10 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                 return;
             }
 
-            // Only process [Data]-attributed types
             if (typeSymbol.GetAttribute(DATA_ATTRIBUTE_METADATA) is null
                 && typeSymbol.GetAttribute($"global::{DATA_ATTRIBUTE_METADATA}") is null
             )
             {
-                // Try matching by full qualified metadata name directly
                 var hasAttr = false;
 
                 foreach (var attr in typeSymbol.GetAttributes())
@@ -67,7 +60,6 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                 ? typeSymbol.Locations[0]
                 : Location.None;
 
-            // ── DATA_0003: immutable + [DataFieldPolicy] ────────────────────────────────────
             var isMutable = typeSymbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE) is not null;
             var fieldPolicyAttrib = typeSymbol.GetAttribute(DATA_FIELD_POLICY_ATTRIBUTE);
 
@@ -80,7 +72,6 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                 ));
             }
 
-            // Determine setter restrictions
             var withoutPropertySetters = false;
 
             if (isMutable)
@@ -102,7 +93,6 @@ namespace EncosyTower.SourceGen.Analyzers.Data
             var allowOnlyPrivateOrInitSetter = isMutable == false || withoutPropertySetters;
             var withoutId = typeSymbol.GetAttribute(DATA_WITHOUT_ID_ATTRIBUTE) is not null;
 
-            // ── Analyze members ─────────────────────────────────────────────────────────────
             foreach (var member in typeSymbol.GetMembers())
             {
                 if (member is IFieldSymbol field)
@@ -112,7 +102,6 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                         continue;
                     }
 
-                    // DATA_0004: immutable data field must be private
                     if (isMutable == false
                         && field.DeclaredAccessibility != Accessibility.Private
                     )
@@ -128,7 +117,6 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                         ));
                     }
 
-                    // DATA_0006: [SerializeField] field named to generate "Id" property but is a collection
                     if (withoutId == false)
                     {
                         var propertyName = field.ToPropertyName();
@@ -156,7 +144,6 @@ namespace EncosyTower.SourceGen.Analyzers.Data
 
                 if (member is IPropertySymbol property)
                 {
-                    // DATA_0005: only private or init-only setter allowed
                     if (allowOnlyPrivateOrInitSetter
                         && property.SetMethod is { } setter
                         && setter.IsInitOnly == false
@@ -174,7 +161,6 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                         ));
                     }
 
-                    // DATA_0006: [DataProperty] property named "Id" but is a collection
                     if (withoutId == false
                         && property.GetAttribute(DATA_PROPERTY_ATTRIBUTE) is not null
                         && string.Equals(property.Name, "Id", System.StringComparison.Ordinal)

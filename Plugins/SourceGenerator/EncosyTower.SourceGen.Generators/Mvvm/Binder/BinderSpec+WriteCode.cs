@@ -890,7 +890,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             p.PrintEndLine();
         }
 
-        // ── Private naming helpers ────────────────────────────────────────────────
 
         private static string IsListeningName(in BinderSpec dec)
             => $"_isListening_{dec.typeIdentifier}";
@@ -910,11 +909,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         private static string ListenerName(in BindingPropertySpec member)
             => $"_listenerFor{member.methodName}";
 
-        /// <summary>
-        /// Returns the method name used in the constructor listener action.
-        /// For non-Variant parameter types, a private <c>__Variant</c> proxy is called instead
-        /// of the user's original method.
-        /// </summary>
         private static string MethodName(in BindingPropertySpec member)
             => member.isParameterTypeVariant ? member.methodName : $"{member.methodName}__Variant";
 
@@ -925,3 +919,4 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             => $"_relayCommandFor{member.methodName}";
     }
 }
+

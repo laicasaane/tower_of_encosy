@@ -28,15 +28,11 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
-
-            // Each matched call site is processed independently — no Collect() — so that
-            // editing one call site only re-runs that single output node.
             var typeProvider = context.SyntaxProvider.CreateSyntaxProvider(
                   predicate: IsSyntaxMatched
                 , transform: GetMatchedType
             ).Where(static c => c.IsValid);
 
-            // Call-site branch: one file per call site, [CacheXxx] attr only.
             context.RegisterSourceOutput(
                   typeProvider.Combine(projectPathProvider)
                 , static (sourceProductionContext, source) => {
@@ -49,9 +45,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 }
             );
 
-            // Header branch: one file per containing type, 5 decorating attrs + empty partial struct.
-            // Collect() on ContainingTypeKey is acceptable — the struct is small and equatable,
-            // so it only re-runs when containing type shape changes, not on call-site edits.
             var typeKeyProvider = typeProvider.Select(static (c, _) => ContainingTypeKey.From(c));
 
             context.RegisterSourceOutput(
@@ -90,14 +83,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             };
         }
 
-        /// <summary>
-        /// Extracts an equatable <see cref="TypeCacheCallSite"/> value from the semantic model.
-        /// All ISymbol and SyntaxNode data is converted to primitive/string representations so
-        /// the incremental pipeline can correctly compare successive runs and skip unchanged steps.
-        /// Invalid call sites (wrong type, forbidden namespace, non-constant assembly name, etc.)
-        /// are returned as <c>default</c> and filtered by <see cref="TypeCacheCallSite.IsValid"/>;
-        /// the <see cref="RuntimeTypeCachesAnalyzer"/> is responsible for reporting those errors.
-        /// </summary>
         private static TypeCacheCallSite GetMatchedType(
               GeneratorSyntaxContext context
             , CancellationToken token
@@ -124,7 +109,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             var typeArgList = member.TypeArgumentList;
             var typeInfo = semanticModel.GetTypeInfo(typeArgList.Arguments[0], token);
 
-            // Type parameters are not applicable; the analyzer will report the diagnostic.
             if (typeInfo.Type is not INamedTypeSymbol type)
             {
                 return default;
@@ -144,7 +128,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 return default;
             }
 
-            // Validate type constraints; the analyzer will report the corresponding diagnostics.
             var typeFullName = type.ToFullName();
 
             if (cacheAttributeType == CacheAttributeType.CacheType)
@@ -165,15 +148,12 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             }
             else
             {
-                // CacheTypesWithAttribute, CacheFieldsWithAttribute, CacheMethodsWithAttribute
                 if (typeFullName.StartsWith(NAMESPACE_PREFIX))
                 {
                     return default;
                 }
             }
 
-            // Validate the optional assembly-name argument is a compile-time constant.
-            // A non-constant argument is silently filtered; the analyzer reports the diagnostic.
             var assemblyName = string.Empty;
 
             if (syntax.Parent is InvocationExpressionSyntax { ArgumentList.Arguments: { Count: 1 } arguments })
@@ -490,17 +470,10 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             CacheMethodsWithAttribute,
         }
 
-        /// <summary>
-        /// Represents a single <c>RuntimeTypeCache.GetXxx&lt;T&gt;()</c> call site.
-        /// All fields are primitive or string values so the incremental pipeline can correctly
-        /// compare successive runs and avoid re-running unchanged downstream steps.
-        /// </summary>
         private struct TypeCacheCallSite : IEquatable<TypeCacheCallSite>
         {
-            // ── Compilation ───────────────────────────────────────────────────────────────
             public string compilationAssemblyName;
 
-            // ── Equatable data extracted from INamedTypeSymbol ───────────────────────────
             public string containingTypeFullName;
             public string containingTypeFileName;
             public string containingTypeIdentifier;
@@ -508,13 +481,10 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             public bool isRefStruct;
             public bool isRecord;
 
-            // ── Equatable data extracted from TypeDeclarationSyntax / SyntaxTree ─────────
             public int syntaxTreeStableHash;
             public string sourceFileBaseName;
             public string scopeOpening;
             public string scopeClosing;
-
-            // ── Equatable data for this individual call site ─────────────────────────────
             public int callSiteLineNumber;
             public string typeFullName;
             public CacheAttributeType cacheAttributeType;
@@ -560,17 +530,10 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                     .Add(isRecord);
         }
 
-        /// <summary>
-        /// Identifies a containing type by its shape — used to deduplicate header output
-        /// across multiple call sites inside the same type.
-        /// All fields are primitive or string values for stable incremental pipeline comparison.
-        /// </summary>
         private struct ContainingTypeKey : IEquatable<ContainingTypeKey>
         {
-            // ── Compilation ───────────────────────────────────────────────────────────────
             public string compilationAssemblyName;
 
-            // ── Equatable data extracted from INamedTypeSymbol ───────────────────────────
             public string containingTypeFullName;
             public string containingTypeFileName;
             public string containingTypeIdentifier;
@@ -578,7 +541,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             public bool isRefStruct;
             public bool isRecord;
 
-            // ── Equatable data extracted from TypeDeclarationSyntax / SyntaxTree ─────────
             public int syntaxTreeStableHash;
             public string sourceFileBaseName;
             public string scopeOpening;
@@ -629,3 +591,4 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         }
     }
 }
+

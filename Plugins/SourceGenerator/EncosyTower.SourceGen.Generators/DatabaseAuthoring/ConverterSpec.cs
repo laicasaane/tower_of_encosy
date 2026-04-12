@@ -6,8 +6,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
     {
         public ConverterKind kind;
         public string converterTypeFullName;
-
-        // The source type (what the converter reads FROM)
         public CollectionSpec sourceCollection;
         public string sourceTypeFullName;
         public string sourceTypeSimpleName;

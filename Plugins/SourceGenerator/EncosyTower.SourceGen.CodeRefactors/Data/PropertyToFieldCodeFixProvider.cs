@@ -22,8 +22,6 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
 
         public sealed override FixAllProvider GetFixAllProvider()
         {
-            // See https://github.com/dotnet/roslyn/blob/main/docs/analyzers/FixAllProvider.md
-            // for more information on Fix All Providers
             return WellKnownFixAllProviders.BatchFixer;
         }
 
@@ -46,7 +44,6 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
                 return;
             }
 
-            // Register a code action that will invoke the fix.
             context.RegisterCodeFix(
                 CodeAction.Create(
                       title: $"Replace '{declaration.Identifier.Text}' with field"

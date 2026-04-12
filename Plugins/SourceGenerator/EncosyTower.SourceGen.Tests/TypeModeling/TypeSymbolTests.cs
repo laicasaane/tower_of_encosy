@@ -46,7 +46,6 @@ public class TypeSymbolTests
         }
         """;
 
-    // ─── TypeSymbol identity ───────────────────────────────────────────────
 
     [TestMethod]
     public void TypeSymbol_Name()
@@ -84,7 +83,6 @@ public class TypeSymbolTests
         Assert.AreEqual(TypeKind.Class, sym.TypeKind);
     }
 
-    // ─── Modifiers ────────────────────────────────────────────────────────
 
     [TestMethod]
     public void TypeSymbol_IsSealed_True_ForSealedClass()
@@ -114,7 +112,6 @@ public class TypeSymbolTests
         Assert.IsTrue(sym.IsRecord);
     }
 
-    // ─── Fields ───────────────────────────────────────────────────────────
 
     [TestMethod]
     public void TypeSymbol_Fields_Count()
@@ -138,7 +135,6 @@ public class TypeSymbolTests
         CollectionAssert.Contains(names, "_private");
     }
 
-    // ─── Properties ───────────────────────────────────────────────────────
 
     [TestMethod]
     public void TypeSymbol_Properties_Count()
@@ -160,7 +156,6 @@ public class TypeSymbolTests
         CollectionAssert.Contains(names, "ReadWrite");
     }
 
-    // ─── Methods (only Ordinary) ──────────────────────────────────────────
 
     [TestMethod]
     public void TypeSymbol_Methods_ExcludesOperators()
@@ -184,7 +179,6 @@ public class TypeSymbolTests
         CollectionAssert.Contains(names, "Hidden");
     }
 
-    // ─── Attributes ───────────────────────────────────────────────────────
 
     [TestMethod]
     public void TypeSymbol_HasAttribute_True_WhenPresent()
@@ -216,7 +210,6 @@ public class TypeSymbolTests
         Assert.IsFalse(attr.Exists);
     }
 
-    // ─── ImplementsInterface ──────────────────────────────────────────────
 
     [TestMethod]
     public void TypeSymbol_ImplementsInterface_True_WhenImplemented()
@@ -232,7 +225,6 @@ public class TypeSymbolTests
         Assert.IsFalse(sym.ImplementsInterface("global::System.IDisposable"));
     }
 
-    // ─── FieldSymbol properties ───────────────────────────────────────────
 
     [TestMethod]
     public void FieldSymbol_IsReadOnly_TrueForReadOnlyField()
@@ -276,7 +268,6 @@ public class TypeSymbolTests
         StringAssert.Contains(found.TypeFullName, "int");
     }
 
-    // ─── PropertySymbol accessor presence ────────────────────────────────
 
     [TestMethod]
     public void PropertySymbol_GetOnly_NoSetter()
@@ -313,7 +304,6 @@ public class TypeSymbolTests
         Assert.IsFalse(found.Setter.IsInitOnly);
     }
 
-    // ─── MethodSymbol Parameters ──────────────────────────────────────────
 
     [TestMethod]
     public void MethodSymbol_Parameters_Count()

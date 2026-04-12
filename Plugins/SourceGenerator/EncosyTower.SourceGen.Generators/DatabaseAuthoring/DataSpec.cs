@@ -2,35 +2,13 @@ using System;
 
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
-    /// <summary>
-    /// Cache-friendly, equatable representation of a data type (<see cref="IData"/>
-    /// implementer) that is referenced by a database table.
-    /// Replaces the non-cacheable <c>DataDeclaration</c> class.
-    /// </summary>
     public partial struct DataSpec : IEquatable<DataSpec>
     {
-        /// <summary>Fully-qualified type name, e.g. <c>global::Foo.Bar.MyData</c>.</summary>
         public string fullName;
-
-        /// <summary>Simple type name, e.g. <c>MyData</c>.</summary>
         public string simpleName;
-
-        /// <summary><c>symbol.ToValidIdentifier()</c> — used to build <c>SetValues_XXX</c> calls.</summary>
         public string validIdentifier;
-
-        /// <summary>Property-backed members declared on this type (includes <c>[DataProperty]</c> and
-        /// <c>[GeneratedPropertyFromField]</c> members).</summary>
         public EquatableArray<MemberSpec> propRefs;
-
-        /// <summary>Field-backed members declared on this type (includes <c>[SerializeField]</c> and
-        /// <c>[GeneratedFieldFromProperty]</c> members).</summary>
         public EquatableArray<MemberSpec> fieldRefs;
-
-        /// <summary>
-        /// Base-type layers in bottom-up order (outermost first, i.e.
-        /// the most-base implementing type first, direct base last).
-        /// Replaces the recursive <c>DataDeclaration.BaseTypeRefs</c> list.
-        /// </summary>
         public EquatableArray<DataLayerSpec> baseTypeLayers;
 
         public readonly bool IsValid

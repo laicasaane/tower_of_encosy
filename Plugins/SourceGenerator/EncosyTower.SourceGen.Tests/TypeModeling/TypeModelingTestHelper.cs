@@ -7,11 +7,6 @@ internal static class TypeModelingTestHelper
 {
     private static readonly IReadOnlyList<MetadataReference> s_references = BuildReferences();
 
-    /// <summary>
-    /// Compiles <paramref name="source"/> and returns the named type symbol for
-    /// <paramref name="typeName"/> (fully-qualified metadata name, e.g. "TestNs.MyClass").
-    /// Throws <see cref="System.InvalidOperationException"/> if the type is not found.
-    /// </summary>
     internal static INamedTypeSymbol GetTypeSymbol(string source, string typeName)
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(source,

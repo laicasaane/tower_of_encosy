@@ -44,8 +44,6 @@ internal static class GeneratorTestHelper
             , CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp10)
         );
 
-        // Unity/EncosyTower DLL references — list and existence are verified at build time
-        // by the GenerateUnityDllPaths MSBuild target via UnityDllPaths.All.
         IEnumerable<PortableExecutableReference> references = UnityDllPaths.All
             .Select(p => MetadataReference.CreateFromFile(p))
             .Concat(new[]

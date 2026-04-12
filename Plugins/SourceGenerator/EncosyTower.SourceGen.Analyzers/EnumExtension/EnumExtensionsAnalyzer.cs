@@ -6,15 +6,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Generators.EnumExtensions
 {
-    /// <summary>
-    /// Analyzer that reports validation diagnostics for types annotated with
-    /// <c>[EnumExtensionsFor]</c>.
-    /// <para>
-    /// Keeping diagnostics in a <see cref="DiagnosticAnalyzer"/> rather than inside the
-    /// source generator itself prevents unnecessary regeneration of source files when only
-    /// an error (and not the surrounding valid code) has changed.
-    /// </para>
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal class EnumExtensionsAnalyzer : DiagnosticAnalyzer
     {

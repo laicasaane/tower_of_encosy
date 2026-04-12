@@ -13,11 +13,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
         private const string NAMESPACE = "EncosyTower.Serialization.NewtonsoftJson";
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
         public const string GENERATOR_NAME = nameof(NewtonsoftJsonAotHelperGenerator);
-
-        /// <summary>
-        /// CLR metadata name (no <c>global::</c> prefix) required by
-        /// <see cref="SyntaxValueProvider.ForAttributeWithMetadataName"/>.
-        /// </summary>
         private const string ATTRIBUTE_METADATA = $"{NAMESPACE}.NewtonsoftJsonAotHelperAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -148,7 +143,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                     continue;
                 }
 
-                // Check whether type IS baseType or baseType appears in the ancestor chain.
                 var equalityComparer = SymbolEqualityComparer.Default;
                 var isDerived = equalityComparer.Equals(type, baseType);
 
@@ -173,7 +167,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                     continue;
                 }
 
-                // Flatten all fields from the full type hierarchy into one list.
                 using var fieldsBuilder = ImmutableArrayBuilder<AotFieldSpec>.Rent();
                 {
                     var typeWalker = type;
@@ -194,7 +187,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                             var fieldTypeFullName = fieldType.ToFullName();
                             var fieldTypeCanEnsure = CanEnsureType(fieldType);
 
-                            // Non-generic or unbound-generic: only the field type itself matters.
                             if (fieldType.IsGenericType == false || fieldType.IsUnboundGenericType)
                             {
                                 fieldsBuilder.Add(new AotFieldSpec {
@@ -205,7 +197,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                                 continue;
                             }
 
-                            // Dictionary<K, V>
                             if (fieldType.TypeArguments.Length == 2
                                 && fieldTypeFullName.StartsWith("global::System.Collections.Generic.Dictionary<", StringComparison.Ordinal)
                                 && fieldType.TypeArguments[0] is INamedTypeSymbol keyArg
@@ -222,7 +213,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                                 continue;
                             }
 
-                            // List<T>
                             if (fieldType.TypeArguments.Length == 1
                                 && fieldTypeFullName.StartsWith("global::System.Collections.Generic.List<", StringComparison.Ordinal)
                                 && fieldType.TypeArguments[0] is INamedTypeSymbol listArg
@@ -237,7 +227,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                                 continue;
                             }
 
-                            // HashSet<T>
                             if (fieldType.TypeArguments.Length == 1
                                 && fieldTypeFullName.StartsWith("global::System.Collections.Generic.HashSet<", StringComparison.Ordinal)
                                 && fieldType.TypeArguments[0] is INamedTypeSymbol hashSetArg
@@ -252,7 +241,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                                 continue;
                             }
 
-                            // Other generic: collect named type arguments.
                             using var otherTypeArgsBuilder = ImmutableArrayBuilder<AotTypeArgSpec>.Rent();
 
                             foreach (var typeArg in fieldType.TypeArguments)
@@ -336,8 +324,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
             try
             {
-                // Reconstruct hintName using the same formula as
-                // SyntaxNodeExtensions.GetGeneratedSourceFileName(syntaxTree, generatorName, salting, typeName).
                 var locationFilePath = helperInfo.location.filePath;
                 var fileBaseName = Path.GetFileNameWithoutExtension(locationFilePath);
                 var stableHashCode = SourceGenHelpers.GetStableHashCode(locationFilePath) & 0x7fffffff;

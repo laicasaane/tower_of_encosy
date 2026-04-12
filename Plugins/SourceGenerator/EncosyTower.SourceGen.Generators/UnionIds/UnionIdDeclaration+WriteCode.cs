@@ -2577,14 +2577,6 @@
             }
         }
 
-        /// <summary>
-        /// Total member count of following enums
-        /// <list type="bullet">
-        /// <item><see cref=""/></item>
-        /// <item>B</item>
-        /// </list>
-        /// </summary>
-        /// <param name="p"></param>
         private void WriteEnumeration(ref Printer p)
         {
             var typeName = SimpleName;

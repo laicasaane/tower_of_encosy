@@ -122,7 +122,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 converterDefault = converterDefault,
                 unmanagedSize = unmanagedSize,
                 isValueType = isValueType,
-                // Struct symbol is never an interface, so implicit conversion from T → struct is always safe.
                 hasImplicitFromStructToType = isValueType || typeArg.TypeKind != TypeKind.Interface,
                 structName = structSymbol.Name,
                 structFullName = structFullName,

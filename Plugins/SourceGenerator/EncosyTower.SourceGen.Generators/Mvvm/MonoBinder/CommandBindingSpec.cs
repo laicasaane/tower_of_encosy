@@ -4,23 +4,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 {
     public struct CommandBindingSpec : IEquatable<CommandBindingSpec>
     {
-        public string memberName;               // "onClick"
-        public string memberPascalName;         // "OnClick"
-        public EquatableArray<string> actionTypeArgs; // [] or ["global::System.Single"]
-        public string wrapperTypeName;          // "" or full wrapper type
-        public string label;                    // "On Click"
-        public string callbackMethodName;       // "OnClick"
-        public string generatedClassName;       // "UnityUIButtonBindingOnClick"
+        public string memberName;
+        public string memberPascalName;
+        public EquatableArray<string> actionTypeArgs;
+        public string wrapperTypeName;
+        public string label;
+        public string callbackMethodName;
+        public string generatedClassName;
         public bool skipGeneration;
         public bool isObsolete;
         public string obsoleteMessage;
-
-        /// <summary><see langword="true"/> when the backing event is a <c>UnityEvent</c>/<c>UnityEvent&lt;T&gt;</c>;
-        /// <see langword="false"/> when it is a plain C# delegate/event.</summary>
         public bool isUnityEvent;
-
-        /// <summary>Full type name of the C# delegate type (e.g. <c>global::System.EventHandler&lt;Foo&gt;</c>).
-        /// Empty when <see cref="isUnityEvent"/> is <see langword="true"/>.</summary>
         public string delegateFullTypeName;
 
         public readonly bool Equals(CommandBindingSpec other)

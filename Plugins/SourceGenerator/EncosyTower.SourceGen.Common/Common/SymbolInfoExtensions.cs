@@ -26,13 +26,11 @@ namespace EncosyTower.SourceGen
         {
             var attributeSymbol = symbolInfo.Symbol;
 
-            // If no symbol is selected and there is a single candidate symbol, use that
             if (attributeSymbol is null && symbolInfo.CandidateSymbols.Length == 1 && symbolInfo.CandidateSymbols[0] is ISymbol candidateSymbol)
             {
                 attributeSymbol = candidateSymbol;
             }
 
-            // Extract the symbol from either the current one or the containing type
             if ((attributeSymbol as INamedTypeSymbol ?? attributeSymbol?.ContainingType) is not INamedTypeSymbol resultingSymbol)
             {
                 typeSymbol = null;

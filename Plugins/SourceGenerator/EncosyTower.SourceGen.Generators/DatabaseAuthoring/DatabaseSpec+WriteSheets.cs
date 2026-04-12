@@ -10,8 +10,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             var databaseTypeName = this.databaseTypeName;
             var databaseTypeKeyword = this.databaseTypeKeyword;
-
-            // Rebuild dataMap (string-keyed) from allDataModels
             var dataMap = new Dictionary<string, DataSpec>(allDataModels.Count, System.StringComparer.Ordinal);
 
             foreach (var dm in allDataModels)
@@ -19,7 +17,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 dataMap[dm.fullName] = dm;
             }
 
-            // Rebuild horizontalListMap from horizontalListEntries
             var horizontalListMap = new Dictionary<string, Dictionary<string, HashSet<string>>>(System.StringComparer.Ordinal);
 
             foreach (var entry in horizontalListEntries)

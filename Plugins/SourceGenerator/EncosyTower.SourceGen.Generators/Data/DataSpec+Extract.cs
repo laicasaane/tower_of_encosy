@@ -15,11 +15,6 @@ namespace EncosyTower.SourceGen.Generators.Data
 
     partial struct DataSpec
     {
-        /// <summary>
-        /// Extracts all data-type metadata from the annotated type symbol into a fully populated,
-        /// cache-friendly <see cref="DataSpec"/>.
-        /// Called once per type inside the <c>ForAttributeWithMetadataName</c> transform.
-        /// </summary>
         public static DataSpec Extract(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
@@ -48,7 +43,6 @@ namespace EncosyTower.SourceGen.Generators.Data
             var typeIdent = typeSyntax.Identifier.Text;
             var typeValidIdent = typeSymbol.ToValidIdentifier();
 
-            // ── TypeName (with type params if generic) ──────────────────────────────────────
             var typeNameSb = new StringBuilder(typeIdent);
 
             if (typeSyntax.TypeParameterList is TypeParameterListSyntax typeParamList
@@ -75,7 +69,6 @@ namespace EncosyTower.SourceGen.Generators.Data
             var typeName = typeNameSb.ToString();
             var readOnlyTypeName = $"ReadOnly{typeName}";
 
-            // ── Opening / closing source (namespace wrapper) ────────────────────────────────
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   typeSyntax
                 , token
@@ -84,7 +77,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            // ── hint / sourceFilePath ───────────────────────────────────────────────────────
             var hintName = syntaxTree.GetGeneratedSourceFileName(
                   GENERATOR_NAME
                 , typeSyntax
@@ -97,7 +89,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                 , typeValidIdent
             );
 
-            // ── Attributes on the container type ───────────────────────────────────────────
             var typeModelAttrs = typeModel.Attributes;
             var typeModelAttrCount = typeModelAttrs.Count;
             var withoutId = false;
@@ -126,7 +117,6 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             var withId = withoutId == false;
 
-            // ── Mutability ──────────────────────────────────────────────────────────────────
             DetermineMutability(
                   typeSymbol
                 , out var isMutable
@@ -134,12 +124,10 @@ namespace EncosyTower.SourceGen.Generators.Data
                 , out var withReadOnlyView
             );
 
-            // ── DataFieldPolicy ─────────────────────────────────────────────────────────────
             var fieldPolicy = DataFieldPolicy.Private;
 
             if (isMutable == false && hasFieldPolicyAttr)
             {
-                // Diagnostic emitted by DataDiagnosticAnalyzer — skip in generator, return invalid
                 return default;
             }
 
@@ -148,7 +136,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                 fieldPolicy = (DataFieldPolicy)fieldPolicyInt;
             }
 
-            // ── Base type ───────────────────────────────────────────────────────────────────
             var baseTypeName = string.Empty;
 
             if (typeSymbol.BaseType is INamedTypeSymbol baseNamedTypeSymbol
@@ -159,12 +146,10 @@ namespace EncosyTower.SourceGen.Generators.Data
                 baseTypeName = baseNamedTypeSymbol.ToFullName();
             }
 
-            // ── Location ────────────────────────────────────────────────────────────────────
             var locationInfo = LocationInfo.From(typeSymbol.Locations.IsEmpty
                 ? Location.None
                 : typeSymbol.Locations[0]);
 
-            // ── Per-member analysis ─────────────────────────────────────────────────────────
             var existingFields = new HashSet<string>();
             var existingProperties = new Dictionary<string, bool>(); // name → isPublic
             var allowOnlyPrivateOrInitSetter = isMutable == false || withoutPropertySetters;
@@ -174,7 +159,6 @@ namespace EncosyTower.SourceGen.Generators.Data
             using var fieldArrayBuilder = ImmutableArrayBuilder<FieldRefData>.Rent();
             using var propArrayBuilder = ImmutableArrayBuilder<PropRefData>.Rent();
             using var overrideEqualsBuilder = ImmutableArrayBuilder<string>.Rent();
-            // Diagnostics from GatherForwardedAttributes are discarded; the analyzer handles them.
             using var throwawayDiagnosticBuilder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
 
             var idPropertyTypeName = string.Empty;
@@ -216,7 +200,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                 }
             }
 
-            // ── Pass 1: TypeModel scan ──────────────────────────────────────────────────────────────────
             var serializedFieldNames = new HashSet<string>(StringComparer.Ordinal);
             var dataPropertyNames = new HashSet<string>(StringComparer.Ordinal);
             var propertiesWithCreateProp = new HashSet<string>(StringComparer.Ordinal);
@@ -284,7 +267,6 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     if (isMutable == false && field.DeclaredAccessibility != Accessibility.Private)
                     {
-                        // Diagnostic emitted by DataDiagnosticAnalyzer — skip member
                         continue;
                     }
 
@@ -337,7 +319,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                         , typeSymbol
                     );
 
-                    // Precompute type names
                     var fieldTypeName = GetFieldTypeName(fieldType, collection);
                     var fieldTypeOriginalFullName = fieldType.ToFullName();
                     var propertyTypeName = propertyType.ToFullName();
@@ -351,8 +332,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                     );
 
                     var typesAreDifferent = equalityComparer.Equals(fieldType, propertyType) == false;
-
-                    // Equality precomputation
                     ITypeSymbol equalityFieldType;
 
                     if (fieldEquality.IsNullable)
@@ -366,8 +345,6 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     var fieldTypeFullNameForEquality = equalityFieldType.ToFullName();
                     var fieldTypeIsReferenceType = equalityFieldType.IsReferenceType;
-
-                    // Forwarded property attribute syntaxes
                     using var attrSyntaxBuilder = ImmutableArrayBuilder<string>.Rent();
                     var propAttrSyntaxCount = propertyAttributes.Length;
 
@@ -408,7 +385,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                     {
                         if (collection.Kind != CollectionKind.NotCollection)
                         {
-                            // Diagnostic emitted by analyzer — skip
                         }
                         else
                         {
@@ -426,7 +402,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                     if (allowOnlyPrivateOrInitSetter && property.SetMethod != null)
                     {
                         var setter = property.SetMethod;
-                        // Only warn — handled by analyzer
                         _ = setter.IsInitOnly || setter.DeclaredAccessibility == Accessibility.Private;
                     }
 
@@ -485,7 +460,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                         , typeSymbol
                     );
 
-                    // Precompute type names
                     var fieldTypeName = GetFieldTypeName(fieldType, collection);
                     var propertyTypeName = property.Type.ToFullName();
 
@@ -498,8 +472,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                     );
 
                     var typesAreDifferent = equalityComparer.Equals(fieldType, property.Type) == false;
-
-                    // Equality precomputation for PropRef uses GetFieldTypeName (not ToFullName)
                     ITypeSymbol equalityFieldType;
 
                     if (fieldEquality.IsNullable)
@@ -511,12 +483,9 @@ namespace EncosyTower.SourceGen.Generators.Data
                         equalityFieldType = fieldType;
                     }
 
-                    // GetFieldTypeName for the equality-field-type with the same collection data
                     var equalityCollection = GetCollection(equalityFieldType, isField: true);
                     var fieldTypeDeclNameForEquality = GetFieldTypeName(equalityFieldType, equalityCollection);
                     var fieldTypeIsReferenceType = equalityFieldType.IsReferenceType;
-
-                    // Forwarded field attributes (fullTypeName + syntax)
                     using var attrBuilder = ImmutableArrayBuilder<ForwardedFieldAttributeData>.Rent();
                     var forwardedAttrCount = fieldAttributes.Length;
 
@@ -564,7 +533,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                     {
                         if (propCollection.Kind != CollectionKind.NotCollection)
                         {
-                            // Diagnostic emitted by analyzer — skip
                         }
                         else
                         {
@@ -576,7 +544,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                 }
             }
 
-            // ── Resolve ImplementedProperty / FieldIsImplemented post-scan ──────────────────
             var resolvedFieldRefs = fieldArrayBuilder.ToImmutable();
 
             for (var i = 0; i < resolvedFieldRefs.Length; i++)
@@ -604,7 +571,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                 }
             }
 
-            // ── Override-equals list (base classes that also implement IData) ────────────────
             if (string.IsNullOrEmpty(baseTypeName) == false)
             {
                 var baseType = typeSymbol.BaseType;
@@ -646,8 +612,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                 overrideEquals = overrideEqualsBuilder.ToImmutable().AsEquatableArray(),
             };
         }
-
-        // ── Internal helpers (symbol-analysis, only used during extraction) ─────────────────
 
         private static FieldCollectionData ToFieldCollectionData(in CollectionRef collection)
         {
@@ -1314,7 +1278,6 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
         }
 
-        // Temporary record used only during extraction — not stored in cache model
         private record struct CollectionRef(
               CollectionKind Kind
             , ITypeSymbol KeyType

@@ -5,77 +5,25 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.EnumTemplates
 {
-    /// <summary>
-    /// Cache-friendly pipeline model for the enum-template source generator.
-    /// Holds only primitive values and equatable collections — no <see cref="SyntaxNode"/>
-    /// or <see cref="ISymbol"/> references — so that Roslyn's incremental generator engine
-    /// can cache and compare instances cheaply across multiple compilations.
-    /// </summary>
     internal struct EnumTemplateSpec : IEquatable<EnumTemplateSpec>
     {
         private const string MEMBERS_FROM_ENUM_ATTRIBUTE = "global::EncosyTower.EnumExtensions.EnumTemplateMembersFromEnumAttribute";
         private const string MEMBER_FROM_TYPE_ATTRIBUTE = "global::EncosyTower.EnumExtensions.EnumTemplateMemberFromTypeAttribute";
 
-        /// <summary>
-        /// Location of the template struct declaration. Intentionally excluded from
-        /// <see cref="Equals(EnumTemplateSpec)"/> and <see cref="GetHashCode"/>:
-        /// location data is not stable across incremental runs and must not drive
-        /// cache invalidation.
-        /// </summary>
         public LocationInfo location;
-
-        /// <summary>
-        /// Pre-computed namespace / containing-type scope opener, produced by
-        /// <c>TypeCreationHelpers.GenerateOpeningAndClosingSource</c> in the
-        /// incremental transform phase. Excluded from <see cref="Equals(EnumTemplateSpec)"/>
-        /// and <see cref="GetHashCode"/> for the same reason as <see cref="location"/>.
-        /// </summary>
         public string openingSource;
-
-        /// <summary>
-        /// Matching closing braces for <see cref="openingSource"/>. Excluded from
-        /// equality / hash for the same reason as <see cref="location"/>.
-        /// </summary>
         public string closingSource;
-
-        /// <summary>Fully qualified name of the template struct.</summary>
         public string templateFullName;
-
-        /// <summary>
-        /// Simple identifier text of the template struct,
-        /// equivalent to <c>Syntax.Identifier.Text</c> in the old non-cache-friendly design.
-        /// </summary>
         public string templateSimpleName;
-
-        /// <summary>Hint name fragment, derived from <c>symbol.ToFileName()</c>.</summary>
         public string fileHintName;
-
         public Accessibility accessibility;
         public bool parentIsNamespace;
         public string namespaceName;
-
-        /// <summary>
-        /// Ordered chain of containing type declarations (outer → inner), each formatted as
-        /// <c>"&lt;accessibility&gt; partial &lt;keyword&gt; &lt;Name&gt;"</c>.
-        /// Empty when the struct is not nested inside another type.
-        /// </summary>
         public EquatableArray<string> containingTypes;
-
-        /// <summary>
-        /// Source-1 inline members extracted from attributes directly on the template struct
-        /// (<c>[EnumTemplateMembersFromEnum]</c> / <c>[EnumTemplateMemberFromType]</c>).
-        /// These are pre-extracted at transform time so they do not need to flow through
-        /// <c>Collect()</c> alongside the source-2 external member provider.
-        /// </summary>
         public EquatableArray<TemplateMemberSpec> inlineMembers;
 
         public readonly bool IsValid => location.IsValid;
 
-        /// <summary>
-        /// Extracts all template metadata from the annotated struct symbol into a fully
-        /// populated, cache-friendly <see cref="EnumTemplateSpec"/>.
-        /// Called once per struct inside the <c>ForAttributeWithMetadataName</c> transform.
-        /// </summary>
         public static EnumTemplateSpec Extract(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
@@ -108,10 +56,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
             var ns = templateSymbol.ContainingNamespace;
             var namespaceName = ns is { IsGlobalNamespace: false } ? ns.ToDisplayString() : string.Empty;
-
             var templateFullName = templateSymbol.ToFullName();
-
-            // Extract source-1 inline members from attributes directly on the template struct.
             var attributes = templateSymbol.GetAttributes(MEMBERS_FROM_ENUM_ATTRIBUTE, MEMBER_FROM_TYPE_ATTRIBUTE);
 
             using var inlineMemberBuilder = ImmutableArrayBuilder<TemplateMemberSpec>.Rent();

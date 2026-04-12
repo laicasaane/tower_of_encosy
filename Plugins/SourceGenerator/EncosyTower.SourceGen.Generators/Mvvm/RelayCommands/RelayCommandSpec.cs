@@ -9,18 +9,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 {
-    /// <summary>
-    /// Cache-friendly, equatable pipeline model for the RelayCommand source generator.
-    /// Holds only primitive values and equatable collections — no <see cref="SyntaxNode"/>
-    /// or <see cref="ISymbol"/> references — so that Roslyn's incremental generator engine
-    /// can cache and compare instances cheaply across multiple compilations.
-    /// </summary>
     public partial struct RelayCommandSpec : IEquatable<RelayCommandSpec>
     {
         public const string RELAY_COMMAND_ATTRIBUTE = "global::EncosyTower.Mvvm.Input.RelayCommandAttribute";
 
-        /// <summary>Excluded from <see cref="Equals(RelayCommandSpec)"/> and
-        /// <see cref="GetHashCode"/> — location data is not stable across incremental runs.</summary>
         public LocationInfo location;
 
         public string className;
@@ -58,11 +50,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             return hash.ToHashCode();
         }
 
-        /// <summary>
-        /// Extracts all relay-command metadata from the annotated class symbol into a fully
-        /// populated, cache-friendly <see cref="RelayCommandSpec"/>.
-        /// Called once per class inside the <c>ForAttributeWithMetadataName</c> transform.
-        /// </summary>
         public static RelayCommandSpec Extract(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
@@ -366,30 +353,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             p.PrintEndLine();
         }
 
-        /// <summary>
-        /// Cache-friendly, equatable model for a single <c>[RelayCommand]</c>-decorated method.
-        /// All symbol-derived data is pre-computed as strings — no <see cref="ISymbol"/> or
-        /// <see cref="SyntaxNode"/> references are retained.
-        /// </summary>
         public struct MemberSpec : IEquatable<MemberSpec>
         {
-            /// <summary>Excluded from <see cref="Equals(MemberSpec)"/> and
-            /// <see cref="GetHashCode"/> — location data is not stable across incremental runs.</summary>
             public LocationInfo location;
-
-            /// <summary>Method name, e.g. <c>"OnDoSomething"</c>.</summary>
             public string methodName;
-
-            /// <summary>Fully-qualified parameter type name, or <see langword="null"/> when the
-            /// method has no parameters.</summary>
             public string paramTypeName;
-
-            /// <summary>Name of the <c>CanExecute</c> method, or <see langword="null"/> when none.</summary>
             public string canExecuteMethodName;
-
-            /// <summary><see langword="true"/> when the <c>CanExecute</c> method itself has a parameter.</summary>
             public bool canExecuteHasParam;
-
             public EquatableArray<AttributeInfo> forwardedFieldAttributes;
             public EquatableArray<AttributeInfo> forwardedPropertyAttributes;
 

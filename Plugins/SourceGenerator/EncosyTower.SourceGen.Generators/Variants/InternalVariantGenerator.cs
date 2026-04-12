@@ -73,11 +73,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
         {
             token.ThrowIfCancellationRequested();
 
-            // Note: IsValidCompilation check deliberately omitted here.
-            // Checking compilation validity requires accessing the full Compilation object inside
-            // the transform step, which prevents incremental cache reuse when unrelated files change.
-            // Validity is deferred to GenerateOutput via CompilationCandidateSlim.isValid.
-
             var semanticModel = context.SemanticModel;
             var syntax = context.Node as MemberAccessExpressionSyntax;
             var typeSyntax = syntax.Expression as GenericNameSyntax;

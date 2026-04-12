@@ -8,15 +8,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
 {
-    /// <summary>
-    /// Analyzes types marked with <c>[AuthorDatabase]</c> and data types implementing
-    /// <c>IData</c> for converter validation errors.
-    /// <para>
-    /// Keeping diagnostics in a <see cref="DiagnosticAnalyzer"/> rather than inside the
-    /// source generator prevents unnecessary source regeneration when only an error (and
-    /// not the surrounding valid code) has changed.
-    /// </para>
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class DatabaseAuthoringDiagnosticAnalyzer : DiagnosticAnalyzer
     {
@@ -29,8 +20,6 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         private const string TABLE_ATTRIBUTE           = "global::" + DATABASES_NAMESPACE + ".TableAttribute";
         private const string DATA_CONVERTER_ATTRIBUTE  = "global::" + DATA_NAMESPACE + ".DataConverterAttribute";
         private const string IDATA                     = "global::" + DATA_NAMESPACE + ".IData";
-
-        // ── Diagnostic Descriptors ─────────────────────────────────────────────────
 
         public static readonly DiagnosticDescriptor MissingDefaultConstructor = new DiagnosticDescriptor(
               id: "AUTHOR_DATABASE_0010"
@@ -158,7 +147,6 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
             , isEnabledByDefault: true
         );
 
-        // ── DiagnosticAnalyzer boilerplate ─────────────────────────────────────────
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => ImmutableArray.Create(
@@ -182,12 +170,9 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         {
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
             context.EnableConcurrentExecution();
-
-            // Validate database-level and table-level converter maps
             context.RegisterSymbolAction(AnalyzeAuthoringType, SymbolKind.NamedType);
         }
 
-        // ── Analysis ───────────────────────────────────────────────────────────────
 
         private static void AnalyzeAuthoringType(SymbolAnalysisContext context)
         {
@@ -207,8 +192,6 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
             }
 
             var attribSyntax = authorAttrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken);
-
-            // Validate database-level converters
             var dbAttrib = GetAttribute(databaseSymbol, DATABASE_ATTRIBUTE);
 
             if (dbAttrib != null)
@@ -225,7 +208,6 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                 }
             }
 
-            // Validate table-level converters
             foreach (var member in databaseSymbol.GetMembers())
             {
                 if (member is not IPropertySymbol property)
@@ -246,7 +228,6 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                     }
                 }
 
-                // Validate [DataConverter] on IData members reachable from this table
                 if (property.Type is INamedTypeSymbol tableType && tableType.BaseType != null)
                 {
                     ValidateDataMembers(context, tableType);
@@ -256,7 +237,6 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
 
         private static void ValidateDataMembers(SymbolAnalysisContext context, INamedTypeSymbol tableType)
         {
-            // Walk through type hierarchy to find IData members
             var visited = new HashSet<string>(System.StringComparer.Ordinal);
             var queue = new Queue<INamedTypeSymbol>();
             queue.Enqueue(tableType);
@@ -289,7 +269,6 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                         ValidateMemberConverter(context, converterAttrib, memberType);
                     }
 
-                    // Queue nested IData types
                     if (memberType is INamedTypeSymbol namedMemberType && IsImplementingIData(namedMemberType))
                     {
                         queue.Enqueue(namedMemberType);
@@ -355,7 +334,6 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                 if (ValidateConverterType(context, converterType, syntax, returnType: null) == false)
                     continue;
 
-                // Find the return type of the Convert method to use as the map key
                 if (TryFindConvertReturnType(converterType, out var returnTypeName) == false)
                     continue;
 
@@ -520,7 +498,6 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
             return true;
         }
 
-        // ── Helpers ────────────────────────────────────────────────────────────────
 
         private static AttributeData GetAttribute(ISymbol symbol, string fullMetadataName)
         {

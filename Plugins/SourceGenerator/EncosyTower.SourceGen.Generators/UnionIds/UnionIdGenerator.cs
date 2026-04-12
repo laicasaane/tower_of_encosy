@@ -157,8 +157,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             info.namespaceName = ns is { IsGlobalNamespace: false } ? ns.ToDisplayString() : string.Empty;
             info.accessibility = symbol.DeclaredAccessibility;
             info.location = LocationInfo.From(context.TargetNode.GetLocation());
-
-            // Determine if parent is a namespace (for EnumExtensionsDeclaration)
             info.parentIsNamespace = context.TargetNode.Parent is BaseNamespaceDeclarationSyntax;
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
@@ -170,8 +168,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             );
 
             info.containingTypes = symbol.GetContainingTypes();
-
-            // Inline kinds via [UnionIdKind] attributes on this struct
             info.inlineKinds = GetInlineKinds(symbol, info.fullName, token);
 
             return info;
@@ -349,7 +345,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     info.externalEnumExtensionsFullName = $"{kindSymbol.ToFullName()}Extensions";
                 }
 
-                // Collect enum members
                 var enumMembers = kindSymbol.GetMembers();
                 using var memberBuilder = ImmutableArrayBuilder<EnumMemberSpec>.Rent();
                 var maxBytes = 0;

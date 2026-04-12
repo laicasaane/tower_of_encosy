@@ -5,11 +5,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
-    /// <summary>
-    /// Analyzer that reports validation diagnostics for structs annotated with
-    /// <c>[StatCollection]</c>, covering conditions that would cause the source generator
-    /// to silently produce no output.
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal class StatCollectionDiagnosticAnalyzer : DiagnosticAnalyzer
     {

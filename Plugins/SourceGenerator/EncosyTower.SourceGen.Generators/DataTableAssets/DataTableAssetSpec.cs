@@ -9,7 +9,6 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
 
     public partial struct DataTableAssetSpec : IEquatable<DataTableAssetSpec>
     {
-        /// <summary>Excluded from equality — location is not stable across incremental runs.</summary>
         public LocationInfo location;
 
         public string className;
@@ -56,7 +55,6 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                 return default;
             }
 
-            // Walk base type chain to find DataTableAsset<TId, TData[, TConv]>
             ITypeSymbol idType = null;
             ITypeSymbol dataType = null;
             ITypeSymbol convertedIdType = null;
@@ -91,7 +89,6 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                 return default;
             }
 
-            // Type kind validation — invalid types are reported by the analyzer, not the generator
             if (idType.TypeKind is not (TypeKind.Struct or TypeKind.Class or TypeKind.Enum))
             {
                 return default;
@@ -102,7 +99,6 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                 return default;
             }
 
-            // Scan members to detect manually-implemented methods
             var members = symbol.GetMembers();
             var comparer = SymbolEqualityComparer.Default;
             var getIdImpl = false;
@@ -151,18 +147,14 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                 }
             }
 
-            // Nothing to generate if GetId is already implemented
             if (getIdImpl)
             {
                 return default;
             }
 
-            // Pre-compute type names
             var idTypeName = idType.ToFullName();
             var dataTypeName = dataType.ToFullName();
             var convertedIdTypeName = convertedIdType?.ToFullName();
-
-            // Pre-compute convert expression (symbol-only, no syntax access)
             string convertExpression = null;
 
             if (convertedIdType != null && convertIdImpl == false)
@@ -180,10 +172,8 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                 }
             }
 
-            // IInitializable check
             var dataTypeImplementsIInitializable = dataType.ImplementsInterface(IINITIALIZABLE);
 
-            // Opening/closing source — only syntax tree access in this method
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   classSyntax
                 , token
@@ -192,7 +182,6 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            // Hint name and source file path
             var syntaxTree = classSyntax.SyntaxTree;
             var fileTypeName = symbol.ToFileName();
             var compilation = context.SemanticModel.Compilation;

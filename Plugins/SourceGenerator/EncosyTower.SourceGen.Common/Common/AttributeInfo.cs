@@ -13,7 +13,6 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace EncosyTower.SourceGen
 {
-
     /// <summary>
     /// A model representing an attribute declaration.
     /// </summary>
@@ -44,13 +43,11 @@ namespace EncosyTower.SourceGen
             using var constructorArguments = ImmutableArrayBuilder<TypedConstantInfo>.Rent();
             using var namedArguments = ImmutableArrayBuilder<(string, TypedConstantInfo)>.Rent();
 
-            // Get the constructor arguments
             foreach (TypedConstant typedConstant in attributeData.ConstructorArguments)
             {
                 constructorArguments.Add(TypedConstantInfo.From(typedConstant));
             }
 
-            // Get the named arguments
             foreach (KeyValuePair<string, TypedConstant> namedConstant in attributeData.NamedArguments)
             {
                 namedArguments.Add((namedConstant.Key, TypedConstantInfo.From(namedConstant.Value)));
@@ -79,7 +76,6 @@ namespace EncosyTower.SourceGen
 
             foreach (AttributeArgumentSyntax argument in arguments)
             {
-                // The attribute expression has to have an available operation to extract information from
                 if (semanticModel.GetOperation(argument.Expression, token) is not IOperation operation)
                 {
                     continue;
@@ -87,8 +83,6 @@ namespace EncosyTower.SourceGen
 
                 var argumentInfo = TypedConstantInfo.From(operation, semanticModel, argument.Expression, token);
 
-                // Try to get the identifier name if the current expression is a named argument expression. If it
-                // isn't, then the expression is a normal attribute constructor argument, so no extra work is needed.
                 if (argument.NameEquals?.Name.Identifier.ValueText is string argumentName)
                 {
                     namedArguments.Add((argumentName, argumentInfo));
@@ -129,12 +123,10 @@ namespace EncosyTower.SourceGen
         /// <returns>The <see cref="ExpressionSyntax"/> instance representing the current value.</returns>
         public AttributeSyntax GetSyntax()
         {
-            // Gather the constructor arguments
             IEnumerable<AttributeArgumentSyntax> arguments =
             ConstructorArgumentInfo
             .Select(static arg => AttributeArgument(arg.GetSyntax()));
 
-            // Gather the named arguments
             IEnumerable<AttributeArgumentSyntax> namedArguments =
             NamedArgumentInfo.Select(static arg =>
                 AttributeArgument(arg.Value.GetSyntax())
