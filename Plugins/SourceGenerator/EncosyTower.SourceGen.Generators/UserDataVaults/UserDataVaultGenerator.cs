@@ -290,8 +290,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             SourceGenHelpers.ProjectPath = projectPath;
 
             var openingPrinter = Printer.DefaultLarge;
-            var printUsings = compilation.references.unitask
-                ? (PrinterAction)PrintUsingUniTask : PrintUsingAwaitable;
+            PrinterAction printUsings = compilation.references.unitask
+                ? PrintUsingUniTask
+                : PrintUsingAwaitable;
+
             printUsings(ref openingPrinter);
 
             var hasNamespace = string.IsNullOrEmpty(vaultInfo.namespaceName) == false;

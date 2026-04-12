@@ -86,7 +86,9 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             foreach (var k in externalKinds)
             {
                 if (string.Equals(k.idFullName, id.fullName, StringComparison.Ordinal))
+                {
                     allKinds.Add(k);
+                }
             }
 
             var kindRefs = KindRefs = new List<KindRef>(allKinds.Count);
@@ -104,23 +106,31 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             foreach (var candidate in allKinds)
             {
                 if (string.Equals(candidate.kindFullName, id.fullName, StringComparison.Ordinal))
+                {
                     continue;
+                }
 
                 if (seenFullNames.Contains(candidate.kindFullName))
+                {
                     continue;
+                }
 
                 var customName = candidate.name.ToValidIdentifier();
                 var hasCustomName = string.IsNullOrEmpty(customName) == false;
                 var kindName = hasCustomName ? customName : candidate.kindSimpleName;
 
                 if (uniqueKindNames.ContainsKey(kindName))
+                {
                     continue;
+                }
 
                 seenFullNames.Add(candidate.kindFullName);
                 uniqueKindNames.Add(kindName, candidate.kindFullName);
 
                 if (hasCustomName == false && removeSuffix)
+                {
                     kindName = RemoveTypeKindSuffix(kindName);
+                }
 
                 var order = candidate.order;
                 var size = candidate.kindUnmanagedSize;
@@ -138,7 +148,9 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     var memList = new List<EnumMemberSpec>(candidate.kindEnumValues.Count);
 
                     foreach (var m in candidate.kindEnumValues)
+                    {
                         memList.Add(m);
+                    }
 
                     var extensions = new EnumExtensionsDeclaration(references.unityCollections, candidate.kindEnumFixedStringBytes) {
                         GeneratedCode = GENERATED_CODE,
@@ -217,13 +229,19 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 });
 
                 if (string.IsNullOrWhiteSpace(candidate.displayName) == false)
+                {
                     kindHasDisplayName = true;
+                }
 
                 if (size > maxIdSize)
+                {
                     maxIdSize = size;
+                }
 
                 if (order > maxKeyOrder)
+                {
                     maxKeyOrder = order;
+                }
 
                 if (maxIdSize >= (int)UnionIdSize.ULong)
                 {
@@ -259,8 +277,10 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
                 var removeCount = kindRefs.Count - SizeToIntCount(kindSize);
 
-                for (; removeCount >= 0; removeCount--)
-                    kindRefs.RemoveAt(kindRefs.Count - 1);
+                if (removeCount >= 0)
+                {
+                    kindRefs.RemoveRange(kindRefs.Count - (removeCount + 1), removeCount + 1);
+                }
 
                 RawTypeName = ToUnsignedTypeName(typeSize);
                 IdRawUnsignedTypeName = ToUnsignedTypeName(idSize);
@@ -301,7 +321,9 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         private static string RemoveTypeKindSuffix(string name)
         {
             while (name.Length > 4 && name.EndsWith("Type") || name.EndsWith("Kind"))
+            {
                 name = name.Remove(name.Length - 4, 4);
+            }
 
             return name;
         }

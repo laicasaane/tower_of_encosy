@@ -104,9 +104,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             var componentFullTypeName = componentType.ToFullName();
             var componentLabelName = MemberNameToLabel(componentType.Name);
-
             var compilation = context.SemanticModel.Compilation;
-
             var excludedMembers = new HashSet<string>(StringComparer.Ordinal);
 
             foreach (var attrData in userClassSymbol.GetAttributes(MONO_BINDING_EXCLUDE_ATTRIBUTE))
@@ -387,16 +385,16 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
             }
 
-            var monoBinderBaseSymbol      = compilation.GetTypeByMetadataName("EncosyTower.Mvvm.ViewBinding.Components.MonoBinder`1");
+            var monoBinderBaseSymbol = compilation.GetTypeByMetadataName("EncosyTower.Mvvm.ViewBinding.Components.MonoBinder`1");
             var monoBindingPropBaseSymbol = compilation.GetTypeByMetadataName("EncosyTower.Mvvm.ViewBinding.Components.MonoBindingProperty`1");
-            var monoBindingCmdBaseSymbol  = compilation.GetTypeByMetadataName("EncosyTower.Mvvm.ViewBinding.Components.MonoBindingCommand`1");
-            var isOuterClassSealed  = userClassSymbol.IsSealed;
+            var monoBindingCmdBaseSymbol = compilation.GetTypeByMetadataName("EncosyTower.Mvvm.ViewBinding.Components.MonoBindingCommand`1");
+            var isOuterClassSealed = userClassSymbol.IsSealed;
             var outerTypeIdentifier = userClassSymbol.ToValidIdentifier();
             var hasOnBindPropertyFailedMethod = false;
-            var hasOnBindCommandFailedMethod  = false;
+            var hasOnBindCommandFailedMethod = false;
 
             {
-                var walkType      = userClassSymbol;
+                var walkType = userClassSymbol;
                 var isCurrentType = true;
 
                 while (walkType != null)
@@ -435,8 +433,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
 
             var outerBindingPropertyNames = new HashSet<string>(StringComparer.Ordinal);
-            var outerConverterNames       = new HashSet<string>(StringComparer.Ordinal);
-            var outerBindingCommandNames  = new HashSet<string>(StringComparer.Ordinal);
+            var outerConverterNames = new HashSet<string>(StringComparer.Ordinal);
+            var outerBindingCommandNames = new HashSet<string>(StringComparer.Ordinal);
             var outerNonVariantTypeFilter = new Dictionary<string, BinderSpec.NonVariantTypeSpec>(StringComparer.Ordinal);
             var semanticModel = context.SemanticModel;
 
@@ -448,14 +446,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 if (outerMember is IMethodSymbol outerMethod)
                 {
                     var bindingPropAttr = outerMethod.GetAttribute(BinderSpec.BINDING_PROPERTY_ATTRIBUTE);
-                    var bindingCmdAttr  = outerMethod.GetAttribute(BinderSpec.BINDING_COMMAND_ATTRIBUTE);
+                    var bindingCmdAttr = outerMethod.GetAttribute(BinderSpec.BINDING_COMMAND_ATTRIBUTE);
 
                     if (bindingPropAttr != null && outerMethod.Parameters.Length < 2)
                     {
-                        var outerParamType         = string.Empty;
-                        var outerVarConvPropName   = string.Empty;
-                        var outerParamRefKind      = RefKind.None;
-                        var outerIsParamVariant    = true;
+                        var outerParamType = string.Empty;
+                        var outerVarConvPropName = string.Empty;
+                        var outerParamRefKind = RefKind.None;
+                        var outerIsParamVariant = true;
 
                         if (outerMethod.Parameters.Length == 1)
                         {
@@ -502,15 +500,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                         && outerMethod.Parameters.Length < 2
                     )
                     {
-                        var outerCmdParamType     = string.Empty;
-                        var outerCmdParamRefKind  = RefKind.None;
-                        var outerCmdParamName     = string.Empty;
+                        var outerCmdParamType = string.Empty;
+                        var outerCmdParamRefKind = RefKind.None;
+                        var outerCmdParamName = string.Empty;
 
                         if (outerMethod.Parameters.Length == 1
                             && outerMethod.Parameters[0].RefKind is RefKind.None or RefKind.In or RefKind.Ref
                         )
                         {
-                            var outerParam        = outerMethod.Parameters[0];
+                            var outerParam = outerMethod.Parameters[0];
                             outerCmdParamType = outerParam.Type.ToFullName();
                             outerCmdParamRefKind = outerParam.RefKind;
                             outerCmdParamName = outerParam.Name;
@@ -546,9 +544,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
             }
 
-            using var outerPropRefBuilder      = ImmutableArrayBuilder<BinderSpec.BindingPropertySpec>.Rent();
-            using var outerCmdRefBuilder       = ImmutableArrayBuilder<BinderSpec.BindingCommandSpec>.Rent();
-            using var outerDiagnostics         = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
+            using var outerPropRefBuilder = ImmutableArrayBuilder<BinderSpec.BindingPropertySpec>.Rent();
+            using var outerCmdRefBuilder = ImmutableArrayBuilder<BinderSpec.BindingCommandSpec>.Rent();
+            using var outerDiagnostics = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
 
             foreach (var entry in tempOuterPropMethods.WrittenSpan)
             {
@@ -599,11 +597,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             using var outerNonVariantTypesBuilder = ImmutableArrayBuilder<BinderSpec.NonVariantTypeSpec>.Rent();
 
             foreach (var nvt in outerNonVariantTypeFilter.Values)
+            {
                 outerNonVariantTypesBuilder.Add(nvt);
+            }
 
-            var syntaxTree  = classSyntax.SyntaxTree;
+            var syntaxTree = classSyntax.SyntaxTree;
             var fileTypeName = userClassSymbol.ToFileName();
-
             var hintName = syntaxTree.GetGeneratedSourceFileName(
                   MonoBinderGenerator.GENERATOR_NAME
                 , classSyntax
@@ -667,7 +666,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
 
             var isUnityEvent = prop.Type.InheritsFromType(UNITY_EVENT_BASE_TYPE);
-            var isDelegate   = isUnityEvent == false && prop.Type.TypeKind == TypeKind.Delegate;
+            var isDelegate = isUnityEvent == false && prop.Type.TypeKind == TypeKind.Delegate;
 
             if (isUnityEvent || isDelegate)
             {
@@ -754,7 +753,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
 
             var isUnityEvent = memberType.InheritsFromType(UNITY_EVENT_BASE_TYPE);
-            var isDelegate   = isUnityEvent == false && memberType.TypeKind == TypeKind.Delegate;
+            var isDelegate = isUnityEvent == false && memberType.TypeKind == TypeKind.Delegate;
 
             if (isUnityEvent == false && isDelegate == false)
             {
@@ -853,9 +852,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 return false;
             }
 
-            var paramType    = method.Parameters[0].Type;
+            var paramType = method.Parameters[0].Type;
             var isUnityEvent = paramType.InheritsFromType(UNITY_EVENT_BASE_TYPE);
-            var isDelegate   = isUnityEvent == false && paramType.TypeKind == TypeKind.Delegate;
+            var isDelegate = isUnityEvent == false && paramType.TypeKind == TypeKind.Delegate;
 
             if (isUnityEvent || isDelegate)
             {
@@ -871,12 +870,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 ? MemberNameToLabel(memberName)
                 : explicitInfo.label;
 
-            var memberPascalName   = MakeFirstCharUpper(memberName);
+            var memberPascalName = MakeFirstCharUpper(memberName);
             var generatedClassName = $"Binding{memberPascalName}";
             var setterMethodName = memberPascalName;
 
             var propFullTypeName = paramType.ToFullName();
-            var needsIn          = NeedsInModifier(paramType);
+            var needsIn = NeedsInModifier(paramType);
 
             var variantConverterPropertyName = propFullTypeName == BinderSpec.VARIANT_TYPE
                 ? string.Empty

@@ -108,10 +108,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 }
             }
 
-            if (constructorIndex != 0)
-            {
-            }
-            else
+            if (constructorIndex == 0)
             {
                 var constructor = constructors[constructorIndex];
                 var parameters = constructor.Parameters;
@@ -124,9 +121,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     {
                         args.Add(new ParamDeclaration(param.Type, argType));
                         validCount += 1;
-                    }
-                    else
-                    {
                     }
                 }
 
@@ -150,6 +144,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     , info.TypeName
                     , info.DataTypeHasDefaultConstructor
                 );
+
                 AccessorTypeName = string.Empty;
             }
             else
@@ -242,13 +237,16 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             foreach (var member in dataType.GetMembers())
             {
-                if (member is Microsoft.CodeAnalysis.IMethodSymbol method
-                    && method.MethodKind == Microsoft.CodeAnalysis.MethodKind.Constructor)
+                if (member is IMethodSymbol method && method.MethodKind == MethodKind.Constructor)
                 {
                     if (method.Parameters.Length > 0)
+                    {
                         nonDefaultCount++;
+                    }
                     else
+                    {
                         defaultCount++;
+                    }
                 }
             }
 

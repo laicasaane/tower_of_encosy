@@ -381,15 +381,11 @@ namespace EncosyTower.SourceGen.Generators.Data
                     orderBuilder.Add(new OrderData { index = fieldIndex, isPropRef = false });
                     fieldArrayBuilder.Add(fieldRefData);
 
-                    if (withId && string.Equals(propertyName, "Id", StringComparison.Ordinal))
+                    if (withId && collection.Kind == CollectionKind.NotCollection
+                        && string.Equals(propertyName, "Id", StringComparison.Ordinal)
+                    )
                     {
-                        if (collection.Kind != CollectionKind.NotCollection)
-                        {
-                        }
-                        else
-                        {
-                            idPropertyTypeName = propertyType.ToFullName();
-                        }
+                        idPropertyTypeName = propertyType.ToFullName();
                     }
 
                     continue;
@@ -402,7 +398,11 @@ namespace EncosyTower.SourceGen.Generators.Data
                     if (allowOnlyPrivateOrInitSetter && property.SetMethod != null)
                     {
                         var setter = property.SetMethod;
-                        _ = setter.IsInitOnly || setter.DeclaredAccessibility == Accessibility.Private;
+
+                        if (setter.IsInitOnly == false && setter.DeclaredAccessibility != Accessibility.Private)
+                        {
+                            continue;
+                        }
                     }
 
                     if (dataPropertyNames.Contains(property.Name) == false)
@@ -529,15 +529,11 @@ namespace EncosyTower.SourceGen.Generators.Data
                     orderBuilder.Add(new OrderData { index = propIndex, isPropRef = true });
                     propArrayBuilder.Add(propRefData);
 
-                    if (withId && string.Equals(property.Name, "Id", StringComparison.Ordinal))
+                    if (withId && propCollection.Kind == CollectionKind.NotCollection
+                         && string.Equals(property.Name, "Id", StringComparison.Ordinal)
+                    )
                     {
-                        if (propCollection.Kind != CollectionKind.NotCollection)
-                        {
-                        }
-                        else
-                        {
-                            idPropertyTypeName = property.Type.ToFullName();
-                        }
+                        idPropertyTypeName = property.Type.ToFullName();
                     }
 
                     continue;

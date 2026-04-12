@@ -146,12 +146,9 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                     return default;
                 }
             }
-            else
+            else if (typeFullName.StartsWith(NAMESPACE_PREFIX))
             {
-                if (typeFullName.StartsWith(NAMESPACE_PREFIX))
-                {
-                    return default;
-                }
+                return default;
             }
 
             var assemblyName = string.Empty;
@@ -473,14 +470,12 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         private struct TypeCacheCallSite : IEquatable<TypeCacheCallSite>
         {
             public string compilationAssemblyName;
-
             public string containingTypeFullName;
             public string containingTypeFileName;
             public string containingTypeIdentifier;
             public bool isStruct;
             public bool isRefStruct;
             public bool isRecord;
-
             public int syntaxTreeStableHash;
             public string sourceFileBaseName;
             public string scopeOpening;
@@ -533,14 +528,12 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         private struct ContainingTypeKey : IEquatable<ContainingTypeKey>
         {
             public string compilationAssemblyName;
-
             public string containingTypeFullName;
             public string containingTypeFileName;
             public string containingTypeIdentifier;
             public bool isStruct;
             public bool isRefStruct;
             public bool isRecord;
-
             public int syntaxTreeStableHash;
             public string sourceFileBaseName;
             public string scopeOpening;
