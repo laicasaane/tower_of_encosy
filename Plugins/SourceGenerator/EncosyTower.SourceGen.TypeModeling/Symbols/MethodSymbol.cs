@@ -15,9 +15,11 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
 
         public string Name => _symbol?.Name ?? string.Empty;
 
-        public string ReturnTypeName => _symbol?.ReturnType.ToDisplayString(SymbolFormats.SimpleNoGlobal) ?? string.Empty;
+        public string ReturnTypeName
+            => _symbol?.ReturnType.ToDisplayString(SymbolFormats.SimpleNoGlobal) ?? string.Empty;
 
-        public string ReturnTypeFullName => _symbol?.ReturnType.ToDisplayString(SymbolFormats.FullyQualified) ?? string.Empty;
+        public string ReturnTypeFullName
+            => _symbol?.ReturnType.ToDisplayString(SymbolFormats.FullyQualified) ?? string.Empty;
 
         public Accessibility Accessibility => _symbol?.DeclaredAccessibility ?? Accessibility.NotApplicable;
 
@@ -36,6 +38,8 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
         public MethodKind MethodKind => _symbol?.MethodKind ?? MethodKind.Ordinary;
 
         public int ParameterCount => _symbol?.Parameters.Length ?? 0;
+
+        public IMethodSymbol Symbol => _symbol;
 
         public ImmutableArray<ParameterSymbol> Parameters
         {
@@ -124,7 +128,5 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
 
             return default;
         }
-
-        public IMethodSymbol Symbol => _symbol;
     }
 }

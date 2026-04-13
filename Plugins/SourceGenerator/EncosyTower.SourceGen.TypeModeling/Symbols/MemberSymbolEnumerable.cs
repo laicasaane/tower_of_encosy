@@ -27,7 +27,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
                 _current = default;
             }
 
-            public FieldSymbol Current => _current;
+            public readonly FieldSymbol Current => _current;
 
             public bool MoveNext()
             {
@@ -73,7 +73,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
                 _current = default;
             }
 
-            public PropertySymbol Current => _current;
+            public readonly PropertySymbol Current => _current;
 
             public bool MoveNext()
             {
@@ -119,7 +119,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
                 _current = default;
             }
 
-            public MethodSymbol Current => _current;
+            public readonly MethodSymbol Current => _current;
 
             public bool MoveNext()
             {
@@ -166,7 +166,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
                 _current = default;
             }
 
-            public EventSymbol Current => _current;
+            public readonly EventSymbol Current => _current;
 
             public bool MoveNext()
             {
@@ -212,7 +212,7 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
                 _current = default;
             }
 
-            public ConstructorSymbol Current => _current;
+            public readonly ConstructorSymbol Current => _current;
 
             public bool MoveNext()
             {

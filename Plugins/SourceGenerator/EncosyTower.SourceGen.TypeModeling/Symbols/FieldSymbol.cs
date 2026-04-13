@@ -32,6 +32,8 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
 
         public RefKind RefKind => _symbol?.RefKind ?? RefKind.None;
 
+        public IFieldSymbol Symbol => _symbol;
+
         public bool HasAttribute(string fullyQualifiedName)
         {
             if (_symbol == null)
@@ -73,7 +75,5 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
 
             return default;
         }
-
-        public IFieldSymbol Symbol => _symbol;
     }
 }

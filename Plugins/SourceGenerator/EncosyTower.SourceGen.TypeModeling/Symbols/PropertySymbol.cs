@@ -58,6 +58,8 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
             }
         }
 
+        public IPropertySymbol Symbol => _symbol;
+
         public bool HasAttribute(string fullyQualifiedName)
         {
             if (_symbol == null)
@@ -99,7 +101,5 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
 
             return default;
         }
-
-        public IPropertySymbol Symbol => _symbol;
     }
 }

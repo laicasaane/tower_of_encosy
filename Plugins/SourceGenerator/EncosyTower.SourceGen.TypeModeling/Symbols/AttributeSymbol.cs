@@ -16,10 +16,13 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
 
         public bool Exists => _data != null;
 
-        public string FullName => _data?.AttributeClass?.ToDisplayString(SymbolFormats.FullyQualified) ?? string.Empty;
+        public string FullName
+            => _data?.AttributeClass?.ToDisplayString(SymbolFormats.FullyQualified) ?? string.Empty;
 
-        public ImmutableArray<TypedConstant> ConstructorArguments => _data?.ConstructorArguments ?? ImmutableArray<TypedConstant>.Empty;
+        public ImmutableArray<TypedConstant> ConstructorArguments
+            => _data?.ConstructorArguments ?? ImmutableArray<TypedConstant>.Empty;
 
-        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments => _data?.NamedArguments ?? ImmutableArray<KeyValuePair<string, TypedConstant>>.Empty;
+        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments
+            => _data?.NamedArguments ?? ImmutableArray<KeyValuePair<string, TypedConstant>>.Empty;
     }
 }

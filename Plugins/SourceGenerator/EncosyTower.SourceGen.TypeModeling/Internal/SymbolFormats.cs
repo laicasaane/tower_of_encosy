@@ -2,12 +2,11 @@ using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.TypeModeling.Internal
 {
-    public static class SymbolFormats
+    internal static class SymbolFormats
     {
         public static readonly SymbolDisplayFormat FullyQualified = new(
               globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Included
-            , typeQualificationStyle:
-                  SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces
+            , typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces
             , genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters
             , miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes
         );

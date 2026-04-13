@@ -17,7 +17,14 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
 
         public string FullName => _symbol?.ToDisplayString(SymbolFormats.FullyQualified) ?? string.Empty;
 
-        public string Namespace => _symbol?.ContainingNamespace?.ToDisplayString() ?? string.Empty;
+        public string Namespace
+        {
+            get
+            {
+                var ns = _symbol.ContainingNamespace;
+                return ns is { IsGlobalNamespace: false } ? ns.ToDisplayString() : string.Empty;
+            }
+        }
 
         public Accessibility Accessibility => _symbol?.DeclaredAccessibility ?? Accessibility.NotApplicable;
 
@@ -52,6 +59,10 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
         public EventSymbolEnumerable Events => new(_symbol?.GetMembers() ?? ImmutableArray<ISymbol>.Empty);
 
         public ConstructorSymbolEnumerable Constructors => new(_symbol?.GetMembers() ?? ImmutableArray<ISymbol>.Empty);
+
+        public TypeSymbol BaseType => _symbol?.BaseType != null ? new TypeSymbol(_symbol.BaseType) : default;
+
+        public INamedTypeSymbol Symbol => _symbol;
 
         public bool HasAttribute(string fullyQualifiedName)
         {
@@ -115,9 +126,5 @@ namespace EncosyTower.SourceGen.TypeModeling.Symbols
 
             return false;
         }
-
-        public TypeSymbol BaseType => _symbol?.BaseType != null ? new TypeSymbol(_symbol.BaseType) : default;
-
-        public INamedTypeSymbol Symbol => _symbol;
     }
 }
