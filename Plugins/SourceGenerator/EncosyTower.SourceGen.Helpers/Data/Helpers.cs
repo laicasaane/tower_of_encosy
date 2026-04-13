@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace EncosyTower.SourceGen.Common.Data.Common
+namespace EncosyTower.SourceGen.Helpers.Data
 {
     public static class Helpers
     {

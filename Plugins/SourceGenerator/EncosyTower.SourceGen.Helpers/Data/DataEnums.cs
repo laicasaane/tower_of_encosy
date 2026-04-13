@@ -1,6 +1,6 @@
 using System;
 
-namespace EncosyTower.SourceGen.Common.Data.Common
+namespace EncosyTower.SourceGen.Helpers.Data
 {
     public enum DataFieldPolicy
     {

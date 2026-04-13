@@ -1,6 +1,6 @@
 using System;
 
-namespace EncosyTower.SourceGen.Common.Data.Common
+namespace EncosyTower.SourceGen.Helpers.Data
 {
     /// <summary>
     /// Cache-friendly, equatable model for a <c>[DataProperty]</c>-decorated property that has a

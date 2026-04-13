@@ -1,4 +1,4 @@
-﻿namespace EncosyTower.SourceGen.Common.Types.Caches
+﻿namespace EncosyTower.SourceGen.Helpers.Types.Caches
 {
     public static class RuntimeTypeCacheMethods
     {

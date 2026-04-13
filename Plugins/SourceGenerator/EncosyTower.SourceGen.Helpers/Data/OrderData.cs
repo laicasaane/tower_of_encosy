@@ -1,6 +1,6 @@
 using System;
 
-namespace EncosyTower.SourceGen.Common.Data.Common
+namespace EncosyTower.SourceGen.Helpers.Data
 {
     /// <summary>
     /// Cache-friendly, equatable replacement for the nested <c>DataDeclaration.Order</c> struct.

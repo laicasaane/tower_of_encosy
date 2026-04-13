@@ -1,4 +1,4 @@
-﻿namespace EncosyTower.SourceGen.Common.UnionIds
+﻿namespace EncosyTower.SourceGen.Helpers.UnionIds
 {
     /// <summary>
     /// Specifies the backing storage size in bytes of a struct decorated with <c>[UnionId]</c>.

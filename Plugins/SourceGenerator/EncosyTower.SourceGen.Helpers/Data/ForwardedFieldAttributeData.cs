@@ -1,6 +1,6 @@
 using System;
 
-namespace EncosyTower.SourceGen.Common.Data.Common
+namespace EncosyTower.SourceGen.Helpers.Data
 {
     /// <summary>
     /// Cache-friendly, equatable model for a forwarded attribute on a <c>[DataProperty]</c> member.
