@@ -754,8 +754,8 @@ namespace EncosyTower.SourceGen
 
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
-                        if (!semanticModel.GetSymbolInfo(attribute, token)
-                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol)
+                        if (semanticModel.GetSymbolInfo(attribute, token)
+                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
                         {
                             diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);
@@ -849,8 +849,8 @@ namespace EncosyTower.SourceGen
 
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
-                        if (!semanticModel.GetSymbolInfo(attribute, token)
-                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol)
+                        if (semanticModel.GetSymbolInfo(attribute, token)
+                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
                         {
                             diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);
@@ -940,8 +940,8 @@ namespace EncosyTower.SourceGen
 
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
-                        if (!semanticModel.GetSymbolInfo(attribute, token)
-                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol)
+                        if (semanticModel.GetSymbolInfo(attribute, token)
+                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
                         {
                             diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);
@@ -1031,8 +1031,8 @@ namespace EncosyTower.SourceGen
 
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
-                        if (!semanticModel.GetSymbolInfo(attribute, token)
-                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol)
+                        if (semanticModel.GetSymbolInfo(attribute, token)
+                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
                         {
                             diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);
@@ -1123,8 +1123,8 @@ namespace EncosyTower.SourceGen
 
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
-                        if (!semanticModel.GetSymbolInfo(attribute, token)
-                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol)
+                        if (semanticModel.GetSymbolInfo(attribute, token)
+                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
                         {
                             diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);

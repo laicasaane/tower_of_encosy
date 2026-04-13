@@ -87,7 +87,7 @@ namespace Newtonsoft.Json.Utilities
 
             for (int i = 0; i < s.Length; i++)
             {
-                if (!char.IsWhiteSpace(s[i]))
+                if (char.IsWhiteSpace(s[i]) == false)
                 {
                     return false;
                 }
@@ -195,7 +195,7 @@ namespace Newtonsoft.Json.Utilities
                             if (i > 0 && hasNext)
                             {
                                 char nextChar = s[i + 1];
-                                if (!char.IsUpper(nextChar) && nextChar != separator)
+                                if (char.IsUpper(nextChar) == false && nextChar != separator)
                                 {
                                     sb.Append(separator);
                                 }
@@ -288,14 +288,14 @@ namespace Newtonsoft.Json.Utilities
             }
             for (; start < end; start++)
             {
-                if (!char.IsWhiteSpace(s[start]))
+                if (char.IsWhiteSpace(s[start]) == false)
                 {
                     break;
                 }
             }
             for (; end >= start; end--)
             {
-                if (!char.IsWhiteSpace(s[end]))
+                if (char.IsWhiteSpace(s[end]) == false)
                 {
                     break;
                 }

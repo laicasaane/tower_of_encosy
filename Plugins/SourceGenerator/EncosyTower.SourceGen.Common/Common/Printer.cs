@@ -535,7 +535,7 @@ namespace EncosyTower.SourceGen
             {
                 get
                 {
-                    var printer                 = AsMultiline;
+                    var printer = AsMultiline;
                     printer.listPrinter.printer = printer.listPrinter.printer.WithIncreasedIndent();
                     return printer;
                 }
@@ -829,7 +829,7 @@ namespace EncosyTower.SourceGen
             }
             Print(key);
             var scope = basePrinter.Print(" = IEnumerable<>").ScopePrinter(openScope);
-            var list  = scope.PrintBeginLine().AsListPrinter(", ").AsMultiline;
+            var list = scope.PrintBeginLine().AsListPrinter(", ").AsMultiline;
             foreach (var v in value)
                 new DebugPrinter(list.NextItemPrinter()).Print(v);
             scope.PrintEndLine();
@@ -859,7 +859,7 @@ namespace EncosyTower.SourceGen
         {
             Print(key);
             var scope = basePrinter.Print(" = ").ScopePrinter(openScope);
-            var list  = scope.PrintBeginLine().AsListPrinter(", ").AsMultiline;
+            var list = scope.PrintBeginLine().AsListPrinter(", ").AsMultiline;
             foreach (var v in value)
                 new DebugPrinter(list.NextItemPrinter()).Print(v);
             scope.PrintEndLine();

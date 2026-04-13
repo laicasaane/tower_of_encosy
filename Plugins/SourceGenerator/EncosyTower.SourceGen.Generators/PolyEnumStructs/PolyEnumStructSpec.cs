@@ -6,7 +6,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
     internal partial struct PolyEnumStructSpec : IEquatable<PolyEnumStructSpec>
     {
         public LocationInfo location;
-
         public string typeName;
         public string typeNamespace;
         public string typeIdentifier;

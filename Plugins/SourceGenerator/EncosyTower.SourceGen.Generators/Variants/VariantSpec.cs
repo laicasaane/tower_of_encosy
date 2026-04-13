@@ -5,7 +5,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
     public partial struct VariantSpec : IEquatable<VariantSpec>
     {
         public LocationInfo location;
-
         public string openingSource;
         public string closingSource;
         public string fullTypeName;

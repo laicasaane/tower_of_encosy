@@ -43,7 +43,7 @@ namespace EncosyTower.SourceGen
             ImmutableHashSet<SyntaxNode> replacementNodeCandidates)
         {
             // If this node shouldn't exist in replaced tree, early out
-            if (!replacementNodeCandidates.Contains(currentNode))
+            if (replacementNodeCandidates.Contains(currentNode) == false)
                 return null;
 
             // Otherwise, check for replaced children by recursing

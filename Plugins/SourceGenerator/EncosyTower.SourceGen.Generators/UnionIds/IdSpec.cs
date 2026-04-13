@@ -7,7 +7,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
     public struct IdSpec : IEquatable<IdSpec>
     {
         public LocationInfo location;
-
         public string openingSource;
         public string closingSource;
         public string fullName;

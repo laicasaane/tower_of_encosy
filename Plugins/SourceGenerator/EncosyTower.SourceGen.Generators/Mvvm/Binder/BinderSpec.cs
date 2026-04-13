@@ -21,7 +21,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         public const string MONO_BEHAVIOUR_TYPE = "global::UnityEngine.MonoBehaviour";
 
         public LocationInfo location;
-
         public string openingSource;
         public string closingSource;
         public string hintName;
@@ -29,12 +28,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         public string className;
         public string simpleTypeName;
         public string typeIdentifier;
-
         public bool hasBaseBinder;
         public bool hasOnBindPropertyFailedMethod;
         public bool hasOnBindCommandFailedMethod;
         public bool isSealed;
-
         public EquatableArray<BindingPropertySpec> bindingPropertyRefs;
         public EquatableArray<BindingCommandSpec> bindingCommandRefs;
         public EquatableArray<NonVariantTypeSpec> nonVariantTypes;

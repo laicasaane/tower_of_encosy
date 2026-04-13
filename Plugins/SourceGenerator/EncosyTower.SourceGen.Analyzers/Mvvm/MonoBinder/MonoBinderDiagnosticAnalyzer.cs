@@ -141,7 +141,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
 
                     if (firstOrphanAttr == null)
                     {
-                        firstOrphanAttr     = attr;
+                        firstOrphanAttr = attr;
                         firstOrphanAttrName = "MonoBindingProperty";
                     }
                 }
@@ -151,7 +151,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
 
                     if (firstOrphanAttr == null)
                     {
-                        firstOrphanAttr     = attr;
+                        firstOrphanAttr = attr;
                         firstOrphanAttrName = "MonoBindingCommand";
                     }
                 }
@@ -161,7 +161,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
 
                     if (firstOrphanAttr == null)
                     {
-                        firstOrphanAttr     = attr;
+                        firstOrphanAttr = attr;
                         firstOrphanAttrName = "MonoBindingExclude";
                     }
                 }
@@ -171,7 +171,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
 
                     if (firstOrphanAttr == null)
                     {
-                        firstOrphanAttr     = attr;
+                        firstOrphanAttr = attr;
                         firstOrphanAttrName = "MonoBinderExcludeParent";
                     }
                 }
@@ -326,7 +326,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                             , parentType.ToDisplayString()
                         ));
                     }
-                    else if (!IsInBaseTypeChain(componentType, parentType))
+                    else if (IsInBaseTypeChain(componentType, parentType) == false)
                     {
                         var location = attr.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
                             ?? typeSymbol.Locations[0];
@@ -363,7 +363,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                     continue;
                 }
 
-                if (!ComponentHasMember(componentType, excludedName))
+                if (ComponentHasMember(componentType, excludedName) == false)
                 {
                     var location = attr.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
                         ?? typeSymbol.Locations[0];

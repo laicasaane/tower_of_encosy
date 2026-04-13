@@ -6,7 +6,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
     internal struct NewtonsoftAotHelperSpec : IEquatable<NewtonsoftAotHelperSpec>
     {
         public LocationInfo location;
-
         public string openingSource;
         public string closingSource;
         public string typeName;

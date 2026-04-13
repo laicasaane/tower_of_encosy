@@ -197,11 +197,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 if (assetRefListDict.TryGetValue(tableTypeKey, out var existing) == false)
                 {
                     var newRef = new AssetRefListSpec {
-                        tableTypeFullName  = tableInfo.tableTypeFullName,
+                        tableTypeFullName = tableInfo.tableTypeFullName,
                         tableTypeSimpleName = tableInfo.tableTypeSimpleName,
-                        dataTypeFullName   = tableInfo.dataTypeFullName,
+                        dataTypeFullName = tableInfo.dataTypeFullName,
                         dataTypeSimpleName = tableInfo.dataTypeSimpleName,
-                        fieldNames         = default,
+                        fieldNames = default,
                     };
 
                     assetRefListDict[tableTypeKey] = newRef;

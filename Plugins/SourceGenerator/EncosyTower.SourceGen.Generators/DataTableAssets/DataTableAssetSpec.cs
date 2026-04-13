@@ -10,7 +10,6 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
     public partial struct DataTableAssetSpec : IEquatable<DataTableAssetSpec>
     {
         public LocationInfo location;
-
         public string className;
         public string openingSource;
         public string closingSource;

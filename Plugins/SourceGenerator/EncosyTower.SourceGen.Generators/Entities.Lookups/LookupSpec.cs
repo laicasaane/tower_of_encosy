@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 {
@@ -19,7 +19,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         public string typeName;
         public string typeIdentifier;
         public string typeShortName;
-
         public bool isReadOnly;
 
         public readonly bool IsValid
@@ -44,7 +43,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
     internal struct LookupSpec : IEquatable<LookupSpec>
     {
         public LocationInfo location;
-
         public string structName;
         public string hintName;
         public string sourceFilePath;

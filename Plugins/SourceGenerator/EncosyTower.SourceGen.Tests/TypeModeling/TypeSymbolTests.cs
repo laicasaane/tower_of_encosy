@@ -118,7 +118,12 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         int count = 0;
-        foreach (var _ in sym.Fields) count++;
+
+        foreach (var _ in sym.Fields)
+        {
+            count++;
+        }
+
         // StaticField, ReadOnlyField, _private + 3 compiler backing fields for auto-properties
         // Layer 1 TypeSymbol is a raw wrapper with no filtering
         Assert.AreEqual(6, count);
@@ -129,7 +134,12 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         var names = new List<string>();
-        foreach (var f in sym.Fields) names.Add(f.Name);
+
+        foreach (var f in sym.Fields)
+        {
+            names.Add(f.Name);
+        }
+
         CollectionAssert.Contains(names, "StaticField");
         CollectionAssert.Contains(names, "ReadOnlyField");
         CollectionAssert.Contains(names, "_private");
@@ -141,7 +151,12 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         int count = 0;
-        foreach (var _ in sym.Properties) count++;
+
+        foreach (var _ in sym.Properties)
+        {
+            count++;
+        }
+
         Assert.AreEqual(3, count); // Value, Name, ReadWrite
     }
 
@@ -150,7 +165,12 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         var names = new List<string>();
-        foreach (var p in sym.Properties) names.Add(p.Name);
+
+        foreach (var p in sym.Properties)
+        {
+            names.Add(p.Name);
+        }
+
         CollectionAssert.Contains(names, "Value");
         CollectionAssert.Contains(names, "Name");
         CollectionAssert.Contains(names, "ReadWrite");
@@ -162,7 +182,12 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         var names = new List<string>();
-        foreach (var m in sym.Methods) names.Add(m.Name);
+
+        foreach (var m in sym.Methods)
+        {
+            names.Add(m.Name);
+        }
+
         // operator+ must NOT appear
         Assert.IsFalse(names.Any(n => n.StartsWith("op_")),
             "Expected operators to be excluded, but found: " + string.Join(", ", names.Where(n => n.StartsWith("op_"))));
@@ -173,7 +198,12 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         var names = new List<string>();
-        foreach (var m in sym.Methods) names.Add(m.Name);
+
+        foreach (var m in sym.Methods)
+        {
+            names.Add(m.Name);
+        }
+
         CollectionAssert.Contains(names, "DoWork");
         CollectionAssert.Contains(names, "Add");
         CollectionAssert.Contains(names, "Hidden");
@@ -231,8 +261,16 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         FieldSymbol found = default;
+
         foreach (var f in sym.Fields)
-            if (f.Name == "ReadOnlyField") { found = f; break; }
+        {
+            if (f.Name == "ReadOnlyField")
+            {
+                found = f;
+                break;
+            }
+        }
+
         Assert.IsTrue(found.IsReadOnly);
         Assert.IsFalse(found.IsStatic);
     }
@@ -242,8 +280,16 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         FieldSymbol found = default;
+
         foreach (var f in sym.Fields)
-            if (f.Name == "StaticField") { found = f; break; }
+        {
+            if (f.Name == "StaticField")
+            {
+                found = f;
+                break;
+            }
+        }
+
         Assert.IsTrue(found.IsStatic);
         Assert.IsTrue(found.IsReadOnly);
     }
@@ -253,8 +299,16 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyStruct").ToTypeSymbol();
         FieldSymbol found = default;
+
         foreach (var f in sym.Fields)
-            if (f.Name == "MaxValue") { found = f; break; }
+        {
+            if (f.Name == "MaxValue")
+            {
+                found = f;
+                break;
+            }
+        }
+
         Assert.IsTrue(found.IsConst);
     }
 
@@ -263,8 +317,16 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         FieldSymbol found = default;
+
         foreach (var f in sym.Fields)
-            if (f.Name == "StaticField") { found = f; break; }
+        {
+            if (f.Name == "StaticField")
+            {
+                found = f;
+                break;
+            }
+        }
+
         StringAssert.Contains(found.TypeFullName, "int");
     }
 
@@ -274,8 +336,16 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         PropertySymbol found = default;
+
         foreach (var p in sym.Properties)
-            if (p.Name == "Name") { found = p; break; }
+        {
+            if (p.Name == "Name")
+            {
+                found = p;
+                break;
+            }
+        }
+
         Assert.IsTrue(found.Getter.Exists);
         Assert.IsFalse(found.Setter.Exists);
     }
@@ -285,8 +355,16 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         PropertySymbol found = default;
+
         foreach (var p in sym.Properties)
-            if (p.Name == "Value") { found = p; break; }
+        {
+            if (p.Name == "Value")
+            {
+                found = p;
+                break;
+            }
+        }
+
         Assert.IsTrue(found.Getter.Exists);
         Assert.IsTrue(found.Setter.Exists);
         Assert.IsTrue(found.Setter.IsInitOnly);
@@ -297,8 +375,16 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         PropertySymbol found = default;
+
         foreach (var p in sym.Properties)
-            if (p.Name == "ReadWrite") { found = p; break; }
+        {
+            if (p.Name == "ReadWrite")
+            {
+                found = p;
+                break;
+            }
+        }
+
         Assert.IsTrue(found.Getter.Exists);
         Assert.IsTrue(found.Setter.Exists);
         Assert.IsFalse(found.Setter.IsInitOnly);
@@ -310,8 +396,16 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         MethodSymbol found = default;
+
         foreach (var m in sym.Methods)
-            if (m.Name == "DoWork") { found = m; break; }
+        {
+            if (m.Name == "DoWork")
+            {
+                found = m;
+                break;
+            }
+        }
+
         Assert.AreEqual(2, found.ParameterCount);
     }
 
@@ -320,8 +414,16 @@ public class TypeSymbolTests
     {
         var sym = TypeModelingTestHelper.GetTypeSymbol(SOURCE, "TestNs.MyClass").ToTypeSymbol();
         MethodSymbol found = default;
+
         foreach (var m in sym.Methods)
-            if (m.Name == "DoWork") { found = m; break; }
+        {
+            if (m.Name == "DoWork")
+            {
+                found = m;
+                break;
+            }
+        }
+
         var parameters = found.Parameters;
         Assert.AreEqual(2, parameters.Length);
         StringAssert.Contains(parameters[0].TypeFullName, "int");

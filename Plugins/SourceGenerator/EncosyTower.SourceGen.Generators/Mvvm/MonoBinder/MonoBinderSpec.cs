@@ -21,21 +21,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private const string UNITY_OBJECT_TYPE = "global::UnityEngine.Object";
 
         public LocationInfo location;
-
         public string openingSource;
         public string closingSource;
         public string hintName;
         public string sourceFilePath;
-
         public string userClassName;
         public string userNamespace;
         public string componentFullTypeName;
         public string componentLabelName;
         public string preprocessorGuard;
-
         public EquatableArray<PropertyBindingSpec> propertyBindings;
         public EquatableArray<CommandBindingSpec> commandBindings;
-
         public bool isOuterClassSealed;
         public string outerTypeIdentifier;
         public bool hasOnBindPropertyFailedMethod;
@@ -197,9 +193,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
 
             using var propBuilder = ImmutableArrayBuilder<PropertyBindingSpec>.Rent();
-            using var cmdBuilder  = ImmutableArrayBuilder<CommandBindingSpec>.Rent();
+            using var cmdBuilder = ImmutableArrayBuilder<CommandBindingSpec>.Rent();
             var seenPropMembers = new HashSet<string>(StringComparer.Ordinal);
-            var seenCmdMembers  = new HashSet<string>(StringComparer.Ordinal);
+            var seenCmdMembers = new HashSet<string>(StringComparer.Ordinal);
             var current = componentType as ITypeSymbol;
 
             while (current != null && current.HasFullName(UNITY_OBJECT_TYPE) == false)
@@ -315,10 +311,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
 
                 ITypeSymbol memberType = memberSymbol switch {
-                    IFieldSymbol fs    => fs.Type,
+                    IFieldSymbol fs => fs.Type,
                     IPropertySymbol ps => ps.Type,
-                    IEventSymbol es    => es.Type,
-                    _                  => null,
+                    IEventSymbol es => es.Type,
+                    _ => null,
                 };
 
                 if (memberType == null)
@@ -439,7 +435,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             var semanticModel = context.SemanticModel;
 
             using var tempOuterPropMethods = ImmutableArrayBuilder<OuterBinderPropertyScanEntry>.Rent();
-            using var tempOuterCmdMethods  = ImmutableArrayBuilder<OuterBinderCommandScanEntry>.Rent();
+            using var tempOuterCmdMethods = ImmutableArrayBuilder<OuterBinderCommandScanEntry>.Rent();
 
             foreach (var outerMember in userClassSymbol.GetMembers())
             {
@@ -468,7 +464,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                             outerParamType = outerParam.Type.ToFullName();
                             outerIsParamVariant = outerParamType == BinderSpec.VARIANT_TYPE;
 
-                            if (!outerIsParamVariant)
+                            if (outerIsParamVariant == false)
                             {
                                 outerVarConvPropName = outerParam.Type
                                     .ToValidIdentifier().AsSpan().MakeFirstCharUpperCase();
@@ -483,9 +479,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                             isParameterTypeVariant = outerIsParamVariant,
                         });
 
-                        if (!outerIsParamVariant
-                            && !string.IsNullOrEmpty(outerParamType)
-                            && !outerNonVariantTypeFilter.ContainsKey(outerParamType)
+                        if (outerIsParamVariant == false
+                            && string.IsNullOrEmpty(outerParamType) == false
+                            && outerNonVariantTypeFilter.ContainsKey(outerParamType) == false
                         )
                         {
                             outerNonVariantTypeFilter[outerParamType] = new BinderSpec.NonVariantTypeSpec {
@@ -1140,10 +1136,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private static string MakeFirstCharUpper(string value)
         {
             if (string.IsNullOrEmpty(value))
+            {
                 return value;
+            }
 
             if (char.IsUpper(value[0]))
+            {
                 return value;
+            }
 
             return char.ToUpperInvariant(value[0]) + value.Substring(1);
         }

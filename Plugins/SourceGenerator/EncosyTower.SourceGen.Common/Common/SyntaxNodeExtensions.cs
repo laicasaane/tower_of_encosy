@@ -393,7 +393,7 @@ namespace EncosyTower.SourceGen
             {
                 case QualifiedNameSyntax qualifiedNameSyntax:
                     // Fast estimate right part and extract a possible TypeArgumentListSyntax to our own TypeArgumentListSyntax output
-                    if (!IsIdentifier(qualifiedNameSyntax.Right, typeName, out typeArgumentListSyntax))
+                    if (IsIdentifier(qualifiedNameSyntax.Right, typeName, out typeArgumentListSyntax) == false)
                     {
                         return false;
                     }

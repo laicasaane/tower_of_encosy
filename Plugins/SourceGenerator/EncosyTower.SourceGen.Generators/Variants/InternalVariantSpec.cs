@@ -1,11 +1,10 @@
-using System;
+﻿using System;
 
 namespace EncosyTower.SourceGen.Generators.Variants
 {
     internal partial struct InternalVariantSpec : IEquatable<InternalVariantSpec>
     {
         public LocationInfo location;
-
         public string fullTypeName;
         public string simpleTypeName;
         public string structName;

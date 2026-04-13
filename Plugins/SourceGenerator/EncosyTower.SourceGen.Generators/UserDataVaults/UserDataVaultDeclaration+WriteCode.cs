@@ -641,7 +641,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                         foreach (var arg in def.Args)
                         {
-                            if (!string.IsNullOrEmpty(arg.AccessorTypeName) && typeSet.Contains(arg.AccessorTypeName) == false)
+                            if (string.IsNullOrEmpty(arg.AccessorTypeName) == false && typeSet.Contains(arg.AccessorTypeName) == false)
                             {
                                 needDependency = true;
                                 break;
@@ -880,7 +880,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     foreach (var arg in def.Args)
                     {
-                        if (!string.IsNullOrEmpty(arg.AccessorTypeName))
+                        if (string.IsNullOrEmpty(arg.AccessorTypeName) == false)
                         {
                             p.Print(arg.AccessorTypeName);
                         }
@@ -906,7 +906,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                             p.PrintBeginLine(comma).Print(" ");
 
-                            if (!string.IsNullOrEmpty(arg.AccessorTypeName))
+                            if (string.IsNullOrEmpty(arg.AccessorTypeName) == false)
                             {
                                 p.Print(arg.AccessorTypeName);
                             }

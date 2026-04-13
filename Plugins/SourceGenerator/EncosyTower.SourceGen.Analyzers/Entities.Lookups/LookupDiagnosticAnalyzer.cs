@@ -11,15 +11,15 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
     {
         private const string NAMESPACE = "EncosyTower.Entities";
         private const string LOOKUP_ATTRIBUTE = $"global::{NAMESPACE}.LookupAttribute";
-        private const string I_BUFFER_LOOKUPS                       = $"{NAMESPACE}.IBufferLookups";
-        private const string I_COMPONENT_LOOKUPS                    = $"{NAMESPACE}.IComponentLookups";
-        private const string I_ENABLEABLE_BUFFER_LOOKUPS            = $"{NAMESPACE}.IEnableableBufferLookups";
-        private const string I_ENABLEABLE_COMPONENT_LOOKUPS         = $"{NAMESPACE}.IEnableableComponentLookups";
-        private const string I_PHYSICS_BUFFER_LOOKUPS               = $"{NAMESPACE}.IPhysicsBufferLookups";
-        private const string I_PHYSICS_COMPONENT_LOOKUPS            = $"{NAMESPACE}.IPhysicsComponentLookups";
+        private const string I_BUFFER_LOOKUPS = $"{NAMESPACE}.IBufferLookups";
+        private const string I_COMPONENT_LOOKUPS = $"{NAMESPACE}.IComponentLookups";
+        private const string I_ENABLEABLE_BUFFER_LOOKUPS = $"{NAMESPACE}.IEnableableBufferLookups";
+        private const string I_ENABLEABLE_COMPONENT_LOOKUPS = $"{NAMESPACE}.IEnableableComponentLookups";
+        private const string I_PHYSICS_BUFFER_LOOKUPS = $"{NAMESPACE}.IPhysicsBufferLookups";
+        private const string I_PHYSICS_COMPONENT_LOOKUPS = $"{NAMESPACE}.IPhysicsComponentLookups";
         private const string I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS = $"{NAMESPACE}.IPhysicsEnableableComponentLookups";
-        private const string I_BUFFER_ELEMENT_DATA  = "global::Unity.Entities.IBufferElementData";
-        private const string I_COMPONENT_DATA       = "global::Unity.Entities.IComponentData";
+        private const string I_BUFFER_ELEMENT_DATA = "global::Unity.Entities.IBufferElementData";
+        private const string I_COMPONENT_DATA = "global::Unity.Entities.IComponentData";
         private const string I_ENABLEABLE_COMPONENT = "global::Unity.Entities.IEnableableComponent";
 
         public static readonly DiagnosticDescriptor NotTypeOfExpression = new(

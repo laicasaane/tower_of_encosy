@@ -11,71 +11,38 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         public const string FIELD_NAME_FORMAT = "{0}Of{1}";
 
         public LocationInfo location;
-
         public string hintName;
-
         public string sourceFilePath;
-
         public string openingSource;
-
         public string closingSource;
-
         public string typeName;
-
         public string typeNameWithTypeParams;
-
         public string fullTypeName;
-
         public string fieldTypeName;
-
         public string fieldEnumUnderlyingTypeName;
-
         public string fieldName;
-
         public InterfaceKind ignoreInterfaceMethods;
-
         public OperatorKind ignoreOperators;
-
         public InterfaceKind implementInterfaces;
-
         public OperatorKind implementOperators;
-
         public SpecialMethodType implementSpecialMethods;
-
         public SpecialType fieldSpecialType;
-
         public SpecialType fieldUnderlyingSpecialType;
-
         public bool isRecord;
-
         public bool isStruct;
-
         public bool isRefStruct;
-
         public bool fieldTypeIsInterface;
-
         public bool excludeConverter;
-
         public bool isFieldDeclared;
-
         public bool isFieldEnum;
-
         public bool isReadOnly;
-
         public bool fieldTypeIsReadOnly;
-
         public bool isSealed;
-
         public bool enableNullable;
-
         public EquatableArray<FieldSpec> fields;
-
         public EquatableArray<PropertySpec> properties;
-
         public EquatableArray<EventSpec> events;
-
         public EquatableArray<MethodSpec> methods;
-
         public EquatableArray<OperatorEntry> operatorEntries;
 
         public readonly bool IsValid

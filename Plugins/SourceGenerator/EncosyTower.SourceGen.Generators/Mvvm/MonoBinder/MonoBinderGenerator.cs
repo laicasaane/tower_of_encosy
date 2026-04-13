@@ -8,7 +8,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
     public class MonoBinderGenerator : IIncrementalGenerator
     {
         public const string GENERATOR_NAME = nameof(MonoBinderGenerator);
-        public const string NAMESPACE      = "EncosyTower.Mvvm";
+        public const string NAMESPACE = "EncosyTower.Mvvm";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
 
         private const string MONO_BINDER_ATTRIBUTE_METADATA =

@@ -6,16 +6,16 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 {
     partial struct MonoBinderSpec
     {
-        private const string BINDER_ATTR       = "[ETMVB.Binder]";
+        private const string BINDER_ATTR = "[ETMVB.Binder]";
         private const string SERIALIZABLE_ATTR = "[S.Serializable]";
         private const string BINDING_PROP_ATTR = "[ETMVB.BindingProperty]";
-        private const string BINDING_CMD_ATTR  = "[ETMVB.BindingCommand]";
+        private const string BINDING_CMD_ATTR = "[ETMVB.BindingCommand]";
         private const string HIDE_IN_INSPECTOR = "[field: UE.HideInInspector]";
-        private const string MONO_BINDER_BASE  = "ETMVBC.MonoBinder";
+        private const string MONO_BINDER_BASE = "ETMVBC.MonoBinder";
         private const string MONO_BINDING_PROP = "ETMVBC.MonoBindingProperty";
-        private const string MONO_BINDING_CMD  = "ETMVBC.MonoBindingCommand";
-        private const string UNITY_ACTION      = "UEE.UnityAction";
-        private const string LABEL_ATTR        = "ETA.Label";
+        private const string MONO_BINDING_CMD = "ETMVBC.MonoBindingCommand";
+        private const string UNITY_ACTION = "UEE.UnityAction";
+        private const string LABEL_ATTR = "ETA.Label";
 
         private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
         private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
@@ -36,7 +36,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            if (!string.IsNullOrEmpty(preprocessorGuard))
+            if (string.IsNullOrEmpty(preprocessorGuard) == false)
             {
                 p.Print("#if ").PrintEndLine(preprocessorGuard);
                 p.PrintEndLine();
@@ -49,7 +49,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             p = p.DecreasedIndent();
 
-            if (!string.IsNullOrEmpty(preprocessorGuard))
+            if (string.IsNullOrEmpty(preprocessorGuard) == false)
             {
                 p.PrintEndLine();
                 p.Print("#endif // ").PrintEndLine(preprocessorGuard);
@@ -321,7 +321,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             foreach (var b in commandBindings)
             {
                 var hasWrapper = !string.IsNullOrEmpty(b.wrapperTypeName);
-                var argCount   = b.actionTypeArgs.Count;
+                var argCount = b.actionTypeArgs.Count;
 
                 if (b.skipGeneration || hasWrapper == false || argCount <= 1)
                     continue;
@@ -462,31 +462,31 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private readonly void WritePropertySubclassIBinder(ref Printer p, in PropertyBindingSpec b)
         {
-            var methodName   = b.setterMethodName;
-            var paramType    = b.propFullTypeName;
-            var isVariant    = paramType == BinderSpec.VARIANT_TYPE;
-            var vcPropName   = b.variantConverterPropertyName;
+            var methodName = b.setterMethodName;
+            var paramType = b.propFullTypeName;
+            var isVariant = paramType == BinderSpec.VARIANT_TYPE;
+            var vcPropName = b.variantConverterPropertyName;
 
             var propInfo = new BinderSpec.BindingPropertySpec {
-                methodName                   = methodName,
-                paramFullTypeName             = paramType,
-                paramRefKind                 = b.needsInModifier ? RefKind.In : RefKind.None,
-                variantConverterPropertyName  = vcPropName,
-                isParameterTypeVariant        = isVariant,
-                skipBindingProperty           = false,
-                skipConverter                 = false,
-                forwardedFieldAttributes      = default,
+                methodName = methodName,
+                paramFullTypeName = paramType,
+                paramRefKind = b.needsInModifier ? RefKind.In : RefKind.None,
+                variantConverterPropertyName = vcPropName,
+                isParameterTypeVariant = isVariant,
+                skipBindingProperty = false,
+                skipConverter = false,
+                forwardedFieldAttributes = default,
             };
 
             var propRefs = ImmutableArray.Create(propInfo).AsEquatableArray();
-            var cmdRefs  = ImmutableArray<BinderSpec.BindingCommandSpec>.Empty.AsEquatableArray();
+            var cmdRefs = ImmutableArray<BinderSpec.BindingCommandSpec>.Empty.AsEquatableArray();
 
             EquatableArray<BinderSpec.NonVariantTypeSpec> nvRefs;
 
-            if (!isVariant && !string.IsNullOrEmpty(paramType))
+            if (isVariant == false && string.IsNullOrEmpty(paramType) == false)
             {
                 var nvInfo = new BinderSpec.NonVariantTypeSpec {
-                    fullTypeName          = paramType,
+                    fullTypeName = paramType,
                     converterPropertyName = vcPropName,
                 };
                 nvRefs = ImmutableArray.Create(nvInfo).AsEquatableArray();
@@ -534,9 +534,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private readonly void WriteCommandSubclassIBinder(ref Printer p, in CommandBindingSpec b)
         {
-            var methodName  = b.callbackMethodName;
-            var argCount    = b.actionTypeArgs.Count;
-            var hasWrapper  = !string.IsNullOrEmpty(b.wrapperTypeName);
+            var methodName = b.callbackMethodName;
+            var argCount = b.actionTypeArgs.Count;
+            var hasWrapper = string.IsNullOrEmpty(b.wrapperTypeName) == false;
 
             string effectiveParamType;
 
@@ -550,17 +550,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 effectiveParamType = string.Empty;
 
             var cmdInfo = new BinderSpec.BindingCommandSpec {
-                methodName               = methodName,
-                paramFullTypeName        = effectiveParamType,
-                paramRefKind             = RefKind.None,
-                paramName                = string.IsNullOrEmpty(effectiveParamType) ? string.Empty : "value",
-                skipBindingCommand       = false,
+                methodName = methodName,
+                paramFullTypeName = effectiveParamType,
+                paramRefKind = RefKind.None,
+                paramName = string.IsNullOrEmpty(effectiveParamType) ? string.Empty : "value",
+                skipBindingCommand = false,
                 forwardedFieldAttributes = default,
             };
 
             var propRefs = ImmutableArray<BinderSpec.BindingPropertySpec>.Empty.AsEquatableArray();
-            var cmdRefs  = ImmutableArray.Create(cmdInfo).AsEquatableArray();
-            var nvRefs   = ImmutableArray<BinderSpec.NonVariantTypeSpec>.Empty.AsEquatableArray();
+            var cmdRefs = ImmutableArray.Create(cmdInfo).AsEquatableArray();
+            var nvRefs = ImmutableArray<BinderSpec.NonVariantTypeSpec>.Empty.AsEquatableArray();
 
             p.PrintBeginLine()
                 .Print("[ETMVBSG.BindingCommandMethodInfo(")
@@ -604,7 +604,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             , in EquatableArray<BinderSpec.NonVariantTypeSpec> nvTypes
         )
         {
-            var keyword          = "override ";
+            var keyword = "override ";
             var isListeningField = IsListeningName(typeIdentifier);
 
             WriteBinderConstantProperties(ref p, className, propRefs);
