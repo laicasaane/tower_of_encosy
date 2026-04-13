@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 using System.Threading;
-using EncosyTower.SourceGen.Common.Data.Common;
+using EncosyTower.SourceGen.Helpers.Data;
 using EncosyTower.SourceGen.TypeModeling.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.Data
 {
-    using static EncosyTower.SourceGen.Common.Data.Common.Helpers;
+    using static EncosyTower.SourceGen.Helpers.Data.Helpers;
 
     partial struct DataSpec
     {

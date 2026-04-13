@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using EncosyTower.SourceGen.Common.UnionIds;
+using EncosyTower.SourceGen.Helpers.UnionIds;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 

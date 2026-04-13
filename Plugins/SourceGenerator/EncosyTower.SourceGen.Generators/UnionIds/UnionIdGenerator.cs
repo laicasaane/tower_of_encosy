@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Threading;
-using EncosyTower.SourceGen.Common.UnionIds;
+using EncosyTower.SourceGen.Helpers.UnionIds;
 using EncosyTower.SourceGen.Generators.EnumExtensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

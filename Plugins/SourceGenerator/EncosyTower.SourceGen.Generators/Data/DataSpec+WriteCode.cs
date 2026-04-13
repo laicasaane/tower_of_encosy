@@ -1,8 +1,8 @@
-﻿using EncosyTower.SourceGen.Common.Data.Common;
+﻿using EncosyTower.SourceGen.Helpers.Data;
 
 namespace EncosyTower.SourceGen.Generators.Data
 {
-    using static EncosyTower.SourceGen.Common.Data.Common.Helpers;
+    using static EncosyTower.SourceGen.Helpers.Data.Helpers;
 
     partial struct DataSpec
     {

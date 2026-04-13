@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using EncosyTower.SourceGen.Common.Mvvm.Common;
+using EncosyTower.SourceGen.Helpers.Mvvm;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 

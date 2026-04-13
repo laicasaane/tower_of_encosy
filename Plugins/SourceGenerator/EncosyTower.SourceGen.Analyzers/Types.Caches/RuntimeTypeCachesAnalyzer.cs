@@ -1,5 +1,5 @@
 ﻿using System.Collections.Immutable;
-using EncosyTower.SourceGen.Common.Types.Caches;
+using EncosyTower.SourceGen.Helpers.Types.Caches;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Threading;
-using EncosyTower.SourceGen.Common.Data.Common;
+using EncosyTower.SourceGen.Helpers.Data;
 using EncosyTower.SourceGen.TypeModeling.Models;
 using EncosyTower.SourceGen.TypeModeling.Symbols;
 using Microsoft.CodeAnalysis;

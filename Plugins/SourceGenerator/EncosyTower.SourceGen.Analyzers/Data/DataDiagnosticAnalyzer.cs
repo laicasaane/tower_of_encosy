@@ -1,11 +1,11 @@
 ﻿using System.Collections.Immutable;
-using EncosyTower.SourceGen.Common.Data.Common;
+using EncosyTower.SourceGen.Helpers.Data;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Analyzers.Data
 {
-    using static Helpers;
+    using static EncosyTower.SourceGen.Helpers.Data.Helpers;
 
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal sealed class DataDiagnosticAnalyzer : DiagnosticAnalyzer

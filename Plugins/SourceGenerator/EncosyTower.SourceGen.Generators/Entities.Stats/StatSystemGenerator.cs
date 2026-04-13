@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using EncosyTower.SourceGen.Common.Entities.Stats;
+using EncosyTower.SourceGen.Helpers.Entities.Stats;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 

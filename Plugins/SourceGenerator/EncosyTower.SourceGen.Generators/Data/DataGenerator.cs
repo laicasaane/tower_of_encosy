@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.Data
 {
-    using static EncosyTower.SourceGen.Common.Data.Common.Helpers;
+    using static EncosyTower.SourceGen.Helpers.Data.Helpers;
 
     [Generator]
     public class DataGenerator : IIncrementalGenerator

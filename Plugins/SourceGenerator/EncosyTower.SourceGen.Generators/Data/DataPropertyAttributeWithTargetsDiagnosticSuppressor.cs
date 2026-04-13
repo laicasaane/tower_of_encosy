@@ -10,8 +10,8 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace EncosyTower.SourceGen.Generators.Data
 {
-    using static EncosyTower.SourceGen.Common.Data.Common.Helpers;
-    using static EncosyTower.SourceGen.Common.Data.Common.SuppressionDescriptors;
+    using static EncosyTower.SourceGen.Helpers.Data.Helpers;
+    using static EncosyTower.SourceGen.Helpers.Data.SuppressionDescriptors;
 
     /// <summary>
     /// <para>

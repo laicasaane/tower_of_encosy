@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using EncosyTower.SourceGen.Common.Entities.Stats;
+using EncosyTower.SourceGen.Helpers.Entities.Stats;
 
 namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {

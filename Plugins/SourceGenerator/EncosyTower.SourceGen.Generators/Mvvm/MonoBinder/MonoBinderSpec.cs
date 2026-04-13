@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 using System.Threading;
-using EncosyTower.SourceGen.Common.Mvvm.Common;
+using EncosyTower.SourceGen.Helpers.Mvvm;
 using EncosyTower.SourceGen.Generators.Mvvm.Binders;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

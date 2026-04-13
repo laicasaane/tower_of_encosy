@@ -1,8 +1,8 @@
 ﻿using System;
-using EncosyTower.SourceGen.Common.Data.Common;
+using EncosyTower.SourceGen.Helpers.Data;
 using EncosyTower.SourceGen.TypeModeling.Models;
 using Microsoft.CodeAnalysis;
-using static EncosyTower.SourceGen.Common.Data.Common.Helpers;
+using static EncosyTower.SourceGen.Helpers.Data.Helpers;
 
 namespace EncosyTower.SourceGen.Generators.Data
 {

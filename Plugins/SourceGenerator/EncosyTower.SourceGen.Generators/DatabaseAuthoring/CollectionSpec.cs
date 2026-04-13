@@ -1,5 +1,5 @@
 using System;
-using EncosyTower.SourceGen.Common.Data.Common;
+using EncosyTower.SourceGen.Helpers.Data;
 
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {

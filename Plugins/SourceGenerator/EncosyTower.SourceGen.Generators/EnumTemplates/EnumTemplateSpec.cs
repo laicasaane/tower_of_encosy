@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using EncosyTower.SourceGen.TypeModeling.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
