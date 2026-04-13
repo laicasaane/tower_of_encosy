@@ -1,6 +1,5 @@
 using System;
 using Microsoft.CodeAnalysis;
-using EncosyTower.SourceGen.TypeModeling.Internal;
 
 namespace EncosyTower.SourceGen.TypeModeling.Models
 {
