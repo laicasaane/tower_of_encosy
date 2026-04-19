@@ -54,7 +54,6 @@
     <ItemGroup>
         <ProjectReference Include="$(MSBuildThisFileDirectory)../EncosyTower.SourceGen.Common/EncosyTower.SourceGen.Common.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="$(MSBuildThisFileDirectory)../EncosyTower.SourceGen.Helpers/EncosyTower.SourceGen.Helpers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <ProjectReference Include="$(MSBuildThisFileDirectory)../EncosyTower.SourceGen.TypeModeling/EncosyTower.SourceGen.TypeModeling.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="$(MSBuildThisFileDirectory)../EncosyTower.SourceGen.Analyzers/EncosyTower.SourceGen.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="$(MSBuildThisFileDirectory)../EncosyTower.SourceGen.CodeRefactors/EncosyTower.SourceGen.CodeRefactors.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="$(MSBuildThisFileDirectory)../EncosyTower.SourceGen.Generators/EncosyTower.SourceGen.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

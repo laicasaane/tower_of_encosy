@@ -24,6 +24,5 @@
     <Project Path="EncosyTower.SourceGen.Generators/EncosyTower.SourceGen.Generators.csproj" />
     <Project Path="EncosyTower.SourceGen.Helpers/EncosyTower.SourceGen.Helpers.csproj" />
     <Project Path="EncosyTower.SourceGen.Tests/EncosyTower.SourceGen.Tests.csproj" />
-    <Project Path="EncosyTower.SourceGen.TypeModeling/EncosyTower.SourceGen.TypeModeling.csproj" />
   </Folder>
 </Solution>
