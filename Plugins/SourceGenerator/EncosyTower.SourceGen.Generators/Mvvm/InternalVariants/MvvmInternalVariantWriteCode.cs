@@ -33,7 +33,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            var hintName = $"{GENERATOR_NAME}__{decl.fileHintName}.g.cs";
+            var hintName = $"{decl.fileHintName}.g.cs";
             var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
             try
@@ -116,7 +116,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            var hintName = $"{GENERATOR_NAME}__InternalVariants__{assemblyName.ToValidIdentifier()}.g.cs";
+            var hintName = $"InternalVariants__{assemblyName.ToValidIdentifier()}.g.cs";
             var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
             try

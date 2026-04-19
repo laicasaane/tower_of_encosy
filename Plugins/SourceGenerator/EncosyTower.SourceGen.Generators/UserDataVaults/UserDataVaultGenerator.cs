@@ -327,7 +327,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             var closingSource = closingPrinter.Result;
             var stableHashCode = SourceGenHelpers.GetStableHashCode(vaultInfo.location.filePath) & 0x7fffffff;
             var fileHintName = vaultInfo.fileHintName;
-            var sourceFileName = $"{fileHintName}__{GENERATOR_NAME}_{stableHashCode}_0.g.cs";
+            var sourceFileName = $"{fileHintName}_{stableHashCode}_0.g.cs";
             var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, sourceFileName);
 
             context.OutputSource(

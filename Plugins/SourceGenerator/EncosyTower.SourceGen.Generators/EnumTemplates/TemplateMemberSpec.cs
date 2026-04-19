@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using EncosyTower.SourceGen.TypeModeling.Models;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen.Generators.EnumTemplates

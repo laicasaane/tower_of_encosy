@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using EncosyTower.SourceGen.TypeModeling.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -54,7 +53,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             );
 
             var containingTypes = templateSymbol.GetContainingTypes();
-
             var ns = templateSymbol.ContainingNamespace;
             var namespaceName = ns is { IsGlobalNamespace: false } ? ns.ToDisplayString() : string.Empty;
             var templateFullName = templateSymbol.ToFullName();

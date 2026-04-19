@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -325,10 +324,9 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             try
             {
                 var locationFilePath = helperInfo.location.filePath;
-                var fileBaseName = Path.GetFileNameWithoutExtension(locationFilePath);
                 var stableHashCode = SourceGenHelpers.GetStableHashCode(locationFilePath) & 0x7fffffff;
                 var lineNumber = helperInfo.location.startLine;
-                var hintName = $"{fileBaseName}__{helperInfo.fileHintName}_{stableHashCode}_{lineNumber}.g.cs";
+                var hintName = $"{helperInfo.fileHintName}_{stableHashCode}_{lineNumber}.g.cs";
 
                 SourceGenHelpers.ProjectPath = projectPath;
                 var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);

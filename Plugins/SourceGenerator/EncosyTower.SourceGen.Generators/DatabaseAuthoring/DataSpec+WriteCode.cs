@@ -286,11 +286,34 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 foreach (var layer in baseTypeLayers)
                 {
-                    WriteConvertType(ref p, dataMap, layer.validIdentifier, layer.propRefs, layer.fieldRefs);
+                    p.OpenScope();
+                    {
+                        p.PrintBeginLine("var resultBase = result as ").Print(layer.fullName).PrintEndLine(";");
+
+                        WriteConvertType(
+                              ref p
+                            , layer.fullName
+                            , "resultBase"
+                            , dataMap
+                            , layer.validIdentifier
+                            , layer.propRefs
+                            , layer.fieldRefs
+                        );
+                    }
+                    p.CloseScope();
                     p.PrintEndLine();
                 }
 
-                WriteConvertType(ref p, dataMap, validIdentifier, propRefs, fieldRefs);
+                WriteConvertType(
+                      ref p
+                    , typeFullName
+                    , "result"
+                    , dataMap
+                    , validIdentifier
+                    , propRefs
+                    , fieldRefs
+                );
+
                 p.PrintEndLine();
 
                 p.PrintLine("return result;");
@@ -301,6 +324,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void WriteConvertType(
               ref Printer p
+            , string typeFullName
+            , string resultName
             , Dictionary<string, DataSpec> dataMap
             , string typeValidIdentifier
             , EquatableArray<MemberSpec> props
@@ -309,17 +334,19 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             foreach (var member in fields)
             {
-                WriteConvertMember(ref p, dataMap, typeValidIdentifier, member);
+                WriteConvertMember(ref p, typeFullName, resultName, dataMap, typeValidIdentifier, member);
             }
 
             foreach (var member in props)
             {
-                WriteConvertMember(ref p, dataMap, typeValidIdentifier, member);
+                WriteConvertMember(ref p, typeFullName, resultName, dataMap, typeValidIdentifier, member);
             }
         }
 
         private static void WriteConvertMember(
               ref Printer p
+            , string typeFullName
+            , string resultName
             , Dictionary<string, DataSpec> dataMap
             , string typeValidIdentifier
             , MemberSpec member
@@ -455,9 +482,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
             }
 
-            p.PrintBeginLine("result.SetValue_").Print(typeValidIdentifier).Print("_")
-                .Print(member.propertyName).Print("(")
-                .Print(expression).PrintEndLine(");");
+            p.PrintBeginLine(typeFullName).Print(".").Print(typeValidIdentifier).Print("_ValueSetter.Set_")
+                .Print(member.propertyName).Print("(ref ").Print(resultName)
+                .Print(", ").Print(expression).PrintEndLine(");");
         }
 
         private static void WriteToCollectionMethod(

@@ -1,8 +1,5 @@
 ﻿using System;
 using EncosyTower.SourceGen.Helpers.Data;
-using EncosyTower.SourceGen.TypeModeling.Models;
-using Microsoft.CodeAnalysis;
-using static EncosyTower.SourceGen.Helpers.Data.Helpers;
 
 namespace EncosyTower.SourceGen.Generators.Data
 {
@@ -15,16 +12,23 @@ namespace EncosyTower.SourceGen.Generators.Data
         public string typeIdentifier;
         public string typeValidIdentifier;
         public string baseTypeName;
+        public string accessibilityKeyword;
         public string hintName;
         public string sourceFilePath;
         public string openingSource;
         public string closingSource;
-        public TypeModel typeModel;
         public string idPropertyTypeName;
         public DataFieldPolicy fieldPolicy;
         public bool isMutable;
+        public bool isValueType;
         public bool withoutPropertySetters;
         public bool withReadOnlyView;
+        public bool isSealed;
+        public bool hasSerializableAttribute;
+        public bool hasGeneratePropertyBagAttribute;
+        public bool hasGetHashCodeMethod;
+        public bool hasEqualsMethod;
+        public bool hasIEquatableMethod;
         public bool withoutId;
         public EquatableArray<OrderData> orders;
         public EquatableArray<FieldRefData> fieldRefs;
@@ -47,16 +51,23 @@ namespace EncosyTower.SourceGen.Generators.Data
             && string.Equals(typeIdentifier, other.typeIdentifier, StringComparison.Ordinal)
             && string.Equals(typeValidIdentifier, other.typeValidIdentifier, StringComparison.Ordinal)
             && string.Equals(baseTypeName, other.baseTypeName, StringComparison.Ordinal)
+            && string.Equals(accessibilityKeyword, other.accessibilityKeyword, StringComparison.Ordinal)
             && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
             && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
             && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
             && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && string.Equals(idPropertyTypeName, other.idPropertyTypeName, StringComparison.Ordinal)
-            && typeModel.Equals(other.typeModel)
             && fieldPolicy == other.fieldPolicy
             && isMutable == other.isMutable
+            && isValueType == other.isValueType
             && withoutPropertySetters == other.withoutPropertySetters
             && withReadOnlyView == other.withReadOnlyView
+            && isSealed == other.isSealed
+            && hasSerializableAttribute == other.hasSerializableAttribute
+            && hasGeneratePropertyBagAttribute == other.hasGeneratePropertyBagAttribute
+            && hasGetHashCodeMethod == other.hasGetHashCodeMethod
+            && hasEqualsMethod == other.hasEqualsMethod
+            && hasIEquatableMethod == other.hasIEquatableMethod
             && withoutId == other.withoutId
             && orders.Equals(other.orders)
             && fieldRefs.Equals(other.fieldRefs)
@@ -74,156 +85,29 @@ namespace EncosyTower.SourceGen.Generators.Data
             hash.Add(typeIdentifier);
             hash.Add(typeValidIdentifier);
             hash.Add(baseTypeName);
+            hash.Add(accessibilityKeyword);
             hash.Add(hintName);
             hash.Add(sourceFilePath);
             hash.Add(openingSource);
             hash.Add(closingSource);
             hash.Add(idPropertyTypeName);
-            hash.Add(typeModel);
             hash.Add(fieldPolicy);
             hash.Add(isMutable);
+            hash.Add(isValueType);
             hash.Add(withoutPropertySetters);
             hash.Add(withReadOnlyView);
+            hash.Add(isSealed);
+            hash.Add(hasSerializableAttribute);
+            hash.Add(hasGeneratePropertyBagAttribute);
+            hash.Add(hasGetHashCodeMethod);
+            hash.Add(hasEqualsMethod);
+            hash.Add(hasIEquatableMethod);
             hash.Add(withoutId);
             hash.Add(orders);
             hash.Add(fieldRefs);
             hash.Add(propRefs);
             hash.Add(overrideEquals);
             return hash.ToHashCode();
-        }
-
-        public readonly string AccessibilityKeyword => typeModel.Accessibility.ToKeyword();
-
-        public readonly bool IsValueType => typeModel.TypeKind == TypeKind.Struct;
-
-        public readonly bool IsSealed => typeModel.IsSealed || IsValueType;
-
-        public readonly bool HasSerializableAttribute
-        {
-            get
-            {
-                var attrs = typeModel.Attributes;
-                var count = attrs.Count;
-
-                for (var i = 0; i < count; i++)
-                {
-                    if (string.Equals(
-                          attrs[i].FullName
-                        , SERIALIZABLE_ATTRIBUTE
-                        , StringComparison.Ordinal
-                    ))
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-
-        public readonly bool HasGeneratePropertyBagAttribute
-        {
-            get
-            {
-                var attrs = typeModel.Attributes;
-                var count = attrs.Count;
-
-                for (var i = 0; i < count; i++)
-                {
-                    if (string.Equals(
-                          attrs[i].FullName
-                        , GENERATE_PROPERTY_BAG_ATTRIBUTE
-                        , StringComparison.Ordinal
-                    ))
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-
-        public readonly bool HasGetHashCodeMethod
-        {
-            get
-            {
-                var methods = typeModel.Methods;
-                var count = methods.Count;
-
-                for (var i = 0; i < count; i++)
-                {
-                    var m = methods[i];
-
-                    if (string.Equals(m.Name, "GetHashCode", StringComparison.Ordinal)
-                        && m.Parameters.Count == 0
-                        && m.ReturnsVoid == false
-                    )
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-
-        public readonly bool HasEqualsMethod
-        {
-            get
-            {
-                var methods = typeModel.Methods;
-                var count = methods.Count;
-
-                for (var i = 0; i < count; i++)
-                {
-                    var m = methods[i];
-
-                    if (string.Equals(m.Name, "Equals", StringComparison.Ordinal)
-                        && m.Parameters.Count == 1
-                        && string.Equals(m.ReturnTypeFullName, "bool", StringComparison.Ordinal)
-                        && string.Equals(
-                              m.Parameters[0].TypeFullName
-                            , "object"
-                            , StringComparison.Ordinal
-                        )
-                    )
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-
-        public readonly bool HasIEquatableMethod
-        {
-            get
-            {
-                var methods = typeModel.Methods;
-                var count = methods.Count;
-
-                for (var i = 0; i < count; i++)
-                {
-                    var m = methods[i];
-
-                    if (string.Equals(m.Name, "Equals", StringComparison.Ordinal)
-                        && m.Parameters.Count == 1
-                        && string.Equals(m.ReturnTypeFullName, "bool", StringComparison.Ordinal)
-                        && string.Equals(
-                              m.Parameters[0].TypeFullName
-                            , typeModel.FullName
-                            , StringComparison.Ordinal
-                        )
-                    )
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
         }
     }
 }

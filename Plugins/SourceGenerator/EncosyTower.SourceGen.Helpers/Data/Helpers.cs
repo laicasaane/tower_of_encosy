@@ -1,6 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-
-namespace EncosyTower.SourceGen.Helpers.Data
+﻿namespace EncosyTower.SourceGen.Helpers.Data
 {
     public static class Helpers
     {
@@ -67,8 +65,5 @@ namespace EncosyTower.SourceGen.Helpers.Data
 
         public const string PR_GENERATED_PROPERTY_FROM_FIELD = $"[ETDSG.GeneratedPropertyFromField(nameof({{0}}), typeof({{1}}))]";
         public const string PR_GENERATED_FIELD_FROM_PROPERTY = $"[ETDSG.GeneratedFieldFromProperty(nameof({{0}}))]";
-
-        public static bool IsIData(ITypeSymbol type)
-            => type.HasAttribute(DATA_ATTRIBUTE_METADATA) || type.InheritsFromInterface(IDATA);
     }
 }

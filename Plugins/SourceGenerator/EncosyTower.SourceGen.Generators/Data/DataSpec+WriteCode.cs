@@ -8,7 +8,7 @@ namespace EncosyTower.SourceGen.Generators.Data
     {
         public readonly string WriteCode()
         {
-            var keyword = IsValueType ? "struct" : "class";
+            var keyword = isValueType ? "struct" : "class";
 
             var p = Printer.DefaultLarge;
             p = p.IncreasedIndent();
@@ -17,15 +17,12 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
-            if (HasSerializableAttribute == false)
+            if (hasSerializableAttribute == false)
             {
                 p.PrintLine("[S.Serializable]");
             }
 
-            p.PrintBeginLine()
-                .Print($"partial {keyword} ").Print(typeName)
-                .Print(" : ETD.IData")
-                .PrintIf(HasBaseType, ", ").PrintIf(HasBaseType, baseTypeName);
+            p.PrintBeginLine().Print("partial ").Print(keyword).Print(" ").Print(typeName).Print(" : ETD.IData");
 
             if (isMutable == false)
             {
@@ -46,7 +43,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 p.Print(", ").Print("ETD.IDataWithReadOnlyView<").Print(typeName).Print(">");
             }
 
-            p.Print(", ").Print($"S.IEquatable<{typeName}>");
+            p.Print(", ").Print("S.IEquatable<").Print(typeName).Print(">");
 
             p.PrintEndLine();
             p.OpenScope();
@@ -57,15 +54,15 @@ namespace EncosyTower.SourceGen.Generators.Data
                 WriteEqualsMethod(ref p);
                 WriteIEquatableMethod(ref p);
 
-                if (IsValueType == false)
+                if (isValueType == false)
                 {
                     WriteEqualsInternalMethod(ref p);
                     WriteOverrideIEquatableMethod(ref p);
                 }
 
-                WriteSetValue_TypeMethods(ref p);
                 WriteAsReadOnlyMethod(ref p);
                 WriteEqualityOperators(ref p);
+                WriteValueSetterClass(ref p);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -81,7 +78,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             var ordersArr = orders;
             var propRefsArr = propRefs;
             var fieldRefsArr = fieldRefs;
-            var readonlyKeyword = IsValueType ? "readonly " : "";
+            var readonlyKeyword = isValueType ? "readonly " : "";
             var accessKeyword = fieldPolicy switch {
                 DataFieldPolicy.Public => "public",
                 DataFieldPolicy.Internal => "internal",
@@ -112,7 +109,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             var fieldName = prop.fieldName;
             var withSerializeField = false;
-            var hasGenPropertyBagAttrib = HasGeneratePropertyBagAttribute;
+            var hasGenPropertyBagAttrib = hasGeneratePropertyBagAttribute;
             var withDontCreateProperty = false;
 
             p.PrintBeginLine();
@@ -279,7 +276,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                     }
 
                     p.PrintLine(PR_AGGRESSIVE_INLINING);
-                    p.PrintBeginLineIf(IsValueType, "readonly get => ", "get => ")
+                    p.PrintBeginLineIf(isValueType, "readonly get => ", "get => ")
                         .PrintIf(mustCast, casting)
                         .Print("(this.").Print(fieldName).PrintEndLine(");");
 
@@ -347,14 +344,14 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteGetHashCodeMethod(ref Printer p)
         {
-            if (HasGetHashCodeMethod)
+            if (hasGetHashCodeMethod)
             {
                 return;
             }
 
             p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLine("public override ")
-                .PrintIf(IsValueType, "readonly ")
+                .PrintIf(isValueType, "readonly ")
                 .PrintEndLine("int GetHashCode()");
             p.OpenScope();
             {
@@ -371,7 +368,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
 
-            if (HasBaseType == false && IsSealed == false)
+            if (HasBaseType == false && isSealed == false)
             {
                 p.PrintBeginLine("protected virtual ");
             }
@@ -385,7 +382,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 p.PrintBeginLine("private ");
             }
 
-            p.PrintIf(IsValueType, "readonly ")
+            p.PrintIf(isValueType, "readonly ")
                 .PrintEndLine("ET.HashValue GetHashCodeInternal()");
             p.OpenScope();
             {
@@ -447,14 +444,14 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteEqualsMethod(ref Printer p)
         {
-            if (HasEqualsMethod)
+            if (hasEqualsMethod)
             {
                 return;
             }
 
             p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLine("public override ")
-                .PrintIf(IsValueType, "readonly ")
+                .PrintIf(isValueType, "readonly ")
                 .PrintEndLine("bool Equals(object obj)");
             p.OpenScope();
             {
@@ -470,8 +467,8 @@ namespace EncosyTower.SourceGen.Generators.Data
             {
                 p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
                 p.PrintBeginLine("public override ")
-                    .PrintIf(IsValueType, "readonly ")
-                    .PrintEndLine($"bool Equals({baseTypeName} other)");
+                    .PrintIf(isValueType, "readonly ")
+                    .Print("bool Equals(").Print(baseTypeName).PrintEndLine(" other)");
                 p.OpenScope();
                 {
                     p.PrintBeginLine("if (other is not ").Print(typeName).PrintEndLine(" otherDerived) return false;");
@@ -489,18 +486,18 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteIEquatableMethod(ref Printer p)
         {
-            if (HasIEquatableMethod)
+            if (hasIEquatableMethod)
             {
                 return;
             }
 
             p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-            p.PrintBeginLineIf(IsSealed, "public ", "public virtual ")
-                .PrintIf(IsValueType, "readonly ")
-                .PrintEndLine($"bool Equals({typeName} other)");
+            p.PrintBeginLineIf(isSealed, "public ", "public virtual ")
+                .PrintIf(isValueType, "readonly ")
+                .Print("bool Equals(").Print(typeName).PrintEndLine(" other)");
             p.OpenScope();
             {
-                if (IsValueType)
+                if (isValueType)
                 {
                     p.PrintLine("return");
                     WriteEqualComparerLines(ref p, false);
@@ -521,8 +518,8 @@ namespace EncosyTower.SourceGen.Generators.Data
         private readonly void WriteEqualsInternalMethod(ref Printer p)
         {
             p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-            p.PrintBeginLineIf(IsSealed, "private ", "protected ")
-                .PrintEndLine($"bool EqualsInternal({typeName} other)");
+            p.PrintBeginLineIf(isSealed, "private ", "protected ")
+                .Print("bool EqualsInternal(").Print(typeName).PrintEndLine(" other)");
             p.OpenScope();
             {
                 p.PrintBeginLine("return")
@@ -716,46 +713,17 @@ namespace EncosyTower.SourceGen.Generators.Data
             }
         }
 
-        private readonly void WriteSetValue_TypeMethods(ref Printer p)
-        {
-            foreach (var fieldRef in fieldRefs)
-            {
-                var fn = fieldRef.fieldName;
-                var pn = fieldRef.propertyName;
-
-                p.PrintLine("[S.Obsolete(\"This method is not intended to be used directly by user code.\")]");
-                p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-                p.PrintLine($"internal void SetValue_{typeValidIdentifier}_{pn}({fieldRef.fieldTypeName} value_{pn})");
-                p.WithIncreasedIndent()
-                    .PrintBeginLine("=> this.").Print(fn).Print(" = value_").Print(pn).PrintEndLine(";");
-                p.PrintEndLine();
-            }
-
-            foreach (var propRef in propRefs)
-            {
-                var fn = propRef.fieldName;
-                var pn = propRef.propertyName;
-
-                p.PrintLine("[S.Obsolete(\"This method is not intended to be used directly by user code.\")]");
-                p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-                p.PrintLine($"internal void SetValue_{typeValidIdentifier}_{pn}({propRef.fieldTypeName} value_{pn})");
-                p.WithIncreasedIndent()
-                    .PrintBeginLine("=> this.").Print(fn).Print(" = value_").Print(pn).PrintEndLine(";");
-                p.PrintEndLine();
-            }
-        }
-
         private readonly void WriteEqualityOperators(ref Printer p)
         {
             p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLine("public static bool operator ==(")
-                .PrintIf(IsValueType, "in ")
+                .PrintIf(isValueType, "in ")
                 .Print(typeName).Print(" left, ")
-                .PrintIf(IsValueType, "in ")
+                .PrintIf(isValueType, "in ")
                 .Print(typeName).PrintEndLine(" right)");
             p.OpenScope();
             {
-                if (IsValueType == false)
+                if (isValueType == false)
                 {
                     p.PrintLine("if (ReferenceEquals(left, null))");
                     p.OpenScope();
@@ -773,13 +741,13 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLine("public static bool operator !=(")
-                .PrintIf(IsValueType, "in ")
+                .PrintIf(isValueType, "in ")
                 .Print(typeName).Print(" left, ")
-                .PrintIf(IsValueType, "in ")
+                .PrintIf(isValueType, "in ")
                 .Print(typeName).PrintEndLine(" right)");
             p.OpenScope();
             {
-                if (IsValueType == false)
+                if (isValueType == false)
                 {
                     p.PrintLine("if (ReferenceEquals(left, null))");
                     p.OpenScope();
@@ -804,8 +772,8 @@ namespace EncosyTower.SourceGen.Generators.Data
             }
 
             p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-            p.PrintBeginLine($"public ")
-                .PrintIf(IsValueType, "readonly ")
+            p.PrintBeginLine("public ")
+                .PrintIf(isValueType, "readonly ")
                 .PrintIf(isMutable, readOnlyTypeName, typeName)
                 .PrintEndLine(" AsReadOnly()");
             p.OpenScope();
@@ -824,11 +792,11 @@ namespace EncosyTower.SourceGen.Generators.Data
             }
 
             p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-            p.PrintBeginLine(AccessibilityKeyword).Print(" readonly partial struct ").Print(readOnlyTypeName)
+            p.PrintBeginLine(accessibilityKeyword).Print(" readonly partial struct ").Print(readOnlyTypeName)
                 .Print(" : ")
                 .Print("ETD.IReadOnlyData").Print("<").Print(typeName).Print(">")
                 .Print(", ")
-                .Print($"S.IEquatable<{readOnlyTypeName}>")
+                .Print("S.IEquatable<").Print(readOnlyTypeName).Print(">")
                 .PrintEndLine();
             p.OpenScope();
             {
@@ -837,9 +805,9 @@ namespace EncosyTower.SourceGen.Generators.Data
                 p.PrintEndLine();
 
                 p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-                p.PrintBeginLine(AccessibilityKeyword)
+                p.PrintBeginLine(accessibilityKeyword)
                     .Print(" ReadOnly").Print(typeIdentifier).Print("(")
-                    .PrintIf(IsValueType, "in ")
+                    .PrintIf(isValueType, "in ")
                     .Print(typeName)
                     .PrintEndLine(" data)");
                 p.OpenScope();
@@ -912,11 +880,11 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private readonly void WriteReadOnlyViewStruct_Equality(ref Printer p)
         {
-            p.PrintBeginLineIf(IsValueType, PR_AGGRESSIVE_INLINING, "").Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-            p.PrintLine($"public bool Equals({readOnlyTypeName} other)");
+            p.PrintBeginLineIf(isValueType, PR_AGGRESSIVE_INLINING, "").Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
+            p.PrintBeginLine("public bool Equals(").Print(readOnlyTypeName).PrintEndLine(" other)");
             p.OpenScope();
             {
-                if (IsValueType == false)
+                if (isValueType == false)
                 {
                     p.PrintLine("if (ReferenceEquals(other._data, null)) return false;");
                     p.PrintLine("if (ReferenceEquals(this, other._data)) return true;");
@@ -932,7 +900,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintLine("public override bool Equals(object obj)");
             p.OpenScope();
             {
-                p.PrintLine($"return obj is {readOnlyTypeName} other && Equals(other);");
+                p.PrintBeginLine("return obj is ").Print(readOnlyTypeName).PrintLine(" other && Equals(other);");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -958,8 +926,8 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintBeginLine("public static implicit operator ")
                 .Print(readOnlyTypeName)
                 .Print("(")
-                .PrintIf(IsValueType, "in ")
-                .PrintEndLine($"{typeName} data)");
+                .PrintIf(isValueType, "in ")
+                .Print(typeName).PrintEndLine(" data)");
             p.OpenScope();
             {
                 p.PrintBeginLine("return ")
@@ -973,7 +941,9 @@ namespace EncosyTower.SourceGen.Generators.Data
         private readonly void WriteReadOnlyViewStruct_EqualityOperators(ref Printer p)
         {
             p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-            p.PrintLine($"public static bool operator ==(in {readOnlyTypeName} left, in {readOnlyTypeName} right)");
+            p.PrintBeginLine("public static bool operator ==(in ")
+                .Print(readOnlyTypeName).Print(" left, in ")
+                .Print(readOnlyTypeName).PrintEndLine(" right)");
             p.OpenScope();
             {
                 p.PrintLine("return left.Equals(right);");
@@ -982,10 +952,52 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintEndLine();
 
             p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-            p.PrintLine($"public static bool operator !=(in {readOnlyTypeName} left, in {readOnlyTypeName} right)");
+            p.PrintBeginLine("public static bool operator !=(in ")
+                .Print(readOnlyTypeName).Print(" left, in ")
+                .Print(readOnlyTypeName).PrintEndLine(" right)");
             p.OpenScope();
             {
                 p.PrintLine("return !left.Equals(right);");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private readonly void WriteValueSetterClass(ref Printer p)
+        {
+            p.PrintLine("[S.Obsolete(\"This method is not intended to be used directly by user code.\")]");
+            p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
+            p.PrintBeginLine("internal ").Print("static class ")
+                .Print(typeValidIdentifier).PrintEndLine("_ValueSetter");
+            p.OpenScope();
+            {
+                foreach (var fieldRef in fieldRefs)
+                {
+                    var fn = fieldRef.fieldName;
+                    var pn = fieldRef.propertyName;
+
+                    p.PrintLine(PR_AGGRESSIVE_INLINING);
+                    p.PrintBeginLine("public static void Set_").Print(pn).Print("(ref ")
+                        .Print(typeName).Print(" @ref")
+                        .Print(", ").Print(fieldRef.fieldTypeName).Print(" value_").Print(pn).PrintEndLine(")");
+                    p.WithIncreasedIndent()
+                        .PrintBeginLine("=> @ref.").Print(fn).Print(" = value_").Print(pn).PrintEndLine(";");
+                    p.PrintEndLine();
+                }
+
+                foreach (var propRef in propRefs)
+                {
+                    var fn = propRef.fieldName;
+                    var pn = propRef.propertyName;
+
+                    p.PrintLine(PR_AGGRESSIVE_INLINING);
+                    p.PrintBeginLine("public static void Set_").Print(pn).Print("(ref ")
+                        .Print(typeName).Print(" @ref")
+                        .Print(", ").Print(propRef.fieldTypeName).Print(" value_").Print(pn).PrintEndLine(")");
+                    p.WithIncreasedIndent()
+                        .PrintBeginLine("=> @ref.").Print(fn).Print(" = value_").Print(pn).PrintEndLine(";");
+                    p.PrintEndLine();
+                }
             }
             p.CloseScope();
             p.PrintEndLine();

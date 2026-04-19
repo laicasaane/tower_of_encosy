@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 using System.Threading;
-using EncosyTower.SourceGen.Helpers.Mvvm;
-using EncosyTower.SourceGen.TypeModeling.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -153,48 +151,19 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             var isBaseObservableObject = false;
 
-            if (classSymbol.BaseType != null && classSymbol.BaseType.TypeKind == TypeKind.Class)
+            if (classSymbol.BaseType != null
+                && classSymbol.BaseType.TypeKind == TypeKind.Class
+                && classSymbol.BaseType.HasAttribute(OBSERVABLE_OBJECT_ATTRIBUTE_METADATA)
+            )
             {
-                if (classSymbol.BaseType.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE))
-                {
-                    isBaseObservableObject = true;
-                }
+                isBaseObservableObject = true;
             }
 
             using var fieldRefsBuilder = ImmutableArrayBuilder<FieldMemberSpec>.Rent();
             using var propRefsBuilder = ImmutableArrayBuilder<PropMemberSpec>.Rent();
-            using var diagnosticBuilder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
 
-            var typeModel = classSymbol.ToModel(
-                  token
-                , new ModelOptions(
-                      ModelParts.Fields
-                    | ModelParts.Properties
-                    | ModelParts.Methods
-                    | ModelParts.Attributes
-                )
-            );
-
-            var typeModelAttrs = typeModel.Attributes;
-            var typeModelAttrCount = typeModelAttrs.Count;
-            var hasSerializableAttribute = false;
-            var hasGeneratePropertyBagAttribute = false;
-
-            for (var i = 0; i < typeModelAttrCount; i++)
-            {
-                var attrFullName = typeModelAttrs[i].FullName;
-
-                if (string.Equals(attrFullName, SERIALIZABLE_ATTRIBUTE, StringComparison.Ordinal))
-                {
-                    hasSerializableAttribute = true;
-                }
-
-                if (string.Equals(attrFullName, GENERATE_PROPERTY_BAG_ATTRIBUTE, StringComparison.Ordinal))
-                {
-                    hasGeneratePropertyBagAttribute = true;
-                }
-            }
-
+            var hasSerializableAttribute = classSymbol.HasAttribute(SERIALIZABLE_ATTRIBUTE);
+            var hasGeneratePropertyBagAttribute = classSymbol.HasAttribute(GENERATE_PROPERTY_BAG_ATTRIBUTE);
             var hasMemberObservableObject = false;
 
             var observableFieldMap = new Dictionary<string, (
@@ -202,305 +171,202 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 , bool hasSerializeField
                 , List<string> commandNames
             )>();
+
             var observablePropMap = new Dictionary<string, (
                   string typeName
                 , bool doesCreateProperty
                 , List<string> commandNames
             )>();
+
+            var propertyMap = new Dictionary<string, (
+                  string propTypeName
+                , string propTypeValidIdent
+            )>();
+
             var observablePropNameSet = new HashSet<string>();
             var propChangedMapByPropName = new Dictionary<string, List<string>>();
             var propertyChangedMap = new Dictionary<string, List<string>>();
             var commandSet = new HashSet<string>();
-            var propertyMap = new Dictionary<string, (string propTypeName, string propTypeValidIdent)>();
-            var methodNames = new List<string>();
-            var typeFields = typeModel.Fields;
-            var typeFieldCount = typeFields.Count;
+            var members = classSymbol.GetMembers();
+            var methods = new List<IMethodSymbol>();
 
-            for (var i = 0; i < typeFieldCount; i++)
+            foreach (var member in members)
             {
-                token.ThrowIfCancellationRequested();
-
-                var fieldModel = typeFields[i];
-                var fieldAttrs = fieldModel.Attributes;
-                var fieldAttrCount = fieldAttrs.Count;
-                var hasObservablePropAttr = false;
-                var hasSerializeFieldAttr = false;
-
-                for (var j = 0; j < fieldAttrCount; j++)
-                {
-                    var attrFullName = fieldAttrs[j].FullName;
-
-                    if (string.Equals(attrFullName, OBSERVABLE_PROPERTY_ATTRIBUTE, StringComparison.Ordinal))
-                    {
-                        hasObservablePropAttr = true;
-                    }
-                    else if (string.Equals(attrFullName, SERIALIZE_FIELD_ATTRIBUTE, StringComparison.Ordinal))
-                    {
-                        hasSerializeFieldAttr = true;
-                    }
-                }
-
-                if (hasObservablePropAttr == false)
-                {
-                    continue;
-                }
-
-                var fieldName = fieldModel.Name;
-                var fieldCommandNames = new List<string>();
-                var uniqueFieldCommandNames = new HashSet<string>();
-
-                for (var j = 0; j < fieldAttrCount; j++)
-                {
-                    var attr = fieldAttrs[j];
-                    var attrFullName = attr.FullName;
-
-                    if (string.Equals(attrFullName, NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE, StringComparison.Ordinal))
-                    {
-                        var ctorArgs = attr.ConstructorArguments;
-
-                        if (ctorArgs.Count > 0
-                            && ctorArgs[0].Kind == TypedConstantKind.Primitive
-                            && string.IsNullOrEmpty(ctorArgs[0].Value) == false
-                        )
-                        {
-                            if (propertyChangedMap.TryGetValue(fieldName, out var propNames) == false)
-                            {
-                                propertyChangedMap[fieldName] = propNames = new List<string>();
-                            }
-
-                            propNames.Add(ctorArgs[0].Value);
-                        }
-                    }
-                    else if (string.Equals(
-                        attrFullName, NOTIFY_CAN_EXECUTE_CHANGED_FOR_ATTRIBUTE, StringComparison.Ordinal
-                    ))
-                    {
-                        var ctorArgs = attr.ConstructorArguments;
-                        var ctorArgCount = ctorArgs.Count;
-
-                        for (var k = 0; k < ctorArgCount; k++)
-                        {
-                            var arg = ctorArgs[k];
-
-                            if (arg.Kind == TypedConstantKind.Primitive && string.IsNullOrEmpty(arg.Value) == false)
-                            {
-                                uniqueFieldCommandNames.Add(arg.Value);
-                                commandSet.Add(arg.Value);
-                            }
-                        }
-                    }
-                }
-
-                fieldCommandNames.AddRange(uniqueFieldCommandNames);
-                observableFieldMap[fieldName] = (fieldModel.TypeFullName, hasSerializeFieldAttr, fieldCommandNames);
-            }
-
-            var typeProperties = typeModel.Properties;
-            var typePropertyCount = typeProperties.Count;
-
-            for (var i = 0; i < typePropertyCount; i++)
-            {
-                token.ThrowIfCancellationRequested();
-
-                var propModel = typeProperties[i];
-                var propAttrs = propModel.Attributes;
-                var propAttrCount = propAttrs.Count;
-                var hasObservablePropAttr = false;
-                var hasCreatePropAttr = false;
-
-                for (var j = 0; j < propAttrCount; j++)
-                {
-                    var attrFullName = propAttrs[j].FullName;
-
-                    if (string.Equals(attrFullName, OBSERVABLE_PROPERTY_ATTRIBUTE, StringComparison.Ordinal))
-                    {
-                        hasObservablePropAttr = true;
-                    }
-                    else if (string.Equals(attrFullName, CREATE_PROPERTY_ATTRIBUTE, StringComparison.Ordinal))
-                    {
-                        hasCreatePropAttr = true;
-                    }
-                }
-
-                if (hasObservablePropAttr == false)
-                {
-                    continue;
-                }
-
-                var propName = propModel.Name;
-                var propCommandNames = new List<string>();
-                var uniquePropCommandNames = new HashSet<string>();
-
-                for (var j = 0; j < propAttrCount; j++)
-                {
-                    var attr = propAttrs[j];
-                    var attrFullName = attr.FullName;
-
-                    if (string.Equals(attrFullName, NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE, StringComparison.Ordinal))
-                    {
-                        var ctorArgs = attr.ConstructorArguments;
-
-                        if (ctorArgs.Count > 0
-                            && ctorArgs[0].Kind == TypedConstantKind.Primitive
-                            && string.IsNullOrEmpty(ctorArgs[0].Value) == false
-                        )
-                        {
-                            if (propChangedMapByPropName.TryGetValue(propName, out var propNames) == false)
-                            {
-                                propChangedMapByPropName[propName] = propNames = new List<string>();
-                            }
-
-                            propNames.Add(ctorArgs[0].Value);
-                        }
-                    }
-                    else if (string.Equals(
-                        attrFullName, NOTIFY_CAN_EXECUTE_CHANGED_FOR_ATTRIBUTE, StringComparison.Ordinal
-                    ))
-                    {
-                        var ctorArgs = attr.ConstructorArguments;
-                        var ctorArgCount = ctorArgs.Count;
-
-                        for (var k = 0; k < ctorArgCount; k++)
-                        {
-                            var arg = ctorArgs[k];
-
-                            if (arg.Kind == TypedConstantKind.Primitive && string.IsNullOrEmpty(arg.Value) == false)
-                            {
-                                uniquePropCommandNames.Add(arg.Value);
-                                commandSet.Add(arg.Value);
-                            }
-                        }
-                    }
-                }
-
-                propCommandNames.AddRange(uniquePropCommandNames);
-                observablePropNameSet.Add(propName);
-                observablePropMap[propName] = (propModel.TypeFullName, hasCreatePropAttr, propCommandNames);
-            }
-
-            var typeMethods = typeModel.Methods;
-            var typeMethodCount = typeMethods.Count;
-
-            for (var i = 0; i < typeMethodCount; i++)
-            {
-                token.ThrowIfCancellationRequested();
-
-                var methodModel = typeMethods[i];
-
-                if (methodModel.Parameters.Count > 1)
-                {
-                    continue;
-                }
-
-                var methodAttrs = methodModel.Attributes;
-                var methodAttrCount = methodAttrs.Count;
-
-                for (var j = 0; j < methodAttrCount; j++)
-                {
-                    if (string.Equals(methodAttrs[j].FullName, RELAY_COMMAND_ATTRIBUTE, StringComparison.Ordinal))
-                    {
-                        methodNames.Add(methodModel.Name);
-                        break;
-                    }
-                }
-            }
-
-            var allMembers = classSymbol.GetMembers();
-            var allMemberCount = allMembers.Length;
-
-            for (var i = 0; i < allMemberCount; i++)
-            {
-                token.ThrowIfCancellationRequested();
-
-                var member = allMembers[i];
-
                 if (member is IFieldSymbol field)
                 {
-                    if (observableFieldMap.TryGetValue(field.Name, out var fieldData) == false)
+                    if (field.HasAttribute(OBSERVABLE_PROPERTY_ATTRIBUTE))
                     {
-                        continue;
+                        var fieldTypeName = field.Type.ToFullName();
+                        var isObservableObject = field.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE);
+
+                        if (isObservableObject)
+                        {
+                            hasMemberObservableObject = true;
+                        }
+
+                        var uniqueCommandNames = new HashSet<string>();
+                        var notifyPropChangedFors = field.GetAttributes(NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE);
+
+                        foreach (var notifyPropChangedFor in notifyPropChangedFors)
+                        {
+                            if (notifyPropChangedFor != null
+                                && notifyPropChangedFor.ConstructorArguments.Length > 0
+                                && notifyPropChangedFor.ConstructorArguments[0].Value is string propName
+                            )
+                            {
+                                if (propertyChangedMap.TryGetValue(field.Name, out var propNames) == false)
+                                {
+                                    propertyChangedMap[field.Name] = propNames = new List<string>();
+                                }
+
+                                propNames.Add(propName);
+                            }
+                        }
+
+                        var notifyCanExecuteChangedFors = field.GetAttributes(NOTIFY_CAN_EXECUTE_CHANGED_FOR_ATTRIBUTE);
+
+                        using var commandNames = ImmutableArrayBuilder<string>.Rent();
+
+                        foreach (var notifyCanExecuteChangedFor in notifyCanExecuteChangedFors)
+                        {
+                            if (notifyCanExecuteChangedFor != null
+                                && notifyCanExecuteChangedFor.ConstructorArguments.Length > 0
+                            )
+                            {
+                                var args = notifyCanExecuteChangedFor.ConstructorArguments;
+
+                                foreach (var arg in args)
+                                {
+                                    if (arg.Value is string commandName)
+                                    {
+                                        uniqueCommandNames.Add(commandName);
+                                        commandSet.Add(commandName);
+                                    }
+                                }
+                            }
+
+                            commandNames.AddRange(uniqueCommandNames);
+                        }
+
+                        field.GatherForwardedAttributes(
+                              semanticModel
+                            , token
+                            , out ImmutableArray<AttributeInfo> propertyAttributes
+                        );
+
+                        fieldRefsBuilder.Add(new FieldMemberSpec {
+                            location = LocationInfo.From(field.Locations.Length > 0 ? field.Locations[0] : Location.None),
+                            fieldName = field.Name,
+                            propertyName = field.ToPropertyName(),
+                            fieldTypeName = fieldTypeName,
+                            fieldTypeValidIdent = field.Type.ToValidIdentifier(),
+                            isObservableObject = isObservableObject,
+                            hasSerializeFieldAttribute = field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE),
+                            commandNames = commandNames.ToImmutable().AsEquatableArray(),
+                            forwardedPropertyAttributes = propertyAttributes.AsEquatableArray(),
+                        });
                     }
-
-                    var isObservableObject = field.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE);
-
-                    if (isObservableObject)
-                    {
-                        hasMemberObservableObject = true;
-                    }
-
-                    field.GatherForwardedAttributes(
-                          semanticModel
-                        , token
-                        , diagnosticBuilder
-                        , out ImmutableArray<AttributeInfo> propertyAttributes
-                        , DiagnosticDescriptors.InvalidPropertyTargetedAttributeOnObservableProperty
-                    );
-
-                    fieldRefsBuilder.Add(new FieldMemberSpec {
-                        location = LocationInfo.From(field.Locations.Length > 0 ? field.Locations[0] : Location.None),
-                        fieldName = field.Name,
-                        propertyName = field.ToPropertyName(),
-                        fieldTypeName = fieldData.typeName,
-                        fieldTypeValidIdent = field.Type.ToValidIdentifier(),
-                        isObservableObject = isObservableObject,
-                        hasSerializeFieldAttribute = fieldData.hasSerializeField,
-                        commandNames = fieldData.commandNames.ToImmutableArray().AsEquatableArray(),
-                        forwardedPropertyAttributes = propertyAttributes.AsEquatableArray(),
-                    });
 
                     continue;
                 }
 
                 if (member is IPropertySymbol property)
                 {
-                    if (observablePropNameSet.Contains(property.Name) == false)
+                    if (property.HasAttribute(OBSERVABLE_PROPERTY_ATTRIBUTE) == false)
                     {
                         propertyMap[property.Name] = (property.Type.ToFullName(), property.Type.ToValidIdentifier());
-                        continue;
                     }
-
-                    var propData = observablePropMap[property.Name];
-                    var fieldName = property.ToPrivateFieldName();
-                    var isObservableObject = property.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE);
-
-                    if (isObservableObject)
+                    else
                     {
-                        hasMemberObservableObject = true;
+                        var propertyTypeName = property.Type.ToFullName();
+                        var fieldName = property.ToPrivateFieldName();
+                        var isObservableObject = property.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE);
+
+                        if (isObservableObject)
+                        {
+                            hasMemberObservableObject = true;
+                        }
+
+                        var uniqueCommandNames = new HashSet<string>();
+                        var notifyPropChangedFors = property.GetAttributes(NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE);
+
+                        foreach (var notifyPropChangedFor in notifyPropChangedFors)
+                        {
+                            if (notifyPropChangedFor != null
+                                && notifyPropChangedFor.ConstructorArguments.Length > 0
+                                && notifyPropChangedFor.ConstructorArguments[0].Value is string propName
+                            )
+                            {
+                                if (propertyChangedMap.TryGetValue(fieldName, out var propNames) == false)
+                                {
+                                    propertyChangedMap[fieldName] = propNames = new List<string>();
+                                }
+
+                                propNames.Add(propName);
+                            }
+                        }
+
+                        var notifyCanExecuteChangedFors = property.GetAttributes(NOTIFY_CAN_EXECUTE_CHANGED_FOR_ATTRIBUTE);
+
+                        using var commandNames = ImmutableArrayBuilder<string>.Rent();
+
+                        foreach (var notifyCanExecuteChangedFor in notifyCanExecuteChangedFors)
+                        {
+                            if (notifyCanExecuteChangedFor != null
+                                && notifyCanExecuteChangedFor.ConstructorArguments.Length > 0
+                            )
+                            {
+                                var args = notifyCanExecuteChangedFor.ConstructorArguments;
+
+                                foreach (var arg in args)
+                                {
+                                    if (arg.Value is string commandName)
+                                    {
+                                        uniqueCommandNames.Add(commandName);
+                                        commandSet.Add(commandName);
+                                    }
+                                }
+                            }
+
+                            commandNames.AddRange(uniqueCommandNames);
+                        }
+
+                        property.GatherForwardedAttributes(
+                              semanticModel
+                            , token
+                            , out ImmutableArray<(string, AttributeInfo)> fieldAttributes
+                        );
+
+                        using var forwardedFieldAttribsBuilder = ImmutableArrayBuilder<ForwardedFieldAttributeSpec>.Rent();
+
+
+                        foreach (var (typeName, attribInfo) in fieldAttributes)
+                        {
+                            forwardedFieldAttribsBuilder.Add(new ForwardedFieldAttributeSpec { typeName = typeName, attributeInfo = attribInfo });
+                        }
+
+                        propRefsBuilder.Add(new PropMemberSpec {
+                            location = LocationInfo.From(property.Locations.Length > 0 ? property.Locations[0] : Location.None),
+                            propertyName = property.Name,
+                            fieldName = fieldName,
+                            propertyTypeName = propertyTypeName,
+                            propertyTypeValidIdent = property.Type.ToValidIdentifier(),
+                            isObservableObject = isObservableObject,
+                            doesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE),
+                            commandNames = commandNames.ToImmutable().AsEquatableArray(),
+                            forwardedFieldAttributes = forwardedFieldAttribsBuilder.ToImmutable().AsEquatableArray(),
+                        });
                     }
 
-                    if (propChangedMapByPropName.TryGetValue(property.Name, out var propChangedNames))
+                    continue;
+                }
+
+                if (member is IMethodSymbol method && method.Parameters.Length <= 1)
+                {
+                    if (method.HasAttribute(RELAY_COMMAND_ATTRIBUTE))
                     {
-                        propertyChangedMap[fieldName] = propChangedNames;
+                        methods.Add(method);
                     }
-
-                    property.GatherForwardedAttributes(
-                          semanticModel
-                        , token
-                        , diagnosticBuilder
-                        , out ImmutableArray<(string, AttributeInfo)> fieldAttributes
-                        , DiagnosticDescriptors.InvalidFieldMethodTargetedAttributeOnObservableProperty
-                    );
-
-                    using var forwardedFieldAttribsBuilder = ImmutableArrayBuilder<ForwardedFieldAttributeSpec>.Rent();
-                    var fieldAttrCount = fieldAttributes.Length;
-
-                    for (var j = 0; j < fieldAttrCount; j++)
-                    {
-                        var (typeName, attribInfo) = fieldAttributes[j];
-                        forwardedFieldAttribsBuilder.Add(new ForwardedFieldAttributeSpec { typeName = typeName, attributeInfo = attribInfo });
-                    }
-
-                    propRefsBuilder.Add(new PropMemberSpec {
-                        location = LocationInfo.From(property.Locations.Length > 0 ? property.Locations[0] : Location.None),
-                        propertyName = property.Name,
-                        fieldName = fieldName,
-                        propertyTypeName = propData.typeName,
-                        propertyTypeValidIdent = property.Type.ToValidIdentifier(),
-                        isObservableObject = isObservableObject,
-                        doesCreateProperty = propData.doesCreateProperty,
-                        commandNames = propData.commandNames.ToImmutableArray().AsEquatableArray(),
-                        forwardedFieldAttributes = forwardedFieldAttribsBuilder.ToImmutable().AsEquatableArray(),
-                    });
 
                     continue;
                 }
@@ -530,11 +396,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             using var notifyCanExecBuilder = ImmutableArrayBuilder<string>.Rent();
 
-            var methodNameCount = methodNames.Count;
-
-            for (var i = 0; i < methodNameCount; i++)
+            foreach (var method in methods)
             {
-                var commandName = $"{methodNames[i]}Command";
+                var commandName = $"{method.Name}Command";
 
                 if (commandSet.Contains(commandName))
                 {

@@ -4,8 +4,6 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Threading;
 using EncosyTower.SourceGen.Helpers.Data;
-using EncosyTower.SourceGen.TypeModeling.Models;
-using EncosyTower.SourceGen.TypeModeling.Symbols;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -77,7 +75,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             {
                 if (arg.Kind == TypedConstantKind.Array)
                 {
-                    BuildConverterMap(arg.Values, dbConverterMap, token);
+                    BuildConverterMap(arg.Values, dbConverterMap);
                     break;
                 }
             }
@@ -126,7 +124,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
                     else if (arg.Kind == TypedConstantKind.Array)
                     {
-                        BuildConverterMap(arg.Values, tableConverterMap, token);
+                        BuildConverterMap(arg.Values, tableConverterMap);
                     }
                 }
 
@@ -174,7 +172,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return default;
             }
 
-            var dataMap = BuildDataMap(tableInfoList, dbConverterMap, token);
+            var dataMap = BuildDataMap(tableInfoList, dbConverterMap);
             var assetRefListDict = new Dictionary<string, AssetRefListSpec>(StringComparer.Ordinal);
             var assetRefListOrder = new List<string>();
             var typeNameList = new List<string>();
@@ -355,27 +353,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static string GetHintName(SyntaxTree syntaxTree, string _, SyntaxNode node, string typeName)
         {
-            var (isSuccess, fileName) = syntaxTree.TryGetFileNameWithoutExtension();
             var stableHashCode = SourceGenHelpers.GetStableHashCode(syntaxTree.FilePath) & 0x7fffffff;
-            //var postfix = generatorName.Length > 0 ? $"__{generatorName}" : string.Empty;
-            var postfix = string.Empty;
-
-            if (string.IsNullOrWhiteSpace(typeName) == false)
-            {
-                postfix = $"__{typeName}{postfix}";
-            }
-
-            if (isSuccess)
-            {
-                var salting = node.GetLineNumber();
-                fileName = $"{fileName}{postfix}_{stableHashCode}_{salting}.g.cs";
-            }
-            else
-            {
-                fileName = Path.Combine($"{Path.GetRandomFileName()}{postfix}", ".g.cs");
-            }
-
-            return fileName;
+            var postfix = string.IsNullOrWhiteSpace(typeName) ? string.Empty : typeName;
+            var salting = node.GetLineNumber();
+            return $"{postfix}_{stableHashCode}_{salting}.g.cs";
         }
 
         private static void CollectHorizontalLists(
@@ -425,7 +406,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         private static Dictionary<string, DataSpec> BuildDataMap(
               List<TableInfo> tableInfoList
             , Dictionary<string, ConverterSpec> dbConverterMap
-            , CancellationToken token
         )
         {
             var map = new Dictionary<string, DataSpec>(StringComparer.Ordinal);
@@ -441,16 +421,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 {
                     var type = queue.Dequeue();
 
-                    if (type is not INamedTypeSymbol namedDataType)
-                    {
-                        continue;
-                    }
-
-                    var dataTypeSymbol = namedDataType.ToTypeSymbol();
-
-                    if (dataTypeSymbol.HasAttribute(DATA_ATTRIBUTE) == false
-                        && dataTypeSymbol.ImplementsInterface(IDATA) == false
-                    )
+                    if (type.HasAttribute(DATA_ATTRIBUTE) == false)
                     {
                         continue;
                     }
@@ -467,7 +438,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         , dbConverterMap
                         , tableInfo.tableConverterMap
                         , queue
-                        , token
                     );
 
                     if (dataModel.propRefs.Count < 1
@@ -490,7 +460,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , Dictionary<string, ConverterSpec> dbConverterMap
             , Dictionary<string, ConverterSpec> tableConverterMap
             , Queue<ITypeSymbol> queue
-            , CancellationToken token
         )
         {
             ExtractMemberModels(
@@ -498,7 +467,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , dbConverterMap
                 , tableConverterMap
                 , queue
-                , token
                 , out var propRefs
                 , out var fieldRefs
             );
@@ -509,12 +477,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             while (baseType != null)
             {
-                var baseTypeSymbol = baseType.ToTypeSymbol();
-
-                if (baseType.TypeKind != TypeKind.Class
-                    || (baseTypeSymbol.HasAttribute(DATA_ATTRIBUTE) == false
-                        && baseTypeSymbol.ImplementsInterface(IDATA) == false)
-                )
+                if (baseType.TypeKind != TypeKind.Class || baseType.HasAttribute(DATA_ATTRIBUTE) == false)
                 {
                     break;
                 }
@@ -524,7 +487,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     , dbConverterMap
                     , tableConverterMap
                     , queue
-                    , token
                     , out var basePropRefs
                     , out var baseFieldRefs
                 );
@@ -563,7 +525,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , Dictionary<string, ConverterSpec> dbConverterMap
             , Dictionary<string, ConverterSpec> tableConverterMap
             , Queue<ITypeSymbol> queue
-            , CancellationToken token
             , out EquatableArray<MemberSpec> propRefs
             , out EquatableArray<MemberSpec> fieldRefs
         )
@@ -651,7 +612,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     , dbConverterMap
                     , tableConverterMap
                     , queue
-                    , token
                 ));
             }
 
@@ -670,7 +630,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     , dbConverterMap
                     , tableConverterMap
                     , queue
-                    , token
                 ));
             }
 
@@ -685,13 +644,12 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , Dictionary<string, ConverterSpec> dbConverterMap
             , Dictionary<string, ConverterSpec> tableConverterMap
             , Queue<ITypeSymbol> queue
-            , CancellationToken token
         )
         {
             var collection = MakeCollectionModel(fieldType, out var keyType, out var elemType);
             EnqueueTypes(queue, fieldType, keyType, elemType);
 
-            var typeHasParameterlessCtor = CheckParameterlessConstructor(fieldType, token);
+            var typeHasParameterlessCtor = CheckParameterlessConstructor(fieldType);
 
             var converter = TryMakeConverterModel(
                   memberSymbol
@@ -699,7 +657,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , out var convType
                 , out var convKeyType
                 , out var convElemType
-                , token
             );
 
             EnqueueTypes(queue, convType, convKeyType, convElemType);
@@ -725,7 +682,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     , out var convFbType
                     , out var convFbKeyType
                     , out var convFbElemType
-                    , token
                 );
 
                 EnqueueTypes(queue, convFbType, convFbKeyType, convFbElemType);
@@ -762,7 +718,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
         }
 
-        private static bool CheckParameterlessConstructor(ITypeSymbol type, CancellationToken token)
+        private static bool CheckParameterlessConstructor(ITypeSymbol type)
         {
             if (type is not INamedTypeSymbol namedType)
             {
@@ -779,30 +735,28 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return false;
             }
 
-            var options = new ModelOptions(ModelParts.Constructors);
-            var typeModel = namedType.ToModel(token, options);
-            var ctors = typeModel.Constructors;
-            var ctorCount = ctors.Count;
-            var hasParamCtor = false;
+            bool? found = null;
+            var paramCtorCount = 0;
 
-            for (var i = 0; i < ctorCount; i++)
+            foreach (var typeMember in namedType.GetMembers())
             {
-                var ctor = ctors[i];
-
-                if (ctor.IsStatic)
+                if (typeMember is not IMethodSymbol method || method.MethodKind != MethodKind.Constructor)
                 {
                     continue;
                 }
 
-                if (ctor.Parameters.Count == 0)
+                if (method.Parameters.Length == 0)
                 {
-                    return true;
+                    found = true;
+                    break;
                 }
-
-                hasParamCtor = true;
+                else
+                {
+                    paramCtorCount++;
+                }
             }
 
-            return hasParamCtor == false;
+            return found ?? paramCtorCount == 0;
         }
 
         private static CollectionSpec MakeCollectionModel(
@@ -927,7 +881,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , out ITypeSymbol type
             , out ITypeSymbol keyType
             , out ITypeSymbol elemType
-            , CancellationToken token
         )
         {
             var attrib = memberSymbol.GetAttribute(DATA_CONVERTER_ATTRIBUTE);
@@ -953,7 +906,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return default;
             }
 
-            return MakeConverterModelFromMethod(converterType, convertMethod, out type, out keyType, out elemType, token);
+            return MakeConverterModelFromMethod(converterType, convertMethod, out type, out keyType, out elemType);
         }
 
         private static ConverterSpec TryFallbackConverterModel(
@@ -961,7 +914,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , out ITypeSymbol type
             , out ITypeSymbol keyType
             , out ITypeSymbol elemType
-            , CancellationToken token
         )
         {
             if (fieldType is not INamedTypeSymbol namedReturn)
@@ -978,7 +930,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return default;
             }
 
-            return MakeConverterModelFromMethod(namedReturn, convertMethod, out type, out keyType, out elemType, token);
+            return MakeConverterModelFromMethod(namedReturn, convertMethod, out type, out keyType, out elemType);
         }
 
         private static ConverterSpec MakeConverterModelFromMethod(
@@ -987,11 +939,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , out ITypeSymbol type
             , out ITypeSymbol keyType
             , out ITypeSymbol elemType
-            , CancellationToken token
         )
         {
             var sourceType = convertMethod.Parameters[0].Type;
-            var sourceHasParameterlessCtor = CheckParameterlessConstructor(sourceType, token);
+            var sourceHasParameterlessCtor = CheckParameterlessConstructor(sourceType);
             var sourceCollection = MakeCollectionModel(sourceType, out keyType, out elemType);
             type = keyType == null && elemType == null ? sourceType : null;
 
@@ -1115,7 +1066,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         private static void BuildConverterMap(
               ImmutableArray<TypedConstant> values
             , Dictionary<string, ConverterSpec> converterMap
-            , CancellationToken token
         )
         {
             if (values.IsDefaultOrEmpty)
@@ -1145,7 +1095,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         , out _
                         , out _
                         , out _
-                        , token
                     );
                 }
             }

@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Text;
 using System.Threading;
 using EncosyTower.SourceGen.Helpers.Data;
-using EncosyTower.SourceGen.TypeModeling.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -34,40 +33,49 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return default;
             }
 
-            var typeModel = typeSymbol.ToModel(token, new ModelOptions(
-                  ModelParts.Attributes | ModelParts.Fields | ModelParts.Properties | ModelParts.Methods
-            ));
+            DetermineMutability(
+                  typeSymbol
+                , out var isMutable
+                , out var withoutPropertySetters
+                , out var withReadOnlyView
+            );
+
+            var fieldPolicyAttrib = typeSymbol.GetAttribute(DATA_FIELD_POLICY_ATTRIBUTE);
+            var fieldPolicy = DataFieldPolicy.Private;
+
+            if (isMutable == false && fieldPolicyAttrib != null)
+            {
+                return default;
+            }
 
             var semanticModel = context.SemanticModel;
             var syntaxTree = typeSyntax.SyntaxTree;
-            var typeIdent = typeSyntax.Identifier.Text;
-            var typeValidIdent = typeSymbol.ToValidIdentifier();
-
-            var typeNameSb = new StringBuilder(typeIdent);
+            var typeIdentifier = typeSyntax.Identifier.Text;
+            var typeValidIdentifier = typeSymbol.ToValidIdentifier();
+            var typeNameBuilder = new StringBuilder(typeIdentifier);
 
             if (typeSyntax.TypeParameterList is TypeParameterListSyntax typeParamList
                 && typeParamList.Parameters.Count > 0
             )
             {
-                typeNameSb.Append("<");
+                typeNameBuilder.Append("<");
                 var typeParams = typeParamList.Parameters;
                 var last = typeParams.Count - 1;
 
                 for (var i = 0; i <= last; i++)
                 {
-                    typeNameSb.Append(typeParams[i].Identifier.Text);
+                    typeNameBuilder.Append(typeParams[i].Identifier.Text);
 
                     if (i < last)
                     {
-                        typeNameSb.Append(", ");
+                        typeNameBuilder.Append(", ");
                     }
                 }
 
-                typeNameSb.Append(">");
+                typeNameBuilder.Append(">");
             }
 
-            var typeName = typeNameSb.ToString();
-            var readOnlyTypeName = $"ReadOnly{typeName}";
+            var typeName = typeNameBuilder.ToString();
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   typeSyntax
@@ -80,78 +88,44 @@ namespace EncosyTower.SourceGen.Generators.Data
             var hintName = syntaxTree.GetGeneratedSourceFileName(
                   GENERATOR_NAME
                 , typeSyntax
-                , typeValidIdent
+                , typeValidIdentifier
             );
 
             var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
                   semanticModel.Compilation.AssemblyName
                 , GENERATOR_NAME
-                , typeValidIdent
+                , typeValidIdentifier
             );
 
-            var typeModelAttrs = typeModel.Attributes;
-            var typeModelAttrCount = typeModelAttrs.Count;
-            var withoutId = false;
-            var fieldPolicyCtorArg = string.Empty;
-            var hasFieldPolicyAttr = false;
-
-            for (var i = 0; i < typeModelAttrCount; i++)
+            if (fieldPolicyAttrib != null)
             {
-                var attr = typeModelAttrs[i];
+                var args = fieldPolicyAttrib.ConstructorArguments;
 
-                if (string.Equals(attr.FullName, DATA_WITHOUT_ID_ATTRIBUTE, StringComparison.Ordinal))
+                if (args.Length > 0 && args[0].Kind == TypedConstantKind.Enum)
                 {
-                    withoutId = true;
+                    fieldPolicy = (DataFieldPolicy)(int)args[0].Value;
                 }
-
-                if (string.Equals(attr.FullName, DATA_FIELD_POLICY_ATTRIBUTE, StringComparison.Ordinal))
-                {
-                    hasFieldPolicyAttr = true;
-
-                    if (attr.ConstructorArguments.Count > 0)
-                    {
-                        fieldPolicyCtorArg = attr.ConstructorArguments[0].Value;
-                    }
-                }
-            }
-
-            var withId = withoutId == false;
-
-            DetermineMutability(
-                  typeSymbol
-                , out var isMutable
-                , out var withoutPropertySetters
-                , out var withReadOnlyView
-            );
-
-            var fieldPolicy = DataFieldPolicy.Private;
-
-            if (isMutable == false && hasFieldPolicyAttr)
-            {
-                return default;
-            }
-
-            if (hasFieldPolicyAttr && int.TryParse(fieldPolicyCtorArg, out var fieldPolicyInt))
-            {
-                fieldPolicy = (DataFieldPolicy)fieldPolicyInt;
             }
 
             var baseTypeName = string.Empty;
 
             if (typeSymbol.BaseType is INamedTypeSymbol baseNamedTypeSymbol
                 && baseNamedTypeSymbol.TypeKind == TypeKind.Class
-                && baseNamedTypeSymbol.ImplementsInterface(IDATA)
+                && baseNamedTypeSymbol.HasAttribute(DATA_ATTRIBUTE_METADATA)
             )
             {
                 baseTypeName = baseNamedTypeSymbol.ToFullName();
             }
 
+            var withoutId = typeSymbol.GetAttribute(DATA_WITHOUT_ID_ATTRIBUTE) != null;
+            var withId = withoutId == false;
             var locationInfo = LocationInfo.From(typeSymbol.Locations.IsEmpty
                 ? Location.None
                 : typeSymbol.Locations[0]);
 
             var existingFields = new HashSet<string>();
             var existingProperties = new Dictionary<string, bool>(); // name → isPublic
+            var existingOverrideEquals = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
             var allowOnlyPrivateOrInitSetter = isMutable == false || withoutPropertySetters;
             var equalityComparer = SymbolEqualityComparer.Default;
 
@@ -159,108 +133,20 @@ namespace EncosyTower.SourceGen.Generators.Data
             using var fieldArrayBuilder = ImmutableArrayBuilder<FieldRefData>.Rent();
             using var propArrayBuilder = ImmutableArrayBuilder<PropRefData>.Rent();
             using var overrideEqualsBuilder = ImmutableArrayBuilder<string>.Rent();
-            using var throwawayDiagnosticBuilder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
 
-            var idPropertyTypeName = string.Empty;
-            var existingOverrideEqualsByName = new HashSet<string>(StringComparer.Ordinal);
-
-            var methodModels = typeModel.Methods;
-            var methodModelCount = methodModels.Count;
-
-            for (var i = 0; i < methodModelCount; i++)
-            {
-                var method = methodModels[i];
-
-                if (string.Equals(method.Name, "GetHashCode", StringComparison.Ordinal)
-                    && method.Parameters.Count == 0
-                    && method.ReturnsVoid == false
-                )
-                {
-                    continue;
-                }
-
-                if (string.Equals(method.Name, "Equals", StringComparison.Ordinal)
-                    && method.Parameters.Count == 1
-                    && string.Equals(method.ReturnTypeFullName, "bool", StringComparison.Ordinal)
-                )
-                {
-                    var paramFullName = method.Parameters[0].TypeFullName;
-
-                    if (string.Equals(paramFullName, "object", StringComparison.Ordinal))
-                    {
-                        continue;
-                    }
-
-                    if (string.Equals(paramFullName, typeModel.FullName, StringComparison.Ordinal))
-                    {
-                        continue;
-                    }
-
-                    existingOverrideEqualsByName.Add(paramFullName);
-                }
-            }
-
-            var serializedFieldNames = new HashSet<string>(StringComparer.Ordinal);
-            var dataPropertyNames = new HashSet<string>(StringComparer.Ordinal);
-            var propertiesWithCreateProp = new HashSet<string>(StringComparer.Ordinal);
-
-            var modelFields = typeModel.Fields;
-            var modelFieldCount = modelFields.Count;
-
-            for (var i = 0; i < modelFieldCount; i++)
-            {
-                var modelField = modelFields[i];
-                existingFields.Add(modelField.Name);
-
-                var fieldAttrs = modelField.Attributes;
-                var fieldAttrCount = fieldAttrs.Count;
-
-                for (var j = 0; j < fieldAttrCount; j++)
-                {
-                    if (string.Equals(fieldAttrs[j].FullName, SERIALIZE_FIELD_ATTRIBUTE, StringComparison.Ordinal))
-                    {
-                        serializedFieldNames.Add(modelField.Name);
-                        break;
-                    }
-                }
-            }
-
-            var modelProperties = typeModel.Properties;
-            var modelPropertyCount = modelProperties.Count;
-
-            for (var i = 0; i < modelPropertyCount; i++)
-            {
-                var modelProp = modelProperties[i];
-                var propAttrs = modelProp.Attributes;
-                var propAttrCount = propAttrs.Count;
-
-                for (var j = 0; j < propAttrCount; j++)
-                {
-                    var attr = propAttrs[j];
-
-                    if (string.Equals(attr.FullName, DATA_PROPERTY_ATTRIBUTE, StringComparison.Ordinal))
-                    {
-                        dataPropertyNames.Add(modelProp.Name);
-                    }
-                    else if (string.Equals(attr.FullName, CREATE_PROPERTY_ATTRIBUTE, StringComparison.Ordinal))
-                    {
-                        propertiesWithCreateProp.Add(modelProp.Name);
-                    }
-                }
-            }
-
-            var typeSb = new StringBuilder();
             var members = typeSymbol.GetMembers();
-            var memberCount = members.Length;
+            var hasGetHashCodeMethod = false;
+            var hasEqualsMethod = false;
+            var hasIEquatableMethod = false;
+            var idPropertyTypeName = string.Empty;
 
-            for (var i = 0; i < memberCount; i++)
+            foreach (var member in members)
             {
-                var member = members[i];
-                token.ThrowIfCancellationRequested();
-
                 if (member is IFieldSymbol field)
                 {
-                    if (serializedFieldNames.Contains(field.Name) == false)
+                    existingFields.Add(field.Name);
+
+                    if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE) == false)
                     {
                         continue;
                     }
@@ -291,9 +177,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                     field.GatherForwardedAttributes(
                           semanticModel
                         , token
-                        , throwawayDiagnosticBuilder
                         , out ImmutableArray<AttributeInfo> propertyAttributes
-                        , DiagnosticDescriptors.InvalidPropertyTargetedAttribute
                     );
 
                     var propertyName = field.ToPropertyName();
@@ -346,11 +230,10 @@ namespace EncosyTower.SourceGen.Generators.Data
                     var fieldTypeFullNameForEquality = equalityFieldType.ToFullName();
                     var fieldTypeIsReferenceType = equalityFieldType.IsReferenceType;
                     using var attrSyntaxBuilder = ImmutableArrayBuilder<string>.Rent();
-                    var propAttrSyntaxCount = propertyAttributes.Length;
 
-                    for (var j = 0; j < propAttrSyntaxCount; j++)
+                    foreach (var attr in propertyAttributes)
                     {
-                        attrSyntaxBuilder.Add(propertyAttributes[j].GetSyntax().ToFullString());
+                        attrSyntaxBuilder.Add(attr.GetSyntax().ToFullString());
                     }
 
                     var fieldRefData = new FieldRefData {
@@ -405,12 +288,10 @@ namespace EncosyTower.SourceGen.Generators.Data
                         }
                     }
 
-                    if (dataPropertyNames.Contains(property.Name) == false)
+                    if (property.GetAttribute(DATA_PROPERTY_ATTRIBUTE) is not { } attribute)
                     {
                         continue;
                     }
-
-                    var attribute = property.GetAttribute(DATA_PROPERTY_ATTRIBUTE);
 
                     ITypeSymbol fieldType;
                     bool implicitlyConvertible;
@@ -431,9 +312,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                     property.GatherForwardedAttributes(
                           semanticModel
                         , token
-                        , throwawayDiagnosticBuilder
                         , out ImmutableArray<(string, AttributeInfo)> fieldAttributes
-                        , DiagnosticDescriptors.InvalidFieldTargetedAttribute
                     );
 
                     var fieldName = property.ToPrivateFieldName();
@@ -487,18 +366,16 @@ namespace EncosyTower.SourceGen.Generators.Data
                     var fieldTypeDeclNameForEquality = GetFieldTypeName(equalityFieldType, equalityCollection);
                     var fieldTypeIsReferenceType = equalityFieldType.IsReferenceType;
                     using var attrBuilder = ImmutableArrayBuilder<ForwardedFieldAttributeData>.Rent();
-                    var forwardedAttrCount = fieldAttributes.Length;
 
-                    for (var j = 0; j < forwardedAttrCount; j++)
+                    foreach (var (fullTypeName, attributeInfo) in fieldAttributes)
                     {
-                        var (fullTypeName, attributeInfo) = fieldAttributes[j];
                         attrBuilder.Add(new ForwardedFieldAttributeData {
                             fullTypeName = fullTypeName,
                             attributeSyntax = attributeInfo.GetSyntax().ToFullString(),
                         });
                     }
 
-                    var doesCreateProperty = propertiesWithCreateProp.Contains(property.Name);
+                    var doesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE);
                     var fieldIsImplemented = existingFields.Contains(fieldName);
 
                     var propRefData = new PropRefData {
@@ -538,6 +415,39 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     continue;
                 }
+
+                if (member is IMethodSymbol method)
+                {
+                    if (method.Name == "GetHashCode" && method.Parameters.Length == 0)
+                    {
+                        hasGetHashCodeMethod = true;
+                        continue;
+                    }
+
+                    if (method.Name == "Equals"
+                        && method.Parameters.Length == 1
+                        && method.ReturnType.SpecialType == SpecialType.System_Boolean
+                    )
+                    {
+                        var param = method.Parameters[0];
+
+                        if (param.Type.SpecialType == SpecialType.System_Object)
+                        {
+                            hasEqualsMethod = true;
+                            continue;
+                        }
+
+                        if (equalityComparer.Equals(typeSymbol, param.Type))
+                        {
+                            hasIEquatableMethod = true;
+                            continue;
+                        }
+
+                        existingOverrideEquals.Add(param.Type);
+                    }
+
+                    continue;
+                }
             }
 
             var resolvedFieldRefs = fieldArrayBuilder.ToImmutable();
@@ -573,8 +483,8 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                 while (baseType != null)
                 {
-                    if (baseType.ImplementsInterface(IDATA)
-                        && existingOverrideEqualsByName.Contains(baseType.ToFullName()) == false
+                    if (baseType.HasAttribute(DATA_ATTRIBUTE_METADATA)
+                        && existingOverrideEquals.Contains(baseType) == false
                     )
                     {
                         overrideEqualsBuilder.Add(baseType.ToFullName());
@@ -587,20 +497,27 @@ namespace EncosyTower.SourceGen.Generators.Data
             return new DataSpec {
                 location = locationInfo,
                 typeName = typeName,
-                readOnlyTypeName = readOnlyTypeName,
-                typeIdentifier = typeIdent,
-                typeValidIdentifier = typeValidIdent,
+                readOnlyTypeName = $"ReadOnly{typeName}",
+                typeIdentifier = typeIdentifier,
+                typeValidIdentifier = typeValidIdentifier,
                 baseTypeName = baseTypeName,
+                accessibilityKeyword = typeSymbol.DeclaredAccessibility.ToKeyword(),
                 hintName = hintName,
                 sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
                 closingSource = closingSource,
-                typeModel = typeModel,
                 idPropertyTypeName = idPropertyTypeName,
                 fieldPolicy = fieldPolicy,
                 isMutable = isMutable,
+                isValueType = typeSymbol.IsValueType,
                 withoutPropertySetters = withoutPropertySetters,
                 withReadOnlyView = withReadOnlyView,
+                isSealed = typeSymbol.IsSealed || typeSymbol.IsValueType,
+                hasSerializableAttribute = typeSymbol.HasAttribute(SERIALIZABLE_ATTRIBUTE),
+                hasGeneratePropertyBagAttribute = typeSymbol.HasAttribute(GENERATE_PROPERTY_BAG_ATTRIBUTE),
+                hasGetHashCodeMethod = hasGetHashCodeMethod,
+                hasEqualsMethod = hasEqualsMethod,
+                hasIEquatableMethod = hasIEquatableMethod,
                 withoutId = withoutId,
                 orders = orderBuilder.ToImmutable().AsEquatableArray(),
                 fieldRefs = resolvedFieldRefs.AsEquatableArray(),
@@ -624,7 +541,7 @@ namespace EncosyTower.SourceGen.Generators.Data
         {
             var fieldEquality = type.DetermineEquality();
 
-            if (IsIData(type))
+            if (type.HasAttribute(DATA_ATTRIBUTE_METADATA))
             {
                 fieldEquality = new Equality(EqualityStrategy.Equals, false, false);
             }
@@ -638,7 +555,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private static bool GetEquatable(ITypeSymbol type)
         {
-            return IsIData(type)
+            return type.HasAttribute(DATA_ATTRIBUTE_METADATA)
                 || type.HasAttribute(UNION_ID_ATTRIBUTE)
                 || type.DetermineIEquatable()
                 ;
@@ -949,9 +866,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             withoutPropertySetters = false;
             withReadOnlyView = false;
 
-            var attrib = symbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE);
-
-            if (attrib == null)
+            if (symbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE) is not { } attrib)
             {
                 return;
             }
@@ -1022,13 +937,13 @@ namespace EncosyTower.SourceGen.Generators.Data
             return;
 
             static string Make(ITypeSymbol type, IMethodSymbol method)
-                => method.IsStatic
-                    ? $"{type.ToFullName()}.{method.Name}"
-                    : $"new {type.ToFullName()}().{method.Name}";
+                => method.IsStatic ? $"{type.ToFullName()}.{method.Name}" : $"new {type.ToFullName()}().{method.Name}";
 
-            static bool IsPublic(Accessibility v) => v == Accessibility.Public;
+            static bool IsPublic(Accessibility v)
+                => v == Accessibility.Public;
 
-            static bool IsAny(Accessibility _) => true;
+            static bool IsAny(Accessibility _)
+                => true;
         }
 
         private static bool TryGetConvertMethod(

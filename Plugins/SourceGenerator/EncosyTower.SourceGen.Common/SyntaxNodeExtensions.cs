@@ -63,60 +63,21 @@ namespace EncosyTower.SourceGen
         public static int GetStableHashCode(this SyntaxTree syntaxTree)
             => SourceGenHelpers.GetStableHashCode(syntaxTree.FilePath) & 0x7fffffff;
 
-        public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, SyntaxNode node)
-            => GetGeneratedSourceFileName(syntaxTree, generatorName, node.GetLineNumber());
-
-        public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, int salting = 0)
-        {
-            var (isSuccess, fileName) = TryGetFileNameWithoutExtension(syntaxTree);
-            var stableHashCode = syntaxTree.GetStableHashCode();
-
-            var postfix = generatorName.Length > 0 ? $"__{generatorName}" : string.Empty;
-
-            if (isSuccess)
-                fileName = $"{fileName}{postfix}_{stableHashCode}_{salting}.g.cs";
-            else
-                fileName = Path.Combine($"{Path.GetRandomFileName()}{postfix}", ".g.cs");
-
-            return fileName;
-        }
-
         public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, SyntaxNode node, string typeName)
             => GetGeneratedSourceFileName(syntaxTree, generatorName, node.GetLineNumber(), typeName);
 
         public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, int salting, string typeName)
         {
-            var (isSuccess, fileName) = TryGetFileNameWithoutExtension(syntaxTree);
             var stableHashCode = syntaxTree.GetStableHashCode();
-
             var postfix = string.Empty;
 
             if (string.IsNullOrWhiteSpace(typeName) == false)
             {
-                postfix = $"__{typeName}{postfix}";
+                postfix = $"{typeName}{postfix}";
             }
 
-            if (isSuccess)
-                fileName = $"{fileName}{postfix}_{stableHashCode}_{salting}.g.cs";
-            else
-                fileName = Path.Combine($"{Path.GetRandomFileName()}{postfix}", ".g.cs");
-
-            return fileName;
+            return $"{postfix}_{stableHashCode}_{salting}.g.cs";
         }
-
-        public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, string fileName, SyntaxNode node)
-            => GetGeneratedSourceFileName(syntaxTree, generatorName, fileName, node.GetLineNumber());
-
-        public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, string fileName, int salting = 0)
-        {
-            var stableHashCode = syntaxTree.GetStableHashCode();
-            var postfix = generatorName.Length > 0 ? $"__{generatorName}" : string.Empty;
-
-            return $"{fileName}{postfix}_{stableHashCode}_{salting}.g.cs";
-        }
-
-        public static string GetGeneratedSourceFilePath(this SyntaxTree syntaxTree, string assemblyName, string generatorName)
-            => GetGeneratedSourceFilePath(syntaxTree, assemblyName, generatorName, string.Empty);
 
         public static string GetGeneratedSourceFilePath(this SyntaxTree syntaxTree, string assemblyName, string generatorName, string typeName)
         {
@@ -130,12 +91,6 @@ namespace EncosyTower.SourceGen
             }
 
             return $"Temp/GeneratedCode/{assemblyName}/{fileName}";
-        }
-
-        public static (bool IsSuccess, string FileName) TryGetFileNameWithoutExtension(this SyntaxTree syntaxTree)
-        {
-            var fileName = Path.GetFileNameWithoutExtension(syntaxTree.FilePath);
-            return (IsSuccess: true, fileName);
         }
 
         private class PreprocessorTriviaRemover : CSharpSyntaxRewriter

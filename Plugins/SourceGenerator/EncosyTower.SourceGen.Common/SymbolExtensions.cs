@@ -353,12 +353,18 @@ namespace EncosyTower.SourceGen
         public static string ToSimpleNoSpecialTypeValidIdentifier(this ITypeSymbol symbol)
             => symbol.ToDisplayString(SimpleNoSpecialTypeFormat).ToValidIdentifier();
 
-        public static bool ImplementsInterface(this ISymbol symbol, string interfaceName)
+        public static bool ImplementsInterface(this ISymbol symbol, string interfaceName, bool onlySelf = false)
         {
             interfaceName = PrependGlobalIfMissing(interfaceName);
 
-            return symbol is ITypeSymbol typeSymbol
-                && typeSymbol.AllInterfaces.Any(i => i.HasFullName(interfaceName) || i.InheritsFromInterface(interfaceName));
+            if (symbol is not ITypeSymbol typeSymbol)
+            {
+                return false;
+            }
+
+            return onlySelf
+                ? typeSymbol.Interfaces.Any(i => i.HasFullName(interfaceName))
+                : typeSymbol.AllInterfaces.Any(i => i.HasFullName(interfaceName) || i.InheritsFromInterface(interfaceName));
         }
 
         public static bool Is(this ITypeSymbol symbol, string nameSpace, string typeName, bool checkBaseType = true)
@@ -667,10 +673,8 @@ namespace EncosyTower.SourceGen
             , SemanticModel semanticModel
             , CancellationToken token
             , bool includePartialImplementationPart
-            , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
             , out ImmutableArray<AttributeInfo> fieldAttributes
             , out ImmutableArray<AttributeInfo> propertyAttributes
-            , DiagnosticDescriptor diagnostic
         )
         {
             using var fieldAttributesInfo = ImmutableArrayBuilder<AttributeInfo>.Rent();
@@ -684,10 +688,8 @@ namespace EncosyTower.SourceGen
                       partialDefinition
                     , semanticModel
                     , token
-                    , in diagnostics
                     , in fieldAttributesInfo
                     , in propertyAttributesInfo
-                    , diagnostic
                 );
 
                 if (includePartialImplementationPart)
@@ -698,10 +700,8 @@ namespace EncosyTower.SourceGen
                           partialImplementation
                         , semanticModel
                         , token
-                        , in diagnostics
                         , in fieldAttributesInfo
                         , in propertyAttributesInfo
-                        , diagnostic
                     );
                 }
             }
@@ -711,10 +711,8 @@ namespace EncosyTower.SourceGen
                       methodSymbol
                     , semanticModel
                     , token
-                    , in diagnostics
                     , in fieldAttributesInfo
                     , in propertyAttributesInfo
-                    , diagnostic
                 );
             }
 
@@ -725,10 +723,8 @@ namespace EncosyTower.SourceGen
                   IMethodSymbol symbol
                 , SemanticModel semanticModel
                 , CancellationToken token
-                , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
                 , in ImmutableArrayBuilder<AttributeInfo> fieldAttributesInfo
                 , in ImmutableArrayBuilder<AttributeInfo> propertyAttributesInfo
-                , DiagnosticDescriptor diagnostic
             )
             {
                 if (symbol.DeclaringSyntaxReferences.Length != 1
@@ -758,7 +754,6 @@ namespace EncosyTower.SourceGen
                             .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
                         {
-                            diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);
                             continue;
                         }
 
@@ -797,9 +792,7 @@ namespace EncosyTower.SourceGen
               this IFieldSymbol fieldSymbol
             , SemanticModel semanticModel
             , CancellationToken token
-            , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
             , out ImmutableArray<AttributeInfo> propertyAttributes
-            , DiagnosticDescriptor diagnostic
         )
         {
             using var propertyAttributesInfo = ImmutableArrayBuilder<AttributeInfo>.Rent();
@@ -808,9 +801,7 @@ namespace EncosyTower.SourceGen
                   fieldSymbol
                 , semanticModel
                 , token
-                , in diagnostics
                 , in propertyAttributesInfo
-                , diagnostic
             );
 
             propertyAttributes = propertyAttributesInfo.ToImmutable();
@@ -819,9 +810,7 @@ namespace EncosyTower.SourceGen
                   IFieldSymbol symbol
                 , SemanticModel semanticModel
                 , CancellationToken token
-                , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
                 , in ImmutableArrayBuilder<AttributeInfo> propertyAttributesInfo
-                , DiagnosticDescriptor diagnostic
             )
             {
                 if (symbol.DeclaringSyntaxReferences.Length != 1
@@ -853,7 +842,6 @@ namespace EncosyTower.SourceGen
                             .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
                         {
-                            diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);
                             continue;
                         }
 
@@ -888,9 +876,7 @@ namespace EncosyTower.SourceGen
               this IPropertySymbol propertySymbol
             , SemanticModel semanticModel
             , CancellationToken token
-            , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
             , out ImmutableArray<AttributeInfo> fieldAttributes
-            , DiagnosticDescriptor diagnostic
         )
         {
             using var fieldAttributesInfo = ImmutableArrayBuilder<AttributeInfo>.Rent();
@@ -899,9 +885,7 @@ namespace EncosyTower.SourceGen
                   propertySymbol
                 , semanticModel
                 , token
-                , in diagnostics
                 , in fieldAttributesInfo
-                , diagnostic
             );
 
             fieldAttributes = fieldAttributesInfo.ToImmutable();
@@ -910,9 +894,7 @@ namespace EncosyTower.SourceGen
                   IPropertySymbol symbol
                 , SemanticModel semanticModel
                 , CancellationToken token
-                , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
                 , in ImmutableArrayBuilder<AttributeInfo> fieldAttributesInfo
-                , DiagnosticDescriptor diagnostic
             )
             {
                 if (symbol.DeclaringSyntaxReferences.Length != 1
@@ -944,7 +926,6 @@ namespace EncosyTower.SourceGen
                             .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
                         {
-                            diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);
                             continue;
                         }
 
@@ -979,9 +960,7 @@ namespace EncosyTower.SourceGen
               this IFieldSymbol fieldSymbol
             , SemanticModel semanticModel
             , CancellationToken token
-            , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
             , out ImmutableArray<(string, AttributeInfo)> propertyAttributes
-            , DiagnosticDescriptor diagnostic
         )
         {
             using var propertyAttributesInfo = ImmutableArrayBuilder<(string, AttributeInfo)>.Rent();
@@ -990,9 +969,7 @@ namespace EncosyTower.SourceGen
                   fieldSymbol
                 , semanticModel
                 , token
-                , in diagnostics
                 , in propertyAttributesInfo
-                , diagnostic
             );
 
             propertyAttributes = propertyAttributesInfo.ToImmutable();
@@ -1001,9 +978,7 @@ namespace EncosyTower.SourceGen
                   IFieldSymbol symbol
                 , SemanticModel semanticModel
                 , CancellationToken token
-                , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
                 , in ImmutableArrayBuilder<(string, AttributeInfo)> propertyAttributesInfo
-                , DiagnosticDescriptor diagnostic
             )
             {
                 if (symbol.DeclaringSyntaxReferences.Length != 1
@@ -1035,7 +1010,6 @@ namespace EncosyTower.SourceGen
                             .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
                         {
-                            diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);
                             continue;
                         }
 
@@ -1071,9 +1045,7 @@ namespace EncosyTower.SourceGen
               this IPropertySymbol propertySymbol
             , SemanticModel semanticModel
             , CancellationToken token
-            , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
             , out ImmutableArray<(string, AttributeInfo)> fieldAttributes
-            , DiagnosticDescriptor diagnostic
         )
         {
             using var fieldAttributesInfo = ImmutableArrayBuilder<(string, AttributeInfo)>.Rent();
@@ -1082,9 +1054,7 @@ namespace EncosyTower.SourceGen
                   propertySymbol
                 , semanticModel
                 , token
-                , in diagnostics
                 , in fieldAttributesInfo
-                , diagnostic
             );
 
             fieldAttributes = fieldAttributesInfo.ToImmutable();
@@ -1093,9 +1063,7 @@ namespace EncosyTower.SourceGen
                   IPropertySymbol symbol
                 , SemanticModel semanticModel
                 , CancellationToken token
-                , in ImmutableArrayBuilder<DiagnosticInfo> diagnostics
                 , in ImmutableArrayBuilder<(string, AttributeInfo)> fieldAttributesInfo
-                , DiagnosticDescriptor diagnostic
             )
             {
                 if (symbol.DeclaringSyntaxReferences.Length != 1
@@ -1127,7 +1095,6 @@ namespace EncosyTower.SourceGen
                             .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
                         {
-                            diagnostics.Add(diagnostic, attribute, symbol, attribute.Name);
                             continue;
                         }
 

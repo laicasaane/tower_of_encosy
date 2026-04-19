@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 using System.Threading;
-using EncosyTower.SourceGen.Helpers.Mvvm;
 using EncosyTower.SourceGen.Generators.Mvvm.Binders;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -542,7 +541,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             using var outerPropRefBuilder = ImmutableArrayBuilder<BinderSpec.BindingPropertySpec>.Rent();
             using var outerCmdRefBuilder = ImmutableArrayBuilder<BinderSpec.BindingCommandSpec>.Rent();
-            using var outerDiagnostics = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
 
             foreach (var entry in tempOuterPropMethods.WrittenSpan)
             {
@@ -550,10 +548,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                       semanticModel
                     , token
                     , true
-                    , outerDiagnostics
                     , out var propForwardedFieldAttrs
                     , out _
-                    , DiagnosticDescriptors.InvalidFieldTargetedAttributeOnBindingPropertyMethod
                 );
 
                 outerPropRefBuilder.Add(new BinderSpec.BindingPropertySpec {
@@ -574,10 +570,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                       semanticModel
                     , token
                     , false
-                    , outerDiagnostics
                     , out var cmdForwardedFieldAttrs
                     , out _
-                    , DiagnosticDescriptors.InvalidFieldTargetedAttributeOnBindingCommandMethod
                 );
 
                 outerCmdRefBuilder.Add(new BinderSpec.BindingCommandSpec {

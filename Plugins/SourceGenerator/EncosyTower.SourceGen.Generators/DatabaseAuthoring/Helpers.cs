@@ -1,6 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-
-namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
+﻿namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
     public static class Helpers
     {
@@ -73,8 +71,5 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public const string PR_GENERATED_SHEET_ATTRIBUTE = $"[ETDBASG.GeneratedSheet(typeof({{0}}), typeof({{1}}), typeof({{2}}), \"{{3}}\")]";
         public const string PR_GENERATED_SHEET_ROW = $"[ETDBASG.GeneratedSheetRow(typeof({{0}}), typeof({{1}}))]";
         public const string PR_GENERATED_DATA_ROW = $"[ETDBASG.GeneratedDataRow(typeof({{0}}))]";
-
-        public static bool IsIData(ITypeSymbol type)
-            => type.HasAttribute(DATA_ATTRIBUTE) || type.InheritsFromInterface(IDATA);
     }
 }

@@ -553,7 +553,9 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         )
         {
             if (idInfo.IsValid == false)
+            {
                 return;
+            }
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
@@ -569,9 +571,11 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 );
 
                 if (declaration.IsInvalid)
+                {
                     return;
+                }
 
-                var hintName = $"{GENERATOR_NAME}__{idInfo.fileHintName}.g.cs";
+                var hintName = $"{idInfo.fileHintName}.g.cs";
                 var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
                 context.OutputSource(

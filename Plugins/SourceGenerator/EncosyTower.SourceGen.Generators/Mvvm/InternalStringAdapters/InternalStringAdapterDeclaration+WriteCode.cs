@@ -23,7 +23,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         {
             var fileName = $"InternalStringAdapters_{assemblyName}";
             var stableHashCode = SourceGenHelpers.GetStableHashCode(string.Empty) & 0x7fffffff;
-            var hintName = $"{fileName}__{GENERATOR_NAME}_{stableHashCode}_0.g.cs";
+            var hintName = $"{fileName}_{stableHashCode}_0.g.cs";
             var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, hintName);
 
             context.OutputSource(

@@ -171,7 +171,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                 }
             }
 
-            var dataTypeImplementsIInitializable = dataType.ImplementsInterface(IINITIALIZABLE);
+            var dataTypeImplementsIInitializable = dataType.ImplementsInterface(IINITIALIZABLE, onlySelf: true);
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   classSyntax

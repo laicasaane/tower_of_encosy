@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Threading;
 using EncosyTower.SourceGen.Helpers.Types.Caches;
 using Microsoft.CodeAnalysis;
@@ -198,7 +197,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 , isRefStruct = isStruct && containingSyntax.Modifiers.Any(SyntaxKind.RefKeyword)
                 , isRecord = containingSyntax.Modifiers.Any(SyntaxKind.RecordKeyword)
                 , syntaxTreeStableHash = containingSyntax.SyntaxTree.GetStableHashCode()
-                , sourceFileBaseName = Path.GetFileNameWithoutExtension(containingSyntax.SyntaxTree.FilePath)
                 , callSiteLineNumber = syntax.GetLineNumber()
                 , scopeOpening = scopeOpening
                 , scopeClosing = scopeClosing
@@ -252,8 +250,8 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
 
             var compilationAssemblyName = candidate.compilationAssemblyName;
             var fileTypeName = candidate.containingTypeFileName;
-            var hintName = $"{candidate.sourceFileBaseName}__{fileTypeName}_{candidate.syntaxTreeStableHash}_{candidate.callSiteLineNumber}.g.cs";
-            var filePathName = $"{candidate.sourceFileBaseName}__{fileTypeName}_{candidate.syntaxTreeStableHash}_{candidate.callSiteLineNumber}.g.cs";
+            var hintName = $"{fileTypeName}_{candidate.syntaxTreeStableHash}_{candidate.callSiteLineNumber}.g.cs";
+            var filePathName = $"{fileTypeName}_{candidate.syntaxTreeStableHash}_{candidate.callSiteLineNumber}.g.cs";
             var filePath = GeneratorHelpers.BuildSourceFilePath(compilationAssemblyName, filePathName);
 
             try
@@ -307,8 +305,8 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
 
                 var compilationAssemblyName = key.compilationAssemblyName;
                 var fileTypeName = key.containingTypeFileName;
-                var hintName = $"{key.sourceFileBaseName}__{fileTypeName}_{key.syntaxTreeStableHash}_header.g.cs";
-                var filePathName = $"{key.sourceFileBaseName}__{fileTypeName}_{key.syntaxTreeStableHash}_header.g.cs";
+                var hintName = $"{fileTypeName}_{key.syntaxTreeStableHash}_header.g.cs";
+                var filePathName = $"{fileTypeName}_{key.syntaxTreeStableHash}_header.g.cs";
                 var filePath = GeneratorHelpers.BuildSourceFilePath(compilationAssemblyName, filePathName);
 
                 try
@@ -477,7 +475,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             public bool isRefStruct;
             public bool isRecord;
             public int syntaxTreeStableHash;
-            public string sourceFileBaseName;
             public string scopeOpening;
             public string scopeClosing;
             public int callSiteLineNumber;
@@ -497,7 +494,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                     && isRefStruct == other.isRefStruct
                     && isRecord == other.isRecord
                     && syntaxTreeStableHash == other.syntaxTreeStableHash
-                    && sourceFileBaseName == other.sourceFileBaseName
                     && scopeOpening == other.scopeOpening
                     && scopeClosing == other.scopeClosing
                     && callSiteLineNumber == other.callSiteLineNumber
@@ -513,7 +509,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 => HashValue.Combine(compilationAssemblyName)
                     .Add(containingTypeFullName)
                     .Add(containingTypeIdentifier)
-                    .Add(sourceFileBaseName)
                     .Add(scopeOpening)
                     .Add(typeFullName)
                     .Add(assemblyName)
@@ -535,7 +530,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             public bool isRefStruct;
             public bool isRecord;
             public int syntaxTreeStableHash;
-            public string sourceFileBaseName;
             public string scopeOpening;
             public string scopeClosing;
 
@@ -548,7 +542,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 , isRefStruct = c.isRefStruct
                 , isRecord = c.isRecord
                 , syntaxTreeStableHash = c.syntaxTreeStableHash
-                , sourceFileBaseName = c.sourceFileBaseName
                 , scopeOpening = c.scopeOpening
                 , scopeClosing = c.scopeClosing
             };
@@ -563,7 +556,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                     && isRefStruct == other.isRefStruct
                     && isRecord == other.isRecord
                     && syntaxTreeStableHash == other.syntaxTreeStableHash
-                    && sourceFileBaseName == other.sourceFileBaseName
                     && scopeOpening == other.scopeOpening
                     && scopeClosing == other.scopeClosing;
             }
@@ -575,7 +567,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 => HashValue.Combine(compilationAssemblyName)
                     .Add(containingTypeFullName)
                     .Add(containingTypeIdentifier)
-                    .Add(sourceFileBaseName)
                     .Add(scopeOpening)
                     .Add(syntaxTreeStableHash)
                     .Add(isStruct)

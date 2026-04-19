@@ -48,7 +48,7 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
         {
             if (context.Symbol is not IFieldSymbol fieldSymbol
                 || fieldSymbol.ContainingType is not INamedTypeSymbol typeSymbol
-                || IsIData(typeSymbol) == false
+                || typeSymbol.HasAttribute(DATA_ATTRIBUTE_METADATA) == false
                 || fieldSymbol.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE) == false
             )
             {
@@ -63,7 +63,7 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
         {
             if (context.Symbol is not IPropertySymbol propSymbol
                 || propSymbol.ContainingType is not INamedTypeSymbol typeSymbol
-                || IsIData(typeSymbol) == false
+                || typeSymbol.HasAttribute(DATA_ATTRIBUTE_METADATA) == false
                 || propSymbol.HasAttribute(DATA_PROPERTY_ATTRIBUTE) == false
             )
             {

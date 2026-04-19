@@ -168,7 +168,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     , compilation.references
                 );
 
-                var hintName = $"{GENERATOR_NAME}__{templateCandidate.fileHintName}.g.cs";
+                var hintName = $"{templateCandidate.fileHintName}.g.cs";
                 var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
 
                 context.OutputSource(

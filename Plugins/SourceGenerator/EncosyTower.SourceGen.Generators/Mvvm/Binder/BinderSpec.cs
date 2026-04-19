@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using EncosyTower.SourceGen.Helpers.Mvvm;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -54,7 +53,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 return default;
             }
 
-            using var diagnosticBuilder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
             var bindingPropertyNames = new HashSet<string>(StringComparer.Ordinal);
             var converterNames = new HashSet<string>(StringComparer.Ordinal);
             var bindingCommandNames = new HashSet<string>(StringComparer.Ordinal);
@@ -95,14 +93,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             var className = classNameSb.ToString();
             var hasBaseBinder = false;
 
-            if (symbol.BaseType != null && symbol.BaseType.TypeKind == TypeKind.Class)
+            if (symbol.BaseType != null
+                && symbol.BaseType.TypeKind == TypeKind.Class
+                && symbol.BaseType.HasAttribute(BINDER_ATTRIBUTE)
+            )
             {
-                if (symbol.BaseType.HasAttribute(BINDER_ATTRIBUTE)
-                    || symbol.BaseType.ImplementsInterface(IBINDER_INTERFACE)
-                )
-                {
-                    hasBaseBinder = true;
-                }
+                hasBaseBinder = true;
             }
 
             var hasOnBindPropertyFailedMethod = false;
@@ -261,10 +257,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                       semanticModel
                     , token
                     , true
-                    , diagnosticBuilder
                     , out var fieldAttributes
                     , out _
-                    , DiagnosticDescriptors.InvalidFieldTargetedAttributeOnBindingPropertyMethod
                 );
 
                 propRefBuilder.Add(new BindingPropertySpec {
@@ -289,10 +283,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                       semanticModel
                     , token
                     , false
-                    , diagnosticBuilder
                     , out var fieldAttributes
                     , out _
-                    , DiagnosticDescriptors.InvalidFieldTargetedAttributeOnBindingCommandMethod
                 );
 
                 cmdRefBuilder.Add(new BindingCommandSpec {
