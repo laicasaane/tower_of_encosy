@@ -14,13 +14,11 @@ namespace EncosyTower.Entities
 namespace EncosyTower.Entities.Lookups
 {
     using EncosyTower.Common;
+    using EncosyTower.Entities.Contracts;
     using Unity.Entities;
 
-    public interface ILookups
+    public interface ILookups : ISystemStateUpdate, ISystemBaseUpdate
     {
-        void Update(ref SystemState state);
-
-        void Update(SystemBase system);
     }
 
     public interface IBufferLookup
