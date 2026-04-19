@@ -1,6 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-
-namespace EncosyTower.SourceGen.Generators.Databases
+﻿namespace EncosyTower.SourceGen.Generators.Databases
 {
     public static class Helpers
     {
@@ -22,8 +20,5 @@ namespace EncosyTower.SourceGen.Generators.Databases
         public const string DATA_NAMESPACE = "EncosyTower.Data";
         public const string DATA_ATTRIBUTE = $"global::{DATA_NAMESPACE}.DataAttribute";
         public const string IDATA = $"global::{DATA_NAMESPACE}.IData";
-
-        public static bool IsIData(ITypeSymbol type)
-            => type.HasAttribute(DATA_ATTRIBUTE) || type.InheritsFromInterface(IDATA);
     }
 }

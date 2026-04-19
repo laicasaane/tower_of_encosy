@@ -42,91 +42,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             IsValid = info.isValid && validCount == infoArgs.Count;
         }
-
-        public UserDataAccessorDeclaration(INamedTypeSymbol symbol)
-        {
-            SymbolName = symbol.Name;
-            FullTypeName = symbol.ToFullName();
-
-            foreach (var attribute in symbol.GetAttributes())
-            {
-                var attributeName = attribute.AttributeClass?.Name ?? string.Empty;
-
-                if (attributeName is not ("LabelAttribute" or "DisplayNameAttribute"))
-                {
-                    continue;
-                }
-
-                if (attribute.ConstructorArguments.Length > 0)
-                {
-                    var arg = attribute.ConstructorArguments[0];
-
-                    if (arg.Kind == TypedConstantKind.Primitive && arg.Value?.ToString() is string dn)
-                    {
-                        FieldName = dn;
-                        goto NEXT;
-                    }
-                }
-                else if (attribute.NamedArguments.Length > 0)
-                {
-                    foreach (var arg in attribute.NamedArguments)
-                    {
-                        if (arg.Key is "Name" or "DisplayName"
-                            && arg.Value.Kind == TypedConstantKind.Primitive
-                            && arg.Value.Value?.ToString() is string dn
-                        )
-                        {
-                            FieldName = dn;
-                            goto NEXT;
-                        }
-                    }
-                }
-            }
-
-            NEXT:
-
-            if (string.IsNullOrEmpty(FieldName))
-            {
-                FieldName = symbol.Name;
-            }
-
-            IsInitializable = symbol.InheritsFromInterface("global::EncosyTower.Initialization.IInitializable");
-            IsDeinitializable = symbol.InheritsFromInterface("global::EncosyTower.Initialization.IDeinitializable");
-
-            var constructors = symbol.Constructors;
-            var constructorIndex = -1;
-            var max = 0;
-
-            for (var i = 0; i < constructors.Length; i++)
-            {
-                var constructor = constructors[i];
-
-                if (constructor.Parameters.Length > max)
-                {
-                    max = constructor.Parameters.Length;
-                    constructorIndex = i;
-                }
-            }
-
-            if (constructorIndex == 0)
-            {
-                var constructor = constructors[constructorIndex];
-                var parameters = constructor.Parameters;
-                var args = Args = new(parameters.Length);
-                var validCount = 0;
-
-                foreach (var param in parameters)
-                {
-                    if (ParamDeclaration.TryGetParam(param.Type, out var argType))
-                    {
-                        args.Add(new ParamDeclaration(param.Type, argType));
-                        validCount += 1;
-                    }
-                }
-
-                IsValid = validCount == parameters.Length;
-            }
-        }
     }
 
     internal readonly struct ParamDeclaration
@@ -151,20 +66,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             {
                 StoreDef = default;
                 AccessorTypeName = info.TypeName;
-            }
-        }
-
-        public ParamDeclaration(ITypeSymbol type, ITypeSymbol argType)
-        {
-            if (argType != null)
-            {
-                StoreDef = new StoreSpec(type, argType);
-                AccessorTypeName = string.Empty;
-            }
-            else
-            {
-                StoreDef = default;
-                AccessorTypeName = type.Name;
             }
         }
 
@@ -220,46 +121,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             DataTypeHasDefaultConstructor = dataTypeHasDefaultConstructor;
         }
 
-        public StoreSpec(ITypeSymbol storeType, ITypeSymbol dataType)
-        {
-            FullStoreTypeName = storeType.ToFullName();
-            FullDataTypeName = dataType.ToFullName();
-            DataTypeName = dataType.Name;
-            DataFieldName = dataType.Name.ToPrivateFieldName();
-            DataArgName = dataType.Name.ToArgumentName();
-            DataTypeHasDefaultConstructor = ComputeHasDefaultConstructor(dataType);
-        }
-
-        private static bool ComputeHasDefaultConstructor(ITypeSymbol dataType)
-        {
-            var nonDefaultCount = 0;
-            var defaultCount = 0;
-
-            foreach (var member in dataType.GetMembers())
-            {
-                if (member is IMethodSymbol method && method.MethodKind == MethodKind.Constructor)
-                {
-                    if (method.Parameters.Length > 0)
-                    {
-                        nonDefaultCount++;
-                    }
-                    else
-                    {
-                        defaultCount++;
-                    }
-                }
-            }
-
-            return defaultCount > 0 || nonDefaultCount < 1;
-        }
-
         public bool Equals(StoreSpec other)
             => string.Equals(FullStoreTypeName, other.FullStoreTypeName, StringComparison.Ordinal);
-
-        public override bool Equals(object obj)
-            => obj is StoreSpec other && Equals(other);
-
-        public override int GetHashCode()
-            => FullStoreTypeName is null ? 0 : FullStoreTypeName.GetHashCode();
     }
 }
