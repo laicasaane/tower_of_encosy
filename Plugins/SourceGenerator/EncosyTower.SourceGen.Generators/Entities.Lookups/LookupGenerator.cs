@@ -21,9 +21,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         private const string I_PHYSICS_COMPONENT_LOOKUPS = $"{NAMESPACE}.IPhysicsComponentLookups";
         private const string I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS = $"{NAMESPACE}.IPhysicsEnableableComponentLookups";
 
-        private const string I_BUFFER_ELEMENT_DATA = "global::Unity.Entities.IBufferElementData";
-        private const string I_COMPONENT_DATA = "global::Unity.Entities.IComponentData";
-        private const string I_ENABLEABLE_COMPONENT = "global::Unity.Entities.IEnableableComponent";
         private const string I_BUFFER_LOOKUP_RO = "ETEL.IBufferLookupRO";
         private const string I_BUFFER_LOOKUP_RW = "ETEL.IBufferLookupRW";
         private const string I_COMPONENT_LOOKUP_RO = "ETEL.IComponentLookupRO";
@@ -108,7 +105,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             }
 
             GetLookupInterfaces(kind, out var interfaceLookupRO, out var interfaceLookupRW);
-            GetRequiredEcsInterfaces(kind, out var ecsInterface1, out var ecsInterface2);
 
             using var typeRefsBuilder = ImmutableArrayBuilder<TypeRefSpec>.Rent();
             var typeHash = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
@@ -123,18 +119,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
                 }
 
                 if (type.IsUnboundGenericType || type.IsUnmanagedType == false)
-                {
-                    continue;
-                }
-
-                if (type.InheritsFromInterface(ecsInterface1) == false)
-                {
-                    continue;
-                }
-
-                if (string.IsNullOrEmpty(ecsInterface2) == false
-                    && type.InheritsFromInterface(ecsInterface2) == false
-                )
                 {
                     continue;
                 }
@@ -261,40 +245,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
                 default:
                     ro = string.Empty;
                     rw = string.Empty;
-                    return;
-            }
-        }
-
-        private static void GetRequiredEcsInterfaces(LookupKind kind, out string iface1, out string iface2)
-        {
-            switch (kind)
-            {
-                case LookupKind.Buffer:
-                case LookupKind.PhysicsBuffer:
-                    iface1 = I_BUFFER_ELEMENT_DATA;
-                    iface2 = string.Empty;
-                    return;
-
-                case LookupKind.Component:
-                case LookupKind.PhysicsComponent:
-                    iface1 = I_COMPONENT_DATA;
-                    iface2 = string.Empty;
-                    return;
-
-                case LookupKind.EnableableBuffer:
-                    iface1 = I_BUFFER_ELEMENT_DATA;
-                    iface2 = I_ENABLEABLE_COMPONENT;
-                    return;
-
-                case LookupKind.EnableableComponent:
-                case LookupKind.PhysicsEnableableComponent:
-                    iface1 = I_COMPONENT_DATA;
-                    iface2 = I_ENABLEABLE_COMPONENT;
-                    return;
-
-                default:
-                    iface1 = string.Empty;
-                    iface2 = string.Empty;
                     return;
             }
         }
