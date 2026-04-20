@@ -47,8 +47,8 @@ namespace Samples.PolyEnumStructs
             }
         }
 
-        [ConstructEnumCaseFrom(1)]
-        [ConstructEnumCaseFrom(ColorEnumType.Red)]
+        [EnumCaseValue(1)]
+        [EnumCaseValue(ColorEnumType.Red)]
         [Label("RED")]
         public partial struct Red : IDisposable
         {
@@ -113,8 +113,8 @@ namespace Samples.PolyEnumStructs
 
     partial struct ColorEnum
     {
-        [ConstructEnumCaseFrom(2)]
-        [ConstructEnumCaseFrom(ColorEnumType.Green)]
+        [EnumCaseValue(2)]
+        [EnumCaseValue(ColorEnumType.Green)]
         public partial struct Green : IDisposable
         {
             public int value;
@@ -171,7 +171,7 @@ namespace Samples.PolyEnumStructs
 
     partial struct ColorEnum
     {
-        [ConstructEnumCaseFrom("str")]
+        [EnumCaseValue("str")]
         public partial struct Blue : IDisposable
         {
             public float value;

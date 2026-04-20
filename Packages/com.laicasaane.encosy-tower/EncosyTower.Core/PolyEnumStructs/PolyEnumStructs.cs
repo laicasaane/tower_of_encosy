@@ -78,27 +78,43 @@ namespace EncosyTower.PolyEnumStructs
     }
 
     /// <summary>
-    /// Specifies a value to be associated with a case-struct.
+    /// Specifies one or more values to be associated with a case-struct.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Apply this attribute to a case-struct to indicate that it should be constructed when a
     /// specific value is provided.
-    /// <br/>
+    /// </para>
+    /// <para>
     /// Multiple instances of this attribute can be applied to a case-struct to associate it with multiple values.
+    /// </para>
+    /// <para>
+    /// Each case-struct will receive generated methods:
+    /// <list type="bullet">
+    /// <item><c>TryGetConstructionValue</c> to get the associated value from the case-struct instance.</item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// The enum-struct will receive generated methods:
+    /// <list type="bullet">
+    /// <item><c>ConstructFrom</c> to construct a case-struct from the associated value.</item>
+    /// <item><c>TryGetConstructionValue</c> to get the associated value from a case-struct instance.</item>
+    /// </list>
+    /// </para>
     /// </remarks>
     /// <example>
     /// <code>
     /// [PolyEnumStruct]
     /// public partial struct Task
     /// {
-    ///     [ConstructEnumCaseFrom(1)]
+    ///     [EnumCaseValue(1)]
     ///     public partial struct Shopping
     ///     {
     ///         public void Execute() { }
     ///     }
     ///
-    ///     [ConstructEnumCaseFrom(2)]
-    ///     [ConstructEnumCaseFrom(DataType.TaskWorking)]
+    ///     [EnumCaseValue(2)]
+    ///     [EnumCaseValue(DataType.TaskWorking)]
     ///     public partial struct Working
     ///     {
     ///         public void Execute() { }
@@ -109,14 +125,24 @@ namespace EncosyTower.PolyEnumStructs
     /// }
     /// </code>
     /// </example>
+    /// <seealso cref="PolyEnumStructAttribute"/>
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true)]
-    public sealed class ConstructEnumCaseFromAttribute : Attribute
+    public sealed class EnumCaseValueAttribute : Attribute
     {
-        public ConstructEnumCaseFromAttribute([NotNull] object value)
+        /// <summary>
+        /// Initializes a new instance of <see cref="EnumCaseValueAttribute"/> with the specified value.
+        /// </summary>
+        /// <param name="value">
+        /// The value to associate with the case-struct. Can be a primitive, enum, or any constant value.
+        /// </param>
+        public EnumCaseValueAttribute([NotNull] object value)
         {
             Value = value;
         }
 
+        /// <summary>
+        /// Gets the value associated with the case-struct.
+        /// </summary>
         public object Value { get; }
     }
 }
