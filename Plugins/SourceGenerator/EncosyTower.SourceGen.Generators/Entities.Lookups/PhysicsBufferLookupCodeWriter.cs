@@ -6,17 +6,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         private const string PR_SAFE_ENTITY = "LP.SafeEntity";
         private const string PR_BUFFER = "UE.DynamicBuffer<";
 
-        protected override void WriteStructBody(ref Printer p, LookupSpec definition)
-        {
-            WriteFields(ref p, definition, PR_LOOKUP);
-            WriteConstructor(ref p, definition, "GetBufferLookup");
-            WriteUpdateMethods(ref p, definition);
-            WriteConcreteMethods(ref p, definition);
-        }
+        protected override string LookupTypePrefix => PR_LOOKUP;
 
-        private static void WriteConcreteMethods(ref Printer p, LookupSpec definition)
+        protected override string GetLookupMethod => "GetBufferLookup";
+
+        protected override void WriteConcreteMethods(ref Printer p, in LookupSpec spec)
         {
-            foreach (var typeRef in definition.typeRefs)
+            foreach (var typeRef in spec.typeRefs)
             {
                 var typeName = typeRef.typeName;
                 var lookupField = GetLookupFieldName(typeRef);
@@ -85,12 +81,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
                         .PrintEndLine(".SetEnabled(entity, value);");
                     p.PrintEndLine();
                 }
-
-                WriteAttributes(ref p);
-                p.PrintBeginLine("public static implicit operator ").Print(PR_LOOKUP)
-                    .Print(typeName).Print(">(in ").Print(definition.structName).Print(" value)")
-                    .Print(" => value.").Print(lookupField).PrintEndLine(";");
-                p.PrintEndLine();
 
                 WriteEndRegion(ref p, typeRef.typeShortName);
             }

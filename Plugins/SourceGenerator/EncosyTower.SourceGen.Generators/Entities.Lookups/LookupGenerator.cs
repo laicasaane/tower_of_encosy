@@ -312,6 +312,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();
         }
+
         private static void PrintAdditionalUsingsWithLatios(ref Printer p)
         {
             p.PrintEndLine();
