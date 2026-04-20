@@ -80,87 +80,95 @@ namespace EncosyTower.Types
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Id<T>(in TypeId<T> id)
+        public static implicit operator Id<T>(TypeId<T> id)
             => id._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator TypeId(in TypeId<T> id)
+        public static explicit operator TypeId(TypeId<T> id)
             => new(id._value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator TypeId<T>(in TypeId id)
+        public static explicit operator TypeId<T>(TypeId id)
             => new(id._value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(in TypeId<T> lhs, in TypeId<T> rhs)
+        public static implicit operator TypeId<T>(Common.T<T> _)
+            => Type<T>.Id;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Common.T<T>(TypeId<T> _)
+            => default;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(TypeId<T> lhs, TypeId<T> rhs)
             => lhs._value == rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(in TypeId<T> lhs, in TypeId<T> rhs)
+        public static bool operator !=(TypeId<T> lhs, TypeId<T> rhs)
             => lhs._value != rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(in TypeId<T> lhs, in TypeId rhs)
+        public static bool operator ==(TypeId<T> lhs, TypeId rhs)
             => lhs._value == rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(in TypeId<T> lhs, in TypeId rhs)
+        public static bool operator !=(TypeId<T> lhs, TypeId rhs)
             => lhs._value != rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(in TypeId lhs, in TypeId<T> rhs)
+        public static bool operator ==(TypeId lhs, TypeId<T> rhs)
             => lhs._value == rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(in TypeId lhs, in TypeId<T> rhs)
+        public static bool operator !=(TypeId lhs, TypeId<T> rhs)
             => lhs._value != rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <(in TypeId<T> lhs, in TypeId<T> rhs)
+        public static bool operator <(TypeId<T> lhs, TypeId<T> rhs)
             => lhs._value < rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >(in TypeId<T> lhs, in TypeId<T> rhs)
+        public static bool operator >(TypeId<T> lhs, TypeId<T> rhs)
             => lhs._value > rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <(in TypeId<T> lhs, in TypeId rhs)
+        public static bool operator <(TypeId<T> lhs, TypeId rhs)
             => lhs._value < rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >(in TypeId<T> lhs, in TypeId rhs)
+        public static bool operator >(TypeId<T> lhs, TypeId rhs)
             => lhs._value > rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <(in TypeId lhs, in TypeId<T> rhs)
+        public static bool operator <(TypeId lhs, TypeId<T> rhs)
             => lhs._value < rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >(in TypeId lhs, in TypeId<T> rhs)
+        public static bool operator >(TypeId lhs, TypeId<T> rhs)
             => lhs._value > rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <=(in TypeId<T> lhs, in TypeId<T> rhs)
+        public static bool operator <=(TypeId<T> lhs, TypeId<T> rhs)
             => lhs._value <= rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >=(in TypeId<T> lhs, in TypeId<T> rhs)
+        public static bool operator >=(TypeId<T> lhs, TypeId<T> rhs)
             => lhs._value >= rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <=(in TypeId<T> lhs, in TypeId rhs)
+        public static bool operator <=(TypeId<T> lhs, TypeId rhs)
             => lhs._value <= rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >=(in TypeId<T> lhs, in TypeId rhs)
+        public static bool operator >=(TypeId<T> lhs, TypeId rhs)
             => lhs._value >= rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <=(in TypeId lhs, in TypeId<T> rhs)
+        public static bool operator <=(TypeId lhs, TypeId<T> rhs)
             => lhs._value <= rhs._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >=(in TypeId lhs, in TypeId<T> rhs)
+        public static bool operator >=(TypeId lhs, TypeId<T> rhs)
             => lhs._value >= rhs._value;
     }
 }
