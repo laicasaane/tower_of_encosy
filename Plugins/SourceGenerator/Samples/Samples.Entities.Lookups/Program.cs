@@ -1,4 +1,4 @@
-﻿namespace Samples.Lookups
+﻿namespace Samples.Entities.Lookups
 {
     public class Program
     {

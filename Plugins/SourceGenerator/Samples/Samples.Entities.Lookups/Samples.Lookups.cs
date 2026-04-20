@@ -1,7 +1,7 @@
 ﻿using EncosyTower.Entities;
 using Unity.Entities;
 
-namespace Samples.Lookups
+namespace Samples.Entities.Lookups
 {
     public struct ComponentA : IComponentData { }
     public struct ComponentB : IComponentData { }
