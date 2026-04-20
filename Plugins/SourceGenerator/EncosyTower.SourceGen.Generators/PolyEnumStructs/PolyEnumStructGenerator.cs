@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,6 +20,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         private const string UNDEFINED_NAME = "Undefined";
         private const string INTERFACE_NAME = "IEnumCase";
         private const string READ_ONLY_ATTRIBUTE = "global::System.ComponentModel.ReadOnlyAttribute";
+        private const string STRUCT_LAYOUT_ATTRIBUTE = "global::System.Runtime.InteropServices.StructLayoutAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -83,6 +85,23 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
+            var isExplicitLayout = false;
+
+            if (structSymbol.TryGetAttribute(STRUCT_LAYOUT_ATTRIBUTE, out var layoutAttrib))
+            {
+                foreach (var arg in layoutAttrib.ConstructorArguments)
+                {
+                    if (arg.Value is int layoutKindValue
+                        && Enum.IsDefined(typeof(LayoutKind), layoutKindValue)
+                        && (LayoutKind)layoutKindValue == LayoutKind.Explicit
+                    )
+                    {
+                        isExplicitLayout = true;
+                        break;
+                    }
+                }
+            }
+
             var result = new PolyEnumStructSpec {
                 typeName = structSymbol.Name,
                 typeNamespace = structSymbol.ContainingNamespace.ToDisplayString(),
@@ -94,6 +113,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 location = LocationInfo.From(structSyntax.GetLocation()),
                 parentIsNamespace = structSyntax.Parent is BaseNamespaceDeclarationSyntax,
                 isReadOnly = structSymbol.IsReadOnly,
+                isExplicitLayout = isExplicitLayout,
             };
 
             foreach (var arg in attribute.NamedArguments)
@@ -135,7 +155,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             context.OutputSource(
                   outputSourceGenFiles
                 , candidate.openingSource
-                , candidate.WriteCode(compilation.references.unityCollections)
+                , candidate.WriteCode(compilation)
                 , candidate.closingSource
                 , candidate.hintName
                 , candidate.sourceFilePath

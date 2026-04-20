@@ -222,10 +222,12 @@ namespace Samples.PolyEnumStructs
 
 namespace Samples.PolyEnumStructs.Errors1
 {
+    using System.Runtime.InteropServices;
     using EncosyTower.PolyEnumStructs;
     using Unity.Collections;
 
     [PolyEnumStruct]
+    [StructLayout(LayoutKind.Explicit)]
     public readonly partial struct Error1
     {
         private static FixedString512Bytes InitFixedString(in FixedString32Bytes prefix)

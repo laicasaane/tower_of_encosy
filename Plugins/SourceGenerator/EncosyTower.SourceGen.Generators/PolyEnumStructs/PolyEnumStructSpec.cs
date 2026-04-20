@@ -21,6 +21,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         public bool autoEquatable;
         public bool withEnumExtensions;
         public bool isReadOnly;
+        public bool isExplicitLayout;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(typeName) == false
@@ -46,6 +47,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             && autoEquatable == other.autoEquatable
             && withEnumExtensions == other.withEnumExtensions
             && isReadOnly == other.isReadOnly
+            && isExplicitLayout == other.isExplicitLayout
             ;
 
         public readonly override bool Equals(object obj)
@@ -68,6 +70,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             hash.Add(autoEquatable);
             hash.Add(withEnumExtensions);
             hash.Add(isReadOnly);
+            hash.Add(isExplicitLayout);
             return hash.ToHashCode();
         }
 

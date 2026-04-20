@@ -75,6 +75,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         {
             public string UnderlyingType { get; set; }
 
+            public int ByteOffset { get; set; }
+
             public int MaxByteCount { get; set; }
 
             public List<EnumMemberSpec> Members { get; } = new();
@@ -107,7 +109,13 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     > ushort.MaxValue => "uint",
                     > byte.MaxValue => "ushort",
                     _ => "byte",
-                }
+                },
+                ByteOffset = (ulong)(structCount + 1) switch {
+                    > uint.MaxValue => 8,
+                    > ushort.MaxValue => 4,
+                    > byte.MaxValue => 2,
+                    _ => 1,
+                },
             };
 
             mergedStructRef.FieldRefs.Add(new MergedFieldRef {

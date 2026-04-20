@@ -18,10 +18,11 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             "SD.Conditional(\"UNITY_EDITOR\"), SD.Conditional(\"DEVELOPMENT_BUILD\")]";
         private const string UNDEFINED_NAME = "Undefined";
         private const string ENUM_CASE_NAME = "EnumCase";
+        private const string FIELD_OFFSET = "SRIS.FieldOffset";
 
         private static readonly List<ConstructionValue> s_emptyValues = new();
 
-        public readonly string WriteCode(bool referenceUnityCollections)
+        public readonly string WriteCode(in CompilationInfo compilation)
         {
             var tempCollections = new TempCollections();
 
@@ -94,7 +95,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.PrintEndLine();
 
                 p.PrintBeginLine("partial ").Print("struct ")
-                    .Print(typeName).Print(" : ").Print(typeName).Print(".IEnumCase");
+                    .Print(typeName).Print(" : SRCS.IUnion, ").Print(typeName).Print(".IEnumCase");
 
                 if (autoEquatable)
                 {
@@ -104,18 +105,27 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.PrintEndLine(" // Enum Struct");
                 p.OpenScope();
                 {
-                    WriteMergedFields(ref p, mergedStructRef.FieldRefs);
-                    WriteConstructor(ref p, mergedStructRef.FieldRefs);
+
+                    if (isExplicitLayout)
+                    {
+                        WriteExplicitFields(ref p, structRefs, enumCaseType.ByteOffset);
+                    }
+                    else
+                    {
+                        WriteMergedFields(ref p, mergedStructRef.FieldRefs);
+                    }
+
+                    WriteConstructors(ref p, structRefs);
+                    WriteUnionPattern(ref p, structRefs, compilation.enableNullable);
                     WriteMergedProperties(ref p, mergedStructRef.PropertyDimMap, tempCollections.Properties);
                     WriteMergedIndexers(ref p, mergedStructRef.IndexerDimMap, tempCollections.Indexers);
                     WriteImplicitOperators(ref p, structRefs, mergedStructRef.Size);
-                    WriteToCaseMethods(ref p, structRefs);
+                    WriteGetValueMethods(ref p, structRefs);
                     WriteConstructFromMethods(ref p, mergedStructRef, undefinedType);
                     WriteTryGetConstructionValueMethods(ref p, mergedStructRef, undefinedType);
                     WriteMergedMethods(ref p, mergedStructRef.MethodDimMap, tempCollections.Methods);
                     WriteAdditionalMethods(ref p, mergedStructRef);
-                    WritePrivateStaticMethods(ref p);
-                    WriteThrowMethods(ref p);
+                    WriteCastableMethods(ref p);
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -157,7 +167,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                 WriteEnumCaseExtensions(
                       ref p
-                    , referenceUnityCollections
+                    , compilation.references.unityCollections
                     , enumCaseType
                     , withEnumExtensions
                     , parentIsNamespace
@@ -532,9 +542,11 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         {
             foreach (var fieldRef in fieldRefs)
             {
+                var def = fieldRef.Value;
+
                 p.PrintBeginLine("public ")
-                    .PrintIf(isReadOnly || fieldRef.Value.isReadOnly, "readonly ")
-                    .Print(fieldRef.Value.returnType.name)
+                    .PrintIf(isReadOnly || def.isReadOnly, "readonly ")
+                    .Print(def.returnType.name)
                     .Print(" ")
                     .Print(fieldRef.Name)
                     .PrintEndLine(";");
@@ -543,65 +555,105 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             p.PrintEndLine();
         }
 
-        private readonly void WriteConstructor(ref Printer p, List<MergedFieldRef> fieldRefs)
+        private readonly void WriteExplicitFields(ref Printer p, List<StructRef> structRefs, int byteOffset)
         {
-            if (fieldRefs.Count < 1)
+            WriteFieldOffset(ref p, 0);
+            p.Print(" public ")
+                .PrintIf(isReadOnly, "readonly ")
+                .PrintEndLine("EnumCase enumCase;");
+
+            foreach (var structRef in structRefs)
             {
-                return;
+                var def = structRef.Value;
+
+                WriteFieldOffset(ref p, byteOffset);
+                p.Print(" public ")
+                    .PrintIf(isReadOnly, "readonly ")
+                    .Print(def.name)
+                    .Print(" case_").Print(def.identifier).PrintEndLine(";");
             }
 
-            p.PrintLine(AGGRESSIVE_INLINING);
-            p.PrintBeginLine("public ").Print(typeName);
+            p.PrintEndLine();
 
-            if (fieldRefs.Count == 1)
+            return;
+
+            static void WriteFieldOffset(ref Printer p, int offset)
             {
-                p.PrintEndLine("(EnumCase enumCase)");
+                p.PrintBeginLine("[").Print(FIELD_OFFSET).Print("(").Print(offset).Print(")]");
             }
-            else
+        }
+
+        private readonly void WriteConstructors(ref Printer p, List<StructRef> structRefs)
+        {
+            var isExplicitLayout = this.isExplicitLayout;
+
+            foreach (var structRef in structRefs)
             {
-                p.PrintEndLine("(");
-                p = p.IncreasedIndent();
+                var def = structRef.Value;
+                var structIn = def.size > 8 ? "in " : "";
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("public ").Print(typeName).Print("(")
+                    .Print(structIn).Print(def.name).PrintEndLine(" @case) : this()");
+                p.OpenScope();
                 {
-                    p.PrintLine("  EnumCase enumCase");
+                    p.PrintBeginLine("this.enumCase = EnumCase.").Print(def.identifier).PrintEndLine(";");
 
-                    for (var i = 0; i < fieldRefs.Count; i++)
+                    if (isExplicitLayout)
                     {
-                        var fieldRef = fieldRefs[i];
-
-                        if (fieldRef.Name == "enumCase")
+                        p.PrintBeginLine("this.case_").Print(def.identifier).PrintEndLine(" = @case;");
+                    }
+                    else
+                    {
+                        foreach (var kv in structRef.FieldToMergedFieldMap)
                         {
-                            continue;
+                            p.PrintBeginLine("this.").Print(kv.Value).Print(" = @case.").Print(kv.Key).PrintEndLine(";");
                         }
-
-                        var def = fieldRef.Value;
-                        var returnType = def.returnType;
-
-                        p.PrintBeginLine().Print(", ")
-                            .Print("ET.Option<")
-                            .Print(returnType.name)
-                            .Print("> ").Print(fieldRef.Name).PrintEndLine(" = default");
                     }
                 }
-                p = p.DecreasedIndent();
-                p.PrintLine(")");
+                p.CloseScope();
+                p.PrintEndLine();
             }
+        }
 
+        private readonly void WriteUnionPattern(ref Printer p, List<StructRef> structRefs, bool enableNullable)
+        {
+            p.PrintBeginLine("public object").PrintIf(enableNullable, "?").PrintEndLine(" Value");
             p.OpenScope();
             {
-                p.PrintLine("this.enumCase = enumCase;");
-
-                for (var i = 0; i < fieldRefs.Count; i++)
+                p.PrintLine("get => this.enumCase switch");
+                p.OpenScope();
                 {
-                    var fieldRef = fieldRefs[i];
-
-                    if (fieldRef.Name == "enumCase")
+                    foreach (var structRef in structRefs)
                     {
-                        continue;
+                        var def = structRef.Value;
+
+                        p.PrintBeginLine("EnumCase.").Print(def.identifier)
+                            .Print(" => GetValueOrDefault(default(ET.T<").Print(def.name).PrintEndLine(">)),");
                     }
 
-                    p.PrintBeginLine("this.")
-                        .Print(fieldRef.Name).Print(" = ").Print(fieldRef.Name).PrintEndLine(".GetValueOrDefault();");
+                    p.PrintBeginLine("_ => null").PrintEndLine(",");
                 }
+                p.CloseScope("};");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintLine("public bool HasValue");
+            p.OpenScope();
+            {
+                p.PrintLine("get => this.enumCase switch");
+                p.OpenScope();
+                {
+                    foreach (var structRef in structRefs)
+                    {
+                        var def = structRef.Value;
+                        p.PrintBeginLine("EnumCase.").Print(def.identifier).PrintEndLine(" => true,");
+                    }
+
+                    p.PrintLine("_ => false");
+                }
+                p.CloseScope("};");
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -623,19 +675,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     .PrintEndLine(" @case)");
                 p.OpenScope();
                 {
-                    p.PrintLine("return new(");
-                    p = p.IncreasedIndent();
-                    {
-                        p.PrintBeginLine("  EnumCase.").PrintEndLine(def.identifier);
-
-                        foreach (var kv in structRef.FieldToMergedFieldMap)
-                        {
-                            p.PrintBeginLine(", ").Print(kv.Value)
-                                .Print(": ET.Option.Some(@case.").Print(kv.Key).PrintEndLine(")");
-                        }
-                    }
-                    p = p.DecreasedIndent();
-                    p.PrintLine(");");
+                    p.PrintLine("return new(@case);");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -647,15 +687,17 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     .PrintEndLine(" @enum)");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine("return @enum.ToCase").Print(def.identifier).PrintEndLine("OrThrow();");
+                    p.PrintBeginLine("return @enum.GetValueOrThrow(default(ET.T<").Print(def.name).PrintEndLine(">));");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
             }
         }
 
-        private readonly void WriteToCaseMethods(ref Printer p, List<StructRef> structRefs)
+        private readonly void WriteGetValueMethods(ref Printer p, List<StructRef> structRefs)
         {
+            var isExplicitLayout = this.isExplicitLayout;
+
             foreach (var structRef in structRefs)
             {
                 var def = structRef.Value;
@@ -663,16 +705,20 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly ").Print(def.name)
-                    .Print(" ToCase").Print(def.identifier).PrintEndLine("OrThrow()");
+                    .Print(" GetValueOrThrow(ET.T<").Print(def.name).PrintEndLine("> _)");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine("ThrowIfCannotCastFromEnumStruct(this.enumCase, EnumCase.")
+                    p.PrintBeginLine("ThrowIfUncastable(this.enumCase, EnumCase.")
                         .Print(def.identifier).PrintEndLine(");");
                     p.PrintEndLine();
 
                     if (structRef.FieldToMergedFieldMap.Count < 1)
                     {
                         p.PrintLine("return new();");
+                    }
+                    else if (isExplicitLayout)
+                    {
+                        p.PrintBeginLine("return this.case_").Print(def.identifier).PrintEndLine(";");
                     }
                     else
                     {
@@ -698,17 +744,21 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public readonly ").Print(def.name)
-                    .Print(" ToCase").Print(def.identifier).Print("OrDefault(")
+                    .Print(" GetValueOrDefault(ET.T<").Print(def.name).Print("> _ = default, ")
                     .Print(structIn).Print(def.name).PrintEndLine(" @default = default)");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine("if (CanCastFromEnumStruct(this.enumCase, EnumCase.")
+                    p.PrintBeginLine("if (IsCastable(this.enumCase, EnumCase.")
                         .Print(def.identifier).PrintEndLine("))");
                     p.OpenScope();
                     {
                         if (structRef.FieldToMergedFieldMap.Count < 1)
                         {
                             p.PrintLine("return new();");
+                        }
+                        else if (isExplicitLayout)
+                        {
+                            p.PrintBeginLine("return this.case_").Print(def.identifier).PrintEndLine(";");
                         }
                         else
                         {
@@ -738,21 +788,25 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.PrintEndLine();
 
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintBeginLine("public readonly bool TryToCase(out ")
-                    .Print(def.name).PrintEndLine(" @case)");
+                p.PrintBeginLine("public readonly bool TryGetValue(out ")
+                    .Print(def.name).PrintEndLine(" value)");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine("if (CanCastFromEnumStruct(this.enumCase, EnumCase.")
+                    p.PrintBeginLine("if (IsCastable(this.enumCase, EnumCase.")
                         .Print(def.identifier).PrintEndLine("))");
                     p.OpenScope();
                     {
                         if (structRef.FieldToMergedFieldMap.Count < 1)
                         {
-                            p.PrintLine("@case = new();");
+                            p.PrintLine("value = new();");
+                        }
+                        else if (isExplicitLayout)
+                        {
+                            p.PrintBeginLine("value = this.case_").Print(def.identifier).PrintEndLine(";");
                         }
                         else
                         {
-                            p.PrintLine("@case = new(");
+                            p.PrintLine("value = new(");
                             p = p.IncreasedIndent();
                             {
                                 var first = true;
@@ -775,7 +829,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintLine("@case = default;");
+                    p.PrintLine("value = default;");
                     p.PrintLine("return false;");
                 }
                 p.CloseScope();
@@ -1394,32 +1448,29 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             p.PrintEndLine();
         }
 
-        private readonly void WritePrivateStaticMethods(ref Printer p)
+        private readonly void WriteCastableMethods(ref Printer p)
         {
             p.PrintLine(AGGRESSIVE_INLINING);
-            p.PrintLine("private static bool CanCastFromEnumStruct(EnumCase enumStruct, EnumCase caseStruct)");
+            p.PrintLine("private static bool IsCastable(EnumCase a, EnumCase b)");
             p.OpenScope();
             {
-                p.PrintLine("return enumStruct == caseStruct;");
+                p.PrintLine("return a == b;");
             }
             p.CloseScope();
             p.PrintEndLine();
-        }
 
-        private readonly void WriteThrowMethods(ref Printer p)
-        {
             p.PrintLine(VALIDATION_ATTRIBUTES);
-            p.PrintBeginLine("private static void ThrowIfCannotCastFromEnumStruct")
-                .PrintEndLine("(EnumCase enumStruct, EnumCase caseStruct)");
+            p.PrintBeginLine("private static void ThrowIfUncastable")
+                .PrintEndLine("(EnumCase source, EnumCase target)");
             p.OpenScope();
             {
-                p.PrintLine("if (CanCastFromEnumStruct(enumStruct, caseStruct) == false)");
+                p.PrintLine("if (IsCastable(source, target) == false)");
                 p.OpenScope();
                 {
                     p.PrintLine("throw new S.InvalidCastException(");
                     p.WithIncreasedIndent().PrintBeginLine("$\"")
-                        .Print("Cannot cast '").Print(typeName).Print("' into '{caseStruct}' ")
-                        .Print("because it currently stores a '{enumStruct}'.")
+                        .Print("Cannot cast '").Print(typeName).Print("' into '{target}' ")
+                        .Print("because it currently stores a '{source}'.")
                         .PrintEndLine("\"");
                     p.PrintLine(");");
                 }
