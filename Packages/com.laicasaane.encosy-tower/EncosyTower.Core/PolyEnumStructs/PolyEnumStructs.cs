@@ -145,4 +145,13 @@ namespace EncosyTower.PolyEnumStructs
         /// </summary>
         public object Value { get; }
     }
+
+    /// <summary>
+    /// Annotates a nested struct to exclude it from being recognized as a case-struct
+    /// for the outer enum-struct.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
+    public sealed class EnumCaseIgnoreAttribute : Attribute
+    {
+    }
 }

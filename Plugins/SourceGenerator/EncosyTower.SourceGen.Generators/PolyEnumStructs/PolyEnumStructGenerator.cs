@@ -14,6 +14,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
         private const string POLY_ENUM_STRUCT_ATTRIBUTE_METADATA = $"{NAMESPACE}.PolyEnumStructAttribute";
         private const string ENUM_CASE_VALUE_ATTRIBUTE = $"global::{NAMESPACE}.EnumCaseValueAttribute";
+        private const string ENUM_CASE_IGNORE_ATTRIBUTE = $"global::{NAMESPACE}.EnumCaseIgnoreAttribute";
         private const string GENERATOR_NAME = nameof(PolyEnumStructGenerator);
         private const string UNDEFINED_NAME = "Undefined";
         private const string INTERFACE_NAME = "IEnumCase";
@@ -204,6 +205,11 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                         )
                     )
                     {
+                        if (structSyntax.HasAttribute("EncosyTower.PolyEnumStructs", "EnumCaseIgnore"))
+                        {
+                            continue;
+                        }
+
                         var @struct = GetStruct(structSyntax, semanticModel, token);
 
                         if (@struct.IsValid == false)
@@ -357,6 +363,12 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             token.ThrowIfCancellationRequested();
 
             var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
+
+            if (symbol.HasAttribute(ENUM_CASE_IGNORE_ATTRIBUTE))
+            {
+                return default;
+            }
+
             var result = new PolyEnumStructSpec.StructSpec {
                 name = syntax.Identifier.Text,
                 displayName = syntax.GetDisplayNameOrDefault(syntax.Identifier.Text),

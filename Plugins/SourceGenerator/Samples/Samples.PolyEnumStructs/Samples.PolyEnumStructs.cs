@@ -343,5 +343,11 @@ namespace Samples.PolyEnumStructs.Errors2
                 return fs;
             }
         }
+
+        [EnumCaseIgnore]
+        public struct Data
+        {
+            public int intValue;
+        }
     }
 }
