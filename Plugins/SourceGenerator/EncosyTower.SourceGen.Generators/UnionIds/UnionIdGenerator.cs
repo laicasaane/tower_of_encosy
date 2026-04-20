@@ -568,6 +568,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                       idInfo
                     , kindInfos
                     , compilation.references
+                    , compilation.enableNullable
                 );
 
                 if (declaration.IsInvalid)
@@ -612,9 +613,11 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             p.PrintLine("using SC = global::System.Collections;");
             p.PrintLine("using SCG = global::System.Collections.Generic;");
             p.PrintLine("using SCM = global::System.ComponentModel;");
+            p.PrintLine("using SD = global::System.Diagnostics;");
             p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
             p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
             p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+            p.PrintLine("using ET = global::EncosyTower.Common;");
             p.PrintLine("using ETCol = global::EncosyTower.Collections;");
             p.PrintLine("using ETColE = global::EncosyTower.Collections.Extensions;");
             p.PrintLine("using ETCon = global::EncosyTower.Conversion;");

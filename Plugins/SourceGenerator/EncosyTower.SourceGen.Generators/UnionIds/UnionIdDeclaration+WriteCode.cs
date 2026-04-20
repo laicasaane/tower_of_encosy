@@ -8,6 +8,7 @@
         private const string STRUCT_LAYOUT_SIZE = "[SRIS.StructLayout(SRIS.LayoutKind.Explicit, Size = {0})]";
         private const string STRUCT_LAYOUT = "[SRIS.StructLayout(SRIS.LayoutKind.Explicit)]";
         private const string FIELD_OFFSET = "[SRIS.FieldOffset({0})]";
+        private const string UNION = "[SRCS.Union]";
         private const string ODIN_PROPERTY_ORDER = "[global::Sirenix.OdinInspector.PropertyOrder({0})]";
         private const string ODIN_SHOW_IN_INSPECTOR = "[global::Sirenix.OdinInspector.ShowInInspector]";
         private const string ODIN_SHOW_IF = "[global::Sirenix.OdinInspector.ShowIf(nameof(Kind), IdKind.{0})]";
@@ -17,6 +18,8 @@
         private const string SERIALIZABLE = "[S.Serializable]";
         private const string NON_SERIALIZED = "[field: S.NonSerialized]";
         private const string SERIALIZE_FIELD = "[UE.SerializeField]";
+        private const string VALIDATION_ATTRIBUTES = "[UE.HideInCallstack, SD.StackTraceHidden, " +
+            "SD.Conditional(\"UNITY_EDITOR\"), SD.Conditional(\"DEVELOPMENT_BUILD\")]";
 
         private readonly static string[] s_operators = new[] { "==", "!=", "<", "<=", ">", ">=" };
         private readonly static string[] s_comparerOps = new[] { "<", "<=", ">", ">=" };
@@ -32,10 +35,12 @@
             p.Print("#pragma warning disable").PrintEndLine();
             p.PrintEndLine();
 
+            p.PrintLine(UNION);
             p.PrintLine(string.Format(STRUCT_LAYOUT_SIZE, TypeSize));
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintLine("[SCM.TypeConverter(typeof(TypeConverter))]");
             p.PrintBeginLine("partial struct ").Print(typeName).Print(" : ")
+                .Print("SRCS.IUnion, ")
                 .Print("ETUI.IUnionId<")
                 .Print(RawTypeName).Print(", ").Print(typeName)
                 .PrintEndLine(">");
@@ -68,6 +73,7 @@
                 WriteConstructor_IdKindSpan_IdSpan(ref p, typeName, false);
                 WriteConstructor_IdKindSpan_IdUnsigned(ref p, typeName);
                 WriteConstructor_IdKindSpan_IdSigned(ref p, typeName);
+                WriteUnionPattern(ref p, typeName);
                 WritePartialTryParseMethods(ref p);
                 WriteTryParse_String(ref p, typeName);
                 WriteTryParse_Span(ref p, typeName);
@@ -95,17 +101,50 @@
                 WriteTryGetFixedNames(ref p);
                 WriteTryGetFixedDisplayNames(ref p);
                 WritePartialAppendMethods(ref p);
-                WriteIdKindEnum(ref p);
-                WriteTypeConverter(ref p, typeName);
-                WriteSerializable(ref p, typeName);
-                WriteIdEnumExtensions(ref p);
+                WriteIsCastableMethods(ref p);
             }
             p.CloseScope();
             p.PrintEndLine();
 
-            KindExtensionsRef.WriteCode(ref p);
+            p.PrintBeginLine("partial struct ").Print(typeName).PrintEndLine(" // IdKind");
+            p.OpenScope();
+            {
+                WriteIdKindEnum(ref p);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
 
-            WriteEnumeration(ref p);
+            p.PrintBeginLine("partial struct ").Print(typeName).PrintEndLine(" // Serializable");
+            p.OpenScope();
+            {
+                WriteSerializable(ref p, typeName);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintBeginLine("partial struct ").Print(typeName).PrintEndLine(" // TypeConverter");
+            p.OpenScope();
+            {
+                WriteTypeConverter(ref p, typeName);
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            WriteIdEnumExtensions(ref p, typeName);
+
+            p.PrintBeginLine("partial struct ").Print(typeName).Print(" { }")
+                .PrintEndLine(" // IdKindExtensions");
+            p.PrintEndLine();
+            {
+                KindExtensionsRef.WriteCode(ref p);
+            }
+
+            p.PrintBeginLine("partial struct ").Print(typeName).Print(" { }")
+                .Print(" // ").Print(typeName).PrintEndLine("Enumeration");
+            p.PrintEndLine();
+            {
+                WriteEnumeration(ref p);
+            }
 
             return p.Result;
         }
@@ -657,6 +696,110 @@
             }
             p.CloseScope();
             p.PrintEndLine();
+        }
+
+        private void WriteUnionPattern(ref Printer p, string typeName)
+        {
+            p.PrintBeginLine("public object").PrintIf(EnableNullable, "?").PrintEndLine(" Value");
+            p.OpenScope();
+            {
+                p.PrintLine("get => Kind switch");
+                p.OpenScope();
+                {
+                    foreach (var kind in KindRefs)
+                    {
+                        var kindName = kind.name;
+                        p.PrintBeginLine("IdKind.").Print(kindName).Print(" => Id_").Print(kindName).PrintEndLine(",");
+                    }
+
+                    p.PrintBeginLine("_ => null").PrintEndLine(",");
+                }
+                p.CloseScope("};");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintLine("public bool HasValue");
+            p.OpenScope();
+            {
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("get => ").Print(KindExtensionsRef.ExtensionsName).PrintEndLine(".IsDefined(Kind);");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            foreach (var kind in KindRefs)
+            {
+                var fullName = kind.fullName;
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("public static explicit operator ").Print(fullName)
+                    .Print("(").Print(typeName).PrintEndLine(" value)");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("return value.GetValueOrThrow(default(ET.T<")
+                        .Print(fullName).PrintEndLine(">));");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+
+            foreach (var kind in KindRefs)
+            {
+                var fullName = kind.fullName;
+                var name = kind.name;
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("public readonly ").Print(fullName)
+                    .Print(" GetValueOrThrow(ET.T<").Print(fullName).PrintEndLine("> _)");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("ThrowIfUncastable(Kind, IdKind.").Print(name).PrintEndLine(");");
+                    p.PrintEndLine();
+
+                    p.PrintBeginLine("return Id_").Print(name).PrintEndLine(";");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("public readonly ").Print(fullName)
+                    .Print(" GetValueOrDefault(ET.T<").Print(fullName).Print("> _ = default, ")
+                    .Print(fullName).PrintEndLine(" @default = default)");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("if (IsCastable(Kind, IdKind.").Print(name).PrintEndLine("))");
+                    p.OpenScope();
+                    {
+                        p.PrintBeginLine("return Id_").Print(name).PrintEndLine(";");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("return @default;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("public bool TryGetValue(out ").Print(fullName).PrintEndLine(" value)");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("if (Kind == IdKind.").Print(name).PrintEndLine(")");
+                    p.OpenScope();
+                    {
+                        p.PrintBeginLine("value = Id_").Print(name).PrintEndLine(";");
+                        p.PrintLine("return true;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("value = default;");
+                    p.PrintLine("return false;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
         }
 
         private void WritePartialTryParseMethods(ref Printer p)
@@ -2237,6 +2380,39 @@
             }
         }
 
+        private void WriteIsCastableMethods(ref Printer p)
+        {
+            p.PrintLine(AGGRESSIVE_INLINING);
+            p.PrintLine("private static bool IsCastable(IdKind a, IdKind b)");
+            p.OpenScope();
+            {
+                p.PrintLine("return a == b;");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintLine(VALIDATION_ATTRIBUTES);
+            p.PrintBeginLine("private static void ThrowIfUncastable")
+                .PrintEndLine("(IdKind source, IdKind target)");
+            p.OpenScope();
+            {
+                p.PrintLine("if (IsCastable(source, target) == false)");
+                p.OpenScope();
+                {
+                    p.PrintLine("throw new S.InvalidCastException(");
+                    p.WithIncreasedIndent().PrintBeginLine("$\"")
+                        .Print("Cannot cast '").Print(SimpleName).Print("' into '{target}' ")
+                        .Print("because it currently stores a '{source}'.")
+                        .PrintEndLine("\"");
+                    p.PrintLine(");");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
         private void WriteIdKindEnum(ref Printer p)
         {
             p.PrintLine(GENERATED_CODE);
@@ -2296,9 +2472,11 @@
 
         private void WriteSerializable(ref Printer p, string typeName)
         {
-            p.PrintLine(SERIALIZABLE).PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(UNION);
+            p.PrintLine(SERIALIZABLE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintBeginLine("public partial struct Serializable ")
-                .Print(": ETUI.ISerializableUnionId<")
+                .Print(": SRCS.IUnion, ETUI.ISerializableUnionId<")
                 .Print(RawTypeName).Print(", ").Print(typeName).Print(", Serializable")
                 .PrintEndLine(">");
 
@@ -2341,6 +2519,41 @@
                 p.PrintLine("public long Id;");
                 p.PrintEndLine();
 
+                p.PrintBeginLine("public Serializable").PrintEndLine("(IdKind kind, long id) : this()");
+                p.OpenScope();
+                {
+                    p.PrintLine("Kind = kind;");
+                    p.PrintLine("Id = id;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                if (KindRefs.Count > 0)
+                {
+                    foreach (var kind in KindRefs)
+                    {
+                        var kindName = kind.name;
+
+                        p.PrintBeginLine("public Serializable").Print("(").Print(kind.fullName).PrintEndLine(" id) : this()");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine("Kind = IdKind.").Print(kindName).PrintEndLine(";");
+                            p.PrintBeginLine("Id = (long)new ").Print(typeName).Print("(id).")
+                                .PrintIf(kind.signed, "IdSigned", "IdUnsigned")
+                                .PrintEndLine(";");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+                }
+
+                WriteConstructor_IdKind_IdString(ref p, "Serializable");
+                WriteConstructor_IdKindString_IdString(ref p, "Serializable");
+                WriteConstructor_IdKindString_IdLong(ref p, "Serializable");
+                WriteConstructor_IdKind_IdSpan(ref p, "Serializable", true);
+                WriteConstructor_IdKindSpan_IdSpan(ref p, "Serializable", true);
+                WriteConstructor_IdKindSpan_IdLong(ref p, "Serializable");
+
                 if (KindRefs.Count > 0)
                 {
                     var order = 1;
@@ -2380,40 +2593,7 @@
                     }
                 }
 
-                p.PrintBeginLine("public Serializable").PrintEndLine("(IdKind kind, long id) : this()");
-                p.OpenScope();
-                {
-                    p.PrintLine("Kind = kind;");
-                    p.PrintLine("Id = id;");
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                if (KindRefs.Count > 0)
-                {
-                    foreach (var kind in KindRefs)
-                    {
-                        var kindName = kind.name;
-
-                        p.PrintBeginLine("public Serializable").Print("(").Print(kind.fullName).PrintEndLine(" id) : this()");
-                        p.OpenScope();
-                        {
-                            p.PrintBeginLine("Kind = IdKind.").Print(kindName).PrintEndLine(";");
-                            p.PrintBeginLine("Id = (long)new ").Print(typeName).Print("(id).")
-                                .PrintIf(kind.signed, "IdSigned", "IdUnsigned")
-                                .PrintEndLine(";");
-                        }
-                        p.CloseScope();
-                        p.PrintEndLine();
-                    }
-                }
-
-                WriteConstructor_IdKind_IdString(ref p, "Serializable");
-                WriteConstructor_IdKindString_IdString(ref p, "Serializable");
-                WriteConstructor_IdKindString_IdLong(ref p, "Serializable");
-                WriteConstructor_IdKind_IdSpan(ref p, "Serializable", true);
-                WriteConstructor_IdKindSpan_IdSpan(ref p, "Serializable", true);
-                WriteConstructor_IdKindSpan_IdLong(ref p, "Serializable");
+                WriteUnionPattern(ref p, "Serializable");
 
                 p.PrintBeginLine("public readonly bool TryConvert(out ").Print(typeName).PrintEndLine(" result)");
                 p.OpenScope();
@@ -2569,11 +2749,18 @@
             p.PrintEndLine();
         }
 
-        private void WriteIdEnumExtensions(ref Printer p)
+        private void WriteIdEnumExtensions(ref Printer p, string typeName)
         {
             foreach (var extensions in IdEnumExtensionsRefs)
             {
-                extensions.WriteCode(ref p);
+                p.PrintBeginLine("partial struct ").Print(typeName)
+                    .Print(" // ").PrintEndLine(extensions.ExtensionsName);
+                p.OpenScope();
+                {
+                    extensions.WriteCode(ref p);
+                }
+                p.CloseScope();
+                p.PrintEndLine();
             }
         }
 
@@ -2583,7 +2770,7 @@
             var idEnums = IdEnumExtensionsRefs;
             var idEnumsCount = idEnums.Count;
 
-            p.PrintLine(GENERATED_CODE).PrintLine(EXCLUDE_COVERAGE);
+            p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintBeginLine(KindExtensionsRef.Accessibility.GetKeyword()).Print(" static partial class ")
                 .Print(typeName)
                 .PrintEndLine("Enumeration");

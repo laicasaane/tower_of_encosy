@@ -51,6 +51,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
         public References References { get; }
 
+        public bool EnableNullable { get; }
+
         public EnumExtensionsDeclaration KindExtensionsRef { get; }
 
         public List<EnumExtensionsDeclaration> IdEnumExtensionsRefs { get; }
@@ -61,6 +63,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
               IdSpec id
             , ImmutableArray<KindSpec> externalKinds
             , References references
+            , bool enableNullable
         )
         {
             SimpleName = id.simpleName;
@@ -75,6 +78,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             DisplayNameForId = string.IsNullOrWhiteSpace(id.displayNameForId) ? string.Empty : id.displayNameForId;
             DisplayNameForKind = string.IsNullOrWhiteSpace(id.displayNameForKind) ? string.Empty : id.displayNameForKind;
             References = references;
+            EnableNullable = enableNullable;
 
             var allKinds = new List<KindSpec>(id.inlineKinds.Count + externalKinds.Length);
 
