@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Threading;
 using EncosyTower.SourceGen.Helpers.Data;
 using Microsoft.CodeAnalysis;
