@@ -154,4 +154,60 @@ namespace EncosyTower.PolyEnumStructs
     public sealed class EnumCaseIgnoreAttribute : Attribute
     {
     }
+
+    /// <summary>
+    /// Specifies a factory type for a poly enum struct.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// [PolyEnumStruct]
+    /// public partial struct Task
+    /// {
+    ///     public partial record struct Shopping(int Allowance);
+    ///
+    ///     public partial record struct Working(float Duration);
+    /// }
+    ///
+    /// [PolyEnumFactoryFor(typeof(Task))]
+    /// public partial class TaskFactory
+    /// {
+    ///     private Task _task;
+    ///
+    ///     // User should define a constructor that accepts the enum-struct type as a single parameter.
+    ///     // When undefined, the source generator will generate a private one, along with a private field
+    ///     // to hold the enum-struct instance.
+    ///
+    ///     private TaskFactory(Task task)
+    ///     {
+    ///         _task = task;
+    ///     }
+    ///
+    ///     // The static factory methods will be generated for each case-struct of the enum-struct.
+    ///
+    ///     public static TaskFactory Shopping(int allowance)
+    ///         => new TaskFactory(new Task.Shopping(allowance));
+    ///
+    ///     public static TaskFactory Working(float duration)
+    ///         => new TaskFactory(new Task.Working(duration));
+    /// }
+    /// </code>
+    /// </example>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+    public sealed class PolyEnumFactoryForAttribute : Attribute
+    {
+        /// <summary>
+        /// Initializes a new instance of the PolyEnumFactoryForAttribute class with the specified type to be
+        /// wrapped.
+        /// </summary>
+        /// <param name="type">The poly enum struct type to be wrapped.</param>
+        public PolyEnumFactoryForAttribute(Type type)
+        {
+            Type = type;
+        }
+
+        /// <summary>
+        /// The poly enum struct type to be wrapped by the annotated wrapper type.
+        /// </summary>
+        public Type Type { get; }
+    }
 }
