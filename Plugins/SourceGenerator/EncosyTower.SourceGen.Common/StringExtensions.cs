@@ -7,8 +7,80 @@ namespace EncosyTower.SourceGen
     {
         private static readonly ConcurrentQueue<StringBuilder> s_sbPool = new();
 
+        public static string EscapeStringLiteral(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+
+            var sb = RentSb();
+            var result = EscapeStringLiteral(value, sb);
+            ReturnSb(sb);
+            return result;
+        }
+
+        public static string EscapeStringLiteral(this string value, StringBuilder sb)
+            => string.IsNullOrEmpty(value) ? string.Empty : EscapeStringLiteral_Internal(value, sb);
+
         public static string ToValidIdentifier(this string value)
-            => value
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+
+            var sb = RentSb();
+            var result = ToValidIdentifier(value, sb);
+            ReturnSb(sb);
+            return result;
+        }
+
+        public static string ToValidIdentifier(this string value, StringBuilder sb)
+            => string.IsNullOrEmpty(value) ? string.Empty : ToValidIdentifier_Internal(value, sb);
+
+        public static string ToFileName(this string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+
+            var sb = RentSb();
+            var result = ToFileName(value, sb);
+            ReturnSb(sb);
+            return result;
+        }
+
+        public static string ToFileName(this string value, StringBuilder sb)
+            => string.IsNullOrEmpty(value) ? string.Empty : ToFileName_Internal(value, sb);
+
+        public static int GetByteCount(this string value)
+            => value == null ? 0 : Encoding.UTF8.GetByteCount(value);
+
+        public static StringBuilder RentSb()
+            => s_sbPool.TryDequeue(out var sb) ? sb : new StringBuilder();
+
+        public static void ReturnSb(StringBuilder sb)
+        {
+            sb.Clear();
+            s_sbPool.Enqueue(sb);
+        }
+
+        private static string EscapeStringLiteral_Internal(string value, StringBuilder sb)
+        {
+            sb.Clear().Append(value)
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"")
+                .Replace("\r", "\\r")
+                .Replace("\n", "\\n");
+
+            return sb.ToString();
+        }
+
+        private static string ToValidIdentifier_Internal(string value, StringBuilder sb)
+        {
+            sb.Clear().Append(value)
                 .Replace(' ', '_')
                 .Replace('.', '_')
                 .Replace("-", "__")
@@ -17,15 +89,10 @@ namespace EncosyTower.SourceGen
                 .Replace("[]", "Array")
                 ;
 
-        public static string ToFileName(this string value)
-        {
-            var sb = RentSb();
-            var result = ToFileName(value, sb);
-            ReturnSb(sb);
-            return result;
+            return sb.ToString();
         }
 
-        public static string ToFileName(this string value, StringBuilder sb)
+        private static string ToFileName_Internal(string value, StringBuilder sb)
         {
             sb.Clear().Append(value)
                 .Replace('\\', '-')
@@ -40,30 +107,6 @@ namespace EncosyTower.SourceGen
                 ;
 
             return sb.ToString();
-        }
-
-        public static int GetByteCount(this string value)
-        {
-            if (value == null)
-                return 0;
-
-            return Encoding.UTF8.GetByteCount(value);
-        }
-
-        private static StringBuilder RentSb()
-        {
-            if (s_sbPool.TryDequeue(out var sb))
-            {
-                return sb;
-            }
-
-            return new StringBuilder();
-        }
-
-        private static void ReturnSb(StringBuilder sb)
-        {
-            sb.Clear();
-            s_sbPool.Enqueue(sb);
         }
     }
 }
