@@ -69,19 +69,31 @@ namespace EncosyTower.SourceGen
         /// <returns></returns>
         public static bool IsIdentifier(
               this SyntaxNode syntaxNode
-            , string identifier
+            , ReadOnlySpan<char> identifier
             , out TypeArgumentListSyntax typeArgumentListSyntax
         )
         {
             switch (syntaxNode)
             {
                 case GenericNameSyntax genericNameSyntax:
+                {
                     typeArgumentListSyntax = genericNameSyntax.TypeArgumentList;
-                    return genericNameSyntax.Identifier.ValueText == identifier;
+                    return MemoryExtensions.Equals(
+                          genericNameSyntax.Identifier.ValueText.AsSpan()
+                        , identifier
+                        , StringComparison.Ordinal
+                    );
+                }
 
                 case SimpleNameSyntax simpleNameSyntax:
+                {
                     typeArgumentListSyntax = default;
-                    return simpleNameSyntax.Identifier.ValueText == identifier;
+                    return MemoryExtensions.Equals(
+                          simpleNameSyntax.Identifier.ValueText.AsSpan()
+                        , identifier
+                        , StringComparison.Ordinal
+                    );
+                }
             }
 
             typeArgumentListSyntax = default;
@@ -106,7 +118,7 @@ namespace EncosyTower.SourceGen
             , string typeName
         )
         {
-            return IsTypeNameCandidate(syntaxNode, typeNameNamesapce, typeName, out _);
+            return IsTypeNameCandidate(syntaxNode, typeNameNamesapce.AsSpan(), typeName.AsSpan(), out _);
         }
 
         /// <summary>
@@ -124,8 +136,8 @@ namespace EncosyTower.SourceGen
         /// <returns></returns>
         public static bool IsTypeNameCandidate(
               this SyntaxNode syntaxNode
-            , string typeNameNamesapce
-            , string typeName
+            , ReadOnlySpan<char> typeNameNamesapce
+            , ReadOnlySpan<char> typeName
             , out TypeArgumentListSyntax typeArgumentListSyntax
         )
         {
@@ -144,20 +156,24 @@ namespace EncosyTower.SourceGen
                     if (iLastDot < 0)
                     {
                         //End of qualified names
-                        var typename = qualifiedNameSyntax.Left.ToString();
+                        var typename = qualifiedNameSyntax.Left.ToString().AsSpan();
 
-                        if (typename.StartsWith("global::"))
-                            typename = typename.Substring(8);
+                        if (typename.StartsWith("global::".AsSpan()))
+                        {
+                            typename = typename.Slice(8);
+                        }
 
                         typeArgumentListSyntax = default;
-                        return typename == typeNameNamesapce;
+
+                        return MemoryExtensions.Equals(typename, typeNameNamesapce, StringComparison.Ordinal);
                     }
                     else if (qualifiedNameSyntax.Left != null)
                     {
                         // Fast estimate left part without extracting any TypeArgumentListSyntax
                         return qualifiedNameSyntax.Left.IsTypeNameCandidate(
-                              typeNameNamesapce.Substring(0, iLastDot)
-                            , typeNameNamesapce.Substring(iLastDot + 1)
+                              typeNameNamesapce.Slice(0, iLastDot)
+                            , typeNameNamesapce.Slice(iLastDot + 1)
+                            , out _
                         );
                     }
                     else
@@ -188,7 +204,11 @@ namespace EncosyTower.SourceGen
         /// <param name="attributeNameSpace">The host namepsace of the attribute type name. e.g. "Unity.Entities"</param>
         /// <param name="attributeName">The unqualified attribute name. e.g. "UpdateBefore" </param>
         /// <returns></returns>
-        public static bool HasAttributeCandidate(this SyntaxNode syntaxNode, string attributeNameSpace, string attributeName)
+        public static bool HasAttributeCandidate(
+              this SyntaxNode syntaxNode
+            , string attributeNameSpace
+            , string attributeName
+        )
         {
             foreach (var attribListCandidate in syntaxNode.ChildNodes())
             {
