@@ -2,10 +2,10 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace EncosyTower.SourceGen.Generators.Mvvm.CodeRefactors
+namespace EncosyTower.SourceGen.CodeRefactors.Mvvm
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    internal class MvvmDiagnosticAnalyzer : DiagnosticAnalyzer
+    internal sealed class MvvmDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         public const string DIAGNOSTIC_FIELD = "MVVMTK0010";
         public const string DIAGNOSTIC_PROPERTY = "MVVMTK0011";

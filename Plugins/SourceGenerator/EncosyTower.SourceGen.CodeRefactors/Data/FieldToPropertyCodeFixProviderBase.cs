@@ -12,7 +12,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 
-namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
+namespace EncosyTower.SourceGen.CodeRefactors.Data
 {
     internal abstract class FieldToPropertyCodeFixProviderBase : CodeFixProvider
     {

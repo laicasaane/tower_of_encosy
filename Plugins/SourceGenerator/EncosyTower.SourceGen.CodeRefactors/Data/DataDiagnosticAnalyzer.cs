@@ -2,12 +2,12 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
+namespace EncosyTower.SourceGen.CodeRefactors.Data
 {
     using static EncosyTower.SourceGen.Helpers.Data.Helpers;
 
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    internal class DataDiagnosticAnalyzer : DiagnosticAnalyzer
+    internal sealed class DataDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         public const string DIAGNOSTIC_FIELD = "DATA0010";
         public const string DIAGNOSTIC_PROPERTY = "DATA0011";

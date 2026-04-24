@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
+namespace EncosyTower.SourceGen.CodeRefactors.Data
 {
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(FieldToPropertyGetOnlyCodeFixProvider)), Shared]
     internal sealed class FieldToPropertyGetOnlyCodeFixProvider : FieldToPropertyCodeFixProviderBase

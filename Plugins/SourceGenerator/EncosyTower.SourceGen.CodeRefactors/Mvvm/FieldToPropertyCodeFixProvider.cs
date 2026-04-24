@@ -13,10 +13,10 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 
-namespace EncosyTower.SourceGen.Generators.Mvvm.CodeRefactors
+namespace EncosyTower.SourceGen.CodeRefactors.Mvvm
 {
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(FieldToPropertyCodeFixProvider)), Shared]
-    internal class FieldToPropertyCodeFixProvider : CodeFixProvider
+    internal sealed class FieldToPropertyCodeFixProvider : CodeFixProvider
     {
         public sealed override ImmutableArray<string> FixableDiagnosticIds
             => ImmutableArray.Create(MvvmDiagnosticAnalyzer.DIAGNOSTIC_FIELD);
