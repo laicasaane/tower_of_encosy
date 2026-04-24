@@ -2,12 +2,10 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-#pragma warning disable RS2008 // Enable analyzer release tracking
-
-namespace EncosyTower.SourceGen.Generators.EnumExtensions
+namespace EncosyTower.SourceGen.Analyzers.EnumExtensions
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    internal class EnumExtensionsAnalyzer : DiagnosticAnalyzer
+    internal sealed class EnumExtensionsAnalyzer : DiagnosticAnalyzer
     {
         private const string NAMESPACE = "EncosyTower.EnumExtensions";
         private const string ENUM_EXTENSIONS_FOR_ATTRIBUTE = $"global::{NAMESPACE}.EnumExtensionsForAttribute";

@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    internal class PolyEnumStructAnalyzer : DiagnosticAnalyzer
+    internal sealed class PolyEnumStructAnalyzer : DiagnosticAnalyzer
     {
         private const string NAMESPACE = "EncosyTower.PolyEnumStructs";
         private const string POLY_ENUM_STRUCT_ATTRIBUTE = $"global::{NAMESPACE}.PolyEnumStructAttribute";

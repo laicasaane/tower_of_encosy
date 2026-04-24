@@ -3,8 +3,6 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-#pragma warning disable RS2008 // Enable analyzer release tracking
-
 namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]

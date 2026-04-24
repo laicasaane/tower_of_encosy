@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace EncosyTower.SourceGen.Analyzers.NewtonsoftJsonHelpers
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    internal class NewtonsoftJsonAotHelperAnalyzer : DiagnosticAnalyzer
+    internal sealed class NewtonsoftJsonAotHelperAnalyzer : DiagnosticAnalyzer
     {
         private const string NAMESPACE = "EncosyTower.Serialization.NewtonsoftJson";
         private const string ATTRIBUTE = $"global::{NAMESPACE}.NewtonsoftJsonAotHelperAttribute";

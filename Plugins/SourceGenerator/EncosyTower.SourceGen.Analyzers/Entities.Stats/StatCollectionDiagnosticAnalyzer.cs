@@ -3,10 +3,10 @@ using EncosyTower.SourceGen.Helpers.Entities.Stats;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace EncosyTower.SourceGen.Generators.Entities.Stats
+namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    internal class StatCollectionDiagnosticAnalyzer : DiagnosticAnalyzer
+    internal sealed class StatCollectionDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         private const string NAMESPACE = StatGeneratorAPI.NAMESPACE;
         private const string STAT_COLLECTION_ATTRIBUTE = $"global::{NAMESPACE}.StatCollectionAttribute";

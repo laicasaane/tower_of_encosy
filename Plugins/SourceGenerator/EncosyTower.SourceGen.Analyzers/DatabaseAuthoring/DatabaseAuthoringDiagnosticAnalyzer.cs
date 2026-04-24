@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class DatabaseAuthoringDiagnosticAnalyzer : DiagnosticAnalyzer
+    public sealed class DatabaseAuthoringDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         private const string DATABASES_NAMESPACE = "EncosyTower.Databases";
         private const string DATABASES_AUTHORING_NAMESPACE = DATABASES_NAMESPACE + ".Authoring";
@@ -191,7 +191,6 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                 return;
             }
 
-            var attribSyntax = authorAttrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken);
             var dbAttrib = GetAttribute(databaseSymbol, DATABASE_ATTRIBUTE);
 
             if (dbAttrib != null)
@@ -247,20 +246,28 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                 var fullName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
                 if (visited.Contains(fullName))
+                {
                     continue;
+                }
 
                 visited.Add(fullName);
 
                 foreach (var member in type.GetMembers())
                 {
-                    ITypeSymbol memberType = null;
+                    ITypeSymbol memberType;
 
                     if (member is IPropertySymbol prop)
+                    {
                         memberType = prop.Type;
+                    }
                     else if (member is IFieldSymbol field)
+                    {
                         memberType = field.Type;
+                    }
                     else
+                    {
                         continue;
+                    }
 
                     var converterAttrib = GetAttribute(member, DATA_CONVERTER_ATTRIBUTE);
 

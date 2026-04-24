@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace EncosyTower.SourceGen.Analyzers.Types.Caches
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    internal class RuntimeTypeCachesAnalyzer : DiagnosticAnalyzer
+    internal sealed class RuntimeTypeCachesAnalyzer : DiagnosticAnalyzer
     {
         private const string NAMESPACE = "EncosyTower.Types.Caches";
         private const string NAMESPACE_PREFIX = $"global::{NAMESPACE}";

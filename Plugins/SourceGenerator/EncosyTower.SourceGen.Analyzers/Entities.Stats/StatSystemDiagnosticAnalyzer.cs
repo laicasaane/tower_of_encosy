@@ -3,7 +3,7 @@ using EncosyTower.SourceGen.Helpers.Entities.Stats;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace EncosyTower.SourceGen.Generators.Entities.Stats
+namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal class StatSystemDiagnosticAnalyzer : DiagnosticAnalyzer

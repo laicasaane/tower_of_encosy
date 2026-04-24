@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace EncosyTower.SourceGen.Analyzers.UserDataVaults
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    internal class UserDataVaultDiagnosticAnalyzer : DiagnosticAnalyzer
+    internal sealed class UserDataVaultDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         public const string NAMESPACE = "EncosyTower.UserDataVaults";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";

@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace EncosyTower.SourceGen.Analyzers.UnionIds
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    internal class UnionIdAnalyzer : DiagnosticAnalyzer
+    internal sealed class UnionIdAnalyzer : DiagnosticAnalyzer
     {
         private const string UNION_ID_ATTRIBUTE = "global::EncosyTower.UnionIds.UnionIdAttribute";
         private const string KIND_FOR_UNION_ID_ATTRIBUTE = "global::EncosyTower.UnionIds.KindForUnionIdAttribute";

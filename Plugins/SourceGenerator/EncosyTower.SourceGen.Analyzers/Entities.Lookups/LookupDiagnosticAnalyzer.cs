@@ -2,12 +2,10 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-#pragma warning disable RS2008 // Enable analyzer release tracking
-
 namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    internal class LookupDiagnosticAnalyzer : DiagnosticAnalyzer
+    internal sealed class LookupDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         private const string NAMESPACE = "EncosyTower.Entities";
         private const string LOOKUP_ATTRIBUTE = $"global::{NAMESPACE}.LookupAttribute";
