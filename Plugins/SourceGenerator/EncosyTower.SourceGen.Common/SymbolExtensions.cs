@@ -556,7 +556,7 @@ namespace EncosyTower.SourceGen
         }
 
         private static string PrependGlobalIfMissing(this string typeOrNamespaceName)
-            => typeOrNamespaceName.StartsWith("global::") == false
+            => typeOrNamespaceName.StartsWith("global::", StringComparison.Ordinal) == false
             ? $"global::{typeOrNamespaceName}"
             : typeOrNamespaceName;
 

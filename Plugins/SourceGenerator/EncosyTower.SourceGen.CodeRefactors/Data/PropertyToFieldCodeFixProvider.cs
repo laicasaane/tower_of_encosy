@@ -182,7 +182,7 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
                     {
                         var name = attrib.ToString();
 
-                        if (name.StartsWith("DataProperty"))
+                        if (name.StartsWith("DataProperty", StringComparison.Ordinal))
                         {
                             if (attrib.ArgumentList is { Arguments.Count: > 0 } argList
                                 && argList.Arguments[0].Expression is TypeOfExpressionSyntax typeOfExp
@@ -209,7 +209,7 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
                     var (_, target) = GetAttributeInfo(semanticModel, attrib);
                     var name = attrib.ToString();
 
-                    if (name.StartsWith("DataProperty"))
+                    if (name.StartsWith("DataProperty", StringComparison.Ordinal))
                     {
                         if (attrib.ArgumentList is { Arguments.Count: > 0 } argList
                             && argList.Arguments[0].Expression is TypeOfExpressionSyntax typeOfExp
@@ -294,7 +294,7 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
             , TypeSyntax fieldTypeSyntax
         )
         {
-            if (fieldAttribCheck.Any(static x => x.StartsWith("PropertyType"))
+            if (fieldAttribCheck.Any(static x => x.StartsWith("PropertyType", StringComparison.Ordinal))
                 || fieldTypeSyntax == null
                 || propertyDecl.Type.IsEquivalentTo(fieldTypeSyntax)
             )

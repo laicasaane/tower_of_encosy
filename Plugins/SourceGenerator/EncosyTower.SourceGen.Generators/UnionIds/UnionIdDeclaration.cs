@@ -324,7 +324,10 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
         private static string RemoveTypeKindSuffix(string name)
         {
-            while (name.Length > 4 && (name.EndsWith("Type") || name.EndsWith("Kind")))
+            while (name.Length > 4
+                && (name.EndsWith("Type", StringComparison.Ordinal)
+                    || name.EndsWith("Kind", StringComparison.Ordinal))
+            )
             {
                 name = name.Remove(name.Length - 4, 4);
             }

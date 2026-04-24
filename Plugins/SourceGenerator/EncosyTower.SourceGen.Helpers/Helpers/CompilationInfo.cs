@@ -62,7 +62,7 @@ namespace EncosyTower.SourceGen
                     continue;
                 }
 
-                if (assembly.Name.StartsWith("UnityEngine"))
+                if (assembly.Name.StartsWith("UnityEngine", StringComparison.Ordinal))
                 {
                     result.unity = true;
                     continue;

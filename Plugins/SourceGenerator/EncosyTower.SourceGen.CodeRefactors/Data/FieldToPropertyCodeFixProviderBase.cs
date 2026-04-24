@@ -234,7 +234,7 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
                         var (_, _) = GetAttributeInfo(semanticModel, attrib);
                         var name = attrib.ToString();
 
-                        if (name.StartsWith("SerializeField"))
+                        if (name.StartsWith("SerializeField", StringComparison.Ordinal))
                         {
                             continue;
                         }
@@ -255,7 +255,7 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
                     var (_, target) = GetAttributeInfo(semanticModel, attrib);
                     var name = attrib.ToString();
 
-                    if (name.StartsWith("SerializeField"))
+                    if (name.StartsWith("SerializeField", StringComparison.Ordinal))
                     {
                         continue;
                     }
@@ -333,7 +333,7 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
                     var attrib = attributes[iAttrib];
                     var name = attrib.ToString();
 
-                    if (name.StartsWith("PropertyType") == false)
+                    if (name.StartsWith("PropertyType", StringComparison.Ordinal) == false)
                     {
                         continue;
                     }
@@ -377,7 +377,7 @@ namespace EncosyTower.SourceGen.Generators.Data.CodeRefactors
             , HashSet<string> propAttribCheck
         )
         {
-            if (propAttribCheck.Any(static x => x.StartsWith("DataProperty")))
+            if (propAttribCheck.Any(static x => x.StartsWith("DataProperty", StringComparison.Ordinal)))
             {
                 return;
             }
