@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    internal class StatSystemDiagnosticAnalyzer : DiagnosticAnalyzer
+    internal sealed class StatSystemDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         private const string NAMESPACE = StatGeneratorAPI.NAMESPACE;
         private const string STAT_SYSTEM_ATTRIBUTE = $"global::{NAMESPACE}.StatSystemAttribute";
