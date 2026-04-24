@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 {
     [Generator]
-    internal class NewtonsoftJsonAotHelperGenerator : IIncrementalGenerator
+    internal sealed class NewtonsoftJsonAotHelperGenerator : IIncrementalGenerator
     {
         private const string NAMESPACE = "EncosyTower.Serialization.NewtonsoftJson";
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";

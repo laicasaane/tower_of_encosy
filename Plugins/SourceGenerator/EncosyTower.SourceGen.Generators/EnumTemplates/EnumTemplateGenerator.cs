@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.EnumTemplates
 {
     [Generator]
-    internal class EnumTemplateGenerator : IIncrementalGenerator
+    internal sealed class EnumTemplateGenerator : IIncrementalGenerator
     {
         public const string NAMESPACE = "EncosyTower.EnumExtensions";
         private const string ENUM_TEMPLATE_ATTRIBUTE_METADATA = $"{NAMESPACE}.EnumTemplateAttribute";

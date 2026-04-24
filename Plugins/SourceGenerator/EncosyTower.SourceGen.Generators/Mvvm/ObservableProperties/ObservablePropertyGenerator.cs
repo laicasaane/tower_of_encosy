@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 {
     [Generator]
-    public class ObservablePropertyGenerator : IIncrementalGenerator
+    public sealed class ObservablePropertyGenerator : IIncrementalGenerator
     {
         public const string GENERATOR_NAME = nameof(ObservablePropertyGenerator);
         public const string NAMESPACE = "EncosyTower.Mvvm";

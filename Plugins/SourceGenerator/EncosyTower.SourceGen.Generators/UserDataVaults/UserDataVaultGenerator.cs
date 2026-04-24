@@ -11,7 +11,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
     using static Helpers;
 
     [Generator]
-    internal class UserDataVaultGenerator : IIncrementalGenerator
+    internal sealed class UserDataVaultGenerator : IIncrementalGenerator
     {
         public const string GENERATOR_NAME = nameof(UserDataVaultGenerator);
 

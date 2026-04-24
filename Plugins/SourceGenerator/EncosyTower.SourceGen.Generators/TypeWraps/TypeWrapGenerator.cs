@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.TypeWraps
 {
     [Generator]
-    public class TypeWrapGenerator : IIncrementalGenerator
+    public sealed class TypeWrapGenerator : IIncrementalGenerator
     {
         public const string NAMESPACE = "EncosyTower.TypeWraps";
         public const string WRAP_TYPE = "WrapType";
@@ -540,7 +540,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationInfo compilation
+            , CompilationInfo _
             , TypeWrapSpec declaration
             , string projectPath
             , bool outputSourceGenFiles

@@ -7,7 +7,7 @@ namespace EncosyTower.SourceGen.Generators.Data
     using static EncosyTower.SourceGen.Helpers.Data.Helpers;
 
     [Generator]
-    public class DataGenerator : IIncrementalGenerator
+    public sealed class DataGenerator : IIncrementalGenerator
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {

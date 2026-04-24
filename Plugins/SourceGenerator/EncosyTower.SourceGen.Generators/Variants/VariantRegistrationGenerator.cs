@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.Variants
 {
     [Generator]
-    public class VariantRegistrationGenerator : IIncrementalGenerator
+    public sealed class VariantRegistrationGenerator : IIncrementalGenerator
     {
         public const string NAMESPACE = "EncosyTower.Variants";
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";

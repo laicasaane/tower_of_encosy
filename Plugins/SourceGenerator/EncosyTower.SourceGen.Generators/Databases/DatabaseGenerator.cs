@@ -7,7 +7,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
     using static EncosyTower.SourceGen.Generators.Databases.Helpers;
 
     [Generator]
-    public class DatabaseGenerator : IIncrementalGenerator
+    public sealed class DatabaseGenerator : IIncrementalGenerator
     {
         public const string GENERATOR_NAME = nameof(DatabaseGenerator);
 

@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EncosyTower.SourceGen.Generators.EnumExtensions
 {
     [Generator]
-    public class EnumExtensionsGenerator : IIncrementalGenerator
+    public sealed class EnumExtensionsForGenerator : IIncrementalGenerator
     {
         private const string NAMESPACE = "EncosyTower.EnumExtensions";
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
-        public const string ENUM_EXTENSIONS_ATTRIBUTE = $"global::{NAMESPACE}.EnumExtensionsAttribute";
-        private const string ENUM_EXTENSIONS_ATTRIBUTE_METADATA = $"{NAMESPACE}.EnumExtensionsAttribute";
+        public const string ENUM_EXTENSIONS_FOR_ATTRIBUTE = $"global::{NAMESPACE}.EnumExtensionsForAttribute";
+        private const string ENUM_EXTENSIONS_FOR_ATTRIBUTE_METADATA = $"{NAMESPACE}.EnumExtensionsForAttribute";
         public const string FLAGS_ATTRIBUTE = "global::System.FlagsAttribute";
         public const string GENERATOR_NAME = nameof(EnumExtensionsGenerator);
 
@@ -24,8 +25,9 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
-                      ENUM_EXTENSIONS_ATTRIBUTE_METADATA
-                    , static (node, _) => node is EnumDeclarationSyntax
+                      ENUM_EXTENSIONS_FOR_ATTRIBUTE_METADATA
+                    , static (node, _) => node is ClassDeclarationSyntax cls
+                        && cls.HasModifier(SyntaxKind.StaticKeyword)
                     , ExtractCandidate
                 )
                 .Where(static t => t.IsValid);
@@ -53,7 +55,29 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.TargetSymbol is not INamedTypeSymbol enumSymbol)
+            if (context.TargetSymbol is not INamedTypeSymbol classSymbol
+                || classSymbol.IsStatic == false
+            )
+            {
+                return default;
+            }
+
+            if (context.Attributes.Length < 1)
+            {
+                return default;
+            }
+
+            var attribData = context.Attributes[0];
+
+            if (attribData.ConstructorArguments.Length < 1)
+            {
+                return default;
+            }
+
+
+            if (attribData.ConstructorArguments[0].Value is not INamedTypeSymbol enumSymbol
+                || enumSymbol.TypeKind != TypeKind.Enum
+            )
             {
                 return default;
             }
@@ -69,16 +93,15 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            var containingTypes = enumSymbol.GetContainingTypes();
+            var containingTypes = classSymbol.GetContainingTypes();
 
-            var ns = enumSymbol.ContainingNamespace;
+            var ns = classSymbol.ContainingNamespace;
             var namespaceName = ns is { IsGlobalNamespace: false } ? ns.ToDisplayString() : string.Empty;
-
             var candidate = EnumExtensionSpec.Extract(
                   enumSymbol
                 , syntax.Parent is BaseNamespaceDeclarationSyntax
-                , EnumExtensionsDeclaration.GetNameExtensionsClass(enumSymbol.Name)
-                , enumSymbol.DeclaredAccessibility
+                , classSymbol.Name
+                , classSymbol.DeclaredAccessibility
                 , location
                 , namespaceName
                 , containingTypes

@@ -116,12 +116,12 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     continue;
                 }
 
-                tableList.Add(new TableSpec(
-                      typeFullName: propType.ToFullName()
-                    , typeName: propType.Name
-                    , propertyName: property.Name
-                    , namingStrategy: namingStrategy
-                ));
+                tableList.Add(new TableSpec {
+                    typeFullName = propType.ToFullName(),
+                    typeName = propType.Name,
+                    propertyName = property.Name,
+                    namingStrategy = namingStrategy,
+                });
             }
 
             if (tableList.Count < 1)

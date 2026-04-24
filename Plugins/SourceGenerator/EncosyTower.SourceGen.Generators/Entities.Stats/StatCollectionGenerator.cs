@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
     [Generator]
-    internal class StatCollectionGenerator : IIncrementalGenerator
+    internal sealed class StatCollectionGenerator : IIncrementalGenerator
     {
         private const string NAMESPACE = StatGeneratorAPI.NAMESPACE;
         private const string SKIP_ATTRIBUTE = StatGeneratorAPI.SKIP_ATTRIBUTE;

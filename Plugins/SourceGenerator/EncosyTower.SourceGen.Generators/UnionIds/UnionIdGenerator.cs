@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.UnionIds
 {
     [Generator]
-    internal class UnionIdGenerator : IIncrementalGenerator
+    internal sealed class UnionIdGenerator : IIncrementalGenerator
     {
         public const string NAMESPACE = "EncosyTower.UnionIds";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";

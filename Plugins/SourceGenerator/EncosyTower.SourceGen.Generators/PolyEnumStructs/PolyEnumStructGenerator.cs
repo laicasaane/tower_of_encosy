@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 {
     [Generator]
-    internal class PolyEnumStructGenerator : IIncrementalGenerator
+    internal sealed class PolyEnumStructGenerator : IIncrementalGenerator
     {
         private const string NAMESPACE = "EncosyTower.PolyEnumStructs";
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";

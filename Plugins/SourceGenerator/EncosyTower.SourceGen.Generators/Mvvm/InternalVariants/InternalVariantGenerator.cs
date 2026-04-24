@@ -10,7 +10,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
     using InternalVariantSpec = Variants.InternalVariantSpec;
 
     [Generator]
-    public class InternalVariantGenerator : IIncrementalGenerator
+    public sealed class InternalVariantGenerator : IIncrementalGenerator
     {
         public const string NAMESPACE = "EncosyTower.Mvvm";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";

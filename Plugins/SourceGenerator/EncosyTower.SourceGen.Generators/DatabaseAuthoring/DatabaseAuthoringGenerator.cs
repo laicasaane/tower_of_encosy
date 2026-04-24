@@ -7,7 +7,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
     using static EncosyTower.SourceGen.Generators.DatabaseAuthoring.Helpers;
 
     [Generator]
-    public class DatabaseAuthoringGenerator : IIncrementalGenerator
+    public sealed class DatabaseAuthoringGenerator : IIncrementalGenerator
     {
         public const string GENERATOR_NAME = nameof(DatabaseAuthoringGenerator);
 

@@ -1,18 +1,17 @@
-using System;
+﻿using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
+namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 {
     [Generator]
-    public class MonoBinderGenerator : IIncrementalGenerator
+    public sealed class BinderGenerator : IIncrementalGenerator
     {
-        public const string GENERATOR_NAME = nameof(MonoBinderGenerator);
+        public const string GENERATOR_NAME = nameof(BinderGenerator);
         public const string NAMESPACE = "EncosyTower.Mvvm";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
 
-        private const string MONO_BINDER_ATTRIBUTE_METADATA =
-            "EncosyTower.Mvvm.ViewBinding.Components.MonoBinderAttribute";
+        private const string BINDER_ATTRIBUTE_METADATA = "EncosyTower.Mvvm.ViewBinding.BinderAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -23,9 +22,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
-                      MONO_BINDER_ATTRIBUTE_METADATA
+                      BINDER_ATTRIBUTE_METADATA
                     , static (node, _) => node is ClassDeclarationSyntax
-                    , MonoBinderSpec.Extract
+                    , BinderSpec.Extract
                 )
                 .Where(static t => t.IsValid);
 
@@ -46,7 +45,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , MonoBinderSpec declaration
+            , BinderSpec declaration
             , string projectPath
             , bool outputSourceGenFiles
         )
@@ -78,3 +77,4 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         }
     }
 }
+

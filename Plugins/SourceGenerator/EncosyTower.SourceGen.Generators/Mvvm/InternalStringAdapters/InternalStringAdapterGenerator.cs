@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 {
     [Generator]
-    public class InternalStringAdapterGenerator : IIncrementalGenerator
+    public sealed class InternalStringAdapterGenerator : IIncrementalGenerator
     {
         public const string NAMESPACE = "EncosyTower.Mvvm";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";

@@ -3,25 +3,12 @@ using Newtonsoft.Json.Utilities;
 
 namespace EncosyTower.SourceGen.Generators.Databases
 {
-    public readonly struct TableSpec : IEquatable<TableSpec>
+    public struct TableSpec : IEquatable<TableSpec>
     {
-        public readonly string typeFullName;
-        public readonly string typeName;
-        public readonly string propertyName;
-        public readonly NamingStrategy namingStrategy;
-
-        public TableSpec(
-              string typeFullName
-            , string typeName
-            , string propertyName
-            , NamingStrategy namingStrategy
-        )
-        {
-            this.typeFullName = typeFullName;
-            this.typeName = typeName;
-            this.propertyName = propertyName;
-            this.namingStrategy = namingStrategy;
-        }
+        public string typeFullName;
+        public string typeName;
+        public string propertyName;
+        public NamingStrategy namingStrategy;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(typeFullName) == false

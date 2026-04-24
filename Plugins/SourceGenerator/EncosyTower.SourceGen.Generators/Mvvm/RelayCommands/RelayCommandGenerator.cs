@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 {
     [Generator]
-    public class RelayCommandGenerator : IIncrementalGenerator
+    public sealed class RelayCommandGenerator : IIncrementalGenerator
     {
         public const string NAMESPACE = "EncosyTower.Mvvm";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";

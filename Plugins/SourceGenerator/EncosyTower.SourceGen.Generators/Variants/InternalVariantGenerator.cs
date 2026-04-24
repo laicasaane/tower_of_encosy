@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.Variants
 {
     [Generator]
-    internal class InternalVariantGenerator : IIncrementalGenerator
+    internal sealed class InternalVariantGenerator : IIncrementalGenerator
     {
         private const string NAMESPACE = "EncosyTower.Variants";
         private const string NAMESPACE_PREFIX = $"global::{NAMESPACE}";

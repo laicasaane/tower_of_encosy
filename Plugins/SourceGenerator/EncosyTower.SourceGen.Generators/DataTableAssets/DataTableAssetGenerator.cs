@@ -7,7 +7,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
     using static EncosyTower.SourceGen.Generators.DataTableAssets.Helpers;
 
     [Generator]
-    public class DataTableAssetGenerator : IIncrementalGenerator
+    public sealed class DataTableAssetGenerator : IIncrementalGenerator
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {

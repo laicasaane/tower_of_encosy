@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.Types.Caches
 {
     [Generator]
-    internal class RuntimeTypeCachesGenerator : IIncrementalGenerator
+    internal sealed class RuntimeTypeCachesGenerator : IIncrementalGenerator
     {
         public const string NAMESPACE = "EncosyTower.Types.Caches";
         public const string NAMESPACE_PREFIX = $"global::{NAMESPACE}";
