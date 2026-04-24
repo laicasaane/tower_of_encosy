@@ -63,8 +63,8 @@ namespace EncosyTower.SourceGen.CodeRefactors.Data
             var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
             var fieldAttribListList = new List<List<AttributeSyntax>>();
             var propAttribListList = new List<List<AttributeSyntax>>();
-            var fieldAttribCheck = new HashSet<string>();
-            var propAttribCheck = new HashSet<string>();
+            var fieldAttribCheck = new HashSet<string>(StringComparer.Ordinal);
+            var propAttribCheck = new HashSet<string>(StringComparer.Ordinal);
 
             TypeSyntax fieldTypeSyntax = null;
 
