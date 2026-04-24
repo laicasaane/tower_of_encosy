@@ -534,7 +534,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             public readonly bool Equals(ForwardedFieldAttributeSpec other)
                 => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
-                && (attributeInfo?.Equals(other.attributeInfo) ?? other.attributeInfo is null);
+                && attributeInfo.Equals(other.attributeInfo);
 
             public readonly override bool Equals(object obj)
                 => obj is ForwardedFieldAttributeSpec other && Equals(other);

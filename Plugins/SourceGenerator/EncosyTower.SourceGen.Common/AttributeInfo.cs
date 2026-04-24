@@ -9,27 +9,33 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-
 namespace EncosyTower.SourceGen
 {
+    using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
     /// <summary>
     /// A model representing an attribute declaration.
     /// </summary>
-    public sealed class AttributeInfo : IEquatable<AttributeInfo>
+    public readonly struct AttributeInfo : IEquatable<AttributeInfo>
     {
-        public string TypeName { get; }
-
-        public EquatableArray<TypedConstantInfo> ConstructorArgumentInfo { get; }
-
-        public EquatableArray<(string Name, TypedConstantInfo Value)> NamedArgumentInfo { get; }
-
-        public AttributeInfo(string typeName, EquatableArray<TypedConstantInfo> constructorArgumentInfo, EquatableArray<(string Name, TypedConstantInfo Value)> namedArgumentInfo)
+        public AttributeInfo(
+              string typeName
+            , EquatableArray<TypedConstantInfo> constructorArgumentInfo
+            , EquatableArray<(string Name, TypedConstantInfo Value)> namedArgumentInfo
+        )
         {
             this.TypeName = typeName;
             this.ConstructorArgumentInfo = constructorArgumentInfo;
             this.NamedArgumentInfo = namedArgumentInfo;
         }
+
+        public bool IsValid => string.IsNullOrEmpty(TypeName) == false;
+
+        public string TypeName { get; }
+
+        public EquatableArray<TypedConstantInfo> ConstructorArgumentInfo { get; }
+
+        public EquatableArray<(string Name, TypedConstantInfo Value)> NamedArgumentInfo { get; }
 
         /// <summary>
         /// Creates a new <see cref="AttributeInfo"/> instance from a given <see cref="AttributeData"/> value.
@@ -67,7 +73,12 @@ namespace EncosyTower.SourceGen
         /// <param name="arguments">The sequence of <see cref="AttributeArgumentSyntax"/> instances to process.</param>
         /// <param name="token">The cancellation token for the current operation.</param>
         /// <returns>A <see cref="AttributeInfo"/> instance representing the input attribute data.</returns>
-        public static AttributeInfo From(INamedTypeSymbol typeSymbol, SemanticModel semanticModel, IEnumerable<AttributeArgumentSyntax> arguments, CancellationToken token)
+        public static AttributeInfo From(
+              INamedTypeSymbol typeSymbol
+            , SemanticModel semanticModel
+            , IEnumerable<AttributeArgumentSyntax> arguments
+            , CancellationToken token
+        )
         {
             string typeName = typeSymbol.ToFullName();
 
@@ -94,9 +105,10 @@ namespace EncosyTower.SourceGen
             }
 
             return new(
-                typeName,
-                constructorArguments.ToImmutable(),
-                namedArguments.ToImmutable());
+                  typeName
+                , constructorArguments.ToImmutable()
+                , namedArguments.ToImmutable()
+            );
         }
 
         public override bool Equals(object obj)
@@ -111,8 +123,7 @@ namespace EncosyTower.SourceGen
 
         public bool Equals(AttributeInfo other)
         {
-            if (other is null) return false;
-            return TypeName == other.TypeName
+            return string.Equals(TypeName, other.TypeName, StringComparison.Ordinal)
                 && ConstructorArgumentInfo.Equals(other.ConstructorArgumentInfo)
                 && NamedArgumentInfo.Equals(other.NamedArgumentInfo);
         }
@@ -123,16 +134,14 @@ namespace EncosyTower.SourceGen
         /// <returns>The <see cref="ExpressionSyntax"/> instance representing the current value.</returns>
         public AttributeSyntax GetSyntax()
         {
-            IEnumerable<AttributeArgumentSyntax> arguments =
-            ConstructorArgumentInfo
-            .Select(static arg => AttributeArgument(arg.GetSyntax()));
-
-            IEnumerable<AttributeArgumentSyntax> namedArguments =
-            NamedArgumentInfo.Select(static arg =>
-                AttributeArgument(arg.Value.GetSyntax())
+            var arguments = ConstructorArgumentInfo.Select(static arg => AttributeArgument(arg.GetSyntax()));
+            var namedArguments = NamedArgumentInfo.Select(static arg => AttributeArgument(arg.Value.GetSyntax())
                 .WithNameEquals(NameEquals(IdentifierName(arg.Name))));
 
-            return Attribute(IdentifierName(TypeName), AttributeArgumentList(SeparatedList(arguments.Concat(namedArguments))));
+            return Attribute(
+                  IdentifierName(TypeName)
+                , AttributeArgumentList(SeparatedList(arguments.Concat(namedArguments)))
+            );
         }
     }
 }
