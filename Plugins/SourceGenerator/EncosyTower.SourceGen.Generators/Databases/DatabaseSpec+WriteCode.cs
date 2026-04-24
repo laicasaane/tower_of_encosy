@@ -449,7 +449,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                         p.CloseScope();
                         p.PrintEndLine();
 
-                        p.PrintLine("return false");
+                        p.PrintLine("return false;");
                     }
                     p.CloseScope();
                 }
