@@ -10,12 +10,14 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal sealed class MonoBinderDiagnosticAnalyzer : DiagnosticAnalyzer
     {
-        private const string MONO_BINDER_ATTRIBUTE = "EncosyTower.Mvvm.ViewBinding.Components.MonoBinderAttribute";
-        private const string MONO_BINDING_PROP_ATTRIBUTE = "EncosyTower.Mvvm.ViewBinding.Components.MonoBindingPropertyAttribute";
-        private const string MONO_BINDING_CMD_ATTRIBUTE = "EncosyTower.Mvvm.ViewBinding.Components.MonoBindingCommandAttribute";
-        private const string MONO_BINDING_EXCLUDE_ATTRIBUTE = "EncosyTower.Mvvm.ViewBinding.Components.MonoBindingExcludeAttribute";
-        private const string MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE = "EncosyTower.Mvvm.ViewBinding.Components.MonoBinderExcludeParentAttribute";
-        private const string UNITY_OBJECT_TYPE = "UnityEngine.Object";
+        private const string NAMESPACE = "EncosyTower.Mvvm.ViewBinding.Components";
+        private const string MONO_BINDER_ATTRIBUTE = $"global::{NAMESPACE}.MonoBinderAttribute";
+        private const string MONO_BINDING_PROP_ATTRIBUTE = $"global::{NAMESPACE}.MonoBindingPropertyAttribute";
+        private const string MONO_BINDING_CMD_ATTRIBUTE = $"global::{NAMESPACE}.MonoBindingCommandAttribute";
+        private const string MONO_BINDING_EXCLUDE_ATTRIBUTE = $"global::{NAMESPACE}.MonoBindingExcludeAttribute";
+        private const string MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE = $"global::{NAMESPACE}.MonoBinderExcludeParentAttribute";
+        private const string UNITY_OBJECT_TYPE = "global::UnityEngine.Object";
+        private const string OBSOLETE_ATTRIBUTE = "global::System.ObsoleteAttribute";
 
         public static readonly DiagnosticDescriptor ComponentTypeMustInheritUnityObject = new(
               id: "MONO_BINDER_0001"
@@ -129,13 +131,11 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                     continue;
                 }
 
-                var fullName = attrClass.ToDisplayString();
-
-                if (fullName == MONO_BINDER_ATTRIBUTE)
+                if (attrClass.IsType(MONO_BINDER_ATTRIBUTE))
                 {
                     monoBinderAttr = attr;
                 }
-                else if (fullName == MONO_BINDING_PROP_ATTRIBUTE)
+                else if (attrClass.IsType(MONO_BINDING_PROP_ATTRIBUTE))
                 {
                     hasMonoBindingProp = true;
 
@@ -145,7 +145,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                         firstOrphanAttrName = "MonoBindingProperty";
                     }
                 }
-                else if (fullName == MONO_BINDING_CMD_ATTRIBUTE)
+                else if (attrClass.IsType(MONO_BINDING_CMD_ATTRIBUTE))
                 {
                     hasMonoBindingCmd = true;
 
@@ -155,7 +155,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                         firstOrphanAttrName = "MonoBindingCommand";
                     }
                 }
-                else if (fullName == MONO_BINDING_EXCLUDE_ATTRIBUTE)
+                else if (attrClass.IsType(MONO_BINDING_EXCLUDE_ATTRIBUTE))
                 {
                     hasMonoBindingExclude = true;
 
@@ -165,7 +165,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                         firstOrphanAttrName = "MonoBindingExclude";
                     }
                 }
-                else if (fullName == MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE)
+                else if (attrClass.IsType(MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE))
                 {
                     hasMonoBinderExcludeParent = true;
 
@@ -242,9 +242,9 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                         continue;
                     }
 
-                    var fullName = attrClass.ToDisplayString();
-
-                    if (fullName == MONO_BINDING_PROP_ATTRIBUTE || fullName == MONO_BINDING_CMD_ATTRIBUTE)
+                    if (attrClass.IsType(MONO_BINDING_PROP_ATTRIBUTE)
+                        || attrClass.IsType(MONO_BINDING_CMD_ATTRIBUTE)
+                    )
                     {
                         if (attr.ConstructorArguments.Length < 1
                             || attr.ConstructorArguments[0].Value is not string memberName
@@ -256,7 +256,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
 
                         if (IsObsoleteMember(componentType, memberName))
                         {
-                            var attrName = fullName == MONO_BINDING_PROP_ATTRIBUTE
+                            var attrName = attrClass.IsType(MONO_BINDING_PROP_ATTRIBUTE)
                                 ? "MonoBindingProperty"
                                 : "MonoBindingCommand";
 
@@ -272,7 +272,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                             ));
                         }
                     }
-                    else if (fullName == MONO_BINDING_EXCLUDE_ATTRIBUTE)
+                    else if (attrClass.IsType(MONO_BINDING_EXCLUDE_ATTRIBUTE))
                     {
                         if (attr.ConstructorArguments.Length < 1
                             || attr.ConstructorArguments[0].Value is not string memberName
@@ -303,7 +303,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 {
                     var attrClass = attr.AttributeClass;
 
-                    if (attrClass is null || attrClass.ToDisplayString() != MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE)
+                    if (attrClass is null || attrClass.IsType(MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE) == false)
                     {
                         continue;
                     }
@@ -350,7 +350,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             {
                 var attrClass = attr.AttributeClass;
 
-                if (attrClass is null || attrClass.ToDisplayString() != MONO_BINDING_EXCLUDE_ATTRIBUTE)
+                if (attrClass is null || attrClass.IsType(MONO_BINDING_EXCLUDE_ATTRIBUTE) == false)
                 {
                     continue;
                 }
@@ -384,7 +384,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
 
             while (walk != null)
             {
-                if (walk.ToDisplayString() == UNITY_OBJECT_TYPE)
+                if (walk.IsType(UNITY_OBJECT_TYPE))
                 {
                     return true;
                 }
@@ -395,18 +395,18 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             return false;
         }
 
-        private static bool IsInBaseTypeChain(INamedTypeSymbol componentType, INamedTypeSymbol candidate)
+        private static bool IsInBaseTypeChain(INamedTypeSymbol componentType, INamedTypeSymbol parentType)
         {
             var walk = componentType.BaseType;
 
             while (walk != null)
             {
-                if (walk.ToDisplayString() == UNITY_OBJECT_TYPE)
+                if (walk.IsType(UNITY_OBJECT_TYPE))
                 {
                     break;
                 }
 
-                if (SymbolEqualityComparer.Default.Equals(walk, candidate))
+                if (SymbolEqualityComparer.Default.Equals(walk, parentType))
                 {
                     return true;
                 }
@@ -459,7 +459,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                     {
                         foreach (var attr in member.GetAttributes())
                         {
-                            if (attr.AttributeClass?.ToDisplayString() == "System.ObsoleteAttribute")
+                            if (attr.AttributeClass is { } attrib && attrib.IsType(OBSOLETE_ATTRIBUTE))
                             {
                                 return true;
                             }
