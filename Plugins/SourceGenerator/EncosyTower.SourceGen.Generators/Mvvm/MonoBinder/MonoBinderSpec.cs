@@ -930,17 +930,19 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 && char.IsUpper(memberName[3])
             )
             {
-                return "Set_" + memberName.Substring(3);
+                return $"Set_{memberName.Substring(3)}";
             }
 
-            return "Set_" + MakeFirstCharUpper(memberName);
+            return $"Set_{MakeFirstCharUpper(memberName)}";
         }
 
         private static (bool isObsolete, string message) GetObsoleteInfo(ISymbol symbol)
         {
+            const string OBSOLETE_ATTRIBUTE = "global::System.ObsoleteAttribute";
+
             foreach (var attr in symbol.GetAttributes())
             {
-                if (attr.AttributeClass?.ToDisplayString() == "System.ObsoleteAttribute")
+                if (attr.AttributeClass.IsType(OBSOLETE_ATTRIBUTE))
                 {
                     var message = attr.ConstructorArguments.Length >= 1
                         ? attr.ConstructorArguments[0].Value as string ?? string.Empty
@@ -959,9 +961,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             while (walk != null)
             {
-                if (walk.Name == "UnityEvent"
-                    && walk.ContainingNamespace?.ToDisplayString() == "UnityEngine.Events"
-                )
+                if (walk is {
+                    Name: "UnityEvent",
+                    ContainingNamespace: {
+                        Name: "Events",
+                        ContainingNamespace.Name: "UnityEngine",
+                    },
+                })
                 {
                     return walk;
                 }
