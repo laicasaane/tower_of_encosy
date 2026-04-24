@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -75,14 +74,6 @@ namespace EncosyTower.SourceGen
                 SymbolDisplayMiscellaneousOptions.ExpandNullable
             );
 
-        private static SymbolDisplayFormat QualifiedFormatWithoutSpecialTypeNames { get; }
-            = new SymbolDisplayFormat(
-                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-                miscellaneousOptions:
-                SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers
-            );
-
         public static SymbolDisplayFormat QualifiedMemberFormatWithType { get; }
             = new SymbolDisplayFormat(
                 typeQualificationStyle:
@@ -137,29 +128,15 @@ namespace EncosyTower.SourceGen
                     SymbolDisplayMiscellaneousOptions.UseSpecialTypes
             );
 
-        public static bool Is(this ITypeSymbol symbol, string fullyQualifiedName, bool checkBaseType = true)
+        public static bool IsType(this ITypeSymbol symbol, string fullyQualifiedName)
         {
-            fullyQualifiedName = PrependGlobalIfMissing(fullyQualifiedName);
-
             if (symbol is null)
-                return false;
-
-            if (symbol.HasFullName(fullyQualifiedName))
-                return true;
-
-            return checkBaseType && symbol.BaseType.Is(fullyQualifiedName);
-        }
-
-        public static IEnumerable<string> GetAllFullyQualifiedInterfaceAndBaseTypeNames(this ITypeSymbol symbol)
-        {
-            if (symbol.BaseType != null)
             {
-                if (symbol.BaseType.SpecialType != SpecialType.System_ValueType)
-                    yield return symbol.BaseType.ToDisplayString(QualifiedFormat);
+                return false;
             }
 
-            foreach (var @interface in symbol.Interfaces)
-                yield return @interface.ToDisplayString(QualifiedFormat);
+            fullyQualifiedName = PrependGlobalIfMissing(fullyQualifiedName);
+            return symbol.HasFullName(fullyQualifiedName);
         }
 
         public static void GetUnmanagedSize(this ITypeSymbol symbol, ref int size)
@@ -355,25 +332,55 @@ namespace EncosyTower.SourceGen
 
         public static bool ImplementsInterface(this ISymbol symbol, string interfaceName, bool onlySelf = false)
         {
-            interfaceName = PrependGlobalIfMissing(interfaceName);
-
             if (symbol is not ITypeSymbol typeSymbol)
             {
                 return false;
             }
 
+            interfaceName = PrependGlobalIfMissing(interfaceName);
+
             return onlySelf
-                ? typeSymbol.Interfaces.Any(i => i.HasFullName(interfaceName))
-                : typeSymbol.AllInterfaces.Any(i => i.HasFullName(interfaceName) || i.InheritsFromInterface(interfaceName));
+                ? InterfacesImplementInterface(typeSymbol.Interfaces, interfaceName)
+                : AllInterfacesImplementInterface(typeSymbol.AllInterfaces, interfaceName);
+
+            static bool InterfacesImplementInterface(ImmutableArray<INamedTypeSymbol> interfaces, string interfaceName)
+            {
+                foreach (var @interface in interfaces)
+                {
+                    if (@interface.HasFullName(interfaceName))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            static bool AllInterfacesImplementInterface(ImmutableArray<INamedTypeSymbol> interfaces, string interfaceName)
+            {
+                foreach (var @interface in interfaces)
+                {
+                    if (@interface.HasFullName(interfaceName) || @interface.InheritsFromInterface(interfaceName))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
 
         public static bool Is(this ITypeSymbol symbol, string nameSpace, string typeName, bool checkBaseType = true)
         {
             if (symbol is null)
+            {
                 return false;
+            }
 
             if (symbol.Name == typeName && symbol.ContainingNamespace?.Name == nameSpace)
+            {
                 return true;
+            }
 
             return checkBaseType && symbol.BaseType.Is(nameSpace, typeName);
         }
@@ -393,24 +400,32 @@ namespace EncosyTower.SourceGen
         public static bool InheritsFromInterface(this ITypeSymbol symbol, string interfaceName, bool checkBaseType = true)
         {
             if (symbol is null)
+            {
                 return false;
+            }
 
             interfaceName = PrependGlobalIfMissing(interfaceName);
 
             foreach (var @interface in symbol.Interfaces)
             {
                 if (@interface.HasFullName(interfaceName))
+                {
                     return true;
+                }
 
                 if (checkBaseType)
                 {
                     foreach (var baseInterface in @interface.AllInterfaces)
                     {
                         if (baseInterface.HasFullName(interfaceName))
+                        {
                             return true;
+                        }
 
                         if (baseInterface.InheritsFromInterface(interfaceName))
+                        {
                             return true;
+                        }
                     }
                 }
             }
@@ -418,7 +433,9 @@ namespace EncosyTower.SourceGen
             if (checkBaseType && symbol.BaseType != null)
             {
                 if (symbol.BaseType.InheritsFromInterface(interfaceName))
+                {
                     return true;
+                }
             }
 
             return false;
@@ -426,39 +443,50 @@ namespace EncosyTower.SourceGen
 
         public static bool InheritsFromType(this ITypeSymbol symbol, string typeName, bool checkBaseType = true)
         {
+            if (symbol is null)
+            {
+                return false;
+            }
+
             typeName = PrependGlobalIfMissing(typeName);
 
-            if (symbol is null)
-                return false;
-
             if (symbol.HasFullName(typeName))
+            {
                 return true;
+            }
 
             if (checkBaseType && symbol.BaseType != null)
             {
                 if (symbol.BaseType.InheritsFromType(typeName))
+                {
                     return true;
+                }
             }
 
             return false;
-        }
-
-        public static bool HasAttributeSimple(this ISymbol typeSymbol, string attributeName)
-        {
-            return typeSymbol.GetAttributes()
-                .Any(attribute => attribute.AttributeClass.Name == attributeName);
         }
 
         public static bool HasAttribute(this ISymbol typeSymbol, string fullyQualifiedAttributeName)
         {
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
-            return typeSymbol.GetAttributes()
-                .Any(attribute => attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName));
+            var attributes = typeSymbol.GetAttributes();
+
+            foreach (var attribute in attributes)
+            {
+                if (attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static bool TryGetAttribute(this ISymbol typeSymbol, string fullyQualifiedAttributeName, out AttributeData result)
         {
+            fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
+
             result = typeSymbol.GetAttribute(fullyQualifiedAttributeName);
             return result != null;
         }
@@ -467,9 +495,17 @@ namespace EncosyTower.SourceGen
         {
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
-            return typeSymbol.GetAttributes()
-                .Where(attribute => attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName))
-                .FirstOrDefault();
+            var attributes = typeSymbol.GetAttributes();
+
+            foreach (var attribute in attributes)
+            {
+                if (attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName))
+                {
+                    return attribute;
+                }
+            }
+
+            return default;
         }
 
         public static IEnumerable<AttributeData> GetAttributes(this ISymbol typeSymbol, string fullyQualifiedAttributeName)
@@ -500,26 +536,23 @@ namespace EncosyTower.SourceGen
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
             return typeSymbol.HasAttribute(fullyQualifiedAttributeName)
-                || typeSymbol.GetMembers().OfType<IFieldSymbol>()
-                    .Any(f => !f.IsStatic && f.Type.HasAttributeOrFieldWithAttribute(fullyQualifiedAttributeName));
-        }
+                || AnyValidField(typeSymbol.GetMembers(), fullyQualifiedAttributeName);
 
-        public static string GetMethodAndParamsAsString(this IMethodSymbol methodSymbol)
-        {
-            var strBuilder = new StringBuilder();
-            strBuilder.Append(methodSymbol.Name);
-
-            for (var typeIndex = 0; typeIndex < methodSymbol.TypeParameters.Length; typeIndex++)
-                strBuilder.Append($"_T{typeIndex}");
-
-            foreach (var param in methodSymbol.Parameters)
+            static bool AnyValidField(ImmutableArray<ISymbol> members, string fullyQualifiedAttributeName)
             {
-                if (param.RefKind != RefKind.None)
-                    strBuilder.Append($"_{param.RefKind.ToString().ToLower()}");
-                strBuilder.Append($"_{param.Type.ToDisplayString(QualifiedFormatWithoutSpecialTypeNames).Replace(" ", string.Empty)}");
-            }
+                foreach (var member in members)
+                {
+                    if (member is IFieldSymbol field
+                        && field.IsStatic == false
+                        && field.Type.HasAttributeOrFieldWithAttribute(fullyQualifiedAttributeName)
+                    )
+                    {
+                        return true;
+                    }
+                }
 
-            return strBuilder.ToString();
+                return false;
+            }
         }
 
         private static string PrependGlobalIfMissing(this string typeOrNamespaceName)
@@ -1138,15 +1171,23 @@ namespace EncosyTower.SourceGen
 
         public static bool DoesMatchInterface(in this ImmutableArray<INamedTypeSymbol> interfaces, string typeName)
         {
+            typeName = PrependGlobalIfMissing(typeName);
+
             foreach (var interfaceSymbol in interfaces)
             {
-                if (interfaceSymbol.ToFullName().AsSpan().Equals(typeName.AsSpan(), StringComparison.Ordinal))
+                if (Match(interfaceSymbol, typeName))
                 {
                     return true;
                 }
             }
 
             return false;
+
+            static bool Match(ITypeSymbol symbol, string typeName)
+            {
+                return symbol is not null
+                    && (symbol.HasFullName(typeName) || Match(symbol.BaseType, typeName));
+            }
         }
 
         public static ITypeSymbol GetTypeFromNullable(this ITypeSymbol symbol)
@@ -1223,7 +1264,7 @@ namespace EncosyTower.SourceGen
                     continue;
                 }
 
-                if (parameters[0].Type.Is("global::System.ReadOnlySpan<char>", false) == false)
+                if (parameters[0].Type.IsType("global::System.ReadOnlySpan<char>") == false)
                 {
                     continue;
                 }
