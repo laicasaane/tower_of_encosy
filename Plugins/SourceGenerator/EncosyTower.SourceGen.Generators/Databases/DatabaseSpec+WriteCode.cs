@@ -1,3 +1,4 @@
+using System.Globalization;
 using Newtonsoft.Json.Utilities;
 
 namespace EncosyTower.SourceGen.Generators.Databases
@@ -288,7 +289,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                         var fullTypeName = table.typeFullName;
                         var tableTypeName = table.typeName;
                         var name = table.propertyName;
-                        var fieldName = StringUtils.ToSnakeCase(name).ToUpper();
+                        var fieldName = StringUtils.ToSnakeCase(name).ToUpper(CultureInfo.InvariantCulture);
                         var fieldValue = $"{tableTypeName}_{name}".ToNamingCase(table.namingStrategy);
 
                         p.PrintLine(string.Format(PR_GENERATED_ASSET_NAME, containerTypeName, fullTypeName));
@@ -320,7 +321,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     {
                         var name = table.propertyName;
                         var tableTypeName = table.typeFullName;
-                        var nameUpper = StringUtils.ToSnakeCase(name).ToUpper();
+                        var nameUpper = StringUtils.ToSnakeCase(name).ToUpper(CultureInfo.InvariantCulture);
 
                         p.PrintBeginLine("public static readonly ").Print(ASSET_KEY)
                             .Print("<").Print(tableTypeName).Print("> ")
@@ -393,7 +394,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                         foreach (var table in tables)
                         {
                             var name = table.propertyName;
-                            var nameUpper = StringUtils.ToSnakeCase(name).ToUpper();
+                            var nameUpper = StringUtils.ToSnakeCase(name).ToUpper(CultureInfo.InvariantCulture);
 
                             p.PrintBeginLine(name).Print(" = ")
                                 .Print(PR_MAKE_ID).Print("(Names.Tables.").Print(nameUpper).PrintEndLine(");");

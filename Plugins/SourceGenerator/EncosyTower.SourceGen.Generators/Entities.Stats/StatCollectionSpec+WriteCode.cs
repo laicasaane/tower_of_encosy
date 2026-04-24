@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace EncosyTower.SourceGen.Generators.Entities.Stats
 {
@@ -1680,7 +1681,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             {
                 var typeName = statData.typeName;
 
-                p.Print("#region STAT DATA - ").Print(typeName.ToUpper()).PrintEndLine();
+                p.Print("#region STAT DATA - ").Print(typeName.ToUpper(CultureInfo.InvariantCulture)).PrintEndLine();
                 p.Print("#endregion =========").PrintRepeat('=', typeName.Length).PrintEndLine();
                 p.PrintEndLine();
 
