@@ -23,87 +23,12 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-using System;
-using System.Globalization;
-using System.IO;
-using System.Text;
+using EncosyTower.SourceGen;
 
 namespace Newtonsoft.Json.Utilities
 {
     public static class StringUtils
     {
-        public const string CarriageReturnLineFeed = "\r\n";
-        public const string Empty = "";
-        public const char CarriageReturn = '\r';
-        public const char LineFeed = '\n';
-        public const char Tab = '\t';
-
-        public static string FormatWith(this string format, IFormatProvider provider, object arg0)
-        {
-            return format.FormatWith(provider, new object[] { arg0 });
-        }
-
-        public static string FormatWith(this string format, IFormatProvider provider, object arg0, object arg1)
-        {
-            return format.FormatWith(provider, new object[] { arg0, arg1 });
-        }
-
-        public static string FormatWith(this string format, IFormatProvider provider, object arg0, object arg1, object arg2)
-        {
-            return format.FormatWith(provider, new object[] { arg0, arg1, arg2 });
-        }
-
-        public static string FormatWith(this string format, IFormatProvider provider, object arg0, object arg1, object arg2, object arg3)
-        {
-            return format.FormatWith(provider, new object[] { arg0, arg1, arg2, arg3 });
-        }
-
-        private static string FormatWith(this string format, IFormatProvider provider, params object[] args)
-        {
-            // leave this a private to force code to use an explicit overload
-            // avoids stack memory being reserved for the object array
-
-            return string.Format(provider, format, args);
-        }
-
-        /// <summary>
-        /// Determines whether the string is all white space. Empty string will return <c>false</c>.
-        /// </summary>
-        /// <param name="s">The string to test whether it is all white space.</param>
-        /// <returns>
-        /// 	<c>true</c> if the string is all white space; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsWhiteSpace(string s)
-        {
-            if (s == null)
-            {
-                throw new ArgumentNullException(nameof(s));
-            }
-
-            if (s.Length == 0)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < s.Length; i++)
-            {
-                if (char.IsWhiteSpace(s[i]) == false)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public static StringWriter CreateStringWriter(int capacity)
-        {
-            StringBuilder sb = new StringBuilder(capacity);
-            StringWriter sw = new StringWriter(sb, CultureInfo.InvariantCulture);
-
-            return sw;
-        }
-
         public static string ToCamelCase(string s)
         {
             if (string.IsNullOrEmpty(s) || !char.IsUpper(s[0]))
@@ -111,17 +36,21 @@ namespace Newtonsoft.Json.Utilities
                 return s;
             }
 
-            char[] chars = s.ToCharArray();
+            var sb = StringExtensions.RentSb().Clear();
+            sb.Append(s);
 
-            for (int i = 0; i < chars.Length; i++)
+            var length = sb.Length;
+
+            for (int i = 0; i < length; i++)
             {
-                if (i == 1 && !char.IsUpper(chars[i]))
+                if (i == 1 && !char.IsUpper(sb[i]))
                 {
                     break;
                 }
 
-                bool hasNext = (i + 1 < chars.Length);
-                if (i > 0 && hasNext && !char.IsUpper(chars[i + 1]))
+                bool hasNext = (i + 1 < length);
+
+                if (i > 0 && hasNext && !char.IsUpper(sb[i + 1]))
                 {
                     // if the next character is a space, which is not considered uppercase
                     // (otherwise we wouldn't be here...)
@@ -131,18 +60,34 @@ namespace Newtonsoft.Json.Utilities
                     // ends when if finds an uppercase letter followed by a lowercase letter.
                     // now a ' ' (space, (char)32) is considered not upper
                     // but in that case we still want our current character to become lowercase
-                    if (char.IsSeparator(chars[i + 1]))
+                    if (char.IsSeparator(sb[i + 1]))
                     {
-                        chars[i] = ToLower(chars[i]);
+                        sb[i] = ToLower(sb[i]);
                     }
 
                     break;
                 }
 
-                chars[i] = ToLower(chars[i]);
+                sb[i] = ToLower(sb[i]);
             }
 
-            return new string(chars);
+            var result = sb.ToString();
+            StringExtensions.ReturnSb(sb);
+            return result;
+        }
+
+        public static string ToSnakeCase(string s)
+            => ToSeparatedCase(s, '_');
+
+        public static string ToKebabCase(string s)
+            => ToSeparatedCase(s, '-');
+
+        private enum SeparatedCaseState
+        {
+            Start,
+            Lower,
+            Upper,
+            NewWord
         }
 
         private static char ToLower(char c)
@@ -155,18 +100,6 @@ namespace Newtonsoft.Json.Utilities
             return c;
         }
 
-        public static string ToSnakeCase(string s) => ToSeparatedCase(s, '_');
-
-        public static string ToKebabCase(string s) => ToSeparatedCase(s, '-');
-
-        private enum SeparatedCaseState
-        {
-            Start,
-            Lower,
-            Upper,
-            NewWord
-        }
-
         private static string ToSeparatedCase(string s, char separator)
         {
             if (string.IsNullOrEmpty(s))
@@ -174,8 +107,8 @@ namespace Newtonsoft.Json.Utilities
                 return s;
             }
 
-            StringBuilder sb = new StringBuilder();
-            SeparatedCaseState state = SeparatedCaseState.Start;
+            var sb = StringExtensions.RentSb().Clear();
+            var state = SeparatedCaseState.Start;
 
             for (int i = 0; i < s.Length; i++)
             {
@@ -234,73 +167,9 @@ namespace Newtonsoft.Json.Utilities
                 }
             }
 
-            return sb.ToString();
-        }
-
-        public static bool IsHighSurrogate(char c)
-        {
-#if HAVE_UNICODE_SURROGATE_DETECTION
-            return char.IsHighSurrogate(c);
-#else
-            return (c >= 55296 && c <= 56319);
-#endif
-        }
-
-        public static bool IsLowSurrogate(char c)
-        {
-#if HAVE_UNICODE_SURROGATE_DETECTION
-            return char.IsLowSurrogate(c);
-#else
-            return (c >= 56320 && c <= 57343);
-#endif
-        }
-
-        public static bool StartsWith(this string source, char value)
-        {
-            return (source.Length > 0 && source[0] == value);
-        }
-
-        public static bool EndsWith(this string source, char value)
-        {
-            return (source.Length > 0 && source[source.Length - 1] == value);
-        }
-
-        public static string Trim(this string s, int start, int length)
-        {
-            // References: https://referencesource.microsoft.com/#mscorlib/system/string.cs,2691
-            // https://referencesource.microsoft.com/#mscorlib/system/string.cs,1226
-            if (s == null)
-            {
-                throw new ArgumentNullException();
-            }
-            if (start < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(start));
-            }
-            if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(length));
-            }
-            int end = start + length - 1;
-            if (end >= s.Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(length));
-            }
-            for (; start < end; start++)
-            {
-                if (char.IsWhiteSpace(s[start]) == false)
-                {
-                    break;
-                }
-            }
-            for (; end >= start; end--)
-            {
-                if (char.IsWhiteSpace(s[end]) == false)
-                {
-                    break;
-                }
-            }
-            return s.Substring(start, end - start + 1);
+            var result = sb.ToString();
+            StringExtensions.ReturnSb(sb);
+            return result;
         }
     }
 }
