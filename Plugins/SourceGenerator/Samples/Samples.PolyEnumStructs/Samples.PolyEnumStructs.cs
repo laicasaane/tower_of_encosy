@@ -353,3 +353,63 @@ namespace Samples.PolyEnumStructs.Errors2
         }
     }
 }
+
+namespace Samples.PolyEnumStructs.Factories
+{
+    using EncosyTower.PolyEnumStructs;
+
+    [PolyEnumStruct]
+    public partial struct Activity
+    {
+        public partial record struct Shopping(int ItemCount, string Store);
+
+        public partial struct Working
+        {
+            public string projectName;
+            public int hoursPlanned;
+
+            public Working(string projectName, int hoursPlanned)
+            {
+                this.projectName = projectName;
+                this.hoursPlanned = hoursPlanned;
+            }
+        }
+
+        public partial struct Idle
+        {
+            public string reason;
+            public readonly int MaxMinutes;
+
+            public Idle(string reason)
+            {
+                this.reason = reason;
+            }
+
+            public int Minutes { get; set; }
+        }
+
+        public partial struct Sleeping { }
+
+        public partial struct Undefined
+        {
+            public string note;
+
+            public int Code { get; set; }
+        }
+    }
+
+    [PolyEnumFactoryFor(typeof(Activity))]
+    public partial class ActivityFactory { }
+
+    [PolyEnumFactoryFor(typeof(Activity))]
+    public partial struct ActivityFactoryStruct
+    {
+        private readonly Activity _value;
+
+        public ActivityFactoryStruct(Activity value)
+        {
+            _value = value;
+        }
+    }
+}
+

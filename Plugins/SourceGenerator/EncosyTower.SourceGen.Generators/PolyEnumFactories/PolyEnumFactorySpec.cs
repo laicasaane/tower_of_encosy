@@ -1,0 +1,235 @@
+using System;
+using Microsoft.CodeAnalysis;
+
+namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
+{
+    internal partial struct PolyEnumFactorySpec : IEquatable<PolyEnumFactorySpec>
+    {
+        public LocationInfo location;
+        public string wrapperTypeName;
+        public string wrapperTypeNamespace;
+        public string wrapperFullyQualifiedName;
+        public string wrapperKindKeyword;
+        public string wrapperPreModifiers;
+        public string wrapperAccessibility;
+        public string enumStructName;
+        public string enumStructFullyQualifiedName;
+        public string enumStructNamespace;
+        public string fieldName;
+        public string hintName;
+        public string sourceFilePath;
+        public string openingSource;
+        public string closingSource;
+        public EquatableArray<CaseSpec> cases;
+        public int enumStructSize;
+        public bool enumStructIsReadOnly;
+        public bool emitBackingField;
+        public bool emitExplicitUndefinedMethod;
+        public bool parentIsNamespace;
+
+        public readonly bool IsValid
+            => string.IsNullOrEmpty(wrapperTypeName) == false
+            && string.IsNullOrEmpty(wrapperKindKeyword) == false
+            && string.IsNullOrEmpty(enumStructName) == false
+            && string.IsNullOrEmpty(enumStructFullyQualifiedName) == false
+            && string.IsNullOrEmpty(hintName) == false
+            && string.IsNullOrEmpty(sourceFilePath) == false
+            && string.IsNullOrEmpty(openingSource) == false
+            && string.IsNullOrEmpty(closingSource) == false
+            ;
+
+        public readonly bool Equals(PolyEnumFactorySpec other)
+            => string.Equals(wrapperTypeName, other.wrapperTypeName, StringComparison.Ordinal)
+            && string.Equals(wrapperTypeNamespace, other.wrapperTypeNamespace, StringComparison.Ordinal)
+            && string.Equals(wrapperFullyQualifiedName, other.wrapperFullyQualifiedName, StringComparison.Ordinal)
+            && string.Equals(wrapperKindKeyword, other.wrapperKindKeyword, StringComparison.Ordinal)
+            && string.Equals(wrapperPreModifiers, other.wrapperPreModifiers, StringComparison.Ordinal)
+            && string.Equals(wrapperAccessibility, other.wrapperAccessibility, StringComparison.Ordinal)
+            && string.Equals(enumStructName, other.enumStructName, StringComparison.Ordinal)
+            && string.Equals(enumStructFullyQualifiedName, other.enumStructFullyQualifiedName, StringComparison.Ordinal)
+            && string.Equals(enumStructNamespace, other.enumStructNamespace, StringComparison.Ordinal)
+            && string.Equals(fieldName, other.fieldName, StringComparison.Ordinal)
+            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
+            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
+            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
+            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
+            && cases.Equals(other.cases)
+            && enumStructSize == other.enumStructSize
+            && enumStructIsReadOnly == other.enumStructIsReadOnly
+            && emitBackingField == other.emitBackingField
+            && emitExplicitUndefinedMethod == other.emitExplicitUndefinedMethod
+            && parentIsNamespace == other.parentIsNamespace
+            ;
+
+        public readonly override bool Equals(object obj)
+            => obj is PolyEnumFactorySpec other && Equals(other);
+
+        public readonly override int GetHashCode()
+        {
+            var hash = new HashValue();
+            hash.Add(wrapperTypeName);
+            hash.Add(wrapperTypeNamespace);
+            hash.Add(wrapperFullyQualifiedName);
+            hash.Add(wrapperKindKeyword);
+            hash.Add(wrapperPreModifiers);
+            hash.Add(wrapperAccessibility);
+            hash.Add(enumStructName);
+            hash.Add(enumStructFullyQualifiedName);
+            hash.Add(enumStructNamespace);
+            hash.Add(fieldName);
+            hash.Add(hintName);
+            hash.Add(sourceFilePath);
+            hash.Add(openingSource);
+            hash.Add(closingSource);
+            hash.Add(cases);
+            hash.Add(enumStructSize);
+            hash.Add(enumStructIsReadOnly);
+            hash.Add(emitBackingField);
+            hash.Add(emitExplicitUndefinedMethod);
+            hash.Add(parentIsNamespace);
+            return hash.ToHashCode();
+        }
+
+        internal enum ConstructionStrategy
+        {
+            Default,
+            Ctors,
+            MemberInit,
+        }
+
+        internal struct CaseSpec : IEquatable<CaseSpec>
+        {
+            public string name;
+            public string identifier;
+            public string fullyQualifiedName;
+            public EquatableArray<CtorSpec> ctors;
+            public EquatableArray<MemberSpec> initMembers;
+            public ConstructionStrategy strategy;
+            public int size;
+            public bool isUndefined;
+            public bool isReadOnly;
+            public bool emitMemberInitOverload;
+
+            public readonly bool IsValid
+                => string.IsNullOrEmpty(name) == false
+                && string.IsNullOrEmpty(fullyQualifiedName) == false
+                ;
+
+            public readonly bool Equals(CaseSpec other)
+                => string.Equals(name, other.name, StringComparison.Ordinal)
+                && string.Equals(identifier, other.identifier, StringComparison.Ordinal)
+                && string.Equals(fullyQualifiedName, other.fullyQualifiedName, StringComparison.Ordinal)
+                && ctors.Equals(other.ctors)
+                && initMembers.Equals(other.initMembers)
+                && strategy == other.strategy
+                && size == other.size
+                && isUndefined == other.isUndefined
+                && isReadOnly == other.isReadOnly
+                && emitMemberInitOverload == other.emitMemberInitOverload
+                ;
+
+            public readonly override bool Equals(object obj)
+                => obj is CaseSpec other && Equals(other);
+
+            public readonly override int GetHashCode()
+            {
+                var hash = new HashValue();
+                hash.Add(name);
+                hash.Add(identifier);
+                hash.Add(fullyQualifiedName);
+                hash.Add(ctors);
+                hash.Add(initMembers);
+                hash.Add(strategy);
+                hash.Add(size);
+                hash.Add(isUndefined);
+                hash.Add(isReadOnly);
+                hash.Add(emitMemberInitOverload);
+                return hash.ToHashCode();
+            }
+        }
+
+        internal struct CtorSpec : IEquatable<CtorSpec>
+        {
+            public EquatableArray<ParamSpec> parameters;
+            public bool isParameterless;
+
+            public readonly bool Equals(CtorSpec other)
+                => parameters.Equals(other.parameters)
+                && isParameterless == other.isParameterless
+                ;
+
+            public readonly override bool Equals(object obj)
+                => obj is CtorSpec other && Equals(other);
+
+            public readonly override int GetHashCode()
+            {
+                var hash = new HashValue();
+                hash.Add(parameters);
+                hash.Add(isParameterless);
+                return hash.ToHashCode();
+            }
+        }
+
+        internal struct ParamSpec : IEquatable<ParamSpec>
+        {
+            public string name;
+            public string typeFullyQualifiedName;
+            public string defaultValueLiteral;
+            public RefKind refKind;
+            public bool isParams;
+            public bool hasExplicitDefaultValue;
+
+            public readonly bool Equals(ParamSpec other)
+                => string.Equals(name, other.name, StringComparison.Ordinal)
+                && string.Equals(typeFullyQualifiedName, other.typeFullyQualifiedName, StringComparison.Ordinal)
+                && string.Equals(defaultValueLiteral, other.defaultValueLiteral, StringComparison.Ordinal)
+                && refKind == other.refKind
+                && isParams == other.isParams
+                && hasExplicitDefaultValue == other.hasExplicitDefaultValue
+                ;
+
+            public readonly override bool Equals(object obj)
+                => obj is ParamSpec other && Equals(other);
+
+            public readonly override int GetHashCode()
+            {
+                var hash = new HashValue();
+                hash.Add(name);
+                hash.Add(typeFullyQualifiedName);
+                hash.Add(defaultValueLiteral);
+                hash.Add(refKind);
+                hash.Add(isParams);
+                hash.Add(hasExplicitDefaultValue);
+                return hash.ToHashCode();
+            }
+        }
+
+        internal struct MemberSpec : IEquatable<MemberSpec>
+        {
+            public string name;
+            public string parameterName;
+            public string typeFullyQualifiedName;
+            public bool isProperty;
+
+            public readonly bool Equals(MemberSpec other)
+                => string.Equals(name, other.name, StringComparison.Ordinal)
+                && string.Equals(parameterName, other.parameterName, StringComparison.Ordinal)
+                && string.Equals(typeFullyQualifiedName, other.typeFullyQualifiedName, StringComparison.Ordinal)
+                && isProperty == other.isProperty
+                ;
+
+            public readonly override bool Equals(object obj)
+                => obj is MemberSpec other && Equals(other);
+
+            public readonly override int GetHashCode()
+            {
+                var hash = new HashValue();
+                hash.Add(name);
+                hash.Add(parameterName);
+                hash.Add(typeFullyQualifiedName);
+                hash.Add(isProperty);
+                return hash.ToHashCode();
+            }
+        }
+    }
+}

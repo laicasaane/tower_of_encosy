@@ -1,0 +1,277 @@
+using Microsoft.CodeAnalysis;
+
+namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
+{
+    partial struct PolyEnumFactorySpec
+    {
+        private const string GENERATED_CODE = $"[SCDC.GeneratedCode(\"PolyEnumFactoryGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        private const string UNDEFINED_METHOD_NAME = "Undefined";
+
+        public readonly string WriteCode(in CompilationInfo compilation)
+        {
+            var p = Printer.DefaultLarge;
+
+            p.PrintEndLine();
+            p.Print("#pragma warning disable").PrintEndLine();
+            p.PrintEndLine();
+
+            p = p.IncreasedIndent();
+            {
+                WriteWrapperHeader(ref p);
+
+                p.OpenScope();
+                {
+                    WriteBackingFieldAndCtor(ref p);
+                    WriteFactoryMethods(ref p);
+                    WriteExplicitUndefinedMethod(ref p);
+                }
+                p.CloseScope();
+            }
+            p = p.DecreasedIndent();
+
+            return p.Result;
+        }
+
+        private readonly void WriteWrapperHeader(ref Printer p)
+        {
+            p.PrintBeginLine();
+
+            if (string.IsNullOrEmpty(wrapperAccessibility) == false)
+            {
+                p.Print(wrapperAccessibility).Print(" ");
+            }
+
+            if (string.IsNullOrEmpty(wrapperPreModifiers) == false)
+            {
+                p.Print(wrapperPreModifiers).Print(" ");
+            }
+
+            p.Print("partial ").Print(wrapperKindKeyword).Print(" ").Print(wrapperTypeName);
+            p.PrintEndLine();
+        }
+
+        private readonly void WriteBackingFieldAndCtor(ref Printer p)
+        {
+            if (emitBackingField == false)
+            {
+                return;
+            }
+
+            p.PrintLine(GENERATED_CODE);
+            p.PrintBeginLine("private readonly ").Print(enumStructFullyQualifiedName).Print(" ").Print(fieldName).PrintEndLine(";");
+            p.PrintEndLine();
+
+            p.PrintLine(GENERATED_CODE);
+            p.PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine("private ").Print(wrapperTypeName)
+                .Print("(").Print(enumStructFullyQualifiedName).Print(" value)").PrintEndLine();
+            p.OpenScope();
+            {
+                p.PrintBeginLine("this.").Print(fieldName).PrintEndLine(" = value;");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private readonly void WriteFactoryMethods(ref Printer p)
+        {
+            for (var i = 0; i < cases.Count; i++)
+            {
+                var c = cases[i];
+
+                switch (c.strategy)
+                {
+                    case ConstructionStrategy.Ctors:
+                        WriteCtorStrategy(ref p, c);
+
+                        if (c.emitMemberInitOverload)
+                        {
+                            WriteMemberInitStrategy(ref p, c);
+                        }
+
+                        break;
+
+                    case ConstructionStrategy.MemberInit:
+                        WriteMemberInitStrategy(ref p, c);
+                        break;
+
+                    case ConstructionStrategy.Default:
+                        WriteDefaultStrategy(ref p, c);
+                        break;
+                }
+            }
+        }
+
+        private readonly void WriteCtorStrategy(ref Printer p, in CaseSpec c)
+        {
+            for (var i = 0; i < c.ctors.Count; i++)
+            {
+                var ctor = c.ctors[i];
+
+                p.PrintLine(GENERATED_CODE);
+                p.PrintLine(EXCLUDE_COVERAGE);
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("public static ").Print(wrapperFullyQualifiedName).Print(" ")
+                    .Print(c.identifier).Print("(");
+
+                WriteParameterList(ref p, ctor.parameters);
+
+                p.PrintEndLine(")");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("return new ").Print(wrapperFullyQualifiedName)
+                        .Print("(new ").Print(c.fullyQualifiedName).Print("(");
+
+                    WriteArgumentList(ref p, ctor.parameters);
+
+                    p.PrintEndLine("));");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+        }
+
+        private readonly void WriteMemberInitStrategy(ref Printer p, in CaseSpec c)
+        {
+            p.PrintLine(GENERATED_CODE);
+            p.PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine("public static ").Print(wrapperFullyQualifiedName).Print(" ")
+                .Print(c.identifier).Print("(");
+
+            for (var i = 0; i < c.initMembers.Count; i++)
+            {
+                if (i > 0)
+                {
+                    p.Print(", ");
+                }
+
+                var member = c.initMembers[i];
+                p.Print(member.typeFullyQualifiedName).Print(" ").Print(member.parameterName);
+            }
+
+            p.PrintEndLine(")");
+            p.OpenScope();
+            {
+                p.PrintBeginLine("return new ").Print(wrapperFullyQualifiedName)
+                    .Print("(new ").Print(c.fullyQualifiedName).PrintEndLine(" {");
+
+                p = p.IncreasedIndent();
+                {
+                    for (var i = 0; i < c.initMembers.Count; i++)
+                    {
+                        var member = c.initMembers[i];
+
+                        p.PrintBeginLine().Print(member.name).Print(" = ").Print(member.parameterName);
+
+                        if (i < c.initMembers.Count - 1)
+                        {
+                            p.PrintEndLine(",");
+                        }
+                        else
+                        {
+                            p.PrintEndLine();
+                        }
+                    }
+                }
+                p = p.DecreasedIndent();
+
+                p.PrintLine("});");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private readonly void WriteDefaultStrategy(ref Printer p, in CaseSpec c)
+        {
+            p.PrintLine(GENERATED_CODE);
+            p.PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine("public static ").Print(wrapperFullyQualifiedName).Print(" ")
+                .Print(c.identifier).PrintEndLine("()");
+            p.OpenScope();
+            {
+                p.PrintBeginLine("return new ").Print(wrapperFullyQualifiedName)
+                    .Print("(default(").Print(c.fullyQualifiedName).PrintEndLine("));");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private readonly void WriteExplicitUndefinedMethod(ref Printer p)
+        {
+            if (emitExplicitUndefinedMethod == false)
+            {
+                return;
+            }
+
+            p.PrintLine(GENERATED_CODE);
+            p.PrintLine(EXCLUDE_COVERAGE);
+            p.PrintLine(AGGRESSIVE_INLINING);
+            p.PrintBeginLine("public static ").Print(wrapperFullyQualifiedName).Print(" ")
+                .Print(UNDEFINED_METHOD_NAME).PrintEndLine("()");
+            p.OpenScope();
+            {
+                p.PrintBeginLine("return new ").Print(wrapperFullyQualifiedName)
+                    .Print("(default(").Print(enumStructFullyQualifiedName).PrintEndLine("));");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
+        private static void WriteParameterList(ref Printer p, EquatableArray<ParamSpec> parameters)
+        {
+            for (var i = 0; i < parameters.Count; i++)
+            {
+                if (i > 0)
+                {
+                    p.Print(", ");
+                }
+
+                var param = parameters[i];
+
+                if (param.isParams)
+                {
+                    p.Print("params ");
+                }
+
+                switch (param.refKind)
+                {
+                    case RefKind.Ref: p.Print("ref "); break;
+                    case RefKind.In: p.Print("in "); break;
+                }
+
+                p.Print(param.typeFullyQualifiedName).Print(" ").Print(param.name);
+
+                if (param.hasExplicitDefaultValue && string.IsNullOrEmpty(param.defaultValueLiteral) == false)
+                {
+                    p.Print(" = ").Print(param.defaultValueLiteral);
+                }
+            }
+        }
+
+        private static void WriteArgumentList(ref Printer p, EquatableArray<ParamSpec> parameters)
+        {
+            for (var i = 0; i < parameters.Count; i++)
+            {
+                if (i > 0)
+                {
+                    p.Print(", ");
+                }
+
+                var param = parameters[i];
+
+                switch (param.refKind)
+                {
+                    case RefKind.Ref: p.Print("ref "); break;
+                    case RefKind.In: p.Print("in "); break;
+                }
+
+                p.Print(param.name);
+            }
+        }
+    }
+}
