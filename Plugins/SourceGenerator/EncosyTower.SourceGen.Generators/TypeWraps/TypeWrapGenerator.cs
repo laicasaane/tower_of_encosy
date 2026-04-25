@@ -145,9 +145,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 case ClassDeclarationSyntax classSyntax:
                 {
-                    if (TryGetWrapTypeInfo(classSyntax, out var candidate)
-                        && InheritBaseClass(semanticModel, symbol, token) == false
-                    )
+                    if (TryGetWrapTypeInfo(classSyntax, out var candidate) && InheritBaseClass(symbol) == false)
                     {
                         GetTypeName(classSyntax, ref candidate);
                         SetOtherFields(ref candidate, classSyntax, symbol, semanticModel, token);
@@ -224,7 +222,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             if (TryGetWrapRecordInfo(recordSyntax, out var candidate)
                 && (recordSyntax.ClassOrStructKeyword.IsKind(SyntaxKind.ClassKeyword) == false
-                    || InheritBaseClass(semanticModel, symbol, token) == false)
+                    || InheritBaseClass(symbol) == false)
             )
             {
                 GetTypeName(recordSyntax, ref candidate);
@@ -299,22 +297,20 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p.PrintEndLine();
         }
 
-        private static bool InheritBaseClass(
-              SemanticModel semanticModel
-            , INamedTypeSymbol classSymbol
-            , CancellationToken token
-        )
+        private static bool InheritBaseClass(INamedTypeSymbol classSymbol)
         {
-            foreach (var syntax in classSymbol.DeclaringSyntaxReferences)
+            var baseType = classSymbol.BaseType;
+
+            while (baseType != null)
             {
-                if (semanticModel.GetDeclaredSymbol(syntax.GetSyntax(token), token) is INamedTypeSymbol symbol
-                    && symbol.BaseType is INamedTypeSymbol baseType
-                    && baseType.TypeKind == TypeKind.Class
+                if (baseType.TypeKind == TypeKind.Class
                     && baseType.SpecialType != SpecialType.System_Object
                 )
                 {
                     return true;
                 }
+
+                baseType = baseType.BaseType;
             }
 
             return false;
