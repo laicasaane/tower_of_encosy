@@ -294,7 +294,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_ENTITIES_STAT_COLLECTION_01"
+            = new("SG_ENTITIES_STAT_COLLECTION_UNKNOWN_0001"
                 , "Stat Collection Generator Error"
                 , "This error indicates a bug in the Stat Collection source generators. Error message: '{0}'."
                 , STAT_COLLECTION_ATTRIBUTE

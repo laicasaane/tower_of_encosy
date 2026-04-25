@@ -12,7 +12,7 @@ namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
     internal static class DiagnosticDescriptors
     {
         public static readonly DiagnosticDescriptor MustBeApplicableForTypeArgument = new DiagnosticDescriptor(
-              id: "DATA_TABLE_ASSET_0001"
+              id: "SG_DATA_TABLE_ASSET_0001"
             , title: "Must be either a struct, a class or an enum to replace type argument"
             , messageFormat: "Type \"{0}\" is not applicable to replace \"{1}\", must be either a struct, a class or an enum"
             , category: "DataTableAssetGenerator"

@@ -15,7 +15,7 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
         private const string UNION_ID_KIND_ATTRIBUTE = "global::EncosyTower.UnionIds.UnionIdKindAttribute";
 
         public static readonly DiagnosticDescriptor SameKindIsIgnored = new(
-              id: "UNION_ID_0001"
+              id: "SG_UNION_ID_0001"
             , title: "A kind of the same name will be ignored"
             , messageFormat: "Kind \"{0}\" has already been defined by another type \"{1}\""
             , category: "UnionIdGenerator"
@@ -25,7 +25,7 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
         );
 
         public static readonly DiagnosticDescriptor MustBeUnmanagedType = new(
-              id: "UNION_ID_0002"
+              id: "SG_UNION_ID_0002"
             , title: "First parameter must be an unmanaged type"
             , messageFormat: "First parameter must be an unmanaged type"
             , category: "UnionIdGenerator"
@@ -35,7 +35,7 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
         );
 
         public static readonly DiagnosticDescriptor KindTypeCannotBeIdType = new(
-              id: "UNION_ID_0003"
+              id: "SG_UNION_ID_0003"
             , title: "Cannot use the id type as a kind of itself"
             , messageFormat: "Cannot use \"{0}\" as a kind of itself"
             , category: "UnionIdGenerator"
@@ -45,7 +45,7 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
         );
 
         public static readonly DiagnosticDescriptor TypeAlreadyDeclared = new(
-              id: "UNION_ID_0004"
+              id: "SG_UNION_ID_0004"
             , title: "Type has already been declared"
             , messageFormat: "Type \"{0}\" has already been declared"
             , category: "UnionIdGenerator"
@@ -55,7 +55,7 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
         );
 
         public static readonly DiagnosticDescriptor KindSizeMustBeSmallerThan16Bytes = new(
-              id: "UNION_ID_0005"
+              id: "SG_UNION_ID_0005"
             , title: "The size of a type is equal to or larger than 16 bytes"
             , messageFormat: "The size of \"{0}\" is equal to or larger than 16 bytes"
             , category: "UnionIdGenerator"

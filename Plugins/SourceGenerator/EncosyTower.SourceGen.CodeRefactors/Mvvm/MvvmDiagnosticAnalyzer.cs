@@ -7,8 +7,8 @@ namespace EncosyTower.SourceGen.CodeRefactors.Mvvm
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal sealed class MvvmDiagnosticAnalyzer : DiagnosticAnalyzer
     {
-        public const string DIAGNOSTIC_FIELD = "MVVMTK0010";
-        public const string DIAGNOSTIC_PROPERTY = "MVVMTK0011";
+        public const string DIAGNOSTIC_FIELD = "SG_MVVM_0010";
+        public const string DIAGNOSTIC_PROPERTY = "SG_MVVM_0011";
 
         public const string INTERFACE = "EncosyTower.Mvvm.ComponentModel.IObservableObject";
         public const string ATTRIBUTE = "global::EncosyTower.Mvvm.ComponentModel.ObservablePropertyAttribute";

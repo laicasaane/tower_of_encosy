@@ -635,7 +635,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_UNION_ID_01"
+            = new("SG_UNION_ID_UNKNOWN_0001"
                 , "UnionId Generator Error"
                 , "This error indicates a bug in the UnionId source generators. Error message: '{0}'."
                 , "EncosyTower.UnionIdAttribute"

@@ -15,7 +15,7 @@ namespace EncosyTower.SourceGen.Helpers.Mvvm
         /// Gets a <see cref="SuppressionDescriptor"/> for a field using [ObservableProperty] with an attribute list targeting a property.
         /// </summary>
         public static readonly SuppressionDescriptor PropertyAttributeListForObservableField = new(
-              id: "MVVMTKSPR0001"
+              id: "SG_MVVM_SUPPRESS_0001"
             , suppressedDiagnosticId: "CS0657"
             , justification: "Fields using [ObservableProperty] can use [property:] or [method:] attribute lists to forward attributes to the generated properties and methods"
         );
@@ -24,7 +24,7 @@ namespace EncosyTower.SourceGen.Helpers.Mvvm
         /// Gets a <see cref="SuppressionDescriptor"/> for a property using [ObservableProperty] with an attribute list targeting a property.
         /// </summary>
         public static readonly SuppressionDescriptor FieldAttributeListForObservableProperty = new(
-              id: "MVVMTKSPR0002"
+              id: "SG_MVVM_SUPPRESS_0002"
             , suppressedDiagnosticId: "CS0657"
             , justification: "Properties using [ObservableProperty] can use [field:] attribute lists to forward attributes to the generated properties"
         );
@@ -33,7 +33,7 @@ namespace EncosyTower.SourceGen.Helpers.Mvvm
         /// Gets a <see cref="SuppressionDescriptor"/> for a method using [RelayCommand] with an attribute list targeting a field or property.
         /// </summary>
         public static readonly SuppressionDescriptor FieldOrPropertyAttributeListForRelayCommandMethod = new(
-              id: "MVVMTKSPR0003"
+              id: "SG_MVVM_SUPPRESS_0003"
             , suppressedDiagnosticId: "CS0657"
             , justification: "Methods using [RelayCommand] can use [field:] and [property:] attribute lists to forward attributes to the generated fields and properties"
         );
@@ -42,7 +42,7 @@ namespace EncosyTower.SourceGen.Helpers.Mvvm
         /// Gets a <see cref="SuppressionDescriptor"/> for a method using [BindingProperty] with an attribute list targeting a field or property.
         /// </summary>
         public static readonly SuppressionDescriptor BindingPropertyAttributeListForBindingMethod = new(
-              id: "MVVMTKSPR0004"
+              id: "SG_MVVM_SUPPRESS_0004"
             , suppressedDiagnosticId: "CS0657"
             , justification: "Methods using [BindingProperty] can use [field:] attribute lists to forward attributes to the generated fields"
         );
@@ -51,7 +51,7 @@ namespace EncosyTower.SourceGen.Helpers.Mvvm
         /// Gets a <see cref="SuppressionDescriptor"/> for a method using [BindingCommand] with an attribute list targeting a field or property.
         /// </summary>
         public static readonly SuppressionDescriptor BindingCommandAttributeListForBindingMethod = new(
-              id: "MVVMTKSPR0005"
+              id: "SG_MVVM_SUPPRESS_0005"
             , suppressedDiagnosticId: "CS0657"
             , justification: "Methods using [BindingCommand] can use [field:] attribute lists to forward attributes to the generated fields"
         );

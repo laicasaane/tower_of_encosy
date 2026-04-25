@@ -203,7 +203,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_ENTITIES_STAT_SYSTEM_01"
+            = new("SG_ENTITIES_STAT_SYSTEM_UNKNOWN_0001"
                 , "Stat System Generator Error"
                 , "This error indicates a bug in the Stat System source generators. Error message: '{0}'."
                 , STAT_SYSTEM_ATTRIBUTE

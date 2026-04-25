@@ -15,7 +15,7 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
         private const string RUNTIME_TYPE_CACHE = "global::EncosyTower.Types.RuntimeTypeCache";
 
         public static readonly DiagnosticDescriptor TypeParameterIsNotApplicable = new(
-              id: "RUNTIME_TYPE_CACHES_0001"
+              id: "SG_RUNTIME_TYPE_CACHES_0001"
             , title: "Type parameter is not applicable"
             , messageFormat: "\"{0}\" is a type parameter thus it is not applicable for the \"{1}\" method"
             , category: "RuntimeTypeCachesGenerator"
@@ -25,7 +25,7 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
         );
 
         public static readonly DiagnosticDescriptor OnlyClassOrInterfaceIsApplicable = new(
-              id: "RUNTIME_TYPE_CACHES_0002"
+              id: "SG_RUNTIME_TYPE_CACHES_0002"
             , title: "Only class or interface is applicable"
             , messageFormat: "\"{0}\" is not applicable because it is not class nor interface"
             , category: "RuntimeTypeCachesGenerator"
@@ -35,7 +35,7 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
         );
 
         public static readonly DiagnosticDescriptor StaticClassIsNotApplicable = new(
-              id: "RUNTIME_TYPE_CACHES_0003"
+              id: "SG_RUNTIME_TYPE_CACHES_0003"
             , title: "Static class is not applicable"
             , messageFormat: "\"{0}\" is not applicable because it is static"
             , category: "RuntimeTypeCachesGenerator"
@@ -45,7 +45,7 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
         );
 
         public static readonly DiagnosticDescriptor SealedClassIsNotApplicable = new(
-              id: "RUNTIME_TYPE_CACHES_0004"
+              id: "SG_RUNTIME_TYPE_CACHES_0004"
             , title: "Sealed class is not applicable"
             , messageFormat: "\"{0}\" is not applicable because it is sealed"
             , category: "RuntimeTypeCachesGenerator"
@@ -55,7 +55,7 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
         );
 
         public static readonly DiagnosticDescriptor AssemblyNameMustBeStringLiteralOrConstant = new(
-              id: "RUNTIME_TYPE_CACHES_0005"
+              id: "SG_RUNTIME_TYPE_CACHES_0005"
             , title: "Assembly name must be a string literal or constant"
             , messageFormat: "Assembly name must be a string literal or constant"
             , category: "RuntimeTypeCachesGenerator"
@@ -65,7 +65,7 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
         );
 
         public static readonly DiagnosticDescriptor TypesFromCachesAreProhibited = new(
-              id: "RUNTIME_TYPE_CACHES_0006"
+              id: "SG_RUNTIME_TYPE_CACHES_0006"
             , title: "Types from \"EncosyTower.Types.Caches\" are prohibited"
             , messageFormat: "\"{0}\" is prohibited"
             , category: "RuntimeTypeCachesGenerator"

@@ -85,7 +85,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_OBSERVABLE_PROPERTY_01"
+            = new("SG_OBSERVABLE_PROPERTY_UNKNOWN_0001"
                 , "Observable Property Generator Error"
                 , "This error indicates a bug in the Observable Property source generators. Error message: '{0}'."
                 , $"{NAMESPACE}.ObservablePropertyAttribute"

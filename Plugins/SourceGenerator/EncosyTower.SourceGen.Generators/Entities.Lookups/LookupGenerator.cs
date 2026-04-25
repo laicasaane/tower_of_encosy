@@ -37,7 +37,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         private const string I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUP_RW = "ETEL.IPhysicsEnableableComponentLookupRW";
 
         private static readonly DiagnosticDescriptor s_errorDescriptor = new(
-              id: "SG_LOOKUPS_01"
+              id: "SG_LOOKUPS_UNKNOWN_0001"
             , title: "Lookup Generator Error"
             , messageFormat: "This error indicates a bug in the Lookup source generators. Error message: '{0}'."
             , category: "EncosyTower.Entities.Lookups"

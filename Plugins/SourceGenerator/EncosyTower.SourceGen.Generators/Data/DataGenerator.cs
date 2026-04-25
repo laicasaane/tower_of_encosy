@@ -79,7 +79,7 @@ namespace EncosyTower.SourceGen.Generators.Data
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("DATA_UNKNOWN_0001"
+            = new("SG_DATA_UNKNOWN_0001"
                 , "Data Generator Error"
                 , "This error indicates a bug in the Data source generators. Error message: '{0}'."
                 , "DataGenerator"

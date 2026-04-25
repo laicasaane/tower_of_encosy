@@ -353,7 +353,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_MVVM_INTERNAL_VARIANTS_01"
+            = new("SG_MVVM_INTERNAL_VARIANTS_UNKNOWN_0001"
                 , "Mvvm Internal Variant Generator Error"
                 , "This error indicates a bug in the Mvvm Internal Variant source generators. Error message: '{0}'."
                 , $"{NAMESPACE}.IObservableObject"

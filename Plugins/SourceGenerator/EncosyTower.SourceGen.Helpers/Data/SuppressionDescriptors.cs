@@ -15,7 +15,7 @@ namespace EncosyTower.SourceGen.Helpers.Data
         /// Gets a <see cref="SuppressionDescriptor"/> for a field using [SerializeField] with an attribute list targeting a property.
         /// </summary>
         public static readonly SuppressionDescriptor PropertyAttributeListForDataField = new(
-              id: "DATASPR0001"
+              id: "SG_DATA_SUPPRESS_0001"
             , suppressedDiagnosticId: "CS0657"
             , justification: "Fields using [SerializeField] can use [property:] attribute lists to forward attributes to the generated properties"
         );
@@ -24,7 +24,7 @@ namespace EncosyTower.SourceGen.Helpers.Data
         /// Gets a <see cref="SuppressionDescriptor"/> for a property using [DataProperty] with an attribute list targeting a field.
         /// </summary>
         public static readonly SuppressionDescriptor FieldAttributeListForDataProperty = new(
-              id: "DATASPR0002"
+              id: "SG_DATA_SUPPRESS_0002"
             , suppressedDiagnosticId: "CS0657"
             , justification: "Properties using [DataProperty] can use [field:] attribute lists to forward attributes to the generated fields"
         );

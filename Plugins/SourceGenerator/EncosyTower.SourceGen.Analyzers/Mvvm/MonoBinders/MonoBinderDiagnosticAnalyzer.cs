@@ -18,7 +18,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
         private const string OBSOLETE_ATTRIBUTE = "global::System.ObsoleteAttribute";
 
         public static readonly DiagnosticDescriptor ComponentTypeMustInheritUnityObject = new(
-              id: "MONO_BINDER_0001"
+              id: "SG_MONO_BINDER_0001"
             , title: "MonoBinder component type must inherit from UnityEngine.Object"
             , messageFormat: "\"{0}\" does not inherit from UnityEngine.Object. The type argument of [MonoBinder] must be a UnityEngine.Object subclass."
             , category: "MonoBinderGenerator"
@@ -28,7 +28,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
         );
 
         public static readonly DiagnosticDescriptor BindingAttributeRequiresMonoBinder = new(
-              id: "MONO_BINDER_0002"
+              id: "SG_MONO_BINDER_0002"
             , title: "[MonoBindingProperty], [MonoBindingCommand], [MonoBindingExclude], and [MonoBinderExcludeParent] require [MonoBinder]"
             , messageFormat: "\"{0}\" has [{1}] but is missing [MonoBinder]. Binding attributes are only valid on types that also carry [MonoBinder]."
             , category: "MonoBinderGenerator"
@@ -38,7 +38,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
         );
 
         public static readonly DiagnosticDescriptor ExcludedMemberNotFound = new(
-              id: "MONO_BINDER_0003"
+              id: "SG_MONO_BINDER_0003"
             , title: "[MonoBindingExclude] member not found on component type"
             , messageFormat: "Member \"{0}\" was not found as a public non-static property, field, or event on component type \"{1}\"."
             , category: "MonoBinderGenerator"
@@ -48,7 +48,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
         );
 
         public static readonly DiagnosticDescriptor ExcludeParentTypeIsComponentType = new(
-              id: "MONO_BINDER_0004"
+              id: "SG_MONO_BINDER_0004"
             , title: "[MonoBinderExcludeParent] type must not be the component type itself"
             , messageFormat: "[MonoBinderExcludeParent]: \"{0}\" is the same as the component type and has no effect."
             , category: "MonoBinderGenerator"
@@ -58,7 +58,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
         );
 
         public static readonly DiagnosticDescriptor ExcludeParentTypeNotInHierarchy = new(
-              id: "MONO_BINDER_0005"
+              id: "SG_MONO_BINDER_0005"
             , title: "[MonoBinderExcludeParent] type must be a base type of the component type"
             , messageFormat: "[MonoBinderExcludeParent]: \"{0}\" is not a base type of component type \"{1}\"."
             , category: "MonoBinderGenerator"
@@ -68,7 +68,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
         );
 
         public static readonly DiagnosticDescriptor ObsoleteExplicitMemberWithExcludeObsolete = new(
-              id: "MONO_BINDER_0006"
+              id: "SG_MONO_BINDER_0006"
             , title: "[MonoBinder(ExcludeObsolete = true)] conflict with explicit binding attribute on obsolete member"
             , messageFormat: "[MonoBinder(ExcludeObsolete = true)]: \"{0}\" is marked [Obsolete] on \"{1}\". Remove [{2}] or set ExcludeObsolete = false."
             , category: "MonoBinderGenerator"
@@ -78,7 +78,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
         );
 
         public static readonly DiagnosticDescriptor ExcludeObsoleteMemberRedundant = new(
-              id: "MONO_BINDER_0007"
+              id: "SG_MONO_BINDER_0007"
             , title: "[MonoBindingExclude] is redundant when ExcludeObsolete = true covers the same member"
             , messageFormat: "[MonoBinder(ExcludeObsolete = true)]: [MonoBindingExclude(\"{0}\")] is unnecessary because ExcludeObsolete = true already excludes obsolete members."
             , category: "MonoBinderGenerator"

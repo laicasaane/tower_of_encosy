@@ -14,7 +14,7 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
         private const string UNDEFINED_NAME = "Undefined";
 
         public static readonly DiagnosticDescriptor MustNotBeGeneric = new(
-              id: "POLY_ENUM_STRUCT_0001"
+              id: "SG_POLY_ENUM_STRUCT_0001"
             , title: "[PolyEnumStruct] cannot be applied to a generic struct"
             , messageFormat: "\"{0}\" is a generic type. [PolyEnumStruct] is not supported on generic structs."
             , category: "PolyEnumStructGenerator"
@@ -24,7 +24,7 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
         );
 
         public static readonly DiagnosticDescriptor MustHaveCaseStructs = new(
-              id: "POLY_ENUM_STRUCT_0002"
+              id: "SG_POLY_ENUM_STRUCT_0002"
             , title: "No case structs declared in [PolyEnumStruct]"
             , messageFormat: "\"{0}\" has no case structs. At least one nested struct (other than the implicit Undefined case) must be declared."
             , category: "PolyEnumStructGenerator"
@@ -34,7 +34,7 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
         );
 
         public static readonly DiagnosticDescriptor IEnumCaseMethodMustNotBeGeneric = new(
-              id: "POLY_ENUM_STRUCT_0003"
+              id: "SG_POLY_ENUM_STRUCT_0003"
             , title: "Generic method in IEnumCase interface is not supported"
             , messageFormat: "Method \"{0}\" declared on IEnumCase is generic. Generic methods in IEnumCase are not supported and will be ignored by the generator."
             , category: "PolyEnumStructGenerator"
@@ -44,7 +44,7 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
         );
 
         public static readonly DiagnosticDescriptor CaseStructMethodMustNotBeGeneric = new(
-              id: "POLY_ENUM_STRUCT_0004"
+              id: "SG_POLY_ENUM_STRUCT_0004"
             , title: "Generic method on case struct is not supported"
             , messageFormat: "Method \"{0}\" on case struct \"{1}\" is generic. Generic methods on case structs are not supported and will be ignored by the generator."
             , category: "PolyEnumStructGenerator"

@@ -578,7 +578,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_TYPE_WRAP_01"
+            = new("SG_TYPE_WRAP_UNKNOWN_0001"
                 , "Type Wrap Generator Error"
                 , "This error indicates a bug in the Type Wrap source generators. Error message: '{0}'."
                 , "TypeWrap"

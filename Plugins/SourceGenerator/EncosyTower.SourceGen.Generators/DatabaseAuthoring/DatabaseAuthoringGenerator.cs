@@ -114,7 +114,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("AUTHOR_DATABASE_UNKNOWN_0001"
+            = new("SG_AUTHOR_DATABASE_UNKNOWN_0001"
                 , "Data Authoring Generator Error"
                 , "This error indicates a bug in the Data Authoring source generators. Error message: '{0}'."
                 , "DataAuthoringGenerator"

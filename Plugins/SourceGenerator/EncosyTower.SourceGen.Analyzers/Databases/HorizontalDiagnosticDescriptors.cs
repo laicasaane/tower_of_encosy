@@ -12,7 +12,7 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
     internal static class HorizontalDiagnosticDescriptors
     {
         public static readonly DiagnosticDescriptor NotTypeOfExpression = new DiagnosticDescriptor(
-              id: "DATABASE_HORIZONTAL_0001"
+              id: "SG_DATABASE_HORIZONTAL_0001"
             , title: "Not a typeof expression"
             , messageFormat: "The first argument must be a 'typeof' expression"
             , category: "DatabaseGenerator"
@@ -22,7 +22,7 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
         );
 
         public static readonly DiagnosticDescriptor AbstractTypeNotSupported = new DiagnosticDescriptor(
-              id: "DATABASE_HORIZONTAL_0003"
+              id: "SG_DATABASE_HORIZONTAL_0003"
             , title: "Abstract type is not supported"
             , messageFormat: "The type \"{0}\" must not be abstract"
             , category: "DatabaseGenerator"
@@ -32,7 +32,7 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
         );
 
         public static readonly DiagnosticDescriptor NotImplementIData = new DiagnosticDescriptor(
-              id: "DATABASE_HORIZONTAL_0004"
+              id: "SG_DATABASE_HORIZONTAL_0004"
             , title: "Target type does not implement IData"
             , messageFormat: "The type \"{0}\" must implement IData interface"
             , category: "DatabaseGenerator"
@@ -42,7 +42,7 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
         );
 
         public static readonly DiagnosticDescriptor InvalidPropertyName = new DiagnosticDescriptor(
-              id: "DATABASE_HORIZONTAL_0005"
+              id: "SG_DATABASE_HORIZONTAL_0005"
             , title: "Invalid property name"
             , messageFormat: "The property name must be a valid identifier"
             , category: "DatabaseGenerator"

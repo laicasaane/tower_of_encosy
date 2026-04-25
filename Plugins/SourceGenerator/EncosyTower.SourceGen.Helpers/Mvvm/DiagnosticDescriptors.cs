@@ -21,7 +21,7 @@ namespace EncosyTower.SourceGen.Helpers.Mvvm
         /// </para>
         /// </summary>
         public static readonly DiagnosticDescriptor InvalidPropertyTargetedAttributeOnObservableProperty = new DiagnosticDescriptor(
-              id: "MVVMTK0001"
+              id: "SG_MVVM_0001"
             , title: "Invalid property targeted attribute type"
             , messageFormat: "The field {0} annotated with [ObservableProperty] is using attribute \"{1}\" which was not recognized as a valid type (are you missing a using directive?)"
             , category: "ObservablePropertyGenerator"
@@ -37,7 +37,7 @@ namespace EncosyTower.SourceGen.Helpers.Mvvm
         /// </para>
         /// </summary>
         public static readonly DiagnosticDescriptor InvalidFieldMethodTargetedAttributeOnObservableProperty = new DiagnosticDescriptor(
-              id: "MVVMTK0002"
+              id: "SG_MVVM_0002"
             , title: "Invalid field targeted attribute type"
             , messageFormat: "The property {0} annotated with [ObservableProperty] is using attribute \"{1}\" which was not recognized as a valid type (are you missing a using directive?)"
             , category: "ObservablePropertyGenerator"
@@ -53,7 +53,7 @@ namespace EncosyTower.SourceGen.Helpers.Mvvm
         /// </para>
         /// </summary>
         public static readonly DiagnosticDescriptor InvalidFieldOrPropertyTargetedAttributeOnRelayCommandMethod = new DiagnosticDescriptor(
-              id: "MVVMTK0003"
+              id: "SG_MVVM_0003"
             , title: "Invalid field targeted attribute type"
             , messageFormat: "The method {0} annotated with [RelayCommand] is using attribute \"{1}\" which was not recognized as a valid type (are you missing a using directive?)"
             , category: "RelayCommandGenerator"
@@ -69,7 +69,7 @@ namespace EncosyTower.SourceGen.Helpers.Mvvm
         /// </para>
         /// </summary>
         public static readonly DiagnosticDescriptor InvalidFieldTargetedAttributeOnBindingPropertyMethod = new DiagnosticDescriptor(
-              id: "MVVMTK0004"
+              id: "SG_MVVM_0004"
             , title: "Invalid field targeted attribute type"
             , messageFormat: "The method {0} annotated with [BindingProperty] is using attribute \"{1}\" which was not recognized as a valid type (are you missing a using directive?)"
             , category: "BinderGenerator"
@@ -85,7 +85,7 @@ namespace EncosyTower.SourceGen.Helpers.Mvvm
         /// </para>
         /// </summary>
         public static readonly DiagnosticDescriptor InvalidFieldTargetedAttributeOnBindingCommandMethod = new DiagnosticDescriptor(
-              id: "MVVMTK0005"
+              id: "SG_MVVM_0005"
             , title: "Invalid field targeted attribute type"
             , messageFormat: "The method {0} annotated with [BindingCommand] is using attribute \"{1}\" which was not recognized as a valid type (are you missing a using directive?)"
             , category: "BinderGenerator"

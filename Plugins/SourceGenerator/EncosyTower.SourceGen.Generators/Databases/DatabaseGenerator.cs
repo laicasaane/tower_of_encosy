@@ -92,7 +92,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("DATABASE_UNKNOWN_0001"
+            = new("SG_DATABASE_UNKNOWN_0001"
                 , "Database Generator Error"
                 , "This error indicates a bug in the Database source generators. Error message: '{0}'."
                 , "DatabaseGenerator"

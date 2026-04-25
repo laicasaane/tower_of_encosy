@@ -21,7 +21,7 @@ namespace EncosyTower.SourceGen.Helpers.Data
         /// </para>
         /// </summary>
         public static readonly DiagnosticDescriptor InvalidPropertyTargetedAttribute = new DiagnosticDescriptor(
-              id: "DATA_0001"
+              id: "SG_DATA_0001"
             , title: "Invalid property targeted attribute type"
             , messageFormat: "The field \"{0}\" is using attribute \"{1}\" which was not recognized as a valid type (are you missing a using directive?)"
             , category: "DataGenerator"
@@ -37,7 +37,7 @@ namespace EncosyTower.SourceGen.Helpers.Data
         /// </para>
         /// </summary>
         public static readonly DiagnosticDescriptor InvalidFieldTargetedAttribute = new DiagnosticDescriptor(
-              id: "DATA_0002"
+              id: "SG_DATA_0002"
             , title: "Invalid field targeted attribute type"
             , messageFormat: "The property \"{0}\" is using attribute \"{1}\" which was not recognized as a valid type (are you missing a using directive?)"
             , category: "DataGenerator"
@@ -47,7 +47,7 @@ namespace EncosyTower.SourceGen.Helpers.Data
         );
 
         public static readonly DiagnosticDescriptor CannotDecorateImmutableDataWithFieldPolicyAttribute = new DiagnosticDescriptor(
-              id: "DATA_0003"
+              id: "SG_DATA_0003"
             , title: "Cannot decorate immutable data with [DataFieldPolicy] attribute"
             , messageFormat: "\"{0}\" is immutable thus cannot be decorated with [DataFieldPolicy] attribute (are you missing [DataMutable] attribute?)"
             , category: "DataGenerator"
@@ -57,7 +57,7 @@ namespace EncosyTower.SourceGen.Helpers.Data
         );
 
         public static readonly DiagnosticDescriptor ImmutableDataFieldMustBePrivate = new DiagnosticDescriptor(
-              id: "DATA_0004"
+              id: "SG_DATA_0004"
             , title: "Fields of immutable data must be private"
             , messageFormat: "\"{0}\" is immutable thus its fields must be private (are you missing [DataMutable] attribute?)"
             , category: "DataGenerator"
@@ -67,7 +67,7 @@ namespace EncosyTower.SourceGen.Helpers.Data
         );
 
         public static readonly DiagnosticDescriptor OnlyPrivateOrInitOnlySetterIsAllowed = new DiagnosticDescriptor(
-              id: "DATA_0005"
+              id: "SG_DATA_0005"
             , title: "Only private setter or init-only setter is allowed because the type is either immutable or decorated with [DataMutable(withoutPropertySetter: true)]"
             , messageFormat: "Only private setter or init-only setter is allowed because \"{0}\" is either immutable or decorated with [DataMutable(withoutPropertySetter: true)]"
             , category: "DataGenerator"
@@ -77,7 +77,7 @@ namespace EncosyTower.SourceGen.Helpers.Data
         );
 
         public static readonly DiagnosticDescriptor CollectionIsNotApplicableForProperty = new DiagnosticDescriptor(
-              id: "DATA_0006"
+              id: "SG_DATA_0006"
             , title: "Collection type is not applicable for the property"
             , messageFormat: "Type \"{0}\" is a collection thus it is not applicable for the \"{1}\" property"
             , category: "DataGenerator"

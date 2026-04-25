@@ -22,7 +22,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         private const string IDATA = "global::" + DATA_NAMESPACE + ".IData";
 
         public static readonly DiagnosticDescriptor MissingDefaultConstructor = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0010"
+              id: "SG_AUTHOR_DATABASE_0010"
             , title: "Missing default constructor"
             , messageFormat: "The type \"{0}\" must contain a default (parameterless) constructor"
             , category: "DatabaseGenerator"
@@ -31,7 +31,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         );
 
         public static readonly DiagnosticDescriptor StaticConvertMethodAmbiguity = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0020"
+              id: "SG_AUTHOR_DATABASE_0020"
             , title: "Static \"Convert\" method ambiguity"
             , messageFormat: "The type \"{0}\" contains multiple public static methods named \"Convert\" thus it cannot be used as a converter"
             , category: "DatabaseGenerator"
@@ -40,7 +40,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         );
 
         public static readonly DiagnosticDescriptor InstancedConvertMethodAmbiguity = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0021"
+              id: "SG_AUTHOR_DATABASE_0021"
             , title: "Instanced \"Convert\" method ambiguity"
             , messageFormat: "The type \"{0}\" contains multiple public instanced methods named \"Convert\" thus it cannot be used as a converter"
             , category: "DatabaseGenerator"
@@ -49,7 +49,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         );
 
         public static readonly DiagnosticDescriptor MissingConvertMethod = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0030"
+              id: "SG_AUTHOR_DATABASE_0030"
             , title: "Missing \"Convert\" method"
             , messageFormat: "The type \"{0}\" does not contain any public (static nor instanced) method named \"Convert\" that accepts a single parameter of any non-void type and returns a value of type \"{1}\""
             , category: "DatabaseGenerator"
@@ -58,7 +58,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         );
 
         public static readonly DiagnosticDescriptor MissingConvertMethodReturnType = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0031"
+              id: "SG_AUTHOR_DATABASE_0031"
             , title: "Missing \"Convert\" method"
             , messageFormat: "The type \"{0}\" does not contain any public (static nor instanced) method named \"Convert\" that accepts a single parameter of any non-void type and returns a value of any non-void type"
             , category: "DatabaseGenerator"
@@ -67,7 +67,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         );
 
         public static readonly DiagnosticDescriptor InvalidStaticConvertMethodReturnType = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0040"
+              id: "SG_AUTHOR_DATABASE_0040"
             , title: "Invalid static \"Convert\" method"
             , messageFormat: "The public static \"Convert\" method of type \"{0}\" must accept a single parameter of any non-void type and must return a value of type \"{1}\""
             , category: "DatabaseGenerator"
@@ -76,7 +76,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         );
 
         public static readonly DiagnosticDescriptor InvalidInstancedConvertMethodReturnType = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0041"
+              id: "SG_AUTHOR_DATABASE_0041"
             , title: "Invalid instanced \"Convert\" method"
             , messageFormat: "The public instanced \"Convert\" method of type \"{0}\" must accept a single parameter of any non-void type and must return a value of type \"{1}\""
             , category: "DatabaseGenerator"
@@ -85,7 +85,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         );
 
         public static readonly DiagnosticDescriptor InvalidStaticConvertMethod = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0042"
+              id: "SG_AUTHOR_DATABASE_0042"
             , title: "Invalid static \"Convert\" method"
             , messageFormat: "The public static \"Convert\" method of type \"{0}\" must accept a single parameter of any non-void type and must return a value of any non-void type"
             , category: "DatabaseGenerator"
@@ -94,7 +94,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         );
 
         public static readonly DiagnosticDescriptor InvalidInstancedConvertMethod = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0043"
+              id: "SG_AUTHOR_DATABASE_0043"
             , title: "Invalid instanced \"Convert\" method"
             , messageFormat: "The public instanced \"Convert\" method of type \"{0}\" must accept a single parameter of any non-void type and must return a value of any non-void type"
             , category: "DatabaseGenerator"
@@ -103,7 +103,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         );
 
         public static readonly DiagnosticDescriptor NotTypeOfExpression = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0050"
+              id: "SG_AUTHOR_DATABASE_0050"
             , title: "Not a typeof expression"
             , messageFormat: "The first argument must be a 'typeof' expression"
             , category: "DatabaseGenerator"
@@ -112,7 +112,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         );
 
         public static readonly DiagnosticDescriptor NotTypeOfExpressionAt = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0051"
+              id: "SG_AUTHOR_DATABASE_0051"
             , title: "Not a typeof expression"
             , messageFormat: "The argument at position {0} must be a 'typeof' expression"
             , category: "DatabaseGenerator"
@@ -121,7 +121,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         );
 
         public static readonly DiagnosticDescriptor AbstractTypeNotSupported = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0060"
+              id: "SG_AUTHOR_DATABASE_0060"
             , title: "Abstract type is not supported"
             , messageFormat: "The type \"{0}\" must not be abstract"
             , category: "DatabaseGenerator"
@@ -130,7 +130,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         );
 
         public static readonly DiagnosticDescriptor OpenGenericTypeNotSupported = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0061"
+              id: "SG_AUTHOR_DATABASE_0061"
             , title: "Open generic type is not supported"
             , messageFormat: "The type \"{0}\" must not be open generic"
             , category: "DatabaseGenerator"
@@ -139,7 +139,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         );
 
         public static readonly DiagnosticDescriptor ConverterAmbiguity = new DiagnosticDescriptor(
-              id: "AUTHOR_DATABASE_0070"
+              id: "SG_AUTHOR_DATABASE_0070"
             , title: "Converter ambiguity"
             , messageFormat: "The type \"{0}\" at position {3} will be ignored because a \"Convert\" method that returns a value of \"{2}\" has already been defined in \"{1}\""
             , category: "DatabaseGenerator"

@@ -21,7 +21,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
         private const string I_ENABLEABLE_COMPONENT = "global::Unity.Entities.IEnableableComponent";
 
         public static readonly DiagnosticDescriptor NotTypeOfExpression = new(
-              id: "LOOKUPS_0001"
+              id: "SG_LOOKUPS_0001"
             , title: "Not a typeof expression"
             , messageFormat: "The first argument must be a 'typeof' expression"
             , category: "Lookups"
@@ -31,7 +31,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
         );
 
         public static readonly DiagnosticDescriptor OpenGenericTypeNotSupported = new(
-              id: "LOOKUPS_0002"
+              id: "SG_LOOKUPS_0002"
             , title: "Open generic type is not supported"
             , messageFormat: "The type \"{0}\" must not be open generic"
             , category: "Lookups"
@@ -41,7 +41,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
         );
 
         public static readonly DiagnosticDescriptor ManagedTypeNotSupported = new(
-              id: "LOOKUPS_0003"
+              id: "SG_LOOKUPS_0003"
             , title: "Type that is managed or contains managed reference is not supported"
             , messageFormat: "The type \"{0}\" must be unmanaged"
             , category: "Lookups"
@@ -51,7 +51,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
         );
 
         public static readonly DiagnosticDescriptor IncompatInterface = new(
-              id: "LOOKUPS_0004"
+              id: "SG_LOOKUPS_0004"
             , title: "Type must implement compatible interface"
             , messageFormat: "The type \"{0}\" must implement interface \"{1}\" to be compatible"
             , category: "Lookups"
@@ -61,7 +61,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
         );
 
         public static readonly DiagnosticDescriptor NoMarkerInterface = new(
-              id: "LOOKUPS_0005"
+              id: "SG_LOOKUPS_0005"
             , title: "Missing lookup marker interface"
             , messageFormat: "Struct \"{0}\" must implement exactly one lookup marker interface"
             , category: "Lookups"
@@ -71,7 +71,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
         );
 
         public static readonly DiagnosticDescriptor MultipleMarkerInterfaces = new(
-              id: "LOOKUPS_0006"
+              id: "SG_LOOKUPS_0006"
             , title: "Multiple lookup marker interfaces are not supported"
             , messageFormat: "Struct \"{0}\" implements {1} lookup marker interfaces; only one is allowed"
             , category: "Lookups"

@@ -19,7 +19,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.TypeHandles
         private const string I_SHARED_COMPONENT_DATA = "global::Unity.Entities.ISharedComponentData";
 
         private static readonly DiagnosticDescriptor s_errorDescriptor = new(
-              id: "SG_TYPE_HANDLES_01"
+              id: "SG_TYPE_HANDLES_UNKNOWN_0001"
             , title: "Type Handle Generator Error"
             , messageFormat: "This error indicates a bug in the Type Handle source generators. Error message: '{0}'."
             , category: "EncosyTower.Entities.TypeHandles"

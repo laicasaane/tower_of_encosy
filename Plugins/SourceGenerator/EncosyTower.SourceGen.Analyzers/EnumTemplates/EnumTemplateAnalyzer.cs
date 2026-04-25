@@ -15,7 +15,7 @@ namespace EncosyTower.SourceGen.Analyzers.EnumTemplates
         private const string MEMBER_FROM_TYPE_ATTRIBUTE = $"global::{NAMESPACE}.EnumTemplateMemberFromTypeAttribute";
 
         public static readonly DiagnosticDescriptor NotEndWithTemplateSuffix = new(
-              id: "ENUM_TEMPLATE_0001"
+              id: "SG_ENUM_TEMPLATE_0001"
             , title: "Not end with template suffix"
             , messageFormat: "The name of a union enum template must end with either \"_EnumTemplate\" or \"_Template\" suffix"
             , category: "EnumTemplateGenerator"
@@ -25,7 +25,7 @@ namespace EncosyTower.SourceGen.Analyzers.EnumTemplates
         );
 
         public static readonly DiagnosticDescriptor NotSupportUnderlyingType = new(
-              id: "ENUM_TEMPLATE_0002"
+              id: "SG_ENUM_TEMPLATE_0002"
             , title: "Not support underlying type"
             , messageFormat: "Only enums whose underlying type is either byte, ushort, uint or ulong are supported"
             , category: "EnumTemplateGenerator"
@@ -35,7 +35,7 @@ namespace EncosyTower.SourceGen.Analyzers.EnumTemplates
         );
 
         public static readonly DiagnosticDescriptor TypeAlreadyDeclared = new(
-              id: "ENUM_TEMPLATE_0003"
+              id: "SG_ENUM_TEMPLATE_0003"
             , title: "Type has already been declared"
             , messageFormat: "Type \"{0}\" has already been declared"
             , category: "EnumTemplateGenerator"
@@ -45,7 +45,7 @@ namespace EncosyTower.SourceGen.Analyzers.EnumTemplates
         );
 
         public static readonly DiagnosticDescriptor MustSpecifyTypeAndOrder = new(
-              id: "ENUM_TEMPLATE_0004"
+              id: "SG_ENUM_TEMPLATE_0004"
             , title: "Must specify type and order"
             , messageFormat: "Must specify type and order"
             , category: "EnumTemplateGenerator"
@@ -55,7 +55,7 @@ namespace EncosyTower.SourceGen.Analyzers.EnumTemplates
         );
 
         public static readonly DiagnosticDescriptor MustBeTypeOfExpression = new(
-              id: "ENUM_TEMPLATE_0005"
+              id: "SG_ENUM_TEMPLATE_0005"
             , title: "First argument must be a type-of expression"
             , messageFormat: "First argument must be a type-of expression"
             , category: "EnumTemplateGenerator"
@@ -65,7 +65,7 @@ namespace EncosyTower.SourceGen.Analyzers.EnumTemplates
         );
 
         public static readonly DiagnosticDescriptor SameMemberIsIgnored = new(
-              id: "ENUM_TEMPLATE_0006"
+              id: "SG_ENUM_TEMPLATE_0006"
             , title: "A member of the same name will be ignored"
             , messageFormat: "Member \"{0}\" is ignored because it already exists in another source \"{1}\""
             , category: "EnumTemplateGenerator"
@@ -75,7 +75,7 @@ namespace EncosyTower.SourceGen.Analyzers.EnumTemplates
         );
 
         public static readonly DiagnosticDescriptor NotSupportUnboundGenericType = new(
-              id: "ENUM_TEMPLATE_0007"
+              id: "SG_ENUM_TEMPLATE_0007"
             , title: "Unbound generic type not supported"
             , messageFormat: "\"{0}\" must be a non-generic type or a closed generic type"
             , category: "EnumTemplateGenerator"

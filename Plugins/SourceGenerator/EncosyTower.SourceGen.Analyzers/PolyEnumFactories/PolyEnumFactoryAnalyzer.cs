@@ -16,7 +16,7 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
         private const string CATEGORY = "PolyEnumFactoryGenerator";
 
         public static readonly DiagnosticDescriptor MustBePartial = new(
-              id: "POLY_ENUM_FACTORY_0001"
+              id: "SG_POLY_ENUM_FACTORY_0001"
             , title: "[PolyEnumFactoryFor] target must be partial"
             , messageFormat: "\"{0}\" is decorated with [PolyEnumFactoryFor] but is not declared as partial. Add the partial keyword to allow code generation."
             , category: CATEGORY
@@ -26,7 +26,7 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
         );
 
         public static readonly DiagnosticDescriptor MustNotBeGeneric = new(
-              id: "POLY_ENUM_FACTORY_0002"
+              id: "SG_POLY_ENUM_FACTORY_0002"
             , title: "[PolyEnumFactoryFor] target must not be generic"
             , messageFormat: "\"{0}\" is generic. [PolyEnumFactoryFor] is not supported on generic types."
             , category: CATEGORY
@@ -36,7 +36,7 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
         );
 
         public static readonly DiagnosticDescriptor TargetMustBePolyEnumStruct = new(
-              id: "POLY_ENUM_FACTORY_0003"
+              id: "SG_POLY_ENUM_FACTORY_0003"
             , title: "[PolyEnumFactoryFor] target type must be a [PolyEnumStruct]"
             , messageFormat: "Type \"{0}\" passed to [PolyEnumFactoryFor] is not decorated with [PolyEnumStruct]. Factory generation requires a poly-enum struct."
             , category: CATEGORY
@@ -46,7 +46,7 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
         );
 
         public static readonly DiagnosticDescriptor TargetMustNotBeGeneric = new(
-              id: "POLY_ENUM_FACTORY_0004"
+              id: "SG_POLY_ENUM_FACTORY_0004"
             , title: "[PolyEnumFactoryFor] target type must not be generic"
             , messageFormat: "Type \"{0}\" passed to [PolyEnumFactoryFor] is generic. Factory generation does not support generic poly-enum structs."
             , category: CATEGORY
@@ -56,7 +56,7 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
         );
 
         public static readonly DiagnosticDescriptor MustHaveCaseStructs = new(
-              id: "POLY_ENUM_FACTORY_0005"
+              id: "SG_POLY_ENUM_FACTORY_0005"
             , title: "[PolyEnumFactoryFor] target type has no case structs"
             , messageFormat: "Type \"{0}\" has no eligible case structs. The generated factory will only contain an Undefined() method."
             , category: CATEGORY
@@ -66,7 +66,7 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
         );
 
         public static readonly DiagnosticDescriptor CaseCtorOutParameterIgnored = new(
-              id: "POLY_ENUM_FACTORY_0006"
+              id: "SG_POLY_ENUM_FACTORY_0006"
             , title: "Case constructor with out parameter is ignored"
             , messageFormat: "Constructor of case struct \"{0}\" has an out parameter and will be skipped by [PolyEnumFactoryFor] code generation."
             , category: CATEGORY

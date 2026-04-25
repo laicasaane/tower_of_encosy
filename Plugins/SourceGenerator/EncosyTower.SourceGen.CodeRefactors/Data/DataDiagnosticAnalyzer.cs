@@ -9,8 +9,8 @@ namespace EncosyTower.SourceGen.CodeRefactors.Data
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal sealed class DataDiagnosticAnalyzer : DiagnosticAnalyzer
     {
-        public const string DIAGNOSTIC_FIELD = "DATA0010";
-        public const string DIAGNOSTIC_PROPERTY = "DATA0011";
+        public const string DIAGNOSTIC_FIELD = "SG_DATA_0010";
+        public const string DIAGNOSTIC_PROPERTY = "SG_DATA_0011";
 
         private static readonly DiagnosticDescriptor s_diagnosticField = new(
               id: DIAGNOSTIC_FIELD

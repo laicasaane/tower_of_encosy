@@ -182,7 +182,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_VARIANT_REG_01"
+            = new("SG_VARIANT_REG_UNKNOWN_0001"
                 , "Variant Registration Generator Error"
                 , "This error indicates a bug in the Variant Registration source generators. Error message: '{0}'."
                 , "EncosyTower.Variants.VariantAttribute"

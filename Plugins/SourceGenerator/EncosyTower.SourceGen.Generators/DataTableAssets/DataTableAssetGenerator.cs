@@ -79,7 +79,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_DATA_TABLE_ASSET_01"
+            = new("SG_DATA_TABLE_ASSET_UNKNOWN_0001"
                 , "Data Table Asset Generator Error"
                 , "This error indicates a bug in the Data Table Asset source generators. Error message: '{0}'."
                 , "EncosyTower.Databases.DataTableAsset<TDataId, TData>"

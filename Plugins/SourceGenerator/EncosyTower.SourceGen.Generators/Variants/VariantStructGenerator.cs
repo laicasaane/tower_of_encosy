@@ -188,7 +188,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_VARIANT_STRUCT_01"
+            = new("SG_VARIANT_STRUCT_UNKNOWN_0001"
                 , "Variant Struct Generator Error"
                 , "This error indicates a bug in the Variant Struct source generators. Error message: '{0}'."
                 , "EncosyTower.Variants.VariantAttribute"

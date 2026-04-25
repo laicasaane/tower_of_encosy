@@ -100,7 +100,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
         }
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
-            = new("SG_RELAY_COMMAND_01"
+            = new("SG_RELAY_COMMAND_UNKNOWN_0001"
                 , "Relay Command Generator Error"
                 , "This error indicates a bug in the RelayCommand source generators. Error message: '{0}'."
                 , $"{NAMESPACE}.ComponentModel.ObservableObject"

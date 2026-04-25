@@ -11,7 +11,7 @@ namespace EncosyTower.SourceGen.Analyzers.EnumExtensions
         private const string ENUM_EXTENSIONS_FOR_ATTRIBUTE = $"global::{NAMESPACE}.EnumExtensionsForAttribute";
 
         public static readonly DiagnosticDescriptor TypeArgumentMustBeEnum = new(
-              id: "ENUM_EXT_FOR_0001"
+              id: "SG_ENUM_EXT_FOR_0001"
             , title: "Type argument of [EnumExtensionsFor] must be an enum type"
             , messageFormat: "\"{0}\" is not an enum type. The typeof argument of [EnumExtensionsFor] must resolve to an enum."
             , category: "EnumExtensionsForGenerator"
