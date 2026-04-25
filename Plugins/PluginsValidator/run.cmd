@@ -1,12 +1,14 @@
 set ROOT=%cd%
 
-cd PluginsValidator
+echo ROOT=%ROOT%
+
+cd src
 
 dotnet publish -r win-x64 -c Release -o bin/win-x64 /p:SelfContained=true /p:PublishSingleFile=true /p:PublishReadyToRun=true
 
 cd ..
 
-%ROOT%/PluginsValidator/bin/win-x64/PluginsValidator.exe --root-directory %ROOT%
+%ROOT%/src/bin/win-x64/PluginsValidator.exe --root-directory %ROOT%
 
 cd UnityPlugins
 

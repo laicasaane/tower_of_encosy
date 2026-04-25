@@ -2,13 +2,15 @@
 
 ROOT=${PWD}
 
-cd PluginsValidator
+echo ROOT=$ROOT
+
+cd src
 
 dotnet publish -r linux-x64 -c Release -o bin/linux-x64 /p:SelfContained=true /p:PublishSingleFile=true /p:PublishReadyToRun=true
 
 cd ..
 
-${ROOT}/PluginsValidator/bin/linux-x64/PluginsValidator --root-directory ${ROOT}
+${ROOT}/src/bin/linux-x64/PluginsValidator --root-directory ${ROOT}
 
 cd UnityPlugins
 
