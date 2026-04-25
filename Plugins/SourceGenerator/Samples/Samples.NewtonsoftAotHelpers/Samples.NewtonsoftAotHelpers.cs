@@ -2,7 +2,7 @@
 using EncosyTower.Serialization.NewtonsoftJson;
 using UnityEngine;
 
-namespace Samples.NewtonsoftJsonAotHelpers
+namespace Samples.NewtonsoftAotHelpers
 {
     [NewtonsoftJsonAotHelper(typeof(MyClass))]
     public static partial class Helper { }

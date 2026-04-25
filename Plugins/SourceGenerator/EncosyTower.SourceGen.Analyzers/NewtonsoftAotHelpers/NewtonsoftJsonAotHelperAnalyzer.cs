@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace EncosyTower.SourceGen.Analyzers.NewtonsoftJsonHelpers
+namespace EncosyTower.SourceGen.Analyzers.NewtonsoftAotHelpers
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal sealed class NewtonsoftJsonAotHelperAnalyzer : DiagnosticAnalyzer
@@ -11,7 +11,7 @@ namespace EncosyTower.SourceGen.Analyzers.NewtonsoftJsonHelpers
         private const string ATTRIBUTE = $"global::{NAMESPACE}.NewtonsoftJsonAotHelperAttribute";
 
         public static readonly DiagnosticDescriptor MustNotBeAbstract = new(
-              id: "NEWTONSOFT_AOT_HELPER_0001"
+              id: "SG_NEWTONSOFT_AOT_HELPER_0001"
             , title: "[NewtonsoftJsonAotHelper] cannot be applied to an abstract type"
             , messageFormat: "\"{0}\" is abstract. [NewtonsoftJsonAotHelper] requires a non-abstract, concrete type."
             , category: "NewtonsoftJsonAotHelperGenerator"
@@ -21,7 +21,7 @@ namespace EncosyTower.SourceGen.Analyzers.NewtonsoftJsonHelpers
         );
 
         public static readonly DiagnosticDescriptor MustNotBeUnboundGeneric = new(
-              id: "NEWTONSOFT_AOT_HELPER_0002"
+              id: "SG_NEWTONSOFT_AOT_HELPER_0002"
             , title: "[NewtonsoftJsonAotHelper] cannot be applied to an unbound generic type"
             , messageFormat: "\"{0}\" is an unbound generic type. [NewtonsoftJsonAotHelper] requires a closed, non-generic type."
             , category: "NewtonsoftJsonAotHelperGenerator"
@@ -31,7 +31,7 @@ namespace EncosyTower.SourceGen.Analyzers.NewtonsoftJsonHelpers
         );
 
         public static readonly DiagnosticDescriptor BaseTypeMustBeProvided = new(
-              id: "NEWTONSOFT_AOT_HELPER_0003"
+              id: "SG_NEWTONSOFT_AOT_HELPER_0003"
             , title: "[NewtonsoftJsonAotHelper] requires a valid base type argument"
             , messageFormat: "\"{0}\" is annotated with [NewtonsoftJsonAotHelper] but the required base-type constructor argument is missing or is not a type symbol."
             , category: "NewtonsoftJsonAotHelperGenerator"

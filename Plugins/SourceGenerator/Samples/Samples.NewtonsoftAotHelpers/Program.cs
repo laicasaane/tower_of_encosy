@@ -1,4 +1,4 @@
-﻿namespace Samples.NewtonsoftJsonAotHelpers
+﻿namespace Samples.NewtonsoftAotHelpers
 {
     public class Program
     {

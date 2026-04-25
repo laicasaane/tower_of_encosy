@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <RootNamespace>Samples.NewtonsoftJsonAotHelpers</RootNamespace>
+        <RootNamespace>Samples.NewtonsoftAotHelpers</RootNamespace>
     </PropertyGroup>
 
 </Project>
