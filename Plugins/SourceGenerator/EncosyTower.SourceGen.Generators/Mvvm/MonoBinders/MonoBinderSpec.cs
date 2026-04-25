@@ -40,8 +40,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         public EquatableArray<BinderSpec.NonVariantTypeSpec> outerNonVariantTypes;
 
         public readonly bool IsValid
-            => string.IsNullOrEmpty(hintName) == false
-            && string.IsNullOrEmpty(userClassName) == false
+            => string.IsNullOrEmpty(userClassName) == false
             && string.IsNullOrEmpty(componentFullTypeName) == false;
 
         public static MonoBinderSpec Extract(

@@ -26,19 +26,11 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         public readonly bool IsValid
             => string.IsNullOrEmpty(typeName) == false
             && string.IsNullOrEmpty(typeNamespace) == false
-            && string.IsNullOrEmpty(hintName) == false
-            && string.IsNullOrEmpty(sourceFilePath) == false
-            && string.IsNullOrEmpty(openingSource) == false
-            && string.IsNullOrEmpty(closingSource) == false
             ;
 
         public readonly bool Equals(PolyEnumStructSpec other)
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(typeNamespace, other.typeNamespace, StringComparison.Ordinal)
-            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
-            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
-            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && interfaceDef.Equals(other.interfaceDef)
             && structs.Equals(other.structs)
             && definedUndefinedStruct == other.definedUndefinedStruct
@@ -58,10 +50,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             var hash = new HashValue();
             hash.Add(typeName);
             hash.Add(typeNamespace);
-            hash.Add(hintName);
-            hash.Add(sourceFilePath);
-            hash.Add(openingSource);
-            hash.Add(closingSource);
             hash.Add(interfaceDef);
             hash.Add(structs);
             hash.Add(definedUndefinedStruct);

@@ -116,7 +116,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         public readonly bool Equals(EnumTemplateSpec other)
             => string.Equals(templateFullName, other.templateFullName, StringComparison.Ordinal)
             && string.Equals(templateSimpleName, other.templateSimpleName, StringComparison.Ordinal)
-            && string.Equals(fileHintName, other.fileHintName, StringComparison.Ordinal)
             && string.Equals(namespaceName, other.namespaceName, StringComparison.Ordinal)
             && accessibility == other.accessibility
             && parentIsNamespace == other.parentIsNamespace
@@ -128,7 +127,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             => obj is EnumTemplateSpec other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(templateFullName, templateSimpleName, fileHintName, namespaceName)
+            => HashValue.Combine(templateFullName, templateSimpleName, namespaceName)
             .Add(accessibility)
             .Add(parentIsNamespace)
             .Add(containingTypes.GetHashCode())

@@ -26,10 +26,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             && string.IsNullOrEmpty(typeNamespace) == false
             && string.IsNullOrEmpty(valueTypeName) == false
             && string.IsNullOrEmpty(valueType) == false
-            && string.IsNullOrEmpty(hintName) == false
-            && string.IsNullOrEmpty(sourceFilePath) == false
-            && string.IsNullOrEmpty(openingSource) == false
-            && string.IsNullOrEmpty(closingSource) == false
             ;
 
         public readonly bool HasCustomNs
@@ -45,10 +41,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             && string.Equals(valueTypeNs, other.valueTypeNs, StringComparison.Ordinal)
             && string.Equals(valueType, other.valueType, StringComparison.Ordinal)
             && string.Equals(underlyingTypeName, other.underlyingTypeName, StringComparison.Ordinal)
-            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
-            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
-            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && size == other.size
             && singleValue == other.singleValue
             && isEnum == other.isEnum
@@ -62,11 +54,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 , valueTypeNs
                 , valueType
                 , underlyingTypeName
-                , hintName
-                , sourceFilePath
             )
-            .Add(openingSource)
-            .Add(closingSource)
             .Add(size)
             .Add(singleValue)
             .Add(isEnum)

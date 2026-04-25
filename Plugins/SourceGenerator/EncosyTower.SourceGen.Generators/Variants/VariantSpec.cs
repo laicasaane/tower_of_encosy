@@ -34,7 +34,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
             && string.Equals(converterDefault, other.converterDefault, StringComparison.Ordinal)
             && string.Equals(structName, other.structName, StringComparison.Ordinal)
             && string.Equals(structFullName, other.structFullName, StringComparison.Ordinal)
-            && string.Equals(fileHintName, other.fileHintName, StringComparison.Ordinal)
             && string.Equals(namespaceName, other.namespaceName, StringComparison.Ordinal)
             && unmanagedSize == other.unmanagedSize
             && isValueType == other.isValueType
@@ -54,7 +53,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 , converterDefault
                 , structName
                 , structFullName
-                , fileHintName
                 , namespaceName
                 , unmanagedSize
             )

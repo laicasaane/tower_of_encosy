@@ -51,10 +51,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.TypeHandles
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(structName) == false
-            && string.IsNullOrEmpty(hintName) == false
-            && string.IsNullOrEmpty(sourceFilePath) == false
-            && string.IsNullOrEmpty(openingSource) == false
-            && string.IsNullOrEmpty(closingSource) == false
             && typeRefs.Count > 0
             ;
 
@@ -64,9 +60,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.TypeHandles
         public readonly bool Equals(TypeHandleSpec other)
             => string.Equals(structName, other.structName, StringComparison.Ordinal)
             && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
-            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
-            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && typeRefs.Equals(other.typeRefs)
             ;
 
@@ -74,9 +67,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.TypeHandles
             => HashValue.Combine(
                   structName
                 , hintName
-                , sourceFilePath
-                , openingSource
-                , closingSource
                 , typeRefs
             );
     }

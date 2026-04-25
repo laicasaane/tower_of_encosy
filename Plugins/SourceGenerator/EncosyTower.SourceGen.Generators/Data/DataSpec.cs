@@ -42,8 +42,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             => string.IsNullOrEmpty(idPropertyTypeName) == false;
 
         public readonly bool IsValid
-            => string.IsNullOrEmpty(typeName) == false
-            && string.IsNullOrEmpty(hintName) == false;
+            => string.IsNullOrEmpty(typeName) == false;
 
         public readonly bool Equals(DataSpec other)
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
@@ -52,10 +51,6 @@ namespace EncosyTower.SourceGen.Generators.Data
             && string.Equals(typeValidIdentifier, other.typeValidIdentifier, StringComparison.Ordinal)
             && string.Equals(baseTypeName, other.baseTypeName, StringComparison.Ordinal)
             && string.Equals(accessibilityKeyword, other.accessibilityKeyword, StringComparison.Ordinal)
-            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
-            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
-            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && string.Equals(idPropertyTypeName, other.idPropertyTypeName, StringComparison.Ordinal)
             && fieldPolicy == other.fieldPolicy
             && isMutable == other.isMutable
@@ -86,10 +81,6 @@ namespace EncosyTower.SourceGen.Generators.Data
             hash.Add(typeValidIdentifier);
             hash.Add(baseTypeName);
             hash.Add(accessibilityKeyword);
-            hash.Add(hintName);
-            hash.Add(sourceFilePath);
-            hash.Add(openingSource);
-            hash.Add(closingSource);
             hash.Add(idPropertyTypeName);
             hash.Add(fieldPolicy);
             hash.Add(isMutable);

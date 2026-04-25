@@ -50,9 +50,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         public readonly bool Equals(ObservablePropertySpec other)
             => string.Equals(className, other.className, StringComparison.Ordinal)
             && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
-            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
-            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && isBaseObservableObject == other.isBaseObservableObject
             && isSealed == other.isSealed
             && hasMemberObservableObject == other.hasMemberObservableObject
@@ -71,9 +68,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             var hash = new HashValue();
             hash.Add(className);
             hash.Add(hintName);
-            hash.Add(sourceFilePath);
-            hash.Add(openingSource);
-            hash.Add(closingSource);
             hash.Add(isBaseObservableObject);
             hash.Add(isSealed);
             hash.Add(hasMemberObservableObject);

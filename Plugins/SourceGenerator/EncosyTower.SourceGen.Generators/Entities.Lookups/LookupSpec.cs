@@ -56,10 +56,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         public readonly bool IsValid
             => kind != LookupKind.None
             && string.IsNullOrEmpty(structName) == false
-            && string.IsNullOrEmpty(hintName) == false
-            && string.IsNullOrEmpty(sourceFilePath) == false
-            && string.IsNullOrEmpty(openingSource) == false
-            && string.IsNullOrEmpty(closingSource) == false
             && typeRefs.Count > 0
             ;
 
@@ -70,9 +66,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             => kind == other.kind
             && string.Equals(structName, other.structName, StringComparison.Ordinal)
             && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
-            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
-            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && string.Equals(interfaceLookupRO, other.interfaceLookupRO, StringComparison.Ordinal)
             && string.Equals(interfaceLookupRW, other.interfaceLookupRW, StringComparison.Ordinal)
             && typeRefs.Equals(other.typeRefs)
@@ -82,9 +75,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             => HashValue.Combine(
                   structName
                 , hintName
-                , sourceFilePath
-                , openingSource
-                , closingSource
                 , interfaceLookupRO
                 , interfaceLookupRW
             )

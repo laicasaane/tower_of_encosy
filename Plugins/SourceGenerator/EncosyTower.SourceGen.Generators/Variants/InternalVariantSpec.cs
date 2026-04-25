@@ -28,7 +28,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
             && string.Equals(simpleTypeName, other.simpleTypeName, StringComparison.Ordinal)
             && string.Equals(structName, other.structName, StringComparison.Ordinal)
             && string.Equals(converterDefault, other.converterDefault, StringComparison.Ordinal)
-            && string.Equals(fileHintName, other.fileHintName, StringComparison.Ordinal)
             && unmanagedSize == other.unmanagedSize
             && isValueType == other.isValueType
             && hasImplicitFromStructToType == other.hasImplicitFromStructToType
@@ -45,7 +44,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 , simpleTypeName
                 , structName
                 , converterDefault
-                , fileHintName
                 , unmanagedSize
             )
             .Add(isValueType)

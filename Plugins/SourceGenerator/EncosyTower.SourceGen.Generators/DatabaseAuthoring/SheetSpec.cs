@@ -14,11 +14,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public EquatableArray<string> nestedDataTypeFullNames;
 
         public readonly bool IsValid
-            => string.IsNullOrEmpty(hintName) == false;
+            => string.IsNullOrEmpty(idTypeFullName) == false
+            && string.IsNullOrEmpty(dataTypeFullName) == false;
 
         public readonly bool Equals(SheetSpec other)
-            => string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(idTypeFullName, other.idTypeFullName, StringComparison.Ordinal)
+            => string.Equals(idTypeFullName, other.idTypeFullName, StringComparison.Ordinal)
             && string.Equals(idTypeSimpleName, other.idTypeSimpleName, StringComparison.Ordinal)
             && string.Equals(dataTypeFullName, other.dataTypeFullName, StringComparison.Ordinal)
             && string.Equals(dataTypeSimpleName, other.dataTypeSimpleName, StringComparison.Ordinal)
@@ -32,8 +32,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         public readonly override int GetHashCode()
             => HashValue.Combine(
-                  hintName
-                , idTypeFullName
+                  idTypeFullName
                 , idTypeSimpleName
                 , dataTypeFullName
                 , dataTypeSimpleName

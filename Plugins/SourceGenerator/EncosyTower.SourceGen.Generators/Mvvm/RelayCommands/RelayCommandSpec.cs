@@ -28,9 +28,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
         public readonly bool Equals(RelayCommandSpec other)
             => string.Equals(className, other.className, StringComparison.Ordinal)
             && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
-            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
-            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && memberRefs.Equals(other.memberRefs);
 
         public readonly override bool Equals(object obj)
@@ -41,9 +38,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             var hash = new HashValue();
             hash.Add(className);
             hash.Add(hintName);
-            hash.Add(sourceFilePath);
-            hash.Add(openingSource);
-            hash.Add(closingSource);
             hash.Add(memberRefs);
             return hash.ToHashCode();
         }

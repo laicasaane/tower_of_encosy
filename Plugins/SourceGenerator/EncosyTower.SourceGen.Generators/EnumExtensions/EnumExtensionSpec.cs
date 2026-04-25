@@ -156,7 +156,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             && string.Equals(fullyQualifiedName, other.fullyQualifiedName, StringComparison.Ordinal)
             && string.Equals(underlyingTypeName, other.underlyingTypeName, StringComparison.Ordinal)
             && string.Equals(namespaceName, other.namespaceName, StringComparison.Ordinal)
-            && string.Equals(fileHintName, other.fileHintName, StringComparison.Ordinal)
             && accessibility == other.accessibility
             && parentIsNamespace == other.parentIsNamespace
             && hasFlags == other.hasFlags
@@ -170,7 +169,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             => obj is EnumExtensionSpec other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(enumName, extensionsName, structName, fullyQualifiedName, underlyingTypeName, namespaceName, fileHintName)
+            => HashValue.Combine(enumName, extensionsName, structName, fullyQualifiedName, underlyingTypeName, namespaceName)
             .Add(accessibility)
             .Add(parentIsNamespace)
             .Add(hasFlags)

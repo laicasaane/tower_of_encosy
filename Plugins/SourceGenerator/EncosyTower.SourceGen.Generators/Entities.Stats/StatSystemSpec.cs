@@ -22,10 +22,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             && string.IsNullOrEmpty(typeNamespace) == false
             && string.IsNullOrEmpty(typeIdentifier) == false
             && string.IsNullOrEmpty(syntaxKeyword) == false
-            && string.IsNullOrEmpty(hintName) == false
-            && string.IsNullOrEmpty(sourceFilePath) == false
-            && string.IsNullOrEmpty(openingSource) == false
-            && string.IsNullOrEmpty(closingSource) == false
             && maxDataSize > 0
             && maxUserDataSize > 0
             ;
@@ -37,10 +33,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(typeNamespace, other.typeNamespace, StringComparison.Ordinal)
             && string.Equals(syntaxKeyword, other.syntaxKeyword, StringComparison.Ordinal)
-            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
-            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
-            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && maxDataSize == other.maxDataSize
             && maxUserDataSize == other.maxUserDataSize
             && isStatic == other.isStatic
@@ -51,10 +43,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                   typeName
                 , typeNamespace
                 , syntaxKeyword
-                , hintName
-                , sourceFilePath
-                , openingSource
-                , closingSource
                 , maxDataSize
             )
             .Add(maxUserDataSize)

@@ -32,10 +32,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             && string.IsNullOrEmpty(wrapperKindKeyword) == false
             && string.IsNullOrEmpty(enumStructName) == false
             && string.IsNullOrEmpty(enumStructFullyQualifiedName) == false
-            && string.IsNullOrEmpty(hintName) == false
-            && string.IsNullOrEmpty(sourceFilePath) == false
-            && string.IsNullOrEmpty(openingSource) == false
-            && string.IsNullOrEmpty(closingSource) == false
             ;
 
         public readonly bool Equals(PolyEnumFactorySpec other)
@@ -49,10 +45,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             && string.Equals(enumStructFullyQualifiedName, other.enumStructFullyQualifiedName, StringComparison.Ordinal)
             && string.Equals(enumStructNamespace, other.enumStructNamespace, StringComparison.Ordinal)
             && string.Equals(fieldName, other.fieldName, StringComparison.Ordinal)
-            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
-            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
-            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && cases.Equals(other.cases)
             && enumStructSize == other.enumStructSize
             && enumStructIsReadOnly == other.enumStructIsReadOnly
@@ -77,10 +69,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             hash.Add(enumStructFullyQualifiedName);
             hash.Add(enumStructNamespace);
             hash.Add(fieldName);
-            hash.Add(hintName);
-            hash.Add(sourceFilePath);
-            hash.Add(openingSource);
-            hash.Add(closingSource);
             hash.Add(cases);
             hash.Add(enumStructSize);
             hash.Add(enumStructIsReadOnly);

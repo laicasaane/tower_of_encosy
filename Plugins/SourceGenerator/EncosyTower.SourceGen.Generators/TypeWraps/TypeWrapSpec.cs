@@ -865,11 +865,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             => obj is TypeWrapSpec other && Equals(other);
 
         public readonly bool Equals(TypeWrapSpec other)
-            => string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
-            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
-            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
-            && string.Equals(fullTypeName, other.fullTypeName, StringComparison.Ordinal)
+            => string.Equals(fullTypeName, other.fullTypeName, StringComparison.Ordinal)
             && string.Equals(fieldTypeName, other.fieldTypeName, StringComparison.Ordinal)
             && string.Equals(fieldEnumUnderlyingTypeName, other.fieldEnumUnderlyingTypeName, StringComparison.Ordinal)
             && string.Equals(fieldName, other.fieldName, StringComparison.Ordinal)
@@ -884,10 +880,6 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         public readonly override int GetHashCode()
         {
             var hash = new HashValue();
-            hash.Add(hintName);
-            hash.Add(sourceFilePath);
-            hash.Add(openingSource);
-            hash.Add(closingSource);
             hash.Add(fullTypeName);
             hash.Add(fieldTypeName);
             hash.Add(fieldEnumUnderlyingTypeName);

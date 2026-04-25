@@ -276,10 +276,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
 
         public readonly bool Equals(DataTableAssetSpec other)
             => string.Equals(className, other.className, StringComparison.Ordinal)
-            && string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
-            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
             && string.Equals(idTypeName, other.idTypeName, StringComparison.Ordinal)
             && string.Equals(dataTypeName, other.dataTypeName, StringComparison.Ordinal)
             && string.Equals(convertedIdTypeName, other.convertedIdTypeName, StringComparison.Ordinal)
@@ -296,10 +293,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
         public readonly override int GetHashCode()
             => HashValue.Combine(
                   className
-                , openingSource
-                , closingSource
                 , hintName
-                , sourceFilePath
                 , idTypeName
                 , dataTypeName
                 , convertedIdTypeName

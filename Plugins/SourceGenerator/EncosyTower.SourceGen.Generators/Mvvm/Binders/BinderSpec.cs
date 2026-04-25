@@ -36,7 +36,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         public EquatableArray<NonVariantTypeSpec> nonVariantTypes;
 
         public readonly bool IsValid
-            => string.IsNullOrEmpty(hintName) == false
+            => string.IsNullOrEmpty(typeIdentifier) == false
             && string.IsNullOrEmpty(simpleTypeName) == false;
 
         public static BinderSpec Extract(
@@ -359,11 +359,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         }
 
         public readonly bool Equals(BinderSpec other)
-            => string.Equals(openingSource, other.openingSource, StringComparison.Ordinal)
-            && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
-            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
-            && string.Equals(sourceFilePath, other.sourceFilePath, StringComparison.Ordinal)
-            && string.Equals(className, other.className, StringComparison.Ordinal)
+            => string.Equals(className, other.className, StringComparison.Ordinal)
             && string.Equals(simpleTypeName, other.simpleTypeName, StringComparison.Ordinal)
             && string.Equals(typeIdentifier, other.typeIdentifier, StringComparison.Ordinal)
             && hasBaseBinder == other.hasBaseBinder
@@ -380,11 +376,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
         public readonly override int GetHashCode()
             => HashValue.Combine(
-                  openingSource
-                , closingSource
-                , hintName
-                , sourceFilePath
-                , className
+                  className
                 , simpleTypeName
                 , typeIdentifier
             )
