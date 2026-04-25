@@ -73,7 +73,7 @@ if (File.Exists(pluginsFilePath) == false)
 }
 
 var csv = File.ReadAllText(pluginsFilePath);
-var gitFolders = new List<(string GitUrl, string FolderName)>();
+var gitFolders = new List<GitInfo>();
 
 var csvOptions = new CsvOptions {
     ValidateColumnCount = false,
@@ -84,6 +84,7 @@ var csvOptions = new CsvOptions {
 
 const string GIT_URL = "git_url";
 const string FOLDER_WITHIN_SRC_REPOS = "folder_within_src_repos";
+const string COMMIT_SHA = "commit_sha";
 
 Console.WriteLine($"Process '{pluginsFilePath}'");
 
@@ -119,6 +120,19 @@ foreach (var line in CsvReader.ReadFromText(csv, csvOptions))
         }
     }
 
+    var commitSha = string.Empty;
+
+    if (line.HasColumn(COMMIT_SHA))
+    {
+        try
+        {
+            commitSha = line[COMMIT_SHA];
+        }
+        catch
+        {
+        }
+    }
+
     if (string.IsNullOrWhiteSpace(folderName))
     {
         var segments = gitUrl.Split('/', StringSplitOptions.RemoveEmptyEntries);
@@ -148,7 +162,7 @@ foreach (var line in CsvReader.ReadFromText(csv, csvOptions))
         folderName = $"{authorName}.{repoName}";
     }
 
-    gitFolders.Add((gitUrl, folderName));
+    gitFolders.Add(new(gitUrl, folderName, commitSha));
 }
 
 if (gitFolders.Count < 1)
@@ -157,9 +171,9 @@ if (gitFolders.Count < 1)
     return;
 }
 
-var processingGitFolders = new List<(string GitUrl, string FolderName)>();
+var processingGitFolders = new List<GitInfo>();
 
-foreach (var (gitUrl, folderName) in gitFolders)
+foreach (var (gitUrl, folderName, commitSha) in gitFolders)
 {
     var srcRepoPath = Path.Combine(srcReposRootPath, folderName);
 
@@ -197,11 +211,22 @@ foreach (var (gitUrl, folderName) in gitFolders)
         }
     }
 
-    processingGitFolders.Add((gitUrl, folderName));
+    processingGitFolders.Add(new(gitUrl, folderName, commitSha));
 }
 
-foreach (var (gitUrl, folderName) in processingGitFolders)
+foreach (var info in processingGitFolders)
 {
+    var cloneResult = CloneGitRepo(info, srcReposRootPath);
+
+    if (cloneResult && string.IsNullOrEmpty(info.CommitSha) == false)
+    {
+        ResetToCommitSha(info, srcReposRootPath);
+    }
+}
+
+static bool CloneGitRepo(GitInfo info, string srcReposRootPath)
+{
+    var (gitUrl, folderName, _) = info;
     var srcRepoPath = Path.Combine(srcReposRootPath, folderName);
 
     Console.WriteLine($"Clone '{gitUrl}' into '{srcRepoPath}'");
@@ -229,15 +254,59 @@ foreach (var (gitUrl, folderName) in processingGitFolders)
         {
             Console.WriteLine($"Git clone failed for '{gitUrl}' with exit code {gitProcess.ExitCode}");
             Console.WriteLine(error);
-            continue;
+            return false;
         }
 
         Console.WriteLine(output);
+        return true;
     }
     catch (Exception ex)
     {
         Console.WriteLine($"Exception occurred while cloning '{gitUrl}': {ex.Message}");
-        continue;
+        return false;
+    }
+}
+
+static void ResetToCommitSha(GitInfo info, string srcReposRootPath)
+{
+    var (gitUrl, folderName, commitSha) = info;
+    var srcRepoPath = Path.Combine(srcReposRootPath, folderName);
+
+    Console.WriteLine($"Reset '{srcRepoPath}' to commit '{commitSha}'");
+
+    using var gitProcess = new Process {
+        StartInfo = new ProcessStartInfo {
+            FileName = "git",
+            Arguments = $"reset --hard {commitSha}",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WorkingDirectory = srcRepoPath,
+        }
+    };
+
+    try
+    {
+        gitProcess.Start();
+
+        var output = gitProcess.StandardOutput.ReadToEnd();
+        var error = gitProcess.StandardError.ReadToEnd();
+        gitProcess.WaitForExit();
+
+        if (gitProcess.ExitCode != 0)
+        {
+            Console.WriteLine($"Git reset failed for '{gitUrl}' with exit code {gitProcess.ExitCode}");
+            Console.WriteLine(error);
+        }
+        else
+        {
+            Console.WriteLine(output);
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Exception occurred while resetting '{gitUrl}': {ex.Message}");
     }
 }
 
@@ -275,7 +344,7 @@ if (slnx == null)
     return;
 }
 
-foreach (var (gitUrl, folderName) in processingGitFolders)
+foreach (var (gitUrl, folderName, commitSha) in processingGitFolders)
 {
     var unityPluginPath = Path.Combine(unityPluginsRootPath, folderName);
 
@@ -283,6 +352,14 @@ foreach (var (gitUrl, folderName) in processingGitFolders)
     {
         Directory.CreateDirectory(unityPluginPath);
     }
+
+    var gitUrlWithoutSuffix = gitUrl.EndsWith(".git", StringComparison.OrdinalIgnoreCase)
+        ? gitUrl[..^4]
+        : gitUrl;
+
+    var repositoryUrl = string.IsNullOrWhiteSpace(commitSha)
+        ? gitUrl
+        : $"{gitUrlWithoutSuffix}/tree/{commitSha}";
 
     var csprojFilePath = Path.Combine(unityPluginPath, $"{folderName}.csproj");
 
@@ -293,7 +370,7 @@ foreach (var (gitUrl, folderName) in processingGitFolders)
             <Project Sdk="Microsoft.NET.Sdk">
 
                 <PropertyGroup>
-                    <RepositoryUrl>{gitUrl}</RepositoryUrl>
+                    <RepositoryUrl>{repositoryUrl}</RepositoryUrl>
                     <TargetFrameworks>netstandard2.1</TargetFrameworks>
                     <SrcRepoDir>../../SrcRepos/{folderName}/</SrcRepoDir>
                 </PropertyGroup>
