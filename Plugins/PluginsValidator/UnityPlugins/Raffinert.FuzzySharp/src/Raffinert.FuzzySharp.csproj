@@ -7,12 +7,13 @@
         <RepositoryUrl>https://github.com/Raffinert/FuzzySharp</RepositoryUrl>
         <TargetFrameworks>netstandard2.1</TargetFrameworks>
         <RootNamespace>Raffinert.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
-        <SrcRepoDir>../../SrcRepos/Raffinert.FuzzySharp/FuzzySharp</SrcRepoDir>
+        <SrcRepoDir>../../../SrcRepos/Raffinert.FuzzySharp/FuzzySharp</SrcRepoDir>
+        <SrcCompatDir>../Compat</SrcCompatDir>
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="$(SrcRepoDir)/**/*.cs"
-                 Exclude="$(SrcRepoDir)/obj/**/*.*" />
+        <Compile Include="$(SrcRepoDir)/**/*.cs;$(SrcCompatDir)/**/*.cs"
+                 Exclude="$(SrcRepoDir)/obj/**/*.*;$(SrcRepoDir)/Indel.Instance.cs" />
     </ItemGroup>
 
 </Project>

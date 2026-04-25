@@ -361,7 +361,7 @@ foreach (var (gitUrl, folderName, commitSha) in processingGitFolders)
         ? gitUrl
         : $"{gitUrlWithoutSuffix}/tree/{commitSha}";
 
-    var csprojFilePath = Path.Combine(unityPluginPath, $"{folderName}.csproj");
+    var csprojFilePath = GetCsprojFilePath(unityPluginsRootPath, folderName, out var srcFolderName);
 
     if (File.Exists(csprojFilePath) == false)
     {
@@ -377,7 +377,7 @@ foreach (var (gitUrl, folderName, commitSha) in processingGitFolders)
 
                 <!--<ItemGroup>
                     <Compile Include="$(SrcRepoDir)/**/*.cs"
-                                Exclude="$(SrcRepoDir)/obj/**/*.*" />
+                        Exclude="$(SrcRepoDir)/obj/**/*.*" />
                 </ItemGroup>-->
 
             </Project>
@@ -385,8 +385,14 @@ foreach (var (gitUrl, folderName, commitSha) in processingGitFolders)
         );
     }
 
-    var csprojFilePathRelative = Path.Combine(folderName, $"{folderName}.csproj").Replace('\\', '/');
-    var index = slnx.Projects.FindIndex(x => string.Equals(x.Path, csprojFilePathRelative));
+    var csprojFilePathRelative = (string.IsNullOrEmpty(srcFolderName)
+        ? Path.Combine(folderName, $"{folderName}.csproj")
+        : Path.Combine(folderName, srcFolderName, $"{folderName}.csproj")
+    ).Replace('\\', '/');
+
+    var index = slnx.Projects.FindIndex(
+        x => string.Equals(x.Path, csprojFilePathRelative, StringComparison.InvariantCultureIgnoreCase)
+    );
 
     if (index < 0)
     {
@@ -396,6 +402,28 @@ foreach (var (gitUrl, folderName, commitSha) in processingGitFolders)
     }
 
     Console.WriteLine($"Successfully verified project '{csprojFilePathRelative}'");
+}
+
+static string GetCsprojFilePath(string unityPluginsRootPath, string folderName, out string srcFolderName)
+{
+    var csprojFilePathOutsideSrc = Path.Combine(unityPluginsRootPath, folderName, $"{folderName}.csproj");
+    var csprojFilePathWithinLowerCaseSrc = Path.Combine(unityPluginsRootPath, folderName, "src", $"{folderName}.csproj");
+    var csprojFilePathWithinUpperCaseSrc = Path.Combine(unityPluginsRootPath, folderName, "Src", $"{folderName}.csproj");
+
+    if (File.Exists(csprojFilePathWithinUpperCaseSrc))
+    {
+        srcFolderName = "Src";
+        return csprojFilePathWithinUpperCaseSrc;
+    }
+
+    if (File.Exists(csprojFilePathWithinLowerCaseSrc))
+    {
+        srcFolderName = "src";
+        return csprojFilePathWithinLowerCaseSrc;
+    }
+
+    srcFolderName = string.Empty;
+    return csprojFilePathOutsideSrc;
 }
 
 var settings = new XmlWriterSettings {

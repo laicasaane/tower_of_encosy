@@ -1,3 +1,7 @@
 <Solution>
-  <Project Path="Raffinert.FuzzySharp/Raffinert.FuzzySharp.csproj" />
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.targets" />
+    <File Path="Directory.Build.props" />
+  </Folder>
+  <Project Path="Raffinert.FuzzySharp/src/Raffinert.FuzzySharp.csproj" />
 </Solution>

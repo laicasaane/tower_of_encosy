@@ -1,8 +1,6 @@
 <Project>
-    <Target Name="CopySourceFiles" AfterTargets="Build" Condition=" '$(Configuration)'=='Release' ">
-        <ItemGroup>
-            <DataFiles Include="bin/**/*.dll" />
-        </ItemGroup>
-        <Copy SourceFiles="@(DataFiles)" DestinationFolder="../../../../Packages/com.laicasaane.encosy-tower/Plugins/$(AssemblyName)/" SkipUnchangedFiles="true" />
-    </Target>
+    <PropertyGroup>
+        <BaseOutputPath>$(MSBuildThisFileDirectory)Build/$(MSBuildProjectName)/bin/</BaseOutputPath>
+        <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)Build/$(MSBuildProjectName)/obj/</BaseIntermediateOutputPath>
+    </PropertyGroup>
 </Project>
