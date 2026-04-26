@@ -28,7 +28,7 @@ for (var i = 0; i < argLength; i++)
 
     switch (id)
     {
-        case "-root-directory":
+        case "--root-directory":
             rootDirectory = arg;
             break;
     }
@@ -36,7 +36,27 @@ for (var i = 0; i < argLength; i++)
 
 if (string.IsNullOrEmpty(rootDirectory))
 {
-    rootDirectory = Directory.GetCurrentDirectory();
+    using (Console.WithColor(ConsoleColor.Red))
+    {
+        Console.WriteLine("Root directory is not specified. Use '--root-directory <path>' to specify it.");
+    }
+
+    return 1;
+}
+
+if (Directory.Exists(rootDirectory) == false)
+{
+    using (Console.WithColor(ConsoleColor.Red))
+    {
+        Console.WriteLine($"Root directory '{rootDirectory}' does not exist.");
+    }
+
+    return 1;
+}
+
+using (Console.WithColor(ConsoleColor.Cyan))
+{
+    Console.WriteLine($"Root directory: '{rootDirectory}'");
 }
 
 var pluginsFilePath = Path.Combine(rootDirectory, "Plugins.csv");
@@ -86,7 +106,10 @@ const string GIT_URL = "git_url";
 const string FOLDER_WITHIN_SRC_REPOS = "folder_within_src_repos";
 const string COMMIT_SHA = "commit_sha";
 
-Console.WriteLine($"Process '{pluginsFilePath}'");
+using (Console.WithColor(ConsoleColor.Green))
+{
+    Console.WriteLine($"Processing '{pluginsFilePath}'");
+}
 
 foreach (var line in CsvReader.ReadFromText(csv, csvOptions))
 {
@@ -147,13 +170,21 @@ foreach (var line in CsvReader.ReadFromText(csv, csvOptions))
 
         if (string.IsNullOrEmpty(repoName))
         {
-            Console.WriteLine($"Cannot extract repository name from '{gitUrl}'");
+            using (Console.WithColor(ConsoleColor.Yellow))
+            {
+                Console.WriteLine($"Cannot extract repository name from '{gitUrl}'");
+            }
+
             continue;
         }
 
         if (segments.Length < 2)
         {
-            Console.WriteLine($"Cannot extract author name from '{gitUrl}'");
+            using (Console.WithColor(ConsoleColor.Yellow))
+            {
+                Console.WriteLine($"Cannot extract author name from '{gitUrl}'");
+            }
+
             continue;
         }
 
@@ -167,8 +198,12 @@ foreach (var line in CsvReader.ReadFromText(csv, csvOptions))
 
 if (gitFolders.Count < 1)
 {
-    Console.WriteLine($"No Git URL found in '{pluginsFilePath}'");
-    return;
+    using (Console.WithColor(ConsoleColor.Red))
+    {
+        Console.WriteLine($"No Git URL found in '{pluginsFilePath}'");
+    }
+
+    return 1;
 }
 
 var processingGitFolders = new List<GitInfo>();
@@ -198,15 +233,23 @@ foreach (var (gitUrl, folderName, commitSha) in gitFolders)
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Cannot delete '{srcRepoPath}'");
-                Console.WriteLine(ex);
+                using (Console.WithColor(ConsoleColor.Red))
+                {
+                    Console.WriteLine($"Cannot delete '{srcRepoPath}'");
+                    Console.WriteLine(ex);
+                }
+
                 continue;
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Cannot delete '{srcRepoPath}'");
-            Console.WriteLine(ex);
+            using (Console.WithColor(ConsoleColor.Red))
+            {
+                Console.WriteLine($"Cannot delete '{srcRepoPath}'");
+                Console.WriteLine(ex);
+            }
+
             continue;
         }
     }
@@ -229,7 +272,10 @@ static bool CloneGitRepo(GitInfo info, string srcReposRootPath)
     var (gitUrl, folderName, _) = info;
     var srcRepoPath = Path.Combine(srcReposRootPath, folderName);
 
-    Console.WriteLine($"Clone '{gitUrl}' into '{srcRepoPath}'");
+    using (Console.WithColor(ConsoleColor.Green))
+    {
+        Console.WriteLine($"Cloning '{gitUrl}' into '{srcRepoPath}'");
+    }
 
     using var gitProcess = new Process {
         StartInfo = new ProcessStartInfo {
@@ -252,17 +298,28 @@ static bool CloneGitRepo(GitInfo info, string srcReposRootPath)
 
         if (gitProcess.ExitCode != 0)
         {
-            Console.WriteLine($"Git clone failed for '{gitUrl}' with exit code {gitProcess.ExitCode}");
-            Console.WriteLine(error);
+            using (Console.WithColor(ConsoleColor.Red))
+            {
+                Console.WriteLine($"Git clone failed for '{gitUrl}' with exit code {gitProcess.ExitCode}");
+                Console.WriteLine(error);
+            }
             return false;
         }
 
-        Console.WriteLine(output);
+        using (Console.WithColor(ConsoleColor.Cyan))
+        {
+            Console.WriteLine(output);
+        }
+
         return true;
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Exception occurred while cloning '{gitUrl}': {ex.Message}");
+        using (Console.WithColor(ConsoleColor.Red))
+        {
+            Console.WriteLine($"Exception occurred while cloning '{gitUrl}': {ex.Message}");
+        }
+
         return false;
     }
 }
@@ -272,7 +329,10 @@ static void ResetToCommitSha(GitInfo info, string srcReposRootPath)
     var (gitUrl, folderName, commitSha) = info;
     var srcRepoPath = Path.Combine(srcReposRootPath, folderName);
 
-    Console.WriteLine($"Reset '{srcRepoPath}' to commit '{commitSha}'");
+    using (Console.WithColor(ConsoleColor.Green))
+    {
+        Console.WriteLine($"Resetting '{srcRepoPath}' to commit '{commitSha}'");
+    }
 
     using var gitProcess = new Process {
         StartInfo = new ProcessStartInfo {
@@ -296,17 +356,26 @@ static void ResetToCommitSha(GitInfo info, string srcReposRootPath)
 
         if (gitProcess.ExitCode != 0)
         {
-            Console.WriteLine($"Git reset failed for '{gitUrl}' with exit code {gitProcess.ExitCode}");
-            Console.WriteLine(error);
+            using (Console.WithColor(ConsoleColor.Red))
+            {
+                Console.WriteLine($"Git reset failed for '{gitUrl}' with exit code {gitProcess.ExitCode}");
+                Console.WriteLine(error);
+            }
         }
         else
         {
-            Console.WriteLine(output);
+            using (Console.WithColor(ConsoleColor.Cyan))
+            {
+                Console.WriteLine(output);
+            }
         }
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Exception occurred while resetting '{gitUrl}': {ex.Message}");
+        using (Console.WithColor(ConsoleColor.Red))
+        {
+            Console.WriteLine($"Exception occurred while resetting '{gitUrl}': {ex.Message}");
+        }
     }
 }
 
@@ -333,15 +402,23 @@ using (var reader = new StreamReader(unityPluginsSlnxPath))
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Failed to deserialize '{unityPluginsSlnxPath}': {ex.Message}");
-        return;
+        using (Console.WithColor(ConsoleColor.Red))
+        {
+            Console.WriteLine($"Failed to deserialize '{unityPluginsSlnxPath}': {ex.Message}");
+        }
+
+        return 1;
     }
 }
 
 if (slnx == null)
 {
-    Console.WriteLine($"Failed to deserialize '{unityPluginsSlnxPath}'");
-    return;
+    using (Console.WithColor(ConsoleColor.Red))
+    {
+        Console.WriteLine($"Failed to deserialize '{unityPluginsSlnxPath}'");
+    }
+
+    return 1;
 }
 
 foreach (var (gitUrl, folderName, commitSha) in processingGitFolders)
@@ -401,7 +478,10 @@ foreach (var (gitUrl, folderName, commitSha) in processingGitFolders)
         });
     }
 
-    Console.WriteLine($"Successfully verified project '{csprojFilePathRelative}'");
+    using (Console.WithColor(ConsoleColor.Cyan))
+    {
+        Console.WriteLine($"Successfully verified project '{csprojFilePathRelative}'");
+    }
 }
 
 static string GetCsprojFilePath(string unityPluginsRootPath, string folderName, out string srcFolderName)
@@ -441,3 +521,5 @@ using (var writer = XmlWriter.Create(stream, settings))
     var serializer = new XmlSerializer(typeof(PluginsIntegrator.Slnx.Solution));
     serializer.Serialize(writer, slnx, ns);
 }
+
+return 0;

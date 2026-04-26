@@ -1,17 +1,19 @@
+@echo off
+
 set ROOT=%cd%
 
 echo ROOT=%ROOT%
 
 cd src
 
-dotnet publish -r win-x64 -c Release -o bin/win-x64 /p:SelfContained=true /p:PublishSingleFile=true /p:PublishReadyToRun=true
+dotnet run -c Release --root-directory %ROOT%
 
-cd ..
+if %ERRORLEVEL% equ 0 (
 
-%ROOT%/src/bin/win-x64/PluginsValidator.exe --root-directory %ROOT%
+    cd ../UnityPlugins
 
-cd UnityPlugins
+    dotnet build --configuration Release
 
-dotnet build --configuration Release
+)
 
 cd ..
