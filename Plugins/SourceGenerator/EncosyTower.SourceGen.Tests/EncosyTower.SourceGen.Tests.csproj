@@ -14,6 +14,7 @@
         <PackageReference Include="MSTest.TestFramework" Version="3.7.3" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.1" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing" Version="1.1.3" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.3" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <PackageReference Include="Unity3D" Version="3.1.1" />
@@ -23,6 +24,7 @@
         <ProjectReference Include="../EncosyTower.SourceGen.Common/EncosyTower.SourceGen.Common.csproj" />
         <ProjectReference Include="../EncosyTower.SourceGen.Helpers/EncosyTower.SourceGen.Helpers.csproj" />
         <ProjectReference Include="../EncosyTower.SourceGen.Generators/EncosyTower.SourceGen.Generators.csproj" />
+        <ProjectReference Include="../EncosyTower.SourceGen.Analyzers/EncosyTower.SourceGen.Analyzers.csproj" ReferenceOutputAssembly="true" OutputItemType="" />
     </ItemGroup>
 
     <Import Project="UnityDllPaths.targets" />

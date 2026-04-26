@@ -33,4 +33,8 @@
       <ProjectReference Include="../EncosyTower.SourceGen.Helpers/EncosyTower.SourceGen.Helpers.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <InternalsVisibleTo Include="EncosyTower.SourceGen.Tests" />
+    </ItemGroup>
+
 </Project>
