@@ -339,7 +339,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
 
         private static readonly DiagnosticDescriptor s_errorDescriptor
             = new(
-                  "SG_RUNTIME_TYPE_CACHE_01"
+                  "SG_RUNTIME_TYPE_CACHES_UNKNOWN_0001"
                 , "Runtime Type Cache Generator Error"
                 , "This error indicates a bug in the Runtime Type Caches source generators. Error message: '{0}'."
                 , "RuntimeTypeCache"
