@@ -22,7 +22,7 @@ namespace Samples.Entities.TypeHandles
     [TypeHandle(typeof(EnableableBufferB), false)]
     [TypeHandle(typeof(EnableableComponentA), true)]
     [TypeHandle(typeof(EnableableComponentB), false)]
-    [TypeHandle(typeof(SharedComponentA), true)]
+    [TypeHandle(typeof(SharedComponentA), false)]
     [TypeHandle(typeof(SharedComponentB), false)]
     public partial struct TypeHandles { }
 }
