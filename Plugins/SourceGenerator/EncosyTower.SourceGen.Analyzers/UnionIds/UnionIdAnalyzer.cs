@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
 using EncosyTower.SourceGen.Helpers.UnionIds;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -86,6 +87,8 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
             if (context.Symbol is not INamedTypeSymbol typeSymbol)
                 return;
 
+            var token = context.CancellationToken;
+
             if (typeSymbol.TypeKind == TypeKind.Struct
                 && typeSymbol.HasAttribute(UNION_ID_ATTRIBUTE))
             {
@@ -98,7 +101,7 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
                     return;
                 }
 
-                ValidateInlineKindAttributes(context, typeSymbol);
+                ValidateInlineKindAttributes(context, typeSymbol, token);
                 return;
             }
 
@@ -122,7 +125,7 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                       MustBeUnmanagedType
-                    , attrib.ApplicationSyntaxReference?.GetSyntax()?.GetLocation() ?? typeSymbol.Locations[0]
+                    , attrib.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation() ?? typeSymbol.Locations[0]
                 ));
                 return;
             }
@@ -131,7 +134,7 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                       KindTypeCannotBeIdType
-                    , attrib.ApplicationSyntaxReference?.GetSyntax()?.GetLocation() ?? typeSymbol.Locations[0]
+                    , attrib.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation() ?? typeSymbol.Locations[0]
                     , typeSymbol.ToDisplayString()
                 ));
             }
@@ -143,19 +146,21 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                       KindSizeMustBeSmallerThan16Bytes
-                    , attrib.ApplicationSyntaxReference?.GetSyntax()?.GetLocation() ?? typeSymbol.Locations[0]
+                    , attrib.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation() ?? typeSymbol.Locations[0]
                     , typeSymbol.ToDisplayString()
                 ));
             }
         }
 
-        private static void ValidateInlineKindAttributes(SymbolAnalysisContext context, INamedTypeSymbol idSymbol)
+        private static void ValidateInlineKindAttributes(SymbolAnalysisContext context, INamedTypeSymbol idSymbol, CancellationToken token)
         {
             var seenNames = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
             var seenKindNames = new Dictionary<string, INamedTypeSymbol>(StringComparer.Ordinal);
 
             foreach (var attrib in idSymbol.GetAttributes())
             {
+                token.ThrowIfCancellationRequested();
+
                 if (attrib.AttributeClass?.HasFullName(UNION_ID_KIND_ATTRIBUTE) != true)
                     continue;
 
@@ -170,7 +175,7 @@ namespace EncosyTower.SourceGen.Analyzers.UnionIds
                 if (typeArg.Value is not INamedTypeSymbol kindSymbol)
                     continue;
 
-                var loc = attrib.ApplicationSyntaxReference?.GetSyntax()?.GetLocation() ?? idSymbol.Locations[0];
+                var loc = attrib.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation() ?? idSymbol.Locations[0];
 
                 if (kindSymbol.IsUnmanagedType == false)
                 {
