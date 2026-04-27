@@ -116,7 +116,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
 
             if (arg.Kind == TypedConstantKind.Enum && arg.Value is byte enumValue && enumValue == 0)
             {
-                var location = attrib.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
+                var location = attrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken)?.GetLocation()
                     ?? typeSymbol.Locations[0];
 
                 context.ReportDiagnostic(Diagnostic.Create(
@@ -134,7 +134,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
             )
             {
                 var displayName = (arg.Value as ISymbol)?.ToDisplayString() ?? arg.Value?.ToString() ?? "?";
-                var location = attrib.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
+                var location = attrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken)?.GetLocation()
                     ?? typeSymbol.Locations[0];
 
                 context.ReportDiagnostic(Diagnostic.Create(
