@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -39,26 +40,22 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
 
         private static void AnalyzeNamedType(SymbolAnalysisContext context)
         {
-            if (context.Symbol is not INamedTypeSymbol typeSymbol)
+            if (context.Symbol is not INamedTypeSymbol typeSymbol
+                || typeSymbol.HasAttribute(DATABASE_ATTRIBUTE) == false
+            )
             {
                 return;
             }
 
-            if (typeSymbol.HasAttribute(DATABASE_ATTRIBUTE) == false)
+            var token = context.CancellationToken;
+
+            foreach (var member in typeSymbol.GetMembers())
             {
-                return;
-            }
+                token.ThrowIfCancellationRequested();
 
-            var members = typeSymbol.GetMembers();
-
-            foreach (var member in members)
-            {
-                if (member is not IPropertySymbol property)
-                {
-                    continue;
-                }
-
-                if (property.Type is not INamedTypeSymbol propType)
+                if (member is not IPropertySymbol property
+                    || property.Type is not INamedTypeSymbol propType
+                )
                 {
                     continue;
                 }
@@ -70,51 +67,73 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
                     continue;
                 }
 
-                var attribLocation = tableAttrib.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
-                    ?? (member.Locations.Length > 0 ? member.Locations[0] : Location.None);
-
-                if (propType.IsAbstract)
+                if (TryReportTablePropertyType(context, member, propType, tableAttrib, token))
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                          TableDiagnosticDescriptors.AbstractTypeNotSupported
-                        , attribLocation
-                        , propType.Name
-                    ));
                     continue;
                 }
 
-                if (propType.IsGenericType)
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                          TableDiagnosticDescriptors.GenericTypeNotSupported
-                        , attribLocation
-                        , propType.Name
-                    ));
-                    continue;
-                }
-
-                if (propType.BaseType == null
-                    || propType.TryGetGenericType(DATA_TABLE_ASSET, 3, 2, out _) == false
-                )
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                          TableDiagnosticDescriptors.MustBeDerivedFromDataTableAsset
-                        , attribLocation
-                        , propType.Name
-                    ));
-                    continue;
-                }
-
-                ValidateHorizontalAttributes(context, member);
+                ValidateHorizontalAttributes(context, member, token);
             }
         }
 
-        private static void ValidateHorizontalAttributes(SymbolAnalysisContext context, ISymbol member)
+        private static bool TryReportTablePropertyType(
+              SymbolAnalysisContext context
+            , ISymbol member
+            , INamedTypeSymbol propType
+            , AttributeData tableAttrib
+            , CancellationToken token
+        )
+        {
+            var memberLocation = member.Locations.Length > 0
+                ? member.Locations[0]
+                : Location.None;
+
+            var attribLocation = tableAttrib.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation()
+                ?? memberLocation;
+
+            if (propType.IsAbstract)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                      TableDiagnosticDescriptors.AbstractTypeNotSupported
+                    , attribLocation
+                    , propType.Name
+                ));
+                return true;
+            }
+
+            if (propType.IsGenericType)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                      TableDiagnosticDescriptors.GenericTypeNotSupported
+                    , attribLocation
+                    , propType.Name
+                ));
+                return true;
+            }
+
+            if (propType.BaseType == null
+                || propType.TryGetGenericType(DATA_TABLE_ASSET, 3, 2, out _) == false
+            )
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                      TableDiagnosticDescriptors.MustBeDerivedFromDataTableAsset
+                    , attribLocation
+                    , propType.Name
+                ));
+                return true;
+            }
+
+            return false;
+        }
+
+        private static void ValidateHorizontalAttributes(SymbolAnalysisContext context, ISymbol member, CancellationToken token)
         {
             var attributes = member.GetAttributes(HORIZONTAL_LIST_ATTRIBUTE);
 
             foreach (var attrib in attributes)
             {
+                token.ThrowIfCancellationRequested();
+
                 var args = attrib.ConstructorArguments;
 
                 if (args.Length < 2)
@@ -122,7 +141,7 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
                     continue;
                 }
 
-                var attribLocation = attrib.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
+                var attribLocation = attrib.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation()
                     ?? (member.Locations.Length > 0 ? member.Locations[0] : Location.None);
 
                 if (args[0].Value is not INamedTypeSymbol targetType)
