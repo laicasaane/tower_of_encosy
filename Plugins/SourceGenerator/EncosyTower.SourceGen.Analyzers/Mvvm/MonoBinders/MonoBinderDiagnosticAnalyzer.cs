@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -112,13 +114,61 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 return;
             }
 
-            AttributeData monoBinderAttr = null;
-            var hasMonoBindingProp = false;
-            var hasMonoBindingCmd = false;
-            var hasMonoBindingExclude = false;
-            var hasMonoBinderExcludeParent = false;
-            AttributeData firstOrphanAttr = null;
-            string firstOrphanAttrName = null;
+            BuildAttributeDirectories(typeSymbol
+                , out var monoBinderAttr
+                , out var bindingExcludeAttrs
+                , out var binderExcludeParentAttrs
+                , out var firstOrphanAttr
+                , out var firstOrphanAttrName
+            );
+
+            if (TryReportOrphanBindingAttribute(context, typeSymbol, monoBinderAttr, firstOrphanAttr, firstOrphanAttrName))
+            {
+                return;
+            }
+
+            if (monoBinderAttr == null
+                || TryGetComponentType(monoBinderAttr, out var componentType) == false
+            )
+            {
+                return;
+            }
+
+            var excludeObsolete = ReadExcludeObsoleteFlag(monoBinderAttr);
+            var token = context.CancellationToken;
+
+            AnalyzeComponentType(context, typeSymbol, componentType, monoBinderAttr, token);
+
+            if (excludeObsolete)
+            {
+                AnalyzeObsoleteConflicts(context, typeSymbol, componentType, token);
+            }
+
+            if (binderExcludeParentAttrs is { Count: > 0 })
+            {
+                AnalyzeExcludeParent(context, typeSymbol, componentType, binderExcludeParentAttrs, token);
+            }
+
+            if (bindingExcludeAttrs is { Count: > 0 })
+            {
+                AnalyzeExcludedMembers(context, typeSymbol, componentType, bindingExcludeAttrs, token);
+            }
+        }
+
+        private static void BuildAttributeDirectories(
+              INamedTypeSymbol typeSymbol
+            , out AttributeData monoBinderAttr
+            , out List<AttributeData> bindingExcludeAttrs
+            , out List<AttributeData> binderExcludeParentAttrs
+            , out AttributeData firstOrphanAttr
+            , out string firstOrphanAttrName
+        )
+        {
+            monoBinderAttr = null;
+            bindingExcludeAttrs = null;
+            binderExcludeParentAttrs = null;
+            firstOrphanAttr = null;
+            firstOrphanAttrName = null;
 
             foreach (var attr in typeSymbol.GetAttributes())
             {
@@ -135,8 +185,6 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 }
                 else if (attrClass.IsType(MONO_BINDING_PROP_ATTRIBUTE))
                 {
-                    hasMonoBindingProp = true;
-
                     if (firstOrphanAttr == null)
                     {
                         firstOrphanAttr = attr;
@@ -145,8 +193,6 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 }
                 else if (attrClass.IsType(MONO_BINDING_CMD_ATTRIBUTE))
                 {
-                    hasMonoBindingCmd = true;
-
                     if (firstOrphanAttr == null)
                     {
                         firstOrphanAttr = attr;
@@ -155,7 +201,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 }
                 else if (attrClass.IsType(MONO_BINDING_EXCLUDE_ATTRIBUTE))
                 {
-                    hasMonoBindingExclude = true;
+                    (bindingExcludeAttrs ??= new List<AttributeData>()).Add(attr);
 
                     if (firstOrphanAttr == null)
                     {
@@ -165,7 +211,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 }
                 else if (attrClass.IsType(MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE))
                 {
-                    hasMonoBinderExcludeParent = true;
+                    (binderExcludeParentAttrs ??= new List<AttributeData>()).Add(attr);
 
                     if (firstOrphanAttr == null)
                     {
@@ -174,184 +220,237 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                     }
                 }
             }
+        }
 
-            if (monoBinderAttr == null
-                && (hasMonoBindingProp || hasMonoBindingCmd || hasMonoBindingExclude || hasMonoBinderExcludeParent)
-                && firstOrphanAttr != null
+        private static bool TryReportOrphanBindingAttribute(
+              SymbolAnalysisContext context
+            , INamedTypeSymbol typeSymbol
+            , AttributeData monoBinderAttr
+            , AttributeData firstOrphanAttr
+            , string firstOrphanAttrName
+        )
+        {
+            if (monoBinderAttr != null || firstOrphanAttr == null)
+            {
+                return false;
+            }
+
+            var location = firstOrphanAttr.ApplicationSyntaxReference
+                ?.GetSyntax(context.CancellationToken)?.GetLocation()?? typeSymbol.Locations[0];
+
+            context.ReportDiagnostic(Diagnostic.Create(
+                  BindingAttributeRequiresMonoBinder
+                , location
+                , typeSymbol.Name
+                , firstOrphanAttrName
+            ));
+
+            return true;
+        }
+
+        private static bool TryGetComponentType(AttributeData monoBinderAttr, out INamedTypeSymbol componentType)
+        {
+            if (monoBinderAttr.ConstructorArguments.Length < 1
+                || monoBinderAttr.ConstructorArguments[0].Value is not INamedTypeSymbol named
             )
             {
-                var location = firstOrphanAttr.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
-                    ?? typeSymbol.Locations[0];
-
-                context.ReportDiagnostic(Diagnostic.Create(
-                      BindingAttributeRequiresMonoBinder
-                    , location
-                    , typeSymbol.Name
-                    , firstOrphanAttrName
-                ));
-
-                return;
+                componentType = null;
+                return false;
             }
 
-            if (monoBinderAttr == null)
-            {
-                return;
-            }
+            componentType = named;
+            return true;
+        }
 
-            if (monoBinderAttr.ConstructorArguments.Length < 1
-                || monoBinderAttr.ConstructorArguments[0].Value is not INamedTypeSymbol componentType)
-            {
-                return;
-            }
-
-            var excludeObsolete = false;
-
+        private static bool ReadExcludeObsoleteFlag(AttributeData monoBinderAttr)
+        {
             foreach (var namedArg in monoBinderAttr.NamedArguments)
             {
                 if (string.Equals(namedArg.Key, "ExcludeObsolete", StringComparison.Ordinal)
                     && namedArg.Value.Value is bool boolValue
                 )
                 {
-                    excludeObsolete = boolValue;
-                    break;
+                    return boolValue;
                 }
             }
 
-            if (InheritsFromUnityObject(componentType) == false)
-            {
-                var location = monoBinderAttr.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
-                    ?? typeSymbol.Locations[0];
+            return false;
+        }
 
-                context.ReportDiagnostic(Diagnostic.Create(
-                      ComponentTypeMustInheritUnityObject
-                    , location
-                    , componentType.ToDisplayString()
-                ));
-            }
-
-            if (excludeObsolete)
-            {
-                foreach (var attr in typeSymbol.GetAttributes())
-                {
-                    var attrClass = attr.AttributeClass;
-
-                    if (attrClass is null)
-                    {
-                        continue;
-                    }
-
-                    if (attrClass.IsType(MONO_BINDING_PROP_ATTRIBUTE)
-                        || attrClass.IsType(MONO_BINDING_CMD_ATTRIBUTE)
-                    )
-                    {
-                        if (attr.ConstructorArguments.Length < 1
-                            || attr.ConstructorArguments[0].Value is not string memberName
-                            || string.IsNullOrEmpty(memberName)
-                        )
-                        {
-                            continue;
-                        }
-
-                        if (IsObsoleteMember(componentType, memberName))
-                        {
-                            var attrName = attrClass.IsType(MONO_BINDING_PROP_ATTRIBUTE)
-                                ? "MonoBindingProperty"
-                                : "MonoBindingCommand";
-
-                            var location = attr.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
-                                ?? typeSymbol.Locations[0];
-
-                            context.ReportDiagnostic(Diagnostic.Create(
-                                  ObsoleteExplicitMemberWithExcludeObsolete
-                                , location
-                                , memberName
-                                , componentType.ToDisplayString()
-                                , attrName
-                            ));
-                        }
-                    }
-                    else if (attrClass.IsType(MONO_BINDING_EXCLUDE_ATTRIBUTE))
-                    {
-                        if (attr.ConstructorArguments.Length < 1
-                            || attr.ConstructorArguments[0].Value is not string memberName
-                            || string.IsNullOrEmpty(memberName)
-                        )
-                        {
-                            continue;
-                        }
-
-                        if (IsObsoleteMember(componentType, memberName))
-                        {
-                            var location = attr.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
-                                ?? typeSymbol.Locations[0];
-
-                            context.ReportDiagnostic(Diagnostic.Create(
-                                  ExcludeObsoleteMemberRedundant
-                                , location
-                                , memberName
-                            ));
-                        }
-                    }
-                }
-            }
-
-            if (hasMonoBinderExcludeParent)
-            {
-                foreach (var attr in typeSymbol.GetAttributes())
-                {
-                    var attrClass = attr.AttributeClass;
-
-                    if (attrClass is null || attrClass.IsType(MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE) == false)
-                    {
-                        continue;
-                    }
-
-                    if (attr.ConstructorArguments.Length < 1
-                        || attr.ConstructorArguments[0].Value is not INamedTypeSymbol parentType
-                    )
-                    {
-                        continue;
-                    }
-
-                    if (SymbolEqualityComparer.Default.Equals(parentType, componentType))
-                    {
-                        var location = attr.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
-                            ?? typeSymbol.Locations[0];
-
-                        context.ReportDiagnostic(Diagnostic.Create(
-                              ExcludeParentTypeIsComponentType
-                            , location
-                            , parentType.ToDisplayString()
-                        ));
-                    }
-                    else if (IsInBaseTypeChain(componentType, parentType) == false)
-                    {
-                        var location = attr.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
-                            ?? typeSymbol.Locations[0];
-
-                        context.ReportDiagnostic(Diagnostic.Create(
-                              ExcludeParentTypeNotInHierarchy
-                            , location
-                            , parentType.ToDisplayString()
-                            , componentType.ToDisplayString()
-                        ));
-                    }
-                }
-            }
-
-            if (hasMonoBindingExclude == false)
+        private static void AnalyzeComponentType(
+              SymbolAnalysisContext context
+            , INamedTypeSymbol typeSymbol
+            , INamedTypeSymbol componentType
+            , AttributeData monoBinderAttr
+            , CancellationToken token
+        )
+        {
+            if (InheritsFromUnityObject(componentType))
             {
                 return;
             }
 
+            var location = monoBinderAttr.ApplicationSyntaxReference
+                ?.GetSyntax(token)?.GetLocation() ?? typeSymbol.Locations[0];
+
+            context.ReportDiagnostic(Diagnostic.Create(
+                  ComponentTypeMustInheritUnityObject
+                , location
+                , componentType.ToDisplayString()
+            ));
+        }
+
+        private static void AnalyzeObsoleteConflicts(
+              SymbolAnalysisContext context
+            , INamedTypeSymbol typeSymbol
+            , INamedTypeSymbol componentType
+            , CancellationToken token
+        )
+        {
             foreach (var attr in typeSymbol.GetAttributes())
             {
+                token.ThrowIfCancellationRequested();
+
                 var attrClass = attr.AttributeClass;
 
-                if (attrClass is null || attrClass.IsType(MONO_BINDING_EXCLUDE_ATTRIBUTE) == false)
+                if (attrClass is null)
                 {
                     continue;
                 }
+
+                if (attrClass.IsType(MONO_BINDING_PROP_ATTRIBUTE))
+                {
+                    TryReportObsoleteExplicit(context, typeSymbol, componentType, attr, "MonoBindingProperty", token);
+                }
+                else if (attrClass.IsType(MONO_BINDING_CMD_ATTRIBUTE))
+                {
+                    TryReportObsoleteExplicit(context, typeSymbol, componentType, attr, "MonoBindingCommand", token);
+                }
+                else if (attrClass.IsType(MONO_BINDING_EXCLUDE_ATTRIBUTE))
+                {
+                    TryReportObsoleteRedundantExclude(context, typeSymbol, componentType, attr, token);
+                }
+            }
+        }
+
+        private static void TryReportObsoleteExplicit(
+              SymbolAnalysisContext context
+            , INamedTypeSymbol typeSymbol
+            , INamedTypeSymbol componentType
+            , AttributeData attr
+            , string attrName
+            , CancellationToken token
+        )
+        {
+            if (attr.ConstructorArguments.Length < 1
+                || attr.ConstructorArguments[0].Value is not string memberName
+                || string.IsNullOrEmpty(memberName)
+            )
+            {
+                return;
+            }
+
+            if (IsObsoleteMember(componentType, memberName) == false)
+            {
+                return;
+            }
+
+            var location = attr.ApplicationSyntaxReference
+                ?.GetSyntax(token)?.GetLocation() ?? typeSymbol.Locations[0];
+
+            context.ReportDiagnostic(Diagnostic.Create(
+                  ObsoleteExplicitMemberWithExcludeObsolete
+                , location
+                , memberName
+                , componentType.ToDisplayString()
+                , attrName
+            ));
+        }
+
+        private static void TryReportObsoleteRedundantExclude(
+              SymbolAnalysisContext context
+            , INamedTypeSymbol typeSymbol
+            , INamedTypeSymbol componentType
+            , AttributeData attr
+            , CancellationToken token
+        )
+        {
+            if (attr.ConstructorArguments.Length < 1
+                || attr.ConstructorArguments[0].Value is not string memberName
+                || string.IsNullOrEmpty(memberName)
+            )
+            {
+                return;
+            }
+
+            if (IsObsoleteMember(componentType, memberName) == false)
+            {
+                return;
+            }
+
+            var location = attr.ApplicationSyntaxReference
+                ?.GetSyntax(token)?.GetLocation() ?? typeSymbol.Locations[0];
+
+            context.ReportDiagnostic(Diagnostic.Create(
+                  ExcludeObsoleteMemberRedundant
+                , location
+                , memberName
+            ));
+        }
+
+        private static void AnalyzeExcludeParent(
+              SymbolAnalysisContext context
+            , INamedTypeSymbol typeSymbol
+            , INamedTypeSymbol componentType
+            , List<AttributeData> binderExcludeParentAttrs
+            , CancellationToken token
+        )
+        {
+            foreach (var attr in binderExcludeParentAttrs)
+            {
+                token.ThrowIfCancellationRequested();
+
+                if (attr.ConstructorArguments.Length < 1
+                    || attr.ConstructorArguments[0].Value is not INamedTypeSymbol parentType
+                )
+                {
+                    continue;
+                }
+
+                var location = attr.ApplicationSyntaxReference
+                    ?.GetSyntax(token)?.GetLocation() ?? typeSymbol.Locations[0];
+
+                if (SymbolEqualityComparer.Default.Equals(parentType, componentType))
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                          ExcludeParentTypeIsComponentType
+                        , location
+                        , parentType.ToDisplayString()
+                    ));
+                }
+                else if (IsInBaseTypeChain(componentType, parentType) == false)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                          ExcludeParentTypeNotInHierarchy
+                        , location
+                        , parentType.ToDisplayString()
+                        , componentType.ToDisplayString()
+                    ));
+                }
+            }
+        }
+
+        private static void AnalyzeExcludedMembers(
+              SymbolAnalysisContext context
+            , INamedTypeSymbol typeSymbol
+            , INamedTypeSymbol componentType
+            , List<AttributeData> bindingExcludeAttrs
+            , CancellationToken token
+        )
+        {
+            foreach (var attr in bindingExcludeAttrs)
+            {
+                token.ThrowIfCancellationRequested();
 
                 if (attr.ConstructorArguments.Length < 1
                     || attr.ConstructorArguments[0].Value is not string excludedName
@@ -361,18 +460,20 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                     continue;
                 }
 
-                if (ComponentHasMember(componentType, excludedName) == false)
+                if (ComponentHasMember(componentType, excludedName))
                 {
-                    var location = attr.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
-                        ?? typeSymbol.Locations[0];
-
-                    context.ReportDiagnostic(Diagnostic.Create(
-                          ExcludedMemberNotFound
-                        , location
-                        , excludedName
-                        , componentType.ToDisplayString()
-                    ));
+                    continue;
                 }
+
+                var location = attr.ApplicationSyntaxReference
+                    ?.GetSyntax(token)?.GetLocation() ?? typeSymbol.Locations[0];
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      ExcludedMemberNotFound
+                    , location
+                    , excludedName
+                    , componentType.ToDisplayString()
+                ));
             }
         }
 
