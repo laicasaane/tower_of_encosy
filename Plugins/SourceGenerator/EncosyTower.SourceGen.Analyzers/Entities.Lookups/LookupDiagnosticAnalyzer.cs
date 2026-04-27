@@ -134,7 +134,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
             foreach (var attrib in typeSymbol.GetAttributes(LOOKUP_ATTRIBUTE))
             {
                 var args = attrib.ConstructorArguments;
-                var location = attrib.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
+                var location = attrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken)?.GetLocation()
                     ?? typeSymbol.Locations[0];
 
                 if (args.Length < 1
