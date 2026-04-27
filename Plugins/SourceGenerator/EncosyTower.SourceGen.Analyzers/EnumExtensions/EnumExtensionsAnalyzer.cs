@@ -59,7 +59,7 @@ namespace EncosyTower.SourceGen.Analyzers.EnumExtensions
             )
             {
                 var displayName = (typeArg.Value as ISymbol)?.ToDisplayString() ?? typeArg.Value?.ToString() ?? "?";
-                var location = attrib.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
+                var location = attrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken)?.GetLocation()
                     ?? typeSymbol.Locations[0];
 
                 context.ReportDiagnostic(Diagnostic.Create(
