@@ -133,6 +133,26 @@ namespace EncosyTower.SourceGen.Analyzers.EnumTemplates
 
         private static void AnalyzeTemplateStruct(SymbolAnalysisContext context, INamedTypeSymbol templateSymbol)
         {
+            ReportTemplateSuffix(context, templateSymbol);
+
+            var attributes = templateSymbol.GetAttributes(MEMBERS_FROM_ENUM_ATTRIBUTE, MEMBER_FROM_TYPE_ATTRIBUTE);
+            var token = context.CancellationToken;
+
+            foreach (var attrib in attributes)
+            {
+                token.ThrowIfCancellationRequested();
+
+                if (attrib == null)
+                {
+                    continue;
+                }
+
+                AnalyzeTemplateMembershipAttribute(context, templateSymbol, attrib);
+            }
+        }
+
+        private static void ReportTemplateSuffix(SymbolAnalysisContext context, INamedTypeSymbol templateSymbol)
+        {
             var name = templateSymbol.Name;
 
             if (name.IndexOf("_EnumTemplate", System.StringComparison.Ordinal) <= 0
@@ -144,47 +164,44 @@ namespace EncosyTower.SourceGen.Analyzers.EnumTemplates
                     , templateSymbol.Locations[0]
                 ));
             }
+        }
 
-            var attributes = templateSymbol.GetAttributes(MEMBERS_FROM_ENUM_ATTRIBUTE, MEMBER_FROM_TYPE_ATTRIBUTE);
+        private static void AnalyzeTemplateMembershipAttribute(
+              SymbolAnalysisContext context
+            , INamedTypeSymbol templateSymbol
+            , AttributeData attrib
+        )
+        {
+            var location = attrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken)?.GetLocation()
+                ?? templateSymbol.Locations[0];
 
-            foreach (var attrib in attributes)
+            if (attrib.ConstructorArguments.Length < 2)
             {
-                if (attrib == null)
-                {
-                    continue;
-                }
+                context.ReportDiagnostic(Diagnostic.Create(MustSpecifyTypeAndOrder, location));
+                return;
+            }
 
-                var location = attrib.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
-                    ?? templateSymbol.Locations[0];
+            var typeArg = attrib.ConstructorArguments[0];
 
-                if (attrib.ConstructorArguments.Length < 2)
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(MustSpecifyTypeAndOrder, location));
-                    continue;
-                }
+            if (typeArg.Kind != TypedConstantKind.Type
+                || typeArg.Value is not INamedTypeSymbol memberType
+            )
+            {
+                context.ReportDiagnostic(Diagnostic.Create(MustBeTypeOfExpression, location));
+                return;
+            }
 
-                var typeArg = attrib.ConstructorArguments[0];
-
-                if (typeArg.Kind != TypedConstantKind.Type
-                    || typeArg.Value is not INamedTypeSymbol memberType
-                )
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(MustBeTypeOfExpression, location));
-                    continue;
-                }
-
-                if (memberType.TypeKind == TypeKind.Enum)
-                {
-                    ValidateEnumUnderlyingType(context, memberType, location);
-                }
-                else if (memberType.IsUnboundGenericType)
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                          NotSupportUnboundGenericType
-                        , location
-                        , memberType.ToDisplayString()
-                    ));
-                }
+            if (memberType.TypeKind == TypeKind.Enum)
+            {
+                ValidateEnumUnderlyingType(context, memberType, location);
+            }
+            else if (memberType.IsUnboundGenericType)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                      NotSupportUnboundGenericType
+                    , location
+                    , memberType.ToDisplayString()
+                ));
             }
         }
 
@@ -195,7 +212,7 @@ namespace EncosyTower.SourceGen.Analyzers.EnumTemplates
             , bool isEnumMembers
         )
         {
-            var location = attrib.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
+            var location = attrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken)?.GetLocation()
                 ?? typeSymbol.Locations[0];
 
             if (attrib.ConstructorArguments.Length < 2)
