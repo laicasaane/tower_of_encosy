@@ -32,28 +32,9 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                 return;
             }
 
-            if (typeSymbol.GetAttribute(DATA_ATTRIBUTE_METADATA) is null
-                && typeSymbol.GetAttribute($"global::{DATA_ATTRIBUTE_METADATA}") is null
-            )
+            if (HasDataAttribute(typeSymbol) == false)
             {
-                var hasAttr = false;
-
-                foreach (var attr in typeSymbol.GetAttributes())
-                {
-                    if (attr.AttributeClass is { } attrClass
-                        && (attrClass.HasFullName("EncosyTower.Data.DataAttribute")
-                            || attrClass.HasFullName("EncosyTower.Data.Data"))
-                    )
-                    {
-                        hasAttr = true;
-                        break;
-                    }
-                }
-
-                if (hasAttr == false)
-                {
-                    return;
-                }
+                return;
             }
 
             var typeLocation = typeSymbol.Locations.Length > 0
@@ -61,6 +42,7 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                 : Location.None;
 
             var isMutable = typeSymbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE) is not null;
+            var withoutId = typeSymbol.GetAttribute(DATA_WITHOUT_ID_ATTRIBUTE) is not null;
             var fieldPolicyAttrib = typeSymbol.GetAttribute(DATA_FIELD_POLICY_ATTRIBUTE);
 
             if (isMutable == false && fieldPolicyAttrib != null)
@@ -72,113 +54,169 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                 ));
             }
 
-            var withoutPropertySetters = false;
-
-            if (isMutable)
-            {
-                var mutableAttrib = typeSymbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE);
-
-                if (mutableAttrib != null)
-                {
-                    var args = mutableAttrib.ConstructorArguments;
-
-                    if (args.Length > 0 && args[0].Kind == TypedConstantKind.Enum)
-                    {
-                        var options = (DataMutableOptions)(int)args[0].Value;
-                        withoutPropertySetters = options.HasFlag(DataMutableOptions.WithoutPropertySetters);
-                    }
-                }
-            }
-
+            var withoutPropertySetters = ReadWithoutPropertySettersFlag(typeSymbol, isMutable);
             var allowOnlyPrivateOrInitSetter = isMutable == false || withoutPropertySetters;
-            var withoutId = typeSymbol.GetAttribute(DATA_WITHOUT_ID_ATTRIBUTE) is not null;
+
+            var token = context.CancellationToken;
 
             foreach (var member in typeSymbol.GetMembers())
             {
-                if (member is IFieldSymbol field)
+                token.ThrowIfCancellationRequested();
+
+                switch (member)
                 {
-                    if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE) == false)
-                    {
-                        continue;
-                    }
+                    case IFieldSymbol field:
+                        AnalyzeField(context, typeSymbol, field, isMutable, withoutId);
+                        break;
 
-                    if (isMutable == false
-                        && field.DeclaredAccessibility != Accessibility.Private
-                    )
-                    {
-                        var fieldLocation = field.Locations.Length > 0
-                            ? field.Locations[0]
-                            : Location.None;
-
-                        context.ReportDiagnostic(Diagnostic.Create(
-                              DiagnosticDescriptors.ImmutableDataFieldMustBePrivate
-                            , fieldLocation
-                            , typeSymbol.Name
-                        ));
-                    }
-
-                    if (withoutId == false)
-                    {
-                        var propertyName = field.ToPropertyName();
-
-                        if (string.Equals(propertyName, "Id", System.StringComparison.Ordinal))
-                        {
-                            if (IsCollectionType(field.Type))
-                            {
-                                var fieldLocation = field.Locations.Length > 0
-                                    ? field.Locations[0]
-                                    : Location.None;
-
-                                context.ReportDiagnostic(Diagnostic.Create(
-                                      DiagnosticDescriptors.CollectionIsNotApplicableForProperty
-                                    , fieldLocation
-                                    , field.Type.Name
-                                    , "Id"
-                                ));
-                            }
-                        }
-                    }
-
-                    continue;
+                    case IPropertySymbol property:
+                        AnalyzeProperty(context, typeSymbol, property, allowOnlyPrivateOrInitSetter, withoutId);
+                        break;
                 }
+            }
+        }
 
-                if (member is IPropertySymbol property)
+        private static bool HasDataAttribute(INamedTypeSymbol typeSymbol)
+        {
+            if (typeSymbol.GetAttribute(DATA_ATTRIBUTE_METADATA) is not null
+                || typeSymbol.GetAttribute($"global::{DATA_ATTRIBUTE_METADATA}") is not null
+            )
+            {
+                return true;
+            }
+
+            foreach (var attr in typeSymbol.GetAttributes())
+            {
+                if (attr.AttributeClass is { } attrClass
+                    && (attrClass.HasFullName("EncosyTower.Data.DataAttribute")
+                        || attrClass.HasFullName("EncosyTower.Data.Data"))
+                )
                 {
-                    if (allowOnlyPrivateOrInitSetter
-                        && property.SetMethod is { } setter
-                        && setter.IsInitOnly == false
-                        && setter.DeclaredAccessibility != Accessibility.Private
-                    )
-                    {
-                        var propLocation = property.Locations.Length > 0
-                            ? property.Locations[0]
-                            : Location.None;
-
-                        context.ReportDiagnostic(Diagnostic.Create(
-                              DiagnosticDescriptors.OnlyPrivateOrInitOnlySetterIsAllowed
-                            , propLocation
-                            , typeSymbol.Name
-                        ));
-                    }
-
-                    if (withoutId == false
-                        && property.GetAttribute(DATA_PROPERTY_ATTRIBUTE) is not null
-                        && string.Equals(property.Name, "Id", System.StringComparison.Ordinal)
-                        && IsCollectionType(property.Type)
-                    )
-                    {
-                        var propLocation = property.Locations.Length > 0
-                            ? property.Locations[0]
-                            : Location.None;
-
-                        context.ReportDiagnostic(Diagnostic.Create(
-                              DiagnosticDescriptors.CollectionIsNotApplicableForProperty
-                            , propLocation
-                            , property.Type.Name
-                            , "Id"
-                        ));
-                    }
+                    return true;
                 }
+            }
+
+            return false;
+        }
+
+        private static bool ReadWithoutPropertySettersFlag(INamedTypeSymbol typeSymbol, bool isMutable)
+        {
+            if (isMutable == false)
+            {
+                return false;
+            }
+
+            var mutableAttrib = typeSymbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE);
+
+            if (mutableAttrib == null)
+            {
+                return false;
+            }
+
+            var args = mutableAttrib.ConstructorArguments;
+
+            if (args.Length == 0 || args[0].Kind != TypedConstantKind.Enum)
+            {
+                return false;
+            }
+
+            var options = (DataMutableOptions)(int)args[0].Value;
+            return options.HasFlag(DataMutableOptions.WithoutPropertySetters);
+        }
+
+        private static void AnalyzeField(
+              SymbolAnalysisContext context
+            , INamedTypeSymbol typeSymbol
+            , IFieldSymbol field
+            , bool isMutable
+            , bool withoutId
+        )
+        {
+            if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE) == false)
+            {
+                return;
+            }
+
+            if (isMutable == false
+                && field.DeclaredAccessibility != Accessibility.Private
+            )
+            {
+                var fieldLocation = field.Locations.Length > 0
+                    ? field.Locations[0]
+                    : Location.None;
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      DiagnosticDescriptors.ImmutableDataFieldMustBePrivate
+                    , fieldLocation
+                    , typeSymbol.Name
+                ));
+            }
+
+            if (withoutId)
+            {
+                return;
+            }
+
+            var propertyName = field.ToPropertyName();
+
+            if (string.Equals(propertyName, "Id", System.StringComparison.Ordinal)
+                && IsCollectionType(field.Type)
+            )
+            {
+                var fieldLocation = field.Locations.Length > 0
+                    ? field.Locations[0]
+                    : Location.None;
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      DiagnosticDescriptors.CollectionIsNotApplicableForProperty
+                    , fieldLocation
+                    , field.Type.Name
+                    , "Id"
+                ));
+            }
+        }
+
+        private static void AnalyzeProperty(
+              SymbolAnalysisContext context
+            , INamedTypeSymbol typeSymbol
+            , IPropertySymbol property
+            , bool allowOnlyPrivateOrInitSetter
+            , bool withoutId
+        )
+        {
+            if (allowOnlyPrivateOrInitSetter
+                && property.SetMethod is { } setter
+                && setter.IsInitOnly == false
+                && setter.DeclaredAccessibility != Accessibility.Private
+            )
+            {
+                var propLocation = property.Locations.Length > 0
+                    ? property.Locations[0]
+                    : Location.None;
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      DiagnosticDescriptors.OnlyPrivateOrInitOnlySetterIsAllowed
+                    , propLocation
+                    , typeSymbol.Name
+                ));
+            }
+
+            if (withoutId == false
+                && property.GetAttribute(DATA_PROPERTY_ATTRIBUTE) is not null
+                && string.Equals(property.Name, "Id", System.StringComparison.Ordinal)
+                && IsCollectionType(property.Type)
+            )
+            {
+                var propLocation = property.Locations.Length > 0
+                    ? property.Locations[0]
+                    : Location.None;
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      DiagnosticDescriptors.CollectionIsNotApplicableForProperty
+                    , propLocation
+                    , property.Type.Name
+                    , "Id"
+                ));
             }
         }
 
