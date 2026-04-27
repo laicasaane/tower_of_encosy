@@ -64,7 +64,7 @@ namespace EncosyTower.SourceGen.Analyzers.NewtonsoftAotHelpers
             }
 
             var attrib = typeSymbol.GetAttribute(ATTRIBUTE);
-            var location = attrib?.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
+            var location = attrib?.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken)?.GetLocation()
                 ?? typeSymbol.Locations[0];
 
             if (typeSymbol.IsAbstract)
