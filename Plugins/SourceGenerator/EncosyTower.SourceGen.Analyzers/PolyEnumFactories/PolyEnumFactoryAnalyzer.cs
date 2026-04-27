@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Immutable;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -102,11 +102,12 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
             }
 
             var attrib = typeSymbol.GetAttribute(POLY_ENUM_FACTORY_FOR_ATTRIBUTE);
-            var attribLocation = attrib?.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
+            var token = context.CancellationToken;
+            var attribLocation = attrib?.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation()
                 ?? typeSymbol.Locations[0];
             var typeLocation = typeSymbol.Locations.Length > 0 ? typeSymbol.Locations[0] : attribLocation;
 
-            if (IsDeclaredPartial(typeSymbol) == false)
+            if (IsDeclaredPartial(typeSymbol, token) == false)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                       MustBePartial
@@ -180,11 +181,13 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
             }
         }
 
-        private static bool IsDeclaredPartial(INamedTypeSymbol typeSymbol)
+        private static bool IsDeclaredPartial(INamedTypeSymbol typeSymbol, CancellationToken token)
         {
             foreach (var syntaxRef in typeSymbol.DeclaringSyntaxReferences)
             {
-                if (syntaxRef.GetSyntax() is TypeDeclarationSyntax typeSyntax)
+                token.ThrowIfCancellationRequested();
+
+                if (syntaxRef.GetSyntax(token) is TypeDeclarationSyntax typeSyntax)
                 {
                     foreach (var modifier in typeSyntax.Modifiers)
                     {

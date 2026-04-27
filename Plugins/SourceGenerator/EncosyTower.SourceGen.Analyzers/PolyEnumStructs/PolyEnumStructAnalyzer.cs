@@ -78,7 +78,8 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
             }
 
             var attrib = typeSymbol.GetAttribute(POLY_ENUM_STRUCT_ATTRIBUTE);
-            var location = attrib?.ApplicationSyntaxReference?.GetSyntax()?.GetLocation()
+            var token = context.CancellationToken;
+            var location = attrib?.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation()
                 ?? typeSymbol.Locations[0];
 
             if (typeSymbol.TypeParameters.Length > 0)
