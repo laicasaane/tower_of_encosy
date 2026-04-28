@@ -9,39 +9,7 @@ namespace EncosyTower.SourceGen.Tests.Mvvm.ObservableProperties;
 [TestClass]
 public class ObservablePropertyDiagnosticAnalyzerTests
 {
-    private const string STUB_ATTRIBUTES = """
-        namespace EncosyTower.Mvvm.ComponentModel
-        {
-            [System.AttributeUsage(System.AttributeTargets.Class)]
-            public class ObservableObjectAttribute : System.Attribute { }
-
-            [System.AttributeUsage(System.AttributeTargets.Field | System.AttributeTargets.Property)]
-            public class ObservablePropertyAttribute : System.Attribute
-            {
-                public ObservablePropertyAttribute() { }
-                public ObservablePropertyAttribute(string name) { }
-            }
-
-            [System.AttributeUsage(System.AttributeTargets.Field | System.AttributeTargets.Property, AllowMultiple = true)]
-            public class NotifyPropertyChangedForAttribute : System.Attribute
-            {
-                public NotifyPropertyChangedForAttribute(string propertyName) { }
-                public NotifyPropertyChangedForAttribute(string propertyName, params string[] otherPropertyNames) { }
-            }
-
-            [System.AttributeUsage(System.AttributeTargets.Field | System.AttributeTargets.Property, AllowMultiple = true)]
-            public class NotifyCanExecuteChangedForAttribute : System.Attribute
-            {
-                public NotifyCanExecuteChangedForAttribute(string commandName) { }
-                public NotifyCanExecuteChangedForAttribute(string commandName, params string[] otherCommandNames) { }
-            }
-        }
-        namespace EncosyTower.Mvvm.Input
-        {
-            [System.AttributeUsage(System.AttributeTargets.Method)]
-            public class RelayCommandAttribute : System.Attribute { }
-        }
-        """;
+    private const string STUB_ATTRIBUTES = MvvmAnalyzerStubs.ATTRIBUTES;
 
     private static string Wrap(string body)
         => $"{STUB_ATTRIBUTES}\nnamespace TestProject\n{{\n{body}\n}}\n";
@@ -357,6 +325,20 @@ public class ObservablePropertyDiagnosticAnalyzerTests
                 {
                     [EncosyTower.Mvvm.ComponentModel.ObservableProperty("Counter")]
                     private int _count;
+                }
+            """);
+
+    [TestMethod]
+    public Task NestedClassWithObservableProperty_NoDiagnostics()
+        => RunAsync("""
+                public class Outer
+                {
+                    [EncosyTower.Mvvm.ComponentModel.ObservableObject]
+                    public partial class Inner
+                    {
+                        [EncosyTower.Mvvm.ComponentModel.ObservableProperty]
+                        private int _count;
+                    }
                 }
             """);
 }

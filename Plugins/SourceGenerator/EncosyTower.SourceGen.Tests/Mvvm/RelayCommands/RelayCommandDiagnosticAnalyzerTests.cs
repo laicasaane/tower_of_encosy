@@ -9,21 +9,7 @@ namespace EncosyTower.SourceGen.Tests.Mvvm.RelayCommands;
 [TestClass]
 public class RelayCommandDiagnosticAnalyzerTests
 {
-    private const string STUB_ATTRIBUTES = """
-        namespace EncosyTower.Mvvm.ComponentModel
-        {
-            [System.AttributeUsage(System.AttributeTargets.Class)]
-            public class ObservableObjectAttribute : System.Attribute { }
-        }
-        namespace EncosyTower.Mvvm.Input
-        {
-            [System.AttributeUsage(System.AttributeTargets.Method)]
-            public class RelayCommandAttribute : System.Attribute
-            {
-                public string CanExecute { get; set; }
-            }
-        }
-        """;
+    private const string STUB_ATTRIBUTES = MvvmAnalyzerStubs.ATTRIBUTES;
 
     private static string Wrap(string body)
         => $"{STUB_ATTRIBUTES}\nnamespace TestProject\n{{\n{body}\n}}\n";
@@ -378,6 +364,20 @@ public class RelayCommandDiagnosticAnalyzerTests
                 public partial class Vm
                 {
                     private bool CanRun() => true;
+                }
+            """);
+
+    [TestMethod]
+    public Task NestedClassWithRelayCommand_NoDiagnostics()
+        => RunAsync("""
+                public class Outer
+                {
+                    [EncosyTower.Mvvm.ComponentModel.ObservableObject]
+                    public partial class Inner
+                    {
+                        [EncosyTower.Mvvm.Input.RelayCommand]
+                        private void Run() { }
+                    }
                 }
             """);
 }
