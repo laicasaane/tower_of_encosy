@@ -2,7 +2,7 @@ using System;
 
 namespace EncosyTower.TypeWraps
 {
-    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     public sealed class WrapTypeAttribute : Attribute
     {
         public const string DEFAULT_MEMBER_NAME = "value";
@@ -23,7 +23,7 @@ namespace EncosyTower.TypeWraps
         }
     }
 
-    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     public sealed class WrapRecordAttribute : Attribute
     {
         public bool ExcludeConverter { get; set; }
