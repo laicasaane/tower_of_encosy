@@ -5,7 +5,7 @@ internal static class TypeWrapsAnalyzerStubs
     public const string ATTRIBUTES = """
         namespace EncosyTower.TypeWraps
         {
-            [System.AttributeUsage(System.AttributeTargets.Struct | System.AttributeTargets.Class)]
+            [System.AttributeUsage(System.AttributeTargets.Struct | System.AttributeTargets.Class, Inherited=false, AllowMultiple=false)]
             public sealed class WrapTypeAttribute : System.Attribute
             {
                 public const string DEFAULT_MEMBER_NAME = "value";
@@ -25,7 +25,7 @@ internal static class TypeWrapsAnalyzerStubs
                 }
             }
 
-            [System.AttributeUsage(System.AttributeTargets.Struct | System.AttributeTargets.Class)]
+            [System.AttributeUsage(System.AttributeTargets.Struct | System.AttributeTargets.Class, Inherited=false, AllowMultiple=false)]
             public sealed class WrapRecordAttribute : System.Attribute
             {
                 public bool ExcludeConverter { get; set; }

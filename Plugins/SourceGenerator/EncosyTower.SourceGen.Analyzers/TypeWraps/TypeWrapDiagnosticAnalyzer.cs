@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -34,14 +35,14 @@ namespace EncosyTower.SourceGen.Analyzers.TypeWraps
             , description: "[WrapType] first argument must be a typeof expression."
         );
 
-        public static readonly DiagnosticDescriptor WrappedTypeIsDynamic = new(
+        public static readonly DiagnosticDescriptor InvalidMemberName = new(
               id: "SG_TYPE_WRAP_0003"
-            , title: "Wrapped type cannot be dynamic"
-            , messageFormat: "Wrapped type for \"{0}\" must not be dynamic"
+            , title: "[WrapType] MemberName must be a valid C# identifier"
+            , messageFormat: "[WrapType] on \"{0}\" requires MemberName \"{1}\" to be a non-empty, valid C# identifier"
             , category: CATEGORY
             , defaultSeverity: DiagnosticSeverity.Error
             , isEnabledByDefault: true
-            , description: "Wrapped type cannot be dynamic."
+            , description: "[WrapType] MemberName must be a valid C# identifier."
         );
 
         public static readonly DiagnosticDescriptor WrapRecordRequiresOneParameter = new(
@@ -78,7 +79,7 @@ namespace EncosyTower.SourceGen.Analyzers.TypeWraps
             => ImmutableArray.Create(
                   WrapTypeOnRecord
                 , NotTypeOfExpression
-                , WrappedTypeIsDynamic
+                , InvalidMemberName
                 , WrapRecordRequiresOneParameter
                 , WrapperInheritsBaseClass
                 , WrapRecordOnNonRecord
@@ -153,7 +154,7 @@ namespace EncosyTower.SourceGen.Analyzers.TypeWraps
 
             if (args.Length < 1
                 || args[0].Kind != TypedConstantKind.Type
-                || args[0].Value is not ITypeSymbol typeArg
+                || args[0].Value is not ITypeSymbol
             )
             {
                 context.ReportDiagnostic(Diagnostic.Create(
@@ -164,14 +165,35 @@ namespace EncosyTower.SourceGen.Analyzers.TypeWraps
                 return;
             }
 
-            if (typeArg.TypeKind == TypeKind.Dynamic)
+            if (args.Length >= 2 && args[1].Kind == TypedConstantKind.Primitive)
             {
-                context.ReportDiagnostic(Diagnostic.Create(
-                      WrappedTypeIsDynamic
-                    , location
-                    , typeSymbol.Name
-                ));
+                var memberName = args[1].Value as string;
+
+                if (IsValidMemberName(memberName) == false)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                          InvalidMemberName
+                        , location
+                        , typeSymbol.Name
+                        , memberName ?? string.Empty
+                    ));
+                }
             }
+        }
+
+        private static bool IsValidMemberName(string name)
+        {
+            if (SyntaxFacts.IsValidIdentifier(name) == false)
+            {
+                return false;
+            }
+
+            if (SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private static void AnalyzeWrapRecord(

@@ -207,4 +207,71 @@ public sealed class TypeWrapDiagnosticAnalyzerTests
                 .WithLocation(0)
                 .WithArguments("Wrapper")
         );
+
+    [TestMethod]
+    public Task WrapType_TwoArgValidIdentifier_NoDiagnostics()
+        => RunAsync("""
+                [EncosyTower.TypeWraps.WrapType(typeof(int), "Inner")]
+                public partial struct Wrapper { }
+            """);
+
+    [TestMethod]
+    public Task WrapType_TwoArgEmptyString_ReportsInvalidMemberName()
+        => RunAsync(
+              """
+                  [{|#0:EncosyTower.TypeWraps.WrapType(typeof(int), "")|}]
+                  public partial struct Wrapper { }
+              """
+            , new DiagnosticResult(TypeWrapDiagnosticAnalyzer.InvalidMemberName)
+                .WithLocation(0)
+                .WithArguments("Wrapper", "")
+        );
+
+    [TestMethod]
+    public Task WrapType_TwoArgNullString_ReportsInvalidMemberName()
+        => RunAsync(
+              """
+                  [{|#0:EncosyTower.TypeWraps.WrapType(typeof(int), null)|}]
+                  public partial struct Wrapper { }
+              """
+            , new DiagnosticResult(TypeWrapDiagnosticAnalyzer.InvalidMemberName)
+                .WithLocation(0)
+                .WithArguments("Wrapper", "")
+        );
+
+    [TestMethod]
+    public Task WrapType_TwoArgKeyword_ReportsInvalidMemberName()
+        => RunAsync(
+              """
+                  [{|#0:EncosyTower.TypeWraps.WrapType(typeof(int), "class")|}]
+                  public partial struct Wrapper { }
+              """
+            , new DiagnosticResult(TypeWrapDiagnosticAnalyzer.InvalidMemberName)
+                .WithLocation(0)
+                .WithArguments("Wrapper", "class")
+        );
+
+    [TestMethod]
+    public Task WrapType_TwoArgStartsWithDigit_ReportsInvalidMemberName()
+        => RunAsync(
+              """
+                  [{|#0:EncosyTower.TypeWraps.WrapType(typeof(int), "1bad")|}]
+                  public partial struct Wrapper { }
+              """
+            , new DiagnosticResult(TypeWrapDiagnosticAnalyzer.InvalidMemberName)
+                .WithLocation(0)
+                .WithArguments("Wrapper", "1bad")
+        );
+
+    [TestMethod]
+    public Task WrapType_TwoArgWithSpaces_ReportsInvalidMemberName()
+        => RunAsync(
+              """
+                  [{|#0:EncosyTower.TypeWraps.WrapType(typeof(int), "bad name")|}]
+                  public partial struct Wrapper { }
+              """
+            , new DiagnosticResult(TypeWrapDiagnosticAnalyzer.InvalidMemberName)
+                .WithLocation(0)
+                .WithArguments("Wrapper", "bad name")
+        );
 }
