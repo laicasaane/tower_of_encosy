@@ -31,7 +31,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             var candidateProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   POLY_ENUM_FACTORY_FOR_ATTRIBUTE_METADATA
                 , static (node, _) => IsCandidateNode(node)
-                , GetSemanticSymbolMatch
+                , ExtractSpec
             ).Where(static t => t.IsValid);
 
             var combined = candidateProvider
@@ -70,7 +70,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             return false;
         }
 
-        private static PolyEnumFactorySpec GetSemanticSymbolMatch(
+        private static PolyEnumFactorySpec ExtractSpec(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )

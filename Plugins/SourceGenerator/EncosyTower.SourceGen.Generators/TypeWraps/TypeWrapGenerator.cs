@@ -31,7 +31,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             var wrapTypeProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   WRAP_TYPE_ATTRIBUTE_METADATA
                 , static (node, _) => node is StructDeclarationSyntax or ClassDeclarationSyntax
-                , GetSemanticSymbolMatchForWrapType
+                , ExtractSpecForWrapType
             ).Where(static t => t.IsValid);
 
             var wrapRecordProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
@@ -39,7 +39,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 , static (node, _) => node is RecordDeclarationSyntax recordSyntax
                     && recordSyntax.ParameterList != null
                     && recordSyntax.ParameterList.Parameters.Count > 0
-                , GetSemanticSymbolMatchForWrapRecord
+                , ExtractSpecForWrapRecord
             ).Where(static t => t.IsValid);
 
             var combinedWrapType = wrapTypeProvider
@@ -73,7 +73,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             });
         }
 
-        public static TypeWrapSpec GetSemanticSymbolMatchForWrapType(
+        public static TypeWrapSpec ExtractSpecForWrapType(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
@@ -198,7 +198,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             return default;
         }
 
-        public static TypeWrapSpec GetSemanticSymbolMatchForWrapRecord(
+        public static TypeWrapSpec ExtractSpecForWrapRecord(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )

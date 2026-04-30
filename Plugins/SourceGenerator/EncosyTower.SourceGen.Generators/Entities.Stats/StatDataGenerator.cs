@@ -27,7 +27,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                       STAT_DATA_ATTRIBUTE_METADATA_NAME
                     , static (node, _) => node is StructDeclarationSyntax syntax
                         && syntax.TypeParameterList is null
-                    , GetSemanticSymbolMatch
+                    , ExtractSpec
                 )
                 .Where(static t => t.IsValid);
 
@@ -47,7 +47,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             });
         }
 
-        private static StatDataSpec GetSemanticSymbolMatch(
+        private static StatDataSpec ExtractSpec(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )

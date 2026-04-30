@@ -26,7 +26,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             var candidateProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   STAT_COLLECTION_ATTRIBUTE_METADATA
                 , static (node, _) => node is StructDeclarationSyntax { TypeParameterList: null }
-                , GetSemanticSymbolMatch
+                , ExtractSpec
             ).Where(static t => t.IsValid);
 
             var combined = candidateProvider
@@ -45,7 +45,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             });
         }
 
-        private static StatCollectionSpec GetSemanticSymbolMatch(
+        private static StatCollectionSpec ExtractSpec(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
