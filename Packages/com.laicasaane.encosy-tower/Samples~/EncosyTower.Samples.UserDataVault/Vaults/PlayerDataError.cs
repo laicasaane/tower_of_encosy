@@ -6,10 +6,16 @@ using Unity.Collections;
 
 namespace EncosyTower.Samples.UserDataVault.Vaults;
 
+[PolyEnumFactoryFor(typeof(Error))]
 public readonly partial struct PlayerDataError
 {
     private readonly FixedString64Bytes _prefix;
     private readonly Error _error;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private PlayerDataError(in Error error) : this(error, default)
+    {
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private PlayerDataError(in Error error, in FixedString64Bytes prefix)
@@ -17,22 +23,6 @@ public readonly partial struct PlayerDataError
         _prefix = prefix;
         _error = error;
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static PlayerDataError ItemNotYetAcquired(ItemId id)
-        => new(new Error.ItemNotYetAcquired(id), default);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static PlayerDataError ItemAlreadyAcquired(ItemId id)
-        => new(new Error.ItemAlreadyAcquired(id), default);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static PlayerDataError ItemAmountNegativeOrZero(ItemId id, int amount)
-        => new(new Error.ItemAmountNegativeOrZero(id, amount), default);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static PlayerDataError AmountNegativeOrZero(int amount)
-        => new(new Error.AmountNegativeOrZero(amount), default);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public PlayerDataError Prefix(in FixedString64Bytes prefix)
