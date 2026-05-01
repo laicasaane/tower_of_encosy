@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <SlnMergeSettings>
   <MergeTargetSolution>Plugins/SourceGenerator/EncosyTower.SourceGen.slnx</MergeTargetSolution>
-  <NestedProjects>
-    <NestedProject ProjectName="EncosyTower.SourceGen*" FolderPath="Plugins/SourceGenerator" />
-    <NestedProject ProjectName="Samples*" FolderPath="Plugins/SourceGenerator/Samples" />
-  </NestedProjects>
   <ProjectConflictResolution>PreserveUnity</ProjectConflictResolution>
   <DefaultProcessingPolicy>Merge</DefaultProcessingPolicy>
 </SlnMergeSettings>
